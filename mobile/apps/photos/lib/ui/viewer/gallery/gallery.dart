@@ -123,7 +123,6 @@ class GalleryState extends State<Gallery> {
   double? groupHeaderExtent;
 
   late Logger _logger;
-  List<List<EnteFile>> currentGroupedFiles = [];
   bool _hasLoadedFiles = false;
   StreamSubscription<FilesUpdatedEvent>? _reloadEventSubscription;
   StreamSubscription<TabDoubleTapEvent>? _tabDoubleTapEvent;
@@ -138,6 +137,7 @@ class GalleryState extends State<Gallery> {
   final scrollBarInUseNotifier = ValueNotifier<bool>(false);
   late GroupType _groupType;
   final scrollbarBottomPaddingNotifier = ValueNotifier<double>(0);
+  late GalleryGroups galleryGroups;
 
   @override
   void initState() {
@@ -187,6 +187,7 @@ class GalleryState extends State<Gallery> {
             );
           }
           if (!hasTriggeredSetState && mounted) {
+            _updateGalleryGroups();
             setState(() {});
           }
         });
@@ -223,8 +224,11 @@ class GalleryState extends State<Gallery> {
     if (widget.initialFiles != null && !_sortOrderAsc) {
       _onFilesLoaded(widget.initialFiles!);
     }
+
     _loadFiles(limit: kInitialLoadLimit).then((result) async {
       _setFilesAndReload(result.files);
+      // if hasmore, let load complete and then set scrollcontroller
+      // else set scrollcontroller.
       if (result.hasMore) {
         final result = await _loadFiles();
         _setFilesAndReload(result.files);
@@ -283,6 +287,19 @@ class GalleryState extends State<Gallery> {
     }
   }
 
+  void _updateGalleryGroups() {
+    galleryGroups = GalleryGroups(
+      allFiles: _allGalleryFiles,
+      groupType: _groupType,
+      sortOrderAsc: _sortOrderAsc,
+      widthAvailable: MediaQuery.sizeOf(context).width,
+      selectedFiles: widget.selectedFiles,
+      tagPrefix: widget.tagPrefix,
+      groupHeaderExtent: groupHeaderExtent,
+      showSelectAll: widget.showSelectAll,
+    );
+  }
+
   void _selectedFilesListener() {
     final bottomInset = MediaQuery.paddingOf(context).bottom;
     final extra = widget.galleryType == GalleryType.homepage ? 76.0 : 0.0;
@@ -305,6 +322,7 @@ class GalleryState extends State<Gallery> {
   void _setFilesAndReload(List<EnteFile> files) {
     final hasReloaded = _onFilesLoaded(files);
     if (!hasReloaded && mounted) {
+      _updateGalleryGroups();
       setState(() {});
     }
   }
@@ -393,29 +411,10 @@ class GalleryState extends State<Gallery> {
     return shouldReloadFromDB;
   }
 
-  // group files into multiple groups and returns `true` if it resulted in a
-  // gallery reload
   bool _onFilesLoaded(List<EnteFile> files) {
     _allGalleryFiles = files;
-
-    final updatedGroupedFiles =
-        widget.enableFileGrouping && _groupType.timeGrouping()
-            ? _groupBasedOnTime(files)
-            : _genericGroupForPerf(files);
-    if (currentGroupedFiles.length != updatedGroupedFiles.length ||
-        currentGroupedFiles.isEmpty) {
-      if (mounted) {
-        setState(() {
-          _hasLoadedFiles = true;
-          currentGroupedFiles = updatedGroupedFiles;
-        });
-        return true;
-      }
-      return false;
-    } else {
-      currentGroupedFiles = updatedGroupedFiles;
-      return false;
-    }
+    _hasLoadedFiles = true;
+    return false;
   }
 
   Future<FileLoadResult> _loadFiles({int? limit}) async {
@@ -516,16 +515,6 @@ class GalleryState extends State<Gallery> {
           : const SizedBox.shrink();
     }
 
-    final galleryGroups = GalleryGroups(
-      allFiles: _allGalleryFiles,
-      groupType: _groupType,
-      widthAvailable: widthAvailable,
-      selectedFiles: widget.selectedFiles,
-      tagPrefix: widget.tagPrefix,
-      groupHeaderExtent: groupHeaderExtent!,
-      showSelectAll: widget.showSelectAll,
-      limitSelectionToOne: widget.limitSelectionToOne,
-    );
     GalleryFilesState.of(context).setGalleryFiles = _allGalleryFiles;
     if (!_hasLoadedFiles) {
       return widget.loadingWidget;
@@ -870,8 +859,8 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
                   child: ColoredBox(
                     color: getEnteColorScheme(context).backgroundBase,
                     child: GroupHeaderWidget(
-                      title: widget
-                          .galleryGroups.groupIdToGroupTypeMap[currentGroupId!]!
+                      title: widget.galleryGroups
+                          .groupIdToGroupDataMap[currentGroupId!]!.groupType
                           .getTitle(
                         context,
                         widget.galleryGroups.groupIDToFilesMap[currentGroupId]!
