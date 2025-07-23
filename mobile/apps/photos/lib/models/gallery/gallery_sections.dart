@@ -11,7 +11,6 @@ import "package:photos/service_locator.dart";
 import "package:photos/ui/viewer/gallery/component/gallery_file_widget.dart";
 import "package:photos/ui/viewer/gallery/component/group/group_header_widget.dart";
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
-import "package:photos/ui/viewer/gallery/scrollbar/custom_scroll_bar.dart";
 import "package:uuid/uuid.dart";
 
 /// In order to make the gallery performant when GroupTypes do not show group
@@ -64,7 +63,7 @@ class GalleryGroups {
   final Map<double, String> _scrollOffsetToGroupIdMap = {};
   final Map<String, double> _groupIdToScrollOffsetMap = {};
   final List<double> _groupScrollOffsets = [];
-  final List<ScrollbarDivision> _scrollbarDivisions = [];
+  final List<({String groupID, String title})> _scrollbarDivisions = [];
   final currentUserID = Configuration.instance.getUserID();
   final _uuid = const Uuid();
 
@@ -76,7 +75,8 @@ class GalleryGroups {
   Map<String, double> get groupIdToScrollOffsetMap => _groupIdToScrollOffsetMap;
   List<FixedExtentSectionLayout> get groupLayouts => _groupLayouts;
   List<double> get groupScrollOffsets => _groupScrollOffsets;
-  List<ScrollbarDivision> get scrollbarDivisions => _scrollbarDivisions;
+  List<({String groupID, String title})> get scrollbarDivisions =>
+      _scrollbarDivisions;
 
   void init() {
     crossAxisCount = localSettings.getPhotoGridSize();
@@ -282,10 +282,7 @@ class GalleryGroups {
       if (!yearsInGroups.contains(yearOfGroup)) {
         yearsInGroups.add(yearOfGroup);
         _scrollbarDivisions.add(
-          ScrollbarDivision(
-            groupID: uuid,
-            title: yearOfGroup.toString(),
-          ),
+          (groupID: uuid, title: yearOfGroup.toString()),
         );
       }
     }

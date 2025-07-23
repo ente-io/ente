@@ -8,16 +8,6 @@ import "package:photos/ui/viewer/gallery/scrollbar/scroll_bar_with_use_notifier.
 import "package:photos/utils/misc_util.dart";
 import "package:photos/utils/widget_util.dart";
 
-class ScrollbarDivision {
-  final String groupID;
-  final String title;
-
-  ScrollbarDivision({
-    required this.groupID,
-    required this.title,
-  });
-}
-
 class CustomScrollBar extends StatefulWidget {
   final Widget child;
   final ValueNotifier<double> bottomPadding;
@@ -128,8 +118,7 @@ class _CustomScrollBarState extends State<CustomScrollBar> {
     heightOfScrollTrack = await _getHeightOfScrollTrack();
     final maxScrollExtent = widget.scrollController.position.maxScrollExtent;
 
-    for (ScrollbarDivision scrollbarDivision
-        in widget.galleryGroups.scrollbarDivisions) {
+    for (final scrollbarDivision in widget.galleryGroups.scrollbarDivisions) {
       final scrollOffsetOfGroup = widget
           .galleryGroups.groupIdToScrollOffsetMap[scrollbarDivision.groupID]!;
 
