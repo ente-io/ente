@@ -7,7 +7,7 @@ import "package:flutter/services.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/error-reporting/isolate_logging.dart";
 import "package:photos/models/base/id.dart";
-import "package:photos/services/isolate_functions.dart";
+import "package:photos/utils/isolate/isolate_operations.dart";
 import "package:synchronized/synchronized.dart";
 
 abstract class SuperIsolate {
