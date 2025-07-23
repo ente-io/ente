@@ -230,10 +230,12 @@ class GalleryState extends State<Gallery> {
     _loadFiles(limit: kInitialLoadLimit).then((result) async {
       _setFilesAndReload(result.files);
       if (result.hasMore) {
-        await _loadFiles();
+        final result = await _loadFiles();
+        _setScrollController(allFilesLoaded: true);
+        _setFilesAndReload(result.files);
+      } else {
+        _setScrollController(allFilesLoaded: true);
       }
-      _setScrollController(allFilesLoaded: !result.hasMore);
-      setState(() {});
     });
 
     if (_groupType.showGroupHeader()) {
