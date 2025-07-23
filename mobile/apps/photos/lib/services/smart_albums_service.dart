@@ -133,7 +133,7 @@ class SmartAlbumsService {
   }
 
   Future<void> syncSmartAlbums() async {
-    final cachedConfigs = await _fetchAndCacheSConfigs();
+    final cachedConfigs = await getSmartConfigs();
 
     for (final entry in cachedConfigs.entries) {
       final collectionId = entry.key;
