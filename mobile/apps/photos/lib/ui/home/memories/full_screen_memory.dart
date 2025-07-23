@@ -21,6 +21,7 @@ import "package:photos/ui/home/memories/memory_progress_indicator.dart";
 import "package:photos/ui/viewer/file/file_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/file_details/favorite_widget.dart";
+import "package:photos/ui/viewer/gallery/jump_to_date_gallery.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/share_util.dart";
 
@@ -351,19 +352,27 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                         Row(
                           children: [
                             child!,
-                            Text(
-                              SmartMemoriesService.getDateFormatted(
-                                creationTime: inheritedData
-                                    .memories[value].file.creationTime!,
-                                context: context,
+                            GestureDetector(
+                              onTap: () {
+                                JumpToDateGallery.jumpToDate(
+                                  inheritedData.memories[value].file,
+                                  context,
+                                );
+                              },
+                              child: Text(
+                                SmartMemoriesService.getDateFormatted(
+                                  creationTime: inheritedData
+                                      .memories[value].file.creationTime!,
+                                  context: context,
+                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium!
+                                    .copyWith(
+                                      fontSize: 14,
+                                      color: Colors.white,
+                                    ),
                               ),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium!
-                                  .copyWith(
-                                    fontSize: 14,
-                                    color: Colors.white,
-                                  ),
                             ),
                           ],
                         ),

@@ -29,6 +29,7 @@ class GalleryGroups {
   final bool sortOrderAsc;
   final double widthAvailable;
   final double groupHeaderExtent;
+  final EnteFile? fileToJumpScrollTo;
   GalleryGroups({
     required this.allFiles,
     required this.groupType,
@@ -41,6 +42,7 @@ class GalleryGroups {
     required this.groupHeaderExtent,
     required this.showSelectAll,
     this.limitSelectionToOne = false,
+    this.fileToJumpScrollTo,
   }) {
     init();
     if (!groupType.showGroupHeader()) {
@@ -59,7 +61,9 @@ class GalleryGroups {
 
   final List<String> _groupIds = [];
   final Map<String, List<EnteFile>> _groupIdToFilesMap = {};
-  final Map<String, GroupType> _groupIdToGroupDataMap = {};
+  final Map<String,
+          ({GroupType groupType, int startCreationTime, int endCreationTime})>
+      _groupIdToGroupDataMap = {};
   final Map<double, String> _scrollOffsetToGroupIdMap = {};
   final Map<String, double> _groupIdToScrollOffsetMap = {};
   final List<double> _groupScrollOffsets = [];
@@ -69,7 +73,9 @@ class GalleryGroups {
 
   List<String> get groupIDs => _groupIds;
   Map<String, List<EnteFile>> get groupIDToFilesMap => _groupIdToFilesMap;
-  Map<String, GroupType> get groupIdToGroupDataMap => _groupIdToGroupDataMap;
+  Map<String,
+          ({GroupType groupType, int startCreationTime, int endCreationTime})>
+      get groupIdToGroupDataMap => _groupIdToGroupDataMap;
   Map<double, String> get scrollOffsetToGroupIdMap => _scrollOffsetToGroupIdMap;
   Map<String, double> get groupIdToScrollOffsetMap => _groupIdToScrollOffsetMap;
   List<FixedExtentSectionLayout> get groupLayouts => _groupLayouts;
@@ -77,10 +83,87 @@ class GalleryGroups {
   List<({String groupID, String title})> get scrollbarDivisions =>
       _scrollbarDivisions;
 
+  /// Scrolls the gallery to the group containing the specified file based on its creation time.
+  /// Uses binary search to efficiently find the appropriate group.
+  double? getOffsetOfFile(EnteFile file) {
+    final creationTime = file.creationTime;
+    if (creationTime == null) {
+      _logger.warning('Cannot scroll to file with null creation time');
+      return null;
+    }
+
+    final groupId = _findGroupForCreationTime(creationTime);
+    if (groupId == null) {
+      _logger.warning(
+        'jumpToFile No group found for creation time: $creationTime',
+      );
+      return null;
+    }
+
+    final scrollOffset = _groupIdToScrollOffsetMap[groupId];
+    if (scrollOffset == null) {
+      _logger.warning('No scroll offset found for group: $groupId');
+      return null;
+    }
+
+    return scrollOffset;
+
+    // scrollController.animateTo(
+    //   scrollOffset,
+    //   duration: const Duration(milliseconds: 300),
+    //   curve: Curves.easeOutExpo,
+    // );
+
+    // scrollController.jumpTo(
+    //   scrollOffset,
+    // );
+  }
+
+  /// Uses binary search to find the group ID that contains the given creation time.
+  String? _findGroupForCreationTime(int creationTime) {
+    if (_groupIds.isEmpty) {
+      _logger.warning(
+        'empty group IDs list, cannot find group for creation time: $creationTime',
+      );
+      return null;
+    }
+    int left = 0;
+    int right = _groupIds.length - 1;
+
+    while (left <= right) {
+      final mid = (left + right) ~/ 2;
+      final groupId = _groupIds[mid];
+      final groupData = _groupIdToGroupDataMap[groupId];
+
+      if (groupData == null) {
+        _logger.warning('No group data found for group: $groupId');
+        return null;
+      }
+
+      final startTime = groupData.startCreationTime;
+      final endTime = groupData.endCreationTime;
+
+      if (creationTime <= startTime && creationTime >= endTime) {
+        // Found the group containing this creation time
+        return groupId;
+      } else if (creationTime > startTime) {
+        right = mid - 1;
+      } else {
+        left = mid + 1;
+      }
+    }
+
+    _logger.warning(
+      '_findGroupForCreationTime No group found for creation time: $creationTime',
+    );
+    return null;
+  }
+
   void init() {
     crossAxisCount = localSettings.getPhotoGridSize();
     _buildGroups();
     _groupLayouts = _computeGroupLayouts();
+
     assert(groupIDs.length == _groupIdToFilesMap.length);
     assert(groupIDs.length == _groupIdToGroupDataMap.length);
     assert(
@@ -129,6 +212,7 @@ class GalleryGroups {
               if (showGroupHeader) {
                 return GroupHeaderWidget(
                   title: _groupIdToGroupDataMap[groupID]!
+                      .groupType
                       .getTitle(context, groupIDToFilesMap[groupID]!.first),
                   gridSize: crossAxisCount,
                   filesInGroup: groupIDToFilesMap[groupID]!,
@@ -268,7 +352,11 @@ class GalleryGroups {
     final uuid = _uuid.v1();
     _groupIds.add(uuid);
     _groupIdToFilesMap[uuid] = groupFiles;
-    _groupIdToGroupDataMap[uuid] = groupType;
+    _groupIdToGroupDataMap[uuid] = (
+      groupType: groupType,
+      startCreationTime: groupFiles.first.creationTime!,
+      endCreationTime: groupFiles.last.creationTime!
+    );
 
     // For scrollbar divisions
     if (groupType.timeGrouping()) {

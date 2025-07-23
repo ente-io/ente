@@ -9,6 +9,7 @@ import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import "package:photos/events/hide_shared_items_from_home_gallery_event.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
+import "package:photos/models/file/file.dart";
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
@@ -16,6 +17,7 @@ import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/filter/db_filters.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
+import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
@@ -25,11 +27,15 @@ class HomeGalleryWidget extends StatefulWidget {
   final Widget? header;
   final Widget? footer;
   final SelectedFiles selectedFiles;
+  final GroupType? groupType;
+  final EnteFile? fileToJumpScrollTo;
 
   const HomeGalleryWidget({
     super.key,
     this.header,
     this.footer,
+    this.groupType,
+    this.fileToJumpScrollTo,
     required this.selectedFiles,
   });
 
@@ -129,6 +135,8 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
       reloadDebounceTime: const Duration(seconds: 2),
       reloadDebounceExecutionInterval: const Duration(seconds: 5),
       galleryType: GalleryType.homepage,
+      groupType: widget.groupType,
+      fileToJumpScrollTo: widget.fileToJumpScrollTo,
     );
     return GalleryFilesState(
       child: SelectionState(
