@@ -1,3 +1,290 @@
 {
-  "@@locale ": "en"
+  "@@locale ": "en",
+  "enterYourEmailAddress": "Унесите Вашу е-пошту",
+  "enterYourNewEmailAddress": "Унесите Вашу нову е-пошту",
+  "accountWelcomeBack": "Добродошли назад!",
+  "emailAlreadyRegistered": "Е-пошта је већ регистрована.",
+  "emailNotRegistered": "Е-пошта није регистрована.",
+  "email": "Е-пошта",
+  "cancel": "Откажи",
+  "verify": "Верификуј",
+  "invalidEmailAddress": "Неисправна е-пошта",
+  "enterValidEmail": "Молимо унесите исправну адресу е-поште.",
+  "deleteAccount": "Обриши налог",
+  "askDeleteReason": "Који је главни разлог што бришете свој налог?",
+  "deleteAccountFeedbackPrompt": "Жао нам је што одлазите. Молимо вас да нам оставите повратне информације како бисмо могли да се побољшамо.",
+  "feedback": "Повратне информације",
+  "kindlyHelpUsWithThisInformation": "Љубазно вас молимо да нам помогнете са овим информацијама",
+  "confirmDeletePrompt": "Да, желим трајно да избришем овај налог и све његове податке у свим апликацијама.",
+  "confirmAccountDeletion": "Потврдите брисање налога",
+  "deleteAccountPermanentlyButton": "Трајно обриши налог",
+  "yourAccountHasBeenDeleted": "Ваш налог је обрисан",
+  "selectReason": "Одаберите разлог",
+  "deleteReason1": "Недостаје важна функција која ми је потребна",
+  "deleteReason2": "Апликација или одређена функција не ради онако како мислим да би требало",
+  "deleteReason3": "Пронашао/ла сам други сервис који ми више одговара",
+  "deleteReason4": "Мој разлог није на листи",
+  "sendEmail": "Пошаљи е-пошту",
+  "deleteRequestSLAText": "Ваш захтев ће бити обрађен у року од 72 сата.",
+  "deleteEmailRequest": "Молимо пошаљите имејл на <warning>account-deletion@ente.io</warning> са ваше регистроване адресе е-поште.",
+  "entePhotosPerm": "Енте-у <i>је потребна дозвола да</i> сачува ваше фотографије",
+  "ok": "Ок",
+  "createAccount": "Направи налог",
+  "createNewAccount": "Креирај нови налог",
+  "password": "Лозинка",
+  "confirmPassword": "Потврдите лозинку",
+  "activeSessions": "Активне сесије",
+  "oops": "Упс!",
+  "somethingWentWrongPleaseTryAgain": "Нешто је пошло наопако, покушајте поново",
+  "thisWillLogYouOutOfThisDevice": "Ово ће вас одјавити са овог уређаја!",
+  "thisWillLogYouOutOfTheFollowingDevice": "Ово ће вас одјавити са овог уређаја:",
+  "terminateSession": "Прекинути сесију?",
+  "terminate": "Прекини",
+  "thisDevice": "Овај уређај",
+  "recoverButton": "Опорави",
+  "recoverySuccessful": "Опоравак успешан!",
+  "decrypting": "Дешифровање...",
+  "incorrectRecoveryKeyTitle": "Нетачан кључ за опоравак",
+  "incorrectRecoveryKeyBody": "Унети кључ за опоравак је натачан",
+  "forgotPassword": "Заборавио сам лозинку",
+  "enterYourRecoveryKey": "Унесите Ваш кључ за опоравак",
+  "noRecoveryKey": "Немате кључ за опоравак?",
+  "sorry": "Извините",
+  "noRecoveryKeyNoDecryption": "Због природе нашег протокола за крај-до-крај енкрипцију, ваши подаци не могу бити дешифровани без ваше лозинке или кључа за опоравак",
+  "verifyEmail": "Верификуј е-пошту",
+  "toResetVerifyEmail": "Да бисте ресетовали лозинку, прво потврдите своју е-пошту.",
+  "checkInboxAndSpamFolder": "Молимо вас да проверите примљену пошту (и нежељену пошту) да бисте довршили верификацију",
+  "tapToEnterCode": "Пипните да бисте унели кôд",
+  "resendEmail": "Поново пошаљи е-пошту",
+  "weHaveSendEmailTo": "Послали смо е-попту на <green>{email}</green>",
+  "@weHaveSendEmailTo": {
+    "description": "Text to indicate that we have sent a mail to the user",
+    "placeholders": {
+      "email": {
+        "description": "The email address of the user",
+        "type": "String",
+        "example": "example@ente.io"
+      }
+    }
+  },
+  "setPasswordTitle": "Постави лозинку",
+  "changePasswordTitle": "Промени лозинку",
+  "resetPasswordTitle": "Ресетуј лозинку",
+  "encryptionKeys": "Кључеви шифровања",
+  "passwordWarning": "Не чувамо ову лозинку, па ако је заборавите, <underline>не можемо дешифрирати ваше податке</underline>",
+  "enterPasswordToEncrypt": "Унесите лозинку коју можемо да користимо за шифровање ваших података",
+  "enterNewPasswordToEncrypt": "Унесите нову лозинку коју можемо да користимо за шифровање ваших података",
+  "weakStrength": "Слабо",
+  "strongStrength": "Јако",
+  "moderateStrength": "Средње",
+  "passwordStrength": "Снага лозинке: {passwordStrengthValue}",
+  "@passwordStrength": {
+    "description": "Text to indicate the password strength",
+    "placeholders": {
+      "passwordStrengthValue": {
+        "description": "The strength of the password as a string",
+        "type": "String",
+        "example": "Weak or Moderate or Strong"
+      }
+    },
+    "message": "Password Strength: {passwordStrengthText}"
+  },
+  "passwordChangedSuccessfully": "Лозинка је успешно промењена",
+  "generatingEncryptionKeys": "Генерисање кључева за шифровање...",
+  "pleaseWait": "Молимо сачекајте...",
+  "continueLabel": "Настави",
+  "insecureDevice": "Уређај није сигуран",
+  "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": "Извините, не можемо да генеришемо сигурне кључеве на овом уређају.\n\nМолимо пријавите се са другог уређаја.",
+  "howItWorks": "Како ради",
+  "encryption": "Шифровање",
+  "ackPasswordLostWarning": "Разумем да ако изгубим лозинку, могу изгубити своје податке пошто су <underline>шифрирани од краја до краја</underline>.",
+  "privacyPolicyTitle": "Политика приватности",
+  "termsOfServicesTitle": "Услови",
+  "signUpTerms": "Прихватам <u-terms>услове сервиса</u-terms> и <u-policy>политику приватности</u-policy>",
+  "logInLabel": "Пријави се",
+  "loginTerms": "Кликом на пријаву, прихватам <u-terms>услове сервиса</u-terms> и <u-policy>политику приватности</u-policy>",
+  "changeEmail": "Промени е-пошту",
+  "enterYourPassword": "Унесите лозинку",
+  "welcomeBack": "Добродошли назад!",
+  "contactSupport": "Контактирати подршку",
+  "incorrectPasswordTitle": "Неисправна лозинка",
+  "pleaseTryAgain": "Пробајте поново",
+  "recreatePasswordTitle": "Рекреирај лозинку",
+  "useRecoveryKey": "Користи кључ за опоравак",
+  "recreatePasswordBody": "Тренутни уређај није довољно моћан да потврди вашу лозинку, али можемо регенерирати на начин који ради са свим уређајима.\n\nПријавите се помоћу кључа за опоравак и обновите своју лозинку (можете поново користити исту ако желите).",
+  "verifyPassword": "Верификујте лозинку",
+  "recoveryKey": "Кључ за опоравак",
+  "recoveryKeyOnForgotPassword": "Ако заборавите лозинку, једини начин на који можете повратити податке је са овим кључем.",
+  "recoveryKeySaveDescription": "Не чувамо овај кључ, молимо да сачувате кључ од 24 речи на сигурном месту.",
+  "doThisLater": "Уради ово касније",
+  "saveKey": "Сачувај кључ",
+  "recoveryKeyCopiedToClipboard": "Кључ за опоравак је копиран у међуспремник",
+  "recoverAccount": "Опоравак налога",
+  "recover": "Опорави",
+  "dropSupportEmail": "Молимо Вас да пошаљете имејл на {supportEmail} са Ваше регистроване адресе е-поште",
+  "@dropSupportEmail": {
+    "placeholders": {
+      "supportEmail": {
+        "description": "The support email address",
+        "type": "String",
+        "example": "support@ente.io"
+      }
+    }
+  },
+  "twofactorSetup": "Постављање двофакторске аутентификације",
+  "enterCode": "Унесите кôд",
+  "scanCode": "Скенирајте кôд",
+  "codeCopiedToClipboard": "Копирано у међуспремник",
+  "copypasteThisCodentoYourAuthenticatorApp": "Копирајте и налепите овај код \nу своју апликацију за аутентификацију",
+  "tapToCopy": "питисните да копирате",
+  "scanThisBarcodeWithnyourAuthenticatorApp": "Скенирајте овај баркод \nсвојом апликацијом за аутентификацију",
+  "enterThe6digitCodeFromnyourAuthenticatorApp": "Унесите 6-цифрени кôд из\nапликације за аутентификацију",
+  "confirm": "Потврди",
+  "setupComplete": "Постављање завршено",
+  "removeLink": "Уклони везу",
+  "manageLink": "Управљај везом",
+  "linkExpiresOn": "Веза ће истећи {expiryTime}",
+  "albumUpdated": "Албум ажуриран",
+  "never": "Никад",
+  "custom": "Прилагођено",
+  "@custom": {
+    "description": "Label for setting custom value for link expiry"
+  },
+  "after1Hour": "Након 1 сата",
+  "after1Day": "Након 1 дана",
+  "after1Week": "Након 1 недеље",
+  "after1Month": "Након 1 месеца",
+  "after1Year": "Након 1 године",
+  "manageParticipants": "Управљај",
+  "albumParticipantsCount": "{count, plural, =0 {Нека учесника} =1 {1 учесник} other {{count} учесника}}",
+  "@albumParticipantsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    },
+    "description": "Number of participants in an album, including the album owner."
+  },
+  "collabLinkSectionDescription": "Креирајте везу која омогућава људима да додају и прегледају фотографије у вашем дељеном албуму без потребе за Енте апликацијом или налогом. Одлично за прикупљање фотографија са догађаја.",
+  "collectPhotos": "Прикупи фотографије",
+  "collaborativeLink": "Сарадничка веза",
+  "shareWithNonenteUsers": "Пошаљи корисницима који немају Енте налог",
+  "createPublicLink": "Креирај јавну везу",
+  "sendLink": "Пошаљи везу",
+  "copyLink": "Копирај везу",
+  "linkHasExpired": "Веза је истекла",
+  "publicLinkEnabled": "Јавна веза је укључена",
+  "shareALink": "Подели везу",
+  "sharedAlbumSectionDescription": "Креирај дељене и заједничке албуме са другим Енте корисницима, укључујући и оне на бесплатним плановима.",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Подели са одређеним особама} =1 {Подељено са 1 особом} other {Подељено са {numberOfPeople} особа}}",
+  "@shareWithPeopleSectionTitle": {
+    "placeholders": {
+      "numberOfPeople": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "thisIsYourVerificationId": "Ово је Ваш ИД за верификацију",
+  "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Особе које деле албуме с тобом би требале да виде исти ИД на свом уређају.",
+  "howToViewShareeVerificationID": "Молимо их да дуго притисну своју адресу е-поште на екрану за подешавања и провере да ли се ИД-ови на оба уређаја поклапају.",
+  "thisIsPersonVerificationId": "Ово је ИД за верификацију корисника {email}",
+  "@thisIsPersonVerificationId": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@ente.io"
+      }
+    }
+  },
+  "verificationId": "ИД за верификацију",
+  "verifyEmailID": "Верификуј {email}",
+  "emailNoEnteAccount": "{email} нема Енте налог.\n\nПошаљи им позивницу за дељење фотографија.",
+  "shareMyVerificationID": "Ево мог ИД-а за верификацију: {verificationID} за ente.io.",
+  "shareTextConfirmOthersVerificationID": "Здраво, можеш ли да потврдиш да је ово твој ente.io ИД за верификацију: {verificationID}",
+  "somethingWentWrong": "Нешто није у реду",
+  "sendInvite": "Пошаљи позивницу",
+  "shareTextRecommendUsingEnte": "Преузми Енте да бисмо лако делили фотографије и видео записе у оригиналном квалитету\n\nhttps://ente.io",
+  "done": "Готово",
+  "applyCodeTitle": "Примени кôд",
+  "enterCodeDescription": "Унеси код који ти је дао пријатељ да бисте обоје добили бесплатан простор за складиштење",
+  "apply": "Примени",
+  "failedToApplyCode": "Грешка у примењивању кôда",
+  "enterReferralCode": "Унеси реферални код",
+  "codeAppliedPageTitle": "Кôд примењен",
+  "changeYourReferralCode": "Промени свој реферални код",
+  "change": "Измени",
+  "unavailableReferralCode": "Жао нам је, овај кôд није доступан.",
+  "codeChangeLimitReached": "Жао нам је, достигли сте максимум броја промена кôда.",
+  "onlyFamilyAdminCanChangeCode": "Молимо вас да контактирате {familyAdminEmail} да бисте променили свој код.",
+  "storageInGB": "{storageAmountInGB} ГБ",
+  "youCannotShareWithYourself": "Не можеш делити сам са собом",
+  "archive": "Архивирај",
+  "createAlbumActionHint": "Дуго притисните да бисте изабрали фотографије и кликните на + да бисте направили албум",
+  "importing": "Увоз....",
+  "failedToLoadAlbums": "Грешка при учитавању албума",
+  "hidden": "Скривено",
+  "authToViewYourHiddenFiles": "Молимо вас да се аутентификујете да бисте видели скривене датотеке",
+  "authToViewTrashedFiles": "Молимо вас да се аутентификујете да бисте видели датотеке у отпаду",
+  "trash": "Смеће",
+  "uncategorized": "Некатегоризовано",
+  "videoSmallCase": "видео",
+  "photoSmallCase": "слика",
+  "singleFileDeleteHighlight": "Биће обрисано из свих албума.",
+  "singleFileInBothLocalAndRemote": "Овај {fileType} се налази и у Енте-у и на Вашем уређају.",
+  "singleFileInRemoteOnly": "Овај {fileType} ће бити избрисан из Енте-а.",
+  "singleFileDeleteFromDevice": "Овај {fileType} ће бити избрисан са твог уређаја.",
+  "deleteFromEnte": "Обриши са Енте-а",
+  "yesDelete": "Да, обриши",
+  "movedToTrash": "Премештено у смеће",
+  "deleteFromDevice": "Обриши са уређаја",
+  "deleteFromBoth": "Обриши са оба",
+  "newAlbum": "Нови албум",
+  "albums": "Албуми",
+  "memoryCount": "{count, plural, =0{нема сећања} one{{formattedCount} сећање} other{{formattedCount} сећања}}",
+  "@memoryCount": {
+    "description": "The text to display the number of memories",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      },
+      "formattedCount": {
+        "type": "String",
+        "example": "11.513, 11,511"
+      }
+    }
+  },
+  "selectedPhotos": "{count} изабрано",
+  "@selectedPhotos": {
+    "description": "Display the number of selected photos",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "5",
+        "type": "int"
+      }
+    }
+  },
+  "selectedPhotosWithYours": "{count} изабрано ({yourCount} Ваше)",
+  "@selectedPhotosWithYours": {
+    "description": "Display the number of selected photos, including the number of selected photos owned by the user",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "12",
+        "type": "int"
+      },
+      "yourCount": {
+        "example": "2",
+        "type": "int"
+      }
+    }
+  },
+  "advancedSettings": "Напредно",
+  "@advancedSettings": {
+    "description": "The text to display in the advanced settings section"
+  }
 }

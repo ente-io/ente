@@ -364,7 +364,7 @@
   "selectAll": "Markera allt",
   "skip": "Hoppa över",
   "updatingFolderSelection": "Uppdaterar mappval...",
-  "itemCount": "{count, plural, other{{count} objekt}}",
+  "itemCount": "{count, plural, one{{count} objekt} other{{count} objekt}}",
   "deleteItemCount": "{count, plural, =1 {Radera {count} objekt} other {Radera {count} objekt}}",
   "duplicateItemsGroup": "{count} filer, {formattedSize} vardera",
   "@duplicateItemsGroup": {
@@ -382,7 +382,7 @@
     }
   },
   "showMemories": "Visa minnen",
-  "yearsAgo": "{count, plural, other{{count} år sedan}}",
+  "yearsAgo": "{count, plural, one{{count} år sedan} other{{count} år sedan}}",
   "backupSettings": "Säkerhetskopieringsinställningar",
   "backupStatus": "Säkerhetskopieringsstatus",
   "about": "Om",
@@ -496,7 +496,7 @@
   "viewAll": "Visa alla",
   "inviteYourFriendsToEnte": "Bjud in dina vänner till Ente",
   "fileTypes": "Filtyper",
-  "searchResultCount": "{count, plural, other{{count} resultat hittades}}",
+  "searchResultCount": "{count, plural, one{{count} resultat hittades} other{{count} resultat hittades}}",
   "@searchResultCount": {
     "description": "Text to tell user how many results were found for their search query",
     "placeholders": {

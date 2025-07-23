@@ -321,7 +321,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m114(email) =>
       "Wir haben eine E-Mail an <green>${email}</green> gesendet";
 
-  static String m115(name) => "Wish \$${name} a happy birthday! 🎉";
+  static String m115(name) => "Wünsche ${name} alles Gute zum Geburtstag! 🎉";
 
   static String m116(count) =>
       "${Intl.plural(count, one: 'vor einem Jahr', other: 'vor ${count} Jahren')}";
@@ -425,6 +425,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Alle Erinnerungsstücke gesichert"),
         "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
             "Alle Gruppierungen für diese Person werden zurückgesetzt und du wirst alle Vorschläge für diese Person verlieren"),
+        "allUnnamedGroupsWillBeMergedIntoTheSelectedPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Alle unbenannten Gruppen werden zur ausgewählten Person zusammengeführt. Dies kann im Verlauf der Vorschläge für diese Person rückgängig gemacht werden."),
         "allWillShiftRangeBasedOnFirst": MessageLookupByLibrary.simpleMessage(
             "Dies ist die erste in der Gruppe. Andere ausgewählte Fotos werden automatisch nach diesem neuen Datum verschoben"),
         "allow": MessageLookupByLibrary.simpleMessage("Erlauben"),
@@ -478,6 +481,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "archiveAlbum":
             MessageLookupByLibrary.simpleMessage("Album archivieren"),
         "archiving": MessageLookupByLibrary.simpleMessage("Archiviere …"),
+        "areThey": MessageLookupByLibrary.simpleMessage("Ist das "),
+        "areYouSureRemoveThisFaceFromPerson": MessageLookupByLibrary.simpleMessage(
+            "Bist du sicher, dass du dieses Gesicht von dieser Person entfernen möchtest?"),
         "areYouSureThatYouWantToLeaveTheFamily":
             MessageLookupByLibrary.simpleMessage(
                 "Bist du sicher, dass du den Familien-Tarif verlassen möchtest?"),
@@ -488,8 +494,16 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Bist du sicher, dass du deinen Tarif ändern möchtest?"),
         "areYouSureYouWantToExit": MessageLookupByLibrary.simpleMessage(
             "Möchtest du Vorgang wirklich abbrechen?"),
+        "areYouSureYouWantToIgnoreThesePersons":
+            MessageLookupByLibrary.simpleMessage(
+                "Bist du sicher, dass du diese Personen ignorieren willst?"),
+        "areYouSureYouWantToIgnoreThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Bist du sicher, dass du diese Person ignorieren willst?"),
         "areYouSureYouWantToLogout": MessageLookupByLibrary.simpleMessage(
             "Bist Du sicher, dass du dich abmelden möchtest?"),
+        "areYouSureYouWantToMergeThem": MessageLookupByLibrary.simpleMessage(
+            "Bist du sicher, dass du sie zusammenführen willst?"),
         "areYouSureYouWantToRenew": MessageLookupByLibrary.simpleMessage(
             "Bist du sicher, dass du verlängern möchtest?"),
         "areYouSureYouWantToResetThisPerson":
@@ -578,28 +592,29 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Black-Friday-Aktion"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
         "cLDesc1": MessageLookupByLibrary.simpleMessage(
-            "Nach der Video-Streaming-Beta und der Arbeit an fortsetzbaren Uploads und Downloads haben wir das Datei-Upload-Limit auf 10 GB erhöht. Dies ist jetzt sowohl in Desktop- als auch in mobilen Apps verfügbar."),
+            "Zusammen mit der Beta-Version des Video-Streamings und der Arbeit an wiederaufnehmbarem Hoch- und Herunterladen haben wir jetzt das Limit für das Hochladen von Dateien auf 10 GB erhöht. Dies ist ab sofort sowohl in den Desktop- als auch Mobil-Apps verfügbar."),
         "cLDesc2": MessageLookupByLibrary.simpleMessage(
-            "Hintergrund-Uploads werden jetzt auch auf iOS unterstützt, zusätzlich zu Android-Geräten. Du musst die App nicht öffnen, um deine neuesten Fotos und Videos zu sichern."),
+            "Das Hochladen im Hintergrund wird jetzt auch unter iOS unterstützt, zusätzlich zu Android-Geräten. Es ist nicht mehr notwendig, die App zu öffnen, um die letzten Fotos und Videos zu sichern."),
         "cLDesc3": MessageLookupByLibrary.simpleMessage(
-            "Wir haben erhebliche Verbesserungen an unserer Erinnerungserfahrung vorgenommen, einschließlich Autoplay, Wischen zur nächsten Erinnerung und vieles mehr."),
+            "Wir haben deutliche Verbesserungen an der Darstellung von Erinnerungen vorgenommen, u.a. automatische Wiedergabe, Wischen zur nächsten Erinnerung und vieles mehr."),
         "cLDesc4": MessageLookupByLibrary.simpleMessage(
-            "Zusammen mit vielen internen Verbesserungen ist es jetzt viel einfacher, alle erkannten Gesichter zu sehen, Feedback zu ähnlichen Gesichtern zu geben und Gesichter zu einem einzelnen Foto hinzuzufügen/zu entfernen."),
+            "Zusammen mit einer Reihe von Verbesserungen unter der Haube ist es jetzt viel einfacher, alle erkannten Gesichter zu sehen, Feedback zu ähnlichen Gesichtern geben und Gesichter für ein einzelnes Foto hinzuzufügen oder zu entfernen."),
         "cLDesc5": MessageLookupByLibrary.simpleMessage(
-            "Du erhältst jetzt eine optionale Benachrichtigung für alle Geburtstage, die du auf Ente gespeichert hast, zusammen mit einer Sammlung ihrer besten Fotos."),
+            "Du erhältst jetzt eine Opt-Out-Benachrichtigung für alle Geburtstage, die du bei Ente gespeichert hast, zusammen mit einer Sammlung der besten Fotos."),
         "cLDesc6": MessageLookupByLibrary.simpleMessage(
-            "Kein Warten mehr darauf, dass Uploads/Downloads abgeschlossen werden, bevor du die App schließen kannst. Alle Uploads und Downloads können jetzt mitten im Vorgang pausiert und von dort fortgesetzt werden, wo du aufgehört hast."),
-        "cLTitle1":
-            MessageLookupByLibrary.simpleMessage("Upload großer Videodateien"),
-        "cLTitle2": MessageLookupByLibrary.simpleMessage("Hintergrund-Upload"),
-        "cLTitle3":
-            MessageLookupByLibrary.simpleMessage("Autoplay-Erinnerungen"),
+            "Kein Warten mehr auf das Hoch- oder Herunterladen, bevor du die App schließen kannst. Alle Übertragungen können jetzt mittendrin pausiert und fortgesetzt werden, wo du aufgehört hast."),
+        "cLTitle1": MessageLookupByLibrary.simpleMessage(
+            "Lade große Videodateien hoch"),
+        "cLTitle2":
+            MessageLookupByLibrary.simpleMessage("Hochladen im Hintergrund"),
+        "cLTitle3": MessageLookupByLibrary.simpleMessage(
+            "Automatische Wiedergabe von Erinnerungen"),
         "cLTitle4": MessageLookupByLibrary.simpleMessage(
             "Verbesserte Gesichtserkennung"),
         "cLTitle5": MessageLookupByLibrary.simpleMessage(
             "Geburtstags-Benachrichtigungen"),
         "cLTitle6": MessageLookupByLibrary.simpleMessage(
-            "Fortsetzbare Uploads und Downloads"),
+            "Wiederaufnehmbares Hoch- und Herunterladen"),
         "cachedData": MessageLookupByLibrary.simpleMessage("Daten im Cache"),
         "calculating":
             MessageLookupByLibrary.simpleMessage("Wird berechnet..."),
@@ -855,6 +870,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deviceNotFound":
             MessageLookupByLibrary.simpleMessage("Gerät nicht gefunden"),
         "didYouKnow": MessageLookupByLibrary.simpleMessage("Schon gewusst?"),
+        "different": MessageLookupByLibrary.simpleMessage("Verschieden"),
         "disableAutoLock": MessageLookupByLibrary.simpleMessage(
             "Automatische Sperre deaktivieren"),
         "disableDownloadWarningBody": MessageLookupByLibrary.simpleMessage(
@@ -1152,6 +1168,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "iOSLockOut": MessageLookupByLibrary.simpleMessage(
             "Die biometrische Authentifizierung ist deaktiviert. Bitte sperren und entsperren Sie Ihren Bildschirm, um sie zu aktivieren."),
         "iOSOkButton": MessageLookupByLibrary.simpleMessage("OK"),
+        "ignore": MessageLookupByLibrary.simpleMessage("Ignorieren"),
         "ignoreUpdate": MessageLookupByLibrary.simpleMessage("Ignorieren"),
         "ignored": MessageLookupByLibrary.simpleMessage("ignoriert"),
         "ignoredFolderUploadReason": MessageLookupByLibrary.simpleMessage(
@@ -1171,6 +1188,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Falscher Wiederherstellungs-Schlüssel"),
         "indexedItems":
             MessageLookupByLibrary.simpleMessage("Indizierte Elemente"),
+        "indexingPausedStatusDescription": MessageLookupByLibrary.simpleMessage(
+            "Die Indizierung ist pausiert. Sie wird automatisch fortgesetzt, wenn das Gerät bereit ist. Das Gerät wird als bereit angesehen, wenn sich der Akkustand, die Akkugesundheit und der thermische Zustand in einem gesunden Bereich befinden."),
         "ineligible": MessageLookupByLibrary.simpleMessage("Unzulässig"),
         "info": MessageLookupByLibrary.simpleMessage("Info"),
         "insecureDevice":
@@ -1354,6 +1373,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Wähle die Arten von Erinnerungen, die du auf der Startseite sehen möchtest."),
         "memoryCount": m50,
         "merchandise": MessageLookupByLibrary.simpleMessage("Merchandise"),
+        "merge": MessageLookupByLibrary.simpleMessage("Zusammenführen"),
         "mergeWithExisting": MessageLookupByLibrary.simpleMessage(
             "Mit vorhandenem zusammenführen"),
         "mergedPhotos":
@@ -1493,6 +1513,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Oder eine vorherige auswählen"),
         "orPickFromYourContacts": MessageLookupByLibrary.simpleMessage(
             "oder wähle aus deinen Kontakten"),
+        "otherDetectedFaces":
+            MessageLookupByLibrary.simpleMessage("Andere erkannte Gesichter"),
         "pair": MessageLookupByLibrary.simpleMessage("Koppeln"),
         "pairWithPin":
             MessageLookupByLibrary.simpleMessage("Mit PIN verbinden"),
@@ -1624,6 +1646,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Öffentlicher Link erstellt"),
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("Öffentlicher Link aktiviert"),
+        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
         "queued": MessageLookupByLibrary.simpleMessage("In der Warteschlange"),
         "quickLinks": MessageLookupByLibrary.simpleMessage("Quick Links"),
         "radius": MessageLookupByLibrary.simpleMessage("Umkreis"),
@@ -1740,6 +1763,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "reportBug": MessageLookupByLibrary.simpleMessage("Fehler melden"),
         "resendEmail":
             MessageLookupByLibrary.simpleMessage("E-Mail erneut senden"),
+        "reset": MessageLookupByLibrary.simpleMessage("Zurücksetzen"),
         "resetIgnoredFiles": MessageLookupByLibrary.simpleMessage(
             "Ignorierte Dateien zurücksetzen"),
         "resetPasswordTitle":
@@ -1767,7 +1791,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "rotateRight":
             MessageLookupByLibrary.simpleMessage("Nach rechts drehen"),
         "safelyStored": MessageLookupByLibrary.simpleMessage("Gesichert"),
+        "same": MessageLookupByLibrary.simpleMessage("Gleich"),
+        "sameperson": MessageLookupByLibrary.simpleMessage("Dieselbe Person?"),
         "save": MessageLookupByLibrary.simpleMessage("Speichern"),
+        "saveAsAnotherPerson":
+            MessageLookupByLibrary.simpleMessage("Als andere Person speichern"),
         "saveChangesBeforeLeavingQuestion":
             MessageLookupByLibrary.simpleMessage(
                 "Änderungen vor dem Verlassen speichern?"),
@@ -1928,8 +1956,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharing": MessageLookupByLibrary.simpleMessage("Teilt..."),
         "shiftDatesAndTime": MessageLookupByLibrary.simpleMessage(
             "Datum und Uhrzeit verschieben"),
+        "showLessFaces":
+            MessageLookupByLibrary.simpleMessage("Weniger Gesichter zeigen"),
         "showMemories":
             MessageLookupByLibrary.simpleMessage("Erinnerungen anschauen"),
+        "showMoreFaces":
+            MessageLookupByLibrary.simpleMessage("Mehr Gesichter zeigen"),
         "showPerson": MessageLookupByLibrary.simpleMessage("Person anzeigen"),
         "signOutFromOtherDevices": MessageLookupByLibrary.simpleMessage(
             "Von anderen Geräten abmelden"),
@@ -2057,6 +2089,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "theLinkYouAreTryingToAccessHasExpired":
             MessageLookupByLibrary.simpleMessage(
                 "Der Link, den du aufrufen möchtest, ist abgelaufen."),
+        "thePersonGroupsWillNotBeDisplayed": MessageLookupByLibrary.simpleMessage(
+            "Diese Personengruppen werden im Personen-Abschnitt nicht mehr angezeigt. Die Fotos bleiben unverändert."),
+        "thePersonWillNotBeDisplayed": MessageLookupByLibrary.simpleMessage(
+            "Diese Person wird im Personen-Abschnitt nicht mehr angezeigt. Die Fotos bleiben unverändert."),
         "theRecoveryKeyYouEnteredIsIncorrect":
             MessageLookupByLibrary.simpleMessage(
                 "Der eingegebene Schlüssel ist ungültig"),
@@ -2256,6 +2292,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "yesDelete": MessageLookupByLibrary.simpleMessage("Ja, löschen"),
         "yesDiscardChanges":
             MessageLookupByLibrary.simpleMessage("Ja, Änderungen verwerfen"),
+        "yesIgnore": MessageLookupByLibrary.simpleMessage("Ja, ignorieren"),
         "yesLogout": MessageLookupByLibrary.simpleMessage("Ja, ausloggen"),
         "yesRemove": MessageLookupByLibrary.simpleMessage("Ja, entfernen"),
         "yesRenew": MessageLookupByLibrary.simpleMessage("Ja, erneuern"),
