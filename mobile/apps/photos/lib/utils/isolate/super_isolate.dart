@@ -7,9 +7,10 @@ import "package:flutter/services.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/error-reporting/isolate_logging.dart";
 import "package:photos/models/base/id.dart";
-import "package:photos/services/isolate_functions.dart";
+import "package:photos/utils/isolate/isolate_operations.dart";
 import "package:synchronized/synchronized.dart";
 
+@pragma('vm:entry-point')
 abstract class SuperIsolate {
   Logger get logger;
 
@@ -80,6 +81,8 @@ abstract class SuperIsolate {
     if (rootToken != null) {
       BackgroundIsolateBinaryMessenger.ensureInitialized(rootToken);
     }
+    final logger = Logger('SuperIsolate');
+    logger.info('IsolateMain started');
 
     receivePort.listen((message) async {
       final taskID = message[0] as String;
@@ -87,6 +90,7 @@ abstract class SuperIsolate {
       final function = IsolateOperation.values[functionIndex];
       final args = message[2] as Map<String, dynamic>;
       final sendPort = message[3] as SendPort;
+      logger.info("Starting isolate operation $function in isolate");
 
       late final Object data;
       try {

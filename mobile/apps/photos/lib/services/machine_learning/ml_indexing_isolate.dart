@@ -2,14 +2,14 @@ import "dart:async";
 
 import "package:flutter/foundation.dart" show debugPrint;
 import "package:logging/logging.dart";
-import "package:photos/services/isolate_functions.dart";
-import "package:photos/services/isolate_service.dart";
 import 'package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart';
 import 'package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart';
 import "package:photos/services/machine_learning/ml_models_overview.dart";
 import 'package:photos/services/machine_learning/ml_result.dart';
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
 import "package:photos/services/remote_assets_service.dart";
+import "package:photos/utils/isolate/isolate_operations.dart";
+import "package:photos/utils/isolate/super_isolate.dart";
 import "package:photos/utils/ml_util.dart";
 import "package:photos/utils/network_util.dart";
 import "package:synchronized/synchronized.dart";

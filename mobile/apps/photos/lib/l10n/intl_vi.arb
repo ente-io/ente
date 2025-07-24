@@ -825,8 +825,8 @@
   "doubleYourStorage": "Gấp đôi dung lượng lưu trữ của bạn",
   "referFriendsAnd2xYourPlan": "Giới thiệu bạn bè và ×2 gói của bạn",
   "shareAlbumHint": "Mở album và nhấn nút chia sẻ ở góc trên bên phải để chia sẻ.",
-  "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Các mục hiện số ngày còn lại trước khi xóa vĩnh viễn",
-  "trashDaysLeft": "{count, plural, =0 {Sắp tới} =1 {1 ngày} other {{count} ngày}}",
+  "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Trên các mục là số ngày còn lại trước khi xóa vĩnh viễn",
+  "trashDaysLeft": "{count, plural, =0 {Sắp xóa} =1 {1 ngày} other {{count} ngày}}",
   "@trashDaysLeft": {
     "description": "Text to indicate number of days remaining before permanent deletion",
     "placeholders": {
@@ -1178,7 +1178,7 @@
   "addPhotos": "Thêm ảnh",
   "noPhotosFoundHere": "Không tìm thấy ảnh ở đây",
   "zoomOutToSeePhotos": "Phóng to để xem ảnh",
-  "noImagesWithLocation": "Không có ảnh ở vị trí này",
+  "noImagesWithLocation": "Không có ảnh với vị trí",
   "unpinAlbum": "Bỏ ghim album",
   "pinAlbum": "Ghim album",
   "create": "Tạo",

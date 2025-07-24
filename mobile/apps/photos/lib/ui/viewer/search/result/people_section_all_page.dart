@@ -95,12 +95,14 @@ class SelectablePersonSearchExample extends StatelessWidget {
   final GenericSearchResult searchResult;
   final double size;
   final SelectedPeople selectedPeople;
+  final bool isDefaultFace;
 
   const SelectablePersonSearchExample({
     super.key,
     required this.searchResult,
     required this.selectedPeople,
     this.size = 102,
+    this.isDefaultFace = false,
   });
 
   void _handleTap(BuildContext context) {
@@ -192,7 +194,10 @@ class SelectablePersonSearchExample extends StatelessWidget {
                                 searchResult.previewThumbnail()!,
                                 shouldShowSyncStatus: false,
                               )
-                            : FaceSearchResult(searchResult);
+                            : FaceSearchResult(
+                                searchResult,
+                                isDefaultFace: isDefaultFace,
+                              );
                       } else {
                         child = const NoThumbnailWidget(
                           addBorder: false,
@@ -301,8 +306,13 @@ class SelectablePersonSearchExample extends StatelessWidget {
 
 class FaceSearchResult extends StatelessWidget {
   final SearchResult searchResult;
+  final bool isDefaultFace;
 
-  const FaceSearchResult(this.searchResult, {super.key});
+  const FaceSearchResult(
+    this.searchResult, {
+    super.key,
+    this.isDefaultFace = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -313,6 +323,7 @@ class FaceSearchResult extends StatelessWidget {
       key: params.containsKey(kPersonWidgetKey)
           ? ValueKey(params[kPersonWidgetKey])
           : ValueKey(params[kPersonParamID] ?? params[kClusterParamId]),
+      keepAlive: isDefaultFace,
     );
   }
 }
@@ -486,6 +497,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                               searchResult: normalFaces[index],
                               size: itemSize,
                               selectedPeople: widget.selectedPeople!,
+                              isDefaultFace: true,
                             )
                           : PersonSearchExample(
                               searchResult: normalFaces[index],
@@ -525,6 +537,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                                 searchResult: extraFaces[index],
                                 size: itemSize,
                                 selectedPeople: widget.selectedPeople!,
+                                isDefaultFace: false,
                               )
                             : PersonSearchExample(
                                 searchResult: extraFaces[index],

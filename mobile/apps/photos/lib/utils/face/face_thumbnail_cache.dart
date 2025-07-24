@@ -137,7 +137,7 @@ Future<Map<String, Uint8List>?> getCachedFaceCrops(
               facesWithoutCrops[face.faceID] = face.detection.box;
             }
           } catch (e, s) {
-            _logger.severe(
+            _logger.warning(
               "Error reading cached face crop for faceID ${face.faceID} from file ${faceCropCacheFile.path}",
               e,
               s,
@@ -213,7 +213,7 @@ Future<Map<String, Uint8List>?> getCachedFaceCrops(
           milliseconds: 100 * pow(2, fetchAttempt + 1).toInt(),
         );
         await Future.delayed(backoff);
-        _logger.warning(
+        _logger.fine(
           "Error getting face crops for faceIDs: ${faces.map((face) => face.faceID).toList()}, retrying (attempt ${fetchAttempt + 1}) in ${backoff.inMilliseconds} ms",
           e,
           s,
@@ -226,13 +226,13 @@ Future<Map<String, Uint8List>?> getCachedFaceCrops(
           useTempCache: useTempCache,
         );
       }
-      _logger.severe(
+      _logger.warning(
         "Error getting face crops for faceIDs: ${faces.map((face) => face.faceID).toList()}",
         e,
         s,
       );
     } else {
-      _logger.info(
+      _logger.severe(
         "Stopped getting face crops for faceIDs: ${faces.map((face) => face.faceID).toList()} due to $e",
       );
     }
@@ -335,12 +335,14 @@ Future<Map<String, Uint8List>?> _getFaceCrops(
   if (useFullFile && file.fileType != FileType.video) {
     final File? ioFile = await getFile(file);
     if (ioFile == null) {
+      _logger.severe("Failed to get file for face crop generation");
       return null;
     }
     imagePath = ioFile.path;
   } else {
     final thumbnail = await getThumbnailForUploadedFile(file);
     if (thumbnail == null) {
+      _logger.severe("Failed to get thumbnail for face crop generation");
       return null;
     }
     imagePath = thumbnail.path;

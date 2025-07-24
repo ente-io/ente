@@ -1451,9 +1451,19 @@ class CollectionsService {
       }
       // group files by collectionID
       final Map<int, List<EnteFile>> filesByCollection = {};
+      final Map<int, Set<int>> fileSeenByCollection = {};
       for (final file in filesToCopy) {
+        fileSeenByCollection.putIfAbsent(file.collectionID!, () => <int>{});
+        if (fileSeenByCollection[file.collectionID]!
+            .contains(file.uploadedFileID)) {
+          _logger.warning(
+            "skip copy, duplicate ID: ${file.uploadedFileID} in collection "
+            "${file.collectionID}",
+          );
+          continue;
+        }
         filesByCollection
-            .putIfAbsent(file.cf!.collectionID, () => [])
+            .putIfAbsent(file.collectionID!, () => [])
             .add(file.copyWith());
       }
       for (final entry in filesByCollection.entries) {
@@ -1702,17 +1712,27 @@ class CollectionsService {
     );
     final List<EnteFile> filesToCopy = [];
     final List<EnteFile> filesToAdd = [];
+    final Set<int> seenForAdd = {};
+    final Set<int> seenForCopy = {};
+
     for (final EnteFile file in othersFile) {
-      if (hashToUserFile.containsKey(file.hash ?? '')) {
-        final userFile = hashToUserFile[file.hash]!;
-        if (userFile.fileType == file.fileType) {
-          filesToAdd.add(userFile);
-        } else {
-          filesToCopy.add(file);
-        }
-      } else {
-        filesToCopy.add(file);
+      final userFile = hashToUserFile[file.hash ?? ''];
+      final bool shouldAdd =
+          userFile != null && userFile.fileType == file.fileType;
+      final targetList = shouldAdd ? filesToAdd : filesToCopy;
+      final seenSet = shouldAdd ? seenForAdd : seenForCopy;
+      final fileToProcess = shouldAdd ? userFile : file;
+      final uploadID = fileToProcess.uploadedFileID;
+
+      if (seenSet.contains(uploadID)) {
+        final action = shouldAdd ? "adding" : "copying";
+        _logger.warning(
+          "skip $action file $uploadID as it is already ${action}ed",
+        );
+        continue;
       }
+      targetList.add(fileToProcess);
+      seenSet.add(uploadID!);
     }
     return (filesToAdd, filesToCopy);
   }

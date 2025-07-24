@@ -23,6 +23,7 @@ class PersonFaceWidget extends StatefulWidget {
   final String? clusterID;
   final bool useFullFile;
   final VoidCallback? onErrorCallback;
+  final bool keepAlive;
 
   // PersonFaceWidget constructor checks that both personId and clusterID are not null
   // and that the file is not null
@@ -31,6 +32,7 @@ class PersonFaceWidget extends StatefulWidget {
     this.clusterID,
     this.useFullFile = true,
     this.onErrorCallback,
+    this.keepAlive = false,
     super.key,
   }) : assert(
           personId != null || clusterID != null,
@@ -41,11 +43,15 @@ class PersonFaceWidget extends StatefulWidget {
   State<PersonFaceWidget> createState() => _PersonFaceWidgetState();
 }
 
-class _PersonFaceWidgetState extends State<PersonFaceWidget> {
+class _PersonFaceWidgetState extends State<PersonFaceWidget>
+    with AutomaticKeepAliveClientMixin {
   Future<Uint8List?>? faceCropFuture;
   EnteFile? fileForFaceCrop;
 
   bool get isPerson => widget.personId != null;
+
+  @override
+  bool get wantKeepAlive => widget.keepAlive;
 
   @override
   void initState() {
@@ -66,6 +72,10 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(
+      context,
+    ); // Calling super.build for AutomaticKeepAliveClientMixin
+
     return FutureBuilder<Uint8List?>(
       future: faceCropFuture,
       builder: (context, snapshot) {
@@ -165,7 +175,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget> {
           }
         }
         if (fileForFaceCrop == null) {
-          _logger.warning(
+          _logger.severe(
             "No suitable file found for face crop for person: ${widget.personId} or cluster: ${widget.clusterID}",
           );
           return null;
@@ -178,7 +188,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget> {
         clusterID: widget.clusterID,
       );
       if (face == null) {
-        debugPrint(
+        _logger.severe(
           "No cover face for person: ${widget.personId} or cluster ${widget.clusterID} and fileID ${fileForFaceCrop.uploadedFileID!}",
         );
         return null;
@@ -190,7 +200,13 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget> {
         personOrClusterID: personOrClusterId,
         useTempCache: false,
       );
-      return cropMap?[face.faceID];
+      final result = cropMap?[face.faceID];
+      if (result == null) {
+        _logger.severe(
+          "Null cover face crop for person: ${widget.personId} or cluster ${widget.clusterID} and fileID ${fileForFaceCrop.uploadedFileID!}",
+        );
+      }
+      return result;
     } catch (e, s) {
       _logger.severe(
         "Error getting cover face for person: ${widget.personId} or cluster ${widget.clusterID}",

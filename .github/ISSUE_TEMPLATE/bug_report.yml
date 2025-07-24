@@ -1,38 +1,21 @@
 name: Report a bug
-description: For regressions only (things that were working earlier)
+description: Things that were working earlier but don't anymore
 labels: []
 body:
     - type: markdown
       attributes:
           value: |
-              Before opening a new issue, **please** ensure
-              1. You are on the latest version,
-              2. You've searched for existing issues,
-              3. It was working earlier (otherwise use [this](https://github.com/ente-io/ente/discussions/categories/enhancements))
-              4. It is not about self hosting (otherwise use [this](https://github.com/ente-io/ente/discussions/categories/q-a))
+              **Checklist**
+              1. You've searched existing [issues](https://github.com/search?q=repo%3Aente-io%2Fente+&type=issues) and [discussions](https://github.com/search?q=repo%3Aente-io%2Fente+&type=discussions)
+              2. It was working earlier (otherwise use [enhancements](https://github.com/ente-io/ente/discussions/categories/enhancements))
+              3. It is not about self hosting (for those use [this](https://github.com/ente-io/ente/discussions/categories/q-a))
     - type: textarea
       attributes:
           label: Description
-          description: >
-              Describe the bug and steps to reproduce the behaviour, and how it
-              differs from the previously working behaviour.
-      validations:
-          required: true
     - type: input
       attributes:
           label: Version
           description: The version can be seen at the bottom of settings.
-          placeholder: e.g. v1.2.3
-    - type: input
-      attributes:
-          label: Last working version
-          description: >
-              The version where things were last known to be working. It is fine
-              if you don't remember the exact version (mention roughly then),
-              but **if there just isn't a last working version, then please file
-              it as an
-              [enhancement](https://github.com/ente-io/ente/discussions/categories/enhancements))**
-              (where the community upvotes can be used to help prioritize).
           placeholder: e.g. v1.2.3
     - type: dropdown
       attributes:
