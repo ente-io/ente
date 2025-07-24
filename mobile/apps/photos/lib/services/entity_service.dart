@@ -83,7 +83,7 @@ class EntityService {
     late LocalEntityData localData;
 
     final EntityData data = id == null || addWithCustomID
-        ? await _gateway.createEntity(type, encryptedData, header)
+        ? await _gateway.createEntity(type, id, encryptedData, header)
         : await _gateway.updateEntity(type, id, encryptedData, header);
     localData = LocalEntityData(
       id: data.id,

@@ -1,7 +1,9 @@
 import "dart:async";
 
 import 'package:flutter/material.dart';
+import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/events/collection_updated_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/smart_album_config.dart";
 import "package:photos/models/selected_people.dart";
@@ -134,6 +136,14 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
                             );
                           }
                         }
+
+                        Bus.instance.fire(
+                          CollectionUpdatedEvent(
+                            widget.collectionId,
+                            [],
+                            "smart_album_people",
+                          ),
+                        );
                       }
                     }
                     newConfig = currentConfig!.getUpdatedConfig(
@@ -142,7 +152,7 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
                   }
 
                   await smartAlbumsService.saveConfig(newConfig);
-                  smartAlbumsService.syncSmartAlbums().ignore();
+                  unawaited(smartAlbumsService.syncSmartAlbums());
 
                   await dialog.hide();
                   Navigator.pop(context);

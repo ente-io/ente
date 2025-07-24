@@ -1403,8 +1403,9 @@ class CollectionsService {
 
   Future<void> addOrCopyToCollection(
     int dstCollectionID,
-    List<EnteFile> files,
-  ) async {
+    List<EnteFile> files, {
+    bool toCopy = true,
+  }) async {
     final splitResult = FilesSplit.split(files, _config.getUserID()!);
     if (splitResult.pendingUploads.isNotEmpty) {
       throw ArgumentError('File should be already uploaded');
@@ -1424,6 +1425,9 @@ class CollectionsService {
           "found existing ${filesToAdd.length} files with same hash, adding symlinks",
         );
         await _addToCollection(dstCollectionID, filesToAdd);
+      }
+      if (!toCopy) {
+        return;
       }
       // group files by collectionID
       final Map<int, List<EnteFile>> filesByCollection = {};

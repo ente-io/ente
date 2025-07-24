@@ -45,6 +45,7 @@ class EntityGateway {
 
   Future<EntityData> createEntity(
     EntityType type,
+    String? id,
     String encryptedData,
     String header,
   ) async {
@@ -52,6 +53,7 @@ class EntityGateway {
       "/user-entity/entity",
       data: {
         "encryptedData": encryptedData,
+        if (id != null) "id": id,
         "header": header,
         "type": type.typeToString(),
       },

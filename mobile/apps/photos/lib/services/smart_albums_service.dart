@@ -3,14 +3,15 @@ import "dart:convert";
 
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/smart_album_syncing_event.dart";
 import "package:photos/models/api/entity/type.dart";
 import "package:photos/models/collection/smart_album_config.dart";
+import "package:photos/models/file/file.dart";
 import "package:photos/models/local_entity_data.dart";
 import "package:photos/service_locator.dart" show entityService;
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/search_service.dart";
-import "package:photos/ui/actions/collection/collection_file_actions.dart";
-import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
 
 class SmartAlbumsService {
   final _logger = Logger((SmartAlbumsService).toString());
@@ -18,6 +19,8 @@ class SmartAlbumsService {
   int _lastCacheRefreshTime = 0;
 
   Future<Map<int, SmartAlbumConfig>>? _cachedConfigsFuture;
+
+  (int, bool)? syncingCollection;
 
   void clearCache() {
     _cachedConfigsFuture = null;
@@ -35,7 +38,7 @@ class SmartAlbumsService {
       _cachedConfigsFuture = null; // Invalidate cache
     }
     _cachedConfigsFuture ??= _fetchAndCacheSaConfigs();
-    return await _cachedConfigsFuture!;
+    return _cachedConfigsFuture!;
   }
 
   Future<Map<int, SmartAlbumConfig>> _fetchAndCacheSaConfigs() async {
@@ -78,10 +81,29 @@ class SmartAlbumsService {
 
   Future<void> syncSmartAlbums() async {
     final cachedConfigs = await getSmartConfigs();
+    final userId = Configuration.instance.getUserID();
 
     for (final entry in cachedConfigs.entries) {
       final collectionId = entry.key;
       final config = entry.value;
+      final collection =
+          CollectionsService.instance.getCollectionByID(collectionId)!;
+
+      if (!collection.canAutoAdd(userId!)) {
+        _logger.warning(
+          "Deleting collection config ($collectionId) as user does not have permission",
+        );
+        await _deleteEntry(
+          userId: userId,
+          collectionId: collectionId,
+        );
+        continue;
+      }
+
+      syncingCollection = (collectionId, false);
+      Bus.instance.fire(
+        SmartAlbumSyncingEvent(collectionId: collectionId, isSyncing: false),
+      );
 
       final infoMap = config.infoMap;
 
@@ -91,6 +113,9 @@ class SmartAlbumsService {
         config.personIDs.toList(),
       );
 
+      Set<EnteFile> toBeSynced = {};
+
+      var newConfig = config;
       for (final personId in config.personIDs) {
         // compares current updateAt with last added file's updatedAt
         if (updatedAtMap[personId] == null ||
@@ -99,7 +124,7 @@ class SmartAlbumsService {
           continue;
         }
 
-        final toBeSynced = (await SearchService.instance
+        final fileIds = (await SearchService.instance
                 .getClusterFilesForPersonID(personId))
             .entries
             .expand((e) => e.value)
@@ -107,35 +132,43 @@ class SmartAlbumsService {
           ..removeWhere(
             (e) =>
                 e.uploadedFileID == null ||
-                config.infoMap[personId]!.addedFiles.contains(e.uploadedFileID),
+                config.infoMap[personId]!.addedFiles
+                    .contains(e.uploadedFileID) ||
+                e.ownerID != userId,
           );
 
-        if (toBeSynced.isNotEmpty) {
-          final CollectionActions collectionActions =
-              CollectionActions(CollectionsService.instance);
+        toBeSynced = {...toBeSynced, ...fileIds};
 
-          final result = await collectionActions.addToCollection(
-            null,
+        newConfig = await newConfig.addFiles(
+          personId,
+          updatedAtMap[personId]!,
+          toBeSynced.map((e) => e.uploadedFileID!).toSet(),
+        );
+      }
+
+      syncingCollection = (collectionId, true);
+      Bus.instance.fire(
+        SmartAlbumSyncingEvent(collectionId: collectionId, isSyncing: true),
+      );
+
+      if (toBeSynced.isNotEmpty) {
+        try {
+          await CollectionsService.instance.addOrCopyToCollection(
+            toCopy: false,
             collectionId,
-            false,
-            selectedFiles: toBeSynced,
+            toBeSynced.toList(),
           );
 
-          if (result) {
-            final newConfig = await config.addFiles(
-              personId,
-              updatedAtMap[personId]!,
-              toBeSynced.map((e) => e.uploadedFileID!).toSet(),
-            );
-            await saveConfig(newConfig);
-          }
-        }
+          await saveConfig(newConfig);
+        } catch (_) {}
       }
     }
+    syncingCollection = null;
+    Bus.instance.fire(SmartAlbumSyncingEvent());
   }
 
   Future<void> saveConfig(SmartAlbumConfig config) async {
-    final userId = Configuration.instance.getUserID();
+    final userId = Configuration.instance.getUserID()!;
 
     await _addOrUpdateEntity(
       EntityType.smartAlbum,
@@ -151,15 +184,21 @@ class SmartAlbumsService {
     return cachedConfigs[collectionId];
   }
 
+  String getId({required int collectionId, required int userId}) =>
+      "sa_${userId}_$collectionId";
+
   /// Wrapper method for entityService.addOrUpdate that handles cache refresh
   Future<LocalEntityData> _addOrUpdateEntity(
     EntityType type,
     Map<String, dynamic> jsonMap, {
     required int collectionId,
     bool addWithCustomID = false,
-    int? userId,
+    required int userId,
   }) async {
-    final id = "sa_${userId!}_$collectionId";
+    final id = getId(
+      collectionId: collectionId,
+      userId: userId,
+    );
     final result = await entityService.addOrUpdate(
       type,
       jsonMap,
@@ -172,8 +211,10 @@ class SmartAlbumsService {
   }
 
   Future<void> _deleteEntry({
-    required String id,
+    required int userId,
+    required int collectionId,
   }) async {
+    final id = getId(collectionId: collectionId, userId: userId);
     await entityService.deleteEntry(id);
     _lastCacheRefreshTime = 0; // Invalidate cache
   }
