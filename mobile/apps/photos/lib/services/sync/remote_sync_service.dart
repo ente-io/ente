@@ -371,6 +371,9 @@ class RemoteSyncService {
         final Set<String> alreadyClaimedLocalIDs =
             await _db.getLocalIDsMarkedForOrAlreadyUploaded(ownerID);
         localIDsToSync.removeAll(alreadyClaimedLocalIDs);
+        if (alreadyClaimedLocalIDs.isNotEmpty) {
+          await _db.removeQueuedLocalFiles(alreadyClaimedLocalIDs);
+        }
       }
 
       if (localIDsToSync.isEmpty) {

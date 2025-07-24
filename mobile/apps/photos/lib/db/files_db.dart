@@ -979,6 +979,29 @@ class FilesDB with SqlDbBase {
     return result;
   }
 
+  // remove references for local files which are either already uploaded
+  // or queued for upload but not yet uploaded
+  Future<int> removeQueuedLocalFiles(Set<String> localIDs) async {
+    final db = await instance.sqliteAsyncDB;
+    final inParam = localIDs.map((id) => "'$id'").join(',');
+    final r = await db.execute(
+      '''
+      DELETE FROM $filesTable
+      WHERE $columnLocalID IN ($inParam) and (collectionID IS NULL || collectionID = -1)
+      and ($columnUploadedFileID IS NULL OR $columnUploadedFileID = -1);
+    ''',
+    );
+    if (r.isNotEmpty) {
+      _logger.warning(
+        "Removed ${r.length} potential dups for already queued local files",
+      );
+    } else {
+      _logger.finest("No duplicate id found for queued/uploaded files");
+    }
+
+    return r.length;
+  }
+
   Future<Set<String>> getLocalFileIDsForCollection(int collectionID) async {
     final db = await instance.sqliteAsyncDB;
     final rows = await db.getAll(
