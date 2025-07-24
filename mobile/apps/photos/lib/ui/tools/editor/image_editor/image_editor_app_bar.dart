@@ -87,8 +87,9 @@ class ImageEditorAppBar extends StatelessWidget implements PreferredSizeWidget {
             child: Text(
               isMainEditor ? 'Save Copy' : 'Done',
               style: getEnteTextTheme(context).body.copyWith(
-                    color:
-                        Theme.of(context).colorScheme.imageEditorPrimaryColor,
+                    color: enableUndo
+                        ? Theme.of(context).colorScheme.imageEditorPrimaryColor
+                        : colorScheme.textMuted,
                   ),
             ),
           ),

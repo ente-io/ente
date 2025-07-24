@@ -338,6 +338,7 @@ class _NewImageEditorState extends State<NewImageEditor> {
               ),
             ),
             textEditor: TextEditorConfigs(
+              canToggleBackgroundMode: true,
               canToggleTextAlign: true,
               customTextStyles: [
                 GoogleFonts.inter(),
