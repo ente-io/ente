@@ -875,10 +875,10 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
                         boxShadow: atZeroScroll
                             ? []
                             : [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.15),
+                                const BoxShadow(
+                                  color: Color(0x26000000),
                                   blurRadius: 4,
-                                  offset: const Offset(0, 2),
+                                  offset: Offset(0, 2),
                                 ),
                               ],
                       ),
