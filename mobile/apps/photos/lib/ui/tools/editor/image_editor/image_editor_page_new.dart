@@ -34,7 +34,6 @@ import "package:photos/ui/tools/editor/image_editor/image_editor_tune_bar.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
-import "package:pro_image_editor/models/editor_configs/utils/editor_safe_area.dart";
 import 'package:pro_image_editor/pro_image_editor.dart';
 
 class NewImageEditor extends StatefulWidget {
@@ -346,10 +345,6 @@ class _NewImageEditorState extends State<NewImageEditor> {
                 GoogleFonts.dmSerifText(),
                 GoogleFonts.comicNeue(),
               ],
-              safeArea: const EditorSafeArea(
-                bottom: false,
-                top: false,
-              ),
               style: const TextEditorStyle(
                 background: Colors.transparent,
                 textFieldMargin: EdgeInsets.only(top: kToolbarHeight),
@@ -373,10 +368,6 @@ class _NewImageEditorState extends State<NewImageEditor> {
               ),
             ),
             cropRotateEditor: CropRotateEditorConfigs(
-              safeArea: const EditorSafeArea(
-                bottom: false,
-                top: false,
-              ),
               style: CropRotateEditorStyle(
                 background: colorScheme.backgroundBase,
                 cropCornerColor:
@@ -414,7 +405,6 @@ class _NewImageEditorState extends State<NewImageEditor> {
             filterEditor: FilterEditorConfigs(
               fadeInUpDuration: fadeInDuration,
               fadeInUpStaggerDelayDuration: fadeInDelay,
-              safeArea: const EditorSafeArea(top: false),
               style: FilterEditorStyle(
                 filterListSpacing: 7,
                 background: colorScheme.backgroundBase,
@@ -465,7 +455,6 @@ class _NewImageEditorState extends State<NewImageEditor> {
               ),
             ),
             tuneEditor: TuneEditorConfigs(
-              safeArea: const EditorSafeArea(top: false),
               style: TuneEditorStyle(
                 background: colorScheme.backgroundBase,
               ),
