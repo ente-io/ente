@@ -117,10 +117,10 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m34(name) => "Vaišiavimas su ${name}";
 
   static String m35(count, formattedNumber) =>
-      "${Intl.plural(count, one: '${formattedNumber} failas šiame įrenginyje saugiai sukurta atsarginė kopija', other: '${formattedNumber} failų šiame įrenginyje saugiai sukurta atsarginių kopijų')}.";
+      "${Intl.plural(count, one: '${formattedNumber} failas šiame įrenginyje saugiai sukurta atsarginė kopija', few: '${formattedNumber} failai šiame įrenginyje saugiai sukurtos atsarginės kopijos', many: '${formattedNumber} failo šiame įrenginyje saugiai sukurtos atsargines kopijos', other: '${formattedNumber} failų šiame įrenginyje saugiai sukurta atsarginių kopijų')}.";
 
   static String m36(count, formattedNumber) =>
-      "${Intl.plural(count, one: '${formattedNumber} failas šiame albume saugiai sukurta atsarginė kopija', other: '${formattedNumber} failų šiame albume saugiai sukurta atsarginė kopija')}.";
+      "${Intl.plural(count, one: '${formattedNumber} failas šiame albume saugiai sukurta atsarginė kopija', few: '${formattedNumber} failai šiame albume saugiai sukurtos atsarginės kopijos', many: '${formattedNumber} failo šiame albume saugiai sukurtos atsargines kopijos', other: '${formattedNumber} failų šiame albume saugiai sukurta atsarginė kopija')}.";
 
   static String m37(storageAmountInGB) =>
       "${storageAmountInGB} GB kiekvieną kartą, kai kas nors užsiregistruoja mokamam planui ir pritaiko jūsų kodą.";
@@ -186,7 +186,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "${Intl.plural(count, zero: 'Nėra nuotraukų', one: '1 nuotrauka', other: '${count} nuotraukų')}";
 
   static String m62(count) =>
-      "${Intl.plural(count, zero: '0 nuotraukų', one: '1 nuotrauka', other: '${count} nuotraukų')}";
+      "${Intl.plural(count, zero: '0 nuotraukų', one: '1 nuotrauka', few: '${count} nuotraukos', many: '${count} nuotraukos', other: '${count} nuotraukų')}";
 
   static String m63(endDate) =>
       "Nemokama bandomoji versija galioja iki ${endDate}.\nVėliau galėsite pasirinkti mokamą planą.";
@@ -314,7 +314,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m112(name) => "Peržiūrėkite ${name}, kad atsietumėte";
 
   static String m113(count) =>
-      "${Intl.plural(count, zero: 'Įtraukta 0 žiūrėtojų', one: 'Įtrauktas 1 žiūrėtojas', other: 'Įtraukta ${count} žiūrėtojų')}";
+      "${Intl.plural(count, zero: 'Įtraukta 0 žiūrėtojų', one: 'Įtrauktas 1 žiūrėtojas', few: 'Įtraukti ${count} žiūrėtojai', many: 'Įtraukta ${count} žiūrėtojo', other: 'Įtraukta ${count} žiūrėtojų')}";
 
   static String m114(email) =>
       "Išsiuntėme laišką adresu <green>${email}</green>";

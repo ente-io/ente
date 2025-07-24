@@ -12306,16 +12306,6 @@ class S {
     );
   }
 
-  /// `Unable to generate face thumbnails`
-  String get faceThumbnailGenerationFailed {
-    return Intl.message(
-      'Unable to generate face thumbnails',
-      name: 'faceThumbnailGenerationFailed',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Last week`
   String get lastWeek {
     return Intl.message(
@@ -12376,6 +12366,16 @@ class S {
     );
   }
 
+  /// `Unable to generate face thumbnails`
+  String get faceThumbnailGenerationFailed {
+    return Intl.message(
+      'Unable to generate face thumbnails',
+      name: 'faceThumbnailGenerationFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Unable to analyze file`
   String get fileAnalysisFailed {
     return Intl.message(
@@ -12419,6 +12419,7 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
       Locale.fromSubtags(languageCode: 'lt'),
       Locale.fromSubtags(languageCode: 'lv'),
       Locale.fromSubtags(languageCode: 'ml'),
+      Locale.fromSubtags(languageCode: 'ms'),
       Locale.fromSubtags(languageCode: 'nl'),
       Locale.fromSubtags(languageCode: 'no'),
       Locale.fromSubtags(languageCode: 'or'),
