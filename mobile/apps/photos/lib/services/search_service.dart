@@ -1173,70 +1173,72 @@ class SearchService {
   ) async {
     final List<GenericSearchResult> searchResults = [];
 
-    final dateVariations = DateParseService.instance.parseDateVariations(query);
+    final parsedDate = DateParseService.instance.parse(query);
 
-    for (final dateVar in dateVariations) {
-      // Handle month-year queries
-      if (dateVar.item1 == null &&
-          dateVar.item2 != null &&
-          dateVar.item3 != null) {
-        final month = dateVar.item2!.monthNumber;
-        final year = dateVar.item3!;
-        final monthYearFiles =
-            await FilesDB.instance.getFilesCreatedWithinDurations(
-          [_getDurationForMonthInYear(month, year)],
-          ignoreCollections(),
-          order: 'DESC',
-        );
-        if (monthYearFiles.isNotEmpty) {
-          final name = '${dateVar.item2!.name} $year';
-          searchResults.add(
-            GenericSearchResult(
-              ResultType.month,
-              name,
-              monthYearFiles,
-              hierarchicalSearchFilter: TopLevelGenericFilter(
-                filterName: name,
-                occurrence: kMostRelevantFilter,
-                filterResultType: ResultType.month,
-                matchedUploadedIDs: filesToUploadedFileIDs(monthYearFiles),
-                filterIcon: Icons.calendar_month_outlined,
-              ),
+    if (parsedDate.isEmpty) {
+      return searchResults;
+    }
+    // Handle month-year queries
+    if (parsedDate.day == null &&
+        parsedDate.month != null &&
+        parsedDate.year != null) {
+      final month = parsedDate.month!;
+      final year = parsedDate.year!;
+      final monthYearFiles =
+          await FilesDB.instance.getFilesCreatedWithinDurations(
+        [_getDurationForMonthInYear(month, year)],
+        ignoreCollections(),
+        order: 'DESC',
+      );
+      if (monthYearFiles.isNotEmpty) {
+        final monthName = DateParseService.instance.getMonthName(month);
+        final name = '$monthName $year';
+        searchResults.add(
+          GenericSearchResult(
+            ResultType.month,
+            name,
+            monthYearFiles,
+            hierarchicalSearchFilter: TopLevelGenericFilter(
+              filterName: name,
+              occurrence: kMostRelevantFilter,
+              filterResultType: ResultType.month,
+              matchedUploadedIDs: filesToUploadedFileIDs(monthYearFiles),
+              filterIcon: Icons.calendar_month_outlined,
             ),
-          );
-        }
+          ),
+        );
       }
-      // Handle day-month queries (with or without year)
-      else if (dateVar.item1 != null && dateVar.item2 != null) {
-        final int day = dateVar.item1!;
-        final int month = dateVar.item2!.monthNumber;
-        final int? year = dateVar.item3; // nullable for generic dates
+    }
+    // Handle day-month queries (with or without year)
+    else if (parsedDate.day != null && parsedDate.month != null) {
+      final int day = parsedDate.day!;
+      final int month = parsedDate.month!;
+      final int? year = parsedDate.year; // nullable for generic dates
 
-        final matchedFiles =
-            await FilesDB.instance.getFilesCreatedWithinDurations(
-          _getDurationsForCalendarDateInEveryYear(day, month, year: year),
-          ignoreCollections(),
-          order: 'DESC',
-        );
+      final matchedFiles =
+          await FilesDB.instance.getFilesCreatedWithinDurations(
+        _getDurationsForCalendarDateInEveryYear(day, month, year: year),
+        ignoreCollections(),
+        order: 'DESC',
+      );
 
-        if (matchedFiles.isNotEmpty) {
-          final name =
-              '$day ${dateVar.item2!.name}${year != null ? ' $year' : ''}';
-          searchResults.add(
-            GenericSearchResult(
-              ResultType.event,
-              name,
-              matchedFiles,
-              hierarchicalSearchFilter: TopLevelGenericFilter(
-                filterName: name,
-                occurrence: kMostRelevantFilter,
-                filterResultType: ResultType.event,
-                matchedUploadedIDs: filesToUploadedFileIDs(matchedFiles),
-                filterIcon: Icons.event_outlined,
-              ),
+      if (matchedFiles.isNotEmpty) {
+        final monthName = DateParseService.instance.getMonthName(month);
+        final name = '$day $monthName${year != null ? ' $year' : ''}';
+        searchResults.add(
+          GenericSearchResult(
+            ResultType.event,
+            name,
+            matchedFiles,
+            hierarchicalSearchFilter: TopLevelGenericFilter(
+              filterName: name,
+              occurrence: kMostRelevantFilter,
+              filterResultType: ResultType.event,
+              matchedUploadedIDs: filesToUploadedFileIDs(matchedFiles),
+              filterIcon: Icons.event_outlined,
             ),
-          );
-        }
+          ),
+        );
       }
     }
     return searchResults;

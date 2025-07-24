@@ -1,12 +1,54 @@
-import "package:photos/data/months.dart";
-import 'package:tuple/tuple.dart';
+import 'dart:collection';
+
+class PartialDate {
+  final int? day;
+  final int? month;
+  final int? year;
+
+  const PartialDate({this.day, this.month, this.year});
+
+  static const empty = PartialDate();
+
+  bool get isEmpty => day == null && month == null && year == null;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PartialDate &&
+          runtimeType == other.runtimeType &&
+          day == other.day &&
+          month == other.month &&
+          year == other.year;
+
+  @override
+  int get hashCode => day.hashCode ^ month.hashCode ^ year.hashCode;
+
+  @override
+  String toString() {
+    return 'PartialDate(day: $day, month: $month, year: $year)';
+  }
+}
 
 class DateParseService {
-  static final DateParseService instance =
-      DateParseService._privateConstructor();
-  DateParseService._privateConstructor();
+  static final DateParseService instance = DateParseService._private();
+  DateParseService._private();
 
-  static const Map<String, int> _monthMap = {
+  static const int _MIN_YEAR = 1900;
+  static const int _MAX_YEAR = 2100;
+  static const int _TWO_DIGIT_YEAR_PIVOT = 50;
+
+  static final _ordinalRegex = RegExp(r'\b(\d{1,2})(st|nd|rd|th)\b');
+  static final _normalizeRegex = RegExp(r'\bof\b|[,\.]+|\s+');
+  static final _isoFormatRegex =
+      RegExp(r'^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$');
+  static final _standardFormatRegex =
+      RegExp(r'^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})$');
+  static final _dotFormatRegex = RegExp(r'^(\d{1,2})\.(\d{1,2})\.(\d{2,4})$');
+  static final _compactFormatRegex = RegExp(r'^(\d{8})$');
+  static final _yearOnlyRegex = RegExp(r'^\s*(\d{4})\s*$');
+  static final _shortFormatRegex = RegExp(r'^(\d{1,2})[\/-](\d{1,2})$');
+
+  static final Map<String, int> _monthMap = UnmodifiableMapView({
     "january": 1,
     "february": 2,
     "march": 3,
@@ -41,7 +83,7 @@ class DateParseService {
     "octo": 10,
     "nove": 11,
     "dece": 12,
-  };
+  });
 
   static const Map<int, String> monthNumberToName = {
     1: "January",
@@ -58,323 +100,266 @@ class DateParseService {
     12: "December",
   };
 
-  String normalizeDateString(String input) {
+  PartialDate parse(String input) {
+    if (input.trim().isEmpty) return PartialDate.empty;
+
+    final lowerInput = input.toLowerCase();
+
+    var result = _parseRelativeDate(lowerInput);
+    if (!result.isEmpty) return result;
+
+    result = _parseStructuredFormats(lowerInput);
+    if (!result.isEmpty) return result;
+
+    final normalized = _normalizeDateString(lowerInput);
+    result = _parseTokenizedDate(normalized);
+
+    return result;
+  }
+
+  String getMonthName(int month) {
+    return monthNumberToName[month] ?? 'Unknown';
+  }
+
+  String _normalizeDateString(String input) {
     return input
-        .toLowerCase()
-        .replaceAllMapped(
-          RegExp(r'\b(\d{1,2})(st|nd|rd|th)\b'),
-          (match) => match.group(1)!,
-        )
-        .replaceAll(RegExp(r'\bof\b'), '')
-        .replaceAll(RegExp(r'[,\.]+'), '')
-        .replaceAll(RegExp(r'\s+'), ' ')
+        .replaceAllMapped(_ordinalRegex, (match) => match.group(1)!)
+        .replaceAll(_normalizeRegex, ' ')
         .trim();
   }
 
-  Tuple3<int?, int?, int?> parseStructuredFormats(String input) {
-    final normalized = input.replaceAll(RegExp(r'\s'), '');
-
-    // ISO format: YYYY-MM-DD or YYYY/MM/DD
-    final isoMatch =
-        RegExp(r'^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$').firstMatch(normalized);
-    if (isoMatch != null) {
-      return Tuple3(
-        int.tryParse(isoMatch.group(3)!), // day
-        int.tryParse(isoMatch.group(2)!), // month
-        int.tryParse(isoMatch.group(1)!), // year
-      );
-    }
-
-    // Standard formats: MM/DD/YYYY, DD/MM/YYYY, MM-DD-YYYY, DD-MM-YYYY
-    final standardMatch =
-        RegExp(r'^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$').firstMatch(normalized);
-    if (standardMatch != null) {
-      final first = int.tryParse(standardMatch.group(1)!);
-      final second = int.tryParse(standardMatch.group(2)!);
-      final year = int.tryParse(standardMatch.group(3)!);
-
-      if (first == null || second == null || year == null) {
-        return const Tuple3(null, null, null);
-      }
-      if (first < 1 || first > 31 || second < 1 || second > 31) {
-        return const Tuple3(null, null, null);
-      }
-
-      // Heuristic: if first number > 12, assume DD/MM format
-      if (first > 12) {
-        if (second > 12) return const Tuple3(null, null, null);
-        return Tuple3(first, second, year);
-      } else {
-        if (second > 12) return const Tuple3(null, null, null);
-        return Tuple3(second, first, year);
-      }
-    }
-
-    // Standard formats with 2-digit years: MM/DD/YY, DD/MM/YY, MM-DD-YY, DD-MM-YY
-    final standardMatchTwoDigitYear =
-        RegExp(r'^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2})$').firstMatch(normalized);
-    if (standardMatchTwoDigitYear != null) {
-      final first = int.tryParse(standardMatchTwoDigitYear.group(1)!);
-      final second = int.tryParse(standardMatchTwoDigitYear.group(2)!);
-      final yearTwoDigit = int.tryParse(standardMatchTwoDigitYear.group(3)!);
-
-      if (first == null || second == null || yearTwoDigit == null) {
-        return const Tuple3(null, null, null);
-      }
-      if (first < 1 || first > 31 || second < 1 || second > 31) {
-        return const Tuple3(null, null, null);
-      }
-
-      final year =
-          yearTwoDigit < 50 ? 2000 + yearTwoDigit : 1900 + yearTwoDigit;
-
-      if (first > 12) {
-        if (second > 12) return const Tuple3(null, null, null);
-        return Tuple3(first, second, year);
-      } else {
-        if (second > 12) return const Tuple3(null, null, null);
-        return Tuple3(second, first, year);
-      }
-    }
-
-    // Dot format: DD.MM.YYYY
-    final dotMatch =
-        RegExp(r'^(\d{1,2})\.(\d{1,2})\.(\d{4})$').firstMatch(normalized);
-    if (dotMatch != null) {
-      final day = int.tryParse(dotMatch.group(1)!);
-      final month = int.tryParse(dotMatch.group(2)!);
-      final year = int.tryParse(dotMatch.group(3)!);
-
-      if (day == null || month == null || year == null) {
-        return const Tuple3(null, null, null);
-      }
-      if (day < 1 || day > 31 || month < 1 || month > 12) {
-        return const Tuple3(null, null, null);
-      }
-
-      return Tuple3(day, month, year);
-    }
-
-    // Dot format with 2-digit year: DD.MM.YY
-    final dotMatchTwoDigitYear =
-        RegExp(r'^(\d{1,2})\.(\d{1,2})\.(\d{2})$').firstMatch(normalized);
-    if (dotMatchTwoDigitYear != null) {
-      final day = int.tryParse(dotMatchTwoDigitYear.group(1)!);
-      final month = int.tryParse(dotMatchTwoDigitYear.group(2)!);
-      final yearTwoDigit = int.tryParse(dotMatchTwoDigitYear.group(3)!);
-
-      if (day == null || month == null || yearTwoDigit == null) {
-        return const Tuple3(null, null, null);
-      }
-      if (day < 1 || day > 31 || month < 1 || month > 12) {
-        return const Tuple3(null, null, null);
-      }
-
-      final year =
-          yearTwoDigit < 50 ? 2000 + yearTwoDigit : 1900 + yearTwoDigit;
-
-      return Tuple3(day, month, year);
-    }
-
-    // Compact format: YYYYMMDD
-    if (normalized.length == 8 && RegExp(r'^\d{8}$').hasMatch(normalized)) {
-      final year = int.tryParse(normalized.substring(0, 4));
-      final month = int.tryParse(normalized.substring(4, 6));
-      final day = int.tryParse(normalized.substring(6, 8));
-      if (year != null &&
-          year > 1900 &&
-          month != null &&
-          month <= 12 &&
-          day != null &&
-          day <= 31) {
-        return Tuple3(day, month, year);
-      }
-    }
-
-    // Short format: MM/DD or DD/MM
-    final shortMatch =
-        RegExp(r'^(\d{1,2})[\/-](\d{1,2})$').firstMatch(normalized);
-    if (shortMatch != null) {
-      final first = int.tryParse(shortMatch.group(1)!);
-      final second = int.tryParse(shortMatch.group(2)!);
-
-      if (first == null || second == null) {
-        return const Tuple3(null, null, null);
-      }
-      if (first < 1 || first > 31 || second < 1 || second > 31) {
-        return const Tuple3(null, null, null);
-      }
-
-      if (first > 12) {
-        if (second > 12) return const Tuple3(null, null, null);
-        return Tuple3(first, second, null);
-      } else {
-        if (second > 12) return const Tuple3(null, null, null);
-        return Tuple3(second, first, null);
-      }
-    }
-
-    return const Tuple3(null, null, null);
+  int _convertTwoDigitYear(int year) {
+    return year < _TWO_DIGIT_YEAR_PIVOT ? 2000 + year : 1900 + year;
   }
 
-  Tuple3<int?, MonthData?, int?> _parseDateParts(String input) {
-    if (input.trim().isEmpty) return const Tuple3(null, null, null);
+  PartialDate _parseRelativeDate(String lowerInput) {
+    final bool hasToday = lowerInput.contains('today');
+    final bool hasTomorrow = lowerInput.contains('tomorrow');
+    final bool hasYesterday = lowerInput.contains('yesterday');
 
-    final lowerInput = input.toLowerCase();
-    final today = DateTime.now();
+    final int count =
+        (hasToday ? 1 : 0) + (hasTomorrow ? 1 : 0) + (hasYesterday ? 1 : 0);
 
-    if (lowerInput.contains('today')) {
-      return Tuple3(
-        today.day,
-        MonthData(monthNumberToName[today.month]!, today.month),
-        today.year,
-      );
-    } else if (lowerInput.contains('tomorrow')) {
-      final tomorrow = today.add(const Duration(days: 1));
-      return Tuple3(
-        tomorrow.day,
-        MonthData(monthNumberToName[tomorrow.month]!, tomorrow.month),
-        tomorrow.year,
-      );
-    } else if (lowerInput.contains('yesterday')) {
-      final yesterday = today.subtract(const Duration(days: 1));
-      return Tuple3(
-        yesterday.day,
-        MonthData(monthNumberToName[yesterday.month]!, yesterday.month),
-        yesterday.year,
+    if (count > 1) {
+      return PartialDate.empty;
+    }
+
+    final now = DateTime.now();
+    if (hasToday) {
+      return PartialDate(day: now.day, month: now.month, year: now.year);
+    }
+    if (hasTomorrow) {
+      final tomorrow = now.add(const Duration(days: 1));
+      return PartialDate(
+        day: tomorrow.day,
+        month: tomorrow.month,
+        year: tomorrow.year,
       );
     }
+    if (hasYesterday) {
+      final yesterday = now.subtract(const Duration(days: 1));
+      return PartialDate(
+        day: yesterday.day,
+        month: yesterday.month,
+        year: yesterday.year,
+      );
+    }
+    return PartialDate.empty;
+  }
 
-    // Check for year-only queries like "2025"
-    final yearOnlyMatch = RegExp(r'^\s*(\d{4})\s*$').firstMatch(input.trim());
-    if (yearOnlyMatch != null) {
-      final year = int.tryParse(yearOnlyMatch.group(1)!);
-      if (year != null && year >= 1900 && year <= 2100) {
-        return Tuple3(null, null, year);
+  PartialDate _parseStructuredFormats(String input) {
+    final cleanInput = input.replaceAll(' ', '');
+
+    Match? match = _isoFormatRegex.firstMatch(cleanInput);
+    if (match != null) {
+      final yearVal = int.tryParse(match.group(1)!);
+      final monthVal = int.tryParse(match.group(2)!);
+      final dayVal = int.tryParse(match.group(3)!);
+      if (yearVal != null &&
+          yearVal >= _MIN_YEAR &&
+          yearVal <= _MAX_YEAR &&
+          monthVal != null &&
+          monthVal >= 1 &&
+          monthVal <= 12 &&
+          dayVal != null &&
+          dayVal >= 1 &&
+          dayVal <= 31) {
+        return PartialDate(day: dayVal, month: monthVal, year: yearVal);
       }
+      return PartialDate.empty;
     }
 
-    // First try structured formats (slash, dash, dot patterns)
-    final structuredResult = parseStructuredFormats(input);
-    if (structuredResult.item1 != null ||
-        structuredResult.item2 != null ||
-        structuredResult.item3 != null) {
-      final int? day = structuredResult.item1;
-      final int? monthNum = structuredResult.item2;
-      final int? year = structuredResult.item3;
-      MonthData? monthData;
-      if (monthNum != null && monthNumberToName.containsKey(monthNum)) {
-        monthData = MonthData(monthNumberToName[monthNum]!, monthNum);
-      }
-      return Tuple3(day, monthData, year);
-    }
+    match = _standardFormatRegex.firstMatch(cleanInput);
+    if (match != null) {
+      final p1 = int.parse(match.group(1)!);
+      final p2 = int.parse(match.group(2)!);
+      final yearRaw = int.parse(match.group(3)!);
+      final year = yearRaw > 99 ? yearRaw : _convertTwoDigitYear(yearRaw);
 
-    final normalized = normalizeDateString(input);
-    final tokens = normalized.split(RegExp(r'\s+'));
+      if (year < _MIN_YEAR || year > _MAX_YEAR) return PartialDate.empty;
 
-    int? day, monthNum, year;
-    MonthData? monthData;
-
-    // Handle patterns like "25 02" (day month) or "Feb 2025" (month year)
-    if (tokens.length == 2) {
-      final first = tokens[0];
-      final second = tokens[1];
-
-      // Check if first token is a month name and second is a year
-      if (_monthMap.containsKey(first)) {
-        final yearValue = int.tryParse(second);
-        if (yearValue != null && yearValue >= 1900 && yearValue <= 2100) {
-          monthNum = _monthMap[first];
-          year = yearValue;
+      if (p1 > 12) {
+        if (p1 >= 1 && p1 <= 31 && p2 >= 1 && p2 <= 12) {
+          return PartialDate(day: p1, month: p2, year: year);
+        }
+      } else if (p2 > 12) {
+        if (p1 >= 1 && p1 <= 12 && p2 >= 1 && p2 <= 31) {
+          return PartialDate(day: p2, month: p1, year: year);
+        }
+      } else {
+        if (p1 >= 1 && p1 <= 12 && p2 >= 1 && p2 <= 31) {
+          return PartialDate(day: p2, month: p1, year: year);
         }
       }
-      // Check if both are numbers - could be day+month or month+day
-      else {
-        final firstNum = int.tryParse(first);
-        final secondNum = int.tryParse(second);
+      return PartialDate.empty;
+    }
 
-        if (firstNum != null && secondNum != null) {
-          if (secondNum >= 1900 && secondNum <= 2100) {
-            if (firstNum >= 1 && firstNum <= 12) {
-              monthNum = firstNum;
-              year = secondNum;
-            }
-          } else if (firstNum >= 1 &&
-              firstNum <= 31 &&
-              secondNum >= 1 &&
-              secondNum <= 12) {
-            day = firstNum;
-            monthNum = secondNum;
-          } else if (firstNum >= 1 &&
-              firstNum <= 12 &&
-              secondNum >= 1 &&
-              secondNum <= 31) {
-            monthNum = firstNum;
-            day = secondNum;
-          }
+    match = _shortFormatRegex.firstMatch(cleanInput);
+    if (match != null) {
+      final p1 = int.parse(match.group(1)!);
+      final p2 = int.parse(match.group(2)!);
+
+      if (p1 > 12) {
+        if (p1 >= 1 && p1 <= 31 && p2 >= 1 && p2 <= 12) {
+          return PartialDate(day: p1, month: p2);
         }
+      } else if (p2 > 12) {
+        if (p1 >= 1 && p1 <= 12 && p2 >= 1 && p2 <= 31) {
+          return PartialDate(day: p2, month: p1);
+        }
+      } else {
+        if (p1 >= 1 && p1 <= 12 && p2 >= 1 && p2 <= 31) {
+          return PartialDate(day: p2, month: p1);
+        }
+      }
+      return PartialDate.empty;
+    }
+
+    match = _dotFormatRegex.firstMatch(cleanInput);
+    if (match != null) {
+      final yearRaw = int.parse(match.group(3)!);
+      final year = yearRaw > 99 ? yearRaw : _convertTwoDigitYear(yearRaw);
+      final dayVal = int.tryParse(match.group(1)!);
+      final monthVal = int.tryParse(match.group(2)!);
+
+      if (year >= _MIN_YEAR &&
+          year <= _MAX_YEAR &&
+          dayVal != null &&
+          dayVal >= 1 &&
+          dayVal <= 31 &&
+          monthVal != null &&
+          monthVal >= 1 &&
+          monthVal <= 12) {
+        return PartialDate(day: dayVal, month: monthVal, year: year);
+      }
+      return PartialDate.empty;
+    }
+
+    match = _compactFormatRegex.firstMatch(cleanInput);
+    if (match != null) {
+      final yearVal = int.tryParse(cleanInput.substring(0, 4));
+      final monthVal = int.tryParse(cleanInput.substring(4, 6));
+      final dayVal = int.tryParse(cleanInput.substring(6, 8));
+
+      if (yearVal != null &&
+          yearVal >= _MIN_YEAR &&
+          yearVal <= _MAX_YEAR &&
+          monthVal != null &&
+          monthVal >= 1 &&
+          monthVal <= 12 &&
+          dayVal != null &&
+          dayVal >= 1 &&
+          dayVal <= 31) {
+        return PartialDate(day: dayVal, month: monthVal, year: yearVal);
+      }
+      return PartialDate.empty;
+    }
+
+    return PartialDate.empty;
+  }
+
+  PartialDate _parseTokenizedDate(String normalized) {
+    final tokens = normalized.split(' ');
+    int? day, month, year;
+
+    if (tokens.length == 1) {
+      final token = tokens[0];
+      final match = _yearOnlyRegex.firstMatch(token);
+      if (match != null) {
+        final parsedYear = int.tryParse(match.group(1)!);
+        if (parsedYear != null &&
+            parsedYear >= _MIN_YEAR &&
+            parsedYear <= _MAX_YEAR) {
+          return PartialDate(year: parsedYear);
+        }
+      }
+      if (_monthMap.containsKey(token)) {
+        return PartialDate(month: _monthMap[token]!);
+      }
+      final singleValue = int.tryParse(token);
+      if (singleValue != null && singleValue >= 1 && singleValue <= 31) {
+        return PartialDate(day: singleValue);
+      }
+      return PartialDate.empty;
+    }
+
+    for (final token in tokens) {
+      if (_monthMap.containsKey(token) && month == null) {
+        month = _monthMap[token];
+        continue;
+      }
+
+      final value = int.tryParse(token);
+      if (value == null) {
+        continue;
+      }
+
+      if (value >= _MIN_YEAR && value <= _MAX_YEAR && year == null) {
+        year = value;
+      } else if (value >= 1 && value <= 31 && day == null) {
+        day = value;
+      } else if (value >= 0 && value <= 99 && year == null) {
+        final convertedYear = _convertTwoDigitYear(value);
+        if (convertedYear >= _MIN_YEAR && convertedYear <= _MAX_YEAR) {
+          year = convertedYear;
+        }
+      } else if (value >= 1 && value <= 12 && month == null) {
+        month = value;
       }
     }
 
-    if (day == null && monthNum == null && year == null) {
-      for (var token in tokens) {
-        if (_monthMap.containsKey(token)) {
-          monthNum = _monthMap[token];
-        } else if (RegExp(r'^\d+$').hasMatch(token)) {
-          final value = int.parse(token);
-          if (value >= 1900 && value <= 2100) {
-            year = value;
-          } else if (value >= 1 && value <= 31) {
-            if (day == null) {
-              day = value;
-            } else if (monthNum == null && value <= 12) {
-              monthNum = value;
-            }
-          } else if (value >= 32 && value <= 99) {
-            year = value < 50 ? 2000 + value : 1900 + value;
-          }
-        }
-      }
-    }
-
-    if (monthNum != null && monthNumberToName.containsKey(monthNum)) {
-      monthData = MonthData(monthNumberToName[monthNum]!, monthNum);
-    }
-
-    if (monthNum != null && (monthNum < 1 || monthNum > 12)) {
-      monthNum = null;
-      monthData = null;
-    }
     if (day != null && (day < 1 || day > 31)) {
       day = null;
     }
-
-    return Tuple3(day, monthData, year);
-  }
-
-  Tuple3<int?, MonthData?, int?> parseDate(String input) {
-    return _parseDateParts(input);
-  }
-
-  List<Tuple3<int?, MonthData?, int?>> parseDateVariations(String input) {
-    final List<Tuple3<int?, MonthData?, int?>> variations = [];
-    final primaryResult = _parseDateParts(input);
-
-    variations.add(primaryResult);
-    return variations;
-  }
-
-  bool isYearQuery(String input) {
-    final yearOnlyMatch = RegExp(r'^\s*(\d{4})\s*$').firstMatch(input.trim());
-    if (yearOnlyMatch != null) {
-      final year = int.tryParse(yearOnlyMatch.group(1)!);
-      return year != null && year >= 1900 && year <= 2100;
+    if (month != null && (month < 1 || month > 12)) {
+      month = null;
     }
-    return false;
-  }
 
-  bool isGenericDateQuery(String input) {
-    final result = _parseDateParts(input);
-    return result.item1 != null && result.item2 != null && result.item3 == null;
+    final bool inputHadMonthWord = tokens.any((t) => _monthMap.containsKey(t));
+    final bool inputHadYearWord = tokens.any((t) {
+      final v = int.tryParse(t);
+      return v != null && v >= 1000 && v <= 9999;
+    });
+
+    if (day != null && month == null && year == null && tokens.length > 1) {
+      if (normalized.contains('of') &&
+          !inputHadMonthWord &&
+          !inputHadYearWord) {
+        return PartialDate.empty;
+      }
+      if (!inputHadMonthWord && !inputHadYearWord && tokens.length > 1) {}
+    }
+
+    if (day == null && month == null && year == null) {
+      return PartialDate.empty;
+    }
+
+    if (day != null && month == null && year == null && tokens.length > 1) {
+      if (!inputHadMonthWord && !inputHadYearWord) {
+        return PartialDate.empty;
+      }
+    }
+
+    return PartialDate(day: day, month: month, year: year);
   }
 }
