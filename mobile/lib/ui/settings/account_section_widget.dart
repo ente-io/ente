@@ -186,18 +186,6 @@ class AccountSectionWidget extends StatelessWidget {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: S.of(context).logout,
-          ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
-          onTap: () async {
-            _onLogoutTapped(context);
-          },
-        ),
-        sectionOptionSpacing,
-        MenuItemWidget(
-          captionedTextWidget: CaptionedTextWidget(
             title: S.of(context).deleteAccount,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
@@ -230,18 +218,6 @@ class AccountSectionWidget extends StatelessWidget {
   Future<String> _getOrCreateRecoveryKey(BuildContext context) async {
     return CryptoUtil.bin2hex(
       await UserService.instance.getOrCreateRecoveryKey(context),
-    );
-  }
-
-  void _onLogoutTapped(BuildContext context) {
-    showChoiceActionSheet(
-      context,
-      title: S.of(context).areYouSureYouWantToLogout,
-      firstButtonLabel: S.of(context).yesLogout,
-      isCritical: true,
-      firstButtonOnTap: () async {
-        await UserService.instance.logout(context);
-      },
     );
   }
 

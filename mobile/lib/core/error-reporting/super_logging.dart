@@ -372,10 +372,6 @@ class SuperLogging {
     }
   }
 
-  static Future<void> setShouldReportCrashes(bool value) {
-    return _preferences.setBool(keyShouldReportCrashes, value);
-  }
-
   /// The log file currently in use.
   static File? logFile;
 

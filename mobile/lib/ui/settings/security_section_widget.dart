@@ -10,7 +10,6 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/two_factor_status_change_event.dart';
 import "package:photos/generated/l10n.dart";
-import "package:photos/l10n/l10n.dart";
 import "package:photos/models/user_details.dart";
 import "package:photos/services/account/passkey_service.dart";
 import 'package:photos/services/account/user_service.dart';
@@ -101,47 +100,6 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                 }
               },
             ),
-          ),
-          sectionOptionSpacing,
-          MenuItemWidget(
-            captionedTextWidget: CaptionedTextWidget(
-              title: S.of(context).emailVerificationToggle,
-            ),
-            trailingWidget: ToggleSwitchWidget(
-              value: () => UserService.instance.hasEmailMFAEnabled(),
-              onChanged: () async {
-                final hasAuthenticated = await LocalAuthenticationService
-                    .instance
-                    .requestLocalAuthentication(
-                  context,
-                  S.of(context).authToChangeEmailVerificationSetting,
-                );
-                final isEmailMFAEnabled =
-                    UserService.instance.hasEmailMFAEnabled();
-                if (hasAuthenticated) {
-                  await updateEmailMFA(!isEmailMFAEnabled);
-                }
-              },
-            ),
-          ),
-          sectionOptionSpacing,
-          MenuItemWidget(
-            captionedTextWidget: CaptionedTextWidget(
-              title: context.l10n.passkey,
-            ),
-            pressedColor: getEnteColorScheme(context).fillFaint,
-            trailingIcon: Icons.chevron_right_outlined,
-            trailingIconIsMuted: true,
-            onTap: () async {
-              final hasAuthenticated = await LocalAuthenticationService.instance
-                  .requestLocalAuthentication(
-                context,
-                S.of(context).authToViewPasskey,
-              );
-              if (hasAuthenticated) {
-                await onPasskeyClick(context);
-              }
-            },
           ),
           sectionOptionSpacing,
         ],
