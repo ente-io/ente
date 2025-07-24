@@ -55,7 +55,6 @@ class _GallerySettingsScreenState extends State<GallerySettingsScreen> {
                 onTap: () {
                   Navigator.pop(context);
                   Navigator.pop(context);
-                  Navigator.pop(context);
                 },
               ),
             ],
