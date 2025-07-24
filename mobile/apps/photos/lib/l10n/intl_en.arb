@@ -1795,5 +1795,7 @@
   "lastMonth": "Last month",
   "thisYear": "This year",
   "lastYear": "Last year",
-  "groupBy": "Group by"
+  "groupBy": "Group by",
+  "faceThumbnailGenerationFailed": "Unable to generate face thumbnails",
+  "fileAnalysisFailed": "Unable to analyze file"
 }

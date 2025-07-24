@@ -162,7 +162,7 @@
     "ok": "OK",
     "success": "Erfolgreich",
     "error": "Fehler",
-    "note": "",
+    "note": "Notiz",
     "offline_message": "Du bist offline, gecachte Erinnerungen werden angezeigt",
     "install": "Installieren",
     "install_mobile_app": "Installiere unsere <a>Android</a> oder <b>iOS</b> App, um automatisch alle deine Fotos zu sichern",
@@ -685,5 +685,5 @@
     "person_favorites": "{{name}}s Favoriten",
     "shared_favorites": "Geteilte Favoriten",
     "added_by_name": "Von {{name}} hinzugefügt",
-    "unowned_files_not_processed": ""
+    "unowned_files_not_processed": "Von anderen Benutzern hinzugefügte Dateien wurden nicht verarbeitet"
 }

@@ -12306,6 +12306,16 @@ class S {
     );
   }
 
+  /// `Unable to generate face thumbnails`
+  String get faceThumbnailGenerationFailed {
+    return Intl.message(
+      'Unable to generate face thumbnails',
+      name: 'faceThumbnailGenerationFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Last week`
   String get lastWeek {
     return Intl.message(
@@ -12361,6 +12371,16 @@ class S {
     return Intl.message(
       'Group by',
       name: 'groupBy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unable to analyze file`
+  String get fileAnalysisFailed {
+    return Intl.message(
+      'Unable to analyze file',
+      name: 'fileAnalysisFailed',
       desc: '',
       args: [],
     );

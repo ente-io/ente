@@ -241,20 +241,44 @@ class MemoriesCacheService {
 
       for (final ToShowMemory memory in cache.toShowMemories) {
         if (memory.shouldShowNow()) {
-          final smartMemory = SmartMemory(
-            memory.fileUploadedIDs
-                .where((fileID) => minimalFileIdsToFile.containsKey(fileID))
-                .map(
-                  (fileID) =>
-                      Memory.fromFile(minimalFileIdsToFile[fileID]!, seenTimes),
-                )
-                .toList(),
-            memory.type,
-            memory.title,
-            memory.firstTimeToShow,
-            memory.lastTimeToShow,
-            id: memory.id,
-          );
+          late final SmartMemory smartMemory;
+          if (memory.type == MemoryType.people) {
+            smartMemory = PeopleMemory(
+              memory.fileUploadedIDs
+                  .where((fileID) => minimalFileIdsToFile.containsKey(fileID))
+                  .map(
+                    (fileID) => Memory.fromFile(
+                      minimalFileIdsToFile[fileID]!,
+                      seenTimes,
+                    ),
+                  )
+                  .toList(),
+              memory.firstTimeToShow,
+              memory.lastTimeToShow,
+              memory.peopleMemoryType!,
+              memory.personID!,
+              memory.personName,
+              title: memory.title,
+              id: memory.id,
+            );
+          } else {
+            smartMemory = SmartMemory(
+              memory.fileUploadedIDs
+                  .where((fileID) => minimalFileIdsToFile.containsKey(fileID))
+                  .map(
+                    (fileID) => Memory.fromFile(
+                      minimalFileIdsToFile[fileID]!,
+                      seenTimes,
+                    ),
+                  )
+                  .toList(),
+              memory.type,
+              memory.title,
+              memory.firstTimeToShow,
+              memory.lastTimeToShow,
+              id: memory.id,
+            );
+          }
           if (smartMemory.memories.isNotEmpty) {
             memories.add(smartMemory);
           }

@@ -153,7 +153,7 @@ class RemoteSyncService {
         await syncDeviceCollectionFilesForUpload();
         final hasMoreFilesToBackup = (await _getFilesToBeUploaded()).isNotEmpty;
         _logger.info("hasMoreFilesToBackup?" + hasMoreFilesToBackup.toString());
-        if (hasMoreFilesToBackup && !_shouldThrottleSync()) {
+        if (hasMoreFilesToBackup) {
           // Skipping a resync to ensure that files that were ignored in this
           // session are not processed now
           await sync();
@@ -371,6 +371,9 @@ class RemoteSyncService {
         final Set<String> alreadyClaimedLocalIDs =
             await _db.getLocalIDsMarkedForOrAlreadyUploaded(ownerID);
         localIDsToSync.removeAll(alreadyClaimedLocalIDs);
+        if (alreadyClaimedLocalIDs.isNotEmpty) {
+          await _db.removeQueuedLocalFiles(alreadyClaimedLocalIDs);
+        }
       }
 
       if (localIDsToSync.isEmpty) {
@@ -548,7 +551,7 @@ class RemoteSyncService {
       return originalFiles;
     }
     final bool shouldRemoveVideos =
-        !_config.shouldBackupVideos() || _shouldThrottleSync();
+        !_config.shouldBackupVideos() || bgWithoutResumableUpload;
     final ignoredIDs = await IgnoredFilesService.instance.idToIgnoreReasonMap;
     bool shouldSkipUploadFunc(EnteFile file) {
       return IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, file);
@@ -606,7 +609,7 @@ class RemoteSyncService {
     final List<Future> futures = [];
 
     for (final file in filesToBeUploaded) {
-      if (_shouldThrottleSync() &&
+      if (shouldThrottleUpload &&
           futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
         _logger.info("Skipping some new files as we are throttling uploads");
         break;
@@ -621,7 +624,7 @@ class RemoteSyncService {
     }
 
     for (final uploadedFileID in updatedFileIDs) {
-      if (_shouldThrottleSync() &&
+      if (shouldThrottleUpload &&
           futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
         _logger
             .info("Skipping some updated files as we are throttling uploads");
@@ -935,9 +938,15 @@ class RemoteSyncService {
     return kEditTimeFeatureReleaseTime;
   }
 
-  bool _shouldThrottleSync() {
-    return !flagService.enableMobMultiPart ||
-        !localSettings.userEnabledMultiplePart;
+  bool get shouldThrottleUpload {
+    return !Platform.isAndroid && !AppLifecycleService.instance.isForeground;
+  }
+
+  bool get bgWithoutResumableUpload {
+    // if multiple part is enabled, then we are not throttling uploads in bg
+    return !(flagService.enableMobMultiPart &&
+            localSettings.userEnabledMultiplePart) &&
+        !AppLifecycleService.instance.isForeground;
   }
 
   // _sortByTime sort by creation time (desc).

@@ -424,8 +424,9 @@ class _SeekBarState extends State<SeekBar> {
       if (widget.isSeekingNotifier.value) return;
       if (mounted) {
         setState(() {
-          _sliderValue = event.inMilliseconds /
-              widget.controller.player.state.duration.inMilliseconds;
+          _sliderValue = (event.inMilliseconds /
+                  widget.controller.player.state.duration.inMilliseconds)
+              .clamp(0, 1);
           if (_sliderValue.isNaN) {
             _sliderValue = 0.0;
           }

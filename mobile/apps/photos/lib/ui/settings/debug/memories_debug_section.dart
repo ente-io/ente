@@ -3,28 +3,28 @@ import "dart:math";
 
 import "package:figma_squircle/figma_squircle.dart";
 import "package:flutter/material.dart";
-import "package:photos/core/constants.dart";
-import "package:photos/events/event.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
-import "package:photos/models/search/search_types.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
-import "package:photos/ui/viewer/search/search_section_cta.dart";
-import "package:photos/ui/viewer/search_tab/section_header.dart";
 import "package:photos/utils/navigation_util.dart";
 
-class MomentsSection extends StatefulWidget {
+class MemoriesDebugSection extends StatefulWidget {
   final List<GenericSearchResult> momentsSearchResults;
-  const MomentsSection(this.momentsSearchResults, {super.key});
+  final VoidCallback onTapCallback;
+  const MemoriesDebugSection(
+    this.momentsSearchResults,
+    this.onTapCallback, {
+    super.key,
+  });
 
   @override
-  State<MomentsSection> createState() => _MomentsSectionState();
+  State<MemoriesDebugSection> createState() => _MemoriesDebugSectionState();
 }
 
-class _MomentsSectionState extends State<MomentsSection> {
+class _MemoriesDebugSectionState extends State<MemoriesDebugSection> {
   late List<GenericSearchResult> _momentsSearchResults;
   final streamSubscriptions = <StreamSubscription>[];
 
@@ -32,19 +32,6 @@ class _MomentsSectionState extends State<MomentsSection> {
   void initState() {
     super.initState();
     _momentsSearchResults = widget.momentsSearchResults;
-
-    final streamsToListenTo = SectionType.moment.sectionUpdateEvents();
-    for (Stream<Event> stream in streamsToListenTo) {
-      streamSubscriptions.add(
-        stream.listen((event) async {
-          _momentsSearchResults = (await SectionType.moment.getData(
-            context,
-            limit: kSearchSectionLimit,
-          )) as List<GenericSearchResult>;
-          setState(() {});
-        }),
-      );
-    }
   }
 
   @override
@@ -56,7 +43,7 @@ class _MomentsSectionState extends State<MomentsSection> {
   }
 
   @override
-  void didUpdateWidget(covariant MomentsSection oldWidget) {
+  void didUpdateWidget(covariant MemoriesDebugSection oldWidget) {
     super.didUpdateWidget(oldWidget);
     _momentsSearchResults = widget.momentsSearchResults;
   }
@@ -74,14 +61,14 @@ class _MomentsSectionState extends State<MomentsSection> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    SectionType.moment.sectionTitle(context),
+                    "Smart memories debug (I)",
                     style: textTheme.largeBold,
                   ),
                   const SizedBox(height: 24),
                   Padding(
                     padding: const EdgeInsets.only(left: 4),
                     child: Text(
-                      SectionType.moment.getEmptyStateText(context),
+                      "Test memories",
                       style: textTheme.smallMuted,
                     ),
                   ),
@@ -89,7 +76,6 @@ class _MomentsSectionState extends State<MomentsSection> {
               ),
             ),
             const SizedBox(width: 8),
-            const SearchSectionEmptyCTAIcon(SectionType.moment),
           ],
         ),
       );
@@ -99,11 +85,7 @@ class _MomentsSectionState extends State<MomentsSection> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SectionHeader(
-              SectionType.moment,
-              hasMore:
-                  (_momentsSearchResults.length >= kSearchSectionLimit - 1),
-            ),
+            _SectionHeader(widget.onTapCallback),
             const SizedBox(height: 2),
             SizedBox(
               child: SingleChildScrollView(
@@ -126,6 +108,40 @@ class _MomentsSectionState extends State<MomentsSection> {
         ),
       );
     }
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  final VoidCallback onTapCallback;
+  const _SectionHeader(this.onTapCallback);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTapCallback,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Text(
+              "Smart memories debug (I)",
+              style: getEnteTextTheme(context).largeBold,
+            ),
+          ),
+          Container(
+            color: Colors.transparent,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 12, 12, 12),
+              child: Icon(
+                Icons.chevron_right_outlined,
+                color: getEnteColorScheme(context).blurStrokePressed,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

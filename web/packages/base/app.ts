@@ -1,4 +1,10 @@
-export const appNames = ["accounts", "auth", "cast", "photos"] as const;
+export const appNames = [
+    "accounts",
+    "auth",
+    "cast",
+    "locker",
+    "photos",
+] as const;
 
 /**
  * Arbitrary names that we used as keys for indexing various constants
@@ -56,6 +62,7 @@ export const staticAppTitle = {
     accounts: "Ente Accounts",
     auth: "Ente Auth",
     cast: "Ente Photos",
+    locker: "Ente Locker",
     photos: "Ente Photos",
 }[appName];
 
@@ -77,6 +84,7 @@ export const clientPackageName = (() => {
         accounts: "io.ente.accounts.web",
         auth: "io.ente.auth.web",
         cast: "io.ente.cast.web",
+        locker: "io.ente.locker.web",
         photos: "io.ente.photos.web",
     }[appName];
 })();
