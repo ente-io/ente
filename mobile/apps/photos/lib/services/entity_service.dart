@@ -60,6 +60,7 @@ class EntityService {
     EntityType type,
     Map<String, dynamic> jsonMap, {
     String? id,
+    bool addWithCustomID = false,
   }) async {
     final String plainText = jsonEncode(jsonMap);
     final key = await getOrCreateEntityKey(type);
@@ -79,16 +80,19 @@ class EntityService {
       " ${id == null ? 'Adding' : 'Updating'} entity of type: " +
           type.typeToString(),
     );
-    final EntityData data = id == null
+    late LocalEntityData localData;
+
+    final EntityData data = id == null || addWithCustomID
         ? await _gateway.createEntity(type, encryptedData, header)
         : await _gateway.updateEntity(type, id, encryptedData, header);
-    final LocalEntityData localData = LocalEntityData(
+    localData = LocalEntityData(
       id: data.id,
       type: type,
       data: plainText,
       ownerID: data.userID,
       updatedAt: data.updatedAt,
     );
+
     await _db.upsertEntities([localData]);
     syncEntities().ignore();
     return localData;
@@ -103,6 +107,7 @@ class EntityService {
     try {
       await _remoteToLocalSync(EntityType.location);
       await _remoteToLocalSync(EntityType.cgroup);
+      await _remoteToLocalSync(EntityType.smartAlbum);
     } catch (e) {
       _logger.severe("Failed to sync entities", e);
     }
@@ -248,5 +253,12 @@ class EntityService {
 
     final hash = md5.convert(utf8.encode(preHash)).toString().substring(0, 10);
     return hash;
+  }
+
+  Future<Map<String, int>> getUpdatedAts(
+    EntityType type,
+    List<String> personIds,
+  ) async {
+    return await _db.getUpdatedAts(type, personIds);
   }
 }

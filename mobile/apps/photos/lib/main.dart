@@ -60,6 +60,7 @@ const kFGHomeWidgetSyncFrequency = Duration(minutes: 15);
 const kBGTaskTimeout = Duration(seconds: 28);
 const kBGPushTimeout = Duration(seconds: 28);
 const kFGTaskDeathTimeoutInMicroseconds = 5000000;
+bool isProcessBg = true;
 
 void main() async {
   debugRepaintRainbowEnabled = false;
@@ -86,6 +87,7 @@ void main() async {
 Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
   return await runWithLogs(() async {
     _logger.info("Starting app in foreground");
+    isProcessBg = false;
     await _init(false, via: 'mainMethod');
     final Locale? locale = await getLocale(noFallback: true);
     runApp(

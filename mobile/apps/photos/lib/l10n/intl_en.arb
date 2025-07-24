@@ -1790,5 +1790,8 @@
   "cLDesc6": "No more waiting for uploads/downloads to complete before you can close the app. All uploads and downloads now have the ability to be paused midway, and resume from where you left off.",
   "indexingPausedStatusDescription": "Indexing is paused. It will automatically resume when the device is ready. The device is considered ready when its battery level, battery health, and thermal status are within a healthy range.",
   "faceThumbnailGenerationFailed": "Unable to generate face thumbnails",
-  "fileAnalysisFailed": "Unable to analyze file"
+  "fileAnalysisFailed": "Unable to analyze file",
+  "editAutoAddPeople": "Edit auto-add people",
+  "autoAddPeople": "Auto-add people",
+  "shouldRemoveFilesSmartAlbumsDesc": "Should the files related to the person that were previously selected in smart albums be removed?"
 }

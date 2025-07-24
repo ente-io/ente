@@ -1,5 +1,6 @@
 import "dart:io";
 
+import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:permission_handler/permission_handler.dart";
 import "package:photos/db/upload_locks_db.dart";
@@ -87,7 +88,7 @@ class BgTaskUtils {
         frequency: Platform.isIOS
             ? const Duration(minutes: 30)
             : const Duration(minutes: 15),
-        initialDelay: const Duration(minutes: 10),
+        initialDelay: kDebugMode ? Duration.zero : const Duration(minutes: 10),
         constraints: workmanager.Constraints(
           networkType: workmanager.NetworkType.connected,
           requiresCharging: false,
