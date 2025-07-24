@@ -304,6 +304,7 @@ class GalleryState extends State<Gallery> {
       tagPrefix: widget.tagPrefix,
       groupHeaderExtent: groupHeaderExtent!,
       showSelectAll: widget.showSelectAll,
+      limitSelectionToOne: widget.limitSelectionToOne,
     );
 
     if (callSetState) {
@@ -583,7 +584,7 @@ class GalleryState extends State<Gallery> {
               ],
             )
           : CustomScrollBar(
-              scrollController: _scrollController!,
+              scrollController: _scrollController,
               galleryGroups: galleryGroups,
               inUseNotifier: scrollBarInUseNotifier,
               heighOfViewport: MediaQuery.sizeOf(context).height,
@@ -635,7 +636,7 @@ class GalleryState extends State<Gallery> {
                     galleryGroups.groupType.showGroupHeader() &&
                             !widget.disablePinnedGroupHeader
                         ? PinnedGroupHeader(
-                            scrollController: _scrollController!,
+                            scrollController: _scrollController,
                             galleryGroups: galleryGroups,
                             headerHeightNotifier: _headerHeightNotifier,
                             selectedFiles: widget.selectedFiles,
