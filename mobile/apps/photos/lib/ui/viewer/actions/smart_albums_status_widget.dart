@@ -23,9 +23,10 @@ class SmartAlbumsStatusWidget extends StatefulWidget {
 }
 
 class _SmartAlbumsStatusWidgetState extends State<SmartAlbumsStatusWidget>
-    with TickerProviderStateMixin {
+    with SingleTickerProviderStateMixin {
   (int, bool)? _syncingCollection;
   StreamSubscription<SmartAlbumSyncingEvent>? subscription;
+  AnimationController? animationController;
 
   void updateData(SmartAlbumSyncingEvent event) {
     if (mounted) {
@@ -42,6 +43,10 @@ class _SmartAlbumsStatusWidgetState extends State<SmartAlbumsStatusWidget>
   @override
   void initState() {
     super.initState();
+    animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    );
     _syncingCollection = smartAlbumsService.syncingCollection;
     subscription = Bus.instance.on<SmartAlbumSyncingEvent>().listen(updateData);
   }
@@ -49,6 +54,7 @@ class _SmartAlbumsStatusWidgetState extends State<SmartAlbumsStatusWidget>
   @override
   void dispose() {
     subscription?.cancel();
+    animationController?.dispose();
     super.dispose();
   }
 
@@ -88,10 +94,7 @@ class _SmartAlbumsStatusWidgetState extends State<SmartAlbumsStatusWidget>
                     color: _syncingCollection?.$2 ?? true
                         ? const Color(0xFF08C225)
                         : const Color(0xFFF78426),
-                    controller: AnimationController(
-                      vsync: this,
-                      duration: const Duration(milliseconds: 1200),
-                    ),
+                    controller: animationController,
                   ),
                 ),
                 const SizedBox(width: 8),
