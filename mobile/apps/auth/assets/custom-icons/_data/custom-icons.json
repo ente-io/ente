@@ -72,6 +72,9 @@
       "hex": "fd4b2d"
     },
     {
+      "title": "availity"
+    },
+    {
       "title": "AzurHosts",
       "slug": "azurhosts",
       "altNames": [
@@ -120,6 +123,13 @@
     },
     {
       "title": "Belo"
+    },
+    {
+      "title": "bestbuy",
+      "altNames": [
+        "Best Buy",
+        "bestbuy.com"
+      ]
     },
     {
       "title": "Bethesda",
@@ -293,6 +303,25 @@
       "title": "CoinDCX"
     },
     {
+      "title": "colorado",
+      "altNames": [
+        "Colorado.gov",
+        "Colorado Gov",
+        "Colorado Government",
+        "Colorado Government Portal",
+        "Colorado COVES Death Certificates",
+        "Colorado COVES",
+        "Colorado Official State Web Portal",
+        "Colorado State Web Portal",
+        "Colorado State Portal",
+        "Colorado Web Portal",
+        "Colorado Portal",
+        "Colorado State",
+        "Colorado PEAK",
+        "myColorado"
+      ]
+    },
+    {
       "title": "ConfigCat"
     },
     {
@@ -401,6 +430,13 @@
       "title": "ecloud",
       "altNames": [
         "Murena"
+      ]
+    },
+    {
+      "title": "emeritihealth",
+      "altNames": [
+        "Emeriti Health",
+        "Emeriti Retirement Health",
       ]
     },
     {
@@ -707,6 +743,14 @@
       "title": "Letterboxd"
     },
     {
+      "title": "lincolnfinancial",
+      "altNames": [
+        "Lincoln Financial",
+        "Lincoln Financial Group",
+        "LFG"
+      ]
+    },
+    {
       "title": "LinkedIn",
       "slug": "linkedin"
     },
@@ -738,6 +782,10 @@
         "luma",
         "lu.ma"
       ]
+    },
+    {
+      "title": "MangaDex",
+      "slug": "mangadex"
     },
     {
       "title": "Marketplace.tf",
@@ -839,6 +887,9 @@
       "slug": "name_com"
     },
     {
+      "title": "nasdaq"
+    },
+    {
       "title": "Nextcloud",
       "slug": "nextcloud"
     },
@@ -923,6 +974,9 @@
       "title": "NuCommunity"
     },
     {
+      "title": "numerai"
+    },
+    {
       "title": "NVIDIA"
     },
     {
@@ -951,6 +1005,10 @@
     {
       "title": "Oracle Cloud",
       "slug": "oracle_cloud"
+    },
+    {
+      "title": "Pangolin",
+      "slug": "pangolin"
     },
     {
       "title": "Parqet",
@@ -1238,6 +1296,10 @@
       ]
     },
     {
+      "title": "Startmail",
+      "slug": "startmail"
+    },
+    {
       "title": "STRATO",
       "hex": "FF8800"
     },
@@ -1369,6 +1431,16 @@
     {
       "title": "Ubuntu One",
       "slug": "ubuntu_one"
+    },
+    {
+      "title": "unitedhealthgroup",
+      "altNames": [
+        "Unitedhealth Group",
+        "United Healthgroup",
+        "UHG",
+        "uhg.com",
+        "unitedhealthgroup.com"
+      ]
     },
     {
       "title": "Unity",

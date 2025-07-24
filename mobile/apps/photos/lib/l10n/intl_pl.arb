@@ -1602,6 +1602,7 @@
   "processing": "Przetwarzanie",
   "queued": "W kolejce",
   "ineligible": "Nie kwalifikuje się",
+  "failed": "Nie powiodło się",
   "playOriginal": "Odtwórz oryginał",
   "joinAlbumConfirmationDialogBody": "Dołączenie do albumu sprawi, że Twój e-mail będzie widoczny dla jego uczestników.",
   "pleaseWaitThisWillTakeAWhile": "Prosimy czekać, to może zająć chwilę.",
@@ -1621,6 +1622,7 @@
   "appIcon": "Ikona aplikacji",
   "notThisPerson": "Nie ta osoba?",
   "selectedItemsWillBeRemovedFromThisPerson": "Wybrane elementy zostaną usunięte z tej osoby, ale nie zostaną usunięte z Twojej biblioteki.",
+  "throughTheYears": "{dateFormat} przez lata",
   "thisWeekThroughTheYears": "Ten tydzień przez lata",
   "youAndThem": "Ty i {name}",
   "admiringThem": "Podziwianie {name}",
@@ -1705,5 +1707,7 @@
   "cLDesc5": "Od teraz otrzymasz powiadomienie z możliwością rezygnacji dotyczące wszystkich zapisanych urodzin w Ente, wraz z kolekcją najlepszych zdjęć danej osoby.",
   "cLTitle6": "Wznawialne Przesyłanie i Pobieranie Danych",
   "cLDesc6": "Nie musisz już czekać na zakończenie przesyłania ani pobierania, żeby móc zamknąć aplikację. Wszystkie operacje przesyłania i pobierania można teraz wstrzymać w dowolnym momencie i wznowić od miejsca, w którym zostały przerwane.",
-  "indexingPausedStatusDescription": "Indeksowanie zostało wstrzymane. Zostanie automatycznie wznowione, gdy urządzenie będzie gotowe. Urządzenie uznaje się za gotowe, gdy poziom baterii, stan jej zdrowia oraz status termiczny znajdują się w bezpiecznym zakresie."
+  "indexingPausedStatusDescription": "Indeksowanie zostało wstrzymane. Zostanie automatycznie wznowione, gdy urządzenie będzie gotowe. Urządzenie uznaje się za gotowe, gdy poziom baterii, stan jej zdrowia oraz status termiczny znajdują się w bezpiecznym zakresie.",
+  "faceThumbnailGenerationFailed": "Nie można wygenerować miniaturek twarzy",
+  "fileAnalysisFailed": "Nie można przeanalizować pliku"
 }
