@@ -338,7 +338,7 @@ func (t *TrashRepository) GetTimeStampForLatestNonDeletedEntry(userID int64) (*i
 // GetUserIDToFileIDsMapForDeletion returns map of userID to fileIds, where the file ids which should be deleted by now
 func (t *TrashRepository) GetUserIDToFileIDsMapForDeletion() (map[int64][]int64, error) {
 	rows, err := t.DB.Query(`SELECT user_id, file_id FROM trash 
-			WHERE delete_by <= $1  AND is_deleted = FALSE AND is_restored = FALSE limit $2`,
+			WHERE delete_by <= $1  AND is_deleted IS FALSE AND is_restored IS FALSE limit $2`,
 		time.Microseconds(), TrashDiffLimit)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
