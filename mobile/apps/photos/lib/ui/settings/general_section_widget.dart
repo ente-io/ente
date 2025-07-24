@@ -37,6 +37,18 @@ class GeneralSectionWidget extends StatelessWidget {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).gallery,
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            _onGallerySettingsTapped(context);
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
             title: S.of(context).referrals,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
@@ -108,18 +120,6 @@ class GeneralSectionWidget extends StatelessWidget {
           trailingIconIsMuted: true,
           onTap: () async {
             _onWidgetsTapped(context);
-          },
-        ),
-        sectionOptionSpacing,
-        MenuItemWidget(
-          captionedTextWidget: CaptionedTextWidget(
-            title: S.of(context).gallery,
-          ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
-          onTap: () async {
-            _onGallerySettingsTapped(context);
           },
         ),
         sectionOptionSpacing,
