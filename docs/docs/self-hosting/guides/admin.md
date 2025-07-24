@@ -85,4 +85,4 @@ using the CLI.
 
 ## Backups
 
-See this [FAQ](/self-hosting/faq/backup).
+See this [document](/self-hosting/administration/backup).

@@ -11,14 +11,11 @@ description:
 
 > [!IMPORTANT]
 >
-> As of now, replication works only if all the 3 storage type needs are
-> fulfilled (1 hot, 1 cold and 1 glacier storage).
+> As of now, replication works only if all the 3 storage buckets are configured (2 hot and 1 cold storage).
 >
 > For more information, check this
-> [discussion](https://github.com/ente-io/ente/discussions/3167#discussioncomment-10585970).
-
-If you're wondering why there are 3 buckets on the MinIO UI - that's because our production instance uses these to perform
-[replication](https://ente.io/reliability/).
+> [discussion](https://github.com/ente-io/ente/discussions/3167#discussioncomment-10585970)
+> and our article on ensuring [reliability](https://ente.io/reliability/).
 
 In a self hosted Ente instance replication is turned off by default. When
 replication is turned off, only the first bucket (`b2-eu-cen`) is used, and the

@@ -207,22 +207,22 @@ export const sidebar = [
                 text: "Migration",
                 collapsed: true,
                 items: [
-                    { text: "Introduction", link: "/auth/migration-guides/" },
+                    { text: "Introduction", link: "/auth/migration/" },
                     {
                         text: "From Authy",
-                        link: "/auth/migration-guides/authy/",
+                        link: "/auth/migration/authy/",
                     },
                     {
                         text: "From Steam",
-                        link: "/auth/migration-guides/steam/",
+                        link: "/auth/migration/steam/",
                     },
                     {
                         text: "From others",
-                        link: "/auth/migration-guides/import",
+                        link: "/auth/migration/import",
                     },
                     {
                         text: "Exporting your data",
-                        link: "/auth/migration-guides/export",
+                        link: "/auth/migration/export",
                     },
                 ],
             },
@@ -267,8 +267,12 @@ export const sidebar = [
                         link: "/self-hosting/install/without-docker",
                     },
                     {
-                        text: "Configuration Variables",
-                        link: "/self-hosting/install/configuration-variables",
+                        text: "Environment Variable and Defaults",
+                        link: "/self-hosting/install/env-var",
+                    },
+                    {
+                        text: "Configuration File",
+                        link: "/self-hosting/install/config-file",
                     },
                     {
                         text: "Post Installation",
@@ -294,7 +298,7 @@ export const sidebar = [
                     },
                     {
                         text: "Configuring CLI for your instance",
-                        link: "/self-hosting/guides/selfhost-cli",
+                        link: "/self-hosting/administration/selfhost-cli",
                     },
 
                 ],

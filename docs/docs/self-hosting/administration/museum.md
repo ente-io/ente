@@ -29,7 +29,7 @@ MinIO buckets.
 If you wish to use an external S3 provider, you can edit the configuration with
 your provider's credentials, and set `are_local_buckets` to `false`.
 
-Check out [Configuring S3](/self-hosting/guides/configuring-s3.md) to understand
+Check out [Configuring S3] to understand
 more about configuring S3 buckets.
 
 MinIO uses the port `3200` for API Endpoints and their web app runs over
@@ -38,7 +38,7 @@ browser.
 
 If you face any issues related to uploads then checkout
 [Troubleshooting bucket CORS](/self-hosting/troubleshooting/bucket-cors) and
-[Frequently encountered S3 errors](/self-hosting/guides/configuring-s3#frequently-encountered-errors).
+[Frequently encountered S3 errors].
 
 ## Web apps
 
@@ -71,7 +71,3 @@ Similarly, you can use the default
 [`local.yaml`](https://github.com/ente-io/ente/tree/main/server/configurations/local.yaml)
 as a reference for building a functioning `museum.yaml` for many other
 functionalities like SMTP, Discord notifications, Hardcoded-OTTs, etc.
-
-## References
-
-- [Environment variables and ports](/self-hosting/faq/environment)
