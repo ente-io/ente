@@ -1,4 +1,5 @@
 import 'dart:async';
+import "dart:io";
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -828,7 +829,11 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
 
     setState(() {});
     if (widget.scrollbarInUseNotifier.value) {
-      HapticFeedback.vibrate();
+      if (Platform.isIOS) {
+        HapticFeedback.selectionClick();
+      } else {
+        HapticFeedback.vibrate();
+      }
     }
   }
 
