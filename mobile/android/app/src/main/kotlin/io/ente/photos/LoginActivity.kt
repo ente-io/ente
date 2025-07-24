@@ -22,9 +22,7 @@ class LoginActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_LOGIN_STATUS = "com.unplugged.photos.LOGIN_STATUS"
 
-        private const val ACCOUNT_ACTIVITY_CLASS_NAME =
-            "com.unplugged.account.ui.thirdparty.ThirdPartyCredentialsActivity"
-        private const val ACCOUNT_PACKAGE_NAME = "com.unplugged.store.dev"
+        private const val ACCOUNT_ACTIVITY_CLASS_NAME = "com.unplugged.account.ui.thirdparty.ThirdPartyCredentialsActivity"
 
         private fun isDebugBuild(context: android.content.Context): Boolean {
             val isDebug = context.packageName.endsWith(".dev") || context.packageName.endsWith(".debug")
@@ -64,7 +62,7 @@ class LoginActivity : AppCompatActivity() {
 
                                 val generateCredentialsIntent = Intent().apply {
                                     component = ComponentName(
-                                        ACCOUNT_PACKAGE_NAME,
+                                        this@LoginActivity.getString(R.string.account_intent_package),
                                         ACCOUNT_ACTIVITY_CLASS_NAME
                                     )
                                     putExtra("action", "generate_credentials")
@@ -95,6 +93,7 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        overridePendingTransition(0, 0)
         val sharedPrefs: SharedPreferences = getSharedPreferences("ente_prefs", MODE_PRIVATE)
         val savedUsername = sharedPrefs.getString("username", null)
         Log.d("UpEnte", "[DEBUG] onCreate: savedUsername from SharedPreferences: $savedUsername")
@@ -113,7 +112,7 @@ class LoginActivity : AppCompatActivity() {
             Log.d("UpEnte", "[DEBUG] No saved username, starting account app flow")
             val credentialsIntent = Intent().apply {
                 component = ComponentName(
-                    ACCOUNT_PACKAGE_NAME,
+                    this@LoginActivity.getString(R.string.account_intent_package),
                     ACCOUNT_ACTIVITY_CLASS_NAME
                 )
                 putExtra("action", "service_1")
@@ -149,6 +148,11 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    override fun finish() {
+        super.finish()
+        overridePendingTransition(0, 0)
+    }
+
     private fun handleAccountLoginResponse(retrievedAccount: AccountModel? = null) {
         var loginSuccess = false
 
@@ -177,8 +181,12 @@ class LoginActivity : AppCompatActivity() {
                 putExtra("service_password", account?.servicePassword)
                 putExtra("up_token", account?.upToken)
                 putExtra("username", account?.username)
+                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
             }
-            startActivity(openFlutterIntent)
+            lifecycleScope.launch {
+                delay(150)
+                startActivity(openFlutterIntent)
+            }
         } else {
             Log.d("UpEnte", "Not starting MainActivity because login failed.")
         }

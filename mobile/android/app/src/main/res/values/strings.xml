@@ -6,5 +6,6 @@
         \"include\": \"https://web.ente.io/.well-known/assetlinks.json\"
         }]
     </string>
+    <string name="account_intent_package" translatable="false">com.unplugged.store</string>
 
 </resources>

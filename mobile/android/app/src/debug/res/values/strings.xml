@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Ente Debug</string>
     <string name="backup">backup debug</string>
+    <string name="intent_package" translatable="false">com.unplugged.store.dev</string>
 </resources>
