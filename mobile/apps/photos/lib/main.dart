@@ -184,6 +184,11 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
   await _sync('bgTaskActiveProcess');
   // only runs for android
   await _homeWidgetSync(true);
+
+  await MLService.instance.init();
+  await SemanticSearchService.instance.init();
+  await MLService.instance.runAllML(force: true);
+  await smartAlbumsService.syncSmartAlbums();
 }
 
 Future<void> _init(bool isBackground, {String via = ''}) async {
