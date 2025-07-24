@@ -187,6 +187,7 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
 
   await MLService.instance.init();
   await SemanticSearchService.instance.init();
+  await PersonService.init(entityService, MLDataDB.instance, prefs);
   await MLService.instance.runAllML(force: true);
   await smartAlbumsService.syncSmartAlbums();
 }
