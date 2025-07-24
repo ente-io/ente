@@ -179,8 +179,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                     actions: isSearching ? null : _getDefaultActions(context),
                     bottom: child as PreferredSizeWidget,
                     surfaceTintColor: Colors.transparent,
-                    scrolledUnderElevation: 4,
-                    shadowColor: Colors.black.withOpacity(0.15),
                   );
                 },
               )

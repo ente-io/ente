@@ -124,7 +124,6 @@ class _CollectionListPageState extends State<CollectionListPage> {
                     enableSelectionMode: enableSelectionMode,
                     albumViewType: albumViewType ?? AlbumViewType.grid,
                     selectedAlbums: _selectedAlbum,
-                    scrollBottomSafeArea: 140,
                   ),
                 ],
               ),

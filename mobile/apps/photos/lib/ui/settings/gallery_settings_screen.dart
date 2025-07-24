@@ -14,6 +14,8 @@ import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
+import "package:photos/ui/viewer/gallery/component/group/type.dart";
+import "package:photos/ui/viewer/gallery/gallery_group_type_picker_page.dart";
 import "package:photos/ui/viewer/gallery/photo_grid_size_picker_page.dart";
 import "package:photos/utils/navigation_util.dart";
 
@@ -26,11 +28,13 @@ class GallerySettingsScreen extends StatefulWidget {
 
 class _GallerySettingsScreenState extends State<GallerySettingsScreen> {
   late int _photoGridSize;
+  late String _groupType;
 
   @override
   void initState() {
     super.initState();
     _photoGridSize = localSettings.getPhotoGridSize();
+    _groupType = localSettings.getGalleryGroupType().name;
   }
 
   @override
@@ -80,6 +84,36 @@ class _GallerySettingsScreenState extends State<GallerySettingsScreen> {
                           captionedTextWidget: CaptionedTextWidget(
                             title: S.of(context).photoGridSize,
                             subTitle: _photoGridSize.toString(),
+                          ),
+                          menuItemColor: colorScheme.fillFaint,
+                          trailingWidget: Icon(
+                            Icons.chevron_right_outlined,
+                            color: colorScheme.strokeBase,
+                          ),
+                          singleBorderRadius: 8,
+                          alignCaptionedTextToLeft: true,
+                          isGestureDetectorDisabled: true,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 24,
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          routeToPage(
+                            context,
+                            const GalleryGroupTypePickerPage(),
+                          ).then((value) {
+                            setState(() {
+                              _groupType =
+                                  localSettings.getGalleryGroupType().name;
+                            });
+                          });
+                        },
+                        child: MenuItemWidget(
+                          captionedTextWidget: CaptionedTextWidget(
+                            title: S.of(context).groupBy,
+                            subTitle: _groupType,
                           ),
                           menuItemColor: colorScheme.fillFaint,
                           trailingWidget: Icon(
