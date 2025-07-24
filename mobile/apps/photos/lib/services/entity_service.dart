@@ -80,12 +80,11 @@ class EntityService {
       " ${id == null ? 'Adding' : 'Updating'} entity of type: " +
           type.typeToString(),
     );
-    late LocalEntityData localData;
 
     final EntityData data = id == null || addWithCustomID
         ? await _gateway.createEntity(type, id, encryptedData, header)
         : await _gateway.updateEntity(type, id, encryptedData, header);
-    localData = LocalEntityData(
+    final localData = LocalEntityData(
       id: data.id,
       type: type,
       data: plainText,
