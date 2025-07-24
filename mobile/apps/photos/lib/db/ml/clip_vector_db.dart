@@ -1,3 +1,4 @@
+import "dart:io" show File;
 import "dart:typed_data" show Float32List;
 
 import "package:flutter_rust_bridge/flutter_rust_bridge.dart" show Uint64List;
@@ -30,6 +31,8 @@ class ClipVectorDB {
     return _vectorDbFuture!;
   }
 
+  bool? _migrationDone;
+
   Future<VectorDb> _initVectorDB() async {
     final documentsDirectory = await getApplicationDocumentsDirectory();
     final String databaseDirectory =
@@ -43,6 +46,32 @@ class ClipVectorDB {
     _logger.info("VectorDB connection opened with stats: ${stats.toString()}");
 
     return vectorDB;
+  }
+
+  Future<bool> checkIfMigrationDone() async {
+    if (_migrationDone != null) return _migrationDone!;
+    _logger.info("Checking if ClipVectorDB migration has run");
+    final documentsDirectory = await getApplicationDocumentsDirectory();
+    final migrationFlagFile =
+        File(join(documentsDirectory.path, 'clip_vector_migration_done'));
+    if (await migrationFlagFile.exists()) {
+      _logger.info("ClipVectorDB migration already done");
+      _migrationDone = true;
+      return _migrationDone!;
+    } else {
+      _logger.info("ClipVectorDB migration not done");
+      _migrationDone = false;
+      return _migrationDone!;
+    }
+  }
+
+  Future<void> setMigrationDone() async {
+    _logger.info("Setting ClipVectorDB migration done");
+    final documentsDirectory = await getApplicationDocumentsDirectory();
+    final migrationFlagFile =
+        File(join(documentsDirectory.path, 'clip_vector_migration_done'));
+    await migrationFlagFile.create(recursive: true);
+    _migrationDone = true;
   }
 
   Future<void> insertEmbedding({

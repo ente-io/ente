@@ -87,8 +87,6 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       "MLDataDB Migration took ${stopwatch.elapsedMilliseconds} ms",
     );
     stopwatch.stop();
-    _logger.info("Starting CLIP vector DB migration check unawaited");
-    if (flagService.enableVectorDb) unawaited(checkMigrateFillClipVectorDB());
 
     return asyncDBConnection;
   }
@@ -1263,6 +1261,12 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     await Future.delayed(const Duration(milliseconds: 100));
     _logger.info("Checking if ClipVectorDB migration is needed");
 
+    final migrationDone = await ClipVectorDB.instance.checkIfMigrationDone();
+    if (migrationDone && !force) {
+      _logger.info("ClipVectorDB migration not needed, already done");
+      return;
+    }
+
     // Check if vector DB migration has run
     _logger.info("Checking if ClipVectorDB migration has run");
     final documentsDirectory = await getApplicationDocumentsDirectory();
@@ -1309,7 +1313,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
 
         _logger.info("Reading $batchSize rows from DB");
         final List<Map<String, dynamic>> results = await db.getAll('''
-        SELECT $fileIDColumn, $embeddingColumn 
+        SELECT $fileIDColumn, $embeddingColumn
         FROM $clipTable
         ORDER BY $fileIDColumn DESC
         LIMIT $batchSize OFFSET $offset
@@ -1406,7 +1410,8 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
         'INSERT OR REPLACE INTO $clipTable ($fileIDColumn, $embeddingColumn, $mlVersionColumn) VALUES (?, ?, ?)',
         _getRowFromEmbedding(embeddings.first),
       );
-      if (flagService.enableVectorDb) {
+      if (flagService.enableVectorDb &&
+          await ClipVectorDB.instance.checkIfMigrationDone()) {
         await ClipVectorDB.instance.insertEmbedding(
           fileID: embeddings.first.fileID,
           embedding: embeddings.first.embedding,
@@ -1418,7 +1423,8 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
         'INSERT OR REPLACE INTO $clipTable ($fileIDColumn, $embeddingColumn, $mlVersionColumn) values(?, ?, ?)',
         inputs,
       );
-      if (flagService.enableVectorDb) {
+      if (flagService.enableVectorDb &&
+          await ClipVectorDB.instance.checkIfMigrationDone()) {
         await ClipVectorDB.instance.bulkInsertEmbeddings(
           fileIDs: embeddings.map((e) => e.fileID).toList(),
           embeddings:
@@ -1435,7 +1441,8 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     await db.execute(
       'DELETE FROM $clipTable WHERE $fileIDColumn IN (${fileIDs.join(", ")})',
     );
-    if (flagService.enableVectorDb) {
+    if (flagService.enableVectorDb &&
+        await ClipVectorDB.instance.checkIfMigrationDone()) {
       await ClipVectorDB.instance.deleteEmbeddings(fileIDs);
     }
     Bus.instance.fire(EmbeddingUpdatedEvent());
@@ -1445,7 +1452,8 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
   Future<void> deleteClipIndexes() async {
     final db = await instance.asyncDB;
     await db.execute('DELETE FROM $clipTable');
-    if (flagService.enableVectorDb) {
+    if (flagService.enableVectorDb &&
+        await ClipVectorDB.instance.checkIfMigrationDone()) {
       await ClipVectorDB.instance.deleteAllEmbeddings();
     }
     Bus.instance.fire(EmbeddingUpdatedEvent());
