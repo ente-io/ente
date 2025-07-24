@@ -1,0 +1,30 @@
+# Copy this file to museum.yaml in the same directory in which this file is present
+
+db:
+    host: postgres
+    port: 5432
+    name: ente_db
+    user: pguser
+    password: <password>
+
+s3:
+    are_local_buckets: true
+    b2-eu-cen:
+      key: <key>
+      secret: <secret>
+      endpoint: localhost:3200
+      region: eu-central-2
+      bucket: b2-eu-cen
+    wasabi-eu-central-2-v3:
+      key: <key>
+      secret: <secret>
+      endpoint: localhost:3200
+      region: eu-central-2
+      bucket: wasabi-eu-central-2-v3
+      compliance: false
+    scw-eu-fr-v3:
+      key: <key>
+      secret: <secret>
+      endpoint: localhost:3200
+      region: eu-central-2
+      bucket: scw-eu-fr-v3

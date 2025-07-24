@@ -6,7 +6,7 @@ description: Self-hosting Ente with quickstart script
 # Quickstart
 
 We provide a quickstart script which can be used for self-hosting Ente on your
-machine.
+machine in less than 5 minutes.
 
 ## Requirements
 
@@ -21,10 +21,10 @@ Run this command on your terminal to setup Ente.
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente-io/ente/main/server/quickstart.sh)"
 ```
 
-The above `curl` command pulls the Docker image, creates a directory `my-ente`
-in the current working directory, prompts to start the cluster and starts all
-the containers required to run Ente.
+The above `curl` command does the following:
+1. Creates a directory `./my-ente` in working directory.
+2. Starts the containers required to run Ente upon prompting.
 
-![quickstart](/quickstart.png)
+You should be able to access the web application at [`http://localhost:3000`](http://localhost:3000) or [`http://<machine-ip>:3000`](http://<machine-ip>:3000)
 
-![self-hosted-ente](/web-app.webp)
+The data pertaining to be used by Museum is stored in `./data` folder inside `my-ente` directory, which contains extra configuration files that is to be used (billing configuration, push notification credentials, etc.)

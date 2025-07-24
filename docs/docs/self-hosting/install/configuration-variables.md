@@ -1,11 +1,11 @@
 ---
-title: "Configuration - Self-hosting"
+title: "Environment Variables and Defaults - Self-hosting"
 description:
     "Information about all the configuration variables needed to run Ente along
     with description on default configuration"
 ---
 
-# Configuration
+# Environment Variables and Defaults
 
 The environment variables needed for running Ente, configuration variables
 present in Museum's configuration file and the default configuration are
@@ -17,24 +17,28 @@ A self-hosted Ente instance requires specific endpoints in both Museum (the
 server) and web apps. This document outlines the essential environment variables
 and port mappings of the web apps.
 
-Here's the list of environment variables that need to be configured:
+Here's the list of environment variables that is used by the cluster:
 
-| Service | Environment Variable | Description                                      | Default Value         |
-| ------- | -------------------- | ------------------------------------------------ | --------------------- |
-| Web     | `ENTE_API_ORIGIN`    | API Endpoint for Ente's API (Museum)             | http://localhost:8080 |
-| Web     | `ENTE_ALBUMS_ORIGIN` | Base URL for Ente Album, used for public sharing | http://localhost:3002 |
-
-## Config File
-
-Ente's server, Museum, uses a configuration file
+| Service    | Environment Variable  | Description                                      | Default Value                     |
+| ---------- | --------------------- | ------------------------------------------------ | --------------------------------- |
+| `web`      | `ENTE_API_ORIGIN`     | API Endpoint for Ente's API (Museum)             | http://localhost:8080             |
+| `web`      | `ENTE_ALBUMS_ORIGIN`  | Base URL for Ente Album, used for public sharing | http://localhost:3002             |
+| `postgres` | `POSTGRES_USER`       | Username for PostgreSQL database                 | pguser                            |
+| `postgres` | `POSTGRES_DB`         | Name of database for use with Ente               | ente_db                           |
+| `postgres` | `POSTGRES_PASSWORD`   | Password for PostgreSQL database's user          | Randomly generated for quickstart |
+| `minio`    | `MINIO_ROOT_USER`     | Username for MinIO                               | Randomly generated for quickstart |
+| `minio`    | `MINIO_ROOT_PASSWORD` | Password for MinIO                               | Randomly generated for quickstart |
 
 ## Default Configuration
+
+Self-hosted Ente clusters have certain default configuration for ease of use,
+which is documented below to understand its behavior:
 
 ### Ports
 
 The below format is according to how ports are mapped in Docker when using
 quickstart script. The mapping is of the format `- <host-port>:<container-port>`
-in `ports`.
+in `ports` in compose file.
 
 | Service                            | Type     | Host Port | Container Port |
 | ---------------------------------- | -------- | --------- | -------------- |

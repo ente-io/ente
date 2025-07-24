@@ -1,16 +1,39 @@
 ---
-title: Custom server
-description: Using a custom self-hosted server with Ente client apps and CLI
+title: Post-installation steps - Self-hosting
+description: Steps to be followed post-installation for smooth experience
 ---
 
-# Connecting to a custom server
+# Post-installation Steps
+
+A list of steps that should be done after installing Ente are described below:
+
+## Step 1: Creating first user
+
+The first user to be created will be treated as an admin user.
+
+Once Ente is up and running, the Ente Photos web app will be accessible on
+`http://localhost:3000`. Open this URL in your browser and proceed with creating
+an account.
+
+To complete your account registration you will need to enter a 6-digit
+verification code.
+
+This code can be found in the server logs, which should already be shown in your
+quickstart terminal. Alternatively, you can open the server logs with the
+following command from inside the `my-ente` folder:
+
+```sh
+sudo docker compose logs
+```
+
+![otp](/otp.png)
+
+## Step 2: Configure apps to use your server
 
 You can modify various Ente client apps and CLI to connect to a self hosted
 custom server endpoint.
 
-[[toc]]
-
-## Mobile
+### Mobile
 
 The pre-built Ente apps from GitHub / App Store / Play Store / F-Droid can be
 easily configured to use a custom server.
@@ -20,7 +43,7 @@ configure the endpoint the app should be connecting to.
 
 ![Setting a custom server on the onboarding screen](custom-server.png)
 
-## Desktop and web
+### Desktop and web
 
 Same as the mobile app, you can tap 7 times on the onboarding screen to
 configure the endpoint the app should connect to.
@@ -47,21 +70,7 @@ Note that the custom server configured this way is cleared when you reset the
 state during logout. In particular, the app also does a reset when you press the
 change email button during the login flow.
 
-### Building from source
-
-Alternatively (e.g. if you don't wish to configure this setting and just want to
-change the endpoint the client connects to by default), you can build the app
-from source and use the `NEXT_PUBLIC_ENTE_ENDPOINT` environment variable to tell
-it which server to connect to. For example:
-
-```sh
-NEXT_PUBLIC_ENTE_ENDPOINT=http://localhost:8080 yarn dev:photos
-```
-
-For more details, see
-[hosting the web app](https://help.ente.io/self-hosting/guides/web-app).
-
-## CLI
+## Step 3: Configure Ente CLI
 
 > [!NOTE]
 >
@@ -79,37 +88,3 @@ endpoint:
 
 (Another
 [example](https://github.com/ente-io/ente/blob/main/cli/config.yaml.example))
-
-## Find the hostname of your server
-
-If you want to access your museum within your own network, you can use the
-`hostname` command to find a addressable local network hostname or IP for your
-computer, and then use it by suffixing it with the port number.
-
-First, run
-
-```sh
-hostname
-```
-
-The result will look something like this
-
-```sh
-my-computer.local
-```
-
-You will need to replace the server endpoint with an address that uses your
-server's hostname and the port number. Here's an example:
-
-```
-http://my-computer.local:8080
-```
-
-Note that this will only work within your network. To access it from outside the
-network, you need to use the public IP or hostname.
-
-> [!TIP]
->
-> If you're having trouble uploading from your mobile app, it is likely that
-> museum is not able to connect to your S3 storage. See the
-> [Configuring S3](/self-hosting/guides/configuring-s3) guide for more details.

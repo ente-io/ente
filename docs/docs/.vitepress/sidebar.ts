@@ -260,24 +260,20 @@ export const sidebar = [
                     },
                     {
                         text: "Docker Compose",
-                        link: "/self-hosting/install/from-source",
+                        link: "/self-hosting/install/compose",
                     },
                     {
                         text: "Without Docker",
-                        link: "/self-hosting/install/standalone-ente",
+                        link: "/self-hosting/install/without-docker",
                     },
                     {
-                        text: "Configuration",
-                        link: "/self-hosting/install/config",
+                        text: "Configuration Variables",
+                        link: "/self-hosting/install/configuration-variables",
                     },
                     {
                         text: "Post Installation",
-                        link: "/self-hosting/install/post-install",
-                    },
-                    {
-                        text: "Connecting to Custom Server",
-                        link: "/self-hosting/install/custom-server/",
-                    },
+                        link: "/self-hosting/install/post-install/",
+                    }
                 ],
             },
             {
@@ -285,37 +281,33 @@ export const sidebar = [
                 collapsed: true,
                 items: [
                     {
-                        text: "Creating accounts",
-                        link: "/self-hosting/administration/creating-accounts",
-                    },
-                    {
                         text: "Configuring your server",
                         link: "/self-hosting/administration/museum",
                     },
                     {
                         text: "Configuring S3",
-                        link: "/self-hosting/guides/configuring-s3",
+                        link: "/self-hosting/administration/configuring-s3",
                     },
                     {
                         text: "Reverse proxy",
                         link: "/self-hosting/administration/reverse-proxy",
                     },
-                ],
-            },
-            {
-                text: "Guides",
-                collapsed: true,
-                items: [
-                    { text: "Introduction", link: "/self-hosting/guides/" },
-                    {
-                        text: "Administering your server",
-                        link: "/self-hosting/guides/admin",
-                    },
                     {
                         text: "Configuring CLI for your instance",
                         link: "/self-hosting/guides/selfhost-cli",
                     },
+
                 ],
+            },
+            {
+                text: "Developer",
+                collapsed: true,
+                items: [
+                    {
+                        text: "Building mobile apps",
+                        link: "/self-hosting/developer/mobile-build"
+                    }
+                ]
             },
             {
                 text: "Troubleshooting",
@@ -337,10 +329,6 @@ export const sidebar = [
                         text: "Docker / quickstart",
                         link: "/self-hosting/troubleshooting/docker",
                     },
-                    {
-                        text: "Ente CLI secrets",
-                        link: "/self-hosting/troubleshooting/keyring",
-                    },
                 ],
             },
             {
@@ -359,23 +347,8 @@ export const sidebar = [
             },
             {
                 text: "FAQ",
-                collapsed: true,
-                items: [
-                    { text: "General", link: "/self-hosting/faq/" },
-                    {
-                        text: "Verification code",
-                        link: "/self-hosting/faq/otp",
-                    },
-                    {
-                        text: "Shared albums",
-                        link: "/self-hosting/faq/sharing",
-                    },
-                    {
-                        text: "Backups",
-                        link: "/self-hosting/faq/backup",
-                    },
-                ],
-            },
+                link: "/self-hosting/faq/",
+            }
         ],
     },
 ];
