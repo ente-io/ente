@@ -72,10 +72,6 @@ class ComputeController {
   }
 
   bool requestCompute({bool ml = false, bool stream = false}) {
-    // TODO: Remove check
-    if (!isProcessBg) {
-      return false;
-    }
     _logger.info("Requesting compute: ml: $ml, stream: $stream");
     if (!_isDeviceHealthy || !isProcessBg && !_canRunGivenUserInteraction()) {
       _logger.info("Device not healthy or user interacting, denying request.");
