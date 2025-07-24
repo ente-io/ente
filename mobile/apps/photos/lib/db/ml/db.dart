@@ -1,5 +1,4 @@
 import 'dart:async';
-import "dart:io" show File;
 import "dart:math";
 
 import "package:collection/collection.dart";
@@ -1257,25 +1256,12 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
   }
 
   Future<void> checkMigrateFillClipVectorDB({bool force = false}) async {
-    _logger.info("Waiting for ClipVectorDB to be ready");
-    await Future.delayed(const Duration(milliseconds: 100));
-    _logger.info("Checking if ClipVectorDB migration is needed");
-
     final migrationDone = await ClipVectorDB.instance.checkIfMigrationDone();
     if (migrationDone && !force) {
       _logger.info("ClipVectorDB migration not needed, already done");
       return;
     }
-
-    // Check if vector DB migration has run
-    _logger.info("Checking if ClipVectorDB migration has run");
-    final documentsDirectory = await getApplicationDocumentsDirectory();
-    final migrationFlagFile =
-        File(join(documentsDirectory.path, 'clip_vector_migration_done'));
-    if (await migrationFlagFile.exists() && !force) {
-      _logger.info("ClipVectorDB migration not needed, already done");
-      return;
-    }
+    _logger.info("Starting ClipVectorDB migration");
 
     // Get total count first to track progress
     _logger.info("Getting total count of clip embeddings");
@@ -1285,20 +1271,20 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     final totalCount = countResult.first['total'] as int;
     if (totalCount == 0) {
       _logger.info("No clip embeddings to migrate");
-      await migrationFlagFile.create();
+      await ClipVectorDB.instance.setMigrationDone();
       return;
     }
     _logger.info("Total count of clip embeddings: $totalCount");
 
-    _logger.info("First time referencing ClipVectorDB in migration");
+    _logger.info("First time referencing ClipVectorDB rust index in migration");
     final clipVectorDB = ClipVectorDB.instance;
-    _logger.info("ClipVectorDB referenced");
     await clipVectorDB.deleteAllEmbeddings();
+    _logger.info("ClipVectorDB rust index referenced");
     _logger.info("ClipVectorDB all embeddings cleared");
 
     _logger
         .info("Starting migration of $totalCount clip embeddings to vector DB");
-    const batchSize = 1000;
+    const batchSize = 5000;
     int offset = 0;
     int processedCount = 0;
     int weirdCount = 0;
@@ -1363,7 +1349,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       _logger.info(
         "migrated all $totalCount embeddings to ClipVectorDB in ${stopwatch.elapsed.inMilliseconds} ms, with $weirdCount weird embeddings not migrated",
       );
-      await migrationFlagFile.create();
+      await ClipVectorDB.instance.setMigrationDone();
       _logger.info("ClipVectorDB migration done, flag file created");
     } catch (e) {
       _logger.severe(
