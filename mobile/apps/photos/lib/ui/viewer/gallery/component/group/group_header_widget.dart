@@ -40,6 +40,14 @@ class _GroupHeaderWidgetState extends State<GroupHeaderWidget> {
   }
 
   @override
+  void didUpdateWidget(covariant GroupHeaderWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.title != widget.title) {
+      _areAllFromGroupSelectedNotifier.value = _areAllFromGroupSelected();
+    }
+  }
+
+  @override
   void dispose() {
     _areAllFromGroupSelectedNotifier.dispose();
     widget.selectedFiles?.removeListener(_selectedFilesListener);
