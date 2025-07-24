@@ -99,6 +99,7 @@ class _ImageEditorCropRotateBarState extends State<ImageEditorCropRotateBar>
   Widget _buildFunctions(BoxConstraints constraints) {
     return BottomAppBar(
       color: getEnteColorScheme(context).backgroundBase,
+      padding: EdgeInsets.zero,
       height: editorBottomBarHeight,
       child: Align(
         alignment: Alignment.bottomCenter,
@@ -111,15 +112,15 @@ class _ImageEditorCropRotateBarState extends State<ImageEditorCropRotateBar>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   CircularIconButton(
-                    svgPath: "assets/image-editor/image-editor-crop-rotate.svg", 
+                    svgPath: "assets/image-editor/image-editor-crop-rotate.svg",
                     label: "Rotate",
                     onTap: () {
                       widget.editor.rotate();
                     },
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 6),
                   CircularIconButton(
-                    svgPath: "assets/image-editor/image-editor-flip.svg", 
+                    svgPath: "assets/image-editor/image-editor-flip.svg",
                     label: "Flip",
                     onTap: () {
                       widget.editor.flip();
@@ -127,9 +128,8 @@ class _ImageEditorCropRotateBarState extends State<ImageEditorCropRotateBar>
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
               SizedBox(
-                height: 48,
+                height: 40,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: CropAspectRatioType.values.length,
@@ -190,17 +190,14 @@ class CropAspectChip extends StatelessWidget {
               : colorScheme.backgroundElevated2,
           borderRadius: BorderRadius.circular(25),
         ),
-        padding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 10,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Row(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             if (svg != null) ...[
               SvgPicture.asset(
                 svg!,
-                height: 40,
+                height: 32,
                 colorFilter: ColorFilter.mode(
                   isSelected ? colorScheme.backdropBase : colorScheme.tabIcon,
                   BlendMode.srcIn,
@@ -217,6 +214,7 @@ class CropAspectChip extends StatelessWidget {
                       : colorScheme.tabIcon,
                 ),
               ),
+            const SizedBox(width: 4),
           ],
         ),
       ),
