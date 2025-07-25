@@ -623,6 +623,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                 collectionId: widget.collection!.id,
               ),
             );
+            setState(() {});
           } else if (value == AlbumPopupAction.freeUpSpace) {
             await _deleteBackedUpFiles(context);
           } else if (value == AlbumPopupAction.setCover) {
