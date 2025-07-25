@@ -52,6 +52,7 @@ class _CustomScrollBarState extends State<CustomScrollBar> {
   double? heightOfScrollbarDivider;
   double? heightOfScrollTrack;
   late bool _showScrollbarDivisions;
+  late bool _showThumb;
 
   // Scrollbar's heigh is not fixed by default. If the scrollable is short
   // enough, the scrollbar's height can go above the minimum length.
@@ -87,6 +88,13 @@ class _CustomScrollBarState extends State<CustomScrollBar> {
       _showScrollbarDivisions = true;
     } else {
       _showScrollbarDivisions = false;
+    }
+
+    if (widget.galleryGroups.groupLayouts.last.maxOffset >
+        widget.heighOfViewport * 3) {
+      _showThumb = true;
+    } else {
+      _showThumb = false;
     }
 
     if (_showScrollbarDivisions) {
@@ -215,6 +223,7 @@ class _CustomScrollBarState extends State<CustomScrollBar> {
             padding: EdgeInsets.only(
               bottom: widget.bottomPadding.value,
               top: widget.topPadding,
+              right: 4,
             ),
           ),
           child: ScrollbarWithUseNotifer(
@@ -223,6 +232,9 @@ class _CustomScrollBarState extends State<CustomScrollBar> {
             interactive: true,
             inUseNotifier: widget.inUseNotifier,
             minScrollbarLength: _kScrollbarMinLength,
+            showThumb: _showThumb,
+            radius: const Radius.circular(4),
+            thickness: 8,
             child: widget.child,
           ),
         ),
