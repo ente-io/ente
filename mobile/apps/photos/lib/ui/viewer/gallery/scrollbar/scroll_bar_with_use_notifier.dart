@@ -8,7 +8,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import "package:flutter/material.dart";
-import "package:photos/ui/viewer/gallery/scrollbar/cupertino_scroll_bar_with_use_notifier.dart";
 
 const double _kScrollbarThickness = 8.0;
 const double _kScrollbarThicknessWithTrack = 12.0;
@@ -96,6 +95,7 @@ class ScrollbarWithUseNotifer extends StatelessWidget {
     this.notificationPredicate,
     this.interactive,
     this.scrollbarOrientation,
+    this.showThumb,
   });
 
   /// {@macro flutter.widgets.Scrollbar.child}
@@ -155,25 +155,10 @@ class ScrollbarWithUseNotifer extends StatelessWidget {
 
   final double minScrollbarLength;
 
+  final bool? showThumb;
+
   @override
   Widget build(BuildContext context) {
-    if (Theme.of(context).platform == TargetPlatform.iOS) {
-      return CupertinoScrollbarWithUseNotifier(
-        thumbVisibility: thumbVisibility ?? false,
-        thickness: thickness ?? CupertinoScrollbar.defaultThickness,
-        thicknessWhileDragging:
-            thickness ?? CupertinoScrollbar.defaultThicknessWhileDragging,
-        radius: radius ?? CupertinoScrollbar.defaultRadius,
-        radiusWhileDragging:
-            radius ?? CupertinoScrollbar.defaultRadiusWhileDragging,
-        controller: controller,
-        notificationPredicate: notificationPredicate,
-        scrollbarOrientation: scrollbarOrientation,
-        inUseNotifier: inUseNotifier,
-        minScrollbarLength: minScrollbarLength,
-        child: child,
-      );
-    }
     return _MaterialScrollbar(
       controller: controller,
       thumbVisibility: thumbVisibility,
@@ -185,6 +170,7 @@ class ScrollbarWithUseNotifer extends StatelessWidget {
       scrollbarOrientation: scrollbarOrientation,
       inUseNotifier: inUseNotifier,
       minScrollbarLength: minScrollbarLength,
+      showThumb: showThumb,
       child: child,
     );
   }
@@ -193,10 +179,12 @@ class ScrollbarWithUseNotifer extends StatelessWidget {
 class _MaterialScrollbar extends RawScrollbar {
   final ValueNotifier<bool> inUseNotifier;
   final double minScrollbarLength;
+  final bool? showThumb;
   const _MaterialScrollbar({
     required super.child,
     required this.inUseNotifier,
     required this.minScrollbarLength,
+    required this.showThumb,
     super.controller,
     super.thumbVisibility,
     super.trackVisibility,
@@ -251,6 +239,9 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       };
 
   MaterialStateProperty<Color> get _thumbColor {
+    if (widget.showThumb == false) {
+      return MaterialStateProperty.all(const Color(0x00000000));
+    }
     final Color onSurface = _colorScheme.onSurface;
     final Brightness brightness = _colorScheme.brightness;
     late Color dragColor;
@@ -291,6 +282,9 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   }
 
   MaterialStateProperty<Color> get _trackColor {
+    if (widget.showThumb == false) {
+      return MaterialStateProperty.all(const Color(0x00000000));
+    }
     final Color onSurface = _colorScheme.onSurface;
     final Brightness brightness = _colorScheme.brightness;
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
@@ -306,6 +300,9 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   }
 
   MaterialStateProperty<Color> get _trackBorderColor {
+    if (widget.showThumb == false) {
+      return MaterialStateProperty.all(const Color(0x00000000));
+    }
     final Color onSurface = _colorScheme.onSurface;
     final Brightness brightness = _colorScheme.brightness;
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {

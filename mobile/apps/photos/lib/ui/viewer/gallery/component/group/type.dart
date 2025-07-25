@@ -223,12 +223,6 @@ extension GroupTypeExtension on GroupType {
       return S.of(context).thisMonth;
     }
 
-    // Check if it's the previous month
-    final lastMonth = DateTime(now.year, now.month - 1);
-    if (date.year == lastMonth.year && date.month == lastMonth.month) {
-      return S.of(context).lastMonth;
-    }
-
     return DateFormat.yMMM(Localizations.localeOf(context).languageCode)
         .format(date);
   }
@@ -239,11 +233,6 @@ extension GroupTypeExtension on GroupType {
 
     if (date.year == now.year) {
       return S.of(context).thisYear;
-    }
-
-    // Check if it's the previous year
-    if (date.year == now.year - 1) {
-      return S.of(context).lastYear;
     }
 
     return DateFormat.y(Localizations.localeOf(context).languageCode)
