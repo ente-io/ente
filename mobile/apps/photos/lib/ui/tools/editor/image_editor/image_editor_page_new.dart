@@ -6,6 +6,7 @@ import 'dart:ui' as ui show Image;
 
 import 'package:flutter/material.dart';
 import "package:flutter_image_compress/flutter_image_compress.dart";
+import "package:flutter_svg/svg.dart";
 import "package:google_fonts/google_fonts.dart";
 import "package:logging/logging.dart";
 import 'package:path/path.dart' as path;
@@ -202,6 +203,11 @@ class _NewImageEditorState extends State<NewImageEditor> {
             ),
           ),
           configs: ProImageEditorConfigs(
+            imageGeneration: const ImageGenerationConfigs(
+              jpegQuality: 100,
+              generateInsideSeparateThread: true,
+              pngLevel: 0,
+            ),
             layerInteraction: const LayerInteractionConfigs(
               hideToolbarOnInteraction: false,
             ),
@@ -241,16 +247,20 @@ class _NewImageEditorState extends State<NewImageEditor> {
                           margin: const EdgeInsets.only(bottom: 24),
                           decoration: BoxDecoration(
                             color: isHovered
-                                ? const Color.fromARGB(255, 255, 197, 197)
-                                : const Color.fromARGB(255, 255, 255, 255),
+                                ? colorScheme.warning400.withOpacity(0.8)
+                                : Colors.white,
                             shape: BoxShape.circle,
                           ),
                           padding: const EdgeInsets.all(12),
-                          child: const Center(
-                            child: Icon(
-                              Icons.delete_forever_outlined,
-                              size: 28,
-                              color: Color(0xFFF44336),
+                          child: Center(
+                            child: SvgPicture.asset(
+                              "assets/image-editor/image-editor-delete.svg",
+                              colorFilter: ColorFilter.mode(
+                                isHovered
+                                    ? Colors.white
+                                    : colorScheme.warning400.withOpacity(0.8),
+                                BlendMode.srcIn,
+                              ),
                             ),
                           ),
                         );
@@ -351,7 +361,34 @@ class _NewImageEditorState extends State<NewImageEditor> {
                 textFieldMargin: EdgeInsets.only(top: kToolbarHeight),
               ),
               widgets: TextEditorWidgets(
-                appBar: (textEditor, rebuildStream) => null,
+                appBar: (textEditor, rebuildStream) => ReactiveCustomAppbar(
+                  builder: (context) {
+                    return ImageEditorAppBar(
+                      key: const Key('image_editor_app_bar'),
+                      configs: textEditor.configs,
+                      done: () => textEditor.done(),
+                      close: () => textEditor.close(),
+                    );
+                  },
+                  stream: rebuildStream,
+                ),
+                bodyItems: (editor, rebuildStream) {
+                  return [
+                    ReactiveCustomWidget(
+                      builder: (context) {
+                        return Positioned.fill(
+                          child: GestureDetector(
+                            onTap: () {},
+                            child: Container(
+                              color: Colors.transparent,
+                            ),
+                          ),
+                        );
+                      },
+                      stream: rebuildStream,
+                    ),
+                  ];
+                },
                 colorPicker:
                     (textEditor, rebuildStream, currentColor, setColor) => null,
                 bottomBar: (editorState, rebuildStream) {
