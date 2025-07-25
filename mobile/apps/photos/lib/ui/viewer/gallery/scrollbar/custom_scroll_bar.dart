@@ -223,7 +223,7 @@ class _CustomScrollBarState extends State<CustomScrollBar> {
             padding: EdgeInsets.only(
               bottom: widget.bottomPadding.value,
               top: widget.topPadding,
-              right: 4,
+              right: 3,
             ),
           ),
           child: ScrollbarWithUseNotifer(
