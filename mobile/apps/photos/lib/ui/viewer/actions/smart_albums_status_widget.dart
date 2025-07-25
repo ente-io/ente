@@ -1,4 +1,5 @@
 import "dart:async";
+import "dart:ui";
 
 import 'package:flutter/material.dart';
 import "package:flutter_spinkit/flutter_spinkit.dart";
@@ -66,7 +67,7 @@ class _SmartAlbumsStatusWidgetState extends State<SmartAlbumsStatusWidget>
       firstCurve: Curves.easeInOutExpo,
       secondCurve: Curves.easeInOutExpo,
       sizeCurve: Curves.easeInOutExpo,
-      crossFadeState: !(_syncingCollection == null ||
+      crossFadeState: (_syncingCollection == null ||
               _syncingCollection!.$1 != widget.collection?.id)
           ? CrossFadeState.showSecond
           : CrossFadeState.showFirst,
@@ -80,9 +81,7 @@ class _SmartAlbumsStatusWidgetState extends State<SmartAlbumsStatusWidget>
                 .copyWith(left: 14),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
-              color: EnteTheme.isDark(context)
-                  ? Colors.white.withOpacity(0.20)
-                  : Colors.black.withOpacity(0.65),
+              color: Colors.black.withOpacity(0.65),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
