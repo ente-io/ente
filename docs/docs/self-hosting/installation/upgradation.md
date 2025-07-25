@@ -9,6 +9,15 @@ Upgrading Ente depends on the method of installation you have chosen.
 
 ## Quickstart
 
+::: tip For Docker users
+
+You can free up some disk space by deleting older images that were used by obsolette containers.
+
+``` shell
+docker image prune
+```
+:::
+
 Upgrade and restart Ente by pulling the latest images in the directory where the Compose file resides.
 
 The directory name is generally `my-ente`.
@@ -52,18 +61,14 @@ based on the updated source code.
     ``` shell
     # Assuming you have cloned repository to ente
     cd ente
-    # Pull changes
-    git pull
+
+    # Pull changes and only keep changes from remote.
+    # This is needed to keep yarn.lock up-to-date.
+    # This resets all changes made in the local repository.
+    # Make sure to stash changes if you have made any.
+    git fetch origin
+    git reset --hard main
     ```
 
-2. Follow the steps described in [manual setup](/self-hosting/installation/manual) for Museum and web applications.
-
-::: tip
-
-If using Docker, you can free up some disk space by deleting older images 
-that were used by obsolette containers
-
-``` shell
-docker image prune
-```
-:::
+2. Follow the steps described in [manual setup](/self-hosting/installation/manual#step-3-configure-web-application)
+    for Museum and web applications.

@@ -19,7 +19,7 @@ have been developed and made available for mobile, web and desktop, namely:
 
 ## History
 
-Ente was the founded by Vishnu Mohandas (Ente's CEO) in response to privacy
+Ente was founded by Vishnu Mohandas (Ente's CEO) in response to privacy
 concerns with major tech companies. The underlying motivation was the
 understanding that big tech had no incentive to fix their act, but with
 end-to-end encrypted cross platform apps, there was a way for people to take
@@ -78,5 +78,5 @@ If you encounter any issues with any of the products that's not answered by our
 documentation, please reach out to our team by sending an email to
 [support@ente.io](mailto:support@ente.io)
 
-For community support, please post your queries on
+For community support, please post your queries on 
 [Discord](https://discord.gg/z2YVKkycX3)
