@@ -56,7 +56,7 @@ based on the updated source code.
     git pull
     ```
 
-2. Follow the steps described in [manual setup](/self-hosting/install/manual) for Museum and web applications.
+2. Follow the steps described in [manual setup](/self-hosting/installation/manual) for Museum and web applications.
 
 ::: tip
 

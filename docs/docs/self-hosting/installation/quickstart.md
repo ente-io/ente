@@ -1,16 +1,16 @@
 ---
-title: Quickstart Script (Recommended) - Self-hosting
+title: Quickstart script (Recommended) - Self-hosting
 description: Self-hosting Ente with quickstart script
 ---
 
-# Quickstart Script (Recommended)
+# Quickstart script (Recommended)
 
 We provide a quickstart script which can be used for self-hosting Ente on your
 machine in less than a minute.
 
 ## Requirements
 
-Check out the [requirements](/self-hosting/install/requirements) page to get
+Check out the [requirements](/self-hosting/installation/requirements) page to get
 started.
 
 ## Getting started
@@ -31,5 +31,5 @@ The data accessed by Museum is stored in `./data` folder inside `my-ente` direct
 It contains extra configuration files that is to be used (push notification credentials, etc.)
 
 ::: tip
-Check out [post-installations steps](/self-hosting/install/post-install/) for further usage.
+Check out [post-installations steps](/self-hosting/installation/post-install/) for further usage.
 :::

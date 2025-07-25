@@ -1,5 +1,5 @@
 ---
-title: "Configuration - Self-hosting"
+title: Configuration - Self-hosting
 description:
     "Information about all the configuration variables needed to run Ente with
     museum.yaml"

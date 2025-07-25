@@ -1,5 +1,5 @@
 ---
-title: Ente CLI for Self-hosted Instance
+title: Ente CLI for Self-hosted Instance - Self-hosting
 description: Guide to configuring Ente CLI for Self Hosted Instance
 ---
 

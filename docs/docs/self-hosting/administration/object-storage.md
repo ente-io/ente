@@ -1,5 +1,5 @@
 ---
-title: Configuring Object Storage
+title: Configuring Object Storage - Self-hosting
 description:
     Configure Object Storage for storing files along with some troubleshooting tips
 ---

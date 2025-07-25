@@ -1,9 +1,9 @@
 ---
-title: Manual Setup (Without Docker) - Self-hosting
+title: Manual setup (without Docker) - Self-hosting
 description: Installing and setting up Ente without Docker
 ---
 
-# Manual Setup (Without Docker)
+# Manual setup (without Docker)
 
 If you wish to run Ente from source without using Docker, follow the steps described below:
 
@@ -188,8 +188,8 @@ relative to `server` directory
     }
     ```
 
-    The web application for Ente Photos should be accessible at http://localhost:3000, check out the [default ports](/self-hosting/install/env-var#ports) for more information.
+    The web application for Ente Photos should be accessible at http://localhost:3000, check out the [default ports](/self-hosting/installation/env-var#ports) for more information.
 
 ::: tip
-Check out [post-installation steps](/self-hosting/install/post-install/) for further usage.
+Check out [post-installation steps](/self-hosting/installation/post-install/) for further usage.
 :::

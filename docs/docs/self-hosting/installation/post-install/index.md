@@ -3,7 +3,7 @@ title: Post-installation steps - Self-hosting
 description: Steps to be followed post-installation for smooth experience
 ---
 
-# Post-installation Steps
+# Post-installation steps
 
 A list of steps that should be done after installing Ente are described below:
 
@@ -114,10 +114,19 @@ You can modify Ente mobile apps and CLI to connect to your server.
 
 ### Mobile
 
-Tap 7 times on the onboarding screen to configure the
-server endpoint to be used.
+Tap the onboarding screen 7 times to modify developer settings.
 
-![Setting a custom server on the onboarding screen](custom-server.png)
+<center>
+<img src="/developer-settings.png" alt="Developer Settings" height="50%" width="50%" />
+</center>
+
+<br>
+Enter your Ente server's endpoint.
+<br>
+
+<center>
+<img src="/developer-settings-endpoint.png" alt="Developer Settings - Server Endpoint" height="50%" width="50%" />
+</center>
 
 ### Desktop
 
@@ -137,5 +146,5 @@ You can download Ente CLI from [here](https://github.com/ente-io/ente/releases?q
 Check our [documentation](/self-hosting/administration/cli) on how to use Ente CLI for managing self-hosted instances.
 
 ::: info For upgradation
-Check out our [documentation](/self-hosting/install/upgrade) for various installation methods.
+Check out our [upgradation documentation](/self-hosting/installation/upgradation) for various installation methods.
 :::

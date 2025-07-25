@@ -1,5 +1,5 @@
 ---
-title: Backups
+title: Backups - Self-hosting
 description: General introduction to backing up your self hosted Ente instance
 ---
 

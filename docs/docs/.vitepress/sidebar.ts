@@ -239,48 +239,48 @@ export const sidebar = [
         ],
     },
     {
-        text: "Self hosting",
+        text: "Self-hosting",
         collapsed: true,
         items: [
             {
-                text: "Get Started",
+                text: "Quickstart",
                 link: "/self-hosting/",
             },
             {
-                text: "Install",
+                text: "Installation",
                 collapsed: true,
                 items: [
                     {
                         text: "Requirements",
-                        link: "/self-hosting/install/requirements",
+                        link: "/self-hosting/installation/requirements",
                     },
                     {
-                        text: "Quickstart Script (Recommended)",
-                        link: "/self-hosting/install/quickstart",
+                        text: "Quickstart script (Recommended)",
+                        link: "/self-hosting/installation/quickstart",
                     },
                     {
                         text: "Docker Compose",
-                        link: "/self-hosting/install/compose",
+                        link: "/self-hosting/installation/compose",
                     },
                     {
-                        text: "Manual Setup (Without Docker)",
-                        link: "/self-hosting/install/manual",
+                        text: "Manual setup (without Docker)",
+                        link: "/self-hosting/installation/manual",
                     },
                     {
-                        text: "Environment Variables and Defaults",
-                        link: "/self-hosting/install/env-var",
+                        text: "Environment variables and defaults",
+                        link: "/self-hosting/installation/env-var",
                     },
                     {
                         text: "Configuration",
-                        link: "/self-hosting/install/config",
+                        link: "/self-hosting/installation/config",
                     },
                     {
-                        text: "Post-installation Steps",
-                        link: "/self-hosting/install/post-install/",
+                        text: "Post-installation steps",
+                        link: "/self-hosting/installation/post-install/",
                     },
                     {
-                        text: "Upgrade",
-                        link: "/self-hosting/install/upgrade/",
+                        text: "Upgradation",
+                        link: "/self-hosting/installation/upgradation",
                     }
 
                 ],
@@ -290,15 +290,15 @@ export const sidebar = [
                 collapsed: true,
                 items: [
                     {
-                        text: "User Management",
+                        text: "User management",
                         link: "/self-hosting/administration/users",
                     },
                     {
-                        text: "Reverse Proxy",
+                        text: "Reverse proxy",
                         link: "/self-hosting/administration/reverse-proxy",
                     },
                     {
-                        text: "Object Storage",
+                        text: "Object storage",
                         link: "/self-hosting/administration/object-storage",
                     },
                     {
@@ -306,19 +306,19 @@ export const sidebar = [
                         link: "/self-hosting/administration/cli",
                     },
                     {
-                        text: "Backup and Restore",
+                        text: "Backup",
                         link: "/self-hosting/administration/backup",
                     },
 
                 ],
             },
             {
-                text: "Developer",
+                text: "Development",
                 collapsed: true,
                 items: [
                     {
                         text: "Building mobile apps",
-                        link: "/self-hosting/developer/mobile-build"
+                        link: "/self-hosting/development/mobile-build"
                     }
                 ]
             },

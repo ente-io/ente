@@ -1,9 +1,9 @@
 ---
-title: Get Started - Self-hosting
+title: Quickstart - Self-hosting
 description: Getting started with self-hosting Ente
 ---
 
-# Get Started
+# Quickstart
 
 If you're looking to spin up Ente on your server for preserving those
 sweet memories or using Auth for 2FA codes, you are in the right place!
@@ -21,7 +21,7 @@ ways of self-hosting Ente on your server as described in the documentation.
 - [Docker Compose](https://docs.docker.com/compose/)
 
 > For more details, check out the
-> [requirements page](/self-hosting/install/requirements).
+> [requirements page](/self-hosting/installation/requirements).
 
 ## Set up the server
 
@@ -42,8 +42,6 @@ directory, prompts to start the cluster with needed containers after pulling the
 
 ## Try the web app
 
-The first user to be registered will be treated as the admin user.
-
 Open Ente Photos web app at `http://<machine-ip>:3000` (or `http://localhost:3000` if
 using on same local machine) and select **Don't have an account?** to create a
 new user.
@@ -54,8 +52,7 @@ Follow the prompts to sign up.
 
 ![Sign Up Page](/sign-up.png)
 
-You will be prompted to enter verification code. Check the cluster logs using
-`sudo docker compose logs` and enter the same.
+You will be prompted to enter verification code. Check the cluster logs using `sudo docker compose logs` and enter the same.
 
 ![Verification Code](/otp.png)
 
@@ -65,33 +62,13 @@ Alternatively, if using Ente Auth, get started by adding an account (assuming yo
 
 ## Try the mobile app
 
-### Install the Mobile App
+You can install Ente Photos from [here](/photos/faq/installing) and Ente Auth from [here](/auth/faq/installing).
 
-You can install Ente Photos by following the [installation section](/photos/faq/installing).
-
-Alternatively, you can install Ente Auth (if you are planning to use Auth) by following the [installation section](/auth/faq/installing).
-
-### Login to the Mobile App
-
-Tap the onboarding screen 7 times to modify developer settings.
-
-<center>
-<img src="/developer-settings.png" alt="Developer Settings" height="50%" width="50%" />
-</center>
-
-<br>
-Enter your Ente server's endpoint.
-<br>
-
-<center>
-<img src="/developer-settings-endpoint.png" alt="Developer Settings - Server Endpoint" height="50%" width="50%" />
-</center>
-
-You should be able to access the uploaded picture from the web user interface.
+Connect to your server from [mobile apps](/self-hosting/installation/post-install/#step-6-configure-apps-to-use-your-server).
 
 ## What next?
 
-Now that you have spinned up a cluster in quick manner, you may wish to install using a different way for your needs. Check the "Install" section for information regarding that.
+Now that you have spinned up a cluster in quick manner, you may wish to install using a different way for your needs. Check the "Installation" section for information regarding that.
 
 You can import your pictures from Google Takeout or from other services to Ente Photos. For more information, check out our [migration guide](/photos/migration/).
 

@@ -1,5 +1,5 @@
 ---
-title: Docker Compose
+title: Docker Compose - Self-hosting
 description: Running Ente with Docker Compose from source
 ---
 
@@ -9,8 +9,7 @@ If you wish to run Ente via Docker Compose from source, do the following:
 
 ## Requirements
 
-Check out the [requirements](/self-hosting/install/requirements) page to get
-started.
+Check out the [requirements](/self-hosting/installation/requirements) page to get started.
 
 ## Step 1: Clone the repository
 
@@ -51,5 +50,5 @@ docker compose up --build
 This builds Museum and web applications based on the Dockerfile and starts the containers needed for Ente.
 
 ::: tip
-Check out [post-installation steps](/self-hosting/install/post-install/) for further usage.
+Check out [post-installation steps](/self-hosting/installation/post-install/) for further usage.
 :::

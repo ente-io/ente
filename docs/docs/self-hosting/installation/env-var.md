@@ -1,11 +1,11 @@
 ---
-title: "Environment Variables and Defaults - Self-hosting"
+title: Environment variables and defaults - Self-hosting
 description:
     "Information about all the configuration variables needed to run Ente along
     with description on default configuration"
 ---
 
-# Environment Variables and Defaults
+# Environment variables and defaults
 
 The environment variables needed for running Ente and the default configuration are
 documented below:

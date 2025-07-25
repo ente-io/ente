@@ -1,5 +1,5 @@
 ---
-title: General troubleshooting cases
+title: General troubleshooting cases - Self-hosting
 description: Fixing various errors when trying to self host Ente
 ---
 

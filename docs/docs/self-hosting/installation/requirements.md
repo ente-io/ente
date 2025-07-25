@@ -1,5 +1,5 @@
 ---
-title: Requirements
+title: Requirements - Self-hosting
 description: Requirements for self-hosting Ente
 ---
 

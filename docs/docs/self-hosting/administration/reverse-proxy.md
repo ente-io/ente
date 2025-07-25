@@ -1,5 +1,5 @@
 ---
-Title: Configuring Reverse Proxy
+Title: Configuring Reverse Proxy - Self-hosting
 Description: Configuring reverse proxy for Museum and other services
 ---
 
