@@ -223,6 +223,7 @@ class _CustomScrollBarState extends State<CustomScrollBar> {
             padding: EdgeInsets.only(
               bottom: widget.bottomPadding.value,
               top: widget.topPadding,
+              right: 4,
             ),
           ),
           child: ScrollbarWithUseNotifer(
@@ -232,8 +233,8 @@ class _CustomScrollBarState extends State<CustomScrollBar> {
             inUseNotifier: widget.inUseNotifier,
             minScrollbarLength: _kScrollbarMinLength,
             showThumb: _showThumb,
-            // radius: const Radius.circular(4),
-            // thickness: 8,
+            radius: const Radius.circular(4),
+            thickness: 8,
             child: widget.child,
           ),
         ),
