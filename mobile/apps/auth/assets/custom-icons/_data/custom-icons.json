@@ -1307,6 +1307,15 @@
       "slug": "startmail"
     },
     {
+      "title": "Stripchat",
+      "slug": "stripchat",
+      "altNames": [
+        "Strip Chat",
+        "stripchat.com",
+        "StripChat Live"
+      ]
+    },
+    {
       "title": "STRATO",
       "hex": "FF8800"
     },
