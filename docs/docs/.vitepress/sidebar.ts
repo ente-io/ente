@@ -267,7 +267,7 @@ export const sidebar = [
                         link: "/self-hosting/install/without-docker",
                     },
                     {
-                        text: "Environment Variable and Defaults",
+                        text: "Environment Variables and Defaults",
                         link: "/self-hosting/install/env-var",
                     },
                     {
@@ -275,7 +275,7 @@ export const sidebar = [
                         link: "/self-hosting/install/config-file",
                     },
                     {
-                        text: "Post Installation",
+                        text: "Post-installation Steps",
                         link: "/self-hosting/install/post-install/",
                     }
                 ],
@@ -289,8 +289,8 @@ export const sidebar = [
                         link: "/self-hosting/administration/museum",
                     },
                     {
-                        text: "Configuring S3",
-                        link: "/self-hosting/administration/configuring-s3",
+                        text: "Configuring Object Storage",
+                        link: "/self-hosting/administration/object-storage",
                     },
                     {
                         text: "Reverse proxy",
@@ -314,16 +314,22 @@ export const sidebar = [
                 ]
             },
             {
+                text: "Community Guides",
+                collapsed: true,
+                items: [
+                    {
+                        text: "Ente via Tailscale",
+                        link: "/self-hosting/guides/tailscale",
+                    },
+                ],
+            },
+            {
                 text: "Troubleshooting",
                 collapsed: true,
                 items: [
                     {
                         text: "General",
                         link: "/self-hosting/troubleshooting/misc",
-                    },
-                    {
-                        text: "Bucket CORS",
-                        link: "/self-hosting/troubleshooting/bucket-cors",
                     },
                     {
                         text: "Uploads",
@@ -335,24 +341,6 @@ export const sidebar = [
                     },
                 ],
             },
-            {
-                text: "Community Guides",
-                collapsed: true,
-                items: [
-                    {
-                        text: "Ente via Tailscale",
-                        link: "/self-hosting/guides/tailscale",
-                    },
-                    {
-                        text: "Ente with External S3",
-                        link: "/self-hosting/guides/external-s3",
-                    },
-                ],
-            },
-            {
-                text: "FAQ",
-                link: "/self-hosting/faq/",
-            }
         ],
     },
 ];

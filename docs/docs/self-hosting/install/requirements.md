@@ -24,7 +24,7 @@ lightweight Go binary, since most of the intensive computational tasks are done 
 
 > [!NOTE]
 > 
-> Ente requires **Docker Compose version 2.25 or higher**.
+> Ente requires **Docker Compose version 2.30 or higher**.
 >
 > Furthermore, Ente uses the command `docker compose`, `docker-compose` is no
 > longer supported.

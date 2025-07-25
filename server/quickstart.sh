@@ -159,13 +159,6 @@ printf " \033[1;32mN\033[0m   Created \033[1mcompose.yaml\033[0m\n"
 sleep 1
 
 cat <<EOF >museum.yaml
-key:
-      encryption: $museum_key
-      hash: $museum_hash
-
-jwt:
-      secret: $museum_jwt_secret
-
 db:
       host: postgres
       port: 5432
@@ -194,6 +187,23 @@ s3:
          endpoint: localhost:3200
          region: eu-central-2
          bucket: scw-eu-fr-v3
+
+# Specify the base endpoints for various web apps
+apps:
+    # If you're running a self hosted instance and wish to serve public links,
+    # set this to the URL where your albums web app is running.
+    public-albums: http://localhost:3002
+    cast: http://localhost:3004
+    # Set this to the URL where your accounts web app is running, primarily used for
+    # passkey based 2FA.
+    accounts: http://localhost:3001
+
+key:
+      encryption: $museum_key
+      hash: $museum_hash
+
+jwt:
+      secret: $museum_jwt_secret
 EOF
 
 printf " \033[1;32mT\033[0m   Created \033[1mmuseum.yaml\033[0m\n"

@@ -7,9 +7,14 @@ description: Running Ente with Docker Compose from source
 
 If you wish to run Ente via Docker Compose from source, do the following:
 
+## Requirements
+
+Check out the [requirements](/self-hosting/install/requirements) page to get
+started.
+
 ## Step 1: Clone the repository
 
-Clone the repository to a prefered directory. Change into the `server/config` directory inside the cloned repository, where the compose file for running the cluster is present.
+Clone the repository. Change into the `server/config` directory of the repository, where the Compose file for running the cluster is present.
 
 Run the following command for the same:
 
@@ -37,10 +42,14 @@ Change the values present in `.env` file along with `museum.yaml` file according
 
 ## Step 3: Start the cluster
 
-Now you can start the cluster by running the following command:
+Start the cluster by running the following command:
 
 ```sh
 docker compose up --build
 ```
 
 This builds Museum and web applications based on the Dockerfile and starts the containers needed for Ente.
+
+::: tip
+Check out [post-installation steps](/self-hosting/install/post-install) for further usage.
+:::

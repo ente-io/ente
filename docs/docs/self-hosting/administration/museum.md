@@ -53,7 +53,6 @@ apps:
     public-albums: https://albums.myente.xyz
     cast: https://cast.myente.xyz
     accounts: https://accounts.myente.xyz
-    family: https://family.myente.xyz
 ```
 
 > [!IMPORTANT] By default, all the values redirect to our publicly hosted
@@ -70,4 +69,4 @@ stop all the Docker containers with `docker compose down` and restart them with
 Similarly, you can use the default
 [`local.yaml`](https://github.com/ente-io/ente/tree/main/server/configurations/local.yaml)
 as a reference for building a functioning `museum.yaml` for many other
-functionalities like SMTP, Discord notifications, Hardcoded-OTTs, etc.
+functionalities like SMTP, Hardcoded-OTTs, etc.

@@ -7,7 +7,7 @@ description: Installing and setting up Ente without Docker
 
 If you wish to run Ente from source without using Docker, follow the steps described below:
 
-## Pre-requisites
+## Requirements
 
 1. **Go:** Install Go on your system. This is needed for building Museum (Ente's server)
     
@@ -26,57 +26,170 @@ If you wish to run Ente from source without using Docker, follow the steps descr
     sudo apt install libsodium23 libsodium-dev
     ```
 
+    Start the database using `systemd` automatically when the system starts.
+    ``` shell
+    sudo systemctl enable postgresql
+    sudo systemctl start postgresql
+    ```
+
+    Ensure the database is running using
+
+    ``` shell
+    sudo systemctl status postgresql
+    ```
 3. **`pkg-config`:** Install `pkg-config` for dependency handling.
     
     ``` shell
     sudo apt install pkg-config
     ```
+4. **yarn, npm and Node.js:** Needed for building the web application.
 
-Start the database using `systemd` automatically when the system starts.
+    Install npm and Node using your package manager.
+
+    ``` shell
+    sudo apt install npm nodejs
+    ```
+
+    Install yarn by following the [official documentation](https://yarnpkg.com/getting-started/install)
+
+5. **Git:** Needed for cloning the repository and pulling in latest changes
+
+6. **Caddy:** Used for setting reverse proxy and file servers
+
+7. **Object Storage:** Ensure you have an object storage configured for usage,
+    needed for storing files. You can choose to run MinIO or Garage locally
+    without Docker, however, an external bucket will be reliable and suited
+    for long-term storage.
+
+## Step 1: Clone the repository
+
+Start by cloning Ente's repository from GitHub to your local machine.
+
 ``` shell
-sudo systemctl enable postgresql
-sudo systemctl start postgresql
-```
-
-Ensure the database is running using
-
-``` shell
-sudo systemctl status postgresql
-```
-
-### Create user
-
-```sh
-sudo useradd postgres
-```
-
-## Start Museum
-
-Start by cloning ente to your system.
-
-```sh
 git clone https://github.com/ente-io/ente
 ```
 
-```sh
-export ENTE_DB_USER=postgres
-cd ente/server
-go run cmd/museum/main.go
-```
+## Step 2: Configure Museum (Ente's server)
 
-You can also add the export line to your shell's RC file, to avoid exporting the environment variable every time.
+1. Install all the needed dependencies for the server.
+    ``` shell
+    # Change into server directory, where the source code for Museum is
+    # present inside the repo
+    cd ente/server
 
-## Museum as a background service
+    # Install the needed dependencies
+    go mod tidy
+    ```
 
-Please check the below links if you want to run Museum as a service, both of
-them are battle tested.
+2. Build the server. The server binary should be available as `./main`
+relative to `server` directory
 
-1. [How to run museum as a systemd service](https://gist.github.com/mngshm/a0edb097c91d1dc45aeed755af310323)
-2. [Museum.service](https://github.com/ente-io/ente/blob/23e678889189157ecc389c258267685934b83631/server/scripts/deploy/museum.service#L4)
+    ``` shell
+    go build cmd/museum/main.go
+    ```
 
-Once you are done with setting and running Museum, all you are left to do is run
-the web app and reverse_proxy it with a webserver. You can check the following
-resources for Deploying your web app.
+3. Create `museum.yaml` file inside `server` for configuring the needed variables.
+    You can copy the templated configuration file for editing with ease.
 
-1. [Hosting the Web App](https://help.ente.io/self-hosting/guides/web-app).
-2. [Running Ente Web app as a systemd Service](https://gist.github.com/mngshm/72e32bd483c2129621ed0d74412492fd)
+    ``` shell
+    cp config/example.yaml ./museum.yaml    
+    ```
+
+4. Run the server
+
+    ``` shell
+    ./main
+    ```
+    
+    Museum should be accessible at `http://localhost:8080`
+
+## Step 3: Configure Web Application
+
+1. Install the dependencies for web application. Enable corepack if prompted.
+    
+    ``` shell
+    # Change into web directory, this is where all the applications
+    # will be managed and built
+    cd web
+
+    # Install dependencies
+    yarn install
+    ```
+
+2. Configure the environment variables in your corresponding shell's configuration file 
+    (`.bashrc`, `.zshrc`)
+    ``` shell
+    # Replace this with actual endpoint for Museum
+    export NEXT_PUBLIC_ENTE_ENDPOINT=http://localhost:8080
+    # Replace this with actual endpoint for Albums
+    export NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT=http://localhost:3002
+    ```
+3. Build the needed applications (Photos, Accounts, Auth, Cast) as per your needs:
+    ```shell
+    # These commands are executed inside web directory
+    # Build photos. Build output to be served is present at apps/photos/out
+    yarn build
+
+    # Build accounts. Build output to be served is present at apps/accounts/out
+    yarn build:accounts
+
+    # Build auth. Build output to be served is present at apps/auth/out
+    yarn build:auth
+
+    # Build cast. Build output to be served is present at apps/cast/out
+    yarn build:cast
+    ```
+
+4. Copy the output files to `/var/www/ente/apps` for easier management.
+    ``` shell
+    mkdir -p /var/www/ente/apps
+    
+    # Photos
+    sudo cp -r apps/photos/out /var/www/ente/apps/photos
+    # Accounts
+    sudo cp -r apps/accounts/out /var/www/ente/apps/accounts
+    # Auth
+    sudo cp -r apps/auth/out /var/www/ente/apps/auth
+    # Cast
+    sudo cp -r apps/cast/out /var/www/ente/apps/cast
+    ```
+
+4. Set up file server using Caddy by editing `Caddyfile`, present at `/etc/caddy/Caddyfile`.
+    ``` groovy
+    # Replace the ports with domain names if you have subdomains configured and need HTTPS
+    :3000 {
+        root * /var/www/ente/apps/out/photos
+        file_server
+        try_files {path} {path}.html /index.html
+    }
+
+    :3001 {
+        root * /var/www/ente/apps/out/accounts
+        file_server
+        try_files {path} {path}.html /index.html
+    }
+
+    :3002 {
+        root * /var/www/ente/apps/out/photos
+        file_server
+        try_files {path} {path}.html /index.html
+    }
+
+    :3003 {
+        root * /var/www/ente/apps/out/auth
+        file_server
+        try_files {path} {path}.html /index.html
+    }
+
+    :3004 {
+        root * /var/www/ente/apps/out/cast
+        file_server
+        try_files {path} {path}.html /index.html
+    }
+    ```
+
+    The web application for Ente Photos should be accessible at http://localhost:3000, check out the [default ports](/self-hosting/install/env-var#ports) for more information.
+
+::: tip
+Check out [post-installation steps](/self-hosting/install/post-install) for further usage.
+:::

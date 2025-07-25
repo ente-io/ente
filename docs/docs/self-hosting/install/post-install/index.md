@@ -9,7 +9,7 @@ A list of steps that should be done after installing Ente are described below:
 
 ## Step 1: Creating first user
 
-The first user to be created will be treated as an admin user.
+The first user (and the only user) to be created will be treated as an admin user by default.
 
 Once Ente is up and running, the Ente Photos web app will be accessible on
 `http://localhost:3000`. Open this URL in your browser and proceed with creating
@@ -28,10 +28,11 @@ sudo docker compose logs
 
 ![otp](/otp.png)
 
+## Step 2: Download mobile and desktop app
+
 ## Step 2: Configure apps to use your server
 
-You can modify various Ente client apps and CLI to connect to a self hosted
-custom server endpoint.
+You can modify Ente mobile apps and CLI to connect to your server.
 
 ### Mobile
 
@@ -43,7 +44,7 @@ configure the endpoint the app should be connecting to.
 
 ![Setting a custom server on the onboarding screen](custom-server.png)
 
-### Desktop and web
+### Desktop
 
 Same as the mobile app, you can tap 7 times on the onboarding screen to
 configure the endpoint the app should connect to.
@@ -54,21 +55,6 @@ configure the endpoint the app should connect to.
 apps](web-dev-settings.png){width=400px}
 
 </div>
-
-This works on both the desktop app and web app (if you deploy on your own).
-
-To make it easier to identify when a custom server is being used, app will
-thereafter show the endpoint in use (if not Ente's production server) at the
-bottom of the login prompt:
-
-![Custom server indicator on the onboarding screen](web-custom-endpoint-indicator.png)
-
-Similarly, it'll be shown at other screens during the login flow. After login,
-you can also see it at the bottom of the sidebar.
-
-Note that the custom server configured this way is cleared when you reset the
-state during logout. In particular, the app also does a reset when you press the
-change email button during the login flow.
 
 ## Step 3: Configure Ente CLI
 

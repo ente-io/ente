@@ -6,7 +6,7 @@ description: Getting started with self-hosting Ente
 # Get Started
 
 If you're looking to spin up Ente on your server for preserving those
-sweet memories, you are in the right place!
+sweet memories or using Auth for 2FA codes, you are in the right place!
 
 Our entire source code ([including the server](https://ente.io/blog/open-sourcing-our-server/))
 is open source. This is the same code we use on production.
@@ -96,7 +96,6 @@ Now that you have spinned up a cluster in quick manner, you may wish to install 
 You can import your pictures from Google Takeout or from other services to Ente Photos. For more information, check out our [migration guide](/photos/migration/).
 
 You can import your codes from other authenticator providers to Ente Auth. Check out the [migration guide](/auth/migration/) for more information.
-
 
 ## Queries?
 

@@ -17,16 +17,6 @@ It is also suggested that the user setups bucket CORS or global CORS on MinIO or
 any external S3 service provider they are connecting to. To setup bucket CORS,
 please [read this](/self-hosting/troubleshooting/bucket-cors).
 
-## What is S3 and how is it incorporated in Ente ?
-
-S3 is an cloud storage protocol made by Amazon (specifically AWS). S3 is
-designed to store files and data as objects inside buckets and it is mostly used
-for online backups and storing different types of files.
-
-Ente's Docker setup is shipped with [MinIO](https://min.io/) as its default S3
-provider. MinIO supports the Amazon S3 protocol and leverages your disk storage
-to dump all the uploaded files as encrypted object blobs.
-
 ## 403 Forbidden
 
 If museum is able to make a network connection to your S3 bucket but uploads are
