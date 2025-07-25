@@ -22,10 +22,10 @@ endpoint:
     api: http://localhost:8080
 ```
 
-## Step 2: Whitelist admin user
+## Step 2: Whitelist admins
 
-You can whitelist administrator user by following this
-[guide](/self-hosting/administration/users#whitelist-admins)
+You can whitelist administrator users by following this
+[guide](/self-hosting/administration/users#whitelist-admins).
 
 ## Step 3: Add an account
 

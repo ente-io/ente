@@ -5,15 +5,12 @@ description: Getting started with self-hosting Ente
 
 # Quickstart
 
-If you're looking to spin up Ente on your server for preserving those
-sweet memories or using Auth for 2FA codes, you are in the right place!
+If you're looking to spin up Ente on your server , you are in the right place!
 
 Our entire source code ([including the server](https://ente.io/blog/open-sourcing-our-server/))
 is open source. This is the same code we use on production.
 
-For a quick preview of Ente on your server, make sure your system meets the
-requirements mentioned below. After trying the preview, you can explore other
-ways of self-hosting Ente on your server as described in the documentation.
+For a quick preview, make sure your system meets the requirements mentioned below. After trying the preview, you can explore other ways of self-hosting Ente on your server as described in the documentation.
 
 ## Requirements
 

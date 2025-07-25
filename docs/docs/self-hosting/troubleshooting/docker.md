@@ -45,15 +45,12 @@ minio-provision:
     entrypoint: |
         sh -c '
         #!/bin/sh
-
         while ! mc alias set h0 http://minio:3200 your_minio_user your_minio_pass
         do
           echo "waiting for minio..."
           sleep 0.5
         done
-
         cd /data
-
         mc mb -p b2-eu-cen
         mc mb -p wasabi-eu-central-2-v3
         mc mb -p scw-eu-fr-v3
@@ -162,15 +159,12 @@ Thus the updated `post_start` will look as follows for `minio` service:
         - command: |
             sh -c '
             #!/bin/sh
-
             while ! mc alias set h0 http://minio:3200 your_minio_user your_minio_pass 2>/dev/null
             do
                 echo "Waiting for minio..."
                 sleep 0.5
             done
-
             cd /data
-
             mc mb -p b2-eu-cen
             mc mb -p wasabi-eu-central-2-v3
             mc mb -p scw-eu-fr-v3

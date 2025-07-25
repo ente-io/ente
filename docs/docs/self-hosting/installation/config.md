@@ -100,8 +100,7 @@ your provider's credentials, and set `are_local_buckets` to `false`.
 MinIO uses the port `3200` for API Endpoints. Web Console can be accessed at
 http://localhost:3201 by enabling port `3201` in the Compose file.
 
-If you face any issues related to uploads then checkout [Troubleshooting bucket
-CORS] and [Frequently encountered S3 errors].
+If you face any issues related to uploads then check out [CORS](/self-hosting/administration/object-storage#cors-cross-origin-resource-sharing) and [troubleshooting](/self-hosting/troubleshooting/uploads) sections.
 
 | Variable                               | Description                                  | Default |
 | -------------------------------------- | -------------------------------------------- | ------- |

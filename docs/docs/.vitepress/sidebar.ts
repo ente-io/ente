@@ -331,7 +331,7 @@ export const sidebar = [
                         link: "/self-hosting/guides/tailscale",
                     },
                     {
-                        text: "Running Ente with systemd",
+                        text: "Running Ente using systemd",
                         link: "/self-hosting/guides/systemd",
                     },
                 ],

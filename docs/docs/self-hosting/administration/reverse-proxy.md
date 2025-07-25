@@ -25,15 +25,12 @@ although you can use other alternatives such as NGINX, Traefik, etc.
     sudo apt install caddy
     ```
 
-    Start the service, enable it to start upon system boot and reload when configuration
-    has changed.
+    Start the service and enable it to start upon system boot.
 
     ``` shell
     sudo systemctl start caddy
 
     sudo systemctl enable caddy
-
-    sudo systemctl reload caddy
     ```
 
 ## Step 1: Configure A or AAAA records
@@ -54,7 +51,7 @@ After installing Caddy, `Caddyfile` is created at
 
 You can edit the minimal configuration provided below for your own needs.
 
-> yourdomain.tld is an example. Replace it with your own domain
+> yourdomain.tld is an example. Replace it with your own domain.
 
 ```groovy
 # For Museum
@@ -90,7 +87,7 @@ cast.ente.yourdomain.tld {
 
 ## Step 3: Reload reverse proxy
 
-Reload Caddy for changes to take effect
+Reload Caddy for changes to take effect.
 
 ``` shell
 sudo systemctl caddy reload
