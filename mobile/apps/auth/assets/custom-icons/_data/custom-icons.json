@@ -436,7 +436,7 @@
       "title": "emeritihealth",
       "altNames": [
         "Emeriti Health",
-        "Emeriti Retirement Health",
+        "Emeriti Retirement Health"
       ]
     },
     {
@@ -1318,6 +1318,9 @@
       ]
     },
     {
+      "title": "Tableau"
+    },
+    {
       "title": "TCPShield"
     },
     {
@@ -1525,6 +1528,12 @@
     },
     {
       "title": "WYZE"
+    },
+    {
+      "title": "X",
+      "altNames": [
+        "Twitter"
+      ]
     },
     {
       "title": "Xbox",
