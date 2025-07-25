@@ -106,7 +106,7 @@ Ente Auth offers various import and export options for your codes.
 - **Import:** Import codes from various other authentication apps.
 
 For detailed instructions, refer to the
-[migration guides](../migration-guides/).
+[migration guides](../migration/).
 
 ### Deduplicate codes
 

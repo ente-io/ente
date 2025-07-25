@@ -6,7 +6,7 @@ description: >
 
 # Welcome!
 
-![Ducky: Ente's Mascot](/public/ducky.png){width=50% style="margin: 0 auto"}
+![Ducky: Ente's Mascot](/ducky.png){width=50% style="margin: 0 auto"}
 
 ## Introduction
 
@@ -19,8 +19,8 @@ have been developed and made available for mobile, web and desktop, namely:
 
 ## History
 
-Ente was the founded by Vishnu Mohandas (he's also Ente's CEO) in response to
-privacy concerns with major tech companies. The underlying motivation was the
+Ente was the founded by Vishnu Mohandas (Ente's CEO) in response to privacy
+concerns with major tech companies. The underlying motivation was the
 understanding that big tech had no incentive to fix their act, but with
 end-to-end encrypted cross platform apps, there was a way for people to take
 back control over their own data without sacrificing on features.
