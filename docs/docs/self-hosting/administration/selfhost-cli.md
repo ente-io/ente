@@ -3,18 +3,21 @@ title: CLI for Self Hosted Instance
 description: Guide to configuring Ente CLI for Self Hosted Instance
 ---
 
-## Self Hosting
+# Ente CLI for self-hosted instance
 
-If you are self-hosting the server, you can still configure CLI to export data &
-perform basic admin actions.
+If you are self-hosting, you can configure CLI to export data &
+perform basic administrative actions.
 
-To do this, first configure the CLI to point to your server. Define a
-config.yaml and put it either in the same directory as CLI binary or path
-defined in env variable `ENTE_CLI_CONFIG_DIR`
+## Step 1: Configure endpoint
 
-```yaml
+To do this, first configure the CLI to use your server's endpoint.
+
+Define `config.yaml` and place it in `~/.ente/` directory or directory
+specified by `ENTE_CLI_CONFIG_DIR` or CLI's directory.
+
+``` yaml
 endpoint:
-    api: "http://localhost:8080"
+    api: http://localhost:8080
 ```
 
 You should be able to
@@ -24,7 +27,7 @@ and subsequently increase the
 using the CLI.
 
 For administrative actions, you first need to whitelist admin users.
-You can create `server/museum.yaml`, and whitelist add the admin userID `internal.admins`. See
+You can create `server/museum.yaml`, and whitelist add the admin user ID `internal.admins`. See
 [local.yaml](https://github.com/ente-io/ente/blob/main/server/configurations/local.yaml#L211C1-L232C1)
 in the server source code for details about how to define this.
 
@@ -35,5 +38,5 @@ command to find the user id of any account.
 ```yaml
 internal:
     admins:
-        # - 1580559962386440
+        - 1580559962386440
 ```

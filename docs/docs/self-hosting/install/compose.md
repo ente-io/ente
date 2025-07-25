@@ -51,5 +51,5 @@ docker compose up --build
 This builds Museum and web applications based on the Dockerfile and starts the containers needed for Ente.
 
 ::: tip
-Check out [post-installation steps](/self-hosting/install/post-install) for further usage.
+Check out [post-installation steps](/self-hosting/install/post-install/) for further usage.
 :::

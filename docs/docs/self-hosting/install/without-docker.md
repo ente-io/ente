@@ -191,5 +191,5 @@ relative to `server` directory
     The web application for Ente Photos should be accessible at http://localhost:3000, check out the [default ports](/self-hosting/install/env-var#ports) for more information.
 
 ::: tip
-Check out [post-installation steps](/self-hosting/install/post-install) for further usage.
+Check out [post-installation steps](/self-hosting/install/post-install/) for further usage.
 :::

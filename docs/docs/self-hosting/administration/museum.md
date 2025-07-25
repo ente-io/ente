@@ -37,7 +37,7 @@ MinIO uses the port `3200` for API Endpoints and their web app runs over
 browser.
 
 If you face any issues related to uploads then checkout
-[Troubleshooting bucket CORS](/self-hosting/troubleshooting/bucket-cors) and
+[Troubleshooting bucket CORS] and
 [Frequently encountered S3 errors].
 
 ## Web apps

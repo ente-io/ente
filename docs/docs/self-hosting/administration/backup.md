@@ -22,15 +22,15 @@ At the minimum, a functional Ente backend needs three things:
 When thinking about backups, this translates into backing up the relevant state
 from each of these:
 
-1. For museum, you'd want to backup your `museum.yaml`, `credentials.yaml` or
+1. For Museum, you'd want to backup your `museum.yaml`, `credentials.yaml` or
    any other custom configuration that you created. In particular, you should
    backup the
    [secrets that are specific to your instance](https://github.com/ente-io/ente/blob/74377a93d8e20e969d9a2531f32f577b5f0ef090/server/configurations/local.yaml#L188)
    (`key.encryption`, `key.hash` and `jwt.secret`).
 
-2. For postgres, the entire data volume needs to be backed up.
+2. For PostgreSQL, the entire data volume needs to be backed up.
 
-3. For object storage, the entire data volume needs to be backed up.
+3. For Object Storage, the entire data volume needs to be backed up.
 
 A common oversight is taking a lot of care for backing up the object storage,
 even going as far as enabling replication and backing up the the multiple object
@@ -56,8 +56,7 @@ keeping a plaintext backup of your photos.
 [You can use the CLI or the desktop app to automate this](/photos/faq/export).
 
 Once you get more comfortable with the various parts, you can try backing up
-your instance. As a reference,
-[this document outlines how Ente itself treats backups](https://ente.io/reliability).
+your instance.
 
 If you stop doing plaintext backups and instead rely on your instance backup,
 ensure that you do the full restore process also to verify you can get back your

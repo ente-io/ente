@@ -5,9 +5,13 @@ Description: Configuring reverse proxy for Museum and other services
 
 # Reverse proxy
 
-We highly recommend using HTTPS for Museum (`8080`). For security reasons, Museum
-will not accept incoming HTTP traffic.
+Configuring reverse proxy is a way to make the service accessible via the public
+Internet without exposing multiple ports for various services.
 
+It also allows configuration of HTTPS through SSL certificate management.
+
+We highly recommend using HTTPS for Museum (Ente's server). For security reasons, Museum
+will not accept incoming HTTP traffic.
 
 ## Pre-requisites
 
@@ -36,21 +40,22 @@ although you can use other alternatives such as NGINX, Traefik, etc.
 Set up the appropriate records for the endpoints in your DNS
 management dashboard (usually associated with your domain registrar).
 
-`A` or `AAAA` records targeting towards your server's IP address should
-be sufficient.
+`A` or `AAAA` records pointing to your server's IP address are sufficient.
+
+DNS propagation can take a few minutes to take effect.
 
 ![cloudflare](/cloudflare.png)
 
 ## Step 2: Configure reverse proxy
 
-Once Caddy is installed on system, a `Caddyfile` is created on the path
+After installing Caddy, a `Caddyfile` is created on the path
 `/etc/caddy/`. Edit `/etc/caddy/Caddyfile` to configure reverse proxies.
 
 Here is a ready-to-use configuration that can be used with your own domain.
 
-```groovy
-# yourdomain.tld is an example. Replace it with your own domain
+> yourdomain.tld is an example. Replace it with your own domain
 
+```groovy
 # For Museum
 api.ente.yourdomain.tld {
     reverse_proxy http://localhost:8080
@@ -80,14 +85,9 @@ auth.ente.yourdomain.tld {
 cast.ente.yourdomain.tld {
     reverse_proxy http://localhost:3004
 }
-
-# For Museum
-api.ente.yourdomain.tld {
-    reverse_proxy http://localhost:8080
-}
 ```
 
-## Step 3: Start reverse proxy
+## Step 3: Reload reverse proxy
 
 Reload Caddy for changes to take effect
 
@@ -95,7 +95,11 @@ Reload Caddy for changes to take effect
 sudo systemctl caddy reload
 ```
 
+## Step 4: Verify the setup
+
 Ente Photos web app should be up on https://web.ente.yourdomain.tld.
+
+Museum should be accessible at https://api.ente.yourdomain.tld.
 
 > [!TIP]
 > If you are using other reverse proxy servers such as NGINX,

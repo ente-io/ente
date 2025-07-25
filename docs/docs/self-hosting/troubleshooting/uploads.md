@@ -15,7 +15,7 @@ for any minor misconfigurations.
 
 It is also suggested that the user setups bucket CORS or global CORS on MinIO or
 any external S3 service provider they are connecting to. To setup bucket CORS,
-please [read this](/self-hosting/troubleshooting/bucket-cors).
+please [read this].
 
 ## 403 Forbidden
 

@@ -14,7 +14,7 @@ See the sidebar for existing guides. In particular:
   [configure custom server].
 
 - For various admin related tasks, e.g. increasing the storage quota on your
-  self hosted instance, see [administering your custom server](admin).
+  self hosted instance, see [administering your custom server].
 
 - For configuring your S3 buckets to get the object storage to work from your
   mobile device or for fixing an upload errors, see

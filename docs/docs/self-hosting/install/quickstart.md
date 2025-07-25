@@ -31,5 +31,5 @@ The data accessed by Museum is stored in `./data` folder inside `my-ente` direct
 It contains extra configuration files that is to be used (push notification credentials, etc.)
 
 ::: tip
-Check out [post-installations steps](/self-hosting/install/post-install) for further usage.
+Check out [post-installations steps](/self-hosting/install/post-install/) for further usage.
 :::
