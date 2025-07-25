@@ -29,6 +29,7 @@ import 'package:photos/services/collections_service.dart';
 import "package:photos/services/files_service.dart";
 import "package:photos/states/location_screen_state.dart";
 import "package:photos/theme/colors.dart";
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import "package:photos/ui/cast/auto.dart";
 import "package:photos/ui/cast/choose.dart";
@@ -539,6 +540,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             (value?[widget.collection!.id]?.personIDs.isEmpty ?? true)
                 ? "assets/auto-add-people.png"
                 : "assets/edit-auto-add-people.png",
+            color: EnteTheme.isDark(context) ? Colors.white : Colors.black,
           ),
         ),
       if (galleryType.canDelete())
@@ -621,7 +623,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                 collectionId: widget.collection!.id,
               ),
             );
-            setState(() {});
           } else if (value == AlbumPopupAction.freeUpSpace) {
             await _deleteBackedUpFiles(context);
           } else if (value == AlbumPopupAction.setCover) {

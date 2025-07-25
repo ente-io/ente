@@ -1,10 +1,12 @@
 import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
+import "package:photos/ui/collections/album/smart_album_people.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/viewer/gallery/hooks/add_photos_sheet.dart";
 import "package:photos/utils/dialog_util.dart";
+import "package:photos/utils/navigation_util.dart";
 
 class EmptyAlbumState extends StatelessWidget {
   final Collection c;
@@ -39,20 +41,48 @@ class EmptyAlbumState extends StatelessWidget {
                   child: Image.asset('assets/loading_photos_background.png'),
                 ),
               ),
-              Center(
-                child: ButtonWidget(
-                  buttonType: ButtonType.primary,
-                  buttonSize: ButtonSize.small,
-                  labelText: S.of(context).addPhotos,
-                  icon: Icons.add_photo_alternate_outlined,
-                  shouldSurfaceExecutionStates: false,
-                  onTap: () async {
-                    try {
-                      await showAddPhotosSheet(context, c);
-                    } catch (e) {
-                      await showGenericErrorDialog(context: context, error: e);
-                    }
-                  },
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    ButtonWidget(
+                      buttonType: ButtonType.primary,
+                      buttonSize: ButtonSize.large,
+                      labelText: S.of(context).addPhotos,
+                      icon: Icons.add_photo_alternate_outlined,
+                      shouldSurfaceExecutionStates: false,
+                      onTap: () async {
+                        try {
+                          await showAddPhotosSheet(context, c);
+                        } catch (e) {
+                          await showGenericErrorDialog(
+                            context: context,
+                            error: e,
+                          );
+                        }
+                      },
+                    ),
+                    SizedBox(height: 12),
+                    ButtonWidget(
+                      buttonType: ButtonType.neutral,
+                      buttonSize: ButtonSize.large,
+                      iconWidget: Image.asset(
+                        'assets/auto-add-people.png',
+                        width: 24,
+                        height: 24,
+                        color: isLightMode ? Colors.white : Colors.black,
+                      ),
+                      labelText: S.of(context).autoAddPeople,
+                      shouldSurfaceExecutionStates: false,
+                      onTap: () async {
+                        await routeToPage(
+                          context,
+                          SmartAlbumPeople(collectionId: c.id),
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ),
             ],
