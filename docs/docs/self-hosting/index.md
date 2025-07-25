@@ -31,8 +31,6 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente-io/ente/main/server/q
 The above command creates a directory `my-ente` in the current working
 directory, prompts to start the cluster with needed containers after pulling the images required to run Ente.
 
-![quickstart](/quickstart.png)
-
 > [!NOTE]
 > Make sure to modify the default values in `compose.yaml` and `museum.yaml`
 > if you wish to change endpoints, bucket configuration or server configuration.
@@ -40,16 +38,17 @@ directory, prompts to start the cluster with needed containers after pulling the
 ## Try the web app
 
 Open Ente Photos web app at `http://<machine-ip>:3000` (or `http://localhost:3000` if
-using on same local machine) and select **Don't have an account?** to create a
+using on same local machine). Select **Don't have an account?** to create a
 new user.
-
-![Onboarding Screen](/onboarding.png)
 
 Follow the prompts to sign up.
 
-![Sign Up Page](/sign-up.png)
+<div style="display: flex; gap: 10px;">
+  <img alt="Onboarding screen" src="/onboarding.png" style="width: 50%; height: auto;">
+  <img alt="Sign up page" src="/sign-up.png" style="width: 50%; height: auto;">
+</div>
 
-You will be prompted to enter verification code. Check the cluster logs using `sudo docker compose logs` and enter the same.
+Enter verification code by checking the cluster logs using `sudo docker compose logs`.
 
 ![Verification Code](/otp.png)
 
@@ -65,11 +64,11 @@ Connect to your server from [mobile apps](/self-hosting/installation/post-instal
 
 ## What next?
 
-Now that you have spinned up a cluster in quick manner, you may wish to install using a different way for your needs. Check the "Installation" section for information regarding that.
+You may wish to install using a different way for your needs. Check the "Installation" section for information regarding that.
 
-You can import your pictures from Google Takeout or from other services to Ente Photos. For more information, check out our [migration guide](/photos/migration/).
+You can import your pictures from Google Takeout or from other services to Ente Photos. For more information, check out our [migration guide](/photos/migration/) for more information.
 
-You can import your codes from other authenticator providers to Ente Auth. Check out the [migration guide](/auth/migration/) for more information.
+You can import your codes from other authenticator providers to Ente Auth. Check out our [migration guide](/auth/migration/) for more information.
 
 ## Queries?
 
