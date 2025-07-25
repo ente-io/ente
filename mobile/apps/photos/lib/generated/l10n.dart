@@ -12365,6 +12365,36 @@ class S {
       args: [],
     );
   }
+
+  /// `Add some photos or pick `
+  String get addSomePhotosDesc1 {
+    return Intl.message(
+      'Add some photos or pick ',
+      name: 'addSomePhotosDesc1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `familiar faces`
+  String get addSomePhotosDesc2 {
+    return Intl.message(
+      'familiar faces',
+      name: 'addSomePhotosDesc2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `\nto begin with`
+  String get addSomePhotosDesc3 {
+    return Intl.message(
+      '\nto begin with',
+      name: 'addSomePhotosDesc3',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

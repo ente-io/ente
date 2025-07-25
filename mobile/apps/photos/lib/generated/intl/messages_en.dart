@@ -380,6 +380,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "Add a people widget to your homescreen and come back here to customize."),
         "addPhotos": MessageLookupByLibrary.simpleMessage("Add photos"),
         "addSelected": MessageLookupByLibrary.simpleMessage("Add selected"),
+        "addSomePhotosDesc1":
+            MessageLookupByLibrary.simpleMessage("Add some photos or pick "),
+        "addSomePhotosDesc2":
+            MessageLookupByLibrary.simpleMessage("familiar faces"),
+        "addSomePhotosDesc3":
+            MessageLookupByLibrary.simpleMessage("\nto begin with"),
         "addToAlbum": MessageLookupByLibrary.simpleMessage("Add to album"),
         "addToEnte": MessageLookupByLibrary.simpleMessage("Add to Ente"),
         "addToHiddenAlbum":

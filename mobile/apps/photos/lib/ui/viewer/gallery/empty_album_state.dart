@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/album/smart_album_people.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
@@ -35,10 +36,36 @@ class EmptyAlbumState extends StatelessWidget {
           )
         : Stack(
             children: [
-              Center(
-                child: Opacity(
-                  opacity: 0.5,
-                  child: Image.asset('assets/loading_photos_background.png'),
+              SizedBox(
+                width: double.infinity,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      "assets/albums-widget-static.png",
+                      height: 160,
+                    ),
+                    const SizedBox(height: 16),
+                    Text.rich(
+                      TextSpan(
+                        text: S.of(context).addSomePhotosDesc1,
+                        children: [
+                          TextSpan(
+                            text: S.of(context).addSomePhotosDesc2,
+                            style: TextStyle(
+                              color: getEnteColorScheme(context).primary500,
+                            ),
+                          ),
+                          TextSpan(
+                            text: S.of(context).addSomePhotosDesc3,
+                          ),
+                        ],
+                      ),
+                      style: getEnteTextTheme(context).smallMuted,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 140),
+                  ],
                 ),
               ),
               Padding(
@@ -82,6 +109,7 @@ class EmptyAlbumState extends StatelessWidget {
                         );
                       },
                     ),
+                    const SizedBox(height: 48),
                   ],
                 ),
               ),
