@@ -64,7 +64,7 @@ class ImageEditorAppBar extends StatelessWidget implements PreferredSizeWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 12),
                 IconButton(
                   tooltip: 'Redo',
                   onPressed: () {
@@ -80,16 +80,27 @@ class ImageEditorAppBar extends StatelessWidget implements PreferredSizeWidget {
                 ),
               ],
             ),
-          TextButton(
-            onPressed: () {
-              done();
-            },
-            child: Text(
-              isMainEditor ? 'Save Copy' : 'Done',
-              style: getEnteTextTheme(context).body.copyWith(
-                    color:
-                        Theme.of(context).colorScheme.imageEditorPrimaryColor,
-                  ),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 250),
+            transitionBuilder: (child, animation) =>
+                FadeTransition(opacity: animation, child: child),
+            child: TextButton(
+              key: ValueKey(isMainEditor ? 'save_copy' : 'done'),
+              onPressed: done,
+              child: Text(
+                isMainEditor ? 'Save Copy' : 'Done',
+                style: getEnteTextTheme(context).body.copyWith(
+                      color: isMainEditor
+                          ? (enableUndo
+                              ? Theme.of(context)
+                                  .colorScheme
+                                  .imageEditorPrimaryColor
+                              : colorScheme.textMuted)
+                          : Theme.of(context)
+                              .colorScheme
+                              .imageEditorPrimaryColor,
+                    ),
+              ),
             ),
           ),
         ],

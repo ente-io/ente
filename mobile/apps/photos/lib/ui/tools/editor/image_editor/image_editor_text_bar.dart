@@ -206,32 +206,46 @@ class _BackgroundPickerWidget extends StatelessWidget {
     final backgroundStyles = {
       LayerBackgroundMode.background: {
         'text': 'Aa',
-        'backgroundColor': isLightMode ? colorScheme.fillFaint : Colors.white,
+        'selectedBackgroundColor':
+            isLightMode ? colorScheme.fillFaint : Colors.white,
+        'backgroundColor': colorScheme.backgroundElevated2,
         'border': null,
         'textColor': Colors.white,
-        'innerBackgroundColor': Colors.black,
+        'selectedInnerBackgroundColor': Colors.black,
+        'innerBackgroundColor': Colors.transparent,
       },
       LayerBackgroundMode.backgroundAndColor: {
         'text': 'Aa',
-        'backgroundColor': isLightMode ? colorScheme.fillFaint : Colors.white,
+        'selectedBackgroundColor':
+            isLightMode ? colorScheme.fillFaint : Colors.white,
+        'backgroundColor': colorScheme.backgroundElevated2,
         'border': null,
         'textColor': Colors.black,
+        'selectedInnerBackgroundColor': Colors.transparent,
         'innerBackgroundColor': Colors.transparent,
       },
       LayerBackgroundMode.backgroundAndColorWithOpacity: {
         'text': 'Aa',
-        'backgroundColor': isLightMode ? colorScheme.fillFaint : Colors.white,
+        'selectedBackgroundColor':
+            isLightMode ? colorScheme.fillFaint : Colors.white,
+        'backgroundColor': colorScheme.backgroundElevated2,
         'border': null,
         'textColor': Colors.black,
-        'innerBackgroundColor': Colors.black.withOpacity(0.11),
+        'selectedInnerBackgroundColor': Colors.black.withOpacity(0.11),
+        'innerBackgroundColor': isLightMode
+            ? Colors.black.withOpacity(0.11)
+            : Colors.white.withOpacity(0.11),
       },
       LayerBackgroundMode.onlyColor: {
         'text': 'Aa',
-        'backgroundColor': isLightMode ? colorScheme.fillFaint : Colors.black,
+        'selectedBackgroundColor':
+            isLightMode ? colorScheme.fillFaint : Colors.black,
+        'backgroundColor': colorScheme.backgroundElevated2,
         'border':
             isLightMode ? null : Border.all(color: Colors.white, width: 2),
         'textColor': Colors.black,
-        'innerBackgroundColor': Colors.white,
+        'selectedInnerBackgroundColor': Colors.white,
+        'innerBackgroundColor': Colors.white.withOpacity(0.6),
       },
     };
 
@@ -256,8 +270,8 @@ class _BackgroundPickerWidget extends StatelessWidget {
               child: Container(
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? style['backgroundColor'] as Color
-                      : colorScheme.backgroundElevated2,
+                      ? style['selectedBackgroundColor'] as Color
+                      : style['backgroundColor'] as Color,
                   borderRadius: BorderRadius.circular(25),
                   border: isSelected ? style['border'] as Border? : null,
                 ),
@@ -270,8 +284,8 @@ class _BackgroundPickerWidget extends StatelessWidget {
                         width: 22,
                         decoration: ShapeDecoration(
                           color: isSelected
-                              ? style['innerBackgroundColor'] as Color
-                              : colorScheme.backgroundElevated2,
+                              ? style['selectedInnerBackgroundColor'] as Color
+                              : style['innerBackgroundColor'] as Color,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(4),
                           ),
