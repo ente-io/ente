@@ -538,6 +538,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             (value?[widget.collection!.id]?.personIDs.isEmpty ?? true)
                 ? "assets/auto-add-people.png"
                 : "assets/edit-auto-add-people.png",
+            width: 20,
+            height: 20,
             color: EnteTheme.isDark(context) ? Colors.white : Colors.black,
           ),
         ),

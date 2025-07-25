@@ -70,31 +70,33 @@ class MLService {
     _logger.info("client: $client");
 
     // Listen on ComputeController
-    Bus.instance.on<ComputeControlEvent>().listen((event) {
-      if (!flagService.hasGrantedMLConsent) {
-        return;
-      }
+    if (!isProcessBg) {
+      Bus.instance.on<ComputeControlEvent>().listen((event) {
+        if (!flagService.hasGrantedMLConsent) {
+          return;
+        }
 
-      _mlControllerStatus = event.shouldRun;
-      if (_mlControllerStatus) {
-        if (_shouldPauseIndexingAndClustering) {
-          _cancelPauseIndexingAndClustering();
-          _logger.info(
-            "MLController allowed running ML, faces indexing undoing previous pause",
-          );
+        _mlControllerStatus = event.shouldRun;
+        if (_mlControllerStatus) {
+          if (_shouldPauseIndexingAndClustering) {
+            _cancelPauseIndexingAndClustering();
+            _logger.info(
+              "MLController allowed running ML, faces indexing undoing previous pause",
+            );
+          } else {
+            _logger.info(
+              "MLController allowed running ML, faces indexing starting",
+            );
+          }
+          unawaited(runAllML());
         } else {
           _logger.info(
-            "MLController allowed running ML, faces indexing starting",
+            "MLController stopped running ML, faces indexing will be paused (unless it's fetching embeddings)",
           );
+          pauseIndexingAndClustering();
         }
-        unawaited(runAllML());
-      } else {
-        _logger.info(
-          "MLController stopped running ML, faces indexing will be paused (unless it's fetching embeddings)",
-        );
-        pauseIndexingAndClustering();
-      }
-    });
+      });
+    }
 
     _isInitialized = true;
     _logger.info('init done');
