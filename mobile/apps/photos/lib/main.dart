@@ -57,7 +57,7 @@ const kLastFGTaskHeartBeatTime = "fg_task_hb_time";
 const kHeartBeatFrequency = Duration(seconds: 1);
 const kFGSyncFrequency = Duration(minutes: 5);
 const kFGHomeWidgetSyncFrequency = Duration(minutes: 15);
-const kBGTaskTimeout = Duration(seconds: 28);
+const kBGTaskTimeout = Duration(seconds: 58);
 const kBGPushTimeout = Duration(seconds: 28);
 const kFGTaskDeathTimeoutInMicroseconds = 5000000;
 bool isProcessBg = true;
@@ -119,11 +119,6 @@ Future<void> _homeWidgetSync([bool isBackground = false]) async {
     return;
   }
 
-  if (isBackground) {
-    final locale = await getLocale();
-    await initializeDateFormatting(locale?.languageCode ?? "en");
-  }
-
   try {
     await HomeWidgetService.instance.initHomeWidget(isBackground);
   } catch (e, s) {
@@ -182,8 +177,16 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
   // only runs for android
   updateService.showUpdateNotification().ignore();
   await _sync('bgTaskActiveProcess');
+
+  final locale = await getLocale();
+  await initializeDateFormatting(locale?.languageCode ?? "en");
   // only runs for android
   await _homeWidgetSync(true);
+
+  await MLService.instance.init();
+  await PersonService.init(entityService, MLDataDB.instance, prefs);
+  // await MLService.instance.runAllML(force: true);
+  await smartAlbumsService.syncSmartAlbums();
 }
 
 Future<void> _init(bool isBackground, {String via = ''}) async {

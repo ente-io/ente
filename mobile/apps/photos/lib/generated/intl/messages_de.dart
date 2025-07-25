@@ -267,11 +267,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m93(storageAmountInGB) => "${storageAmountInGB} GB";
 
   static String m94(
-    usedAmount,
-    usedStorageUnit,
-    totalAmount,
-    totalStorageUnit,
-  ) =>
+          usedAmount, usedStorageUnit, totalAmount, totalStorageUnit) =>
       "${usedAmount} ${usedStorageUnit} von ${totalAmount} ${totalStorageUnit} verwendet";
 
   static String m95(id) =>

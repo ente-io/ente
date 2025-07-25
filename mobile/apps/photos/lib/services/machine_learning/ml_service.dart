@@ -10,6 +10,7 @@ import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/events/compute_control_event.dart";
 import "package:photos/events/people_changed_event.dart";
+import "package:photos/main.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/service_locator.dart";
@@ -136,7 +137,7 @@ class MLService {
         );
         await clusterAllImages();
       }
-      if (_mlControllerStatus == true) {
+      if (!isProcessBg && _mlControllerStatus == true) {
         // refresh discover section
         magicCacheService.updateCache(forced: force).ignore();
         // refresh memories section
@@ -148,7 +149,7 @@ class MLService {
       if ((await mlDataDB.getUnclusteredFaceCount()) > 0) {
         await clusterAllImages();
       }
-      if (_mlControllerStatus == true) {
+      if (!isProcessBg && _mlControllerStatus == true) {
         // refresh discover section
         magicCacheService.updateCache().ignore();
         // refresh memories section (only runs if forced is true)
@@ -158,9 +159,10 @@ class MLService {
       _logger.severe("runAllML failed", e, s);
       rethrow;
     } finally {
+      _logger.severe("ML finished running");
       _isRunningML = false;
       computeController.releaseCompute(ml: true);
-      VideoPreviewService.instance.queueFiles();
+      if (!isProcessBg) VideoPreviewService.instance.queueFiles();
     }
   }
 

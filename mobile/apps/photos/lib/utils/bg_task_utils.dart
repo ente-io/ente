@@ -6,6 +6,7 @@ import "package:permission_handler/permission_handler.dart";
 import "package:photos/db/upload_locks_db.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/main.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/utils/file_uploader.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import "package:workmanager/workmanager.dart" as workmanager;
@@ -22,7 +23,7 @@ void callbackDispatcher() {
         try {
           BgTaskUtils.$.info('Task started $tlog');
           await runBackgroundTask(taskName, tlog).timeout(
-            Platform.isIOS ? kBGTaskTimeout : const Duration(hours: 1),
+            Platform.isIOS ? kBGTaskTimeout : const Duration(minutes: 15),
             onTimeout: () async {
               BgTaskUtils.$.warning(
                 "TLE, committing seppuku for taskID: $taskName",
@@ -80,7 +81,7 @@ class BgTaskUtils {
     try {
       await workmanager.Workmanager().initialize(
         callbackDispatcher,
-        isInDebugMode: false,
+        isInDebugMode: Platform.isIOS && flagService.internalUser,
       );
       await workmanager.Workmanager().registerPeriodicTask(
         backgroundTaskIdentifier,

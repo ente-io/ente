@@ -1800,5 +1800,10 @@
   "fileAnalysisFailed": "Unable to analyze file",
   "editAutoAddPeople": "Edit auto-add people",
   "autoAddPeople": "Auto-add people",
-  "shouldRemoveFilesSmartAlbumsDesc": "Should the files related to the person that were previously selected in smart albums be removed?"
+  "shouldRemoveFilesSmartAlbumsDesc": "Should the files related to the person that were previously selected in smart albums be removed?",
+  "addingPhotos": "Adding photos",
+  "gettingReady": "Getting ready",
+  "addSomePhotosDesc1": "Add some photos or pick ",
+  "addSomePhotosDesc2": "familiar faces",
+  "addSomePhotosDesc3": "\nto begin with"
 }

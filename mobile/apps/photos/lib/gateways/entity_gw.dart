@@ -16,7 +16,7 @@ class EntityGateway {
     await _enteDio.post(
       "/user-entity/key",
       data: {
-        "type": entityType.typeToString(),
+        "type": entityType.name,
         "encryptedKey": encKey,
         "header": header,
       },
@@ -28,7 +28,7 @@ class EntityGateway {
       final response = await _enteDio.get(
         "/user-entity/key",
         queryParameters: {
-          "type": type.typeToString(),
+          "type": type.name,
         },
       );
       return EntityKey.fromMap(response.data);
@@ -45,6 +45,7 @@ class EntityGateway {
 
   Future<EntityData> createEntity(
     EntityType type,
+    String? id,
     String encryptedData,
     String header,
   ) async {
@@ -52,8 +53,9 @@ class EntityGateway {
       "/user-entity/entity",
       data: {
         "encryptedData": encryptedData,
+        if (id != null) "id": id,
         "header": header,
-        "type": type.typeToString(),
+        "type": type.name,
       },
     );
     return EntityData.fromMap(response.data);
@@ -71,7 +73,7 @@ class EntityGateway {
         "id": id,
         "encryptedData": encryptedData,
         "header": header,
-        "type": type.typeToString(),
+        "type": type.name,
       },
     );
     return EntityData.fromMap(response.data);
@@ -98,7 +100,7 @@ class EntityGateway {
       queryParameters: {
         "sinceTime": sinceTime,
         "limit": limit,
-        "type": type.typeToString(),
+        "type": type.name,
       },
     );
     final List<EntityData> authEntities = <EntityData>[];

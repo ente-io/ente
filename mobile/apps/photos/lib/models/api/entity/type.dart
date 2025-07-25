@@ -1,30 +1,11 @@
-import "package:flutter/foundation.dart";
-
 enum EntityType {
   location,
   person,
   cgroup,
   unknown,
-  smartAlbum,
-}
+  smartAlbum;
 
-EntityType typeFromString(String type) {
-  switch (type) {
-    case "location":
-      return EntityType.location;
-    case "person":
-      return EntityType.location;
-    case "cgroup":
-      return EntityType.cgroup;
-    case "smart_album":
-      return EntityType.smartAlbum;
-  }
-  debugPrint("unexpected entity type $type");
-  return EntityType.unknown;
-}
-
-extension EntityTypeExtn on EntityType {
-  bool isZipped() {
+  bool get isZipped {
     switch (this) {
       case EntityType.location:
       case EntityType.person:
@@ -34,7 +15,7 @@ extension EntityTypeExtn on EntityType {
     }
   }
 
-  String typeToString() {
+  String get name {
     switch (this) {
       case EntityType.location:
         return "location";
@@ -48,4 +29,11 @@ extension EntityTypeExtn on EntityType {
         return "unknown";
     }
   }
+}
+
+EntityType entityTypeFromString(String type) {
+  return EntityType.values.firstWhere(
+    (e) => e.name == type,
+    orElse: () => EntityType.unknown,
+  );
 }

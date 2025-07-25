@@ -30,15 +30,15 @@ class EntityService {
   }
 
   String _getEntityKeyPrefix(EntityType type) {
-    return "entity_key_" + type.typeToString();
+    return "entity_key_" + type.name;
   }
 
   String _getEntityHeaderPrefix(EntityType type) {
-    return "entity_key_header_" + type.typeToString();
+    return "entity_key_header_" + type.name;
   }
 
   String _getEntityLastSyncTimePrefix(EntityType type) {
-    return "entity_last_sync_time_" + type.typeToString();
+    return "entity_last_sync_time_" + type.name;
   }
 
   Future<List<LocalEntityData>> getCertainEntities(
@@ -65,7 +65,7 @@ class EntityService {
     final String plainText = jsonEncode(jsonMap);
     final key = await getOrCreateEntityKey(type);
     late String encryptedData, header;
-    if (type.isZipped()) {
+    if (type.isZipped) {
       final ChaChaEncryptionResult result =
           await gzipAndEncryptJson(jsonMap, key);
       encryptedData = result.encData;
@@ -77,15 +77,13 @@ class EntityService {
       header = CryptoUtil.bin2base64(encryptedKeyData.header!);
     }
     debugPrint(
-      " ${id == null ? 'Adding' : 'Updating'} entity of type: " +
-          type.typeToString(),
+      " ${id == null ? 'Adding' : 'Updating'} entity of type: " + type.name,
     );
-    late LocalEntityData localData;
 
     final EntityData data = id == null || addWithCustomID
-        ? await _gateway.createEntity(type, encryptedData, header)
+        ? await _gateway.createEntity(type, id, encryptedData, header)
         : await _gateway.updateEntity(type, id, encryptedData, header);
-    localData = LocalEntityData(
+    final localData = LocalEntityData(
       id: data.id,
       type: type,
       data: plainText,
@@ -156,7 +154,7 @@ class EntityService {
       for (EntityData e in result) {
         try {
           late String plainText;
-          if (type.isZipped()) {
+          if (type.isZipped) {
             final jsonMap = await decryptAndUnzipJson(
               entityKey,
               encryptedData: e.encryptedData!,
