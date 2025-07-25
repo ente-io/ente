@@ -11,6 +11,16 @@
       "title": "3Commas"
     },
     {
+      "title": "Accredible",
+      "slug": "accredible",
+      "altNames": [
+        "Accredible Certificates",
+        "Accredible Badges",
+        "Digital Credentials",
+        "certificates.zaka.ai"
+      ]
+    },
+    {
       "title": "Addy.io",
       "slug": "addy_io"
     },
@@ -70,6 +80,13 @@
         "goauthentik"
       ],
       "hex": "fd4b2d"
+    },
+    {
+      "title": "Autenticacion Digital",
+      "slug": "autenticacion-digital",
+      "altNames": [
+        "autenticaciondigital.and.gov.co"
+      ]
     },
     {
       "title": "availity"
@@ -278,6 +295,13 @@
     {
       "title": "CERN",
       "slug": "cern"
+    },
+    {
+      "title": "Chaturbate",
+      "slug": "chaturbate",
+      "altNames": [
+        "Chaturbate.com"
+      ]
     },
     {
       "title": "ChangeNOW"
@@ -741,6 +765,15 @@
     },
     {
       "title": "Letterboxd"
+    },
+    {
+      "title": "LifeMiles",
+      "slug": "lifemiles",
+      "altNames": [
+        "Life Miles",
+        "lifemiles.com",
+        "Avianca LifeMiles"
+      ]
     },
     {
       "title": "lincolnfinancial",
@@ -1300,6 +1333,15 @@
       "slug": "startmail"
     },
     {
+      "title": "Stripchat",
+      "slug": "stripchat",
+      "altNames": [
+        "Strip Chat",
+        "stripchat.com",
+        "StripChat Live"
+      ]
+    },
+    {
       "title": "STRATO",
       "hex": "FF8800"
     },
@@ -1589,6 +1631,14 @@
     {
       "title": "xAI",
       "slug": "xai"
+    },
+    {
+      "title": "XVideos",
+      "slug": "xvideos",
+      "altNames": [
+        "X Videos",
+        "xvideos.com"
+      ]
     },
     {
       "title": "Cronometer",
