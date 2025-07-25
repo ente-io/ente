@@ -63,7 +63,7 @@ class EmptyAlbumState extends StatelessWidget {
                         }
                       },
                     ),
-                    SizedBox(height: 12),
+                    const SizedBox(height: 12),
                     ButtonWidget(
                       buttonType: ButtonType.neutral,
                       buttonSize: ButtonSize.large,
