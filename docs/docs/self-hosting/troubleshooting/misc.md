@@ -3,6 +3,8 @@ title: General troubleshooting cases
 description: Fixing various errors when trying to self host Ente
 ---
 
+# Troubleshooting
+
 ## Functionality not working on self hosted instance
 
 If some specific functionality (e.g. album listing, video playback) does not

@@ -5,8 +5,9 @@ Description: Configuring reverse proxy for Museum and other services
 
 # Reverse proxy
 
-Configuring reverse proxy is a way to make the service accessible via the public
-Internet without exposing multiple ports for various services.
+Reverse proxy helps in making application services
+accessible via the Internet without exposing multiple
+ports for various services.
 
 It also allows configuration of HTTPS through SSL certificate management.
 
@@ -48,10 +49,10 @@ DNS propagation can take a few minutes to take effect.
 
 ## Step 2: Configure reverse proxy
 
-After installing Caddy, a `Caddyfile` is created on the path
+After installing Caddy, `Caddyfile` is created at
 `/etc/caddy/`. Edit `/etc/caddy/Caddyfile` to configure reverse proxies.
 
-Here is a ready-to-use configuration that can be used with your own domain.
+You can edit the minimal configuration provided below for your own needs.
 
 > yourdomain.tld is an example. Replace it with your own domain
 
@@ -97,9 +98,8 @@ sudo systemctl caddy reload
 
 ## Step 4: Verify the setup
 
-Ente Photos web app should be up on https://web.ente.yourdomain.tld.
-
-Museum should be accessible at https://api.ente.yourdomain.tld.
+Ente Photos web app should be up on https://web.ente.yourdomain.tld and
+Museum at https://api.ente.yourdomain.tld.
 
 > [!TIP]
 > If you are using other reverse proxy servers such as NGINX,

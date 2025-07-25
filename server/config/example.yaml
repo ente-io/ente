@@ -51,6 +51,16 @@ s3:
       region: eu-central-2
       bucket: scw-eu-fr-v3
 
+# Specify the base endpoints for various web apps
+apps:
+    # If you're running a self hosted instance and wish to serve public links,
+    # set this to the URL where your albums web app is running.
+    public-albums: http://localhost:3002
+    cast: http://localhost:3004
+    # Set this to the URL where your accounts web app is running, primarily used for
+    # passkey based 2FA.
+    accounts: http://localhost:3001
+
 # Key used for encrypting customer emails before storing them in DB
 #
 # To make it easy to get started, some randomly generated (but fixed) values are
@@ -65,12 +75,3 @@ key:
 jwt:
     secret: i2DecQmfGreG6q1vBj5tCokhlN41gcfS2cjOs9Po-u8=
 
-# Specify the base endpoints for various web apps
-apps:
-    # If you're running a self hosted instance and wish to serve public links,
-    # set this to the URL where your albums web app is running.
-    public-albums: http://localhost:3002
-    cast: http://localhost:3004
-    # Set this to the URL where your accounts web app is running, primarily used for
-    # passkey based 2FA.
-    accounts: http://localhost:3001

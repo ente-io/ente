@@ -1,9 +1,9 @@
 ---
-title: Running Ente Without Docker - Self-hosting
+title: Manual Setup (Without Docker) - Self-hosting
 description: Installing and setting up Ente without Docker
 ---
 
-# Running Ente without Docker
+# Manual Setup (Without Docker)
 
 If you wish to run Ente from source without using Docker, follow the steps described below:
 

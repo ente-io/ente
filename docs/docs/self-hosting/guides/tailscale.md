@@ -347,3 +347,5 @@ This will list all account details. Copy Acount ID.
 > ente-museum-1 container from linux terminal. Run
 > `docker restart ente-museum-1`. All well, now you will have 100TB storage.
 > Repeat if for any other accounts you want to give unlimited storage access.
+
+> **Credits:** [A4alli](https://github.com/A4alli)

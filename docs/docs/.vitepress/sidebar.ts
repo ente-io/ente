@@ -263,21 +263,26 @@ export const sidebar = [
                         link: "/self-hosting/install/compose",
                     },
                     {
-                        text: "Without Docker",
-                        link: "/self-hosting/install/without-docker",
+                        text: "Manual Setup (Without Docker)",
+                        link: "/self-hosting/install/manual",
                     },
                     {
                         text: "Environment Variables and Defaults",
                         link: "/self-hosting/install/env-var",
                     },
                     {
-                        text: "Configuration File",
-                        link: "/self-hosting/install/config-file",
+                        text: "Configuration",
+                        link: "/self-hosting/install/config",
                     },
                     {
                         text: "Post-installation Steps",
                         link: "/self-hosting/install/post-install/",
+                    },
+                    {
+                        text: "Upgrade",
+                        link: "/self-hosting/install/upgrade/",
                     }
+
                 ],
             },
             {
@@ -285,20 +290,24 @@ export const sidebar = [
                 collapsed: true,
                 items: [
                     {
-                        text: "Configuring your server",
-                        link: "/self-hosting/administration/museum",
+                        text: "User Management",
+                        link: "/self-hosting/administration/users",
                     },
                     {
-                        text: "Configuring Object Storage",
-                        link: "/self-hosting/administration/object-storage",
-                    },
-                    {
-                        text: "Reverse proxy",
+                        text: "Reverse Proxy",
                         link: "/self-hosting/administration/reverse-proxy",
                     },
                     {
-                        text: "Configuring CLI for your instance",
-                        link: "/self-hosting/administration/selfhost-cli",
+                        text: "Object Storage",
+                        link: "/self-hosting/administration/object-storage",
+                    },
+                    {
+                        text: "Ente CLI",
+                        link: "/self-hosting/administration/cli",
+                    },
+                    {
+                        text: "Backup and Restore",
+                        link: "/self-hosting/administration/backup",
                     },
 
                 ],
@@ -320,6 +329,10 @@ export const sidebar = [
                     {
                         text: "Ente via Tailscale",
                         link: "/self-hosting/guides/tailscale",
+                    },
+                    {
+                        text: "Running Ente with systemd",
+                        link: "/self-hosting/guides/systemd",
                     },
                 ],
             },
