@@ -60,7 +60,6 @@ class _SmartAlbumsStatusWidgetState extends State<SmartAlbumsStatusWidget>
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
 
     return AnimatedCrossFade(
@@ -82,7 +81,7 @@ class _SmartAlbumsStatusWidgetState extends State<SmartAlbumsStatusWidget>
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
               color: EnteTheme.isDark(context)
-                  ? Colors.white.withOpacity(0.08)
+                  ? Colors.white.withOpacity(0.20)
                   : Colors.black.withOpacity(0.65),
             ),
             child: Row(
@@ -102,9 +101,7 @@ class _SmartAlbumsStatusWidgetState extends State<SmartAlbumsStatusWidget>
                   (_syncingCollection?.$2 ?? true)
                       ? S.of(context).addingPhotos
                       : S.of(context).gettingReady,
-                  style: textTheme.small.copyWith(
-                    color: colorScheme.backdropBase,
-                  ),
+                  style: textTheme.small.copyWith(color: Colors.white),
                 ),
               ],
             ),
