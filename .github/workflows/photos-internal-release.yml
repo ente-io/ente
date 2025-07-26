@@ -4,7 +4,7 @@ on:
   workflow_dispatch: # Manual trigger only
 
 env:
-  FLUTTER_VERSION: "3.24.3"
+  FLUTTER_VERSION: "3.27.4"
   ANDROID_KEYSTORE_PATH: "keystore/ente_photos_key.jks"
 
 jobs:
@@ -83,7 +83,7 @@ jobs:
         run: |
           flutter build ipa \
             --release \
-            --export-options-plist=ExportOptions.plist \
+            --export-options-plist=ios/ExportOptions.plist \
             --dart-define=cronetHttpNoPlay=true
         env:
           SIGNING_TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
