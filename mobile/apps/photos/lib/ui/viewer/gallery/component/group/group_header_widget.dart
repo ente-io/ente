@@ -1,9 +1,11 @@
 import "package:flutter/material.dart";
+import "package:flutter_animate/flutter_animate.dart";
 import 'package:photos/core/constants.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/ui/viewer/gallery/layout_settings.dart";
 
 class GroupHeaderWidget extends StatefulWidget {
@@ -15,6 +17,8 @@ class GroupHeaderWidget extends StatefulWidget {
   final bool showSelectAll;
   final bool showGallerySettingCTA;
   final bool showTrailingIcons;
+  final bool isPinnedHeader;
+  final bool fadeInTrailingIcons;
 
   const GroupHeaderWidget({
     super.key,
@@ -26,6 +30,8 @@ class GroupHeaderWidget extends StatefulWidget {
     this.showGallerySettingCTA = false,
     this.height,
     this.showTrailingIcons = true,
+    this.isPinnedHeader = false,
+    this.fadeInTrailingIcons = false,
   });
 
   @override
@@ -102,20 +108,58 @@ class _GroupHeaderWidgetState extends State<GroupHeaderWidget> {
               : widget.showTrailingIcons
                   ? GestureDetector(
                       behavior: HitTestBehavior.translucent,
-                      child: ValueListenableBuilder(
-                        valueListenable: _areAllFromGroupSelectedNotifier,
-                        builder: (context, dynamic value, _) {
-                          return value
-                              ? const Icon(
-                                  Icons.check_circle,
-                                  size: 18,
-                                )
-                              : Icon(
-                                  Icons.check_circle_outlined,
-                                  color: colorScheme.strokeMuted,
-                                  size: 18,
-                                );
-                        },
+                      child: Padding(
+                        padding: const EdgeInsets.all(4),
+                        child: ValueListenableBuilder(
+                          valueListenable: _areAllFromGroupSelectedNotifier,
+                          builder: (context, dynamic value, _) {
+                            return value
+                                ? widget.fadeInTrailingIcons
+                                    ? const Icon(
+                                        Icons.check_circle,
+                                        size: 22,
+                                      ).animate().fadeIn(
+                                          duration: const Duration(
+                                            milliseconds: PinnedGroupHeader
+                                                .kTrailingIconsFadeInDurationMs,
+                                          ),
+                                          delay: const Duration(
+                                            milliseconds: PinnedGroupHeader
+                                                    .kScaleDurationInMilliseconds +
+                                                PinnedGroupHeader
+                                                    .kTrailingIconsFadeInDelayMs,
+                                          ),
+                                          curve: Curves.easeOut,
+                                        )
+                                    : const Icon(
+                                        Icons.check_circle,
+                                        size: 22,
+                                      )
+                                : widget.fadeInTrailingIcons
+                                    ? Icon(
+                                        Icons.check_circle_outlined,
+                                        color: colorScheme.strokeMuted,
+                                        size: 22,
+                                      ).animate().fadeIn(
+                                          duration: const Duration(
+                                            milliseconds: PinnedGroupHeader
+                                                .kTrailingIconsFadeInDurationMs,
+                                          ),
+                                          delay: const Duration(
+                                            milliseconds: PinnedGroupHeader
+                                                    .kScaleDurationInMilliseconds +
+                                                PinnedGroupHeader
+                                                    .kTrailingIconsFadeInDelayMs,
+                                          ),
+                                          curve: Curves.easeOut,
+                                        )
+                                    : Icon(
+                                        Icons.check_circle_outlined,
+                                        color: colorScheme.strokeMuted,
+                                        size: 22,
+                                      );
+                          },
+                        ),
                       ),
                       onTap: () {
                         widget.selectedFiles?.toggleGroupSelection(
@@ -133,15 +177,32 @@ class _GroupHeaderWidgetState extends State<GroupHeaderWidget> {
                       onTap: () => _showLayoutSettingsOverflowMenu(context),
                       child: Padding(
                         padding: const EdgeInsets.all(4),
-                        child: Icon(
-                          Icons.more_vert_outlined,
-                          color: colorScheme.strokeBase,
-                        ),
+                        child: widget.fadeInTrailingIcons
+                            ? Icon(
+                                Icons.more_vert_outlined,
+                                color: colorScheme.blurStrokeBase,
+                              ).animate().fadeIn(
+                                  duration: const Duration(
+                                    milliseconds: PinnedGroupHeader
+                                        .kTrailingIconsFadeInDurationMs,
+                                  ),
+                                  delay: const Duration(
+                                    milliseconds: PinnedGroupHeader
+                                            .kScaleDurationInMilliseconds +
+                                        PinnedGroupHeader
+                                            .kTrailingIconsFadeInDelayMs,
+                                  ),
+                                  curve: Curves.easeOut,
+                                )
+                            : Icon(
+                                Icons.more_vert_outlined,
+                                color: colorScheme.strokeBase,
+                              ),
                       ),
                     )
                   : const SizedBox.shrink()
               : const SizedBox.shrink(),
-          const SizedBox(width: 12),
+          SizedBox(width: horizontalPadding - 4.0),
         ],
       ),
     );

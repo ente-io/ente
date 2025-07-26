@@ -667,6 +667,9 @@ class PinnedGroupHeader extends StatefulWidget {
   final bool showSelectAll;
   final ValueNotifier<bool> scrollbarInUseNotifier;
   final bool showGallerySettingsCTA;
+  static const kScaleDurationInMilliseconds = 200;
+  static const kTrailingIconsFadeInDelayMs = 0;
+  static const kTrailingIconsFadeInDurationMs = 200;
 
   const PinnedGroupHeader({
     required this.scrollController,
@@ -689,6 +692,8 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
   Timer? _enlargeHeaderTimer;
   late final ValueNotifier<bool> _atZeroScrollNotifier;
   Timer? _timer;
+  bool lastInUseState = false;
+  bool fadeInTrailingIcons = false;
   @override
   void initState() {
     super.initState();
@@ -791,9 +796,26 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
     _enlargeHeaderTimer?.cancel();
     if (widget.scrollbarInUseNotifier.value) {
       _enlargeHeader.value = true;
+      lastInUseState = true;
+      fadeInTrailingIcons = false;
     } else {
       _enlargeHeaderTimer = Timer(const Duration(milliseconds: 250), () {
         _enlargeHeader.value = false;
+        if (lastInUseState) {
+          fadeInTrailingIcons = true;
+          Future.delayed(
+              const Duration(
+                milliseconds: PinnedGroupHeader.kTrailingIconsFadeInDelayMs +
+                    PinnedGroupHeader.kTrailingIconsFadeInDurationMs +
+                    100,
+              ), () {
+            setState(() {
+              if (!mounted) return;
+              fadeInTrailingIcons = false;
+            });
+          });
+        }
+        lastInUseState = false;
       });
     }
   }
@@ -814,7 +836,9 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
               return AnimatedScale(
                 scale: inUse ? 1.2 : 1.0,
                 alignment: Alignment.topLeft,
-                duration: const Duration(milliseconds: 200),
+                duration: const Duration(
+                  milliseconds: PinnedGroupHeader.kScaleDurationInMilliseconds,
+                ),
                 curve: Curves.easeInOutSine,
                 child: ValueListenableBuilder<bool>(
                   valueListenable: _atZeroScrollNotifier,
@@ -854,6 +878,8 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
                       showSelectAll: widget.showSelectAll,
                       showGallerySettingCTA: widget.showGallerySettingsCTA,
                       showTrailingIcons: !inUse,
+                      isPinnedHeader: true,
+                      fadeInTrailingIcons: fadeInTrailingIcons,
                     ),
                   ),
                 ),
