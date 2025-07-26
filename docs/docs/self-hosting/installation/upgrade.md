@@ -1,6 +1,6 @@
 ---
 title: Upgrade - Self-hosting
-description: Upgradation of self-hosted Ente
+description: Upgrading self-hosted Ente
 ---
 
 # Upgrade your server

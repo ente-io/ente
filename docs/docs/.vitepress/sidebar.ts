@@ -279,8 +279,8 @@ export const sidebar = [
                         link: "/self-hosting/installation/post-install/",
                     },
                     {
-                        text: "Upgradation",
-                        link: "/self-hosting/installation/upgradation",
+                        text: "Upgrade",
+                        link: "/self-hosting/installation/upgrade",
                     }
 
                 ],

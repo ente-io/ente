@@ -145,6 +145,6 @@ You can download Ente CLI from [here](https://github.com/ente-io/ente/releases?q
 
 Check our [documentation](/self-hosting/administration/cli) on how to use Ente CLI for managing self-hosted instances.
 
-::: info For upgradation
-Check out our [upgradation documentation](/self-hosting/installation/upgradation) for various installation methods.
+::: info For upgrading
+Check out our [upgrading documentation](/self-hosting/installation/upgrade) for various installation methods.
 :::
