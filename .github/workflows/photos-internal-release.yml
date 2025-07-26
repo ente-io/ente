@@ -65,8 +65,8 @@ jobs:
       - name: Update CocoaPods Specs
         run: pod repo update
 
-      - name: Install CocoaPods dependencies
-        run: pod install
+      # - name: Install CocoaPods dependencies
+      #   run: pod install
 
       - name: Create ExportOptions.plist
         run: |
