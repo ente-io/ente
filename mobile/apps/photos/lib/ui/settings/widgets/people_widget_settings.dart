@@ -48,10 +48,6 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
 
   @override
   Widget build(BuildContext context) {
-    final areIdsChanged = lastSelectedPeople != null
-        ? !setEquals(_selectedPeople.personIds, lastSelectedPeople)
-        : _selectedPeople.personIds.isNotEmpty;
-
     return Scaffold(
       bottomNavigationBar: hasInstalledAny
           ? Padding(
@@ -64,6 +60,13 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
               child: ListenableBuilder(
                 listenable: _selectedPeople,
                 builder: (context, _) {
+                  final areIdsChanged = lastSelectedPeople != null
+                      ? !setEquals(
+                          _selectedPeople.personIds,
+                          lastSelectedPeople,
+                        )
+                      : _selectedPeople.personIds.isEmpty;
+
                   return ButtonWidget(
                     buttonType: ButtonType.primary,
                     buttonSize: ButtonSize.large,

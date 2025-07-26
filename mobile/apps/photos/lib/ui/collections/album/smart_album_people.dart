@@ -54,10 +54,6 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
 
   @override
   Widget build(BuildContext context) {
-    final areIdsChanged = currentConfig?.personIDs != null
-        ? !setEquals(_selectedPeople.personIds, currentConfig!.personIDs)
-        : _selectedPeople.personIds.isNotEmpty;
-
     return Scaffold(
       bottomNavigationBar: Padding(
         padding: EdgeInsets.fromLTRB(
@@ -69,6 +65,12 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
         child: ListenableBuilder(
           listenable: _selectedPeople,
           builder: (context, _) {
+            final areIdsChanged = currentConfig?.personIDs != null
+                ? !setEquals(
+                    _selectedPeople.personIds,
+                    currentConfig!.personIDs,
+                  )
+                : _selectedPeople.personIds.isEmpty;
             return ButtonWidget(
               buttonType: ButtonType.primary,
               buttonSize: ButtonSize.large,
