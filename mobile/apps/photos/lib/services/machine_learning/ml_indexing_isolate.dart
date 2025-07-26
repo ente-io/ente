@@ -14,6 +14,7 @@ import "package:photos/utils/ml_util.dart";
 import "package:photos/utils/network_util.dart";
 import "package:synchronized/synchronized.dart";
 
+@pragma('vm:entry-point')
 class MLIndexingIsolate extends SuperIsolate {
   @override
   Logger get logger => _logger;
