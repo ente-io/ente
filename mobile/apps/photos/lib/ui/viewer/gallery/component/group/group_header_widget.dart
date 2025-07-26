@@ -180,7 +180,8 @@ class _GroupHeaderWidgetState extends State<GroupHeaderWidget> {
                         child: widget.fadeInTrailingIcons
                             ? Icon(
                                 Icons.more_vert_outlined,
-                                color: colorScheme.blurStrokeBase,
+                                // color: colorScheme.blurStrokeBase,
+                                color: colorScheme.strokeMuted,
                               ).animate().fadeIn(
                                   duration: const Duration(
                                     milliseconds: PinnedGroupHeader
@@ -196,7 +197,8 @@ class _GroupHeaderWidgetState extends State<GroupHeaderWidget> {
                                 )
                             : Icon(
                                 Icons.more_vert_outlined,
-                                color: colorScheme.strokeBase,
+                                // color: colorScheme.blurStrokeBase,
+                                color: colorScheme.strokeMuted,
                               ),
                       ),
                     )
