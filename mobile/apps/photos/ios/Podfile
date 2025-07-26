@@ -43,7 +43,7 @@ post_install do |installer|
     target.build_configurations.each do |config|
       config.build_settings.delete 'IPHONEOS_DEPLOYMENT_TARGET'
       config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
+      config.build_settings['DEVELOPMENT_TEAM'] = '6Z68YJY9Q2'
     end
-
   end
 end
