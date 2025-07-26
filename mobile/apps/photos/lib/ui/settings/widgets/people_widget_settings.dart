@@ -65,17 +65,16 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
                           _selectedPeople.personIds,
                           lastSelectedPeople,
                         )
-                      : _selectedPeople.personIds.isEmpty;
+                      : _selectedPeople.personIds.isNotEmpty;
 
                   return ButtonWidget(
                     buttonType: ButtonType.primary,
                     buttonSize: ButtonSize.large,
                     labelText: S.of(context).save,
                     shouldSurfaceExecutionStates: false,
-                    isDisabled: areIdsChanged,
+                    isDisabled: !areIdsChanged,
                     onTap: areIdsChanged
-                        ? null
-                        : () async {
+                        ? () async {
                             unawaited(
                               PeopleHomeWidgetService.instance
                                   .setSelectedPeople(
@@ -83,7 +82,8 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
                               ),
                             );
                             Navigator.pop(context);
-                          },
+                          }
+                        : null,
                   );
                 },
               ),

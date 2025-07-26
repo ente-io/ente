@@ -70,7 +70,7 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
                     _selectedPeople.personIds,
                     currentConfig!.personIDs,
                   )
-                : _selectedPeople.personIds.isEmpty;
+                : _selectedPeople.personIds.isNotEmpty;
             return ButtonWidget(
               buttonType: ButtonType.primary,
               buttonSize: ButtonSize.large,
