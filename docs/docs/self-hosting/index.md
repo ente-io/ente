@@ -37,17 +37,16 @@ run Ente.
 
 ::: info
 
-Make sure to modify the default values in `compose.yaml` and `museum.yaml` 
-if you wish to change endpoints, bucket configuration or server
-configuration.
+Make sure to modify the default values in `compose.yaml` and `museum.yaml` if
+you wish to change endpoints, bucket configuration or server configuration.
 
 :::
 
 ## Try the web app
 
 Open Ente Photos web app at `http://<machine-ip>:3000` (or
-`http://localhost:3000` if using on same local machine).
-Select **Don't have an account?** to create a new user.
+`http://localhost:3000` if using on same local machine). Select **Don't have an
+account?** to create a new user.
 
 Follow the prompts to sign up.
 

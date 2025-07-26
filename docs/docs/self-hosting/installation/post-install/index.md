@@ -161,7 +161,8 @@ apps](web-dev-settings.png){width=400px}
 You can download Ente CLI from
 [here](https://github.com/ente-io/ente/releases?q=tag%3Acli).
 
-Check our [documentation](/self-hosting/administration/cli) on how to use Ente CLI for managing self-hosted instances.
+Check our [documentation](/self-hosting/administration/cli) on how to use Ente
+CLI for managing self-hosted instances.
 
 ::: info For upgrading
 

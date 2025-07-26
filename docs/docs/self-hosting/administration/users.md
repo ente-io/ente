@@ -108,24 +108,11 @@ emails having @example.com as suffix.
 
 ### Send email with verification code
 
-You can configure SMTP for sending verification code e-mails to users, which is
-efficient if you do not know mail addresses of people for who you want to
-hardcode OTTs or if you are serving larger audience.
+You can configure SMTP for sending verification code e-mails to users, if you do
+not wish to hardcode OTTs and have larger audience.
 
-Set the host and port accordingly with your credentials in `museum.yaml`
-
-```yaml
-smtp:
-    host:
-    port:
-    # Optional username and password if using local relay server
-    username:
-    password:
-    # Email address used for sending emails (this mail's credentials have to be provided)
-    email:
-    # Optional name for sender
-    sender-name:
-```
+For more information on configuring email, check out the
+[email configuration](/self-hosting/install/config#email) section.
 
 ## Disable registrations
 
