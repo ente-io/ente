@@ -4,6 +4,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/viewer/gallery/layout_settings.dart";
 
 class GroupHeaderWidget extends StatefulWidget {
   final String title;
@@ -12,6 +13,7 @@ class GroupHeaderWidget extends StatefulWidget {
   final List<EnteFile> filesInGroup;
   final SelectedFiles? selectedFiles;
   final bool showSelectAll;
+  final bool showGallerySettingCTA;
 
   const GroupHeaderWidget({
     super.key,
@@ -20,6 +22,7 @@ class GroupHeaderWidget extends StatefulWidget {
     required this.filesInGroup,
     required this.selectedFiles,
     required this.showSelectAll,
+    this.showGallerySettingCTA = false,
     this.height,
   });
 
@@ -67,14 +70,15 @@ class _GroupHeaderWidgetState extends State<GroupHeaderWidget> {
 
     return SizedBox(
       height: widget.height,
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: horizontalPadding,
-          vertical: verticalPadding,
-        ),
-        child: Row(
-          children: [
-            Container(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: horizontalPadding,
+              vertical: verticalPadding,
+            ),
+            child: Container(
               alignment: Alignment.centerLeft,
               child: Text(
                 widget.title,
@@ -89,34 +93,50 @@ class _GroupHeaderWidgetState extends State<GroupHeaderWidget> {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            Expanded(child: Container()),
-            !widget.showSelectAll
-                ? const SizedBox.shrink()
-                : GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    child: ValueListenableBuilder(
-                      valueListenable: _areAllFromGroupSelectedNotifier,
-                      builder: (context, dynamic value, _) {
-                        return value
-                            ? const Icon(
-                                Icons.check_circle,
-                                size: 18,
-                              )
-                            : Icon(
-                                Icons.check_circle_outlined,
-                                color: getEnteColorScheme(context).strokeMuted,
-                                size: 18,
-                              );
-                      },
-                    ),
-                    onTap: () {
-                      widget.selectedFiles?.toggleGroupSelection(
-                        widget.filesInGroup.toSet(),
-                      );
+          ),
+          Expanded(child: Container()),
+          !widget.showSelectAll
+              ? const SizedBox.shrink()
+              : GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  child: ValueListenableBuilder(
+                    valueListenable: _areAllFromGroupSelectedNotifier,
+                    builder: (context, dynamic value, _) {
+                      return value
+                          ? const Icon(
+                              Icons.check_circle,
+                              size: 18,
+                            )
+                          : Icon(
+                              Icons.check_circle_outlined,
+                              color: colorScheme.strokeMuted,
+                              size: 18,
+                            );
                     },
                   ),
-          ],
-        ),
+                  onTap: () {
+                    widget.selectedFiles?.toggleGroupSelection(
+                      widget.filesInGroup.toSet(),
+                    );
+                  },
+                ),
+          widget.showGallerySettingCTA
+              ? const SizedBox(width: 8)
+              : const SizedBox.shrink(),
+          widget.showGallerySettingCTA
+              ? GestureDetector(
+                  onTap: () => _showLayoutSettingsOverflowMenu(context),
+                  child: Padding(
+                    padding: const EdgeInsets.all(4),
+                    child: Icon(
+                      Icons.more_vert_outlined,
+                      color: colorScheme.strokeBase,
+                    ),
+                  ),
+                )
+              : const SizedBox.shrink(),
+          const SizedBox(width: 12),
+        ],
       ),
     );
   }
@@ -134,5 +154,15 @@ class _GroupHeaderWidgetState extends State<GroupHeaderWidget> {
     } else {
       return false;
     }
+  }
+
+  void _showLayoutSettingsOverflowMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: getEnteColorScheme(context).backgroundElevated,
+      builder: (BuildContext context) {
+        return const GalleryLayoutSettings();
+      },
+    );
   }
 }

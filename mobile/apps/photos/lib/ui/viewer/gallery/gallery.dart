@@ -62,6 +62,7 @@ class Gallery extends StatefulWidget {
   final Duration reloadDebounceTime;
   final Duration reloadDebounceExecutionInterval;
   final GalleryType? galleryType;
+  final bool showGallerySettingsCTA;
 
   /// When true, selection will be limited to one item. Tapping on any item
   /// will select even when no other item is selected.
@@ -111,6 +112,7 @@ class Gallery extends StatefulWidget {
     this.galleryType,
     this.disableVerticalPaddingForScrollbar = false,
     this.fileToJumpScrollTo,
+    this.showGallerySettingsCTA = false,
     super.key,
   });
 
@@ -199,8 +201,8 @@ class GalleryState extends State<Gallery> {
         Bus.instance.on<TabDoubleTapEvent>().listen((event) async {
       // todo: Assign ID to Gallery and fire generic event with ID &
       //  target index/date
-      if (mounted && event.selectedIndex == 0 && _scrollController != null) {
-        await _scrollController!.animateTo(
+      if (mounted && event.selectedIndex == 0) {
+        await _scrollController.animateTo(
           0,
           duration: const Duration(milliseconds: 250),
           curve: Curves.easeOutExpo,
@@ -306,6 +308,7 @@ class GalleryState extends State<Gallery> {
       groupHeaderExtent: groupHeaderExtent!,
       showSelectAll: widget.showSelectAll,
       limitSelectionToOne: widget.limitSelectionToOne,
+      showGallerySettingsCTA: widget.showGallerySettingsCTA,
     );
 
     if (callSetState) {
@@ -494,7 +497,7 @@ class GalleryState extends State<Gallery> {
       subscription.cancel();
     }
     _debouncer.cancelDebounceTimer();
-    _scrollController?.dispose();
+    _scrollController.dispose();
     scrollBarInUseNotifier.dispose();
     _headerHeightNotifier.dispose();
     widget.selectedFiles?.removeListener(_selectedFilesListener);
@@ -644,6 +647,8 @@ class GalleryState extends State<Gallery> {
                             showSelectAll: widget.showSelectAll &&
                                 !widget.limitSelectionToOne,
                             scrollbarInUseNotifier: scrollBarInUseNotifier,
+                            showGallerySettingsCTA:
+                                widget.showGallerySettingsCTA,
                           )
                         : const SizedBox.shrink(),
                   ],
@@ -651,67 +656,6 @@ class GalleryState extends State<Gallery> {
               ),
             ),
     );
-  }
-
-  // create groups of 200 files for performance
-  List<List<EnteFile>> _genericGroupForPerf(List<EnteFile> files) {
-    if (_groupType == GroupType.size) {
-      // sort files by fileSize on the bases of _sortOrderAsc
-      files.sort((a, b) {
-        if (_sortOrderAsc) {
-          return a.fileSize!.compareTo(b.fileSize!);
-        } else {
-          return b.fileSize!.compareTo(a.fileSize!);
-        }
-      });
-    }
-    // todo:(neeraj) Stick to default group behaviour for magicSearch and editLocationGallery
-    // In case of Magic search, we need to hide the scrollbar title (can be done
-    // by specifying none as groupType)
-    if (_groupType != GroupType.size) {
-      return [files];
-    }
-
-    final List<List<EnteFile>> resultGroupedFiles = [];
-    List<EnteFile> singleGroupFile = [];
-    const int groupSize = 40;
-    for (int i = 0; i < files.length; i += 1) {
-      singleGroupFile.add(files[i]);
-      if (singleGroupFile.length == groupSize) {
-        resultGroupedFiles.add(singleGroupFile);
-        singleGroupFile = [];
-      }
-    }
-    if (singleGroupFile.isNotEmpty) {
-      resultGroupedFiles.add(singleGroupFile);
-    }
-    _logger.info('Grouped files into ${resultGroupedFiles.length} groups');
-    return resultGroupedFiles;
-  }
-
-  List<List<EnteFile>> _groupBasedOnTime(List<EnteFile> files) {
-    List<EnteFile> dailyFiles = [];
-
-    final List<List<EnteFile>> resultGroupedFiles = [];
-    for (int index = 0; index < files.length; index++) {
-      if (index > 0 &&
-          !_groupType.areFromSameGroup(files[index - 1], files[index])) {
-        resultGroupedFiles.add(dailyFiles);
-        dailyFiles = [];
-      }
-      dailyFiles.add(files[index]);
-    }
-    if (dailyFiles.isNotEmpty) {
-      resultGroupedFiles.add(dailyFiles);
-    }
-    if (_sortOrderAsc) {
-      resultGroupedFiles
-          .sort((a, b) => a[0].creationTime!.compareTo(b[0].creationTime!));
-    } else {
-      resultGroupedFiles
-          .sort((a, b) => b[0].creationTime!.compareTo(a[0].creationTime!));
-    }
-    return resultGroupedFiles;
   }
 }
 
@@ -722,6 +666,7 @@ class PinnedGroupHeader extends StatefulWidget {
   final SelectedFiles? selectedFiles;
   final bool showSelectAll;
   final ValueNotifier<bool> scrollbarInUseNotifier;
+  final bool showGallerySettingsCTA;
 
   const PinnedGroupHeader({
     required this.scrollController,
@@ -730,6 +675,7 @@ class PinnedGroupHeader extends StatefulWidget {
     required this.selectedFiles,
     required this.showSelectAll,
     required this.scrollbarInUseNotifier,
+    required this.showGallerySettingsCTA,
     super.key,
   });
 
@@ -906,6 +852,7 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
                           .galleryGroups.groupIDToFilesMap[currentGroupId!]!,
                       selectedFiles: widget.selectedFiles,
                       showSelectAll: widget.showSelectAll,
+                      showGallerySettingCTA: widget.showGallerySettingsCTA,
                     ),
                   ),
                 ),

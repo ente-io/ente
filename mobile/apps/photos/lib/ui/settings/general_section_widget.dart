@@ -170,7 +170,9 @@ class GeneralSectionWidget extends StatelessWidget {
   void _onGallerySettingsTapped(BuildContext context) {
     routeToPage(
       context,
-      const GallerySettingsScreen(),
+      const GallerySettingsScreen(
+        fromGallerySettingsCTA: false,
+      ),
     );
   }
 }

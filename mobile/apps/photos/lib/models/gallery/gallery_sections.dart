@@ -24,6 +24,7 @@ class GalleryGroups {
   final String tagPrefix;
   final bool showSelectAll;
   final _logger = Logger("GalleryGroups");
+  final bool showGallerySettingsCTA;
 
   //TODO: Add support for sort order
   final bool sortOrderAsc;
@@ -43,6 +44,7 @@ class GalleryGroups {
     required this.showSelectAll,
     this.limitSelectionToOne = false,
     this.fileToJumpScrollTo,
+    this.showGallerySettingsCTA = false,
   }) {
     init();
     if (!groupType.showGroupHeader()) {
@@ -195,7 +197,7 @@ class GalleryGroups {
       final maxOffset = minOffset +
           (numberOfGridRows * tileHeight) +
           (numberOfGridRows - 1) * spacing +
-          groupHeaderExtent!;
+          groupHeaderExtent;
       final bodyFirstIndex = firstIndex + 1;
 
       groupLayouts.add(
@@ -204,7 +206,7 @@ class GalleryGroups {
           lastIndex: lastIndex,
           minOffset: minOffset,
           maxOffset: maxOffset,
-          headerExtent: groupHeaderExtent!,
+          headerExtent: groupHeaderExtent,
           tileHeight: tileHeight,
           spacing: spacing,
           builder: (context, rowIndex) {
@@ -218,6 +220,8 @@ class GalleryGroups {
                   filesInGroup: groupIDToFilesMap[groupID]!,
                   selectedFiles: selectedFiles,
                   showSelectAll: showSelectAll && !limitSelectionToOne,
+                  showGallerySettingCTA:
+                      rowIndex == 0 && showGallerySettingsCTA,
                 );
               } else {
                 return const SizedBox(height: spacing);
