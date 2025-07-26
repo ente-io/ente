@@ -82,7 +82,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "あなたの登録したメールアドレスから${supportEmail} にメールを送ってください";
 
   static String m26(count, storageSaved) =>
-      "お掃除しました ${Intl.plural(count, other: '${count} 個の重複ファイル')}, (${storageSaved}が開放されます！)";
+      "お掃除しました ${Intl.plural(count, one: '${count} 個の重複ファイル', other: '${count} 個の重複ファイル')}, (${storageSaved}が開放されます！)";
 
   static String m27(count, formattedSize) =>
       "${count} 個のファイル、それぞれ${formattedSize}";
@@ -184,7 +184,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m76(name) => "${name}と車で旅行！";
 
-  static String m77(count) => "${Intl.plural(count, other: '${count} 個の結果')}";
+  static String m77(count) =>
+      "${Intl.plural(count, one: '${count} 個の結果', other: '${count} 個の結果')}";
 
   static String m78(snapshotLength, searchLength) =>
       "セクションの長さの不一致: ${snapshotLength} != ${searchLength}";
@@ -265,7 +266,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m114(email) => "<green>${email}</green>にメールを送りました";
 
-  static String m116(count) => "${Intl.plural(count, other: '${count} 年前')}";
+  static String m116(count) =>
+      "${Intl.plural(count, one: '${count} 年前', other: '${count} 年前')}";
 
   static String m117(name) => "あなたと${name}";
 

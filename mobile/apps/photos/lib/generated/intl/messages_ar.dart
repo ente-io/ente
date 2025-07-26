@@ -23,16 +23,16 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m0(title) => "${title} (أنا)";
 
   static String m1(count) =>
-      "${Intl.plural(count, zero: 'إضافة متعاون', one: 'إضافة متعاون', two: 'إضافة متعاونين', other: 'إضافة ${count} متعاونًا')}";
+      "${Intl.plural(count, zero: 'إضافة متعاون', one: 'إضافة متعاون', two: 'إضافة متعاونين', few: 'إضافة ${count} متعاونين', many: 'إضافة ${count} متعاونًا', other: 'إضافة ${count} متعاونًا')}";
 
   static String m2(count) =>
-      "${Intl.plural(count, one: 'إضافة عنصر', two: 'إضافة عنصرين', other: 'إضافة ${count} عنصرًا')}";
+      "${Intl.plural(count, one: 'إضافة عنصر', two: 'إضافة عنصرين', few: 'إضافة ${count} عناصر', many: 'إضافة ${count} عنصرًا', other: 'إضافة ${count} عنصرًا')}";
 
   static String m3(storageAmount, endDate) =>
       "إضافتك بسعة ${storageAmount} صالحة حتى ${endDate}";
 
   static String m4(count) =>
-      "${Intl.plural(count, zero: 'إضافة مشاهد', one: 'إضافة مشاهد', two: 'إضافة مشاهدين', other: 'إضافة ${count} مشاهدًا')}";
+      "${Intl.plural(count, zero: 'إضافة مشاهد', one: 'إضافة مشاهد', two: 'إضافة مشاهدين', few: 'إضافة ${count} مشاهدين', many: 'إضافة ${count} مشاهدًا', other: 'إضافة ${count} مشاهدًا')}";
 
   static String m5(emailOrName) => "تمت الإضافة بواسطة ${emailOrName}";
 
@@ -66,7 +66,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m15(albumName) => "تم إنشاء رابط تعاوني لـ ${albumName}";
 
   static String m16(count) =>
-      "${Intl.plural(count, zero: 'تمت إضافة 0 متعاونين', one: 'تمت إضافة متعاون واحد', two: 'تمت إضافة متعاونين', other: 'تمت إضافة ${count} متعاونًا')}";
+      "${Intl.plural(count, zero: 'تمت إضافة 0 متعاونين', one: 'تمت إضافة متعاون واحد', two: 'تمت إضافة متعاونين', few: 'تمت إضافة ${count} متعاونين', many: 'تمت إضافة ${count} متعاونًا', other: 'تمت إضافة ${count} متعاونًا')}";
 
   static String m17(email, numOfDays) =>
       "أنت على وشك إضافة ${email} كجهة اتصال موثوقة. سيكون بإمكانهم استعادة حسابك إذا كنت غائبًا لمدة ${numOfDays} أيام.";
@@ -80,7 +80,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m20(endpoint) => "متصل بـ ${endpoint}";
 
   static String m21(count) =>
-      "${Intl.plural(count, one: 'حذف عنصر واحد', two: 'حذف عنصرين', other: 'حذف ${count} عنصرًا')}";
+      "${Intl.plural(count, one: 'حذف عنصر واحد', two: 'حذف عنصرين', few: 'حذف ${count} عناصر', many: 'حذف ${count} عنصرًا', other: 'حذف ${count} عنصرًا')}";
 
   static String m22(count) =>
       "هل تريد أيضًا حذف الصور (والمقاطع) الموجودة في هذه الألبومات ${count} من <bold>كافة</bold> الألبومات الأخرى التي تشترك فيها؟";
@@ -95,7 +95,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "يرجى إرسال بريد إلكتروني إلى ${supportEmail} من عنوان بريدك الإلكتروني المسجل";
 
   static String m26(count, storageSaved) =>
-      "لقد قمت بتنظيف ${Intl.plural(count, one: 'ملف مكرر واحد', two: 'ملفين مكررين', other: '${count} ملفًا مكررًا')}، مما وفر ${storageSaved}!";
+      "لقد قمت بتنظيف ${Intl.plural(count, one: 'ملف مكرر واحد', two: 'ملفين مكررين', few: '${count} ملفات مكررة', many: '${count} ملفًا مكررًا', other: '${count} ملفًا مكررًا')}، مما وفر ${storageSaved}!";
 
   static String m27(count, formattedSize) =>
       "${count} ملفات، ${formattedSize} لكل منها";
@@ -116,10 +116,10 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m34(name) => "الاستمتاع بالطعام مع ${name}";
 
   static String m35(count, formattedNumber) =>
-      "${Intl.plural(count, one: 'ملف واحد', two: 'ملفان', other: '${formattedNumber} ملفًا')} على هذا الجهاز تم نسخه احتياطيًا بأمان";
+      "${Intl.plural(count, one: 'ملف واحد', two: 'ملفان', few: '${formattedNumber} ملفات', many: '${formattedNumber} ملفًا', other: '${formattedNumber} ملفًا')} على هذا الجهاز تم نسخه احتياطيًا بأمان";
 
   static String m36(count, formattedNumber) =>
-      "${Intl.plural(count, one: 'ملف واحد', two: 'ملفان', other: '${formattedNumber} ملفًا')} في هذا الألبوم تم نسخه احتياطيًا بأمان";
+      "${Intl.plural(count, one: 'ملف واحد', two: 'ملفان', few: '${formattedNumber} ملفات', many: '${formattedNumber} ملفًا', other: '${formattedNumber} ملفًا')} في هذا الألبوم تم نسخه احتياطيًا بأمان";
 
   static String m37(storageAmountInGB) =>
       "${storageAmountInGB} جيجابايت مجانية في كل مرة يشترك فيها شخص بخطة مدفوعة ويطبق رمزك";
@@ -132,7 +132,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m40(sizeInMBorGB) => "تحرير ${sizeInMBorGB}";
 
   static String m41(count, formattedSize) =>
-      "${Intl.plural(count, one: 'يمكن حذفه من الجهاز لتحرير ${formattedSize}', two: 'يمكن حذفهما من الجهاز لتحرير ${formattedSize}', other: 'يمكن حذفها من الجهاز لتحرير ${formattedSize}')}";
+      "${Intl.plural(count, one: 'يمكن حذفه من الجهاز لتحرير ${formattedSize}', two: 'يمكن حذفهما من الجهاز لتحرير ${formattedSize}', few: 'يمكن حذفها من الجهاز لتحرير ${formattedSize}', many: 'يمكن حذفها من الجهاز لتحرير ${formattedSize}', other: 'يمكن حذفها من الجهاز لتحرير ${formattedSize}')}";
 
   static String m42(currentlyProcessing, totalCount) =>
       "جارٍ المعالجة ${currentlyProcessing} / ${totalCount}";
@@ -154,10 +154,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "سيؤدي هذا إلى ربط ${personName} بـ ${email}";
 
   static String m50(count, formattedCount) =>
-      "${Intl.plural(count, zero: 'لا توجد ذكريات', one: 'ذكرى واحدة', two: 'ذكريتان', other: '${formattedCount} ذكرى')}";
+      "${Intl.plural(count, zero: 'لا توجد ذكريات', one: 'ذكرى واحدة', two: 'ذكريتان', few: '${formattedCount} ذكريات', many: '${formattedCount} ذكرى', other: '${formattedCount} ذكرى')}";
 
   static String m51(count) =>
-      "${Intl.plural(count, one: 'نقل عنصر', two: 'نقل عنصرين', other: 'نقل ${count} عنصرًا')}";
+      "${Intl.plural(count, one: 'نقل عنصر', two: 'نقل عنصرين', few: 'نقل ${count} عناصر', many: 'نقل ${count} عنصرًا', other: 'نقل ${count} عنصرًا')}";
 
   static String m52(albumName) => "تم النقل بنجاح إلى ${albumName}";
 
@@ -181,10 +181,10 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m60(name, age) => "${name} سيبلغ ${age} قريبًا";
 
   static String m61(count) =>
-      "${Intl.plural(count, zero: 'لا توجد صور', one: 'صورة واحدة', two: 'صورتان', other: '${count} صورة')}";
+      "${Intl.plural(count, zero: 'لا توجد صور', one: 'صورة واحدة', two: 'صورتان', few: '${count} صور', many: '${count} صورة', other: '${count} صورة')}";
 
   static String m62(count) =>
-      "${Intl.plural(count, zero: 'لا توجد صور', one: 'صورة واحدة', two: 'صورتان', other: '${count} صورة')}";
+      "${Intl.plural(count, zero: 'لا توجد صور', one: 'صورة واحدة', two: 'صورتان', few: '${count} صور', many: '${count} صورة', other: '${count} صورة')}";
 
   static String m63(endDate) =>
       "التجربة المجانية صالحة حتى ${endDate}.\nيمكنك اختيار خطة مدفوعة بعد ذلك.";
@@ -221,7 +221,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m76(name) => "رحلة برية مع ${name}";
 
   static String m77(count) =>
-      "${Intl.plural(count, other: '${count} النتائج التي تم العثور عليها')}";
+      "${Intl.plural(count, one: '${count} النتائج التي تم العثور عليها', other: '${count} النتائج التي تم العثور عليها')}";
 
   static String m78(snapshotLength, searchLength) =>
       "عدم تطابق طول الأقسام: ${snapshotLength} != ${searchLength}";
@@ -281,12 +281,12 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m100(email) => "هذا هو معرّف التحقق الخاص بـ ${email}";
 
   static String m101(count) =>
-      "${Intl.plural(count, one: 'هذا الأسبوع، قبل سنة', two: 'هذا الأسبوع، قبل سنتين', other: 'هذا الأسبوع، قبل ${count} سنة')}";
+      "${Intl.plural(count, one: 'هذا الأسبوع، قبل سنة', two: 'هذا الأسبوع، قبل سنتين', few: 'هذا الأسبوع، قبل ${count} سنوات', many: 'هذا الأسبوع، قبل ${count} سنة', other: 'هذا الأسبوع، قبل ${count} سنة')}";
 
   static String m102(dateFormat) => "${dateFormat} عبر السنين";
 
   static String m103(count) =>
-      "${Intl.plural(count, zero: 'قريبًا', one: 'يوم واحد', two: 'يومان', other: '${count} يومًا')}";
+      "${Intl.plural(count, zero: 'قريبًا', one: 'يوم واحد', two: 'يومان', few: '${count} أيام', many: '${count} يومًا', other: '${count} يومًا')}";
 
   static String m104(year) => "رحلة في ${year}";
 
@@ -309,7 +309,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m112(name) => "عرض ${name} لإلغاء الربط";
 
   static String m113(count) =>
-      "${Intl.plural(count, zero: 'تمت إضافة 0 مشاهدين', one: 'تمت إضافة مشاهد واحد', two: 'تمت إضافة مشاهدين', other: 'تمت إضافة ${count} مشاهدًا')}";
+      "${Intl.plural(count, zero: 'تمت إضافة 0 مشاهدين', one: 'تمت إضافة مشاهد واحد', two: 'تمت إضافة مشاهدين', few: 'تمت إضافة ${count} مشاهدين', many: 'تمت إضافة ${count} مشاهدًا', other: 'تمت إضافة ${count} مشاهدًا')}";
 
   static String m114(email) =>
       "لقد أرسلنا بريدًا إلكترونيًا إلى <green>${email}</green>";
@@ -317,7 +317,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m115(name) => "أتمنى لـ${name} عيد ميلاد سعيد! 🎉";
 
   static String m116(count) =>
-      "${Intl.plural(count, one: 'قبل سنة', two: 'قبل سنتين', other: 'قبل ${count} سنة')}";
+      "${Intl.plural(count, one: 'قبل سنة', two: 'قبل سنتين', few: 'قبل ${count} سنوات', many: 'قبل ${count} سنة', other: 'قبل ${count} سنة')}";
 
   static String m117(name) => "أنت و ${name}";
 

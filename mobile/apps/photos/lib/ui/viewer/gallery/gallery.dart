@@ -55,6 +55,8 @@ class Gallery extends StatefulWidget {
   /// will select even when no other item is selected.
   final bool limitSelectionToOne;
 
+  final bool addHeaderOrFooterEmptyState;
+
   /// When true, the gallery will be in selection mode. Tapping on any item
   /// will select it even when no other item is selected. This is only used to
   /// make selection possible without long pressing. If a gallery has selected
@@ -77,6 +79,7 @@ class Gallery extends StatefulWidget {
     this.removalEventTypes = const {},
     this.header,
     this.footer = const SizedBox(height: 212),
+    this.addHeaderOrFooterEmptyState = true,
     this.emptyState = const EmptyState(),
     this.scrollBottomSafeArea = 120.0,
     this.albumName = '',
@@ -396,6 +399,7 @@ class GalleryState extends State<Gallery> {
         reloadEvent: widget.reloadEvent,
         header: widget.header,
         footer: widget.footer,
+        addHeaderOrFooterEmptyState: widget.addHeaderOrFooterEmptyState,
         selectedFiles: widget.selectedFiles,
         showSelectAllByDefault:
             widget.showSelectAllByDefault && widget.groupType.showGroupHeader(),

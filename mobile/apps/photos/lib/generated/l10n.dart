@@ -12315,6 +12315,86 @@ class S {
       args: [],
     );
   }
+
+  /// `Edit auto-add people`
+  String get editAutoAddPeople {
+    return Intl.message(
+      'Edit auto-add people',
+      name: 'editAutoAddPeople',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Auto-add people`
+  String get autoAddPeople {
+    return Intl.message(
+      'Auto-add people',
+      name: 'autoAddPeople',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Should the files related to the person that were previously selected in smart albums be removed?`
+  String get shouldRemoveFilesSmartAlbumsDesc {
+    return Intl.message(
+      'Should the files related to the person that were previously selected in smart albums be removed?',
+      name: 'shouldRemoveFilesSmartAlbumsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Adding photos`
+  String get addingPhotos {
+    return Intl.message(
+      'Adding photos',
+      name: 'addingPhotos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Getting ready`
+  String get gettingReady {
+    return Intl.message(
+      'Getting ready',
+      name: 'gettingReady',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add some photos or pick `
+  String get addSomePhotosDesc1 {
+    return Intl.message(
+      'Add some photos or pick ',
+      name: 'addSomePhotosDesc1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `familiar faces`
+  String get addSomePhotosDesc2 {
+    return Intl.message(
+      'familiar faces',
+      name: 'addSomePhotosDesc2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `\nto begin with`
+  String get addSomePhotosDesc3 {
+    return Intl.message(
+      '\nto begin with',
+      name: 'addSomePhotosDesc3',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
@@ -12349,6 +12429,7 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
       Locale.fromSubtags(languageCode: 'lt'),
       Locale.fromSubtags(languageCode: 'lv'),
       Locale.fromSubtags(languageCode: 'ml'),
+      Locale.fromSubtags(languageCode: 'ms'),
       Locale.fromSubtags(languageCode: 'nl'),
       Locale.fromSubtags(languageCode: 'no'),
       Locale.fromSubtags(languageCode: 'or'),

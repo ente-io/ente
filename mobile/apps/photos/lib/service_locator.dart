@@ -14,6 +14,7 @@ import "package:photos/services/machine_learning/face_ml/face_recognition_servic
 import "package:photos/services/magic_cache_service.dart";
 import "package:photos/services/memories_cache_service.dart";
 import "package:photos/services/permission/service.dart";
+import "package:photos/services/smart_albums_service.dart";
 import "package:photos/services/smart_memories_service.dart";
 import "package:photos/services/storage_bonus_service.dart";
 import "package:photos/services/sync/trash_sync_service.dart";
@@ -175,4 +176,10 @@ DownloadManager get downloadManager {
     ServiceLocator.instance.nonEnteDio,
   );
   return _downloadManager!;
+}
+
+SmartAlbumsService? _smartAlbumsService;
+SmartAlbumsService get smartAlbumsService {
+  _smartAlbumsService ??= SmartAlbumsService();
+  return _smartAlbumsService!;
 }

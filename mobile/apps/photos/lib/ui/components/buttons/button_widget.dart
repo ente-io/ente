@@ -28,6 +28,7 @@ enum ButtonAction {
 
 class ButtonWidget extends StatelessWidget {
   final IconData? icon;
+  final Widget? iconWidget;
   final String? labelText;
   final ButtonType buttonType;
   final FutureVoidCallback? onTap;
@@ -70,6 +71,7 @@ class ButtonWidget extends StatelessWidget {
     required this.buttonType,
     this.buttonSize = ButtonSize.large,
     this.icon,
+    this.iconWidget,
     this.labelText,
     this.onTap,
     this.shouldStickToDarkTheme = false,
@@ -142,6 +144,7 @@ class ButtonWidget extends StatelessWidget {
       onTap: onTap,
       labelText: labelText,
       icon: icon,
+      iconWidget: iconWidget,
       buttonAction: buttonAction,
       shouldSurfaceExecutionStates: shouldSurfaceExecutionStates,
       progressStatus: progressStatus,
@@ -156,6 +159,7 @@ class ButtonChildWidget extends StatefulWidget {
   final ButtonType buttonType;
   final String? labelText;
   final IconData? icon;
+  final Widget? iconWidget;
   final bool isDisabled;
   final ButtonSize buttonSize;
   final ButtonAction? buttonAction;
@@ -176,6 +180,7 @@ class ButtonChildWidget extends StatefulWidget {
     this.onTap,
     this.labelText,
     this.icon,
+    this.iconWidget,
     this.buttonAction,
     super.key,
   });
@@ -272,7 +277,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
                                     ),
                                   ),
                             widget.icon == null
-                                ? const SizedBox.shrink()
+                                ? widget.iconWidget ?? const SizedBox.shrink()
                                 : Icon(
                                     widget.icon,
                                     size: 20,
@@ -297,13 +302,16 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 widget.icon == null
-                                    ? const SizedBox.shrink()
+                                    ? widget.iconWidget ??
+                                        const SizedBox.shrink()
                                     : Icon(
                                         widget.icon,
                                         size: 20,
                                         color: iconColor,
                                       ),
-                                widget.icon == null || widget.labelText == null
+                                widget.icon == null &&
+                                            widget.iconWidget == null ||
+                                        widget.labelText == null
                                     ? const SizedBox.shrink()
                                     : const SizedBox(width: 8),
                                 widget.labelText == null

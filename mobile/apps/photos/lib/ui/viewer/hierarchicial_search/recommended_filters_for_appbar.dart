@@ -62,6 +62,10 @@ class _RecommendedFiltersForAppbarState
 
   @override
   Widget build(BuildContext context) {
+    if (_recommendations.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: SizedBox(

@@ -1053,6 +1053,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ce visage n\'a pas encore été regroupé, veuillez revenir plus tard"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Reconnaissance faciale"),
+        "faceThumbnailGenerationFailed": MessageLookupByLibrary.simpleMessage(
+            "Impossible de créer des miniatures de visage"),
         "faces": MessageLookupByLibrary.simpleMessage("Visages"),
         "failed": MessageLookupByLibrary.simpleMessage("Échec"),
         "failedToApplyCode": MessageLookupByLibrary.simpleMessage(
@@ -1090,6 +1092,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "feastingWithThem": m34,
         "feedback": MessageLookupByLibrary.simpleMessage("Commentaires"),
         "file": MessageLookupByLibrary.simpleMessage("Fichier"),
+        "fileAnalysisFailed": MessageLookupByLibrary.simpleMessage(
+            "Impossible d\'analyser le fichier"),
         "fileFailedToSaveToGallery": MessageLookupByLibrary.simpleMessage(
             "Échec de l\'enregistrement dans la galerie"),
         "fileInfoAddDescHint":

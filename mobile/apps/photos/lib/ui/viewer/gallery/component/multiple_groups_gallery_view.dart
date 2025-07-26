@@ -43,6 +43,7 @@ class MultipleGroupsGalleryView extends StatelessWidget {
   final Logger logger;
   final bool showSelectAllByDefault;
   final bool isScrollablePositionedList;
+  final bool addHeaderOrFooterEmptyState;
 
   const MultipleGroupsGalleryView({
     required this.itemScroller,
@@ -50,6 +51,7 @@ class MultipleGroupsGalleryView extends StatelessWidget {
     required this.disableScroll,
     this.header,
     this.footer,
+    this.addHeaderOrFooterEmptyState = true,
     required this.emptyState,
     required this.asyncLoader,
     this.reloadEvent,
@@ -81,7 +83,7 @@ class MultipleGroupsGalleryView extends StatelessWidget {
       },
       emptyResultBuilder: (_) {
         final List<Widget> children = [];
-        if (header != null) {
+        if (header != null && addHeaderOrFooterEmptyState) {
           children.add(header!);
         }
         children.add(
@@ -89,7 +91,7 @@ class MultipleGroupsGalleryView extends StatelessWidget {
             child: emptyState,
           ),
         );
-        if (footer != null) {
+        if (footer != null && addHeaderOrFooterEmptyState) {
           children.add(footer!);
         }
         return Column(

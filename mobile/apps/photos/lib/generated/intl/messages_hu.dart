@@ -52,7 +52,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m37(storageAmountInGB) =>
       "${storageAmountInGB} GB minden alkalommal, amikor valaki fizetős csomagra fizet elő és felhasználja a kódodat";
 
-  static String m44(count) => "${Intl.plural(count, other: '${count} elem')}";
+  static String m44(count) =>
+      "${Intl.plural(count, one: '${count} elem', other: '${count} elem')}";
 
   static String m47(expiryTime) => "Hivatkozás lejár ${expiryTime} ";
 
@@ -102,8 +103,6 @@ class MessageLookup extends MessageLookupByLibrary {
       "Emellett ${storageAmountInGB} GB-ot kapnak";
 
   static String m100(email) => "Ez ${email} ellenőrző azonosítója";
-
-  static String m111(email) => "${email} ellenőrzése";
 
   static String m114(email) =>
       "E-mailt küldtünk a következő címre: <green>${email}</green>";
@@ -713,7 +712,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "verify": MessageLookupByLibrary.simpleMessage("Hitelesítés"),
         "verifyEmail":
             MessageLookupByLibrary.simpleMessage("Emailcím megerősítés"),
-        "verifyEmailID": m111,
         "verifyPassword":
             MessageLookupByLibrary.simpleMessage("Jelszó megerősítése"),
         "verifyingRecoveryKey": MessageLookupByLibrary.simpleMessage(

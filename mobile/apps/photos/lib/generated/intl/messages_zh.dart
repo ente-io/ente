@@ -134,7 +134,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m43(name) => "与 ${name} 徒步";
 
-  static String m44(count) => "${Intl.plural(count, other: '${count} 个项目')}";
+  static String m44(count) =>
+      "${Intl.plural(count, one: '${count} 个项目', other: '${count} 个项目')}";
 
   static String m45(name) => "最后一次与 ${name} 相聚";
 
@@ -294,7 +295,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m115(name) => "祝 ${name} 生日快乐！ 🎉";
 
-  static String m116(count) => "${Intl.plural(count, other: '${count} 年前')}";
+  static String m116(count) =>
+      "${Intl.plural(count, one: '${count} 年前', other: '${count} 年前')}";
 
   static String m117(name) => "您和 ${name}";
 
@@ -856,6 +858,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "faceNotClusteredYet":
             MessageLookupByLibrary.simpleMessage("人脸尚未聚类，请稍后再来"),
         "faceRecognition": MessageLookupByLibrary.simpleMessage("人脸识别"),
+        "faceThumbnailGenerationFailed":
+            MessageLookupByLibrary.simpleMessage("无法生成人脸缩略图"),
         "faces": MessageLookupByLibrary.simpleMessage("人脸"),
         "failed": MessageLookupByLibrary.simpleMessage("失败"),
         "failedToApplyCode": MessageLookupByLibrary.simpleMessage("无法使用此代码"),
@@ -884,6 +888,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "feastingWithThem": m34,
         "feedback": MessageLookupByLibrary.simpleMessage("反馈"),
         "file": MessageLookupByLibrary.simpleMessage("文件"),
+        "fileAnalysisFailed": MessageLookupByLibrary.simpleMessage("无法分析文件"),
         "fileFailedToSaveToGallery":
             MessageLookupByLibrary.simpleMessage("无法将文件保存到相册"),
         "fileInfoAddDescHint": MessageLookupByLibrary.simpleMessage("添加说明..."),

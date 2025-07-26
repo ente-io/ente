@@ -53,7 +53,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m37(storageAmountInGB) =>
       "${storageAmountInGB} GB varje gång någon registrerar sig för en betalplan och tillämpar din kod";
 
-  static String m44(count) => "${Intl.plural(count, other: '${count} objekt')}";
+  static String m44(count) =>
+      "${Intl.plural(count, one: '${count} objekt', other: '${count} objekt')}";
 
   static String m47(expiryTime) => "Länken upphör att gälla ${expiryTime}";
 
@@ -73,7 +74,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "${userEmail} kommer att tas bort från detta delade album\n\nAlla bilder som lagts till av dem kommer också att tas bort från albumet";
 
   static String m77(count) =>
-      "${Intl.plural(count, other: '${count} resultat hittades')}";
+      "${Intl.plural(count, one: '${count} resultat hittades', other: '${count} resultat hittades')}";
 
   static String m83(verificationID) =>
       "Här är mitt verifierings-ID: ${verificationID} för ente.io.";
@@ -102,7 +103,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Vi har skickat ett e-postmeddelande till <green>${email}</green>";
 
   static String m116(count) =>
-      "${Intl.plural(count, other: '${count} år sedan')}";
+      "${Intl.plural(count, one: '${count} år sedan', other: '${count} år sedan')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
