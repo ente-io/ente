@@ -137,6 +137,7 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
       galleryType: GalleryType.homepage,
       groupType: widget.groupType,
       fileToJumpScrollTo: widget.fileToJumpScrollTo,
+      showGallerySettingsCTA: true,
     );
     return GalleryFilesState(
       child: SelectionState(
