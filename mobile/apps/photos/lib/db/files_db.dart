@@ -817,26 +817,6 @@ class FilesDB with SqlDbBase {
     return deduplicatedFiles;
   }
 
-  ///Returns "columnName1 = ?, columnName2 = ?, ..."
-  String _generateUpdateAssignmentsWithPlaceholders({
-    required int? fileGenId,
-    bool omitCollectionId = false,
-  }) {
-    final assignments = <String>[];
-
-    for (String columnName in _columnNames) {
-      if (columnName == columnGeneratedID && fileGenId == null) {
-        continue;
-      }
-      if (columnName == columnCollectionID && omitCollectionId) {
-        continue;
-      }
-      assignments.add("$columnName = ?");
-    }
-
-    return assignments.join(",");
-  }
-
   Map<String, String> _generateColumnsAndPlaceholdersForInsert({
     required int? fileGenId,
   }) {
