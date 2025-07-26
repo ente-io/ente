@@ -207,22 +207,22 @@ export const sidebar = [
                 text: "Migration",
                 collapsed: true,
                 items: [
-                    { text: "Introduction", link: "/auth/migration-guides/" },
+                    { text: "Introduction", link: "/auth/migration/" },
                     {
                         text: "From Authy",
-                        link: "/auth/migration-guides/authy/",
+                        link: "/auth/migration/authy/",
                     },
                     {
                         text: "From Steam",
-                        link: "/auth/migration-guides/steam/",
+                        link: "/auth/migration/steam/",
                     },
                     {
                         text: "From others",
-                        link: "/auth/migration-guides/import",
+                        link: "/auth/migration/import",
                     },
                     {
                         text: "Exporting your data",
-                        link: "/auth/migration-guides/export",
+                        link: "/auth/migration/export",
                     },
                 ],
             },
@@ -239,76 +239,84 @@ export const sidebar = [
         ],
     },
     {
-        text: "Self hosting",
+        text: "Self-hosting",
         collapsed: true,
         items: [
-            { text: "Getting started", link: "/self-hosting/" },
             {
-                text: "Connecting to custom server",
-                link: "/self-hosting/guides/custom-server/",
+                text: "Quickstart",
+                link: "/self-hosting/",
             },
             {
-                text: "Creating accounts",
-                link: "/self-hosting/creating-accounts",
-            },
-            {
-                text: "Configuring your server",
-                link: "/self-hosting/museum",
-            },
-            {
-                text: "Configuring S3",
-                link: "/self-hosting/guides/configuring-s3",
-            },
-            {
-                text: "Reverse proxy",
-                link: "/self-hosting/reverse-proxy",
-            },
-            {
-                text: "Guides",
+                text: "Installation",
                 collapsed: true,
                 items: [
-                    { text: "Introduction", link: "/self-hosting/guides/" },
                     {
-                        text: "Administering your server",
-                        link: "/self-hosting/guides/admin",
+                        text: "Requirements",
+                        link: "/self-hosting/installation/requirements",
                     },
                     {
-                        text: "Configuring CLI for your instance",
-                        link: "/self-hosting/guides/selfhost-cli",
+                        text: "Quickstart script (Recommended)",
+                        link: "/self-hosting/installation/quickstart",
                     },
                     {
-                        text: "Running Ente from source",
-                        link: "/self-hosting/guides/from-source",
+                        text: "Docker Compose",
+                        link: "/self-hosting/installation/compose",
                     },
                     {
-                        text: "Running Ente without Docker",
-                        link: "/self-hosting/guides/standalone-ente",
+                        text: "Manual setup (without Docker)",
+                        link: "/self-hosting/installation/manual",
+                    },
+                    {
+                        text: "Environment variables and defaults",
+                        link: "/self-hosting/installation/env-var",
+                    },
+                    {
+                        text: "Configuration",
+                        link: "/self-hosting/installation/config",
+                    },
+                    {
+                        text: "Post-installation steps",
+                        link: "/self-hosting/installation/post-install/",
+                    },
+                    {
+                        text: "Upgrade",
+                        link: "/self-hosting/installation/upgrade",
                     },
                 ],
             },
             {
-                text: "Troubleshooting",
+                text: "Administration",
                 collapsed: true,
                 items: [
                     {
-                        text: "General",
-                        link: "/self-hosting/troubleshooting/misc",
+                        text: "User management",
+                        link: "/self-hosting/administration/users",
                     },
                     {
-                        text: "Bucket CORS",
-                        link: "/self-hosting/troubleshooting/bucket-cors",
+                        text: "Reverse proxy",
+                        link: "/self-hosting/administration/reverse-proxy",
                     },
                     {
-                        text: "Uploads",
-                        link: "/self-hosting/troubleshooting/uploads",
+                        text: "Object storage",
+                        link: "/self-hosting/administration/object-storage",
                     },
                     {
-                        text: "Docker / quickstart",
-                        link: "/self-hosting/troubleshooting/docker",
+                        text: "Ente CLI",
+                        link: "/self-hosting/administration/cli",
                     },
                     {
-                        text: "Ente CLI secrets",
-                        link: "/self-hosting/troubleshooting/keyring",
+                        text: "Backup",
+                        link: "/self-hosting/administration/backup",
+                    },
+                ],
+            },
+            {
+                text: "Development",
+                collapsed: true,
+                items: [
+                    {
+                        text: "Building mobile apps",
+                        link: "/self-hosting/development/mobile-build",
                     },
                 ],
             },
@@ -321,31 +329,26 @@ export const sidebar = [
                         link: "/self-hosting/guides/tailscale",
                     },
                     {
-                        text: "Ente with External S3",
-                        link: "/self-hosting/guides/external-s3",
+                        text: "Running Ente using systemd",
+                        link: "/self-hosting/guides/systemd",
                     },
                 ],
             },
             {
-                text: "FAQ",
+                text: "Troubleshooting",
                 collapsed: true,
                 items: [
-                    { text: "General", link: "/self-hosting/faq/" },
                     {
-                        text: "Verification code",
-                        link: "/self-hosting/faq/otp",
+                        text: "General",
+                        link: "/self-hosting/troubleshooting/misc",
                     },
                     {
-                        text: "Shared albums",
-                        link: "/self-hosting/faq/sharing",
+                        text: "Uploads",
+                        link: "/self-hosting/troubleshooting/uploads",
                     },
                     {
-                        text: "Backups",
-                        link: "/self-hosting/faq/backup",
-                    },
-                    {
-                        text: "Environment variables",
-                        link: "/self-hosting/faq/environment",
+                        text: "Docker / quickstart",
+                        link: "/self-hosting/troubleshooting/docker",
                     },
                 ],
             },
