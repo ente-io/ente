@@ -6,11 +6,11 @@ description: Fixing Docker-related errors when trying to self-host Ente
 # Troubleshooting Docker-related errors
 
 > [!TIP] Restart after changes
-> 
+>
 > Remember to restart your cluster to ensure changes that you make in the
 > `compose.yaml` and `museum.yaml` get picked up.
-> 
-> ``` shell
+>
+> ```shell
 > docker compose down
 > docker compose up
 > ```
@@ -87,25 +87,25 @@ museum-1    |   /etc/ente/cmd/museum/main.go:124 +0x44c
 museum-1 exited with code 2
 ```
 
-Then the issue is that the password you're using is not the password PostgreSQL is
-expecting.
+Then the issue is that the password you're using is not the password PostgreSQL
+is expecting.
 
 There are 2 possibilities:
 
-1. When you have created  a cluster in `my-ente` directory on
-running `quickstart.sh` and later deleted it, only to create
-another cluster with same `my-ente` directory.
-    
+1.  When you have created a cluster in `my-ente` directory on running
+    `quickstart.sh` and later deleted it, only to create another cluster with
+    same `my-ente` directory.
+
     However, by deleting the directory, the Docker volumes are not deleted.
 
-    Thus the older volumes with previous cluster's credentials are used
-    for new cluster and the error arises.
+    Thus the older volumes with previous cluster's credentials are used for new
+    cluster and the error arises.
 
-    Deletion of the stale Docker volume can solve this. **Be careful**, this will
-    delete all data in those volumes (any thing you uploaded etc). Do this
+    Deletion of the stale Docker volume can solve this. **Be careful**, this
+    will delete all data in those volumes (any thing you uploaded etc). Do this
     if you are sure this is the exact problem.
 
-    ```sh
+    ```shell
     docker volume ls
     ```
 
@@ -122,29 +122,25 @@ another cluster with same `my-ente` directory.
     docker compose down --volumes
     ```
 
-    If you're unsure about removing volumes, another alternative is to rename your
-    `my-ente` folder. Docker uses the folder name to determine the volume name
-    prefix, so giving it a different name will cause Docker to create a volume
-    afresh for it.
+    If you're unsure about removing volumes, another alternative is to rename
+    your `my-ente` folder. Docker uses the folder name to determine the volume
+    name prefix, so giving it a different name will cause Docker to create a
+    volume afresh for it.
 
 ## MinIO provisioning error
-
-If you have used our quickstart script for self-hosting Ente (new users will be
-unaffected) and are using the default MinIO container for object storage, you
-may run into issues while starting the cluster after pulling latest images with
-provisioning MinIO and creating buckets.
-
-You may encounter similar logs while trying to start the cluster:
-
-```
-my-ente-minio-1 ->  | Waiting for minio...
-my-ente-minio-1 ->  | Waiting for minio...
-my-ente-minio-1 ->  | Waiting for minio...
-```
 
 MinIO has deprecated the `mc config` command in favor of `mc alias set`
 resulting in failure in execution of the command for creating bucket using
 `post_start` hook.
+
+You may encounter similar logs while trying to start the cluster if you are
+using the older command (provided by default in `quickstart.sh`):
+
+```
+my-ente-minio-1 ->  | Waiting for minio...
+my-ente-minio-1 ->  | Waiting for minio...
+my-ente-minio-1 ->  | Waiting for minio...
+```
 
 This can be resolved by changing
 `mc config host h0 add http://minio:3200 $minio_user $minio_pass` to

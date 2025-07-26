@@ -281,8 +281,7 @@ export const sidebar = [
                     {
                         text: "Upgrade",
                         link: "/self-hosting/installation/upgrade",
-                    }
-
+                    },
                 ],
             },
             {
@@ -309,7 +308,6 @@ export const sidebar = [
                         text: "Backup",
                         link: "/self-hosting/administration/backup",
                     },
-
                 ],
             },
             {
@@ -318,9 +316,9 @@ export const sidebar = [
                 items: [
                     {
                         text: "Building mobile apps",
-                        link: "/self-hosting/development/mobile-build"
-                    }
-                ]
+                        link: "/self-hosting/development/mobile-build",
+                    },
+                ],
             },
             {
                 text: "Community Guides",

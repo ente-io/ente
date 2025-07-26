@@ -25,8 +25,7 @@ attempt to load `configurations/production.yaml`.
 
 If `credentials-file` is defined and found, it overrides the defaults.
 
-Self-hosted clusters generally use `museum.yaml` file for declaring
-configuration over directly editing `local.yaml`.
+Use `museum.yaml` file for declaring configuration over `local.yaml`.
 
 All configuration values can be overridden via environment variables using the
 `ENTE_` prefix and replacing dots (`.`) or hyphens (`-`) with underscores (`_`).
@@ -100,7 +99,9 @@ your provider's credentials, and set `are_local_buckets` to `false`.
 MinIO uses the port `3200` for API Endpoints. Web Console can be accessed at
 http://localhost:3201 by enabling port `3201` in the Compose file.
 
-If you face any issues related to uploads then check out [CORS](/self-hosting/administration/object-storage#cors-cross-origin-resource-sharing) and [troubleshooting](/self-hosting/troubleshooting/uploads) sections.
+If you face any issues related to uploads then check out
+[CORS](/self-hosting/administration/object-storage#cors-cross-origin-resource-sharing)
+and [troubleshooting](/self-hosting/troubleshooting/uploads) sections.
 
 | Variable                               | Description                                  | Default |
 | -------------------------------------- | -------------------------------------------- | ------- |
@@ -169,7 +170,7 @@ go run tools/gen-random-keys/main.go
 | `internal.silent`                            | Suppress external effects (e.g. email alerts) | `false` |
 | `internal.health-check-url`                  | External healthcheck URL                      |         |
 | `internal.hardcoded-ott`                     | Predefined OTPs for testing                   |         |
-| `internal.hardcoded-ott.emails`              | E-mail addresses with hardcoded OTTs          |  `[]`   |
+| `internal.hardcoded-ott.emails`              | E-mail addresses with hardcoded OTTs          | `[]`    |
 | `internal.hardcoded-ott.local-domain-suffix` | Suffix for which hardcoded OTT is to be used  |         |
 | `internal.hardcoded-ott.local-domain-value`  | Hardcoded OTT value for the above suffix      |         |
 | `internal.admins`                            | List of admin user IDs                        | `[]`    |

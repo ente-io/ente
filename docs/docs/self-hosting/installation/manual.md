@@ -5,74 +5,82 @@ description: Installing and setting up Ente without Docker
 
 # Manual setup (without Docker)
 
-If you wish to run Ente from source without using Docker, follow the steps described below:
+If you wish to run Ente from source without using Docker, follow the steps
+described below:
 
 ## Requirements
 
-1. **Go:** Install Go on your system. This is needed for building Museum (Ente's server)
-    
-    ``` shell
+1. **Go:** Install Go on your system. This is needed for building Museum (Ente's
+   server)
+
+    ```shell
     sudo apt update && sudo apt upgrade
     sudo apt install golang-go
     ```
 
-    Alternatively, you can also download the latest binaries
-    from the [official website](https://go.dev/dl/).
+    Alternatively, you can also download the latest binaries from the
+    [official website](https://go.dev/dl/).
 
-2. **PostgreSQL and `libsodium`:** Install PostgreSQL (database) and `libsodium` (high level API for encryption) via package manager.
-    
-    ``` shell
+2. **PostgreSQL and `libsodium`:** Install PostgreSQL (database) and `libsodium`
+   (high level API for encryption) via package manager.
+
+    ```shell
     sudo apt install postgresql
     sudo apt install libsodium23 libsodium-dev
     ```
 
     Start the database using `systemd` automatically when the system starts.
-    ``` shell
+
+    ```shell
     sudo systemctl enable postgresql
     sudo systemctl start postgresql
     ```
 
     Ensure the database is running using
 
-    ``` shell
+    ```shell
     sudo systemctl status postgresql
     ```
+
 3. **`pkg-config`:** Install `pkg-config` for dependency handling.
-    
-    ``` shell
+
+    ```shell
     sudo apt install pkg-config
     ```
+
 4. **yarn, npm and Node.js:** Needed for building the web application.
 
     Install npm and Node using your package manager.
 
-    ``` shell
+    ```shell
     sudo apt install npm nodejs
     ```
 
-    Install yarn by following the [official documentation](https://yarnpkg.com/getting-started/install)
+    Install yarn by following the
+    [official documentation](https://yarnpkg.com/getting-started/install)
 
 5. **Git:** Needed for cloning the repository and pulling in latest changes
 
 6. **Caddy:** Used for setting reverse proxy and file servers
 
 7. **Object Storage:** Ensure you have an object storage configured for usage,
-    needed for storing files. You can choose to run MinIO or Garage locally
-    without Docker, however, an external bucket will be reliable and suited
-    for long-term storage.
+   needed for storing files. You can choose to run MinIO or Garage locally
+   without Docker, however, an external bucket will be reliable and suited for
+   long-term storage.
 
 ## Step 1: Clone the repository
 
 Start by cloning Ente's repository from GitHub to your local machine.
 
-``` shell
+```shell
 git clone https://github.com/ente-io/ente
 ```
 
 ## Step 2: Configure Museum (Ente's server)
 
-1. Install all the needed dependencies for the server.
-    ``` shell
+1.  Install all the needed dependencies for the server.
+
+    ```shell
     # Change into server directory, where the source code for Museum is
     # present inside the repo
     cd ente/server
@@ -81,33 +89,34 @@ git clone https://github.com/ente-io/ente
     go mod tidy
     ```
 
-2. Build the server. The server binary should be available as `./main`
-relative to `server` directory
+2.  Build the server. The server binary should be available as `./main` relative
+    to `server` directory
 
-    ``` shell
-    go build cmd/museum/main.go
+        ``` shell
+        go build cmd/museum/main.go
+        ```
+
+3.  Create `museum.yaml` file inside `server` for configuring the needed
+    variables. You can copy the templated configuration file for editing with
+    ease.
+
+    ```shell
+    cp config/example.yaml ./museum.yaml
     ```
 
-3. Create `museum.yaml` file inside `server` for configuring the needed variables.
-    You can copy the templated configuration file for editing with ease.
+4.  Run the server
 
-    ``` shell
-    cp config/example.yaml ./museum.yaml    
-    ```
-
-4. Run the server
-
-    ``` shell
+    ```shell
     ./main
     ```
-    
+
     Museum should be accessible at `http://localhost:8080`
 
 ## Step 3: Configure Web Application
 
 1. Install the dependencies for web application. Enable corepack if prompted.
-    
-    ``` shell
+
+    ```shell
     # Change into web directory, this is where all the applications
     # will be managed and built
     cd web
@@ -116,15 +125,17 @@ relative to `server` directory
     yarn install
     ```
 
-2. Configure the environment variables in your corresponding shell's configuration file 
-    (`.bashrc`, `.zshrc`)
-    ``` shell
+2. Configure the environment variables in your corresponding shell's
+   configuration file (`.bashrc`, `.zshrc`)
+    ```shell
     # Replace this with actual endpoint for Museum
     export NEXT_PUBLIC_ENTE_ENDPOINT=http://localhost:8080
     # Replace this with actual endpoint for Albums
     export NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT=http://localhost:3002
     ```
-3. Build the needed applications (Photos, Accounts, Auth, Cast) as per your needs:
+3. Build the needed applications (Photos, Accounts, Auth, Cast) as per your
+   needs:
+
     ```shell
     # These commands are executed inside web directory
     # Build photos. Build output to be served is present at apps/photos/out
@@ -141,9 +152,10 @@ relative to `server` directory
     ```
 
 4. Copy the output files to `/var/www/ente/apps` for easier management.
-    ``` shell
+
+    ```shell
     mkdir -p /var/www/ente/apps
-    
+
     # Photos
     sudo cp -r apps/photos/out /var/www/ente/apps/photos
     # Accounts
@@ -154,8 +166,10 @@ relative to `server` directory
     sudo cp -r apps/cast/out /var/www/ente/apps/cast
     ```
 
-4. Set up file server using Caddy by editing `Caddyfile`, present at `/etc/caddy/Caddyfile`.
-    ``` groovy
+5. Set up file server using Caddy by editing `Caddyfile`, present at
+   `/etc/caddy/Caddyfile`.
+
+    ```groovy
     # Replace the ports with domain names if you have subdomains configured and need HTTPS
     :3000 {
         root * /var/www/ente/apps/out/photos
@@ -188,8 +202,14 @@ relative to `server` directory
     }
     ```
 
-    The web application for Ente Photos should be accessible at http://localhost:3000, check out the [default ports](/self-hosting/installation/env-var#ports) for more information.
+    The web application for Ente Photos should be accessible at
+    http://localhost:3000, check out the
+    [default ports](/self-hosting/installation/env-var#ports) for more
+    information.
 
 ::: tip
-Check out [post-installation steps](/self-hosting/installation/post-install/) for further usage.
+
+Check out [post-installations steps](/self-hosting/installation/post-install/)
+for further usage.
+
 :::
