@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
@@ -53,6 +54,10 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
 
   @override
   Widget build(BuildContext context) {
+    final areIdsChanged = currentConfig?.personIDs != null
+        ? !setEquals(_selectedPeople.personIds, currentConfig!.personIDs)
+        : _selectedPeople.personIds.isNotEmpty;
+
     return Scaffold(
       bottomNavigationBar: Padding(
         padding: EdgeInsets.fromLTRB(
@@ -69,98 +74,107 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
               buttonSize: ButtonSize.large,
               labelText: S.of(context).save,
               shouldSurfaceExecutionStates: false,
-              onTap: () async {
-                final dialog = createProgressDialog(
-                  context,
-                  S.of(context).pleaseWait,
-                  isDismissible: true,
-                );
+              isDisabled: !areIdsChanged,
+              onTap: areIdsChanged
+                  ? () async {
+                      final dialog = createProgressDialog(
+                        context,
+                        S.of(context).pleaseWait,
+                        isDismissible: true,
+                      );
 
-                if (_selectedPeople.personIds.length ==
-                        currentConfig?.personIDs.length &&
-                    _selectedPeople.personIds
-                        .toSet()
-                        .difference(currentConfig?.personIDs.toSet() ?? {})
-                        .isEmpty) {
-                  Navigator.pop(context);
-                  return;
-                }
+                      if (_selectedPeople.personIds.length ==
+                              currentConfig?.personIDs.length &&
+                          _selectedPeople.personIds
+                              .toSet()
+                              .difference(
+                                currentConfig?.personIDs.toSet() ?? {},
+                              )
+                              .isEmpty) {
+                        Navigator.pop(context);
+                        return;
+                      }
 
-                try {
-                  await dialog.show();
-                  SmartAlbumConfig newConfig;
+                      try {
+                        await dialog.show();
+                        SmartAlbumConfig newConfig;
 
-                  if (currentConfig == null) {
-                    final infoMap = <String, PersonInfo>{};
+                        if (currentConfig == null) {
+                          final infoMap = <String, PersonInfo>{};
 
-                    // Add files which are needed
-                    for (final personId in _selectedPeople.personIds) {
-                      infoMap[personId] = (updatedAt: 0, addedFiles: {});
-                    }
-
-                    newConfig = SmartAlbumConfig(
-                      collectionId: widget.collectionId,
-                      personIDs: _selectedPeople.personIds,
-                      infoMap: infoMap,
-                    );
-                  } else {
-                    final removedPersonIds = currentConfig!.personIDs
-                        .toSet()
-                        .difference(_selectedPeople.personIds.toSet())
-                        .toList();
-
-                    if (removedPersonIds.isNotEmpty) {
-                      final toDelete = await removeFilesDialog(context);
-                      await dialog.show();
-
-                      if (toDelete) {
-                        for (final personId in removedPersonIds) {
-                          final files =
-                              currentConfig!.infoMap[personId]?.addedFiles;
-
-                          final enteFiles = await FilesDB.instance
-                              .getAllFilesGroupByCollectionID(
-                            files?.toList() ?? [],
-                          );
-
-                          final collection = CollectionsService.instance
-                              .getCollectionByID(widget.collectionId);
-
-                          if (files?.isNotEmpty ?? false) {
-                            await CollectionActions(CollectionsService.instance)
-                                .moveFilesFromCurrentCollection(
-                              context,
-                              collection!,
-                              enteFiles[widget.collectionId] ?? [],
-                              isHidden: collection.isHidden(),
-                            );
+                          // Add files which are needed
+                          for (final personId in _selectedPeople.personIds) {
+                            infoMap[personId] = (updatedAt: 0, addedFiles: {});
                           }
+
+                          newConfig = SmartAlbumConfig(
+                            collectionId: widget.collectionId,
+                            personIDs: _selectedPeople.personIds,
+                            infoMap: infoMap,
+                          );
+                        } else {
+                          final removedPersonIds = currentConfig!.personIDs
+                              .toSet()
+                              .difference(_selectedPeople.personIds.toSet())
+                              .toList();
+
+                          if (removedPersonIds.isNotEmpty) {
+                            final toDelete = await removeFilesDialog(context);
+                            await dialog.show();
+
+                            if (toDelete) {
+                              for (final personId in removedPersonIds) {
+                                final files = currentConfig!
+                                    .infoMap[personId]?.addedFiles;
+
+                                final enteFiles = await FilesDB.instance
+                                    .getAllFilesGroupByCollectionID(
+                                  files?.toList() ?? [],
+                                );
+
+                                final collection = CollectionsService.instance
+                                    .getCollectionByID(widget.collectionId);
+
+                                if (files?.isNotEmpty ?? false) {
+                                  await CollectionActions(
+                                    CollectionsService.instance,
+                                  ).moveFilesFromCurrentCollection(
+                                    context,
+                                    collection!,
+                                    enteFiles[widget.collectionId] ?? [],
+                                    isHidden: collection.isHidden(),
+                                  );
+                                }
+                              }
+
+                              Bus.instance.fire(
+                                CollectionUpdatedEvent(
+                                  widget.collectionId,
+                                  [],
+                                  "smart_album_people",
+                                ),
+                              );
+                            }
+                          }
+                          newConfig = currentConfig!.getUpdatedConfig(
+                            _selectedPeople.personIds,
+                          );
                         }
 
-                        Bus.instance.fire(
-                          CollectionUpdatedEvent(
-                            widget.collectionId,
-                            [],
-                            "smart_album_people",
-                          ),
+                        await smartAlbumsService.saveConfig(newConfig);
+                        unawaited(smartAlbumsService.syncSmartAlbums());
+
+                        await dialog.hide();
+                        Navigator.pop(context);
+                      } catch (e) {
+                        await dialog.hide();
+                        await showGenericErrorDialog(
+                          context: context,
+                          error: e,
                         );
                       }
                     }
-                    newConfig = currentConfig!.getUpdatedConfig(
-                      _selectedPeople.personIds,
-                    );
-                  }
-
-                  await smartAlbumsService.saveConfig(newConfig);
-                  unawaited(smartAlbumsService.syncSmartAlbums());
-
-                  await dialog.hide();
-                  Navigator.pop(context);
-                } catch (e) {
-                  await dialog.hide();
-                  await showGenericErrorDialog(context: context, error: e);
-                }
-              },
+                  : null,
             );
           },
         ),
