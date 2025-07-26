@@ -1,21 +1,15 @@
 import "dart:async";
 import 'dart:io';
-import "dart:math";
 
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import 'package:path/path.dart' as path;
 import "package:photo_manager/photo_manager.dart";
-import "package:photos/core/event_bus.dart";
-import "package:photos/db/files_db.dart";
 import "package:photos/ente_theme_data.dart";
-import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
-import "package:photos/models/location/location.dart";
-import "package:photos/services/sync/sync_service.dart";
 import "package:photos/ui/common/linear_progress_dialog.dart";
-import "package:photos/ui/notification/toast.dart";
+import 'package:photos/ui/tools/editor/editor_utils.dart';
 import "package:photos/ui/tools/editor/export_video_service.dart";
 import 'package:photos/ui/tools/editor/video_crop_page.dart';
 import "package:photos/ui/tools/editor/video_editor/video_editor_bottom_action.dart";
@@ -254,90 +248,39 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
       },
     );
 
-    try {
-      await ExportService.runFFmpegCommand(
-        await config.getExecuteConfig(),
-        onProgress: (stats) {
-          if (dialogKey.currentState != null) {
-            dialogKey.currentState!
-                .setProgress(config.getFFmpegProgress(stats.getTime().toInt()));
-          }
-        },
-        onError: (e, s) => _logger.severe("Error exporting video", e, s),
-        onCompleted: (result) async {
-          _isExporting.value = false;
-          if (!mounted) return;
-
-          final fileName = path.basenameWithoutExtension(widget.file.title!) +
-              "_edited_" +
-              DateTime.now().microsecondsSinceEpoch.toString() +
-              ".mp4";
-          //Disabling notifications for assets changing to insert the file into
-          //files db before triggering a sync.
-          await PhotoManager.stopChangeNotify();
-
-          try {
-            final AssetEntity newAsset =
-                await (PhotoManager.editor.saveVideo(result, title: fileName));
+    await ExportService.runFFmpegCommand(
+      await config.getExecuteConfig(),
+      onProgress: (stats) {
+        if (dialogKey.currentState != null) {
+          dialogKey.currentState!
+              .setProgress(config.getFFmpegProgress(stats.getTime().toInt()));
+        }
+      },
+      onError: (e, s) => _logger.severe("Error exporting video", e, s),
+      onCompleted: (result) async {
+        _isExporting.value = false;
+        await saveAsset(
+          context: context,
+          originalFile: widget.file,
+          detailPageConfig: widget.detailPageConfig,
+          saveAction: () async {
+            final fileName = path.basenameWithoutExtension(widget.file.title!) +
+                "_edited_" +
+                DateTime.now().microsecondsSinceEpoch.toString() +
+                ".mp4";
+            final newAsset =
+                await PhotoManager.editor.saveVideo(result, title: fileName);
             result.deleteSync();
-            final newFile = await EnteFile.fromAsset(
-              widget.file.deviceFolder ?? '',
-              newAsset,
-            );
-
-            newFile.creationTime = widget.file.creationTime;
-            newFile.collectionID = widget.file.collectionID;
-            newFile.location = widget.file.location;
-            if (!newFile.hasLocation && widget.file.localID != null) {
-              final assetEntity = await widget.file.getAsset;
-              if (assetEntity != null) {
-                final latLong = await assetEntity.latlngAsync();
-                newFile.location = Location(
-                  latitude: latLong.latitude,
-                  longitude: latLong.longitude,
-                );
-              }
-            }
-
-            newFile.generatedID =
-                await FilesDB.instance.insertAndGetId(newFile);
-            Bus.instance
-                .fire(LocalPhotosUpdatedEvent([newFile], source: "editSave"));
-            SyncService.instance.sync().ignore();
-            showShortToast(context, S.of(context).editsSaved);
-            _logger.info("Original file " + widget.file.toString());
-            _logger.info("Saved edits to file " + newFile.toString());
-            final files = widget.detailPageConfig.files;
-
-            // the index could be -1 if the files fetched doesn't contain the newly
-            // edited files
-            int selectionIndex = files
-                .indexWhere((file) => file.generatedID == newFile.generatedID);
-            if (selectionIndex == -1) {
-              files.add(newFile);
-              selectionIndex = files.length - 1;
-            }
+            return newAsset;
+          },
+          fileExtension: ".mp4",
+          logger: _logger,
+          onSaveFinished: () {
             Navigator.of(dialogKey.currentContext!).pop('dialog');
-
-            replacePage(
-              context,
-              DetailPage(
-                widget.detailPageConfig.copyWith(
-                  files: files,
-                  selectedIndex: min(selectionIndex, files.length - 1),
-                ),
-              ),
-            );
-          } catch (_) {
-            Navigator.of(dialogKey.currentContext!).pop('dialog');
-          }
-        },
-      );
-    } catch (_) {
-      Navigator.of(dialogKey.currentContext!).pop('dialog');
-    } finally {
-      await PhotoManager.startChangeNotify();
-    }
+          },
+        );
+      },
+    );
   }
 
   void _doRotationCorrectionIfAndroid() {

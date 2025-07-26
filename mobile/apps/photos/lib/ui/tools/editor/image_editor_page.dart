@@ -1,6 +1,5 @@
 import "dart:async";
 import 'dart:io';
-import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' as ui show Image;
 
@@ -11,21 +10,17 @@ import 'package:image_editor/image_editor.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 import 'package:photo_manager/photo_manager.dart';
-import 'package:photos/core/event_bus.dart';
-import 'package:photos/db/files_db.dart';
-import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart' as ente;
-import 'package:photos/models/location/location.dart';
-import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/notification/toast.dart';
+import 'package:photos/ui/tools/editor/editor_utils.dart';
 import 'package:photos/ui/tools/editor/filtered_image.dart';
 import 'package:photos/ui/viewer/file/detail_page.dart';
-import 'package:photos/utils/dialog_util.dart';
+import "package:photos/utils/dialog_util.dart";
 import 'package:photos/utils/navigation_util.dart';
 import 'package:syncfusion_flutter_core/theme.dart';
 import 'package:syncfusion_flutter_sliders/sliders.dart';
@@ -305,13 +300,6 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
     final bool flipVertical = action.flipX;
     final Uint8List img = state.rawImageData;
 
-    // ignore: unnecessary_null_comparison
-    if (img == null) {
-      _logger.severe("null rawImageData");
-      showToast(context, S.of(context).somethingWentWrong);
-      return;
-    }
-
     final ImageEditorOption option = ImageEditorOption();
 
     option.addOption(ClipOption.fromRect(rect));
@@ -328,7 +316,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
     option.outputFormat = const OutputFormat.jpeg(100);
 
     final DateTime start = DateTime.now();
-    Uint8List? result = await ImageEditor.editImage(
+    final result = await ImageEditor.editImage(
       image: img,
       imageEditorOption: option,
     );
@@ -340,77 +328,36 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
     _logger.info('Size before compression = ${result.length}');
 
     final ui.Image decodedResult = await decodeImageFromList(result);
-    result = await FlutterImageCompress.compressWithList(
+    final compressedResult = await FlutterImageCompress.compressWithList(
       result,
       minWidth: decodedResult.width,
       minHeight: decodedResult.height,
     );
-    _logger.info('Size after compression = ${result.length}');
+    _logger.info('Size after compression = ${compressedResult.length}');
     final Duration diff = DateTime.now().difference(start);
     _logger.info('image_editor time : $diff');
 
-    try {
-      final fileName =
-          path.basenameWithoutExtension(widget.originalFile.title!) +
-              "_edited_" +
-              DateTime.now().microsecondsSinceEpoch.toString() +
-              ".JPEG";
-      //Disabling notifications for assets changing to insert the file into
-      //files db before triggering a sync.
-      await PhotoManager.stopChangeNotify();
-      final AssetEntity newAsset =
-          await (PhotoManager.editor.saveImage(result, filename: fileName));
-      final newFile = await ente.EnteFile.fromAsset(
-        widget.originalFile.deviceFolder ?? '',
-        newAsset,
-      );
-
-      newFile.creationTime = widget.originalFile.creationTime;
-      newFile.collectionID = widget.originalFile.collectionID;
-      newFile.location = widget.originalFile.location;
-      if (!newFile.hasLocation && widget.originalFile.localID != null) {
-        final assetEntity = await widget.originalFile.getAsset;
-        if (assetEntity != null) {
-          final latLong = await assetEntity.latlngAsync();
-          newFile.location = Location(
-            latitude: latLong.latitude,
-            longitude: latLong.longitude,
-          );
-        }
-      }
-      newFile.generatedID = await FilesDB.instance.insertAndGetId(newFile);
-      Bus.instance.fire(LocalPhotosUpdatedEvent([newFile], source: "editSave"));
-      unawaited(SyncService.instance.sync());
-      showShortToast(context, S.of(context).editsSaved);
-      _logger.info("Original file " + widget.originalFile.toString());
-      _logger.info("Saved edits to file " + newFile.toString());
-      final files = widget.detailPageConfig.files;
-
-      // the index could be -1 if the files fetched doesn't contain the newly
-      // edited files
-      int selectionIndex =
-          files.indexWhere((file) => file.generatedID == newFile.generatedID);
-      if (selectionIndex == -1) {
-        files.add(newFile);
-        selectionIndex = files.length - 1;
-      }
-      await dialog.hide();
-      replacePage(
-        context,
-        DetailPage(
-          widget.detailPageConfig.copyWith(
-            files: files,
-            selectedIndex: min(selectionIndex, files.length - 1),
-          ),
-        ),
-      );
-    } catch (e, s) {
-      await dialog.hide();
-      showToast(context, S.of(context).oopsCouldNotSaveEdits);
-      _logger.severe(e, s);
-    } finally {
-      await PhotoManager.startChangeNotify();
-    }
+    await saveAsset(
+      context: context,
+      originalFile: widget.originalFile,
+      detailPageConfig: widget.detailPageConfig,
+      saveAction: () async {
+        final fileName =
+            path.basenameWithoutExtension(widget.originalFile.title!) +
+                "_edited_" +
+                DateTime.now().microsecondsSinceEpoch.toString() +
+                ".JPEG";
+        return PhotoManager.editor.saveImage(
+          compressedResult,
+          filename: fileName,
+        );
+      },
+      fileExtension: ".JPEG",
+      logger: _logger,
+      onSaveFinished: () async {
+        await dialog.hide();
+      },
+    );
   }
 
   void flip() {
