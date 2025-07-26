@@ -35,8 +35,11 @@ jobs:
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
+      
+      - name: Get Flutter dependencies
+        run: flutter pub get
 
-      # Android Build 
+      # Android Build
       - name: Setup Android signing key
         uses: timheuer/base64-to-file@v1
         with:
@@ -59,6 +62,14 @@ jobs:
       - name: Install fastlane
         run: gem install fastlane
       
+      - name: Update CocoaPods Specs
+        run: pod repo update
+        working-directory: ./ios
+
+      - name: Install CocoaPods dependencies
+        run: pod install
+        working-directory: ./ios
+      
       - name: Create ExportOptions.plist
         run: |
           cat <<EOF > ios/ExportOptions.plist
@@ -74,9 +85,6 @@ jobs:
           </plist>
           EOF
       
-      - name: Resolve Xcode Package Dependencies
-        run: xcodebuild -resolvePackageDependencies -project ios/Runner.xcodeproj -scheme Runner
-
       - name: Setup App Store Connect API Key
         run: |
           echo '${{ secrets.IOS_API_KEY }}' > api_key.json
