@@ -78,6 +78,9 @@ used for Compose and quickstart for ease of use.)
 
 ### Database
 
+The `db` section is used for configuring database connectivity. Ensure you
+provide correct credentials for proper connectivity within Museum.
+
 | Variable      | Description                | Default     |
 | ------------- | -------------------------- | ----------- |
 | `db.host`     | DB hostname                | `localhost` |
@@ -154,6 +157,8 @@ You may wish to send emails for verification codes instead of
 such cases, you can configure SMTP (or Zoho Transmail, for bulk emails).
 
 Set the host and port accordingly with your credentials in `museum.yaml`
+
+You may skip the username and password if using a local relay server.
 
 ```yaml
 smtp:

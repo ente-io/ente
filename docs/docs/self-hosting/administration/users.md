@@ -112,7 +112,7 @@ You can configure SMTP for sending verification code e-mails to users, if you do
 not wish to hardcode OTTs and have larger audience.
 
 For more information on configuring email, check out the
-[email configuration](/self-hosting/install/config#email) section.
+[email configuration](/self-hosting/installation/config#email) section.
 
 ## Disable registrations
 

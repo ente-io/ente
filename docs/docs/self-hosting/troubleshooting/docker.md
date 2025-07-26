@@ -17,19 +17,20 @@ description: Fixing Docker-related errors when trying to self-host Ente
 
 ## post_start
 
-The `server/compose.yaml` Docker compose file uses the "post_start" lifecycle
-hook to provision the MinIO instance.
+The Docker compose file used if relying on quickstart script or installation
+using Docker Compose uses the "post_start" lifecycle hook to provision the MinIO
+instance.
 
 The lifecycle hook **requires Docker Compose version 2.30.0+**, and if you're
-using an older version of docker compose you will see an error like this:
+using an older version of Docker Compose you will see an error like this:
 
 ```
 validating compose.yaml: services.minio Additional property post_start is not allowed
 ```
 
-The easiest way to resolve this is to upgrade your Docker compose.
+The easiest way to resolve this is to upgrade your Docker Compose.
 
-If you cannot update your Docker compose version, then alternatively you can
+If you cannot update your Docker Compose version, then alternatively you can
 perform the same configuration by removing the "post_start" hook, and adding a
 new service definition:
 
@@ -70,11 +71,11 @@ supports the `start_interval` property on the health check.
 
 ## Postgres authentication failed
 
-If you're getting Postgres password authentication failures when starting your
+If you are getting Postgres password authentication failures when starting your
 cluster, then you might be using a stale Docker volume.
 
-In more detail, if you're getting an error of the following form (pasting a full
-example for easier greppability):
+If you are getting an error of the following form (pasting a full example for
+easier greppability):
 
 ```
 museum-1    | panic: pq: password authentication failed for user "pguser"
@@ -92,9 +93,13 @@ is expecting.
 
 There are 2 possibilities:
 
-1.  When you have created a cluster in `my-ente` directory on running
-    `quickstart.sh` and later deleted it, only to create another cluster with
-    same `my-ente` directory.
+1. If you are using Docker Compose for running Ente from source, you might not
+   have set the same credentials in `.env` and `museum.yaml` inside
+   `server/config` directory. Edit the values to make sure the correct
+   credentials are being used.
+2. When you have created a cluster in `my-ente` directory on running
+   `quickstart.sh` and later deleted it, only to create another cluster with
+   same `my-ente` directory.
 
     However, by deleting the directory, the Docker volumes are not deleted.
 
@@ -129,10 +134,6 @@ There are 2 possibilities:
 
 ## MinIO provisioning error
 
-MinIO has deprecated the `mc config` command in favor of `mc alias set`
-resulting in failure in execution of the command for creating bucket using
-`post_start` hook.
-
 You may encounter similar logs while trying to start the cluster if you are
 using the older command (provided by default in `quickstart.sh`):
 
@@ -142,9 +143,8 @@ my-ente-minio-1 ->  | Waiting for minio...
 my-ente-minio-1 ->  | Waiting for minio...
 ```
 
-This can be resolved by changing
-`mc config host h0 add http://minio:3200 $minio_user $minio_pass` to
-`mc alias set h0 http://minio:3200  $minio_user $minio_pass`
+This could be due to usage of deprecated MinIO `mc config` command. Changing
+`mc config host h0 add` to `mc alias set h0` resolves this.
 
 Thus the updated `post_start` will look as follows for `minio` service:
 
@@ -156,13 +156,6 @@ Thus the updated `post_start` will look as follows for `minio` service:
             sh -c '
             #!/bin/sh
             while ! mc alias set h0 http://minio:3200 your_minio_user your_minio_pass 2>/dev/null
-            do
-                echo "Waiting for minio..."
-                sleep 0.5
-            done
-            cd /data
-            mc mb -p b2-eu-cen
-            mc mb -p wasabi-eu-central-2-v3
-            mc mb -p scw-eu-fr-v3
+            ...
             '
 ```
