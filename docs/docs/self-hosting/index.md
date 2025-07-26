@@ -5,12 +5,14 @@ description: Getting started with self-hosting Ente
 
 # Quickstart
 
-If you're looking to spin up Ente on your server , you are in the right place!
+If you're looking to spin up Ente on your server, you are in the right place!
 
 Our entire source code ([including the server](https://ente.io/blog/open-sourcing-our-server/))
 is open source. This is the same code we use on production.
 
-For a quick preview, make sure your system meets the requirements mentioned below. After trying the preview, you can explore other ways of self-hosting Ente on your server as described in the documentation.
+For a quick preview, make sure your system meets the requirements mentioned below.
+After trying the preview, you can explore other ways of self-hosting Ente on your
+server as described in the documentation.
 
 ## Requirements
 
@@ -28,12 +30,14 @@ Run this command on your terminal to setup Ente.
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente-io/ente/main/server/quickstart.sh)"
 ```
 
-The above command creates a directory `my-ente` in the current working
-directory, prompts to start the cluster with needed containers after pulling the images required to run Ente.
+This creates a directory `my-ente` in the current working
+directory, prompts to start the cluster with needed containers
+after pulling the images required to run Ente.
 
-> [!NOTE]
-> Make sure to modify the default values in `compose.yaml` and `museum.yaml`
-> if you wish to change endpoints, bucket configuration or server configuration.
+::: note
+Make sure to modify the default values in `compose.yaml` and `museum.yaml`
+if you wish to change endpoints, bucket configuration or server configuration.
+:::
 
 ## Try the web app
 

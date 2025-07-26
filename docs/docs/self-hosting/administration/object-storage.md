@@ -92,7 +92,7 @@ Use the content provided below for creating a `cors.json` file:
 ```
 
 You may have to change the `AllowedOrigins` to allow only certain origins
-(your Ente web apps and Museum.) for security.
+(your Ente web apps and Museum) for security.
 
 Assuming you have AWS CLI on your system and that you have configured
 it with your access key and secret, you can execute the below command to

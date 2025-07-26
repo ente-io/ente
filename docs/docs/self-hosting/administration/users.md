@@ -27,7 +27,7 @@ related to Ente).
     psql -U pguser -d ente_db 
     ```
 
-2. Get the user ID of the first user by running the following PSQL command:
+2. Get the user ID of the first user by running the following SQL query:
     ``` sql
     SELECT * from users;
     ```

@@ -29,8 +29,9 @@ You can whitelist administrator users by following this
 
 ## Step 3: Add an account
 
-::: detail
-You can not create new accounts using Ente CLI. You can only log in to your existing accounts.
+::: info You can not create new accounts using Ente CLI. 
+You can only log in to your existing accounts.
+
 To create a new account, use Ente Photos (or Ente Auth) web application, desktop or mobile.
 :::
 
@@ -40,11 +41,11 @@ You can add your existing account using Ente CLI.
 ente account add
 ```
 
-This should prompt you for authentication details.
+This should prompt you for authentication details and export directory.
+Your account should be added after successful authentication.
 
-Your account should be added and can be used for exporting data
-(for plain-text backup), managing Ente Auth and performing
-administrative actions.
+It can be used for exporting data (for plain-text backup),
+managing Ente Auth and performing administrative actions.
 
 ## Step 4: Increase storage and account validity
 
@@ -52,11 +53,12 @@ You can use `ente admin update-subscription` to increase
 storage quota and account validity (duration).
 
 For infinite storage and validity, use the following command:
+
 ``` shell
-ente admin update-subscription -a <admin-user-mail> -u <user-to-update> --no-limit 
+ente admin update-subscription -a <admin-user-mail> -u <user-email-to-update> --no-limit 
 
 # Set a limit
-ente admin update-subscription -a <admin-user-mail> -u <user-to-update> --no-limit False
+ente admin update-subscription -a <admin-user-mail> -u <user-email-to-update> --no-limit False
 ```
 
 For more information, check out the documentation for setting 
