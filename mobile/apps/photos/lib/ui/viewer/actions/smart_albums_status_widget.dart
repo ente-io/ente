@@ -67,7 +67,7 @@ class _SmartAlbumsStatusWidgetState extends State<SmartAlbumsStatusWidget>
       firstCurve: Curves.easeInOutExpo,
       secondCurve: Curves.easeInOutExpo,
       sizeCurve: Curves.easeInOutExpo,
-      crossFadeState: (_syncingCollection == null ||
+      crossFadeState: !(_syncingCollection == null ||
               _syncingCollection!.$1 != widget.collection?.id)
           ? CrossFadeState.showSecond
           : CrossFadeState.showFirst,
