@@ -20,7 +20,11 @@ import "package:photos/ui/viewer/gallery/photo_grid_size_picker_page.dart";
 import "package:photos/utils/navigation_util.dart";
 
 class GallerySettingsScreen extends StatefulWidget {
-  const GallerySettingsScreen({super.key});
+  final bool fromGallerySettingsCTA;
+  const GallerySettingsScreen({
+    super.key,
+    required this.fromGallerySettingsCTA,
+  });
 
   @override
   State<GallerySettingsScreen> createState() => _GallerySettingsScreenState();
@@ -54,7 +58,9 @@ class _GallerySettingsScreenState extends State<GallerySettingsScreen> {
                 iconButtonType: IconButtonType.secondary,
                 onTap: () {
                   Navigator.pop(context);
-                  Navigator.pop(context);
+                  if (!widget.fromGallerySettingsCTA) {
+                    Navigator.pop(context);
+                  }
                 },
               ),
             ],

@@ -1803,5 +1803,7 @@
   "gettingReady": "Getting ready",
   "addSomePhotosDesc1": "Add some photos or pick ",
   "addSomePhotosDesc2": "familiar faces",
-  "addSomePhotosDesc3": "\nto begin with"
+  "addSomePhotosDesc3": "\nto begin with",
+  "layout" : "Layout",
+  "day": "Day"
 }
