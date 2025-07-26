@@ -126,6 +126,34 @@ class SharedAssetService {
     }
   }
 
+  static Future<File> moveToSharedDir(File ioFile, String id) async {
+    final srcPath = ioFile.path;
+    try {
+      ioFile = ioFile.renameSync(
+        Configuration.instance.getSharedMediaDirectory() + "/" + id,
+      );
+    } catch (e) {
+      if (e is FileSystemException) {
+        //from renameSync docs:
+        //On some platforms, a rename operation cannot move a file between
+        //different file systems. If that is the case, instead copySync the
+        //file to the new location and then deleteSync the original.
+        _logger.info("Creating new copy of file in path ${ioFile.path}");
+        final newIoFile = ioFile.copySync(
+          Configuration.instance.getSharedMediaDirectory() + "/" + id,
+        );
+        if (srcPath.contains("io.ente.photos")) {
+          _logger.info("delete original file in path ${ioFile.path}");
+          ioFile.deleteSync();
+        }
+        ioFile = newIoFile;
+      } else {
+        rethrow;
+      }
+    }
+    return ioFile;
+  }
+
   static Future<void> cleanUpUntrackedItems() async {
     final sharedMediaDir =
         Configuration.instance.getSharedMediaDirectory() + "/";

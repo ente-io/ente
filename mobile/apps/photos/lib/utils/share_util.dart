@@ -14,6 +14,7 @@ import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/local/shared_asset.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/local/shared_assert.service.dart";
 import "package:photos/ui/sharing/show_images_prevew.dart";
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/exif_util.dart';
@@ -133,32 +134,10 @@ Future<List<SharedAsset>> convertIncomingSharedMediaToFile(
     int durationInSeconds = 0;
     final fileType =
         media.type == SharedMediaType.image ? FileType.image : FileType.video;
-    var ioFile = File(media.path);
-    try {
-      ioFile = ioFile.renameSync(
-        Configuration.instance.getSharedMediaDirectory() + "/" + sharedLocalId,
-      );
-    } catch (e) {
-      if (e is FileSystemException) {
-        //from renameSync docs:
-        //On some platforms, a rename operation cannot move a file between
-        //different file systems. If that is the case, instead copySync the
-        //file to the new location and then deleteSync the original.
-        _logger.info("Creating new copy of file in path ${ioFile.path}");
-        final newIoFile = ioFile.copySync(
-          Configuration.instance.getSharedMediaDirectory() +
-              "/" +
-              sharedLocalId,
-        );
-        if (media.path.contains("io.ente.photos")) {
-          _logger.info("delete original file in path ${ioFile.path}");
-          ioFile.deleteSync();
-        }
-        ioFile = newIoFile;
-      } else {
-        rethrow;
-      }
-    }
+    final ioFile = await SharedAssetService.moveToSharedDir(
+      File(media.path),
+      sharedLocalId,
+    );
 
     if (fileType == FileType.image) {
       final dateResult = await tryParseExifDateTime(ioFile, null);
