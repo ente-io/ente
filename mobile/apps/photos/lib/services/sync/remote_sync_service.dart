@@ -308,8 +308,8 @@ class RemoteSyncService {
     EnteFile file,
   ) async {
     try {
-      final uploadedFile =
-          await _uploader.upload(file, queueEntry.destCollectionId, queue: queueEntry);
+      final uploadedFile = await _uploader
+          .upload(file, queueEntry.destCollectionId, queue: queueEntry);
       await _collectionsService.addOrCopyToCollection(
         queueEntry.destCollectionId,
         [uploadedFile],

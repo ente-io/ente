@@ -89,8 +89,8 @@ class RemoteDiffService {
         await remoteDB.deleteFilesDiff(diff.deletedItems);
       }
       if (diff.updatedItems.isNotEmpty) {
-        await _mapRemoteToLocalItems(diff);
         await remoteCache.insertDiffItems(diff.updatedItems);
+        await _mapRemoteToLocalItems(diff);
       }
       // todo:(rewrite) neeraj add logic to refresh home gallery when time or visibility changes
       if (diff.maxUpdatedAtTime > currentSinceTime) {
