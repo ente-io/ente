@@ -64,9 +64,13 @@ jobs:
       
       - name: Update CocoaPods Specs
         run: pod repo update
+        working-directory: mobile/apps/photos/ios
 
-      # - name: Install CocoaPods dependencies
-      #   run: pod install
+      - name: Install CocoaPods dependencies
+        run: |
+          rm -f Podfile.lock
+          pod install
+        working-directory: mobile/apps/photos/ios
 
       - name: Create ExportOptions.plist
         run: |
