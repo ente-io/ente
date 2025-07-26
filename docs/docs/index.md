@@ -14,16 +14,16 @@ Ente (pronounced en-_tay_) is a end-to-end encrypted platform for privately,
 reliably, and securely storing your data on the cloud, over which 2 applications
 have been developed and made available for mobile, web and desktop, namely:
 
-- **Ente Photos** - An alternative to Google Photos and Apple Photos
-- **Ente Auth** - A free 2FA alternative to Authy
+- **Ente Photos** - An alternative to Google Photos and Apple Photos.
+- **Ente Auth** - A free 2FA alternative to Authy.
 
 ## History
 
-Ente was the founded by Vishnu Mohandas (Ente's CEO) in response to privacy
-concerns with major tech companies. The underlying motivation was the
-understanding that big tech had no incentive to fix their act, but with
-end-to-end encrypted cross platform apps, there was a way for people to take
-back control over their own data without sacrificing on features.
+Ente was founded by Vishnu Mohandas (Ente's CEO) in response to privacy concerns
+with major tech companies. The underlying motivation was the understanding that
+big tech had no incentive to fix their act, but with end-to-end encrypted cross
+platform apps, there was a way for people to take back control over their own
+data without sacrificing on features.
 
 ### Origin of the name
 
@@ -76,7 +76,7 @@ and stay updated:
 
 If you encounter any issues with any of the products that's not answered by our
 documentation, please reach out to our team by sending an email to
-[support@ente.io](mailto:support@ente.io)
+[support@ente.io](mailto:support@ente.io).
 
-For community support, please post your queries on
-[Discord](https://discord.gg/z2YVKkycX3)
+For community support, please post your queries on our
+[Discord](https://discord.gg/z2YVKkycX3) server.

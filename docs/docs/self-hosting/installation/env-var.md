@@ -7,14 +7,16 @@ description:
 
 # Environment variables and defaults
 
-The environment variables needed for running Ente and the default configuration are
-documented below:
+The environment variables needed for running Ente and the default configuration
+are documented below:
 
 ## Environment Variables
 
-A self-hosted Ente instance requires specific endpoints in both Museum (the
-server) and web apps. This document outlines the essential environment variables
-and port mappings of the web apps.
+A self-hosted Ente instance has to specify endpoints for both Museum (the
+server) and web apps.
+
+This document outlines the essential environment variables and port mappings of
+the web apps.
 
 Here's the list of environment variables that is used by the cluster:
 
@@ -22,8 +24,8 @@ Here's the list of environment variables that is used by the cluster:
 | ---------- | --------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------- |
 | `web`      | `ENTE_API_ORIGIN`     | Alias for `NEXT_PUBLIC_ENTE_ENDPOINT`. API Endpoint for Ente's API (Museum).                    | http://localhost:8080           |
 | `web`      | `ENTE_ALBUMS_ORIGIN`  | Alias for `NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT`. Base URL for Ente Album, used for public sharing. | http://localhost:3002           |
-| `postgres` | `POSTGRES_USER`       | Username for PostgreSQL database                                                                | pguser                          |
-| `postgres` | `POSTGRES_DB`         | Name of database for use with Ente                                                              | ente_db                         |
+| `postgres` | `POSTGRES_USER`       | Username for PostgreSQL database                                                                | `pguser`                        |
+| `postgres` | `POSTGRES_DB`         | Name of database for use with Ente                                                              | `ente_db`                       |
 | `postgres` | `POSTGRES_PASSWORD`   | Password for PostgreSQL database's user                                                         | Randomly generated (quickstart) |
 | `minio`    | `MINIO_ROOT_USER`     | Username for MinIO                                                                              | Randomly generated (quickstart) |
 | `minio`    | `MINIO_ROOT_PASSWORD` | Password for MinIO                                                                              | Randomly generated (quickstart) |
@@ -35,7 +37,7 @@ which is documented below to understand its behavior:
 
 ### Ports
 
-The below format is according to how ports are mapped in Docker when using
+The below format is according to how ports are mapped in Docker when using the
 quickstart script. The mapping is of the format `<host-port>:<container-port>`
 in `ports` in compose file.
 
