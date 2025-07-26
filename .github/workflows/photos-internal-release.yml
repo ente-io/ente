@@ -73,6 +73,9 @@ jobs:
           </dict>
           </plist>
           EOF
+      
+      - name: Resolve Xcode Package Dependencies
+        run: xcodebuild -resolvePackageDependencies -project ios/Runner.xcodeproj -scheme Runner
 
       - name: Setup App Store Connect API Key
         run: |
