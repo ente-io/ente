@@ -555,29 +555,6 @@ class GalleryState extends State<Gallery> {
       sortOrderAsc: _sortOrderAsc,
       inSelectionMode: widget.inSelectionMode,
       type: _groupType,
-      // Replace this with the new gallery and use `_allGalleryFiles`
-      // child: MultipleGroupsGalleryView(
-      //   groupedFiles: currentGroupedFiles,
-      //   disableScroll: widget.disableScroll,
-      //   emptyState: widget.emptyState,
-      //   asyncLoader: widget.asyncLoader,
-      //   removalEventTypes: widget.removalEventTypes,
-      //   tagPrefix: widget.tagPrefix,
-      //   scrollBottomSafeArea: widget.scrollBottomSafeArea,
-      //   limitSelectionToOne: widget.limitSelectionToOne,
-      //   enableFileGrouping:
-      //       widget.enableFileGrouping && widget.groupType.showGroupHeader(),
-      //   logTag: _logTag,
-      //   logger: _logger,
-      //   reloadEvent: widget.reloadEvent,
-      //   header: widget.header,
-      //   footer: widget.footer,
-      //   selectedFiles: widget.selectedFiles,
-      //   showSelectAllByDefault:
-      //       widget.showSelectAllByDefault && widget.groupType.showGroupHeader(),
-      //   isScrollablePositionedList: widget.isScrollablePositionedList,
-      // ),
-
       child: _allGalleryFiles.isEmpty
           ? Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
