@@ -383,6 +383,10 @@
       "slug": "csgoroll"
     },
     {
+      "title": "CrowdSec",
+      "slug": "crowdsec"
+    },
+    {
       "title": "Cryptee",
       "slug": "cryptee"
     },
@@ -517,6 +521,10 @@
       "altNames": [
         "Fidelity Investments"
       ]
+    },
+    {
+      "title": "FileCloud",
+      "slug": "filecloud"
     },
     {
       "title": "Filen"
@@ -690,6 +698,13 @@
       "hex": "D3D800"
     },
     {
+      "title": "JetBrains YouTrack",
+      "slug": "jetbrains-youtrack",
+      "altNames": [
+        "YouTrack"
+      ]
+    },
+    {
       "title": "jianguoyun",
       "altNames": [
         "坚果云"
@@ -814,6 +829,14 @@
       "altNames": [
         "luma",
         "lu.ma"
+      ]
+    },
+    {
+      "title": "MailCow",
+      "slug": "mailcow",
+      "altNames": [
+        "mailcow",
+        "mailcow UI"
       ]
     },
     {
@@ -969,6 +992,10 @@
     },
     {
       "title": "Nelnet"
+    },
+    {
+      "title": "NetBird",
+      "slug": "netbird"
     },
     {
       "title": "nintendo",

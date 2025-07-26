@@ -1,5 +1,5 @@
 ---
-title: Ente CLI Secrets
+title: Ente CLI Secrets - Self-hosting
 description: A quick hotfix for keyring errors while running Ente CLI.
 ---
 
@@ -13,9 +13,8 @@ Follow the below steps to run Ente CLI and also avoid keyrings errors.
 
 Run:
 
-```sh
+```shell
 # export the secrets path
-
 export ENTE_CLI_SECRETS_PATH=./<path-to-secrets.txt>
 
 ./ente-cli
@@ -33,7 +32,7 @@ Then one of the following:
 
 And you are good to go.
 
-## Ref
+## References
 
 - [Ente CLI Secrets Path](https://www.reddit.com/r/selfhosted/comments/1gc09il/comment/lu2hox2/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button)
 - [Keyrings](https://man7.org/linux/man-pages/man7/keyrings.7.html)

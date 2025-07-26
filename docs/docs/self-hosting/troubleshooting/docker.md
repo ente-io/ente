@@ -1,19 +1,19 @@
 ---
-title: Docker Errors
-description: Fixing docker related errors when trying to self host Ente
+title: Troubleshooting Docker-related errors - Self-hosting
+description: Fixing Docker-related errors when trying to self-host Ente
 ---
 
-# Docker
+# Troubleshooting Docker-related errors
 
-## configs
-
-Remember to restart your cluster to ensure changes that you make in the
-`configs` section in `compose.yaml` get picked up.
-
-```sh
-docker compose down
-docker compose up
-```
+> [!TIP] Restart after changes
+>
+> Remember to restart your cluster to ensure changes that you make in the
+> `compose.yaml` and `museum.yaml` get picked up.
+>
+> ```shell
+> docker compose down
+> docker compose up
+> ```
 
 ## post_start
 
@@ -45,15 +45,12 @@ minio-provision:
     entrypoint: |
         sh -c '
         #!/bin/sh
-
         while ! mc alias set h0 http://minio:3200 your_minio_user your_minio_pass
         do
           echo "waiting for minio..."
           sleep 0.5
         done
-
         cd /data
-
         mc mb -p b2-eu-cen
         mc mb -p wasabi-eu-central-2-v3
         mc mb -p scw-eu-fr-v3
@@ -90,57 +87,54 @@ museum-1    |   /etc/ente/cmd/museum/main.go:124 +0x44c
 museum-1 exited with code 2
 ```
 
-Then the issue is that the password you're using is not the password postgres is
-expecting (duh), and a potential scenario where that can happen is something
-like this:
+Then the issue is that the password you're using is not the password PostgreSQL
+is expecting.
 
-1. On a machine, you create a new cluster with `quickstart.sh`.
+There are 2 possibilities:
 
-2. Later you delete that folder, but then create another cluster with
-   `quickstart.sh`. Each time `quickstart.sh` runs, it creates new credentials,
-   and then when it tries to spin up the docker compose cluster, use them to
-   connect to the postgres running within.
+1.  When you have created a cluster in `my-ente` directory on running
+    `quickstart.sh` and later deleted it, only to create another cluster with
+    same `my-ente` directory.
 
-3. However, you would already have a docker volume from the first run of
-   `quickstart.sh`. Since the folder name is the same in both cases `my-ente`,
-   Docker will reuse the existing volumes (`my-ente_postgres-data`,
-   `my-ente_minio-data`). So your postgres is running off the old credentials,
-   and you're trying to connect to it using the new ones, and the error arises.
+    However, by deleting the directory, the Docker volumes are not deleted.
 
-The solution is to delete the stale docker volume. **Be careful**, this will
-delete all data in those volumes (any thing you uploaded etc), so first
-understand if this is the exact problem you are facing before deleting those
-volumes.
+    Thus the older volumes with previous cluster's credentials are used for new
+    cluster and the error arises.
 
-If you're sure of what you're doing, the volumes can be deleted by
+    Deletion of the stale Docker volume can solve this. **Be careful**, this
+    will delete all data in those volumes (any thing you uploaded etc). Do this
+    if you are sure this is the exact problem.
 
-```sh
-docker volume ls
-```
+    ```shell
+    docker volume ls
+    ```
 
-to list them, and then delete the ones that begin with `my-ente` using
-`docker volume rm`. You can delete all stale volumes by using
-`docker system prune` with the `--volumes` flag, but be _really_ careful,
-that'll delete all volumes (Ente or otherwise) on your machine that are not
-currently in use by a running docker container.
+    to list them, and then delete the ones that begin with `my-ente` using
+    `docker volume rm`. You can delete all stale volumes by using
+    `docker system prune` with the `--volumes` flag, but be _really_ careful,
+    that'll delete all volumes (Ente or otherwise) on your machine that are not
+    currently in use by a running Docker container.
 
-An alternative way is to delete the volumes along with removal of cluster's
-containers using `docker compose` inside `my-ente` directory.
+    An alternative way is to delete the volumes along with removal of cluster's
+    containers using `docker compose` inside `my-ente` directory.
 
-```sh
-docker compose down --volumes
-```
+    ```sh
+    docker compose down --volumes
+    ```
 
-If you're unsure about removing volumes, another alternative is to rename your
-`my-ente` folder. Docker uses the folder name to determine the volume name
-prefix, so giving it a different name will cause Docker to create a volume
-afresh for it.
+    If you're unsure about removing volumes, another alternative is to rename
+    your `my-ente` folder. Docker uses the folder name to determine the volume
+    name prefix, so giving it a different name will cause Docker to create a
+    volume afresh for it.
 
 ## MinIO provisioning error
 
-If you have used our quickstart script for self-hosting Ente (new users will be unaffected) and are using the default MinIO container for object storage, you may run into issues while starting the cluster after pulling latest images with provisioning MinIO and creating buckets.
+MinIO has deprecated the `mc config` command in favor of `mc alias set`
+resulting in failure in execution of the command for creating bucket using
+`post_start` hook.
 
-You may encounter similar logs while trying to start the cluster:
+You may encounter similar logs while trying to start the cluster if you are
+using the older command (provided by default in `quickstart.sh`):
 
 ```
 my-ente-minio-1 ->  | Waiting for minio...
@@ -148,28 +142,25 @@ my-ente-minio-1 ->  | Waiting for minio...
 my-ente-minio-1 ->  | Waiting for minio...
 ```
 
-MinIO has deprecated the `mc config` command in favor of `mc alias set` resulting in failure in execution of the command for creating bucket using `post_start` hook.
-
-This can be resolved by changing `mc config host h0 add http://minio:3200 $minio_user $minio_pass` to `mc alias set h0 http://minio:3200  $minio_user $minio_pass`
+This can be resolved by changing
+`mc config host h0 add http://minio:3200 $minio_user $minio_pass` to
+`mc alias set h0 http://minio:3200  $minio_user $minio_pass`
 
 Thus the updated `post_start` will look as follows for `minio` service:
 
-``` yaml
-    minio: 
+```yaml
+    minio:
         ...
         post_start:
         - command: |
             sh -c '
             #!/bin/sh
-
             while ! mc alias set h0 http://minio:3200 your_minio_user your_minio_pass 2>/dev/null
             do
                 echo "Waiting for minio..."
                 sleep 0.5
             done
-
             cd /data
-
             mc mb -p b2-eu-cen
             mc mb -p wasabi-eu-central-2-v3
             mc mb -p scw-eu-fr-v3
