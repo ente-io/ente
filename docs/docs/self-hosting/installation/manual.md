@@ -92,9 +92,9 @@ git clone https://github.com/ente-io/ente
 2.  Build the server. The server binary should be available as `./main` relative
     to `server` directory
 
-        ``` shell
-        go build cmd/museum/main.go
-        ```
+    ```shell
+    go build cmd/museum/main.go
+    ```
 
 3.  Create `museum.yaml` file inside `server` for configuring the needed
     variables. You can copy the templated configuration file for editing with
@@ -103,6 +103,25 @@ git clone https://github.com/ente-io/ente
     ```shell
     cp config/example.yaml ./museum.yaml
     ```
+
+    ::: tip
+
+    Make sure to enter the correct values for the database and object storage.
+
+    You should consider generating values for JWT and encryption keys for emails
+    if you intend to use for long-term needs.
+
+    You can do by running the following command inside `ente/server`, assuming
+    you cloned the repository to `ente`:
+
+    ```shell
+    # Change into the ente/server
+    cd ente/server
+    # Generate secrets
+    go run tools/gen-random-keys/main.go
+    ```
+
+    :::
 
 4.  Run the server
 

@@ -343,12 +343,16 @@ export const sidebar = [
                         link: "/self-hosting/troubleshooting/misc",
                     },
                     {
+                        text: "Docker / quickstart",
+                        link: "/self-hosting/troubleshooting/docker",
+                    },
+                    {
                         text: "Uploads",
                         link: "/self-hosting/troubleshooting/uploads",
                     },
                     {
-                        text: "Docker / quickstart",
-                        link: "/self-hosting/troubleshooting/docker",
+                        text: "Ente CLI",
+                        link: "/self-hosting/troubleshooting/cli",
                     },
                 ],
             },
