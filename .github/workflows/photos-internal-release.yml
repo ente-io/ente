@@ -64,12 +64,10 @@ jobs:
       
       - name: Update CocoaPods Specs
         run: pod repo update
-        working-directory: ./ios
 
       - name: Install CocoaPods dependencies
         run: pod install
-        working-directory: ./ios
-      
+
       - name: Create ExportOptions.plist
         run: |
           cat <<EOF > ios/ExportOptions.plist
