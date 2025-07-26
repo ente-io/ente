@@ -26,7 +26,6 @@ class GalleryGroups {
   final _logger = Logger("GalleryGroups");
   final bool showGallerySettingsCTA;
 
-  //TODO: Add support for sort order
   final bool sortOrderAsc;
   final double widthAvailable;
   final double groupHeaderExtent;
