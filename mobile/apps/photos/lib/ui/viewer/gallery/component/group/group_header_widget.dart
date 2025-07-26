@@ -14,6 +14,7 @@ class GroupHeaderWidget extends StatefulWidget {
   final SelectedFiles? selectedFiles;
   final bool showSelectAll;
   final bool showGallerySettingCTA;
+  final bool showTrailingIcons;
 
   const GroupHeaderWidget({
     super.key,
@@ -24,6 +25,7 @@ class GroupHeaderWidget extends StatefulWidget {
     required this.showSelectAll,
     this.showGallerySettingCTA = false,
     this.height,
+    this.showTrailingIcons = true,
   });
 
   @override
@@ -97,43 +99,47 @@ class _GroupHeaderWidgetState extends State<GroupHeaderWidget> {
           Expanded(child: Container()),
           !widget.showSelectAll
               ? const SizedBox.shrink()
-              : GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  child: ValueListenableBuilder(
-                    valueListenable: _areAllFromGroupSelectedNotifier,
-                    builder: (context, dynamic value, _) {
-                      return value
-                          ? const Icon(
-                              Icons.check_circle,
-                              size: 18,
-                            )
-                          : Icon(
-                              Icons.check_circle_outlined,
-                              color: colorScheme.strokeMuted,
-                              size: 18,
-                            );
-                    },
-                  ),
-                  onTap: () {
-                    widget.selectedFiles?.toggleGroupSelection(
-                      widget.filesInGroup.toSet(),
-                    );
-                  },
-                ),
+              : widget.showTrailingIcons
+                  ? GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      child: ValueListenableBuilder(
+                        valueListenable: _areAllFromGroupSelectedNotifier,
+                        builder: (context, dynamic value, _) {
+                          return value
+                              ? const Icon(
+                                  Icons.check_circle,
+                                  size: 18,
+                                )
+                              : Icon(
+                                  Icons.check_circle_outlined,
+                                  color: colorScheme.strokeMuted,
+                                  size: 18,
+                                );
+                        },
+                      ),
+                      onTap: () {
+                        widget.selectedFiles?.toggleGroupSelection(
+                          widget.filesInGroup.toSet(),
+                        );
+                      },
+                    )
+                  : const SizedBox.shrink(),
           widget.showGallerySettingCTA
               ? const SizedBox(width: 8)
               : const SizedBox.shrink(),
           widget.showGallerySettingCTA
-              ? GestureDetector(
-                  onTap: () => _showLayoutSettingsOverflowMenu(context),
-                  child: Padding(
-                    padding: const EdgeInsets.all(4),
-                    child: Icon(
-                      Icons.more_vert_outlined,
-                      color: colorScheme.strokeBase,
-                    ),
-                  ),
-                )
+              ? widget.showTrailingIcons
+                  ? GestureDetector(
+                      onTap: () => _showLayoutSettingsOverflowMenu(context),
+                      child: Padding(
+                        padding: const EdgeInsets.all(4),
+                        child: Icon(
+                          Icons.more_vert_outlined,
+                          color: colorScheme.strokeBase,
+                        ),
+                      ),
+                    )
+                  : const SizedBox.shrink()
               : const SizedBox.shrink(),
           const SizedBox(width: 12),
         ],

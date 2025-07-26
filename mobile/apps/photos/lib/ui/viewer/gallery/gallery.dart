@@ -853,6 +853,7 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
                       selectedFiles: widget.selectedFiles,
                       showSelectAll: widget.showSelectAll,
                       showGallerySettingCTA: widget.showGallerySettingsCTA,
+                      showTrailingIcons: !inUse,
                     ),
                   ),
                 ),
