@@ -37,7 +37,7 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
 
     if (selectedPeople != null) {
       _selectedPeople.select(selectedPeople.toSet());
-      lastSelectedPeople = _selectedPeople.personIds;
+      lastSelectedPeople = selectedPeople.toSet();
     }
   }
 
