@@ -11,7 +11,6 @@ import "package:flutter_animate/flutter_animate.dart";
 import "package:flutter_local_notifications/flutter_local_notifications.dart";
 import 'package:logging/logging.dart';
 import "package:media_extension/media_extension_action_types.dart";
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import "package:move_to_background/move_to_background.dart";
 import "package:package_info_plus/package_info_plus.dart";
 import 'package:photos/core/configuration.dart';
@@ -44,7 +43,6 @@ import "package:photos/services/sync/diff_fetcher.dart";
 import 'package:photos/services/sync/local_sync_service.dart';
 import "package:photos/services/sync/remote_sync_service.dart";
 import 'package:photos/states/user_details_state.dart';
-import 'package:photos/theme/colors.dart';
 import "package:photos/theme/effects.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/account/up_login_page.dart';
@@ -58,10 +56,8 @@ import 'package:photos/ui/home/home_bottom_nav_bar.dart';
 import 'package:photos/ui/home/home_gallery_widget.dart';
 import "package:photos/ui/home/loading_photos_widget.dart";
 import 'package:photos/ui/home/start_backup_hook_widget.dart';
-import 'package:photos/ui/notification/update/change_log_page.dart';
 import "package:photos/ui/settings/app_update_dialog.dart";
 import "package:photos/ui/settings_page.dart";
-import "package:photos/ui/tabs/shared_collections_tab.dart";
 import "package:photos/ui/tabs/user_collections_tab.dart";
 import "package:photos/ui/viewer/actions/file_viewer.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
@@ -85,7 +81,6 @@ class HomeWidget extends StatefulWidget {
 
 class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
   static const _userCollectionsTab = UserCollectionsTab();
-  static const _sharedCollectionTab = SharedCollectionsTab();
   static const _searchTab = SearchTab();
   static final _settingsPage = SettingsPage(
     emailNotifier: UserService.instance.emailValueNotifier,
@@ -252,14 +247,6 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
 
     // For sharing images coming from outside the app
     _initMediaShareSubscription();
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => Future.delayed(
-        const Duration(seconds: 1),
-        () => {
-          if (mounted) {showChangeLog(context)},
-        },
-      ),
-    );
 
     NotificationService.instance
         .initialize(_onDidReceiveNotificationResponse)
@@ -768,7 +755,6 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
                         selectedFiles: _selectedFiles,
                       ),
                 _userCollectionsTab,
-                _sharedCollectionTab,
                 _searchTab,
               ],
             );
@@ -901,36 +887,6 @@ class _HomeWidgetState extends State<HomeWidget> with WidgetsBindingObserver {
     }
     final ott = link!.queryParameters["ott"]!;
     UserService.instance.verifyEmail(context, ott);
-  }
-
-  showChangeLog(BuildContext context) async {
-    final bool show = await updateService.showChangeLog();
-    if (!show || !Configuration.instance.isLoggedIn()) {
-      return;
-    }
-    final colorScheme = getEnteColorScheme(context);
-    await showBarModalBottomSheet(
-      topControl: const SizedBox.shrink(),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(5),
-          topRight: Radius.circular(5),
-        ),
-      ),
-      backgroundColor: colorScheme.backgroundElevated,
-      enableDrag: false,
-      barrierColor: backdropFaintDark,
-      context: context,
-      builder: (BuildContext context) {
-        return Padding(
-          padding:
-              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          child: const ChangeLogPage(),
-        );
-      },
-    );
-    // Do not show change dialog again
-    updateService.hideChangeLog().ignore();
   }
 
   void _onDidReceiveNotificationResponse(
