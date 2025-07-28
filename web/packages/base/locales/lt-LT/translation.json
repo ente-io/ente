@@ -162,7 +162,7 @@
     "ok": "Gerai",
     "success": "Pavyko",
     "error": "Klaida",
-    "note": "",
+    "note": "Pastaba",
     "offline_message": "Esate neprisijungę. Rodomi prisiminimai iš podėlio.",
     "install": "Diegti",
     "install_mobile_app": "Įdiekite mūsų <a>„Android“</a> arba <b>„iOS“</b> programą, kad automatiškai sukurtumėte atsargines visų nuotraukų kopijas",
@@ -685,5 +685,5 @@
     "person_favorites": "{{name}} mėgstami",
     "shared_favorites": "Bendrinami mėgstami",
     "added_by_name": "Įtraukė {{name}}",
-    "unowned_files_not_processed": ""
+    "unowned_files_not_processed": "Kiti naudotojai pridėti failai nebuvo apdoroti"
 }
