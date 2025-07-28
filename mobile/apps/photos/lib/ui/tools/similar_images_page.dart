@@ -256,7 +256,13 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     try {
       final similarFiles = await SimilarImagesService.instance
           .getSimilarFiles(_distanceThreshold);
+      _logger.info(
+        "Found ${similarFiles.length} groups of similar images",
+      );
       _sortSimilarFiles();
+      _logger.fine(
+        "Sorted similar files by $_sortKey",
+      );
 
       setState(() {
         _similarFilesList = similarFiles;
