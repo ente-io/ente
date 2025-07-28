@@ -19,7 +19,45 @@ jobs:
         working-directory: mobile/apps/photos
 
     steps:
-      # Common Setup
+
+      - name: Install Apple Certificate
+        env:
+          MAC_OS_CERTIFICATE: ${{ secrets.MAC_OS_CERTIFICATE }}
+          MAC_OS_CERTIFICATE_PASSWORD: ${{ secrets.MAC_OS_CERTIFICATE_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          # Create variables
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+          # Import certificate from secrets
+          echo -n "$MAC_OS_CERTIFICATE" | base64 --decode -o $CERTIFICATE_PATH
+
+          # Create temporary keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+          # Import certificate to keychain
+          security import $CERTIFICATE_PATH -P "$MAC_OS_CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+          # Make the keychain the default
+          security list-keychain -d user -s $KEYCHAIN_PATH
+      
+      - name: Add provisioning profiles
+        run: |
+          # Decode and install all provisioning profiles
+          PROFILES_HOME="$HOME/Library/MobileDevice/Provisioning Profiles"
+          mkdir -p "$PROFILES_HOME"
+          IFS=$'\n'
+          for profile in ${{ secrets.MAC_OS_PROFILES_BASE64 }}; do
+            PROFILE_PATH="$(mktemp "$PROFILES_HOME"/$(uuidgen).mobileprovision)"
+            echo "$profile" | base64 --decode > "$PROFILE_PATH"
+            echo "Saved provisioning profile to $PROFILE_PATH"
+          done
+      
+          # Common Setup
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -71,28 +109,6 @@ jobs:
           rm -f Podfile.lock
           pod install
         working-directory: mobile/apps/photos/ios
-
-      - name: Add certificates
-        run: |
-          # Create a temporary keychain
-          keychain initialize
-
-          # Decode and import the certificate
-          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
-          echo -n "${{ secrets.MAC_OS_CERTIFICATE }}" | base64 --decode -o $CERTIFICATE_PATH
-          keychain add-certificates --certificate $CERTIFICATE_PATH --certificate-password "${{ secrets.MAC_OS_CERTIFICATE_PASSWORD }}"
-      
-      - name: Add provisioning profiles
-        run: |
-          # Decode and install all provisioning profiles
-          PROFILES_HOME="$HOME/Library/MobileDevice/Provisioning Profiles"
-          mkdir -p "$PROFILES_HOME"
-          IFS=$'\n'
-          for profile in ${{ secrets.MAC_OS_PROFILES_BASE64 }}; do
-            PROFILE_PATH="$(mktemp "$PROFILES_HOME"/$(uuidgen).mobileprovision)"
-            echo "$profile" | base64 --decode > "$PROFILE_PATH"
-            echo "Saved provisioning profile to $PROFILE_PATH"
-          done
 
       - name: Create simple ExportOptions.plist
         run: |
