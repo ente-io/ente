@@ -1338,12 +1338,8 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
           _logger.info("All embeddings migrated, breaking out of while loop");
           break;
         }
-        _logger.info("Clearing out embeddings and fileIDs");
-        embeddings.clear();
-        fileIDs.clear();
-        results.clear();
         // Allow some time for any GC to finish
-        _logger.info("Waiting for 100ms for GC to finish");
+        _logger.info("Waiting for 100ms out of precaution, for GC to finish");
         await Future.delayed(const Duration(milliseconds: 100));
       }
       _logger.info(
@@ -1351,10 +1347,11 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       );
       await ClipVectorDB.instance.setMigrationDone();
       _logger.info("ClipVectorDB migration done, flag file created");
-    } catch (e) {
+    } catch (e, s) {
       _logger.severe(
         "Error migrating ClipVectorDB after ${stopwatch.elapsed.inMilliseconds} ms, clearing out DB again",
         e,
+        s,
       );
       await clipVectorDB.deleteAllEmbeddings();
       rethrow;
