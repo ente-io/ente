@@ -110,7 +110,7 @@ jobs:
           pod install
         working-directory: mobile/apps/photos/ios
 
-      - name: Create simple ExportOptions.plist
+      - name: Create ExportOptions.plist
         run: |
           cat <<EOF > ios/ExportOptions.plist
           <?xml version="1.0" encoding="UTF-8"?>
@@ -121,6 +121,19 @@ jobs:
               <string>app-store</string>
               <key>teamID</key>
               <string>${{ secrets.IOS_TEAM_ID }}</string>
+              <key>provisioningProfiles</key>
+              <dict>
+                  <key>io.ente.photos</key>
+                  <string>match AppStore io.ente.photos</string>
+                  <key>io.ente.frame</key>
+                  <string>match AppStore io.ente.frame</string>
+                  <key>io.ente.frame.EntePeopleWidget</key>
+                  <string>match AppStore io.ente.frame.EntePeopleWidget</string>
+                  <key>io.ente.frame.EnteAlbumWidget</key>
+                  <string>match AppStore io.ente.frame.EnteAlbumWidget</string>
+                  <key>io.ente.frame.EnteMemoryWidget</key>
+                  <string>match AppStore io.ente.frame.EnteMemoryWidget</string>
+              </dict>
           </dict>
           </plist>
           EOF
