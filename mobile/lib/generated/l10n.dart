@@ -313,7 +313,7 @@ class S {
   /// `Ente <i>needs permission to</i> preserve your photos`
   String get entePhotosPerm {
     return Intl.message(
-      'Ente <i>needs permission to</i> preserve your photos',
+      'UP Photos <i>needs permission to</i> preserve your photos',
       name: 'entePhotosPerm',
       desc: '',
       args: [],

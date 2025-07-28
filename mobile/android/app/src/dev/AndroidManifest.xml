@@ -1,27 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="io.ente.photos">
-    
-    <!-- Adding the following block to prevent the app from having multiple
-    launcher entries. We can remove this along with the `LAUNCHER` category from
-    main/AndroidManifest.xml once
-    https://github.com/flutter/flutter/issues/38965 is fixed. -->
-    <application>
-        <activity android:name=".MainActivity"
-            android:launchMode="singleTask"
-            android:theme="@style/LaunchTheme"
-            android:exported="true"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
-            android:hardwareAccelerated="true"
-            android:windowSoftInputMode="adjustResize">
-        </activity>
-    </application>
 
-    <!-- Flutter needs it to communicate with the running application
-         to allow setting breakpoints, to provide hot reload, etc.
-    -->
+    <!-- Only add dev-specific overrides here. Activities and application block will be inherited from main manifest. -->
+
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="com.unplugged.account.dev.THIRD_PARTY_ACTIVITY" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 </manifest>
