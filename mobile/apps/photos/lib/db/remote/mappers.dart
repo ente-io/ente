@@ -9,7 +9,7 @@ import "package:photos/models/file/remote/rl_mapping.dart";
 
 RemoteAsset fromRow(Map<String, dynamic> row) {
   final metadata = Metadata.fromEncodedJson(row['metadata']);
-  final privateMetadata = Metadata.fromEncodedJson(row['pri_metadata']);
+  final privateMetadata = Metadata.fromEncodedJson(row['priv_metadata']);
   final publicMetadata = Metadata.fromEncodedJson(row['pub_metadata']);
   final info = Info.fromEncodedJson(row['info']);
   return RemoteAsset(

@@ -24,7 +24,7 @@ final String collectionFilesUpdateColumns = collectionFilesColumns
     .map((column) => '$column = excluded.$column') // Use excluded virtual table
     .join(', ');
 const filesColumns =
-    'id, owner_id, file_header, thumb_header, creation_time, modification_time, title, size, hash, lat, lng, '
+    'id, owner_id, file_header, thumb_header, creation_time, modification_time, title, size, hash, lat, lng, visibility, '
     'metadata, priv_metadata, pub_metadata, info';
 
 final String filesUpdateColumns = filesColumns
@@ -94,6 +94,7 @@ class RemoteDBMigration {
       hash TEXT,
       lat REAL DEFAULT NULL,
       lng REAL DEFAULT NULL,
+      visibility integer NOT NULL DEFAULT 0,
       metadata TEXT NOT NULL,
       priv_metadata TEXT,
       pub_metadata TEXT,

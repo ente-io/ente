@@ -5,6 +5,7 @@ import "dart:typed_data";
 import "package:photos/models/api/diff/trash_time.dart";
 import "package:photos/models/file/remote/asset.dart";
 import "package:photos/models/location/location.dart";
+import "package:photos/models/metadata/common_keys.dart";
 import "package:photos/models/metadata/file_magic.dart";
 
 class Info {
@@ -111,6 +112,7 @@ class ApiFileItem {
       hash,
       loc?.latitude,
       loc?.longitude,
+      privMagicMetadata?.data[magicKeyVisibility] ?? 0,
       metadata?.toEncodedJson(),
       privMagicMetadata?.toEncodedJson(),
       pubMagicMetadata?.toEncodedJson(),

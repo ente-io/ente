@@ -17,7 +17,7 @@ import "package:sqlite_async/sqlite_async.dart";
 enum RemoteTable { collections, collection_files, files, entities, trash }
 
 class RemoteDB with SqlDbBase {
-  static const _databaseName = "remotex4.db";
+  static const _databaseName = "remotex6.db";
   static const _batchInsertMaxCount = 1000;
   late final SqliteDatabase _sqliteDB;
 
@@ -72,7 +72,9 @@ class RemoteDB with SqlDbBase {
 
   Future<List<RemoteAsset>> getRemoteAssets() async {
     final result = <RemoteAsset>[];
-    final cursor = await _sqliteDB.getAll("SELECT * FROM files");
+    final cursor = await _sqliteDB.getAll(
+      "SELECT id, owner_id, thumb_header, file_header, metadata, priv_metadata, pub_metadata, info FROM files",
+    );
     for (final row in cursor) {
       result.add(fromRow(row));
     }
@@ -114,7 +116,7 @@ class RemoteDB with SqlDbBase {
           collectionFileValues,
         ),
         _sqliteDB.executeBatch(
-          'INSERT INTO files ($filesColumns) values(${getParams(15)}) ON CONFLICT(id) DO UPDATE SET $filesUpdateColumns',
+          'INSERT INTO files ($filesColumns) values(${getParams(16)}) ON CONFLICT(id) DO UPDATE SET $filesUpdateColumns',
           fileValues,
         ),
       ]);
