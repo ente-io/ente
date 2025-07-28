@@ -86,37 +86,34 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
             ? _onLongPressWithSelectionLimit(context, widget.file)
             : _onLongPressNoSelectionLimit(context, widget.file);
       },
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(1),
-            child: Hero(
-              tag: heroTag,
-              flightShuttleBuilder: (
-                flightContext,
-                animation,
-                flightDirection,
-                fromHeroContext,
-                toHeroContext,
-              ) =>
-                  thumbnailWidget,
-              transitionOnUserGestures: true,
-              child: _isFileSelected
-                  ? ColorFiltered(
-                      colorFilter: ColorFilter.mode(
-                        Colors.black.withOpacity(
-                          0.4,
-                        ),
+      child: _isFileSelected
+          ? Stack(
+              clipBehavior: Clip.none,
+              children: [
+                ClipRRect(
+                  key: ValueKey(heroTag),
+                  borderRadius: BorderRadius.circular(1),
+                  child: Hero(
+                    tag: heroTag,
+                    flightShuttleBuilder: (
+                      flightContext,
+                      animation,
+                      flightDirection,
+                      fromHeroContext,
+                      toHeroContext,
+                    ) =>
+                        thumbnailWidget,
+                    transitionOnUserGestures: true,
+                    child: ColorFiltered(
+                      colorFilter: const ColorFilter.mode(
+                        Color.fromARGB(102, 0, 0, 0),
                         BlendMode.darken,
                       ),
                       child: thumbnailWidget,
-                    )
-                  : thumbnailWidget,
-            ),
-          ),
-          _isFileSelected
-              ? Positioned(
+                    ),
+                  ),
+                ),
+                Positioned(
                   right: 4,
                   top: 4,
                   child: Icon(
@@ -124,10 +121,26 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
                     size: 20,
                     color: selectionColor, //same for both themes
                   ),
-                )
-              : const SizedBox.shrink(),
-        ],
-      ),
+                ),
+              ],
+            )
+          : ClipRRect(
+              key: ValueKey(heroTag),
+              borderRadius: BorderRadius.circular(1),
+              child: Hero(
+                tag: heroTag,
+                flightShuttleBuilder: (
+                  flightContext,
+                  animation,
+                  flightDirection,
+                  fromHeroContext,
+                  toHeroContext,
+                ) =>
+                    thumbnailWidget,
+                transitionOnUserGestures: true,
+                child: thumbnailWidget,
+              ),
+            ),
     );
   }
 
