@@ -46,10 +46,14 @@ class RemoteDB with SqlDbBase {
 
   Future<void> clearAllTables() async {
     final stopwatch = Stopwatch()..start();
-    await _sqliteDB.executeBatch(
-      'DELETE FROM collections; DELETE FROM collection_files; DELETE FROM files; DELETE FROM entities; DELETE FROM trash; delete FROM upload_mapping;',
-      [],
-    );
+    await Future.wait([
+      _sqliteDB.execute('DELETE FROM collections'),
+      _sqliteDB.execute('DELETE FROM collection_files'),
+      _sqliteDB.execute('DELETE FROM files'),
+      _sqliteDB.execute('DELETE FROM entities'),
+      _sqliteDB.execute('DELETE FROM trash'),
+      _sqliteDB.execute('DELETE FROM upload_mapping'),
+    ]);
     debugPrint(
       '$runtimeType clearAllTables complete in ${stopwatch.elapsed.inMilliseconds}ms',
     );
