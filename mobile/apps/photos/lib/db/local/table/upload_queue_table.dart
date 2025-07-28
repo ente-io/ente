@@ -43,6 +43,14 @@ extension UploadQueueTable on LocalDB {
     }
   }
 
+  Future<bool> existsQueueEntry(AssetUploadQueue entry) async {
+    final result = await sqliteDB.getAll(
+      'SELECT 1 FROM asset_upload_queue WHERE asset_id = ? AND owner_id = ? AND dest_collection_id = ?',
+      [entry.id, entry.ownerId, entry.destCollectionId],
+    );
+    return result.isNotEmpty;
+  }
+
   Future<int> delete(AssetUploadQueue entry) async {
     final stopwatch = Stopwatch()..start();
     final result = await sqliteDB.execute(

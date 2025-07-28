@@ -31,6 +31,25 @@ class DBFilterOptions {
     this.ignoreSharedItems = false,
   });
 
+  // CopyWith method to create a new instance with some options changed
+  DBFilterOptions copyWith({
+    Set<int>? ignoredCollectionIDs,
+    bool? hideIgnoredForUpload,
+    bool? dedupeUploadID,
+    bool? ignoreSavedFiles,
+    bool? onlyUploadedFiles,
+    bool? ignoreSharedItems,
+  }) {
+    return DBFilterOptions(
+      ignoredCollectionIDs: ignoredCollectionIDs ?? this.ignoredCollectionIDs,
+      hideIgnoredForUpload: hideIgnoredForUpload ?? this.hideIgnoredForUpload,
+      dedupeUploadID: dedupeUploadID ?? this.dedupeUploadID,
+      ignoreSavedFiles: ignoreSavedFiles ?? this.ignoreSavedFiles,
+      onlyUploadedFiles: onlyUploadedFiles ?? this.onlyUploadedFiles,
+      ignoreSharedItems: ignoreSharedItems ?? this.ignoreSharedItems,
+    );
+  }
+
   static DBFilterOptions dedupeOption = DBFilterOptions(
     dedupeUploadID: true,
   );

@@ -51,6 +51,7 @@ import "package:photos/utils/file_key.dart";
 import "package:photos/utils/network_util.dart";
 import 'package:photos/utils/standalone/data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import "package:timezone/timezone.dart";
 import "package:uuid/uuid.dart";
 
 class FileUploader {
@@ -1153,20 +1154,20 @@ class FileUploader {
         .where((e) => e.value.status == UploadStatus.inBackground)
         .toList();
     for (final upload in blockedUploads) {
-      final file = upload.value.file;
+      final String lockKey = upload.value.lockKey;
       final isStillLocked = await _uploadLocks.isLocked(
-        file.localID!,
+        lockKey,
         ProcessType.background.toString(),
       );
-      if (!isStillLocked) {
+      if (!isStillLocked && upload.value.assetQueue != null) {
         final completer = _queue.remove(upload.key)?.completer;
-        final dbFile =
-            await FilesDB.instance.getFile(upload.value.file.generatedID!);
-        if (dbFile?.uploadedFileID != null) {
+        final exists = await localDB.existsQueueEntry(upload.value.assetQueue!);
+        if (exists) {
           _logger.info(
             "Background upload success detected ${upload.value.file.tag}",
           );
-          completer?.complete(dbFile);
+          // todo:neeraj Instead of cancel, fire event
+          completer?.completeError(SilentlyCancelUploadsError());
           _allBackups[upload.key] = _allBackups[upload.key]!
               .copyWith(status: BackupItemStatus.uploaded);
         } else {
@@ -1177,7 +1178,7 @@ class FileUploader {
           // by the background process. Release any lock taken by the foreground process
           // and complete the completer with error.
           await _uploadLocks.releaseLock(
-            file.localID!,
+            lockKey,
             ProcessType.foreground.toString(),
           );
           completer?.completeError(SilentlyCancelUploadsError());

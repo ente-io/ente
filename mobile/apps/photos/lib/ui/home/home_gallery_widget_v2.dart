@@ -104,7 +104,9 @@ class _HomeGalleryWidgetV2State extends State<HomeGalleryWidgetV2> {
         final List<EnteFile> allFiles = await merge(
           localFiles: localFiles,
           remoteFiles: enteFiles,
-          filterOptions: homeGalleryFilters,
+          filterOptions: homeGalleryFilters.copyWith(
+            ignoreSharedItems: _shouldHideSharedItems,
+          ),
         );
         _logger.info(
           "Merged files: ${allFiles.length} (local: ${localFiles.length}, remote: ${enteFiles.length}) files $tl, total ${tl.elapsed}",

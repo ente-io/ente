@@ -191,23 +191,23 @@ class AlbumHomeWidgetService {
         await remoteCache.geFilesForCollection(collection.id);
 
     // Then open the specific file
-    final file = await FilesDB.instance.getFile(fileId);
+    // final file = await FilesDB.instance.getFile(fileId);
+    final file = null;
     if (file == null) {
       _logger.warning("Cannot launch widget: file with ID $fileId not found");
-      return;
-    }
-
-    routeToPage(
-      context,
-      DetailPage(
-        DetailPageConfiguration(
-          getAllFilesCollection,
-          getAllFilesCollection.indexOf(file),
-          "albumwidget",
+    } else {
+      routeToPage(
+        context,
+        DetailPage(
+          DetailPageConfiguration(
+            getAllFilesCollection,
+            getAllFilesCollection.indexOf(file),
+            "albumwidget",
+          ),
         ),
-      ),
-      forceCustomPageRoute: true,
-    ).ignore();
+        forceCustomPageRoute: true,
+      ).ignore();
+    }
     await _refreshAlbumsWidget();
   }
 

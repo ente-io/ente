@@ -17,6 +17,8 @@ class FileUploadItem {
     this.assetQueue,
     this.status = UploadStatus.notStarted,
   });
+
+  String get lockKey => assetQueue?.id ?? file.localID!;
 }
 
 enum UploadStatus { notStarted, inProgress, inBackground, completed }

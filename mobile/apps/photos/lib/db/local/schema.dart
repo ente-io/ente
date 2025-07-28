@@ -215,6 +215,17 @@ class LocalDBMigration {
     '''
         CREATE INDEX IF NOT EXISTS assets_created_at_desc ON assets(created_at DESC);
     ''',
+    '''
+      CREATE TABLE edited_assets (
+       id String NOT NULL,
+       created_at INTEGER NOT NULL,
+       modified_at INTEGER NOT NULL,
+       latitude REAL,
+       longitude REAL,
+       PRIMARY KEY (id)
+       FOREIGN KEY (id) REFERENCES assets(id) ON DELETE CASCADE
+    );
+  ''',
   ];
 
   static Future<void> migrate(

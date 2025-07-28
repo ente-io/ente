@@ -4,12 +4,13 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
+import "package:photos/core/configuration.dart";
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/db/files_db.dart';
+import "package:photos/db/local/table/upload_queue_table.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/generated/l10n.dart';
 import 'package:photos/models/file/file.dart';
-import 'package:photos/models/location/location.dart';
+import "package:photos/service_locator.dart";
 import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/ui/viewer/file/detail_page.dart';
@@ -37,32 +38,33 @@ Future<void> saveAsset({
       originalFile.deviceFolder ?? '',
       newAsset,
     );
-
     newFile.creationTime = originalFile.creationTime;
     newFile.collectionID = originalFile.collectionID;
     newFile.location = originalFile.location;
-    if (!newFile.hasLocation && originalFile.localID != null) {
-      final assetEntity = await originalFile.getAsset;
-      if (assetEntity != null) {
-        final latLong = await assetEntity.latlngAsync();
-        newFile.location = Location(
-          latitude: latLong.latitude,
-          longitude: latLong.longitude,
-        );
-      }
+    await localDB.trackEdit(
+      newAsset.id,
+      originalFile.creationTime!,
+      originalFile.modificationTime!,
+      originalFile.location?.latitude,
+      originalFile.location?.longitude,
+    );
+    if (originalFile.collectionID != null) {
+      await localDB.insertOrUpdateQueue(
+        {newAsset.id},
+        originalFile.collectionID!,
+        Configuration.instance.getUserID()!,
+      );
     }
-    newFile.generatedID = await FilesDB.instance.insertAndGetId(newFile);
+
     Bus.instance.fire(LocalPhotosUpdatedEvent([newFile], source: "editSave"));
-    unawaited(SyncService.instance.sync());
     showShortToast(context, S.of(context).editsSaved);
     logger.info("Original file " + originalFile.toString());
     logger.info("Saved edits to file " + newFile.toString());
     final files = detailPageConfig.files;
-
     // the index could be -1 if the files fetched doesn't contain the newly
     // edited files
-    int selectionIndex =
-        files.indexWhere((file) => file.generatedID == newFile.generatedID);
+    int selectionIndex = files.indexWhere((file) =>
+        originalFile.localID != null && file.localID == newFile.localID);
     if (selectionIndex == -1) {
       files.add(newFile);
       selectionIndex = files.length - 1;
@@ -83,5 +85,9 @@ Future<void> saveAsset({
     logger.severe(e, s);
   } finally {
     await PhotoManager.startChangeNotify();
+    Future.delayed(
+      const Duration(seconds: 2),
+      () => SyncService.instance.sync().ignore(),
+    );
   }
 }

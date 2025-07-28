@@ -162,12 +162,6 @@ class PeopleHomeWidgetService {
     String personId,
     BuildContext context,
   ) async {
-    final file = await FilesDB.instance.getFile(fileId);
-    if (file == null) {
-      _logger.warning("Cannot launch widget: file with ID $fileId not found");
-      return;
-    }
-
     final person = await PersonService.instance.getPerson(personId);
     if (person == null) {
       _logger
@@ -184,6 +178,12 @@ class PeopleHomeWidgetService {
       forceCustomPageRoute: true,
     ).ignore();
 
+    // final file = await FilesDB.instance.getFile(fileId);
+    final file = null;
+    if (file == null) {
+      _logger.warning("Cannot launch widget: file with ID $fileId not found");
+      return;
+    }
     final clusterFiles =
         await SearchService.instance.getClusterFilesForPersonID(
       personId,

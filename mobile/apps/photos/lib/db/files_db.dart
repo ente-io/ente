@@ -421,36 +421,6 @@ class FilesDB with SqlDbBase {
     await db.execute('DELETE FROM entities');
   }
 
-  // blocked upload queue (shared assets rendering)
-  Future<int> insertAndGetId(EnteFile file) async {
-    _logger.info("Inserting $file");
-    final db = await instance.sqliteAsyncDB;
-    final columnsAndPlaceholders =
-        _generateColumnsAndPlaceholdersForInsert(fileGenId: file.generatedID);
-    final values = _getParameterSetForFile(file);
-    return await db.writeTransaction((tx) async {
-      await tx.execute(
-        'INSERT OR REPLACE INTO $filesTable (${columnsAndPlaceholders["columns"]}) VALUES (${columnsAndPlaceholders["placeholders"]})',
-        values,
-      );
-      final result = await tx.get('SELECT last_insert_rowid()');
-      return result["last_insert_rowid()"] as int;
-    });
-  }
-
-  //  upload queue
-  Future<EnteFile?> getFile(int generatedID) async {
-    final db = await instance.sqliteAsyncDB;
-    final results = await db.getAll(
-      'SELECT * FROM $filesTable WHERE $columnGeneratedID = ?',
-      [generatedID],
-    );
-    if (results.isEmpty) {
-      return null;
-    }
-    return convertToFiles(results)[0];
-  }
-
   Future<BackedUpFileIDs> getBackedUpIDs() async {
     final db = await instance.sqliteAsyncDB;
     final results = await db.getAll(
@@ -615,23 +585,6 @@ class FilesDB with SqlDbBase {
     final files = convertToFiles(results);
     return files;
   }
-
-  // todo:rewrite (upload related)
-  // Future<List<int>> getUploadedFileIDsToBeUpdated(int ownerID) async {
-  //   final db = await instance.sqliteAsyncDB;
-  //   final rows = await db.getAll(
-  //     'SELECT DISTINCT $columnUploadedFileID FROM $filesTable WHERE '
-  //     '($columnLocalID IS NOT NULL AND $columnOwnerID = ? AND '
-  //     '($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1) '
-  //     'AND $columnUpdationTime IS NULL) ORDER BY $columnCreationTime DESC ',
-  //     [ownerID],
-  //   );
-  //   final uploadedFileIDs = <int>[];
-  //   for (final row in rows) {
-  //     uploadedFileIDs.add(row[columnUploadedFileID] as int);
-  //   }
-  //   return uploadedFileIDs;
-  // }
 
   // todo:rewrite (upload related)
   Future<void> markFilesForReUpload(
@@ -835,25 +788,6 @@ class FilesDB with SqlDbBase {
     return deduplicatedFiles;
   }
 
-  Map<String, String> _generateColumnsAndPlaceholdersForInsert({
-    required int? fileGenId,
-  }) {
-    final columnNames = <String>[];
-
-    for (String columnName in _columnNames) {
-      if (columnName == columnGeneratedID && fileGenId == null) {
-        continue;
-      }
-
-      columnNames.add(columnName);
-    }
-
-    return {
-      "columns": columnNames.join(","),
-      "placeholders": List.filled(columnNames.length, "?").join(","),
-    };
-  }
-
   List<EnteFile> convertToFilesForIsolate(Map args) {
     final List<EnteFile> files = [];
     for (final result in args["result"]) {
@@ -868,66 +802,6 @@ class FilesDB with SqlDbBase {
       files.add(_getFileFromRow(result));
     }
     return files;
-  }
-
-  List<Object?> _getParameterSetForFile(
-    EnteFile file, {
-    bool omitCollectionId = false,
-  }) {
-    final values = <Object?>[];
-
-    double? latitude = file.location?.latitude;
-    double? longitude = file.location?.longitude;
-
-    int? creationTime = file.creationTime;
-
-    if (file.generatedID != null) {
-      values.add(file.generatedID);
-    }
-    values.addAll([
-      file.localID,
-      file.uploadedFileID ?? -1,
-      file.ownerID,
-      file.collectionID ?? -1,
-      file.title,
-      file.deviceFolder,
-      latitude,
-      longitude,
-      getInt(file.fileType),
-      file.modificationTime,
-      // file.encryptedKey,
-      'no_encrypted_key', // encryptedKey is not used in this context
-      // file.keyDecryptionNonce,
-      'no_key_decryption_nonce', // keyDecryptionNonce is not used in this context
-      // file.fileDecryptionHeader,
-      'no_file_decryption_header', // fileDecryptionHeader is not used in this context
-      // file.thumbnailDecryptionHeader,
-      'no_thumbnail_decryption_header', // thumbnailDecryptionHeader is not used in this context
-      'na',
-      creationTime,
-      file.updationTime,
-      file.fileSubType ?? -1,
-      file.duration ?? 0,
-      file.exif,
-      file.hash,
-      file.metadataVersion,
-      // file.mMdEncodedJson ?? '{}',
-      {}, // mMdEncodedJson is not used in this context
-      0, // version
-      0, // default visibility
-      '{}', // pubMmdEncodedJson is not used in this context
-      0, // pubMmdVersion is not used in this context
-      // file.pubMmdEncodedJson ?? '{}',
-      // file.pubMmdVersion,
-      file.fileSize,
-      DateTime.now().microsecondsSinceEpoch, // added Time
-    ]);
-
-    if (omitCollectionId) {
-      values.removeAt(3);
-    }
-
-    return values;
   }
 
   EnteFile _getFileFromRow(Map<String, dynamic> row) {

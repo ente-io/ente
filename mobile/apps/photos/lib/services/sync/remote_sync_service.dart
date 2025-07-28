@@ -310,11 +310,7 @@ class RemoteSyncService {
     try {
       final uploadedFile = await _uploader
           .upload(file, queueEntry.destCollectionId, queue: queueEntry);
-      await _collectionsService.addOrCopyToCollection(
-        queueEntry.destCollectionId,
-        [uploadedFile],
-      );
-      _onFileUploaded(uploadedFile, queueEntry: queueEntry);
+      _onFileUploaded(uploadedFile);
     } catch (error, stackTrace) {
       _onFileUploadError(error, stackTrace, file);
     }
@@ -322,7 +318,7 @@ class RemoteSyncService {
 
   void _onFileUploaded(
     EnteFile file, {
-    AssetUploadQueue? queueEntry,
+
   }) {
     Bus.instance.fire(
       CollectionUpdatedEvent(file.collectionID, [file], "fileUpload"),
