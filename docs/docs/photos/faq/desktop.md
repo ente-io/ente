@@ -1,7 +1,6 @@
 ---
 title: Desktop app FAQ
-description:
-    An assortment of frequently asked questions about Ente Photos desktop app
+description: An assortment of frequently asked questions about Ente Photos desktop app
 ---
 
 # Desktop app FAQ

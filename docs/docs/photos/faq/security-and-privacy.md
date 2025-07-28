@@ -1,7 +1,6 @@
 ---
 title: Security and Privacy FAQ
-description:
-    Comprehensive information about security and privacy measures in Ente Photos
+description: Comprehensive information about security and privacy measures in Ente Photos
 ---
 
 # Security and Privacy FAQ
