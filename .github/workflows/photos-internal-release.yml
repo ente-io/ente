@@ -72,9 +72,6 @@ jobs:
           pod install
         working-directory: mobile/apps/photos/ios
 
-      - name: Install codemagic-cli-tools
-        run: pip3 install codemagic-cli-tools
-
       - name: Add certificates
         run: |
           # Create a temporary keychain
