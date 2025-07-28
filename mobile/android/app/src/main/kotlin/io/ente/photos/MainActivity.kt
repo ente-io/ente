@@ -95,7 +95,7 @@ class MainActivity : FlutterFragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        overridePendingTransition(0, 0)
         handleIntent(intent)
     }
 
@@ -229,5 +229,10 @@ class MainActivity : FlutterFragmentActivity() {
         }
         logoutChannel = null // Clean up the logout channel
         super.onDestroy()
+    }
+
+    override fun finish() {
+        super.finish()
+        overridePendingTransition(0, 0)
     }
 }
