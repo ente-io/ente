@@ -204,7 +204,6 @@ class ClipVectorDB {
   Future<(List<Uint64List>, List<Float32List>)> bulkSearchVectors(
     List<Float32List> queries,
     BigInt count,
-    double thresholdThreshold,
   ) async {
     final db = await _vectorDB;
     try {
