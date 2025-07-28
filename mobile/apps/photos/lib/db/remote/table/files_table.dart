@@ -73,4 +73,21 @@ extension FilesTable on RemoteDB {
     }
     return result;
   }
+
+  Future<int> getFilesCountByVisibility(
+    int visibility,
+    int ownerID,
+    Set<int> hiddenCollections,
+  ) async {
+    String subQuery = '';
+    if (hiddenCollections.isNotEmpty) {
+      subQuery =
+          'AND id NOT IN (SELECT file_id FROM collection_files WHERE collection_id IN (${hiddenCollections.join(',')}))';
+    }
+    final row = await sqliteDB.get(
+      'SELECT COUNT(id) as count FROM files WHERE visibility = ? AND owner_id = ? $subQuery',
+      [visibility, ownerID],
+    );
+    return row['count'] as int;
+  }
 }

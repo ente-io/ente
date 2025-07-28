@@ -725,20 +725,6 @@ class FilesDB with SqlDbBase {
     return convertToFiles(results);
   }
 
-  Future<int> archivedFilesCount(
-    int visibility,
-    int ownerID,
-    Set<int> hiddenCollections,
-  ) async {
-    final db = await instance.sqliteAsyncDB;
-    final count = await db.getAll(
-      'SELECT COUNT(distinct($columnUploadedFileID)) as COUNT FROM $filesTable where '
-      '$columnMMdVisibility'
-      ' = $visibility AND $columnOwnerID = $ownerID AND $columnCollectionID NOT IN (${hiddenCollections.join(', ')})',
-    );
-    return count.first['COUNT'] as int;
-  }
-
   Future<Map<int, EnteFile>> getFileIDToFileFromIDs(List<int> ids) async {
     final result = <int, EnteFile>{};
     if (ids.isEmpty) {
