@@ -72,7 +72,32 @@ jobs:
           pod install
         working-directory: mobile/apps/photos/ios
 
-      - name: Create ExportOptions.plist
+      - name: Install codemagic-cli-tools
+        run: pip3 install codemagic-cli-tools
+
+      - name: Add certificates
+        run: |
+          # Create a temporary keychain
+          keychain initialize
+
+          # Decode and import the certificate
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          echo -n "${{ secrets.MAC_OS_CERTIFICATE }}" | base64 --decode -o $CERTIFICATE_PATH
+          keychain add-certificates --certificate $CERTIFICATE_PATH --certificate-password "${{ secrets.MAC_OS_CERTIFICATE_PASSWORD }}"
+      
+      - name: Add provisioning profiles
+        run: |
+          # Decode and install all provisioning profiles
+          PROFILES_HOME="$HOME/Library/MobileDevice/Provisioning Profiles"
+          mkdir -p "$PROFILES_HOME"
+          IFS=$'\n'
+          for profile in ${{ secrets.MAC_OS_PROFILES_BASE64 }}; do
+            PROFILE_PATH="$(mktemp "$PROFILES_HOME"/$(uuidgen).mobileprovision)"
+            echo "$profile" | base64 --decode > "$PROFILE_PATH"
+            echo "Saved provisioning profile to $PROFILE_PATH"
+          done
+
+      - name: Create simple ExportOptions.plist
         run: |
           cat <<EOF > ios/ExportOptions.plist
           <?xml version="1.0" encoding="UTF-8"?>
@@ -83,19 +108,6 @@ jobs:
               <string>app-store</string>
               <key>teamID</key>
               <string>${{ secrets.IOS_TEAM_ID }}</string>
-              <key>provisioningProfiles</key>
-              <dict>
-                  <key>io.ente.photos</key>
-                  <string>match AppStore io.ente.photos</string>
-                  <key>io.ente.frame</key>
-                  <string>match AppStore io.ente.frame</string>
-                  <key>io.ente.frame.EntePeopleWidget</key>
-                  <string>match AppStore io.ente.frame.EntePeopleWidget</string>
-                  <key>io.ente.frame.EnteAlbumWidget</key>
-                  <string>match AppStore io.ente.frame.EnteAlbumWidget</string>
-                  <key>io.ente.frame.EnteMemoryWidget</key>
-                  <string>match AppStore io.ente.frame.EnteMemoryWidget</string>
-              </dict>
           </dict>
           </plist>
           EOF
