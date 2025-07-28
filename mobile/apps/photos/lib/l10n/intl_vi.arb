@@ -870,9 +870,9 @@
   "youCanTrySearchingForADifferentQuery": "Bạn có thể thử tìm kiếm một truy vấn khác.",
   "noResultsFound": "Không tìm thấy kết quả",
   "addedBy": "Được thêm bởi {emailOrName}",
-  "loadingExifData": "Đang tải thông số Exif...",
+  "loadingExifData": "Đang lấy thông số Exif...",
   "viewAllExifData": "Xem thông số Exif",
-  "noExifData": "Không có thông số Exif",
+  "noExifData": "Không có Exif",
   "thisImageHasNoExifData": "Ảnh này không có thông số Exif",
   "exif": "Exif",
   "noResults": "Không có kết quả",
@@ -1217,7 +1217,7 @@
   "searchHint4": "Vị trí",
   "searchHint5": "Sắp ra mắt: Nhận diện khuôn mặt & tìm kiếm vi diệu ✨",
   "addYourPhotosNow": "Thêm ảnh của bạn ngay bây giờ",
-  "searchResultCount": "{count, plural, other{{count} kết quả được tìm thấy}}",
+  "searchResultCount": "{count, plural, other{{count} kết quả đã tìm thấy}}",
   "@searchResultCount": {
     "description": "Text to tell user how many results were found for their search query",
     "placeholders": {

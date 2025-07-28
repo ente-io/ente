@@ -11,6 +11,16 @@
       "title": "3Commas"
     },
     {
+      "title": "Accredible",
+      "slug": "accredible",
+      "altNames": [
+        "Accredible Certificates",
+        "Accredible Badges",
+        "Digital Credentials",
+        "certificates.zaka.ai"
+      ]
+    },
+    {
       "title": "Addy.io",
       "slug": "addy_io"
     },
@@ -70,6 +80,13 @@
         "goauthentik"
       ],
       "hex": "fd4b2d"
+    },
+    {
+      "title": "Autenticacion Digital",
+      "slug": "autenticacion-digital",
+      "altNames": [
+        "autenticaciondigital.and.gov.co"
+      ]
     },
     {
       "title": "availity"
@@ -280,6 +297,13 @@
       "slug": "cern"
     },
     {
+      "title": "Chaturbate",
+      "slug": "chaturbate",
+      "altNames": [
+        "Chaturbate.com"
+      ]
+    },
+    {
       "title": "ChangeNOW"
     },
     {
@@ -359,6 +383,10 @@
       "slug": "csgoroll"
     },
     {
+      "title": "CrowdSec",
+      "slug": "crowdsec"
+    },
+    {
       "title": "Cryptee",
       "slug": "cryptee"
     },
@@ -436,7 +464,7 @@
       "title": "emeritihealth",
       "altNames": [
         "Emeriti Health",
-        "Emeriti Retirement Health",
+        "Emeriti Retirement Health"
       ]
     },
     {
@@ -493,6 +521,10 @@
       "altNames": [
         "Fidelity Investments"
       ]
+    },
+    {
+      "title": "FileCloud",
+      "slug": "filecloud"
     },
     {
       "title": "Filen"
@@ -666,6 +698,13 @@
       "hex": "D3D800"
     },
     {
+      "title": "JetBrains YouTrack",
+      "slug": "jetbrains-youtrack",
+      "altNames": [
+        "YouTrack"
+      ]
+    },
+    {
       "title": "jianguoyun",
       "altNames": [
         "坚果云"
@@ -743,6 +782,15 @@
       "title": "Letterboxd"
     },
     {
+      "title": "LifeMiles",
+      "slug": "lifemiles",
+      "altNames": [
+        "Life Miles",
+        "lifemiles.com",
+        "Avianca LifeMiles"
+      ]
+    },
+    {
       "title": "lincolnfinancial",
       "altNames": [
         "Lincoln Financial",
@@ -781,6 +829,14 @@
       "altNames": [
         "luma",
         "lu.ma"
+      ]
+    },
+    {
+      "title": "MailCow",
+      "slug": "mailcow",
+      "altNames": [
+        "mailcow",
+        "mailcow UI"
       ]
     },
     {
@@ -936,6 +992,10 @@
     },
     {
       "title": "Nelnet"
+    },
+    {
+      "title": "NetBird",
+      "slug": "netbird"
     },
     {
       "title": "nintendo",
@@ -1300,6 +1360,15 @@
       "slug": "startmail"
     },
     {
+      "title": "Stripchat",
+      "slug": "stripchat",
+      "altNames": [
+        "Strip Chat",
+        "stripchat.com",
+        "StripChat Live"
+      ]
+    },
+    {
       "title": "STRATO",
       "hex": "FF8800"
     },
@@ -1316,6 +1385,9 @@
         "T Mobile",
         "T-Mobile ID"
       ]
+    },
+    {
+      "title": "Tableau"
     },
     {
       "title": "TCPShield"
@@ -1527,6 +1599,12 @@
       "title": "WYZE"
     },
     {
+      "title": "X",
+      "altNames": [
+        "Twitter"
+      ]
+    },
+    {
       "title": "Xbox",
       "hex": "107C10"
     },
@@ -1580,6 +1658,14 @@
     {
       "title": "xAI",
       "slug": "xai"
+    },
+    {
+      "title": "XVideos",
+      "slug": "xvideos",
+      "altNames": [
+        "X Videos",
+        "xvideos.com"
+      ]
     },
     {
       "title": "Cronometer",
