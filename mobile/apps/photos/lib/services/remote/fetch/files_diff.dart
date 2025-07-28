@@ -177,7 +177,7 @@ class RemoteFileDiffService {
       defaultMeta['hash'] =
           '${defaultMeta['imageHash']}$kHashSeprator${defaultMeta['videoHash']}';
     }
-
+    defaultMeta.remove('exif'); // remove exif as it is not used in mobile
     // Decrypt magic metadata if present
     Metadata? privateMagicMetadata;
     if (item['magicMetadata'] != null) {
