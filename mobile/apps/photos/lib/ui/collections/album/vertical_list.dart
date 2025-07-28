@@ -142,7 +142,7 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
         },
         showOnlyLoadingState: true,
         textCapitalization: TextCapitalization.words,
-        popnavAfterSubmission: false,
+        popnavAfterSubmission: true,
       );
       if (result is Exception) {
         await showGenericErrorDialog(
