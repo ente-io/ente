@@ -7,6 +7,7 @@ import 'package:logging/logging.dart';
 import "package:photos/db/ml/clip_vector_db.dart";
 import "package:photos/db/ml/db.dart";
 import 'package:photos/models/file/file.dart';
+import "package:photos/models/file/file_type.dart";
 import "package:photos/models/ml/vector.dart";
 import "package:photos/models/similar_files.dart";
 import "package:photos/services/search_service.dart";
@@ -61,7 +62,7 @@ class SimilarImagesService {
     );
     final allFileIdsToFile = <int, EnteFile>{};
     for (final file in allFiles) {
-      if (file.uploadedFileID != null) {
+      if (file.uploadedFileID != null && file.fileType != FileType.video) {
         allFileIdsToFile[file.uploadedFileID!] = file;
       }
     }
