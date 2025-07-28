@@ -1,7 +1,6 @@
 ---
 title: Migrating to Ente Auth
-description:
-    Guides for migrating your existing 2FA tokens into or out of Ente Auth
+description: Guides for migrating your existing 2FA tokens into or out of Ente Auth
 ---
 
 # Migrating to/from Ente Auth
