@@ -283,7 +283,7 @@
     "disable_maps_confirm_message": "<p>Ảnh của bạn sẽ thôi hiển thị trên bản đồ thế giới.</p><p>Bạn có thể bật tính năng này bất cứ lúc nào từ Cài đặt.</p>",
     "details": "Chi tiết",
     "view_exif": "Xem thông số Exif",
-    "no_exif": "No Exif data",
+    "no_exif": "Không có Exif",
     "exif": "Exif",
     "two_factor": "Xác thực 2 bước",
     "two_factor_authentication": "Xác thực 2 bước",
