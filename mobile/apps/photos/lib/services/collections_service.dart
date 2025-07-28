@@ -91,10 +91,13 @@ class CollectionsService {
     await remoteDB.init();
     // todo: neeraj move it to local sync service
     await localDB.init();
-
-    final newColections = await remoteDB.getAllCollections();
-    for (final collection in newColections) {
-      _cacheLocalPathAndCollection(collection);
+    if (_config.isLoggedIn()) {
+      final newColections = await remoteDB.getAllCollections();
+      for (final collection in newColections) {
+        _cacheLocalPathAndCollection(collection);
+      }
+    } else {
+      remoteDB.clearAllTables().ignore();
     }
     Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
       _collectionIDToNewestFileTime = null;
