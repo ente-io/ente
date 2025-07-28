@@ -3,14 +3,15 @@ import "package:photos/models/file/file.dart";
 class SimilarFiles {
   final List<EnteFile> files;
   final int totalSize;
-  final double similarityScore;
+  final double furthestDistance;
 
   SimilarFiles(
     this.files,
     this.totalSize,
-    this.similarityScore,
+    this.furthestDistance,
   );
 
   @override
-  String toString() => 'SimilarFiles(files: $files, size: $totalSize)';
+  String toString() =>
+      'SimilarFiles(files: $files, size: $totalSize, distance: $furthestDistance)';
 }
