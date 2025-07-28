@@ -15,6 +15,7 @@ import 'package:photos/ui/settings/advanced_settings_screen.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import "package:photos/ui/settings/gallery_settings_screen.dart";
 import "package:photos/ui/settings/language_picker.dart";
+import "package:photos/ui/settings/memories_settings_screen.dart";
 import "package:photos/ui/settings/notification_settings_screen.dart";
 import "package:photos/ui/settings/widget_settings_screen.dart";
 import 'package:photos/utils/navigation_util.dart';
@@ -44,6 +45,18 @@ class GeneralSectionWidget extends StatelessWidget {
           trailingIconIsMuted: true,
           onTap: () async {
             _onGallerySettingsTapped(context);
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).memories,
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            _onMemoriesSettingsTapped(context);
           },
         ),
         sectionOptionSpacing,
@@ -173,6 +186,13 @@ class GeneralSectionWidget extends StatelessWidget {
       const GallerySettingsScreen(
         fromGallerySettingsCTA: false,
       ),
+    );
+  }
+
+  void _onMemoriesSettingsTapped(BuildContext context) {
+    routeToPage(
+      context,
+      const MemoriesSettingsScreen(),
     );
   }
 }
