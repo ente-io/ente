@@ -12336,6 +12336,16 @@ class S {
     );
   }
 
+  /// `Auto-add to album`
+  String get autoAddToAlbum {
+    return Intl.message(
+      'Auto-add to album',
+      name: 'autoAddToAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Should the files related to the person that were previously selected in smart albums be removed?`
   String get shouldRemoveFilesSmartAlbumsDesc {
     return Intl.message(

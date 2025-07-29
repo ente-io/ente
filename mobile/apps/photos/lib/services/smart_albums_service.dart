@@ -126,8 +126,8 @@ class SmartAlbumsService {
       for (final personId in config.personIDs) {
         // compares current updateAt with last added file's updatedAt
         if (updatedAtMap[personId] == null ||
-            infoMap[personId] == null ||
-            (updatedAtMap[personId]! <= infoMap[personId]!.updatedAt)) {
+            infoMap[personId] != null &&
+                (updatedAtMap[personId]! <= infoMap[personId]!.updatedAt)) {
           continue;
         }
 
@@ -171,6 +171,36 @@ class SmartAlbumsService {
     }
     syncingCollection = null;
     Bus.instance.fire(SmartAlbumSyncingEvent());
+  }
+
+  Future<SmartAlbumConfig> addPeopleToSmartAlbum(
+    int collectionId,
+    List<String> personIDs,
+  ) async {
+    final cachedConfigs = await getSmartConfigs();
+
+    late SmartAlbumConfig newConfig;
+
+    final config = cachedConfigs[collectionId];
+    final infoMap = Map<String, PersonInfo>.from(config?.infoMap ?? {});
+
+    for (final personId in personIDs) {
+      // skip if personId already exists in infoMap
+      // only relevant when config exists before
+      if (infoMap.containsKey(personId)) continue;
+      infoMap[personId] = (updatedAt: 0, addedFiles: {});
+    }
+
+    newConfig = SmartAlbumConfig(
+      id: config?.id,
+      collectionId: collectionId,
+      personIDs: {...?config?.personIDs, ...personIDs},
+      infoMap: infoMap,
+      updatedAt: DateTime.now().millisecondsSinceEpoch,
+    );
+
+    await saveConfig(newConfig);
+    return newConfig;
   }
 
   Future<void> saveConfig(SmartAlbumConfig config) async {

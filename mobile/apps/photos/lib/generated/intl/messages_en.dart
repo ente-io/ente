@@ -548,6 +548,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Authentication successful!"),
         "autoAddPeople":
             MessageLookupByLibrary.simpleMessage("Auto-add people"),
+        "autoAddToAlbum":
+            MessageLookupByLibrary.simpleMessage("Auto-add to album"),
         "autoCastDialogBody": MessageLookupByLibrary.simpleMessage(
             "You\'ll see available Cast devices here."),
         "autoCastiOSPermission": MessageLookupByLibrary.simpleMessage(

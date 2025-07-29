@@ -1793,6 +1793,7 @@
   "fileAnalysisFailed": "Unable to analyze file",
   "editAutoAddPeople": "Edit auto-add people",
   "autoAddPeople": "Auto-add people",
+  "autoAddToAlbum": "Auto-add to album",
   "shouldRemoveFilesSmartAlbumsDesc": "Should the files related to the person that were previously selected in smart albums be removed?",
   "addingPhotos": "Adding photos",
   "gettingReady": "Getting ready",
