@@ -53,10 +53,10 @@ Future<DecodedImage> decodeImageFromPath(
   final Map<String, IfdTag> exifData = await readExifFromBytes(imageData);
   final int orientation =
       exifData['Image Orientation']?.values.firstAsInt() ?? 1;
+  final format = imagePath.split('.').last;
   if (orientation > 1 && includeRgbaBytes) {
-    _logger.severe("Image EXIF orientation $orientation is not supported");
-    throw Exception(
-      'UnhandledExifOrientation: exif orientation $orientation',
+    _logger.warning(
+      "Image EXIF orientation $orientation might not work, for format $format",
     );
   }
 
@@ -64,7 +64,6 @@ Future<DecodedImage> decodeImageFromPath(
   try {
     image = await decodeImageFromData(imageData);
   } catch (e, s) {
-    final format = imagePath.split('.').last;
     _logger.info(
       'Cannot decode $format on ${Platform.isAndroid ? "Android" : "iOS"}, converting to jpeg',
     );
