@@ -137,7 +137,7 @@ class _PeoplePageState extends State<PeoplePage> {
                 Size.fromHeight(widget.searchResult != null ? 90.0 : 50.0),
             child: PeopleAppBar(
               GalleryType.peopleTag,
-              _person.data.name,
+              _person.data.isIgnored ? "(ignored)" : _person.data.name,
               _selectedFiles,
               _person,
             ),
@@ -264,8 +264,9 @@ class _GalleryState extends State<_Gallery> {
           widget.personFiles.isNotEmpty ? [widget.personFiles.first] : [],
       header: Column(
         children: [
-          widget.personEntity.data.email != null &&
-                  widget.personEntity.data.email!.isNotEmpty
+          (widget.personEntity.data.email != null &&
+                      widget.personEntity.data.email!.isNotEmpty) ||
+                  widget.personEntity.data.isIgnored
               ? const SizedBox.shrink()
               : Padding(
                   padding: const EdgeInsets.only(top: 12, bottom: 8),
