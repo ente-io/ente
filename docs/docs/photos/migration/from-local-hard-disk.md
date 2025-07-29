@@ -1,7 +1,6 @@
 ---
 title: Import from local hard disk
-description:
-    Migrating to Ente Photos by importing data from your local hard disk
+description: Migrating to Ente Photos by importing data from your local hard disk
 ---
 
 # Import photos from your local hard disk

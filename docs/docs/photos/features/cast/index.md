@@ -1,7 +1,6 @@
 ---
 title: Cast
-description:
-    Casting your photos on to a large screen or a TV or a Chromecast device
+description: Casting your photos on to a large screen or a TV or a Chromecast device
 ---
 
 # Cast
