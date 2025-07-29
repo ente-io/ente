@@ -250,18 +250,6 @@ class _NewImageEditorState extends State<NewImageEditor> {
               ),
               brightness: isLightMode ? Brightness.light : Brightness.dark,
             ),
-            mainEditorConfigs: const MainEditorConfigs(),
-            paintEditorConfigs: const PaintEditorConfigs(enabled: true),
-            textEditorConfigs: TextEditorConfigs(
-              canToggleBackgroundMode: true,
-              canToggleTextAlign: true,
-              customTextStyles: [
-                GoogleFonts.inter(),
-                GoogleFonts.giveYouGlory(),
-                GoogleFonts.dmSerifText(),
-                GoogleFonts.comicNeue(),
-              ],
-            ),
             customWidgets: ImageEditorCustomWidgets(
               filterEditor: CustomWidgetsFilterEditor(
                 slider: (
@@ -531,6 +519,18 @@ class _NewImageEditorState extends State<NewImageEditor> {
                   ),
                 ),
               ),
+            ),
+            mainEditorConfigs: const MainEditorConfigs(enableZoom: true),
+            paintEditorConfigs: const PaintEditorConfigs(enabled: true),
+            textEditorConfigs: TextEditorConfigs(
+              canToggleBackgroundMode: true,
+              canToggleTextAlign: true,
+              customTextStyles: [
+                GoogleFonts.inter(),
+                GoogleFonts.giveYouGlory(),
+                GoogleFonts.dmSerifText(),
+                GoogleFonts.comicNeue(),
+              ],
             ),
             cropRotateEditorConfigs: const CropRotateEditorConfigs(
               canChangeAspectRatio: true,
