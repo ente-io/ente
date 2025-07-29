@@ -982,24 +982,50 @@ class FilesDB with SqlDbBase {
   // remove references for local files which are either already uploaded
   // or queued for upload but not yet uploaded
   Future<int> removeQueuedLocalFiles(Set<String> localIDs) async {
+    if (localIDs.isEmpty) {
+      _logger.finest("No local IDs provided for removal");
+      return 0;
+    }
+
     final db = await instance.sqliteAsyncDB;
-    final inParam = localIDs.map((id) => "'$id'").join(',');
-    final r = await db.execute(
-      '''
+    const batchSize = 10000;
+    int totalRemoved = 0;
+
+    final localIDsList = localIDs.toList();
+
+    for (int i = 0; i < localIDsList.length; i += batchSize) {
+      final endIndex = (i + batchSize > localIDsList.length)
+          ? localIDsList.length
+          : i + batchSize;
+
+      final batch = localIDsList.sublist(i, endIndex);
+      final placeholders = List.filled(batch.length, '?').join(',');
+
+      final r = await db.execute(
+        '''
       DELETE FROM $filesTable
-      WHERE $columnLocalID IN ($inParam) and (collectionID IS NULL || collectionID = -1)
-      and ($columnUploadedFileID IS NULL OR $columnUploadedFileID = -1);
-    ''',
-    );
-    if (r.isNotEmpty) {
+      WHERE $columnLocalID IN ($placeholders) 
+      AND ($columnCollectionID IS NULL OR $columnCollectionID = -1)
+      AND ($columnUploadedFileID IS NULL OR $columnUploadedFileID = -1)
+      ''',
+        batch,
+      );
+
+      if (r.isNotEmpty) {
+        _logger
+            .fine("Batch ${(i ~/ batchSize) + 1}: Removed ${r.length} files");
+        totalRemoved += r.length;
+      }
+    }
+
+    if (totalRemoved > 0) {
       _logger.warning(
-        "Removed ${r.length} potential dups for already queued local files",
+        "Removed $totalRemoved potential dups for already queued local files",
       );
     } else {
       _logger.finest("No duplicate id found for queued/uploaded files");
     }
-
-    return r.length;
+    return totalRemoved;
   }
 
   Future<Set<String>> getLocalFileIDsForCollection(int collectionID) async {

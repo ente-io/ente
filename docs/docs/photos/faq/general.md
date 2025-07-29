@@ -67,7 +67,7 @@ reliable as any one can be.
 If you would like to fund the development of this project, please consider
 [subscribing](https://ente.io/download).
 
-## How do I pronounce ente?
+## How do I pronounce Ente?
 
 It's like cafe 😊. kaf-_ay_. en-_tay_.
 
