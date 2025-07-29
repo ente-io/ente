@@ -139,7 +139,7 @@ class SmartAlbumsService {
 
         toBeSynced = {...toBeSynced, ...fileIds};
 
-        newConfig = await newConfig.addFiles(
+        newConfig = newConfig.addFiles(
           personId,
           updatedAtMap[personId]!,
           toBeSynced.map((e) => e.uploadedFileID!).toSet(),
