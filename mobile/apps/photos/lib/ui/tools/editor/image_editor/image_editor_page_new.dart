@@ -35,6 +35,7 @@ import "package:photos/ui/tools/editor/image_editor/image_editor_tune_bar.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
+import "package:pro_image_editor/models/editor_configs/main_editor_configs.dart";
 import 'package:pro_image_editor/pro_image_editor.dart';
 
 class NewImageEditor extends StatefulWidget {
@@ -177,6 +178,7 @@ class _NewImageEditorState extends State<NewImageEditor> {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: colorScheme.backgroundBase,
       body: PopScope(
         canPop: false,
@@ -203,12 +205,38 @@ class _NewImageEditorState extends State<NewImageEditor> {
             ),
           ),
           configs: ProImageEditorConfigs(
-            imageGeneration: const ImageGenerationConfigs(
+            imageEditorTheme: ImageEditorTheme(
+              appBarBackgroundColor: colorScheme.backgroundBase,
+              background: colorScheme.backgroundBase,
+              bottomBarBackgroundColor: colorScheme.backgroundBase,
+              filterEditor: FilterEditorTheme(
+                background: colorScheme.backgroundBase,
+              ),
+              paintingEditor: PaintingEditorTheme(
+                background: colorScheme.backgroundBase,
+              ),
+              textEditor: const TextEditorTheme(
+                background: Colors.transparent,
+                textFieldMargin: EdgeInsets.only(top: kToolbarHeight),
+              ),
+              cropRotateEditor: CropRotateEditorTheme(
+                background: colorScheme.backgroundBase,
+                cropCornerColor:
+                    Theme.of(context).colorScheme.imageEditorPrimaryColor,
+              ),
+              tuneEditor: TuneEditorTheme(
+                background: colorScheme.backgroundBase,
+              ),
+              emojiEditor: EmojiEditorTheme(
+                backgroundColor: colorScheme.backgroundBase,
+              ),
+            ),
+            imageGenerationConfigs: const ImageGenerationConfigs(
               jpegQuality: 100,
               generateInsideSeparateThread: true,
               pngLevel: 0,
             ),
-            layerInteraction: const LayerInteractionConfigs(
+            layerInteraction: const LayerInteraction(
               hideToolbarOnInteraction: false,
             ),
             theme: ThemeData(
@@ -222,132 +250,9 @@ class _NewImageEditorState extends State<NewImageEditor> {
               ),
               brightness: isLightMode ? Brightness.light : Brightness.dark,
             ),
-            mainEditor: MainEditorConfigs(
-              enableCloseButton: false,
-              style: MainEditorStyle(
-                appBarBackground: colorScheme.backgroundBase,
-                background: colorScheme.backgroundBase,
-                bottomBarBackground: colorScheme.backgroundBase,
-              ),
-              widgets: MainEditorWidgets(
-                removeLayerArea: (removeAreaKey, editor, rebuildStream) {
-                  return Align(
-                    alignment: Alignment.bottomCenter,
-                    child: StreamBuilder(
-                      stream: rebuildStream,
-                      builder: (_, __) {
-                        final isHovered =
-                            editor.layerInteractionManager.hoverRemoveBtn;
-
-                        return AnimatedContainer(
-                          key: removeAreaKey,
-                          duration: const Duration(milliseconds: 150),
-                          height: 56,
-                          width: 56,
-                          margin: const EdgeInsets.only(bottom: 24),
-                          decoration: BoxDecoration(
-                            color: isHovered
-                                ? colorScheme.warning400.withOpacity(0.8)
-                                : Colors.white,
-                            shape: BoxShape.circle,
-                          ),
-                          padding: const EdgeInsets.all(12),
-                          child: Center(
-                            child: SvgPicture.asset(
-                              "assets/image-editor/image-editor-delete.svg",
-                              colorFilter: ColorFilter.mode(
-                                isHovered
-                                    ? Colors.white
-                                    : colorScheme.warning400.withOpacity(0.8),
-                                BlendMode.srcIn,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  );
-                },
-                appBar: (editor, rebuildStream) {
-                  return ReactiveCustomAppbar(
-                    builder: (context) {
-                      return ImageEditorAppBar(
-                        enableRedo: editor.canRedo,
-                        enableUndo: editor.canUndo,
-                        key: const Key('image_editor_app_bar'),
-                        redo: () => editor.redoAction(),
-                        undo: () => editor.undoAction(),
-                        configs: editor.configs,
-                        done: () async {
-                          final Uint8List bytes = await editorKey.currentState!
-                              .captureEditorImage();
-                          await saveImage(bytes);
-                        },
-                        close: () {
-                          _showExitConfirmationDialog(context);
-                        },
-                        isMainEditor: true,
-                      );
-                    },
-                    stream: rebuildStream,
-                  );
-                },
-                bottomBar: (editor, rebuildStream, key) => ReactiveCustomWidget(
-                  key: key,
-                  builder: (context) {
-                    return ImageEditorMainBottomBar(
-                      key: _mainEditorBarKey,
-                      editor: editor,
-                      configs: editor.configs,
-                      callbacks: editor.callbacks,
-                    );
-                  },
-                  stream: rebuildStream,
-                ),
-              ),
-            ),
-            paintEditor: PaintEditorConfigs(
-              style: PaintEditorStyle(
-                background: colorScheme.backgroundBase,
-                initialStrokeWidth: 5,
-              ),
-              widgets: PaintEditorWidgets(
-                appBar: (editor, rebuildStream) {
-                  return ReactiveCustomAppbar(
-                    builder: (context) {
-                      return ImageEditorAppBar(
-                        enableRedo: editor.canRedo,
-                        enableUndo: editor.canUndo,
-                        key: const Key('image_editor_app_bar'),
-                        redo: () => editor.redoAction(),
-                        undo: () => editor.undoAction(),
-                        configs: editor.configs,
-                        done: () => editor.done(),
-                        close: () => editor.close(),
-                      );
-                    },
-                    stream: rebuildStream,
-                  );
-                },
-                colorPicker:
-                    (paintEditor, rebuildStream, currentColor, setColor) =>
-                        null,
-                bottomBar: (editorState, rebuildStream) {
-                  return ReactiveCustomWidget(
-                    builder: (context) {
-                      return ImageEditorPaintBar(
-                        configs: editorState.configs,
-                        callbacks: editorState.callbacks,
-                        editor: editorState,
-                        i18nColor: 'Color',
-                      );
-                    },
-                    stream: rebuildStream,
-                  );
-                },
-              ),
-            ),
-            textEditor: TextEditorConfigs(
+            mainEditorConfigs: const MainEditorConfigs(),
+            paintEditorConfigs: const PaintEditorConfigs(enabled: true),
+            textEditorConfigs: TextEditorConfigs(
               canToggleBackgroundMode: true,
               canToggleTextAlign: true,
               customTextStyles: [
@@ -356,98 +261,9 @@ class _NewImageEditorState extends State<NewImageEditor> {
                 GoogleFonts.dmSerifText(),
                 GoogleFonts.comicNeue(),
               ],
-              style: const TextEditorStyle(
-                background: Colors.transparent,
-                textFieldMargin: EdgeInsets.only(top: kToolbarHeight),
-              ),
-              widgets: TextEditorWidgets(
-                appBar: (textEditor, rebuildStream) => ReactiveCustomAppbar(
-                  builder: (context) {
-                    return ImageEditorAppBar(
-                      key: const Key('image_editor_app_bar'),
-                      configs: textEditor.configs,
-                      done: () => textEditor.done(),
-                      close: () => textEditor.close(),
-                    );
-                  },
-                  stream: rebuildStream,
-                ),
-                bodyItems: (editor, rebuildStream) {
-                  return [
-                    ReactiveCustomWidget(
-                      builder: (context) {
-                        return Positioned.fill(
-                          child: GestureDetector(
-                            onTap: () {},
-                            child: Container(
-                              color: Colors.transparent,
-                            ),
-                          ),
-                        );
-                      },
-                      stream: rebuildStream,
-                    ),
-                  ];
-                },
-                colorPicker:
-                    (textEditor, rebuildStream, currentColor, setColor) => null,
-                bottomBar: (editorState, rebuildStream) {
-                  return ReactiveCustomWidget(
-                    builder: (context) {
-                      return ImageEditorTextBar(
-                        configs: editorState.configs,
-                        callbacks: editorState.callbacks,
-                        editor: editorState,
-                      );
-                    },
-                    stream: rebuildStream,
-                  );
-                },
-              ),
             ),
-            cropRotateEditor: CropRotateEditorConfigs(
-              style: CropRotateEditorStyle(
-                background: colorScheme.backgroundBase,
-                cropCornerColor:
-                    Theme.of(context).colorScheme.imageEditorPrimaryColor,
-              ),
-              widgets: CropRotateEditorWidgets(
-                appBar: (editor, rebuildStream) {
-                  return ReactiveCustomAppbar(
-                    builder: (context) {
-                      return ImageEditorAppBar(
-                        key: const Key('image_editor_app_bar'),
-                        configs: editor.configs,
-                        done: () => editor.done(),
-                        close: () => editor.close(),
-                        enableRedo: editor.canRedo,
-                        enableUndo: editor.canUndo,
-                        redo: () => editor.redoAction(),
-                        undo: () => editor.undoAction(),
-                      );
-                    },
-                    stream: rebuildStream,
-                  );
-                },
-                bottomBar: (cropRotateEditor, rebuildStream) =>
-                    ReactiveCustomWidget(
-                  stream: rebuildStream,
-                  builder: (_) => ImageEditorCropRotateBar(
-                    configs: cropRotateEditor.configs,
-                    callbacks: cropRotateEditor.callbacks,
-                    editor: cropRotateEditor,
-                  ),
-                ),
-              ),
-            ),
-            filterEditor: FilterEditorConfigs(
-              fadeInUpDuration: fadeInDuration,
-              fadeInUpStaggerDelayDuration: fadeInDelay,
-              style: FilterEditorStyle(
-                filterListSpacing: 7,
-                background: colorScheme.backgroundBase,
-              ),
-              widgets: FilterEditorWidgets(
+            customWidgets: ImageEditorCustomWidgets(
+              filterEditor: CustomWidgetsFilterEditor(
                 slider: (
                   editorState,
                   rebuildStream,
@@ -491,12 +307,7 @@ class _NewImageEditorState extends State<NewImageEditor> {
                   );
                 },
               ),
-            ),
-            tuneEditor: TuneEditorConfigs(
-              style: TuneEditorStyle(
-                background: colorScheme.backgroundBase,
-              ),
-              widgets: TuneEditorWidgets(
+              tuneEditor: CustomWidgetsTuneEditor(
                 appBar: (editor, rebuildStream) {
                   return ReactiveCustomAppbar(
                     builder: (context) {
@@ -527,28 +338,223 @@ class _NewImageEditorState extends State<NewImageEditor> {
                   );
                 },
               ),
-            ),
-            blurEditor: const BlurEditorConfigs(
-              enabled: false,
-            ),
-            emojiEditor: EmojiEditorConfigs(
-              icons: const EmojiEditorIcons(),
-              style: EmojiEditorStyle(
-                backgroundColor: colorScheme.backgroundBase,
-                emojiViewConfig: const EmojiViewConfig(
-                  gridPadding: EdgeInsets.zero,
-                  horizontalSpacing: 0,
-                  verticalSpacing: 0,
-                  recentsLimit: 40,
-                  loadingIndicator: Center(child: CircularProgressIndicator()),
-                  replaceEmojiOnLimitExceed: false,
+              mainEditor: CustomWidgetsMainEditor(
+                removeLayerArea: (key, rebuildStream) {
+                  return ReactiveCustomWidget(
+                    key: key,
+                    builder: (context) {
+                      return Align(
+                        alignment: Alignment.bottomCenter,
+                        child: StreamBuilder(
+                          stream: rebuildStream,
+                          builder: (context, snapshot) {
+                            final isHovered = editorKey.currentState
+                                    !.layerInteractionManager.hoverRemoveBtn;
+
+                            return AnimatedContainer(
+                              key: key,
+                              duration: const Duration(milliseconds: 150),
+                              height: 56,
+                              width: 56,
+                              margin: const EdgeInsets.only(bottom: 24),
+                              decoration: BoxDecoration(
+                                color: isHovered
+                                    ? colorScheme.warning400.withOpacity(0.8)
+                                    : Colors.white,
+                                shape: BoxShape.circle,
+                              ),
+                              padding: const EdgeInsets.all(12),
+                              child: Center(
+                                child: SvgPicture.asset(
+                                  "assets/image-editor/image-editor-delete.svg",
+                                  colorFilter: ColorFilter.mode(
+                                    isHovered
+                                        ? Colors.white
+                                        : colorScheme.warning400
+                                            .withOpacity(0.8),
+                                    BlendMode.srcIn,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                    stream: rebuildStream,
+                  );
+                },
+                appBar: (editor, rebuildStream) {
+                  return ReactiveCustomAppbar(
+                    builder: (context) {
+                      return ImageEditorAppBar(
+                        enableRedo: editor.canRedo,
+                        enableUndo: editor.canUndo,
+                        key: const Key('image_editor_app_bar'),
+                        redo: () => editor.redoAction(),
+                        undo: () => editor.undoAction(),
+                        configs: editor.configs,
+                        done: () async {
+                          final Uint8List bytes = await editorKey.currentState!
+                              .captureEditorImage();
+                          await saveImage(bytes);
+                        },
+                        close: () {
+                          _showExitConfirmationDialog(context);
+                        },
+                        isMainEditor: true,
+                      );
+                    },
+                    stream: rebuildStream,
+                  );
+                },
+                bottomBar: (editor, rebuildStream, key) => ReactiveCustomWidget(
+                  key: key,
+                  builder: (context) {
+                    return ImageEditorMainBottomBar(
+                      key: _mainEditorBarKey,
+                      editor: editor,
+                      configs: editor.configs,
+                      callbacks: editor.callbacks,
+                    );
+                  },
+                  stream: rebuildStream,
                 ),
-                bottomActionBarConfig: const BottomActionBarConfig(
-                  enabled: false,
+              ),
+              paintEditor: CustomWidgetsPaintEditor(
+                appBar: (editor, rebuildStream) {
+                  return ReactiveCustomAppbar(
+                    builder: (context) {
+                      return ImageEditorAppBar(
+                        enableRedo: editor.canRedo,
+                        enableUndo: editor.canUndo,
+                        key: const Key('image_editor_app_bar'),
+                        redo: () => editor.redoAction(),
+                        undo: () => editor.undoAction(),
+                        configs: editor.configs,
+                        done: () => editor.done(),
+                        close: () => editor.close(),
+                      );
+                    },
+                    stream: rebuildStream,
+                  );
+                },
+                colorPicker:
+                    (paintEditor, rebuildStream, currentColor, setColor) =>
+                        null,
+                bottomBar: (editorState, rebuildStream) {
+                  return ReactiveCustomWidget(
+                    builder: (context) {
+                      return ImageEditorPaintBar(
+                        configs: editorState.configs,
+                        callbacks: editorState.callbacks,
+                        editor: editorState,
+                        i18nColor: 'Color',
+                      );
+                    },
+                    stream: rebuildStream,
+                  );
+                },
+              ),
+              textEditor: CustomWidgetsTextEditor(
+                appBar: (textEditor, rebuildStream) => ReactiveCustomAppbar(
+                  builder: (context) {
+                    return ImageEditorAppBar(
+                      key: const Key('image_editor_app_bar'),
+                      configs: textEditor.configs,
+                      done: () => textEditor.done(),
+                      close: () => textEditor.close(),
+                    );
+                  },
+                  stream: rebuildStream,
+                ),
+                bodyItems: (editor, rebuildStream) {
+                  return [
+                    ReactiveCustomWidget(
+                      builder: (context) {
+                        return Positioned.fill(
+                          child: GestureDetector(
+                            onTap: () {},
+                            child: Container(
+                              color: Colors.transparent,
+                            ),
+                          ),
+                        );
+                      },
+                      stream: rebuildStream,
+                    ),
+                  ];
+                },
+                colorPicker:
+                    (textEditor, rebuildStream, currentColor, setColor) => null,
+                bottomBar: (editorState, rebuildStream) {
+                  return ReactiveCustomWidget(
+                    builder: (context) {
+                      return ImageEditorTextBar(
+                        configs: editorState.configs,
+                        callbacks: editorState.callbacks,
+                        editor: editorState,
+                      );
+                    },
+                    stream: rebuildStream,
+                  );
+                },
+              ),
+              cropRotateEditor: CustomWidgetsCropRotateEditor(
+                appBar: (editor, rebuildStream) {
+                  return ReactiveCustomAppbar(
+                    builder: (context) {
+                      return ImageEditorAppBar(
+                        key: const Key('image_editor_app_bar'),
+                        configs: editor.configs,
+                        done: () => editor.done(),
+                        close: () => editor.close(),
+                        enableRedo: editor.canRedo,
+                        enableUndo: editor.canUndo,
+                        redo: () => editor.redoAction(),
+                        undo: () => editor.undoAction(),
+                      );
+                    },
+                    stream: rebuildStream,
+                  );
+                },
+                bottomBar: (cropRotateEditor, rebuildStream) =>
+                    ReactiveCustomWidget(
+                  stream: rebuildStream,
+                  builder: (_) => ImageEditorCropRotateBar(
+                    configs: cropRotateEditor.configs,
+                    callbacks: cropRotateEditor.callbacks,
+                    editor: cropRotateEditor,
+                  ),
                 ),
               ),
             ),
-            stickerEditor: const StickerEditorConfigs(enabled: false),
+            cropRotateEditorConfigs: const CropRotateEditorConfigs(
+              canChangeAspectRatio: true,
+              canFlip: true,
+              canRotate: true,
+              canReset: true,
+              enabled: true,
+            ),
+            filterEditorConfigs: const FilterEditorConfigs(
+              enabled: true,
+              fadeInUpDuration: fadeInDuration,
+              fadeInUpStaggerDelayDuration: fadeInDelay,
+            ),
+            tuneEditorConfigs: const TuneEditorConfigs(enabled: true),
+            blurEditorConfigs: const BlurEditorConfigs(
+              enabled: false,
+            ),
+            emojiEditorConfigs: const EmojiEditorConfigs(
+              enabled: true,
+              checkPlatformCompatibility: true,
+            ),
+            stickerEditorConfigs: StickerEditorConfigs(
+              enabled: false,
+              buildStickers: (setLayer, scrollController) {
+                return const SizedBox.shrink();
+              },
+            ),
           ),
         ),
       ),
