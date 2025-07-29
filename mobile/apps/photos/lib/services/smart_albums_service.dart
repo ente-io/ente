@@ -149,7 +149,11 @@ class SmartAlbumsService {
         try {
           await CollectionsService.instance.addOrCopyToCollection(
             collectionId,
-            toBeSynced.entries.map((e) => e.value).expand((e) => e).toList(),
+            toBeSynced.entries
+                .map((e) => e.value)
+                .expand((e) => e)
+                .toSet()
+                .toList(),
             toCopy: false,
           );
           newConfig = newConfig.addFiles(
