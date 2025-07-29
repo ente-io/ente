@@ -43,11 +43,7 @@ class SmartAlbumConfig {
     );
   }
 
-  Future<SmartAlbumConfig> addFiles(
-    String personId,
-    int updatedAt,
-    Set<int> fileId,
-  ) async {
+  SmartAlbumConfig addFiles(String personId, int updatedAt, Set<int> fileId) {
     if (!infoMap.containsKey(personId)) {
       return this;
     }
@@ -57,6 +53,7 @@ class SmartAlbumConfig {
       updatedAt: updatedAt,
       addedFiles: newInfoMap[personId]!.addedFiles.union(fileId),
     );
+
     return SmartAlbumConfig(
       id: id,
       collectionId: collectionId,
