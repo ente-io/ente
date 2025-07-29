@@ -140,8 +140,9 @@ class Collection {
   }
 
   bool canAutoAdd(int userID) {
-    return (owner.id ?? -100) == userID ||
+    final canEditCollection = isOwner(userID) ||
         getRole(userID) == CollectionParticipantRole.collaborator;
+    return canEditCollection && !isDeleted;
   }
 
   bool isDownloadEnabledForPublicLink() {
