@@ -288,7 +288,10 @@ class _NewImageEditorState extends State<NewImageEditor> {
                   return ImageEditorFilterBar(
                     filterModel: filter,
                     isSelected: isSelected,
-                    onSelectFilter: onSelectFilter,
+                    onSelectFilter: () {
+                      onSelectFilter.call();
+                      editorKey.currentState?.setState(() {});
+                    },
                     editorImage: editorImage,
                     filterKey: filterKey,
                   );
@@ -348,8 +351,8 @@ class _NewImageEditorState extends State<NewImageEditor> {
                         child: StreamBuilder(
                           stream: rebuildStream,
                           builder: (context, snapshot) {
-                            final isHovered = editorKey.currentState
-                                    !.layerInteractionManager.hoverRemoveBtn;
+                            final isHovered = editorKey.currentState!
+                                .layerInteractionManager.hoverRemoveBtn;
 
                             return AnimatedContainer(
                               key: key,
@@ -536,10 +539,11 @@ class _NewImageEditorState extends State<NewImageEditor> {
               canReset: true,
               enabled: true,
             ),
-            filterEditorConfigs: const FilterEditorConfigs(
+            filterEditorConfigs: FilterEditorConfigs(
               enabled: true,
               fadeInUpDuration: fadeInDuration,
               fadeInUpStaggerDelayDuration: fadeInDelay,
+              filterList: filterList,
             ),
             tuneEditorConfigs: const TuneEditorConfigs(enabled: true),
             blurEditorConfigs: const BlurEditorConfigs(
