@@ -217,6 +217,7 @@ dependencies:
   xml: ^6.3.0
 
 dependency_overrides:
+  cronet_http: "1.3.4"
   # Remove this after removing dependency from flutter_sodium.
   # Newer flutter packages depends on ffi > 2.0.0 while flutter_sodium depends on ffi < 2.0.0
   ffi: 2.1.0
