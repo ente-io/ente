@@ -159,19 +159,32 @@ class ScrollbarWithUseNotifer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _MaterialScrollbar(
-      controller: controller,
-      thumbVisibility: thumbVisibility,
-      trackVisibility: trackVisibility,
-      thickness: thickness,
-      radius: radius,
-      notificationPredicate: notificationPredicate,
-      interactive: interactive,
-      scrollbarOrientation: scrollbarOrientation,
-      inUseNotifier: inUseNotifier,
-      minScrollbarLength: minScrollbarLength,
-      showThumb: showThumb,
-      child: child,
+    return ScrollbarTheme(
+      data: ScrollbarTheme.of(context).copyWith(
+        thumbColor: Theme.of(context).brightness == Brightness.dark
+            ? const WidgetStatePropertyAll(Color.fromARGB(244, 215, 215, 215))
+            : WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+                if (states.contains(WidgetState.dragged)) {
+                  return const Color.fromARGB(243, 143, 143, 143);
+                }
+
+                return const Color.fromARGB(244, 199, 199, 199);
+              }),
+      ),
+      child: _MaterialScrollbar(
+        controller: controller,
+        thumbVisibility: thumbVisibility,
+        trackVisibility: trackVisibility,
+        thickness: thickness,
+        radius: radius,
+        notificationPredicate: notificationPredicate,
+        interactive: interactive,
+        scrollbarOrientation: scrollbarOrientation,
+        inUseNotifier: inUseNotifier,
+        minScrollbarLength: minScrollbarLength,
+        showThumb: showThumb,
+        child: child,
+      ),
     );
   }
 }
