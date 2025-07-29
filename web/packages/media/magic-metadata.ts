@@ -1,4 +1,5 @@
 import { decryptMetadataJSON, encryptMetadataJSON } from "ente-base/crypto";
+import { nullishToZero } from "ente-utils/transform";
 import { z } from "zod/v4";
 
 /**
@@ -10,7 +11,7 @@ import { z } from "zod/v4";
  */
 export const RemoteMagicMetadata = z.object({
     version: z.number(),
-    count: z.number(),
+    count: z.number().nullish().transform(nullishToZero),
     data: z.string(),
     header: z.string(),
 });
