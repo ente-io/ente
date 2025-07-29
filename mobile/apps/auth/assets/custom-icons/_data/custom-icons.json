@@ -1031,6 +1031,11 @@
       "title": "Notion"
     },
     {
+      "title": "NumberBarn",
+      "slug": "numberbarn",
+      "hex": "1c5787"
+    },
+    {
       "title": "NuCommunity"
     },
     {
@@ -1553,7 +1558,7 @@
       "title": "Warner Bros.",
       "slug": "warner_bros",
       "altNames": [
-          "Warner Brothers"
+        "Warner Brothers"
       ]
     },
     {
