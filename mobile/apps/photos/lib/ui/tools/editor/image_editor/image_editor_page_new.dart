@@ -7,7 +7,6 @@ import 'dart:ui' as ui show Image;
 import 'package:flutter/material.dart';
 import "package:flutter_image_compress/flutter_image_compress.dart";
 import "package:flutter_svg/svg.dart";
-import "package:google_fonts/google_fonts.dart";
 import "package:logging/logging.dart";
 import 'package:path/path.dart' as path;
 import "package:photo_manager/photo_manager.dart";
@@ -522,16 +521,10 @@ class _NewImageEditorState extends State<NewImageEditor> {
             ),
             mainEditorConfigs: const MainEditorConfigs(enableZoom: true),
             paintEditorConfigs: const PaintEditorConfigs(enabled: true),
-            textEditorConfigs: TextEditorConfigs(
+            textEditorConfigs: const TextEditorConfigs(
               enabled: false,
               canToggleBackgroundMode: true,
               canToggleTextAlign: true,
-              customTextStyles: [
-                GoogleFonts.inter(),
-                GoogleFonts.giveYouGlory(),
-                GoogleFonts.dmSerifText(),
-                GoogleFonts.comicNeue(),
-              ],
             ),
             cropRotateEditorConfigs: const CropRotateEditorConfigs(
               canChangeAspectRatio: true,
