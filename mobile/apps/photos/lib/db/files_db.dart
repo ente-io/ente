@@ -522,17 +522,6 @@ class FilesDB with SqlDbBase {
     return FileLoadResult(filteredFiles, files.length == limit);
   }
 
-  Future<List<EnteFile>> getAllFilesFromCollections(
-    Iterable<int> collectionID,
-  ) async {
-    final db = await instance.sqliteAsyncDB;
-    final String sql =
-        'SELECT * FROM $filesTable WHERE $columnCollectionID IN (${collectionID.join(',')})';
-    final results = await db.getAll(sql);
-    final files = convertToFiles(results);
-    return files;
-  }
-
   // todo:rewrite (upload related)
   Future<void> markFilesForReUpload(
     int ownerID,

@@ -30,13 +30,28 @@ class RemoteCache {
     return files;
   }
 
-  Future<List<EnteFile>> geFilesForCollection(int collectionID) async {
+  Future<List<EnteFile>> getFilesForCollection(int collectionID) async {
     if (!_isLoaded) await _ensureLoaded();
     final cf = await remoteDB.getCollectionFiles(
       FilterQueryParam(
         collectionID: collectionID,
       ),
     );
+    final List<EnteFile> files = [];
+    for (final file in cf) {
+      final asset = remoteAssets[file.fileID];
+      if (asset != null) {
+        files.add(EnteFile.fromRemoteAsset(asset, file));
+      }
+    }
+    return files;
+  }
+
+  Future<List<EnteFile>> getFilesForCollections(Set<int> cIDs) async {
+    final cf = await remoteDB.getCollectionsFiles(
+      cIDs,
+    );
+    if (!_isLoaded) await _ensureLoaded();
     final List<EnteFile> files = [];
     for (final file in cf) {
       final asset = remoteAssets[file.fileID];

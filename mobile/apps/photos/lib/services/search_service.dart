@@ -128,7 +128,7 @@ class SearchService {
     final hiddenCollections =
         CollectionsService.instance.getHiddenCollectionIds();
     _cachedHiddenFilesFuture =
-        FilesDB.instance.getAllFilesFromCollections(hiddenCollections);
+        remoteCache.getFilesForCollections(hiddenCollections);
     return _cachedHiddenFilesFuture!;
   }
 
@@ -1056,8 +1056,7 @@ class SearchService {
         parsedDate.year != null) {
       final month = parsedDate.month!;
       final year = parsedDate.year!;
-      final monthYearFiles =
-          await _getFilesWithDuration(
+      final monthYearFiles = await _getFilesWithDuration(
         [_getDurationForMonthInYear(month, year)],
       );
 
@@ -1086,8 +1085,7 @@ class SearchService {
       final int month = parsedDate.month!;
       final int? year = parsedDate.year; // nullable for generic dates
 
-      final matchedFiles =
-          await _getFilesWithDuration(
+      final matchedFiles = await _getFilesWithDuration(
         _getDurationsForCalendarDateInEveryYear(day, month, year: year),
       );
 

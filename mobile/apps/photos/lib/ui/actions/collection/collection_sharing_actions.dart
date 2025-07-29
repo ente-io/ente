@@ -511,7 +511,7 @@ class CollectionActions {
     BuildContext bContext,
   ) async {
     final List<EnteFile> files =
-        await remoteCache.geFilesForCollection(collection.id);
+        await remoteCache.getFilesForCollection(collection.id);
     await moveFilesFromCurrentCollection(
       bContext,
       collection,
@@ -528,7 +528,7 @@ class CollectionActions {
   ) async {
     try {
       final List<EnteFile> files =
-          await remoteCache.geFilesForCollection(collection.id);
+          await remoteCache.getFilesForCollection(collection.id);
       await moveFilesFromCurrentCollection(bContext, collection, files);
     } catch (e) {
       logger.severe("Failed to remove files from uncategorized", e);
