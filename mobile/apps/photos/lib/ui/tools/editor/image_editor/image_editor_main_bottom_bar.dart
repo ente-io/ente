@@ -121,7 +121,7 @@ class ImageEditorMainBottomBarState extends State<ImageEditorMainBottomBar>
                           svgPath: "assets/image-editor/image-editor-paint.svg", 
                           label: "Draw",
                           onTap: () {
-                            widget.editor.openPaintEditor();
+                            widget.editor.openPaintingEditor();
                           },
                         ),
                         CircularIconButton(

@@ -18,7 +18,7 @@ class ImageEditorPaintBar extends StatefulWidget with SimpleConfigsAccess {
     required this.i18nColor,
   });
 
-  final PaintEditorState editor;
+  final PaintingEditorState editor;
 
   @override
   final ProImageEditorConfigs configs;
