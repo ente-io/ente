@@ -53,11 +53,16 @@ Future<DecodedImage> decodeImageFromPath(
   final Map<String, IfdTag> exifData = await readExifFromBytes(imageData);
   final int orientation =
       exifData['Image Orientation']?.values.firstAsInt() ?? 1;
-  final format = imagePath.split('.').last;
+  final format = imagePath.split('.').last.toLowerCase();
   if (orientation > 1 && includeRgbaBytes) {
-    _logger.warning(
-      "Image EXIF orientation $orientation might not work, for format $format",
-    );
+    if (format == 'heic' || format == 'heif') {
+      _logger
+          .info("Decoding HEIC/HEIF image with EXIF orientation $orientation");
+    } else {
+      _logger.warning(
+        "Decoding image with EXIF orientation $orientation, for format $format",
+      );
+    }
   }
 
   late Image image;
