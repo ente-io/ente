@@ -3,6 +3,7 @@ import "dart:async";
 import "package:flutter/material.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/force_reload_home_gallery_event.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -25,33 +26,15 @@ class _GalleryLayoutSettingsState extends State<GalleryLayoutSettings> {
       localSettings.getPhotoGridSize() == 3;
   bool isMonthLayout = localSettings.getGalleryGroupType() == GroupType.month &&
       localSettings.getPhotoGridSize() == 5;
-  late StreamSubscription<ForceReloadHomeGalleryEvent> _forceReloadSubscription;
 
-  @override
-  void initState() {
-    super.initState();
-    _forceReloadSubscription =
-        Bus.instance.on<ForceReloadHomeGalleryEvent>().listen((event) {
-      if (event.reason == "Gallery layout changed") {
-        Future.delayed(const Duration(milliseconds: 1000), () {
-          if (!mounted) return;
-          setState(() {
-            isDayLayout =
-                localSettings.getGalleryGroupType() == GroupType.day &&
-                    localSettings.getPhotoGridSize() == 3;
-            isMonthLayout =
-                localSettings.getGalleryGroupType() == GroupType.month &&
-                    localSettings.getPhotoGridSize() == 5;
-          });
-        });
-      }
+  _reloadWithLatestSetting() {
+    if (!mounted) return;
+    setState(() {
+      isDayLayout = localSettings.getGalleryGroupType() == GroupType.day &&
+          localSettings.getPhotoGridSize() == 3;
+      isMonthLayout = localSettings.getGalleryGroupType() == GroupType.month &&
+          localSettings.getPhotoGridSize() == 5;
     });
-  }
-
-  @override
-  void dispose() {
-    _forceReloadSubscription.cancel();
-    super.dispose();
   }
 
   @override
@@ -148,8 +131,8 @@ class _GalleryLayoutSettingsState extends State<GalleryLayoutSettings> {
                       bgColor: getEnteColorScheme(context).fillFaint,
                     ),
                     MenuItemWidget(
-                      captionedTextWidget: const CaptionedTextWidget(
-                        title: "Custom",
+                      captionedTextWidget: CaptionedTextWidget(
+                        title: S.of(context).custom,
                       ),
                       menuItemColor: colorScheme.fillFaint,
                       alignCaptionedTextToLeft: true,
@@ -166,6 +149,10 @@ class _GalleryLayoutSettingsState extends State<GalleryLayoutSettings> {
                         const GallerySettingsScreen(
                           fromGallerySettingsCTA: true,
                         ),
+                      ).then(
+                        (_) {
+                          _reloadWithLatestSetting();
+                        },
                       ),
                     ),
                   ],
