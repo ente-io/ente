@@ -400,6 +400,25 @@
       ]
     },
     {
+      "title": "U.S. Department of Homeland Security",
+      "slug": "us_dhs",
+      "altNames": [
+        "DHS",
+        "dhs",
+        "United States Department of Homeland Security",
+        "uscis",
+        "USCIS",
+        "U.S. Citizenship and Immigration Services",
+        "cbp",
+        "CBP",
+        "U.S. Customs and Border Protection",
+        "U.S. Immigration and Customs Enforcement",
+        "ice",
+        "ICE"
+      ],
+      "hex": "005189"
+    },
+    {
       "title": "DCS",
       "altNames": [
         "Digital Combat Simulator"
@@ -1553,7 +1572,7 @@
       "title": "Warner Bros.",
       "slug": "warner_bros",
       "altNames": [
-          "Warner Brothers"
+        "Warner Brothers"
       ]
     },
     {
