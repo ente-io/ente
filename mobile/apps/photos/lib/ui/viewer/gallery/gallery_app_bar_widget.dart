@@ -529,7 +529,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           context.l10n.playOnTv,
           icon: Icons.tv_outlined,
         ),
-      if (widget.collection?.canAutoAdd(userId) ?? false)
+      if (flagService.hasGrantedMLConsent &&
+          (widget.collection?.canAutoAdd(userId) ?? false))
         EntePopupMenuItemAsync(
           (value) => (value?[widget.collection!.id]?.personIDs.isEmpty ?? true)
               ? S.of(context).autoAddPeople

@@ -9,7 +9,7 @@ import "package:photos/models/api/entity/type.dart";
 import "package:photos/models/collection/smart_album_config.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/local_entity_data.dart";
-import "package:photos/service_locator.dart" show entityService;
+import "package:photos/service_locator.dart" show entityService, flagService;
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/search_service.dart";
 
@@ -80,8 +80,14 @@ class SmartAlbumsService {
   }
 
   Future<void> syncSmartAlbums() async {
+    final isMLEnabled = flagService.hasGrantedMLConsent;
+    if (!isMLEnabled) {
+      _logger.warning("ML is not enabled, skipping smart album sync");
+      return;
+    }
+
     final cachedConfigs = await getSmartConfigs();
-    final userId = Configuration.instance.getUserID();
+    final userId = Configuration.instance.getUserID()!;
 
     for (final entry in cachedConfigs.entries) {
       final collectionId = entry.key;
@@ -89,7 +95,7 @@ class SmartAlbumsService {
       final collection =
           CollectionsService.instance.getCollectionByID(collectionId);
 
-      if (!(collection?.canAutoAdd(userId!) ?? false)) {
+      if (!(collection?.canAutoAdd(userId) ?? false)) {
         _logger.warning(
           "Deleting collection config ($collectionId) as user does not have permission",
         );
