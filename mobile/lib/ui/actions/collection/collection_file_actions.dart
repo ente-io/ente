@@ -92,6 +92,9 @@ extension CollectionFileActions on CollectionActions {
     List<SharedMediaFile>? sharedFiles,
     List<AssetEntity>? picketAssets,
   }) async {
+    logger.info('[UPLOAD_SYNC] addToCollection called with collectionID: $collectionID, showProgressDialog: $showProgressDialog');
+    logger.info('[UPLOAD_SYNC] selectedFiles: ${selectedFiles?.length ?? 0}, sharedFiles: ${sharedFiles?.length ?? 0}, picketAssets: ${picketAssets?.length ?? 0}');
+    
     ProgressDialog? dialog = showProgressDialog
         ? createProgressDialog(
             context,
@@ -104,7 +107,10 @@ extension CollectionFileActions on CollectionActions {
       final List<EnteFile> files = [];
       final List<EnteFile> filesPendingUpload = [];
       final int currentUserID = Configuration.instance.getUserID()!;
+      logger.info('[UPLOAD_SYNC] Current user ID: $currentUserID');
+      
       if (sharedFiles != null) {
+        logger.info('[UPLOAD_SYNC] Processing ${sharedFiles.length} shared files');
         filesPendingUpload.addAll(
           await convertIncomingSharedMediaToFile(
             sharedFiles,
@@ -112,42 +118,52 @@ extension CollectionFileActions on CollectionActions {
           ),
         );
       } else if (picketAssets != null) {
+        logger.info('[UPLOAD_SYNC] Processing ${picketAssets.length} picked assets');
         filesPendingUpload.addAll(
           await convertPicketAssets(
             picketAssets,
             collectionID,
           ),
         );
-      } else {
+      } else if (selectedFiles != null) {
+        logger.info('[UPLOAD_SYNC] Processing ${selectedFiles.length} selected files');
         for (final file in selectedFiles!) {
           EnteFile? currentFile;
           if (file.uploadedFileID != null) {
+            logger.info('[UPLOAD_SYNC] File already uploaded: ${file.tag}');
             currentFile = file.copyWith();
           } else if (file.generatedID != null) {
+            logger.info('[UPLOAD_SYNC] File not uploaded, refreshing from DB: ${file.tag}');
             // when file is not uploaded, refresh the state from the db to
             // ensure we have latest upload status for given file before
             // queueing it up as pending upload
             currentFile = await (FilesDB.instance.getFile(file.generatedID!));
           } else if (file.generatedID == null) {
-            logger.severe("generated id should not be null");
+            logger.severe('[UPLOAD_SYNC] generated id should not be null for file: ${file.tag}');
           }
           if (currentFile == null) {
-            logger.severe("Failed to find fileBy genID");
+            logger.severe('[UPLOAD_SYNC] Failed to find fileBy genID for file: ${file.tag}');
             continue;
           }
           if (currentFile.uploadedFileID == null) {
+            logger.info('[UPLOAD_SYNC] File needs upload: ${currentFile.tag}');
             currentFile.collectionID = collectionID;
             filesPendingUpload.add(currentFile);
           } else {
+            logger.info('[UPLOAD_SYNC] File already uploaded, adding to collection: ${currentFile.tag}');
             files.add(currentFile);
           }
         }
       }
+      
+      logger.info('[UPLOAD_SYNC] Files to add to collection: ${files.length}, files pending upload: ${filesPendingUpload.length}');
+      
       if (filesPendingUpload.isNotEmpty) {
         // Newly created collection might not be cached
         final Collection? c =
             CollectionsService.instance.getCollectionByID(collectionID);
         if (c != null && c.owner.id != currentUserID) {
+          logger.info('[UPLOAD_SYNC] Collection owned by different user, uploading to uncategorized first');
           if (!showProgressDialog) {
             dialog = createProgressDialog(
               context,
@@ -159,13 +175,16 @@ extension CollectionFileActions on CollectionActions {
           final Collection uncat =
               await CollectionsService.instance.getUncategorizedCollection();
           for (EnteFile unuploadedFile in filesPendingUpload) {
+            logger.info('[UPLOAD_SYNC] Force uploading file to uncategorized: ${unuploadedFile.tag}');
             final uploadedFile = await FileUploader.instance.forceUpload(
               unuploadedFile,
               uncat.id,
             );
+            logger.info('[UPLOAD_SYNC] Force upload completed: ${uploadedFile.tag}');
             files.add(uploadedFile);
           }
         } else {
+          logger.info('[UPLOAD_SYNC] Adding ${filesPendingUpload.length} files to upload queue');
           for (final file in filesPendingUpload) {
             file.collectionID = collectionID;
           }
@@ -184,14 +203,17 @@ extension CollectionFileActions on CollectionActions {
         }
       }
       if (files.isNotEmpty) {
+        logger.info('[UPLOAD_SYNC] Adding ${files.length} already uploaded files to collection');
         await CollectionsService.instance
             .addOrCopyToCollection(collectionID, files);
       }
+      logger.info('[UPLOAD_SYNC] Triggering sync');
       unawaited(RemoteSyncService.instance.sync(silently: true));
       await dialog?.hide();
+      logger.info('[UPLOAD_SYNC] addToCollection completed successfully');
       return true;
     } catch (e, s) {
-      logger.severe("Failed to add to album", e, s);
+      logger.severe('[UPLOAD_SYNC] Failed to add to album', e, s);
       await dialog?.hide();
       await showGenericErrorDialog(context: context, error: e);
       rethrow;

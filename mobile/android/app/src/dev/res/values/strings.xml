@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Ente Dev</string>
+    <string name="app_name">UP Photos Dev</string>
     <string name="backup">backup dev</string>
     <string name="intent_package" translatable="false">com.unplugged.store.dev</string>
 </resources>

@@ -85,6 +85,7 @@ class LoginActivity : AppCompatActivity() {
         overridePendingTransition(0, 0)
         val sharedPrefs: SharedPreferences = getSharedPreferences("ente_prefs", MODE_PRIVATE)
         val savedUsername = sharedPrefs.getString("username", null)
+
         Log.d("UpEnte", "[DEBUG] onCreate: savedUsername from SharedPreferences: $savedUsername")
 
         val accountType = if (isDebugBuild(this)) "com.unplugged.account.dev" else "com.unplugged.account"
@@ -125,6 +126,8 @@ class LoginActivity : AppCompatActivity() {
             )
             val openFlutterIntent = Intent(this, MainActivity::class.java).apply {
                 putExtra("shouldLogout", true)
+                // Use REORDER_TO_FRONT to bring existing MainActivity to front if it exists
+                addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
             }
             startActivity(openFlutterIntent)
             finish()
@@ -134,6 +137,9 @@ class LoginActivity : AppCompatActivity() {
             Log.d("UpEnte", "[DEBUG] Usernames match, proceeding to MainActivity")
             val openFlutterIntent = Intent(this, MainActivity::class.java).apply {
                 putExtra("username", savedUsername)
+                putExtra("from_gallery", true) // Flag to indicate this came from gallery app
+                // Use REORDER_TO_FRONT to bring existing MainActivity to front if it exists
+                addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
             }
             startActivity(openFlutterIntent)
             finish()
@@ -166,7 +172,9 @@ class LoginActivity : AppCompatActivity() {
                 putExtra("service_password", account?.servicePassword)
                 putExtra("up_token", account?.upToken)
                 putExtra("username", account?.username)
-                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+                putExtra("from_gallery", true) // Flag to indicate this came from gallery app
+                // Use REORDER_TO_FRONT to bring existing MainActivity to front if it exists
+                addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
             }
             startActivity(openFlutterIntent)
             finish()
@@ -179,10 +187,16 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun openGalleryApp() {
-            val intent = Intent().apply {
-                component = ComponentName("com.android.gallery3d", "com.android.gallery3d.app.GalleryActivity")
-                putExtra("up_photos", "false")
-            }
-            startActivity(intent)
+        val intent = Intent().apply {
+            component = ComponentName("com.android.gallery3d", "com.android.gallery3d.app.GalleryActivity")
+            putExtra("up_photos", "false")
         }
+        try {
+            startActivity(intent)
+        } catch (e: ActivityNotFoundException) {
+            Log.d("UpEnte", "Gallery app not found, finishing LoginActivity")
+            // If gallery app is not available, just finish the activity
+            finish()
+        }
+    }
     }

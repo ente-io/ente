@@ -71,6 +71,7 @@ class SyncService {
   }
 
   Future<bool> sync() async {
+    _logger.info('[UPLOAD_SYNC] sync() called');
     _syncStopRequested = false;
     if (_existingSync != null) {
       _logger.warning("Sync already in progress, skipping.");
@@ -79,25 +80,30 @@ class SyncService {
     _existingSync = Completer<bool>();
     bool successful = false;
     try {
+      _logger.info('[UPLOAD_SYNC] Starting _doSync()');
       await _doSync();
       if (_lastSyncStatusEvent != null &&
           _lastSyncStatusEvent!.status !=
               SyncStatus.completedFirstGalleryImport &&
           _lastSyncStatusEvent!.status != SyncStatus.completedBackup) {
+        _logger.info('[UPLOAD_SYNC] Firing completedBackup event');
         Bus.instance.fire(SyncStatusUpdate(SyncStatus.completedBackup));
       }
       successful = true;
+      _logger.info('[UPLOAD_SYNC] Sync completed successfully');
     } on WiFiUnavailableError {
-      _logger.warning("Not uploading over mobile data");
+      _logger.warning('[UPLOAD_SYNC] Not uploading over mobile data');
       Bus.instance.fire(
         SyncStatusUpdate(SyncStatus.paused, reason: "Waiting for WiFi..."),
       );
     } on SyncStopRequestedError {
+      _logger.warning('[UPLOAD_SYNC] Sync stop requested');
       _syncStopRequested = false;
       Bus.instance.fire(
         SyncStatusUpdate(SyncStatus.completedBackup, wasStopped: true),
       );
     } on NoActiveSubscriptionError {
+      _logger.warning('[UPLOAD_SYNC] No active subscription error');
       Bus.instance.fire(
         SyncStatusUpdate(
           SyncStatus.error,
@@ -105,6 +111,7 @@ class SyncService {
         ),
       );
     } on StorageLimitExceededError {
+      _logger.warning('[UPLOAD_SYNC] Storage limit exceeded error');
       _showStorageLimitExceededNotification();
       Bus.instance.fire(
         SyncStatusUpdate(
@@ -113,22 +120,23 @@ class SyncService {
         ),
       );
     } on UnauthorizedError {
-      _logger.info("Logging user out");
+      _logger.info('[UPLOAD_SYNC] Logging user out due to unauthorized error');
       Bus.instance.fire(TriggerLogoutEvent());
     } on NoMediaLocationAccessError {
-      _logger.severe("Not uploading due to no media location access");
+      _logger.severe('[UPLOAD_SYNC] Not uploading due to no media location access');
       Bus.instance.fire(
         SyncStatusUpdate(
           SyncStatus.error,
           error: NoMediaLocationAccessError(),
         ),
       );
-    } catch (e) {
+    } catch (e, s) {
       if (e is DioException) {
         if (e.type == DioExceptionType.connectionTimeout ||
             e.type == DioExceptionType.sendTimeout ||
             e.type == DioExceptionType.receiveTimeout ||
             e.type == DioExceptionType.unknown) {
+          _logger.warning('[UPLOAD_SYNC] Network timeout error: ${e.type}');
           Bus.instance.fire(
             SyncStatusUpdate(
               SyncStatus.paused,
@@ -139,7 +147,7 @@ class SyncService {
           return false;
         }
       }
-      _logger.severe("backup failed", e, StackTrace.current);
+      _logger.severe('[UPLOAD_SYNC] Backup failed', e, StackTrace.current);
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.error));
       rethrow;
     } finally {
@@ -191,14 +199,28 @@ class SyncService {
   }
 
   Future<void> _doSync() async {
+    _logger.info('[UPLOAD_SYNC] _doSync() starting');
+    _logger.info('[UPLOAD_SYNC] Starting local sync');
     await _localSyncService.sync();
+    _logger.info('[UPLOAD_SYNC] Local sync completed');
+    
     if (_localSyncService.hasCompletedFirstImport()) {
+      _logger.info('[UPLOAD_SYNC] First import completed, starting remote sync');
       await _remoteSyncService.sync();
+      _logger.info('[UPLOAD_SYNC] Remote sync completed');
+      
       final shouldSync = await _localSyncService.syncAll();
+      _logger.info('[UPLOAD_SYNC] Local syncAll returned: $shouldSync');
+      
       if (shouldSync) {
+        _logger.info('[UPLOAD_SYNC] Starting second remote sync');
         await _remoteSyncService.sync();
+        _logger.info('[UPLOAD_SYNC] Second remote sync completed');
       }
+    } else {
+      _logger.info('[UPLOAD_SYNC] First import not completed yet, skipping remote sync');
     }
+    _logger.info('[UPLOAD_SYNC] _doSync() completed');
   }
 
   void _showStorageLimitExceededNotification() async {

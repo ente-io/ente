@@ -43,7 +43,11 @@ class IgnoredFilesService {
   bool shouldSkipUpload(Map<String, String> idToReasonMap, EnteFile file) {
     final id = _getIgnoreID(file.localID, file.deviceFolder, file.title);
     if (id != null && id.isNotEmpty) {
-      return idToReasonMap.containsKey(id);
+      final isIgnored = idToReasonMap.containsKey(id);
+      if (isIgnored) {
+        _logger.info('[UPLOAD_SYNC] File ${file.tag} is ignored due to reason: ${idToReasonMap[id]}');
+      }
+      return isIgnored;
     }
     return false;
   }

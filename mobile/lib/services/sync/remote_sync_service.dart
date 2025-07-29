@@ -578,32 +578,38 @@ class RemoteSyncService {
   }
 
   Future<bool> _uploadFiles(List<EnteFile> filesToBeUploaded) async {
+    _logger.info('[UPLOAD_SYNC] Starting _uploadFiles with ${filesToBeUploaded.length} files to upload');
     final int ownerID = _config.getUserID()!;
     final updatedFileIDs = await _db.getUploadedFileIDsToBeUpdated(ownerID);
     if (updatedFileIDs.isNotEmpty) {
-      _logger.info("Identified ${updatedFileIDs.length} files for reupload");
+      _logger.info("[UPLOAD_SYNC] Identified ${updatedFileIDs.length} files for reupload");
     }
 
     _completedUploads = 0;
     _ignoredUploads = 0;
     final int toBeUploaded = filesToBeUploaded.length + updatedFileIDs.length;
+    _logger.info('[UPLOAD_SYNC] Total files to be uploaded: $toBeUploaded (new: ${filesToBeUploaded.length}, updated: ${updatedFileIDs.length})');
+    
     if (toBeUploaded > 0) {
       Bus.instance.fire(
         SyncStatusUpdate(SyncStatus.preparingForUpload, total: toBeUploaded),
       );
+      _logger.info('[UPLOAD_SYNC] Verifying media location access...');
       await _uploader.verifyMediaLocationAccess();
+      _logger.info('[UPLOAD_SYNC] Checking network for upload...');
       await _uploader.checkNetworkForUpload();
       // verify if files upload is allowed based on their subscription plan and
       // storage limit. To avoid creating new endpoint, we are using
       // fetchUploadUrls as alternative method.
+      _logger.info('[UPLOAD_SYNC] Fetching upload URLs for $toBeUploaded files...');
       await _uploader.fetchUploadURLs(toBeUploaded);
+      _logger.info('[UPLOAD_SYNC] Upload URLs fetched successfully');
     }
     final List<Future> futures = [];
     for (final uploadedFileID in updatedFileIDs) {
       if (_shouldThrottleSync() &&
           futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
-        _logger
-            .info("Skipping some updated files as we are throttling uploads");
+        _logger.info("[UPLOAD_SYNC] Skipping some updated files as we are throttling uploads");
         break;
       }
       final allFiles = await _db.getFilesInAllCollection(
@@ -611,7 +617,7 @@ class RemoteSyncService {
         ownerID,
       );
       if (allFiles.isEmpty) {
-        _logger.warning("No files found for uploadedFileID $uploadedFileID");
+        _logger.warning("[UPLOAD_SYNC] No files found for uploadedFileID $uploadedFileID");
         continue;
       }
       EnteFile? fileInCollectionOwnedByUser;
@@ -622,6 +628,7 @@ class RemoteSyncService {
         }
       }
       if (fileInCollectionOwnedByUser != null) {
+        _logger.info('[UPLOAD_SYNC] Queuing updated file for reupload: ${fileInCollectionOwnedByUser.tag}');
         _uploadFile(
           fileInCollectionOwnedByUser,
           fileInCollectionOwnedByUser.collectionID!,
@@ -633,7 +640,7 @@ class RemoteSyncService {
     for (final file in filesToBeUploaded) {
       if (_shouldThrottleSync() &&
           futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
-        _logger.info("Skipping some new files as we are throttling uploads");
+        _logger.info("[UPLOAD_SYNC] Skipping some new files as we are throttling uploads");
         break;
       }
       // prefer existing collection ID for manually uploaded files.
@@ -642,35 +649,51 @@ class RemoteSyncService {
           (await _collectionsService
                   .getOrCreateForPath(file.deviceFolder ?? 'Unknown Folder'))
               .id;
+      _logger.info('[UPLOAD_SYNC] Queuing new file for upload: ${file.tag}, collectionID: $collectionID');
       _uploadFile(file, collectionID, futures);
     }
 
+    _logger.info('[UPLOAD_SYNC] Starting upload of ${futures.length} files...');
     try {
       await Future.wait(futures);
+      _logger.info('[UPLOAD_SYNC] All upload futures completed. Completed: $_completedUploads, Ignored: $_ignoredUploads');
     } on InvalidFileError {
+      _logger.warning('[UPLOAD_SYNC] InvalidFileError caught during upload');
       // Do nothing
     } on FileSystemException {
+      _logger.warning('[UPLOAD_SYNC] FileSystemException caught during upload - likely concurrency issue');
       // Do nothing since it's caused mostly due to concurrency issues
       // when the foreground app deletes temporary files, interrupting a background
       // upload
     } on LockAlreadyAcquiredError {
+      _logger.warning('[UPLOAD_SYNC] LockAlreadyAcquiredError caught during upload');
       // Do nothing
     } on SilentlyCancelUploadsError {
+      _logger.warning('[UPLOAD_SYNC] SilentlyCancelUploadsError caught during upload');
       // Do nothing
     } on UserCancelledUploadError {
+      _logger.warning('[UPLOAD_SYNC] UserCancelledUploadError caught during upload');
       // Do nothing
-    } catch (e) {
+    } catch (e, s) {
+      _logger.severe('[UPLOAD_SYNC] Unexpected error during upload', e, s);
       rethrow;
     }
     return _completedUploads > 0;
   }
 
   void _uploadFile(EnteFile file, int collectionID, List<Future> futures) {
+    _logger.info('[UPLOAD_SYNC] Creating upload future for file: ${file.tag}, collectionID: $collectionID');
     final future = _uploader
         .upload(file, collectionID)
-        .then((uploadedFile) => _onFileUploaded(uploadedFile))
+        .then((uploadedFile) {
+          _logger.info('[UPLOAD_SYNC] Upload successful for file: ${uploadedFile.tag}');
+          return _onFileUploaded(uploadedFile);
+        })
         .onError(
-          (error, stackTrace) => _onFileUploadError(error, stackTrace, file),
+          (error, stackTrace) {
+            _logger.severe('[UPLOAD_SYNC] Upload failed for file: ${file.tag}', error, stackTrace);
+            return _onFileUploadError(error, stackTrace, file);
+          },
         );
     futures.add(future);
   }

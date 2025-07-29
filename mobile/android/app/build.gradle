@@ -61,6 +61,17 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
         consumerProguardFiles 'proguard-rules.pro'
+
+        // NDK ABI filters removed to avoid conflict with splits configuration
+    }
+
+    splits {
+        abi {
+            enable  true
+            reset()
+            include 'arm64-v8a'
+            universalApk false
+        }
     }
 
     signingConfigs {
@@ -92,22 +103,21 @@ android {
             dimension "default"
 //            applicationIdSuffix ".dev"
         }
-        playstore {
-            dimension "default"
-        }
-        fdroid {
-            dimension "default"
-            applicationIdSuffix ".fdroid"
-        }
+ //       playstore {
+ //           dimension "default"
+ //       }
+ //       fdroid {
+ //           dimension "default"//          applicationIdSuffix ".fdroid"
+ //       }
     }
 
     buildTypes {
         release {
 //            signingConfig signingConfigs.release
+//            debuggable true
         }
         debug {
             debuggable true
-            applicationIdSuffix '.dev'
           versionNameSuffix "-debug"
           externalNativeBuild {
             cmake {

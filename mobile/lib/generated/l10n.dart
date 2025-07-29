@@ -5591,7 +5591,7 @@ class S {
   /// `Add to Ente`
   String get addToEnte {
     return Intl.message(
-      'Add to Ente',
+      'Add to Up Photos',
       name: 'addToEnte',
       desc: '',
       args: [],
@@ -6089,7 +6089,7 @@ class S {
   /// `Files added to this device album will automatically get uploaded to Ente.`
   String get deviceFilesAutoUploading {
     return Intl.message(
-      'Files added to this device album will automatically get uploaded to Ente.',
+      'Files added to this device album will automatically get uploaded to UP Photos.',
       name: 'deviceFilesAutoUploading',
       desc: '',
       args: [],
@@ -6099,7 +6099,7 @@ class S {
   /// `Turn on backup to automatically upload files added to this device folder to Ente.`
   String get turnOnBackupForAutoUpload {
     return Intl.message(
-      'Turn on backup to automatically upload files added to this device folder to Ente.',
+      'Turn on backup to automatically upload files added to this device folder to UP Photos.',
       name: 'turnOnBackupForAutoUpload',
       desc: '',
       args: [],
@@ -6573,7 +6573,7 @@ class S {
   /// `You can still access {count, plural, =1 {it} other {them}} on Ente as long as you have an active subscription`
   String freeUpAccessPostDelete(int count) {
     return Intl.message(
-      'You can still access ${Intl.plural(count, one: 'it', other: 'them')} on Ente as long as you have an active subscription',
+      'You can still access ${Intl.plural(count, one: 'it', other: 'them')} on UP Photos as long as you have an active subscription',
       name: 'freeUpAccessPostDelete',
       desc: '',
       args: [count],
@@ -6913,7 +6913,7 @@ class S {
   /// `Selected files are not on Ente`
   String get selectedFilesAreNotOnEnte {
     return Intl.message(
-      'Selected files are not on Ente',
+      'Selected files are not on UP Photos',
       name: 'selectedFilesAreNotOnEnte',
       desc: '',
       args: [],
@@ -7063,7 +7063,7 @@ class S {
   /// `Unable to connect to Ente, please check your network settings and contact support if the error persists.`
   String get networkHostLookUpErr {
     return Intl.message(
-      'Unable to connect to Ente, please check your network settings and contact support if the error persists.',
+      'Unable to connect to UP Photos, please check your network settings and contact support if the error persists.',
       name: 'networkHostLookUpErr',
       desc: '',
       args: [],
@@ -7073,7 +7073,7 @@ class S {
   /// `Unable to connect to Ente, please retry after sometime. If the error persists, please contact support.`
   String get networkConnectionRefusedErr {
     return Intl.message(
-      'Unable to connect to Ente, please retry after sometime. If the error persists, please contact support.',
+      'Unable to connect to UP Photos, please retry after sometime. If the error persists, please contact support.',
       name: 'networkConnectionRefusedErr',
       desc: '',
       args: [],
@@ -8289,7 +8289,7 @@ class S {
   /// `Invite your friends to Ente`
   String get inviteYourFriendsToEnte {
     return Intl.message(
-      'Invite your friends to Ente',
+      'Invite your friends to UP Photos',
       name: 'inviteYourFriendsToEnte',
       desc: '',
       args: [],
@@ -8399,7 +8399,7 @@ class S {
   /// `This account is linked to other Ente apps, if you use any. Your uploaded data, across all Ente apps, will be scheduled for deletion, and your account will be permanently deleted.`
   String get deleteConfirmDialogBody {
     return Intl.message(
-      'This account is linked to other Ente apps, if you use any. Your uploaded data, across all Ente apps, will be scheduled for deletion, and your account will be permanently deleted.',
+      'This account is linked to other UP Photos apps, if you use any. Your uploaded data, across all UP Photos apps, will be scheduled for deletion, and your account will be permanently deleted.',
       name: 'deleteConfirmDialogBody',
       desc: '',
       args: [],

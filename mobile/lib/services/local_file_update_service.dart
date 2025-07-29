@@ -338,13 +338,18 @@ class LocalFileUpdateService {
   //#endregion Android Missing GPS specific methods ###
 
   Future<MediaUploadData> getUploadData(EnteFile file) async {
+    _logger.info('[UPLOAD_SYNC] getUploadData called for file: ${file.tag}');
     final mediaUploadData = await getUploadDataFromEnteFile(file);
+    _logger.info('[UPLOAD_SYNC] getUploadDataFromEnteFile completed for file: ${file.tag}');
+    
     // delete the file from app's internal cache if it was copied to app
     // for upload. Shared Media should only be cleared when the upload
     // succeeds.
     if (Platform.isIOS && mediaUploadData.sourceFile != null) {
+      _logger.info('[UPLOAD_SYNC] Deleting source file from cache for iOS: ${file.tag}');
       await mediaUploadData.sourceFile?.delete();
     }
+    _logger.info('[UPLOAD_SYNC] getUploadData completed for file: ${file.tag}');
     return mediaUploadData;
   }
 

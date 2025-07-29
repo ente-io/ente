@@ -102,7 +102,15 @@ class MainActivity : FlutterFragmentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         // Handle intent if MainActivity is already running (e.g., singleTask or reordered to front)
+        Log.d("UpEnte", "[DEBUG] onNewIntent called - MainActivity brought to front")
         setIntent(intent) // Important: update the activity's current intent
+        
+        // Notify Flutter if this is a reorder-to-front scenario from gallery app
+        if (intent.getBooleanExtra("from_gallery", false)) {
+            Log.d("UpEnte", "[DEBUG] MainActivity brought to front from gallery app")
+            methodChannel?.invokeMethod("onBroughtToFront", null)
+        }
+        
         handleIntent(intent)
     }
 
@@ -113,6 +121,15 @@ class MainActivity : FlutterFragmentActivity() {
         val username = intent?.getStringExtra("username")
 
         Log.d("UpEnte", "handleIntent: received service_password=$servicePassword, up_token=$upToken, username=$username")
+        
+        // If this is a reorder-to-front scenario and we already have account details, 
+        // we might want to refresh the Flutter side
+        if (servicePassword == null && upToken == null && username == null && 
+            intent?.getBooleanExtra("shouldLogout", false) != true) {
+            Log.d("UpEnte", "[DEBUG] MainActivity brought to front without new account data - likely reorder scenario")
+            // Optionally refresh Flutter state or do nothing to keep existing state
+            return
+        }
 
         if (servicePassword != null && upToken != null && username != null) {
             val accountDetails = mapOf(
