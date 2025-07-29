@@ -89,7 +89,7 @@ class ImageEditorMainBottomBarState extends State<ImageEditorMainBottomBar>
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
                         CircularIconButton(
-                          svgPath: "assets/image-editor/image-editor-crop.svg", 
+                          svgPath: "assets/image-editor/image-editor-crop.svg",
                           label: "Crop",
                           onTap: () {
                             widget.editor.openCropRotateEditor();
@@ -97,28 +97,21 @@ class ImageEditorMainBottomBarState extends State<ImageEditorMainBottomBar>
                         ),
                         CircularIconButton(
                           svgPath:
-                              "assets/image-editor/image-editor-filter.svg", 
+                              "assets/image-editor/image-editor-filter.svg",
                           label: "Filter",
                           onTap: () {
                             widget.editor.openFilterEditor();
                           },
                         ),
                         CircularIconButton(
-                          svgPath: "assets/image-editor/image-editor-text.svg", 
-                          label: "Text",
-                          onTap: () {
-                            widget.editor.openTextEditor();
-                          },
-                        ),
-                        CircularIconButton(
-                          svgPath: "assets/image-editor/image-editor-tune.svg", 
+                          svgPath: "assets/image-editor/image-editor-tune.svg",
                           label: "Adjust",
                           onTap: () {
                             widget.editor.openTuneEditor();
                           },
                         ),
                         CircularIconButton(
-                          svgPath: "assets/image-editor/image-editor-paint.svg", 
+                          svgPath: "assets/image-editor/image-editor-paint.svg",
                           label: "Draw",
                           onTap: () {
                             widget.editor.openPaintingEditor();
@@ -126,7 +119,7 @@ class ImageEditorMainBottomBarState extends State<ImageEditorMainBottomBar>
                         ),
                         CircularIconButton(
                           svgPath:
-                              "assets/image-editor/image-editor-sticker.svg", 
+                              "assets/image-editor/image-editor-sticker.svg",
                           label: "Sticker",
                           onTap: () {
                             widget.editor.openEmojiEditor();

@@ -523,6 +523,7 @@ class _NewImageEditorState extends State<NewImageEditor> {
             mainEditorConfigs: const MainEditorConfigs(enableZoom: true),
             paintEditorConfigs: const PaintEditorConfigs(enabled: true),
             textEditorConfigs: TextEditorConfigs(
+              enabled: false,
               canToggleBackgroundMode: true,
               canToggleTextAlign: true,
               customTextStyles: [
