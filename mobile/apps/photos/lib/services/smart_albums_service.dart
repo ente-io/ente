@@ -87,9 +87,9 @@ class SmartAlbumsService {
       final collectionId = entry.key;
       final config = entry.value;
       final collection =
-          CollectionsService.instance.getCollectionByID(collectionId)!;
+          CollectionsService.instance.getCollectionByID(collectionId);
 
-      if (!collection.canAutoAdd(userId!)) {
+      if (!(collection?.canAutoAdd(userId!) ?? false)) {
         _logger.warning(
           "Deleting collection config ($collectionId) as user does not have permission",
         );
