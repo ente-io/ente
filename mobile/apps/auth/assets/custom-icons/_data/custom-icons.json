@@ -498,6 +498,14 @@
       "hex": "858585"
     },
     {
+      "title": "exaroton",
+      "slug": "exaroton",
+      "altNames": [
+        "Exaroton"
+      ],
+      "hex": "17AB17"
+    },
+    {
       "title": "Fanatical",
       "slug": "fanatical",
       "altNames": [
@@ -1553,7 +1561,7 @@
       "title": "Warner Bros.",
       "slug": "warner_bros",
       "altNames": [
-          "Warner Brothers"
+        "Warner Brothers"
       ]
     },
     {
