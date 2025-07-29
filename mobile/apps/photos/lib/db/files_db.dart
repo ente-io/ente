@@ -421,59 +421,6 @@ class FilesDB with SqlDbBase {
     await db.execute('DELETE FROM entities');
   }
 
-  Future<BackedUpFileIDs> getBackedUpIDs() async {
-    final db = await instance.sqliteAsyncDB;
-    final results = await db.getAll(
-      'SELECT $columnLocalID, $columnUploadedFileID, $columnFileSize FROM $filesTable'
-      ' WHERE $columnLocalID IS NOT NULL AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1)',
-    );
-    final Set<String> localIDs = <String>{};
-    final Set<int> uploadedIDs = <int>{};
-    int localSize = 0;
-    for (final result in results) {
-      final String localID = result[columnLocalID] as String;
-      final int? fileSize = result[columnFileSize] as int?;
-      if (!localIDs.contains(localID) && fileSize != null) {
-        localSize += fileSize;
-      }
-      localIDs.add(result[columnLocalID] as String);
-      uploadedIDs.add(result[columnUploadedFileID] as int);
-    }
-    return BackedUpFileIDs(localIDs.toList(), uploadedIDs.toList(), localSize);
-  }
-
-  Future<BackedUpFileIDs> getBackedUpForDeviceCollection(
-    String pathID,
-    int ownerID,
-  ) async {
-    final db = await sqliteAsyncDB;
-    const String rawQuery = '''
-    SELECT ${FilesDB.columnLocalID}, ${FilesDB.columnUploadedFileID},
-    ${FilesDB.columnFileSize}
-    FROM ${FilesDB.filesTable}
-          WHERE ${FilesDB.columnLocalID} IS NOT NULL AND
-          (${FilesDB.columnOwnerID} IS NULL OR ${FilesDB.columnOwnerID} = ?)
-          AND (${FilesDB.columnUploadedFileID} IS NOT NULL AND ${FilesDB.columnUploadedFileID} IS NOT -1)
-          AND
-          ${FilesDB.columnLocalID} IN
-          (SELECT id FROM device_files where path_id = ?)
-          ''';
-    final results = await db.getAll(rawQuery, [ownerID, pathID]);
-    final localIDs = <String>{};
-    final uploadedIDs = <int>{};
-    int localSize = 0;
-    for (final result in results) {
-      final String localID = result[FilesDB.columnLocalID] as String;
-      final int? fileSize = result[FilesDB.columnFileSize] as int?;
-      if (!localIDs.contains(localID) && fileSize != null) {
-        localSize += fileSize;
-      }
-      localIDs.add(localID);
-      uploadedIDs.add(result[FilesDB.columnUploadedFileID] as int);
-    }
-    return BackedUpFileIDs(localIDs.toList(), uploadedIDs.toList(), localSize);
-  }
-
   Future<FileLoadResult> getAllPendingOrUploadedFiles(
     int startTime,
     int endTime,

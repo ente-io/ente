@@ -6,6 +6,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network/network.dart';
 import "package:photos/db/files_db.dart";
 import "package:photos/db/remote/table/files_table.dart";
+import "package:photos/db/remote/table/mapping_table.dart";
 import 'package:photos/extensions/list.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/backup_status.dart";
@@ -71,16 +72,13 @@ class FilesService {
   }
 
   Future<BackupStatus> getBackupStatus({String? pathID}) async {
-    BackedUpFileIDs ids;
     final bool hasMigratedSize = await FilesService.instance.hasMigratedSizes();
-    if (pathID == null) {
-      ids = await FilesDB.instance.getBackedUpIDs();
-    } else {
-      ids = await FilesDB.instance.getBackedUpForDeviceCollection(
-        pathID,
-        Configuration.instance.getUserID()!,
-      );
-    }
+    final Set<String>? localAssets =
+        pathID == null ? null : await localDB.getAssetsIDsForPath(pathID);
+    final BackedUpFileIDs ids = await remoteDB.getLocalIDsForUser(
+      Configuration.instance.getUserID()!,
+      localAssets,
+    );
     late int size;
     if (hasMigratedSize) {
       size = ids.localSize;

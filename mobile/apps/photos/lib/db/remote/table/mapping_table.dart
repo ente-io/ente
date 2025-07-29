@@ -3,6 +3,7 @@ import "package:flutter/foundation.dart";
 import "package:photos/db/remote/db.dart";
 import "package:photos/db/remote/mappers.dart";
 import "package:photos/db/remote/schema.dart";
+import "package:photos/models/backup_status.dart";
 import "package:photos/models/file/remote/rl_mapping.dart";
 
 extension UploadMappingTable on RemoteDB {
@@ -40,6 +41,37 @@ extension UploadMappingTable on RemoteDB {
       result[mapping.localID] = mapping;
     }
     return result;
+  }
+
+  // getLocalIDsForUser returns information about the localIDs that have been
+  // uploaded for the given userID. If the localIDSInGivenPath  is not null,
+  // it will only return the localIDs that are in the given path.
+  Future<BackedUpFileIDs> getLocalIDsForUser(
+    int userID,
+    Set<String>? localIDSInGivenPath,
+  ) async {
+    final results = await sqliteDB.getAll(
+      'SELECT local_id, files.id, size FROM upload_mapping join files on upload_mapping.file_id = files.id WHERE owner_id = ?',
+      [userID],
+    );
+
+    final Set<String> localIDs = <String>{};
+    final Set<int> uploadedIDs = <int>{};
+    int localSize = 0;
+    for (final result in results) {
+      final String localID = result['local_id'] as String;
+      if (localIDSInGivenPath != null &&
+          !localIDSInGivenPath.contains(localID)) {
+        continue; // Skip if not in the given path
+      }
+      final int? fileSize = result['size'] as int?;
+      if (!localIDs.contains(localID) && fileSize != null) {
+        localSize += fileSize;
+      }
+      localIDs.add(localID);
+      uploadedIDs.add(result['id'] as int);
+    }
+    return BackedUpFileIDs(localIDs.toList(), uploadedIDs.toList(), localSize);
   }
 
   Future<Set<String>> getLocalIDsWithMapping(List<String> localIDs) async {

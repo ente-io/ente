@@ -318,7 +318,7 @@ class RemoteSyncService {
 
   void _onFileUploaded(
     EnteFile file, {
-
+    AssetUploadQueue? queueEntry,
   }) {
     Bus.instance.fire(
       CollectionUpdatedEvent(file.collectionID, [file], "fileUpload"),

@@ -66,16 +66,6 @@ class LocalDB with SqlDbBase {
       '$runtimeType editCopy complete in ${stopwatch.elapsed.inMilliseconds}ms for $id',
     );
   }
-  ) async {
-    final stopwatch = Stopwatch()..start();
-    await _sqliteDB.execute(
-      'INSERT INTO edited_assets (id, created_at, modified_at, latitude, longitude) VALUES (?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET created_at = ?, modified_at = ?, latitude = ?, longitude = ?',
-      [id, createdAt, modifiedAt, lat, lng, createdAt, modifiedAt, lat, lng],
-    );
-    debugPrint(
-      '$runtimeType editCopy complete in ${stopwatch.elapsed.inMilliseconds}ms for $id',
-    );
-  }
 
   Future<void> updateMetadata(
     String id, {
@@ -240,6 +230,20 @@ class LocalDB with SqlDbBase {
     final ids = <String>{};
     for (var row in result) {
       ids.add(row["id"] as String);
+    }
+    return ids;
+  }
+
+  Future<Set<String>> getAssetsIDsForPath(
+    String pathID,
+  ) async {
+    final result = await _sqliteDB.getAll(
+      "SELECT asset_id FROM device_path_assets WHERE path_id = ? ",
+      [pathID],
+    );
+    final ids = <String>{};
+    for (var row in result) {
+      ids.add(row["asset_id"] as String);
     }
     return ids;
   }
