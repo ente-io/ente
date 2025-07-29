@@ -6,6 +6,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/events/people_changed_event.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file_load_result.dart';
@@ -137,7 +138,9 @@ class _PeoplePageState extends State<PeoplePage> {
                 Size.fromHeight(widget.searchResult != null ? 90.0 : 50.0),
             child: PeopleAppBar(
               GalleryType.peopleTag,
-              _person.data.isIgnored ? "(ignored)" : _person.data.name,
+              _person.data.isIgnored
+                  ? S.of(context).ignored
+                  : _person.data.name,
               _selectedFiles,
               _person,
             ),
