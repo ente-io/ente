@@ -315,7 +315,9 @@ class _CircularProgressWithValueState extends State<CircularProgressWithValue>
           AnimatedBuilder(
             animation: _progressAnimation,
             builder: (context, child) {
-              final animatedValue = _progressAnimation.value;
+              final animatedValue =
+                  displayValue == 0 ? 0.0 : _progressAnimation.value;
+
               final isClockwise =
                   _isClockwise(animatedValue, widget.min, widget.max);
               final progressValue = _normalizeValueForProgress(
