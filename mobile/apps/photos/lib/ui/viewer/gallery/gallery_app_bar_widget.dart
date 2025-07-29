@@ -11,6 +11,7 @@ import "package:photos/core/constants.dart";
 import 'package:photos/core/event_bus.dart';
 import "package:photos/core/network/network.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/events/collection_meta_event.dart";
 import "package:photos/events/magic_sort_change_event.dart";
 import 'package:photos/events/subscription_purchased_event.dart';
 import "package:photos/gateways/cast_gw.dart";
@@ -111,6 +112,7 @@ enum AlbumPopupAction {
 class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   final _logger = Logger("GalleryAppBar");
   late StreamSubscription _userAuthEventSubscription;
+  late StreamSubscription<CollectionMetaEvent> _collectionMetaEventSubscription;
   late Function() _selectedFilesListener;
   String? _appBarTitle;
   late CollectionActions collectionActions;
@@ -131,6 +133,15 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
       setState(() {});
     });
+    _collectionMetaEventSubscription = Bus.instance
+        .on<CollectionMetaEvent>()
+        .where(
+          (event) =>
+              event.id == widget.collection?.id &&
+              event.type == CollectionMetaEventType.autoAddPeople,
+        )
+        .listen(stateRefresh);
+
     _appBarTitle = widget.title;
     galleryType = widget.type;
   }
@@ -138,8 +149,14 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   @override
   void dispose() {
     _userAuthEventSubscription.cancel();
+    _collectionMetaEventSubscription.cancel();
     widget.selectedFiles.removeListener(_selectedFilesListener);
     super.dispose();
+  }
+
+  void stateRefresh(dynamic event) {
+    if (!mounted) return;
+    setState(() {});
   }
 
   @override

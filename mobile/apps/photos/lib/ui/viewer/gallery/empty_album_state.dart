@@ -12,10 +12,13 @@ import "package:photos/utils/navigation_util.dart";
 class EmptyAlbumState extends StatelessWidget {
   final Collection c;
   final bool isFromCollectPhotos;
+  final VoidCallback? onAddPhotos;
+
   const EmptyAlbumState(
     this.c, {
     super.key,
     this.isFromCollectPhotos = false,
+    this.onAddPhotos,
   });
 
   @override
@@ -107,6 +110,7 @@ class EmptyAlbumState extends StatelessWidget {
                           context,
                           SmartAlbumPeople(collectionId: c.id),
                         );
+                        onAddPhotos?.call();
                       },
                     ),
                     const SizedBox(height: 48),

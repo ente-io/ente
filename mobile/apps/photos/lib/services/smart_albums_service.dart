@@ -176,13 +176,20 @@ class SmartAlbumsService {
   Future<void> saveConfig(SmartAlbumConfig config) async {
     final userId = Configuration.instance.getUserID()!;
 
-    await _addOrUpdateEntity(
-      EntityType.smartAlbum,
-      config.toJson(),
-      collectionId: config.collectionId,
-      addWithCustomID: config.id == null,
-      userId: userId,
-    );
+    if (config.personIDs.isNotEmpty) {
+      await _addOrUpdateEntity(
+        EntityType.smartAlbum,
+        config.toJson(),
+        collectionId: config.collectionId,
+        addWithCustomID: config.id == null,
+        userId: userId,
+      );
+    } else if (config.id != null) {
+      await _deleteEntry(
+        userId: userId,
+        collectionId: config.collectionId,
+      );
+    }
   }
 
   Future<SmartAlbumConfig?> getConfig(int collectionId) async {
@@ -201,10 +208,7 @@ class SmartAlbumsService {
     bool addWithCustomID = false,
     required int userId,
   }) async {
-    final id = getId(
-      collectionId: collectionId,
-      userId: userId,
-    );
+    final id = getId(collectionId: collectionId, userId: userId);
     final result = await entityService.addOrUpdate(
       type,
       jsonMap,

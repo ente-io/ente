@@ -100,6 +100,14 @@ class CollectionPage extends StatelessWidget {
           ? EmptyAlbumState(
               c.collection,
               isFromCollectPhotos: isFromCollectPhotos,
+              onAddPhotos: () {
+                Bus.instance.fire(
+                  CollectionMetaEvent(
+                    c.collection.id,
+                    CollectionMetaEventType.autoAddPeople,
+                  ),
+                );
+              },
             )
           : const EmptyState(),
       footer: isFromCollectPhotos
