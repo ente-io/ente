@@ -113,7 +113,7 @@ class SmartAlbumsService {
         config.personIDs.toList(),
       );
 
-      Set<EnteFile> toBeSynced = {};
+      Map<String, List<EnteFile>> toBeSynced = {};
 
       var newConfig = config;
       for (final personId in config.personIDs) {
@@ -137,13 +137,7 @@ class SmartAlbumsService {
                 e.ownerID != userId,
           );
 
-        toBeSynced = {...toBeSynced, ...fileIds};
-
-        newConfig = newConfig.addFiles(
-          personId,
-          updatedAtMap[personId]!,
-          toBeSynced.map((e) => e.uploadedFileID!).toSet(),
-        );
+        toBeSynced = {...toBeSynced, personId: fileIds};
       }
 
       syncingCollection = (collectionId, true);
@@ -154,9 +148,16 @@ class SmartAlbumsService {
       if (toBeSynced.isNotEmpty) {
         try {
           await CollectionsService.instance.addOrCopyToCollection(
-            toCopy: false,
             collectionId,
-            toBeSynced.toList(),
+            toBeSynced.entries.map((e) => e.value).expand((e) => e).toList(),
+            toCopy: false,
+          );
+          newConfig = newConfig.addFiles(
+            updatedAtMap,
+            toBeSynced.map(
+              (key, value) =>
+                  MapEntry(key, value.map((e) => e.uploadedFileID!).toSet()),
+            ),
           );
 
           await saveConfig(newConfig);

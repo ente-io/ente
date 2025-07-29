@@ -43,16 +43,25 @@ class SmartAlbumConfig {
     );
   }
 
-  SmartAlbumConfig addFiles(String personId, int updatedAt, Set<int> fileId) {
-    if (!infoMap.containsKey(personId)) {
-      return this;
-    }
-
+  SmartAlbumConfig addFiles(
+    Map<String, int> personUpdatedAt,
+    Map<String, Set<int>> personMappedFiles,
+  ) {
     final newInfoMap = Map<String, PersonInfo>.from(infoMap);
-    newInfoMap[personId] = (
-      updatedAt: updatedAt,
-      addedFiles: newInfoMap[personId]!.addedFiles.union(fileId),
-    );
+    var isUpdated = false;
+
+    personMappedFiles.forEach((personId, fileIds) {
+      if (newInfoMap.containsKey(personId)) {
+        isUpdated = true;
+        newInfoMap[personId] = (
+          updatedAt: personUpdatedAt[personId] ??
+              DateTime.now().millisecondsSinceEpoch,
+          addedFiles: {...?newInfoMap[personId]?.addedFiles, ...fileIds},
+        );
+      }
+    });
+
+    if (!isUpdated) return this;
 
     return SmartAlbumConfig(
       id: id,
