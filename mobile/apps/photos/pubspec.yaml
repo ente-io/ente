@@ -173,6 +173,7 @@ dependencies:
     git:
       url: https://github.com/eddyuan/privacy_screen.git
       ref: 855418e
+  pro_image_editor: 6.0.0
   receive_sharing_intent: # pub.dev is behind
     git:
       url: https://github.com/KasemJaffer/receive_sharing_intent.git
@@ -342,6 +343,7 @@ flutter:
   assets:
     - assets/
     - assets/video-editor/
+    - assets/image-editor/
     - assets/icons/
     - assets/launcher_icon/
   fonts:
