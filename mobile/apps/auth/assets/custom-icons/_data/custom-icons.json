@@ -11,6 +11,16 @@
       "title": "3Commas"
     },
     {
+      "title": "Aadhaar",
+      "slug": "aadhaar",
+      "altNames": [
+        "uidai",
+        "UIDAI",
+        "Unique Identification Authority of India"
+      ],
+      "hex": "FBB401"
+    },
+    {
       "title": "Accredible",
       "slug": "accredible",
       "altNames": [
@@ -44,6 +54,11 @@
     },
     {
       "title": "Amazon"
+    },
+    {
+      "title": "Amtrak",
+      "slug": "amtrak",
+      "hex": "003A5D"
     },
     {
       "title": "Ankama",
@@ -281,6 +296,11 @@
       "title": "Caixa"
     },
     {
+      "title": "Caltrain",
+      "slug": "caltrain",
+      "hex": "E31837"
+    },
+    {
       "title": "Canva"
     },
     {
@@ -310,6 +330,16 @@
       "title": "Channel Island Hosting",
       "slug": "cih",
       "hex": "D14633"
+    },
+    {
+      "title": "Clipper",
+      "slug": "clippercard",
+      "altNames": [
+        "ClipperCard",
+        "clipper-card",
+        "Clipper Card"
+      ],
+      "hex": "006298"
     },
     {
       "title": "CloudAMQP"
@@ -351,6 +381,11 @@
     {
       "title": "Control D",
       "slug": "controld"
+    },
+    {
+      "title": "Coolify",
+      "slug": "coolify",
+      "hex": "8C52FF"
     },
     {
       "title": "Crowdpear"
@@ -425,6 +460,11 @@
       ]
     },
     {
+      "title": "Deepseek",
+      "slug": "deepseek",
+      "hex": "4D6BFE"
+    },
+    {
       "title": "DEGIRO"
     },
     {
@@ -453,6 +493,15 @@
       "title": "DocuSeal"
     },
     {
+      "title": "Dominos",
+      "slug": "dominos",
+      "altNames": [
+        "Domino's",
+        "Domino's Pizza"
+      ],
+      "hex": "0B648F"
+    },
+    {
       "title": "Doppler"
     },
     {
@@ -465,6 +514,16 @@
     {
       "title": "dus.net",
       "slug": "dusnet"
+    },
+    {
+      "title": "Dunkin' Donuts",
+      "slug": "dunkindonuts",
+      "altNames": [
+        "Dunkin'",
+        "Dunkin",
+        "Dunkin Donuts"
+      ],
+      "hex": "C63663"
     },
     {
       "title": "eBay"
@@ -523,6 +582,11 @@
         "Exaroton"
       ],
       "hex": "17AB17"
+    },
+    {
+      "title": "Experian",
+      "slug": "experian",
+      "hex": "AF1685"
     },
     {
       "title": "Fanatical",
@@ -641,6 +705,15 @@
       ]
     },
     {
+      "title": "Green Man Gaming",
+      "slug": "greenmangaming",
+      "altNames": [
+        "green man gaming",
+        "gmg"
+      ],
+      "hex": "00E205"
+    },
+    {
       "title": "Guideline"
     },
     {
@@ -657,6 +730,15 @@
       "title": "Hivelocity"
     },
     {
+      "title": "HSA Bank",
+      "slug": "hsa_bank",
+      "altNames": [
+        "hsa bank",
+        "hsabank"
+      ],
+      "hex": "00FF85"
+    },
+    {
       "title": "HTX"
     },
     {
@@ -664,6 +746,11 @@
       "altNames": [
         "Hugging Face"
       ]
+    },
+    {
+      "title": "Hulu",
+      "slug": "hulu",
+      "hex": "1CE783"
     },
     {
       "title": "IBKR",
@@ -712,6 +799,15 @@
       "title": "INWX"
     },
     {
+      "title": "IRCTC",
+      "slug": "irctc",
+      "altNames": [
+        "Indian Railway Catering and Tourism Corporation",
+        "Indian Railways"
+      ],
+      "hex": "000075"
+    },
+    {
       "title": "Itch",
       "slug": "itch_io",
       "hex": "000000"
@@ -739,6 +835,11 @@
     },
     {
       "title": "Kagi"
+    },
+    {
+      "title": "Kayak",
+      "slug": "kayak",
+      "hex": "FF6900"
     },
     {
       "title": "Keygen",
@@ -1035,6 +1136,14 @@
       "title": "Njalla"
     },
     {
+      "title": "NJTransit",
+      "slug": "njtransit",
+      "altNames": [
+        "NJ Transit"
+      ],
+      "hex": "1A2B57"
+    },
+    {
       "title": "nordvpn",
       "slug": "nordaccount",
       "hex": "4687FF",
@@ -1131,6 +1240,14 @@
       "altNames": [
         "Pebble Host"
       ]
+    },
+    {
+      "title": "PCPartPicker",
+      "slug": "pcpartpicker",
+      "altNames": [
+        "PC Part Picker"
+      ],
+      "hex": "EDA920"
     },
     {
       "title": "Peerberry"
@@ -1331,6 +1448,14 @@
       "slug": "seafile"
     },
     {
+      "title": "SBI",
+      "slug": "sbi",
+      "altNames": [
+        "State Bank of India"
+      ],
+      "hex": "12A8E0"
+    },
+    {
       "title": "SEI",
       "altNames": [
         "sei",
@@ -1404,6 +1529,14 @@
       "slug": "startmail"
     },
     {
+      "title": "State Farm",
+      "slug": "state_farm",
+      "altNames": [
+        "StateFarm"
+      ],
+      "hex": "EDA920"
+    },
+    {
       "title": "Stripchat",
       "slug": "stripchat",
       "altNames": [
@@ -1415,6 +1548,11 @@
     {
       "title": "STRATO",
       "hex": "FF8800"
+    },
+    {
+      "title": "Supercell",
+      "slug": "supercell",
+      "hex": "000000"
     },
     {
       "title": "Surfshark"
@@ -1481,6 +1619,15 @@
     {
       "title": "Temu",
       "slug": "temu"
+    },
+    {
+      "title": "The StoryGraph",
+      "slug": "thestorygraph",
+      "altNames": [
+        "StoryGraph",
+        "TheStoryGraph"
+      ],
+      "hex": "15919B"
     },
     {
       "title": "tianyiyun",
@@ -1610,6 +1757,14 @@
       "title": "WEB.DE",
       "slug": "web_de"
     },
+     {
+      "title": "WeMod",
+      "slug": "wemod",
+      "altNames": [
+        "wemod"
+      ],
+      "hex": "4B63FB"
+    },
     {
       "title": "WHMCS"
     },
@@ -1618,6 +1773,16 @@
     },
     {
       "title": "Wise"
+    },
+    {
+      "title": "WMATA",
+      "slug": "wmata",
+      "altNames": [
+        "Washington Metro",
+        "DC Metro",
+        "Washington Metropolitan Area Transit Authority"
+      ],
+      "hex": "2D2D2D"
     },
     {
       "title": "Wolvesville"
