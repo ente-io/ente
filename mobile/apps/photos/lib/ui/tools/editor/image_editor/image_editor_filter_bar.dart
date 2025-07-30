@@ -4,6 +4,100 @@ import "package:photos/ente_theme_data.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:pro_image_editor/pro_image_editor.dart';
 
+class GlacierFilterMatrix {
+  static const saturation = [
+    0.97,
+    0.02,
+    0.00,
+    0.00,
+    0.00,
+    0.01,
+    0.98,
+    0.00,
+    0.00,
+    0.00,
+    0.01,
+    0.02,
+    0.96,
+    0.00,
+    0.00,
+    0.00,
+    0.00,
+    0.00,
+    1.00,
+    0.00,
+  ];
+
+  static const contrast = [
+    0.94,
+    0.00,
+    0.00,
+    0.00,
+    7.07,
+    0.00,
+    0.94,
+    0.00,
+    0.00,
+    7.07,
+    0.00,
+    0.00,
+    0.94,
+    0.00,
+    7.07,
+    0.00,
+    0.00,
+    0.00,
+    1.00,
+    0.00,
+  ];
+
+  static const hue = [
+    1.01,
+    0.40,
+    -0.41,
+    0.00,
+    0.00,
+    -0.04,
+    0.91,
+    0.14,
+    0.00,
+    0.00,
+    0.38,
+    -0.25,
+    0.87,
+    0.00,
+    0.00,
+    0.00,
+    0.00,
+    0.00,
+    1.00,
+    0.00,
+  ];
+
+  static const temperature = [
+    0.80,
+    0.00,
+    0.00,
+    0.00,
+    0.00,
+    0.00,
+    1.00,
+    0.00,
+    0.00,
+    0.00,
+    0.00,
+    0.00,
+    1.00,
+    0.00,
+    0.00,
+    0.00,
+    0.00,
+    0.00,
+    1.00,
+    0.00,
+  ];
+}
+
 final filterList = [
   const FilterModel(
     name: "None",
@@ -38,13 +132,13 @@ final filterList = [
       ColorFilterAddons.grayscale(),
     ],
   ),
-  FilterModel(
+  const FilterModel(
     name: 'Glacier',
     filters: [
-      ColorFilterAddons.hue(-0.6),
-      ColorFilterAddons.rgbScale(0.8, 1.0, 1.2),
-      ColorFilterAddons.saturation(-0.08),
-      ColorFilterAddons.contrast(-0.06),
+      GlacierFilterMatrix.saturation,
+      GlacierFilterMatrix.temperature,
+      GlacierFilterMatrix.hue,
+      GlacierFilterMatrix.contrast,
     ],
   ),
   FilterModel(
