@@ -2,24 +2,29 @@ import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
 import "package:photos/ente_theme_data.dart";
 import "package:photos/theme/ente_theme.dart";
-import 'package:pro_image_editor/pro_image_editor.dart'; 
+import 'package:pro_image_editor/pro_image_editor.dart';
 
 final filterList = [
+  const FilterModel(
+    name: "None",
+    filters: [],
+  ),
   FilterModel(
-    name: "Juno",
+    name: 'Pop',
+    filters: [
+      ColorFilterAddons.saturation(0.3),
+      ColorFilterAddons.brightness(0.15),
+    ],
+  ),
+  FilterModel(
+    name: "Amber",
     filters: [
       ColorFilterAddons.rgbScale(1.01, 1.04, 1),
       ColorFilterAddons.saturation(0.3),
     ],
   ),
   FilterModel(
-    name: 'Perpetua',
-    filters: [
-      ColorFilterAddons.rgbScale(1.05, 1.1, 1),
-    ],
-  ),
-  FilterModel(
-    name: 'Reyes',
+    name: 'Dust',
     filters: [
       ColorFilterAddons.sepia(0.4),
       ColorFilterAddons.brightness(0.13),
@@ -27,30 +32,36 @@ final filterList = [
     ],
   ),
   FilterModel(
-    name: 'Aden',
+    name: 'Carbon',
+    filters: [
+      ColorFilterAddons.contrast(0.2),
+      ColorFilterAddons.grayscale(),
+    ],
+  ),
+  FilterModel(
+    name: 'Glacier',
+    filters: [
+      ColorFilterAddons.hue(-0.6),
+      ColorFilterAddons.rgbScale(0.8, 1.0, 1.2),
+      ColorFilterAddons.saturation(-0.08),
+      ColorFilterAddons.contrast(-0.06),
+    ],
+  ),
+  FilterModel(
+    name: 'Haze',
     filters: [
       ColorFilterAddons.colorOverlay(228, 130, 225, 0.13),
       ColorFilterAddons.saturation(-0.2),
     ],
   ),
   FilterModel(
-    name: "New preset",
+    name: 'Meadow',
     filters: [
-      ColorFilterAddons.hue(-0.6),
-      ColorFilterAddons.rgbScale(0.8, 1.0, 1.2),
-      ColorFilterAddons.saturation(-0.8),
-      ColorFilterAddons.contrast(-0.6),
+      ColorFilterAddons.rgbScale(1.05, 1.1, 1),
     ],
   ),
   FilterModel(
-    name: 'Amaro',
-    filters: [
-      ColorFilterAddons.saturation(0.3),
-      ColorFilterAddons.brightness(0.15),
-    ],
-  ),
-  FilterModel(
-    name: 'Clarendon',
+    name: 'Zest',
     filters: [
       ColorFilterAddons.brightness(.1),
       ColorFilterAddons.contrast(.1),
@@ -58,24 +69,17 @@ final filterList = [
     ],
   ),
   FilterModel(
-    name: 'Brooklyn',
+    name: 'Retro',
     filters: [
       ColorFilterAddons.colorOverlay(25, 240, 252, 0.05),
       ColorFilterAddons.sepia(0.3),
     ],
   ),
   FilterModel(
-    name: 'Sierra',
+    name: 'Sepia',
     filters: [
       ColorFilterAddons.contrast(-0.15),
       ColorFilterAddons.saturation(0.1),
-    ],
-  ),
-  FilterModel(
-    name: 'Inkwell',
-    filters: [
-      ColorFilterAddons.contrast(0.2),
-      ColorFilterAddons.grayscale(),
     ],
   ),
 ];
