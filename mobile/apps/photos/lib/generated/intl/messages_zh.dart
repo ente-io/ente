@@ -523,16 +523,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "我们对回忆体验进行了重大改进，包括自动播放、滑动到下一个回忆以及更多功能。"),
         "cLDesc4": MessageLookupByLibrary.simpleMessage(
             "除了多项底层改进外，现在可以更轻松地查看所有检测到的人脸，对相似人脸提供反馈，以及从单张照片中添加/删除人脸。"),
-        "cLDesc5": MessageLookupByLibrary.simpleMessage(
-            "您现在将收到 Ente 上保存的所有生日的可选退出通知，同时附上他们最佳照片的合集。"),
-        "cLDesc6": MessageLookupByLibrary.simpleMessage(
-            "无需等待上传/下载完成即可关闭应用程序。所有上传和下载现在都可以中途暂停，并从中断处继续。"),
         "cLTitle1": MessageLookupByLibrary.simpleMessage("正在上传大型视频文件"),
         "cLTitle2": MessageLookupByLibrary.simpleMessage("后台上传"),
         "cLTitle3": MessageLookupByLibrary.simpleMessage("自动播放回忆"),
         "cLTitle4": MessageLookupByLibrary.simpleMessage("改进的人脸识别"),
-        "cLTitle5": MessageLookupByLibrary.simpleMessage("生日通知"),
-        "cLTitle6": MessageLookupByLibrary.simpleMessage("可恢复的上传和下载"),
         "cachedData": MessageLookupByLibrary.simpleMessage("缓存数据"),
         "calculating": MessageLookupByLibrary.simpleMessage("正在计算..."),
         "canNotOpenBody":

@@ -599,10 +599,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Wir haben deutliche Verbesserungen an der Darstellung von Erinnerungen vorgenommen, u.a. automatische Wiedergabe, Wischen zur nächsten Erinnerung und vieles mehr."),
         "cLDesc4": MessageLookupByLibrary.simpleMessage(
             "Zusammen mit einer Reihe von Verbesserungen unter der Haube ist es jetzt viel einfacher, alle erkannten Gesichter zu sehen, Feedback zu ähnlichen Gesichtern geben und Gesichter für ein einzelnes Foto hinzuzufügen oder zu entfernen."),
-        "cLDesc5": MessageLookupByLibrary.simpleMessage(
-            "Du erhältst jetzt eine Opt-Out-Benachrichtigung für alle Geburtstage, die du bei Ente gespeichert hast, zusammen mit einer Sammlung der besten Fotos."),
-        "cLDesc6": MessageLookupByLibrary.simpleMessage(
-            "Kein Warten mehr auf das Hoch- oder Herunterladen, bevor du die App schließen kannst. Alle Übertragungen können jetzt mittendrin pausiert und fortgesetzt werden, wo du aufgehört hast."),
         "cLTitle1": MessageLookupByLibrary.simpleMessage(
             "Lade große Videodateien hoch"),
         "cLTitle2":
@@ -611,10 +607,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Automatische Wiedergabe von Erinnerungen"),
         "cLTitle4": MessageLookupByLibrary.simpleMessage(
             "Verbesserte Gesichtserkennung"),
-        "cLTitle5": MessageLookupByLibrary.simpleMessage(
-            "Geburtstags-Benachrichtigungen"),
-        "cLTitle6": MessageLookupByLibrary.simpleMessage(
-            "Wiederaufnehmbares Hoch- und Herunterladen"),
         "cachedData": MessageLookupByLibrary.simpleMessage("Daten im Cache"),
         "calculating":
             MessageLookupByLibrary.simpleMessage("Wird berechnet..."),

@@ -591,10 +591,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Otomatik oynatma, bir sonraki belleğe kaydırma ve çok daha fazlası dahil olmak üzere bellek deneyimimizde önemli iyileştirmeler yaptık."),
         "cLDesc4": MessageLookupByLibrary.simpleMessage(
             "Bazı arka plandaki iyileştirmelere ek olarak, artık tespit edilen tüm yüzleri görmek, benzer yüzler hakkında geri bildirimde bulunmak ve tek bir fotoğraftan yüz ekleyip çıkarmak çok daha kolay."),
-        "cLDesc5": MessageLookupByLibrary.simpleMessage(
-            "Ente’ye kaydettiğiniz tüm doğum günleri için artık en iyi fotoğraflarından oluşan bir koleksiyonla birlikte, devre dışı bırakabileceğiniz bir bildirim alacaksınız."),
-        "cLDesc6": MessageLookupByLibrary.simpleMessage(
-            "Uygulamayı kapatmadan önce yüklemelerin / indirmelerin tamamlanmasını beklemenize gerek yok. Tüm yüklemeler ve indirmeler artık yarıda duraklatma ve kaldığınız yerden devam etme özelliğine sahip."),
         "cLTitle1": MessageLookupByLibrary.simpleMessage(
             "Büyük Video Dosyalarını Yükleme"),
         "cLTitle2": MessageLookupByLibrary.simpleMessage("Arka Plan Yükleme"),
@@ -602,10 +598,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Otomatik Oynatma Anıları"),
         "cLTitle4":
             MessageLookupByLibrary.simpleMessage("Geliştirilmiş Yüz Tanıma"),
-        "cLTitle5":
-            MessageLookupByLibrary.simpleMessage("Doğum Günü Bildirimleri"),
-        "cLTitle6": MessageLookupByLibrary.simpleMessage(
-            "Devam Ettirilebilir Yüklemeler ve İndirmeler"),
         "cachedData":
             MessageLookupByLibrary.simpleMessage("Önbelleğe alınmış veriler"),
         "calculating": MessageLookupByLibrary.simpleMessage("Hesaplanıyor..."),

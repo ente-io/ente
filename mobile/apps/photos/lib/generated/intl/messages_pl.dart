@@ -557,10 +557,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Wprowadziliśmy istotne ulepszenia w funkcji wspomnień, w tym automatyczne odtwarzanie, przesuwanie do kolejnego wspomnienia i wiele innych."),
         "cLDesc4": MessageLookupByLibrary.simpleMessage(
             "Wraz z kilkoma ulepszeniami w mechanizmie teraz znacznie łatwiej jest widzieć wszystkie wykryte twarze, zapewniać informacje zwrotne o podobnych twarzach i dodawać/usuwać twarze z jednego zdjęcia."),
-        "cLDesc5": MessageLookupByLibrary.simpleMessage(
-            "Od teraz otrzymasz powiadomienie z możliwością rezygnacji dotyczące wszystkich zapisanych urodzin w Ente, wraz z kolekcją najlepszych zdjęć danej osoby."),
-        "cLDesc6": MessageLookupByLibrary.simpleMessage(
-            "Nie musisz już czekać na zakończenie przesyłania ani pobierania, żeby móc zamknąć aplikację. Wszystkie operacje przesyłania i pobierania można teraz wstrzymać w dowolnym momencie i wznowić od miejsca, w którym zostały przerwane."),
         "cLTitle1": MessageLookupByLibrary.simpleMessage(
             "Przesyłanie Dużych Plików Wideo"),
         "cLTitle2": MessageLookupByLibrary.simpleMessage("Przesyłanie w Tle"),
@@ -568,10 +564,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Automatyczne Odtwarzanie Wspomnień"),
         "cLTitle4": MessageLookupByLibrary.simpleMessage(
             "Ulepszone Rozpoznawanie Twarzy"),
-        "cLTitle5":
-            MessageLookupByLibrary.simpleMessage("Powiadomienia o Urodzinach"),
-        "cLTitle6": MessageLookupByLibrary.simpleMessage(
-            "Wznawialne Przesyłanie i Pobieranie Danych"),
         "cachedData":
             MessageLookupByLibrary.simpleMessage("Dane w pamięci podręcznej"),
         "calculating": MessageLookupByLibrary.simpleMessage("Obliczanie..."),

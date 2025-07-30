@@ -226,7 +226,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m76(name) => "Đi bộ với ${name}";
 
   static String m77(count) =>
-      "${Intl.plural(count, other: '${count} kết quả được tìm thấy')}";
+      "${Intl.plural(count, other: '${count} kết quả đã tìm thấy')}";
 
   static String m78(snapshotLength, searchLength) =>
       "Độ dài các phần không khớp: ${snapshotLength} != ${searchLength}";
@@ -593,10 +593,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Chúng tôi đã có những cải tiến đáng kể cho trải nghiệm kỷ niệm, bao gồm tự phát, vuốt xem kỷ niệm tiếp theo và nhiều tính năng khác."),
         "cLDesc4": MessageLookupByLibrary.simpleMessage(
             "Cùng với một loạt cải tiến nội bộ, giờ đây bạn có thể dễ dàng xem tất cả khuôn mặt đã phát hiện, cung cấp phản hồi về các khuôn mặt giống nhau và thêm/xóa khuôn mặt khỏi một bức ảnh."),
-        "cLDesc5": MessageLookupByLibrary.simpleMessage(
-            "Bây giờ bạn sẽ nhận được thông báo tùy-chọn cho tất cả các ngày sinh nhật mà bạn đã lưu trên Ente, cùng với bộ sưu tập những bức ảnh đẹp nhất của họ."),
-        "cLDesc6": MessageLookupByLibrary.simpleMessage(
-            "Không còn phải chờ tải lên/tải xuống xong mới có thể đóng ứng dụng. Tất cả các tải lên và tải xuống hiện có thể tạm dừng giữa chừng và tiếp tục từ nơi bạn đã dừng lại."),
         "cLTitle1":
             MessageLookupByLibrary.simpleMessage("Tải lên tệp video lớn"),
         "cLTitle2": MessageLookupByLibrary.simpleMessage("Tải lên trong nền"),
@@ -604,9 +600,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Tự động phát kỷ niệm"),
         "cLTitle4": MessageLookupByLibrary.simpleMessage(
             "Cải thiện nhận diện khuôn mặt"),
-        "cLTitle5": MessageLookupByLibrary.simpleMessage("Thông báo sinh nhật"),
-        "cLTitle6": MessageLookupByLibrary.simpleMessage(
-            "Tiếp tục tải lên và tải xuống"),
         "cachedData": MessageLookupByLibrary.simpleMessage(
             "Dữ liệu đã lưu trong bộ nhớ đệm"),
         "calculating":
@@ -1272,7 +1265,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "loadMessage9": MessageLookupByLibrary.simpleMessage(
             "Chúng tôi sử dụng Xchacha20Poly1305 để mã hóa dữ liệu của bạn"),
         "loadingExifData":
-            MessageLookupByLibrary.simpleMessage("Đang tải thông số Exif..."),
+            MessageLookupByLibrary.simpleMessage("Đang lấy thông số Exif..."),
         "loadingGallery":
             MessageLookupByLibrary.simpleMessage("Đang tải thư viện..."),
         "loadingMessage":
@@ -1412,8 +1405,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("✨ Không có trùng lặp"),
         "noEnteAccountExclamation":
             MessageLookupByLibrary.simpleMessage("Chưa có tài khoản Ente!"),
-        "noExifData":
-            MessageLookupByLibrary.simpleMessage("Không có thông số Exif"),
+        "noExifData": MessageLookupByLibrary.simpleMessage("Không có Exif"),
         "noFacesFound":
             MessageLookupByLibrary.simpleMessage("Không tìm thấy khuôn mặt"),
         "noHiddenPhotosOrVideos":

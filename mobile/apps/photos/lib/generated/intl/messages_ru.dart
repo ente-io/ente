@@ -594,10 +594,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Мы внесли значительные улучшения в работу с воспоминаниями, включая автовоспроизведение, переход к следующему воспоминанию и многое другое."),
         "cLDesc4": MessageLookupByLibrary.simpleMessage(
             "Наряду с рядом внутренних улучшений теперь стало гораздо проще просматривать все обнаруженные лица, оставлять отзывы о похожих лицах, а также добавлять/удалять лица с одной фотографии."),
-        "cLDesc5": MessageLookupByLibrary.simpleMessage(
-            "Теперь вы будете получать уведомления о всех днях рождениях, которые вы сохранили на Ente, а также коллекцию их лучших фотографий."),
-        "cLDesc6": MessageLookupByLibrary.simpleMessage(
-            "Больше не нужно ждать завершения загрузки/скачивания, прежде чем закрыть приложение. Все загрузки и скачивания теперь можно приостановить и возобновить с того места, где вы остановились."),
         "cLTitle1": MessageLookupByLibrary.simpleMessage(
             "Загрузка больших видеофайлов"),
         "cLTitle2": MessageLookupByLibrary.simpleMessage("Фоновая загрузка"),
@@ -605,10 +601,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Автовоспроизведение воспоминаний"),
         "cLTitle4": MessageLookupByLibrary.simpleMessage(
             "Улучшенное распознавание лиц"),
-        "cLTitle5":
-            MessageLookupByLibrary.simpleMessage("Уведомления о днях рождения"),
-        "cLTitle6": MessageLookupByLibrary.simpleMessage(
-            "Возобновляемые загрузки и скачивания"),
         "cachedData":
             MessageLookupByLibrary.simpleMessage("Кэшированные данные"),
         "calculating": MessageLookupByLibrary.simpleMessage("Подсчёт..."),
