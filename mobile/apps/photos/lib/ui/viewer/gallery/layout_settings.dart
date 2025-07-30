@@ -147,7 +147,7 @@ class _GalleryLayoutSettingsState extends State<GalleryLayoutSettings> {
                       onTap: () => routeToPage(
                         context,
                         const GallerySettingsScreen(
-                          fromGallerySettingsCTA: true,
+                          fromGalleryLayoutSettingsCTA: true,
                         ),
                       ).then(
                         (_) {

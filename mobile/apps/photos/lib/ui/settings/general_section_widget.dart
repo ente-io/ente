@@ -184,7 +184,7 @@ class GeneralSectionWidget extends StatelessWidget {
     routeToPage(
       context,
       const GallerySettingsScreen(
-        fromGallerySettingsCTA: false,
+        fromGalleryLayoutSettingsCTA: false,
       ),
     );
   }
