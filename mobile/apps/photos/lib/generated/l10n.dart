@@ -12525,6 +12525,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Select the people you want to automatically add to the album`
+  String get peopleAutoAddDesc {
+    return Intl.message(
+      'Select the people you want to automatically add to the album',
+      name: 'peopleAutoAddDesc',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

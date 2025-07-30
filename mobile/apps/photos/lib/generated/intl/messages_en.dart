@@ -1521,6 +1521,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "pendingItems": MessageLookupByLibrary.simpleMessage("Pending items"),
         "pendingSync": MessageLookupByLibrary.simpleMessage("Pending sync"),
         "people": MessageLookupByLibrary.simpleMessage("People"),
+        "peopleAutoAddDesc": MessageLookupByLibrary.simpleMessage(
+            "Select the people you want to automatically add to the album"),
         "peopleUsingYourCode":
             MessageLookupByLibrary.simpleMessage("People using your code"),
         "peopleWidgetDesc": MessageLookupByLibrary.simpleMessage(

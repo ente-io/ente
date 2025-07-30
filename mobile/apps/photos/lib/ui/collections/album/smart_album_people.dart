@@ -189,7 +189,7 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
               title: S.of(context).people,
             ),
             expandedHeight: MediaQuery.textScalerOf(context).scale(120),
-            flexibleSpaceCaption: S.of(context).peopleWidgetDesc,
+            flexibleSpaceCaption: S.of(context).peopleAutoAddDesc,
             actionIcons: const [],
           ),
           SliverFillRemaining(
