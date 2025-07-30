@@ -12366,6 +12366,56 @@ class S {
     );
   }
 
+  /// `Ignore person`
+  String get ignorePerson {
+    return Intl.message(
+      'Ignore person',
+      name: 'ignorePerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Mixed grouping?`
+  String get mixedGrouping {
+    return Intl.message(
+      'Mixed grouping?',
+      name: 'mixedGrouping',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Analysis`
+  String get analysis {
+    return Intl.message(
+      'Analysis',
+      name: 'analysis',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Does this grouping contain multiple people?`
+  String get doesGroupContainMultiplePeople {
+    return Intl.message(
+      'Does this grouping contain multiple people?',
+      name: 'doesGroupContainMultiplePeople',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We will automatically analyze the grouping to determine if there are multiple people present, and separate them out again. This may take a few seconds.`
+  String get automaticallyAnalyzeAndSplitGrouping {
+    return Intl.message(
+      'We will automatically analyze the grouping to determine if there are multiple people present, and separate them out again. This may take a few seconds.',
+      name: 'automaticallyAnalyzeAndSplitGrouping',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Layout`
   String get layout {
     return Intl.message(

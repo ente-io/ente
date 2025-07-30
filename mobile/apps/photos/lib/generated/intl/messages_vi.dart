@@ -226,7 +226,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m76(name) => "Đi bộ với ${name}";
 
   static String m77(count) =>
-      "${Intl.plural(count, other: '${count} kết quả được tìm thấy')}";
+      "${Intl.plural(count, other: '${count} kết quả đã tìm thấy')}";
 
   static String m78(snapshotLength, searchLength) =>
       "Độ dài các phần không khớp: ${snapshotLength} != ${searchLength}";
@@ -1272,7 +1272,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "loadMessage9": MessageLookupByLibrary.simpleMessage(
             "Chúng tôi sử dụng Xchacha20Poly1305 để mã hóa dữ liệu của bạn"),
         "loadingExifData":
-            MessageLookupByLibrary.simpleMessage("Đang tải thông số Exif..."),
+            MessageLookupByLibrary.simpleMessage("Đang lấy thông số Exif..."),
         "loadingGallery":
             MessageLookupByLibrary.simpleMessage("Đang tải thư viện..."),
         "loadingMessage":
@@ -1412,8 +1412,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("✨ Không có trùng lặp"),
         "noEnteAccountExclamation":
             MessageLookupByLibrary.simpleMessage("Chưa có tài khoản Ente!"),
-        "noExifData":
-            MessageLookupByLibrary.simpleMessage("Không có thông số Exif"),
+        "noExifData": MessageLookupByLibrary.simpleMessage("Không có Exif"),
         "noFacesFound":
             MessageLookupByLibrary.simpleMessage("Không tìm thấy khuôn mặt"),
         "noHiddenPhotosOrVideos":

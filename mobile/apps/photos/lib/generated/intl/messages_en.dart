@@ -435,6 +435,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Please allow access to your photos from Settings so Ente can display and backup your library."),
         "allowPermTitle":
             MessageLookupByLibrary.simpleMessage("Allow access to photos"),
+        "analysis": MessageLookupByLibrary.simpleMessage("Analysis"),
         "androidBiometricHint":
             MessageLookupByLibrary.simpleMessage("Verify identity"),
         "androidBiometricNotRecognized":
@@ -551,6 +552,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "autoPair": MessageLookupByLibrary.simpleMessage("Auto pair"),
         "autoPairDesc": MessageLookupByLibrary.simpleMessage(
             "Auto pair works only with devices that support Chromecast."),
+        "automaticallyAnalyzeAndSplitGrouping":
+            MessageLookupByLibrary.simpleMessage(
+                "We will automatically analyze the grouping to determine if there are multiple people present, and separate them out again. This may take a few seconds."),
         "available": MessageLookupByLibrary.simpleMessage("Available"),
         "availableStorageSpace": m10,
         "backedUpFolders":
@@ -889,6 +893,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "doYouWantToDiscardTheEditsYouHaveMade":
             MessageLookupByLibrary.simpleMessage(
                 "Do you want to discard the edits you have made?"),
+        "doesGroupContainMultiplePeople": MessageLookupByLibrary.simpleMessage(
+            "Does this grouping contain multiple people?"),
         "done": MessageLookupByLibrary.simpleMessage("Done"),
         "dontSave": MessageLookupByLibrary.simpleMessage("Don\'t save"),
         "doubleYourStorage":
@@ -1136,6 +1142,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Biometric authentication is disabled. Please lock and unlock your screen to enable it."),
         "iOSOkButton": MessageLookupByLibrary.simpleMessage("OK"),
         "ignore": MessageLookupByLibrary.simpleMessage("Ignore"),
+        "ignorePerson": MessageLookupByLibrary.simpleMessage("Ignore person"),
         "ignoreUpdate": MessageLookupByLibrary.simpleMessage("Ignore"),
         "ignored": MessageLookupByLibrary.simpleMessage("ignored"),
         "ignoredFolderUploadReason": MessageLookupByLibrary.simpleMessage(
@@ -1336,6 +1343,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "mergeWithExisting":
             MessageLookupByLibrary.simpleMessage("Merge with existing"),
         "mergedPhotos": MessageLookupByLibrary.simpleMessage("Merged photos"),
+        "mixedGrouping":
+            MessageLookupByLibrary.simpleMessage("Mixed grouping?"),
         "mlConsent":
             MessageLookupByLibrary.simpleMessage("Enable machine learning"),
         "mlConsentConfirmation": MessageLookupByLibrary.simpleMessage(

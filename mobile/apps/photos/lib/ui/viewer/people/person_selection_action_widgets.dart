@@ -45,7 +45,7 @@ class _LinkContactToPersonSelectionPageState
       final List<PersonEntity> result = [];
       for (final person in persons) {
         if ((person.data.email != null && person.data.email!.isNotEmpty) ||
-            (person.data.isHidden || person.data.isIgnored)) {
+            (person.data.isIgnored)) {
           continue;
         }
         result.add(person);
@@ -217,7 +217,7 @@ class _ReassignMeSelectionPageState extends State<ReassignMeSelectionPage> {
       final List<PersonEntity> result = [];
       for (final person in persons) {
         if ((person.data.email != null && person.data.email!.isNotEmpty) ||
-            (person.data.isHidden || person.data.isIgnored)) {
+            (person.data.isIgnored)) {
           continue;
         }
         result.add(person);
