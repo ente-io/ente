@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import "package:photos/generated/l10n.dart";
@@ -11,10 +10,11 @@ import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
+import 'package:photos/ui/viewer/gallery/component/group/type.dart';
 import 'package:photos/utils/separators_util.dart';
 
-class PhotoGridSizePickerPage extends StatelessWidget {
-  const PhotoGridSizePickerPage({super.key});
+class GalleryGroupTypePickerPage extends StatelessWidget {
+  const GalleryGroupTypePickerPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +24,7 @@ class PhotoGridSizePickerPage extends StatelessWidget {
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: S.of(context).photoGridSize,
+              title: S.of(context).groupBy,
             ),
             actionIcons: [
               IconButtonWidget(
@@ -75,26 +75,26 @@ class ItemsWidget extends StatefulWidget {
 }
 
 class _ItemsWidgetState extends State<ItemsWidget> {
-  late int currentGridSize;
+  late GroupType currentGroupType;
   List<Widget> items = [];
-  final List<int> gridSizes = [];
+  final groupTypes = GroupType.values
+      .where(
+        (type) => type != GroupType.size && type != GroupType.none,
+      )
+      .toList();
+
   @override
   void initState() {
-    currentGridSize = localSettings.getPhotoGridSize();
-    for (int gridSize = photoGridSizeMin;
-        gridSize <= photoGridSizeMax;
-        gridSize++) {
-      gridSizes.add(gridSize);
-    }
     super.initState();
+    currentGroupType = localSettings.getGalleryGroupType();
   }
 
   @override
   Widget build(BuildContext context) {
     items.clear();
-    for (int girdSize in gridSizes) {
+    for (final groupType in groupTypes) {
       items.add(
-        _menuItemForPicker(girdSize),
+        _menuItemForPicker(groupType),
       );
     }
     items = addSeparators(
@@ -110,26 +110,26 @@ class _ItemsWidgetState extends State<ItemsWidget> {
     );
   }
 
-  Widget _menuItemForPicker(int gridSize) {
+  Widget _menuItemForPicker(GroupType groupType) {
     return MenuItemWidget(
-      key: ValueKey(gridSize),
+      key: ValueKey(groupType.name),
       menuItemColor: getEnteColorScheme(context).fillFaint,
       captionedTextWidget: CaptionedTextWidget(
-        title: "$gridSize",
+        title: groupType.name,
       ),
-      trailingIcon: currentGridSize == gridSize ? Icons.check : null,
+      trailingIcon: currentGroupType == groupType ? Icons.check : null,
       alignCaptionedTextToLeft: true,
       isTopBorderRadiusRemoved: true,
       isBottomBorderRadiusRemoved: true,
       showOnlyLoadingState: true,
       onTap: () async {
-        await localSettings.setPhotoGridSize(gridSize).then(
+        await localSettings.setGalleryGroupType(groupType).then(
               (value) => setState(() {
-                currentGridSize = gridSize;
+                currentGroupType = groupType;
               }),
             );
         Bus.instance.fire(
-          ForceReloadHomeGalleryEvent("grid size changed"),
+          ForceReloadHomeGalleryEvent("group type changed"),
         );
       },
     );

@@ -325,7 +325,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m115(name) => "Wens ${name} een fijne verjaardag! 🎉";
 
   static String m116(count) =>
-      "${Intl.plural(count, other: '${count} jaar geleden')}";
+      "${Intl.plural(count, one: '${count} jaar geleden', other: '${count} jaar geleden')}";
 
   static String m117(name) => "Jij en ${name}";
 

@@ -12296,6 +12296,56 @@ class S {
     );
   }
 
+  /// `This week`
+  String get thisWeek {
+    return Intl.message(
+      'This week',
+      name: 'thisWeek',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Last week`
+  String get lastWeek {
+    return Intl.message(
+      'Last week',
+      name: 'lastWeek',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This month`
+  String get thisMonth {
+    return Intl.message(
+      'This month',
+      name: 'thisMonth',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This year`
+  String get thisYear {
+    return Intl.message(
+      'This year',
+      name: 'thisYear',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Group by`
+  String get groupBy {
+    return Intl.message(
+      'Group by',
+      name: 'groupBy',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Unable to generate face thumbnails`
   String get faceThumbnailGenerationFailed {
     return Intl.message(
@@ -12311,6 +12361,26 @@ class S {
     return Intl.message(
       'Unable to analyze file',
       name: 'fileAnalysisFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Layout`
+  String get layout {
+    return Intl.message(
+      'Layout',
+      name: 'layout',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Day`
+  String get day {
+    return Intl.message(
+      'Day',
+      name: 'day',
       desc: '',
       args: [],
     );
@@ -12349,6 +12419,7 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
       Locale.fromSubtags(languageCode: 'lt'),
       Locale.fromSubtags(languageCode: 'lv'),
       Locale.fromSubtags(languageCode: 'ml'),
+      Locale.fromSubtags(languageCode: 'ms'),
       Locale.fromSubtags(languageCode: 'nl'),
       Locale.fromSubtags(languageCode: 'no'),
       Locale.fromSubtags(languageCode: 'or'),
