@@ -1413,10 +1413,8 @@ class CollectionsService {
     if (splitResult.ownedByCurrentUser.isNotEmpty) {
       await _addToCollection(dstCollectionID, splitResult.ownedByCurrentUser);
     }
-    if (splitResult.ownedByOtherUsers.isNotEmpty) {
-      late final List<EnteFile> filesToCopy;
-      late final List<EnteFile> filesToAdd;
-      (filesToAdd, filesToCopy) = (await _splitFilesToAddAndCopy(
+    if (splitResult.ownedByOtherUsers.isNotEmpty && toCopy) {
+      final (filesToAdd, filesToCopy) = (await _splitFilesToAddAndCopy(
         splitResult.ownedByOtherUsers,
       ));
 
@@ -1426,9 +1424,7 @@ class CollectionsService {
         );
         await _addToCollection(dstCollectionID, filesToAdd);
       }
-      if (!toCopy) {
-        return;
-      }
+
       // group files by collectionID
       final Map<int, List<EnteFile>> filesByCollection = {};
       final Map<int, Set<int>> fileSeenByCollection = {};
