@@ -84,8 +84,6 @@ class GalleryGroups {
   List<({String groupID, String title})> get scrollbarDivisions =>
       _scrollbarDivisions;
 
-  /// Scrolls the gallery to the group containing the specified file based on its creation time.
-  /// Uses binary search to efficiently find the appropriate group.
   double? getOffsetOfFile(EnteFile file) {
     final creationTime = file.creationTime;
     if (creationTime == null) {
