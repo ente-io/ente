@@ -134,8 +134,7 @@ There are 2 possibilities:
 
 ## MinIO provisioning error
 
-You may encounter similar logs while trying to start the cluster if you are
-using the older command (provided by default in `quickstart.sh`):
+If you encounter similar logs while starting your Docker Compose cluster
 
 ```
 my-ente-minio-1 ->  | Waiting for minio...
