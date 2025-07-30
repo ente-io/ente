@@ -10,7 +10,6 @@ import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/events/compute_control_event.dart";
 import "package:photos/events/people_changed_event.dart";
-import "package:photos/main.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/service_locator.dart";
@@ -70,33 +69,31 @@ class MLService {
     _logger.info("client: $client");
 
     // Listen on ComputeController
-    if (!isProcessBg) {
-      Bus.instance.on<ComputeControlEvent>().listen((event) {
-        if (!flagService.hasGrantedMLConsent) {
-          return;
-        }
+    Bus.instance.on<ComputeControlEvent>().listen((event) {
+      if (!flagService.hasGrantedMLConsent) {
+        return;
+      }
 
-        _mlControllerStatus = event.shouldRun;
-        if (_mlControllerStatus) {
-          if (_shouldPauseIndexingAndClustering) {
-            _cancelPauseIndexingAndClustering();
-            _logger.info(
-              "MLController allowed running ML, faces indexing undoing previous pause",
-            );
-          } else {
-            _logger.info(
-              "MLController allowed running ML, faces indexing starting",
-            );
-          }
-          unawaited(runAllML());
+      _mlControllerStatus = event.shouldRun;
+      if (_mlControllerStatus) {
+        if (_shouldPauseIndexingAndClustering) {
+          _cancelPauseIndexingAndClustering();
+          _logger.info(
+            "MLController allowed running ML, faces indexing undoing previous pause",
+          );
         } else {
           _logger.info(
-            "MLController stopped running ML, faces indexing will be paused (unless it's fetching embeddings)",
+            "MLController allowed running ML, faces indexing starting",
           );
-          pauseIndexingAndClustering();
         }
-      });
-    }
+        unawaited(runAllML());
+      } else {
+        _logger.info(
+          "MLController stopped running ML, faces indexing will be paused (unless it's fetching embeddings)",
+        );
+        pauseIndexingAndClustering();
+      }
+    });
 
     _isInitialized = true;
     _logger.info('init done');
@@ -139,7 +136,7 @@ class MLService {
         );
         await clusterAllImages();
       }
-      if (!isProcessBg && _mlControllerStatus == true) {
+      if (_mlControllerStatus == true) {
         // refresh discover section
         magicCacheService.updateCache(forced: force).ignore();
         // refresh memories section
@@ -151,7 +148,7 @@ class MLService {
       if ((await mlDataDB.getUnclusteredFaceCount()) > 0) {
         await clusterAllImages();
       }
-      if (!isProcessBg && _mlControllerStatus == true) {
+      if (_mlControllerStatus == true) {
         // refresh discover section
         magicCacheService.updateCache().ignore();
         // refresh memories section (only runs if forced is true)
@@ -164,7 +161,7 @@ class MLService {
       _logger.severe("ML finished running");
       _isRunningML = false;
       computeController.releaseCompute(ml: true);
-      if (!isProcessBg) VideoPreviewService.instance.queueFiles();
+      VideoPreviewService.instance.queueFiles();
     }
   }
 

@@ -8,7 +8,6 @@ import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/compute_control_event.dart";
-import "package:photos/main.dart";
 import "package:thermal/thermal.dart";
 
 enum _ComputeRunState {
@@ -73,7 +72,7 @@ class ComputeController {
 
   bool requestCompute({bool ml = false, bool stream = false}) {
     _logger.info("Requesting compute: ml: $ml, stream: $stream");
-    if (!_isDeviceHealthy || !isProcessBg && !_canRunGivenUserInteraction()) {
+    if (!_isDeviceHealthy || !_canRunGivenUserInteraction()) {
       _logger.info("Device not healthy or user interacting, denying request.");
       return false;
     }
