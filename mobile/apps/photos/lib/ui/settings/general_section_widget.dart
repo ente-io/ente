@@ -13,7 +13,9 @@ import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import "package:photos/ui/growth/referral_screen.dart";
 import 'package:photos/ui/settings/advanced_settings_screen.dart';
 import 'package:photos/ui/settings/common_settings.dart';
+import "package:photos/ui/settings/gallery_settings_screen.dart";
 import "package:photos/ui/settings/language_picker.dart";
+import "package:photos/ui/settings/memories_settings_screen.dart";
 import "package:photos/ui/settings/notification_settings_screen.dart";
 import "package:photos/ui/settings/widget_settings_screen.dart";
 import 'package:photos/utils/navigation_util.dart';
@@ -33,6 +35,30 @@ class GeneralSectionWidget extends StatelessWidget {
   Widget _getSectionOptions(BuildContext context) {
     return Column(
       children: [
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).gallery,
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            _onGallerySettingsTapped(context);
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).memories,
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            _onMemoriesSettingsTapped(context);
+          },
+        ),
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
@@ -151,6 +177,22 @@ class GeneralSectionWidget extends StatelessWidget {
     routeToPage(
       context,
       const AdvancedSettingsScreen(),
+    );
+  }
+
+  void _onGallerySettingsTapped(BuildContext context) {
+    routeToPage(
+      context,
+      const GallerySettingsScreen(
+        fromGalleryLayoutSettingsCTA: false,
+      ),
+    );
+  }
+
+  void _onMemoriesSettingsTapped(BuildContext context) {
+    routeToPage(
+      context,
+      const MemoriesSettingsScreen(),
     );
   }
 }

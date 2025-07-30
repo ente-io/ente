@@ -63,17 +63,11 @@ It has no relation to Backblaze, Wasabi or Scaleway.
 Each bucket's endpoint, region, key and secret should be configured accordingly
 if using an external bucket.
 
-Additionally, you can enable SSL and path-style URL for specific buckets, which
-provides flexibility for storage. If this is not configured, top level
-configuration (`s3.are_local_buckets` and `s3.use_path_style_urls`) is used.
-
 A sample configuration for `b2-eu-cen` is provided, which can be used for other
 2 buckets as well:
 
 ```yaml
 b2-eu-cen:
-    are_local_buckets: true
-    use_path_style_urls: true
     key: <key>
     secret: <secret>
     endpoint: localhost:3200

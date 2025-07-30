@@ -785,6 +785,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "custom": MessageLookupByLibrary.simpleMessage("Custom"),
         "customEndpoint": m20,
         "darkTheme": MessageLookupByLibrary.simpleMessage("Dark"),
+        "day": MessageLookupByLibrary.simpleMessage("Day"),
         "dayToday": MessageLookupByLibrary.simpleMessage("Today"),
         "dayYesterday": MessageLookupByLibrary.simpleMessage("Yesterday"),
         "declineTrustInvite":
@@ -1114,6 +1115,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "grantPermission":
             MessageLookupByLibrary.simpleMessage("Grant permission"),
         "greenery": MessageLookupByLibrary.simpleMessage("The green life"),
+        "groupBy": MessageLookupByLibrary.simpleMessage("Group by"),
         "groupNearbyPhotos":
             MessageLookupByLibrary.simpleMessage("Group nearby photos"),
         "guestView": MessageLookupByLibrary.simpleMessage("Guest view"),
@@ -1214,8 +1216,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "language": MessageLookupByLibrary.simpleMessage("Language"),
         "lastTimeWithThem": m45,
         "lastUpdated": MessageLookupByLibrary.simpleMessage("Last updated"),
+        "lastWeek": MessageLookupByLibrary.simpleMessage("Last week"),
         "lastYearsTrip":
             MessageLookupByLibrary.simpleMessage("Last year\'s trip"),
+        "layout": MessageLookupByLibrary.simpleMessage("Layout"),
         "leave": MessageLookupByLibrary.simpleMessage("Leave"),
         "leaveAlbum": MessageLookupByLibrary.simpleMessage("Leave album"),
         "leaveFamily": MessageLookupByLibrary.simpleMessage("Leave family"),
@@ -2056,6 +2060,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "thisIsPersonVerificationId": m100,
         "thisIsYourVerificationId": MessageLookupByLibrary.simpleMessage(
             "This is your Verification ID"),
+        "thisMonth": MessageLookupByLibrary.simpleMessage("This month"),
+        "thisWeek": MessageLookupByLibrary.simpleMessage("This week"),
         "thisWeekThroughTheYears":
             MessageLookupByLibrary.simpleMessage("This week through the years"),
         "thisWeekXYearsAgo": m101,
@@ -2070,6 +2076,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "thisWillRemovePublicLinksOfAllSelectedQuickLinks":
             MessageLookupByLibrary.simpleMessage(
                 "This will remove public links of all selected quick links."),
+        "thisYear": MessageLookupByLibrary.simpleMessage("This year"),
         "throughTheYears": m102,
         "toEnableAppLockPleaseSetupDevicePasscodeOrScreen":
             MessageLookupByLibrary.simpleMessage(

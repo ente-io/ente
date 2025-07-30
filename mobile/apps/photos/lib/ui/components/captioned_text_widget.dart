@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/utils/string_util.dart";
 
 class CaptionedTextWidget extends StatelessWidget {
   final String title;
@@ -23,10 +24,12 @@ class CaptionedTextWidget extends StatelessWidget {
     final enteColorScheme = Theme.of(context).colorScheme.enteTheme.colorScheme;
     final enteTextTheme = Theme.of(context).colorScheme.enteTheme.textTheme;
 
+    final capitalized = title.capitalizeFirst();
+
     final List<Widget> children = [
       Flexible(
         child: Text(
-          title,
+          capitalized,
           style: textStyle ??
               (makeTextBold
                   ? enteTextTheme.bodyBold.copyWith(color: textColor)

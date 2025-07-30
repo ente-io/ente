@@ -7,8 +7,8 @@ description: Getting started with self-hosting Ente
 
 If you're looking to spin up Ente on your server, you are in the right place!
 
-Our entire source code
-([including the server](https://ente.io/blog/open-sourcing-our-server/)) is open
+Our entire source code,
+[including the server](https://ente.io/blog/open-sourcing-our-server/) is open
 source. This is the same code we use on production.
 
 For a quick preview, make sure your system meets the requirements mentioned
@@ -35,9 +35,12 @@ This creates a directory `my-ente` in the current working directory, prompts to
 start the cluster with needed containers after pulling the images required to
 run Ente.
 
-::: note Make sure to modify the default values in `compose.yaml` and
-`museum.yaml` if you wish to change endpoints, bucket configuration or server
-configuration. :::
+::: info
+
+Make sure to modify the default values in `compose.yaml` and `museum.yaml` if
+you wish to change endpoints, bucket configuration or server configuration.
+
+:::
 
 ## Try the web app
 

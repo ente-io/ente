@@ -16,6 +16,7 @@ import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/filter/db_filters.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
+import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
@@ -25,11 +26,13 @@ class HomeGalleryWidget extends StatefulWidget {
   final Widget? header;
   final Widget? footer;
   final SelectedFiles selectedFiles;
+  final GroupType? groupType;
 
   const HomeGalleryWidget({
     super.key,
     this.header,
     this.footer,
+    this.groupType,
     required this.selectedFiles,
   });
 
@@ -73,7 +76,6 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final double bottomSafeArea = MediaQuery.paddingOf(context).bottom;
     final gallery = Gallery(
       key: ValueKey(_shouldHideSharedItems),
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
@@ -127,10 +129,11 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
       selectedFiles: widget.selectedFiles,
       header: widget.header,
       footer: widget.footer,
-      // scrollSafe area -> SafeArea + Preserver more + Nav Bar buttons
-      scrollBottomSafeArea: bottomSafeArea + 180,
       reloadDebounceTime: const Duration(seconds: 2),
       reloadDebounceExecutionInterval: const Duration(seconds: 5),
+      galleryType: GalleryType.homepage,
+      groupType: widget.groupType,
+      showGallerySettingsCTA: true,
     );
     return GalleryFilesState(
       child: SelectionState(

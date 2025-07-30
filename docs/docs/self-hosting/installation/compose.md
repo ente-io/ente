@@ -45,6 +45,25 @@ cp example.yaml museum.yaml
 Change the values present in `.env` file along with `museum.yaml` file
 accordingly.
 
+::: tip
+
+Make sure to enter the correct values for the database and object storage.
+
+You should consider generating values for JWT and encryption keys for emails if
+you intend to use for long-term needs.
+
+You can do by running the following command inside `ente/server`, assuming you
+cloned the repository to `ente`:
+
+```shell
+# Change into the ente/server
+cd ente/server
+# Generate secrets
+go run tools/gen-random-keys/main.go
+```
+
+:::
+
 ## Step 3: Start the cluster
 
 Start the cluster by running the following command:
