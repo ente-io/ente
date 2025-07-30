@@ -2,7 +2,6 @@ import "dart:async";
 
 import "package:flutter/material.dart";
 import "package:photos/core/event_bus.dart";
-import "package:photos/events/hide_shared_items_from_home_gallery_event.dart";
 import "package:photos/events/memories_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
@@ -103,32 +102,6 @@ class _MemoriesSettingsScreenState extends State<MemoriesSettingsScreen> {
                               height: 24,
                             )
                           : const SizedBox(),
-                      MenuItemWidget(
-                        captionedTextWidget: CaptionedTextWidget(
-                          title: S.of(context).hideSharedItemsFromHomeGallery,
-                        ),
-                        menuItemColor: colorScheme.fillFaint,
-                        singleBorderRadius: 8,
-                        alignCaptionedTextToLeft: true,
-                        trailingWidget: ToggleSwitchWidget(
-                          value: () =>
-                              localSettings.hideSharedItemsFromHomeGallery,
-                          onChanged: () async {
-                            final prevSetting =
-                                localSettings.hideSharedItemsFromHomeGallery;
-                            await localSettings
-                                .setHideSharedItemsFromHomeGallery(
-                              !prevSetting,
-                            );
-
-                            Bus.instance.fire(
-                              HideSharedItemsFromHomeGalleryEvent(
-                                !prevSetting,
-                              ),
-                            );
-                          },
-                        ),
-                      ),
                     ],
                   ),
                 );
