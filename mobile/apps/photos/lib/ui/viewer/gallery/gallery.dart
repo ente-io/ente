@@ -83,7 +83,6 @@ class Gallery extends StatefulWidget {
   final GroupType? groupType;
   final bool disablePinnedGroupHeader;
   final bool disableVerticalPaddingForScrollbar;
-  final EnteFile? fileToJumpScrollTo;
 
   const Gallery({
     required this.asyncLoader,
@@ -111,7 +110,6 @@ class Gallery extends StatefulWidget {
     this.disablePinnedGroupHeader = false,
     this.galleryType,
     this.disableVerticalPaddingForScrollbar = false,
-    this.fileToJumpScrollTo,
     this.showGallerySettingsCTA = false,
     super.key,
   });
