@@ -2,6 +2,7 @@ import "dart:async";
 
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/constants.dart';
 
 import "package:photos/models/file/file.dart";
 import "package:photos/models/similar_files.dart";
@@ -12,7 +13,7 @@ import "package:photos/ui/common/loading_widget.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
-import "package:photos/ui/viewer/file/file_widget.dart";
+import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/standalone/data.dart";
@@ -37,7 +38,11 @@ class SimilarImagesPage extends StatefulWidget {
 }
 
 class _SimilarImagesPageState extends State<SimilarImagesPage> {
+  static const crossAxisCount = 4;
+  static const crossAxisSpacing = 4.0;
+
   final _logger = Logger("SimilarImagesPage");
+  bool _isDisposed = false;
 
   SimilarImagesPageState _pageState = SimilarImagesPageState.setup;
   double _distanceThreshold = 0.04; // Default value
@@ -51,6 +56,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
 
   @override
   void dispose() {
+    _isDisposed = true;
     super.dispose();
   }
 
@@ -133,6 +139,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                   max: 0.15,
                   divisions: 14,
                   onChanged: (value) {
+                    if (_isDisposed) return;
                     setState(() {
                       _distanceThreshold = (value * 100).round() / 100;
                     });
@@ -202,6 +209,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
               labelText: "Try Again", // TODO: lau: extract string
               buttonType: ButtonType.secondary,
               onTap: () async {
+                if (_isDisposed) return;
                 setState(() {
                   _pageState = SimilarImagesPageState.setup;
                 });
@@ -212,43 +220,49 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       );
     }
 
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: getEnteColorScheme(context).fillFaint,
-            border: Border(
-              bottom: BorderSide(
-                color: getEnteColorScheme(context).strokeFaint,
-                width: 1,
+    return ListView.builder(
+      itemCount: _similarFilesList.length + 1, // +1 for header
+      itemBuilder: (context, index) {
+        if (index == 0) {
+          // Header item
+          return Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: getEnteColorScheme(context).fillFaint,
+              border: Border(
+                bottom: BorderSide(
+                  color: getEnteColorScheme(context).strokeFaint,
+                  width: 1,
+                ),
               ),
             ),
-          ),
-          child: Column(
-            children: [
-              Text(
-                "Found ${_similarFilesList.length} groups of similar images", // TODO: lau: extract string
-                style: getEnteTextTheme(context).bodyBold,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                "Threshold: ${_distanceThreshold.toStringAsFixed(2)}", // TODO: lau: extract string
-                style: getEnteTextTheme(context).mini.copyWith(
-                      color: getEnteColorScheme(context).textMuted,
-                    ),
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: _getGridView(),
-        ),
-      ],
+            child: Column(
+              children: [
+                Text(
+                  "Found ${_similarFilesList.length} groups of similar images", // TODO: lau: extract string
+                  style: getEnteTextTheme(context).bodyBold,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  "Threshold: ${_distanceThreshold.toStringAsFixed(2)}", // TODO: lau: extract string
+                  style: getEnteTextTheme(context).mini.copyWith(
+                        color: getEnteColorScheme(context).textMuted,
+                      ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        // Similar files groups (index - 1 because first item is header)
+        final similarFiles = _similarFilesList[index - 1];
+        return _buildSimilarFilesGroup(similarFiles);
+      },
     );
   }
 
   Future<void> _findSimilarImages() async {
+    if (_isDisposed) return;
     setState(() {
       _pageState = SimilarImagesPageState.loading;
     });
@@ -259,11 +273,14 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       _logger.info(
         "Found ${similarFiles.length} groups of similar images",
       );
+
+      if (_isDisposed) return;
       _sortSimilarFiles();
       _logger.fine(
         "Sorted similar files by $_sortKey",
       );
 
+      if (_isDisposed) return;
       setState(() {
         _similarFilesList = similarFiles;
         _pageState = SimilarImagesPageState.results;
@@ -272,9 +289,11 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       return;
     } catch (e, s) {
       _logger.severe("Failed to get similar files", e, s);
+      if (_isDisposed) return;
       if (flagService.internalUser) {
         await showGenericErrorDialog(context: context, error: e);
       }
+      if (_isDisposed) return;
       setState(() {
         _pageState = SimilarImagesPageState.setup;
       });
@@ -296,88 +315,65 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             .sort((a, b) => b.files.length.compareTo(a.files.length));
         break;
     }
+    if (_isDisposed) return;
     setState(() {});
   }
 
-  Widget _getGridView() {
-    return ListView.builder(
-      itemCount: _similarFilesList.length,
-      itemBuilder: (context, index) {
-        final similarFiles = _similarFilesList[index];
-        return _buildSimilarFilesGroup(similarFiles, index);
-      },
-    );
-  }
-
-  Widget _buildSimilarFilesGroup(SimilarFiles similarFiles, int index) {
-    final colorScheme = getEnteColorScheme(context);
-
-    return Container(
-      margin: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        border: Border.all(color: colorScheme.strokeFaint),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: colorScheme.fillFaint,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(8),
-                topRight: Radius.circular(8),
-              ),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "${similarFiles.files.length} similar images", // TODO: lau: extract string
-                        style: getEnteTextTheme(context).bodyBold,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        "Total size: ${formatBytes(similarFiles.totalSize)}", // TODO: lau: extract string
-                        style: getEnteTextTheme(context).mini,
-                      ),
-                      Text(
-                        "Distance: ${similarFiles.furthestDistance.toStringAsFixed(3)}", // TODO: lau: extract string
-                        style: getEnteTextTheme(context).mini.copyWith(
-                              color: colorScheme.textMuted,
-                            ),
-                      ),
-                    ],
-                  ),
+  Widget _buildSimilarFilesGroup(SimilarFiles similarFiles) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(2, 4, 2, 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "${similarFiles.files.length} similar images • ${formatBytes(similarFiles.totalSize)}", // TODO: lau: extract string
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      "Distance: ${similarFiles.furthestDistance.toStringAsFixed(3)}", // TODO: lau: extract string
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: getEnteColorScheme(context).textMuted,
+                            fontSize: 12,
+                          ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          GridView.builder(
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: crossAxisSpacing / 2),
+          child: GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(8),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 4,
-              mainAxisSpacing: 4,
-            ),
-            itemCount: similarFiles.files.length,
-            itemBuilder: (context, fileIndex) {
+            itemBuilder: (context, index) {
               return _buildFile(
                 context,
-                similarFiles.files[fileIndex],
+                similarFiles.files[index],
                 similarFiles.files,
-                fileIndex,
+                index,
               );
             },
+            itemCount: similarFiles.files.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              crossAxisSpacing: crossAxisSpacing,
+              childAspectRatio: 0.75,
+            ),
+            padding: const EdgeInsets.all(0),
           ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 16), // Add spacing between groups
+      ],
     );
   }
 
@@ -401,21 +397,29 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
           ),
         );
       },
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(4),
-          border: Border.all(
-            color: getEnteColorScheme(context).strokeFaint,
-            width: 1,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            height: (MediaQuery.of(context).size.width -
+                    (crossAxisSpacing * crossAxisCount)) /
+                crossAxisCount,
+            child: Hero(
+              tag: "similar_images_" + file.tag,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: ThumbnailWidget(
+                  file,
+                  diskLoadDeferDuration: galleryThumbnailDiskLoadDeferDuration,
+                  serverLoadDeferDuration:
+                      galleryThumbnailServerLoadDeferDuration,
+                  shouldShowLivePhotoOverlay: true,
+                  key: Key("similar_images_" + file.tag),
+                ),
+              ),
+            ),
           ),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: FileWidget(
-            file,
-            tagPrefix: "similar_images",
-          ),
-        ),
+        ],
       ),
     );
   }
@@ -462,6 +466,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         ),
       ),
       onSelected: (int index) {
+        if (_isDisposed) return;
         setState(() {
           _sortKey = SortKey.values[index];
         });
