@@ -91,7 +91,7 @@ class SmartAlbumConfig {
 
   factory SmartAlbumConfig.fromJson(
     Map<String, dynamic> json,
-    String remoteId,
+    String id,
     int updatedAt,
   ) {
     final personIDs = Set<String>.from(json["person_ids"] as List? ?? []);
@@ -107,7 +107,7 @@ class SmartAlbumConfig {
     );
 
     return SmartAlbumConfig(
-      id: remoteId,
+      id: id,
       collectionId: json["collection_id"] as int,
       personIDs: personIDs,
       infoMap: infoMap,
