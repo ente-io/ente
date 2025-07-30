@@ -15,7 +15,7 @@ class GroupHeaderWidget extends StatefulWidget {
   final List<EnteFile> filesInGroup;
   final SelectedFiles? selectedFiles;
   final bool showSelectAll;
-  final bool showGallerySettingCTA;
+  final bool showGalleryLayoutSettingCTA;
   final bool showTrailingIcons;
   final bool isPinnedHeader;
   final bool fadeInTrailingIcons;
@@ -27,7 +27,7 @@ class GroupHeaderWidget extends StatefulWidget {
     required this.filesInGroup,
     required this.selectedFiles,
     required this.showSelectAll,
-    this.showGallerySettingCTA = false,
+    this.showGalleryLayoutSettingCTA = false,
     this.height,
     this.showTrailingIcons = true,
     this.isPinnedHeader = false,
@@ -168,10 +168,10 @@ class _GroupHeaderWidgetState extends State<GroupHeaderWidget> {
                       },
                     )
                   : const SizedBox.shrink(),
-          widget.showGallerySettingCTA
+          widget.showGalleryLayoutSettingCTA
               ? const SizedBox(width: 8)
               : const SizedBox.shrink(),
-          widget.showGallerySettingCTA
+          widget.showGalleryLayoutSettingCTA
               ? widget.showTrailingIcons
                   ? GestureDetector(
                       onTap: () => _showLayoutSettingsOverflowMenu(context),

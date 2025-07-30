@@ -851,7 +851,8 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
                           .galleryGroups.groupIDToFilesMap[currentGroupId!]!,
                       selectedFiles: widget.selectedFiles,
                       showSelectAll: widget.showSelectAll,
-                      showGallerySettingCTA: widget.showGallerySettingsCTA,
+                      showGalleryLayoutSettingCTA:
+                          widget.showGallerySettingsCTA,
                       showTrailingIcons: !inUse,
                       isPinnedHeader: true,
                       fadeInTrailingIcons: fadeInTrailingIcons,

@@ -207,7 +207,7 @@ class GalleryGroups {
                   filesInGroup: groupIDToFilesMap[groupID]!,
                   selectedFiles: selectedFiles,
                   showSelectAll: showSelectAll && !limitSelectionToOne,
-                  showGallerySettingCTA:
+                  showGalleryLayoutSettingCTA:
                       rowIndex == 0 && showGallerySettingsCTA,
                 );
               } else {
