@@ -1,5 +1,5 @@
 // Modified Scrollbar that accepts a ValueNotifier<bool> to indicate if the
-// scrollbar is in use
+// scrollbar is in use plus with modified scrollbar theme.
 
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be

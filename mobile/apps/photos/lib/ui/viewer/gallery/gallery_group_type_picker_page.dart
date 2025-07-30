@@ -85,8 +85,8 @@ class _ItemsWidgetState extends State<ItemsWidget> {
 
   @override
   void initState() {
-    currentGroupType = localSettings.getGalleryGroupType();
     super.initState();
+    currentGroupType = localSettings.getGalleryGroupType();
   }
 
   @override

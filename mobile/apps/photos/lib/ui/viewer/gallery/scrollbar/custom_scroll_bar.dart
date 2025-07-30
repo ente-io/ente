@@ -31,20 +31,6 @@ class CustomScrollBar extends StatefulWidget {
   State<CustomScrollBar> createState() => _CustomScrollBarState();
 }
 
-/*
-Create a new variable that stores Position to title mapping which will be used
-to show scrollbar divisions. 
-
-List of scrollbar divisions can be obtained from galleryGroups.scrollbarDivisions.
-And the scroll positions of each division can be obtained from 
-galleryGroups.groupIdToScrollOffsetMap[groupID] where groupID.
-
-Can ignore adding the top offset of the header for accuracy. 
-
-Get the height of the scrollbar and create a normalized position for each
-division and populate position to title mapping. 
-*/
-
 class _CustomScrollBarState extends State<CustomScrollBar> {
   final _logger = Logger("CustomScrollBar2");
   final _scrollbarKey = GlobalKey();
@@ -54,7 +40,7 @@ class _CustomScrollBarState extends State<CustomScrollBar> {
   late bool _showScrollbarDivisions;
   late bool _showThumb;
 
-  // Scrollbar's heigh is not fixed by default. If the scrollable is short
+  // Scrollbar's thumb height is not fixed by default. If the scrollable is short
   // enough, the scrollbar's height can go above the minimum length.
   // In our case, we only depend on this value for showing scrollbar divisions,
   // which we do not show unless scrollable is long enough. So we can safely
