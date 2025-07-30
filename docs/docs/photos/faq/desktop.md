@@ -37,17 +37,3 @@ be specific to your distro (e.g. `xdg-desktop-menu forceupdate`).
 >
 > If you're using an AppImage and not seeing the icon, you'll need to
 > [enable AppImage desktop integration](/photos/troubleshooting/desktop-install/#appimage-desktop-integration).
-
-### Application reporting offline despite Internet connectivity
-
-Due to unreliability of usage of `navigator.onLine` in Linux, the app may report that you are offline, even though the internet connection is functional.
-
-You can resolve the issue by adding a dummy network interface using the following command:
-
-```shell
-ip link add dummy0 type dummy
-ip addr add 10.10.10.1/24 dev dummy0
-ip link set dummy0 up
-```
-
-Once the interface is up, Ente correctly detects that the system is online.
