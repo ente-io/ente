@@ -40,7 +40,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   final _logger = Logger("SimilarImagesPage");
 
   SimilarImagesPageState _pageState = SimilarImagesPageState.setup;
-  double _distanceThreshold = 0.05; // Default value
+  double _distanceThreshold = 0.04; // Default value
   List<SimilarFiles> _similarFilesList = [];
   SortKey _sortKey = SortKey.size;
 
