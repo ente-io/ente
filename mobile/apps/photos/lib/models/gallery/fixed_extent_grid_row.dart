@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
+// Based on code from https://github.com/deckerst/aves
+// Copyright (c) 2020-2023 Thibault Deckers and contributors
+// Licensed under BSD-3-Clause License
+
 class FixedExtentGridRow extends MultiChildRenderObjectWidget {
   final double width, height, spacing;
   final TextDirection textDirection;

@@ -7,6 +7,10 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import "package:photos/models/gallery/fixed_extent_section_layout.dart";
 
+// Based on code from https://github.com/deckerst/aves
+// Copyright (c) 2020-2023 Thibault Deckers and contributors
+// Licensed under BSD-3-Clause License
+
 // Using a Single SliverVariedExtentList or Using a combination where there are
 // multiple sliver delegate builders in a CustomScrollView doesn't scale.
 
@@ -21,8 +25,6 @@ import "package:photos/models/gallery/fixed_extent_section_layout.dart";
 
 // https://github.com/flutter/flutter/issues/168442
 // https://github.com/flutter/flutter/issues/95028
-
-// Based on code from https://github.com/deckerst/aves
 
 // A custom implementation of SliverMultiBoxAdaptorWidget
 // adapted from SliverFixedExtentBoxAdaptor. Optimizations in layout solves
