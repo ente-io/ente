@@ -1,7 +1,7 @@
 import "dart:async";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
-import "package:photos/models/gallery/gallery_sections.dart";
+import "package:photos/models/gallery/gallery_groups.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import "package:photos/ui/viewer/gallery/scrollbar/scroll_bar_with_use_notifier.dart";

@@ -108,16 +108,6 @@ class GalleryGroups {
     }
 
     return scrollOffset;
-
-    // scrollController.animateTo(
-    //   scrollOffset,
-    //   duration: const Duration(milliseconds: 300),
-    //   curve: Curves.easeOutExpo,
-    // );
-
-    // scrollController.jumpTo(
-    //   scrollOffset,
-    // );
   }
 
   /// Uses binary search to find the group ID that contains the given creation time.
@@ -299,15 +289,11 @@ class GalleryGroups {
     _logger.info(
       "Built group layouts in ${stopwatch.elapsedMilliseconds} ms",
     );
-    print(
-      "Built group layouts in ${stopwatch.elapsedMilliseconds} ms",
-    );
     stopwatch.stop();
 
     return groupLayouts;
   }
 
-// TODO: compute this in isolate
   void _buildGroups() {
     final stopwatch = Stopwatch()..start();
 
@@ -340,9 +326,6 @@ class GalleryGroups {
     }
 
     _logger.info(
-      "Built ${_groupIds.length} groups for group type ${groupType.name} in ${stopwatch.elapsedMilliseconds} ms",
-    );
-    print(
       "Built ${_groupIds.length} groups for group type ${groupType.name} in ${stopwatch.elapsedMilliseconds} ms",
     );
     stopwatch.stop();
