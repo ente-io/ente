@@ -23,7 +23,7 @@ void callbackDispatcher() {
         try {
           BgTaskUtils.$.info('Task started $tlog');
           await runBackgroundTask(taskName, tlog).timeout(
-            Platform.isIOS ? kBGTaskTimeout : const Duration(minutes: 15),
+            Platform.isIOS ? kBGTaskTimeout : const Duration(hours: 1),
             onTimeout: () async {
               BgTaskUtils.$.warning(
                 "TLE, committing seppuku for taskID: $taskName",
