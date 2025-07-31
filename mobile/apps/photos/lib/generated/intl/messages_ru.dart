@@ -322,7 +322,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m115(name) => "Поздравляем ${name} с днем ​​рождения! 🎉";
 
   static String m116(count) =>
-      "${Intl.plural(count, one: '${count} год назад', other: '${count} лет назад')}";
+      "${Intl.plural(count, one: '${count} год назад', few: '${count} года назад', other: '${count} лет назад')}";
 
   static String m117(name) => "Вы и ${name}";
 
@@ -1006,6 +1006,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Лицо ещё не кластеризовано. Пожалуйста, попробуйте позже"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Распознавание лиц"),
+        "faceThumbnailGenerationFailed": MessageLookupByLibrary.simpleMessage(
+            "Не удалось создать миниатюры лиц"),
         "faces": MessageLookupByLibrary.simpleMessage("Лица"),
         "failed": MessageLookupByLibrary.simpleMessage("Не удалось"),
         "failedToApplyCode":
@@ -1042,6 +1044,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "feastingWithThem": m34,
         "feedback": MessageLookupByLibrary.simpleMessage("Обратная связь"),
         "file": MessageLookupByLibrary.simpleMessage("Файл"),
+        "fileAnalysisFailed": MessageLookupByLibrary.simpleMessage(
+            "Не удалось проанализировать файл"),
         "fileFailedToSaveToGallery": MessageLookupByLibrary.simpleMessage(
             "Не удалось сохранить файл в галерею"),
         "fileInfoAddDescHint":

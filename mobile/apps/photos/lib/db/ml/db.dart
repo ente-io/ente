@@ -1359,7 +1359,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     final db = await instance.asyncDB;
     const String sql = '''
       DELETE FROM $faceCacheTable
-      WHERE $personOrClusterIdColumn = ?'
+      WHERE $personOrClusterIdColumn = ?
     ''';
     final List<Object?> params = [personOrClusterID];
     await db.execute(sql, params);

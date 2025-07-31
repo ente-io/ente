@@ -18,6 +18,7 @@ import "package:photos/services/memories_cache_service.dart";
 import "package:photos/services/permission/service.dart";
 import "package:photos/services/remote/cache/remote_cache.dart";
 import "package:photos/services/remote/trash_service.dart";
+import "package:photos/services/smart_albums_service.dart";
 import "package:photos/services/smart_memories_service.dart";
 import "package:photos/services/storage_bonus_service.dart";
 import "package:photos/services/update_service.dart";
@@ -196,4 +197,10 @@ DownloadManager get downloadManager {
     ServiceLocator.instance.nonEnteDio,
   );
   return _downloadManager!;
+}
+
+SmartAlbumsService? _smartAlbumsService;
+SmartAlbumsService get smartAlbumsService {
+  _smartAlbumsService ??= SmartAlbumsService();
+  return _smartAlbumsService!;
 }

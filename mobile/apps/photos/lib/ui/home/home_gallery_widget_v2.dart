@@ -18,6 +18,7 @@ import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart";
 import "package:photos/services/remote/localMapper/merge.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
+import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
@@ -27,11 +28,13 @@ class HomeGalleryWidgetV2 extends StatefulWidget {
   final Widget? header;
   final Widget? footer;
   final SelectedFiles selectedFiles;
+  final GroupType? groupType;
 
   const HomeGalleryWidgetV2({
     super.key,
     this.header,
     this.footer,
+    this.groupType,
     required this.selectedFiles,
   });
 
@@ -133,10 +136,11 @@ class _HomeGalleryWidgetV2State extends State<HomeGalleryWidgetV2> {
       selectedFiles: widget.selectedFiles,
       header: widget.header,
       footer: widget.footer,
-      // scrollSafe area -> SafeArea + Preserver more + Nav Bar buttons
-      scrollBottomSafeArea: bottomSafeArea + 180,
       reloadDebounceTime: const Duration(seconds: 2),
       reloadDebounceExecutionInterval: const Duration(seconds: 5),
+      galleryType: GalleryType.homepage,
+      groupType: widget.groupType,
+      showGallerySettingsCTA: true,
     );
     return GalleryFilesState(
       child: SelectionState(

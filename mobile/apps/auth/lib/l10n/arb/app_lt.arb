@@ -173,6 +173,7 @@
   "invalidQRCode": "Netinkamas QR kodas.",
   "noRecoveryKeyTitle": "Neturite atkūrimo rakto?",
   "enterEmailHint": "Įveskite savo el. pašto adresą",
+  "enterNewEmailHint": "Įveskite savo naują el. pašto adresą",
   "invalidEmailTitle": "Netinkamas el. pašto adresas",
   "invalidEmailMessage": "Įveskite tinkamą el. pašto adresą.",
   "deleteAccount": "Ištrinti paskyrą",

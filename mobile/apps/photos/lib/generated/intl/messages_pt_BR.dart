@@ -586,6 +586,21 @@ class MessageLookup extends MessageLookupByLibrary {
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Promoção Black Friday"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
+        "cLDesc1": MessageLookupByLibrary.simpleMessage(
+            "De volta na transmissão de vídeo beta, e trabalhando em envios e downloads retomáveis, nós aumentamos o limite de envio de arquivos para 10 GB. Isso está disponível em ambos a versão móvel e a versão para desktop."),
+        "cLDesc2": MessageLookupByLibrary.simpleMessage(
+            "Envios de fundo agora são suportados no iOS também, para assemelhar-se aos dispositivos Android. Não precisa abrir o aplicativo para salvar em segurança as fotos e vídeos mais recentes."),
+        "cLDesc3": MessageLookupByLibrary.simpleMessage(
+            "Fizemos melhorias significantes para a experiência de memórias, incluindo reprodução automática, deslizar para a próxima memória e mais."),
+        "cLDesc4": MessageLookupByLibrary.simpleMessage(
+            "Ao lado de outras melhorias, agora ficou mais fácil para detectar rostos, fornecer comentários em rostos similares, e adicionar/remover rostos de uma foto."),
+        "cLTitle1": MessageLookupByLibrary.simpleMessage(
+            "Enviando arquivos de vídeo grandes"),
+        "cLTitle2": MessageLookupByLibrary.simpleMessage("Envio de fundo"),
+        "cLTitle3":
+            MessageLookupByLibrary.simpleMessage("Reproduzir memórias auto."),
+        "cLTitle4": MessageLookupByLibrary.simpleMessage(
+            "Reconhecimento Facial Melhorado"),
         "cachedData":
             MessageLookupByLibrary.simpleMessage("Dados armazenados em cache"),
         "calculating": MessageLookupByLibrary.simpleMessage("Calculando..."),
@@ -1003,6 +1018,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Rosto não agrupado ainda, volte aqui mais tarde"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Reconhecimento facial"),
+        "faceThumbnailGenerationFailed": MessageLookupByLibrary.simpleMessage(
+            "Incapaz de gerar miniaturas de rosto"),
         "faces": MessageLookupByLibrary.simpleMessage("Rostos"),
         "failed": MessageLookupByLibrary.simpleMessage("Falhou"),
         "failedToApplyCode":
@@ -1040,6 +1057,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "feastingWithThem": m34,
         "feedback": MessageLookupByLibrary.simpleMessage("Feedback"),
         "file": MessageLookupByLibrary.simpleMessage("Arquivo"),
+        "fileAnalysisFailed":
+            MessageLookupByLibrary.simpleMessage("Incapaz de analisar rosto"),
         "fileFailedToSaveToGallery": MessageLookupByLibrary.simpleMessage(
             "Falhou ao salvar arquivo na galeria"),
         "fileInfoAddDescHint":

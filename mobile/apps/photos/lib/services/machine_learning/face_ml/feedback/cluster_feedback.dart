@@ -330,6 +330,10 @@ class ClusterFeedbackService<T> {
       for (final person in personsMap.values) {
         final personID = person.remoteID;
         final personClusters = personToClusterIDs[personID] ?? {};
+        if (person.data.isIgnored) {
+          personIdToOtherPersonClusterIDs[personID] = personClusters;
+          continue;
+        }
         int biggestClusterSize = 0;
         String biggestClusterID = '';
         final Set<String> otherPersonClusterIDs = {};

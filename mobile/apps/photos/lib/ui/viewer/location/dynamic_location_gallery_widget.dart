@@ -105,7 +105,7 @@ class _DynamicLocationGalleryWidgetState
                     },
                     tagPrefix: widget.tagPrefix,
                     enableFileGrouping: false,
-                    showSelectAllByDefault: false,
+                    showSelectAll: false,
                   ),
                 ),
               );

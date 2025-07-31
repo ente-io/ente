@@ -191,6 +191,9 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
         _logger.severe(
           "No cover face for person: ${widget.personId} or cluster ${widget.clusterID} and fileID ${fileForFaceCrop.uploadedFileID!}",
         );
+        await checkRemoveCachedFaceIDForPersonOrClusterId(
+          personOrClusterId,
+        );
         return null;
       }
       final cropMap = await getCachedFaceCrops(

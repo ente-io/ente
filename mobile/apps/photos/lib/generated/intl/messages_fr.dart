@@ -597,6 +597,22 @@ class MessageLookup extends MessageLookupByLibrary {
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Offre Black Friday"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
+        "cLDesc1": MessageLookupByLibrary.simpleMessage(
+            "Derrière la version beta du streaming vidéo, tout en travaillant sur la reprise des chargements et téléchargements, nous avons maintenant augmenté la limite de téléchargement de fichiers à 10 Go. Ceci est maintenant disponible dans les applications bureau et mobiles."),
+        "cLDesc2": MessageLookupByLibrary.simpleMessage(
+            "Les chargements en arrière-plan sont maintenant pris en charge sur iOS, en plus des appareils Android. Inutile d\'ouvrir l\'application pour sauvegarder vos dernières photos et vidéos."),
+        "cLDesc3": MessageLookupByLibrary.simpleMessage(
+            "Nous avons apporté des améliorations significatives à l\'expérience des souvenirs, comme la lecture automatique, la glisse vers le souvenir suivant et bien plus encore."),
+        "cLDesc4": MessageLookupByLibrary.simpleMessage(
+            "Avec un tas d\'améliorations sous le capot, il est maintenant beaucoup plus facile de voir tous les visages détectés, mettre des commentaires sur des visages similaires, et ajouter/supprimer des visages depuis une seule photo."),
+        "cLTitle1": MessageLookupByLibrary.simpleMessage(
+            "Envoi de gros fichiers vidéo"),
+        "cLTitle2":
+            MessageLookupByLibrary.simpleMessage("Charger en arrière-plan"),
+        "cLTitle3": MessageLookupByLibrary.simpleMessage(
+            "Lecture automatique des souvenirs"),
+        "cLTitle4": MessageLookupByLibrary.simpleMessage(
+            "Amélioration de la reconnaissance faciale"),
         "cachedData":
             MessageLookupByLibrary.simpleMessage("Données mises en cache"),
         "calculating":
@@ -1029,6 +1045,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ce visage n\'a pas encore été regroupé, veuillez revenir plus tard"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Reconnaissance faciale"),
+        "faceThumbnailGenerationFailed": MessageLookupByLibrary.simpleMessage(
+            "Impossible de créer des miniatures de visage"),
         "faces": MessageLookupByLibrary.simpleMessage("Visages"),
         "failed": MessageLookupByLibrary.simpleMessage("Échec"),
         "failedToApplyCode": MessageLookupByLibrary.simpleMessage(
@@ -1066,6 +1084,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "feastingWithThem": m34,
         "feedback": MessageLookupByLibrary.simpleMessage("Commentaires"),
         "file": MessageLookupByLibrary.simpleMessage("Fichier"),
+        "fileAnalysisFailed": MessageLookupByLibrary.simpleMessage(
+            "Impossible d\'analyser le fichier"),
         "fileFailedToSaveToGallery": MessageLookupByLibrary.simpleMessage(
             "Échec de l\'enregistrement dans la galerie"),
         "fileInfoAddDescHint":

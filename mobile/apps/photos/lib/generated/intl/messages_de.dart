@@ -591,6 +591,22 @@ class MessageLookup extends MessageLookupByLibrary {
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Black-Friday-Aktion"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
+        "cLDesc1": MessageLookupByLibrary.simpleMessage(
+            "Zusammen mit der Beta-Version des Video-Streamings und der Arbeit an wiederaufnehmbarem Hoch- und Herunterladen haben wir jetzt das Limit für das Hochladen von Dateien auf 10 GB erhöht. Dies ist ab sofort sowohl in den Desktop- als auch Mobil-Apps verfügbar."),
+        "cLDesc2": MessageLookupByLibrary.simpleMessage(
+            "Das Hochladen im Hintergrund wird jetzt auch unter iOS unterstützt, zusätzlich zu Android-Geräten. Es ist nicht mehr notwendig, die App zu öffnen, um die letzten Fotos und Videos zu sichern."),
+        "cLDesc3": MessageLookupByLibrary.simpleMessage(
+            "Wir haben deutliche Verbesserungen an der Darstellung von Erinnerungen vorgenommen, u.a. automatische Wiedergabe, Wischen zur nächsten Erinnerung und vieles mehr."),
+        "cLDesc4": MessageLookupByLibrary.simpleMessage(
+            "Zusammen mit einer Reihe von Verbesserungen unter der Haube ist es jetzt viel einfacher, alle erkannten Gesichter zu sehen, Feedback zu ähnlichen Gesichtern geben und Gesichter für ein einzelnes Foto hinzuzufügen oder zu entfernen."),
+        "cLTitle1": MessageLookupByLibrary.simpleMessage(
+            "Lade große Videodateien hoch"),
+        "cLTitle2":
+            MessageLookupByLibrary.simpleMessage("Hochladen im Hintergrund"),
+        "cLTitle3": MessageLookupByLibrary.simpleMessage(
+            "Automatische Wiedergabe von Erinnerungen"),
+        "cLTitle4": MessageLookupByLibrary.simpleMessage(
+            "Verbesserte Gesichtserkennung"),
         "cachedData": MessageLookupByLibrary.simpleMessage("Daten im Cache"),
         "calculating":
             MessageLookupByLibrary.simpleMessage("Wird berechnet..."),
@@ -1012,6 +1028,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Gesicht ist noch nicht gruppiert, bitte komm später zurück"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Gesichtserkennung"),
+        "faceThumbnailGenerationFailed": MessageLookupByLibrary.simpleMessage(
+            "Vorschaubilder konnten nicht erstellt werden"),
         "faces": MessageLookupByLibrary.simpleMessage("Gesichter"),
         "failed": MessageLookupByLibrary.simpleMessage("Fehlgeschlagen"),
         "failedToApplyCode": MessageLookupByLibrary.simpleMessage(
@@ -1048,6 +1066,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "feastingWithThem": m34,
         "feedback": MessageLookupByLibrary.simpleMessage("Rückmeldung"),
         "file": MessageLookupByLibrary.simpleMessage("Datei"),
+        "fileAnalysisFailed": MessageLookupByLibrary.simpleMessage(
+            "Datei konnte nicht analysiert werden"),
         "fileFailedToSaveToGallery": MessageLookupByLibrary.simpleMessage(
             "Fehler beim Speichern der Datei in der Galerie"),
         "fileInfoAddDescHint":

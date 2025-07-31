@@ -7,6 +7,8 @@ import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/selected_people.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/collections/collection_action_sheet.dart";
 import "package:photos/ui/components/bottom_action_bar/selection_action_button_widget.dart";
 import "package:photos/ui/viewer/people/person_cluster_suggestion.dart";
 import "package:photos/ui/viewer/people/save_or_edit_person.dart";
@@ -73,6 +75,8 @@ class _PeopleSelectionActionWidgetState
     final selectedClusterIds = _getSelectedClusterIds();
     final onlyOnePerson =
         selectedPersonIds.length == 1 && selectedClusterIds.isEmpty;
+    final onlyPersonSelected =
+        selectedPersonIds.isNotEmpty && selectedClusterIds.isEmpty;
     final onePersonAndClusters =
         selectedPersonIds.length == 1 && selectedClusterIds.isNotEmpty;
     final anythingSelected =
@@ -116,6 +120,19 @@ class _PeopleSelectionActionWidgetState
         icon: Icons.remove_outlined,
         onTap: _onResetPerson,
         shouldShow: onlyOnePerson,
+      ),
+    );
+    items.add(
+      SelectionActionButton(
+        labelText: S.of(context).autoAddToAlbum,
+        iconWidget: Image.asset(
+          "assets/auto-add-people.png",
+          width: 24,
+          height: 24,
+          color: EnteTheme.isDark(context) ? Colors.white : Colors.black,
+        ),
+        onTap: _autoAddToAlbum,
+        shouldShow: onlyPersonSelected,
       ),
     );
 
@@ -178,6 +195,17 @@ class _PeopleSelectionActionWidgetState
     await routeToPage(
       context,
       PersonReviewClusterSuggestion(person),
+    );
+    widget.selectedPeople.clearAll();
+  }
+
+  Future<void> _autoAddToAlbum() async {
+    final selectedPersonIds = _getSelectedPersonIds();
+    if (selectedPersonIds.isEmpty) return;
+    showCollectionActionSheet(
+      context,
+      selectedPeople: selectedPersonIds,
+      actionType: CollectionActionType.autoAddPeople,
     );
     widget.selectedPeople.clearAll();
   }

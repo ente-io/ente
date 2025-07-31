@@ -78,6 +78,9 @@ used for Compose and quickstart for ease of use.)
 
 ### Database
 
+The `db` section is used for configuring database connectivity. Ensure you
+provide correct credentials for proper connectivity within Museum.
+
 | Variable      | Description                | Default     |
 | ------------- | -------------------------- | ----------- |
 | `db.host`     | DB hostname                | `localhost` |
@@ -94,10 +97,13 @@ The `s3` section within `museum.yaml` is by default configured to use local
 MinIO buckets when using `quickstart.sh` or Docker Compose.
 
 If you wish to use an external S3 provider, you can edit the configuration with
-your provider's credentials, and set `are_local_buckets` to `false`.
+your provider's credentials, and set `s3.are_local_buckets` to `false`.
 
-MinIO uses the port `3200` for API Endpoints. Web Console can be accessed at
-http://localhost:3201 by enabling port `3201` in the Compose file.
+If you are using default MinIO, it is accessible at port `3200`. Web Console can
+be accessed by enabling port `3201` in the Compose file.
+
+For more information on object storage configuration, check our
+[documentation](/self-hosting/administration/object-storage).
 
 If you face any issues related to uploads then check out
 [CORS](/self-hosting/administration/object-storage#cors-cross-origin-resource-sharing)
@@ -145,6 +151,27 @@ go run tools/gen-random-keys/main.go
 | `jwt.secret` | Secret for signing JWTs | Predefined |
 
 ### Email
+
+You may wish to send emails for verification codes instead of
+[hardcoding them](/self-hosting/administration/users#use-hardcoded-otts). In
+such cases, you can configure SMTP (or Zoho Transmail, for bulk emails).
+
+Set the host and port accordingly with your credentials in `museum.yaml`
+
+You may skip the username and password if using a local relay server.
+
+```yaml
+smtp:
+    host:
+    port:
+    # Optional username and password if using local relay server
+    username:
+    password:
+    # Email address used for sending emails (this mail's credentials have to be provided)
+    email:
+    # Optional name for sender
+    sender-name:
+```
 
 | Variable           | Description                  | Default |
 | ------------------ | ---------------------------- | ------- |

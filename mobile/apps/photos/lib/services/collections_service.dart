@@ -1430,8 +1430,9 @@ class CollectionsService {
 
   Future<void> addOrCopyToCollection(
     int dstCollectionID,
-    List<EnteFile> files,
-  ) async {
+    List<EnteFile> files, {
+    bool toCopy = true,
+  }) async {
     final splitResult = FilesSplit.split(files, _config.getUserID()!);
     if (splitResult.pendingUploads.isNotEmpty) {
       throw ArgumentError('File should be already uploaded');
@@ -1439,10 +1440,8 @@ class CollectionsService {
     if (splitResult.ownedByCurrentUser.isNotEmpty) {
       await _addToCollection(dstCollectionID, splitResult.ownedByCurrentUser);
     }
-    if (splitResult.ownedByOtherUsers.isNotEmpty) {
-      late final List<EnteFile> filesToCopy;
-      late final List<EnteFile> filesToAdd;
-      (filesToAdd, filesToCopy) = (await _splitFilesToAddAndCopy(
+    if (splitResult.ownedByOtherUsers.isNotEmpty && toCopy) {
+      final (filesToAdd, filesToCopy) = (await _splitFilesToAddAndCopy(
         splitResult.ownedByOtherUsers,
       ));
 
@@ -1452,6 +1451,7 @@ class CollectionsService {
         );
         await _addToCollection(dstCollectionID, filesToAdd);
       }
+
       // group files by collectionID
       final Map<int, List<EnteFile>> filesByCollection = {};
       final Map<int, Set<int>> fileSeenByCollection = {};
