@@ -78,10 +78,10 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     final asyncDBConnection =
         SqliteDatabase(path: databaseDirectory, maxReaders: 2);
     final stopwatch = Stopwatch()..start();
-    _logger.info("MLDataDB: Starting migration");
+    _logger.info("$runtimeType: Starting migration");
     await migrate(asyncDBConnection, _migrationScripts);
     _logger.info(
-      "MLDataDB Migration took ${stopwatch.elapsedMilliseconds} ms",
+      "$runtimeType Migration took ${stopwatch.elapsedMilliseconds} ms",
     );
     stopwatch.stop();
 

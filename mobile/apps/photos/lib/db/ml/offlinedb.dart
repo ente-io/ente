@@ -75,7 +75,7 @@ class OfflineMLDataDB with SqlDbBase implements IMLDataDB<String> {
     final asyncDBConnection =
         SqliteDatabase(path: databaseDirectory, maxReaders: 2);
     final stopwatch = Stopwatch()..start();
-    _logger.info("MLDataDB: Starting migration");
+    _logger.info("$runtimeType: Starting migration");
     await migrate(asyncDBConnection, _migrationScripts);
     _logger.info(
       "MLDataDB Migration took ${stopwatch.elapsedMilliseconds} ms",
@@ -1250,13 +1250,13 @@ class OfflineMLDataDB with SqlDbBase implements IMLDataDB<String> {
       embedding.version,
     ];
   }
-  
+
   @override
   Future<Map<String, Set<String>>> getPersonToClusterIDs() {
     // TODO: implement getPersonToClusterIDs
     throw UnimplementedError();
   }
-  
+
   @override
   Future<Map<String, Set<String>>> getPersonToRejectedSuggestions() {
     // TODO: implement getPersonToRejectedSuggestions
