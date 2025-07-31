@@ -75,6 +75,15 @@ extension CollectionFiles on RemoteDB {
         .toList(growable: false);
   }
 
+  Future<List<CollectionFile>> getAllFiles(int userID) {
+    return sqliteDB.getAll(
+      "SELECT * FROM collection_files JOIN files ON collection_files.file_id = files.id WHERE files.owner_id = ? ORDER BY files.creation_time DESC",
+      [userID],
+    ).then(
+      (rows) => rows.map((row) => CollectionFile.fromMap(row)).toList(),
+    );
+  }
+
   Future<(Set<int>, Map<String, int>)> getUploadAndHash(
     int collectionID,
   ) async {

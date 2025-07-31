@@ -203,6 +203,30 @@ class RemoteCache {
     return FileLoadResult(filterFiles, true);
   }
 
+  Future<List<EnteFile>> getAllFiles(
+    Set<int> ignoredCollectionIDs,
+    int userID, {
+    bool dedupeByUploadId = true,
+  }) async {
+    final collectionFileEntries = await remoteDB.getAllFiles(userID);
+    if (!_isLoaded) await _ensureLoaded();
+    final List<EnteFile> files = [];
+    for (final entry in collectionFileEntries) {
+      final asset = remoteAssets[entry.fileID];
+      if (asset != null) {
+        files.add(EnteFile.fromRemoteAsset(asset, entry));
+      }
+    }
+    return await merge(
+      localFiles: [],
+      remoteFiles: files,
+      filterOptions: DBFilterOptions(
+        ignoredCollectionIDs: ignoredCollectionIDs,
+        dedupeUploadID: dedupeByUploadId,
+      ),
+    );
+  }
+
   Future<Map<String, EnteFile>> ownedFilesWithSameHash(
     List<String> hashes,
     int ownerID,

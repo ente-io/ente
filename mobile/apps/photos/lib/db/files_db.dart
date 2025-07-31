@@ -665,37 +665,6 @@ class FilesDB with SqlDbBase {
     return convertToFiles(results);
   }
 
-  Future<List<EnteFile>> getAllFilesFromDB(
-    Set<int> collectionsToIgnore, {
-    bool dedupeByUploadId = true,
-  }) async {
-    final db = await instance.sqliteAsyncDB;
-    final result = await db.getAll(
-      'SELECT * FROM $filesTable ORDER BY $columnCreationTime DESC',
-    );
-    _logger.info("${result.length} rows in filesDB");
-
-    final List<EnteFile> files = await Computer.shared()
-        .compute(convertToFilesForIsolate, param: {"result": result});
-
-    final List<EnteFile> deduplicatedFiles = await applyDBFilters(
-      files,
-      DBFilterOptions(
-        ignoredCollectionIDs: collectionsToIgnore,
-        dedupeUploadID: dedupeByUploadId,
-      ),
-    );
-    return deduplicatedFiles;
-  }
-
-  List<EnteFile> convertToFilesForIsolate(Map args) {
-    final List<EnteFile> files = [];
-    for (final result in args["result"]) {
-      files.add(_getFileFromRow(result));
-    }
-    return files;
-  }
-
   List<EnteFile> convertToFiles(List<Map<String, dynamic>> results) {
     final List<EnteFile> files = [];
     for (final result in results) {

@@ -6,6 +6,7 @@ import "package:photos/models/api/diff/diff.dart";
 import 'package:photos/models/duplicate_files.dart';
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file/file_type.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/files_service.dart";
 
@@ -40,8 +41,9 @@ class DeduplicationService {
     final Set<int> allowedCollectionIDs =
         CollectionsService.instance.nonHiddenOwnedCollections();
 
-    final List<EnteFile> allFiles = await FilesDB.instance.getAllFilesFromDB(
+    final List<EnteFile> allFiles = await remoteCache.getAllFiles(
       CollectionsService.instance.getHiddenCollectionIds(),
+      Configuration.instance.getUserID()!,
       dedupeByUploadId: false,
     );
     final int ownerID = Configuration.instance.getUserID()!;
