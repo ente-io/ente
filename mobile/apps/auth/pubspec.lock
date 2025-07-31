@@ -393,6 +393,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.0"
+  ente_accounts:
+    dependency: transitive
+    description:
+      path: "../../packages/accounts"
+      relative: true
+    source: path
+    version: "1.0.0"
   ente_base:
     dependency: "direct main"
     description:
@@ -423,6 +430,13 @@ packages:
       relative: true
     source: path
     version: "1.0.0"
+  ente_lock_screen:
+    dependency: "direct main"
+    description:
+      path: "../../packages/lock_screen"
+      relative: true
+    source: path
+    version: "1.0.0"
   ente_logging:
     dependency: "direct main"
     description:
@@ -434,6 +448,27 @@ packages:
     dependency: "direct main"
     description:
       path: "../../packages/network"
+      relative: true
+    source: path
+    version: "1.0.0"
+  ente_strings:
+    dependency: transitive
+    description:
+      path: "../../packages/strings"
+      relative: true
+    source: path
+    version: "1.0.0"
+  ente_ui:
+    dependency: transitive
+    description:
+      path: "../../packages/ui"
+      relative: true
+    source: path
+    version: "1.0.0"
+  ente_utils:
+    dependency: transitive
+    description:
+      path: "../../packages/utils"
       relative: true
     source: path
     version: "1.0.0"
