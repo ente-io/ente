@@ -9,7 +9,7 @@ import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/models/memories/smart_memory_constants.dart";
 import "package:photos/models/memories/trip_memory.dart";
 
-const kPersonShowTimeout = Duration(days: 7 * 10);
+const kPersonShowTimeout = Duration(days: 16 * kMemoriesUpdateFrequencyDays);
 const kPersonAndTypeShowTimeout = Duration(days: 7 * 26);
 const kClipShowTimeout = Duration(days: 3 * 10);
 const kTripShowTimeout = Duration(days: 7 * 25);

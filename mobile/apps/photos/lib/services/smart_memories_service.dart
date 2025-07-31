@@ -422,6 +422,7 @@ class SmartMemoriesService {
         .map((p) => p.remoteID)
         .toList();
     orderedImportantPersonsID.shuffle(Random());
+    final amountOfPersons = orderedImportantPersonsID.length;
     w?.log('orderedImportantPersonsID setup');
 
     // Check if the user has assignmed "me"
@@ -709,6 +710,12 @@ class SmartMemoriesService {
     w?.log('relevancy setup');
 
     // Loop through the people (and memory types) and add based on rotation
+    final shownPersonTimeout = Duration(
+      days: min(
+        kPersonShowTimeout.inDays,
+        max(1, amountOfPersons) * kMemoriesUpdateFrequencyDays,
+      ),
+    );
     peopleRotationLoop:
     for (final personID in orderedImportantPersonsID) {
       for (final memory in memoryResults) {
@@ -721,7 +728,7 @@ class SmartMemoriesService {
         final shownDate =
             DateTime.fromMicrosecondsSinceEpoch(shownLog.lastTimeShown);
         final bool seenPersonRecently =
-            currentTime.difference(shownDate) < kPersonShowTimeout;
+            currentTime.difference(shownDate) < shownPersonTimeout;
         if (seenPersonRecently) continue peopleRotationLoop;
       }
       if (personToMemories[personID] == null) continue peopleRotationLoop;
