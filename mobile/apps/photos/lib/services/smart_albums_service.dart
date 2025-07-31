@@ -108,7 +108,7 @@ class SmartAlbumsService {
         _logger.warning(
           "For config ($collectionId) user does not have permission",
         );
-        if (collection?.isDeleted ?? true) {
+        if (collection?.isDeleted ?? false) {
           await _deleteEntry(
             userId: userId,
             collectionId: collectionId,
