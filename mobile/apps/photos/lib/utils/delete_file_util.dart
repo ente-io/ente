@@ -82,9 +82,9 @@ Future<void> deleteFilesFromEverywhere(
       if (deletedIDs.contains(file.localID) ||
           alreadyDeletedIDs.contains(file.localID)) {
         deletedFiles.add(file);
-        if (file.uploadedFileID != null) {
+        if (file.rAsset != null) {
           uploadedFilesToBeTrashed
-              .add(TrashRequest(file.uploadedFileID!, file.collectionID!));
+              .add(TrashRequest(file.rAsset!.id, file.collectionID!));
           updatedCollectionIDs.add(file.collectionID!);
         } else {
           await FilesDB.instance.deleteLocalFile(file);
@@ -94,7 +94,7 @@ Future<void> deleteFilesFromEverywhere(
       updatedCollectionIDs.add(file.collectionID!);
       deletedFiles.add(file);
       uploadedFilesToBeTrashed
-          .add(TrashRequest(file.uploadedFileID!, file.collectionID!));
+          .add(TrashRequest(file.rAsset!.id, file.collectionID!));
     }
   }
   if (uploadedFilesToBeTrashed.isNotEmpty) {
@@ -384,12 +384,7 @@ Future<bool> deleteLocalFiles(
     }
 
     if (delLocalIDs.isNotEmpty) {
-      final deletedFiles = await FilesDB.instance.getLocalFiles(delLocalIDs);
-      await FilesDB.instance.markLocalIDAsNull(delLocalIDs);
-      _logger.info(deletedFiles.length.toString() + " files deleted locally");
-      Bus.instance.fire(
-        LocalPhotosUpdatedEvent(deletedFiles, source: "deleteLocal"),
-      );
+      await _handleLocallyDeletedFiles(delLocalIDs);
       return true;
     } else {
       //On android 10, even if files were deleted, deletedIDs is empty.
@@ -404,6 +399,15 @@ Future<bool> deleteLocalFiles(
     _logger.severe("Could not delete local files", e, s);
     return false;
   }
+}
+
+Future<void> _handleLocallyDeletedFiles(List<String> localIDs) async {
+  final deletedFiles = await FilesDB.instance.getLocalFiles(localIDs);
+  await FilesDB.instance.markLocalIDAsNull(localIDs);
+  _logger.info(deletedFiles.length.toString() + " files deleted locally");
+  Bus.instance.fire(
+    LocalPhotosUpdatedEvent(deletedFiles, source: "deleteLocal"),
+  );
 }
 
 Future<bool> deleteLocalFilesAfterRemovingAlreadyDeletedIDs(
@@ -462,12 +466,7 @@ Future<bool> deleteLocalFilesAfterRemovingAlreadyDeletedIDs(
     }
 
     if (deletedIDs.isNotEmpty) {
-      final deletedFiles = await FilesDB.instance.getLocalFiles(deletedIDs);
-      await FilesDB.instance.markLocalIDAsNull(deletedIDs);
-      _logger.info(deletedFiles.length.toString() + " files deleted locally");
-      Bus.instance.fire(
-        LocalPhotosUpdatedEvent(deletedFiles, source: "deleteLocal"),
-      );
+      await _handleLocallyDeletedFiles(deletedIDs);
       return true;
     } else {
       //On android 10, even if files were deleted, deletedIDs is empty.
@@ -537,12 +536,7 @@ Future<bool> retryFreeUpSpaceAfterRemovingAssetsNonExistingInDisk(
     }
 
     if (deletedIDs.isNotEmpty) {
-      final deletedFiles = await FilesDB.instance.getLocalFiles(deletedIDs);
-      await FilesDB.instance.markLocalIDAsNull(deletedIDs);
-      _logger.info(deletedFiles.length.toString() + " files deleted locally");
-      Bus.instance.fire(
-        LocalPhotosUpdatedEvent(deletedFiles, source: "deleteLocal"),
-      );
+      await _handleLocallyDeletedFiles(deletedIDs);
       return true;
     } else {
       //On android 10, even if files were deleted, deletedIDs is empty.
