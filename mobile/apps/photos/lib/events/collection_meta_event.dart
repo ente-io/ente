@@ -14,4 +14,5 @@ enum CollectionMetaEventType {
   sortChanged,
   orderChanged,
   thumbnailChanged,
+  autoAddPeople,
 }

@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import "package:logging/logging.dart";
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
@@ -10,6 +11,7 @@ import "package:photos/events/create_new_album_event.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/selected_files.dart';
+import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -17,12 +19,14 @@ import "package:photos/ui/actions/collection/collection_file_actions.dart";
 import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
 import 'package:photos/ui/collections/album/vertical_list.dart';
 import 'package:photos/ui/common/loading_widget.dart';
+import "package:photos/ui/common/progress_dialog.dart";
 import 'package:photos/ui/components/bottom_of_title_bar_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import "package:photos/ui/components/text_input_widget.dart";
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import "package:photos/ui/notification/toast.dart";
+import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/separators_util.dart";
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
@@ -34,6 +38,7 @@ enum CollectionActionType {
   shareCollection,
   addToHiddenAlbum,
   moveToHiddenCollection,
+  autoAddPeople;
 }
 
 extension CollectionActionTypeExtension on CollectionActionType {
@@ -70,6 +75,9 @@ String _actionName(
     case CollectionActionType.moveToHiddenCollection:
       text = S.of(context).moveToHiddenAlbum;
       break;
+    case CollectionActionType.autoAddPeople:
+      text = S.of(context).autoAddToAlbum;
+      break;
   }
   return text;
 }
@@ -80,6 +88,7 @@ void showCollectionActionSheet(
   List<SharedMediaFile>? sharedFiles,
   CollectionActionType actionType = CollectionActionType.addFiles,
   bool showOptionToCreateNewAlbum = true,
+  List<String>? selectedPeople,
 }) {
   showBarModalBottomSheet(
     context: context,
@@ -89,6 +98,7 @@ void showCollectionActionSheet(
         sharedFiles: sharedFiles,
         actionType: actionType,
         showOptionToCreateNewAlbum: showOptionToCreateNewAlbum,
+        selectedPeople: selectedPeople,
       );
     },
     shape: const RoundedRectangleBorder(
@@ -107,6 +117,7 @@ void showCollectionActionSheet(
 class CollectionActionSheet extends StatefulWidget {
   final SelectedFiles? selectedFiles;
   final List<SharedMediaFile>? sharedFiles;
+  final List<String>? selectedPeople;
   final CollectionActionType actionType;
   final bool showOptionToCreateNewAlbum;
   const CollectionActionSheet({
@@ -114,6 +125,7 @@ class CollectionActionSheet extends StatefulWidget {
     required this.sharedFiles,
     required this.actionType,
     required this.showOptionToCreateNewAlbum,
+    this.selectedPeople,
     super.key,
   });
 
@@ -129,14 +141,18 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
   final _selectedCollections = <Collection>[];
   final _recentlyCreatedCollections = <Collection>[];
   late StreamSubscription<CreateNewAlbumEvent> _createNewAlbumSubscription;
+  final _logger = Logger("CollectionActionSheet");
 
   @override
   void initState() {
     super.initState();
     _showOnlyHiddenCollections = widget.actionType.isHiddenAction;
-    _enableSelection = (widget.actionType == CollectionActionType.addFiles ||
-            widget.actionType == CollectionActionType.addToHiddenAlbum) &&
-        (widget.sharedFiles == null || widget.sharedFiles!.isEmpty);
+    _enableSelection = (widget.actionType ==
+                CollectionActionType.autoAddPeople &&
+            widget.selectedPeople != null) ||
+        ((widget.actionType == CollectionActionType.addFiles ||
+                widget.actionType == CollectionActionType.addToHiddenAlbum) &&
+            (widget.sharedFiles == null || widget.sharedFiles!.isEmpty));
     _createNewAlbumSubscription =
         Bus.instance.on<CreateNewAlbumEvent>().listen((event) {
       setState(() {
@@ -156,7 +172,9 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
   Widget build(BuildContext context) {
     final filesCount = widget.sharedFiles != null
         ? widget.sharedFiles!.length
-        : widget.selectedFiles?.files.length ?? 0;
+        : widget.selectedPeople != null
+            ? widget.selectedPeople!.length
+            : widget.selectedFiles?.files.length ?? 0;
     final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
     final isKeyboardUp = bottomInset > 100;
     final double bottomPadding =
@@ -256,6 +274,31 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
           shouldSurfaceExecutionStates: false,
           isDisabled: _selectedCollections.isEmpty,
           onTap: () async {
+            if (widget.selectedPeople != null) {
+              final ProgressDialog? dialog = createProgressDialog(
+                context,
+                S.of(context).uploadingFilesToAlbum,
+                isDismissible: true,
+              );
+              await dialog?.show();
+              for (final collection in _selectedCollections) {
+                try {
+                  await smartAlbumsService.addPeopleToSmartAlbum(
+                    collection.id,
+                    widget.selectedPeople!,
+                  );
+                } catch (error, stackTrace) {
+                  _logger.severe(
+                    "Error while adding people to smart album",
+                    error,
+                    stackTrace,
+                  );
+                }
+              }
+              unawaited(smartAlbumsService.syncSmartAlbums());
+              await dialog?.hide();
+              return;
+            }
             final CollectionActions collectionActions =
                 CollectionActions(CollectionsService.instance);
             final result = await collectionActions.addToMultipleCollections(
@@ -319,6 +362,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                     widget.actionType,
                     widget.selectedFiles,
                     widget.sharedFiles,
+                    widget.selectedPeople,
                     _searchQuery,
                     shouldShowCreateAlbum,
                     enableSelection: _enableSelection,
