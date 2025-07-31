@@ -721,7 +721,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
   }
 
   @override
-  Future<List<FaceDbInfoForClustering>> getFaceInfoForClustering({
+  Future<List<FaceDbInfoForClustering<int>>> getFaceInfoForClustering({
     int maxFaces = 20000,
     int offset = 0,
     int batchSize = 10000,
@@ -733,7 +733,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       );
       final db = await instance.asyncDB;
 
-      final List<FaceDbInfoForClustering> result = <FaceDbInfoForClustering>[];
+      final List<FaceDbInfoForClustering<int>> result = <FaceDbInfoForClustering<int>>[];
       while (true) {
         // Query a batch of rows
         final List<Map<String, dynamic>> maps = await db.getAll(
@@ -753,7 +753,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
         final faceIdToClusterId = await getFaceIdsToClusterIds(faceIds);
         for (final map in maps) {
           final faceID = map[faceIDColumn] as String;
-          final faceInfo = FaceDbInfoForClustering(
+          final faceInfo = FaceDbInfoForClustering<int>(
             faceID: faceID,
             clusterId: faceIdToClusterId[faceID],
             embeddingBytes: map[embeddingColumn] as Uint8List,

@@ -20,6 +20,9 @@ class FaceDbInfoForClustering<T> {
     if (T == int) {
       _fileID = int.parse(faceID.split('_').first) as T;
     }
+    if (_fileID == null) {
+      throw Exception('Unable to parse fileID from faceID: $faceID');
+    }
 
     return _fileID!;
   }

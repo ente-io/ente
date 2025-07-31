@@ -123,12 +123,11 @@ class MLService {
 
   // localMode indicates if the function is called from the offline mode
   // in such cases, files are pulled from local device & indexes are kept locally
-  Future<void> runAllML({bool force = false, bool localMode = true}) async {
+  Future<void> runAllML({bool force = false, bool localMode = false}) async {
     try {
       if (force) {
         _mlControllerStatus = true;
       }
-      return;
       if (!_canRunMLFunction(function: "AllML") && !force) return;
       if (!force && !computeController.requestCompute(ml: true)) return;
       _isRunningML = true;
@@ -203,7 +202,7 @@ class MLService {
 
     try {
       _isIndexingOrClusteringRunning = true;
-      _logger.info('starting image indexing');
+      _logger.info('starting image indexing local: $local');
       final Stream<List<FileMLInstruction>> instructionStream =
           fetchEmbeddingsAndInstructions(fileDownloadMlLimit, local);
 
@@ -265,8 +264,8 @@ class MLService {
     bool localMode = false,
   }) async {
     final mlDataDB = localMode
-        ? OfflineMLDataDB.instance as IMLDataDB
-        : MLDataDB.instance as IMLDataDB;
+        ? OfflineMLDataDB.instance as IMLDataDB<T>
+        : MLDataDB.instance as IMLDataDB<T>;
     if (!_canRunMLFunction(function: "Clustering") && !force) return;
     if (_clusteringIsHappening) {
       _logger.info("clusterAllImages() is already running, returning");
@@ -304,9 +303,9 @@ class MLService {
       final result = await mlDataDB.getFaceInfoForClustering(
         maxFaces: totalFaces,
       );
-      final Set<int> missingFileIDs = {};
-      final allFaceInfoForClustering = <FaceDbInfoForClustering>[];
-      for (final faceInfo in result) {
+      final Set<T> missingFileIDs = {};
+      final allFaceInfoForClustering = <FaceDbInfoForClustering<T>>[];
+      for (final FaceDbInfoForClustering<T> faceInfo in result) {
         if (!fileIDToCreationTime.containsKey(faceInfo.fileID)) {
           missingFileIDs.add(faceInfo.fileID);
         } else {

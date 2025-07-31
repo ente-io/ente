@@ -52,7 +52,7 @@ abstract class IMLDataDB<T> {
   Future<void> forceUpdateClusterIds(Map<String, String> faceIDToClusterID);
   Future<void> removeFaceIdToClusterId(Map<String, String> faceIDToClusterID);
   Future<void> removePerson(String personID);
-  Future<List<FaceDbInfoForClustering>> getFaceInfoForClustering({
+  Future<List<FaceDbInfoForClustering<T>>> getFaceInfoForClustering({
     int maxFaces,
     int offset,
     int batchSize,
