@@ -14,6 +14,7 @@ import "package:photos/models/search/hierarchical/hierarchical_search_filter.dar
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
+import "package:photos/ui/viewer/actions/smart_albums_status_widget.dart";
 import "package:photos/ui/viewer/gallery/collect_photos_bottom_buttons.dart";
 import "package:photos/ui/viewer/gallery/empty_album_state.dart";
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
@@ -93,11 +94,20 @@ class CollectionPage extends StatelessWidget {
       initialFiles: initialFiles,
       albumName: c.collection.displayName,
       sortAsyncFn: () => c.collection.pubMagicMetadata.asc ?? false,
+      addHeaderOrFooterEmptyState: false,
       showSelectAll: galleryType != GalleryType.sharedCollection,
       emptyState: galleryType == GalleryType.ownedCollection
           ? EmptyAlbumState(
               c.collection,
               isFromCollectPhotos: isFromCollectPhotos,
+              onAddPhotos: () {
+                Bus.instance.fire(
+                  CollectionMetaEvent(
+                    c.collection.id,
+                    CollectionMetaEventType.autoAddPeople,
+                  ),
+                );
+              },
             )
           : const EmptyState(),
       footer: isFromCollectPhotos
@@ -152,6 +162,9 @@ class CollectionPage extends StatelessWidget {
                       },
                     );
                   },
+                ),
+                SmartAlbumsStatusWidget(
+                  collection: c.collection,
                 ),
                 FileSelectionOverlayBar(
                   galleryType,

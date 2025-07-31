@@ -74,8 +74,10 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     _peopleChangedSubscription = Bus.instance.on<PeopleChangedEvent>().listen(
       (event) async {
         _changeCallbackDebouncer.run(
-          () async =>
-              unawaited(PeopleHomeWidgetService.instance.checkPeopleChanged()),
+          () async {
+            unawaited(PeopleHomeWidgetService.instance.checkPeopleChanged());
+            unawaited(smartAlbumsService.syncSmartAlbums());
+          },
         );
       },
     );

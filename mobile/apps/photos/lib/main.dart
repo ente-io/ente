@@ -60,6 +60,7 @@ const kFGHomeWidgetSyncFrequency = Duration(minutes: 15);
 const kBGTaskTimeout = Duration(seconds: 28);
 const kBGPushTimeout = Duration(seconds: 28);
 const kFGTaskDeathTimeoutInMicroseconds = 5000000;
+bool isProcessBg = true;
 
 void main() async {
   debugRepaintRainbowEnabled = false;
@@ -86,6 +87,7 @@ void main() async {
 Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
   return await runWithLogs(() async {
     _logger.info("Starting app in foreground");
+    isProcessBg = false;
     await _init(false, via: 'mainMethod');
     final Locale? locale = await getLocale(noFallback: true);
     runApp(
@@ -115,11 +117,6 @@ Future<void> _homeWidgetSync([bool isBackground = false]) async {
   if (isBackground && Platform.isIOS) {
     _logger.info("Home widget sync skipped in background on iOS");
     return;
-  }
-
-  if (isBackground) {
-    final locale = await getLocale();
-    await initializeDateFormatting(locale?.languageCode ?? "en");
   }
 
   try {
@@ -180,8 +177,16 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
   // only runs for android
   updateService.showUpdateNotification().ignore();
   await _sync('bgTaskActiveProcess');
+
+  final locale = await getLocale();
+  await initializeDateFormatting(locale?.languageCode ?? "en");
   // only runs for android
   await _homeWidgetSync(true);
+
+  // await MLService.instance.init();
+  // await PersonService.init(entityService, MLDataDB.instance, prefs);
+  // await MLService.instance.runAllML(force: true);
+  await smartAlbumsService.syncSmartAlbums();
 }
 
 Future<void> _init(bool isBackground, {String via = ''}) async {

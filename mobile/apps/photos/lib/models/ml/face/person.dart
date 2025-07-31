@@ -48,7 +48,11 @@ class ClusterInfo {
 
 class PersonData {
   final String name;
+
+  /// Used to mark a person to not show in the people section.
+  /// WARNING: When checking whether to show a person, use [isIgnored] instead, as it also checks legacy hidden names.
   final bool isHidden;
+
   String? avatarFaceID;
   List<ClusterInfo> assigned = List<ClusterInfo>.empty();
   List<String> rejectedFaceIDs = List<String>.empty();
@@ -63,8 +67,10 @@ class PersonData {
 
   bool hasAvatar() => avatarFaceID != null;
 
+  /// Returns true if the person should be ignored in the UI.
+  /// This included the regular [isHidden] check, but also a check for legacy names
   bool get isIgnored =>
-      (name.isEmpty || name == '(hidden)' || name == '(ignored)');
+      (isHidden || name.isEmpty || name == '(hidden)' || name == '(ignored)');
 
   PersonData({
     required this.name,

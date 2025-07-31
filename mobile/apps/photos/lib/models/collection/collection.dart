@@ -139,6 +139,12 @@ class Collection {
     return (owner.id ?? -100) == userID;
   }
 
+  bool canAutoAdd(int userID) {
+    final canEditCollection = isOwner(userID) ||
+        getRole(userID) == CollectionParticipantRole.collaborator;
+    return canEditCollection && !isDeleted;
+  }
+
   bool isDownloadEnabledForPublicLink() {
     if (publicURLs.isEmpty) {
       return false;

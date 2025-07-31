@@ -103,6 +103,7 @@ dependencies:
   # If not resolved and we need to upgrade, write a migration script.
   flutter_secure_storage: 9.0.0
   flutter_sodium:
+  flutter_spinkit: ^5.2.1
   flutter_staggered_grid_view: ^0.6.2
   flutter_svg: ^2.0.10+1
   flutter_timezone: ^4.1.0
@@ -173,6 +174,7 @@ dependencies:
     git:
       url: https://github.com/eddyuan/privacy_screen.git
       ref: 855418e
+  pro_image_editor: 6.0.0
   receive_sharing_intent: # pub.dev is behind
     git:
       url: https://github.com/KasemJaffer/receive_sharing_intent.git
@@ -342,6 +344,7 @@ flutter:
   assets:
     - assets/
     - assets/video-editor/
+    - assets/image-editor/
     - assets/icons/
     - assets/launcher_icon/
   fonts:

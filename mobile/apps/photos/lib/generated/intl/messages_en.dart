@@ -380,6 +380,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "Add a people widget to your homescreen and come back here to customize."),
         "addPhotos": MessageLookupByLibrary.simpleMessage("Add photos"),
         "addSelected": MessageLookupByLibrary.simpleMessage("Add selected"),
+        "addSomePhotosDesc1":
+            MessageLookupByLibrary.simpleMessage("Add some photos or pick "),
+        "addSomePhotosDesc2":
+            MessageLookupByLibrary.simpleMessage("familiar faces"),
+        "addSomePhotosDesc3":
+            MessageLookupByLibrary.simpleMessage("\nto begin with"),
         "addToAlbum": MessageLookupByLibrary.simpleMessage("Add to album"),
         "addToEnte": MessageLookupByLibrary.simpleMessage("Add to Ente"),
         "addToHiddenAlbum":
@@ -393,6 +399,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "addedAs": MessageLookupByLibrary.simpleMessage("Added as"),
         "addedBy": m5,
         "addedSuccessfullyTo": m6,
+        "addingPhotos": MessageLookupByLibrary.simpleMessage("Adding photos"),
         "addingToFavorites":
             MessageLookupByLibrary.simpleMessage("Adding to favorites..."),
         "admiringThem": m7,
@@ -435,6 +442,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Please allow access to your photos from Settings so Ente can display and backup your library."),
         "allowPermTitle":
             MessageLookupByLibrary.simpleMessage("Allow access to photos"),
+        "analysis": MessageLookupByLibrary.simpleMessage("Analysis"),
         "androidBiometricHint":
             MessageLookupByLibrary.simpleMessage("Verify identity"),
         "androidBiometricNotRecognized":
@@ -539,6 +547,10 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Authentication failed, please try again"),
         "authenticationSuccessful":
             MessageLookupByLibrary.simpleMessage("Authentication successful!"),
+        "autoAddPeople":
+            MessageLookupByLibrary.simpleMessage("Auto-add people"),
+        "autoAddToAlbum":
+            MessageLookupByLibrary.simpleMessage("Auto-add to album"),
         "autoCastDialogBody": MessageLookupByLibrary.simpleMessage(
             "You\'ll see available Cast devices here."),
         "autoCastiOSPermission": MessageLookupByLibrary.simpleMessage(
@@ -551,6 +563,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "autoPair": MessageLookupByLibrary.simpleMessage("Auto pair"),
         "autoPairDesc": MessageLookupByLibrary.simpleMessage(
             "Auto pair works only with devices that support Chromecast."),
+        "automaticallyAnalyzeAndSplitGrouping":
+            MessageLookupByLibrary.simpleMessage(
+                "We will automatically analyze the grouping to determine if there are multiple people present, and separate them out again. This may take a few seconds."),
         "available": MessageLookupByLibrary.simpleMessage("Available"),
         "availableStorageSpace": m10,
         "backedUpFolders":
@@ -880,6 +895,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "doYouWantToDiscardTheEditsYouHaveMade":
             MessageLookupByLibrary.simpleMessage(
                 "Do you want to discard the edits you have made?"),
+        "doesGroupContainMultiplePeople": MessageLookupByLibrary.simpleMessage(
+            "Does this grouping contain multiple people?"),
         "done": MessageLookupByLibrary.simpleMessage("Done"),
         "dontSave": MessageLookupByLibrary.simpleMessage("Don\'t save"),
         "doubleYourStorage":
@@ -892,6 +909,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "duplicateFileCountWithStorageSaved": m26,
         "duplicateItemsGroup": m27,
         "edit": MessageLookupByLibrary.simpleMessage("Edit"),
+        "editAutoAddPeople":
+            MessageLookupByLibrary.simpleMessage("Edit auto-add people"),
         "editEmailAlreadyLinked": m28,
         "editLocation": MessageLookupByLibrary.simpleMessage("Edit location"),
         "editLocationTagTitle":
@@ -1085,6 +1104,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(
             "Generating encryption keys..."),
         "genericProgress": m42,
+        "gettingReady": MessageLookupByLibrary.simpleMessage("Getting ready"),
         "goToSettings": MessageLookupByLibrary.simpleMessage("Go to settings"),
         "googlePlayId": MessageLookupByLibrary.simpleMessage("Google Play ID"),
         "grantFullAccessPrompt": MessageLookupByLibrary.simpleMessage(
@@ -1127,6 +1147,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Biometric authentication is disabled. Please lock and unlock your screen to enable it."),
         "iOSOkButton": MessageLookupByLibrary.simpleMessage("OK"),
         "ignore": MessageLookupByLibrary.simpleMessage("Ignore"),
+        "ignorePerson": MessageLookupByLibrary.simpleMessage("Ignore person"),
         "ignoreUpdate": MessageLookupByLibrary.simpleMessage("Ignore"),
         "ignored": MessageLookupByLibrary.simpleMessage("ignored"),
         "ignoredFolderUploadReason": MessageLookupByLibrary.simpleMessage(
@@ -1327,6 +1348,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "mergeWithExisting":
             MessageLookupByLibrary.simpleMessage("Merge with existing"),
         "mergedPhotos": MessageLookupByLibrary.simpleMessage("Merged photos"),
+        "mixedGrouping":
+            MessageLookupByLibrary.simpleMessage("Mixed grouping?"),
         "mlConsent":
             MessageLookupByLibrary.simpleMessage("Enable machine learning"),
         "mlConsentConfirmation": MessageLookupByLibrary.simpleMessage(
@@ -1489,6 +1512,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "pendingItems": MessageLookupByLibrary.simpleMessage("Pending items"),
         "pendingSync": MessageLookupByLibrary.simpleMessage("Pending sync"),
         "people": MessageLookupByLibrary.simpleMessage("People"),
+        "peopleAutoAddDesc": MessageLookupByLibrary.simpleMessage(
+            "Select the people you want to automatically add to the album"),
         "peopleUsingYourCode":
             MessageLookupByLibrary.simpleMessage("People using your code"),
         "peopleWidgetDesc": MessageLookupByLibrary.simpleMessage(
@@ -1881,6 +1906,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharing": MessageLookupByLibrary.simpleMessage("Sharing..."),
         "shiftDatesAndTime":
             MessageLookupByLibrary.simpleMessage("Shift dates and time"),
+        "shouldRemoveFilesSmartAlbumsDesc": MessageLookupByLibrary.simpleMessage(
+            "Should the files related to the person that were previously selected in smart albums be removed?"),
         "showLessFaces":
             MessageLookupByLibrary.simpleMessage("Show less faces"),
         "showMemories": MessageLookupByLibrary.simpleMessage("Show memories"),
