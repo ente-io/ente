@@ -599,10 +599,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Mes žymiai patobulinome prisiminimų patirtį, įskaitant automatinį peržiūrėjimą, braukimą į kitą prisiminimą ir daug daugiau."),
         "cLDesc4": MessageLookupByLibrary.simpleMessage(
             "Kartu su daugybe vidinių patobulinimų, dabar daug lengviau matyti visus aptiktus veidus, pateikti atsiliepimus apie panašius veidus ir pridėti / pašalinti veidus iš vienos nuotraukos."),
-        "cLDesc5": MessageLookupByLibrary.simpleMessage(
-            "Dabar gausite pranešimą apie galimybę atsisakyti visų gimtadienių, kuriuos išsaugojote platformoje „Ente“, kartu su geriausių jų nuotraukų rinkiniu."),
-        "cLDesc6": MessageLookupByLibrary.simpleMessage(
-            "Nebereikia laukti įkėlimų / atsisiuntimų užbaigti, kad užvertumėte programėlę. Dabar visus įkėlimus ir atsisiuntimus galima pristabdyti ir tęsti nuo tos vietos, kurioje sustojote."),
         "cLTitle1": MessageLookupByLibrary.simpleMessage(
             "Įkeliami dideli vaizdo įrašų failai"),
         "cLTitle2": MessageLookupByLibrary.simpleMessage("Fono įkėlimas"),
@@ -610,10 +606,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Automatiniai peržiūros prisiminimai"),
         "cLTitle4": MessageLookupByLibrary.simpleMessage(
             "Patobulintas veido atpažinimas"),
-        "cLTitle5":
-            MessageLookupByLibrary.simpleMessage("Gimtadienio pranešimai"),
-        "cLTitle6": MessageLookupByLibrary.simpleMessage(
-            "Tęsiami įkėlimai ir atsisiuntimai"),
         "cachedData":
             MessageLookupByLibrary.simpleMessage("Podėliuoti duomenis"),
         "calculating": MessageLookupByLibrary.simpleMessage("Skaičiuojama..."),

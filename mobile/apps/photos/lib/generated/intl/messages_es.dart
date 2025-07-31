@@ -602,10 +602,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Hemos hecho mejoras significativas en nuestra experiencia de recuerdos, incluyendo la reproducción automática, el deslizado a la memoria siguiente y mucho más."),
         "cLDesc4": MessageLookupByLibrary.simpleMessage(
             "Junto con un montón de mejoras adicionales, ahora es mucho más fácil ver todas las caras detectadas, proporcionar comentarios sobre caras similares, y añadir o quitar caras de una sola foto."),
-        "cLDesc5": MessageLookupByLibrary.simpleMessage(
-            "Ahora recibirás una notificación de exclusión voluntaria para todos los cumpleaños que hayas guardado en Ente, junto con una colección de sus mejores fotos."),
-        "cLDesc6": MessageLookupByLibrary.simpleMessage(
-            "Ya no tienes que esperar a que las subidas o descargas se completen para cerrar la aplicación. Ahora, todas las subidas y descargas se pueden pausar a mitad de proceso y reanudarse justo donde lo dejaste."),
         "cLTitle1": MessageLookupByLibrary.simpleMessage(
             "Subiendo archivos de vídeo grandes"),
         "cLTitle2":
@@ -614,10 +610,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Reproducción automática de recuerdos"),
         "cLTitle4": MessageLookupByLibrary.simpleMessage(
             "Reconocimiento facial mejorado"),
-        "cLTitle5":
-            MessageLookupByLibrary.simpleMessage("Notificación de cumpleaños"),
-        "cLTitle6": MessageLookupByLibrary.simpleMessage(
-            "Subidas y Descargas reanudables"),
         "cachedData":
             MessageLookupByLibrary.simpleMessage("Datos almacenados en caché"),
         "calculating": MessageLookupByLibrary.simpleMessage("Calculando..."),

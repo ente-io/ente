@@ -12166,121 +12166,81 @@ class S {
     );
   }
 
-  /// `Uploading Large Video Files`
+  /// `Advanced Image Editor`
   String get cLTitle1 {
     return Intl.message(
-      'Uploading Large Video Files',
+      'Advanced Image Editor',
       name: 'cLTitle1',
       desc: '',
       args: [],
     );
   }
 
-  /// `On the back of video streaming beta, and work on resumable uploads and downloads, we have now increased the file upload limit to 10GB. This is now available in both desktop and mobile apps.`
+  /// `We are releasing a new and advanced image editor that add more cropping frames, filter presets for quick edits, fine tuning options including saturation, contrast, brightness, temperature and a lot more. The new editor also includes the ability to draw on your photos and add emojis as stickers.`
   String get cLDesc1 {
     return Intl.message(
-      'On the back of video streaming beta, and work on resumable uploads and downloads, we have now increased the file upload limit to 10GB. This is now available in both desktop and mobile apps.',
+      'We are releasing a new and advanced image editor that add more cropping frames, filter presets for quick edits, fine tuning options including saturation, contrast, brightness, temperature and a lot more. The new editor also includes the ability to draw on your photos and add emojis as stickers.',
       name: 'cLDesc1',
       desc: '',
       args: [],
     );
   }
 
-  /// `Background Upload`
+  /// `Smart Albums`
   String get cLTitle2 {
     return Intl.message(
-      'Background Upload',
+      'Smart Albums',
       name: 'cLTitle2',
       desc: '',
       args: [],
     );
   }
 
-  /// `Background uploads are now supported on iOS as well, in addition to Android devices. No need to open the app to backup your latest photos and videos.`
+  /// `You can now automatically add photos of selected people to any album. Just go the album, and select "auto-add people" from the overflow menu. If used along with shared album, you can share photos with zero clicks.`
   String get cLDesc2 {
     return Intl.message(
-      'Background uploads are now supported on iOS as well, in addition to Android devices. No need to open the app to backup your latest photos and videos.',
+      'You can now automatically add photos of selected people to any album. Just go the album, and select "auto-add people" from the overflow menu. If used along with shared album, you can share photos with zero clicks.',
       name: 'cLDesc2',
       desc: '',
       args: [],
     );
   }
 
-  /// `Autoplay Memories`
+  /// `Improved Gallery`
   String get cLTitle3 {
     return Intl.message(
-      'Autoplay Memories',
+      'Improved Gallery',
       name: 'cLTitle3',
       desc: '',
       args: [],
     );
   }
 
-  /// `We have made significant improvements to our memories experience, including autoplay, swipe to next memory and a lot more.`
+  /// `We have added the ability to group your gallery by weeks, months, and years. You can now customise your gallery to look exactly the way you want with these new grouping options, along with custom grids`
   String get cLDesc3 {
     return Intl.message(
-      'We have made significant improvements to our memories experience, including autoplay, swipe to next memory and a lot more.',
+      'We have added the ability to group your gallery by weeks, months, and years. You can now customise your gallery to look exactly the way you want with these new grouping options, along with custom grids',
       name: 'cLDesc3',
       desc: '',
       args: [],
     );
   }
 
-  /// `Improved Face Recognition`
+  /// `Faster Scroll`
   String get cLTitle4 {
     return Intl.message(
-      'Improved Face Recognition',
+      'Faster Scroll',
       name: 'cLTitle4',
       desc: '',
       args: [],
     );
   }
 
-  /// `Along with a bunch of under the hood improvements, now its much easier to see all detected faces, provide feedback on similar faces, and add/remove faces from a single photo.`
+  /// `Along with a bunch of under the hood improvements to improve the gallery scroll experience, we have also redesigned the scroll bar to show markers, allowing you to quickly jump across the timeline.`
   String get cLDesc4 {
     return Intl.message(
-      'Along with a bunch of under the hood improvements, now its much easier to see all detected faces, provide feedback on similar faces, and add/remove faces from a single photo.',
+      'Along with a bunch of under the hood improvements to improve the gallery scroll experience, we have also redesigned the scroll bar to show markers, allowing you to quickly jump across the timeline.',
       name: 'cLDesc4',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Birthday Notifications`
-  String get cLTitle5 {
-    return Intl.message(
-      'Birthday Notifications',
-      name: 'cLTitle5',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `You will now receive an opt-out notification for all the birthdays your have saved on Ente, along with a collection of their best photos.`
-  String get cLDesc5 {
-    return Intl.message(
-      'You will now receive an opt-out notification for all the birthdays your have saved on Ente, along with a collection of their best photos.',
-      name: 'cLDesc5',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Resumable Uploads and Downloads`
-  String get cLTitle6 {
-    return Intl.message(
-      'Resumable Uploads and Downloads',
-      name: 'cLTitle6',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `No more waiting for uploads/downloads to complete before you can close the app. All uploads and downloads now have the ability to be paused midway, and resume from where you left off.`
-  String get cLDesc6 {
-    return Intl.message(
-      'No more waiting for uploads/downloads to complete before you can close the app. All uploads and downloads now have the ability to be paused midway, and resume from where you left off.',
-      name: 'cLDesc6',
       desc: '',
       args: [],
     );

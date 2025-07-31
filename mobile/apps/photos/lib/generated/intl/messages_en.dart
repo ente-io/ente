@@ -591,27 +591,18 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Black Friday Sale"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
         "cLDesc1": MessageLookupByLibrary.simpleMessage(
-            "On the back of video streaming beta, and work on resumable uploads and downloads, we have now increased the file upload limit to 10GB. This is now available in both desktop and mobile apps."),
+            "We are releasing a new and advanced image editor that add more cropping frames, filter presets for quick edits, fine tuning options including saturation, contrast, brightness, temperature and a lot more. The new editor also includes the ability to draw on your photos and add emojis as stickers."),
         "cLDesc2": MessageLookupByLibrary.simpleMessage(
-            "Background uploads are now supported on iOS as well, in addition to Android devices. No need to open the app to backup your latest photos and videos."),
+            "You can now automatically add photos of selected people to any album. Just go the album, and select \"auto-add people\" from the overflow menu. If used along with shared album, you can share photos with zero clicks."),
         "cLDesc3": MessageLookupByLibrary.simpleMessage(
-            "We have made significant improvements to our memories experience, including autoplay, swipe to next memory and a lot more."),
+            "We have added the ability to group your gallery by weeks, months, and years. You can now customise your gallery to look exactly the way you want with these new grouping options, along with custom grids"),
         "cLDesc4": MessageLookupByLibrary.simpleMessage(
-            "Along with a bunch of under the hood improvements, now its much easier to see all detected faces, provide feedback on similar faces, and add/remove faces from a single photo."),
-        "cLDesc5": MessageLookupByLibrary.simpleMessage(
-            "You will now receive an opt-out notification for all the birthdays your have saved on Ente, along with a collection of their best photos."),
-        "cLDesc6": MessageLookupByLibrary.simpleMessage(
-            "No more waiting for uploads/downloads to complete before you can close the app. All uploads and downloads now have the ability to be paused midway, and resume from where you left off."),
+            "Along with a bunch of under the hood improvements to improve the gallery scroll experience, we have also redesigned the scroll bar to show markers, allowing you to quickly jump across the timeline."),
         "cLTitle1":
-            MessageLookupByLibrary.simpleMessage("Uploading Large Video Files"),
-        "cLTitle2": MessageLookupByLibrary.simpleMessage("Background Upload"),
-        "cLTitle3": MessageLookupByLibrary.simpleMessage("Autoplay Memories"),
-        "cLTitle4":
-            MessageLookupByLibrary.simpleMessage("Improved Face Recognition"),
-        "cLTitle5":
-            MessageLookupByLibrary.simpleMessage("Birthday Notifications"),
-        "cLTitle6": MessageLookupByLibrary.simpleMessage(
-            "Resumable Uploads and Downloads"),
+            MessageLookupByLibrary.simpleMessage("Advanced Image Editor"),
+        "cLTitle2": MessageLookupByLibrary.simpleMessage("Smart Albums"),
+        "cLTitle3": MessageLookupByLibrary.simpleMessage("Improved Gallery"),
+        "cLTitle4": MessageLookupByLibrary.simpleMessage("Faster Scroll"),
         "cachedData": MessageLookupByLibrary.simpleMessage("Cached data"),
         "calculating": MessageLookupByLibrary.simpleMessage("Calculating..."),
         "canNotOpenBody": MessageLookupByLibrary.simpleMessage(
