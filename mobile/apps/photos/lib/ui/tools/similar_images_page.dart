@@ -65,7 +65,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: const Text("Similar Images"), // TODO: lau: extract string
+        title: const Text("Similar images"), // TODO: lau: extract string
         actions: _pageState == SimilarImagesPageState.results
             ? [
                 _getSortMenu(),
