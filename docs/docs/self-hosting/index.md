@@ -1,37 +1,29 @@
 ---
-title: Self Hosting
-description: Getting started self hosting Ente Photos and/or Ente Auth
+title: Quickstart - Self-hosting
+description: Getting started with self-hosting Ente
 ---
 
-# Self Hosting
+# Quickstart
 
-The entire source code for Ente is open source,
-[including the servers](https://ente.io/blog/open-sourcing-our-server/). This is
-the same code we use for our own cloud service.
+If you're looking to spin up Ente on your server, you are in the right place!
+
+Our entire source code,
+[including the server](https://ente.io/blog/open-sourcing-our-server/) is open
+source. This is the same code we use on production.
+
+For a quick preview, make sure your system meets the requirements mentioned
+below. After trying the preview, you can explore other ways of self-hosting Ente
+on your server as described in the documentation.
 
 ## Requirements
 
-### Hardware
+- A system with at least 1 GB of RAM and 1 CPU core
+- [Docker Compose](https://docs.docker.com/compose/)
 
-The server is capable of running on minimal resource requirements as a
-lightweight Go binary, since most of the intensive computational tasks are done
-on the client. It performs well on small cloud instances, old laptops, and even
-[low-end embedded devices](https://github.com/ente-io/ente/discussions/594).
+> For more details, check out the
+> [requirements page](/self-hosting/installation/requirements).
 
-### Software
-
-#### Operating System
-
-Any Linux or \*nix operating system, Ubuntu or Debian is recommended to have a
-good Docker experience. Non-Linux operating systems tend to provide poor
-experience with Docker and difficulty with troubleshooting and assistance.
-
-#### Docker
-
-Required for running Ente's server, web application and dependent services
-(database and object storage)
-
-## Getting started
+## Set up the server
 
 Run this command on your terminal to setup Ente.
 
@@ -39,17 +31,60 @@ Run this command on your terminal to setup Ente.
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente-io/ente/main/server/quickstart.sh)"
 ```
 
-The above `curl` command pulls the Docker image, creates a directory `my-ente`
-in the current working directory, prompts to start the cluster and starts all the containers required to run Ente.
+This creates a directory `my-ente` in the current working directory, prompts to
+start the cluster with needed containers after pulling the images required to
+run Ente.
 
-![quickstart](/quickstart.png)
+::: info
 
-![self-hosted-ente](/web-app.webp)
+Make sure to modify the default values in `compose.yaml` and `museum.yaml` if
+you wish to change endpoints, bucket configuration or server configuration.
 
-> [!TIP] Important:
-> If you have used quickstart for self-hosting Ente and are facing issues while > trying to run the cluster due to MinIO buckets not being created, please check [troubleshooting MinIO](/self-hosting/troubleshooting/docker#minio-provisioning-error)
-> 
-> 
+:::
+
+## Try the web app
+
+Open Ente Photos web app at `http://<machine-ip>:3000` (or
+`http://localhost:3000` if using on same local machine). Select **Don't have an
+account?** to create a new user.
+
+Follow the prompts to sign up.
+
+<div style="display: flex; gap: 10px;">
+  <img alt="Onboarding screen" src="/onboarding.png" style="width: 50%; height: auto;">
+  <img alt="Sign up page" src="/sign-up.png" style="width: 50%; height: auto;">
+</div>
+
+Enter the verification code by checking the cluster logs using
+`sudo docker compose logs`.
+
+![Verification Code](/otp.png)
+
+Upload a picture via the web user interface.
+
+Alternatively, if using Ente Auth, get started by adding an account (assuming
+you are running Ente Auth at `http://<machine-ip>:3002` or
+`http://localhost:3002`).
+
+## Try the mobile app
+
+You can install Ente Photos from [here](/photos/faq/installing) and Ente Auth
+from [here](/auth/faq/installing).
+
+Connect to your server from
+[mobile apps](/self-hosting/installation/post-install/#step-6-configure-apps-to-use-your-server).
+
+## What next?
+
+You may wish to install using a different way for your needs. Check the
+"Installation" section for information regarding that.
+
+You can import your pictures from Google Takeout or from other services to Ente
+Photos. For more information, check out our
+[migration guide](/photos/migration/) for more information.
+
+You can import your codes from other authenticator providers to Ente Auth. Check
+out our [migration guide](/auth/migration/) for more information.
 
 ## Queries?
 

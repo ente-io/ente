@@ -383,8 +383,12 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       }
     }
     if (personID == null && clusterID == null) {
+      _logger.severe("personID and clusterID cannot be null both");
       throw Exception("personID and clusterID cannot be null");
     }
+    _logger.severe(
+      "Something went wrong finding a face from `getCoverFaceForPerson` (personID: $personID, clusterID: $clusterID)",
+    );
     return null;
   }
 
@@ -1355,7 +1359,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     final db = await instance.asyncDB;
     const String sql = '''
       DELETE FROM $faceCacheTable
-      WHERE $personOrClusterIdColumn = ?'
+      WHERE $personOrClusterIdColumn = ?
     ''';
     final List<Object?> params = [personOrClusterID];
     await db.execute(sql, params);

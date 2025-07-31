@@ -183,7 +183,7 @@ class _MapPullUpGalleryState extends State<MapPullUpGallery> {
                         EventType.deletedFromEverywhere,
                       },
                       tagPrefix: "map_gallery",
-                      showSelectAllByDefault: true,
+                      showSelectAll: true,
                       selectedFiles: _selectedFiles,
                       isScrollablePositionedList: false,
                     ),

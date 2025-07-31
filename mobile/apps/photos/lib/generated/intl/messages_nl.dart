@@ -322,10 +322,10 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m114(email) =>
       "We hebben een e-mail gestuurd naar <green>${email}</green>";
 
-  static String m115(name) => "Wish \$${name} a happy birthday! 🎉";
+  static String m115(name) => "Wens ${name} een fijne verjaardag! 🎉";
 
   static String m116(count) =>
-      "${Intl.plural(count, other: '${count} jaar geleden')}";
+      "${Intl.plural(count, one: '${count} jaar geleden', other: '${count} jaar geleden')}";
 
   static String m117(name) => "Jij en ${name}";
 
@@ -425,6 +425,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Alle herinneringen bewaard"),
         "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
             "Alle groepen voor deze persoon worden gereset, en je verliest alle suggesties die voor deze persoon zijn gedaan"),
+        "allUnnamedGroupsWillBeMergedIntoTheSelectedPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Alle naamloze groepen worden samengevoegd met de geselecteerde persoon. Dit kan nog steeds ongedaan worden gemaakt vanuit het geschiedenisoverzicht van de persoon."),
         "allWillShiftRangeBasedOnFirst": MessageLookupByLibrary.simpleMessage(
             "Dit is de eerste in de groep. Andere geselecteerde foto\'s worden automatisch verschoven op basis van deze nieuwe datum"),
         "allow": MessageLookupByLibrary.simpleMessage("Toestaan"),
@@ -477,6 +480,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "archiveAlbum":
             MessageLookupByLibrary.simpleMessage("Album archiveren"),
         "archiving": MessageLookupByLibrary.simpleMessage("Archiveren..."),
+        "areThey": MessageLookupByLibrary.simpleMessage("Is dit "),
+        "areYouSureRemoveThisFaceFromPerson": MessageLookupByLibrary.simpleMessage(
+            "Weet je zeker dat je dit gezicht van deze persoon wilt verwijderen?"),
         "areYouSureThatYouWantToLeaveTheFamily":
             MessageLookupByLibrary.simpleMessage(
                 "Weet u zeker dat u het familie abonnement wilt verlaten?"),
@@ -487,8 +493,16 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Weet u zeker dat u uw abonnement wilt wijzigen?"),
         "areYouSureYouWantToExit": MessageLookupByLibrary.simpleMessage(
             "Weet u zeker dat u wilt afsluiten?"),
+        "areYouSureYouWantToIgnoreThesePersons":
+            MessageLookupByLibrary.simpleMessage(
+                "Weet je zeker dat je deze personen wilt negeren?"),
+        "areYouSureYouWantToIgnoreThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Weet je zeker dat je deze persoon wilt negeren?"),
         "areYouSureYouWantToLogout": MessageLookupByLibrary.simpleMessage(
             "Weet je zeker dat je wilt uitloggen?"),
+        "areYouSureYouWantToMergeThem": MessageLookupByLibrary.simpleMessage(
+            "Weet je zeker dat je ze wilt samenvoegen?"),
         "areYouSureYouWantToRenew": MessageLookupByLibrary.simpleMessage(
             "Weet u zeker dat u wilt verlengen?"),
         "areYouSureYouWantToResetThisPerson":
@@ -569,6 +583,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Back-up video\'s"),
         "beach": MessageLookupByLibrary.simpleMessage("Zand en zee"),
         "birthday": MessageLookupByLibrary.simpleMessage("Verjaardag"),
+        "birthdayNotifications":
+            MessageLookupByLibrary.simpleMessage("Meldingen over verjaardagen"),
+        "birthdays": MessageLookupByLibrary.simpleMessage("Verjaardagen"),
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Black Friday-aanbieding"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
@@ -1096,6 +1113,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "guestView": MessageLookupByLibrary.simpleMessage("Gasten weergave"),
         "guestViewEnablePreSteps": MessageLookupByLibrary.simpleMessage(
             "Om gasten weergave in te schakelen, moet u een toegangscode of schermvergrendeling instellen in uw systeeminstellingen."),
+        "happyBirthday":
+            MessageLookupByLibrary.simpleMessage("Fijne verjaardag! 🥳"),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "Wij gebruiken geen tracking. Het zou helpen als je ons vertelt waar je ons gevonden hebt!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
@@ -1122,6 +1141,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "iOSLockOut": MessageLookupByLibrary.simpleMessage(
             "Biometrische verificatie is uitgeschakeld. Vergrendel en ontgrendel uw scherm om het in te schakelen."),
         "iOSOkButton": MessageLookupByLibrary.simpleMessage("Oké"),
+        "ignore": MessageLookupByLibrary.simpleMessage("Negeren"),
         "ignoreUpdate": MessageLookupByLibrary.simpleMessage("Negeren"),
         "ignored": MessageLookupByLibrary.simpleMessage("genegeerd"),
         "ignoredFolderUploadReason": MessageLookupByLibrary.simpleMessage(
@@ -1324,6 +1344,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Selecteer het soort herinneringen dat je wilt zien op je beginscherm."),
         "memoryCount": m50,
         "merchandise": MessageLookupByLibrary.simpleMessage("Merchandise"),
+        "merge": MessageLookupByLibrary.simpleMessage("Samenvoegen"),
         "mergeWithExisting":
             MessageLookupByLibrary.simpleMessage("Samenvoegen met bestaand"),
         "mergedPhotos":
@@ -1463,6 +1484,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Of kies een bestaande"),
         "orPickFromYourContacts":
             MessageLookupByLibrary.simpleMessage("of kies uit je contacten"),
+        "otherDetectedFaces": MessageLookupByLibrary.simpleMessage(
+            "Andere gedetecteerde gezichten"),
         "pair": MessageLookupByLibrary.simpleMessage("Koppelen"),
         "pairWithPin": MessageLookupByLibrary.simpleMessage("Koppelen met PIN"),
         "pairingComplete":
@@ -1594,6 +1617,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Publieke link aangemaakt"),
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("Publieke link ingeschakeld"),
+        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
         "queued": MessageLookupByLibrary.simpleMessage("In wachtrij"),
         "quickLinks": MessageLookupByLibrary.simpleMessage("Snelle links"),
         "radius": MessageLookupByLibrary.simpleMessage("Straal"),
@@ -1606,6 +1630,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "reassignedToName": m69,
         "reassigningLoading":
             MessageLookupByLibrary.simpleMessage("Opnieuw toewijzen..."),
+        "receiveRemindersOnBirthdays": MessageLookupByLibrary.simpleMessage(
+            "Ontvang herinneringen wanneer iemand jarig is. Als je op de melding drukt, krijg je foto\'s van de jarige."),
         "recover": MessageLookupByLibrary.simpleMessage("Herstellen"),
         "recoverAccount":
             MessageLookupByLibrary.simpleMessage("Account herstellen"),
@@ -1708,6 +1734,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "reportBug": MessageLookupByLibrary.simpleMessage("Fout melden"),
         "resendEmail":
             MessageLookupByLibrary.simpleMessage("E-mail opnieuw versturen"),
+        "reset": MessageLookupByLibrary.simpleMessage("Reset"),
         "resetIgnoredFiles":
             MessageLookupByLibrary.simpleMessage("Reset genegeerde bestanden"),
         "resetPasswordTitle":
@@ -1736,6 +1763,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "safelyStored":
             MessageLookupByLibrary.simpleMessage("Veilig opgeslagen"),
         "save": MessageLookupByLibrary.simpleMessage("Opslaan"),
+        "saveAsAnotherPerson":
+            MessageLookupByLibrary.simpleMessage("Opslaan als ander persoon"),
         "saveChangesBeforeLeavingQuestion":
             MessageLookupByLibrary.simpleMessage(
                 "Wijzigingen opslaan voor verlaten?"),
@@ -1897,8 +1926,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharing": MessageLookupByLibrary.simpleMessage("Delen..."),
         "shiftDatesAndTime":
             MessageLookupByLibrary.simpleMessage("Verschuif datum en tijd"),
+        "showLessFaces":
+            MessageLookupByLibrary.simpleMessage("Minder gezichten weergeven"),
         "showMemories":
             MessageLookupByLibrary.simpleMessage("Toon herinneringen"),
+        "showMoreFaces":
+            MessageLookupByLibrary.simpleMessage("Minder gezichten weergeven"),
         "showPerson": MessageLookupByLibrary.simpleMessage("Toon persoon"),
         "signOutFromOtherDevices":
             MessageLookupByLibrary.simpleMessage("Log uit op andere apparaten"),
@@ -2021,6 +2054,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "theLinkYouAreTryingToAccessHasExpired":
             MessageLookupByLibrary.simpleMessage(
                 "De link die je probeert te openen is verlopen."),
+        "thePersonGroupsWillNotBeDisplayed": MessageLookupByLibrary.simpleMessage(
+            "De groepen worden niet meer getoond in de personen sectie. Foto\'s blijven ongemoeid."),
+        "thePersonWillNotBeDisplayed": MessageLookupByLibrary.simpleMessage(
+            "De persoon wordt niet meer getoond in de personen sectie. Foto\'s blijven ongemoeid."),
         "theRecoveryKeyYouEnteredIsIncorrect":
             MessageLookupByLibrary.simpleMessage(
                 "De ingevoerde herstelsleutel is onjuist"),
@@ -2219,6 +2256,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "yesDelete": MessageLookupByLibrary.simpleMessage("Ja, verwijderen"),
         "yesDiscardChanges":
             MessageLookupByLibrary.simpleMessage("Ja, wijzigingen negeren"),
+        "yesIgnore": MessageLookupByLibrary.simpleMessage("Ja, negeer"),
         "yesLogout": MessageLookupByLibrary.simpleMessage("Ja, log uit"),
         "yesRemove": MessageLookupByLibrary.simpleMessage("Ja, verwijderen"),
         "yesRenew": MessageLookupByLibrary.simpleMessage("Ja, verlengen"),

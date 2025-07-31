@@ -79,6 +79,12 @@ services:
     volumes:
       - ./museum.yaml:/museum.yaml:ro
       - ./data:/data:ro
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/ping"]
+      interval: 60s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
 
   # Resolve "localhost:3200" in the museum container to the minio container.
   socat:
@@ -153,13 +159,6 @@ printf " \033[1;32mN\033[0m   Created \033[1mcompose.yaml\033[0m\n"
 sleep 1
 
 cat <<EOF >museum.yaml
-key:
-      encryption: $museum_key
-      hash: $museum_hash
-
-jwt:
-      secret: $museum_jwt_secret
-
 db:
       host: postgres
       port: 5432
@@ -188,15 +187,32 @@ s3:
          endpoint: localhost:3200
          region: eu-central-2
          bucket: scw-eu-fr-v3
+
+# Specify the base endpoints for various web apps
+apps:
+    # If you're running a self hosted instance and wish to serve public links,
+    # set this to the URL where your albums web app is running.
+    public-albums: http://localhost:3002
+    cast: http://localhost:3004
+    # Set this to the URL where your accounts web app is running, primarily used for
+    # passkey based 2FA.
+    accounts: http://localhost:3001
+
+key:
+      encryption: $museum_key
+      hash: $museum_hash
+
+jwt:
+      secret: $museum_jwt_secret
 EOF
 
 printf " \033[1;32mT\033[0m   Created \033[1mmuseum.yaml\033[0m\n"
 sleep 1
 
-printf " \033[1;32mE\033[0m   Do you want to start Ente? (y/n): "
-read choice
+printf " \033[1;32mE\033[0m   Do you want to start Ente? (y/n) [n]: "
+read -r choice
 
-if [[ "$choice" == "y" || "$choice" == "Y" ]]; then
+if [[ "$choice" =~ ^[Yy]$ ]]; then
     printf "\nStarting docker compose\n"
     printf "\nAfter the cluster has started, open web app at \033[1mhttp://localhost:3000\033[0m\n"
     printf "(Verification code will be in the logs here)\n\n"

@@ -10,6 +10,7 @@ import 'package:photos/db/ml/base.dart';
 import "package:photos/db/ml/db.dart";
 import "package:photos/events/people_changed_event.dart";
 import 'package:photos/events/subscription_purchased_event.dart';
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/ml/face/person.dart";
@@ -116,12 +117,12 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
     items.addAll(
       [
         EntePopupMenuItem(
-          "Ignore person",
+          S.of(context).ignorePerson,
           value: ClusterPopupAction.ignore,
           icon: Icons.hide_image_outlined,
         ),
         EntePopupMenuItem(
-          "Mixed grouping?",
+          S.of(context).mixedGrouping,
           value: ClusterPopupAction.breakupCluster,
           icon: Icons.analytics_outlined,
         ),
@@ -165,10 +166,9 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
   Future<void> _onIgnoredClusterClicked(BuildContext context) async {
     await showChoiceDialog(
       context,
-      title: "Are you sure you want to ignore this person?",
-      body:
-          "The person grouping will not be displayed in the discovery tap anymore. Photos will remain untouched.",
-      firstButtonLabel: "Yes, confirm",
+      title: S.of(context).areYouSureYouWantToIgnoreThisPerson,
+      body: S.of(context).thePersonGroupsWillNotBeDisplayed,
+      firstButtonLabel: S.of(context).confirm,
       firstButtonOnTap: () async {
         try {
           await ClusterFeedbackService.instance.ignoreCluster(widget.clusterID);
@@ -187,10 +187,9 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
     String biggestClusterID = '';
     await showChoiceDialog(
       context,
-      title: "Does this grouping contain multiple people?",
-      body:
-          "We will automatically analyze the grouping to determine if there are multiple people present, and separate them out again. This may take a few seconds.",
-      firstButtonLabel: "Yes, confirm",
+      title: S.of(context).doesGroupContainMultiplePeople,
+      body: S.of(context).automaticallyAnalyzeAndSplitGrouping,
+      firstButtonLabel: S.of(context).confirm,
       firstButtonOnTap: () async {
         try {
           final breakupResult = await ClusterFeedbackService.instance
@@ -282,7 +281,7 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
       MaterialPageRoute(
         builder: (context) => ClusterBreakupPage(
           newClusterIDToFiles,
-          "(Analysis)",
+          S.of(context).analysis,
         ),
       ),
     );

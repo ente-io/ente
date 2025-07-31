@@ -899,7 +899,7 @@
   "authToViewYourMemories": "Authentifiez-vous pour voir vos souvenirs",
   "unlock": "Déverrouiller",
   "freeUpSpace": "Libérer de l'espace",
-  "freeUpSpaceSaving": "{count, plural, =1 {Il peut être supprimé de l'appareil pour libérer {formattedSize}} other {Ils peuvent être supprimés de l'appareil pour libérer {formattedSize}}}",
+  "freeUpSpaceSaving": "{count, plural, one {}=1 {Il peut être supprimé de l'appareil pour libérer {formattedSize}} other {Ils peuvent être supprimés de l'appareil pour libérer {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 fichier dans cet album a été sauvegardé en toute sécurité} other {{formattedNumber} fichiers dans cet album ont été sauvegardés en toute sécurité}}",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -933,7 +933,7 @@
   "@freeUpSpaceSaving": {
     "description": "Text to tell user how much space they can free up by deleting items from the device"
   },
-  "freeUpAccessPostDelete": "Vous pouvez toujours {count, plural, =1 {l'} other {les}} accéder sur Ente tant que vous avez un abonnement actif",
+  "freeUpAccessPostDelete": "Vous pouvez toujours {count, plural, one {}=1 {l'} other {les}} accéder sur Ente tant que vous avez un abonnement actif",
   "@freeUpAccessPostDelete": {
     "placeholders": {
       "count": {
@@ -1269,8 +1269,8 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Trouver des personnes rapidement par leur nom",
-  "addViewers": "{count, plural, =0 {Ajouter un spectateur} =1 {Ajouter une spectateur} other {Ajouter des spectateurs}}",
-  "addCollaborators": "{count, plural, =0 {Ajouter un collaborateur} =1 {Ajouter un collaborateur} other {Ajouter des collaborateurs}}",
+  "addViewers": "{count, plural, one {}=0 {Ajouter un spectateur} =1 {Ajouter une spectateur} other {Ajouter des spectateurs}}",
+  "addCollaborators": "{count, plural, one {}=0 {Ajouter un collaborateur} =1 {Ajouter un collaborateur} other {Ajouter des collaborateurs}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Appuyez longuement sur un email pour vérifier le chiffrement de bout en bout.",
   "developerSettingsWarning": "Êtes-vous sûr de vouloir modifier les paramètres du développeur ?",
   "developerSettings": "Paramètres du développeur",
@@ -1403,7 +1403,7 @@
   "enableMachineLearningBanner": "Activer l'apprentissage automatique pour la reconnaissance des visages et la recherche magique",
   "searchDiscoverEmptySection": "Les images seront affichées ici une fois le traitement terminé",
   "searchPersonsEmptySection": "Les personnes seront affichées ici une fois le traitement terminé",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {0 spectateur ajouté} =1 {Un spectateur ajouté} other {{count} spectateurs ajoutés}}",
+  "viewersSuccessfullyAdded": "{count, plural, one {}=0 {0 spectateur ajouté} =1 {Un spectateur ajouté} other {{count} spectateurs ajoutés}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1776,17 +1776,15 @@
   "same": "Identique",
   "different": "Différent(e)",
   "sameperson": "Même personne ?",
-  "cLTitle1": "Envoi de gros fichiers vidéo",
-  "cLDesc1": "Derrière la version beta du streaming vidéo, tout en travaillant sur la reprise des chargements et téléchargements, nous avons maintenant augmenté la limite de téléchargement de fichiers à 10 Go. Ceci est maintenant disponible dans les applications bureau et mobiles.",
-  "cLTitle2": "Charger en arrière-plan",
-  "cLDesc2": "Les chargements en arrière-plan sont maintenant pris en charge sur iOS, en plus des appareils Android. Inutile d'ouvrir l'application pour sauvegarder vos dernières photos et vidéos.",
-  "cLTitle3": "Lecture automatique des souvenirs",
-  "cLDesc3": "Nous avons apporté des améliorations significatives à l'expérience des souvenirs, comme la lecture automatique, la glisse vers le souvenir suivant et bien plus encore.",
-  "cLTitle4": "Amélioration de la reconnaissance faciale",
-  "cLDesc4": "Avec un tas d'améliorations sous le capot, il est maintenant beaucoup plus facile de voir tous les visages détectés, mettre des commentaires sur des visages similaires, et ajouter/supprimer des visages depuis une seule photo.",
-  "cLTitle5": "Notifications d’anniversaire",
-  "cLDesc5": "Vous recevrez maintenant une notification de désinscription pour tous les anniversaires que vous avez enregistrés sur Ente, ainsi qu'une collection de leurs meilleures photos.",
-  "cLTitle6": "Reprise des chargements et téléchargements",
-  "cLDesc6": "Plus besoin d'attendre la fin des chargements/téléchargements avant de pouvoir fermer l'application. Tous peuvent maintenant être mis en pause en cours de route et reprendre à partir de là où ça s'est arrêté.",
-  "indexingPausedStatusDescription": "L'indexation est en pause. Elle reprendra automatiquement lorsque l'appareil sera prêt. Celui-ci est considéré comme prêt lorsque le niveau de batterie, sa santé et son état thermique sont dans une plage saine."
+  "cLTitle1": "Éditeur d'images avancé",
+  "cLDesc1": "Nous lançons un nouvel éditeur d'images avancé qui ajoute plus de cadres de recadrage, des préréglages de filtres pour des modifications rapides, des options de réglage fin incluant la saturation, le contraste, la luminosité, la température et bien plus encore. Le nouvel éditeur inclut également la possibilité de dessiner sur vos photos et d'ajouter des emojis comme autocollants.",
+  "cLTitle2": "Albums intelligents",
+  "cLDesc2": "Vous pouvez maintenant ajouter automatiquement des photos de personnes sélectionnées à n'importe quel album. Allez simplement dans l'album et sélectionnez \"ajout automatique de personnes\" dans le menu de débordement. Si utilisé avec un album partagé, vous pouvez partager des photos en zéro clic.",
+  "cLTitle3": "Galerie améliorée",
+  "cLDesc3": "Nous avons ajouté la possibilité de regrouper votre galerie par semaines, mois et années. Vous pouvez maintenant personnaliser votre galerie pour qu'elle apparaisse exactement comme vous le souhaitez avec ces nouvelles options de regroupement, ainsi que des grilles personnalisées.",
+  "cLTitle4": "Défilement plus rapide",
+  "cLDesc4": "Avec de nombreuses améliorations sous le capot pour améliorer l'expérience de défilement de la galerie, nous avons également repensé la barre de défilement pour afficher des marqueurs, vous permettant de naviguer rapidement dans la chronologie.",
+  "indexingPausedStatusDescription": "L'indexation est en pause. Elle reprendra automatiquement lorsque l'appareil sera prêt. Celui-ci est considéré comme prêt lorsque le niveau de batterie, sa santé et son état thermique sont dans une plage saine.",
+  "faceThumbnailGenerationFailed": "Impossible de créer des miniatures de visage",
+  "fileAnalysisFailed": "Impossible d'analyser le fichier"
 }

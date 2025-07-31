@@ -1,10 +1,12 @@
 import "dart:io";
 
+import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:permission_handler/permission_handler.dart";
 import "package:photos/db/upload_locks_db.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/main.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/utils/file_uploader.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import "package:workmanager/workmanager.dart" as workmanager;
@@ -79,7 +81,7 @@ class BgTaskUtils {
     try {
       await workmanager.Workmanager().initialize(
         callbackDispatcher,
-        isInDebugMode: false,
+        isInDebugMode: Platform.isIOS && flagService.internalUser,
       );
       await workmanager.Workmanager().registerPeriodicTask(
         backgroundTaskIdentifier,
@@ -87,7 +89,7 @@ class BgTaskUtils {
         frequency: Platform.isIOS
             ? const Duration(minutes: 30)
             : const Duration(minutes: 15),
-        initialDelay: const Duration(minutes: 10),
+        initialDelay: kDebugMode ? Duration.zero : const Duration(minutes: 10),
         constraints: workmanager.Constraints(
           networkType: workmanager.NetworkType.connected,
           requiresCharging: false,

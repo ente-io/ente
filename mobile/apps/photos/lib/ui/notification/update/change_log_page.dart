@@ -1,5 +1,3 @@
-import "dart:io";
-
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
@@ -103,29 +101,20 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     final List<ChangeLogEntry> items = [];
     items.addAll([
       ChangeLogEntry(
-        context.l10n.cLTitle4,
-        context.l10n.cLDesc4,
+        context.l10n.cLTitle1,
+        context.l10n.cLDesc1,
+      ),
+      ChangeLogEntry(
+        context.l10n.cLTitle2,
+        context.l10n.cLDesc2,
       ),
       ChangeLogEntry(
         context.l10n.cLTitle3,
         context.l10n.cLDesc3,
       ),
       ChangeLogEntry(
-        context.l10n.cLTitle5,
-        context.l10n.cLDesc5,
-      ),
-      if (!Platform.isAndroid)
-        ChangeLogEntry(
-          context.l10n.cLTitle2,
-          context.l10n.cLDesc2,
-        ),
-      ChangeLogEntry(
-        context.l10n.cLTitle6,
-        context.l10n.cLDesc6,
-      ),
-      ChangeLogEntry(
-        context.l10n.cLTitle1,
-        context.l10n.cLDesc1,
+        context.l10n.cLTitle4,
+        context.l10n.cLDesc4,
       ),
     ]);
 

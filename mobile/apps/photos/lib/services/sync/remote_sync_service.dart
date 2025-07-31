@@ -51,6 +51,10 @@ class RemoteSyncService {
   Completer<void>? _existingSync;
   bool _isExistingSyncSilent = false;
 
+  // _hasCleanupStaleEntry is used to track if we have already cleaned up
+  // statle db entries in this sync session.
+  bool _hasCleanupStaleEntry = false;
+
   static const kHasSyncedArchiveKey = "has_synced_archive";
   /* This setting is used to maintain a list of local IDs for videos that the user has manually
  marked for upload, even if the global video upload setting is currently disabled.
@@ -371,6 +375,14 @@ class RemoteSyncService {
         final Set<String> alreadyClaimedLocalIDs =
             await _db.getLocalIDsMarkedForOrAlreadyUploaded(ownerID);
         localIDsToSync.removeAll(alreadyClaimedLocalIDs);
+        if (alreadyClaimedLocalIDs.isNotEmpty && !_hasCleanupStaleEntry) {
+          try {
+          await _db.removeQueuedLocalFiles(alreadyClaimedLocalIDs);
+          } catch(e, s) {
+            _logger.severe("removeQueuedLocalFiles failed",e,s);
+            
+          }
+        }
       }
 
       if (localIDsToSync.isEmpty) {
@@ -439,6 +451,7 @@ class RemoteSyncService {
       // "force reload due to display new files"
       Bus.instance.fire(ForceReloadHomeGalleryEvent("newFilesDisplay"));
     }
+    _hasCleanupStaleEntry = true;
   }
 
   Future<void> updateDeviceFolderSyncStatus(

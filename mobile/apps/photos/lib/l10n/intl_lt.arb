@@ -484,7 +484,7 @@
   "backupOverMobileData": "Kurti atsargines kopijas per mobiliuosius duomenis",
   "backupVideos": "Kurti atsargines vaizdo įrašų kopijas",
   "disableAutoLock": "Išjungti automatinį užraktą",
-  "deviceLockExplanation": "Išjunkite įrenginio ekrano užraktą, kai „Ente“ yra priekiniame fone ir kuriama atsarginės kopijos. Paprastai to nereikia, bet tai gali padėti greičiau užbaigti didelius įkėlimus ir pradinį didelių bibliotekų importą.",
+  "deviceLockExplanation": "Išjunkite įrenginio ekrano užraktą, kai „Ente“ yra priekiniame fone ir kuriama atsarginės kopijos. Paprastai to nereikia, bet tai gali padėti sparčiau užbaigti didelius įkėlimus ir pradinį didelių bibliotekų importą.",
   "about": "Apie",
   "weAreOpenSource": "Esame atviro kodo!",
   "privacy": "Privatumas",
@@ -900,7 +900,7 @@
   "unlock": "Atrakinti",
   "freeUpSpace": "Atlaisvinti vietos",
   "freeUpSpaceSaving": "{count, plural, =1 {Jį galima ištrinti iš įrenginio, kad atlaisvintų {formattedSize}} other {Jų galima ištrinti iš įrenginio, kad atlaisvintų {formattedSize}}}",
-  "filesBackedUpInAlbum": "{count, plural, one {{formattedNumber} failas šiame albume saugiai sukurta atsarginė kopija} other {{formattedNumber} failų šiame albume saugiai sukurta atsarginė kopija}}.",
+  "filesBackedUpInAlbum": "{count, plural, one {{formattedNumber} failas šiame albume saugiai sukurta atsarginė kopija} few {{formattedNumber} failai šiame albume saugiai sukurtos atsarginės kopijos} many {{formattedNumber} failo šiame albume saugiai sukurtos atsargines kopijos} other {{formattedNumber} failų šiame albume saugiai sukurta atsarginė kopija}}.",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
     "placeholders": {
@@ -915,7 +915,7 @@
       }
     }
   },
-  "filesBackedUpFromDevice": "{count, plural, one {{formattedNumber} failas šiame įrenginyje saugiai sukurta atsarginė kopija} other {{formattedNumber} failų šiame įrenginyje saugiai sukurta atsarginių kopijų}}.",
+  "filesBackedUpFromDevice": "{count, plural, one {{formattedNumber} failas šiame įrenginyje saugiai sukurta atsarginė kopija} few {{formattedNumber} failai šiame įrenginyje saugiai sukurtos atsarginės kopijos} many {{formattedNumber} failo šiame įrenginyje saugiai sukurtos atsargines kopijos} other {{formattedNumber} failų šiame įrenginyje saugiai sukurta atsarginių kopijų}}.",
   "@filesBackedUpFromDevice": {
     "description": "Text to tell user how many files have been backed up from this device",
     "placeholders": {
@@ -1049,7 +1049,7 @@
   "searchPeopleEmptySection": "Pakvieskite asmenis ir čia matysite visas jų bendrinamas nuotraukas.",
   "searchAlbumsEmptySection": "Albumai",
   "searchFileTypesAndNamesEmptySection": "Failų tipai ir pavadinimai",
-  "searchCaptionEmptySection": "Pridėkite aprašymus, pavyzdžiui, „#kelionė“, į nuotraukos informaciją, kad greičiau jas čia rastumėte.",
+  "searchCaptionEmptySection": "Pridėkite aprašus, pavyzdžiui, „#kelionė“, į nuotraukos informaciją, kad sparčiau jas čia rastumėte.",
   "language": "Kalba",
   "selectLanguage": "Pasirinkite kalbą",
   "locationName": "Vietovės pavadinimas",
@@ -1264,11 +1264,11 @@
   "joinDiscord": "Jungtis prie „Discord“",
   "locations": "Vietovės",
   "addAName": "Pridėti vardą",
-  "findThemQuickly": "Raskite juos greitai",
+  "findThemQuickly": "Raskite juos sparčiai",
   "@findThemQuickly": {
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
-  "findPeopleByName": "Greitai suraskite žmones pagal vardą",
+  "findPeopleByName": "Sparčiai suraskite asmenis pagal vardą",
   "addViewers": "{count, plural, =0 {Pridėti žiūrėtojų} =1 {Pridėti žiūrėtoją} other {Pridėti žiūrėtojų}}",
   "addCollaborators": "{count, plural, =0 {Pridėti bendradarbių} =1 {Pridėti bendradarbį} other {Pridėti bendradarbių}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Ilgai paspauskite el. paštą, kad patvirtintumėte visapusį šifravimą.",
@@ -1403,7 +1403,7 @@
   "enableMachineLearningBanner": "Įjunkite mašininį mokymąsi magiškai paieškai ir veidų atpažinimui",
   "searchDiscoverEmptySection": "Vaizdai bus rodomi čia, kai bus užbaigtas apdorojimas ir sinchronizavimas.",
   "searchPersonsEmptySection": "Asmenys bus rodomi čia, kai bus užbaigtas apdorojimas ir sinchronizavimas.",
-  "viewersSuccessfullyAdded": "{count, plural, =0 {Įtraukta 0 žiūrėtojų} =1 {Įtrauktas 1 žiūrėtojas} other {Įtraukta {count} žiūrėtojų}}",
+  "viewersSuccessfullyAdded": "{count, plural, one {Įtrauktas {count} žiūrėtojas} few {Įtraukti {count} žiūrėtojai} many {Įtraukta {count} žiūrėtojo} =0 {Įtraukta 0 žiūrėtojų} =1 {Įtrauktas 1 žiūrėtojas} other {Įtraukta {count} žiūrėtojų}}",
   "@viewersSuccessfullyAdded": {
     "placeholders": {
       "count": {
@@ -1488,7 +1488,7 @@
   },
   "currentlyRunning": "šiuo metu vykdoma",
   "ignored": "ignoruota",
-  "photosCount": "{count, plural, =0 {0 nuotraukų} =1 {1 nuotrauka} other {{count} nuotraukų}}",
+  "photosCount": "{count, plural, one {{count} nuotrauka} few {{count} nuotraukos} many {{count} nuotraukos} =0 {0 nuotraukų} =1 {1 nuotrauka} other {{count} nuotraukų}}",
   "@photosCount": {
     "placeholders": {
       "count": {
@@ -1755,5 +1755,36 @@
   "receiveRemindersOnBirthdays": "Gaukite priminimus, kai yra kažkieno gimtadienis. Paliesdami pranešimą, pateksite į gimtadienio šventės asmens nuotraukas.",
   "happyBirthday": "Su gimtadieniu! 🥳",
   "birthdays": "Gimtadieniai",
-  "wishThemAHappyBirthday": "Palinkėkite {name} su gimtadieniu! 🎉"
+  "wishThemAHappyBirthday": "Palinkėkite {name} su gimtadieniu! 🎉",
+  "areYouSureRemoveThisFaceFromPerson": "Ar tikrai norite pašalinti šį veidą iš šio asmens?",
+  "otherDetectedFaces": "Kiti aptikti veidai",
+  "areThey": "Ar jie ",
+  "questionmark": "?",
+  "saveAsAnotherPerson": "Išsaugoti kaip kitą asmenį",
+  "showLessFaces": "Rodyti mažiau veidų",
+  "showMoreFaces": "Rodyti daugiau veidų",
+  "ignore": "Ignoruoti",
+  "merge": "Sujungti",
+  "reset": "Atkurti",
+  "areYouSureYouWantToIgnoreThisPerson": "Ar tikrai norite ignoruoti šį asmenį?",
+  "areYouSureYouWantToIgnoreThesePersons": "Ar tikrai norite ignoruoti šiuos asmenis?",
+  "thePersonGroupsWillNotBeDisplayed": "Asmenų grupės nebebus rodomos asmenų sekcijoje. Nuotraukos liks nepakitusios.",
+  "thePersonWillNotBeDisplayed": "Asmuo nebebus rodomas asmenų sekcijoje. Nuotraukos liks nepakitusios.",
+  "areYouSureYouWantToMergeThem": "Ar tikrai norite juos sujungti?",
+  "allUnnamedGroupsWillBeMergedIntoTheSelectedPerson": "Visos nepavadintos grupės bus sujungtos su pasirinktu asmeniu. Tai vis dar galima atšaukti iš asmens pasiūlymų istorijos apžvalgos.",
+  "yesIgnore": "Taip, ignoruoti",
+  "same": "Tas pats",
+  "different": "Skirtingas",
+  "sameperson": "Tas pats asmuo?",
+  "cLTitle1": "Išplėstinis vaizdų redaktorius",
+  "cLDesc1": "Paleidžiame naują ir išplėstinį vaizdų redaktorių, kuris prideda daugiau apkarpymo rėmelių, filtrų šablonus spartiems redagavimams, tikslaus derinimo parinktis, įskaitant sodrumą, kontrastą, ryškumą, temperatūrą ir daug daugiau. Naujasis redaktorius taip pat įtraukia galimybę piešti ant nuotraukų ir pridėti šypsniukus kaip lipdukus.",
+  "cLTitle2": "Protingi albumai",
+  "cLDesc2": "Dabar galite automatiškai pridėti pasirinktų asmenų nuotraukas į bet kurį albumą. Tiesiog eikite į albumą ir pasirinkite „automatiškai pridėti asmenis“ iš perpildymo meniu. Jei naudojate kartu su bendrinamu albumu, galite bendrinti nuotraukas su nuliniais paspaudimais. ir sistemoje „iOS“ bei „Android“ įrenginiuose. Nebereikia atverti programėlės, kad būtų galima sukurti naujausių nuotraukų ir vaizdo įrašų atsarginę kopiją.",
+  "cLTitle3": "Patobulinta galerija",
+  "cLDesc3": "Pridėjome galimybę grupuoti galeriją pagal savaites, mėnesius ir metus. Dabar galite pritaikyti galeriją, kad ji atrodytų lygiai taip, kaip norite, su šiomis naujomis grupavimo parinktimis kartu su tinkintais tinkleliais.",
+  "cLTitle4": "Greitesnis slinkimas",
+  "cLDesc4": "Kartu su daugybe vidinių patobulinimų galerijos slinkimo patirčiai pagerinti, taip pat perdarėme slinkimo juostą, kad rodytų žymeklius, leidžiančius greitai šokti per laiko juostą.",
+  "indexingPausedStatusDescription": "Indeksavimas pristabdytas. Jis bus automatiškai tęsiamas, kai įrenginys bus parengtas. Įrenginys laikomas parengtu, kai jo akumuliatoriaus įkrovos lygis, akumuliatoriaus būklė ir terminė būklė yra normos ribose.",
+  "faceThumbnailGenerationFailed": "Nepavyksta sugeneruoti veido miniatiūrų.",
+  "fileAnalysisFailed": "Nepavyksta išanalizuoti failo."
 }

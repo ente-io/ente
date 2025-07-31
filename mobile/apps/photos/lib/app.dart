@@ -5,7 +5,7 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:home_widget/home_widget.dart' as hw;
 import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension_action_types.dart';
@@ -74,8 +74,10 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     _peopleChangedSubscription = Bus.instance.on<PeopleChangedEvent>().listen(
       (event) async {
         _changeCallbackDebouncer.run(
-          () async =>
-              unawaited(PeopleHomeWidgetService.instance.checkPeopleChanged()),
+          () async {
+            unawaited(PeopleHomeWidgetService.instance.checkPeopleChanged());
+            unawaited(smartAlbumsService.syncSmartAlbums());
+          },
         );
       },
     );
@@ -143,7 +145,9 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
             supportedLocales: appSupportedLocales,
             localeListResolutionCallback: localResolutionCallBack,
             localizationsDelegates: const [
-              ...AppLocalizations.localizationsDelegates,
+              GlobalMaterialLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
               S.delegate,
             ],
           ),
@@ -166,7 +170,9 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
           supportedLocales: appSupportedLocales,
           localeListResolutionCallback: localResolutionCallBack,
           localizationsDelegates: const [
-            ...AppLocalizations.localizationsDelegates,
+            GlobalMaterialLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
             S.delegate,
           ],
         ),

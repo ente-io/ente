@@ -12166,121 +12166,81 @@ class S {
     );
   }
 
-  /// `Uploading Large Video Files`
+  /// `Advanced Image Editor`
   String get cLTitle1 {
     return Intl.message(
-      'Uploading Large Video Files',
+      'Advanced Image Editor',
       name: 'cLTitle1',
       desc: '',
       args: [],
     );
   }
 
-  /// `On the back of video streaming beta, and work on resumable uploads and downloads, we have now increased the file upload limit to 10GB. This is now available in both desktop and mobile apps.`
+  /// `We are releasing a new and advanced image editor that add more cropping frames, filter presets for quick edits, fine tuning options including saturation, contrast, brightness, temperature and a lot more. The new editor also includes the ability to draw on your photos and add emojis as stickers.`
   String get cLDesc1 {
     return Intl.message(
-      'On the back of video streaming beta, and work on resumable uploads and downloads, we have now increased the file upload limit to 10GB. This is now available in both desktop and mobile apps.',
+      'We are releasing a new and advanced image editor that add more cropping frames, filter presets for quick edits, fine tuning options including saturation, contrast, brightness, temperature and a lot more. The new editor also includes the ability to draw on your photos and add emojis as stickers.',
       name: 'cLDesc1',
       desc: '',
       args: [],
     );
   }
 
-  /// `Background Upload`
+  /// `Smart Albums`
   String get cLTitle2 {
     return Intl.message(
-      'Background Upload',
+      'Smart Albums',
       name: 'cLTitle2',
       desc: '',
       args: [],
     );
   }
 
-  /// `Background uploads are now supported on iOS as well, in addition to Android devices. No need to open the app to backup your latest photos and videos.`
+  /// `You can now automatically add photos of selected people to any album. Just go the album, and select "auto-add people" from the overflow menu. If used along with shared album, you can share photos with zero clicks.`
   String get cLDesc2 {
     return Intl.message(
-      'Background uploads are now supported on iOS as well, in addition to Android devices. No need to open the app to backup your latest photos and videos.',
+      'You can now automatically add photos of selected people to any album. Just go the album, and select "auto-add people" from the overflow menu. If used along with shared album, you can share photos with zero clicks.',
       name: 'cLDesc2',
       desc: '',
       args: [],
     );
   }
 
-  /// `Autoplay Memories`
+  /// `Improved Gallery`
   String get cLTitle3 {
     return Intl.message(
-      'Autoplay Memories',
+      'Improved Gallery',
       name: 'cLTitle3',
       desc: '',
       args: [],
     );
   }
 
-  /// `We have made significant improvements to our memories experience, including autoplay, swipe to next memory and a lot more.`
+  /// `We have added the ability to group your gallery by weeks, months, and years. You can now customise your gallery to look exactly the way you want with these new grouping options, along with custom grids`
   String get cLDesc3 {
     return Intl.message(
-      'We have made significant improvements to our memories experience, including autoplay, swipe to next memory and a lot more.',
+      'We have added the ability to group your gallery by weeks, months, and years. You can now customise your gallery to look exactly the way you want with these new grouping options, along with custom grids',
       name: 'cLDesc3',
       desc: '',
       args: [],
     );
   }
 
-  /// `Improved Face Recognition`
+  /// `Faster Scroll`
   String get cLTitle4 {
     return Intl.message(
-      'Improved Face Recognition',
+      'Faster Scroll',
       name: 'cLTitle4',
       desc: '',
       args: [],
     );
   }
 
-  /// `Along with a bunch of under the hood improvements, now its much easier to see all detected faces, provide feedback on similar faces, and add/remove faces from a single photo.`
+  /// `Along with a bunch of under the hood improvements to improve the gallery scroll experience, we have also redesigned the scroll bar to show markers, allowing you to quickly jump across the timeline.`
   String get cLDesc4 {
     return Intl.message(
-      'Along with a bunch of under the hood improvements, now its much easier to see all detected faces, provide feedback on similar faces, and add/remove faces from a single photo.',
+      'Along with a bunch of under the hood improvements to improve the gallery scroll experience, we have also redesigned the scroll bar to show markers, allowing you to quickly jump across the timeline.',
       name: 'cLDesc4',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Birthday Notifications`
-  String get cLTitle5 {
-    return Intl.message(
-      'Birthday Notifications',
-      name: 'cLTitle5',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `You will now receive an opt-out notification for all the birthdays your have saved on Ente, along with a collection of their best photos.`
-  String get cLDesc5 {
-    return Intl.message(
-      'You will now receive an opt-out notification for all the birthdays your have saved on Ente, along with a collection of their best photos.',
-      name: 'cLDesc5',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Resumable Uploads and Downloads`
-  String get cLTitle6 {
-    return Intl.message(
-      'Resumable Uploads and Downloads',
-      name: 'cLTitle6',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `No more waiting for uploads/downloads to complete before you can close the app. All uploads and downloads now have the ability to be paused midway, and resume from where you left off.`
-  String get cLDesc6 {
-    return Intl.message(
-      'No more waiting for uploads/downloads to complete before you can close the app. All uploads and downloads now have the ability to be paused midway, and resume from where you left off.',
-      name: 'cLDesc6',
       desc: '',
       args: [],
     );
@@ -12291,6 +12251,246 @@ class S {
     return Intl.message(
       'Indexing is paused. It will automatically resume when the device is ready. The device is considered ready when its battery level, battery health, and thermal status are within a healthy range.',
       name: 'indexingPausedStatusDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This week`
+  String get thisWeek {
+    return Intl.message(
+      'This week',
+      name: 'thisWeek',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Last week`
+  String get lastWeek {
+    return Intl.message(
+      'Last week',
+      name: 'lastWeek',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This month`
+  String get thisMonth {
+    return Intl.message(
+      'This month',
+      name: 'thisMonth',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This year`
+  String get thisYear {
+    return Intl.message(
+      'This year',
+      name: 'thisYear',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Group by`
+  String get groupBy {
+    return Intl.message(
+      'Group by',
+      name: 'groupBy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unable to generate face thumbnails`
+  String get faceThumbnailGenerationFailed {
+    return Intl.message(
+      'Unable to generate face thumbnails',
+      name: 'faceThumbnailGenerationFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unable to analyze file`
+  String get fileAnalysisFailed {
+    return Intl.message(
+      'Unable to analyze file',
+      name: 'fileAnalysisFailed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Edit auto-add people`
+  String get editAutoAddPeople {
+    return Intl.message(
+      'Edit auto-add people',
+      name: 'editAutoAddPeople',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Auto-add people`
+  String get autoAddPeople {
+    return Intl.message(
+      'Auto-add people',
+      name: 'autoAddPeople',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Auto-add to album`
+  String get autoAddToAlbum {
+    return Intl.message(
+      'Auto-add to album',
+      name: 'autoAddToAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Should the files related to the person that were previously selected in smart albums be removed?`
+  String get shouldRemoveFilesSmartAlbumsDesc {
+    return Intl.message(
+      'Should the files related to the person that were previously selected in smart albums be removed?',
+      name: 'shouldRemoveFilesSmartAlbumsDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Adding photos`
+  String get addingPhotos {
+    return Intl.message(
+      'Adding photos',
+      name: 'addingPhotos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Getting ready`
+  String get gettingReady {
+    return Intl.message(
+      'Getting ready',
+      name: 'gettingReady',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add some photos or pick `
+  String get addSomePhotosDesc1 {
+    return Intl.message(
+      'Add some photos or pick ',
+      name: 'addSomePhotosDesc1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `familiar faces`
+  String get addSomePhotosDesc2 {
+    return Intl.message(
+      'familiar faces',
+      name: 'addSomePhotosDesc2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `\nto begin with`
+  String get addSomePhotosDesc3 {
+    return Intl.message(
+      '\nto begin with',
+      name: 'addSomePhotosDesc3',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ignore person`
+  String get ignorePerson {
+    return Intl.message(
+      'Ignore person',
+      name: 'ignorePerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Mixed grouping?`
+  String get mixedGrouping {
+    return Intl.message(
+      'Mixed grouping?',
+      name: 'mixedGrouping',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Analysis`
+  String get analysis {
+    return Intl.message(
+      'Analysis',
+      name: 'analysis',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Does this grouping contain multiple people?`
+  String get doesGroupContainMultiplePeople {
+    return Intl.message(
+      'Does this grouping contain multiple people?',
+      name: 'doesGroupContainMultiplePeople',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We will automatically analyze the grouping to determine if there are multiple people present, and separate them out again. This may take a few seconds.`
+  String get automaticallyAnalyzeAndSplitGrouping {
+    return Intl.message(
+      'We will automatically analyze the grouping to determine if there are multiple people present, and separate them out again. This may take a few seconds.',
+      name: 'automaticallyAnalyzeAndSplitGrouping',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Layout`
+  String get layout {
+    return Intl.message(
+      'Layout',
+      name: 'layout',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Day`
+  String get day {
+    return Intl.message(
+      'Day',
+      name: 'day',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select the people you want to automatically add to the album`
+  String get peopleAutoAddDesc {
+    return Intl.message(
+      'Select the people you want to automatically add to the album',
+      name: 'peopleAutoAddDesc',
       desc: '',
       args: [],
     );
@@ -12329,6 +12529,7 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
       Locale.fromSubtags(languageCode: 'lt'),
       Locale.fromSubtags(languageCode: 'lv'),
       Locale.fromSubtags(languageCode: 'ml'),
+      Locale.fromSubtags(languageCode: 'ms'),
       Locale.fromSubtags(languageCode: 'nl'),
       Locale.fromSubtags(languageCode: 'no'),
       Locale.fromSubtags(languageCode: 'or'),

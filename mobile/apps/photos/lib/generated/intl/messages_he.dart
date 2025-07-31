@@ -43,7 +43,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "אנא צור איתנו קשר ב-support@ente.io על מנת לנהל את המנוי ${provider}.";
 
   static String m21(count) =>
-      "${Intl.plural(count, one: 'מחק ${count} פריט', other: 'מחק ${count} פריטים')}";
+      "${Intl.plural(count, one: 'מחק ${count} פריט', two: 'מחק ${count} פריטים', other: 'מחק ${count} פריטים')}";
 
   static String m23(currentlyDeleting, totalCount) =>
       "מוחק ${currentlyDeleting} / ${totalCount}";
@@ -66,7 +66,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m38(endDate) => "ניסיון חינם בתוקף עד ל-${endDate}";
 
   static String m44(count) =>
-      "${Intl.plural(count, one: '${count} פריט', other: '${count} פריטים')}";
+      "${Intl.plural(count, one: '${count} פריט', two: '${count} פריטים', many: '${count} פריטים', other: '${count} פריטים')}";
 
   static String m47(expiryTime) => "תוקף הקישור יפוג ב-${expiryTime}";
 
@@ -114,10 +114,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m114(email) => "שלחנו דוא\"ל ל<green>${email}</green>";
 
-  static String m115(name) => "Wish \$${name} a happy birthday! 🎉";
-
   static String m116(count) =>
-      "${Intl.plural(count, one: 'לפני ${count} שנה', other: 'לפני ${count} שנים')}";
+      "${Intl.plural(count, one: 'לפני ${count} שנה', two: 'לפני ${count} שנים', many: 'לפני ${count} שנים', other: 'לפני ${count} שנים')}";
 
   static String m118(storageSaved) => "הצלחת לפנות ${storageSaved}!";
 
@@ -910,7 +908,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "weHaveSendEmailTo": m114,
         "weakStrength": MessageLookupByLibrary.simpleMessage("חלשה"),
         "welcomeBack": MessageLookupByLibrary.simpleMessage("ברוך שובך!"),
-        "wishThemAHappyBirthday": m115,
         "yearly": MessageLookupByLibrary.simpleMessage("שנתי"),
         "yearsAgo": m116,
         "yes": MessageLookupByLibrary.simpleMessage("כן"),

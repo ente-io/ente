@@ -11,7 +11,6 @@ import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/ui/settings/app_icon_selection_screen.dart";
-import "package:photos/ui/settings/gallery_settings_screen.dart";
 import "package:photos/ui/settings/ml/machine_learning_settings_page.dart";
 import 'package:photos/utils/navigation_util.dart';
 
@@ -65,28 +64,6 @@ class AdvancedSettingsScreen extends StatelessWidget {
                           routeToPage(
                             context,
                             const MachineLearningSettingsPage(),
-                          );
-                        },
-                      ),
-                      const SizedBox(
-                        height: 24,
-                      ),
-                      MenuItemWidget(
-                        captionedTextWidget: CaptionedTextWidget(
-                          title: S.of(context).gallery,
-                        ),
-                        menuItemColor: colorScheme.fillFaint,
-                        trailingWidget: Icon(
-                          Icons.chevron_right_outlined,
-                          color: colorScheme.strokeBase,
-                        ),
-                        singleBorderRadius: 8,
-                        alignCaptionedTextToLeft: true,
-                        onTap: () async {
-                          // ignore: unawaited_futures
-                          routeToPage(
-                            context,
-                            const GallerySettingsScreen(),
                           );
                         },
                       ),

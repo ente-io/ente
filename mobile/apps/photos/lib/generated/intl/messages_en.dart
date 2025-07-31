@@ -380,6 +380,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "Add a people widget to your homescreen and come back here to customize."),
         "addPhotos": MessageLookupByLibrary.simpleMessage("Add photos"),
         "addSelected": MessageLookupByLibrary.simpleMessage("Add selected"),
+        "addSomePhotosDesc1":
+            MessageLookupByLibrary.simpleMessage("Add some photos or pick "),
+        "addSomePhotosDesc2":
+            MessageLookupByLibrary.simpleMessage("familiar faces"),
+        "addSomePhotosDesc3":
+            MessageLookupByLibrary.simpleMessage("\nto begin with"),
         "addToAlbum": MessageLookupByLibrary.simpleMessage("Add to album"),
         "addToEnte": MessageLookupByLibrary.simpleMessage("Add to Ente"),
         "addToHiddenAlbum":
@@ -393,6 +399,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "addedAs": MessageLookupByLibrary.simpleMessage("Added as"),
         "addedBy": m5,
         "addedSuccessfullyTo": m6,
+        "addingPhotos": MessageLookupByLibrary.simpleMessage("Adding photos"),
         "addingToFavorites":
             MessageLookupByLibrary.simpleMessage("Adding to favorites..."),
         "admiringThem": m7,
@@ -435,6 +442,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Please allow access to your photos from Settings so Ente can display and backup your library."),
         "allowPermTitle":
             MessageLookupByLibrary.simpleMessage("Allow access to photos"),
+        "analysis": MessageLookupByLibrary.simpleMessage("Analysis"),
         "androidBiometricHint":
             MessageLookupByLibrary.simpleMessage("Verify identity"),
         "androidBiometricNotRecognized":
@@ -539,6 +547,10 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Authentication failed, please try again"),
         "authenticationSuccessful":
             MessageLookupByLibrary.simpleMessage("Authentication successful!"),
+        "autoAddPeople":
+            MessageLookupByLibrary.simpleMessage("Auto-add people"),
+        "autoAddToAlbum":
+            MessageLookupByLibrary.simpleMessage("Auto-add to album"),
         "autoCastDialogBody": MessageLookupByLibrary.simpleMessage(
             "You\'ll see available Cast devices here."),
         "autoCastiOSPermission": MessageLookupByLibrary.simpleMessage(
@@ -551,6 +563,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "autoPair": MessageLookupByLibrary.simpleMessage("Auto pair"),
         "autoPairDesc": MessageLookupByLibrary.simpleMessage(
             "Auto pair works only with devices that support Chromecast."),
+        "automaticallyAnalyzeAndSplitGrouping":
+            MessageLookupByLibrary.simpleMessage(
+                "We will automatically analyze the grouping to determine if there are multiple people present, and separate them out again. This may take a few seconds."),
         "available": MessageLookupByLibrary.simpleMessage("Available"),
         "availableStorageSpace": m10,
         "backedUpFolders":
@@ -576,27 +591,18 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Black Friday Sale"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
         "cLDesc1": MessageLookupByLibrary.simpleMessage(
-            "On the back of video streaming beta, and work on resumable uploads and downloads, we have now increased the file upload limit to 10GB. This is now available in both desktop and mobile apps."),
+            "We are releasing a new and advanced image editor that add more cropping frames, filter presets for quick edits, fine tuning options including saturation, contrast, brightness, temperature and a lot more. The new editor also includes the ability to draw on your photos and add emojis as stickers."),
         "cLDesc2": MessageLookupByLibrary.simpleMessage(
-            "Background uploads are now supported on iOS as well, in addition to Android devices. No need to open the app to backup your latest photos and videos."),
+            "You can now automatically add photos of selected people to any album. Just go the album, and select \"auto-add people\" from the overflow menu. If used along with shared album, you can share photos with zero clicks."),
         "cLDesc3": MessageLookupByLibrary.simpleMessage(
-            "We have made significant improvements to our memories experience, including autoplay, swipe to next memory and a lot more."),
+            "We have added the ability to group your gallery by weeks, months, and years. You can now customise your gallery to look exactly the way you want with these new grouping options, along with custom grids"),
         "cLDesc4": MessageLookupByLibrary.simpleMessage(
-            "Along with a bunch of under the hood improvements, now its much easier to see all detected faces, provide feedback on similar faces, and add/remove faces from a single photo."),
-        "cLDesc5": MessageLookupByLibrary.simpleMessage(
-            "You will now receive an opt-out notification for all the birthdays your have saved on Ente, along with a collection of their best photos."),
-        "cLDesc6": MessageLookupByLibrary.simpleMessage(
-            "No more waiting for uploads/downloads to complete before you can close the app. All uploads and downloads now have the ability to be paused midway, and resume from where you left off."),
+            "Along with a bunch of under the hood improvements to improve the gallery scroll experience, we have also redesigned the scroll bar to show markers, allowing you to quickly jump across the timeline."),
         "cLTitle1":
-            MessageLookupByLibrary.simpleMessage("Uploading Large Video Files"),
-        "cLTitle2": MessageLookupByLibrary.simpleMessage("Background Upload"),
-        "cLTitle3": MessageLookupByLibrary.simpleMessage("Autoplay Memories"),
-        "cLTitle4":
-            MessageLookupByLibrary.simpleMessage("Improved Face Recognition"),
-        "cLTitle5":
-            MessageLookupByLibrary.simpleMessage("Birthday Notifications"),
-        "cLTitle6": MessageLookupByLibrary.simpleMessage(
-            "Resumable Uploads and Downloads"),
+            MessageLookupByLibrary.simpleMessage("Advanced Image Editor"),
+        "cLTitle2": MessageLookupByLibrary.simpleMessage("Smart Albums"),
+        "cLTitle3": MessageLookupByLibrary.simpleMessage("Improved Gallery"),
+        "cLTitle4": MessageLookupByLibrary.simpleMessage("Faster Scroll"),
         "cachedData": MessageLookupByLibrary.simpleMessage("Cached data"),
         "calculating": MessageLookupByLibrary.simpleMessage("Calculating..."),
         "canNotOpenBody": MessageLookupByLibrary.simpleMessage(
@@ -774,6 +780,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "custom": MessageLookupByLibrary.simpleMessage("Custom"),
         "customEndpoint": m20,
         "darkTheme": MessageLookupByLibrary.simpleMessage("Dark"),
+        "day": MessageLookupByLibrary.simpleMessage("Day"),
         "dayToday": MessageLookupByLibrary.simpleMessage("Today"),
         "dayYesterday": MessageLookupByLibrary.simpleMessage("Yesterday"),
         "declineTrustInvite":
@@ -888,6 +895,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "doYouWantToDiscardTheEditsYouHaveMade":
             MessageLookupByLibrary.simpleMessage(
                 "Do you want to discard the edits you have made?"),
+        "doesGroupContainMultiplePeople": MessageLookupByLibrary.simpleMessage(
+            "Does this grouping contain multiple people?"),
         "done": MessageLookupByLibrary.simpleMessage("Done"),
         "dontSave": MessageLookupByLibrary.simpleMessage("Don\'t save"),
         "doubleYourStorage":
@@ -900,6 +909,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "duplicateFileCountWithStorageSaved": m26,
         "duplicateItemsGroup": m27,
         "edit": MessageLookupByLibrary.simpleMessage("Edit"),
+        "editAutoAddPeople":
+            MessageLookupByLibrary.simpleMessage("Edit auto-add people"),
         "editEmailAlreadyLinked": m28,
         "editLocation": MessageLookupByLibrary.simpleMessage("Edit location"),
         "editLocationTagTitle":
@@ -1005,6 +1016,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Face not clustered yet, please come back later"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Face recognition"),
+        "faceThumbnailGenerationFailed": MessageLookupByLibrary.simpleMessage(
+            "Unable to generate face thumbnails"),
         "faces": MessageLookupByLibrary.simpleMessage("Faces"),
         "failed": MessageLookupByLibrary.simpleMessage("Failed"),
         "failedToApplyCode":
@@ -1040,6 +1053,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "feastingWithThem": m34,
         "feedback": MessageLookupByLibrary.simpleMessage("Feedback"),
         "file": MessageLookupByLibrary.simpleMessage("File"),
+        "fileAnalysisFailed":
+            MessageLookupByLibrary.simpleMessage("Unable to analyze file"),
         "fileFailedToSaveToGallery": MessageLookupByLibrary.simpleMessage(
             "Failed to save file to gallery"),
         "fileInfoAddDescHint":
@@ -1089,6 +1104,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "generatingEncryptionKeys": MessageLookupByLibrary.simpleMessage(
             "Generating encryption keys..."),
         "genericProgress": m42,
+        "gettingReady": MessageLookupByLibrary.simpleMessage("Getting ready"),
         "goToSettings": MessageLookupByLibrary.simpleMessage("Go to settings"),
         "googlePlayId": MessageLookupByLibrary.simpleMessage("Google Play ID"),
         "grantFullAccessPrompt": MessageLookupByLibrary.simpleMessage(
@@ -1096,6 +1112,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "grantPermission":
             MessageLookupByLibrary.simpleMessage("Grant permission"),
         "greenery": MessageLookupByLibrary.simpleMessage("The green life"),
+        "groupBy": MessageLookupByLibrary.simpleMessage("Group by"),
         "groupNearbyPhotos":
             MessageLookupByLibrary.simpleMessage("Group nearby photos"),
         "guestView": MessageLookupByLibrary.simpleMessage("Guest view"),
@@ -1130,6 +1147,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Biometric authentication is disabled. Please lock and unlock your screen to enable it."),
         "iOSOkButton": MessageLookupByLibrary.simpleMessage("OK"),
         "ignore": MessageLookupByLibrary.simpleMessage("Ignore"),
+        "ignorePerson": MessageLookupByLibrary.simpleMessage("Ignore person"),
         "ignoreUpdate": MessageLookupByLibrary.simpleMessage("Ignore"),
         "ignored": MessageLookupByLibrary.simpleMessage("ignored"),
         "ignoredFolderUploadReason": MessageLookupByLibrary.simpleMessage(
@@ -1196,8 +1214,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "language": MessageLookupByLibrary.simpleMessage("Language"),
         "lastTimeWithThem": m45,
         "lastUpdated": MessageLookupByLibrary.simpleMessage("Last updated"),
+        "lastWeek": MessageLookupByLibrary.simpleMessage("Last week"),
         "lastYearsTrip":
             MessageLookupByLibrary.simpleMessage("Last year\'s trip"),
+        "layout": MessageLookupByLibrary.simpleMessage("Layout"),
         "leave": MessageLookupByLibrary.simpleMessage("Leave"),
         "leaveAlbum": MessageLookupByLibrary.simpleMessage("Leave album"),
         "leaveFamily": MessageLookupByLibrary.simpleMessage("Leave family"),
@@ -1328,6 +1348,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "mergeWithExisting":
             MessageLookupByLibrary.simpleMessage("Merge with existing"),
         "mergedPhotos": MessageLookupByLibrary.simpleMessage("Merged photos"),
+        "mixedGrouping":
+            MessageLookupByLibrary.simpleMessage("Mixed grouping?"),
         "mlConsent":
             MessageLookupByLibrary.simpleMessage("Enable machine learning"),
         "mlConsentConfirmation": MessageLookupByLibrary.simpleMessage(
@@ -1490,6 +1512,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "pendingItems": MessageLookupByLibrary.simpleMessage("Pending items"),
         "pendingSync": MessageLookupByLibrary.simpleMessage("Pending sync"),
         "people": MessageLookupByLibrary.simpleMessage("People"),
+        "peopleAutoAddDesc": MessageLookupByLibrary.simpleMessage(
+            "Select the people you want to automatically add to the album"),
         "peopleUsingYourCode":
             MessageLookupByLibrary.simpleMessage("People using your code"),
         "peopleWidgetDesc": MessageLookupByLibrary.simpleMessage(
@@ -1882,6 +1906,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharing": MessageLookupByLibrary.simpleMessage("Sharing..."),
         "shiftDatesAndTime":
             MessageLookupByLibrary.simpleMessage("Shift dates and time"),
+        "shouldRemoveFilesSmartAlbumsDesc": MessageLookupByLibrary.simpleMessage(
+            "Should the files related to the person that were previously selected in smart albums be removed?"),
         "showLessFaces":
             MessageLookupByLibrary.simpleMessage("Show less faces"),
         "showMemories": MessageLookupByLibrary.simpleMessage("Show memories"),
@@ -2036,6 +2062,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "thisIsPersonVerificationId": m100,
         "thisIsYourVerificationId": MessageLookupByLibrary.simpleMessage(
             "This is your Verification ID"),
+        "thisMonth": MessageLookupByLibrary.simpleMessage("This month"),
+        "thisWeek": MessageLookupByLibrary.simpleMessage("This week"),
         "thisWeekThroughTheYears":
             MessageLookupByLibrary.simpleMessage("This week through the years"),
         "thisWeekXYearsAgo": m101,
@@ -2050,6 +2078,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "thisWillRemovePublicLinksOfAllSelectedQuickLinks":
             MessageLookupByLibrary.simpleMessage(
                 "This will remove public links of all selected quick links."),
+        "thisYear": MessageLookupByLibrary.simpleMessage("This year"),
         "throughTheYears": m102,
         "toEnableAppLockPleaseSetupDevicePasscodeOrScreen":
             MessageLookupByLibrary.simpleMessage(

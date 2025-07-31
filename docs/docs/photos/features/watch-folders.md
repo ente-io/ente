@@ -1,7 +1,6 @@
 ---
 title: Watch folder
-description:
-    Automatic syncing of selected folders using the Ente Photos desktop app
+description: Automatic syncing of selected folders using the Ente Photos desktop app
 ---
 
 # Watch folders

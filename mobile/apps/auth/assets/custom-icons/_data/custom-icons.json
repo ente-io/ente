@@ -11,6 +11,26 @@
       "title": "3Commas"
     },
     {
+      "title": "Aadhaar",
+      "slug": "aadhaar",
+      "altNames": [
+        "uidai",
+        "UIDAI",
+        "Unique Identification Authority of India"
+      ],
+      "hex": "FBB401"
+    },
+    {
+      "title": "Accredible",
+      "slug": "accredible",
+      "altNames": [
+        "Accredible Certificates",
+        "Accredible Badges",
+        "Digital Credentials",
+        "certificates.zaka.ai"
+      ]
+    },
+    {
       "title": "Addy.io",
       "slug": "addy_io"
     },
@@ -34,6 +54,11 @@
     },
     {
       "title": "Amazon"
+    },
+    {
+      "title": "Amtrak",
+      "slug": "amtrak",
+      "hex": "003A5D"
     },
     {
       "title": "Ankama",
@@ -70,6 +95,16 @@
         "goauthentik"
       ],
       "hex": "fd4b2d"
+    },
+    {
+      "title": "Autenticacion Digital",
+      "slug": "autenticacion-digital",
+      "altNames": [
+        "autenticaciondigital.and.gov.co"
+      ]
+    },
+    {
+      "title": "availity"
     },
     {
       "title": "AzurHosts",
@@ -120,6 +155,13 @@
     },
     {
       "title": "Belo"
+    },
+    {
+      "title": "bestbuy",
+      "altNames": [
+        "Best Buy",
+        "bestbuy.com"
+      ]
     },
     {
       "title": "Bethesda",
@@ -254,6 +296,11 @@
       "title": "Caixa"
     },
     {
+      "title": "Caltrain",
+      "slug": "caltrain",
+      "hex": "E31837"
+    },
+    {
       "title": "Canva"
     },
     {
@@ -270,12 +317,39 @@
       "slug": "cern"
     },
     {
+      "title": "Chaturbate",
+      "slug": "chaturbate",
+      "altNames": [
+        "Chaturbate.com"
+      ]
+    },
+    {
       "title": "ChangeNOW"
+    },
+    {
+      "title": "Charles Schwab",
+      "slug": "charles_schwab",
+      "altNames": [
+        "schwab",
+        "charles-schwab",
+        "charles schwab"
+      ],
+      "hex": "01A0E0"
     },
     {
       "title": "Channel Island Hosting",
       "slug": "cih",
       "hex": "D14633"
+    },
+    {
+      "title": "Clipper",
+      "slug": "clippercard",
+      "altNames": [
+        "ClipperCard",
+        "clipper-card",
+        "Clipper Card"
+      ],
+      "hex": "006298"
     },
     {
       "title": "CloudAMQP"
@@ -293,11 +367,35 @@
       "title": "CoinDCX"
     },
     {
+      "title": "colorado",
+      "altNames": [
+        "Colorado.gov",
+        "Colorado Gov",
+        "Colorado Government",
+        "Colorado Government Portal",
+        "Colorado COVES Death Certificates",
+        "Colorado COVES",
+        "Colorado Official State Web Portal",
+        "Colorado State Web Portal",
+        "Colorado State Portal",
+        "Colorado Web Portal",
+        "Colorado Portal",
+        "Colorado State",
+        "Colorado PEAK",
+        "myColorado"
+      ]
+    },
+    {
       "title": "ConfigCat"
     },
     {
       "title": "Control D",
       "slug": "controld"
+    },
+    {
+      "title": "Coolify",
+      "slug": "coolify",
+      "hex": "8C52FF"
     },
     {
       "title": "Crowdpear"
@@ -330,6 +428,10 @@
       "slug": "csgoroll"
     },
     {
+      "title": "CrowdSec",
+      "slug": "crowdsec"
+    },
+    {
       "title": "Cryptee",
       "slug": "cryptee"
     },
@@ -343,10 +445,34 @@
       ]
     },
     {
+      "title": "U.S. Department of Homeland Security",
+      "slug": "us_dhs",
+      "altNames": [
+        "DHS",
+        "dhs",
+        "United States Department of Homeland Security",
+        "uscis",
+        "USCIS",
+        "U.S. Citizenship and Immigration Services",
+        "cbp",
+        "CBP",
+        "U.S. Customs and Border Protection",
+        "U.S. Immigration and Customs Enforcement",
+        "ice",
+        "ICE"
+      ],
+      "hex": "005189"
+    },
+    {
       "title": "DCS",
       "altNames": [
         "Digital Combat Simulator"
       ]
+    },
+    {
+      "title": "DeepSeek",
+      "slug": "deepseek",
+      "hex": "4D6BFE"
     },
     {
       "title": "DEGIRO"
@@ -377,6 +503,15 @@
       "title": "DocuSeal"
     },
     {
+      "title": "Dominos",
+      "slug": "dominos",
+      "altNames": [
+        "Domino's",
+        "Domino's Pizza"
+      ],
+      "hex": "0B648F"
+    },
+    {
       "title": "Doppler"
     },
     {
@@ -391,6 +526,16 @@
       "slug": "dusnet"
     },
     {
+      "title": "Dunkin' Donuts",
+      "slug": "dunkindonuts",
+      "altNames": [
+        "Dunkin'",
+        "Dunkin",
+        "Dunkin Donuts"
+      ],
+      "hex": "C63663"
+    },
+    {
       "title": "eBay"
     },
     {
@@ -401,6 +546,13 @@
       "title": "ecloud",
       "altNames": [
         "Murena"
+      ]
+    },
+    {
+      "title": "emeritihealth",
+      "altNames": [
+        "Emeriti Health",
+        "Emeriti Retirement Health"
       ]
     },
     {
@@ -434,6 +586,19 @@
       "hex": "858585"
     },
     {
+      "title": "exaroton",
+      "slug": "exaroton",
+      "altNames": [
+        "Exaroton"
+      ],
+      "hex": "17AB17"
+    },
+    {
+      "title": "Experian",
+      "slug": "experian",
+      "hex": "AF1685"
+    },
+    {
       "title": "Fanatical",
       "slug": "fanatical",
       "altNames": [
@@ -457,6 +622,10 @@
       "altNames": [
         "Fidelity Investments"
       ]
+    },
+    {
+      "title": "FileCloud",
+      "slug": "filecloud"
     },
     {
       "title": "Filen"
@@ -546,6 +715,15 @@
       ]
     },
     {
+      "title": "Green Man Gaming",
+      "slug": "greenmangaming",
+      "altNames": [
+        "green man gaming",
+        "gmg"
+      ],
+      "hex": "00E205"
+    },
+    {
       "title": "Guideline"
     },
     {
@@ -562,6 +740,15 @@
       "title": "Hivelocity"
     },
     {
+      "title": "HSA Bank",
+      "slug": "hsa_bank",
+      "altNames": [
+        "hsa bank",
+        "hsabank"
+      ],
+      "hex": "00FF85"
+    },
+    {
       "title": "HTX"
     },
     {
@@ -569,6 +756,11 @@
       "altNames": [
         "Hugging Face"
       ]
+    },
+    {
+      "title": "Hulu",
+      "slug": "hulu",
+      "hex": "1CE783"
     },
     {
       "title": "IBKR",
@@ -617,6 +809,15 @@
       "title": "INWX"
     },
     {
+      "title": "IRCTC",
+      "slug": "irctc",
+      "altNames": [
+        "Indian Railway Catering and Tourism Corporation",
+        "Indian Railways"
+      ],
+      "hex": "000075"
+    },
+    {
       "title": "Itch",
       "slug": "itch_io",
       "hex": "000000"
@@ -630,6 +831,13 @@
       "hex": "D3D800"
     },
     {
+      "title": "JetBrains YouTrack",
+      "slug": "jetbrains-youtrack",
+      "altNames": [
+        "YouTrack"
+      ]
+    },
+    {
       "title": "jianguoyun",
       "altNames": [
         "坚果云"
@@ -637,6 +845,11 @@
     },
     {
       "title": "Kagi"
+    },
+    {
+      "title": "Kayak",
+      "slug": "kayak",
+      "hex": "FF6900"
     },
     {
       "title": "Keygen",
@@ -707,6 +920,23 @@
       "title": "Letterboxd"
     },
     {
+      "title": "LifeMiles",
+      "slug": "lifemiles",
+      "altNames": [
+        "Life Miles",
+        "lifemiles.com",
+        "Avianca LifeMiles"
+      ]
+    },
+    {
+      "title": "lincolnfinancial",
+      "altNames": [
+        "Lincoln Financial",
+        "Lincoln Financial Group",
+        "LFG"
+      ]
+    },
+    {
       "title": "LinkedIn",
       "slug": "linkedin"
     },
@@ -738,6 +968,18 @@
         "luma",
         "lu.ma"
       ]
+    },
+    {
+      "title": "MailCow",
+      "slug": "mailcow",
+      "altNames": [
+        "mailcow",
+        "mailcow UI"
+      ]
+    },
+    {
+      "title": "MangaDex",
+      "slug": "mangadex"
     },
     {
       "title": "Marketplace.tf",
@@ -839,6 +1081,9 @@
       "slug": "name_com"
     },
     {
+      "title": "nasdaq"
+    },
+    {
       "title": "Nextcloud",
       "slug": "nextcloud"
     },
@@ -887,6 +1132,10 @@
       "title": "Nelnet"
     },
     {
+      "title": "NetBird",
+      "slug": "netbird"
+    },
+    {
       "title": "nintendo",
       "altNames": [
         "任天堂",
@@ -895,6 +1144,14 @@
     },
     {
       "title": "Njalla"
+    },
+    {
+      "title": "NJTransit",
+      "slug": "njtransit",
+      "altNames": [
+        "NJ Transit"
+      ],
+      "hex": "1A2B57"
     },
     {
       "title": "nordvpn",
@@ -920,7 +1177,15 @@
       "title": "Notion"
     },
     {
+      "title": "NumberBarn",
+      "slug": "numberbarn",
+      "hex": "1c5787"
+    },
+    {
       "title": "NuCommunity"
+    },
+    {
+      "title": "numerai"
     },
     {
       "title": "NVIDIA"
@@ -953,6 +1218,10 @@
       "slug": "oracle_cloud"
     },
     {
+      "title": "Pangolin",
+      "slug": "pangolin"
+    },
+    {
       "title": "Parqet",
       "slug": "parqet"
     },
@@ -981,6 +1250,14 @@
       "altNames": [
         "Pebble Host"
       ]
+    },
+    {
+      "title": "PCPartPicker",
+      "slug": "pcpartpicker",
+      "altNames": [
+        "PC Part Picker"
+      ],
+      "hex": "EDA920"
     },
     {
       "title": "Peerberry"
@@ -1150,6 +1427,18 @@
       "slug": "rockstar_games"
     },
     {
+      "title": "Rose-Hulman Institute of Technology",
+      "slug": "rose_hulman",
+      "altNames": [
+        "rose-hulman",
+        "Rose-Hulman",
+        "Rose Hulman",
+        "Rose Hulman Institute of Technology",
+        "RHIT"
+      ],
+      "hex": "800000"
+    },
+    {
       "title": "RuneMate"
     },
     {
@@ -1167,6 +1456,15 @@
     {
       "title": "Seafile",
       "slug": "seafile"
+    },
+    {
+      "title": "SBI",
+      "slug": "sbi",
+      "altNames": [
+        "onlinesbi",
+        "State Bank of India"
+      ],
+      "hex": "12A8E0"
     },
     {
       "title": "SEI",
@@ -1238,8 +1536,34 @@
       ]
     },
     {
+      "title": "Startmail",
+      "slug": "startmail"
+    },
+    {
+      "title": "State Farm",
+      "slug": "state_farm",
+      "altNames": [
+        "StateFarm"
+      ],
+      "hex": "EDA920"
+    },
+    {
+      "title": "Stripchat",
+      "slug": "stripchat",
+      "altNames": [
+        "Strip Chat",
+        "stripchat.com",
+        "StripChat Live"
+      ]
+    },
+    {
       "title": "STRATO",
       "hex": "FF8800"
+    },
+    {
+      "title": "Supercell",
+      "slug": "supercell",
+      "hex": "000000"
     },
     {
       "title": "Surfshark"
@@ -1254,6 +1578,18 @@
         "T Mobile",
         "T-Mobile ID"
       ]
+    },
+    {
+      "title": "Tableau"
+    },
+    {
+      "title": "Tally.so",
+      "slug": "tally_so",
+      "altNames": [
+        "Tally Forms",
+        "Tally"
+      ],
+      "hex": "000000"
     },
     {
       "title": "TCPShield"
@@ -1299,6 +1635,19 @@
     {
       "title": "Termius",
       "hex": "858585"
+    },
+    {
+      "title": "Temu",
+      "slug": "temu"
+    },
+    {
+      "title": "The StoryGraph",
+      "slug": "thestorygraph",
+      "altNames": [
+        "StoryGraph",
+        "TheStoryGraph"
+      ],
+      "hex": "15919B"
     },
     {
       "title": "tianyiyun",
@@ -1367,6 +1716,16 @@
       "slug": "ubuntu_one"
     },
     {
+      "title": "unitedhealthgroup",
+      "altNames": [
+        "Unitedhealth Group",
+        "United Healthgroup",
+        "UHG",
+        "uhg.com",
+        "unitedhealthgroup.com"
+      ]
+    },
+    {
       "title": "Unity",
       "hex": "858585"
     },
@@ -1418,6 +1777,14 @@
       "title": "WEB.DE",
       "slug": "web_de"
     },
+     {
+      "title": "WeMod",
+      "slug": "wemod",
+      "altNames": [
+        "wemod"
+      ],
+      "hex": "4B63FB"
+    },
     {
       "title": "WHMCS"
     },
@@ -1426,6 +1793,16 @@
     },
     {
       "title": "Wise"
+    },
+    {
+      "title": "WMATA",
+      "slug": "wmata",
+      "altNames": [
+        "Washington Metro",
+        "DC Metro",
+        "Washington Metropolitan Area Transit Authority"
+      ],
+      "hex": "2D2D2D"
     },
     {
       "title": "Wolvesville"
@@ -1449,6 +1826,12 @@
     },
     {
       "title": "WYZE"
+    },
+    {
+      "title": "X",
+      "altNames": [
+        "Twitter"
+      ]
     },
     {
       "title": "Xbox",
@@ -1504,6 +1887,14 @@
     {
       "title": "xAI",
       "slug": "xai"
+    },
+    {
+      "title": "XVideos",
+      "slug": "xvideos",
+      "altNames": [
+        "X Videos",
+        "xvideos.com"
+      ]
     },
     {
       "title": "Cronometer",

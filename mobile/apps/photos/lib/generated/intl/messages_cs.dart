@@ -22,7 +22,13 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m6(albumName) => "Úspěšně přidáno do  ${albumName}";
 
+  static String m25(supportEmail) =>
+      "Prosíme, napiště e-mail na ${supportEmail} ze schránky, kterou jste použili k registraci";
+
   static String m47(expiryTime) => "Platnost odkazu vyprší ${expiryTime}";
+
+  static String m57(passwordStrengthValue) =>
+      "Síla hesla: ${passwordStrengthValue}";
 
   static String m68(storeName) => "Ohodnoťte nás na ${storeName}";
 
@@ -32,7 +38,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m111(email) => "Ověřit ${email}";
 
-  static String m115(name) => "Wish \$${name} a happy birthday! 🎉";
+  static String m114(email) =>
+      "Poslali jsme vám zprávu na <green>${email}</green>";
 
   static String m117(name) => "Vy a ${name}";
 
@@ -45,6 +52,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "account": MessageLookupByLibrary.simpleMessage("Účet"),
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("Vítejte zpět!"),
+        "ackPasswordLostWarning": MessageLookupByLibrary.simpleMessage(
+            "Rozumím, že pokud zapomenu své heslo, mohu přijít o data, jelikož má data jsou <underline>koncově šifrována</underline>."),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Aktivní relace"),
         "add": MessageLookupByLibrary.simpleMessage("Přidat"),
@@ -80,10 +89,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "archiveAlbum":
             MessageLookupByLibrary.simpleMessage("Archivovat album"),
         "archiving": MessageLookupByLibrary.simpleMessage("Archivování..."),
-        "areThey": MessageLookupByLibrary.simpleMessage("Are they "),
-        "areYouSureRemoveThisFaceFromPerson":
-            MessageLookupByLibrary.simpleMessage(
-                "Are you sure you want to remove this face from this person?"),
         "areYouSureYouWantToLogout":
             MessageLookupByLibrary.simpleMessage("Opravdu se chcete odhlásit?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
@@ -108,6 +113,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Sdílené soubory nelze odstranit"),
         "changeEmail": MessageLookupByLibrary.simpleMessage("Změnit e-mail"),
         "changePassword": MessageLookupByLibrary.simpleMessage("Změnit heslo"),
+        "changePasswordTitle":
+            MessageLookupByLibrary.simpleMessage("Změnit heslo"),
         "checkForUpdates":
             MessageLookupByLibrary.simpleMessage("Zkontrolovat aktualizace"),
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
@@ -121,6 +128,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "close": MessageLookupByLibrary.simpleMessage("Zavřít"),
         "codeAppliedPageTitle":
             MessageLookupByLibrary.simpleMessage("Kód byl použit"),
+        "codeCopiedToClipboard":
+            MessageLookupByLibrary.simpleMessage("Kód zkopírován do schránky"),
         "collaborator": MessageLookupByLibrary.simpleMessage("Spolupracovník"),
         "collageLayout": MessageLookupByLibrary.simpleMessage("Rozvržení"),
         "color": MessageLookupByLibrary.simpleMessage("Barva"),
@@ -128,6 +137,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "confirm": MessageLookupByLibrary.simpleMessage("Potvrdit"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Potvrdit odstranění účtu"),
+        "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
+            "Ano, chci trvale smazat tento účet a jeho data napříč všemi aplikacemi."),
+        "confirmPassword":
+            MessageLookupByLibrary.simpleMessage("Potvrdte heslo"),
         "contactSupport":
             MessageLookupByLibrary.simpleMessage("Kontaktovat podporu"),
         "contacts": MessageLookupByLibrary.simpleMessage("Kontakty"),
@@ -150,10 +163,14 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Dešifrování videa..."),
         "delete": MessageLookupByLibrary.simpleMessage("Smazat"),
         "deleteAccount": MessageLookupByLibrary.simpleMessage("Smazat účet"),
+        "deleteAccountFeedbackPrompt": MessageLookupByLibrary.simpleMessage(
+            "Je nám líto, že nás opouštíte. Prosím, dejte nám zpětnou vazbu, ať se můžeme zlepšit."),
         "deleteAccountPermanentlyButton":
             MessageLookupByLibrary.simpleMessage("Trvale smazat účet"),
         "deleteAlbum": MessageLookupByLibrary.simpleMessage("Odstranit album"),
         "deleteAll": MessageLookupByLibrary.simpleMessage("Smazat vše"),
+        "deleteEmailRequest": MessageLookupByLibrary.simpleMessage(
+            "Prosím, zašlete e-mail na <warning>account-deletion@ente.io</warning> ze schránky, se kterou jste se registrovali."),
         "deleteEmptyAlbums":
             MessageLookupByLibrary.simpleMessage("Smazat prázdná alba"),
         "deleteEmptyAlbumsWithQuestionMark":
@@ -194,6 +211,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "discover_selfies": MessageLookupByLibrary.simpleMessage("Selfie"),
         "discover_wallpapers": MessageLookupByLibrary.simpleMessage("Pozadí"),
         "dismiss": MessageLookupByLibrary.simpleMessage("Zrušit"),
+        "doThisLater": MessageLookupByLibrary.simpleMessage("Udělat později"),
         "done": MessageLookupByLibrary.simpleMessage("Hotovo"),
         "doubleYourStorage":
             MessageLookupByLibrary.simpleMessage("Zdvojnásobte své úložiště"),
@@ -201,6 +219,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "downloadFailed":
             MessageLookupByLibrary.simpleMessage("Stahování selhalo"),
         "downloading": MessageLookupByLibrary.simpleMessage("Stahuji..."),
+        "dropSupportEmail": m25,
         "edit": MessageLookupByLibrary.simpleMessage("Upravit"),
         "editLocation": MessageLookupByLibrary.simpleMessage("Upravit polohu"),
         "editLocationTagTitle":
@@ -219,18 +238,27 @@ class MessageLookup extends MessageLookupByLibrary {
         "encryption": MessageLookupByLibrary.simpleMessage("Šifrování"),
         "encryptionKeys":
             MessageLookupByLibrary.simpleMessage("Šifrovací klíče"),
+        "entePhotosPerm": MessageLookupByLibrary.simpleMessage(
+            "Ente <i>potřebuje oprávnění</i> k uchovávání vašich fotek"),
         "enterAlbumName":
             MessageLookupByLibrary.simpleMessage("Zadejte název alba"),
+        "enterCode": MessageLookupByLibrary.simpleMessage("Zadat kód"),
         "enterDateOfBirth":
             MessageLookupByLibrary.simpleMessage("Narozeniny (volitelné)"),
         "enterFileName":
             MessageLookupByLibrary.simpleMessage("Zadejte název souboru"),
+        "enterNewPasswordToEncrypt": MessageLookupByLibrary.simpleMessage(
+            "Zadejte nové heslo, které můžeme použít k šifrování vašich dat"),
         "enterPassword": MessageLookupByLibrary.simpleMessage("Zadejte heslo"),
+        "enterPasswordToEncrypt": MessageLookupByLibrary.simpleMessage(
+            "Zadejte heslo, které můžeme použít k šifrování vašich dat"),
         "enterPin": MessageLookupByLibrary.simpleMessage("Zadejte PIN"),
         "enterValidEmail": MessageLookupByLibrary.simpleMessage(
             "Prosím, zadejte platnou e-mailovou adresu."),
         "enterYourEmailAddress": MessageLookupByLibrary.simpleMessage(
             "Zadejte svou e-mailovou adresu"),
+        "enterYourNewEmailAddress": MessageLookupByLibrary.simpleMessage(
+            "Zadejte novou e-mailovou adresu"),
         "enterYourPassword":
             MessageLookupByLibrary.simpleMessage("Zadejte své heslo"),
         "enterYourRecoveryKey": MessageLookupByLibrary.simpleMessage(
@@ -258,6 +286,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "filesDeleted":
             MessageLookupByLibrary.simpleMessage("Soubory odstraněny"),
         "flip": MessageLookupByLibrary.simpleMessage("Překlopit"),
+        "forgotPassword":
+            MessageLookupByLibrary.simpleMessage("Zapomenuté heslo"),
         "freeUpSpace": MessageLookupByLibrary.simpleMessage("Uvolnit místo"),
         "gallery": MessageLookupByLibrary.simpleMessage("Galerie"),
         "general": MessageLookupByLibrary.simpleMessage("Obecné"),
@@ -278,6 +308,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "incorrectRecoveryKeyTitle":
             MessageLookupByLibrary.simpleMessage("Nesprávný obnovovací klíč"),
         "info": MessageLookupByLibrary.simpleMessage("Informace"),
+        "insecureDevice":
+            MessageLookupByLibrary.simpleMessage("Nezabezpečené zařízení"),
         "installManually":
             MessageLookupByLibrary.simpleMessage("Instalovat manuálně"),
         "invalidEmailAddress":
@@ -308,6 +340,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "loggingOut": MessageLookupByLibrary.simpleMessage("Odhlašování..."),
         "loginSessionExpired":
             MessageLookupByLibrary.simpleMessage("Relace vypršela"),
+        "loginTerms": MessageLookupByLibrary.simpleMessage(
+            "Kliknutím na přihlášení souhlasím s <u-terms>podmínkami služby</u-terms> a <u-policy>zásadami ochrany osobních údajů</u-policy>"),
         "loginWithTOTP":
             MessageLookupByLibrary.simpleMessage("Přihlášení pomocí TOTP"),
         "logout": MessageLookupByLibrary.simpleMessage("Odhlásit se"),
@@ -325,6 +359,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "merchandise": MessageLookupByLibrary.simpleMessage("E-shop"),
         "mergedPhotos":
             MessageLookupByLibrary.simpleMessage("Sloučené fotografie"),
+        "moderateStrength": MessageLookupByLibrary.simpleMessage("Střední"),
         "moments": MessageLookupByLibrary.simpleMessage("Momenty"),
         "monthly": MessageLookupByLibrary.simpleMessage("Měsíčně"),
         "moreDetails":
@@ -350,6 +385,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Zde nebyly nalezeny žádné fotky"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Nemáte obnovovací klíč?"),
+        "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
+            "Vzhledem k povaze našeho protokolu koncového šifrování nemohou být vaše data dešifrována bez vašeho hesla nebo obnovovacího klíče"),
         "noResultsFound": MessageLookupByLibrary.simpleMessage(
             "Nebyly nalezeny žádné výsledky"),
         "notifications": MessageLookupByLibrary.simpleMessage("Notifikace"),
@@ -365,13 +402,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "openFile": MessageLookupByLibrary.simpleMessage("Otevřít soubor"),
         "openSettings":
             MessageLookupByLibrary.simpleMessage("Otevřít Nastavení"),
-        "otherDetectedFaces":
-            MessageLookupByLibrary.simpleMessage("Other detected faces"),
         "pair": MessageLookupByLibrary.simpleMessage("Spárovat"),
         "panorama": MessageLookupByLibrary.simpleMessage("Panorama"),
         "password": MessageLookupByLibrary.simpleMessage("Heslo"),
         "passwordChangedSuccessfully":
             MessageLookupByLibrary.simpleMessage("Heslo úspěšně změněno"),
+        "passwordStrength": m57,
+        "passwordWarning": MessageLookupByLibrary.simpleMessage(
+            "Toto heslo neukládáme, takže pokud jej zapomenete, <underline>nemůžeme dešifrovat vaše data</underline>"),
         "paymentDetails":
             MessageLookupByLibrary.simpleMessage("Platební údaje"),
         "people": MessageLookupByLibrary.simpleMessage("Lidé"),
@@ -387,19 +425,33 @@ class MessageLookup extends MessageLookupByLibrary {
         "pleaseWait": MessageLookupByLibrary.simpleMessage("Čekejte prosím..."),
         "previous": MessageLookupByLibrary.simpleMessage("Předchozí"),
         "privacy": MessageLookupByLibrary.simpleMessage("Soukromí"),
+        "privacyPolicyTitle": MessageLookupByLibrary.simpleMessage(
+            "Zásady ochrany osobních údajů"),
         "processing": MessageLookupByLibrary.simpleMessage("Zpracovává se"),
         "publicLinkCreated":
             MessageLookupByLibrary.simpleMessage("Veřejný odkaz vytvořen"),
-        "questionmark": MessageLookupByLibrary.simpleMessage("?"),
         "queued": MessageLookupByLibrary.simpleMessage("Ve frontě"),
         "radius": MessageLookupByLibrary.simpleMessage("Rádius"),
         "rateUs": MessageLookupByLibrary.simpleMessage("Ohodnoť nás"),
         "rateUsOnStore": m68,
+        "recover": MessageLookupByLibrary.simpleMessage("Obnovit"),
+        "recoverAccount": MessageLookupByLibrary.simpleMessage("Obnovit účet"),
         "recoverButton": MessageLookupByLibrary.simpleMessage("Obnovit"),
+        "recoveryKey": MessageLookupByLibrary.simpleMessage("Obnovovací klíč"),
+        "recoveryKeyCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
+            "Obnovovací klíč zkopírován do schránky"),
+        "recoveryKeyOnForgotPassword": MessageLookupByLibrary.simpleMessage(
+            "Tento klíč je jedinou cestou pro obnovení Vašich dat, pokud zapomenete heslo."),
+        "recoveryKeySaveDescription": MessageLookupByLibrary.simpleMessage(
+            "Tento 24-slovný klíč neuchováváme, uschovejte ho, prosím, na bezpečném místě."),
         "recoveryKeyVerified":
             MessageLookupByLibrary.simpleMessage("Obnovovací klíč byl ověřen"),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("Úspěšně obnoveno!"),
+        "recreatePasswordBody": MessageLookupByLibrary.simpleMessage(
+            "Aktuální zařízení není dostatečně silné k ověření vašeho hesla, ale můžeme ho regenerovat způsobem, které funguje na všech zařízeních.\n\nProsím, přihlašte se pomocí vašeho obnovovacího klíče a regenerujte své heslo (můžete klidně znovu použít své aktuální heslo)."),
+        "recreatePasswordTitle":
+            MessageLookupByLibrary.simpleMessage("Znovu vytvořit heslo"),
         "reddit": MessageLookupByLibrary.simpleMessage("Reddit"),
         "reenterPin": MessageLookupByLibrary.simpleMessage("Zadejte PIN znovu"),
         "remove": MessageLookupByLibrary.simpleMessage("Odstranit"),
@@ -442,11 +494,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "safelyStored":
             MessageLookupByLibrary.simpleMessage("Bezpečně uloženo"),
         "save": MessageLookupByLibrary.simpleMessage("Uložit"),
-        "saveAsAnotherPerson":
-            MessageLookupByLibrary.simpleMessage("Save as another person"),
         "saveCopy": MessageLookupByLibrary.simpleMessage("Uložit kopii"),
         "saveKey": MessageLookupByLibrary.simpleMessage("Uložit klíč"),
         "savePerson": MessageLookupByLibrary.simpleMessage("Uložit osobu"),
+        "scanCode": MessageLookupByLibrary.simpleMessage("Skenovat kód"),
         "search": MessageLookupByLibrary.simpleMessage("Hledat"),
         "searchAlbumsEmptySection":
             MessageLookupByLibrary.simpleMessage("Alba"),
@@ -479,6 +530,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "setNewPassword":
             MessageLookupByLibrary.simpleMessage("Nastavit nové heslo"),
         "setNewPin": MessageLookupByLibrary.simpleMessage("Nastavit nový PIN"),
+        "setPasswordTitle":
+            MessageLookupByLibrary.simpleMessage("Nastavit heslo"),
         "share": MessageLookupByLibrary.simpleMessage("Sdílet"),
         "shareLink": MessageLookupByLibrary.simpleMessage("Sdílet odkaz"),
         "sharedByMe": MessageLookupByLibrary.simpleMessage("Sdíleno mnou"),
@@ -486,12 +539,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedWithMe": MessageLookupByLibrary.simpleMessage("Sdíleno se mnou"),
         "sharedWithYou": MessageLookupByLibrary.simpleMessage("Sdíleno s vámi"),
         "sharing": MessageLookupByLibrary.simpleMessage("Sdílení..."),
-        "showLessFaces":
-            MessageLookupByLibrary.simpleMessage("Show less faces"),
-        "showMoreFaces":
-            MessageLookupByLibrary.simpleMessage("Show more faces"),
+        "signUpTerms": MessageLookupByLibrary.simpleMessage(
+            "Souhlasím s <u-terms>podmínkami služby</u-terms> a <u-terms>zásadami ochrany osobních údajů</u-terms>"),
         "skip": MessageLookupByLibrary.simpleMessage("Přeskočit"),
+        "somethingWentWrongPleaseTryAgain":
+            MessageLookupByLibrary.simpleMessage(
+                "Něco se pokazilo. Zkuste to, prosím, znovu"),
         "sorry": MessageLookupByLibrary.simpleMessage("Omlouváme se"),
+        "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
+            MessageLookupByLibrary.simpleMessage(
+                "Omlouváme se, nemohli jsme vygenerovat bezpečné klíče na tomto zařízení.\n\nProsíme, zaregistrujte se z jiného zařízení."),
         "sort": MessageLookupByLibrary.simpleMessage("Seřadit"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("Seřadit podle"),
         "sortNewestFirst":
@@ -512,10 +569,14 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Synchronizace zastavena"),
         "syncing": MessageLookupByLibrary.simpleMessage("Synchronizace..."),
         "systemTheme": MessageLookupByLibrary.simpleMessage("Systém"),
+        "tapToEnterCode":
+            MessageLookupByLibrary.simpleMessage("Klepněte pro zadání kódu"),
         "terminate": MessageLookupByLibrary.simpleMessage("Ukončit"),
         "terminateSession":
             MessageLookupByLibrary.simpleMessage("Ukončit relaci?"),
         "terms": MessageLookupByLibrary.simpleMessage("Podmínky"),
+        "termsOfServicesTitle":
+            MessageLookupByLibrary.simpleMessage("Podmínky služby"),
         "thankYou": MessageLookupByLibrary.simpleMessage("Děkujeme"),
         "theDownloadCouldNotBeCompleted": MessageLookupByLibrary.simpleMessage(
             "Stahování nebylo možné dokončit"),
@@ -523,10 +584,19 @@ class MessageLookup extends MessageLookupByLibrary {
         "thisDevice": MessageLookupByLibrary.simpleMessage("Toto zařízení"),
         "thisIsMeExclamation":
             MessageLookupByLibrary.simpleMessage("To jsem já!"),
+        "thisWillLogYouOutOfTheFollowingDevice":
+            MessageLookupByLibrary.simpleMessage(
+                "Toto vás odhlásí z následujícího zařízení:"),
+        "thisWillLogYouOutOfThisDevice": MessageLookupByLibrary.simpleMessage(
+            "Toto vás odhlásí z tohoto zařízení!"),
+        "toResetVerifyEmail": MessageLookupByLibrary.simpleMessage(
+            "Pro reset vašeho hesla nejprve vyplňte vaší e-mailovou adresu prosím."),
         "totalSize": MessageLookupByLibrary.simpleMessage("Celková velikost"),
         "trash": MessageLookupByLibrary.simpleMessage("Koš"),
         "tryAgain": MessageLookupByLibrary.simpleMessage("Zkusit znovu"),
         "twitter": MessageLookupByLibrary.simpleMessage("Twitter"),
+        "twofactorSetup": MessageLookupByLibrary.simpleMessage(
+            "Nastavení dvoufaktorového ověřování"),
         "unlock": MessageLookupByLibrary.simpleMessage("Odemknout"),
         "unpinAlbum": MessageLookupByLibrary.simpleMessage("Odepnout album"),
         "unselectAll": MessageLookupByLibrary.simpleMessage("Zrušit výběr"),
@@ -536,11 +606,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "upgrade": MessageLookupByLibrary.simpleMessage("Upgradovat"),
         "uploadingFilesToAlbum": MessageLookupByLibrary.simpleMessage(
             "Nahrávání souborů do alba..."),
+        "useRecoveryKey":
+            MessageLookupByLibrary.simpleMessage("Použít obnovovací klíč"),
         "usedSpace": MessageLookupByLibrary.simpleMessage("Využité místo"),
         "verify": MessageLookupByLibrary.simpleMessage("Ověřit"),
         "verifyEmail": MessageLookupByLibrary.simpleMessage("Ověřit e-mail"),
         "verifyEmailID": m111,
         "verifyIDLabel": MessageLookupByLibrary.simpleMessage("Ověřit"),
+        "verifyPassword": MessageLookupByLibrary.simpleMessage("Ověřit heslo"),
         "verifying": MessageLookupByLibrary.simpleMessage("Ověřování..."),
         "verifyingRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Ověřování obnovovacího klíče..."),
@@ -550,10 +623,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "warning": MessageLookupByLibrary.simpleMessage("Varování"),
         "weAreOpenSource":
             MessageLookupByLibrary.simpleMessage("Jsme open source!"),
+        "weHaveSendEmailTo": m114,
         "weakStrength": MessageLookupByLibrary.simpleMessage("Slabé"),
         "welcomeBack": MessageLookupByLibrary.simpleMessage("Vítejte zpět!"),
         "whatsNew": MessageLookupByLibrary.simpleMessage("Co je nového"),
-        "wishThemAHappyBirthday": m115,
         "yearly": MessageLookupByLibrary.simpleMessage("Ročně"),
         "yes": MessageLookupByLibrary.simpleMessage("Ano"),
         "yesCancel": MessageLookupByLibrary.simpleMessage("Ano, zrušit"),

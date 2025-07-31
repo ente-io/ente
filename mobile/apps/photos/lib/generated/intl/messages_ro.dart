@@ -75,7 +75,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Vă rugăm să trimiteți un e-mail la ${supportEmail} de pe adresa de e-mail înregistrată";
 
   static String m26(count, storageSaved) =>
-      "Ați curățat ${Intl.plural(count, one: '${count} dublură', other: '${count} de dubluri')}, economisind (${storageSaved}!)";
+      "Ați curățat ${Intl.plural(count, one: '${count} dublură', few: '${count} dubluri', other: '${count} de dubluri')}, economisind (${storageSaved}!)";
 
   static String m27(count, formattedSize) =>
       "${count} fișiere, ${formattedSize} fiecare";
@@ -88,10 +88,10 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m33(text) => "S-au găsit fotografii extra pentru ${text}";
 
   static String m35(count, formattedNumber) =>
-      "${Intl.plural(count, one: 'Un fișier de pe acest dispozitiv a fost deja salvat în siguranță', other: '${formattedNumber} de fișiere de pe acest dispozitiv fost deja salvate în siguranță')}";
+      "${Intl.plural(count, one: 'Un fișier de pe acest dispozitiv a fost deja salvat în siguranță', few: '${formattedNumber} fișiere de pe acest dispozitiv au fost deja salvate în siguranță', other: '${formattedNumber} de fișiere de pe acest dispozitiv fost deja salvate în siguranță')}";
 
   static String m36(count, formattedNumber) =>
-      "${Intl.plural(count, one: 'Un fișier din acest album a fost deja salvat în siguranță', other: '${formattedNumber} de fișiere din acest album au fost deja salvate în siguranță')}";
+      "${Intl.plural(count, one: 'Un fișier din acest album a fost deja salvat în siguranță', few: '${formattedNumber} fișiere din acest album au fost deja salvate în siguranță', other: '${formattedNumber} de fișiere din acest album au fost deja salvate în siguranță')}";
 
   static String m37(storageAmountInGB) =>
       "${storageAmountInGB} GB de fiecare dată când cineva se înscrie pentru un plan plătit și aplică codul dvs.";
@@ -105,7 +105,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Se procesează ${currentlyProcessing} / ${totalCount}";
 
   static String m44(count) =>
-      "${Intl.plural(count, one: '${count} articol', other: '${count} de articole')}";
+      "${Intl.plural(count, one: '${count} articol', few: '${count} articole', other: '${count} de articole')}";
 
   static String m46(email) =>
       "${email} v-a invitat să fiți un contact de încredere";
@@ -157,7 +157,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m75(endDate) => "Abonamentul se reînnoiește pe ${endDate}";
 
   static String m77(count) =>
-      "${Intl.plural(count, one: '${count} rezultat găsit', other: '${count} de rezultate găsite')}";
+      "${Intl.plural(count, one: '${count} rezultat găsit', few: '${count} rezultate găsite', other: '${count} de rezultate găsite')}";
 
   static String m78(snapshotLength, searchLength) =>
       "Lungimea secțiunilor nu se potrivesc: ${snapshotLength} != ${searchLength}";
@@ -232,10 +232,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m114(email) => "Am trimis un e-mail la <green>${email}</green>";
 
-  static String m115(name) => "Wish \$${name} a happy birthday! 🎉";
-
   static String m116(count) =>
-      "${Intl.plural(count, one: 'acum ${count} an', other: 'acum ${count} de ani')}";
+      "${Intl.plural(count, one: 'acum ${count} an', few: 'acum ${count} ani', other: 'acum ${count} de ani')}";
 
   static String m118(storageSaved) => "Ați eliberat cu succes ${storageSaved}!";
 
@@ -1969,7 +1967,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "whatsNew": MessageLookupByLibrary.simpleMessage("Noutăți"),
         "whyAddTrustContact": MessageLookupByLibrary.simpleMessage(
             "Contactul de încredere vă poate ajuta la recuperarea datelor."),
-        "wishThemAHappyBirthday": m115,
         "yearShort": MessageLookupByLibrary.simpleMessage("an"),
         "yearly": MessageLookupByLibrary.simpleMessage("Anual"),
         "yearsAgo": m116,

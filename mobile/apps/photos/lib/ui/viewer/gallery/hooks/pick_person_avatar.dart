@@ -54,7 +54,7 @@ class PickPersonCoverPhotoWidget extends StatelessWidget {
     final result = await SearchService.instance
         .getClusterFilesForPersonID(personEntity.remoteID);
 
-    final List<EnteFile> resultFiles = [];
+    final resultFiles = <EnteFile>{};
     for (final e in result.entries) {
       resultFiles.addAll(e.value);
     }
@@ -119,7 +119,9 @@ class PickPersonCoverPhotoWidget extends StatelessWidget {
                               tagPrefix: "pick_center_point_gallery",
                               selectedFiles: selectedFiles,
                               limitSelectionToOne: true,
-                              showSelectAllByDefault: false,
+                              showSelectAll: false,
+                              disablePinnedGroupHeader: true,
+                              disableVerticalPaddingForScrollbar: true,
                             ),
                           ),
                         ),

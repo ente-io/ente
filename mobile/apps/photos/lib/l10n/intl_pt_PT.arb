@@ -242,7 +242,7 @@
   "publicLinkEnabled": "Link público ativado",
   "shareALink": "Partilhar um link",
   "sharedAlbumSectionDescription": "Criar álbuns compartilhados e colaborativos com outros usuários da Ente, incluindo usuários em planos gratuitos.",
-  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Compartilhe com pessoas específicas} =1 {Compartilhado com 1 pessoa} other {Compartilhado com {numberOfPeople} pessoas}}",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, one {}=0 {Compartilhe com pessoas específicas} =1 {Compartilhado com 1 pessoa} other {Compartilhado com {numberOfPeople} pessoas}}",
   "@shareWithPeopleSectionTitle": {
     "placeholders": {
       "numberOfPeople": {
@@ -899,7 +899,7 @@
   "authToViewYourMemories": "Por favor, autentique-se para ver suas memórias",
   "unlock": "Desbloquear",
   "freeUpSpace": "Libertar espaço",
-  "freeUpSpaceSaving": "{count, plural, =1 {Pode eliminá-lo do aparelho para esvaziar {formattedSize}} other {Pode eliminá-los do aparelho para esvaziar {formattedSize}}}",
+  "freeUpSpaceSaving": "{count, plural, one {}=1 {Pode eliminá-lo do aparelho para esvaziar {formattedSize}} other {Pode eliminá-los do aparelho para esvaziar {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 arquivo} other {{formattedNumber} arquivos}} neste álbum teve um backup seguro",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -1776,17 +1776,15 @@
   "same": "Igual",
   "different": "Diferente",
   "sameperson": "A mesma pessoa?",
-  "cLTitle1": "A Enviar Ficheiros de Vídeo Grandes",
-  "cLDesc1": "De volta aos vídeos em direto (beta), e a trabalhar em envios e transferências retomáveis, nós aumentamos o limite de envio de ficheiros para 10 GB. Isto está disponível para dispositivos Móveis e para Desktop.",
-  "cLTitle2": "Envio de Fundo",
-  "cLDesc2": "Envios de fundo agora fornecerem suporte ao iOS. Para combinar com os aparelhos Android. Não precisa abrir a aplicação para fazer backup das fotos e vídeos recentes.",
-  "cLTitle3": "Revisão automática de memórias",
-  "cLDesc3": "Nós fizemos melhorias significativas para a experiência das memórias, incluindo revisão automática, arrastar até a próxima memória e muito mais.",
-  "cLTitle4": "Reconhecimento Facial Melhorado",
-  "cLDesc4": "Junto a outras mudanças, agora facilitou a maneira de ver todos os rostos detetados, fornecer comentários para rostos similares, e adicionar ou remover rostos de uma foto única.",
-  "cLTitle5": "Notificações de Felicidade",
-  "cLDesc5": "Ganhará uma notificação para todos os aniversários que salvaste no Ente, além de uma coleção das melhores fotos.",
-  "cLTitle6": "Envios e transferências retomáveis",
-  "cLDesc6": "Sem mais aguardar até que os envios e transferências sejam concluídos para fechar a aplicação. Todos os envios e transferências podem ser pausados a qualquer momento, e retomar onde parou.",
-  "indexingPausedStatusDescription": "A indexação foi interrompida. Ele será retomado se o dispositivo estiver pronto. O dispositivo é considerado pronto se o nível de bateria, saúde da bateria, e estado térmico esteja num estado saudável."
+  "cLTitle1": "Editor de Imagem Avançado",
+  "cLDesc1": "Estamos a lançar um novo e avançado editor de imagem que adiciona mais molduras de recorte, predefinições de filtros para edições rápidas, opções de ajuste fino incluindo saturação, contraste, brilho, temperatura e muito mais. O novo editor também inclui a capacidade de desenhar nas suas fotos e adicionar emojis como autocolantes.",
+  "cLTitle2": "Álbuns Inteligentes",
+  "cLDesc2": "Agora pode adicionar automaticamente fotos de pessoas selecionadas a qualquer álbum. Basta ir ao álbum e selecionar \"adicionar pessoas automaticamente\" no menu overflow. Se usado em conjunto com álbum partilhado, pode partilhar fotos com zero cliques.",
+  "cLTitle3": "Galeria Melhorada",
+  "cLDesc3": "Adicionámos a capacidade de agrupar a sua galeria por semanas, meses e anos. Agora pode personalizar a sua galeria para que fique exatamente como deseja com estas novas opções de agrupamento, juntamente com grades personalizadas.",
+  "cLTitle4": "Deslocamento Mais Rápido",
+  "cLDesc4": "Juntamente com uma série de melhorias nos bastidores para melhorar a experiência de deslocamento da galeria, também redesenhámos a barra de deslocamento para mostrar marcadores, permitindo-lhe saltar rapidamente pela linha do tempo.",
+  "indexingPausedStatusDescription": "A indexação foi interrompida. Ele será retomado se o dispositivo estiver pronto. O dispositivo é considerado pronto se o nível de bateria, saúde da bateria, e estado térmico esteja num estado saudável.",
+  "faceThumbnailGenerationFailed": "Impossível gerar thumbnails de rosto",
+  "fileAnalysisFailed": "Impossível analisar arquivo"
 }

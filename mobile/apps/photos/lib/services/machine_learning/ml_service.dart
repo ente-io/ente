@@ -158,6 +158,7 @@ class MLService {
       _logger.severe("runAllML failed", e, s);
       rethrow;
     } finally {
+      _logger.severe("ML finished running");
       _isRunningML = false;
       computeController.releaseCompute(ml: true);
       VideoPreviewService.instance.queueFiles();
@@ -516,6 +517,7 @@ class MLService {
       final bool acceptedIssue =
           errorString.contains('ThumbnailRetrievalException') ||
               errorString.contains('InvalidImageFormatException') ||
+              errorString.contains('UnhandledExifOrientation') ||
               errorString.contains('FileSizeTooLargeForMobileIndexing');
       if (acceptedIssue) {
         _logger.severe(

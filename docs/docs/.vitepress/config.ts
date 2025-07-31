@@ -26,6 +26,9 @@ export default defineConfig({
             },
         },
         sidebar: sidebar,
+        outline: {
+            level: [2, 3],
+        },
         socialLinks: [
             { icon: "github", link: "https://github.com/ente-io/ente/" },
             { icon: "twitter", link: "https://twitter.com/enteio" },
