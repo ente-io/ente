@@ -716,6 +716,8 @@ class SmartMemoriesService {
         max(1, amountOfPersons) * kMemoriesUpdateFrequencyDays,
       ),
     );
+    final shownPersonAndTypeTimeout =
+        Duration(days: shownPersonTimeout.inDays * 2);
     peopleRotationLoop:
     for (final personID in orderedImportantPersonsID) {
       for (final memory in memoryResults) {
@@ -733,6 +735,8 @@ class SmartMemoriesService {
       }
       if (personToMemories[personID] == null) continue peopleRotationLoop;
       int added = 0;
+      final amountOfMemoryTypesForPerson = personToMemories[personID]!.length;
+      final bool manyMemoryTypes = amountOfMemoryTypesForPerson > 2;
       potentialMemoryLoop:
       for (final memoriesForCategory in personToMemories[personID]!.values) {
         PeopleMemory potentialMemory = memoriesForCategory.first;
@@ -755,8 +759,10 @@ class SmartMemoriesService {
           final shownTypeDate =
               DateTime.fromMicrosecondsSinceEpoch(shownLog.lastTimeShown);
           final bool seenPersonTypeRecently =
-              currentTime.difference(shownTypeDate) < kPersonAndTypeShowTimeout;
-          if (seenPersonTypeRecently) continue potentialMemoryLoop;
+              currentTime.difference(shownTypeDate) < shownPersonAndTypeTimeout;
+          if (manyMemoryTypes && seenPersonTypeRecently) {
+            continue potentialMemoryLoop;
+          }
         }
         memoryResults.add(potentialMemory);
         added++;
