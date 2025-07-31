@@ -4,10 +4,11 @@ import "package:computer/computer.dart";
 import "package:dio/dio.dart";
 import "package:flutter/foundation.dart" show Uint8List;
 import "package:logging/logging.dart";
-import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/db/ml/filedata.dart";
+import "package:photos/db/remote/table/collection_files.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/filedata/model/enc_file_data.dart";
 import "package:photos/services/filedata/model/file_data.dart";
 import "package:photos/services/filedata/model/response.dart";
@@ -102,14 +103,18 @@ class FileDataService {
       return result;
     }
     final inputs = <_DecoderInput>[];
-    final fileMap = await FilesDB.instance
-        .getFileIDToFileFromIDs(remoteData.map((e) => e.fileID).toList());
+    final fileToCFMap = await remoteDB
+        .getFileIdToCollectionFile(remoteData.map((e) => e.fileID).toList());
     for (final data in remoteData) {
-      final file = fileMap[data.fileID];
-      if (file == null) {
+      final cf = fileToCFMap[data.fileID];
+      if (cf == null) {
+        assert(
+          false,
+          "Assert: CF for for fileID ${data.fileID} not found in DB",
+        );
         continue;
       }
-      final fileKey = getFileKey(file);
+      final fileKey = getKeyFromCF(cf);
       final input = _DecoderInput(data, fileKey);
       inputs.add(input);
     }

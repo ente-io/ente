@@ -122,7 +122,7 @@ class RemoteFaceEmbedding {
   factory RemoteFaceEmbedding.fromJson(Map<String, dynamic> json) {
     return RemoteFaceEmbedding(
       List<Face>.from(
-        json['faces'].map((x) => Face.fromJson(x as Map<String, dynamic>)),
+        json['faces'].map((x) => Face.fromJson<int>(x as Map<String, dynamic>)),
       ),
       json['version'] as int,
       client: json['client'] as String,

@@ -2,10 +2,14 @@ import "dart:typed_data";
 
 import "package:ente_crypto/ente_crypto.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/file/remote/collection_file.dart";
 import "package:photos/services/collections_service.dart";
 
 Uint8List getFileKey(EnteFile file) {
-  final cf = file.cf!;
+  return getKeyFromCF(file.cf!);
+}
+
+Uint8List getKeyFromCF(CollectionFile cf) {
   final collectionKey =
       CollectionsService.instance.getCollectionKey(cf.collectionID);
   return CryptoUtil.decryptSync(
