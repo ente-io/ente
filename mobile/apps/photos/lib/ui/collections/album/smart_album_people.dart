@@ -2,6 +2,7 @@ import "dart:async";
 
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
+import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/events/collection_updated_event.dart";
@@ -35,6 +36,8 @@ class SmartAlbumPeople extends StatefulWidget {
 class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
   final _selectedPeople = SelectedPeople();
   SmartAlbumConfig? currentConfig;
+
+  final _logger = Logger("SmartAlbumPeople");
 
   @override
   void initState() {
@@ -169,6 +172,7 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
                         await dialog.hide();
                         Navigator.pop(context);
                       } catch (e) {
+                        _logger.severe(e);
                         await dialog.hide();
                         await showGenericErrorDialog(
                           context: context,
