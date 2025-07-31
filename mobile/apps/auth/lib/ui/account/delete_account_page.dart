@@ -3,13 +3,13 @@ import 'dart:convert';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/delete_account.dart';
-import 'package:ente_auth/services/local_authentication_service.dart';
-import 'package:ente_auth/services/user_service.dart';
+ import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/ui/common/dialogs.dart';
 import 'package:ente_auth/ui/common/gradient_button.dart';
 import 'package:ente_auth/utils/email_util.dart';
 import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:ente_lock_screen/local_authentication_service.dart';
 import 'package:flutter/material.dart';
 
 class DeleteAccountPage extends StatelessWidget {
