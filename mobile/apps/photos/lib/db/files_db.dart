@@ -620,28 +620,6 @@ class FilesDB with SqlDbBase {
     return result;
   }
 
-  Future<Map<int, List<EnteFile>>> getAllFilesGroupByCollectionID(
-    List<int> ids,
-  ) async {
-    final result = <int, List<EnteFile>>{};
-    if (ids.isEmpty) {
-      return result;
-    }
-    final inParam = ids.map((id) => "'$id'").join(',');
-    final db = await instance.sqliteAsyncDB;
-    final results = await db.getAll(
-      'SELECT * FROM $filesTable WHERE $columnUploadedFileID IN ($inParam)',
-    );
-    final files = convertToFiles(results);
-    for (EnteFile eachFile in files) {
-      if (!result.containsKey(eachFile.collectionID)) {
-        result[eachFile.collectionID as int] = <EnteFile>[];
-      }
-      result[eachFile.collectionID]!.add(eachFile);
-    }
-    return result;
-  }
-
   Future<List<EnteFile>> getAllFilesAfterDate({
     required FileType fileType,
     required DateTime beginDate,

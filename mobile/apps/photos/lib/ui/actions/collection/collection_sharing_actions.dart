@@ -622,7 +622,7 @@ class CollectionActions {
     }
 
     final Map<int, List<EnteFile>> collectionToFilesMap =
-        await FilesDB.instance.getAllFilesGroupByCollectionID(uploadedIDs);
+        await remoteCache.getFilesGroupByCollection(uploadedIDs);
 
     // Find and map the files from current collection to to entries in other
     // collections. This mapping is done to avoid moving all the files to

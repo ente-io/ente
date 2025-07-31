@@ -160,6 +160,29 @@ class RemoteCache {
     return EnteFile.fromRemoteAsset(asset, cf);
   }
 
+  Future<Map<int, List<EnteFile>>> getFilesGroupByCollection(
+    List<int> fileIDs,
+  ) async {
+    final collectionFiles =
+        await remoteDB.getCollectionFilesGroupedByCollection(fileIDs);
+    if (!_isLoaded) await _ensureLoaded();
+
+    final Map<int, List<EnteFile>> result = {};
+
+    for (final entry in collectionFiles.entries) {
+      final collectionID = entry.key;
+      final collectionFileList = entry.value;
+      for (final cf in collectionFileList) {
+        final asset = remoteAssets[cf.fileID];
+        if (asset != null) {
+          result[collectionID] ??= [];
+          result[collectionID]!.add(EnteFile.fromRemoteAsset(asset, cf));
+        }
+      }
+    }
+    return result;
+  }
+
   Future<List<EnteFile>> getFilesCreatedWithinDurations(
     List<List<int>> durations,
     Set<int> ignoredCollectionIDs, {

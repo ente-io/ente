@@ -131,7 +131,7 @@ extension HiddenService on CollectionsService {
 
       final defaultHiddenCollection = await getDefaultHiddenCollection();
       final Map<int, List<EnteFile>> collectionToFilesMap =
-          await filesDB.getAllFilesGroupByCollectionID(uploadedIDs);
+          await remoteCache.getFilesGroupByCollection(uploadedIDs);
       for (MapEntry<int, List<EnteFile>> entry
           in collectionToFilesMap.entries) {
         if (entry.key == defaultHiddenCollection.id) {

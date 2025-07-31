@@ -129,8 +129,8 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
                                 final files = currentConfig!
                                     .infoMap[personId]?.addedFiles;
 
-                                final enteFiles = await FilesDB.instance
-                                    .getAllFilesGroupByCollectionID(
+                                final enteFiles =
+                                    await remoteCache.getFilesGroupByCollection(
                                   files?.toList() ?? [],
                                 );
 
