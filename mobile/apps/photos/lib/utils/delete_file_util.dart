@@ -72,7 +72,7 @@ Future<void> deleteFilesFromEverywhere(
   } catch (e, s) {
     _logger.severe("Could not delete file", e, s);
   }
-  deletedIDs.addAll(await SharedAssetService.tryDelete(sharedAssetIDs));
+  await SharedAssetService.tryDelete(sharedAssetIDs);
   final updatedCollectionIDs = <int>{};
   final List<TrashRequest> uploadedFilesToBeTrashed = [];
   final List<EnteFile> deletedFiles = [];
@@ -228,7 +228,7 @@ Future<void> deleteFilesOnDeviceOnly(
   } catch (e, s) {
     _logger.severe("Could not delete file", e, s);
   }
-  deletedIDs.addAll(await SharedAssetService.tryDelete(localSharedMediaIDs));
+  await SharedAssetService.tryDelete(localSharedMediaIDs);
   final List<EnteFile> deletedFiles = [];
   for (final file in files) {
     // Remove only those files that have been removed from disk
@@ -347,7 +347,7 @@ Future<bool> deleteLocalFiles(
         localAssetIDs.add(id);
       }
     }
-    delLocalIDs.addAll(await SharedAssetService.tryDelete(localSharedMediaIDs));
+    await SharedAssetService.tryDelete(localSharedMediaIDs);
 
     final bool shouldDeleteInBatches =
         await isAndroidSDKVersionLowerThan(android11SDKINT) || tooManyAssets;
@@ -435,7 +435,7 @@ Future<bool> deleteLocalFilesAfterRemovingAlreadyDeletedIDs(
       }
     }
     deletedIDs.addAll(alreadyDeletedIDs);
-    deletedIDs.addAll(await SharedAssetService.tryDelete(localSharedMediaIDs));
+    await SharedAssetService.tryDelete(localSharedMediaIDs);
 
     await dialog.hide();
 
@@ -520,7 +520,7 @@ Future<bool> retryFreeUpSpaceAfterRemovingAssetsNonExistingInDisk(
         localAssetIDs.add(localID);
       }
     }
-    deletedIDs.addAll(await SharedAssetService.tryDelete(localSharedMediaIDs));
+    await SharedAssetService.tryDelete(localSharedMediaIDs);
 
     await dialog.hide();
 

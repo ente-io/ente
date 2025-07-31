@@ -103,27 +103,39 @@ class SharedAssetService {
     return (width, height);
   }
 
-  static Future<List<String>> tryDelete(List<String> localIDs) {
+  static Future<List<String>> tryDelete(List<String> localIDs,
+      {int batchSize = 10}) async {
     final List<String> actuallyDeletedIDs = [];
     try {
-      return Future.forEach<String>(localIDs, (id) async {
-        final String localPath = getPath(id);
-        try {
-          // verify the file exists as the OS may have already deleted it from cache
-          if (File(localPath).existsSync()) {
-            await File(localPath).delete();
-          }
-          actuallyDeletedIDs.add(id);
-        } catch (e, s) {
-          _logger.severe("Could not delete file ", e, s);
-        }
-      }).then((ignore) {
-        return actuallyDeletedIDs;
-      });
+      for (int i = 0; i < localIDs.length; i += batchSize) {
+        final batch = localIDs.skip(i).take(batchSize).toList();
+
+        final batchResults = await Future.wait(
+          batch.map((id) async {
+            final String localPath = getPath(id);
+            try {
+              if (File(localPath).existsSync()) {
+                await File(localPath).delete();
+              }
+              return id;
+            } catch (e, s) {
+              _logger.severe("Could not delete file $id", e, s);
+              return null;
+            }
+          }),
+          eagerError: false, // Continue even if some deletions fail
+        );
+
+        // Add successful deletions
+        actuallyDeletedIDs.addAll(batchResults.whereType<String>());
+      }
     } catch (e, s) {
       _logger.severe("Unexpected error while deleting share media files", e, s);
-      return Future.value(actuallyDeletedIDs);
     }
+    if (actuallyDeletedIDs.isNotEmpty) {
+      await localDB.deleteSharedAssets(actuallyDeletedIDs.toSet());
+    }
+    return actuallyDeletedIDs;
   }
 
   static Future<File> moveToSharedDir(File ioFile, String id) async {

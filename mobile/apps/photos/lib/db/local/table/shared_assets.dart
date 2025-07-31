@@ -53,4 +53,17 @@ extension SharedAssetsTable on LocalDB {
       [assetID],
     );
   }
+
+  Future<void> deleteSharedAssets(Set<String> assetIDs) async {
+    if (assetIDs.isEmpty) return;
+    await Future.forEach(
+      assetIDs.slices(LocalDB.batchInsertMaxCount),
+      (slice) async {
+        await sqliteDB.executeBatch(
+          'DELETE FROM shared_assets WHERE id = ?',
+          slice.map((id) => [id]).toList(),
+        );
+      },
+    );
+  }
 }
