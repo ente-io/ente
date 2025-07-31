@@ -31,6 +31,15 @@ extension UploadMappingTable on RemoteDB {
     return result;
   }
 
+  Future<void> deleteMappingsForLocalIDs(Set<String> localIDs) async {
+    if (localIDs.isEmpty) return;
+    final placeholders = List.filled(localIDs.length, '?').join(',');
+    await sqliteDB.execute(
+      'DELETE FROM upload_mapping WHERE local_id IN ($placeholders)',
+      localIDs.toList(),
+    );
+  }
+
   Future<Map<String, RLMapping>> getLocalIDToMappingForActiveFiles() async {
     final result = <String, RLMapping>{};
     final cursor = await sqliteDB.getAll(

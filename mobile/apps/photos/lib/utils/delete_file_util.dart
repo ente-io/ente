@@ -8,6 +8,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
+import "package:photos/db/remote/table/mapping_table.dart";
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import "package:photos/events/force_reload_trash_page_event.dart";
@@ -21,6 +22,7 @@ import "package:photos/models/files_split.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart";
 import "package:photos/services/files_service.dart";
+import "package:photos/services/local/asset_entity.service.dart";
 import "package:photos/services/local/import/local_import.dart";
 import "package:photos/services/local/shared_assert.service.dart";
 import 'package:photos/services/sync/remote_sync_service.dart';
@@ -402,11 +404,12 @@ Future<bool> deleteLocalFiles(
 }
 
 Future<void> _handleLocallyDeletedFiles(List<String> localIDs) async {
-  final deletedFiles = await FilesDB.instance.getLocalFiles(localIDs);
-  await FilesDB.instance.markLocalIDAsNull(localIDs);
-  _logger.info(deletedFiles.length.toString() + " files deleted locally");
+  final Set<String> ids = localIDs.toSet();
+  await localDB.deleteAssets(ids);
+  await remoteDB.deleteMappingsForLocalIDs(ids);
+  _logger.info(ids.length.toString() + " files deleted locally");
   Bus.instance.fire(
-    LocalPhotosUpdatedEvent(deletedFiles, source: "deleteLocal"),
+    LocalPhotosUpdatedEvent([], source: "deleteLocal"),
   );
 }
 
@@ -426,16 +429,17 @@ Future<bool> deleteLocalFilesAfterRemovingAlreadyDeletedIDs(
   final dialog = createProgressDialog(context, "Loading...");
   await dialog.show();
   try {
-    final files =
-        await FilesDB.instance.getLocalFiles(localIDs, dedupeByLocalID: true);
-    for (final file in files) {
-      if (!(await _localFileExist(file))) {
-        _logger.warning("Already deleted " + file.toString());
-        alreadyDeletedIDs.add(file.localID!);
-      } else if (file.localID!.startsWith(sharedMediaIdentifier)) {
-        localSharedMediaIDs.add(file.localID!);
+    final Set<String> ids = localIDs.toSet();
+    for (final id in ids) {
+      if (id.startsWith(sharedMediaIdentifier)) {
+        localSharedMediaIDs.add(id);
       } else {
-        localAssetIDs.add(file.localID!);
+        if (!(await AssetEntityService.exists(id))) {
+          _logger.warning("Already deleted " + id);
+          alreadyDeletedIDs.add(id);
+        } else {
+          localAssetIDs.add(id);
+        }
       }
     }
     deletedIDs.addAll(alreadyDeletedIDs);

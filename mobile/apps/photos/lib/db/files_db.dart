@@ -578,41 +578,6 @@ class FilesDB with SqlDbBase {
     }
   }
 
-  Future<void> markLocalIDAsNull(List<String> localIDs) async {
-    final inParam = localIDs.map((id) => "'$id'").join(',');
-    final db = await instance.sqliteAsyncDB;
-    await db.execute(
-      '''
-      UPDATE $filesTable
-      SET $columnLocalID = NULL
-      WHERE $columnLocalID IN ($inParam);
-    ''',
-    );
-  }
-
-  Future<List<EnteFile>> getLocalFiles(
-    List<String> localIDs, {
-    bool dedupeByLocalID = false,
-  }) async {
-    late final String query;
-    final inParam = localIDs.map((id) => "'$id'").join(',');
-    final db = await instance.sqliteAsyncDB;
-    if (dedupeByLocalID) {
-      query = '''
-      SELECT * FROM $filesTable
-      WHERE $columnLocalID IN ($inParam)
-      GROUP BY $columnLocalID;
-    ''';
-    } else {
-      query = '''
-      SELECT * FROM $filesTable
-      WHERE $columnLocalID IN ($inParam);
-    ''';
-    }
-    final results = await db.getAll(query);
-    return convertToFiles(results);
-  }
-
   Future<Map<int, EnteFile>> getFileIDToFileFromIDs(List<int> ids) async {
     final result = <int, EnteFile>{};
     if (ids.isEmpty) {

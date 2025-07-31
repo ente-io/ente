@@ -122,8 +122,8 @@ class LocalFileUpdateService {
     List<String> localIDsToProcess,
   ) async {
     final int userID = Configuration.instance.getUserID()!;
-    final List<EnteFile> result =
-        await FilesDB.instance.getLocalFiles(localIDsToProcess);
+    // todo: rewrite:neeraj Handle this case for file uploads
+    final List<EnteFile> result = [];
     final List<EnteFile> localFilesForUser = [];
     final Set<String> localIDsWithFile = {};
     for (EnteFile file in result) {

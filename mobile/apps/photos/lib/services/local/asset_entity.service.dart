@@ -29,6 +29,11 @@ class AssetEntityService {
     return asset;
   }
 
+  static Future<bool> exists(String localID) async {
+    final asset = await AssetEntity.fromId(localID);
+    return asset != null && await asset.exists;
+  }
+
   // Use this time if exif data is not available
   static int estimateCreationTime(AssetEntity asset) {
     int creationTime = asset.createDateTime.microsecondsSinceEpoch;
