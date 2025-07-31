@@ -94,7 +94,7 @@ class Face<T> {
 
   static Face<T> fromJson<T>(Map<String, dynamic> json) {
     final String faceID = json['faceID'] as String;
-    final T fileID = getFileIdFromFaceId(faceID);
+    final T fileID = getFileIdFromFaceId<T>(faceID);
     return Face(
       faceID,
       fileID,
