@@ -86,24 +86,35 @@ class SmartAlbumsService {
       return;
     }
 
-    _logger.info("Syncing Smart Albums");
+    _logger.fine("Syncing Smart Albums");
     final cachedConfigs = await getSmartConfigs();
     final userId = Configuration.instance.getUserID()!;
 
     for (final entry in cachedConfigs.entries) {
       final collectionId = entry.key;
       final config = entry.value;
+
+      if (config.personIDs.isEmpty) {
+        _logger.warning(
+          "Skipping sync for collection ($collectionId) as it has no person IDs",
+        );
+        continue;
+      }
+
       final collection =
           CollectionsService.instance.getCollectionByID(collectionId);
 
-      if (!(collection?.canAutoAdd(userId) ?? false)) {
+      if (collection == null || !collection.canAutoAdd(userId)) {
         _logger.warning(
-          "Deleting collection config ($collectionId) as user does not have permission",
+          "For config ($collectionId) user does not have permission",
         );
-        await _deleteEntry(
-          userId: userId,
-          collectionId: collectionId,
-        );
+        if (collection?.isDeleted ?? true) {
+          await _deleteEntry(
+            userId: userId,
+            collectionId: collectionId,
+          );
+        }
+
         continue;
       }
 
@@ -174,7 +185,7 @@ class SmartAlbumsService {
     }
     syncingCollection = null;
     Bus.instance.fire(SmartAlbumSyncingEvent());
-    _logger.info("Smart Albums sync completed");
+    _logger.fine("Smart Albums sync completed");
   }
 
   Future<SmartAlbumConfig> addPeopleToSmartAlbum(
@@ -218,11 +229,6 @@ class SmartAlbumsService {
         addWithCustomID: config.id == null,
         userId: userId,
       );
-    } else if (config.id != null) {
-      await _deleteEntry(
-        userId: userId,
-        collectionId: config.collectionId,
-      );
     }
   }
 
@@ -242,6 +248,7 @@ class SmartAlbumsService {
     bool addWithCustomID = false,
     required int userId,
   }) async {
+    _logger.fine("Adding or updating entity for collection ($collectionId)");
     final id = getId(collectionId: collectionId, userId: userId);
     final result = await entityService.addOrUpdate(
       type,
@@ -258,6 +265,7 @@ class SmartAlbumsService {
     required int userId,
     required int collectionId,
   }) async {
+    _logger.fine("Deleting entry for collection ($collectionId)");
     final id = getId(collectionId: collectionId, userId: userId);
     await entityService.deleteEntry(id);
     _lastCacheRefreshTime = 0; // Invalidate cache
