@@ -86,6 +86,7 @@ class SmartAlbumsService {
       return;
     }
 
+    _logger.info("Syncing Smart Albums");
     final cachedConfigs = await getSmartConfigs();
     final userId = Configuration.instance.getUserID()!;
 
@@ -166,11 +167,14 @@ class SmartAlbumsService {
           newConfig = newConfig.addFiles(updatedAtMap, pendingSyncFiles);
 
           await saveConfig(newConfig);
-        } catch (_) {}
+        } catch (e, sT) {
+          _logger.warning(e, sT);
+        }
       }
     }
     syncingCollection = null;
     Bus.instance.fire(SmartAlbumSyncingEvent());
+    _logger.info("Smart Albums sync completed");
   }
 
   Future<SmartAlbumConfig> addPeopleToSmartAlbum(
