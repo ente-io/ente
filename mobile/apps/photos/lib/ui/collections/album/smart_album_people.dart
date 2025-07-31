@@ -171,12 +171,16 @@ class _SmartAlbumPeopleState extends State<SmartAlbumPeople> {
 
                         await dialog.hide();
                         Navigator.pop(context);
-                      } catch (e) {
-                        _logger.severe(e);
+                      } catch (error, stackTrace) {
+                        _logger.severe(
+                          "Error saving smart album config",
+                          error,
+                          stackTrace,
+                        );
                         await dialog.hide();
                         await showGenericErrorDialog(
                           context: context,
-                          error: e,
+                          error: error,
                         );
                       }
                     }
