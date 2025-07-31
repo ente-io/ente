@@ -20,7 +20,6 @@ import "package:photos/states/detail_page_state.dart";
 import "package:photos/ui/common/fast_scroll_physics.dart";
 import 'package:photos/ui/notification/toast.dart';
 import "package:photos/ui/tools/editor/image_editor/image_editor_page_new.dart";
-import 'package:photos/ui/tools/editor/image_editor_page.dart';
 import "package:photos/ui/tools/editor/video_editor_page.dart";
 import "package:photos/ui/viewer/file/file_app_bar.dart";
 import "package:photos/ui/viewer/file/file_bottom_bar.dart";
@@ -176,7 +175,7 @@ class _DetailPageState extends State<DetailPage> {
                   builder: (BuildContext context, int selectedIndex, _) {
                     return FileBottomBar(
                       _files![selectedIndex],
-                      _onNewImageEditor,
+                      _onEditFileRequested,
                       widget.config.mode == DetailPageMode.minimalistic &&
                           !isGuestView,
                       onFileRemoved: _onFileRemoved,
@@ -358,7 +357,7 @@ class _DetailPageState extends State<DetailPage> {
     }
   }
 
-  Future<void> _onNewImageEditor(EnteFile file) async {
+  Future<void> _onEditFileRequested(EnteFile file) async {
     if (file.uploadedFileID != null &&
         file.ownerID != Configuration.instance.getUserID()) {
       _logger.severe(
@@ -409,67 +408,6 @@ class _DetailPageState extends State<DetailPage> {
           originalFile: file,
           file: ioFile,
           detailPageConfig: widget.config.copyWith(
-            files: _files,
-            selectedIndex: _selectedIndexNotifier.value,
-          ),
-        ),
-      );
-    } catch (e) {
-      await dialog.hide();
-      _logger.warning("Failed to initiate edit", e);
-    }
-  }
-
-  Future<void> _onEditFileRequested(EnteFile file) async {
-    if (file.uploadedFileID != null &&
-        file.ownerID != Configuration.instance.getUserID()) {
-      _logger.severe(
-        "Attempt to edit unowned file",
-        UnauthorizedEditError(),
-        StackTrace.current,
-      );
-      // ignore: unawaited_futures
-      showErrorDialog(
-        context,
-        S.of(context).sorry,
-        S.of(context).weDontSupportEditingPhotosAndAlbumsThatYouDont,
-      );
-      return;
-    }
-    final dialog = createProgressDialog(context, S.of(context).pleaseWait);
-    await dialog.show();
-    try {
-      final ioFile = await getFile(file);
-      if (ioFile == null) {
-        showShortToast(context, S.of(context).failedToFetchOriginalForEdit);
-        await dialog.hide();
-        return;
-      }
-      if (file.fileType == FileType.video) {
-        await dialog.hide();
-        replacePage(
-          context,
-          VideoEditorPage(
-            file: file,
-            ioFile: ioFile,
-            detailPageConfig: widget.config.copyWith(
-              files: _files,
-              selectedIndex: _selectedIndexNotifier.value,
-            ),
-          ),
-        );
-        return;
-      }
-      final imageProvider =
-          ExtendedFileImageProvider(ioFile, cacheRawData: true);
-      await precacheImage(imageProvider, context);
-      await dialog.hide();
-      replacePage(
-        context,
-        ImageEditorPage(
-          imageProvider,
-          file,
-          widget.config.copyWith(
             files: _files,
             selectedIndex: _selectedIndexNotifier.value,
           ),

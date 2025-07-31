@@ -310,9 +310,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
             if (result) {
               showShortToast(
                 context,
-                "Added successfully to " +
-                    _selectedCollections.length.toString() +
-                    " albums",
+                S.of(context).addedToAlbums(_selectedCollections.length),
               );
               widget.selectedFiles?.clearAll();
             }

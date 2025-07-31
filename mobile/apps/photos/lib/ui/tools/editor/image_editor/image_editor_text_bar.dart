@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import "package:flutter_svg/svg.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/tools/editor/image_editor/circular_icon_button.dart";
 import "package:photos/ui/tools/editor/image_editor/image_editor_color_picker.dart";
@@ -75,7 +76,7 @@ class _ImageEditorTextBarState extends State<ImageEditorTextBar>
       children: [
         CircularIconButton(
           svgPath: "assets/image-editor/image-editor-text-color.svg",
-          label: "Color",
+          label: S.of(context).color,
           isSelected: selectedActionIndex == 0,
           onTap: () {
             _selectAction(0);
@@ -83,7 +84,7 @@ class _ImageEditorTextBarState extends State<ImageEditorTextBar>
         ),
         CircularIconButton(
           svgPath: "assets/image-editor/image-editor-text-font.svg",
-          label: "Font",
+          label: S.of(context).font,
           isSelected: selectedActionIndex == 1,
           onTap: () {
             _selectAction(1);
@@ -91,7 +92,7 @@ class _ImageEditorTextBarState extends State<ImageEditorTextBar>
         ),
         CircularIconButton(
           svgPath: "assets/image-editor/image-editor-text-background.svg",
-          label: "Background",
+          label: S.of(context).background,
           isSelected: selectedActionIndex == 2,
           onTap: () {
             setState(() {
@@ -101,7 +102,7 @@ class _ImageEditorTextBarState extends State<ImageEditorTextBar>
         ),
         CircularIconButton(
           svgPath: "assets/image-editor/image-editor-text-align-left.svg",
-          label: "Align",
+          label: S.of(context).align,
           isSelected: selectedActionIndex == 3,
           onTap: () {
             setState(() {
