@@ -19,7 +19,7 @@ import "package:photos/services/local_authentication_service.dart";
 import "package:photos/states/detail_page_state.dart";
 import "package:photos/ui/common/fast_scroll_physics.dart";
 import 'package:photos/ui/notification/toast.dart';
-import "package:photos/ui/tools/editor/image_editor/image_editor_page_new.dart";
+import "package:photos/ui/tools/editor/image_editor/image_editor_page.dart";
 import "package:photos/ui/tools/editor/video_editor_page.dart";
 import "package:photos/ui/viewer/file/file_app_bar.dart";
 import "package:photos/ui/viewer/file/file_bottom_bar.dart";
@@ -404,7 +404,7 @@ class _DetailPageState extends State<DetailPage> {
       await dialog.hide();
       replacePage(
         context,
-        NewImageEditor(
+        ImageEditorPage(
           originalFile: file,
           file: ioFile,
           detailPageConfig: widget.config.copyWith(
