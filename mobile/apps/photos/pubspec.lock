@@ -1271,38 +1271,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.3.0"
-  image_editor:
-    dependency: "direct main"
-    description:
-      name: image_editor
-      sha256: "38070067264fd9fea4328ca630d2ff7bd65ebe6aa4ed375d983b732d2ae7146b"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.6.0"
-  image_editor_common:
-    dependency: transitive
-    description:
-      name: image_editor_common
-      sha256: "93d2f5c8b636f862775dd62a9ec20d09c8272598daa02f935955a4640e1844ee"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.2.0"
-  image_editor_ohos:
-    dependency: transitive
-    description:
-      name: image_editor_ohos
-      sha256: "06756859586d5acefec6e3b4f356f9b1ce05ef09213bcb9a0ce1680ecea2d054"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.9"
-  image_editor_platform_interface:
-    dependency: transitive
-    description:
-      name: image_editor_platform_interface
-      sha256: "474517efc770464f7d99942472d8cfb369a3c378e95466ec17f74d2b80bd40de"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.0"
   in_app_purchase:
     dependency: "direct main"
     description:
