@@ -93,7 +93,7 @@ jobs:
 
             - name: Install code signing dependencies
               run: |
-                  pip3 install codemagic-cli-tools
+                  pip3 install --break-system-packages codemagic-cli-tools
 
             - name: Add provisioning profiles
               run: |
