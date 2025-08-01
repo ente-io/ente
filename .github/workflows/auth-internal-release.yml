@@ -118,7 +118,7 @@ jobs:
                   keychain add-certificates --certificate $CERTIFICATE_PATH --certificate-password $P12_PASSWORD
 
                   # Use profile in current project
-                  xcode-project use-profiles
+                  xcode-project use-profiles --project=ios/*.xcodeproj
               env:
                   BUILD_CERTIFICATE_BASE64: ${{ secrets.MAC_OS_CERTIFICATE }}
                   P12_PASSWORD: ${{ secrets.MAC_OS_CERTIFICATE_PASSWORD }}
