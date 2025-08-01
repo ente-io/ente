@@ -82,13 +82,14 @@ class SimilarImagesService {
       final similarFilesList = <EnteFile>[];
       double furthestDistance = 0.0;
       for (int j = 0; j < otherFileIDs.length; j++) {
+        final otherFileID = otherFileIDs[j].toInt();
+        if (otherFileID == fileID) continue;
         final distance = distancesToFiles[j];
         if (distance > distanceThreshold) {
           break;
         } else {
           furthestDistance = max(furthestDistance, distance);
         }
-        final otherFileID = otherFileIDs[j].toInt();
         if (alreadyUsedFileIDs.contains(otherFileID)) continue;
         final otherFile = allFileIdsToFile[otherFileID];
         if (otherFile != null && otherFile.uploadedFileID != null) {
