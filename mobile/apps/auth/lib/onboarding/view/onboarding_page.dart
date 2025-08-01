@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:ente_accounts/pages/email_entry_page.dart';
 import 'package:ente_auth/app/view/app.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/ente_theme_data.dart';
@@ -8,7 +9,6 @@ import 'package:ente_auth/events/trigger_logout_event.dart';
 import "package:ente_auth/l10n/l10n.dart";
 import 'package:ente_auth/locale.dart';
 import 'package:ente_auth/theme/text_style.dart';
-import 'package:ente_auth/ui/account/email_entry_page.dart';
 import 'package:ente_auth/ui/account/login_page.dart';
 import 'package:ente_auth/ui/account/logout_dialog.dart';
 import 'package:ente_auth/ui/account/password_entry_page.dart';
@@ -260,7 +260,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   void _navigateToSignUpPage() {
     Widget page;
     if (Configuration.instance.getEncryptedToken() == null) {
-      page = const EmailEntryPage();
+      page = EmailEntryPage(Configuration.instance);
     } else {
       // No key
       if (Configuration.instance.getKeyAttributes() == null) {
