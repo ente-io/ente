@@ -83,11 +83,21 @@ impl VectorDB {
         self.save_index();
     }
 
-    pub fn search_vectors(&self, query: &Vec<f32>, count: usize) -> (Vec<u64>, Vec<f32>) {
-        let matches = self
-            .index
-            .search(query, count)
-            .expect("Failed to search vectors");
+    pub fn search_vectors(
+        &self,
+        query: &Vec<f32>,
+        count: usize,
+        exact: bool,
+    ) -> (Vec<u64>, Vec<f32>) {
+        let matches = if exact {
+            self.index
+                .exact_search(query, count)
+                .expect("Failed to exact search vectors")
+        } else {
+            self.index
+                .search(query, count)
+                .expect("Failed to search vectors")
+        };
         (matches.keys, matches.distances)
     }
 
@@ -95,12 +105,13 @@ impl VectorDB {
         &self,
         queries: &Vec<Vec<f32>>,
         count: usize,
+        exact: bool,
     ) -> (Vec<Vec<u64>>, Vec<Vec<f32>>) {
         let mut keys = Vec::new();
         let mut distances = Vec::new();
 
         for query in queries {
-            let (keys_result, distances_result) = self.search_vectors(query, count);
+            let (keys_result, distances_result) = self.search_vectors(query, count, exact);
             keys.push(keys_result);
             distances.push(distances_result);
         }

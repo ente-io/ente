@@ -22,7 +22,9 @@ abstract class VectorDb implements RustOpaqueInterface {
   Future<BigInt> bulkRemoveVectors({required Uint64List keys});
 
   Future<(List<Uint64List>, List<Float32List>)> bulkSearchVectors(
-      {required List<Float32List> queries, required BigInt count});
+      {required List<Float32List> queries,
+      required BigInt count,
+      required bool exact});
 
   /// Check if a vector with the given key exists in the index.
   /// `true` if the index contains the vector with the given key, `false` otherwise.
@@ -44,5 +46,7 @@ abstract class VectorDb implements RustOpaqueInterface {
   Future<void> resetIndex();
 
   Future<(Uint64List, Float32List)> searchVectors(
-      {required List<double> query, required BigInt count});
+      {required List<double> query,
+      required BigInt count,
+      required bool exact});
 }

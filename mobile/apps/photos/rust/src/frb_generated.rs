@@ -296,6 +296,7 @@ fn wire__crate__api__usearch_api__VectorDb_bulk_search_vectors_impl(
             >>::sse_decode(&mut deserializer);
             let api_queries = <Vec<Vec<f32>>>::sse_decode(&mut deserializer);
             let api_count = <usize>::sse_decode(&mut deserializer);
+            let api_exact = <bool>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, ()>((move || {
@@ -318,6 +319,7 @@ fn wire__crate__api__usearch_api__VectorDb_bulk_search_vectors_impl(
                             &*api_that_guard,
                             &api_queries,
                             api_count,
+                            api_exact,
                         ),
                     )?;
                     Ok(output_ok)
@@ -682,6 +684,7 @@ fn wire__crate__api__usearch_api__VectorDb_search_vectors_impl(
             >>::sse_decode(&mut deserializer);
             let api_query = <Vec<f32>>::sse_decode(&mut deserializer);
             let api_count = <usize>::sse_decode(&mut deserializer);
+            let api_exact = <bool>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, ()>((move || {
@@ -704,6 +707,7 @@ fn wire__crate__api__usearch_api__VectorDb_search_vectors_impl(
                             &*api_that_guard,
                             &api_query,
                             api_count,
+                            api_exact,
                         ))?;
                     Ok(output_ok)
                 })())

@@ -105,7 +105,8 @@ abstract class RustLibApi extends BaseApi {
       crateApiUsearchApiVectorDbBulkSearchVectors(
           {required VectorDb that,
           required List<Float32List> queries,
-          required BigInt count});
+          required BigInt count,
+          required bool exact});
 
   Future<bool> crateApiUsearchApiVectorDbContainsVector(
       {required VectorDb that, required BigInt key});
@@ -129,7 +130,8 @@ abstract class RustLibApi extends BaseApi {
   Future<(Uint64List, Float32List)> crateApiUsearchApiVectorDbSearchVectors(
       {required VectorDb that,
       required List<double> query,
-      required BigInt count});
+      required BigInt count,
+      required bool exact});
 
   String crateApiSimpleGreet({required String name});
 
@@ -275,7 +277,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       crateApiUsearchApiVectorDbBulkSearchVectors(
           {required VectorDb that,
           required List<Float32List> queries,
-          required BigInt count}) {
+          required BigInt count,
+          required bool exact}) {
     return handler.executeNormal(NormalTask(
       callFfi: (port_) {
         final serializer = SseSerializer(generalizedFrbRustBinding);
@@ -283,6 +286,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that, serializer);
         sse_encode_list_list_prim_f_32_strict(queries, serializer);
         sse_encode_usize(count, serializer);
+        sse_encode_bool(exact, serializer);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
             funcId: 5, port: port_);
       },
@@ -292,7 +296,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         decodeErrorData: null,
       ),
       constMeta: kCrateApiUsearchApiVectorDbBulkSearchVectorsConstMeta,
-      argValues: [that, queries, count],
+      argValues: [that, queries, count, exact],
       apiImpl: this,
     ));
   }
@@ -300,7 +304,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   TaskConstMeta get kCrateApiUsearchApiVectorDbBulkSearchVectorsConstMeta =>
       const TaskConstMeta(
         debugName: "VectorDb_bulk_search_vectors",
-        argNames: ["that", "queries", "count"],
+        argNames: ["that", "queries", "count", "exact"],
       );
 
   @override
@@ -498,7 +502,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   Future<(Uint64List, Float32List)> crateApiUsearchApiVectorDbSearchVectors(
       {required VectorDb that,
       required List<double> query,
-      required BigInt count}) {
+      required BigInt count,
+      required bool exact}) {
     return handler.executeNormal(NormalTask(
       callFfi: (port_) {
         final serializer = SseSerializer(generalizedFrbRustBinding);
@@ -506,6 +511,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that, serializer);
         sse_encode_list_prim_f_32_loose(query, serializer);
         sse_encode_usize(count, serializer);
+        sse_encode_bool(exact, serializer);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
             funcId: 13, port: port_);
       },
@@ -515,7 +521,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         decodeErrorData: null,
       ),
       constMeta: kCrateApiUsearchApiVectorDbSearchVectorsConstMeta,
-      argValues: [that, query, count],
+      argValues: [that, query, count, exact],
       apiImpl: this,
     ));
   }
@@ -523,7 +529,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   TaskConstMeta get kCrateApiUsearchApiVectorDbSearchVectorsConstMeta =>
       const TaskConstMeta(
         debugName: "VectorDb_search_vectors",
-        argNames: ["that", "query", "count"],
+        argNames: ["that", "query", "count", "exact"],
       );
 
   @override
@@ -1103,9 +1109,11 @@ class VectorDbImpl extends RustOpaque implements VectorDb {
           .crateApiUsearchApiVectorDbBulkRemoveVectors(that: this, keys: keys);
 
   Future<(List<Uint64List>, List<Float32List>)> bulkSearchVectors(
-          {required List<Float32List> queries, required BigInt count}) =>
+          {required List<Float32List> queries,
+          required BigInt count,
+          required bool exact}) =>
       RustLib.instance.api.crateApiUsearchApiVectorDbBulkSearchVectors(
-          that: this, queries: queries, count: count);
+          that: this, queries: queries, count: count, exact: exact);
 
   /// Check if a vector with the given key exists in the index.
   /// `true` if the index contains the vector with the given key, `false` otherwise.
@@ -1135,7 +1143,9 @@ class VectorDbImpl extends RustOpaque implements VectorDb {
       );
 
   Future<(Uint64List, Float32List)> searchVectors(
-          {required List<double> query, required BigInt count}) =>
+          {required List<double> query,
+          required BigInt count,
+          required bool exact}) =>
       RustLib.instance.api.crateApiUsearchApiVectorDbSearchVectors(
-          that: this, query: query, count: count);
+          that: this, query: query, count: count, exact: exact);
 }
