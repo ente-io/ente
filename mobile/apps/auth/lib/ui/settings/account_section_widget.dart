@@ -1,11 +1,11 @@
 import 'package:ente_accounts/pages/change_email_dialog.dart';
 import 'package:ente_accounts/pages/delete_account_page.dart';
 import 'package:ente_accounts/pages/password_entry_page.dart';
+import 'package:ente_accounts/pages/recovery_key_page.dart';
+import 'package:ente_accounts/services/user_service.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
-import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
-import 'package:ente_auth/ui/account/recovery_key_page.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/expandable_menu_item_widget.dart';
 import 'package:ente_auth/ui/components/menu_item_widget.dart';
@@ -124,6 +124,7 @@ class AccountSectionWidget extends StatelessWidget {
             routeToPage(
               context,
               RecoveryKeyPage(
+                Configuration.instance,
                 recoveryKey,
                 l10n.ok,
                 showAppBar: true,

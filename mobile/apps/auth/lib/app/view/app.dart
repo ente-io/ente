@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:ente_accounts/services/user_service.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/ente_theme_data.dart';
 import "package:ente_auth/l10n/l10n.dart";
@@ -9,7 +10,6 @@ import 'package:ente_auth/locale.dart';
 import "package:ente_auth/onboarding/view/onboarding_page.dart";
 import 'package:ente_auth/services/authenticator_service.dart';
 import 'package:ente_auth/services/update_service.dart';
-import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/services/window_listener_service.dart';
 import 'package:ente_auth/ui/home_page.dart';
 import 'package:ente_auth/ui/settings/app_update_dialog.dart';
