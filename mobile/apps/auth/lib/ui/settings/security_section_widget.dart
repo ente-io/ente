@@ -2,13 +2,13 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:ente_accounts/models/user_details.dart';
+import 'package:ente_accounts/pages/request_pwd_verification_page.dart';
 import 'package:ente_accounts/pages/sessions_page.dart';
+import 'package:ente_accounts/services/passkey_service.dart';
+import 'package:ente_accounts/services/user_service.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
-import 'package:ente_auth/services/passkey_service.dart';
-import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
-import 'package:ente_auth/ui/account/request_pwd_verification_page.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/expandable_menu_item_widget.dart';
@@ -243,6 +243,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         await routeToPage(
           context,
           RequestPasswordVerificationPage(
+            Configuration.instance,
             onPasswordVerified: (Uint8List keyEncryptionKey) async {
               final Uint8List loginKey =
                   await CryptoUtil.deriveLoginKey(keyEncryptionKey);
