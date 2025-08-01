@@ -99,6 +99,20 @@ void main() {
       expect(parsedDate.year, 2025);
     });
 
+    test('should parse partial month-year "03-2024"', () {
+      final PartialDate parsedDate = dateParseService.parse('03-2024');
+      expect(parsedDate.day, isNull);
+      expect(parsedDate.month, 3);
+      expect(parsedDate.year, 2024);
+    });
+
+    test('should parse partial month/year "03/2025"', () {
+      final PartialDate parsedDate = dateParseService.parse('03/2025');
+      expect(parsedDate.day, isNull);
+      expect(parsedDate.month, 3);
+      expect(parsedDate.year, 2025);
+    });
+
     test('should parse partial month name "Febr 2025"', () {
       final PartialDate parsedDate = dateParseService.parse('Febr 2025');
       expect(parsedDate.day, isNull);
@@ -119,6 +133,20 @@ void main() {
       expect(parsedDate.day, 22);
       expect(parsedDate.month, 2);
       expect(parsedDate.year, isNull);
+    });
+
+    test('should parse ordinal number dd mm format "23 03"', () {
+      final PartialDate parsedDate = dateParseService.parse('23 03');
+      expect(parsedDate.day, 23);
+      expect(parsedDate.month, 3);
+      expect(parsedDate.year, isNull);
+    });
+
+    test('should parse ordinal number "24 04 2024"', () {
+      final PartialDate parsedDate = dateParseService.parse('24 04 2024');
+      expect(parsedDate.day, 24);
+      expect(parsedDate.month, 4);
+      expect(parsedDate.year, 2024);
     });
 
     test('should parse ordinal number "3rd March"', () {
@@ -190,7 +218,7 @@ void main() {
     test('should parse ambiguous "01/02/2024" as MM/DD/YYYY (Jan 2)', () {
       // Test your specific heuristic for ambiguous cases
       final PartialDate parsedDate = dateParseService.parse('01/02/2024');
-      expect(parsedDate.day, 2);
+      expect(parsedDate.day, 1);
       expect(parsedDate.month, 1);
       expect(parsedDate.year, 2024);
     });

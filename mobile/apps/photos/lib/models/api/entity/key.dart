@@ -22,7 +22,7 @@ class EntityKey {
   Map<String, dynamic> toMap() {
     return {
       'userID': userID,
-      'type': type.typeToString(),
+      'type': type.name,
       'encryptedKey': encryptedKey,
       'header': header,
       'createdAt': createdAt,
@@ -35,7 +35,7 @@ class EntityKey {
       map['encryptedKey']!,
       map['header']!,
       map['createdAt']?.toInt() ?? 0,
-      typeFromString(map['type']!),
+      entityTypeFromString(map['type']!),
     );
   }
 

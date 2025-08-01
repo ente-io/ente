@@ -134,7 +134,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m43(name) => "与 ${name} 徒步";
 
-  static String m44(count) => "${Intl.plural(count, other: '${count} 个项目')}";
+  static String m44(count) =>
+      "${Intl.plural(count, one: '${count} 个项目', other: '${count} 个项目')}";
 
   static String m45(name) => "最后一次与 ${name} 相聚";
 
@@ -294,7 +295,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m115(name) => "祝 ${name} 生日快乐！ 🎉";
 
-  static String m116(count) => "${Intl.plural(count, other: '${count} 年前')}";
+  static String m116(count) =>
+      "${Intl.plural(count, one: '${count} 年前', other: '${count} 年前')}";
 
   static String m117(name) => "您和 ${name}";
 
@@ -521,16 +523,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "我们对回忆体验进行了重大改进，包括自动播放、滑动到下一个回忆以及更多功能。"),
         "cLDesc4": MessageLookupByLibrary.simpleMessage(
             "除了多项底层改进外，现在可以更轻松地查看所有检测到的人脸，对相似人脸提供反馈，以及从单张照片中添加/删除人脸。"),
-        "cLDesc5": MessageLookupByLibrary.simpleMessage(
-            "您现在将收到 Ente 上保存的所有生日的可选退出通知，同时附上他们最佳照片的合集。"),
-        "cLDesc6": MessageLookupByLibrary.simpleMessage(
-            "无需等待上传/下载完成即可关闭应用程序。所有上传和下载现在都可以中途暂停，并从中断处继续。"),
         "cLTitle1": MessageLookupByLibrary.simpleMessage("正在上传大型视频文件"),
         "cLTitle2": MessageLookupByLibrary.simpleMessage("后台上传"),
         "cLTitle3": MessageLookupByLibrary.simpleMessage("自动播放回忆"),
         "cLTitle4": MessageLookupByLibrary.simpleMessage("改进的人脸识别"),
-        "cLTitle5": MessageLookupByLibrary.simpleMessage("生日通知"),
-        "cLTitle6": MessageLookupByLibrary.simpleMessage("可恢复的上传和下载"),
         "cachedData": MessageLookupByLibrary.simpleMessage("缓存数据"),
         "calculating": MessageLookupByLibrary.simpleMessage("正在计算..."),
         "canNotOpenBody":
@@ -856,6 +852,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "faceNotClusteredYet":
             MessageLookupByLibrary.simpleMessage("人脸尚未聚类，请稍后再来"),
         "faceRecognition": MessageLookupByLibrary.simpleMessage("人脸识别"),
+        "faceThumbnailGenerationFailed":
+            MessageLookupByLibrary.simpleMessage("无法生成人脸缩略图"),
         "faces": MessageLookupByLibrary.simpleMessage("人脸"),
         "failed": MessageLookupByLibrary.simpleMessage("失败"),
         "failedToApplyCode": MessageLookupByLibrary.simpleMessage("无法使用此代码"),
@@ -884,6 +882,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "feastingWithThem": m34,
         "feedback": MessageLookupByLibrary.simpleMessage("反馈"),
         "file": MessageLookupByLibrary.simpleMessage("文件"),
+        "fileAnalysisFailed": MessageLookupByLibrary.simpleMessage("无法分析文件"),
         "fileFailedToSaveToGallery":
             MessageLookupByLibrary.simpleMessage("无法将文件保存到相册"),
         "fileInfoAddDescHint": MessageLookupByLibrary.simpleMessage("添加说明..."),

@@ -34,7 +34,6 @@ class PhotoGridSizePickerPage extends StatelessWidget {
                   Navigator.pop(context);
                   Navigator.pop(context);
                   Navigator.pop(context);
-                  Navigator.pop(context);
                 },
               ),
             ],

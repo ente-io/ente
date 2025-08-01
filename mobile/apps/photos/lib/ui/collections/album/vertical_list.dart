@@ -37,12 +37,14 @@ class AlbumVerticalListWidget extends StatefulWidget {
   final bool enableSelection;
   final List<Collection> selectedCollections;
   final Function()? onSelectionChanged;
+  final List<String>? selectedPeople;
 
   const AlbumVerticalListWidget(
     this.collections,
     this.actionType,
     this.selectedFiles,
     this.sharedFiles,
+    this.selectedPeople,
     this.searchQuery,
     this.shouldShowCreateAlbum, {
     required this.selectedCollections,
@@ -66,7 +68,9 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
   Widget build(BuildContext context) {
     final filesCount = widget.sharedFiles != null
         ? widget.sharedFiles!.length
-        : widget.selectedFiles?.files.length ?? 0;
+        : widget.selectedPeople != null
+            ? widget.selectedPeople!.length
+            : widget.selectedFiles?.files.length ?? 0;
 
     if (widget.collections.isEmpty) {
       if (widget.shouldShowCreateAlbum) {
@@ -142,7 +146,7 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
         },
         showOnlyLoadingState: true,
         textCapitalization: TextCapitalization.words,
-        popnavAfterSubmission: false,
+        popnavAfterSubmission: true,
       );
       if (result is Exception) {
         await showGenericErrorDialog(
@@ -282,6 +286,8 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
   }) async {
     switch (widget.actionType) {
       case CollectionActionType.addFiles:
+      case CollectionActionType.addToHiddenAlbum:
+      case CollectionActionType.autoAddPeople:
         return _addToCollection(
           context,
           collection.id,
@@ -297,8 +303,6 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
         return _showShareCollectionPage(context, collection);
       case CollectionActionType.moveToHiddenCollection:
         return _moveFilesToCollection(context, collection.id);
-      case CollectionActionType.addToHiddenAlbum:
-        return _addToCollection(context, collection.id, showProgressDialog);
     }
   }
 

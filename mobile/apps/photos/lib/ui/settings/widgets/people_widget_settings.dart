@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
@@ -22,6 +23,7 @@ class PeopleWidgetSettings extends StatefulWidget {
 class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
   bool hasInstalledAny = false;
   final _selectedPeople = SelectedPeople();
+  Set<String>? lastSelectedPeople;
 
   @override
   void initState() {
@@ -35,14 +37,13 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
 
     if (selectedPeople != null) {
       _selectedPeople.select(selectedPeople.toSet());
+      lastSelectedPeople = selectedPeople.toSet();
     }
   }
 
   Future<void> checkIfAnyWidgetInstalled() async {
     final count = await PeopleHomeWidgetService.instance.countHomeWidgets();
-    setState(() {
-      hasInstalledAny = count > 0;
-    });
+    setState(() => hasInstalledAny = count > 0);
   }
 
   @override
@@ -59,15 +60,21 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
               child: ListenableBuilder(
                 listenable: _selectedPeople,
                 builder: (context, _) {
+                  final areIdsChanged = lastSelectedPeople != null
+                      ? !setEquals(
+                          _selectedPeople.personIds,
+                          lastSelectedPeople,
+                        )
+                      : _selectedPeople.personIds.isNotEmpty;
+
                   return ButtonWidget(
                     buttonType: ButtonType.primary,
                     buttonSize: ButtonSize.large,
                     labelText: S.of(context).save,
                     shouldSurfaceExecutionStates: false,
-                    isDisabled: _selectedPeople.personIds.isEmpty,
-                    onTap: _selectedPeople.personIds.isEmpty
-                        ? null
-                        : () async {
+                    isDisabled: !areIdsChanged,
+                    onTap: areIdsChanged
+                        ? () async {
                             unawaited(
                               PeopleHomeWidgetService.instance
                                   .setSelectedPeople(
@@ -75,7 +82,8 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
                               ),
                             );
                             Navigator.pop(context);
-                          },
+                          }
+                        : null,
                   );
                 },
               ),
