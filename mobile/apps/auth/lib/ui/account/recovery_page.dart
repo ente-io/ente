@@ -1,7 +1,8 @@
+import 'package:ente_accounts/pages/password_entry_page.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
-import 'package:ente_auth/ui/account/password_entry_page.dart';
 import 'package:ente_auth/ui/common/dynamic_fab.dart';
+import 'package:ente_auth/ui/home_page.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:flutter/material.dart';
@@ -27,10 +28,12 @@ class _RecoveryPageState extends State<RecoveryPage> {
       await Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (BuildContext context) {
-            return const PopScope(
+            return PopScope(
               canPop: false,
               child: PasswordEntryPage(
-                mode: PasswordEntryMode.reset,
+                Configuration.instance,
+                PasswordEntryMode.reset,
+                const HomePage(),
               ),
             );
           },

@@ -10,21 +10,21 @@ import 'package:ente_accounts/models/set_keys_request.dart';
 import 'package:ente_accounts/models/set_recovery_key_request.dart';
 import 'package:ente_accounts/models/two_factor.dart';
 import 'package:ente_accounts/models/user_details.dart';
+import 'package:ente_accounts/pages/login_page.dart';
+import 'package:ente_accounts/pages/ott_verification_page.dart';
+import 'package:ente_accounts/pages/passkey_page.dart';
+import 'package:ente_accounts/pages/password_entry_page.dart';
 import 'package:ente_accounts/pages/two_factor_authentication_page.dart';
 import 'package:ente_accounts/pages/two_factor_recovery_page.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/constants.dart';
 import 'package:ente_auth/core/errors.dart';
 import 'package:ente_auth/l10n/l10n.dart';
-import 'package:ente_auth/models/api/user/srp.dart'; 
-import 'package:ente_auth/ui/account/login_page.dart';
-import 'package:ente_auth/ui/account/ott_verification_page.dart';
-import 'package:ente_auth/ui/account/password_entry_page.dart';
+import 'package:ente_auth/models/api/user/srp.dart';
 import 'package:ente_auth/ui/account/password_reentry_page.dart';
 import 'package:ente_auth/ui/account/recovery_page.dart';
 import 'package:ente_auth/ui/common/progress_dialog.dart';
 import 'package:ente_auth/ui/home_page.dart';
-import 'package:ente_auth/ui/passkey_page.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_base/models/key_attributes.dart';
@@ -405,6 +405,7 @@ class UserService {
         }
         if (passkeySessionID.isNotEmpty) {
           page = PasskeyPage(
+            Configuration.instance,
             passkeySessionID,
             totp2FASessionID: twoFASessionID,
             accountsUrl: accountsUrl,
@@ -420,8 +421,10 @@ class UserService {
               page = const PasswordReentryPage();
             }
           } else {
-            page = const PasswordEntryPage(
-              mode: PasswordEntryMode.set,
+            page = PasswordEntryPage(
+              Configuration.instance,
+              PasswordEntryMode.set,
+              const HomePage(),
             );
           }
         }
@@ -721,6 +724,7 @@ class UserService {
       Configuration.instance.setVolatilePassword(userPassword);
       if (passkeySessionID.isNotEmpty) {
         page = PasskeyPage(
+          Configuration.instance,
           passkeySessionID,
           totp2FASessionID: twoFASessionID,
           accountsUrl: accountsUrl,
@@ -838,7 +842,7 @@ class UserService {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
-              return const LoginPage();
+              return LoginPage(Configuration.instance);
             },
           ),
           (route) => route.isFirst,
@@ -904,7 +908,7 @@ class UserService {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
-              return const LoginPage();
+              return LoginPage(Configuration.instance);
             },
           ),
           (route) => route.isFirst,
@@ -1002,7 +1006,7 @@ class UserService {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
-              return const LoginPage();
+              return LoginPage(Configuration.instance);
             },
           ),
           (route) => route.isFirst,
