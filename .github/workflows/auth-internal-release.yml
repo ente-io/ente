@@ -66,3 +66,71 @@ jobs:
                   title: "🏆 Internal release available for Auth"
                   description: "[Download](https://play.google.com/store/apps/details?id=io.ente.auth)"
                   color: 0x800080
+
+    build-ios:
+        runs-on: macos-15
+        env:
+          APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.IOS_API_KEY }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.IOS_ISSUER_ID }}
+          APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ secrets.IOS_API_KEY_ID }}
+
+        defaults:
+            run:
+                working-directory: mobile/apps/auth
+
+        steps:
+            - name: Checkout code and submodules
+              uses: actions/checkout@v4
+              with:
+                  submodules: recursive
+
+            - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
+              uses: subosito/flutter-action@v2
+              with:
+                  channel: "stable"
+                  flutter-version: ${{ env.FLUTTER_VERSION  }}
+                  cache: true
+
+            - name: Install code signing dependencies
+              run: |
+                  pip3 install codemagic-cli-tools
+
+            - name: Add provisioning profiles
+              run: |
+                  PROFILES_HOME="$HOME/Library/MobileDevice/Provisioning Profiles"
+                  mkdir -p "$PROFILES_HOME"
+                  PROFILE_PATH="$(mktemp "$PROFILES_HOME"/$(uuidgen).mobileprovision)"
+                  echo ${CM_PROVISIONING_PROFILE} | base64 --decode > "$PROFILE_PATH"
+                  echo "Saved provisioning profile $PROFILE_PATH"
+              env:
+                  CM_PROVISIONING_PROFILE: ${{ secrets.MAC_OS_BUILD_PROVISION_PROFILE_BASE64 }}
+
+            - name: Add certificates
+              run: |
+                  # create variables
+                  CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+
+                  # copy certificates from base64
+                  echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+
+                  # add certificate to keychain
+                  keychain initialize
+                  keychain add-certificates --certificate $CERTIFICATE_PATH --certificate-password $P12_PASSWORD
+
+                  # Use profile in current project
+                  xcode-project use-profiles
+              env:
+                  BUILD_CERTIFICATE_BASE64: ${{ secrets.MAC_OS_CERTIFICATE }}
+                  P12_PASSWORD: ${{ secrets.MAC_OS_CERTIFICATE_PASSWORD }}
+
+            - name: Build iOS IPA
+              run: |
+                  flutter build ipa \
+                    --release \
+                    --export-options-plist=$HOME/export_options.plist \
+                    --dart-define=cronetHttpNoPlay=true
+                  
+            - name: Upload IPA to App Store Connect
+              run: |
+                  APP_FILE=$(find $(pwd) -name "*.ipa")
+                  app-store-connect publish --path "$APP_FILE" 
