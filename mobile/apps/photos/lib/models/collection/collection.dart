@@ -142,7 +142,9 @@ class Collection {
   bool canAutoAdd(int userID) {
     final canEditCollection = isOwner(userID) ||
         getRole(userID) == CollectionParticipantRole.collaborator;
-    return canEditCollection && !isDeleted;
+    final isFavoritesOrUncategorized = type == CollectionType.favorites ||
+        type == CollectionType.uncategorized;
+    return canEditCollection && !isDeleted && !isFavoritesOrUncategorized;
   }
 
   bool isDownloadEnabledForPublicLink() {
