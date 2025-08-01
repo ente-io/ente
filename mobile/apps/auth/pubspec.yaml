@@ -25,6 +25,8 @@ dependencies:
   dotted_border: ^3.1.0
   dropdown_button2: ^2.3.9
   email_validator: ^3.0.0
+  ente_accounts:
+    path: ../../packages/accounts
   ente_base:
     path: ../../packages/base
   ente_configuration:

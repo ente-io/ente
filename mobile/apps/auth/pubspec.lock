@@ -394,7 +394,7 @@ packages:
     source: hosted
     version: "3.0.0"
   ente_accounts:
-    dependency: transitive
+    dependency: "direct main"
     description:
       path: "../../packages/accounts"
       relative: true
