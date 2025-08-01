@@ -1,9 +1,9 @@
+import 'package:ente_accounts/pages/change_email_dialog.dart';
+import 'package:ente_accounts/pages/delete_account_page.dart';
 import 'package:ente_auth/core/configuration.dart';
-import 'package:ente_auth/l10n/l10n.dart'; 
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
-import 'package:ente_auth/ui/account/change_email_dialog.dart';
-import 'package:ente_auth/ui/account/delete_account_page.dart';
 import 'package:ente_auth/ui/account/password_entry_page.dart';
 import 'package:ente_auth/ui/account/recovery_key_page.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
@@ -151,8 +151,9 @@ class AccountSectionWidget extends StatelessWidget {
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
         onTap: () async {
+          final config = Configuration.instance;
           // ignore: unawaited_futures
-          routeToPage(context, const DeleteAccountPage());
+          routeToPage(context, DeleteAccountPage(config));
         },
       ),
       sectionOptionSpacing,

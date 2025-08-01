@@ -1,14 +1,14 @@
 import 'dart:convert';
 
 import 'package:app_links/app_links.dart';
+import 'package:ente_accounts/models/two_factor.dart';
+import 'package:ente_accounts/pages/two_factor_authentication_page.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/errors.dart';
 import 'package:ente_auth/l10n/l10n.dart';
-import 'package:ente_auth/models/account/two_factor.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
-import 'package:ente_auth/ui/two_factor_authentication_page.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';

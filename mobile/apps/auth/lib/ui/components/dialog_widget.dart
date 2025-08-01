@@ -1,7 +1,6 @@
 import 'dart:math';
 
-import 'package:ente_auth/l10n/l10n.dart';
-import 'package:ente_auth/models/typedefs.dart';
+import 'package:ente_auth/l10n/l10n.dart'; 
 import 'package:ente_auth/theme/colors.dart';
 import 'package:ente_auth/theme/effects.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
@@ -11,6 +10,7 @@ import 'package:ente_auth/ui/components/models/button_result.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/ui/components/separators.dart';
 import 'package:ente_auth/ui/components/text_input_widget.dart';
+import 'package:ente_base/typedefs.dart';
 import 'package:flutter/material.dart';
 
 ///Will return null if dismissed by tapping outside

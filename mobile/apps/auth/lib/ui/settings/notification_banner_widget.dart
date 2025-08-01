@@ -1,8 +1,8 @@
 import 'dart:io';
 
+import 'package:ente_accounts/models/user_details.dart';
 import 'package:ente_auth/core/configuration.dart';
-import 'package:ente_auth/l10n/l10n.dart';
-import 'package:ente_auth/models/user_details.dart';
+import 'package:ente_auth/l10n/l10n.dart'; 
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/ui/components/banner_widget.dart';
