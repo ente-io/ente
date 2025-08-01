@@ -26,7 +26,8 @@ enum SimilarImagesPageState {
 
 enum SortKey {
   size,
-  distance,
+  distanceAsc,
+  distanceDesc,
   count,
 }
 
@@ -306,9 +307,13 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       case SortKey.size:
         _similarFilesList.sort((a, b) => b.totalSize.compareTo(a.totalSize));
         break;
-      case SortKey.distance:
+      case SortKey.distanceAsc:
         _similarFilesList
             .sort((a, b) => a.furthestDistance.compareTo(b.furthestDistance));
+        break;
+      case SortKey.distanceDesc:
+        _similarFilesList
+            .sort((a, b) => b.furthestDistance.compareTo(a.furthestDistance));
         break;
       case SortKey.count:
         _similarFilesList
@@ -431,8 +436,11 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         case SortKey.size:
           text = "Size"; // TODO: lau: extract string
           break;
-        case SortKey.distance:
-          text = "Similarity"; // TODO: lau: extract string
+        case SortKey.distanceAsc:
+          text = "Distance ascending"; // TODO: lau: extract string
+          break;
+        case SortKey.distanceDesc:
+          text = "Distance descending"; // TODO: lau: extract string
           break;
         case SortKey.count:
           text = "Count"; // TODO: lau: extract string
