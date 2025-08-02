@@ -189,7 +189,7 @@ jobs:
                       ${{ github.workspace }}/mobile/apps/auth/ente-${{ github.ref_name }}-windows/auth.exe
                 file-digest: SHA256
                 timestamp-rfc3161: http://timestamp.acs.microsoft.com
-                timestamp-digest: SHA256  
+                timestamp-digest: SHA256
 
 
             - name: Zip Windows EXE and DLLs
@@ -294,6 +294,107 @@ jobs:
 
             - name: Generate checksums
               run: shasum -a 256 artifacts/ente-* > artifacts/sha256sum-macos
+
+            - name: Create a draft GitHub release
+              uses: ncipollo/release-action@v1
+              with:
+                  artifacts: "mobile/apps/auth/artifacts/*"
+                  draft: true
+                  allowUpdates: true
+                  updateOnlyUnreleased: true
+
+    build-ios:
+        runs-on: macos-13
+
+        defaults:
+            run:
+                working-directory: mobile/apps/auth
+
+        steps:
+            - name: Checkout code and submodules
+              uses: actions/checkout@v4
+              with:
+                  submodules: recursive
+
+            - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
+              uses: subosito/flutter-action@v2
+              with:
+                  channel: "stable"
+                  flutter-version: ${{ env.FLUTTER_VERSION  }}
+                  cache: true
+
+            - name: Install fastlane
+              run: gem install fastlane
+
+            - name: Create ExportOptions.plist
+              run: |
+                cat <<EOF > ios/ExportOptions.plist
+                <?xml version="1.0" encoding="UTF-8"?>
+                <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+                <plist version="1.0">
+                <dict>
+                    <key>method</key>
+                    <string>app-store</string>
+                    <key>teamID</key>
+                    <string>${{ secrets.IOS_TEAM_ID }}</string>
+                </dict>
+                </plist>
+                EOF
+
+            - name: Setup App Store Connect API Key
+              run: |
+                echo '${{ secrets.IOS_API_KEY }}' > api_key.json
+                chmod 600 api_key.json
+
+            - name: Build iOS IPA
+              run: |
+                flutter build ipa \
+                  --release \
+                  --export-options-plist=ios/ExportOptions.plist \
+                  --dart-define=cronetHttpNoPlay=true
+              env:
+                SIGNING_TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
+
+            - name: Create artifacts directory
+              run: mkdir artifacts
+
+            - name: Copy IPA to artifacts
+              run: cp build/ios/ipa/*.ipa artifacts/ente-${{ github.ref_name }}.ipa
+
+            - name: Generate checksums
+              run: shasum -a 256 artifacts/ente-${{ github.ref_name }}.ipa > artifacts/sha256sum-ios
+
+            - name: Upload to TestFlight
+              run: |
+                fastlane pilot upload \
+                  --api_key_path api_key.json \
+                  --ipa "artifacts/ente-${{ github.ref_name }}.ipa" \
+                  --skip_waiting_for_build_processing \
+                  --apple_id ${{ secrets.IOS_APPLE_ID }} \
+                  --app_identifier "io.ente.auth"
+              env:
+                APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.IOS_API_KEY_ID }}
+                APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.IOS_ISSUER_ID }}
+                FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.IOS_APP_SPECIFIC_PASSWORD }}
+
+            - name: Submit app to App Store
+              if: startsWith(github.ref, 'refs/tags/auth-v') && !contains(github.ref, 'nightly') && !contains(github.ref, 'beta')
+              run: |
+                fastlane deliver \
+                  --api_key_path api_key.json \
+                  --ipa "artifacts/ente-${{ github.ref_name }}.ipa" \
+                  --skip_metadata \
+                  --skip_screenshots \
+                  --submit_for_review \
+                  --app_identifier "io.ente.auth"
+              env:
+                APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.IOS_API_KEY_ID }}
+                APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.IOS_ISSUER_ID }}
+                FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.IOS_APP_SPECIFIC_PASSWORD }}
+
+            - name: Clean sensitive files
+              run: |
+                rm -f api_key.json
 
             - name: Create a draft GitHub release
               uses: ncipollo/release-action@v1
