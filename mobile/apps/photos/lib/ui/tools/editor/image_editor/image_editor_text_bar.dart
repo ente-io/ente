@@ -232,10 +232,10 @@ class _BackgroundPickerWidget extends StatelessWidget {
         'backgroundColor': colorScheme.backgroundElevated2,
         'border': null,
         'textColor': Colors.black,
-        'selectedInnerBackgroundColor': Colors.black.withOpacity(0.11),
+        'selectedInnerBackgroundColor': Colors.black.withValues(alpha: 0.11),
         'innerBackgroundColor': isLightMode
-            ? Colors.black.withOpacity(0.11)
-            : Colors.white.withOpacity(0.11),
+            ? Colors.black.withValues(alpha: 0.11)
+            : Colors.white.withValues(alpha: 0.11),
       },
       LayerBackgroundMode.onlyColor: {
         'text': 'Aa',
@@ -246,7 +246,7 @@ class _BackgroundPickerWidget extends StatelessWidget {
             isLightMode ? null : Border.all(color: Colors.white, width: 2),
         'textColor': Colors.black,
         'selectedInnerBackgroundColor': Colors.white,
-        'innerBackgroundColor': Colors.white.withOpacity(0.6),
+        'innerBackgroundColor': Colors.white.withValues(alpha: 0.6),
       },
     };
 

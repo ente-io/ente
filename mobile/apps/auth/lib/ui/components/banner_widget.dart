@@ -54,12 +54,12 @@ class BannerWidget extends StatelessWidget {
         dashColor = const Color.fromRGBO(255, 191, 12, 1);
         boxShadow = [
           BoxShadow(
-            color: const Color(0xFFFDB816).withOpacity(0.1),
+            color: const Color(0xFFFDB816).withValues(alpha: 0.1),
             blurRadius: 50,
             spreadRadius: 80,
           ),
           BoxShadow(
-            color: const Color(0xFFFDB816).withOpacity(0.2),
+            color: const Color(0xFFFDB816).withValues(alpha: 0.2),
             blurRadius: 25,
           ),
         ];
@@ -71,12 +71,12 @@ class BannerWidget extends StatelessWidget {
         dashColor = const Color.fromRGBO(233, 233, 233, 1);
         boxShadow = [
           BoxShadow(
-            color: const Color.fromRGBO(78, 78, 78, 1).withOpacity(0.2),
+            color: const Color.fromRGBO(78, 78, 78, 1).withValues(alpha: 0.2),
             blurRadius: 50,
             spreadRadius: 100,
           ),
           BoxShadow(
-            color: const Color.fromRGBO(23, 22, 22, 0.30).withOpacity(0.1),
+            color: const Color.fromRGBO(23, 22, 22, 0.30).withValues(alpha: 0.1),
             blurRadius: 25,
           ),
         ];
@@ -87,12 +87,12 @@ class BannerWidget extends StatelessWidget {
         dashColor = const Color.fromRGBO(29, 185, 84, 1);
         boxShadow = [
           BoxShadow(
-            color: const Color.fromRGBO(38, 203, 95, 1).withOpacity(0.08),
+            color: const Color.fromRGBO(38, 203, 95, 1).withValues(alpha: 0.08),
             blurRadius: 50,
             spreadRadius: 100,
           ),
           BoxShadow(
-            color: const Color.fromRGBO(0, 0, 0, 0.50).withOpacity(0.08),
+            color: const Color.fromRGBO(0, 0, 0, 0.50).withValues(alpha: 0.08),
             blurRadius: 25,
           ),
         ];
@@ -103,12 +103,12 @@ class BannerWidget extends StatelessWidget {
         imagePath = "assets/discount.png";
         boxShadow = [
           BoxShadow(
-            color: const Color.fromRGBO(38, 203, 95, 1).withOpacity(0.08),
+            color: const Color.fromRGBO(38, 203, 95, 1).withValues(alpha: 0.08),
             blurRadius: 50,
             spreadRadius: 100,
           ),
           BoxShadow(
-            color: const Color.fromRGBO(0, 0, 0, 0.50).withOpacity(0.08),
+            color: const Color.fromRGBO(0, 0, 0, 0.50).withValues(alpha: 0.08),
             blurRadius: 25,
           ),
         ];

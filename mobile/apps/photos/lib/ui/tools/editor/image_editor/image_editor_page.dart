@@ -349,7 +349,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                               margin: const EdgeInsets.only(bottom: 24),
                               decoration: BoxDecoration(
                                 color: isHovered
-                                    ? colorScheme.warning400.withOpacity(0.8)
+                                    ? colorScheme.warning400.withValues(alpha: 0.8)
                                     : Colors.white,
                                 shape: BoxShape.circle,
                               ),
@@ -361,7 +361,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                                     isHovered
                                         ? Colors.white
                                         : colorScheme.warning400
-                                            .withOpacity(0.8),
+                                            .withValues(alpha: 0.8),
                                     BlendMode.srcIn,
                                   ),
                                 ),

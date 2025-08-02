@@ -262,17 +262,17 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
     late Color idleColor;
     switch (brightness) {
       case Brightness.light:
-        dragColor = onSurface.withOpacity(0.6);
-        hoverColor = onSurface.withOpacity(0.5);
+        dragColor = onSurface.withValues(alpha: 0.6);
+        hoverColor = onSurface.withValues(alpha: 0.5);
         idleColor = _useAndroidScrollbar
-            ? Theme.of(context).highlightColor.withOpacity(1.0)
-            : onSurface.withOpacity(0.1);
+            ? Theme.of(context).highlightColor.withValues(alpha: 1.0)
+            : onSurface.withValues(alpha: 0.1);
       case Brightness.dark:
-        dragColor = onSurface.withOpacity(0.75);
-        hoverColor = onSurface.withOpacity(0.65);
+        dragColor = onSurface.withValues(alpha: 0.75);
+        hoverColor = onSurface.withValues(alpha: 0.65);
         idleColor = _useAndroidScrollbar
-            ? Theme.of(context).highlightColor.withOpacity(1.0)
-            : onSurface.withOpacity(0.3);
+            ? Theme.of(context).highlightColor.withValues(alpha: 1.0)
+            : onSurface.withValues(alpha: 0.3);
     }
 
     return WidgetStateProperty.resolveWith((Set<WidgetState> states) {
@@ -304,8 +304,8 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       if (showScrollbar && _trackVisibility.resolve(states)) {
         return _scrollbarTheme.trackColor?.resolve(states) ??
             switch (brightness) {
-              Brightness.light => onSurface.withOpacity(0.03),
-              Brightness.dark => onSurface.withOpacity(0.05),
+              Brightness.light => onSurface.withValues(alpha: 0.03),
+              Brightness.dark => onSurface.withValues(alpha: 0.05),
             };
       }
       return const Color(0x00000000);
@@ -322,8 +322,8 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
       if (showScrollbar && _trackVisibility.resolve(states)) {
         return _scrollbarTheme.trackBorderColor?.resolve(states) ??
             switch (brightness) {
-              Brightness.light => onSurface.withOpacity(0.1),
-              Brightness.dark => onSurface.withOpacity(0.25),
+              Brightness.light => onSurface.withValues(alpha: 0.1),
+              Brightness.dark => onSurface.withValues(alpha: 0.25),
             };
       }
       return const Color(0x00000000);

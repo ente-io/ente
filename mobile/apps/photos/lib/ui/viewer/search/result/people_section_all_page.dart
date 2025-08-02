@@ -217,7 +217,7 @@ class SelectablePersonSearchExample extends StatelessWidget {
                           ),
                           child: ColorFiltered(
                             colorFilter: ColorFilter.mode(
-                              Colors.black.withOpacity(
+                              Colors.black.withValues(alpha: 
                                 isSelected ? 0.4 : 0,
                               ),
                               BlendMode.darken,
@@ -596,7 +596,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
               side: BorderSide(
-                color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
                 width: 1,
               ),
             ),

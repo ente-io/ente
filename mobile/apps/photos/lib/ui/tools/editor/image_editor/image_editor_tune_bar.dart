@@ -302,11 +302,11 @@ class _CircularProgressWithValueState extends State<CircularProgressWithValue>
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: showValue || widget.isSelected
-                  ? progressColor.withOpacity(0.2)
+                  ? progressColor.withValues(alpha: 0.2)
                   : colorTheme.backgroundElevated2,
               border: Border.all(
                 color: widget.isSelected
-                    ? progressColor.withOpacity(0.4)
+                    ? progressColor.withValues(alpha: 0.4)
                     : colorTheme.backgroundElevated2,
                 width: 2,
               ),

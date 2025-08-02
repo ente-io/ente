@@ -286,7 +286,7 @@ class PersonSearchExample extends StatelessWidget {
                           ),
                           child: ColorFiltered(
                             colorFilter: ColorFilter.mode(
-                              Colors.black.withOpacity(
+                              Colors.black.withValues(alpha: 
                                 isSelected ? 0.4 : 0,
                               ),
                               BlendMode.darken,

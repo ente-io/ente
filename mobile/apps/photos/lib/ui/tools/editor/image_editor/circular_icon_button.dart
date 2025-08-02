@@ -39,7 +39,7 @@ class CircularIconButton extends StatelessWidget {
                     ? Theme.of(context)
                         .colorScheme
                         .imageEditorPrimaryColor
-                        .withOpacity(0.24)
+                        .withValues(alpha: 0.24)
                     : colorScheme.backgroundElevated2,
                 shape: BoxShape.circle,
                 border: Border.all(
