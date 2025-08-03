@@ -48,7 +48,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
   final _logger = Logger((_PasswordEntryPageState).toString());
   final _passwordController1 = TextEditingController(),
       _passwordController2 = TextEditingController();
-  final Color _validFieldValueColor = const Color.fromRGBO(45, 194, 98, 0.2);
+  final Color _validFieldValueColor = const Color(0xFF475CC7).withOpacity(0.2);
   String? _volatilePassword;
   String _passwordInInputBox = '';
   String _passwordInInputConfirmationBox = '';
@@ -141,10 +141,10 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
   Widget _getBody(String buttonTextAndHeading) {
     final email = Configuration.instance.getEmail();
     var passwordStrengthText = S.of(context).weakStrength;
-    var passwordStrengthColor = Colors.redAccent;
+    Color passwordStrengthColor = Colors.redAccent;
     if (_passwordStrength > kStrongPasswordStrengthThreshold) {
       passwordStrengthText = S.of(context).strongStrength;
-      passwordStrengthColor = Colors.greenAccent;
+              passwordStrengthColor = const Color(0xFF475CC7);
     } else if (_passwordStrength > kMildPasswordStrengthThreshold) {
       passwordStrengthText = S.of(context).moderateStrength;
       passwordStrengthColor = Colors.orangeAccent;

@@ -35,7 +35,7 @@ class _SessionsPageState extends State<SessionsPage> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: Text(S.of(context).activeSessions),
+        title: const SizedBox.shrink(),
       ),
       body: _getBody(),
     );

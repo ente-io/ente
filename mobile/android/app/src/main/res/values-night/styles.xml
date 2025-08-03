@@ -2,9 +2,8 @@
 <resources>
     <!-- Theme applied to the Android Window while the process is starting when the OS's Dark Mode setting is on -->
     <style name="LaunchTheme" parent="@android:style/Theme.Black.NoTitleBar">
-        <!-- Show a splash screen on the activity. Automatically removed when
-             Flutter draws its first frame -->
-        <item name="android:windowBackground">@drawable/launch_background</item>
+        <!-- No splash screen - direct launch -->
+        <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:forceDarkAllowed">false</item>
         <item name="android:windowFullscreen">false</item>
         <item name="android:windowDrawsSystemBarBackgrounds">false</item>

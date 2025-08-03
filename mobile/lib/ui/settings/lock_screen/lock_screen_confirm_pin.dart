@@ -24,7 +24,7 @@ class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
     width: 48,
     padding: const EdgeInsets.only(top: 6.0),
     decoration: BoxDecoration(
-      border: Border.all(color: const Color.fromRGBO(45, 194, 98, 1.0)),
+              border: Border.all(color: const Color(0xFF475CC7)),
       borderRadius: BorderRadius.circular(15.0),
     ),
   );

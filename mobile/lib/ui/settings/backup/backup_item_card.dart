@@ -199,7 +199,7 @@ class _BackupItemCardState extends State<BackupItemCard> {
                       height: 24,
                       child: Icon(
                         Icons.check,
-                        color: Color(0xFF00B33C),
+                        color: Color(0xFF475CC7),
                       ),
                     ),
                   BackupItemStatus.inQueue => SizedBox(

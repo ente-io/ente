@@ -89,13 +89,7 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
     return AppBar(
       elevation: 0,
       centerTitle: false,
-      title: Text(
-        _appBarTitle!,
-        style:
-            Theme.of(context).textTheme.headlineSmall!.copyWith(fontSize: 16),
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
-      ),
+      title: const SizedBox.shrink(),
       actions: _getDefaultActions(context),
       scrolledUnderElevation: 4,
       shadowColor: Colors.black.withOpacity(0.15),

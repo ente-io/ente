@@ -30,7 +30,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: Text(S.of(context).freeUpSpace),
+        title: const SizedBox.shrink(),
       ),
       body: _getBody(),
     );
@@ -94,7 +94,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
             children: [
               const Icon(
                 Icons.cloud_done_outlined,
-                color: Color.fromRGBO(45, 194, 98, 1.0),
+                color: Color(0xFF475CC7),
               ),
               const Padding(padding: EdgeInsets.all(10)),
               Expanded(
@@ -113,7 +113,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
             children: [
               const Icon(
                 Icons.delete_outline,
-                color: Color.fromRGBO(45, 194, 98, 1.0),
+                color: Color(0xFF475CC7),
               ),
               const Padding(padding: EdgeInsets.all(10)),
               Expanded(
@@ -134,7 +134,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
             children: [
               const Icon(
                 Icons.devices,
-                color: Color.fromRGBO(45, 194, 98, 1.0),
+                color: Color(0xFF475CC7),
               ),
               const Padding(padding: EdgeInsets.all(10)),
               Expanded(

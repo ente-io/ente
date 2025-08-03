@@ -34,6 +34,19 @@ bool isValidEmail(String? email) {
   return EmailValidator.validate(email);
 }
 
+/// Extracts the username part from an email address
+/// Returns the part before the @ symbol, or the original email if no @ is found
+String getUsernameFromEmail(String email) {
+  if (email.isEmpty) {
+    return email;
+  }
+  final atIndex = email.indexOf('@');
+  if (atIndex == -1) {
+    return email;
+  }
+  return email.substring(0, atIndex);
+}
+
 Future<void> sendLogs(
   BuildContext context,
   String title,

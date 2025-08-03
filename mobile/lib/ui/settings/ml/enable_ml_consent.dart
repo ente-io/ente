@@ -66,7 +66,7 @@ class _EnableMachineLearningConsentState
                             builder: (BuildContext context) {
                               return WebPage(
                                 S.of(context).privacyPolicyTitle,
-                                "https://ente.io/privacy",
+                                "https://unplugged.com/privacy",
                               );
                             },
                           ),

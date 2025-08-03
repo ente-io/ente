@@ -6,7 +6,7 @@
         android:name="${applicationName}"
         android:allowBackup="false"
         android:fullBackupContent="false"
-        android:icon="@mipmap/icon_green"
+        android:icon="@mipmap/up_app_icon"
         android:label="@string/app_name"
         android:largeHeap="true"
         android:requestLegacyExternalStorage="true"
@@ -121,7 +121,7 @@
             android:name="${applicationId}.IconGreen"
             android:enabled="true"
             android:exported="true"
-            android:icon="@mipmap/icon_green"
+            android:icon="@mipmap/unplugged_gallery"
             android:targetActivity=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -133,7 +133,7 @@
             android:name="${applicationId}.IconLight"
             android:enabled="false"
             android:exported="true"
-            android:icon="@mipmap/icon_light"
+            android:icon="@mipmap/unplugged_gallery"
             android:targetActivity=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -145,7 +145,7 @@
             android:name="${applicationId}.IconDark"
             android:enabled="false"
             android:exported="true"
-            android:icon="@mipmap/icon_dark"
+            android:icon="@mipmap/unplugged_gallery"
             android:targetActivity=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -156,7 +156,7 @@
             android:name="${applicationId}.IconOG"
             android:enabled="false"
             android:exported="true"
-            android:icon="@mipmap/icon_og"
+            android:icon="@mipmap/unplugged_gallery"
             android:targetActivity=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

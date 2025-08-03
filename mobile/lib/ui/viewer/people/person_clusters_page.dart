@@ -35,7 +35,7 @@ class _PersonClustersPageState extends State<PersonClustersPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.person.data.name),
+        title: const SizedBox.shrink(),
       ),
       body: FutureBuilder<Map<String, List<EnteFile>>>(
         future: SearchService.instance

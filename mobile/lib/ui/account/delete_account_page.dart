@@ -47,7 +47,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: Text(S.of(context).deleteAccount),
+        title: const SizedBox.shrink(),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           color: Theme.of(context).iconTheme.color,

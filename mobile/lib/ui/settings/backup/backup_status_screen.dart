@@ -12,7 +12,6 @@ import "package:photos/models/backup/backup_item.dart";
 import "package:photos/models/backup/backup_item_status.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/services/search_service.dart";
-import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/settings/backup/backup_item_card.dart";
 import "package:photos/utils/file_uploader.dart";
 
@@ -109,11 +108,7 @@ class _BackupStatusScreenState extends State<BackupStatusScreen> {
     return Scaffold(
       appBar: AppBar(
         leadingWidth: 32,
-        title: TitleWidget(
-          title: S.of(context).backupStatus,
-          caption: null,
-          isTitleH2WithoutLeading: false,
-        ),
+        title: const SizedBox.shrink(),
       ),
       body: allItems.isEmpty
           ? Padding(

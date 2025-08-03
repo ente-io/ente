@@ -84,7 +84,7 @@ class _VideoStreamChangeWidgetState extends State<VideoStreamChangeWidget> {
                 vertical: 4,
               ),
               decoration: BoxDecoration(
-                color: Colors.green,
+                color: const Color(0xFF475CC7),
                 borderRadius: const BorderRadius.all(
                   Radius.circular(200),
                 ),

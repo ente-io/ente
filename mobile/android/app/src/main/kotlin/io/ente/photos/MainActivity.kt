@@ -95,7 +95,7 @@ class MainActivity : FlutterFragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        overridePendingTransition(0, 0)
+        overridePendingTransition(0,0)
         handleIntent(intent)
     }
 

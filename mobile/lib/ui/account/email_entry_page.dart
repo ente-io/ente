@@ -28,7 +28,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   final _config = Configuration.instance;
   final _passwordController1 = TextEditingController();
   final _passwordController2 = TextEditingController();
-  final Color _validFieldValueColor = const Color.fromRGBO(45, 194, 98, 0.2);
+  final Color _validFieldValueColor = const Color(0xFF475CC7).withOpacity(0.2);
 
   String? _email;
   String? _password;
@@ -132,10 +132,10 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
 
   Widget _getBody() {
     var passwordStrengthText = S.of(context).weakStrength;
-    var passwordStrengthColor = Colors.redAccent;
+    Color passwordStrengthColor = Colors.redAccent;
     if (_passwordStrength > kStrongPasswordStrengthThreshold) {
       passwordStrengthText = S.of(context).strongStrength;
-      passwordStrengthColor = Colors.greenAccent;
+              passwordStrengthColor = const Color(0xFF475CC7);
     } else if (_passwordStrength > kMildPasswordStrengthThreshold) {
       passwordStrengthText = S.of(context).moderateStrength;
       passwordStrengthColor = Colors.orangeAccent;
@@ -472,7 +472,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       builder: (BuildContext context) {
                         return WebPage(
                           S.of(context).termsOfServicesTitle,
-                          "https://ente.io/terms",
+                          "https://unplugged.com/tos",
                         );
                       },
                     ),
@@ -488,7 +488,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       builder: (BuildContext context) {
                         return WebPage(
                           S.of(context).privacyPolicyTitle,
-                          "https://ente.io/privacy",
+                          "https://unplugged.com/privacy",
                         );
                       },
                     ),

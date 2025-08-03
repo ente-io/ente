@@ -1,5 +1,5 @@
 name: photos
-description: ente photos application
+description: UP Photos photos application
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 1.0.10+1040
+version: 1.1.0+1040
 publish_to: none
 
 environment:
@@ -313,19 +313,12 @@ dev_dependencies:
 # ios: "IconOG"
 # image_path: "assets/launcher_icon/icon-og.png"
 
-flutter_native_splash:
-  color: "#ffffff"
-  color_dark: "#000000"
-  image: assets/splash-screen-icon.png
-  android_gravity: center
-  ios_content_mode: center
-  android_12:
-    # The image parameter sets the splash screen icon image.  If this parameter is not specified,
-    # the app's launcher icon will be used instead.
-    # Please note that the splash screen will be clipped to a circle on the center of the screen.
-    # App icon without an icon background: This should be 1152×1152 pixels, and fit within a circle
-    # 768 pixels in diameter.
-    image: assets/splash-screen-icon.png
+# flutter_native_splash:
+#   color: "#475CC7"
+#   color_dark: "#475CC7"
+#   # image: assets/splash-screen-icon.png  # Commented out to remove image
+#   android_12:
+#     # image: assets/splash-screen-icon.png  # Commented out to remove image
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

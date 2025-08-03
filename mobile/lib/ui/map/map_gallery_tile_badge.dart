@@ -31,7 +31,7 @@ class MapGalleryTileBadge extends StatelessWidget {
           ),
           shape: BoxShape.rectangle,
           // color: Color.fromRGBO(30, 215, 96, 1),
-          color: Colors.green,
+          color: Color(0xFF475CC7),
           // color: Colors.redAccent,
         ),
         child: Text(

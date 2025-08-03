@@ -313,7 +313,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
           //     : Theme.of(context).colorScheme.boxUnSelectColor,
           gradient: isSelected
               ? const LinearGradient(
-                  colors: [Color(0xFF00DD4D), Color(0xFF43BA6C)],
+                  colors: [Color(0xFF475CC7), Color(0xFF475CC7)],
                 ) //same for both themes
               : LinearGradient(
                   colors: [
@@ -330,8 +330,9 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
               Row(
                 children: [
                   Checkbox(
-                    checkColor: Colors.green,
-                    activeColor: Colors.white,
+                    // checkColor: Colors.green,
+                    checkColor: const Color(0xFF475CC7),
+                    activeColor: const Color(0xFF475CC7),
                     value: isSelected,
                     onChanged: (value) {
                       if (value!) {

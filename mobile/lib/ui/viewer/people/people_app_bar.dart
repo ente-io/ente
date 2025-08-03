@@ -156,15 +156,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
                         height: kFilterChipHeight + 1,
                         child: AppliedFiltersForAppbar(),
                       )
-                    : Text(
-                        _appBarTitle ?? "",
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineSmall!
-                            .copyWith(fontSize: 16),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                    : const SizedBox.shrink(),
                 bottom: child as PreferredSizeWidget,
                 actions: isSearching ? null : _getDefaultActions(context),
                 surfaceTintColor: Colors.transparent,
@@ -176,15 +168,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
         : AppBar(
             elevation: 0,
             centerTitle: false,
-            title: Text(
-              _appBarTitle ?? "",
-              style: Theme.of(context)
-                  .textTheme
-                  .headlineSmall!
-                  .copyWith(fontSize: 16),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
+            title: const SizedBox.shrink(),
             actions: _getDefaultActions(context),
           );
   }

@@ -37,7 +37,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
     height: 45,
     width: 45,
     decoration: BoxDecoration(
-      border: Border.all(color: const Color.fromRGBO(45, 194, 98, 1.0)),
+              border: Border.all(color: const Color(0xFF475CC7)),
       borderRadius: BorderRadius.circular(15.0),
     ),
   );

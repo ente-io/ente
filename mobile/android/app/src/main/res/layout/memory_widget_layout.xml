@@ -65,7 +65,7 @@
             android:id="@+id/widget_placeholder"
             android:layout_width="120dp"
             android:layout_height="120dp"
-            android:src="@drawable/ic_home_widget_default"
+            android:src="@drawable/unplugged_gallery"
             android:scaleType="fitCenter" />
 
         <TextView

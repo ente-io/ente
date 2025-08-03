@@ -164,15 +164,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                             height: kFilterChipHeight + 1,
                             child: AppliedFiltersForAppbar(),
                           )
-                        : Text(
-                            _appBarTitle!,
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineSmall!
-                                .copyWith(fontSize: 16),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                        : const SizedBox.shrink(),
                     actions: isSearching ? null : _getDefaultActions(context),
                     bottom: child as PreferredSizeWidget,
                     surfaceTintColor: Colors.transparent,
@@ -184,15 +176,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             : AppBar(
                 elevation: 0,
                 centerTitle: false,
-                title: Text(
-                  _appBarTitle!,
-                  style: Theme.of(context)
-                      .textTheme
-                      .headlineSmall!
-                      .copyWith(fontSize: 16),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                title: const SizedBox.shrink(),
                 actions: _getDefaultActions(context),
               );
   }

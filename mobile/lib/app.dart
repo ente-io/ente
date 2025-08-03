@@ -130,7 +130,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
           dark: darkThemeData,
           initial: widget.savedThemeMode ?? AdaptiveThemeMode.system,
           builder: (lightTheme, dartTheme) => MaterialApp(
-            title: "ente",
+            title: "UP Photos",
             themeMode: ThemeMode.system,
             theme: lightTheme,
             darkTheme: dartTheme,
@@ -161,7 +161,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
           machineLearningController.onUserInteraction();
         },
         child: MaterialApp(
-          title: "ente",
+          title: "UP Photos",
           themeMode: ThemeMode.system,
           theme: lightThemeData,
           darkTheme: darkThemeData,

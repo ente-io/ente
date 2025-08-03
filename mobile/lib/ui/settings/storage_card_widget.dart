@@ -21,28 +21,10 @@ class StorageCardWidget extends StatefulWidget {
 }
 
 class _StorageCardWidgetState extends State<StorageCardWidget> {
-  late Image _background;
   final _logger = Logger((_StorageCardWidgetState).toString());
   final ValueNotifier<bool> _isStorageCardPressed = ValueNotifier(false);
   int? familyMemberStorageLimit;
   bool showFamilyBreakup = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _background = const Image(
-      image: AssetImage("assets/storage_card_background.png"),
-      fit: BoxFit.fill,
-    );
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // precache background image to avoid flicker
-    // https://stackoverflow.com/questions/51343735/flutter-image-preload
-    precacheImage(_background.image, context);
-  }
 
   @override
   void dispose() {
@@ -86,9 +68,13 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
   ) {
     return Stack(
       children: [
-        SizedBox(
+        Container(
           width: double.infinity,
-          child: _background,
+          height: 120, // Added height since we removed the image
+          decoration: BoxDecoration(
+            color: const Color(0xFF475CC7),
+            borderRadius: BorderRadius.circular(8),
+          ),
         ),
         Positioned.fill(
           child: userDetails is UserDetails

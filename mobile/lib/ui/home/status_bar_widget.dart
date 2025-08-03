@@ -110,7 +110,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
                   },
                   child: const SyncStatusWidget(),
                 )
-              : const Text("ente", style: brandStyleMedium),
+              : const SizedBox.shrink(),
         ),
         _showErrorBanner
             ? Divider(
@@ -166,13 +166,8 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
 
   // _showVerificationBanner after 3 days of installation
   bool _showVerificationBanner() {
-    if (_showErrorBanner ||
-        _showErrorBanner ||
-        flagService.recoveryKeyVerified) {
-      return false;
-    }
-    final DateTime installTime = localSettings.getInstallDateTime();
-    return DateTime.now().difference(installTime).inDays >= 3;
+    // Banner "confirm your recovery key" permanently disabled
+    return false;
   }
 }
 
@@ -272,7 +267,7 @@ class _SyncStatusWidgetState extends State<SyncStatusWidget> {
 class RefreshIndicatorWidget extends StatelessWidget {
   static const _inProgressIcon = CircularProgressIndicator(
     strokeWidth: 2,
-    valueColor: AlwaysStoppedAnimation<Color>(Color.fromRGBO(45, 194, 98, 1.0)),
+            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF475CC7)),
   );
 
   final String text;

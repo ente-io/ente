@@ -23,6 +23,7 @@ import 'package:photos/ui/settings/storage_card_widget.dart';
 import 'package:photos/ui/settings/support_section_widget.dart';
 import 'package:photos/ui/settings/theme_switch_widget.dart';
 import "package:photos/ui/sharing/verify_identity_dialog.dart";
+import 'package:photos/utils/email_util.dart';
 
 class SettingsPage extends StatelessWidget {
   final ValueNotifier<String?> emailNotifier;
@@ -65,7 +66,7 @@ class SettingsPage extends StatelessWidget {
               animation: emailNotifier,
               builder: (BuildContext context, Widget? child) {
                 return Text(
-                  emailNotifier.value!,
+                  getUsernameFromEmail(emailNotifier.value!),
                   style: enteTextTheme.body.copyWith(
                     color: colorScheme.textMuted,
                     overflow: TextOverflow.ellipsis,
@@ -82,6 +83,7 @@ class SettingsPage extends StatelessWidget {
     if (hasLoggedIn) {
       contents.addAll([
         const StorageCardWidget(),
+        const SizedBox(height: 16), // Add margin between storage card and backup section
         const BackupSectionWidget(),
         sectionSpacing,
         const AccountSectionWidget(),

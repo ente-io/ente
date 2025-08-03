@@ -80,6 +80,7 @@ android {
            keyAlias keystoreProperties['keyAlias'] ? keystoreProperties['keyAlias'] : System.getenv("SIGNING_KEY_ALIAS")
            keyPassword keystoreProperties['keyPassword'] ? keystoreProperties['keyPassword'] : System.getenv("SIGNING_KEY_PASSWORD")
            storePassword keystoreProperties['storePassword'] ? keystoreProperties['storePassword'] : System.getenv("SIGNING_STORE_PASSWORD")
+
        }
 
         debug{
@@ -107,13 +108,15 @@ android {
  //           dimension "default"
  //       }
  //       fdroid {
- //           dimension "default"//          applicationIdSuffix ".fdroid"
+ //           dimension "default"//
+ //           applicationIdSuffix ".fdroid"
  //       }
     }
 
     buildTypes {
         release {
-//            signingConfig signingConfigs.release
+            signingConfig signingConfigs.release
+            signingConfig signingConfigs.debug
 //            debuggable true
         }
         debug {

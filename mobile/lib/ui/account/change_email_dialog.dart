@@ -61,7 +61,7 @@ class _ChangeEmailDialogState extends State<ChangeEmailDialog> {
           child: Text(
             l10n.verify,
             style: const TextStyle(
-              color: Colors.green,
+              color: Color(0xFF475CC7),
             ),
           ),
           onPressed: () {

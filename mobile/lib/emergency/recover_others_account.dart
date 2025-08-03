@@ -37,7 +37,7 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
   final _logger = Logger((_RecoverOthersAccountState).toString());
   final _passwordController1 = TextEditingController(),
       _passwordController2 = TextEditingController();
-  final Color _validFieldValueColor = const Color.fromRGBO(45, 194, 98, 0.2);
+  final Color _validFieldValueColor = const Color(0xFF475CC7).withOpacity(0.2);
   String _passwordInInputBox = '';
   String _passwordInInputConfirmationBox = '';
   double _passwordStrength = 0.0;
@@ -110,10 +110,10 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
   Widget _getBody(String buttonTextAndHeading) {
     final email = widget.sessions.user.email;
     var passwordStrengthText = S.of(context).weakStrength;
-    var passwordStrengthColor = Colors.redAccent;
+    Color passwordStrengthColor = Colors.redAccent;
     if (_passwordStrength > kStrongPasswordStrengthThreshold) {
       passwordStrengthText = S.of(context).strongStrength;
-      passwordStrengthColor = Colors.greenAccent;
+              passwordStrengthColor =  const Color(0xFF475CC7);
     } else if (_passwordStrength > kMildPasswordStrengthThreshold) {
       passwordStrengthText = S.of(context).moderateStrength;
       passwordStrengthColor = Colors.orangeAccent;

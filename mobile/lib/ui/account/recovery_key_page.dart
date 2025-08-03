@@ -82,7 +82,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
           : widget.showAppBar!
               ? AppBar(
                   elevation: 0,
-                  title: Text(widget.title ?? S.of(context).recoveryKey),
+                  title: const SizedBox.shrink(),
                 )
               : null,
       body: Padding(

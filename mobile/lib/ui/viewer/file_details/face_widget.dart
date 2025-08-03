@@ -205,7 +205,7 @@ class _FaceWidgetState extends State<FaceWidget> {
                           child: isJustRemoved
                               ? const Icon(
                                   CupertinoIcons.add_circled_solid,
-                                  color: Colors.green,
+                                  color: Color(0xFF475CC7),
                                 )
                               : const Icon(
                                   Icons.cancel,

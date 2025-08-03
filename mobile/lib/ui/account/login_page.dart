@@ -191,7 +191,7 @@ class _LoginPageState extends State<LoginPage> {
                                   builder: (BuildContext context) {
                                     return WebPage(
                                       S.of(context).termsOfServicesTitle,
-                                      "https://ente.io/terms",
+                                      "https://unplugged.com/tos",
                                     );
                                   },
                                 ),
@@ -207,7 +207,7 @@ class _LoginPageState extends State<LoginPage> {
                                   builder: (BuildContext context) {
                                     return WebPage(
                                       S.of(context).privacyPolicyTitle,
-                                      "https://ente.io/privacy",
+                                      "https://unplugged.com/privacy",
                                     );
                                   },
                                 ),
@@ -239,7 +239,7 @@ class _LoginPageState extends State<LoginPage> {
     _email = value.trim();
     _emailIsValid = EmailValidator.validate(_email!);
     if (_emailIsValid) {
-      _emailInputFieldColor = const Color.fromRGBO(45, 194, 98, 0.2);
+              _emailInputFieldColor = const Color(0xFF475CC7).withOpacity(0.2);
     } else {
       _emailInputFieldColor = getEnteColorScheme(context).fillFaint;
     }

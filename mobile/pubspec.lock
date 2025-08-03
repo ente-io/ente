@@ -1603,10 +1603,10 @@ packages:
     dependency: transitive
     description:
       name: media_kit_libs_windows_video
-      sha256: "32654572167825c42c55466f5d08eee23ea11061c84aa91b09d0e0f69bdd0887"
+      sha256: dff76da2778729ab650229e6b4ec6ec111eb5151431002cbd7ea304ff1f112ab
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.10"
+    version: "1.0.11"
   media_kit_video:
     dependency: "direct main"
     description:

@@ -19,13 +19,13 @@ final lightThemeData = ThemeData(
   ),
   outlinedButtonTheme: buildOutlinedButtonThemeData(
     bgDisabled: const Color.fromRGBO(158, 158, 158, 1),
-    bgEnabled: const Color.fromRGBO(0, 0, 0, 1),
+    bgEnabled: const Color(0xFF475CC7),
     fgDisabled: const Color.fromRGBO(255, 255, 255, 1),
     fgEnabled: const Color.fromRGBO(255, 255, 255, 1),
   ),
   elevatedButtonTheme: buildElevatedButtonThemeData(
     onPrimary: const Color.fromRGBO(255, 255, 255, 1),
-    primary: const Color.fromRGBO(0, 0, 0, 1),
+    primary: const Color(0xFF475CC7),
   ),
   switchTheme: getSwitchThemeData(const Color.fromRGBO(102, 187, 106, 1)),
   scaffoldBackgroundColor: const Color.fromRGBO(255, 255, 255, 1),
@@ -66,18 +66,18 @@ final lightThemeData = ThemeData(
   ),
   checkboxTheme: CheckboxThemeData(
     side: const BorderSide(
-      color: Colors.black,
+      color: Color(0xFF475CC7),
       width: 2,
     ),
     fillColor: WidgetStateProperty.resolveWith((states) {
       return states.contains(WidgetState.selected)
-          ? const Color.fromRGBO(0, 0, 0, 1)
+          ? const Color(0xFF475CC7)
           : const Color.fromRGBO(255, 255, 255, 1);
     }),
     checkColor: WidgetStateProperty.resolveWith((states) {
       return states.contains(WidgetState.selected)
           ? const Color.fromRGBO(255, 255, 255, 1)
-          : const Color.fromRGBO(0, 0, 0, 1);
+          : const Color(0xFF475CC7);
     }),
   ),
 );
@@ -97,19 +97,19 @@ final darkThemeData = ThemeData(
     surfaceTint: Colors.transparent,
   ),
   buttonTheme: const ButtonThemeData().copyWith(
-    buttonColor: const Color.fromRGBO(45, 194, 98, 1.0),
+    buttonColor: const Color(0xFF475CC7),
   ),
   textTheme: _buildTextTheme(const Color.fromRGBO(255, 255, 255, 1)),
   switchTheme: getSwitchThemeData(const Color.fromRGBO(102, 187, 106, 1)),
   outlinedButtonTheme: buildOutlinedButtonThemeData(
     bgDisabled: const Color.fromRGBO(158, 158, 158, 1),
-    bgEnabled: const Color.fromRGBO(255, 255, 255, 1),
+    bgEnabled: const Color(0xFF475CC7),
     fgDisabled: const Color.fromRGBO(255, 255, 255, 1),
-    fgEnabled: const Color.fromRGBO(0, 0, 0, 1),
+    fgEnabled: const Color.fromRGBO(255, 255, 255, 1),
   ),
   elevatedButtonTheme: buildElevatedButtonThemeData(
-    onPrimary: const Color.fromRGBO(0, 0, 0, 1),
-    primary: const Color.fromRGBO(255, 255, 255, 1),
+    onPrimary: const Color.fromRGBO(255, 255, 255, 1),
+    primary: const Color(0xFF475CC7),
   ),
   scaffoldBackgroundColor: const Color.fromRGBO(0, 0, 0, 1),
   appBarTheme: const AppBarTheme().copyWith(
@@ -141,21 +141,21 @@ final darkThemeData = ThemeData(
   ),
   checkboxTheme: CheckboxThemeData(
     side: const BorderSide(
-      color: Colors.grey,
+      color: Color(0xFF475CC7),
       width: 2,
     ),
     fillColor: WidgetStateProperty.resolveWith((states) {
       if (states.contains(WidgetState.selected)) {
-        return const Color.fromRGBO(158, 158, 158, 1);
+        return const Color(0xFF475CC7);
       } else {
         return const Color.fromRGBO(0, 0, 0, 1);
       }
     }),
     checkColor: WidgetStateProperty.resolveWith((states) {
       if (states.contains(WidgetState.selected)) {
-        return const Color.fromRGBO(0, 0, 0, 1);
+        return const Color.fromRGBO(255, 255, 255, 1);
       } else {
-        return const Color.fromRGBO(158, 158, 158, 1);
+        return const Color(0xFF475CC7);
       }
     }),
   ),
@@ -253,7 +253,7 @@ extension CustomColorScheme on ColorScheme {
       ? const Color.fromRGBO(240, 240, 240, 1)
       : const Color.fromRGBO(8, 18, 18, 0.4);
 
-  Color get greenAlternative => const Color.fromRGBO(45, 194, 98, 1.0);
+  Color get greenAlternative => const Color(0xFF475CC7);
 
   Color get dynamicFABBackgroundColor => brightness == Brightness.light
       ? const Color.fromRGBO(0, 0, 0, 1)
@@ -270,8 +270,8 @@ extension CustomColorScheme on ColorScheme {
       ).style;
 
   Color get recoveryKeyBoxColor => brightness == Brightness.light
-      ? const Color.fromRGBO(49, 155, 86, 0.2)
-      : const Color(0xFF1DB954);
+      ? const Color(0xFF475CC7).withOpacity(0.2)
+      : const Color(0xFF475CC7);
 
   Color get frostyBlurBackdropFilterColor => brightness == Brightness.light
       ? const Color.fromRGBO(238, 238, 238, 0.5)
@@ -285,7 +285,7 @@ extension CustomColorScheme on ColorScheme {
       ? const Color.fromRGBO(255, 255, 255, 1)
       : const Color.fromRGBO(10, 15, 15, 1.0);
 
-  Color get greenText => const Color.fromARGB(255, 40, 190, 113);
+  Color get greenText => const Color(0xFF475CC7);
 
   Color get cupertinoPickerTopColor => brightness == Brightness.light
       ? const Color.fromARGB(255, 238, 238, 238)

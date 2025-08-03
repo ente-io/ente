@@ -230,10 +230,10 @@ const Color fixedStrokeMutedWhite = Color.fromRGBO(255, 255, 255, 0.50);
 const Color strokeSolidMutedLight = Color.fromRGBO(147, 147, 147, 1);
 const Color strokeSolidFaintLight = Color.fromRGBO(221, 221, 221, 1);
 
-const Color _primary700 = Color.fromRGBO(0, 179, 60, 1);
-const Color _primary500 = Color.fromRGBO(29, 185, 84, 1);
-const Color _primary400 = Color.fromRGBO(38, 203, 95, 1);
-const Color _primary300 = Color.fromRGBO(1, 222, 77, 1);
+const Color _primary700 = Color(0xFF475CC7);
+const Color _primary500 = Color(0xFF475CC7);
+const Color _primary400 = Color(0xFF475CC7);
+const Color _primary300 = Color(0xFF475CC7);
 
 const Color _warning700 = Color.fromRGBO(234, 63, 63, 1);
 const Color _warning500 = Color.fromRGBO(255, 101, 101, 1);
