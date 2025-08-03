@@ -189,10 +189,10 @@ class IconUtils {
     return _colorLuminance.putIfAbsent(color, () => color.computeLuminance());
   }
 
-  bool _isCloseToNeutralGrey(Color color, {double tolerance = 3}) {
-    return (color.red - color.green).abs() <= tolerance &&
-        (color.green - color.blue).abs() <= tolerance &&
-        (color.blue - color.red).abs() <= tolerance;
+  bool _isCloseToNeutralGrey(Color color, {double tolerance = 0.012}) {
+    return (color.r - color.g).abs() <= tolerance &&
+        (color.g - color.b).abs() <= tolerance &&
+        (color.b - color.r).abs() <= tolerance;
   }
 
   Future<void> _loadJson() async {
