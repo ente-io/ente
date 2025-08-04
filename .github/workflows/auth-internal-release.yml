@@ -69,10 +69,14 @@ jobs:
 
     build-ios:
         runs-on: macos-15
+        environment: "ios-build"
         env:
           APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.IOS_API_KEY }}
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.IOS_ISSUER_ID }}
           APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ secrets.IOS_API_KEY_ID }}
+          PROVISIONING_PROFILE: ${{ secrets.IOS_AUTHGITHUBDISTRIBUTION_PROFILE }}
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.MAC_OS_CERTIFICATE }}
+          P12_PASSWORD: ${{ secrets.MAC_OS_CERTIFICATE_PASSWORD }}
 
         defaults:
             run:
@@ -100,28 +104,20 @@ jobs:
                   PROFILES_HOME="$HOME/Library/MobileDevice/Provisioning Profiles"
                   mkdir -p "$PROFILES_HOME"
                   PROFILE_PATH="$(mktemp "$PROFILES_HOME"/$(uuidgen).mobileprovision)"
-                  echo ${CM_PROVISIONING_PROFILE} | base64 --decode > "$PROFILE_PATH"
+                  echo ${PROVISIONING_PROFILE} | base64 --decode > "$PROFILE_PATH"
                   echo "Saved provisioning profile $PROFILE_PATH"
-              env:
-                  CM_PROVISIONING_PROFILE: ${{ secrets.MAC_OS_BUILD_PROVISION_PROFILE_BASE64 }}
 
             - name: Add certificates
               run: |
                   # create variables
                   CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
-
                   # copy certificates from base64
                   echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
-
                   # add certificate to keychain
                   keychain initialize
                   keychain add-certificates --certificate $CERTIFICATE_PATH --certificate-password $P12_PASSWORD
-
                   # Use profile in current project
                   xcode-project use-profiles --project=ios/*.xcodeproj
-              env:
-                  BUILD_CERTIFICATE_BASE64: ${{ secrets.MAC_OS_CERTIFICATE }}
-                  P12_PASSWORD: ${{ secrets.MAC_OS_CERTIFICATE_PASSWORD }}
 
             - name: Build iOS IPA
               run: |
