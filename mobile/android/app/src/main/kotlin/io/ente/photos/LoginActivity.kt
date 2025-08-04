@@ -22,12 +22,8 @@ class LoginActivity : AppCompatActivity() {
             "com.unplugged.account.ui.thirdparty.ThirdPartyCredentialsActivity"
 
         private fun isDebugBuild(context: android.content.Context): Boolean {
-            val isDebug =
-                context.packageName.endsWith(".dev") || context.packageName.endsWith(".debug")
-            Log.d(
-                "UpEnte",
-                "[DEBUG] isDebugBuild: packageName=${context.packageName}, isDebug=$isDebug"
-            )
+            val isDebug = context.packageName.endsWith(".dev") || context.packageName.endsWith(".debug")
+            Log.d("UpEnte", "[DEBUG] isDebugBuild: packageName=${context.packageName}, isDebug=$isDebug")
             return isDebug
         }
     }
@@ -45,7 +41,8 @@ class LoginActivity : AppCompatActivity() {
                     account = AccountModel(
                         servicePassword,
                         upToken,
-                        "$usernameRaw@matrix.unpluggedsystems.app"
+                        "$usernameRaw@matrix.unpluggedsystems.app",
+//                        "$usernameRaw",
                     )
                 }
 
@@ -68,7 +65,7 @@ class LoginActivity : AppCompatActivity() {
                                 try {
                                     startActivity(generateCredentialsIntent)
                                     finish()
-                                    return@launch // Exit early to prevent handleAccountLoginResponse from being called
+                                    return@launch// Exit early to prevent handleAccountLoginResponse from being called
                                 } catch (e: ActivityNotFoundException) {
                                     Log.d(
                                         "UpEnte",

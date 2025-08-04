@@ -35,10 +35,9 @@ class MainActivity : FlutterFragmentActivity() {
 
         GeneratedPluginRegistrant.registerWith(flutterEngine)
 
-        // Initialize MethodChannelHandler
+        // Initialize MethodChannelHandler with context
         methodChannelHandler = MethodChannelHandler()
-        methodChannelHandler.onAttachedToEngine(flutterEngine.dartExecutor.binaryMessenger)
-        methodChannelHandler.setActivity(this)
+        methodChannelHandler.onAttachedToEngine(flutterEngine.dartExecutor.binaryMessenger, this)
 
         methodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, ACCOUNT_CHANNEL_NAME)
         logoutChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, LOGOUT_CHANNEL_NAME)
