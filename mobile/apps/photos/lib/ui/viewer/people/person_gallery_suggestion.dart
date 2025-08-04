@@ -124,8 +124,8 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
         }
 
         if (mounted && _fadeController != null && _slideController != null) {
-          unawaited(_fadeController!.forward());
-          unawaited(_slideController!.forward());
+          unawaited(_fadeController?.forward());
+          unawaited(_slideController?.forward());
         }
 
         unawaited(_precomputeNextSuggestions());
@@ -385,8 +385,8 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
 
   Future<void> _animateIn() async {
     if (mounted && _fadeController != null && _slideController != null) {
-      _slideController!.reset();
-      _fadeController!.reset();
+      _slideController?.reset();
+      _fadeController?.reset();
       await Future.wait([
         _fadeController!.forward(),
         _slideController!.forward(),
