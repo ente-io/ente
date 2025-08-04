@@ -5,7 +5,7 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:ente_accounts/services/user_service.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/ente_theme_data.dart';
-import "package:ente_auth/l10n/l10n.dart";
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/locale.dart';
 import "package:ente_auth/onboarding/view/onboarding_page.dart";
 import 'package:ente_auth/services/authenticator_service.dart';
@@ -82,7 +82,7 @@ class _AppState extends State<App>
                 UpdateService.instance.getLatestVersionInfo(),
               );
             },
-            barrierColor: Colors.black.withValues(alpha: 0.85),
+            barrierColor: Colors.black.withOpacity(0.85),
           );
         });
       }

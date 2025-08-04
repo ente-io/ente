@@ -24,7 +24,7 @@ class CoachMarkWidget extends StatelessWidget {
             child: Container(
               width: double.infinity,
               color:
-                  Theme.of(context).colorScheme.surface.withValues(alpha: 0.1),
+                  Theme.of(context).colorScheme.surface.withOpacity(0.1),
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
                 child: Row(

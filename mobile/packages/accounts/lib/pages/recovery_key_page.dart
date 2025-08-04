@@ -152,17 +152,16 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                               getEnteColorScheme(context).primary500,
                               getEnteColorScheme(context).primary300,
                             ],
-                            stops: [0.0, 0.9753],
+                            stops: const [0.0, 0.9753],
                           ),
                         ),
                         child: DottedBorder(
-                          options: const RoundedRectDottedBorderOptions(
-                            padding: EdgeInsets.zero,
-                            strokeWidth: 1,
-                            color: Color(0xFF6B6B6B),
-                            dashPattern: [6, 6],
-                            radius: Radius.circular(8),
-                          ),
+                          padding: EdgeInsets.zero,
+                          strokeWidth: 1,
+                          color: const Color(0xFF6B6B6B),
+                          dashPattern: const [6, 6],
+                          borderType: BorderType.RRect,
+                          radius: const Radius.circular(8),
                           child: SizedBox(
                             width: double.infinity,
                             child: Stack(

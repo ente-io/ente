@@ -11,7 +11,7 @@ dependencies:
   bip39: ^1.0.6
   collection: ^1.18.0
   dio: ^5.4.0
-  dotted_border: ^3.1.0
+  dotted_border: ^2.0.0+2
   email_validator: ^3.0.0
   ente_base:
     path: ../base
@@ -32,7 +32,7 @@ dependencies:
     path: ../ui
   ente_utils:
     path: ../utils
-  file_saver: ^0.3.0
+  file_saver: ^0.2.14
   flutter:
     sdk: flutter
   logging: ^1.2.0
