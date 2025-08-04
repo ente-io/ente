@@ -1,7 +1,7 @@
 
 name: ente_auth
 description: ente two-factor authenticator
-version: 4.4.1+441
+version: 4.4.3+443
 publish_to: none
 
 environment:
@@ -73,7 +73,7 @@ dependencies:
     git:
       url: https://github.com/eaceto/flutter_local_authentication
       ref: 1ac346a04592a05fd75acccf2e01fa3c7e955d96
-  flutter_local_notifications: ^18.0.1
+  flutter_local_notifications: ^17.2.2
   flutter_localizations:
     sdk: flutter
   flutter_native_splash: ^2.2.13
