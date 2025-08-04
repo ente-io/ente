@@ -58,7 +58,7 @@ dependencies:
     sdk: flutter
   flutter_animate: ^4.1.0
   flutter_bloc: ^8.0.1
-  flutter_context_menu: ^0.2.0
+  flutter_context_menu: 0.2.0
   flutter_displaymode: ^0.6.0
   flutter_email_sender: ^6.0.2
   # revert to pub.dev when merged
@@ -104,16 +104,13 @@ dependencies:
   pointycastle: ^3.7.3
   privacy_screen: ^0.0.6
   protobuf: ^3.0.0
-  qr_code_scanner: ^1.0.1
+  qr_code_scanner_plus: ^2.0.10+1
   qr_flutter: ^4.1.0 
   sentry: ^8.14.2
   sentry_flutter: ^8.14.2
   share_plus: ^10.0.2
   shared_preferences: ^2.0.5
-  sqflite:
-    git:
-      url: https://github.com/tekartik/sqflite
-      path: sqflite
+  sqflite: ^2.4.1
   sqflite_common_ffi: ^2.3.0+4
   sqlite3: ^2.4.3
   sqlite3_flutter_libs: ^0.5.24

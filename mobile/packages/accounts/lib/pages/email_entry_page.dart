@@ -8,7 +8,7 @@ import 'package:ente_utils/platform_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:password_strength/password_strength.dart';
-import 'package:step_progress_indicator/step_progress_indicator.dart';
+import "package:step_progress_indicator/step_progress_indicator.dart";
 import "package:styled_text/styled_text.dart";
 
 class EmailEntryPage extends StatefulWidget {

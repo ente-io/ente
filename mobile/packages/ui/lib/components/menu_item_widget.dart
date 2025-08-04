@@ -3,6 +3,7 @@ import 'package:ente_ui/components/menu_item_child_widgets.dart';
 import 'package:ente_ui/models/execution_states.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_utils/debouncer.dart';
+import "package:expandable/expandable.dart";
 import 'package:flutter/material.dart';
 
 class MenuItemWidget extends StatefulWidget {
@@ -40,7 +41,7 @@ class MenuItemWidget extends StatefulWidget {
   final double singleBorderRadius;
   final double multipleBorderRadius;
   final Color? pressedColor;
-  final ExpansibleController? expandableController;
+  final ExpandableController? expandableController;
   final bool isBottomBorderRadiusRemoved;
   final bool isTopBorderRadiusRemoved;
 
@@ -152,7 +153,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
 
   Widget menuItemWidget(BuildContext context) {
     final circularRadius = Radius.circular(borderRadius);
-    final isExpanded = widget.expandableController?.isExpanded;
+    final isExpanded = widget.expandableController?.value;
     final bottomBorderRadius =
         (isExpanded != null && isExpanded) || widget.isBottomBorderRadiusRemoved
             ? const Radius.circular(0)

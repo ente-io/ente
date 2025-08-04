@@ -38,7 +38,7 @@ final lightThemeData = ThemeData(
     bodyMedium: const TextStyle(color: Colors.yellow),
     bodyLarge: const TextStyle(color: Colors.orange),
   ),
-  cardColor: const Color.fromRGBO(250, 250, 250, 1.0),
+  cardColor: const Color.fromRGBO(250, 250, 250, 1),
   dialogTheme: const DialogTheme().copyWith(
     backgroundColor: const Color.fromRGBO(250, 250, 250, 1.0), //
     titleTextStyle: const TextStyle(

@@ -1,4 +1,4 @@
-import 'package:email_validator/email_validator.dart';
+import "package:email_validator/email_validator.dart";
 import 'package:ente_accounts/ente_accounts.dart';
 import 'package:ente_accounts/models/errors.dart';
 import 'package:ente_configuration/base_configuration.dart';
@@ -8,7 +8,8 @@ import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_utils/platform_util.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import "package:styled_text/styled_text.dart";
+import "package:styled_text/tags/styled_text_tag_action.dart";
+import "package:styled_text/widgets/styled_text.dart";
 
 class LoginPage extends StatefulWidget {
   final BaseConfiguration config;
