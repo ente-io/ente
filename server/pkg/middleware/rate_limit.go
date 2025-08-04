@@ -140,6 +140,7 @@ func (r *RateLimitMiddleware) getLimiter(reqPath string, reqMethod string) *limi
 		reqPath == "/users/verify-email" ||
 		reqPath == "/user/change-email" ||
 		reqPath == "/public-collection/verify-password" ||
+		reqPath == "/file-link/verify-password" ||
 		reqPath == "/family/accept-invite" ||
 		reqPath == "/users/srp/attributes" ||
 		(reqPath == "/cast/device-info" && reqMethod == "POST") ||
