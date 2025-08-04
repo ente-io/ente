@@ -48,7 +48,7 @@ See [docs/](docs/README.md) for how to edit these documents.
 
 ## Code contributions
 
-If you'd like to contribute code, it is best to start small. Consider some well-scoped changes, say like adding more [custom icons to auth](mobile/apps/auth/docs/adding-icons.md), or fixing a specific bug.
+If you'd like to contribute code, it is best to start small. Consider some well-scoped changes, say like adding more [custom icons to auth](auth/docs/adding-icons.md), or fixing a specific bug.
 
 Code that changes the behaviour of the product might not get merged, at least not initially. The PR can serve as a discussion bed, but you might find it easier to just start a discussion instead, or post your perspective in the (likely) existing thread about the behaviour change or new feature you wish for.
 
