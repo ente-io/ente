@@ -101,7 +101,9 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
       } else {
         suggestions = await ClusterFeedbackService.instance
             .getAllLargePersonSuggestions();
-        person = suggestions.first.person;
+        if (suggestions.isNotEmpty) {
+          person = suggestions.first.person;
+        }
       }
 
       if (suggestions.isNotEmpty && mounted) {
