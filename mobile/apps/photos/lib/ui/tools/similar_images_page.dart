@@ -40,8 +40,8 @@ class SimilarImagesPage extends StatefulWidget {
 }
 
 class _SimilarImagesPageState extends State<SimilarImagesPage> {
-  static const crossAxisCount = 4;
-  static const crossAxisSpacing = 4.0;
+  static const crossAxisCount = 3;
+  static const crossAxisSpacing = 16.0;
 
   final _logger = Logger("SimilarImagesPage");
   bool _isDisposed = false;
