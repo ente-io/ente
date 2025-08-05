@@ -1,11 +1,13 @@
 import "dart:math" show max;
 import "dart:typed_data" show Float32List;
 
+import "package:flutter/foundation.dart" show kDebugMode;
 import "package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart"
     show Uint64List;
 import 'package:logging/logging.dart';
 import "package:photos/db/ml/clip_vector_db.dart";
 import "package:photos/db/ml/db.dart";
+import "package:photos/extensions/stop_watch.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/ml/vector.dart";
@@ -21,10 +23,18 @@ class SimilarImagesService {
 
   /// Returns a list of SimilarFiles, where each SimilarFiles object contains
   /// a list of files that are perceptually similar
-  Future<List<SimilarFiles>> getSimilarFiles(double distanceThreshold) async {
+  Future<List<SimilarFiles>> getSimilarFiles(
+    double distanceThreshold,
+    bool exact,
+  ) async {
     try {
+      final now = DateTime.now();
       final List<SimilarFiles> result =
-          await _getSimilarFiles(distanceThreshold);
+          await _getSimilarFiles(distanceThreshold, exact);
+      final duration = DateTime.now().difference(now);
+      _logger.info(
+        "Found ${result.length} similar files in ${duration.inSeconds} seconds for threshold $distanceThreshold and exact $exact",
+      );
       return result;
     } catch (e, s) {
       _logger.severe("failed to get similar files", e, s);
@@ -32,10 +42,15 @@ class SimilarImagesService {
     }
   }
 
-  Future<List<SimilarFiles>> _getSimilarFiles(double distanceThreshold) async {
+  Future<List<SimilarFiles>> _getSimilarFiles(
+    double distanceThreshold,
+    bool exact,
+  ) async {
+    final w = (kDebugMode ? EnteWatch('getSimilarFiles') : null)?..start();
     final mlDataDB = MLDataDB.instance;
     _logger.info("Checking migration and filling clip vector DB");
     await mlDataDB.checkMigrateFillClipVectorDB();
+    w?.log("checkMigrateFillClipVectorDB");
 
     // Get the embeddings ready for vector search
     final List<EmbeddingVector> allImageEmbeddings =
@@ -48,13 +63,16 @@ class SimilarImagesService {
     final keys = Uint64List.fromList(
       allImageEmbeddings.map((e) => BigInt.from(e.fileID)).toList(),
     );
+    w?.log("getAllClipVectors");
 
     // Run bulk vector search
     final (vectorKeys, distances) =
         await ClipVectorDB.instance.bulkSearchVectors(
       clipFloat32,
       BigInt.from(100),
+      exact,
     );
+    w?.log("bulkSearchVectors");
 
     // Get all files, and create a map of fileID to file
     final allFiles = Set<EnteFile>.from(
@@ -66,6 +84,7 @@ class SimilarImagesService {
         allFileIdsToFile[file.uploadedFileID!] = file;
       }
     }
+    w?.log("getAllFilesForSearch");
 
     // Run through the vector search results and create SimilarFiles objects
     final alreadyUsedFileIDs = <int>{};
@@ -111,9 +130,11 @@ class SimilarImagesService {
         allSimilarFiles.add(similarFiles);
       }
     }
+    w?.log("going through files");
 
     // Sort the similar files by total size in descending order
     allSimilarFiles.sort((a, b) => b.totalSize.compareTo(a.totalSize));
+    w?.log("sort similar files");
 
     return allSimilarFiles;
   }

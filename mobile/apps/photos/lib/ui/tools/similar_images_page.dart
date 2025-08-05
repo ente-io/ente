@@ -12,6 +12,7 @@ import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/common/loading_widget.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import "package:photos/ui/components/models/button_type.dart";
+import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/dialog_util.dart";
@@ -49,6 +50,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   double _distanceThreshold = 0.04; // Default value
   List<SimilarFiles> _similarFilesList = [];
   SortKey _sortKey = SortKey.size;
+  bool _exactSearch = false;
 
   @override
   void initState() {
@@ -159,6 +161,25 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 48),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Exact search", // TODO: lau: extract string
+                style: getEnteTextTheme(context).bodyBold,
+              ),
+              ToggleSwitchWidget(
+                value: () => _exactSearch,
+                onChanged: () async {
+                  if (_isDisposed) return;
+                  setState(() {
+                    _exactSearch = !_exactSearch;
+                  });
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 32),
           ButtonWidget(
             labelText: "Find similar images", // TODO: lau: extract string
             buttonType: ButtonType.primary,
@@ -269,8 +290,11 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     });
 
     try {
+      // You can use _toggleValue here for advanced mode features
+      _logger.info("exact mode: $_exactSearch");
+
       final similarFiles = await SimilarImagesService.instance
-          .getSimilarFiles(_distanceThreshold);
+          .getSimilarFiles(_distanceThreshold, _exactSearch);
       _logger.info(
         "Found ${similarFiles.length} groups of similar images",
       );

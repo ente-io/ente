@@ -176,11 +176,15 @@ class ClipVectorDB {
   Future<(Uint64List, Float32List)> searchClosestVectors(
     List<double> query,
     int count,
+    bool exact,
   ) async {
     final db = await _vectorDB;
     try {
-      final result =
-          await db.searchVectors(query: query, count: BigInt.from(count));
+      final result = await db.searchVectors(
+        query: query,
+        count: BigInt.from(count),
+        exact: exact,
+      );
       return result;
     } catch (e, s) {
       _logger.severe("Error searching closest vectors", e, s);
@@ -190,10 +194,12 @@ class ClipVectorDB {
 
   Future<(BigInt, double)> searchClosestVector(
     List<double> query,
+    bool exact,
   ) async {
     final db = await _vectorDB;
     try {
-      final result = await db.searchVectors(query: query, count: BigInt.one);
+      final result =
+          await db.searchVectors(query: query, count: BigInt.one, exact: exact);
       return (result.$1[0], result.$2[0]);
     } catch (e, s) {
       _logger.severe("Error searching closest vector", e, s);
@@ -204,12 +210,14 @@ class ClipVectorDB {
   Future<(List<Uint64List>, List<Float32List>)> bulkSearchVectors(
     List<Float32List> queries,
     BigInt count,
+    bool exact,
   ) async {
     final db = await _vectorDB;
     try {
       final result = await db.bulkSearchVectors(
         queries: queries,
         count: count,
+        exact: exact,
       );
       return result;
     } catch (e, s) {
@@ -230,7 +238,7 @@ class ClipVectorDB {
         final minimumSimilarity = minimumSimilarityMap[query]!;
         final textEmbedding = entry.value;
         final (potentialFileIDs, distances) =
-            await searchClosestVectors(textEmbedding, 1000);
+            await searchClosestVectors(textEmbedding, 1000, true);
         final queryResults = <QueryResult>[];
         for (var i = 0; i < potentialFileIDs.length; i++) {
           final similarity = 1 - distances[i];

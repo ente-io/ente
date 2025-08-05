@@ -420,6 +420,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               final (vectorKeys, distances) = await vectorDB.bulkSearchVectors(
                 queries: queries,
                 count: count,
+                exact: false,
               );
 
               w?.log(
@@ -504,6 +505,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               final (vectorKeys, distances) = await vectorDB.bulkSearchVectors(
                 queries: clipFloat32,
                 count: count,
+                exact: false,
               );
 
               w?.log(
