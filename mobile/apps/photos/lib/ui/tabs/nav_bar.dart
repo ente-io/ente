@@ -340,7 +340,7 @@ class _ButtonState extends State<Button> with TickerProviderStateMixin {
                   : widget.border,
               gradient: widget.gradient,
               color: _expanded!
-                  ? widget.color!.withValues(alpha: 0)
+                  ? widget.color!.withOpacity( 0)
                   : widget.debug!
                       ? Colors.red
                       : widget.gradient != null

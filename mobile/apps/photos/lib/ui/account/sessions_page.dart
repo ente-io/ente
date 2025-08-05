@@ -83,7 +83,7 @@ class _SessionsPageState extends State<SessionsPage> {
                           color: Theme.of(context)
                               .colorScheme
                               .onSurface
-                              .withValues(alpha: 0.8),
+                              .withOpacity( 0.8),
                           fontSize: 14,
                         ),
                       ),
@@ -96,7 +96,7 @@ class _SessionsPageState extends State<SessionsPage> {
                           color: Theme.of(context)
                               .colorScheme
                               .onSurface
-                              .withValues(alpha: 0.8),
+                              .withOpacity( 0.8),
                           fontSize: 12,
                         ),
                       ),

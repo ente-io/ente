@@ -87,8 +87,8 @@ class GalleryFileWidget extends StatelessWidget {
               child: isFileSelected
                   ? ColorFiltered(
                       colorFilter: ColorFilter.mode(
-                        Colors.black.withValues(
-                          alpha: 0.4,
+                        Colors.black.withOpacity(
+                           0.4,
                         ),
                         BlendMode.darken,
                       ),

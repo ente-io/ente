@@ -42,7 +42,7 @@ final lightThemeData = ThemeData(
     bodyLarge: const TextStyle(color: Colors.orange),
   ),
   cardColor: const Color.fromRGBO(250, 250, 250, 1.0),
-  dialogTheme: const DialogThemeData(
+  dialogTheme: const DialogTheme(
     backgroundColor: Color.fromRGBO(250, 250, 250, 1.0), //
     titleTextStyle: TextStyle(
       color: Colors.black,
@@ -119,7 +119,7 @@ final darkThemeData = ThemeData(
     elevation: 0,
   ),
   cardColor: const Color.fromRGBO(10, 15, 15, 1.0),
-  dialogTheme: const DialogThemeData(
+  dialogTheme: const DialogTheme(
     backgroundColor: Color.fromRGBO(15, 15, 15, 1.0),
     titleTextStyle: TextStyle(
       color: Colors.white,
@@ -210,7 +210,7 @@ TextTheme _buildTextTheme(Color textColor) {
       fontWeight: FontWeight.w500,
     ),
     bodySmall: TextStyle(
-      color: textColor.withValues(alpha: 0.6),
+      color: textColor.withOpacity(0.6),
       fontSize: 14,
       fontWeight: FontWeight.w500,
     ),
@@ -282,7 +282,7 @@ extension CustomColorScheme on ColorScheme {
       : const Color.fromRGBO(48, 48, 48, 0.5);
 
   Color get iconColor => brightness == Brightness.light
-      ? const Color.fromRGBO(0, 0, 0, 1).withValues(alpha: 0.75)
+      ? const Color.fromRGBO(0, 0, 0, 1).withOpacity(0.75)
       : const Color.fromRGBO(255, 255, 255, 1);
 
   Color get bgColorForQuestions => brightness == Brightness.light
@@ -293,7 +293,7 @@ extension CustomColorScheme on ColorScheme {
 
   Color get cupertinoPickerTopColor => brightness == Brightness.light
       ? const Color.fromARGB(255, 238, 238, 238)
-      : const Color.fromRGBO(255, 255, 255, 1).withValues(alpha: 0.1);
+      : const Color.fromRGBO(255, 255, 255, 1).withOpacity(0.1);
 
   Color get stepProgressUnselectedColor => brightness == Brightness.light
       ? const Color.fromRGBO(196, 196, 196, 0.6)
@@ -304,20 +304,20 @@ extension CustomColorScheme on ColorScheme {
       : const Color.fromRGBO(20, 20, 20, 1);
 
   Color get galleryThumbDrawColor => brightness == Brightness.light
-      ? const Color.fromRGBO(0, 0, 0, 1).withValues(alpha: 0.8)
-      : const Color.fromRGBO(255, 255, 255, 1).withValues(alpha: 0.5);
+      ? const Color.fromRGBO(0, 0, 0, 1).withOpacity(0.8)
+      : const Color.fromRGBO(255, 255, 255, 1).withOpacity(0.5);
 
   Color get backupEnabledBgColor => brightness == Brightness.light
       ? const Color.fromRGBO(230, 230, 230, 0.95)
       : const Color.fromRGBO(10, 40, 40, 0.3);
 
   Color get dotsIndicatorActiveColor => brightness == Brightness.light
-      ? const Color.fromRGBO(0, 0, 0, 1).withValues(alpha: 0.5)
-      : const Color.fromRGBO(255, 255, 255, 1).withValues(alpha: 0.5);
+      ? const Color.fromRGBO(0, 0, 0, 1).withOpacity(0.5)
+      : const Color.fromRGBO(255, 255, 255, 1).withOpacity(0.5);
 
   Color get dotsIndicatorInactiveColor => brightness == Brightness.light
-      ? const Color.fromRGBO(0, 0, 0, 1).withValues(alpha: 0.12)
-      : const Color.fromRGBO(255, 255, 255, 1).withValues(alpha: 0.12);
+      ? const Color.fromRGBO(0, 0, 0, 1).withOpacity(0.12)
+      : const Color.fromRGBO(255, 255, 255, 1).withOpacity(0.12);
 
   Color get toastTextColor => brightness == Brightness.light
       ? const Color.fromRGBO(255, 255, 255, 1)
@@ -340,8 +340,8 @@ extension CustomColorScheme on ColorScheme {
       : const Color.fromRGBO(150, 150, 150, 1);
 
   Color get searchResultsBackgroundColor => brightness == Brightness.light
-      ? Colors.black.withValues(alpha: 0.32)
-      : Colors.black.withValues(alpha: 0.64);
+      ? Colors.black.withOpacity(0.32)
+      : Colors.black.withOpacity(0.64);
 
   EnteTheme get enteTheme =>
       brightness == Brightness.light ? lightTheme : darkTheme;

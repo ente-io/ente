@@ -170,7 +170,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
                 actions: isSearching ? null : _getDefaultActions(context),
                 surfaceTintColor: Colors.transparent,
                 scrolledUnderElevation: 4,
-                shadowColor: Colors.black.withValues(alpha: 0.15),
+                shadowColor: Colors.black.withOpacity( 0.15),
               );
             },
           )

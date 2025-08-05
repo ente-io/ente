@@ -287,7 +287,7 @@ class _InfoMapState extends State<InfoMap> {
                                 child: Container(
                                   color: getEnteColorScheme(context)
                                       .backgroundElevated
-                                      .withValues(alpha: 0.5),
+                                      .withOpacity( 0.5),
                                 ),
                               ),
                               Container(

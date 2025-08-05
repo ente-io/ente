@@ -103,7 +103,7 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
                     fontSize: 12,
                     color: getEnteColorScheme(context)
                         .textBase
-                        .withValues(alpha: 0.9),
+                        .withOpacity( 0.9),
                   ),
                 ),
               ),

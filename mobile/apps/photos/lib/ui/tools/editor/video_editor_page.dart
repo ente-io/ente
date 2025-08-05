@@ -80,7 +80,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
           lineColor: Theme.of(context)
               .colorScheme
               .videoPlayerBorderColor
-              .withValues(alpha: 0.6),
+              .withOpacity( 0.6),
         ),
       );
 
