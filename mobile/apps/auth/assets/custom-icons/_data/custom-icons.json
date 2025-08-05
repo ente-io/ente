@@ -1730,7 +1730,7 @@
     {
       "title": "Twitter",
       "altNames": [
-        "X",
+        "X"
       ]
     },
     {
@@ -1940,6 +1940,22 @@
     {
       "title": "Co-Wheels",
       "slug": "cowheels"
+    },
+    {
+      "title": "Zivver",
+      "slug": "zivver"
+    },
+    {
+      "title": "Meesman Indexbeleggen",
+      "slug": "meesman"
+    },
+    {
+      "title": "Scouting Nederland",
+      "slug": "scoutingnederland"
+    },
+    {
+      "title": "ISC2",
+      "slug": "isc2"
     }
   ]
 }
