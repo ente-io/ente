@@ -1,4 +1,5 @@
 import "package:photos/models/file/file.dart";
+import "package:photos/models/file/remote/rl_mapping.dart";
 import "package:photos/services/filter/db_filters.dart";
 
 final homeGalleryFilters = DBFilterOptions(
@@ -6,10 +7,13 @@ final homeGalleryFilters = DBFilterOptions(
   ignoreSavedFiles: true,
   onlyUploadedFiles: false,
 );
+
 Future<List<EnteFile>> merge({
   required List<EnteFile> localFiles,
   required List<EnteFile> remoteFiles,
   DBFilterOptions? filterOptions,
+  Map<String, RLMapping>? localToRemoteMappings,
+  Map<int, RLMapping>? remoteToLocalMappings,
 }) {
   final List<EnteFile> mergedFiles = [];
   int i = 0;
@@ -18,6 +22,11 @@ Future<List<EnteFile>> merge({
   final int remoteLength = remoteFiles.length;
 
   while (i < localLength && j < remoteLength) {
+    if(localToRemoteMappings?.containsKey(localFiles[i].localID) ?? false)  {
+      i++;
+      continue;
+    }
+    
     if (localFiles[i].creationTime! >= remoteFiles[j].creationTime!) {
       mergedFiles.add(localFiles[i++]);
     } else {

@@ -2,11 +2,13 @@ import "dart:async";
 import "package:logging/logging.dart";
 import "package:photos/db/remote/schema.dart";
 import "package:photos/db/remote/table/collection_files.dart";
+import "package:photos/db/remote/table/mapping_table.dart";
 import "package:photos/models/api/diff/diff.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/remote/asset.dart";
 import "package:photos/models/file/remote/collection_file.dart";
+import "package:photos/models/file/remote/rl_mapping.dart";
 import "package:photos/models/file_load_result.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/filter/db_filters.dart";
@@ -15,6 +17,8 @@ import "package:photos/services/remote/localMapper/merge.dart";
 class RemoteCache {
   final Logger logger = Logger("RemoteCache");
   Map<int, RemoteAsset> remoteAssets = {};
+  Map<String, RLMapping> lToRMapping = {};
+  Map<int, RLMapping> rToLMapping = {};
   bool _isLoaded = false;
   Completer<void>? _loadCompleter;
 
@@ -89,6 +93,11 @@ class RemoteCache {
     try {
       logger.info("Loading remote assets into cache");
       final rAssets = await remoteDB.getRemoteAssets();
+      final mappings = await remoteDB.getMappings();
+      for (final mapping in mappings) {
+        lToRMapping[mapping.localID] = mapping;
+        rToLMapping[mapping.remoteUploadID] = mapping;
+      }
       for (final item in rAssets) {
         remoteAssets[item.id] = item;
       }

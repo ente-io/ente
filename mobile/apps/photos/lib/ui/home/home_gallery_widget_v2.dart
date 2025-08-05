@@ -110,6 +110,8 @@ class _HomeGalleryWidgetV2State extends State<HomeGalleryWidgetV2> {
           filterOptions: homeGalleryFilters.copyWith(
             ignoreSharedItems: _shouldHideSharedItems,
           ),
+          localToRemoteMappings: remoteCache.lToRMapping,
+          remoteToLocalMappings: remoteCache.rToLMapping,
         );
         _logger.info(
           "Merged files: ${allFiles.length} (local: ${localFiles.length}, remote: ${enteFiles.length}) files $tl, total ${tl.elapsed}",
