@@ -4,16 +4,18 @@ import "package:flutter/cupertino.dart";
 
 const editTimeKey = 'editedTime';
 const editNameKey = 'editedName';
+const latKey = "lat";
+const longKey = "long";
+
+const noThumbKey = "noThumb";
 const captionKey = "caption";
 const uploaderNameKey = "uploaderName";
 const widthKey = 'w';
 const heightKey = 'h';
 const streamVersionKey = 'sv';
 const mediaTypeKey = 'mediaType';
-const latKey = "lat";
-const longKey = "long";
 const motionVideoIndexKey = "mvi";
-const noThumbKey = "noThumb";
+
 const dateTimeKey = 'dateTime';
 const offsetTimeKey = 'offsetTime';
 

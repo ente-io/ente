@@ -24,7 +24,6 @@ import "package:photos/utils/file_key.dart";
 class FileMagicService {
   final _logger = Logger("FileMagicService");
   late Dio _enteDio;
-  late FilesDB _filesDB;
 
   FileMagicService._privateConstructor() {
     _filesDB = FilesDB.instance;

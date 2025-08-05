@@ -53,14 +53,6 @@ class RemoteAsset {
   String get title =>
       publicMetadata?.data['editedName'] ?? metadata.data['title'] ?? "";
 
-  String? get localID => metadata.data['localID'];
-
-  String? get matchLocalID => localID == null || deviceFolder == null
-      ? null
-      : Platform.isIOS
-          ? localID
-          : '$localID-$deviceFolder-$title';
-
   bool get isArchived {
     return metadata.data[magicKeyVisibility] == archiveVisibility;
   }

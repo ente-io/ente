@@ -1794,7 +1794,7 @@ class CollectionsService {
         "/collections/add-files",
         data: params,
       );
-      await remoteDB.insertDiffItems([localDiffItem]);
+      await remoteCache.insertDiffItems([localDiffItem]);
       return newFile;
     } catch (e) {
       rethrow;
