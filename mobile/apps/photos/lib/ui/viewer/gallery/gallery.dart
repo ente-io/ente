@@ -29,6 +29,7 @@ import "package:photos/ui/viewer/gallery/scrollbar/custom_scroll_bar.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
+import "package:photos/utils/gallery_util.dart";
 import "package:photos/utils/hierarchical_search_util.dart";
 import "package:photos/utils/misc_util.dart";
 import "package:photos/utils/standalone/date_time.dart";
@@ -600,7 +601,7 @@ class GalleryState extends State<Gallery> {
                           ? const NeverScrollableScrollPhysics()
                           : const ExponentialBouncingScrollPhysics(),
                       controller: _scrollController,
-                      cacheExtent: 1000,
+                      cacheExtent: galleryCacheExtent,
                       slivers: [
                         SliverToBoxAdapter(
                           child: SizeChangedLayoutNotifier(
