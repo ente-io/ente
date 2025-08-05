@@ -25,7 +25,7 @@ class SimilarImagesService {
   /// a list of files that are perceptually similar
   Future<List<SimilarFiles>> getSimilarFiles(
     double distanceThreshold,
-    bool exact,
+    {bool exact = false,}
   ) async {
     try {
       final now = DateTime.now();
@@ -70,7 +70,7 @@ class SimilarImagesService {
         await ClipVectorDB.instance.bulkSearchVectors(
       clipFloat32,
       BigInt.from(100),
-      exact,
+      exact: exact,
     );
     w?.log("bulkSearchVectors");
 

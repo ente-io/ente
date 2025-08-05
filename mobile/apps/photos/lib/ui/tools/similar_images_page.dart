@@ -294,7 +294,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       _logger.info("exact mode: $_exactSearch");
 
       final similarFiles = await SimilarImagesService.instance
-          .getSimilarFiles(_distanceThreshold, _exactSearch);
+          .getSimilarFiles(_distanceThreshold, exact: _exactSearch);
       _logger.info(
         "Found ${similarFiles.length} groups of similar images",
       );
