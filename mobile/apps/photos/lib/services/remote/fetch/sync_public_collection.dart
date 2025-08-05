@@ -40,16 +40,7 @@ Future<List<EnteFile>> getPublicFiles(
           updatedAt: item.updatedAt,
           createdAt: item.createdAt ?? 0,
         );
-        final rAsset = RemoteAsset.fromMetadata(
-          id: item.fileItem.fileID,
-          ownerID: item.fileItem.ownerID,
-          fileHeader: item.fileItem.fileDecryptionHeader!,
-          thumbHeader: item.fileItem.thumnailDecryptionHeader!,
-          metadata: item.fileItem.metadata!,
-          publicMetadata: item.fileItem.pubMagicMetadata,
-          privateMetadata: item.fileItem.privMagicMetadata,
-          info: item.fileItem.info,
-        );
+        final rAsset = item.fileItem.toRemoteAsset();
         sharedFiles.add(EnteFile.fromRemoteAsset(rAsset, cf));
       }
       sinceTime = diffResult.maxUpdatedAtTime;
