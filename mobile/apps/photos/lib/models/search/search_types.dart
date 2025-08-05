@@ -188,11 +188,14 @@ extension SectionTypeExtensions on SectionType {
               try {
                 final Collection c =
                     await CollectionsService.instance.createAlbum(text);
-                unawaited(
-                  routeToPage(
-                    context,
-                    CollectionPage(CollectionWithThumbnail(c, null)),
-                  ),
+
+                // Close the dialog now so that it does not flash when leaving the album again.
+                Navigator.of(context).pop();
+
+                // ignore: unawaited_futures
+                await routeToPage(
+                  context,
+                  CollectionPage(CollectionWithThumbnail(c, null)),
                 );
               } catch (e, s) {
                 Logger("CreateNewAlbumIcon")

@@ -128,15 +128,15 @@ Future<void> triggerSendLogs(
   String? subject,
   String? body,
 ) async {
-  final String zipFilePath = await getZippedLogsFile(null);
-  final Email email = Email(
-    recipients: [toEmail],
-    subject: subject ?? '',
-    body: body ?? '',
-    attachmentPaths: [zipFilePath],
-    isHTML: false,
-  );
   try {
+    final String zipFilePath = await getZippedLogsFile(null);
+    final Email email = Email(
+      recipients: [toEmail],
+      subject: subject ?? '',
+      body: body ?? '',
+      attachmentPaths: [zipFilePath],
+      isHTML: false,
+    );
     await FlutterEmailSender.send(email);
   } catch (e, s) {
     _logger.severe('email sender failed', e, s);

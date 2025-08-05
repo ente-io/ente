@@ -12495,6 +12495,118 @@ class S {
       args: [],
     );
   }
+
+  /// `Undo`
+  String get undo {
+    return Intl.message(
+      'Undo',
+      name: 'undo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Redo`
+  String get redo {
+    return Intl.message(
+      'Redo',
+      name: 'redo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Filter`
+  String get filter {
+    return Intl.message(
+      'Filter',
+      name: 'filter',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Adjust`
+  String get adjust {
+    return Intl.message(
+      'Adjust',
+      name: 'adjust',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Draw`
+  String get draw {
+    return Intl.message(
+      'Draw',
+      name: 'draw',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sticker`
+  String get sticker {
+    return Intl.message(
+      'Sticker',
+      name: 'sticker',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Brush Color`
+  String get brushColor {
+    return Intl.message(
+      'Brush Color',
+      name: 'brushColor',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Font`
+  String get font {
+    return Intl.message(
+      'Font',
+      name: 'font',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Background`
+  String get background {
+    return Intl.message(
+      'Background',
+      name: 'background',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Align`
+  String get align {
+    return Intl.message(
+      'Align',
+      name: 'align',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, =1{Added successfully to 1 album} other{Added successfully to {count} albums}}`
+  String addedToAlbums(int count) {
+    return Intl.plural(
+      count,
+      one: 'Added successfully to 1 album',
+      other: 'Added successfully to $count albums',
+      name: 'addedToAlbums',
+      desc: 'Message shown when items are added to albums',
+      args: [count],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

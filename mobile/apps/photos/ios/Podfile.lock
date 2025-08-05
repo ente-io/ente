@@ -108,8 +108,6 @@ PODS:
     - GoogleUtilities/Privacy
   - home_widget (0.0.1):
     - Flutter
-  - image_editor_common (1.0.0):
-    - Flutter
   - in_app_purchase_storekit (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -267,7 +265,6 @@ DEPENDENCIES:
   - flutter_timezone (from `.symlinks/plugins/flutter_timezone/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - home_widget (from `.symlinks/plugins/home_widget/ios`)
-  - image_editor_common (from `.symlinks/plugins/image_editor_common/ios`)
   - in_app_purchase_storekit (from `.symlinks/plugins/in_app_purchase_storekit/darwin`)
   - integration_test (from `.symlinks/plugins/integration_test/ios`)
   - launcher_icon_switcher (from `.symlinks/plugins/launcher_icon_switcher/ios`)
@@ -373,8 +370,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/fluttertoast/ios"
   home_widget:
     :path: ".symlinks/plugins/home_widget/ios"
-  image_editor_common:
-    :path: ".symlinks/plugins/image_editor_common/ios"
   in_app_purchase_storekit:
     :path: ".symlinks/plugins/in_app_purchase_storekit/darwin"
   integration_test:
@@ -479,7 +474,6 @@ SPEC CHECKSUMS:
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
   GoogleUtilities: 00c88b9a86066ef77f0da2fab05f65d7768ed8e1
   home_widget: 0434835a4c9a75704264feff6be17ea40e0f0d57
-  image_editor_common: d6f6644ae4a6de80481e89fe6d0a8c49e30b4b43
   in_app_purchase_storekit: a1ce04056e23eecc666b086040239da7619cd783
   integration_test: 252f60fa39af5e17c3aa9899d35d908a0721b573
   launcher_icon_switcher: 8e0ad2131a20c51c1dd939896ee32e70cd845b37
