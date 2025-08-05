@@ -171,20 +171,20 @@ class RemoteDiffService {
         continue;
       }
       final localAssetInfo = localAsset[localID]!;
-      final ApiFileItem remoteFile = fileIDtoLocalID[remoteFileID]!.$2;
+      final ApiFileItem apiFile = fileIDtoLocalID[remoteFileID]!.$2;
       late bool? isHashMatched;
       late bool hasIdMatched;
-      if (localAssetInfo.hash != null && remoteFile.hash != null) {
-        isHashMatched = localAssetInfo.hash == remoteFile.hash;
+      if (localAssetInfo.hash != null && apiFile.hash != null) {
+        isHashMatched = localAssetInfo.hash == apiFile.hash;
       } else {
         isHashMatched = null; // hash status unknown
       }
       if (Platform.isAndroid) {
-        hasIdMatched = localAssetInfo.id == remoteFile.localID &&
-            remoteFile.deviceFolder == localAssetInfo.relativePath &&
-            localAssetInfo.title == remoteFile.nonEditedTitle;
+        hasIdMatched = localAssetInfo.id == apiFile.localID &&
+            apiFile.deviceFolder == localAssetInfo.relativePath &&
+            localAssetInfo.title == apiFile.nonEditedTitle;
       } else if (Platform.isIOS) {
-        hasIdMatched = localAssetInfo.id == remoteFile.localID;
+        hasIdMatched = localAssetInfo.id == apiFile.localID;
       } else {
         hasIdMatched = false; // Unsupported platform
       }
@@ -198,11 +198,11 @@ class RemoteDiffService {
         mappingType = MatchType.localID;
       } else {
         _logger.warning(
-          "Remote file ${remoteFile.fileID} has localID $localID but hash does not match",
+          "Remote file ${apiFile.fileID} has localID $localID but hash does not match",
         );
         if (kDebugMode) {
           throw Exception(
-            "Remote file ${remoteFile.fileID} has localID $localID but hash does not match",
+            "Remote file ${apiFile.fileID} has localID $localID but hash does not match",
           );
         }
       }

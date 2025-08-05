@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import "package:photos/core/errors.dart";
-import 'package:photos/db/files_db.dart';
 import "package:photos/extensions/user_extension.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/api/collection/create_request.dart';

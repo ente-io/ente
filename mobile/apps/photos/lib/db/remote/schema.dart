@@ -23,11 +23,20 @@ final String collectionFilesUpdateColumns = collectionFilesColumns
     )
     .map((column) => '$column = excluded.$column') // Use excluded virtual table
     .join(', ');
+
 const filesColumns =
-    'id, owner_id, file_header, thumb_header, creation_time, modification_time, title, size, hash, lat, lng, visibility, '
-    'metadata, priv_metadata, pub_metadata, info';
+    'id, owner_id, file_header, thumb_header, creation_time, modification_time, '
+    'type, subtype, title, size, hash, visibility, durationInSec, lat, lng, '
+    'height, width, no_thumb, sv, media_type, motion_video_index, caption, uploader_name';
 
 final String filesUpdateColumns = filesColumns
+    .split(', ')
+    .where((column) => (column != 'id'))
+    .map((column) => '$column = excluded.$column') // Use excluded virtual table
+    .join(', ');
+
+const filesMetadataColumns = 'id, metadata, priv_metadata, pub_metadata, info';
+final String filesMetadataUpdateColumns = filesMetadataColumns
     .split(', ')
     .where((column) => (column != 'id'))
     .map((column) => '$column = excluded.$column') // Use excluded virtual table
@@ -89,24 +98,33 @@ class RemoteDBMigration {
       thumb_header BLOB NOT NULL,
       creation_time INTEGER NOT NULL,
       modification_time INTEGER NOT NULL,
-      title TEXT NOT NULL,
-      size INTEGER NOT NULL DEFAULT -1,
-      hash TEXT,
       type INTEGER NOT NULL,
+      subtype INTEGER NOT NULL,
+      title TEXT NOT NULL,
+      size INTEGER,
+      hash TEXT,
+      visibility integer,
+      durationInSec INTEGER,
       lat REAL DEFAULT NULL,
       lng REAL DEFAULT NULL,
-      height INTEGER DEFAULT NULL,
-      width INTEGER DEFAULT NULL,
-      noThumb INTEGER NOT NULL DEFAULT 0,
-      --- Stream version
-      sv INTEGER DEFAULT NULL,
-      mediaType INTEGER DEFAULT NULL,
-      motionVideoIndex INTEGER DEFAULT NULL,
-      visibility integer NOT NULL DEFAULT 0,
+      height INTEGER,
+      width INTEGER,
+      no_thumb INTEGER,
+      sv INTEGER,
+      media_type INTEGER,
+      motion_video_index INTEGER,
+      caption TEXT,
+      uploader_name TEXT
+    )
+    ''',
+    '''
+    CREATE TABLE files_metadata (
+      id INTEGER PRIMARY KEY,
       metadata TEXT NOT NULL,
       priv_metadata TEXT,
       pub_metadata TEXT,
-      info TEXT
+      info TEXT,
+      FOREIGN KEY (id) REFERENCES files(id) ON DELETE CASCADE
     )
     ''',
     '''

@@ -15,7 +15,7 @@ class IgnoredFile {
     final fileItem = item.fileItem;
     if (fileItem.localID == null ||
         fileItem.localID!.isEmpty ||
-        fileItem.title.isEmpty ||
+        fileItem.nonEditedTitle.isEmpty ||
         fileItem.deviceFolder == null ||
         fileItem.deviceFolder!.isEmpty) {
       return null;
@@ -23,7 +23,7 @@ class IgnoredFile {
 
     return IgnoredFile(
       fileItem.localID,
-      fileItem.title,
+      fileItem.nonEditedTitle,
       fileItem.deviceFolder,
       kIgnoreReasonTrash,
     );

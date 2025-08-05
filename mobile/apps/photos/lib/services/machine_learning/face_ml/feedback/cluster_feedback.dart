@@ -6,7 +6,6 @@ import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:ml_linalg/linalg.dart";
 import "package:photos/core/event_bus.dart";
-import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/db/remote/table/files_table.dart";
 import "package:photos/events/people_changed_event.dart";

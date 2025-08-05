@@ -1,8 +1,6 @@
 import 'package:logging/logging.dart';
 import "package:photos/core/configuration.dart";
 import 'package:photos/core/network/network.dart';
-import 'package:photos/db/files_db.dart';
-import "package:photos/models/api/diff/diff.dart";
 import 'package:photos/models/duplicate_files.dart';
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file/file_type.dart";
@@ -57,10 +55,7 @@ class DeduplicationService {
       }
       if ((file.fileSize ?? 0) <= 0 && file.rAsset != null) {
         file.rAsset = file.rAsset!.copyWith(
-          info: Info(
-            fileSize: uploadIDToSize[file.uploadedFileID!] ?? -1,
-            thumbSize: -1,
-          ),
+          fileSize: uploadIDToSize[file.uploadedFileID!],
         );
       }
       if ((file.fileSize ?? 0) <= 0) {

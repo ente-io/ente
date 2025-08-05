@@ -6,7 +6,6 @@ const editTimeKey = 'editedTime';
 const editNameKey = 'editedName';
 const latKey = "lat";
 const longKey = "long";
-
 const noThumbKey = "noThumb";
 const captionKey = "caption";
 const uploaderNameKey = "uploaderName";
@@ -15,7 +14,6 @@ const heightKey = 'h';
 const streamVersionKey = 'sv';
 const mediaTypeKey = 'mediaType';
 const motionVideoIndexKey = "mvi";
-
 const dateTimeKey = 'dateTime';
 const offsetTimeKey = 'offsetTime';
 
@@ -96,12 +94,12 @@ class PubMagicMetadata {
       sv: safeParseInt(map[streamVersionKey], streamVersionKey),
     );
   }
+}
 
-  static int? safeParseInt(dynamic value, String key) {
-    if (value == null) return null;
-    if (value is int) return value;
-    debugPrint("PubMagicMetadata key: $key Unexpected value: $value");
-    if (value is String) return int.tryParse(value);
-    return null;
-  }
+int? safeParseInt(dynamic value, String key) {
+  if (value == null) return null;
+  if (value is int) return value;
+  debugPrint("PubMagicMetadata key: $key Unexpected value: $value");
+  if (value is String) return int.tryParse(value);
+  return null;
 }

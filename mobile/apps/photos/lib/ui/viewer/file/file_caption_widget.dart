@@ -193,7 +193,7 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
 
   bool _onEditFileFinish(bool isSuccess) {
     if (isSuccess) {
-      widget.file.rAsset?.inMemUpdateCaption(editedCaption);
+      widget.file.rAsset?.caption = editedCaption;
       Bus.instance.fire(FileCaptionUpdatedEvent(widget.file.tag));
       return true;
     } else {

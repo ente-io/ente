@@ -40,7 +40,7 @@ Future<List<EnteFile>> getPublicFiles(
           updatedAt: item.updatedAt,
           createdAt: item.createdAt ?? 0,
         );
-        final rAsset = RemoteAsset(
+        final rAsset = RemoteAsset.fromMetadata(
           id: item.fileItem.fileID,
           ownerID: item.fileItem.ownerID,
           fileHeader: item.fileItem.fileDecryptionHeader!,

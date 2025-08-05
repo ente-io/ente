@@ -99,7 +99,7 @@ class EnteFile {
     file.lAsset = lAsset;
     file.ownerID = rAsset.ownerID;
     file.title = rAsset.title;
-    file.deviceFolder = rAsset.deviceFolder;
+    // file.deviceFolder = rAsset.deviceFolder;
     file.location = rAsset.location;
     file.fileType = rAsset.fileType;
     file.creationTime = rAsset.creationTime;
@@ -126,7 +126,7 @@ class EnteFile {
   }
 
   int? get fileSize {
-    if (rAsset != null && rAsset!.fileSize != -1) {
+    if (rAsset != null) {
       return rAsset!.fileSize;
     }
     return null;

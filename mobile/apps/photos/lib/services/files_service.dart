@@ -4,7 +4,6 @@ import "package:latlong2/latlong.dart";
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network/network.dart';
-import "package:photos/db/files_db.dart";
 import "package:photos/db/remote/table/files_table.dart";
 import "package:photos/db/remote/table/mapping_table.dart";
 import 'package:photos/extensions/list.dart';

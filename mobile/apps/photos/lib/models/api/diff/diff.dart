@@ -1,5 +1,4 @@
 import "dart:convert";
-import "dart:io";
 import "dart:typed_data";
 
 import "package:photos/models/api/diff/trash_time.dart";
@@ -98,21 +97,9 @@ class ApiFileItem {
     );
   }
 
-  List<Object?> filesRowValues() {
-    final Location? loc = location;
+  List<Object?> filesMetadataRowValues() {
     return [
       fileID,
-      ownerID,
-      fileDecryptionHeader,
-      thumnailDecryptionHeader,
-      creationTime,
-      modificationTime,
-      title,
-      fileSize,
-      hash,
-      loc?.latitude,
-      loc?.longitude,
-      privMagicMetadata?.data[magicKeyVisibility] ?? 0,
       metadata?.toEncodedJson(),
       privMagicMetadata?.toEncodedJson(),
       pubMagicMetadata?.toEncodedJson(),
@@ -121,7 +108,7 @@ class ApiFileItem {
   }
 
   RemoteAsset toRemoteAsset() {
-    return RemoteAsset(
+    return RemoteAsset.fromMetadata(
       id: fileID,
       ownerID: ownerID,
       thumbHeader: thumnailDecryptionHeader!,
@@ -142,35 +129,8 @@ class ApiFileItem {
 
   String? get localID => metadata?.data['localID'];
 
-  String? get matchLocalID => localID == null || deviceFolder == null
-      ? null
-      : Platform.isIOS
-          ? localID
-          : '$localID-$deviceFolder-$title';
-
   String? get deviceFolder => metadata?.data['deviceFolder'];
 
-  Location? get location {
-    if (pubMagicMetadata != null && pubMagicMetadata!.data[latKey] != null) {
-      return Location(
-        latitude: pubMagicMetadata!.data[latKey],
-        longitude: pubMagicMetadata!.data[longKey],
-      );
-    }
-    if (metadata != null && metadata!.data['latitude'] == null ||
-        metadata!.data['longitude'] == null) {
-      return null;
-    }
-    final latitude = double.tryParse(metadata!.data["latitude"].toString());
-    final longitude = double.tryParse(metadata!.data["longitude"].toString());
-    if (latitude == null ||
-        longitude == null ||
-        (latitude == 0.0 && longitude == 0.0)) {
-      return null;
-    } else {
-      return Location(latitude: latitude, longitude: longitude);
-    }
-  }
 
   int get creationTime =>
       pubMagicMetadata?.data['editedTime'] ??

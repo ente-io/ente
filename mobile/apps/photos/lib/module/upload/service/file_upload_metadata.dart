@@ -9,14 +9,16 @@ import "package:exif_reader/exif_reader.dart";
 import 'package:logging/logging.dart';
 import "package:motion_photos/motion_photos.dart";
 import 'package:photo_manager/photo_manager.dart';
+import "package:photos/db/remote/table/files_table.dart";
+import "package:photos/models/api/diff/diff.dart";
 import "package:photos/models/api/metadata.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
-import "package:photos/models/file/remote/asset.dart";
 import "package:photos/models/location/location.dart";
 import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/module/upload/model/media.dart";
 import "package:photos/module/upload/model/upload_data.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/local/metadata/metadata.service.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/panorama_util.dart";
@@ -71,10 +73,15 @@ Future<UploadMetadaData> getUploadMetadata(
     exifData,
     file,
   );
-
+  Metadata? existingPublicMetadata;
+  if (file.rAsset != null) {
+    final result =
+        await remoteDB.getIDToMetadata({file.rAsset!.id}, public: true);
+    existingPublicMetadata = result[file.rAsset!.id];
+  }
   final Map<String, dynamic> publicMetadata = _buildPublicMagicData(
     exifTime,
-    file.rAsset,
+    existingPublicMetadata,
     width: uploadMedia.localAsset?.width,
     height: uploadMedia.localAsset?.height,
     isPanorama: isPanorama,
@@ -85,6 +92,7 @@ Future<UploadMetadaData> getUploadMetadata(
   return UploadMetadaData(
     defaultMetadata: defaultMetadata,
     publicMetadata: publicMetadata.isEmpty ? null : publicMetadata,
+    currentPublicMetadataVersion: existingPublicMetadata?.version,
   );
 }
 
@@ -150,7 +158,7 @@ Future<Map<String, dynamic>> getMetadata(
 
 Map<String, dynamic> _buildPublicMagicData(
   ParsedExifDateTime? parsedExifTime,
-  RemoteAsset? rAsset, {
+  Metadata? existingPublicMetadata, {
   required int? width,
   required int? height,
   required bool? isPanorama,
@@ -177,7 +185,7 @@ Map<String, dynamic> _buildPublicMagicData(
   }
 
   final Map<String, dynamic> jsonToUpdate =
-      rAsset?.publicMetadata?.data ?? <String, dynamic>{};
+      existingPublicMetadata?.data ?? <String, dynamic>{};
   pubMetadata.forEach((key, value) {
     jsonToUpdate[key] = value;
   });
@@ -185,14 +193,14 @@ Map<String, dynamic> _buildPublicMagicData(
 }
 
 Future<MetadataRequest?> getPubMetadataRequest(
-  EnteFile file,
   Map<String, dynamic> jsonToUpdate,
   Uint8List fileKey,
+  int? publicMetadataVersion,
 ) async {
   if (jsonToUpdate.isEmpty) {
     return null;
   }
-  final int currentVersion = (file.rAsset?.publicMetadata?.version ?? 0);
+  final int currentVersion = (publicMetadataVersion ?? 0);
   final encryptedMMd = await CryptoUtil.encryptChaCha(
     utf8.encode(jsonEncode(jsonToUpdate)),
     fileKey,

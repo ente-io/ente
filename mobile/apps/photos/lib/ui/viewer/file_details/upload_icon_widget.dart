@@ -129,7 +129,8 @@ class _UpdateIconWidgetState extends State<UploadIconWidget> {
                 }
                 int? destCollection = widget.file.collectionID;
                 destCollection ??= (await CollectionsService.instance
-                    .getUncategorizedCollection()) as int?;
+                        .getUncategorizedCollection())
+                    .id;
                 await localDB.insertOrUpdateQueue(
                   {widget.file.lAsset!.id},
                   destCollection!,

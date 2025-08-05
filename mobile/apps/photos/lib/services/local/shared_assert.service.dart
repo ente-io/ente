@@ -103,8 +103,10 @@ class SharedAssetService {
     return (width, height);
   }
 
-  static Future<List<String>> tryDelete(List<String> localIDs,
-      {int batchSize = 10}) async {
+  static Future<List<String>> tryDelete(
+    List<String> localIDs, {
+    int batchSize = 10,
+  }) async {
     final List<String> actuallyDeletedIDs = [];
     try {
       for (int i = 0; i < localIDs.length; i += batchSize) {

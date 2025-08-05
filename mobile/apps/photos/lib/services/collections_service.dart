@@ -30,12 +30,13 @@ import 'package:photos/models/api/collection/collection_file_request.dart';
 import 'package:photos/models/api/collection/create_request.dart';
 import "package:photos/models/api/collection/public_url.dart";
 import "package:photos/models/api/collection/user.dart";
-import "package:photos/models/api/diff/diff.dart";
 import "package:photos/models/api/metadata.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
 import "package:photos/models/collection/collection_old.dart";
 import 'package:photos/models/file/file.dart';
+import "package:photos/models/file/remote/asset.dart";
+import "package:photos/models/file/remote/collection_file.dart";
 import "package:photos/models/files_split.dart";
 import "package:photos/models/metadata/collection_magic.dart";
 import "package:photos/service_locator.dart";
@@ -1508,21 +1509,21 @@ class CollectionsService {
     }
     final batchedFiles = files.chunks(batchSize);
     for (final batch in batchedFiles) {
-      final List<DiffItem> diffItems = [];
+      final List<(CollectionFile, RemoteAsset)> diffItems = [];
       final params = <String, dynamic>{};
       params["collectionID"] = destCollection;
       params["files"] = [];
       final List<EnteFile> newFiles = [];
       for (final file in batch) {
         final newFile = moveOrAddEntry(file, destCollection);
-        final localDiffItem = buildDiffItem(newFile, destCollection);
+        final localDiffItem = validateAndGetPair(newFile, destCollection);
         diffItems.add(localDiffItem);
         newFiles.add(newFile);
         params["files"].add(
           CollectionFileRequest.req(
-            localDiffItem.fileID,
-            encKey: localDiffItem.encFileKey!,
-            encKeyNonce: localDiffItem.encFileKeyNonce!,
+            localDiffItem.$1.fileID,
+            encKey: localDiffItem.$1.encFileKey,
+            encKeyNonce: localDiffItem.$1.encFileKeyNonce,
           ),
         );
       }
@@ -1531,7 +1532,7 @@ class CollectionsService {
           "/collections/add-files",
           data: params,
         );
-        await remoteCache.insertDiffItems(diffItems);
+        await remoteCache.insertDiffPairItems(diffItems);
         Bus.instance
             .fire(CollectionUpdatedEvent(destCollection, newFiles, "addTo"));
       } catch (e) {
@@ -1618,7 +1619,7 @@ class CollectionsService {
       params["files"] = [];
       final Map<int, (Uint8List encKey, Uint8List encKeyNonce)> newFileKeys =
           {};
-      final List<DiffItem> diffItems = [];
+      final List<(CollectionFile, RemoteAsset)> diffItems = [];
       final List<EnteFile> copiedFiles = [];
       for (final batchFile in batch) {
         if (newFileKeys.containsKey(batchFile.remoteID)) {
@@ -1664,7 +1665,7 @@ class CollectionsService {
               ownerID: _config.getUserID()!,
               newID: newUploadID,
             );
-            final diffItem = buildDiffItem(
+            final diffItem = validateAndGetPair(
               copiedFile,
               dstCollectionID,
             );
@@ -1681,9 +1682,10 @@ class CollectionsService {
             "Failed to map following uploadKey ${srcToCopiedFileIDs.keys}",
           );
         }
-        await remoteCache.insertDiffItems(diffItems);
+        await remoteCache.insertDiffPairItems(diffItems);
         Bus.instance.fire(
-            CollectionUpdatedEvent(dstCollectionID, copiedFiles, "copiedTo"));
+          CollectionUpdatedEvent(dstCollectionID, copiedFiles, "copiedTo"),
+        );
       } catch (e) {
         rethrow;
       }
@@ -1778,15 +1780,15 @@ class CollectionsService {
       );
     }
     final newFile = moveOrAddEntry(existingUploadedFile, destCollectionID);
-    final localDiffItem = buildDiffItem(newFile, destCollectionID);
+    final localDiffItem = validateAndGetPair(newFile, destCollectionID);
     final params = <String, dynamic>{};
     params["collectionID"] = destCollectionID;
     params["files"] = [];
     params["files"].add(
       CollectionFileRequest.req(
-        localDiffItem.fileID,
-        encKey: localDiffItem.encFileKey!,
-        encKeyNonce: localDiffItem.encFileKeyNonce!,
+        localDiffItem.$1.fileID,
+        encKey: localDiffItem.$1.encFileKey,
+        encKeyNonce: localDiffItem.$1.encFileKeyNonce,
       ),
     );
     try {
@@ -1794,7 +1796,7 @@ class CollectionsService {
         "/collections/add-files",
         data: params,
       );
-      await remoteCache.insertDiffItems([localDiffItem]);
+      await remoteCache.insertDiffPairItems([localDiffItem]);
       return newFile;
     } catch (e) {
       rethrow;
@@ -1812,17 +1814,17 @@ class CollectionsService {
       params["collectionID"] = toCollectionID;
       params["files"] = [];
       final List<EnteFile> batchFiles = [];
-      final List<DiffItem> diffItems = [];
+      final List<(CollectionFile, RemoteAsset)> diffItems = [];
       for (final file in batch) {
         final newFile = moveOrAddEntry(file, toCollectionID);
-        final localDiffItem = buildDiffItem(newFile, toCollectionID);
+        final localDiffItem = validateAndGetPair(newFile, toCollectionID);
         batchFiles.add(newFile);
         diffItems.add(localDiffItem);
         params["files"].add(
           CollectionFileRequest.req(
-            localDiffItem.fileID,
-            encKey: localDiffItem.encFileKey!,
-            encKeyNonce: localDiffItem.encFileKeyNonce!,
+            localDiffItem.$1.fileID,
+            encKey: localDiffItem.$1.encFileKey,
+            encKeyNonce: localDiffItem.$1.encFileKeyNonce,
           ),
         );
       }
@@ -1831,7 +1833,7 @@ class CollectionsService {
           "/collections/restore-files",
           data: params,
         );
-        await remoteCache.insertDiffItems(diffItems);
+        await remoteCache.insertDiffPairItems(diffItems);
         await remoteDB.removeTrashItems(batch.map((e) => e.remoteID).toList());
         Bus.instance.fire(
           CollectionUpdatedEvent(toCollectionID, batchFiles, "restore"),
@@ -1866,10 +1868,10 @@ class CollectionsService {
       params["fromCollectionID"] = fromCollectionID;
       params["files"] = [];
       final List<EnteFile> batchMovedFiles = [];
-      final List<DiffItem> collectionDiffItems = [];
+      final List<(CollectionFile, RemoteAsset)> collectionDiffItems = [];
       for (final file in batch) {
         final newFile = moveOrAddEntry(file, toCollectionID);
-        final DiffItem localDiffItem = buildDiffItem(
+        final localDiffItem = validateAndGetPair(
           newFile,
           toCollectionID,
         );
@@ -1877,9 +1879,9 @@ class CollectionsService {
         collectionDiffItems.add(localDiffItem);
         params["files"].add(
           CollectionFileRequest.req(
-            localDiffItem.fileID,
-            encKey: localDiffItem.encFileKey!,
-            encKeyNonce: localDiffItem.encFileKeyNonce!,
+            localDiffItem.$1.fileID,
+            encKey: localDiffItem.$1.encFileKey,
+            encKeyNonce: localDiffItem.$1.encFileKeyNonce,
           ),
         );
       }
@@ -1887,7 +1889,7 @@ class CollectionsService {
         "/collections/move-files",
         data: params,
       );
-      await remoteCache.insertDiffItems(collectionDiffItems);
+      await remoteCache.insertDiffPairItems(collectionDiffItems);
       await remoteDB.deleteCFEnteries(
         fromCollectionID,
         files.map((e) => e.uploadedFileID!).toList(),

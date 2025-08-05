@@ -727,7 +727,7 @@ class VideoPreviewService {
     EnteFile enteFile,
   ) async {
     final RemoteAsset? rAsset = enteFile.rAsset;
-    if ((rAsset?.streamingVersion ?? 0) == 1) {
+    if ((rAsset?.sv ?? 0) == 1) {
       _logger.info(
         "Skip Preview due to sv=1 for  ${enteFile.displayName}",
       );

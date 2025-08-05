@@ -26,6 +26,44 @@ extension FilesTable on RemoteDB {
     return result;
   }
 
+  Future<Map<int, Metadata?>> getIDToMetadata(
+    Set<int> ids, {
+    bool private = false,
+    bool public = false,
+    bool metadata = false,
+  }) async {
+    if (ids.isEmpty) return {};
+
+    // Ensure only one parameter is true
+    final trueCount = [private, public, metadata].where((x) => x).length;
+    if (trueCount != 1) {
+      throw ArgumentError(
+        'Exactly one of private, public, or metadata must be true',
+      );
+    }
+
+    final placeholders = List.filled(ids.length, '?').join(',');
+    String column;
+
+    if (private) {
+      column = 'priv_metadata';
+    } else if (public) {
+      column = 'pub_metadata';
+    } else {
+      column = 'metadata';
+    }
+    final rows = await sqliteDB.getAll(
+      "SELECT id, $column FROM files_metadata WHERE id IN ($placeholders)",
+      ids.toList(),
+    );
+    final result = <int, Metadata?>{};
+    for (final row in rows) {
+      final metadata = Metadata.fromEncodedJson(row[column]);
+      result[row['id'] as int] = metadata;
+    }
+    return result;
+  }
+
   Future<Set<int>> idsWithSameHashAndType(String hash, int ownerID) {
     return sqliteDB.getAll(
       "SELECT id FROM files WHERE hash = ? AND owner_id = ?",

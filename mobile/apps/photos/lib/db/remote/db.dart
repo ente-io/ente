@@ -50,6 +50,7 @@ class RemoteDB with SqlDbBase {
       _sqliteDB.execute('DELETE FROM collections'),
       _sqliteDB.execute('DELETE FROM collection_files'),
       _sqliteDB.execute('DELETE FROM files'),
+      _sqliteDB.execute('DELETE FROM files_metadata'),
       _sqliteDB.execute('DELETE FROM trash'),
       _sqliteDB.execute('DELETE FROM upload_mapping'),
     ]);
@@ -72,10 +73,10 @@ class RemoteDB with SqlDbBase {
   Future<List<RemoteAsset>> getRemoteAssets() async {
     final result = <RemoteAsset>[];
     final cursor = await _sqliteDB.getAll(
-      "SELECT id, owner_id, thumb_header, file_header, metadata, priv_metadata, pub_metadata, info FROM files",
+      "SELECT * FROM files",
     );
     for (final row in cursor) {
-      result.add(fromRow(row));
+      result.add(fromFilesRow(row));
     }
     return result;
   }
@@ -97,17 +98,22 @@ class RemoteDB with SqlDbBase {
     );
   }
 
-  Future<void> insertDiffItems(
+  Future<List<RemoteAsset>> insertDiffItems(
     List<DiffItem> items,
   ) async {
-    if (items.isEmpty) return;
+    if (items.isEmpty) return [];
+    final List<RemoteAsset> assets = [];
     final stopwatch = Stopwatch()..start();
     await Future.forEach(items.slices(_batchInsertMaxCount), (slice) async {
       final List<List<Object?>> collectionFileValues = [];
       final List<List<Object?>> fileValues = [];
+      final List<List<Object?>> fileMetadataValues = [];
       for (final item in slice) {
+        final rAsset = item.fileItem.toRemoteAsset();
         collectionFileValues.add(item.collectionFileRowValues());
-        fileValues.add(item.fileItem.filesRowValues());
+        fileMetadataValues.add(item.fileItem.filesMetadataRowValues());
+        fileValues.add(remoteAssetToRow(rAsset));
+        assets.add(rAsset);
       }
       await Future.wait([
         _sqliteDB.executeBatch(
@@ -115,14 +121,19 @@ class RemoteDB with SqlDbBase {
           collectionFileValues,
         ),
         _sqliteDB.executeBatch(
-          'INSERT INTO files ($filesColumns) values(${getParams(16)}) ON CONFLICT(id) DO UPDATE SET $filesUpdateColumns',
+          'INSERT INTO files ($filesColumns) values(${getParams(23)}) ON CONFLICT(id) DO UPDATE SET $filesUpdateColumns',
           fileValues,
+        ),
+        _sqliteDB.executeBatch(
+          'INSERT INTO files_metadata ($filesMetadataColumns) values(${getParams(5)}) ON CONFLICT(id) DO UPDATE SET $filesMetadataUpdateColumns',
+          fileMetadataValues,
         ),
       ]);
     });
     debugPrint(
       '$runtimeType insertCollectionFilesDiff complete in ${stopwatch.elapsed.inMilliseconds}ms for ${items.length}',
     );
+    return assets;
   }
 
   Future<void> deleteFilesDiff(

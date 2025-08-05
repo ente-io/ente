@@ -6,6 +6,7 @@ import "package:photos/models/api/diff/diff.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/remote/asset.dart";
+import "package:photos/models/file/remote/collection_file.dart";
 import "package:photos/models/file_load_result.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/filter/db_filters.dart";
@@ -104,9 +105,19 @@ class RemoteCache {
     List<DiffItem> items,
   ) async {
     if (items.isEmpty) return;
-    await remoteDB.insertDiffItems(items);
-    for (final item in items) {
-      remoteAssets[item.fileItem.fileID] = item.fileItem.toRemoteAsset();
+    final rAssets = await remoteDB.insertDiffItems(items);
+    for (final rAsset in rAssets) {
+      remoteAssets[rAsset.id] = rAsset;
+    }
+  }
+
+  Future<void> insertDiffPairItems(
+    List<(CollectionFile, RemoteAsset)> items,
+  ) async {
+    if (items.isEmpty) return;
+    // final rAssets = await remoteDB.insertDiffItems(items);
+    for (final (_, remoteAsset) in items) {
+      remoteAssets[remoteAsset.id] = remoteAsset;
     }
   }
 

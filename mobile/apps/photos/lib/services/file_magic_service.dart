@@ -7,12 +7,11 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network/network.dart';
-import 'package:photos/db/files_db.dart';
+import "package:photos/db/remote/table/files_table.dart";
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/extensions/list.dart';
-import "package:photos/models/api/diff/diff.dart";
 import "package:photos/models/api/metadata.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file/remote/asset.dart";
@@ -26,7 +25,6 @@ class FileMagicService {
   late Dio _enteDio;
 
   FileMagicService._privateConstructor() {
-    _filesDB = FilesDB.instance;
     _enteDio = NetworkClient.instance.enteDio;
   }
 
@@ -65,18 +63,29 @@ class FileMagicService {
     final params = <String, dynamic>{};
     params['metadataList'] = [];
     final int ownerID = Configuration.instance.getUserID()!;
+    final Set<int> fileIDs = {};
+    for (final file in files) {
+      if (file.rAsset == null) {
+        throw AssertionError(
+          "operation is only supported on backed up files",
+        );
+      }
+      final rAsset = file.rAsset!;
+      if (rAsset.ownerID != ownerID) {
+        throw AssertionError("cannot modify memories not owned by you");
+      }
+      fileIDs.add(rAsset.id);
+    }
+
+    final existingMetadata = await remoteDB.getIDToMetadata(
+      fileIDs,
+      public: true,
+    );
+
     try {
       final Map<int, RemoteAsset> updatedRAssets = {};
       for (final file in files) {
-        if (file.rAsset == null) {
-          throw AssertionError(
-            "operation is only supported on backed up files",
-          );
-        }
         final rAsset = file.rAsset!;
-        if (rAsset.ownerID != ownerID) {
-          throw AssertionError("cannot modify memories not owned by you");
-        }
         // read the existing magic metadata and apply new updates to existing data
         // current update is simple replace. This will be enhanced in the future,
         // as required.
@@ -89,8 +98,8 @@ class FileMagicService {
         );
 
         final Map<String, dynamic> jsonToUpdate =
-            rAsset.publicMetadata?.data ?? {};
-        final currentVersion = rAsset.publicMetadata?.version ?? 0;
+            existingMetadata[rAsset.id]?.data ?? {};
+        final currentVersion = existingMetadata[rAsset.id]?.version ?? 0;
         newUpdates!.forEach((key, value) {
           jsonToUpdate[key] = value;
         });
@@ -110,12 +119,14 @@ class FileMagicService {
             ),
           ),
         );
+
+        // todo: neeraj-rewrite: Modify this update logic
         updatedRAssets[rAsset.id] = rAsset.copyWith(
-          publicMetadata: Metadata(
-            data: jsonToUpdate,
-            version: currentVersion + 1,
-          ),
-        );
+            // publicMetadata: Metadata(
+            //   data: jsonToUpdate,
+            //   version: currentVersion + 1,
+            // ),
+            );
       }
       await _enteDio.put("/files/public-magic-metadata", data: params);
       // update the state of the selected file. Same file in other collection
@@ -146,7 +157,7 @@ class FileMagicService {
       for (final batch in batchedFiles) {
         final Map<int, RemoteAsset> updatedRAssets = {};
         final params = <String, dynamic>{};
-        params['metadataList'] = [];
+        final Set<int> fileIDs = {};
         for (final file in batch) {
           if (file.rAsset == null) {
             throw AssertionError(
@@ -157,12 +168,21 @@ class FileMagicService {
           if (rAsset.ownerID != ownerID) {
             throw AssertionError("cannot modify memories not owned by you");
           }
+          fileIDs.add(rAsset.id);
+        }
+        final existingMetadata = await remoteDB.getIDToMetadata(
+          fileIDs,
+          private: true,
+        );
+        params['metadataList'] = [];
+        for (final file in batch) {
+          final rAsset = file.rAsset!;
           // read the existing magic metadata and apply new updates to existing data
           // current update is simple replace. This will be enhanced in the future,
           // as required.
           final Map<String, dynamic> jsonToUpdate =
-              rAsset.privateMetadata?.data ?? {};
-          final currentVersion = rAsset.privateMetadata?.version ?? 0;
+              existingMetadata[rAsset.id]?.data ?? {};
+          final currentVersion = existingMetadata[rAsset.id]?.version ?? 0;
           newMetadataUpdate.forEach((key, value) {
             jsonToUpdate[key] = value;
           });
@@ -184,12 +204,13 @@ class FileMagicService {
             ),
           );
           // for updating the local information so that it's reflected on UI
+          // todo: neeraj-rewrite: Modify this update logic
           updatedRAssets[rAsset.id] = rAsset.copyWith(
-            privateMetadata: Metadata(
-              data: jsonToUpdate,
-              version: currentVersion + 1,
-            ),
-          );
+              // privateMetadata: Metadata(
+              //   data: jsonToUpdate,
+              //   version: currentVersion + 1,
+              // ),
+              );
         }
         await _enteDio.put("/files/magic-metadata", data: params);
         for (final file in batch) {
