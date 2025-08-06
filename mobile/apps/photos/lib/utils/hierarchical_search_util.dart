@@ -134,10 +134,12 @@ Future<List<EnteFile>> getFilteredFiles(
       }
     }
 
-    filteredFiles = await FilesDB.instance.getUniqueFiles(
-      filteredUploadedIDs.toList(),
-      collectionsToIgnore: ignoredCollections,
-    );
+    filteredFiles = await remoteCache
+        .getUniqueFiles(
+          filteredUploadedIDs.toList(),
+          ignoredCollectionIDs: ignoredCollections,
+        )
+        .then((mapping) => mapping.$1.values.toList());
   } catch (e) {
     Logger("HierarchicalSearchUtil").severe("Failed to get filtered files: $e");
   }

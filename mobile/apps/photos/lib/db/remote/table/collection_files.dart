@@ -61,6 +61,7 @@ extension CollectionFiles on RemoteDB {
   Future<List<CollectionFile>> getAllCFForFileIDs(
     List<int> fileIDs,
   ) async {
+    if (fileIDs.isEmpty) return [];
     final rows = await sqliteDB.getAll(
       "SELECT * FROM collection_files WHERE file_id IN (${fileIDs.join(",")})",
     );

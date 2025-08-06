@@ -224,17 +224,14 @@ class MemoriesCacheService {
           minimalFileIDs.addAll(memory.fileUploadedIDs);
         }
       }
-      final minimalFiles = await FilesDB.instance.getUniqueFiles(
-        minimalFileIDs.toList(),
-        collectionsToIgnore:
-            CollectionsService.instance.getHiddenCollectionIds(),
-      );
-      final minimalFileIdsToFile = <int, EnteFile>{};
-      for (final file in minimalFiles) {
-        if (file.isUploaded) {
-          minimalFileIdsToFile[file.remoteID] = file;
-        }
-      }
+
+      final minimalFileIdsToFile = await remoteCache
+          .getUniqueFiles(
+            minimalFileIDs.toList(),
+            ignoredCollectionIDs:
+                CollectionsService.instance.getHiddenCollectionIds(),
+          )
+          .then((mapping) => mapping.$1);
 
       for (final ToShowMemory memory in cache.toShowMemories) {
         if (memory.shouldShowNow()) {

@@ -577,30 +577,6 @@ class FilesDB with SqlDbBase {
     }
   }
 
-  Future<List<EnteFile>> getUniqueFiles(
-    List<int> ids, {
-    Set<int> collectionsToIgnore = const {},
-  }) async {
-    if (ids.isEmpty) {
-      return [];
-    }
-    final inParam = ids.map((id) => "'$id'").join(',');
-    final db = await instance.sqliteAsyncDB;
-    final results = await db.getAll(
-      'SELECT * FROM $filesTable WHERE $columnUploadedFileID IN ($inParam) ORDER BY $columnCreationTime DESC',
-    );
-    final files = convertToFiles(results);
-    final result = await applyDBFilters(
-      files,
-      DBFilterOptions(
-        ignoredCollectionIDs: collectionsToIgnore,
-        dedupeUploadID: true,
-      ),
-    );
-
-    return result;
-  }
-
   Future<List<EnteFile>> getAllFilesAfterDate({
     required FileType fileType,
     required DateTime beginDate,
