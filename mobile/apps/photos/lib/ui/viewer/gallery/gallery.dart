@@ -510,6 +510,7 @@ class GalleryState extends State<Gallery> {
   Widget build(BuildContext context) {
     _logger.info("Building Gallery  ${widget.tagPrefix}");
     final widthAvailable = MediaQuery.sizeOf(context).width;
+    GalleryFilesState.of(context).setGalleryFiles = _allGalleryFiles;
 
     if (groupHeaderExtent == null) {
       final photoGridSize = localSettings.getPhotoGridSize();
@@ -548,7 +549,6 @@ class GalleryState extends State<Gallery> {
           : const SizedBox.shrink();
     }
 
-    GalleryFilesState.of(context).setGalleryFiles = _allGalleryFiles;
     if (!_hasLoadedFiles) {
       return widget.loadingWidget;
     }
