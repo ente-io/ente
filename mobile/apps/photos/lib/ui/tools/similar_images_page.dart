@@ -18,6 +18,7 @@ import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
+import "package:photos/utils/standalone/data.dart";
 
 enum SimilarImagesPageState {
   setup,
@@ -584,7 +585,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
               ),
               const SizedBox(height: 2),
               Text(
-                "${file.fileSize! ~/ (1024 * 1024)}MB", // TODO: lau: extract string
+                formatBytes(file.fileSize!),
                 style: textTheme.miniMuted,
               ),
               const SizedBox(height: 16),
