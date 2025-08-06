@@ -75,8 +75,8 @@ jobs:
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.IOS_ISSUER_ID }}
           APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ secrets.IOS_API_KEY_ID }}
           PROVISIONING_PROFILE: ${{ secrets.IOS_AUTHGITHUBDISTRIBUTION_PROFILE }}
-          BUILD_CERTIFICATE_BASE64: ${{ secrets.MAC_OS_CERTIFICATE }}
-          P12_PASSWORD: ${{ secrets.MAC_OS_CERTIFICATE_PASSWORD }}
+          DIST_CERTIFICATE: ${{ secrets.IOS_DISTRIBUTION_P12_CERT }}
+          DIST_CERTIFICATE_PASSWORD: ${{ secrets.IOS_DISTRIBUTION_P12_CERT_PWD }}
 
         defaults:
             run:
@@ -112,10 +112,10 @@ jobs:
                   # create variables
                   CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
                   # copy certificates from base64
-                  echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+                  echo -n "$DIST_CERTIFICATE" | base64 --decode -o $CERTIFICATE_PATH
                   # add certificate to keychain
                   keychain initialize
-                  keychain add-certificates --certificate $CERTIFICATE_PATH --certificate-password $P12_PASSWORD
+                  keychain add-certificates --certificate $CERTIFICATE_PATH --certificate-password $DIST_CERTIFICATE_PASSWORD
                   # Use profile in current project
                   xcode-project use-profiles --project=ios/*.xcodeproj
 
