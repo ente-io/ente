@@ -357,15 +357,20 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "${similarFiles.files.length} similar images" +
-                (flagService.internalUser
-                    ? "(I: d: ${similarFiles.furthestDistance.toStringAsFixed(3)})"
-                    : ""), // TODO: lau: extract string
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: getEnteColorScheme(context).textMuted,
-                  // fontSize: 12,
-                ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "${similarFiles.files.length} similar images" +
+                    (flagService.internalUser
+                        ? "(I: d: ${similarFiles.furthestDistance.toStringAsFixed(3)})"
+                        : ""), // TODO: lau: extract string
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: getEnteColorScheme(context).textMuted,
+                    ),
+              ),
+              _getDeleteButton([]),
+            ],
           ),
           const SizedBox(height: 16),
           GridView.builder(
@@ -451,6 +456,41 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
           ),
           const SizedBox(height: 16),
         ],
+      ),
+    );
+  }
+
+  Widget _getDeleteButton(List<EnteFile> files) {
+    final colorScheme = getEnteColorScheme(context);
+
+    return GestureDetector(
+      onTap: () async {
+        // TODO: Implement delete functionality
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        decoration: BoxDecoration(
+          color: colorScheme.warning500.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.delete_outline,
+              size: 12,
+              color: colorScheme.warning500,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              "Delete (${files.length})", // TODO: lau: extract string
+              style: getEnteTextTheme(context).small.copyWith(
+                    color: colorScheme.warning500,
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+          ],
+        ),
       ),
     );
   }
