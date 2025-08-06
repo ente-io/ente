@@ -48,7 +48,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   SimilarImagesPageState _pageState = SimilarImagesPageState.setup;
   double _distanceThreshold = 0.04; // Default value
   List<SimilarFiles> _similarFilesList = [];
-  SortKey _sortKey = SortKey.size;
+  SortKey _sortKey = SortKey.distanceAsc;
   bool _exactSearch = false;
 
   @override
