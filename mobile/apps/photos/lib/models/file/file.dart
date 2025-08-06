@@ -15,7 +15,7 @@ import "package:photos/services/local/asset_entity.service.dart";
 
 //Todo: files with no location data have lat and long set to 0.0. This should ideally be null.
 class EnteFile {
-  static final _logger = Logger('File');
+  static final _logger = Logger('EnteFile');
   AssetEntity? lAsset;
   RemoteAsset? rAsset;
   CollectionFile? cf;

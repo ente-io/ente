@@ -118,6 +118,12 @@ class RemoteDBMigration {
     )
     ''',
     '''
+    CREATE INDEX IF NOT EXISTS file_hash_index ON files(hash);
+    ''',
+    '''
+    CREATE INDEX IF NOT EXISTS file_creation_time_index ON files(creation_time);
+    ''',
+    '''
     CREATE TABLE files_metadata (
       id INTEGER PRIMARY KEY,
       metadata TEXT NOT NULL,
