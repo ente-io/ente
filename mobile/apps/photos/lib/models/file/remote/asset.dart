@@ -80,7 +80,7 @@ class RemoteAsset {
       creationTime: publicMetadata?.data[editTimeKey] ??
           metadata.data['creationTime'] ??
           0,
-      title: publicMetadata?.data[editTimeKey] ?? metadata.data['title'] ?? "",
+      title: publicMetadata?.data[editNameKey] ?? metadata.data['title'] ?? "",
       modificationTime: metadata.data["modificationTime"] ??
           publicMetadata?.data[editTimeKey] ??
           metadata.data['creationTime'] ??
@@ -90,13 +90,16 @@ class RemoteAsset {
       durationInSec: metadata.data['duration'] ?? 0,
       fileSize: info?.fileSize,
       subType: metadata.data['subType'] ?? -1,
-      type: metadata.data['type'] ?? -1,
+      type: metadata.data['fileType'] ?? -1,
       height: safeParseInt(publicMetadata?.data[heightKey], heightKey),
       width: safeParseInt(publicMetadata?.data[widthKey], widthKey),
       sv: publicMetadata?.data[streamVersionKey],
       motionVideoIndex: publicMetadata?.data[motionVideoIndexKey],
-      noThumb: publicMetadata?.data[noThumbKey] ??
-          metadata.data["hasStaticThumbnail"],
+      noThumb: (publicMetadata?.data[noThumbKey] ??
+              metadata.data["hasStaticThumbnail"] ??
+              false)
+          ? 1
+          : 0,
       caption: publicMetadata?.data[captionKey],
       mediaType: publicMetadata?.data[mediaTypeKey],
       uploaderName: publicMetadata?.data[uploaderNameKey],
