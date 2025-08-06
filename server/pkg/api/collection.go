@@ -10,7 +10,6 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/ente-io/museum/ente"
-	"github.com/ente-io/museum/pkg/controller"
 	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/museum/pkg/utils/handler"
 	"github.com/ente-io/museum/pkg/utils/time"
@@ -172,35 +171,6 @@ func (h *CollectionHandler) UpdateShareURL(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
-	if req.DeviceLimit == nil && req.ValidTill == nil && req.DisablePassword == nil &&
-		req.Nonce == nil && req.PassHash == nil && req.EnableDownload == nil && req.EnableCollect == nil {
-		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "all parameters are missing"))
-		return
-	}
-
-	if req.DeviceLimit != nil && (*req.DeviceLimit < 0 || *req.DeviceLimit > controller.DeviceLimitThreshold) {
-		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("device limit: %d out of range", *req.DeviceLimit)))
-		return
-	}
-
-	if req.ValidTill != nil && *req.ValidTill != 0 && *req.ValidTill < time.Microseconds() {
-		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "valid till should be greater than current timestamp"))
-		return
-	}
-
-	var allPassParamsMissing = req.Nonce == nil && req.PassHash == nil && req.MemLimit == nil && req.OpsLimit == nil
-	var allPassParamsPresent = req.Nonce != nil && req.PassHash != nil && req.MemLimit != nil && req.OpsLimit != nil
-
-	if !(allPassParamsMissing || allPassParamsPresent) {
-		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "all password params should be either present or missing"))
-		return
-	}
-
-	if allPassParamsPresent && req.DisablePassword != nil && *req.DisablePassword {
-		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "can not set and disable password in same request"))
-		return
-	}
-
 	response, err := h.Controller.UpdateShareURL(c, auth.GetUserID(c.Request.Header), req)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))

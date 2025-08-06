@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/tools/editor/image_editor/image_editor_color_picker.dart";
 import "package:photos/ui/tools/editor/image_editor/image_editor_configs_mixin.dart";
@@ -63,7 +64,7 @@ class _ImageEditorPaintBarState extends State<ImageEditorPaintBar>
               Padding(
                 padding: const EdgeInsets.only(left: 20.0),
                 child: Text(
-                  "Brush Color",
+                  S.of(context).brushColor,
                   style: getEnteTextTheme(context).body,
                 ),
               ),

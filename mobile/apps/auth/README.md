@@ -98,7 +98,7 @@ more, see [docs/adding-icons](docs/adding-icons.md).
 The best way to support this project is by checking out [Ente
 Photos](../mobile/README.md) or spreading the word.
 
-For more ways to contribute, see [../CONTRIBUTING.md](../../../CONTRIBUTING.md).
+For more ways to contribute, see [../../../CONTRIBUTING.md](../../../CONTRIBUTING.md).
 
 ## Certificate Fingerprints
 
