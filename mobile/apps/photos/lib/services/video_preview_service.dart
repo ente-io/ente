@@ -803,8 +803,15 @@ class VideoPreviewService {
     );
 
     final previewIds = fileDataService.previewIds;
-    final allFiles =
-        files.where((file) => previewIds[file.uploadedFileID] == null).toList();
+    // filter files for which preview is already created
+    // or we don't need to create preview
+    final allFiles = files
+        .where(
+          (file) =>
+              !previewIds.containsKey(file.uploadedFileID) ||
+              file.rAsset?.sv != 1,
+        )
+        .toList();
 
     // set all video status to in queue
     var n = allFiles.length, i = 0;
