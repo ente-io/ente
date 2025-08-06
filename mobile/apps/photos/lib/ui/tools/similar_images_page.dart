@@ -5,6 +5,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 
 import "package:photos/models/file/file.dart";
+import "package:photos/models/selected_files.dart";
 import "package:photos/models/similar_files.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/similar_images_service.dart";
@@ -51,14 +52,18 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   SortKey _sortKey = SortKey.distanceAsc;
   bool _exactSearch = false;
 
+  late SelectedFiles _selectedFiles;
+
   @override
   void initState() {
     super.initState();
+    _selectedFiles = SelectedFiles();
   }
 
   @override
   void dispose() {
     _isDisposed = true;
+    _selectedFiles.dispose();
     super.dispose();
   }
 
@@ -70,7 +75,22 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         title: const Text("Similar images"), // TODO: lau: extract string
         actions: _pageState == SimilarImagesPageState.results
             ? [
-                _getSortMenu(),
+                ListenableBuilder(
+                  listenable: _selectedFiles,
+                  builder: (context, _) {
+                    final selectedCount = _selectedFiles.files.length;
+                    if (selectedCount > 0) {
+                      return IconButton(
+                        onPressed: () {
+                          _selectedFiles.clearAll(fireEvent: false);
+                        },
+                        icon: const Icon(Icons.clear),
+                      );
+                    } else {
+                      return _getSortMenu();
+                    }
+                  },
+                ),
               ]
             : null,
       ),
@@ -360,7 +380,40 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              _getSmallDeleteButton([]),
+              SizedBox(
+                height: 34,
+                child: ListenableBuilder(
+                  listenable: _selectedFiles,
+                  builder: (context, _) {
+                    final groupSelectedFiles = similarFiles.files
+                        .where((file) => _selectedFiles.isFileSelected(file))
+                        .toList();
+                    final hasAnySelection = _selectedFiles.files.isNotEmpty;
+                    final allGroupFilesSelected = similarFiles.files.every(
+                      (file) => _selectedFiles.isFileSelected(file),
+                    );
+
+                    if (groupSelectedFiles.isNotEmpty) {
+                      return _getSmallDeleteButton(groupSelectedFiles);
+                    } else if (hasAnySelection) {
+                      return _getSmallSelectButton(allGroupFilesSelected, () {
+                        if (allGroupFilesSelected) {
+                          // Unselect all files in this group
+                          _selectedFiles.unSelectAll(
+                            similarFiles.files.toSet(),
+                          );
+                        } else {
+                          // Select all files in this group
+                          _selectedFiles.selectAll(
+                            similarFiles.files.toSet(),
+                          );
+                        }
+                      });
+                    }
+                    return const SizedBox.shrink();
+                  },
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -396,60 +449,134 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     int index,
   ) {
     final textTheme = getEnteTextTheme(context);
-    return GestureDetector(
-      onTap: () {
-        routeToPage(
-          context,
-          DetailPage(
-            DetailPageConfiguration(
-              allFiles,
-              index,
-              "similar_images_",
-              mode: DetailPageMode.minimalistic,
-            ),
+    return ListenableBuilder(
+      listenable: _selectedFiles,
+      builder: (context, _) {
+        final bool isSelected = _selectedFiles.isFileSelected(file);
+        final bool hasAnySelection = _selectedFiles.files.isNotEmpty;
+
+        return GestureDetector(
+          onTap: () {
+            if (hasAnySelection) {
+              // If files are selected, tap should toggle selection
+              _selectedFiles.toggleSelection(file);
+            } else {
+              // If no files selected, tap opens detail page
+              routeToPage(
+                context,
+                DetailPage(
+                  DetailPageConfiguration(
+                    allFiles,
+                    index,
+                    "similar_images_",
+                    mode: DetailPageMode.minimalistic,
+                  ),
+                ),
+              );
+            }
+          },
+          onLongPress: () {
+            if (hasAnySelection) {
+              // If files are selected, long press opens detail page
+              routeToPage(
+                context,
+                DetailPage(
+                  DetailPageConfiguration(
+                    allFiles,
+                    index,
+                    "similar_images_",
+                    mode: DetailPageMode.minimalistic,
+                  ),
+                ),
+              );
+            } else {
+              // If no files selected, long press starts selection
+              _selectedFiles.toggleSelection(file);
+            }
+          },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Stack(
+                  children: [
+                    Hero(
+                      tag: "similar_images_" + file.tag,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: isSelected
+                            ? ColorFiltered(
+                                colorFilter: ColorFilter.mode(
+                                  Colors.black.withValues(alpha: 0.4),
+                                  BlendMode.darken,
+                                ),
+                                child: ThumbnailWidget(
+                                  file,
+                                  diskLoadDeferDuration:
+                                      galleryThumbnailDiskLoadDeferDuration,
+                                  serverLoadDeferDuration:
+                                      galleryThumbnailServerLoadDeferDuration,
+                                  shouldShowLivePhotoOverlay: true,
+                                  key: Key("similar_images_" + file.tag),
+                                ),
+                              )
+                            : ThumbnailWidget(
+                                file,
+                                diskLoadDeferDuration:
+                                    galleryThumbnailDiskLoadDeferDuration,
+                                serverLoadDeferDuration:
+                                    galleryThumbnailServerLoadDeferDuration,
+                                shouldShowLivePhotoOverlay: true,
+                                key: Key("similar_images_" + file.tag),
+                              ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 5,
+                      right: 5,
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        switchInCurve: Curves.easeOut,
+                        switchOutCurve: Curves.easeIn,
+                        child: isSelected
+                            ? const Icon(
+                                Icons.check_circle_rounded,
+                                color: Colors.white,
+                                size: 22,
+                              )
+                            : null,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                file.displayName,
+                style: textTheme.small,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                "${file.fileSize! ~/ (1024 * 1024)}MB", // TODO: lau: extract string
+                style: textTheme.miniMuted,
+              ),
+              const SizedBox(height: 16),
+            ],
           ),
         );
       },
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Hero(
-              tag: "similar_images_" + file.tag,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: ThumbnailWidget(
-                  file,
-                  diskLoadDeferDuration: galleryThumbnailDiskLoadDeferDuration,
-                  serverLoadDeferDuration:
-                      galleryThumbnailServerLoadDeferDuration,
-                  shouldShowLivePhotoOverlay: true,
-                  key: Key("similar_images_" + file.tag),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            file.displayName,
-            style: textTheme.small,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 2),
-          Text(
-            "${file.fileSize! ~/ (1024 * 1024)}MB", // TODO: lau: extract string
-            style: textTheme.miniMuted,
-          ),
-          const SizedBox(height: 16),
-        ],
-      ),
     );
   }
 
   Widget _getSmallDeleteButton(List<EnteFile> files) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+
+    if (files.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
     return GestureDetector(
       onTap: () async {
@@ -477,6 +604,35 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _getSmallSelectButton(bool unselectAll, void Function() onTap) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 8,
+          vertical: 8,
+        ),
+        decoration: BoxDecoration(
+          color: unselectAll
+              ? getEnteColorScheme(context).primary500
+              : getEnteColorScheme(context).strokeFaint,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Text(
+          unselectAll
+              ? "Unselect all" // TODO: lau: extract string
+              : "Select all", // TODO: lau: extract string
+          style: textTheme.smallMuted.copyWith(
+            color: unselectAll ? Colors.white : colorScheme.textMuted,
+          ),
         ),
       ),
     );
