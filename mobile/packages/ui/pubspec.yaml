@@ -22,11 +22,7 @@ dependencies:
   expandable: ^5.0.1
   flutter:
     sdk: flutter
-  flutter_inappwebview:
-    git:
-      url: https://github.com/pichillilorenzo/flutter_inappwebview.git
-      path: flutter_inappwebview
-      ref: 3e6c4c4a25340cd363af9d38891d88498b90be26
+  flutter_inappwebview: ^6.1.4
   fluttertoast: ^8.1.1
   modal_bottom_sheet: ^3.0.0
   shared_preferences: ^2.5.3

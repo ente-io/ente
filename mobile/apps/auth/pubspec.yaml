@@ -63,11 +63,7 @@ dependencies:
   flutter_email_sender: ^6.0.2
   # revert to pub.dev when merged
   # https://github.com/pichillilorenzo/flutter_inappwebview/pull/2548
-  flutter_inappwebview:
-    git:
-      url: https://github.com/pichillilorenzo/flutter_inappwebview.git
-      path: flutter_inappwebview
-      ref: 3e6c4c4a25340cd363af9d38891d88498b90be26
+  flutter_inappwebview: ^6.1.4
   flutter_launcher_icons: ^0.14.1
   flutter_local_authentication:
     git:

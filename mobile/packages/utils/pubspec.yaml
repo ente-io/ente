@@ -8,7 +8,7 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
-  archive: ^4.0.7
+  archive: ^3.3.7
   email_validator: ^3.0.0
   ente_configuration:
     path: ../../packages/configuration
@@ -27,7 +27,7 @@ dependencies:
   package_info_plus: ^8.1.1
   path: ^1.9.0
   path_provider: ^2.1.5
-  share_plus: ^11.0.0
+  share_plus: ^10.0.2
   url_launcher: ^6.3.1
   window_manager: ^0.4.2
   
