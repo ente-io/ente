@@ -42,6 +42,7 @@ class SimilarImagesPage extends StatefulWidget {
 class _SimilarImagesPageState extends State<SimilarImagesPage> {
   static const crossAxisCount = 3;
   static const crossAxisSpacing = 12.0;
+  static const autoSelectDistanceThreshold = 0.01;
 
   final _logger = Logger("SimilarImagesPage");
   bool _isDisposed = false;
@@ -312,17 +313,13 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         "Found ${similarFiles.length} groups of similar images",
       );
 
-      if (_isDisposed) return;
+      _similarFilesList = similarFiles;
+      _pageState = SimilarImagesPageState.results;
       _sortSimilarFiles();
-      _logger.fine(
-        "Sorted similar files by $_sortKey",
-      );
+      _autoSelectSimilarFiles();
 
       if (_isDisposed) return;
-      setState(() {
-        _similarFilesList = similarFiles;
-        _pageState = SimilarImagesPageState.results;
-      });
+      setState(() {});
 
       return;
     } catch (e, s) {
@@ -359,6 +356,34 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     }
     if (_isDisposed) return;
     setState(() {});
+  }
+
+  void _autoSelectSimilarFiles() {
+    final filesToSelect = <EnteFile>{};
+    int groupsProcessed = 0;
+    int groupsAutoSelected = 0;
+
+    for (final similarFilesGroup in _similarFilesList) {
+      groupsProcessed++;
+      if (similarFilesGroup.furthestDistance < autoSelectDistanceThreshold) {
+        groupsAutoSelected++;
+        // Skip the first file (keep it unselected) and select the rest
+        for (int i = 1; i < similarFilesGroup.files.length; i++) {
+          filesToSelect.add(similarFilesGroup.files[i]);
+        }
+      }
+    }
+
+    if (filesToSelect.isNotEmpty) {
+      _selectedFiles.selectAll(filesToSelect);
+      _logger.info(
+        "Auto-selected ${filesToSelect.length} files from $groupsAutoSelected/$groupsProcessed groups (threshold: $autoSelectDistanceThreshold)",
+      );
+    } else {
+      _logger.info(
+        "No files auto-selected from $groupsProcessed groups (threshold: $autoSelectDistanceThreshold)",
+      );
+    }
   }
 
   Widget _buildSimilarFilesGroup(SimilarFiles similarFiles) {
