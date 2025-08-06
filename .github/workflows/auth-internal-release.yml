@@ -1,132 +1,143 @@
 name: "Internal release (auth mobile)"
 
 on:
-    workflow_dispatch: # Allow manually running the action
+  workflow_dispatch: # Allow manually running the action
 
 env:
-    FLUTTER_VERSION: "3.24.3"
+  FLUTTER_VERSION: "3.24.3"
 
 permissions:
-    contents: write
+  contents: write
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile/apps/auth
+    steps:
+      - name: Checkout code and submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-        defaults:
-            run:
-                working-directory: mobile/apps/auth
+      - name: Setup JDK 17
+        uses: actions/setup-java@v1
+        with:
+          java-version: 17
 
-        steps:
-            - name: Checkout code and submodules
-              uses: actions/checkout@v4
-              with:
-                  submodules: recursive
+      - name: Install Flutter ${{ env.FLUTTER_VERSION }}
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
 
-            - name: Setup JDK 17
-              uses: actions/setup-java@v1
-              with:
-                  java-version: 17
+      - name: Setup keys
+        uses: timheuer/base64-to-file@v1
+        with:
+          fileName: "keystore/ente_auth_key.jks"
+          encodedString: ${{ secrets.SIGNING_KEY }}
 
-            - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
-              uses: subosito/flutter-action@v2
-              with:
-                  channel: "stable"
-                  flutter-version: ${{ env.FLUTTER_VERSION  }}
-                  cache: true
-
-            - name: Setup keys
-              uses: timheuer/base64-to-file@v1
-              with:
-                  fileName: "keystore/ente_auth_key.jks"
-                  encodedString: ${{ secrets.SIGNING_KEY }}
-
-            - name: Build PlayStore AAB
-              run: |
-                  flutter build appbundle --dart-define=cronetHttpNoPlay=true --release --flavor playstore
-              env:
-                  SIGNING_KEY_PATH: "/home/runner/work/_temp/keystore/ente_auth_key.jks"
-                  SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
-                  SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
-                  SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
-
-            - name: Upload AAB to PlayStore
-              uses: r0adkll/upload-google-play@v1
-              with:
-                  serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
-                  packageName: io.ente.auth
-                  releaseFiles: mobile/apps/auth/build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
-                  track: internal
-
-            - name: Notify Discord
-              uses: sarisia/actions-status-discord@v1
-              with:
-                  webhook: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK }}
-                  nodetail: true
-                  title: "🏆 Internal release available for Auth"
-                  description: "[Download](https://play.google.com/store/apps/details?id=io.ente.auth)"
-                  color: 0x800080
-
-    build-ios:
-        runs-on: macos-15
-        environment: "ios-build"
+      - name: Build PlayStore AAB
+        run: |
+          flutter build appbundle --dart-define=cronetHttpNoPlay=true --release --flavor playstore
         env:
-          APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.IOS_API_KEY }}
-          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.IOS_ISSUER_ID }}
-          APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ secrets.IOS_API_KEY_ID }}
-          PROVISIONING_PROFILE: ${{ secrets.IOS_AUTHGITHUBDISTRIBUTION_PROFILE }}
-          DIST_CERTIFICATE: ${{ secrets.IOS_DISTRIBUTION_P12_CERT }}
-          DIST_CERTIFICATE_PASSWORD: ${{ secrets.IOS_DISTRIBUTION_P12_CERT_PWD }}
+          SIGNING_KEY_PATH: "/home/runner/work/_temp/keystore/ente_auth_key.jks"
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
 
-        defaults:
-            run:
-                working-directory: mobile/apps/auth
+      - name: Upload AAB to PlayStore
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          packageName: io.ente.auth
+          releaseFiles: mobile/apps/auth/build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
+          track: internal
 
-        steps:
-            - name: Checkout code and submodules
-              uses: actions/checkout@v4
-              with:
-                  submodules: recursive
+      - name: Notify Discord
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK }}
+          nodetail: true
+          title: "🏆 Internal release available for Auth"
+          description: "[Download](https://play.google.com/store/apps/details?id=io.ente.auth)"
+          color: 0x800080
 
-            - name: Install Flutter ${{ env.FLUTTER_VERSION  }}
-              uses: subosito/flutter-action@v2
-              with:
-                  channel: "stable"
-                  flutter-version: ${{ env.FLUTTER_VERSION  }}
-                  cache: true
+  build-ios:
+    runs-on: macos-15
+    environment: "ios-build"
 
-            - name: Install code signing dependencies
-              run: |
-                  pip3 install --break-system-packages codemagic-cli-tools
+    env:
+      FLUTTER_VERSION: "3.24.3"
+      APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.IOS_API_KEY }}
+      APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.IOS_ISSUER_ID }}
+      APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ secrets.IOS_API_KEY_ID }}
+      PROVISIONING_PROFILE: ${{ secrets.IOS_AUTHGITHUBDISTRIBUTION_PROFILE }}
+      DIST_CERTIFICATE: ${{ secrets.IOS_DISTRIBUTION_P12_CERT }}
+      DIST_CERTIFICATE_PASSWORD: ${{ secrets.IOS_DISTRIBUTION_P12_CERT_PWD }}
 
-            - name: Add provisioning profiles
-              run: |
-                  PROFILES_HOME="$HOME/Library/MobileDevice/Provisioning Profiles"
-                  mkdir -p "$PROFILES_HOME"
-                  PROFILE_PATH="$(mktemp "$PROFILES_HOME"/$(uuidgen).mobileprovision)"
-                  echo ${PROVISIONING_PROFILE} | base64 --decode > "$PROFILE_PATH"
-                  echo "Saved provisioning profile $PROFILE_PATH"
+    defaults:
+      run:
+        working-directory: mobile/apps/auth
 
-            - name: Add certificates
-              run: |
-                  # create variables
-                  CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
-                  # copy certificates from base64
-                  echo -n "$DIST_CERTIFICATE" | base64 --decode -o $CERTIFICATE_PATH
-                  # add certificate to keychain
-                  keychain initialize
-                  keychain add-certificates --certificate $CERTIFICATE_PATH --certificate-password $DIST_CERTIFICATE_PASSWORD
-                  # Use profile in current project
-                  xcode-project use-profiles --project=ios/*.xcodeproj
+    steps:
+      - name: Checkout code and submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-            - name: Build iOS IPA
-              run: |
-                  flutter build ipa \
-                    --release \
-                    --export-options-plist=$HOME/export_options.plist \
-                    --dart-define=cronetHttpNoPlay=true
-                  
-            - name: Upload IPA to App Store Connect
-              run: |
-                  APP_FILE=$(find $(pwd) -name "*.ipa")
-                  app-store-connect publish --path "$APP_FILE" 
+      - name: Install Flutter ${{ env.FLUTTER_VERSION }}
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Install codemagic tools (optional)
+        run: pip3 install --break-system-packages codemagic-cli-tools
+
+      - name: Install provisioning profile
+        run: |
+          PROFILES_HOME="$HOME/Library/MobileDevice/Provisioning Profiles"
+          mkdir -p "$PROFILES_HOME"
+          PROFILE_PATH="$PROFILES_HOME/$(uuidgen).mobileprovision"
+          echo "$PROVISIONING_PROFILE" | base64 --decode > "$PROFILE_PATH"
+          echo "Saved provisioning profile to $PROFILE_PATH"
+
+      - name: Import iOS Distribution Certificate
+        run: |
+          # Create keychain
+          security create-keychain -p "apple123" build.keychain
+          security set-keychain-settings -lut 21600 build.keychain
+          security unlock-keychain -p "apple123" build.keychain
+          security list-keychains -s build.keychain
+
+          # Decode and import certificate
+          CERT_PATH=$RUNNER_TEMP/dist_cert.p12
+          echo "$DIST_CERTIFICATE" | base64 --decode > "$CERT_PATH"
+          security import "$CERT_PATH" -k build.keychain -P "$DIST_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+
+          # Allow codesign to use this identity
+          security set-key-partition-list -S apple-tool:,apple: -s -k "apple123" build.keychain
+
+          # Debug: show available code signing identities
+          security find-identity -v -p codesigning
+
+      - name: Build iOS IPA
+        run: |
+          flutter build ipa \
+            --release \
+            --export-method app-store \
+            --dart-define=cronetHttpNoPlay=true
+
+      - name: Upload IPA to App Store Connect
+        run: |
+          IPA_PATH=$(find build/ios/archive/ -name "*.ipa" | head -n 1)
+          if [[ -f "$IPA_PATH" ]]; then
+            app-store-connect publish --path "$IPA_PATH"
+          else
+            echo "❌ IPA not found"
+            exit 1
+          fi
