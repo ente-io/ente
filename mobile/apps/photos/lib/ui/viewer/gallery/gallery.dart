@@ -29,7 +29,6 @@ import "package:photos/ui/viewer/gallery/scrollbar/custom_scroll_bar.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
-import "package:photos/utils/gallery_util.dart";
 import "package:photos/utils/hierarchical_search_util.dart";
 import "package:photos/utils/misc_util.dart";
 import "package:photos/utils/standalone/date_time.dart";
@@ -638,6 +637,25 @@ class GalleryState extends State<Gallery> {
               ),
             ),
     );
+  }
+
+  double get galleryCacheExtent {
+    final int photoGridSize = localSettings.getPhotoGridSize();
+    switch (photoGridSize) {
+      case 2:
+      case 3:
+        return 1000;
+      case 4:
+        return 850;
+      case 5:
+        return 600;
+      case 6:
+        return 300;
+      default:
+        throw StateError(
+          'Invalid photo grid size configuration: $photoGridSize',
+        );
+    }
   }
 }
 
