@@ -91,6 +91,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
 
   Widget _getSetupView() {
     final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
 
     return Padding(
       padding: const EdgeInsets.all(24),
@@ -106,33 +107,31 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
           const SizedBox(height: 32),
           Text(
             "Find similar images", // TODO: lau: extract string
-            style: getEnteTextTheme(context).h3Bold,
+            style: textTheme.h3Bold,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
           Text(
             "Use AI to find images that look similar to each other. Adjust the distance threshold below.", // TODO: lau: extract string
-            style: getEnteTextTheme(context).body,
+            style: textTheme.body,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 48),
           Text(
             "Similarity threshold", // TODO: lau: extract string
-            style: getEnteTextTheme(context).bodyBold,
+            style: textTheme.bodyBold,
           ),
           const SizedBox(height: 8),
           Text(
             "Lower values mean a closer match.", // TODO: lau: extract string
-            style: getEnteTextTheme(context).mini.copyWith(
-                  color: colorScheme.textMuted,
-                ),
+            style: textTheme.miniMuted,
           ),
           const SizedBox(height: 16),
           Row(
             children: [
               Text(
                 "0.01",
-                style: getEnteTextTheme(context).mini,
+                style: textTheme.mini,
               ),
               Expanded(
                 child: Slider(
@@ -150,13 +149,13 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
               ),
               Text(
                 "0.15",
-                style: getEnteTextTheme(context).mini,
+                style: textTheme.mini,
               ),
             ],
           ),
           Text(
             "Current: ${_distanceThreshold.toStringAsFixed(2)}", // TODO: lau: extract string
-            style: getEnteTextTheme(context).body,
+            style: textTheme.body,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 48),
@@ -165,7 +164,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             children: [
               Text(
                 "Exact search", // TODO: lau: extract string
-                style: getEnteTextTheme(context).bodyBold,
+                style: textTheme.bodyBold,
               ),
               ToggleSwitchWidget(
                 value: () => _exactSearch,
@@ -205,6 +204,8 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   }
 
   Widget _getResultsView() {
+    final textTheme = getEnteTextTheme(context);
+    final colorScheme = getEnteColorScheme(context);
     if (_similarFilesList.isEmpty) {
       return Center(
         child: Column(
@@ -213,17 +214,17 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             Icon(
               Icons.check_circle_outline,
               size: 72,
-              color: getEnteColorScheme(context).primary500,
+              color: colorScheme.primary500,
             ),
             const SizedBox(height: 16),
             Text(
               "No Similar Images Found", // TODO: lau: extract string
-              style: getEnteTextTheme(context).h3Bold,
+              style: textTheme.h3Bold,
             ),
             const SizedBox(height: 8),
             Text(
               "Try adjusting the similarity threshold", // TODO: lau: extract string
-              style: getEnteTextTheme(context).body,
+              style: textTheme.body,
             ),
             const SizedBox(height: 32),
             ButtonWidget(
@@ -249,27 +250,16 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
           if (flagService.internalUser) {
             return Container(
               padding: const EdgeInsets.all(16),
-              // decoration: BoxDecoration(
-              //   color: getEnteColorScheme(context).fillFaint,
-              //   border: Border(
-              //     bottom: BorderSide(
-              //       color: getEnteColorScheme(context).strokeFaint,
-              //       width: 1,
-              //     ),
-              //   ),
-              // ),
               child: Column(
                 children: [
                   Text(
                     "(I) Found ${_similarFilesList.length} groups of similar images", // TODO: lau: extract string
-                    style: getEnteTextTheme(context).bodyBold,
+                    style: textTheme.bodyBold,
                   ),
                   const SizedBox(height: 4),
                   Text(
                     "(I) Threshold: ${_distanceThreshold.toStringAsFixed(2)}", // TODO: lau: extract string
-                    style: getEnteTextTheme(context).mini.copyWith(
-                          color: getEnteColorScheme(context).textMuted,
-                        ),
+                    style: textTheme.miniMuted,
                   ),
                 ],
               ),
@@ -352,6 +342,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   }
 
   Widget _buildSimilarFilesGroup(SimilarFiles similarFiles) {
+    final textTheme = getEnteTextTheme(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: crossAxisSpacing),
       child: Column(
@@ -363,13 +354,13 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
               Text(
                 "${similarFiles.files.length} similar images" +
                     (flagService.internalUser
-                        ? "(I: d: ${similarFiles.furthestDistance.toStringAsFixed(3)})"
+                        ? " (I: d: ${similarFiles.furthestDistance.toStringAsFixed(3)})"
                         : ""), // TODO: lau: extract string
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: getEnteColorScheme(context).textMuted,
-                    ),
+                style: textTheme.smallMuted.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-              _getDeleteButton([]),
+              _getSmallDeleteButton([]),
             ],
           ),
           const SizedBox(height: 16),
@@ -404,6 +395,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     List<EnteFile> allFiles,
     int index,
   ) {
+    final textTheme = getEnteTextTheme(context);
     return GestureDetector(
       onTap: () {
         routeToPage(
@@ -437,22 +429,17 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
               ),
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           Text(
             file.displayName,
-            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                  fontSize: 12,
-                  color: getEnteColorScheme(context).textBase,
-                ),
+            style: textTheme.small,
+            maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 2),
           Text(
             "${file.fileSize! ~/ (1024 * 1024)}MB", // TODO: lau: extract string
-            style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                  fontSize: 10,
-                  color: getEnteColorScheme(context).textMuted,
-                ),
+            style: textTheme.miniMuted,
           ),
           const SizedBox(height: 16),
         ],
@@ -460,8 +447,9 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     );
   }
 
-  Widget _getDeleteButton(List<EnteFile> files) {
+  Widget _getSmallDeleteButton(List<EnteFile> files) {
     final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
 
     return GestureDetector(
       onTap: () async {
@@ -484,10 +472,9 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             const SizedBox(width: 4),
             Text(
               "Delete (${files.length})", // TODO: lau: extract string
-              style: getEnteTextTheme(context).small.copyWith(
-                    color: colorScheme.warning500,
-                    fontWeight: FontWeight.w600,
-                  ),
+              style: textTheme.smallBold.copyWith(
+                color: colorScheme.warning500,
+              ),
             ),
           ],
         ),
@@ -496,6 +483,8 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   }
 
   Widget _getSortMenu() {
+    final textTheme = getEnteTextTheme(context);
+    final colorScheme = getEnteColorScheme(context);
     Text sortOptionText(SortKey key) {
       String text = key.toString();
       switch (key) {
@@ -514,10 +503,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       }
       return Text(
         text,
-        style: Theme.of(context).textTheme.titleMedium!.copyWith(
-              fontSize: 14,
-              color: Theme.of(context).iconTheme.color!.withValues(alpha: 0.7),
-            ),
+        style: textTheme.miniBold,
       );
     }
 
@@ -533,7 +519,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             const Padding(padding: EdgeInsets.only(left: 4)),
             Icon(
               Icons.sort,
-              color: getEnteColorScheme(context).strokeBase,
+              color: colorScheme.strokeBase,
               size: 20,
             ),
           ],
@@ -552,9 +538,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             value: index,
             child: Text(
               sortOptionText(SortKey.values[index]).data!,
-              style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                    fontSize: 14,
-                  ),
+              style: textTheme.miniBold,
             ),
           );
         });
