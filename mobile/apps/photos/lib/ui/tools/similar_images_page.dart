@@ -40,7 +40,7 @@ class SimilarImagesPage extends StatefulWidget {
 
 class _SimilarImagesPageState extends State<SimilarImagesPage> {
   static const crossAxisCount = 3;
-  static const crossAxisSpacing = 16.0;
+  static const crossAxisSpacing = 12.0;
 
   final _logger = Logger("SimilarImagesPage");
   bool _isDisposed = false;
@@ -353,7 +353,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
 
   Widget _buildSimilarFilesGroup(SimilarFiles similarFiles) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: crossAxisSpacing / 2),
+      padding: const EdgeInsets.symmetric(horizontal: crossAxisSpacing),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
