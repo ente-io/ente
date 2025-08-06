@@ -577,29 +577,6 @@ class FilesDB with SqlDbBase {
     }
   }
 
-  Future<List<EnteFile>> getAllFilesAfterDate({
-    required FileType fileType,
-    required DateTime beginDate,
-    required int userID,
-  }) async {
-    final db = await instance.sqliteAsyncDB;
-    final results = await db.getAll(
-      '''
-      SELECT * FROM $filesTable
-      WHERE $columnFileType = ?
-      AND $columnCreationTime > ?
-      AND $columnUploadedFileID  != -1
-      AND $columnOwnerID = $userID
-      AND $columnLocalID IS NOT NULL
-      AND ($columnFileSize IS NOT NULL AND $columnFileSize <= 524288000)
-      AND ($columnDuration IS NOT NULL AND ($columnDuration <= 60 AND $columnDuration > 0))
-      ORDER BY $columnCreationTime DESC
-    ''',
-      [getInt(fileType), beginDate.microsecondsSinceEpoch],
-    );
-    return convertToFiles(results);
-  }
-
   List<EnteFile> convertToFiles(List<Map<String, dynamic>> results) {
     final List<EnteFile> files = [];
     for (final result in results) {

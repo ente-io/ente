@@ -1,5 +1,6 @@
 import "package:photos/db/remote/db.dart";
 import "package:photos/models/api/diff/diff.dart";
+import "package:photos/models/file/file_type.dart";
 
 extension FilesTable on RemoteDB {
   // For a given userID, return unique uploadedFileId for the given userID
@@ -90,6 +91,30 @@ extension FilesTable on RemoteDB {
       "UPDATE files SET size = ? WHERE id = ?;",
       parameterSets,
     );
+  }
+
+  Future<List<int>> getAllFilesAfterDate({
+    required FileType fileType,
+    required DateTime beginDate,
+    required int userID,
+  }) async {
+    final results = await sqliteDB.getAll(
+      '''
+      SELECT files.id FROM files join upload_mapping
+      ON files.id = upload_mapping.file_id
+      WHERE file_type = ?
+      AND creation_time > ?
+      AND owner_id = ?
+      AND (size IS NOT NULL AND size <= 524288000)
+      AND (durationInSec IS NOT NULL AND (durationInSec <= 60 AND durationInSec > 0))
+    ''',
+      [getInt(fileType), beginDate.microsecondsSinceEpoch, userID],
+    );
+    final fileIDs = <int>[];
+    for (final row in results) {
+      fileIDs.add(row['id'] as int);
+    }
+    return fileIDs;
   }
 
   Future<Map<int, List<(int, Metadata?)>>> getNotificationCandidate(

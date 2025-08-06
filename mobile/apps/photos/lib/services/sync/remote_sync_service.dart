@@ -7,7 +7,6 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import "package:photos/core/network/network.dart";
-import 'package:photos/db/files_db.dart';
 import "package:photos/db/remote/table/files_table.dart";
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
@@ -32,7 +31,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class RemoteSyncService {
   final _logger = Logger("RemoteSyncService");
-  final _db = FilesDB.instance;
   final FileUploader _uploader = FileUploader.instance;
   final Configuration _config = Configuration.instance;
   final CollectionsService _collectionsService = CollectionsService.instance;

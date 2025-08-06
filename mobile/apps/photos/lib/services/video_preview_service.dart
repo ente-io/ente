@@ -19,6 +19,7 @@ import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/core/network/network.dart";
 import 'package:photos/db/files_db.dart';
+import "package:photos/db/remote/table/files_table.dart";
 import "package:photos/db/upload_locks_db.dart";
 import "package:photos/events/video_streaming_changed.dart";
 import "package:photos/models/base/id.dart";
@@ -793,8 +794,7 @@ class VideoPreviewService {
         }
       }
     } catch (_) {}
-
-    final files = await FilesDB.instance.getAllFilesAfterDate(
+    final List<int> candidateFileIDs = await remoteDB.getAllFilesAfterDate(
       fileType: FileType.video,
       beginDate: DateTime.now().subtract(
         const Duration(days: 30),
@@ -802,9 +802,11 @@ class VideoPreviewService {
       userID: Configuration.instance.getUserID()!,
     );
 
+    final files = await remoteCache
+        .getUniqueFiles(candidateFileIDs)
+        .then((mapping) => mapping.$1.values.toList());
+
     final previewIds = fileDataService.previewIds;
-    // filter files for which preview is already created
-    // or we don't need to create preview
     final allFiles = files
         .where(
           (file) =>

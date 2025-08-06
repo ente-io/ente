@@ -58,7 +58,6 @@ class CollectionsService {
 
   final _logger = Logger("CollectionsService");
 
-  late FilesDB _filesDB;
   late Configuration _config;
   late SharedPreferences _prefs;
 
@@ -80,7 +79,6 @@ class CollectionsService {
   final _cachedPublicAlbumKey = <int, String>{};
 
   CollectionsService._privateConstructor() {
-    _filesDB = FilesDB.instance;
     _config = Configuration.instance;
   }
 
@@ -115,8 +113,6 @@ class CollectionsService {
 
   Map<int, Collection> get collectionIDToCollections =>
       _collectionIDToCollections;
-
-  FilesDB get filesDB => _filesDB;
 
   // sync method fetches just sync the collections, not the individual files
   // within the collection.
