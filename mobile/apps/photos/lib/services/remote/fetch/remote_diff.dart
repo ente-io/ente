@@ -10,6 +10,7 @@ import "package:photos/events/diff_sync_complete_event.dart";
 import "package:photos/events/sync_status_update_event.dart";
 import "package:photos/models/api/diff/diff.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/file/remote/asset.dart";
 import "package:photos/models/file/remote/rl_mapping.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
@@ -230,29 +231,37 @@ class RemoteDiffService {
   }
 
   // todo: rewrite this inside collection_file diff service
-  bool _shouldClearCache(EnteFile remoteFile, EnteFile existingFile) {
-    return false;
-    // if (remoteFile.hash != null && existingFile.hash != null) {
-    //   return remoteFile.hash != existingFile.hash;
-    // }
-    // return remoteFile.updationTime != (existingFile.updationTime ?? 0);
+  bool _shouldClearCache(
+    RemoteAsset? newAsset,
+    RemoteAsset? existingAsset,
+  ) {
+    if (newAsset == null || existingAsset == null) {
+      return false;
+    }
+    // return true if hash values are different
+    return newAsset.hash != existingAsset.hash;
   }
 
-  bool _shouldReloadHomeGallery(EnteFile remoteFile, EnteFile existingFile) {
-    // int remoteCreationTime = remoteFile.creationTime!;
-    // if (remoteFile.pubMmdVersion > 0 &&
-    //     (remoteFile.pubMagicMetadata?.editedTime ?? 0) != 0) {
-    //   remoteCreationTime = remoteFile.pubMagicMetadata!.editedTime!;
-    // }
-    // if (remoteCreationTime != existingFile.creationTime) {
-    //   return true;
-    // }
-    // if (existingFile.mMdVersion > 0 &&
-    //     remoteFile.mMdVersion != existingFile.mMdVersion &&
-    //     remoteFile.magicMetadata.visibility !=
-    //         existingFile.magicMetadata.visibility) {
-    //   return false;
-    // }
+  bool _shouldReloadHomeGallery(
+    RemoteAsset? newAsset,
+    RemoteAsset? existingAsset,
+  ) {
+    if (newAsset == null || existingAsset == null) {
+      return false;
+    }
+    if (newAsset.creationTime != existingAsset.creationTime) {
+      _logger.info('Reloading home gallery for file ${newAsset.id} '
+          'due to creation time change: ${newAsset.creationTime} '
+          '!= ${existingAsset.creationTime}');
+      return true;
+    }
+    if (newAsset.visibility != existingAsset.visibility) {
+      _logger.info('Reloading home gallery for file ${newAsset.id} '
+          'due to visibility change: ${newAsset.visibility} '
+          '!= ${existingAsset.visibility}');
+      return true;
+    }
+
     return false;
   }
 }
