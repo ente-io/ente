@@ -43,7 +43,7 @@ Future<void> initSystemTray() async {
       : Platform.isMacOS
           ? 'assets/icons/auth-icon-monochrome.png'
           : 'assets/icons/auth-icon.png';
-  await trayManager.setIcon(path);
+  await trayManager.setIcon(path, isTemplate: true);
   Menu menu = Menu(
     items: [
       MenuItem(
