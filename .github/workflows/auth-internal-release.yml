@@ -155,7 +155,6 @@ jobs:
           flutter build ipa \
             --release \
             --export-options-plist=$HOME/export_options.plist \
-            --export-method app-store \
             --dart-define=cronetHttpNoPlay=true
 
       - name: Upload IPA to App Store Connect
