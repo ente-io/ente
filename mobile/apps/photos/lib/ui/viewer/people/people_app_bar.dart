@@ -169,8 +169,6 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
                 bottom: child as PreferredSizeWidget,
                 actions: isSearching ? null : _getDefaultActions(context),
                 surfaceTintColor: Colors.transparent,
-                scrolledUnderElevation: 4,
-                shadowColor: Colors.black.withValues(alpha: 0.15),
               );
             },
           )

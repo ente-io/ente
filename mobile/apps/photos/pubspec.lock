@@ -1085,7 +1085,7 @@ packages:
     source: git
     version: "0.2.0"
   flutter_spinkit:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: flutter_spinkit
       sha256: d2696eed13732831414595b98863260e33e8882fc069ee80ec35d4ac9ddb0472
@@ -1275,38 +1275,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.5.4"
-  image_editor:
-    dependency: "direct main"
-    description:
-      name: image_editor
-      sha256: "38070067264fd9fea4328ca630d2ff7bd65ebe6aa4ed375d983b732d2ae7146b"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.6.0"
-  image_editor_common:
-    dependency: transitive
-    description:
-      name: image_editor_common
-      sha256: "93d2f5c8b636f862775dd62a9ec20d09c8272598daa02f935955a4640e1844ee"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.2.0"
-  image_editor_ohos:
-    dependency: transitive
-    description:
-      name: image_editor_ohos
-      sha256: "06756859586d5acefec6e3b4f356f9b1ce05ef09213bcb9a0ce1680ecea2d054"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.9"
-  image_editor_platform_interface:
-    dependency: transitive
-    description:
-      name: image_editor_platform_interface
-      sha256: "474517efc770464f7d99942472d8cfb369a3c378e95466ec17f74d2b80bd40de"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.0"
   in_app_purchase:
     dependency: "direct main"
     description:
@@ -1708,7 +1676,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "7814e2c61ee1fa74cef73b946eb08519c35bdaa5"
+      resolved-ref: "64e47a446bf3b64f012f2076481cebea51ca27cf"
       url: "https://github.com/ente-io/motionphoto.git"
     source: git
     version: "0.0.1"

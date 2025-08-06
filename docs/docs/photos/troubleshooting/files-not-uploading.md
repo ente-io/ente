@@ -1,7 +1,6 @@
 ---
 title: Files not uploading
-description:
-    Troubleshooting when files are not uploading from your Ente Photos app
+description: Troubleshooting when files are not uploading from your Ente Photos app
 ---
 
 # Files not uploading

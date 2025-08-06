@@ -170,8 +170,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                               context,
                               CollectionListPage(
                                 collections.incoming,
-                                sectionType:
-                                    UISectionType.incomingCollections,
+                                sectionType: UISectionType.incomingCollections,
                                 tag: "incoming",
                                 appTitle: sharedWithYou,
                               ),
@@ -227,8 +226,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                               context,
                               CollectionListPage(
                                 collections.outgoing,
-                                sectionType:
-                                    UISectionType.outgoingCollections,
+                                sectionType: UISectionType.outgoingCollections,
                                 tag: "outgoing",
                                 appTitle: sharedByYou,
                               ),
@@ -275,72 +273,72 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
             ),
             numberOfQuickLinks > 0
                 ? Column(
-                  children: [
-                    SectionOptions(
-                      onTap: numberOfQuickLinks > maxQuickLinks
-                          ? () {
-                              unawaited(
-                                routeToPage(
-                                  context,
-                                  AllQuickLinksPage(
-                                    titleHeroTag: quickLinkTitleHeroTag,
-                                    quickLinks: collections.quickLinks,
+                    children: [
+                      SectionOptions(
+                        onTap: numberOfQuickLinks > maxQuickLinks
+                            ? () {
+                                unawaited(
+                                  routeToPage(
+                                    context,
+                                    AllQuickLinksPage(
+                                      titleHeroTag: quickLinkTitleHeroTag,
+                                      quickLinks: collections.quickLinks,
+                                    ),
                                   ),
-                                ),
-                              );
-                            }
-                          : null,
-                      Hero(
-                        tag: quickLinkTitleHeroTag,
-                        child: SectionTitle(
-                          title: S.of(context).quickLinks,
-                        ),
-                      ),
-                      trailingWidget: numberOfQuickLinks > maxQuickLinks
-                          ? IconButtonWidget(
-                              icon: Icons.chevron_right,
-                              iconButtonType: IconButtonType.secondary,
-                              iconColor: colorTheme.blurStrokePressed,
-                            )
-                          : null,
-                    ),
-                    const SizedBox(height: 2),
-                    ListView.separated(
-                      shrinkWrap: true,
-                      padding: const EdgeInsets.only(
-                        bottom: 12,
-                        left: 12,
-                        right: 12,
-                      ),
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemBuilder: (context, index) {
-                        return GestureDetector(
-                          onTap: () async {
-                            final thumbnail = await CollectionsService
-                                .instance
-                                .getCover(collections.quickLinks[index]);
-                            final page = CollectionPage(
-                              CollectionWithThumbnail(
-                                collections.quickLinks[index],
-                                thumbnail,
-                              ),
-                              tagPrefix: heroTagPrefix,
-                            );
-                            // ignore: unawaited_futures
-                            routeToPage(context, page);
-                          },
-                          child: QuickLinkAlbumItem(
-                            c: collections.quickLinks[index],
+                                );
+                              }
+                            : null,
+                        Hero(
+                          tag: quickLinkTitleHeroTag,
+                          child: SectionTitle(
+                            title: S.of(context).quickLinks,
                           ),
-                        );
-                      },
-                      separatorBuilder: (context, index) {
-                        return const SizedBox(height: 4);
-                      },
-                      itemCount: min(numberOfQuickLinks, maxQuickLinks),
-                    ),
-                  ],
-                )
+                        ),
+                        trailingWidget: numberOfQuickLinks > maxQuickLinks
+                            ? IconButtonWidget(
+                                icon: Icons.chevron_right,
+                                iconButtonType: IconButtonType.secondary,
+                                iconColor: colorTheme.blurStrokePressed,
+                              )
+                            : null,
+                      ),
+                      const SizedBox(height: 2),
+                      ListView.separated(
+                        shrinkWrap: true,
+                        padding: const EdgeInsets.only(
+                          bottom: 12,
+                          left: 12,
+                          right: 12,
+                        ),
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemBuilder: (context, index) {
+                          return GestureDetector(
+                            onTap: () async {
+                              final thumbnail = await CollectionsService
+                                  .instance
+                                  .getCover(collections.quickLinks[index]);
+                              final page = CollectionPage(
+                                CollectionWithThumbnail(
+                                  collections.quickLinks[index],
+                                  thumbnail,
+                                ),
+                                tagPrefix: heroTagPrefix,
+                              );
+                              // ignore: unawaited_futures
+                              routeToPage(context, page);
+                            },
+                            child: QuickLinkAlbumItem(
+                              c: collections.quickLinks[index],
+                            ),
+                          );
+                        },
+                        separatorBuilder: (context, index) {
+                          return const SizedBox(height: 4);
+                        },
+                        itemCount: min(numberOfQuickLinks, maxQuickLinks),
+                      ),
+                    ],
+                  )
                 : const SizedBox.shrink(),
             const SizedBox(height: 2),
             ValueListenableBuilder(
@@ -367,7 +365,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                           }
                         },
                       )
-                    : const EnteLoadingWidget();
+                    : const SizedBox.shrink();
               },
             ),
             const CollectPhotosCardWidget(),

@@ -1,3 +1,5 @@
+import "dart:io";
+
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
@@ -16,6 +18,7 @@ import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart"
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 
 class FileSelectionOverlayBar extends StatefulWidget {
+  static double roughHeight = Platform.isIOS ? 240.0 : 232.0;
   final GalleryType galleryType;
   final SelectedFiles selectedFiles;
   final Collection? collection;

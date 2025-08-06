@@ -104,7 +104,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Обробка ${currentlyProcessing} / ${totalCount}";
 
   static String m44(count) =>
-      "${Intl.plural(count, one: '${count} елемент', other: '${count} елементів')}";
+      "${Intl.plural(count, one: '${count} елемент', few: '${count} елементи', many: '${count} елементів', other: '${count} елементів')}";
 
   static String m46(email) => "${email} запросив вас стати довіреною особою";
 
@@ -154,7 +154,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m75(endDate) => "Передплата поновиться ${endDate}";
 
   static String m77(count) =>
-      "${Intl.plural(count, one: 'Знайдено ${count} результат', other: 'Знайдено ${count} результати')}";
+      "${Intl.plural(count, one: 'Знайдено ${count} результат', few: 'Знайдено ${count} результати', many: 'Знайдено ${count} результатів', other: 'Знайдено ${count} результати')}";
 
   static String m78(snapshotLength, searchLength) =>
       "Невідповідність довжини розділів: ${snapshotLength} != ${searchLength}";

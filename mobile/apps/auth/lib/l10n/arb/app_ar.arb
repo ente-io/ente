@@ -1,6 +1,6 @@
 {
   "account": "الحساب",
-  "unlock": "فتح القُفْل",
+  "unlock": "فتح القفل",
   "recoveryKey": "مفتاح الاسترداد",
   "counterAppBarTitle": "العداد",
   "@counterAppBarTitle": {
@@ -9,8 +9,8 @@
   "onBoardingBody": "النسخ الاحتياطي لشيفرات الاستيثاق ذي العاملين",
   "onBoardingGetStarted": "ابدأ الآن",
   "setupFirstAccount": "إعداد الحساب الأول الخاص بك",
-  "importScanQrCode": "مسح شيفرة الاستجابة السريعة",
-  "qrCode": "شيفرة الاستجابة السريعة",
+  "importScanQrCode": "مسح رمز QR",
+  "qrCode": "رمز QR",
   "importEnterSetupKey": "أدخِل مفتاح الإعداد",
   "importAccountPageTitle": "أدخل تفاصيل الحساب",
   "secretCanNotBeEmpty": "لا يمكن أن يكون رمز السر فارغ",
@@ -36,7 +36,7 @@
   "codeAccountHint": "الحساب (you@domain.com)",
   "codeTagHint": "وسم",
   "accountKeyType": "نوع المفتاح",
-  "sessionExpired": "انتهت صَلاحِيَة الجِلسة",
+  "sessionExpired": "انتهت صلاحية الجلسة",
   "@sessionExpired": {
     "description": "Title of the dialog when the users current session is invalid/expired"
   },
@@ -106,7 +106,7 @@
   "importSelectJsonFile": "انتقِ ملف JSON",
   "importSelectAppExport": "حدد ملف التصدير الخاص بـ{appName}",
   "importEnteEncGuide": "اختر ملف JSON المشفر المصدَّر من Ente",
-  "importRaivoGuide": "استخدم خيار \"صدر كلمات المرور لمرة واحدة إلى أرشيف Zip\" في إعدادات Raivo.\n\nاستخرج ملف الـzip واسترد ملف الـJSON.",
+  "importRaivoGuide": "استخدم خيار تصدير OTP إلى أرشيف Zip في إعدادات Raivo.\n\nاستخرج ملف zip واسترد ملف JSON.",
   "importBitwardenGuide": "استخدم خيار \"تصدير خزانة\" داخل أدوات Bitwarden واستيراد ملف JSON غير مشفر.",
   "importAegisGuide": "استخدم خيار \"Export the vault\" في إعدادات Aegis.\n\nإذا كان المخزن الخاص بك مشفرًا، فستحتاج إلى إدخال كلمة مرور المخزن لفك تشفير المخزن.",
   "import2FasGuide": "استخدم خيار \"الإعدادات -> النسخ الاحتياطي - التصدير\" في 2FAS.\n\nإذا تم تشفير النسخة الاحتياطية، سوف تحتاج إلى إدخال كلمة المرور لفك تشفير النسخة الاحتياطية",

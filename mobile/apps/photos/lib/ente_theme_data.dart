@@ -237,6 +237,8 @@ extension CustomColorScheme on ColorScheme {
       ? const Color(0xFF424242)
       : const Color(0xFFFFFFFF);
 
+  Color get imageEditorPrimaryColor => const Color.fromRGBO(8, 194, 37, 1);
+
   Color get defaultBackgroundColor =>
       brightness == Brightness.light ? backgroundBaseLight : backgroundBaseDark;
 
