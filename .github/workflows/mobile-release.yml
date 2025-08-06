@@ -9,7 +9,7 @@ on:
             - "photos-v*"
 
 env:
-    FLUTTER_VERSION: "3.29.3"
+    FLUTTER_VERSION: "3.32.8"
 
 permissions:
     contents: write
