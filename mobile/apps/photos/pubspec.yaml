@@ -20,7 +20,7 @@ environment:
 
 dependencies:
   adaptive_theme: ^3.1.0
-  android_intent_plus: ^5.2.0
+  android_intent_plus: ^5.3.0
   animated_list_plus: ^0.5.2
   app_links: ^6.4.0
   archive: ^4.0.7
@@ -43,7 +43,7 @@ dependencies:
   cupertino_icons: ^1.0.0
   dart_ui_isolate: ^1.1.1
   defer_pointer: ^0.0.2
-  device_info_plus:
+  device_info_plus: 11.3.0
   dio: ^5.8.0+1
   dots_indicator: ^4.0.1
   dotted_border: ^2.1.0
@@ -74,7 +74,7 @@ dependencies:
     git:
       url: https://github.com/ente-io/ffmpeg-kit
       path: flutter/flutter
-      ref: android-packaged
+      ref: remove-event-sub
   figma_squircle: ^0.6.3
   file_saver: ^0.2.14
   firebase_core: ^3.6.0
@@ -141,7 +141,7 @@ dependencies:
   move_to_background: # no updates in git, replace package
     git:
       url: https://github.com/ente-io/move_to_background.git
-      ref: 3b862fe
+      ref: v2-only
   nanoid: ^1.0.0
   native_dio_adapter: ^1.4.0
   native_video_player: ^4.0.0
@@ -154,7 +154,7 @@ dependencies:
   open_mail_app: # replace plugin, git is archived
     git:
       url: https://github.com/ente-io/open-mail-app-flutter.git
-      ref: 83740bf
+      ref: v2-only
   package_info_plus: ^8.2.1
   panorama:
     git:
@@ -171,8 +171,8 @@ dependencies:
   pointycastle: ^3.7.3
   privacy_screen: # pub.dev is behind
     git:
-      url: https://github.com/eddyuan/privacy_screen.git
-      ref: 855418e
+      url: https://github.com/ente-io/privacy_screen.git
+      ref: v2-only
   receive_sharing_intent: # pub.dev is behind
     git:
       url: https://github.com/KasemJaffer/receive_sharing_intent.git
@@ -183,7 +183,7 @@ dependencies:
   sentry_flutter: ^8.14.1
   share_plus: ^11.0.0
   shared_preferences: ^2.0.5
-  sqflite: ^2.3.0
+  sqflite: ^2.4.2
   sqflite_migration: ^0.3.0
   sqlite3_flutter_libs: ^0.5.20
   sqlite_async: ^0.11.7
@@ -207,7 +207,7 @@ dependencies:
       url: https://github.com/ente-io/packages.git
       ref: android_video_roation_fix
       path: packages/video_player/video_player/
-  video_thumbnail: ^0.5.3
+  video_thumbnail: ^0.5.6
   visibility_detector: ^0.4.0+2
   wakelock_plus: ^1.1.1
   wechat_assets_picker: ^9.5.1
@@ -222,7 +222,8 @@ dependency_overrides:
   flutter_sodium: # update source if there is any update
     git:
       url: https://github.com/ente-io/flutter_sodium
-  intl: 0.18.1
+      ref: v2-embeddings-only
+  intl: ^0.20.2
   js: ^0.6.7
   media_kit: # update media_kit* if there is any update
     git:

@@ -125,10 +125,10 @@ packages:
     dependency: "direct main"
     description:
       name: async
-      sha256: d2872f9c19731c2e5f10444b14686eb7cc85c76274bd6c16e1816bff9a3bab63
+      sha256: "758e6d74e971c3e5aceb4110bfd6698efc7f501675bcfe0c775459a8140750eb"
       url: "https://pub.dev"
     source: hosted
-    version: "2.12.0"
+    version: "2.13.0"
   battery_info:
     dependency: "direct main"
     description:
@@ -630,10 +630,10 @@ packages:
     dependency: transitive
     description:
       name: fake_async
-      sha256: "6a95e56b2449df2273fd8c45a662d6947ce1ebb7aafe80e550a3f68297f3cacc"
+      sha256: "5368f224a74523e8d2e7399ea1638b37aecfca824a3cc4dfdf77bf1fa905ac44"
       url: "https://pub.dev"
     source: hosted
-    version: "1.3.2"
+    version: "1.3.3"
   fast_base58:
     dependency: "direct main"
     description:
@@ -654,18 +654,19 @@ packages:
     dependency: "direct main"
     description:
       path: "flutter/flutter"
-      ref: android-packaged
-      resolved-ref: "6d5d27a8c259eda6292f204a27fba53da70af20e"
+      ref: remove-event-sub
+      resolved-ref: b7aac7903f70dce6d71506e221066af1a53ec7fc
       url: "https://github.com/ente-io/ffmpeg-kit"
     source: git
     version: "6.0.3"
   ffmpeg_kit_flutter_platform_interface:
     dependency: transitive
     description:
-      name: ffmpeg_kit_flutter_platform_interface
-      sha256: addf046ae44e190ad0101b2fde2ad909a3cd08a2a109f6106d2f7048b7abedee
-      url: "https://pub.dev"
-    source: hosted
+      path: "flutter/flutter_platform_interface"
+      ref: remove-event-sub
+      resolved-ref: b7aac7903f70dce6d71506e221066af1a53ec7fc
+      url: "https://github.com/ente-io/ffmpeg-kit"
+    source: git
     version: "0.2.1"
   figma_squircle:
     dependency: "direct main"
@@ -1078,8 +1079,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: HEAD
-      resolved-ref: "134ecc72bc09d55500d240df677b8360f140f9ab"
+      ref: v2-embeddings-only
+      resolved-ref: "342ed3a42febd2dcc8b532c0ff07bd327a472d82"
       url: "https://github.com/ente-io/flutter_sodium"
     source: git
     version: "0.2.0"
@@ -1347,10 +1348,10 @@ packages:
     dependency: "direct main"
     description:
       name: intl
-      sha256: "3bc132a9dbce73a7e4a21a17d06e1878839ffbf975568bc875c60537824b0c4d"
+      sha256: "3df61194eb431efc39c4ceba583b95633a403f46c9fd341e550ce0bfa50e9aa5"
       url: "https://pub.dev"
     source: hosted
-    version: "0.18.1"
+    version: "0.20.2"
   intl_utils:
     dependency: "direct dev"
     description:
@@ -1427,10 +1428,10 @@ packages:
     dependency: transitive
     description:
       name: leak_tracker
-      sha256: c35baad643ba394b40aac41080300150a4f08fd0fd6a10378f8f7c6bc161acec
+      sha256: "6bb818ecbdffe216e81182c2f0714a2e62b593f4a4f13098713ff1685dfb6ab0"
       url: "https://pub.dev"
     source: hosted
-    version: "10.0.8"
+    version: "10.0.9"
   leak_tracker_flutter_testing:
     dependency: transitive
     description:
@@ -1715,8 +1716,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "3b862fe"
-      resolved-ref: "3b862fea9665a50e59bcce96cab6997cc7c0cb9e"
+      ref: v2-only
+      resolved-ref: "0cdfeed654d79636eff0c57110f3f6ad5801ba2f"
       url: "https://github.com/ente-io/move_to_background.git"
     source: git
     version: "1.0.2"
@@ -1820,8 +1821,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "83740bf"
-      resolved-ref: "83740bf55dac38a0be01c863609cf900c4d1aab1"
+      ref: v2-only
+      resolved-ref: "13c0244db82b386ad1a53b2451bdfda8d2687cb6"
       url: "https://github.com/ente-io/open-mail-app-flutter.git"
     source: git
     version: "0.4.4"
@@ -2078,9 +2079,9 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "855418e"
-      resolved-ref: "855418e4b39632893a322fdfa2a9b69487b1831d"
-      url: "https://github.com/eddyuan/privacy_screen.git"
+      ref: v2-only
+      resolved-ref: "2389eaa88f07724a38b9dcab49fef8e96c723921"
+      url: "https://github.com/ente-io/privacy_screen.git"
     source: git
     version: "0.0.6"
   process:
@@ -2381,10 +2382,10 @@ packages:
     dependency: "direct main"
     description:
       name: sqflite
-      sha256: "2d7299468485dca85efeeadf5d38986909c5eb0cd71fd3db2c2f000e6c9454bb"
+      sha256: e2297b1da52f127bc7a3da11439985d9b536f75070f3325e62ada69a5c585d03
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.1"
+    version: "2.4.2"
   sqflite_android:
     dependency: transitive
     description:
@@ -2840,10 +2841,10 @@ packages:
     dependency: transitive
     description:
       name: vm_service
-      sha256: "0968250880a6c5fe7edc067ed0a13d4bae1577fe2771dcf3010d52c4a9d3ca14"
+      sha256: ddfa8d30d89985b96407efce8acbdd124701f96741f2d981ca860662f1c0dc02
       url: "https://pub.dev"
     source: hosted
-    version: "14.3.1"
+    version: "15.0.0"
   volume_controller:
     dependency: transitive
     description:
@@ -2904,10 +2905,10 @@ packages:
     dependency: transitive
     description:
       name: webdriver
-      sha256: "3d773670966f02a646319410766d3b5e1037efb7f07cc68f844d5e06cd4d61c8"
+      sha256: "2f3a14ca026957870cfd9c635b83507e0e51d8091568e90129fbf805aba7cade"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.4"
+    version: "3.1.0"
   webkit_inspection_protocol:
     dependency: transitive
     description:
@@ -3005,5 +3006,5 @@ packages:
     source: hosted
     version: "3.1.3"
 sdks:
-  dart: ">=3.7.0-0 <4.0.0"
+  dart: ">=3.7.0 <4.0.0"
   flutter: ">=3.27.0"
