@@ -17,7 +17,6 @@ import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
-import "package:photos/utils/standalone/data.dart";
 
 enum SimilarImagesPageState {
   setup,
@@ -247,33 +246,37 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       itemBuilder: (context, index) {
         if (index == 0) {
           // Header item
-          return Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: getEnteColorScheme(context).fillFaint,
-              border: Border(
-                bottom: BorderSide(
-                  color: getEnteColorScheme(context).strokeFaint,
-                  width: 1,
-                ),
+          if (flagService.internalUser) {
+            return Container(
+              padding: const EdgeInsets.all(16),
+              // decoration: BoxDecoration(
+              //   color: getEnteColorScheme(context).fillFaint,
+              //   border: Border(
+              //     bottom: BorderSide(
+              //       color: getEnteColorScheme(context).strokeFaint,
+              //       width: 1,
+              //     ),
+              //   ),
+              // ),
+              child: Column(
+                children: [
+                  Text(
+                    "(I) Found ${_similarFilesList.length} groups of similar images", // TODO: lau: extract string
+                    style: getEnteTextTheme(context).bodyBold,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "(I) Threshold: ${_distanceThreshold.toStringAsFixed(2)}", // TODO: lau: extract string
+                    style: getEnteTextTheme(context).mini.copyWith(
+                          color: getEnteColorScheme(context).textMuted,
+                        ),
+                  ),
+                ],
               ),
-            ),
-            child: Column(
-              children: [
-                Text(
-                  "Found ${_similarFilesList.length} groups of similar images", // TODO: lau: extract string
-                  style: getEnteTextTheme(context).bodyBold,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  "Threshold: ${_distanceThreshold.toStringAsFixed(2)}", // TODO: lau: extract string
-                  style: getEnteTextTheme(context).mini.copyWith(
-                        color: getEnteColorScheme(context).textMuted,
-                      ),
-                ),
-              ],
-            ),
-          );
+            );
+          } else {
+            return const SizedBox.shrink();
+          }
         }
 
         // Similar files groups (index - 1 because first item is header)
@@ -349,39 +352,23 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   }
 
   Widget _buildSimilarFilesGroup(SimilarFiles similarFiles) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(2, 4, 2, 12),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "${similarFiles.files.length} similar images • ${formatBytes(similarFiles.totalSize)}", // TODO: lau: extract string
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      "Distance: ${similarFiles.furthestDistance.toStringAsFixed(3)}", // TODO: lau: extract string
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: getEnteColorScheme(context).textMuted,
-                            fontSize: 12,
-                          ),
-                    ),
-                  ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: crossAxisSpacing / 2),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "${similarFiles.files.length} similar images" +
+                (flagService.internalUser
+                    ? "(I: d: ${similarFiles.furthestDistance.toStringAsFixed(3)})"
+                    : ""), // TODO: lau: extract string
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: getEnteColorScheme(context).textMuted,
+                  // fontSize: 12,
                 ),
-              ),
-            ],
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: crossAxisSpacing / 2),
-          child: GridView.builder(
+          const SizedBox(height: 16),
+          GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemBuilder: (context, index) {
@@ -396,13 +383,13 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: crossAxisCount,
               crossAxisSpacing: crossAxisSpacing,
-              childAspectRatio: 0.75,
+              childAspectRatio: 0.70,
             ),
             padding: const EdgeInsets.all(0),
           ),
-        ),
-        const SizedBox(height: 16), // Add spacing between groups
-      ],
+          const SizedBox(height: 16), // Add spacing between groups
+        ],
+      ),
     );
   }
 
@@ -429,14 +416,11 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            height: (MediaQuery.of(context).size.width -
-                    (crossAxisSpacing * crossAxisCount)) /
-                crossAxisCount,
+          Expanded(
             child: Hero(
               tag: "similar_images_" + file.tag,
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(8),
                 child: ThumbnailWidget(
                   file,
                   diskLoadDeferDuration: galleryThumbnailDiskLoadDeferDuration,
@@ -448,6 +432,24 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
               ),
             ),
           ),
+          const SizedBox(height: 4),
+          Text(
+            file.displayName,
+            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                  fontSize: 12,
+                  color: getEnteColorScheme(context).textBase,
+                ),
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 2),
+          Text(
+            "${file.fileSize! ~/ (1024 * 1024)}MB", // TODO: lau: extract string
+            style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                  fontSize: 10,
+                  color: getEnteColorScheme(context).textMuted,
+                ),
+          ),
+          const SizedBox(height: 16),
         ],
       ),
     );
