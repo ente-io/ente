@@ -124,11 +124,37 @@ jobs:
 
           # Debug: show available code signing identities
           security find-identity -v -p codesigning
+       
+      - name: Create export options plist
+        run: |
+              cat <<EOF > $HOME/export_options.plist
+              <?xml version="1.0" encoding="UTF-8"?>
+              <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+              <plist version="1.0">
+              <dict>
+                <key>method</key>
+                <string>app-store</string>
+                <key>teamID</key>
+                <string>6Z68YJY9Q2</string>
+                <key>signingStyle</key>
+                <string>manual</string>
+                <key>signingCertificate</key>
+                <string>Apple Distribution</string>
+                <key>provisioningProfiles</key>
+                <dict>
+                  <key>io.ente.auth</key>
+                  <string>GithubAuthProvisingProfile</string>
+                </dict>
+              </dict>
+              </plist>
+              EOF
+
 
       - name: Build iOS IPA
         run: |
           flutter build ipa \
             --release \
+            --export-options-plist=$HOME/export_options.plist \
             --export-method app-store \
             --dart-define=cronetHttpNoPlay=true
 
