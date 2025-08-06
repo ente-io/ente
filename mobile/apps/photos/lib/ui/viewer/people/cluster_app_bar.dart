@@ -15,6 +15,7 @@ import "package:photos/models/file/file.dart";
 import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/ml/face/person.dart";
 import 'package:photos/models/selected_files.dart';
+import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
@@ -219,11 +220,13 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
           final biggestClusterFileIDs = newClusterIDToFaceIDs[biggestClusterID]!
               .map((e) => getFileIdFromFaceId<int>(e))
               .toList();
-          biggestClusterFiles = await FilesDB.instance
-              .getFileIDToFileFromIDs(
+          biggestClusterFiles = await remoteCache
+              .getUniqueFiles(
                 biggestClusterFileIDs,
+                ignoredCollectionIDs:
+                    CollectionsService.instance.getHiddenCollectionIds(),
               )
-              .then((mapping) => mapping.values.toList());
+              .then((mapping) => mapping.$1.values.toList());
           // Sort the files to prevent issues with the order of the files in gallery
           biggestClusterFiles
               .sort((a, b) => b.creationTime!.compareTo(a.creationTime!));
@@ -264,9 +267,13 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
         .map((e) => getFileIdFromFaceId<int>(e))
         .toList();
 
-    final fileIDtoFile = await FilesDB.instance.getFileIDToFileFromIDs(
-      allFileIDs,
-    );
+    final fileIDtoFile = await remoteCache
+        .getUniqueFiles(
+          allFileIDs,
+          ignoredCollectionIDs:
+              CollectionsService.instance.getHiddenCollectionIds(),
+        )
+        .then((mapping) => mapping.$1);
 
     final newClusterIDToFiles = newClusterIDToFaceIDs.map(
       (key, value) => MapEntry(

@@ -1,7 +1,6 @@
 import "dart:async";
 import "dart:io";
 
-import "package:computer/computer.dart";
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -578,26 +577,8 @@ class FilesDB with SqlDbBase {
     }
   }
 
-  Future<Map<int, EnteFile>> getFileIDToFileFromIDs(List<int> ids) async {
-    final result = <int, EnteFile>{};
-    if (ids.isEmpty) {
-      return result;
-    }
-    final inParam = ids.map((id) => "'$id'").join(',');
-    final db = await instance.sqliteAsyncDB;
-    final results = await db.getAll(
-      'SELECT * FROM $filesTable WHERE $columnUploadedFileID IN ($inParam)',
-    );
-    final files = convertToFiles(results);
-    for (final file in files) {
-      result[file.uploadedFileID!] = file;
-    }
-    return result;
-  }
-
   Future<List<EnteFile>> getUniqueFiles(
     List<int> ids, {
-    bool dedupeByUploadId = false,
     Set<int> collectionsToIgnore = const {},
   }) async {
     if (ids.isEmpty) {

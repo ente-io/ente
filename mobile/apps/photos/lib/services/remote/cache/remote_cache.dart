@@ -203,6 +203,33 @@ class RemoteCache {
     return result;
   }
 
+  // Returns a map of fileID to EnteFile for the given fileIDs.
+  // and also returns a set of fileIDs that were not found in the DB
+  Future<(Map<int, EnteFile>, Set<int>)> getUniqueFiles(
+    List<int> fileIDs, {
+    Set<int> ignoredCollectionIDs = const {},
+  }) async {
+    final collectionFiles = await remoteDB.getAllCFForFileIDs(fileIDs);
+    final Set<int> missingIDs = fileIDs.toSet();
+    if (!_isLoaded) await _ensureLoaded();
+    final Map<int, EnteFile> result = {};
+    final Set<int> toIgnoreFileIds = {};
+    for (final cf in collectionFiles) {
+      missingIDs.remove(cf.fileID);
+      final asset = remoteAssets[cf.fileID];
+      if (asset != null) {
+        result[cf.fileID] = EnteFile.fromRemoteAsset(asset, cf);
+      }
+      if (ignoredCollectionIDs.contains(cf.collectionID)) {
+        toIgnoreFileIds.add(cf.fileID);
+      }
+    }
+    for (final fileID in toIgnoreFileIds) {
+      result.remove(fileID);
+    }
+    return (result, missingIDs);
+  }
+
   Future<List<EnteFile>> getFilesCreatedWithinDurations(
     List<List<int>> durations,
     Set<int> ignoredCollectionIDs, {

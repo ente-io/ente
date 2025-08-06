@@ -146,28 +146,24 @@ class SemanticSearchService {
     for (final result in queryResults) {
       fileIDToScoreMap[result.id] = result.score;
     }
+    late final Map<int, EnteFile> filesMap;
+    late final Set<int> missingFileIDs;
+    (filesMap, missingFileIDs) = await remoteCache.getUniqueFiles(
+      queryResults.map((e) => e.id).toList(),
+      ignoredCollectionIDs:
+          CollectionsService.instance.getHiddenCollectionIds(),
+    );
 
-    final filesMap = await FilesDB.instance
-        .getFileIDToFileFromIDs(queryResults.map((e) => e.id).toList());
-
-    final ignoredCollections =
-        CollectionsService.instance.getHiddenCollectionIds();
-
-    final deletedEntries = <int>[];
     final results = <EnteFile>[];
-
     for (final result in queryResults) {
       final file = filesMap[result.id];
-      if (file != null && !ignoredCollections.contains(file.collectionID)) {
+      if (file != null) {
         results.add(file);
-      }
-      if (file == null) {
-        deletedEntries.add(result.id);
       }
     }
     _logger.info(results.length.toString() + " results");
-    if (deletedEntries.isNotEmpty) {
-      unawaited(mlDataDB.deleteClipEmbeddings(deletedEntries));
+    if (missingFileIDs.isNotEmpty) {
+      unawaited(mlDataDB.deleteClipEmbeddings(missingFileIDs.toList()));
     }
     return results;
   }

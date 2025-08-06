@@ -136,7 +136,6 @@ Future<List<EnteFile>> getFilteredFiles(
 
     filteredFiles = await FilesDB.instance.getUniqueFiles(
       filteredUploadedIDs.toList(),
-      dedupeByUploadId: true,
       collectionsToIgnore: ignoredCollections,
     );
   } catch (e) {
