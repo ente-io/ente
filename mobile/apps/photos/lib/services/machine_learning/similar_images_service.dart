@@ -117,14 +117,11 @@ class SimilarImagesService {
       }
       if (similarFilesList.isNotEmpty) {
         similarFilesList.add(firstLoopFile);
-        int totalSize = 0;
         for (final file in similarFilesList) {
           alreadyUsedFileIDs.add(file.uploadedFileID!);
-          totalSize += file.fileSize ?? 0;
         }
         final similarFiles = SimilarFiles(
           similarFilesList,
-          totalSize,
           furthestDistance,
         );
         allSimilarFiles.add(similarFiles);
