@@ -61,6 +61,7 @@ const kBGTaskTimeout = Duration(seconds: 28);
 const kBGPushTimeout = Duration(seconds: 28);
 const kFGTaskDeathTimeoutInMicroseconds = 5000000;
 bool isProcessBg = true;
+bool _stopHearBeat = false;
 
 void main() async {
   debugRepaintRainbowEnabled = false;
@@ -291,6 +292,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     EnteWakeLockService.instance.init(preferences);
     logLocalSettings();
     initComplete = true;
+    _stopHearBeat = true;
     _logger.info("Initialization done $tlog");
   } catch (e, s) {
     _logger.severe("Error in init ", e, s);
@@ -316,8 +318,12 @@ void logLocalSettings() {
 }
 
 void _heartBeatOnInit(int i) {
-  if (i <= 15) {
+  if (i <= 15 && !_stopHearBeat) {
     Future.delayed(const Duration(seconds: 1), () {
+      if (_stopHearBeat) {
+        _logger.info("Stopping Heartbeat check at $i");
+        return;
+      }
       _logger.info("init Heartbeat $i");
       _heartBeatOnInit(i + 1);
     });
