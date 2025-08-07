@@ -127,6 +127,9 @@ PODS:
   - libwebp/sharpyuv (1.5.0)
   - libwebp/webp (1.5.0):
     - libwebp/sharpyuv
+  - local_auth_darwin (0.0.1):
+    - Flutter
+    - FlutterMacOS
   - local_auth_ios (0.0.1):
     - Flutter
   - Mantle (2.2.0):
@@ -268,6 +271,7 @@ DEPENDENCIES:
   - in_app_purchase_storekit (from `.symlinks/plugins/in_app_purchase_storekit/darwin`)
   - integration_test (from `.symlinks/plugins/integration_test/ios`)
   - launcher_icon_switcher (from `.symlinks/plugins/launcher_icon_switcher/ios`)
+  - local_auth_darwin (from `.symlinks/plugins/local_auth_darwin/darwin`)
   - local_auth_ios (from `.symlinks/plugins/local_auth_ios/ios`)
   - maps_launcher (from `.symlinks/plugins/maps_launcher/ios`)
   - media_extension (from `.symlinks/plugins/media_extension/ios`)
@@ -376,6 +380,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/integration_test/ios"
   launcher_icon_switcher:
     :path: ".symlinks/plugins/launcher_icon_switcher/ios"
+  local_auth_darwin:
+    :path: ".symlinks/plugins/local_auth_darwin/darwin"
   local_auth_ios:
     :path: ".symlinks/plugins/local_auth_ios/ios"
   maps_launcher:
@@ -478,6 +484,7 @@ SPEC CHECKSUMS:
   integration_test: 252f60fa39af5e17c3aa9899d35d908a0721b573
   launcher_icon_switcher: 8e0ad2131a20c51c1dd939896ee32e70cd845b37
   libwebp: 02b23773aedb6ff1fd38cec7a77b81414c6842a8
+  local_auth_darwin: 66e40372f1c29f383a314c738c7446e2f7fdadc3
   local_auth_ios: 5046a18c018dd973247a0564496c8898dbb5adf9
   Mantle: c5aa8794a29a022dfbbfc9799af95f477a69b62d
   maps_launcher: 2e5b6a2d664ec6c27f82ffa81b74228d770ab203
