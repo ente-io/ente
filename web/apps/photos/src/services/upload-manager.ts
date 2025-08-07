@@ -4,7 +4,7 @@ import { ensureLocalUser } from "ente-accounts/services/user";
 import { isDesktop } from "ente-base/app";
 import { createComlinkCryptoWorker } from "ente-base/crypto";
 import { type CryptoWorker } from "ente-base/crypto/worker";
-import { lowercaseExtension, nameAndExtension } from "ente-base/file-name";
+import { lowercaseExtension } from "ente-base/file-name";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
 import { ComlinkWorker } from "ente-base/worker/comlink-worker";
@@ -705,56 +705,50 @@ const splitMetadataAndMediaItems = (
  * single live photo when appropriate.
  */
 const clusterLivePhotos = async (
-    items: UploadItemWithCollectionIDAndName[],
+    _items: UploadItemWithCollectionIDAndName[],
     parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
 ) => {
     const result: ClusteredUploadItem[] = [];
+    type ItemAsset = PotentialLivePhotoAsset & {
+        localID: number;
+        isLivePhoto?: boolean;
+    };
+    const items: ItemAsset[] = _items.map((item) => ({
+        localID: item.localID,
+        isLivePhoto: item.isLivePhoto,
+        fileName: item.fileName,
+        fileType: potentialFileTypeFromExtension(item.fileName) ?? -1,
+        collectionID: item.collectionID,
+        uploadItem: item.uploadItem!,
+        pathPrefix: item.pathPrefix,
+    }));
     items
-        .sort((f, g) =>
-            nameAndExtension(f.fileName)[0].localeCompare(
-                nameAndExtension(g.fileName)[0],
-            ),
-        )
+        .sort((f, g) => f.fileName.localeCompare(g.fileName))
+        .sort((f, g) => f.fileType - g.fileType)
         .sort((f, g) => f.collectionID - g.collectionID);
     let index = 0;
     while (index < items.length - 1) {
-        const f = items[index]!;
-        const g = items[index + 1]!;
-        const fFileType = potentialFileTypeFromExtension(f.fileName)!;
-        const gFileType = potentialFileTypeFromExtension(g.fileName)!;
-        const fa: PotentialLivePhotoAsset = {
-            fileName: f.fileName,
-            fileType: fFileType,
-            collectionID: f.collectionID,
-            uploadItem: f.uploadItem!,
-            pathPrefix: f.pathPrefix,
-        };
-        const ga: PotentialLivePhotoAsset = {
-            fileName: g.fileName,
-            fileType: gFileType,
-            collectionID: g.collectionID,
-            uploadItem: g.uploadItem!,
-            pathPrefix: g.pathPrefix,
-        };
+        const fa = items[index]!;
+        const ga = items[index + 1]!;
         if (await areLivePhotoAssets(fa, ga, parsedMetadataJSONMap)) {
             const [image, video] =
-                fFileType == FileType.image ? [f, g] : [g, f];
+                fa.fileType == FileType.image ? [fa, ga] : [ga, fa];
             result.push({
-                localID: f.localID,
-                collectionID: f.collectionID,
+                localID: fa.localID,
+                collectionID: fa.collectionID,
                 fileName: image.fileName,
                 isLivePhoto: true,
                 pathPrefix: image.pathPrefix,
                 livePhotoAssets: {
-                    image: image.uploadItem!,
-                    video: video.uploadItem!,
+                    image: image.uploadItem,
+                    video: video.uploadItem,
                 },
             });
             index += 2;
         } else {
             // They may already be a live photo (we might be retrying a
             // previously failed upload).
-            result.push({ ...f, isLivePhoto: f.isLivePhoto ?? false });
+            result.push({ ...fa, isLivePhoto: fa.isLivePhoto ?? false });
             index += 1;
         }
     }
