@@ -1,6 +1,5 @@
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
-import "package:photos/ui/home/memories/memories_widget.dart";
 import 'package:photos/ui/home/status_bar_widget.dart';
 
 class HeaderWidget extends StatelessWidget {
@@ -15,7 +14,7 @@ class HeaderWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         StatusBarWidget(),
-        MemoriesWidget(),
+        // MemoriesWidget(), // Removed to eliminate the area below app bar
       ],
     );
   }
