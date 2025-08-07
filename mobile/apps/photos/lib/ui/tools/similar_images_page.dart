@@ -76,24 +76,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         elevation: 0,
         title: const Text("Similar images"), // TODO: lau: extract string
         actions: _pageState == SimilarImagesPageState.results
-            ? [
-                ListenableBuilder(
-                  listenable: _selectedFiles,
-                  builder: (context, _) {
-                    final selectedCount = _selectedFiles.files.length;
-                    if (selectedCount > 0) {
-                      return IconButton(
-                        onPressed: () {
-                          _selectedFiles.clearAll(fireEvent: false);
-                        },
-                        icon: const Icon(Icons.clear),
-                      );
-                    } else {
-                      return _getSortMenu();
-                    }
-                  },
-                ),
-              ]
+            ? [_getSortMenu()]
             : null,
       ),
       body: _getBody(),
@@ -264,36 +247,97 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       );
     }
 
-    return ListView.builder(
-      itemCount: _similarFilesList.length + 1, // +1 for header
-      itemBuilder: (context, index) {
-        if (index == 0) {
-          // Header item
-          if (flagService.internalUser) {
-            return Container(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  Text(
-                    "(I) Found ${_similarFilesList.length} groups of similar images", // TODO: lau: extract string
-                    style: textTheme.bodyBold,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    "(I) Threshold: ${_distanceThreshold.toStringAsFixed(2)}", // TODO: lau: extract string
-                    style: textTheme.miniMuted,
-                  ),
-                ],
-              ),
-            );
-          } else {
-            return const SizedBox.shrink();
-          }
+    return Column(
+      children: [
+        Expanded(
+          child: ListView.builder(
+            itemCount: _similarFilesList.length + 1, // +1 for header
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                // Header item
+                if (flagService.internalUser) {
+                  return Container(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        Text(
+                          "(I) Found ${_similarFilesList.length} groups of similar images", // TODO: lau: extract string
+                          style: textTheme.bodyBold,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          "(I) Threshold: ${_distanceThreshold.toStringAsFixed(2)}", // TODO: lau: extract string
+                          style: textTheme.miniMuted,
+                        ),
+                      ],
+                    ),
+                  );
+                } else {
+                  return const SizedBox.shrink();
+                }
+              }
+
+              // Similar files groups (index - 1 because first item is header)
+              final similarFiles = _similarFilesList[index - 1];
+              return _buildSimilarFilesGroup(similarFiles);
+            },
+          ),
+        ),
+        _getBottomActionButtons(),
+      ],
+    );
+  }
+
+  Widget _getBottomActionButtons() {
+    return ListenableBuilder(
+      listenable: _selectedFiles,
+      builder: (context, _) {
+        final selectedCount = _selectedFiles.files.length;
+        final hasSelectedFiles = selectedCount > 0;
+
+        if (!hasSelectedFiles) {
+          return const SizedBox.shrink();
         }
 
-        // Similar files groups (index - 1 because first item is header)
-        final similarFiles = _similarFilesList[index - 1];
-        return _buildSimilarFilesGroup(similarFiles);
+        final colorScheme = getEnteColorScheme(context);
+
+        return SafeArea(
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: crossAxisSpacing,
+              vertical: 8,
+            ),
+            decoration: BoxDecoration(
+              color: colorScheme.backgroundBase,
+            ),
+            child: Column(
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  child: ButtonWidget(
+                    labelText:
+                        "Delete $selectedCount photos", // TODO: lau: extract string
+                    buttonType: ButtonType.critical,
+                    onTap: () async {
+                      // TODO: Implement delete functionality
+                    },
+                  ),
+                ),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  child: ButtonWidget(
+                    labelText: "Unselect all", // TODO: lau: extract string
+                    buttonType: ButtonType.secondary,
+                    onTap: () async {
+                      _selectedFiles.clearAll(fireEvent: false);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
       },
     );
   }
