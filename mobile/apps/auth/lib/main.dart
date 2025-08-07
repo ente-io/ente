@@ -7,7 +7,7 @@ import "package:ente_auth/app/view/app.dart";
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/constants.dart';
 import 'package:ente_auth/ente_theme_data.dart';
-import 'package:ente_auth/l10n/l10n.dart';
+import 'package:ente_auth/l10n/l10n.dart'; 
 import 'package:ente_auth/locale.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
 import 'package:ente_auth/services/billing_service.dart';
@@ -29,6 +29,7 @@ import 'package:ente_lock_screen/ui/app_lock.dart';
 import 'package:ente_lock_screen/ui/lock_screen.dart';
 import 'package:ente_logging/logging.dart';
 import 'package:ente_network/network.dart';
+import 'package:ente_strings/l10n/strings_localizations.dart';
 import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
 import 'package:flutter_displaymode/flutter_displaymode.dart';
@@ -111,7 +112,8 @@ Future<void> _runInForeground() async {
         darkTheme: darkThemeData,
         savedThemeMode: savedThemeMode,
         localeListResolutionCallback: localResolutionCallBack,
-        localizationsDelegates: const [
+        localizationsDelegates:  const [
+          ...StringsLocalizations.localizationsDelegates,
           ...AppLocalizations.localizationsDelegates,
         ],
         supportedLocales: appSupportedLocales,

@@ -16,6 +16,7 @@ import 'package:ente_auth/ui/settings/app_update_dialog.dart';
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_events/models/signed_in_event.dart';
 import 'package:ente_events/models/signed_out_event.dart';
+import 'package:ente_strings/l10n/strings_localizations.dart';
 import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -131,6 +132,7 @@ class _AppState extends State<App>
           localeListResolutionCallback: localResolutionCallBack,
           localizationsDelegates: const [
             AppLocalizations.delegate,
+            StringsLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
@@ -150,6 +152,7 @@ class _AppState extends State<App>
         localeListResolutionCallback: localResolutionCallBack,
         localizationsDelegates: const [
           AppLocalizations.delegate,
+          StringsLocalizations.delegate,
           GlobalMaterialLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
