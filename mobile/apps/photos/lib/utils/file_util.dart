@@ -70,7 +70,7 @@ Future<File?> _getLocalDiskFile(
   bool liveVideo = false,
   bool isOrigin = false,
 }) {
-  if (file.isSharedMediaToAppSandbox) {
+  if (file.isInAppMedia) {
     return SharedAssetService.getFile(file.localID!);
   } else if (file.fileType == FileType.livePhoto && liveVideo) {
     return Motionphoto.getLivePhotoFile(file.localID!);

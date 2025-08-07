@@ -3,7 +3,6 @@ import "dart:core";
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:photos/core/constants.dart';
 import "package:photos/models/api/diff/trash_time.dart";
 import 'package:photos/models/file/file_type.dart';
 import "package:photos/models/file/remote/asset.dart";
@@ -25,8 +24,6 @@ class EnteFile {
   int? generatedID;
   int? ownerID;
 
-  String? localID;
-
   String? deviceFolder;
   int? creationTime;
   int? modificationTime;
@@ -34,14 +31,11 @@ class EnteFile {
   late Location? location;
   late FileType fileType;
 
-  // String? hash;
-
   EnteFile();
 
   static Future<EnteFile> fromAsset(String pathName, AssetEntity lAsset) async {
     final EnteFile file = EnteFile();
     file.lAsset = lAsset;
-    file.localID = lAsset.id;
     file.deviceFolder = pathName;
     file.location =
         Location(latitude: lAsset.latitude, longitude: lAsset.longitude);
@@ -54,7 +48,6 @@ class EnteFile {
   static EnteFile fromAssetSync(AssetEntity asset) {
     final EnteFile file = EnteFile();
     file.lAsset = asset;
-    file.localID = asset.id;
     file.deviceFolder = asset.relativePath;
     file.location =
         Location(latitude: asset.latitude, longitude: asset.longitude);
@@ -81,6 +74,8 @@ class EnteFile {
     file.modificationTime = rAsset.modificationTime;
     return file;
   }
+
+  String? get localID => lAsset?.id ?? sharedAsset?.id;
 
   int get remoteID {
     if (rAsset != null) {
@@ -159,8 +154,9 @@ class EnteFile {
     return rAsset != null;
   }
 
-  bool get isSharedMediaToAppSandbox {
-    return localID != null && localID!.startsWith(sharedMediaIdentifier);
+  // returns true if the file is only available in the app's sandbox
+  bool get isInAppMedia {
+    return sharedAsset != null;
   }
 
   bool get hasLocation {
@@ -223,7 +219,6 @@ class EnteFile {
       ..cf = cf
       ..generatedID = generatedID ?? this.generatedID
       ..ownerID = ownerID ?? this.ownerID
-      ..localID = localID ?? this.localID
       ..deviceFolder = deviceFolder ?? this.deviceFolder
       ..creationTime = creationTime ?? this.creationTime
       ..modificationTime = modificationTime ?? this.modificationTime

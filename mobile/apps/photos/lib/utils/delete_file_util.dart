@@ -51,7 +51,7 @@ Future<void> deleteFilesFromEverywhere(
       if (!(await _localFileExist(file))) {
         _logger.warning("Already deleted " + file.toString());
         alreadyDeletedIDs.add(file.localID!);
-      } else if (file.isSharedMediaToAppSandbox) {
+      } else if (file.isInAppMedia) {
         sharedAssetIDs.add(file.localID!);
       } else {
         localAssetIDs.add(file.localID!);
@@ -206,7 +206,7 @@ Future<void> deleteFilesOnDeviceOnly(
       if (!(await _localFileExist(file))) {
         _logger.warning("Already deleted " + file.toString());
         alreadyDeletedIDs.add(file.localID!);
-      } else if (file.isSharedMediaToAppSandbox) {
+      } else if (file.isInAppMedia) {
         localSharedMediaIDs.add(file.localID!);
       } else {
         localAssetIDs.add(file.localID!);
@@ -240,7 +240,7 @@ Future<void> deleteFilesOnDeviceOnly(
       if (hasLocalOnlyFiles && localOnlyIDs.contains(file.localID)) {
         await FilesDB.instance.deleteLocalFile(file);
       } else {
-        file.localID = null;
+        file.lAsset = null;
         throw Exception("pending rewrite change");
         // await FilesDB.instance.update(file);
       }
@@ -675,7 +675,7 @@ Future<void> _recursivelyReduceBatchSizeAndRetryDeletion({
 }
 
 Future<bool> _localFileExist(EnteFile file) async {
-  if (file.isSharedMediaToAppSandbox) {
+  if (file.isInAppMedia) {
     final localFile = await SharedAssetService.getFile(file.localID!);
     return localFile != null;
   } else {

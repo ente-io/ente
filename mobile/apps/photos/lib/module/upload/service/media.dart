@@ -20,7 +20,7 @@ Logger _logger = Logger("UploadMediaService");
 const kMaximumThumbnailCompressionAttempts = 2;
 
 Future<UploadMedia> getUploadMedia(EnteFile file) async {
-  if (file.isSharedMediaToAppSandbox) {
+  if (file.isInAppMedia) {
     return _getUploadMediaFromSharedAsset(file);
   }
   return _getUploadMediaFromAsset(file);

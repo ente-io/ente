@@ -103,7 +103,7 @@ Future<Uint8List?> getThumbnailFromLocal(
   if (lruCachedThumbnail != null) {
     return lruCachedThumbnail;
   }
-  if (file.isSharedMediaToAppSandbox) {
+  if (file.isInAppMedia) {
     //todo:neeraj support specifying size/quality
     return SharedAssetService.getThumbnail(
       file.localID!,

@@ -9,6 +9,7 @@ import 'package:logging/logging.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
+import "package:photos/db/remote/table/mapping_table.dart";
 import "package:photos/events/file_caption_updated_event.dart";
 import "package:photos/events/files_updated_event.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
@@ -16,6 +17,7 @@ import "package:photos/events/reset_zoom_of_photo_view_event.dart";
 import "package:photos/image/in_memory_image_cache.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
+import "package:photos/service_locator.dart";
 import "package:photos/states/detail_page_state.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -347,8 +349,9 @@ class _ZoomableImageState extends State<ZoomableImage> {
           );
         } else {
           _logger.info("File was deleted " + _photo.toString());
-          if (_photo.isUploaded) {
-            _photo.localID = null;
+          if (_photo.isUploaded && _photo.lAsset != null) {
+            remoteDB.deleteMappingsForLocalIDs({_photo.lAsset!.id}).ignore();
+            _photo.lAsset = null;
             // FilesDB.instance.update(_photo);
             _loadNetworkImage();
           } else {

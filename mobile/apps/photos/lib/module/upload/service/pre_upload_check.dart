@@ -57,7 +57,7 @@ class PreUploadCheck {
       );
     }
     final int userID = Configuration.instance.getUserID()!;
-    final bool isSandBoxFile = fileToUpload.isSharedMediaToAppSandbox;
+    final bool isSandBoxFile = fileToUpload.isInAppMedia;
     final remoteIDs = await remoteDB.idsWithSameHashAndType(
       uploadMedia.hash,
       userID,

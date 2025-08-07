@@ -138,7 +138,7 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
     if (widget.file.isRemoteFile) {
       _loadNetworkVideo();
       _setFileSizeIfNull();
-    } else if (widget.file.isSharedMediaToAppSandbox) {
+    } else if (widget.file.isInAppMedia) {
       final localFile = File(SharedAssetService.getPath(widget.file.localID!));
       if (localFile.existsSync()) {
         _setVideoController(localFile.path);

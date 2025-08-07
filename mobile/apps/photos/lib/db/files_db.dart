@@ -588,7 +588,6 @@ class FilesDB with SqlDbBase {
   EnteFile _getFileFromRow(Map<String, dynamic> row) {
     final file = EnteFile();
     file.generatedID = row[columnGeneratedID];
-    file.localID = row[columnLocalID];
     // file.uploadedFileID =
     //     row[columnUploadedFileID] == -1 ? null : row[columnUploadedFileID];
     file.ownerID = row[columnOwnerID];

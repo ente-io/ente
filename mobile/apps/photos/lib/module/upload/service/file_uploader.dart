@@ -755,7 +755,7 @@ class FileUploader {
         );
         if (uploadMedia.isDeleted) {
           _logger.info("File found to be deleted");
-          remoteFile.localID = null;
+          remoteFile.lAsset = null;
         }
         // await FilesDB.instance.update(remoteFile);
       }
@@ -833,7 +833,7 @@ class FileUploader {
       // Shared Media should only be cleared when the upload
       // succeeds.
       if ((Platform.isIOS && (uploadCompleted || uploadHardFailure)) ||
-          (uploadCompleted && file.isSharedMediaToAppSandbox)) {
+          (uploadCompleted && file.isInAppMedia)) {
         await uploadMedia.delete();
       }
     }
@@ -857,7 +857,7 @@ class FileUploader {
       final bool canIgnoreFile = file.localID != null &&
           file.deviceFolder != null &&
           file.title != null &&
-          !file.isSharedMediaToAppSandbox;
+          !file.isInAppMedia;
       // If the file is not uploaded yet and either it can not be ignored or the
       // err is related to live photo media, delete the local entry
       final bool deleteEntry =

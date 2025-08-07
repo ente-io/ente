@@ -177,7 +177,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     if (widget.file.isRemoteFile) {
       _loadNetworkVideo(update);
       _setFileSizeIfNull();
-    } else if (widget.file.isSharedMediaToAppSandbox) {
+    } else if (widget.file.isInAppMedia) {
       final localFile = File(SharedAssetService.getPath(widget.file.localID!));
       if (localFile.existsSync()) {
         _setFilePathForNativePlayer(localFile.path, update);
