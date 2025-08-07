@@ -27,10 +27,9 @@ Future<void> showSingleFileDeleteSheet(
   final String fileType = file.fileType == FileType.video
       ? S.of(context).videoSmallCase
       : S.of(context).photoSmallCase;
-  final bool isBothLocalAndRemote =
-      file.uploadedFileID != null && file.localID != null;
-  final bool isLocalOnly = file.uploadedFileID == null && file.localID != null;
-  final bool isRemoteOnly = file.uploadedFileID != null && file.localID == null;
+  final bool isBothLocalAndRemote = file.rAsset != null && file.localID != null;
+  final bool isLocalOnly = file.rAsset == null && file.localID != null;
+  final bool isRemoteOnly = file.rAsset != null && file.localID == null;
   final String bodyHighlight = S.of(context).singleFileDeleteHighlight;
   String body = "";
   if (isBothLocalAndRemote) {

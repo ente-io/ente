@@ -370,7 +370,7 @@ class _BodyState extends State<_Body> {
   }
 
   Future<void> _onEditFileRequested(EnteFile file) async {
-    if (file.uploadedFileID != null &&
+    if (file.rAsset != null &&
         file.ownerID != Configuration.instance.getUserID()) {
       _logger.severe(
         "Attempt to edit unowned file",

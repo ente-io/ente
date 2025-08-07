@@ -12,7 +12,7 @@ class BackedUpTimeItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dateTimeForUpdationTime =
-        DateTime.fromMicrosecondsSinceEpoch(file.updationTime!);
+        DateTime.fromMicrosecondsSinceEpoch(file.cf!.updatedAt);
     return InfoItemWidget(
       key: const ValueKey("Backedup date"),
       leadingIcon: Icons.backup_outlined,

@@ -605,7 +605,7 @@ class FilesDB with SqlDbBase {
     file.fileType = getFileType(row[columnFileType]);
     file.creationTime = row[columnCreationTime];
     file.modificationTime = row[columnModificationTime];
-    file.updationTime = row[columnUpdationTime] ?? -1;
+    // file.updationTime = row[columnUpdationTime] ?? -1;
     // file.encryptedKey = row[columnEncryptedKey];
     // file.keyDecryptionNonce = row[columnKeyDecryptionNonce];
     // file.fileDecryptionHeader = row[columnFileDecryptionHeader];
@@ -614,7 +614,7 @@ class FilesDB with SqlDbBase {
     file.duration = row[columnDuration] ?? 0;
     // file.exif = row[columnExif];
     file.hash = row[columnHash];
-    file.metadataVersion = row[columnMetadataVersion] ?? 0;
+    // file.metadataVersion = row[columnMetadataVersion] ?? 0;
     // file.fileSize = row[columnFileSize];
 
     // file.mMdVersion = row[columnMMdVersion] ?? 0;

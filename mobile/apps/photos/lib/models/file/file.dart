@@ -30,17 +30,12 @@ class EnteFile {
   String? deviceFolder;
   int? creationTime;
   int? modificationTime;
-  int? updationTime;
+
   late Location? location;
   late FileType fileType;
   int? fileSubType;
   int? duration;
   String? hash;
-  int? metadataVersion;
-
-  // in Version 1, live photo hash is stored as zip's hash.
-  // in V2: LivePhoto hash is stored as imgHash:vidHash
-  static const kCurrentMetadataVersion = 2;
 
   EnteFile();
 
@@ -55,7 +50,6 @@ class EnteFile {
     file.creationTime = AssetEntityService.estimateCreationTime(lAsset);
     file.modificationTime = lAsset.modifiedDateTime.microsecondsSinceEpoch;
     file.fileSubType = lAsset.subtype;
-    file.metadataVersion = kCurrentMetadataVersion;
     return file;
   }
 
@@ -70,7 +64,6 @@ class EnteFile {
     file.creationTime = asset.createDateTime.microsecondsSinceEpoch;
     file.modificationTime = asset.modifiedDateTime.microsecondsSinceEpoch;
     file.fileSubType = asset.subtype;
-    file.metadataVersion = kCurrentMetadataVersion;
     file.duration = asset.duration;
     return file;
   }
@@ -103,7 +96,6 @@ class EnteFile {
     file.creationTime = rAsset.creationTime;
     file.modificationTime = rAsset.modificationTime;
     file.fileSubType = rAsset.subType;
-    file.metadataVersion = kCurrentMetadataVersion;
     file.duration = rAsset.durationInSec;
     file.collectionID = collection.collectionID;
     return file;
@@ -179,7 +171,7 @@ class EnteFile {
   String toString() {
     return '''File(generatedID: $generatedID, localID: $localID, title: $title, 
       type: $fileType, uploadedFileId: $uploadedFileID, modificationTime: $modificationTime, 
-      ownerID: $ownerID, collectionID: $collectionID, updationTime: $updationTime)''';
+      ownerID: $ownerID, collectionID: $collectionID, updationTime: ${cf?.updatedAt})''';
   }
 
   @override
@@ -239,12 +231,10 @@ class EnteFile {
       ..deviceFolder = deviceFolder ?? this.deviceFolder
       ..creationTime = creationTime ?? this.creationTime
       ..modificationTime = modificationTime ?? this.modificationTime
-      ..updationTime = updationTime ?? this.updationTime
       ..location = location ?? this.location
       ..fileType = fileType ?? this.fileType
       ..fileSubType = fileSubType ?? this.fileSubType
       ..duration = duration ?? this.duration
-      ..hash = hash ?? this.hash
-      ..metadataVersion = metadataVersion ?? this.metadataVersion;
+      ..hash = hash ?? this.hash;
   }
 }

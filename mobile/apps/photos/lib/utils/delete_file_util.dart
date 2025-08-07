@@ -144,22 +144,22 @@ Future<void> deleteFilesFromRemoteOnly(
   BuildContext context,
   List<EnteFile> files,
 ) async {
-  files.removeWhere((element) => element.uploadedFileID == null);
+  files.removeWhere((element) => element.rAsset == null);
   if (files.isEmpty) {
     showToast(context, S.of(context).selectedFilesAreNotOnEnte);
     return;
   }
   _logger.info(
     "Trying to deleteFilesFromRemoteOnly " +
-        files.map((f) => f.uploadedFileID).toString(),
+        files.map((f) => f.remoteID).toString(),
   );
   final updatedCollectionIDs = <int>{};
   final List<int> uploadedFileIDs = [];
   final List<TrashRequest> trashRequests = [];
   for (final file in files) {
     updatedCollectionIDs.add(file.collectionID!);
-    uploadedFileIDs.add(file.uploadedFileID!);
-    trashRequests.add(TrashRequest(file.uploadedFileID!, file.collectionID!));
+    uploadedFileIDs.add(file.remoteID);
+    trashRequests.add(TrashRequest(file.remoteID, file.collectionID!));
   }
   try {
     await trashSyncService.trashFilesOnServer(trashRequests);

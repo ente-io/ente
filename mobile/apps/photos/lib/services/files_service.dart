@@ -126,7 +126,7 @@ class FilesService {
     BuildContext context,
   ) async {
     final List<EnteFile> uploadedFiles =
-        files.where((element) => element.uploadedFileID != null).toList();
+        files.where((element) => element.rAsset != null).toList();
 
     final List<EnteFile> remoteFilesToUpdate = [];
     final Map<int, Map<String, dynamic>> fileIDToUpdateMetadata = {};

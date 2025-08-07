@@ -27,7 +27,7 @@ import 'package:synchronized/synchronized.dart';
 final LRUMap<String, bool> trackOriginFetchForUploadOrML = LRUMap(200);
 
 class LocalImportService {
-  final _log = Logger("LocalSyncService");
+  final _log = Logger("LocalImportService");
   late SharedPreferences _prefs;
   Completer<void>? _existingSync;
   Completer<bool>? _fullSync;

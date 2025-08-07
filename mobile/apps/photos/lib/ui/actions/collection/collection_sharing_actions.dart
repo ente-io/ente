@@ -614,9 +614,9 @@ class CollectionActions {
     final Map<int, List<EnteFile>> destCollectionToFilesMap = {};
     final List<int> uploadedIDs = [];
     for (EnteFile f in split.ownedByCurrentUser) {
-      if (f.uploadedFileID != null) {
-        pendingAssignMap[f.uploadedFileID!] = f;
-        uploadedIDs.add(f.uploadedFileID!);
+      if (f.rAsset != null) {
+        pendingAssignMap[f.rAsset!.id] = f;
+        uploadedIDs.add(f.rAsset!.id);
       }
     }
 

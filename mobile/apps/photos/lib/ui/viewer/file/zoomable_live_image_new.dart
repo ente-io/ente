@@ -25,7 +25,7 @@ class ZoomableLiveImageNew extends StatefulWidget {
   final Decoration? backgroundDecoration;
   final bool isFromMemories;
   final Function({required int memoryDuration})? onFinalFileLoad;
-  
+
   const ZoomableLiveImageNew(
     this.enteFile, {
     super.key,
@@ -172,7 +172,7 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
     // getFile with liveVideo as true can fail for file with localID when
     // the live photo was downloaded from remote.
     if ((videoFile == null || !videoFile.existsSync()) &&
-        _enteFile.uploadedFileID != null) {
+        _enteFile.rAsset != null) {
       videoFile = await getFileFromServer(widget.enteFile, liveVideo: true)
           .timeout(const Duration(seconds: 15))
           .onError((dynamic e, s) {

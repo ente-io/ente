@@ -221,8 +221,8 @@ Future<List<AlbumFilter>> _curateAlbumFilters(
   final albumFilters = <AlbumFilter>[];
   final uploadedIDs = <int>[];
   for (EnteFile file in files) {
-    if (file.uploadedFileID != null && file.uploadedFileID != -1) {
-      uploadedIDs.add(file.uploadedFileID!);
+    if (file.rAsset != null) {
+      uploadedIDs.add(file.rAsset!.id);
     }
   }
   final idToOccurrence = await remoteDB.getCollectionIdToFileCount(uploadedIDs);

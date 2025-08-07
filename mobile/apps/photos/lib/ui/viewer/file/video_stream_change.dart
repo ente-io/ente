@@ -36,8 +36,8 @@ class _VideoStreamChangeWidgetState extends State<VideoStreamChangeWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isPreviewAvailable = widget.file.uploadedFileID != null &&
-        (fileDataService.previewIds.containsKey(widget.file.uploadedFileID));
+    final bool isPreviewAvailable = widget.file.rAsset != null &&
+        (fileDataService.previewIds.containsKey(widget.file.rAsset!.id));
     if (!isPreviewAvailable) {
       return const SizedBox();
     }

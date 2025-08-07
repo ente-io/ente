@@ -301,7 +301,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
       ]);
     }
 
-    if (file.isUploaded && file.updationTime != null) {
+    if (file.isUploaded && file.cf?.updatedAt != null) {
       fileDetailsTiles.addAll(
         [
           BackedUpTimeItemWidget(file),

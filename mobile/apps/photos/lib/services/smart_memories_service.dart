@@ -182,7 +182,7 @@ class SmartMemoriesService {
     );
     final Set<EnteFile> allFiles = {};
     for (final file in allFilesFromSearchService) {
-      if (file.uploadedFileID != null && file.creationTime != null) {
+      if (file.rAsset != null && file.creationTime != null) {
         allFiles.add(file);
       }
     }

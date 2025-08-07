@@ -24,6 +24,9 @@ import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/panorama_util.dart";
 
 final _logger = Logger("FileUtil");
+// in Version 1, live photo hash is stored as zip's hash.
+// in V2: LivePhoto hash is stored as imgHash:vidHash
+const kCurrentMetadataVersion = 2;
 
 Future<int?> motionVideoIndex(Map<String, dynamic> args) async {
   final String path = args['path'];
@@ -134,7 +137,7 @@ Future<Map<String, dynamic>> getMetadata(
   final metadata = <String, dynamic>{
     "localID": asset?.id,
     "hash": uploadMedia.hash,
-    "version": EnteFile.kCurrentMetadataVersion,
+    "version": kCurrentMetadataVersion,
     "title": title,
     "deviceFolder": deviceFolder,
     "creationTime": creationTime,

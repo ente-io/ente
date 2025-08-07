@@ -40,7 +40,7 @@ class _BackupStatusScreenState extends State<BackupStatusScreen> {
   Future<void> getAllFiles() async {
     result = (await SearchService.instance.getAllFilesForSearch())
         .where(
-          (e) => e.uploadedFileID != null && e.isOwner,
+          (e) => e.rAsset != null && e.isOwner,
         )
         .map(
           (e) {
@@ -53,7 +53,7 @@ class _BackupStatusScreenState extends State<BackupStatusScreen> {
           },
         )
         .sorted(
-          (a, b) => (b.file.uploadedFileID!).compareTo(a.file.uploadedFileID!),
+          (a, b) => (b.file.rAsset!.id).compareTo(a.file.rAsset!.id),
         )
         .toList();
     _fileUploadedSubscription =

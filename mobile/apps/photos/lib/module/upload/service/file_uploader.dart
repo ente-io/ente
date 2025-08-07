@@ -517,7 +517,7 @@ class FileUploader {
 
     try {
       final bool isUpdatedFile =
-          file.uploadedFileID != null && file.updationTime == -1;
+          file.rAsset != null && file.cf?.updatedAt == -1;
       _logger.info(
         'starting ${forcedUpload ? 'forced' : ''} '
         '${isUpdatedFile ? 're-upload' : 'upload'} of ${file.toString()}',
