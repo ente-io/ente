@@ -59,22 +59,24 @@ class GradientButton extends StatelessWidget {
     }
     return InkWell(
       onTap: onTap as void Function()?,
-      child: Container(
-        height: 56,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: const Alignment(0.1, -0.9),
-            end: const Alignment(-0.6, 0.9),
-            colors: onTap != null
-                ? getEnteColorScheme(context).gradientButtonBgColors
-                : [
-                    getEnteColorScheme(context).fillMuted,
-                    getEnteColorScheme(context).fillMuted,
-                  ],
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(4),
+        child: Container(
+          height: 56,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: const Alignment(0.1, -0.9),
+              end: const Alignment(-0.6, 0.9),
+              colors: onTap != null
+                  ? getEnteColorScheme(context).gradientButtonBgColors
+                  : [
+                      getEnteColorScheme(context).fillMuted,
+                      getEnteColorScheme(context).fillMuted,
+                    ],
+            ), 
           ),
-          borderRadius: BorderRadius.circular(24),
+          child: Center(child: buttonContent),
         ),
-        child: Center(child: buttonContent),
       ),
     );
   }
