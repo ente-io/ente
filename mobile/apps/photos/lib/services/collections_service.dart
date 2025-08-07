@@ -14,7 +14,6 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network/network.dart';
-import 'package:photos/db/files_db.dart';
 import "package:photos/db/local/table/path_config_table.dart";
 import "package:photos/db/remote/db.dart";
 import "package:photos/db/remote/table/collection_files.dart";
@@ -845,7 +844,7 @@ class CollectionsService {
       // current update is simple replace. This will be enhanced in the future,
       // as required.
       final Map<String, dynamic> jsonToUpdate =
-          jsonDecode(collection.mMdEncodedJson ?? '{}');
+          jsonDecode(collection.mMdEncodedJson);
       newMetadataUpdate.forEach((key, value) {
         jsonToUpdate[key] = value;
       });
@@ -904,7 +903,7 @@ class CollectionsService {
       // current update is simple replace. This will be enhanced in the future,
       // as required.
       final Map<String, dynamic> jsonToUpdate =
-          jsonDecode(collection.mMdPubEncodedJson ?? '{}');
+          jsonDecode(collection.mMdPubEncodedJson);
       newMetadataUpdate.forEach((key, value) {
         jsonToUpdate[key] = value;
       });
@@ -964,7 +963,7 @@ class CollectionsService {
       // current update is simple replace. This will be enhanced in the future,
       // as required.
       final Map<String, dynamic> jsonToUpdate =
-          jsonDecode(collection.sharedMmdJson ?? '{}');
+          jsonDecode(collection.sharedMmdJson);
       newMetadataUpdate.forEach((key, value) {
         jsonToUpdate[key] = value;
       });

@@ -2,12 +2,10 @@
 
 import "dart:io";
 
-import "package:collection/collection.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/errors.dart";
 import "package:photos/core/event_bus.dart";
-import "package:photos/db/files_db.dart";
 import "package:photos/db/remote/table/collection_files.dart";
 import "package:photos/db/remote/table/files_table.dart";
 import "package:photos/db/remote/table/mapping_table.dart";

@@ -3,7 +3,6 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/generated/l10n.dart';
 import 'package:photos/models/file/file.dart';
-import "package:photos/models/file/remote/asset.dart";
 import "package:photos/models/file/remote/collection_file.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/remote/fetch/files_diff.dart";

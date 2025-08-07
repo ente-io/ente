@@ -9,7 +9,6 @@ import "package:photos/events/collection_updated_event.dart";
 import "package:photos/events/diff_sync_complete_event.dart";
 import "package:photos/events/sync_status_update_event.dart";
 import "package:photos/models/api/diff/diff.dart";
-import "package:photos/models/file/file.dart";
 import "package:photos/models/file/remote/asset.dart";
 import "package:photos/models/file/remote/rl_mapping.dart";
 import "package:photos/service_locator.dart";

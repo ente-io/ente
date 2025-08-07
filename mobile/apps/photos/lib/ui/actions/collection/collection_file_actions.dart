@@ -154,7 +154,7 @@ extension CollectionFileActions on CollectionActions {
 
   Future<bool> addToCollection(
     BuildContext context,
-    int collectionID,
+    int dstCollectionID,
     bool showProgressDialog, {
     List<EnteFile>? selectedFiles,
     List<SharedMediaFile>? sharedFiles,
@@ -175,7 +175,7 @@ extension CollectionFileActions on CollectionActions {
       if (sharedFiles != null) {
         final sharedAssets = await convertIncomingSharedMediaToFile(
           sharedFiles,
-          collectionID,
+          dstCollectionID,
           Configuration.instance.getUserID()!,
         );
         await localDB.insertSharedAssets(sharedAssets);
@@ -183,7 +183,7 @@ extension CollectionFileActions on CollectionActions {
         filesPendingUpload.addAll(
           await convertPicketAssets(
             picketAssets,
-            collectionID,
+            dstCollectionID,
           ),
         );
       } else {
@@ -206,13 +206,13 @@ extension CollectionFileActions on CollectionActions {
             .removeIgnoredMappings(filesPendingUpload);
         await localDB.insertOrUpdateQueue(
           pendingUploadAssetIDs,
-          collectionID,
+          dstCollectionID,
           currentUserID,
           manual: true,
         );
         Bus.instance.fire(
           CollectionUpdatedEvent(
-            collectionID,
+            dstCollectionID,
             filesPendingUpload,
             "queuedForUpload",
           ),
@@ -220,7 +220,7 @@ extension CollectionFileActions on CollectionActions {
       }
       if (uploadedFiles.isNotEmpty) {
         await CollectionsService.instance
-            .addOrCopyToCollection(collectionID, uploadedFiles);
+            .addOrCopyToCollection(dstCollectionID, uploadedFiles);
       }
       unawaited(RemoteSyncService.instance.sync(silently: true));
       await dialog?.hide();

@@ -5,7 +5,6 @@ import "dart:math" show pow;
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/cache/lru_map.dart";
-import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/models/file/file.dart";

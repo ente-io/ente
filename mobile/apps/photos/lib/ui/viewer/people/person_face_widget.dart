@@ -2,9 +2,7 @@ import "dart:typed_data";
 
 import 'package:flutter/widgets.dart';
 import "package:logging/logging.dart";
-import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
-import "package:photos/db/remote/table/collection_files.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/person.dart";

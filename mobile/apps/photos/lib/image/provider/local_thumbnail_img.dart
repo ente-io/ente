@@ -109,7 +109,7 @@ class LocalThumbnailProvider extends ImageProvider<LocalThumbnailProviderKey> {
         throw StateError("$runtimeType biThumb ${key.asset.title} failed");
       }
 
-      final buffer = await ui.ImmutableBuffer.fromUint8List(normalThumbBytes!);
+      final buffer = await ui.ImmutableBuffer.fromUint8List(normalThumbBytes);
       final codec = await decode(buffer);
       yield codec;
     }

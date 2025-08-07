@@ -58,7 +58,10 @@ extension PathBackupConfigTable on LocalDB {
   }
 
   Future<void> updateDestConnection(
-      String pathID, int destCollection, int ownerID) async {
+    String pathID,
+    int destCollection,
+    int ownerID,
+  ) async {
     await sqliteDB.execute(
       'UPDATE path_backup_config SET collection_id = ? WHERE device_path_id = ? AND owner_id = ?',
       [destCollection, pathID, ownerID],

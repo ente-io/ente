@@ -1,7 +1,6 @@
 import "dart:typed_data";
 
 import "package:ente_crypto/ente_crypto.dart";
-import "package:photos/models/api/diff/diff.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/remote/asset.dart";
 import "package:photos/models/file/remote/collection_file.dart";
@@ -63,7 +62,9 @@ extension CollectionsServiceMapper on CollectionsService {
   }
 
   (CollectionFile, RemoteAsset) validateAndGetPair(
-      EnteFile file, int dstCollectionID) {
+    EnteFile file,
+    int dstCollectionID,
+  ) {
     if (file.rAsset == null || file.cf == null) {
       throw ArgumentError("must have remoteAsset and fileEntry");
     }

@@ -11,7 +11,6 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/data/holidays.dart';
 import 'package:photos/data/months.dart';
 import 'package:photos/data/years.dart';
-import 'package:photos/db/files_db.dart';
 import "package:photos/db/ml/db.dart";
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/extensions/user_extension.dart";

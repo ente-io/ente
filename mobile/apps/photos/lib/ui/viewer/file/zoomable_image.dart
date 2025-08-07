@@ -9,7 +9,6 @@ import 'package:logging/logging.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/db/files_db.dart';
 import "package:photos/events/file_caption_updated_event.dart";
 import "package:photos/events/files_updated_event.dart";
 import 'package:photos/events/local_photos_updated_event.dart';

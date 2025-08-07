@@ -6,7 +6,6 @@ import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import "package:photo_manager/photo_manager.dart";
-import 'package:photos/core/configuration.dart';
 import "package:photos/db/remote/schema.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
@@ -178,7 +177,6 @@ Future<List<EnteFile>> convertPicketAssets(
   final List<EnteFile> localFiles = [];
   for (var asset in pickedAssets) {
     final enteFile = await EnteFile.fromAsset('', asset);
-    enteFile.collectionID = collectionID;
     localFiles.add(enteFile);
   }
   return localFiles;

@@ -3,9 +3,6 @@ import "dart:typed_data";
 
 import "package:photos/models/api/diff/trash_time.dart";
 import "package:photos/models/file/remote/asset.dart";
-import "package:photos/models/location/location.dart";
-import "package:photos/models/metadata/common_keys.dart";
-import "package:photos/models/metadata/file_magic.dart";
 
 class Info {
   final int fileSize;
@@ -130,7 +127,6 @@ class ApiFileItem {
   String? get localID => metadata?.data['localID'];
 
   String? get deviceFolder => metadata?.data['deviceFolder'];
-
 
   int get creationTime =>
       pubMagicMetadata?.data['editedTime'] ??

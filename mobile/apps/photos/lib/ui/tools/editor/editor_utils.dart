@@ -33,14 +33,17 @@ Future<void> saveAsset({
     if (newAsset == null) {
       throw Exception("Failed to save asset");
     }
+    newAsset.copyWith(
+      createDateSecond: originalFile.creationTime! ~/ 1000000,
+      modifiedDateSecond: originalFile.modificationTime! ~/ 1000000,
+      latitude: originalFile.location?.latitude,
+      longitude: originalFile.location?.longitude,
+    );
 
     final newFile = await EnteFile.fromAsset(
       originalFile.deviceFolder ?? '',
       newAsset,
     );
-    newFile.creationTime = originalFile.creationTime;
-    newFile.collectionID = originalFile.collectionID;
-    newFile.location = originalFile.location;
     await localDB.trackEdit(
       newAsset.id,
       originalFile.creationTime!,
@@ -63,8 +66,9 @@ Future<void> saveAsset({
     final files = detailPageConfig.files;
     // the index could be -1 if the files fetched doesn't contain the newly
     // edited files
-    int selectionIndex = files.indexWhere((file) =>
-        originalFile.localID != null && file.localID == newFile.localID);
+    int selectionIndex = files.indexWhere(
+      (file) => originalFile.localID != null && file.localID == newFile.localID,
+    );
     if (selectionIndex == -1) {
       files.add(newFile);
       selectionIndex = files.length - 1;

@@ -592,8 +592,8 @@ class FilesDB with SqlDbBase {
     // file.uploadedFileID =
     //     row[columnUploadedFileID] == -1 ? null : row[columnUploadedFileID];
     file.ownerID = row[columnOwnerID];
-    file.collectionID =
-        row[columnCollectionID] == -1 ? null : row[columnCollectionID];
+    // file.collectionID =
+    //     row[columnCollectionID] == -1 ? null : row[columnCollectionID];
     // file.title = row[columnTitle];
     file.deviceFolder = row[columnDeviceFolder];
     if (row[columnLatitude] != null && row[columnLongitude] != null) {
@@ -610,9 +610,9 @@ class FilesDB with SqlDbBase {
     // file.keyDecryptionNonce = row[columnKeyDecryptionNonce];
     // file.fileDecryptionHeader = row[columnFileDecryptionHeader];
     // file.thumbnailDecryptionHeader = row[columnThumbnailDecryptionHeader];
-    file.fileSubType = row[columnFileSubType] ?? -1;
+    // file.fileSubType = row[columnFileSubType] ?? -1;
     // file.exif = row[columnExif];
-    file.hash = row[columnHash];
+    // file.hash = row[columnHash];
     // file.metadataVersion = row[columnMetadataVersion] ?? 0;
     // file.fileSize = row[columnFileSize];
 

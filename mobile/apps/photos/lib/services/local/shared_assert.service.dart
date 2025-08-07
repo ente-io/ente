@@ -89,7 +89,7 @@ class SharedAssetService {
         _logger.warning('failed video thumbnail for $sharedAssetID');
         return null;
       }
-      final thumbnailFile = File(thumbnailFilePath!);
+      final thumbnailFile = File(thumbnailFilePath);
       decodedImage = await decodeImageInIsolate(thumbnailFile.path);
     } else {
       decodedImage = await decodeImageInIsolate(localPath);

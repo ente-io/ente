@@ -4,7 +4,6 @@ import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
-import "package:photos/db/files_db.dart";
 import "package:photos/events/collection_updated_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/smart_album_config.dart";

@@ -24,7 +24,7 @@ class EnteFile {
 
   int? generatedID;
   int? ownerID;
-  int? collectionID;
+
   String? localID;
 
   String? deviceFolder;
@@ -33,9 +33,8 @@ class EnteFile {
 
   late Location? location;
   late FileType fileType;
-  int? fileSubType;
-  int? get durationInSec => rAsset?.durationInSec ?? lAsset?.duration;
-  String? hash;
+
+  // String? hash;
 
   EnteFile();
 
@@ -49,7 +48,6 @@ class EnteFile {
     file.fileType = enteTypeFromAsset(lAsset);
     file.creationTime = AssetEntityService.estimateCreationTime(lAsset);
     file.modificationTime = lAsset.modifiedDateTime.microsecondsSinceEpoch;
-    file.fileSubType = lAsset.subtype;
     return file;
   }
 
@@ -63,21 +61,8 @@ class EnteFile {
     file.fileType = enteTypeFromAsset(asset);
     file.creationTime = asset.createDateTime.microsecondsSinceEpoch;
     file.modificationTime = asset.modifiedDateTime.microsecondsSinceEpoch;
-    file.fileSubType = asset.subtype;
     return file;
   }
-
-  int get remoteID {
-    if (rAsset != null) {
-      return rAsset!.id;
-    } else {
-      throw Exception("Remote ID is not set for the file");
-    }
-  }
-
-  int? get uploadedFileID => rAsset?.id;
-
-  String? get title => rAsset?.title ?? lAsset?.title;
 
   static EnteFile fromRemoteAsset(
     RemoteAsset rAsset,
@@ -94,10 +79,28 @@ class EnteFile {
     file.fileType = rAsset.fileType;
     file.creationTime = rAsset.creationTime;
     file.modificationTime = rAsset.modificationTime;
-    file.fileSubType = rAsset.subType;
-    file.collectionID = collection.collectionID;
     return file;
   }
+
+  int get remoteID {
+    if (rAsset != null) {
+      return rAsset!.id;
+    } else {
+      throw Exception("Remote ID is not set for the file");
+    }
+  }
+
+  String? get hash => rAsset?.hash;
+
+  int? get fileSubType => rAsset?.subType ?? lAsset?.subtype;
+
+  int? get uploadedFileID => rAsset?.id;
+
+  int? get durationInSec => rAsset?.durationInSec ?? lAsset?.duration;
+
+  String? get title => rAsset?.title ?? lAsset?.title;
+
+  int? get collectionID => cf?.collectionID;
 
   Future<AssetEntity?> get getAsset {
     if (localID == null) {
@@ -204,7 +207,6 @@ class EnteFile {
   EnteFile copyWith({
     int? generatedID,
     int? ownerID,
-    int? collectionID,
     String? localID,
     String? deviceFolder,
     int? creationTime,
@@ -212,8 +214,6 @@ class EnteFile {
     int? updationTime,
     Location? location,
     FileType? fileType,
-    int? fileSubType,
-    String? hash,
     int? metadataVersion,
     int? fileSize,
   }) {
@@ -223,14 +223,11 @@ class EnteFile {
       ..cf = cf
       ..generatedID = generatedID ?? this.generatedID
       ..ownerID = ownerID ?? this.ownerID
-      ..collectionID = collectionID ?? this.collectionID
       ..localID = localID ?? this.localID
       ..deviceFolder = deviceFolder ?? this.deviceFolder
       ..creationTime = creationTime ?? this.creationTime
       ..modificationTime = modificationTime ?? this.modificationTime
       ..location = location ?? this.location
-      ..fileType = fileType ?? this.fileType
-      ..fileSubType = fileSubType ?? this.fileSubType
-      ..hash = hash ?? this.hash;
+      ..fileType = fileType ?? this.fileType;
   }
 }

@@ -2,7 +2,6 @@ import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/constants.dart";
-import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/db/remote/table/collection_files.dart";
 import "package:photos/generated/l10n.dart";
