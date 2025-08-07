@@ -734,14 +734,14 @@ class VideoPreviewService {
       );
       return (null, true, null);
     }
-    if (enteFile.fileSize == null || enteFile.duration == null) {
+    if (enteFile.fileSize == null || enteFile.durationInSec == null) {
       _logger.warning(
         "Skip Preview due to misisng size/duration for ${enteFile.displayName}",
       );
       return (null, true, null);
     }
     final int size = enteFile.fileSize!;
-    final int duration = enteFile.duration!;
+    final int duration = enteFile.durationInSec!;
     if (size >= 500 * 1024 * 1024 || duration > 60) {
       _logger.info(
         "Skip Preview due to size: $size or duration: $duration",

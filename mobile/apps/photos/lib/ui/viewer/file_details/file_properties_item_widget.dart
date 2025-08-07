@@ -86,11 +86,11 @@ class _FilePropertiesItemWidgetState extends State<FilePropertiesItemWidget> {
     );
 
     if ((widget.file.fileType == FileType.video) &&
-        (widget.file.localID != null || widget.file.duration != 0)) {
-      if (widget.file.duration != 0) {
+        (widget.file.localID != null || widget.file.durationInSec != 0)) {
+      if (widget.file.durationInSec != 0) {
         subSectionWidgets.add(
           Text(
-            secondsToHHMMSS(widget.file.duration!),
+            secondsToHHMMSS(widget.file.durationInSec!),
             style: textStyle,
           ),
         );

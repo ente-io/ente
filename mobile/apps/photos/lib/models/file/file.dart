@@ -34,7 +34,7 @@ class EnteFile {
   late Location? location;
   late FileType fileType;
   int? fileSubType;
-  int? duration;
+  int? get durationInSec => rAsset?.durationInSec ?? lAsset?.duration;
   String? hash;
 
   EnteFile();
@@ -64,7 +64,6 @@ class EnteFile {
     file.creationTime = asset.createDateTime.microsecondsSinceEpoch;
     file.modificationTime = asset.modifiedDateTime.microsecondsSinceEpoch;
     file.fileSubType = asset.subtype;
-    file.duration = asset.duration;
     return file;
   }
 
@@ -96,7 +95,6 @@ class EnteFile {
     file.creationTime = rAsset.creationTime;
     file.modificationTime = rAsset.modificationTime;
     file.fileSubType = rAsset.subType;
-    file.duration = rAsset.durationInSec;
     file.collectionID = collection.collectionID;
     return file;
   }
@@ -215,7 +213,6 @@ class EnteFile {
     Location? location,
     FileType? fileType,
     int? fileSubType,
-    int? duration,
     String? hash,
     int? metadataVersion,
     int? fileSize,
@@ -234,7 +231,6 @@ class EnteFile {
       ..location = location ?? this.location
       ..fileType = fileType ?? this.fileType
       ..fileSubType = fileSubType ?? this.fileSubType
-      ..duration = duration ?? this.duration
       ..hash = hash ?? this.hash;
   }
 }

@@ -377,7 +377,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                                           )
                                         : const SizedBox();
                                   },
-                                  valueListenable: _isPlaybackReady, 
+                                  valueListenable: _isPlaybackReady,
                                 ),
                               ),
                             ),
@@ -516,8 +516,8 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
 
   void _onPlaybackStatusChanged() {
     if (widget.isFromMemories) return;
-    final duration = widget.file.duration != null
-        ? widget.file.duration! * 1000
+    final duration = widget.file.durationInSec != null
+        ? widget.file.durationInSec! * 1000
         : _controller?.videoInfo?.durationInMilliseconds;
 
     if (_isSeeking.value ||
@@ -720,8 +720,8 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     if (widget.playlistData != null && widget.selectedPreview) {
       aspectRatio = widget.playlistData!.width! / widget.playlistData!.height!;
       if (duration == "0:00" || duration == null) {
-        if ((widget.file.duration ?? 0) > 0) {
-          duration = secondsToDuration(widget.file.duration!);
+        if ((widget.file.durationInSec ?? 0) > 0) {
+          duration = secondsToDuration(widget.file.durationInSec!);
         } else if (widget.playlistData!.durationInSeconds != null) {
           duration = secondsToDuration(
             widget.playlistData!.durationInSeconds!,

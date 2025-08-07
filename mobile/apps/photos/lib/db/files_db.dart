@@ -611,7 +611,6 @@ class FilesDB with SqlDbBase {
     // file.fileDecryptionHeader = row[columnFileDecryptionHeader];
     // file.thumbnailDecryptionHeader = row[columnThumbnailDecryptionHeader];
     file.fileSubType = row[columnFileSubType] ?? -1;
-    file.duration = row[columnDuration] ?? 0;
     // file.exif = row[columnExif];
     file.hash = row[columnHash];
     // file.metadataVersion = row[columnMetadataVersion] ?? 0;
