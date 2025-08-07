@@ -21,7 +21,7 @@ class HomeHeaderWidget extends StatefulWidget {
 }
 
 class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
-  bool _hasLoadedFiles = false;
+  bool _hasLoadedFiles = false; // Added state
 
   @override
   void initState() {

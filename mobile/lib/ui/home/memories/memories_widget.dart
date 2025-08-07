@@ -75,10 +75,7 @@ class _MemoriesWidgetState extends State<MemoriesWidget> {
     if (!memoriesCacheService.showAnyMemories) {
       return const SizedBox.shrink();
     }
-    return Container(
-      color: Colors.white,
-      child: _memories(),
-    );
+    return _memories();
   }
 
   Widget _memories() {
