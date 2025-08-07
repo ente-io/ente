@@ -3,6 +3,7 @@ import "dart:async";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
+import "package:photos/generated/l10n.dart";
 
 import "package:photos/models/file/file.dart";
 import "package:photos/models/selected_files.dart";
@@ -16,6 +17,7 @@ import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
+import "package:photos/utils/delete_file_util.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/standalone/data.dart";
@@ -319,7 +321,10 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                                 "Delete $selectedCount photos", // TODO: lau: extract string
                             buttonType: ButtonType.critical,
                             onTap: () async {
-                              // TODO: Implement delete functionality
+                              await _deleteFiles(
+                                _selectedFiles.files,
+                                showDialog: true,
+                              );
                             },
                           ),
                         ),
@@ -460,14 +465,19 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                   builder: (context, _) {
                     final groupSelectedFiles = similarFiles.files
                         .where((file) => _selectedFiles.isFileSelected(file))
-                        .toList();
+                        .toSet();
+                    final bool allFilesFromGroupSelected =
+                        groupSelectedFiles.length == similarFiles.length;
                     final hasAnySelection = _selectedFiles.files.isNotEmpty;
                     final allGroupFilesSelected = similarFiles.files.every(
                       (file) => _selectedFiles.isFileSelected(file),
                     );
 
                     if (groupSelectedFiles.isNotEmpty) {
-                      return _getSmallDeleteButton(groupSelectedFiles);
+                      return _getSmallDeleteButton(
+                        groupSelectedFiles,
+                        allFilesFromGroupSelected,
+                      );
                     } else if (hasAnySelection) {
                       return _getSmallSelectButton(allGroupFilesSelected, () {
                         if (allGroupFilesSelected) {
@@ -643,7 +653,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     );
   }
 
-  Widget _getSmallDeleteButton(List<EnteFile> files) {
+  Widget _getSmallDeleteButton(Set<EnteFile> files, bool showDialog) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
 
@@ -653,7 +663,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
 
     return GestureDetector(
       onTap: () async {
-        // TODO: Implement delete functionality
+        await _deleteFiles(files, showDialog: showDialog);
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -680,6 +690,51 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _deleteFiles(
+    Set<EnteFile> filesToDelete, {
+    bool showDialog = true,
+  }) async {
+    if (filesToDelete.isEmpty) return;
+    if (showDialog) {
+      final actionResult = await showChoiceActionSheet(
+        context,
+        title: "Delete files", // TODO: lau: extract string
+        body:
+            "Are you sure you want to delete these files?", // TODO: lau: extract string
+        firstButtonLabel: S.of(context).delete,
+        isCritical: true,
+        firstButtonOnTap: () async {
+          try {
+            await _deleteFilesLogic(filesToDelete);
+          } catch (e, s) {
+            _logger.severe("Failed to delete files", e, s);
+            if (flagService.internalUser) {
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          }
+        },
+      );
+    } else {
+      await _deleteFilesLogic(filesToDelete);
+    }
+  }
+
+  Future<void> _deleteFilesLogic(Set<EnteFile> filesToDelete) async {
+    _selectedFiles.unSelectAll(filesToDelete);
+    for (final file in filesToDelete) {
+      for (final similarGroup in _similarFilesList) {
+        if (similarGroup.containsFile(file)) {
+          similarGroup.removeFile(file);
+          if (similarGroup.isEmpty) {
+            _similarFilesList.remove(similarGroup);
+          }
+        }
+      }
+    }
+    setState(() {});
+    await deleteFilesFromRemoteOnly(context, filesToDelete.toList());
   }
 
   Widget _getSmallSelectButton(bool unselectAll, void Function() onTap) {
