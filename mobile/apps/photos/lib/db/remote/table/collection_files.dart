@@ -98,7 +98,7 @@ extension CollectionFiles on RemoteDB {
     Set<int> collectionIDs,
   ) async {
     final rows = await sqliteDB.getAll(
-      "SELECT * FROM collection_files JOIN files on collection_files.file_id=files.id WHERE collection_id IN (${collectionIDs.join(",")}) ORDER BY creation_time DESC",
+      "SELECT collection_files.* FROM collection_files JOIN files on collection_files.file_id=files.id WHERE collection_id IN (${collectionIDs.join(",")}) ORDER BY creation_time DESC",
     );
     return rows
         .map((row) => CollectionFile.fromMap(row))
@@ -109,7 +109,7 @@ extension CollectionFiles on RemoteDB {
     List<int> fileIDs,
   ) async {
     final rows = await sqliteDB.getAll(
-      "SELECT * FROM collection_files JOIN files on collection_files.file_id=files.id WHERE file_id IN (${fileIDs.join(",")})",
+      "SELECT collection_files.* FROM collection_files JOIN files on collection_files.file_id=files.id WHERE file_id IN (${fileIDs.join(",")})",
     );
     final Map<int, CollectionFile> result = {};
     for (var row in rows) {
@@ -121,7 +121,7 @@ extension CollectionFiles on RemoteDB {
 
   Future<List<CollectionFile>> getAllFiles(int userID) {
     return sqliteDB.getAll(
-      "SELECT * FROM collection_files JOIN files ON collection_files.file_id = files.id WHERE files.owner_id = ? ORDER BY files.creation_time DESC",
+      "SELECT collection_files.* FROM collection_files JOIN files ON collection_files.file_id = files.id WHERE files.owner_id = ? ORDER BY files.creation_time DESC",
       [userID],
     ).then(
       (rows) => rows.map((row) => CollectionFile.fromMap(row)).toList(),
@@ -156,7 +156,7 @@ extension CollectionFiles on RemoteDB {
     if (hashes.isEmpty) return [];
     final inParam = hashes.map((e) => "'$e'").join(',');
     final rows = await sqliteDB.getAll(
-      "SELECT * FROM collection_files JOIN files ON collection_files.file_id = files.id WHERE files.hash IN ($inParam) AND files.owner_id = ?",
+      "SELECT collection_files.* FROM collection_files JOIN files ON collection_files.file_id = files.id WHERE files.hash IN ($inParam) AND files.owner_id = ?",
       [ownerID],
     );
     return rows
@@ -176,7 +176,7 @@ extension CollectionFiles on RemoteDB {
       }
     }
     final sortedRow = await sqliteDB.getOptional(
-      "SELECT * FROM collection_files join files on files.id= collection_files.file_id WHERE collection_id = ? ORDER BY files.creation_time ${sortInAsc ? 'ASC' : 'DESC'} LIMIT 1",
+      "SELECT collection_files.* FROM collection_files join files on files.id= collection_files.file_id WHERE collection_id = ? ORDER BY files.creation_time ${sortInAsc ? 'ASC' : 'DESC'} LIMIT 1",
       [collectionID],
     );
     if (sortedRow != null) {
@@ -223,7 +223,7 @@ extension CollectionFiles on RemoteDB {
       final start = duration[0];
       final end = duration[1];
       final rows = await sqliteDB.getAll(
-        "SELECT * FROM collection_files join files on files.id=collection_files.file_id WHERE files.creation_time BETWEEN ? AND ? AND collection_id NOT IN (${ignoredCollectionIDs.join(",")}) ORDER BY creation_time $order",
+        "SELECT collection_files.* FROM collection_files join files on files.id=collection_files.file_id WHERE files.creation_time BETWEEN ? AND ? AND collection_id NOT IN (${ignoredCollectionIDs.join(",")}) ORDER BY creation_time $order",
         [start, end],
       );
       result.addAll(rows.map((row) => CollectionFile.fromMap(row)));
@@ -234,7 +234,7 @@ extension CollectionFiles on RemoteDB {
   Future<List<CollectionFile>> filesWithLocation() {
     return sqliteDB
         .getAll(
-          "SELECT * FROM collection_files JOIN files ON collection_files.file_id = files.id WHERE files.lat IS NOT NULL and files.lng IS NOT NULL order by files.creation_time desc",
+          "SELECT collection_files.* FROM collection_files JOIN files ON collection_files.file_id = files.id WHERE files.lat IS NOT NULL and files.lng IS NOT NULL order by files.creation_time desc",
         )
         .then(
           (rows) => rows.map((row) => CollectionFile.fromMap(row)).toList(),
