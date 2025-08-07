@@ -26,7 +26,7 @@ class EnteFile {
   int? ownerID;
   int? collectionID;
   String? localID;
-  String? get title => rAsset?.title ?? lAsset?.title;
+
   String? deviceFolder;
   int? creationTime;
   int? modificationTime;
@@ -35,7 +35,6 @@ class EnteFile {
   late FileType fileType;
   int? fileSubType;
   int? duration;
-  String? exif;
   String? hash;
   int? metadataVersion;
 
@@ -85,6 +84,8 @@ class EnteFile {
   }
 
   int? get uploadedFileID => rAsset?.id;
+
+  String? get title => rAsset?.title ?? lAsset?.title;
 
   static EnteFile fromRemoteAsset(
     RemoteAsset rAsset,
@@ -223,7 +224,6 @@ class EnteFile {
     FileType? fileType,
     int? fileSubType,
     int? duration,
-    String? exif,
     String? hash,
     int? metadataVersion,
     int? fileSize,
@@ -244,7 +244,6 @@ class EnteFile {
       ..fileType = fileType ?? this.fileType
       ..fileSubType = fileSubType ?? this.fileSubType
       ..duration = duration ?? this.duration
-      ..exif = exif ?? this.exif
       ..hash = hash ?? this.hash
       ..metadataVersion = metadataVersion ?? this.metadataVersion;
   }
