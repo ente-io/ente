@@ -157,6 +157,23 @@ class UploadLocksDB {
     );
   }
 
+  Future<String> getLockData(String id) async {
+    final db = await instance.database;
+    final rows = await db.query(
+      _uploadLocksTable.table,
+      where: '${_uploadLocksTable.columnID} = ?',
+      whereArgs: [id],
+    );
+    if (rows.isEmpty) {
+      return "No lock found for $id";
+    }
+    final row = rows.first;
+    final time = row[_uploadLocksTable.columnTime] as int;
+    final owner = row[_uploadLocksTable.columnOwner] as String;
+    final duration = DateTime.now().millisecondsSinceEpoch - time;
+    return "Lock for $id acquired by $owner since ${Duration(milliseconds: duration)}";
+  }
+
   Future<bool> isLocked(String id, String owner) async {
     final db = await instance.database;
     final rows = await db.query(

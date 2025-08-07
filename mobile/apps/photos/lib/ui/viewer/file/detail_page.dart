@@ -19,8 +19,7 @@ import "package:photos/services/local_authentication_service.dart";
 import "package:photos/states/detail_page_state.dart";
 import "package:photos/ui/common/fast_scroll_physics.dart";
 import 'package:photos/ui/notification/toast.dart';
-import "package:photos/ui/tools/editor/image_editor/image_editor_page_new.dart";
-import 'package:photos/ui/tools/editor/image_editor_page.dart';
+import "package:photos/ui/tools/editor/image_editor/image_editor_page.dart";
 import "package:photos/ui/tools/editor/video_editor_page.dart";
 import "package:photos/ui/viewer/file/file_app_bar.dart";
 import "package:photos/ui/viewer/file/file_bottom_bar.dart";
@@ -64,16 +63,30 @@ class DetailPageConfiguration {
   }
 }
 
-class DetailPage extends StatefulWidget {
+class DetailPage extends StatelessWidget {
   final DetailPageConfiguration config;
 
   const DetailPage(this.config, {super.key});
 
   @override
-  State<DetailPage> createState() => _DetailPageState();
+  Widget build(BuildContext context) {
+    // Separating body to a different widget to avoid
+    // unnecessary reinitialization of the InheritedDetailPageState
+    // when the body is rebuilt, which can reset state stored in it.
+    return InheritedDetailPageState(child: _Body(config));
+  }
 }
 
-class _DetailPageState extends State<DetailPage> {
+class _Body extends StatefulWidget {
+  final DetailPageConfiguration config;
+
+  const _Body(this.config);
+
+  @override
+  State<_Body> createState() => _BodyState();
+}
+
+class _BodyState extends State<_Body> {
   final _logger = Logger("DetailPageState");
   bool _shouldDisableScroll = false;
   List<EnteFile>? _files;
@@ -137,102 +150,100 @@ class _DetailPageState extends State<DetailPage> {
           _files!.length.toString() +
           " files .",
     );
-    return InheritedDetailPageState(
-      child: PopScope(
-        canPop: !isGuestView,
-        onPopInvokedWithResult: (didPop, _) async {
-          if (isGuestView) {
-            final authenticated = await _requestAuthentication();
-            if (authenticated) {
-              Bus.instance.fire(GuestViewEvent(false, false));
-              await localSettings.setOnGuestView(false);
-            }
+    return PopScope(
+      canPop: !isGuestView,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (isGuestView) {
+          final authenticated = await _requestAuthentication();
+          if (authenticated) {
+            Bus.instance.fire(GuestViewEvent(false, false));
+            await localSettings.setOnGuestView(false);
           }
-        },
-        child: Scaffold(
-          appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(80),
-            child: ValueListenableBuilder(
-              builder: (BuildContext context, int selectedIndex, _) {
-                return FileAppBar(
-                  _files![selectedIndex],
-                  _onFileRemoved,
-                  widget.config.mode == DetailPageMode.full,
-                  enableFullScreenNotifier: InheritedDetailPageState.of(context)
-                      .enableFullScreenNotifier,
-                );
-              },
-              valueListenable: _selectedIndexNotifier,
-            ),
+        }
+      },
+      child: Scaffold(
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(80),
+          child: ValueListenableBuilder(
+            builder: (BuildContext context, int selectedIndex, _) {
+              return FileAppBar(
+                _files![selectedIndex],
+                _onFileRemoved,
+                widget.config.mode == DetailPageMode.full,
+                enableFullScreenNotifier: InheritedDetailPageState.of(context)
+                    .enableFullScreenNotifier,
+              );
+            },
+            valueListenable: _selectedIndexNotifier,
           ),
-          extendBodyBehindAppBar: true,
-          resizeToAvoidBottomInset: false,
-          backgroundColor: Colors.black,
-          body: Center(
-            child: Stack(
-              children: [
-                _buildPageView(),
-                ValueListenableBuilder(
-                  builder: (BuildContext context, int selectedIndex, _) {
-                    return FileBottomBar(
-                      _files![selectedIndex],
-                      _onNewImageEditor,
-                      widget.config.mode == DetailPageMode.minimalistic &&
-                          !isGuestView,
-                      onFileRemoved: _onFileRemoved,
-                      userID: Configuration.instance.getUserID(),
-                      enableFullScreenNotifier:
-                          InheritedDetailPageState.of(context)
-                              .enableFullScreenNotifier,
-                    );
-                  },
-                  valueListenable: _selectedIndexNotifier,
-                ),
-                ValueListenableBuilder(
-                  valueListenable: _selectedIndexNotifier,
-                  builder: (BuildContext context, int selectedIndex, _) {
-                    if (_files![selectedIndex].isPanorama() == true) {
-                      return ValueListenableBuilder(
-                        valueListenable: InheritedDetailPageState.of(context)
+        ),
+        extendBodyBehindAppBar: true,
+        resizeToAvoidBottomInset: false,
+        backgroundColor: Colors.black,
+        body: Center(
+          child: Stack(
+            children: [
+              _buildPageView(),
+              ValueListenableBuilder(
+                builder: (BuildContext context, int selectedIndex, _) {
+                  return FileBottomBar(
+                    _files![selectedIndex],
+                    _onEditFileRequested,
+                    widget.config.mode == DetailPageMode.minimalistic &&
+                        !isGuestView,
+                    onFileRemoved: _onFileRemoved,
+                    userID: Configuration.instance.getUserID(),
+                    enableFullScreenNotifier:
+                        InheritedDetailPageState.of(context)
                             .enableFullScreenNotifier,
-                        builder: (context, value, child) {
-                          return IgnorePointer(
-                            ignoring: value,
-                            child: AnimatedOpacity(
-                              duration: const Duration(milliseconds: 200),
-                              opacity: !value ? 1.0 : 0.0,
-                              child: Align(
-                                alignment: Alignment.center,
-                                child: Tooltip(
-                                  message: S.of(context).panorama,
-                                  child: IconButton(
-                                    style: IconButton.styleFrom(
-                                      backgroundColor: const Color(0xAA252525),
-                                      fixedSize: const Size(44, 44),
-                                    ),
-                                    icon: const Icon(
-                                      Icons.threesixty,
-                                      color: Colors.white,
-                                      size: 26,
-                                    ),
-                                    onPressed: () async {
-                                      await openPanoramaViewerPage(
-                                        _files![selectedIndex],
-                                      );
-                                    },
+                  );
+                },
+                valueListenable: _selectedIndexNotifier,
+              ),
+              ValueListenableBuilder(
+                valueListenable: _selectedIndexNotifier,
+                builder: (BuildContext context, int selectedIndex, _) {
+                  if (_files![selectedIndex].isPanorama() == true) {
+                    return ValueListenableBuilder(
+                      valueListenable: InheritedDetailPageState.of(context)
+                          .enableFullScreenNotifier,
+                      builder: (context, value, child) {
+                        return IgnorePointer(
+                          ignoring: value,
+                          child: AnimatedOpacity(
+                            duration: const Duration(milliseconds: 200),
+                            opacity: !value ? 1.0 : 0.0,
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: Tooltip(
+                                message: S.of(context).panorama,
+                                child: IconButton(
+                                  style: IconButton.styleFrom(
+                                    backgroundColor: const Color(0xAA252525),
+                                    fixedSize: const Size(44, 44),
                                   ),
+                                  icon: const Icon(
+                                    Icons.threesixty,
+                                    color: Colors.white,
+                                    size: 26,
+                                  ),
+                                  onPressed: () async {
+                                    await openPanoramaViewerPage(
+                                      _files![selectedIndex],
+                                    );
+                                  },
                                 ),
                               ),
                             ),
-                          );
-                        },
-                      );
-                    }
-                    return const SizedBox();
-                  },
-                ),
-              ],
-            ),
+                          ),
+                        );
+                      },
+                    );
+                  }
+                  return const SizedBox();
+                },
+              ),
+            ],
           ),
         ),
       ),
@@ -358,68 +369,6 @@ class _DetailPageState extends State<DetailPage> {
     }
   }
 
-  Future<void> _onNewImageEditor(EnteFile file) async {
-    if (file.uploadedFileID != null &&
-        file.ownerID != Configuration.instance.getUserID()) {
-      _logger.severe(
-        "Attempt to edit unowned file",
-        UnauthorizedEditError(),
-        StackTrace.current,
-      );
-      // ignore: unawaited_futures
-      showErrorDialog(
-        context,
-        S.of(context).sorry,
-        S.of(context).weDontSupportEditingPhotosAndAlbumsThatYouDont,
-      );
-      return;
-    }
-    final dialog = createProgressDialog(context, S.of(context).pleaseWait);
-    await dialog.show();
-
-    try {
-      final ioFile = await getFile(file);
-      if (ioFile == null) {
-        showShortToast(context, S.of(context).failedToFetchOriginalForEdit);
-        await dialog.hide();
-        return;
-      }
-      if (file.fileType == FileType.video) {
-        await dialog.hide();
-        replacePage(
-          context,
-          VideoEditorPage(
-            file: file,
-            ioFile: ioFile,
-            detailPageConfig: widget.config.copyWith(
-              files: _files,
-              selectedIndex: _selectedIndexNotifier.value,
-            ),
-          ),
-        );
-        return;
-      }
-      final imageProvider =
-          ExtendedFileImageProvider(ioFile, cacheRawData: true);
-      await precacheImage(imageProvider, context);
-      await dialog.hide();
-      replacePage(
-        context,
-        NewImageEditor(
-          originalFile: file,
-          file: ioFile,
-          detailPageConfig: widget.config.copyWith(
-            files: _files,
-            selectedIndex: _selectedIndexNotifier.value,
-          ),
-        ),
-      );
-    } catch (e) {
-      await dialog.hide();
-      _logger.warning("Failed to initiate edit", e);
-    }
-  }
-
   Future<void> _onEditFileRequested(EnteFile file) async {
     if (file.uploadedFileID != null &&
         file.ownerID != Configuration.instance.getUserID()) {
@@ -438,6 +387,7 @@ class _DetailPageState extends State<DetailPage> {
     }
     final dialog = createProgressDialog(context, S.of(context).pleaseWait);
     await dialog.show();
+
     try {
       final ioFile = await getFile(file);
       if (ioFile == null) {
@@ -467,9 +417,9 @@ class _DetailPageState extends State<DetailPage> {
       replacePage(
         context,
         ImageEditorPage(
-          imageProvider,
-          file,
-          widget.config.copyWith(
+          originalFile: file,
+          file: ioFile,
+          detailPageConfig: widget.config.copyWith(
             files: _files,
             selectedIndex: _selectedIndexNotifier.value,
           ),

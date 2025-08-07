@@ -37,12 +37,12 @@ import "package:photos/utils/navigation_util.dart";
 import "package:pro_image_editor/models/editor_configs/main_editor_configs.dart";
 import 'package:pro_image_editor/pro_image_editor.dart';
 
-class NewImageEditor extends StatefulWidget {
+class ImageEditorPage extends StatefulWidget {
   final ente.EnteFile originalFile;
   final File file;
   final DetailPageConfiguration detailPageConfig;
 
-  const NewImageEditor({
+  const ImageEditorPage({
     super.key,
     required this.file,
     required this.originalFile,
@@ -50,10 +50,10 @@ class NewImageEditor extends StatefulWidget {
   });
 
   @override
-  State<NewImageEditor> createState() => _NewImageEditorState();
+  State<ImageEditorPage> createState() => _ImageEditorPageState();
 }
 
-class _NewImageEditorState extends State<NewImageEditor> {
+class _ImageEditorPageState extends State<ImageEditorPage> {
   final _mainEditorBarKey = GlobalKey<ImageEditorMainBottomBarState>();
   final editorKey = GlobalKey<ProImageEditorState>();
   final _logger = Logger("ImageEditor");

@@ -61,6 +61,15 @@
       "hex": "003A5D"
     },
     {
+      "title": "Animal Crossing",
+      "slug:": "animal_crossing",
+      "altNames": [
+        "AnimalCrossing",
+        "Bell Tree Forums",
+        "BellTree Forums"
+      ]
+    },
+    {
       "title": "Ankama",
       "slug": "ankama"
     },
@@ -79,6 +88,13 @@
       "title": "AR24",
       "altNames": [
         "Docaposte AR24"
+      ]
+    },
+    {
+      "title": "Art Fight",
+      "slug": "art_fight",
+      "altNames": [
+        "ArtFight"
       ]
     },
     {
@@ -340,6 +356,9 @@
       "title": "Channel Island Hosting",
       "slug": "cih",
       "hex": "D14633"
+    },
+    {
+      "title": "Chucklefish"
     },
     {
       "title": "Clipper",
@@ -1506,6 +1525,9 @@
       "title": "Skinport"
     },
     {
+      "title": "Smogon"
+    },
+    {
       "title": "SMSPool",
       "slug": "sms_pool_net",
       "altNames": [
@@ -1665,6 +1687,12 @@
       "title": "TorGuard"
     },
     {
+      "title": "Toyhouse",
+      "altNames": [
+        "Toyhou.se"
+      ]
+    },
+    {
       "title": "Trading 212"
     },
     {
@@ -1686,6 +1714,15 @@
       ]
     },
     {
+      "title": "TU Dresden",
+      "slug": "tu_dresden",
+      "altNames": [
+        "Technische Universität Dresden",
+        "Dresden University of Technology"
+      ],
+      "hex": "00305d"
+    },
+    {
       "title": "Tweakers"
     },
     {
@@ -1697,6 +1734,12 @@
       "altNames": [
         "Twitch.tv",
         "Twitch tv"
+      ]
+    },
+    {
+      "title": "Twitter",
+      "altNames": [
+        "X"
       ]
     },
     {
@@ -1906,6 +1949,22 @@
     {
       "title": "Co-Wheels",
       "slug": "cowheels"
+    },
+    {
+      "title": "Zivver",
+      "slug": "zivver"
+    },
+    {
+      "title": "Meesman Indexbeleggen",
+      "slug": "meesman"
+    },
+    {
+      "title": "Scouting Nederland",
+      "slug": "scoutingnederland"
+    },
+    {
+      "title": "ISC2",
+      "slug": "isc2"
     }
   ]
 }
