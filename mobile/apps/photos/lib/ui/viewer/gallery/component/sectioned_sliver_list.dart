@@ -42,12 +42,6 @@ class SectionedListSliver<T> extends StatelessWidget {
       sectionLayouts: sectionLayouts,
       delegate: SliverChildBuilderDelegate(
         (context, index) {
-          //TODO:
-          // This could be optimized by using a combination of
-          //linear search and binary search depending on the index (use linear
-          //if index is small) or keep track on lastIndex of section and
-          //go to next section after the last index.
-          // Check if the optimization is required.
           if (index >= childCount) return null;
           final sectionLayout = sectionLayouts
               .firstWhereOrNull((section) => section.hasChild(index));
