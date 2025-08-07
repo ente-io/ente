@@ -600,6 +600,7 @@ class GalleryState extends State<Gallery> {
                           ? const NeverScrollableScrollPhysics()
                           : const ExponentialBouncingScrollPhysics(),
                       controller: _scrollController,
+                      cacheExtent: 1000,
                       slivers: [
                         SliverToBoxAdapter(
                           child: SizeChangedLayoutNotifier(
