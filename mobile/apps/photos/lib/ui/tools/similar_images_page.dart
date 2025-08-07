@@ -295,48 +295,51 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         final selectedCount = _selectedFiles.files.length;
         final hasSelectedFiles = selectedCount > 0;
 
-        if (!hasSelectedFiles) {
-          return const SizedBox.shrink();
-        }
-
-        final colorScheme = getEnteColorScheme(context);
-
-        return SafeArea(
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: crossAxisSpacing,
-              vertical: 8,
-            ),
-            decoration: BoxDecoration(
-              color: colorScheme.backgroundBase,
-            ),
-            child: Column(
-              children: [
-                SizedBox(
-                  width: double.infinity,
-                  child: ButtonWidget(
-                    labelText:
-                        "Delete $selectedCount photos", // TODO: lau: extract string
-                    buttonType: ButtonType.critical,
-                    onTap: () async {
-                      // TODO: Implement delete functionality
-                    },
+        return AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          switchInCurve: Curves.easeOut,
+          switchOutCurve: Curves.easeIn,
+          child: hasSelectedFiles
+              ? SafeArea(
+                  child: Container(
+                    key: const ValueKey('bottom_buttons'),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: crossAxisSpacing,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: getEnteColorScheme(context).backgroundBase,
+                    ),
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          width: double.infinity,
+                          child: ButtonWidget(
+                            labelText:
+                                "Delete $selectedCount photos", // TODO: lau: extract string
+                            buttonType: ButtonType.critical,
+                            onTap: () async {
+                              // TODO: Implement delete functionality
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ButtonWidget(
+                            labelText:
+                                "Unselect all", // TODO: lau: extract string
+                            buttonType: ButtonType.secondary,
+                            onTap: () async {
+                              _selectedFiles.clearAll(fireEvent: false);
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                SizedBox(
-                  width: double.infinity,
-                  child: ButtonWidget(
-                    labelText: "Unselect all", // TODO: lau: extract string
-                    buttonType: ButtonType.secondary,
-                    onTap: () async {
-                      _selectedFiles.clearAll(fireEvent: false);
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
+                )
+              : const SizedBox.shrink(key: ValueKey('empty')),
         );
       },
     );
