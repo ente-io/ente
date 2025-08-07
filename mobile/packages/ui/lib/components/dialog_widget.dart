@@ -8,6 +8,8 @@ import 'package:ente_ui/components/buttons/models/button_type.dart';
 import 'package:ente_ui/components/components_constants.dart';
 import 'package:ente_ui/components/separators.dart';
 import 'package:ente_ui/components/text_input_widget.dart';
+import "package:ente_ui/theme/colors.dart";
+import "package:ente_ui/theme/effects.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
 
@@ -24,7 +26,7 @@ Future<ButtonResult?> showDialogWidget({
   return showDialog(
     useRootNavigator: useRootNavigator,
     barrierDismissible: isDismissible,
-    barrierColor: getEnteColorScheme(context).backdropFaint,
+    barrierColor: backdropFaintDark,
     context: context,
     builder: (context) {
       final widthOfScreen = MediaQuery.of(context).size.width;
@@ -70,7 +72,7 @@ class DialogWidget extends StatelessWidget {
           : const EdgeInsets.fromLTRB(6, 8, 6, 6),
       decoration: BoxDecoration(
         color: colorScheme.backgroundElevated,
-        boxShadow: getEnteShadowFloat(context),
+        boxShadow: shadowFloatLight,
         borderRadius: const BorderRadius.all(Radius.circular(8)),
       ),
       child: Material(
@@ -225,7 +227,7 @@ class _TextInputDialogState extends State<TextInputDialog> {
           : const EdgeInsets.fromLTRB(6, 8, 6, 6),
       decoration: BoxDecoration(
         color: colorScheme.backgroundElevated,
-        boxShadow: getEnteShadowFloat(context),
+        boxShadow: shadowFloatLight,
         borderRadius: const BorderRadius.all(Radius.circular(8)),
       ),
       child: Padding(
