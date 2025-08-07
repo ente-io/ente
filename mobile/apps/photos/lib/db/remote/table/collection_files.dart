@@ -87,7 +87,7 @@ extension CollectionFiles on RemoteDB {
     FilterQueryParam? params,
   ) async {
     final rows = await sqliteDB.getAll(
-      "SELECT * FROM collection_files  JOIN files on collection_files.file_id=files.id WHERE ${params?.whereClause() ?? "order by creation_time desc"}",
+      "SELECT collection_files.* FROM collection_files  JOIN files on collection_files.file_id=files.id WHERE ${params?.whereClause() ?? "order by creation_time desc"}",
     );
     return rows
         .map((row) => CollectionFile.fromMap(row))
