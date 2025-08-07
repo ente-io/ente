@@ -4,7 +4,7 @@ import { ensureLocalUser } from "ente-accounts/services/user";
 import { isDesktop } from "ente-base/app";
 import { createComlinkCryptoWorker } from "ente-base/crypto";
 import { type CryptoWorker } from "ente-base/crypto/worker";
-import { lowercaseExtension } from "ente-base/file-name";
+import { lowercaseExtension, nameAndExtension } from "ente-base/file-name";
 import type { PublicAlbumsCredentials } from "ente-base/http";
 import log from "ente-base/log";
 import { ComlinkWorker } from "ente-base/worker/comlink-worker";
@@ -723,8 +723,12 @@ const clusterLivePhotos = async (
         pathPrefix: item.pathPrefix,
     }));
     items
-        .sort((f, g) => f.fileName.localeCompare(g.fileName))
-        .sort((f, g) => f.fileType - g.fileType)
+        .sort((f, g) => {
+            const cmp = nameAndExtension(f.fileName)[0].localeCompare(
+                nameAndExtension(g.fileName)[0],
+            );
+            return cmp == 0 ? f.fileType - g.fileType : cmp;
+        })
         .sort((f, g) => f.collectionID - g.collectionID);
     let index = 0;
     while (index < items.length - 1) {
