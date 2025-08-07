@@ -26,7 +26,7 @@ class EnteFile {
   int? ownerID;
   int? collectionID;
   String? localID;
-  String? title;
+  String? get title => rAsset?.title ?? lAsset?.title;
   String? deviceFolder;
   int? creationTime;
   int? modificationTime;
@@ -49,7 +49,6 @@ class EnteFile {
     final EnteFile file = EnteFile();
     file.lAsset = lAsset;
     file.localID = lAsset.id;
-    file.title = lAsset.title;
     file.deviceFolder = pathName;
     file.location =
         Location(latitude: lAsset.latitude, longitude: lAsset.longitude);
@@ -65,7 +64,6 @@ class EnteFile {
     final EnteFile file = EnteFile();
     file.lAsset = asset;
     file.localID = asset.id;
-    file.title = asset.title;
     file.deviceFolder = asset.relativePath;
     file.location =
         Location(latitude: asset.latitude, longitude: asset.longitude);
@@ -98,7 +96,6 @@ class EnteFile {
     file.cf = collection;
     file.lAsset = lAsset;
     file.ownerID = rAsset.ownerID;
-    file.title = rAsset.title;
     // file.deviceFolder = rAsset.deviceFolder;
     file.location = rAsset.location;
     file.fileType = rAsset.fileType;
@@ -218,7 +215,6 @@ class EnteFile {
     int? ownerID,
     int? collectionID,
     String? localID,
-    String? title,
     String? deviceFolder,
     int? creationTime,
     int? modificationTime,
@@ -240,7 +236,6 @@ class EnteFile {
       ..ownerID = ownerID ?? this.ownerID
       ..collectionID = collectionID ?? this.collectionID
       ..localID = localID ?? this.localID
-      ..title = title ?? this.title
       ..deviceFolder = deviceFolder ?? this.deviceFolder
       ..creationTime = creationTime ?? this.creationTime
       ..modificationTime = modificationTime ?? this.modificationTime

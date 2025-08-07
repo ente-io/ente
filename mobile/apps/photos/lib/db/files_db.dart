@@ -594,7 +594,7 @@ class FilesDB with SqlDbBase {
     file.ownerID = row[columnOwnerID];
     file.collectionID =
         row[columnCollectionID] == -1 ? null : row[columnCollectionID];
-    file.title = row[columnTitle];
+    // file.title = row[columnTitle];
     file.deviceFolder = row[columnDeviceFolder];
     if (row[columnLatitude] != null && row[columnLongitude] != null) {
       file.location = Location(
