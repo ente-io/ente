@@ -373,7 +373,7 @@ class GalleryState extends State<Gallery> {
     _logger.finest("Building Gallery  ${widget.tagPrefix}");
     GalleryFilesState.of(context).setGalleryFiles = _allGalleryFiles;
     if (!_hasLoadedFiles) {
-      return widget.loadingWidget;
+      return const SizedBox.shrink();
     }
     return GalleryContextState(
       sortOrderAsc: _sortOrderAsc,
@@ -394,7 +394,7 @@ class GalleryState extends State<Gallery> {
         logTag: _logTag,
         logger: _logger,
         reloadEvent: widget.reloadEvent,
-        header: widget.header,
+        header: _hasLoadedFiles ? widget.header : null,
         footer: widget.footer,
         selectedFiles: widget.selectedFiles,
         showSelectAllByDefault:

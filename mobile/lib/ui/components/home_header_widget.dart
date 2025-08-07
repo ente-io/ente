@@ -6,10 +6,12 @@ import "package:logging/logging.dart";
 import "package:photo_manager/photo_manager.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/ui/common/loading_widget.dart";
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import "package:photos/ui/settings/backup/backup_folder_selection_page.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
+
 class HomeHeaderWidget extends StatefulWidget {
   final Widget centerWidget;
   const HomeHeaderWidget({required this.centerWidget, super.key});
@@ -19,6 +21,26 @@ class HomeHeaderWidget extends StatefulWidget {
 }
 
 class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
+  bool _hasLoadedFiles = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Simulate the same loading logic as the gallery
+    _checkLoadingState();
+  }
+
+  void _checkLoadingState() {
+    // Simulate loading for a few seconds like the gallery does
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        setState(() {
+          _hasLoadedFiles = true;
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -36,10 +58,14 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
             ),
           ],
         ),
-        AnimatedSwitcher(
-          duration: const Duration(milliseconds: 250),
-          child: widget.centerWidget,
-        ),
+        // Small loading widget in the center - only show when loading
+        !_hasLoadedFiles 
+          ? const SizedBox(
+              width: 24,
+              height: 24,
+              child: EnteLoadingWidget(),
+            )
+          : const SizedBox.shrink(),
         IconButtonWidget(
           icon: Icons.add_photo_alternate_outlined,
           iconButtonType: IconButtonType.primary,
