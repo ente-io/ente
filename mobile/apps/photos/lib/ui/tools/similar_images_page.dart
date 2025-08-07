@@ -698,7 +698,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   }) async {
     if (filesToDelete.isEmpty) return;
     if (showDialog) {
-      final actionResult = await showChoiceActionSheet(
+      final _ = await showChoiceActionSheet(
         context,
         title: "Delete files", // TODO: lau: extract string
         body:
