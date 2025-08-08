@@ -33,6 +33,7 @@ type FeatureFlagResponse struct {
 	EnableMobMultiPart  bool    `json:"enableMobMultiPart"`
 	CastUrl             string  `json:"castUrl"`
 	CustomDomain        *string `json:"customDomain,omitempty"`
+	CustomDomainCNAME   string  `json:"customDomainCNAME,omitempty"`
 }
 
 type FlagKey string
