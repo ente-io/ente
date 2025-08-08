@@ -777,6 +777,8 @@ const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     onClose,
     onRootClose,
 }) => {
+    const { show: showDomainSettings, props: domainSettingsVisibilityProps } =
+        useModalVisibility();
     const { show: showMapSettings, props: mapSettingsVisibilityProps } =
         useModalVisibility();
     const {
@@ -835,7 +837,7 @@ const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                             <ChevronRightIcon />
                         </Stack>
                     }
-                    onClick={showMapSettings}
+                    onClick={showDomainSettings}
                 />
                 <RowButton
                     endIcon={<ChevronRightIcon />}
@@ -857,6 +859,10 @@ const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                     </RowButtonGroup>
                 )}
             </Stack>
+            <DomainSettings
+                {...domainSettingsVisibilityProps}
+                onRootClose={onRootClose}
+            />
             <MapSettings
                 {...mapSettingsVisibilityProps}
                 onRootClose={onRootClose}
@@ -974,6 +980,89 @@ const ThemeSelector = () => {
         </Stack>
     );
 };
+
+const DomainSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
+    open,
+    onClose,
+    onRootClose,
+}) => {
+    // const { showMiniDialog } = useBaseContext();
+
+    // const { mapEnabled } = useSettingsSnapshot();
+
+    // const confirmToggle = useCallback(
+    //     () =>
+    //         showMiniDialog(
+    //             mapEnabled
+    //                 ? confirmDisableMapsDialogAttributes(() =>
+    //                       updateMapEnabled(false),
+    //                   )
+    //                 : confirmEnableMapsDialogAttributes(() =>
+    //                       updateMapEnabled(true),
+    //                   ),
+    //         ),
+    //     [showMiniDialog, mapEnabled],
+    // );
+
+    const handleRootClose = () => {
+        onClose();
+        onRootClose();
+    };
+
+    return (
+        <TitledNestedSidebarDrawer
+            {...{ open, onClose }}
+            onRootClose={handleRootClose}
+            title={pt("Custom domains")}
+            caption={pt("Your albums, your domain")}
+        >
+            <Stack sx={{ px: 2, py: "20px" }}>
+                <DomainItem title={pt("Set your domain")} ordinal={pt("1")}>
+                    <Box />
+                </DomainItem>
+                <Divider />
+                <DomainItem title={pt("Set a CNAME")} ordinal={pt("2")}>
+                    <Box />
+                </DomainItem>
+                <Divider />
+                <DomainItem title={ut("🎉")} ordinal={pt("3")}>
+                    <Box />
+                </DomainItem>
+            </Stack>
+        </TitledNestedSidebarDrawer>
+    );
+};
+
+interface DomainSectionProps {
+    title: string;
+    ordinal: string;
+}
+
+const DomainItem: React.FC<React.PropsWithChildren<DomainSectionProps>> = ({
+    title,
+    ordinal,
+    children,
+}) => (
+    <Stack>
+        <Stack
+            direction="row"
+            sx={{ alignItems: "center", justifyContent: "space-between" }}
+        >
+            <Typography variant="h4">{title}</Typography>
+            <Typography
+                variant="h1"
+                sx={{
+                    minWidth: "28px",
+                    textAlign: "center",
+                    color: "stroke.faint",
+                }}
+            >
+                {ordinal}
+            </Typography>
+        </Stack>
+        {children}
+    </Stack>
+);
 
 const MapSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     open,
