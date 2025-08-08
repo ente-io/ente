@@ -10,7 +10,7 @@ void showToast(
   toastLength = Toast.LENGTH_LONG,
   iOSDismissOnTap = true,
 }) async {
-  // If on mobile and keyboard is visible, render toast above the keyboard using FToast.
+  // If on mobile render toast above the keyboard using FToast.
   final bool isMobile = PlatformUtil.isMobile();
 
   if (isMobile) {
@@ -61,7 +61,7 @@ void showToast(
     return;
   }
 
-  // Default path (Android, desktop, or when keyboard isn't visible)
+  // Default path (desktop)
   try {
     await Fluttertoast.cancel();
     await Fluttertoast.showToast(
