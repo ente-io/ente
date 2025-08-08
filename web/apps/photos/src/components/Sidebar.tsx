@@ -989,29 +989,35 @@ const DomainSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
 }) => {
     // const { showMiniDialog } = useBaseContext();
 
-    // const { mapEnabled } = useSettingsSnapshot();
+    const { customDomain, customDomainCNAME } = useSettingsSnapshot();
 
+    // const handleSubmit = useCallback(async (newName: string) => {
+    //     const newFileName = [newName, extension].filter((x) => !!x).join(".");
+    //     if (newFileName != fileName) {
+    //         await onRename(newFileName);
+    //     }
+    //     onClose();
+    // };
     const handleSubmit = useCallback(() => {
-        console.log("test");
+        // customDomain
+        //         showMiniDialog(
+        //             mapEnabled
+        //                 ? confirmDisableMapsDialogAttributes(() =>
+        //                       updateMapEnabled(false),
+        //                   )
+        //                 : confirmEnableMapsDialogAttributes(() =>
+        //                       updateMapEnabled(true),
+        //                   ),
+        //         ),
+        //     [showMiniDialog, mapEnabled],
     }, []);
-    //         showMiniDialog(
-    //             mapEnabled
-    //                 ? confirmDisableMapsDialogAttributes(() =>
-    //                       updateMapEnabled(false),
-    //                   )
-    //                 : confirmEnableMapsDialogAttributes(() =>
-    //                       updateMapEnabled(true),
-    //                   ),
-    //         ),
-    //     [showMiniDialog, mapEnabled],
-    // );
 
     const handleRootClose = () => {
         onClose();
         onRootClose();
     };
 
-    const customDomain = "";
+    // const customDomain = "";
 
     return (
         <TitledNestedSidebarDrawer
@@ -1028,28 +1034,17 @@ const DomainSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                         placeholder={ut("photos.example.org")}
                         initialValue={customDomain}
                         submitButtonColor="accent"
-                        submitButtonTitle={pt("Set")}
+                        submitButtonTitle={
+                            customDomain ? pt("Update") : pt("Set")
+                        }
                         onSubmit={handleSubmit}
-                        // onCancel={onClose}
-                        slotProps={{
-                            input: {
-                                // Align the adornment text to the input text.
-                                sx: { alignItems: "baseline" },
-
-                                // endAdornment: extension && (
-                                // <InputAdornment position="end">
-                                // {`.${extension}`}
-                                // </InputAdornment>
-                                // ),
-                            },
-                        }}
                     />
                 </DomainItem>
                 <Divider sx={{ mt: 4, mb: 1 }} />
-                <DomainItem title={pt("Add a CNAME")} ordinal={pt("2")}>
+                <DomainItem title={pt("Add DNS")} ordinal={pt("2")}>
                     <Typography sx={{ color: "text.muted" }}>
                         On your DNS provider, add a CNAME from your domain to{" "}
-                        <b>my.ente.io</b>
+                        <b>{customDomainCNAME}</b>
                     </Typography>
                 </DomainItem>
                 <Divider sx={{ mt: 6, mb: 1 }} />
