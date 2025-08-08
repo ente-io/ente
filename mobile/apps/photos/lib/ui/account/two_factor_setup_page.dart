@@ -160,14 +160,14 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
             padding: const EdgeInsets.only(left: 10, right: 10),
             child: Container(
               padding: const EdgeInsets.all(16),
-              color: textColor.withOpacity(0.1),
+              color: textColor.withValues(alpha: 0.1),
               child: Center(
                 child: Text(
                   widget.secretCode,
                   style: TextStyle(
                     fontSize: 15,
                     fontFeatures: const [FontFeature.tabularFigures()],
-                    color: textColor.withOpacity(0.7),
+                    color: textColor.withValues(alpha: 0.7),
                   ),
                 ),
               ),
@@ -176,7 +176,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
           const Padding(padding: EdgeInsets.all(6)),
           Text(
             S.of(context).tapToCopy,
-            style: TextStyle(color: textColor.withOpacity(0.5)),
+            style: TextStyle(color: textColor.withValues(alpha: 0.5)),
           ),
         ],
       ),

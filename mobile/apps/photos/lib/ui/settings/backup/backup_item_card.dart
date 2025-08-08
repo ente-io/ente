@@ -77,7 +77,7 @@ class _BackupItemCardState extends State<BackupItemCard> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(4),
           border: Border.all(
-            color: colorScheme.fillFaint.withOpacity(0.08),
+            color: colorScheme.fillFaint.withValues(alpha: 0.08),
             width: 1,
           ),
         ),

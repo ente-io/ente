@@ -130,7 +130,7 @@ class _VideoWidgetState extends State<VideoWidget> {
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24),
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             border: Border.all(
               color: strokeFaintDark,
               width: 1,

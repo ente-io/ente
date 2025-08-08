@@ -45,3 +45,4 @@ dist/
 
 # FVM Version Cache
 .fvm/
+lib/l10n/arb/*.dart

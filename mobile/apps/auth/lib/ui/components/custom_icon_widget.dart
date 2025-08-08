@@ -28,7 +28,7 @@ class CustomIconWidget extends StatelessWidget {
                   width: 1.5,
                   color: getEnteColorScheme(context)
                       .tagChipSelectedColor
-                      .withOpacity(0.5),
+                      .withValues(alpha: 0.5),
                 ),
                 borderRadius: SmoothBorderRadius(
                   cornerRadius: 15.5,
@@ -102,7 +102,7 @@ class CustomIconWidget extends StatelessWidget {
           child: Icon(
             Icons.edit,
             size: 16,
-            color: Colors.black.withOpacity(0.9),
+            color: Colors.black.withValues(alpha: 0.9),
           ),
         ),
       ),

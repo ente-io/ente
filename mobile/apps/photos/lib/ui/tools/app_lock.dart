@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import "package:flutter_localizations/flutter_localizations.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/utils/lock_screen_settings.dart";
@@ -118,10 +118,10 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
       supportedLocales: appSupportedLocales,
       localeListResolutionCallback: localResolutionCallBack,
       localizationsDelegates: const [
+        S.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
-        S.delegate,
       ],
       onGenerateRoute: (settings) {
         switch (settings.name) {
