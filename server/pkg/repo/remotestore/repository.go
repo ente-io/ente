@@ -3,6 +3,9 @@ package remotestore
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"github.com/ente-io/museum/ente"
+	"github.com/lib/pq"
 
 	"github.com/ente-io/stacktrace"
 )
@@ -21,6 +24,17 @@ func (r *Repository) InsertOrUpdate(ctx context.Context, userID int64, key strin
 		key,    // $2 key_name
 		value,  // $3 key_value
 	)
+
+	if err != nil {
+		// Check for unique violation (PostgreSQL error code 23505)
+		var pgErr *pq.Error
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			if pgErr.Constraint == "remote_store_custom_domain_unique_idx" {
+				return ente.NewConflictError("custom domain already exists for another user")
+			}
+		}
+		return stacktrace.Propagate(err, "failed to insert/update")
+	}
 	return stacktrace.Propagate(err, "failed to insert/update")
 }
 
