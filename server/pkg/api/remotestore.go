@@ -33,6 +33,20 @@ func (h *RemoteStoreHandler) InsertOrUpdate(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+func (h *RemoteStoreHandler) RemoveKey(c *gin.Context) {
+	key := c.Param("key")
+	if key == "" {
+		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("key is missing"), ""))
+		return
+	}
+	err := h.Controller.RemoveKey(c, key)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, "failed to update key's value"))
+		return
+	}
+	c.Status(http.StatusOK)
+}
+
 // GetKey handler for fetching a value for particular key
 func (h *RemoteStoreHandler) GetKey(c *gin.Context) {
 	var request ente.GetValueRequest

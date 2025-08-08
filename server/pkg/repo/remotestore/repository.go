@@ -24,6 +24,15 @@ func (r *Repository) InsertOrUpdate(ctx context.Context, userID int64, key strin
 	return stacktrace.Propagate(err, "failed to insert/update")
 }
 
+func (r *Repository) RemoveKey(ctx context.Context, userID int64, key string) error {
+	_, err := r.DB.ExecContext(ctx, `DELETE FROM remote_store
+		WHERE user_id = $1 AND key_name = $2`,
+		userID, // $1
+		key,    // $2
+	)
+	return stacktrace.Propagate(err, "failed to remove key")
+}
+
 // GetValue fetches and return the value for given user_id and key
 func (r *Repository) GetValue(ctx context.Context, userID int64, key string) (string, error) {
 	rows := r.DB.QueryRowContext(ctx, `SELECT key_value FROM remote_store

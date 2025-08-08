@@ -23,15 +23,16 @@ type AdminUpdateKeyValueRequest struct {
 type FeatureFlagResponse struct {
 	EnableStripe bool `json:"enableStripe"`
 	// If true, the mobile client will stop using CF worker to download files
-	DisableCFWorker     bool   `json:"disableCFWorker"`
-	MapEnabled          bool   `json:"mapEnabled"`
-	FaceSearchEnabled   bool   `json:"faceSearchEnabled"`
-	PassKeyEnabled      bool   `json:"passKeyEnabled"`
-	RecoveryKeyVerified bool   `json:"recoveryKeyVerified"`
-	InternalUser        bool   `json:"internalUser"`
-	BetaUser            bool   `json:"betaUser"`
-	EnableMobMultiPart  bool   `json:"enableMobMultiPart"`
-	CastUrl             string `json:"castUrl"`
+	DisableCFWorker     bool    `json:"disableCFWorker"`
+	MapEnabled          bool    `json:"mapEnabled"`
+	FaceSearchEnabled   bool    `json:"faceSearchEnabled"`
+	PassKeyEnabled      bool    `json:"passKeyEnabled"`
+	RecoveryKeyVerified bool    `json:"recoveryKeyVerified"`
+	InternalUser        bool    `json:"internalUser"`
+	BetaUser            bool    `json:"betaUser"`
+	EnableMobMultiPart  bool    `json:"enableMobMultiPart"`
+	CastUrl             string  `json:"castUrl"`
+	CustomDomain        *string `json:"customDomain,omitempty"`
 }
 
 type FlagKey string
@@ -43,7 +44,23 @@ const (
 	PassKeyEnabled      FlagKey = "passKeyEnabled"
 	IsInternalUser      FlagKey = "internalUser"
 	IsBetaUser          FlagKey = "betaUser"
+	CustomDomain        FlagKey = "customDomain"
 )
+
+var validFlagKeys = map[FlagKey]struct{}{
+	RecoveryKeyVerified: {},
+	MapEnabled:          {},
+	FaceSearchEnabled:   {},
+	PassKeyEnabled:      {},
+	IsInternalUser:      {},
+	IsBetaUser:          {},
+	CustomDomain:        {},
+}
+
+func IsValidFlagKey(key string) bool {
+	_, exists := validFlagKeys[FlagKey(key)]
+	return exists
+}
 
 func (k FlagKey) String() string {
 	return string(k)
@@ -52,11 +69,19 @@ func (k FlagKey) String() string {
 // UserEditable returns true if the key is user editable
 func (k FlagKey) UserEditable() bool {
 	switch k {
-	case RecoveryKeyVerified, MapEnabled, FaceSearchEnabled, PassKeyEnabled:
+	case RecoveryKeyVerified, MapEnabled, FaceSearchEnabled, PassKeyEnabled, CustomDomain:
 		return true
 	default:
 		return false
 	}
+}
+
+func (k FlagKey) NeedSubscription() bool {
+	return k == CustomDomain
+}
+
+func (k FlagKey) CanRemove() bool {
+	return k == CustomDomain
 }
 
 func (k FlagKey) IsAdminEditable() bool {

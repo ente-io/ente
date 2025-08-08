@@ -213,7 +213,6 @@ func main() {
 	commonBillController := commonbilling.NewController(emailNotificationCtrl, storagBonusRepo, userRepo, usageRepo, billingRepo)
 	appStoreController := controller.NewAppStoreController(defaultPlan,
 		billingRepo, fileRepo, userRepo, commonBillController)
-	remoteStoreController := &remoteStoreCtrl.Controller{Repo: remoteStoreRepository}
 	playStoreController := controller.NewPlayStoreController(defaultPlan,
 		billingRepo, fileRepo, userRepo, storagBonusRepo, commonBillController)
 	stripeController := controller.NewStripeController(plans, stripeClients,
@@ -222,6 +221,8 @@ func main() {
 		appStoreController, playStoreController, stripeController,
 		discordController, emailNotificationCtrl,
 		billingRepo, userRepo, usageRepo, storagBonusRepo, commonBillController)
+	remoteStoreController := &remoteStoreCtrl.Controller{Repo: remoteStoreRepository, BillingCtrl: billingController}
+
 	pushController := controller.NewPushController(pushRepo, taskLockingRepo, hostName)
 	mailingListsController := controller.NewMailingListsController()
 
@@ -788,6 +789,7 @@ func main() {
 	remoteStoreHandler := &api.RemoteStoreHandler{Controller: remoteStoreController}
 
 	privateAPI.POST("/remote-store/update", remoteStoreHandler.InsertOrUpdate)
+	privateAPI.DELETE("/remote-store/:key", remoteStoreHandler.RemoveKey)
 	privateAPI.GET("/remote-store", remoteStoreHandler.GetKey)
 	privateAPI.GET("/remote-store/feature-flags", remoteStoreHandler.GetFeatureFlags)
 
