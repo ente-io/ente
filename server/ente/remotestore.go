@@ -1,5 +1,12 @@
 package ente
 
+import (
+	"fmt"
+	"github.com/ente-io/stacktrace"
+	"net/url"
+	"strings"
+)
+
 type GetValueRequest struct {
 	Key          string  `form:"key" binding:"required"`
 	DefaultValue *string `form:"defaultValue"`
@@ -100,7 +107,36 @@ func (k FlagKey) IsBoolType() bool {
 	switch k {
 	case RecoveryKeyVerified, MapEnabled, FaceSearchEnabled, PassKeyEnabled, IsInternalUser, IsBetaUser:
 		return true
+	case CustomDomain:
+		return false
 	default:
+		return false // Explicitly handle unexpected cases
+	}
+}
+
+func (k FlagKey) IsValidValue(value string) error {
+	if k.IsBoolType() && value != "true" && value != "false" {
+		return stacktrace.Propagate(NewBadRequestWithMessage(fmt.Sprintf("value %s is not allowed", value)), "value not allowed")
+	}
+	if k == CustomDomain && value != "" {
+		if !isValidCustomDomainURL(value) {
+			return stacktrace.Propagate(NewBadRequestWithMessage(fmt.Sprintf("unexcpeted %s", value)), "url with https://. Also, tt should not end with trailing dash.")
+		}
+		// ensure that it's valid domain that starts with https and does not end with trailing dash.
+		return stacktrace.Propagate(NewBadRequestWithMessage("custom domain cannot be empty"), "custom domain cannot be empty")
+	}
+	return nil
+}
+
+func isValidCustomDomainURL(input string) bool {
+	if !strings.HasPrefix(input, "https://") || strings.HasSuffix(input, "/") {
 		return false
 	}
+
+	u, err := url.Parse(input)
+	if err != nil || u.Scheme != "https" || u.Host == "" {
+		return false
+	}
+
+	return true
 }

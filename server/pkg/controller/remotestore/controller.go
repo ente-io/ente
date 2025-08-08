@@ -26,6 +26,9 @@ func (c *Controller) InsertOrUpdate(ctx *gin.Context, request ente.UpdateKeyValu
 	if err := c._validateRequest(userID, request.Key, request.Value, false); err != nil {
 		return err
 	}
+	if request.Value == "" && ente.FlagKey(request.Key).CanRemove() {
+		return c.Repo.RemoveKey(ctx, userID, request.Key)
+	}
 	return c.Repo.InsertOrUpdate(ctx, userID, request.Key, request.Value)
 }
 
@@ -79,9 +82,6 @@ func (c *Controller) GetFeatureFlags(ctx *gin.Context) (*ente.FeatureFlagRespons
 	}
 	for key, value := range values {
 		flag := ente.FlagKey(key)
-		if !flag.IsBoolType() {
-			continue
-		}
 		switch flag {
 		case ente.RecoveryKeyVerified:
 			response.RecoveryKeyVerified = value == "true"
@@ -109,15 +109,16 @@ func (c *Controller) _validateRequest(userID int64, key, value string, byAdmin b
 		return stacktrace.Propagate(ente.NewBadRequestWithMessage(fmt.Sprintf("key %s is not allowed", key)), "invalid flag key")
 	}
 	flag := ente.FlagKey(key)
+	if err := flag.IsValidValue(value); err != nil {
+		return stacktrace.Propagate(err, "")
+	}
 	if !flag.UserEditable() && !byAdmin {
 		return stacktrace.Propagate(ente.NewBadRequestWithMessage(fmt.Sprintf("key %s is not user editable", key)), "key not user editable")
 	}
 	if byAdmin && !flag.IsAdminEditable() {
 		return stacktrace.Propagate(ente.NewBadRequestWithMessage(fmt.Sprintf("key %s is not admin editable", key)), "key not admin editable")
 	}
-	if flag.IsBoolType() && value != "true" && value != "false" {
-		return stacktrace.Propagate(ente.NewBadRequestWithMessage(fmt.Sprintf("value %s is not allowed", value)), "value not allowed")
-	}
+
 	if flag.NeedSubscription() {
 		return c.BillingCtrl.HasActiveSelfOrFamilySubscription(userID, true)
 	}
