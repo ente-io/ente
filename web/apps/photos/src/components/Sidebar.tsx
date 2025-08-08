@@ -1,4 +1,3 @@
-import { SingleInputForm } from "ente-base/components/SingleInputForm";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import CategoryIcon from "@mui/icons-material/Category";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -36,6 +35,7 @@ import {
     RowButtonGroupHint,
     RowSwitch,
 } from "ente-base/components/RowButton";
+import { SingleInputForm } from "ente-base/components/SingleInputForm";
 import { SpacedRow } from "ente-base/components/containers";
 import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
@@ -831,8 +831,25 @@ const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                             <Box
                                 sx={{
                                     width: "8px",
-                                    bgcolor: "accent.main",
+                                    bgcolor: "stroke.faint",
                                     alignSelf: "stretch",
+                                    mr: 0.5,
+                                }}
+                            />
+                            <Box
+                                sx={{
+                                    width: "8px",
+                                    bgcolor: "stroke.muted",
+                                    alignSelf: "stretch",
+                                    mr: 0.5,
+                                }}
+                            />
+                            <Box
+                                sx={{
+                                    width: "8px",
+                                    bgcolor: "stroke.base",
+                                    alignSelf: "stretch",
+                                    opacity: 0.3,
                                     mr: 1.5,
                                 }}
                             />
@@ -999,28 +1016,36 @@ const DomainSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
         <TitledNestedSidebarDrawer
             {...{ open, onClose }}
             onRootClose={handleRootClose}
-            title={pt("Custom domain")}
+            title={pt("Custom domains")}
             // caption={pt("Your albums, your domain")}
             caption="Use your own domain when sharing"
         >
             <Stack sx={{ px: 2, py: "12px" }}>
-                <DomainItem title={pt("Set your domain")} ordinal={pt("1")}>
+                <DomainItem title={pt("Link your domain")} ordinal={pt("1")}>
+                    <Typography sx={{ color: "text.muted" }}>
+                        Any domain or subdomain you own
+                    </Typography>
                     <SingleInputForm
                         label={t("Domain")}
                         placeholder={ut("photos.example.org")}
                         initialValue={customDomain}
                         submitButtonColor="accent"
                         submitButtonTitle={
-                            customDomain ? pt("Update") : pt("Set")
+                            customDomain ? pt("Update") : pt("Save")
                         }
                         onSubmit={updateCustomDomain}
                     />
                 </DomainItem>
                 <Divider sx={{ mt: 4, mb: 1 }} />
-                <DomainItem title={pt("Add DNS")} ordinal={pt("2")}>
+                <DomainItem title={pt("Add DNS entry")} ordinal={pt("2")}>
                     <Typography sx={{ color: "text.muted" }}>
                         On your DNS provider, add a CNAME from your domain to{" "}
-                        <b>{customDomainCNAME}</b>
+                        <Typography
+                            component="span"
+                            sx={{ fontWeight: "bold", color: "text.base" }}
+                        >
+                            {customDomainCNAME}
+                        </Typography>
                     </Typography>
                 </DomainItem>
                 <Divider sx={{ mt: 6, mb: 1 }} />
@@ -1029,7 +1054,7 @@ const DomainSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                         Within 1 hour, your public albums will be accessible via
                         your domain!
                     </Typography>
-                    <Typography sx={{ color: "text.muted", mt: 2 }}>
+                    <Typography sx={{ color: "text.muted", mt: 3 }}>
                         For more information, see
                         <Typography
                             component="span"
