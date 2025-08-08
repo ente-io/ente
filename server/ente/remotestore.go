@@ -120,10 +120,8 @@ func (k FlagKey) IsValidValue(value string) error {
 	}
 	if k == CustomDomain && value != "" {
 		if !isValidCustomDomainURL(value) {
-			return stacktrace.Propagate(NewBadRequestWithMessage(fmt.Sprintf("unexcpeted %s", value)), "url with https://. Also, tt should not end with trailing dash.")
+			return stacktrace.Propagate(NewBadRequestWithMessage(fmt.Sprintf("invalid domain fmt: %s", value)), "url with https://. Also, tt should not end with trailing dash.")
 		}
-		// ensure that it's valid domain that starts with https and does not end with trailing dash.
-		return stacktrace.Propagate(NewBadRequestWithMessage("custom domain cannot be empty"), "custom domain cannot be empty")
 	}
 	return nil
 }

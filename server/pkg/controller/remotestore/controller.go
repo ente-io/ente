@@ -109,7 +109,7 @@ func (c *Controller) DomainOwner(ctx *gin.Context, domain string) (*int64, error
 }
 
 func (c *Controller) _validateRequest(userID int64, key, value string, byAdmin bool) error {
-	if ente.IsValidFlagKey(key) {
+	if !ente.IsValidFlagKey(key) {
 		return stacktrace.Propagate(ente.NewBadRequestWithMessage(fmt.Sprintf("key %s is not allowed", key)), "invalid flag key")
 	}
 	flag := ente.FlagKey(key)
