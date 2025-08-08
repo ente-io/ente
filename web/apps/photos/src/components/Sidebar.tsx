@@ -51,6 +51,7 @@ import {
 import { useBaseContext } from "ente-base/context";
 import {
     getLocaleInUse,
+    pt,
     setLocaleInUse,
     supportedLocales,
     ut,
@@ -816,6 +817,26 @@ const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                         />
                     </RowButtonGroup>
                 )}
+                <RowButton
+                    label={pt("Custom domains")}
+                    endIcon={
+                        <Stack
+                            direction="row"
+                            sx={{ alignSelf: "stretch", alignItems: "center" }}
+                        >
+                            <Box
+                                sx={{
+                                    width: "8px",
+                                    bgcolor: "accent.main",
+                                    alignSelf: "stretch",
+                                    mr: 1.5,
+                                }}
+                            />
+                            <ChevronRightIcon />
+                        </Stack>
+                    }
+                    onClick={showMapSettings}
+                />
                 <RowButton
                     endIcon={<ChevronRightIcon />}
                     label={t("map")}
