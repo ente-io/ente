@@ -1,3 +1,4 @@
+import { SingleInputForm } from "ente-base/components/SingleInputForm";
 import ArchiveOutlinedIcon from "@mui/icons-material/ArchiveOutlined";
 import CategoryIcon from "@mui/icons-material/Category";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -990,8 +991,9 @@ const DomainSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
 
     // const { mapEnabled } = useSettingsSnapshot();
 
-    // const confirmToggle = useCallback(
-    //     () =>
+    const handleSubmit = useCallback(() => {
+        console.log("test");
+    }, []);
     //         showMiniDialog(
     //             mapEnabled
     //                 ? confirmDisableMapsDialogAttributes(() =>
@@ -1009,24 +1011,62 @@ const DomainSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
         onRootClose();
     };
 
+    const customDomain = "";
+
     return (
         <TitledNestedSidebarDrawer
             {...{ open, onClose }}
             onRootClose={handleRootClose}
-            title={pt("Custom domains")}
-            caption={pt("Your albums, your domain")}
+            title={pt("Custom domain")}
+            // caption={pt("Your albums, your domain")}
+            caption="Use your own domain when sharing"
         >
-            <Stack sx={{ px: 2, py: "20px" }}>
+            <Stack sx={{ px: 2, py: "12px" }}>
                 <DomainItem title={pt("Set your domain")} ordinal={pt("1")}>
-                    <Box />
+                    <SingleInputForm
+                        label={t("Domain")}
+                        placeholder={ut("photos.example.org")}
+                        initialValue={customDomain}
+                        submitButtonColor="accent"
+                        submitButtonTitle={pt("Set")}
+                        onSubmit={handleSubmit}
+                        // onCancel={onClose}
+                        slotProps={{
+                            input: {
+                                // Align the adornment text to the input text.
+                                sx: { alignItems: "baseline" },
+
+                                // endAdornment: extension && (
+                                // <InputAdornment position="end">
+                                // {`.${extension}`}
+                                // </InputAdornment>
+                                // ),
+                            },
+                        }}
+                    />
                 </DomainItem>
-                <Divider />
-                <DomainItem title={pt("Set a CNAME")} ordinal={pt("2")}>
-                    <Box />
+                <Divider sx={{ mt: 4, mb: 1 }} />
+                <DomainItem title={pt("Add a CNAME")} ordinal={pt("2")}>
+                    <Typography sx={{ color: "text.muted" }}>
+                        On your DNS provider, add a CNAME from your domain to{" "}
+                        <b>my.ente.io</b>
+                    </Typography>
                 </DomainItem>
-                <Divider />
+                <Divider sx={{ mt: 6, mb: 1 }} />
                 <DomainItem title={ut("🎉")} ordinal={pt("3")}>
-                    <Box />
+                    <Typography sx={{ color: "text.muted" }}>
+                        Within 1 hour, your public albums will be accessible via
+                        your domain!
+                    </Typography>
+                    <Typography sx={{ color: "text.muted", mt: 2 }}>
+                        For more information, see
+                        <Typography
+                            component="span"
+                            sx={{ color: "accent.main" }}
+                        >
+                            {" help "}
+                        </Typography>
+                    </Typography>
                 </DomainItem>
             </Stack>
         </TitledNestedSidebarDrawer>
