@@ -2,6 +2,7 @@ import 'package:ente_ui/theme/colors.dart';
 import 'package:ente_ui/theme/effects.dart';
 import "package:ente_ui/theme/ente_theme_data.dart";
 import 'package:ente_ui/theme/text_style.dart';
+import "package:ente_ui/theme/theme_config.dart";
 import 'package:flutter/material.dart';
 
 class EnteTheme {
@@ -49,10 +50,12 @@ EnteColorScheme getEnteColorScheme(
     return colorScheme;
   }
 
-  // Fallback to old system if new system is not available
-  return inverse
-      ? Theme.of(context).colorScheme.inverseEnteTheme.colorScheme
-      : Theme.of(context).colorScheme.enteTheme.colorScheme;
+  final brightness = Theme.of(context).brightness;
+
+  return EnteColorScheme.fromApp(
+    AppThemeConfig.currentApp,
+    brightness: brightness,
+  );
 }
 
 EnteTextTheme getEnteTextTheme(

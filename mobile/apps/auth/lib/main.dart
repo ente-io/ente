@@ -30,6 +30,7 @@ import 'package:ente_lock_screen/ui/lock_screen.dart';
 import 'package:ente_logging/logging.dart';
 import 'package:ente_network/network.dart';
 import 'package:ente_strings/l10n/strings_localizations.dart';
+import 'package:ente_ui/theme/theme_config.dart';
 import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
 import 'package:flutter_displaymode/flutter_displaymode.dart';
@@ -90,6 +91,7 @@ void main() async {
 }
 
 Future<void> _runInForeground() async {
+  AppThemeConfig.initialize(EnteApp.auth);
   final savedThemeMode = _themeMode(await AdaptiveTheme.getThemeMode());
   final configuration = Configuration.instance;
   return await _runWithLogs(() async {

@@ -1,3 +1,4 @@
+import "package:ente_ui/theme/theme_config.dart";
 import 'package:flutter/material.dart';
 
 /// This color scheme provides all the colors needed for a modern Flutter app,
@@ -24,6 +25,54 @@ import 'package:flutter/material.dart';
 /// );
 /// ```
 class EnteColorScheme extends ThemeExtension<EnteColorScheme> {
+  factory EnteColorScheme.fromApp(
+    EnteApp app, {
+    Brightness brightness = Brightness.light,
+  }) {
+    final appColors = switch (app) {
+      EnteApp.auth => (
+          primary700: const Color.fromARGB(255, 164, 0, 182),
+          primary500: const Color.fromARGB(255, 204, 10, 101),
+          primary400: const Color.fromARGB(255, 122, 41, 193),
+          primary300: const Color.fromARGB(255, 152, 77, 244),
+          gradientButtonBgColor: const Color(0xFF531DAB),
+          gradientButtonBgColors: const [
+            Color.fromARGB(255, 122, 41, 193),
+            Color.fromARGB(255, 122, 41, 193),
+          ],
+        ),
+      EnteApp.locker => (
+          primary700: const Color.fromARGB(255, 0, 122, 255),
+          primary400: const Color.fromARGB(255, 52, 152, 255),
+          primary500: const Color.fromARGB(255, 102, 178, 255),
+          primary300: const Color.fromARGB(255, 153, 204, 255),
+          gradientButtonBgColor: const Color.fromRGBO(0, 122, 255, 1),
+          gradientButtonBgColors: const [
+            Color.fromRGBO(0, 122, 255, 1),
+            Color.fromRGBO(52, 152, 255, 1),
+          ],
+        ),
+    };
+
+    return brightness == Brightness.light
+        ? EnteColorScheme.light(
+            primary700: appColors.primary700,
+            primary500: appColors.primary500,
+            primary400: appColors.primary400,
+            primary300: appColors.primary300,
+            gradientButtonBgColor: appColors.gradientButtonBgColor,
+            gradientButtonBgColors: appColors.gradientButtonBgColors,
+          )
+        : EnteColorScheme.dark(
+            primary700: appColors.primary700,
+            primary500: appColors.primary500,
+            primary400: appColors.primary400,
+            primary300: appColors.primary300,
+            gradientButtonBgColor: appColors.gradientButtonBgColor,
+            gradientButtonBgColors: appColors.gradientButtonBgColors,
+          );
+  }
+
   // Background Colors
   final Color backgroundBase;
   final Color backgroundElevated;
