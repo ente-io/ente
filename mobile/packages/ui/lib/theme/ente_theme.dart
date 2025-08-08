@@ -1,6 +1,8 @@
 import 'package:ente_ui/theme/colors.dart';
 import 'package:ente_ui/theme/effects.dart';
+import "package:ente_ui/theme/ente_theme_data.dart";
 import 'package:ente_ui/theme/text_style.dart';
+import "package:ente_ui/theme/theme_config.dart";
 import 'package:flutter/material.dart';
 
 class EnteTheme {
@@ -48,22 +50,21 @@ EnteColorScheme getEnteColorScheme(
     return colorScheme;
   }
 
-  // Fallback to old system if new system is not available
-  return inverse
-      ? getEnteColorScheme(context).inverseEnteTheme.colorScheme
-      : getEnteColorScheme(context);
+  final brightness = Theme.of(context).brightness;
+
+  return EnteColorScheme.fromApp(
+    AppThemeConfig.currentApp,
+    brightness: brightness,
+  );
 }
 
 EnteTextTheme getEnteTextTheme(
   BuildContext context, {
   bool inverse = false,
 }) {
-  final isDark = Theme.of(context).brightness == Brightness.dark;
-  if (inverse) {
-    return isDark ? lightTextTheme : darkTextTheme;
-  } else {
-    return isDark ? darkTextTheme : lightTextTheme;
-  }
+  return inverse
+      ? Theme.of(context).colorScheme.inverseEnteTheme.textTheme
+      : Theme.of(context).colorScheme.enteTheme.textTheme;
 }
 
 /// Get theme-aware shadow for floating elements (dialogs, modals, etc.)

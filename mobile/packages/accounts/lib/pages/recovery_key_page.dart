@@ -149,7 +149,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                             colors: [
-                              getEnteColorScheme(context).primary500,
+                              getEnteColorScheme(context).primary700,
                               getEnteColorScheme(context).primary300,
                             ],
                             stops: const [0.0, 0.9753],
@@ -248,7 +248,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
       childrens.add(
         SizedBox(
           height: 56,
-          child: OutlinedButton(
+          child: ElevatedButton(
             onPressed: () async {
               await _saveKeys();
             },

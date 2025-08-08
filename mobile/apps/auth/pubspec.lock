@@ -457,7 +457,7 @@ packages:
     source: path
     version: "1.0.0"
   ente_strings:
-    dependency: transitive
+    dependency: "direct main"
     description:
       path: "../../packages/strings"
       relative: true

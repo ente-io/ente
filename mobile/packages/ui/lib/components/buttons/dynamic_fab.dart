@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:ente_ui/theme/ente_theme.dart';
+import 'package:ente_ui/theme/ente_theme_data.dart';
 import 'package:flutter/material.dart';
 
 class DynamicFAB extends StatelessWidget {
@@ -24,7 +25,7 @@ class DynamicFAB extends StatelessWidget {
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: getEnteColorScheme(context).alternativeColor,
+              color: Theme.of(context).colorScheme.surface,
               spreadRadius: 200,
               blurRadius: 100,
               offset: const Offset(0, 230),
@@ -38,7 +39,7 @@ class DynamicFAB extends StatelessWidget {
             FloatingActionButton(
               heroTag: 'FAB',
               backgroundColor:
-                  getEnteColorScheme(context).dynamicFABBackgroundColor,
+                  Theme.of(context).colorScheme.dynamicFABBackgroundColor,
               foregroundColor: getEnteColorScheme(context).dynamicFABTextColor,
               onPressed: isFormValid!
                   ? onPressedFunction as void Function()?
@@ -64,12 +65,7 @@ class DynamicFAB extends StatelessWidget {
         child: OutlinedButton(
           onPressed:
               isFormValid! ? onPressedFunction as void Function()? : null,
-          child: Text(
-            buttonText!,
-            style: isFormValid!
-                ? getEnteTextTheme(context).body
-                : getEnteTextTheme(context).bodyFaint,
-          ),
+          child: Text(buttonText!),
         ),
       );
     }
