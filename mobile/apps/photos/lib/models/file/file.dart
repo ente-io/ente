@@ -187,12 +187,7 @@ class EnteFile {
   }
 
   String get tag {
-    return "local_" +
-        localID.toString() +
-        ":remote_" +
-        uploadedFileID.toString() +
-        ":generated_" +
-        generatedID.toString();
+    return "local_$localID:remote_$uploadedFileID:generated_$generatedID";
   }
 
   String cacheKey() {
