@@ -104,6 +104,10 @@ func (c *Controller) GetFeatureFlags(ctx *gin.Context) (*ente.FeatureFlagRespons
 	return response, nil
 }
 
+func (c *Controller) DomainOwner(ctx *gin.Context, domain string) (*int64, error) {
+	return c.Repo.DomainOwner(ctx, domain)
+}
+
 func (c *Controller) _validateRequest(userID int64, key, value string, byAdmin bool) error {
 	if ente.IsValidFlagKey(key) {
 		return stacktrace.Propagate(ente.NewBadRequestWithMessage(fmt.Sprintf("key %s is not allowed", key)), "invalid flag key")

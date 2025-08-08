@@ -47,6 +47,24 @@ func (r *Repository) RemoveKey(ctx context.Context, userID int64, key string) er
 	return stacktrace.Propagate(err, "failed to remove key")
 }
 
+func (r *Repository) DomainOwner(ctx context.Context, domain string) (*int64, error) {
+	// Check if the domain is already taken by another user
+	rows := r.DB.QueryRowContext(ctx, `SELECT user_id FROM remote_store
+	   WHERE key_name = $1 AND key_value = $2`,
+		ente.CustomDomain, // $1
+		domain,            // $2
+	)
+	var userID int64
+	err := rows.Scan(&userID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, stacktrace.Propagate(&ente.ErrNotFoundError, "")
+		}
+		return nil, stacktrace.Propagate(err, "failed to fetch domain owner")
+	}
+	return &userID, nil
+}
+
 // GetValue fetches and return the value for given user_id and key
 func (r *Repository) GetValue(ctx context.Context, userID int64, key string) (string, error) {
 	rows := r.DB.QueryRowContext(ctx, `SELECT key_value FROM remote_store

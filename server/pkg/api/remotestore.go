@@ -73,3 +73,18 @@ func (h *RemoteStoreHandler) GetFeatureFlags(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, resp)
 }
+
+// CheckDomain returns 200 ok if the custom domain is claimed by any ente user
+func (h *RemoteStoreHandler) CheckDomain(c *gin.Context) {
+	domain := c.Query("domain")
+	if domain == "" {
+		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("domain is missing"), ""))
+		return
+	}
+	_, err := h.Controller.DomainOwner(c, domain)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, "failed to get feature flags"))
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{})
+}
