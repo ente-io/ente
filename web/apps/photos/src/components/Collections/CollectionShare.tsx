@@ -58,6 +58,7 @@ import type {
 import { type CollectionUser } from "ente-media/collection";
 import type { RemotePullOpts } from "ente-new/photos/components/gallery";
 import { PublicLinkCreated } from "ente-new/photos/components/share/PublicLinkCreated";
+import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import { avatarTextColor } from "ente-new/photos/services/avatar";
 import {
     createPublicURL,
@@ -1105,6 +1106,8 @@ const PublicShare: React.FC<PublicShareProps> = ({
     setBlockingLoad,
     onRemotePull,
 }) => {
+    const { customDomain } = useSettingsSnapshot();
+
     const {
         show: showPublicLinkCreated,
         props: publicLinkCreatedVisibilityProps,
@@ -1126,11 +1129,15 @@ const PublicShare: React.FC<PublicShareProps> = ({
             void appendCollectionKeyToShareURL(
                 publicURL.url,
                 collection.key,
-            ).then((url) => setResolvedURL(url));
+            ).then((url) =>
+                setResolvedURL(
+                    substituteCustomDomainIfNeeded(url, customDomain),
+                ),
+            );
         } else {
             setResolvedURL(undefined);
         }
-    }, [collection.key, publicURL]);
+    }, [collection.key, publicURL, customDomain]);
 
     const handleCopyLink = () => {
         if (resolvedURL) void navigator.clipboard.writeText(resolvedURL);
@@ -1162,6 +1169,16 @@ const PublicShare: React.FC<PublicShareProps> = ({
             />
         </>
     );
+};
+
+const substituteCustomDomainIfNeeded = (
+    url: string,
+    customDomain: string | undefined,
+) => {
+    if (!customDomain) return url;
+    const u = new URL(url);
+    u.host = customDomain;
+    return u.href;
 };
 
 type EnablePublicShareOptionsProps = {

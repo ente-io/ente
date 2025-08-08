@@ -8,7 +8,11 @@ import log from "ente-base/log";
 import { updateShouldDisableCFUploadProxy } from "ente-gallery/services/upload";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
-import { fetchFeatureFlags, updateRemoteFlag } from "./remote-store";
+import {
+    fetchFeatureFlags,
+    updateRemoteFlag,
+    updateRemoteValue,
+} from "./remote-store";
 
 /**
  * In-memory flags that tracks various settings.
@@ -221,6 +225,17 @@ export const isDevBuildAndUser = () => isDevBuild && isDevUserViaEmail();
 
 const isDevUserViaEmail = () =>
     !!savedPartialLocalUser()?.email?.endsWith("@ente.io");
+
+/**
+ * Persist the user's custom domain preference both locally and on remote.
+ *
+ * Setting the value to a blank string is equivalent to deleting the custom
+ * domain value altogether.
+ */
+export const updateCustomDomain = async (customDomain: string) => {
+    await updateRemoteValue("customDomain", customDomain);
+    return pullSettings();
+};
 
 /**
  * Persist the user's map enabled preference both locally and on remote.

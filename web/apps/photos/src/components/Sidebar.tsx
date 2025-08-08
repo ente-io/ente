@@ -90,6 +90,7 @@ import {
     isDevBuildAndUser,
     pullSettings,
     updateCFProxyDisabledPreference,
+    updateCustomDomain,
     updateMapEnabled,
 } from "ente-new/photos/services/settings";
 import {
@@ -987,37 +988,12 @@ const DomainSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     onClose,
     onRootClose,
 }) => {
-    // const { showMiniDialog } = useBaseContext();
-
     const { customDomain, customDomainCNAME } = useSettingsSnapshot();
-
-    // const handleSubmit = useCallback(async (newName: string) => {
-    //     const newFileName = [newName, extension].filter((x) => !!x).join(".");
-    //     if (newFileName != fileName) {
-    //         await onRename(newFileName);
-    //     }
-    //     onClose();
-    // };
-    const handleSubmit = useCallback(() => {
-        // customDomain
-        //         showMiniDialog(
-        //             mapEnabled
-        //                 ? confirmDisableMapsDialogAttributes(() =>
-        //                       updateMapEnabled(false),
-        //                   )
-        //                 : confirmEnableMapsDialogAttributes(() =>
-        //                       updateMapEnabled(true),
-        //                   ),
-        //         ),
-        //     [showMiniDialog, mapEnabled],
-    }, []);
 
     const handleRootClose = () => {
         onClose();
         onRootClose();
     };
-
-    // const customDomain = "";
 
     return (
         <TitledNestedSidebarDrawer
@@ -1037,7 +1013,7 @@ const DomainSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                         submitButtonTitle={
                             customDomain ? pt("Update") : pt("Set")
                         }
-                        onSubmit={handleSubmit}
+                        onSubmit={updateCustomDomain}
                     />
                 </DomainItem>
                 <Divider sx={{ mt: 4, mb: 1 }} />
