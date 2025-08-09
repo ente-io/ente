@@ -1,0 +1,271 @@
+{
+  "error": "Virhe",
+  "@error": {
+    "description": "Generic error title"
+  },
+  "ok": "Selvä",
+  "@ok": {
+    "description": "Generic OK button label"
+  },
+  "faq": "Usein kysyttyä",
+  "@faq": {
+    "description": "FAQ link label"
+  },
+  "contactSupport": "Ota yhteyttä käyttötukeen",
+  "@contactSupport": {
+    "description": "Contact support button label"
+  },
+  "cancel": "Keskeytä",
+  "@cancel": {
+    "description": "Cancel button label"
+  },
+  "reportABug": "Ilmoita virhetoiminnosta",
+  "@reportABug": {
+    "description": "Label for reporting a bug"
+  },
+  "save": "Tallenna",
+  "@save": {
+    "description": "Label for save button"
+  },
+  "send": "Lähetä",
+  "@send": {
+    "description": "Label for send button"
+  },
+  "email": "Sähköposti",
+  "@email": {
+    "description": "Email field label"
+  },
+  "verify": "Vahvista",
+  "@verify": {
+    "description": "Verify button label"
+  },
+  "invalidEmailTitle": "Epäkelpo sähköpostiosoite",
+  "@invalidEmailTitle": {
+    "description": "Title for invalid email error dialog"
+  },
+  "invalidEmailMessage": "Syötä kelpoisa sähköpostiosoite.",
+  "@invalidEmailMessage": {
+    "description": "Message for invalid email error dialog"
+  },
+  "pleaseWait": "Odota hetki...",
+  "@pleaseWait": {
+    "description": "Please wait message"
+  },
+  "verifyPassword": "Vahvista salasana",
+  "@verifyPassword": {
+    "description": "Verify password button label"
+  },
+  "incorrectPasswordTitle": "Salasana on väärin",
+  "@incorrectPasswordTitle": {
+    "description": "Title for incorrect password error"
+  },
+  "pleaseTryAgain": "Yritä uudestaan",
+  "@pleaseTryAgain": {
+    "description": "Message asking user to try again"
+  },
+  "enterPassword": "Syötä salasana",
+  "@enterPassword": {
+    "description": "Enter password field label"
+  },
+  "enterYourPasswordHint": "Syötä salasanasi",
+  "@enterYourPasswordHint": {
+    "description": "Hint for password field"
+  },
+  "oops": "Hupsista",
+  "@oops": {
+    "description": "Oops error title"
+  },
+  "createAccount": "Luo tili",
+  "@createAccount": {
+    "description": "Create account button label"
+  },
+  "weakStrength": "Heikko salasana",
+  "@weakStrength": {
+    "description": "Weak password strength label"
+  },
+  "moderateStrength": "Kohtalainen salasana",
+  "@moderateStrength": {
+    "description": "Moderate password strength label"
+  },
+  "strongStrength": "Vahva salasana",
+  "@strongStrength": {
+    "description": "Strong password strength label"
+  },
+  "deleteAccount": "Poista tili",
+  "@deleteAccount": {
+    "description": "Delete account button label"
+  },
+  "deleteAccountQuery": "Olemme pahoillamme että lähdet keskuudestamme. Kohtasitko käytössä jonkin ongelman?",
+  "@deleteAccountQuery": {
+    "description": "Message asking user why they want to delete account"
+  },
+  "yesSendFeedbackAction": "Kyllä, lähetä palautetta",
+  "@yesSendFeedbackAction": {
+    "description": "Button to confirm sending feedback"
+  },
+  "noDeleteAccountAction": "En, poista tili",
+  "@noDeleteAccountAction": {
+    "description": "Button to proceed with account deletion"
+  },
+  "initiateAccountDeleteTitle": "Ole hyvä ja tee todennus käynnistääksesi tilisi poistoprosessin",
+  "@initiateAccountDeleteTitle": {
+    "description": "Title for authentication dialog before account deletion"
+  },
+  "delete": "Poista",
+  "@delete": {
+    "description": "Delete button label"
+  },
+  "createNewAccount": "Luo uusi tili",
+  "@createNewAccount": {
+    "description": "Create new account button label"
+  },
+  "password": "Salasana",
+  "@password": {
+    "description": "Password field label"
+  },
+  "confirmPassword": "Vahvista salasana",
+  "@confirmPassword": {
+    "description": "Confirm password field label"
+  },
+  "encryption": "Salaus",
+  "@encryption": {
+    "description": "Encryption label"
+  },
+  "logInLabel": "Kirjaudu sisään",
+  "@logInLabel": {
+    "description": "Log in button label"
+  },
+  "welcomeBack": "Tervetuloa takaisin!",
+  "@welcomeBack": {
+    "description": "Welcome back message"
+  },
+  "useRecoveryKey": "Käytä palautusavainta",
+  "@useRecoveryKey": {
+    "description": "Use recovery key button label"
+  },
+  "forgotPassword": "Olen unohtanut salasanani",
+  "@forgotPassword": {
+    "description": "Forgot password link label"
+  },
+  "changeEmail": "vaihda sähköpostiosoitteesi",
+  "@changeEmail": {
+    "description": "Change email button label"
+  },
+  "verifyEmail": "Vahvista sähköpostiosoite",
+  "@verifyEmail": {
+    "description": "Verify email title"
+  },
+  "sendEmail": "Lähetä sähköpostia",
+  "passkeyAuthTitle": "Avainkoodin vahvistus",
+  "@passkeyAuthTitle": {
+    "description": "Passkey authentication title"
+  },
+  "recoverAccount": "Palauta tilisi",
+  "@recoverAccount": {
+    "description": "Recover account button label"
+  },
+  "setPasswordTitle": "Luo salasana",
+  "@setPasswordTitle": {
+    "description": "Set password title"
+  },
+  "changePasswordTitle": "Vaihda salasana",
+  "@changePasswordTitle": {
+    "description": "Change password title"
+  },
+  "resetPasswordTitle": "Nollaa salasana",
+  "@resetPasswordTitle": {
+    "description": "Reset password title"
+  },
+  "encryptionKeys": "Salausavaimet",
+  "@encryptionKeys": {
+    "description": "Encryption keys title"
+  },
+  "generatingEncryptionKeys": "Luodaan salausavaimia...",
+  "@generatingEncryptionKeys": {
+    "description": "Generating encryption keys message"
+  },
+  "passwordChangedSuccessfully": "Salasana vaihdettu onnistuneesti",
+  "@passwordChangedSuccessfully": {
+    "description": "Password changed successfully message"
+  },
+  "generatingEncryptionKeysTitle": "Luodaan salausavaimia...",
+  "@generatingEncryptionKeysTitle": {
+    "description": "Generating encryption keys title"
+  },
+  "continueLabel": "Jatka",
+  "@continueLabel": {
+    "description": "Continue button label"
+  },
+  "recoveryKeyCopiedToClipboard": "Palautusavain kopioitu leikepöydälle",
+  "@recoveryKeyCopiedToClipboard": {
+    "description": "Recovery key copied message"
+  },
+  "recoveryKey": "Palautusavain",
+  "@recoveryKey": {
+    "description": "Recovery key label"
+  },
+  "recoveryKeyOnForgotPassword": "Jos unohdat salasanasi, ainoa tapa palauttaa tietosi on tällä avaimella.",
+  "@recoveryKeyOnForgotPassword": {
+    "description": "Recovery key importance explanation"
+  },
+  "recoveryKeySaveDescription": "Emme tallenna tätä avainta, ole hyvä ja tallenna tämä 24 sanan avain turvalliseen paikkaan.",
+  "@recoveryKeySaveDescription": {
+    "description": "Recovery key save description"
+  },
+  "doThisLater": "Tee tämä myöhemmin",
+  "@doThisLater": {
+    "description": "Do this later button label"
+  },
+  "saveKey": "Tallenna avain",
+  "@saveKey": {
+    "description": "Save key button label"
+  },
+  "noRecoveryKeyTitle": "Ei palautusavainta?",
+  "@noRecoveryKeyTitle": {
+    "description": "No recovery key title"
+  },
+  "twoFactorAuthTitle": "Kaksivaiheinen vahvistus",
+  "@twoFactorAuthTitle": {
+    "description": "Two-factor authentication title"
+  },
+  "enterCodeHint": "Syötä 6-merkkinen koodi varmennussovelluksestasi",
+  "@enterCodeHint": {
+    "description": "Hint for entering 2FA code"
+  },
+  "lostDeviceTitle": "Kadonnut laite?",
+  "@lostDeviceTitle": {
+    "description": "Lost device title"
+  },
+  "enterRecoveryKeyHint": "Syötä palautusavaimesi",
+  "@enterRecoveryKeyHint": {
+    "description": "Hint for entering recovery key"
+  },
+  "recover": "Palauta",
+  "@recover": {
+    "description": "Recover button label"
+  },
+  "loggingOut": "Kirjaudutaan ulos...",
+  "@loggingOut": {
+    "description": "Message shown while logging out"
+  },
+  "yesLogout": "Kyllä, kirjaudu ulos",
+  "@yesLogout": {
+    "description": "Confirmation button for logout"
+  },
+  "androidBiometricSuccess": "Kirjautuminen onnistui",
+  "@androidBiometricSuccess": {
+    "description": "Message to let the user know that authentication was successful. It is used on Android side. Maximum 60 characters."
+  },
+  "androidCancelButton": "Peruuta",
+  "@androidCancelButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on Android side. Maximum 30 characters."
+  },
+  "goToSettings": "Mene asetuksiin",
+  "@goToSettings": {
+    "description": "Message showed on a button that the user can click to go to settings pages from the current dialog. It is used on both Android and iOS side. Maximum 30 characters."
+  },
+  "sessionExpired": "Istunto on vanheutunut",
+  "@sessionExpired": {
+    "description": "Error message when session has expired"
+  }
+}

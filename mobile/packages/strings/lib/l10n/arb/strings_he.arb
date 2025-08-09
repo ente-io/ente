@@ -1,0 +1,478 @@
+{
+  "itLooksLikeSomethingWentWrongPleaseRetryAfterSome": "נראה שמשהו לא פעל כשורה. אנא נסה שוב אחרי כמה זמן. אם הבעיה ממשיכה, אנא צור קשר עם צוות התמיכה שלנו.",
+  "@itLooksLikeSomethingWentWrongPleaseRetryAfterSome": {
+    "description": "Generic error message for temporary issues"
+  },
+  "error": "שגיאה",
+  "@error": {
+    "description": "Generic error title"
+  },
+  "ok": "אוקיי",
+  "@ok": {
+    "description": "Generic OK button label"
+  },
+  "faq": "שאלות נפוצות",
+  "@faq": {
+    "description": "FAQ link label"
+  },
+  "contactSupport": "צור קשר עם התמיכה",
+  "@contactSupport": {
+    "description": "Contact support button label"
+  },
+  "emailYourLogs": "שלח באימייל את הלוגים שלך",
+  "@emailYourLogs": {
+    "description": "Title for emailing logs dialog"
+  },
+  "pleaseSendTheLogsTo": "אנא שלחו את הלוגים האלו ל-{toEmail}",
+  "@pleaseSendTheLogsTo": {
+    "description": "Message asking user to send logs to email address",
+    "placeholders": {
+      "toEmail": {
+        "type": "String",
+        "description": "Email address to send logs to"
+      }
+    }
+  },
+  "copyEmailAddress": "העתק כתובת דוא\"ל",
+  "@copyEmailAddress": {
+    "description": "Button to copy email address to clipboard"
+  },
+  "exportLogs": "ייצוא לוגים",
+  "@exportLogs": {
+    "description": "Button to export logs"
+  },
+  "cancel": "בטל",
+  "@cancel": {
+    "description": "Cancel button label"
+  },
+  "reportABug": "דווח על באג",
+  "@reportABug": {
+    "description": "Label for reporting a bug"
+  },
+  "save": "שמור",
+  "@save": {
+    "description": "Label for save button"
+  },
+  "send": "שלח",
+  "@send": {
+    "description": "Label for send button"
+  },
+  "email": "דוא\"ל",
+  "@email": {
+    "description": "Email field label"
+  },
+  "verify": "אמת",
+  "@verify": {
+    "description": "Verify button label"
+  },
+  "invalidEmailTitle": "כתובת דוא״ל לא תקינה",
+  "@invalidEmailTitle": {
+    "description": "Title for invalid email error dialog"
+  },
+  "invalidEmailMessage": "אנא הכנס כתובת דוא\"ל תקינה.",
+  "@invalidEmailMessage": {
+    "description": "Message for invalid email error dialog"
+  },
+  "pleaseWait": "אנא המתן...",
+  "@pleaseWait": {
+    "description": "Please wait message"
+  },
+  "verifyPassword": "אמת סיסמא",
+  "@verifyPassword": {
+    "description": "Verify password button label"
+  },
+  "incorrectPasswordTitle": "סיסמא לא נכונה",
+  "@incorrectPasswordTitle": {
+    "description": "Title for incorrect password error"
+  },
+  "pleaseTryAgain": "אנא נסה שנית",
+  "@pleaseTryAgain": {
+    "description": "Message asking user to try again"
+  },
+  "enterPassword": "הזן את הסיסמה",
+  "@enterPassword": {
+    "description": "Enter password field label"
+  },
+  "enterYourPasswordHint": "הכנס סיסמא",
+  "@enterYourPasswordHint": {
+    "description": "Hint for password field"
+  },
+  "activeSessions": "חיבורים פעילים",
+  "@activeSessions": {
+    "description": "Title for active sessions page"
+  },
+  "oops": "אופס",
+  "@oops": {
+    "description": "Oops error title"
+  },
+  "somethingWentWrongPleaseTryAgain": "משהו השתבש, אנא נסה שנית",
+  "@somethingWentWrongPleaseTryAgain": {
+    "description": "Generic error message"
+  },
+  "thisWillLogYouOutOfThisDevice": "זה ינתק אותך במכשיר זה!",
+  "@thisWillLogYouOutOfThisDevice": {
+    "description": "Warning message for logging out of current device"
+  },
+  "thisWillLogYouOutOfTheFollowingDevice": "זה ינתק אותך מהמכשיר הבא:",
+  "@thisWillLogYouOutOfTheFollowingDevice": {
+    "description": "Warning message for logging out of another device"
+  },
+  "terminateSession": "סיים חיבור?",
+  "@terminateSession": {
+    "description": "Title for terminate session dialog"
+  },
+  "terminate": "סיים",
+  "@terminate": {
+    "description": "Terminate button label"
+  },
+  "thisDevice": "מכשיר זה",
+  "@thisDevice": {
+    "description": "Label for current device"
+  },
+  "createAccount": "צור חשבון",
+  "@createAccount": {
+    "description": "Create account button label"
+  },
+  "weakStrength": "חלש",
+  "@weakStrength": {
+    "description": "Weak password strength label"
+  },
+  "moderateStrength": "מתון",
+  "@moderateStrength": {
+    "description": "Moderate password strength label"
+  },
+  "strongStrength": "חזק",
+  "@strongStrength": {
+    "description": "Strong password strength label"
+  },
+  "deleteAccount": "מחק חשבון",
+  "@deleteAccount": {
+    "description": "Delete account button label"
+  },
+  "deleteAccountQuery": "אנו מצטערים שאתה עוזב. האם יש בעיות שאתה חווה?",
+  "@deleteAccountQuery": {
+    "description": "Message asking user why they want to delete account"
+  },
+  "yesSendFeedbackAction": "כן, שלח משוב",
+  "@yesSendFeedbackAction": {
+    "description": "Button to confirm sending feedback"
+  },
+  "noDeleteAccountAction": "לא, מחק את החשבון",
+  "@noDeleteAccountAction": {
+    "description": "Button to proceed with account deletion"
+  },
+  "initiateAccountDeleteTitle": "אנא אמת על מנת להתחיל את מחיקת החשבון שלך",
+  "@initiateAccountDeleteTitle": {
+    "description": "Title for authentication dialog before account deletion"
+  },
+  "confirmAccountDeleteTitle": "אישור מחיקת חשבון",
+  "@confirmAccountDeleteTitle": {
+    "description": "Title for account deletion confirmation dialog"
+  },
+  "delete": "למחוק",
+  "@delete": {
+    "description": "Delete button label"
+  },
+  "createNewAccount": "צור חשבון חדש",
+  "@createNewAccount": {
+    "description": "Create new account button label"
+  },
+  "password": "סיסמא",
+  "@password": {
+    "description": "Password field label"
+  },
+  "confirmPassword": "אמת סיסמא",
+  "@confirmPassword": {
+    "description": "Confirm password field label"
+  },
+  "passwordStrength": "חוזק הסיסמא: {passwordStrengthValue}",
+  "@passwordStrength": {
+    "description": "Text to indicate the password strength",
+    "placeholders": {
+      "passwordStrengthValue": {
+        "description": "The strength of the password as a string",
+        "type": "String",
+        "example": "Weak or Moderate or Strong"
+      }
+    }
+  },
+  "signUpTerms": "אני מסכים ל<u-terms>תנאי שירות</u-terms> ול<u-policy>מדיניות הפרטיות</u-policy>",
+  "@signUpTerms": {
+    "description": "Terms agreement text for sign up"
+  },
+  "termsOfServicesTitle": "תנאים",
+  "@termsOfServicesTitle": {
+    "description": "Terms of service title"
+  },
+  "privacyPolicyTitle": "מדיניות פרטיות",
+  "@privacyPolicyTitle": {
+    "description": "Privacy policy title"
+  },
+  "ackPasswordLostWarning": "אני מבין שאם אאבד את הסיסמא, אני עלול לאבד את המידע שלי מכיוון שהמידע שלי <underline>מוצפן מקצה אל קצה</underline>.",
+  "@ackPasswordLostWarning": {
+    "description": "Warning about password loss"
+  },
+  "encryption": "הצפנה",
+  "@encryption": {
+    "description": "Encryption label"
+  },
+  "logInLabel": "התחבר",
+  "@logInLabel": {
+    "description": "Log in button label"
+  },
+  "welcomeBack": "ברוך שובך!",
+  "@welcomeBack": {
+    "description": "Welcome back message"
+  },
+  "loginTerms": "על ידי לחיצה על התחברות, אני מסכים ל<u-terms>תנאי שירות</u-terms> ול<u-policy>מדיניות הפרטיות</u-policy>",
+  "@loginTerms": {
+    "description": "Terms agreement text for login"
+  },
+  "noInternetConnection": "אין חיבור לאינטרנט",
+  "@noInternetConnection": {
+    "description": "No internet connection error message"
+  },
+  "pleaseCheckYourInternetConnectionAndTryAgain": "אנא בדוק את חיבור האינטרנט שלך ונסה שוב.",
+  "@pleaseCheckYourInternetConnectionAndTryAgain": {
+    "description": "Message asking user to check internet connection"
+  },
+  "verificationFailedPleaseTryAgain": "אימות נכשל, אנא נסה שנית",
+  "@verificationFailedPleaseTryAgain": {
+    "description": "Verification failed error message"
+  },
+  "recreatePasswordTitle": "צור סיסמא מחדש",
+  "@recreatePasswordTitle": {
+    "description": "Title for recreate password dialog"
+  },
+  "recreatePasswordBody": "המכשיר הנוכחי אינו חזק מספיק כדי לאמת את הסיסמא שלך, אבל אנחנו יכולים ליצור מחדש בצורה שתעבוד עם כל המכשירים.\n\nאנא התחבר בעזרת המפתח שחזור שלך וצור מחדש את הסיסמא שלך (אתה יכול להשתמש באותה אחת אם אתה רוצה).",
+  "@recreatePasswordBody": {
+    "description": "Body text for recreate password dialog"
+  },
+  "useRecoveryKey": "השתמש במפתח שחזור",
+  "@useRecoveryKey": {
+    "description": "Use recovery key button label"
+  },
+  "forgotPassword": "שכחתי סיסמה",
+  "@forgotPassword": {
+    "description": "Forgot password link label"
+  },
+  "changeEmail": "שנה דוא\"ל",
+  "@changeEmail": {
+    "description": "Change email button label"
+  },
+  "verifyEmail": "אימות דוא\"ל",
+  "@verifyEmail": {
+    "description": "Verify email title"
+  },
+  "weHaveSendEmailTo": "שלחנו דוא\"ל ל<green>{email}</green>",
+  "@weHaveSendEmailTo": {
+    "description": "Text to indicate that we have sent a mail to the user",
+    "placeholders": {
+      "email": {
+        "description": "The email address of the user",
+        "type": "String",
+        "example": "example@ente.io"
+      }
+    }
+  },
+  "toResetVerifyEmail": "כדי לאפס את הסיסמא שלך, אנא אמת את האימייל שלך קודם.",
+  "@toResetVerifyEmail": {
+    "description": "Message asking user to verify email before password reset"
+  },
+  "checkInboxAndSpamFolder": "אנא בדוק את תיבת הדואר שלך (והספאם) כדי להשלים את האימות",
+  "@checkInboxAndSpamFolder": {
+    "description": "Message asking user to check inbox and spam folder"
+  },
+  "tapToEnterCode": "הקש כדי להזין את הקוד",
+  "@tapToEnterCode": {
+    "description": "Hint for entering verification code"
+  },
+  "sendEmail": "שלח אימייל",
+  "resendEmail": "שלח דוא\"ל מחדש",
+  "@resendEmail": {
+    "description": "Resend email button label"
+  },
+  "tryAgain": "נסה שוב",
+  "@tryAgain": {
+    "description": "Try again button label"
+  },
+  "checkStatus": "בדוק סטטוס",
+  "@checkStatus": {
+    "description": "Check status button label"
+  },
+  "recoverAccount": "שחזר חשבון",
+  "@recoverAccount": {
+    "description": "Recover account button label"
+  },
+  "setPasswordTitle": "הגדר סיסמא",
+  "@setPasswordTitle": {
+    "description": "Set password title"
+  },
+  "changePasswordTitle": "שנה סיסמה",
+  "@changePasswordTitle": {
+    "description": "Change password title"
+  },
+  "resetPasswordTitle": "איפוס סיסמה",
+  "@resetPasswordTitle": {
+    "description": "Reset password title"
+  },
+  "encryptionKeys": "מפתחות ההצפנה",
+  "@encryptionKeys": {
+    "description": "Encryption keys title"
+  },
+  "enterPasswordToEncrypt": "הזן סיסמא כדי שנוכל להצפין את המידע שלך",
+  "@enterPasswordToEncrypt": {
+    "description": "Prompt to enter password for encryption"
+  },
+  "enterNewPasswordToEncrypt": "הכנס סיסמא חדשה כדי שנוכל להצפין את המידע שלך",
+  "@enterNewPasswordToEncrypt": {
+    "description": "Prompt to enter new password for encryption"
+  },
+  "passwordWarning": "אנחנו לא שומרים את הסיסמא הזו, לכן אם אתה שוכח אותה, <underline>אנחנו לא יכולים לפענח את המידע שלך</underline>",
+  "@passwordWarning": {
+    "description": "Warning about password storage"
+  },
+  "howItWorks": "איך זה עובד",
+  "@howItWorks": {
+    "description": "How it works button label"
+  },
+  "generatingEncryptionKeys": "יוצר מפתחות הצפנה...",
+  "@generatingEncryptionKeys": {
+    "description": "Generating encryption keys message"
+  },
+  "passwordChangedSuccessfully": "הסיסמה הוחלפה בהצלחה",
+  "@passwordChangedSuccessfully": {
+    "description": "Password changed successfully message"
+  },
+  "generatingEncryptionKeysTitle": "יוצר מפתחות הצפנה...",
+  "@generatingEncryptionKeysTitle": {
+    "description": "Generating encryption keys title"
+  },
+  "continueLabel": "המשך",
+  "@continueLabel": {
+    "description": "Continue button label"
+  },
+  "insecureDevice": "מכשיר בלתי מאובטח",
+  "@insecureDevice": {
+    "description": "Insecure device warning title"
+  },
+  "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": "אנחנו מצטערים, לא הצלחנו ליצור מפתחות מאובטחים על מכשיר זה.\n\nאנא הירשם ממכשיר אחר.",
+  "@sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": {
+    "description": "Error message for insecure device"
+  },
+  "recoveryKeyCopiedToClipboard": "מפתח השחזור הועתק ללוח",
+  "@recoveryKeyCopiedToClipboard": {
+    "description": "Recovery key copied message"
+  },
+  "recoveryKey": "מפתח שחזור",
+  "@recoveryKey": {
+    "description": "Recovery key label"
+  },
+  "recoveryKeyOnForgotPassword": "אם אתה שוכח את הסיסמא שלך, הדרך היחידה שתוכל לשחזר את המידע שלך היא עם המפתח הזה.",
+  "@recoveryKeyOnForgotPassword": {
+    "description": "Recovery key importance explanation"
+  },
+  "recoveryKeySaveDescription": "אנחנו לא מאחסנים את המפתח הזה, אנא שמור את המפתח 24 מילים הזה במקום בטוח.",
+  "@recoveryKeySaveDescription": {
+    "description": "Recovery key save description"
+  },
+  "doThisLater": "עשה זאת מאוחר יותר",
+  "@doThisLater": {
+    "description": "Do this later button label"
+  },
+  "saveKey": "שמור מפתח",
+  "@saveKey": {
+    "description": "Save key button label"
+  },
+  "noRecoveryKeyTitle": "אין מפתח שחזור?",
+  "@noRecoveryKeyTitle": {
+    "description": "No recovery key title"
+  },
+  "twoFactorAuthTitle": "אימות דו-שלבי",
+  "@twoFactorAuthTitle": {
+    "description": "Two-factor authentication title"
+  },
+  "enterCodeHint": "הכנס את הקוד בעל 6 ספרות מתוך\nאפליקציית האימות שלך",
+  "@enterCodeHint": {
+    "description": "Hint for entering 2FA code"
+  },
+  "lostDeviceTitle": "איבדת את המכשיר?",
+  "@lostDeviceTitle": {
+    "description": "Lost device title"
+  },
+  "enterRecoveryKeyHint": "הזן את מפתח השחזור שלך",
+  "@enterRecoveryKeyHint": {
+    "description": "Hint for entering recovery key"
+  },
+  "recover": "שחזר",
+  "@recover": {
+    "description": "Recover button label"
+  },
+  "loggingOut": "מתנתק...",
+  "@loggingOut": {
+    "description": "Message shown while logging out"
+  },
+  "areYouSureYouWantToLogout": "האם את/ה בטוח/ה שאת/ה רוצה לצאת?",
+  "@areYouSureYouWantToLogout": {
+    "description": "Confirmation message before logout"
+  },
+  "yesLogout": "כן, התנתק",
+  "@yesLogout": {
+    "description": "Confirmation button for logout"
+  },
+  "confirm": "אשר",
+  "@confirm": {
+    "description": "Confirm button label"
+  },
+  "thisEmailIsAlreadyInUse": "כתובת דואר אלקטרוני זאת כבר נמצאת בשימוש",
+  "@thisEmailIsAlreadyInUse": {
+    "description": "Error message when email is already in use"
+  },
+  "emailChangedTo": "אימייל שונה ל-{newEmail}",
+  "@emailChangedTo": {
+    "description": "Message when email has been changed",
+    "placeholders": {
+      "newEmail": {
+        "description": "The new email address",
+        "type": "String",
+        "example": "new@example.com"
+      }
+    }
+  },
+  "authenticationFailedPleaseTryAgain": "אימות נכשל, אנא נסה שוב",
+  "@authenticationFailedPleaseTryAgain": {
+    "description": "Error message when authentication fails"
+  },
+  "authenticationSuccessful": "אימות הצליח!",
+  "@authenticationSuccessful": {
+    "description": "Success message when authentication is successful"
+  },
+  "sessionExpired": "זמן החיבור הסתיים",
+  "@sessionExpired": {
+    "description": "Error message when session has expired"
+  },
+  "incorrectRecoveryKey": "מפתח שחזור שגוי",
+  "@incorrectRecoveryKey": {
+    "description": "Error message when recovery key is incorrect"
+  },
+  "theRecoveryKeyYouEnteredIsIncorrect": "המפתח שחזור שהזנת שגוי",
+  "@theRecoveryKeyYouEnteredIsIncorrect": {
+    "description": "Detailed error message when recovery key is incorrect"
+  },
+  "twofactorAuthenticationSuccessfullyReset": "אימות דו-שלבי אופס בהצלחה",
+  "@twofactorAuthenticationSuccessfullyReset": {
+    "description": "Message when two-factor authentication is successfully reset"
+  },
+  "yourVerificationCodeHasExpired": "קוד האימות שלך פג תוקף",
+  "@yourVerificationCodeHasExpired": {
+    "description": "Error message when verification code has expired"
+  },
+  "incorrectCode": "קוד שגוי",
+  "@incorrectCode": {
+    "description": "Error message when code is incorrect"
+  },
+  "sorryTheCodeYouveEnteredIsIncorrect": "אנו מתנצלים, אבל הקוד שהזנת איננו נכון",
+  "@sorryTheCodeYouveEnteredIsIncorrect": {
+    "description": "Detailed error message when code is incorrect"
+  }
+}

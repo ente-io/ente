@@ -1,0 +1,331 @@
+{
+  "error": "Памылка",
+  "@error": {
+    "description": "Generic error title"
+  },
+  "ok": "OK",
+  "@ok": {
+    "description": "Generic OK button label"
+  },
+  "faq": "Частыя пытанні",
+  "@faq": {
+    "description": "FAQ link label"
+  },
+  "contactSupport": "Звярнуцца ў службу падтрымкі",
+  "@contactSupport": {
+    "description": "Contact support button label"
+  },
+  "emailYourLogs": "Адправіць журналы",
+  "@emailYourLogs": {
+    "description": "Title for emailing logs dialog"
+  },
+  "exportLogs": "Экспартаваць журналы",
+  "@exportLogs": {
+    "description": "Button to export logs"
+  },
+  "cancel": "Скасаваць",
+  "@cancel": {
+    "description": "Cancel button label"
+  },
+  "reportABug": "Паведаміць аб памылцы",
+  "@reportABug": {
+    "description": "Label for reporting a bug"
+  },
+  "save": "Захаваць",
+  "@save": {
+    "description": "Label for save button"
+  },
+  "send": "Адправіць",
+  "@send": {
+    "description": "Label for send button"
+  },
+  "email": "Электронная пошта",
+  "@email": {
+    "description": "Email field label"
+  },
+  "verify": "Праверыць",
+  "@verify": {
+    "description": "Verify button label"
+  },
+  "pleaseWait": "Пачакайце...",
+  "@pleaseWait": {
+    "description": "Please wait message"
+  },
+  "verifyPassword": "Праверыць пароль",
+  "@verifyPassword": {
+    "description": "Verify password button label"
+  },
+  "incorrectPasswordTitle": "Няправільны пароль",
+  "@incorrectPasswordTitle": {
+    "description": "Title for incorrect password error"
+  },
+  "pleaseTryAgain": "Калі ласка, паспрабуйце яшчэ раз",
+  "@pleaseTryAgain": {
+    "description": "Message asking user to try again"
+  },
+  "enterPassword": "Увядзіце пароль",
+  "@enterPassword": {
+    "description": "Enter password field label"
+  },
+  "enterYourPasswordHint": "Увядзіце ваш пароль",
+  "@enterYourPasswordHint": {
+    "description": "Hint for password field"
+  },
+  "activeSessions": "Актыўныя сеансы",
+  "@activeSessions": {
+    "description": "Title for active sessions page"
+  },
+  "oops": "Вой",
+  "@oops": {
+    "description": "Oops error title"
+  },
+  "terminate": "Перарваць",
+  "@terminate": {
+    "description": "Terminate button label"
+  },
+  "thisDevice": "Гэта прылада",
+  "@thisDevice": {
+    "description": "Label for current device"
+  },
+  "createAccount": "Стварыць уліковы запіс",
+  "@createAccount": {
+    "description": "Create account button label"
+  },
+  "weakStrength": "Ненадзейны",
+  "@weakStrength": {
+    "description": "Weak password strength label"
+  },
+  "moderateStrength": "Умераная",
+  "@moderateStrength": {
+    "description": "Moderate password strength label"
+  },
+  "strongStrength": "Надзейны",
+  "@strongStrength": {
+    "description": "Strong password strength label"
+  },
+  "deleteAccount": "Выдаліць уліковы запіс",
+  "@deleteAccount": {
+    "description": "Delete account button label"
+  },
+  "noDeleteAccountAction": "Не, выдаліць уліковы запіс",
+  "@noDeleteAccountAction": {
+    "description": "Button to proceed with account deletion"
+  },
+  "delete": "Выдаліць",
+  "@delete": {
+    "description": "Delete button label"
+  },
+  "createNewAccount": "Стварыць новы ўліковы запіс",
+  "@createNewAccount": {
+    "description": "Create new account button label"
+  },
+  "password": "Пароль",
+  "@password": {
+    "description": "Password field label"
+  },
+  "confirmPassword": "Пацвердзіць пароль",
+  "@confirmPassword": {
+    "description": "Confirm password field label"
+  },
+  "termsOfServicesTitle": "Умовы",
+  "@termsOfServicesTitle": {
+    "description": "Terms of service title"
+  },
+  "privacyPolicyTitle": "Палітыка прыватнасці",
+  "@privacyPolicyTitle": {
+    "description": "Privacy policy title"
+  },
+  "encryption": "Шыфраванне",
+  "@encryption": {
+    "description": "Encryption label"
+  },
+  "logInLabel": "Увайсці",
+  "@logInLabel": {
+    "description": "Log in button label"
+  },
+  "welcomeBack": "З вяртаннем!",
+  "@welcomeBack": {
+    "description": "Welcome back message"
+  },
+  "useRecoveryKey": "Выкарыстоўваць ключ аднаўлення",
+  "@useRecoveryKey": {
+    "description": "Use recovery key button label"
+  },
+  "forgotPassword": "Забылі пароль",
+  "@forgotPassword": {
+    "description": "Forgot password link label"
+  },
+  "changeEmail": "Змяніць адрас электроннай пошты",
+  "@changeEmail": {
+    "description": "Change email button label"
+  },
+  "verifyEmail": "Праверыць электронную пошту",
+  "@verifyEmail": {
+    "description": "Verify email title"
+  },
+  "sendEmail": "Адправіць ліст",
+  "resendEmail": "Адправіць ліст яшчэ раз",
+  "@resendEmail": {
+    "description": "Resend email button label"
+  },
+  "loginSessionExpired": "Сеанс завяршыўся",
+  "@loginSessionExpired": {
+    "description": "Login session expired title"
+  },
+  "tryAgain": "Паспрабуйце яшчэ раз",
+  "@tryAgain": {
+    "description": "Try again button label"
+  },
+  "checkStatus": "Праверыць статус",
+  "@checkStatus": {
+    "description": "Check status button label"
+  },
+  "loginWithTOTP": "Увайсці з TOTP",
+  "@loginWithTOTP": {
+    "description": "Login with TOTP button label"
+  },
+  "recoverAccount": "Аднавіць уліковы запіс",
+  "@recoverAccount": {
+    "description": "Recover account button label"
+  },
+  "setPasswordTitle": "Задаць пароль",
+  "@setPasswordTitle": {
+    "description": "Set password title"
+  },
+  "changePasswordTitle": "Змяніць пароль",
+  "@changePasswordTitle": {
+    "description": "Change password title"
+  },
+  "resetPasswordTitle": "Скінуць пароль",
+  "@resetPasswordTitle": {
+    "description": "Reset password title"
+  },
+  "encryptionKeys": "Ключы шыфравання",
+  "@encryptionKeys": {
+    "description": "Encryption keys title"
+  },
+  "howItWorks": "Як гэта працуе",
+  "@howItWorks": {
+    "description": "How it works button label"
+  },
+  "doNotSignOut": "Не выходзіць",
+  "@doNotSignOut": {
+    "description": "Do not sign out button label"
+  },
+  "generatingEncryptionKeysTitle": "Генерацыя ключоў шыфравання...",
+  "@generatingEncryptionKeysTitle": {
+    "description": "Generating encryption keys title"
+  },
+  "continueLabel": "Працягнуць",
+  "@continueLabel": {
+    "description": "Continue button label"
+  },
+  "insecureDevice": "Небяспечная прылада",
+  "@insecureDevice": {
+    "description": "Insecure device warning title"
+  },
+  "recoveryKey": "Ключ аднаўлення",
+  "@recoveryKey": {
+    "description": "Recovery key label"
+  },
+  "doThisLater": "Зрабіць гэта пазней",
+  "@doThisLater": {
+    "description": "Do this later button label"
+  },
+  "saveKey": "Захаваць ключ",
+  "@saveKey": {
+    "description": "Save key button label"
+  },
+  "lostDeviceTitle": "Згубілі прыладу?",
+  "@lostDeviceTitle": {
+    "description": "Lost device title"
+  },
+  "recover": "Аднавіць",
+  "@recover": {
+    "description": "Recover button label"
+  },
+  "loggingOut": "Выхад...",
+  "@loggingOut": {
+    "description": "Message shown while logging out"
+  },
+  "immediately": "Адразу",
+  "@immediately": {
+    "description": "Immediately option for auto lock timing"
+  },
+  "appLock": "Блакіроўка праграмы",
+  "@appLock": {
+    "description": "App lock setting title"
+  },
+  "autoLock": "Аўтаблакіроўка",
+  "@autoLock": {
+    "description": "Auto lock setting title"
+  },
+  "deviceLock": "Блакіроўка прылады",
+  "@deviceLock": {
+    "description": "Device lock option title"
+  },
+  "pinLock": "Блакіроўка PIN'ам",
+  "@pinLock": {
+    "description": "PIN lock option title"
+  },
+  "hideContent": "Схаваць змест",
+  "@hideContent": {
+    "description": "Hide content setting title"
+  },
+  "tapToUnlock": "Націсніце для разблакіроўкі",
+  "@tapToUnlock": {
+    "description": "Message prompting user to tap to unlock"
+  },
+  "yesLogout": "Так, выйсці",
+  "@yesLogout": {
+    "description": "Confirmation button for logout"
+  },
+  "next": "Далей",
+  "@next": {
+    "description": "Next button label"
+  },
+  "enterPin": "Увядзіце PIN-код",
+  "@enterPin": {
+    "description": "Enter PIN prompt"
+  },
+  "setNewPin": "Задаць новы PIN",
+  "@setNewPin": {
+    "description": "Set new PIN title"
+  },
+  "confirm": "Пацвердзіць",
+  "@confirm": {
+    "description": "Confirm button label"
+  },
+  "reEnterPin": "Увядзіце PIN-код яшчэ раз",
+  "@reEnterPin": {
+    "description": "Re-enter PIN prompt"
+  },
+  "androidBiometricHint": "Праверыць ідэнтыфікацыю",
+  "@androidBiometricHint": {
+    "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricSuccess": "Паспяхова",
+  "@androidBiometricSuccess": {
+    "description": "Message to let the user know that authentication was successful. It is used on Android side. Maximum 60 characters."
+  },
+  "androidCancelButton": "Скасаваць",
+  "@androidCancelButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on Android side. Maximum 30 characters."
+  },
+  "goToSettings": "Перайсці ў налады",
+  "@goToSettings": {
+    "description": "Message showed on a button that the user can click to go to settings pages from the current dialog. It is used on both Android and iOS side. Maximum 30 characters."
+  },
+  "iOSOkButton": "OK",
+  "@iOSOkButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
+  },
+  "sessionExpired": "Сеанс завяршыўся",
+  "@sessionExpired": {
+    "description": "Error message when session has expired"
+  },
+  "incorrectCode": "Няправільны код",
+  "@incorrectCode": {
+    "description": "Error message when code is incorrect"
+  }
+}

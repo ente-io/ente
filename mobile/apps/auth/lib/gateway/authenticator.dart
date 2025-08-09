@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:ente_auth/core/errors.dart';
-import 'package:ente_auth/core/network.dart';
 import 'package:ente_auth/models/authenticator/auth_entity.dart';
 import 'package:ente_auth/models/authenticator/auth_key.dart';
+import 'package:ente_network/network.dart';
 
 class AuthenticatorGateway {
   late Dio _enteDio;

@@ -1,0 +1,720 @@
+{
+  "networkHostLookUpErr": "No s'ha pogut connectar a Ente, si us plau, comprova la configuració de la xarxa i contacta amb suport si l'error persisteix.",
+  "@networkHostLookUpErr": {
+    "description": "Error message shown when the app cannot connect to Ente due to network host lookup failure"
+  },
+  "networkConnectionRefusedErr": "No s'ha pogut connectar a Ente, si us plau, torna-ho a intentar després d'un temps. Si l'error persisteix, contacta amb suport.",
+  "@networkConnectionRefusedErr": {
+    "description": "Error message shown when the app cannot connect to Ente due to connection refused"
+  },
+  "itLooksLikeSomethingWentWrongPleaseRetryAfterSome": "Sembla que alguna cosa ha anat malament. Si us plau, torna-ho a intentar després d'un temps. Si l'error persisteix, contacta amb el nostre equip de suport.",
+  "@itLooksLikeSomethingWentWrongPleaseRetryAfterSome": {
+    "description": "Generic error message for temporary issues"
+  },
+  "error": "Error",
+  "@error": {
+    "description": "Generic error title"
+  },
+  "ok": "D'acord",
+  "@ok": {
+    "description": "Generic OK button label"
+  },
+  "faq": "FAQ",
+  "@faq": {
+    "description": "FAQ link label"
+  },
+  "contactSupport": "Contacta amb suport",
+  "@contactSupport": {
+    "description": "Contact support button label"
+  },
+  "emailYourLogs": "Envia els teus registres per correu",
+  "@emailYourLogs": {
+    "description": "Title for emailing logs dialog"
+  },
+  "pleaseSendTheLogsTo": "Si us plau, envia els registres a \n{toEmail}",
+  "@pleaseSendTheLogsTo": {
+    "description": "Message asking user to send logs to email address",
+    "placeholders": {
+      "toEmail": {
+        "type": "String",
+        "description": "Email address to send logs to"
+      }
+    }
+  },
+  "copyEmailAddress": "Copia l'adreça de correu",
+  "@copyEmailAddress": {
+    "description": "Button to copy email address to clipboard"
+  },
+  "exportLogs": "Exporta els registres",
+  "@exportLogs": {
+    "description": "Button to export logs"
+  },
+  "cancel": "Cancel·la",
+  "@cancel": {
+    "description": "Cancel button label"
+  },
+  "reportABug": "Informa d'un error",
+  "@reportABug": {
+    "description": "Label for reporting a bug"
+  },
+  "customEndpoint": "Connectat a {endpoint}",
+  "@customEndpoint": {
+    "description": "Text showing user is connected to a custom endpoint",
+    "placeholders": {
+      "endpoint": {
+        "type": "String",
+        "description": "URL of the custom endpoint"
+      }
+    }
+  },
+  "save": "Guarda",
+  "@save": {
+    "description": "Label for save button"
+  },
+  "send": "Envia",
+  "@send": {
+    "description": "Label for send button"
+  },
+  "saveOrSendDescription": "Vols guardar-ho al teu emmagatzematge (per defecte, a la carpeta Descàrregues) o enviar-ho a altres aplicacions?",
+  "@saveOrSendDescription": {
+    "description": "Description text asking user if they want to save to storage or share with other apps"
+  },
+  "saveOnlyDescription": "Vols guardar-ho al teu emmagatzematge (per defecte, a la carpeta Descàrregues)?",
+  "@saveOnlyDescription": {
+    "description": "Description text asking user if they want to save to storage (for platforms that don't support sharing)"
+  },
+  "email": "Correu electrònic",
+  "@email": {
+    "description": "Email field label"
+  },
+  "verify": "Verifica",
+  "@verify": {
+    "description": "Verify button label"
+  },
+  "invalidEmailTitle": "Adreça de correu electrònic no vàlida",
+  "@invalidEmailTitle": {
+    "description": "Title for invalid email error dialog"
+  },
+  "invalidEmailMessage": "Si us plau, introdueix una adreça de correu electrònic vàlida.",
+  "@invalidEmailMessage": {
+    "description": "Message for invalid email error dialog"
+  },
+  "pleaseWait": "Si us plau, espera...",
+  "@pleaseWait": {
+    "description": "Please wait message"
+  },
+  "verifyPassword": "Verifica la contrasenya",
+  "@verifyPassword": {
+    "description": "Verify password button label"
+  },
+  "incorrectPasswordTitle": "Contrasenya incorrecta",
+  "@incorrectPasswordTitle": {
+    "description": "Title for incorrect password error"
+  },
+  "pleaseTryAgain": "Si us plau, intenta-ho de nou",
+  "@pleaseTryAgain": {
+    "description": "Message asking user to try again"
+  },
+  "enterPassword": "Introdueix la contrasenya",
+  "@enterPassword": {
+    "description": "Enter password field label"
+  },
+  "enterYourPasswordHint": "Introdueix la teva contrasenya",
+  "@enterYourPasswordHint": {
+    "description": "Hint for password field"
+  },
+  "activeSessions": "Sessions actives",
+  "@activeSessions": {
+    "description": "Title for active sessions page"
+  },
+  "oops": "Ups",
+  "@oops": {
+    "description": "Oops error title"
+  },
+  "somethingWentWrongPleaseTryAgain": "S'ha produït un error, si us plau, intenta-ho de nou",
+  "@somethingWentWrongPleaseTryAgain": {
+    "description": "Generic error message"
+  },
+  "thisWillLogYouOutOfThisDevice": "Això tancarà la sessió en aquest dispositiu!",
+  "@thisWillLogYouOutOfThisDevice": {
+    "description": "Warning message for logging out of current device"
+  },
+  "thisWillLogYouOutOfTheFollowingDevice": "Això tancarà la sessió en el següent dispositiu:",
+  "@thisWillLogYouOutOfTheFollowingDevice": {
+    "description": "Warning message for logging out of another device"
+  },
+  "terminateSession": "Finalitzar sessió?",
+  "@terminateSession": {
+    "description": "Title for terminate session dialog"
+  },
+  "terminate": "Finalitzar",
+  "@terminate": {
+    "description": "Terminate button label"
+  },
+  "thisDevice": "Aquest dispositiu",
+  "@thisDevice": {
+    "description": "Label for current device"
+  },
+  "createAccount": "Crea un compte",
+  "@createAccount": {
+    "description": "Create account button label"
+  },
+  "weakStrength": "Feble",
+  "@weakStrength": {
+    "description": "Weak password strength label"
+  },
+  "moderateStrength": "Moderada",
+  "@moderateStrength": {
+    "description": "Moderate password strength label"
+  },
+  "strongStrength": "Forta",
+  "@strongStrength": {
+    "description": "Strong password strength label"
+  },
+  "deleteAccount": "Elimina el compte",
+  "@deleteAccount": {
+    "description": "Delete account button label"
+  },
+  "deleteAccountQuery": "Ens sabrà greu veure't marxar. Tens algun problema?",
+  "@deleteAccountQuery": {
+    "description": "Message asking user why they want to delete account"
+  },
+  "yesSendFeedbackAction": "Sí, envia comentaris",
+  "@yesSendFeedbackAction": {
+    "description": "Button to confirm sending feedback"
+  },
+  "noDeleteAccountAction": "No, elimina el compte",
+  "@noDeleteAccountAction": {
+    "description": "Button to proceed with account deletion"
+  },
+  "initiateAccountDeleteTitle": "Si us plau, autentica't per iniciar l'eliminació del compte",
+  "@initiateAccountDeleteTitle": {
+    "description": "Title for authentication dialog before account deletion"
+  },
+  "confirmAccountDeleteTitle": "Confirma la supressió del compte",
+  "@confirmAccountDeleteTitle": {
+    "description": "Title for account deletion confirmation dialog"
+  },
+  "confirmAccountDeleteMessage": "Aquest compte està vinculat a altres apps d'Ente, si en fas ús.\n\nLes dades pujades, a través de totes les apps d'Ente, es programaran per a la supressió, i el teu compte s'eliminarà permanentment.",
+  "@confirmAccountDeleteMessage": {
+    "description": "Message warning about account deletion consequences"
+  },
+  "delete": "Elimina",
+  "@delete": {
+    "description": "Delete button label"
+  },
+  "createNewAccount": "Crea un nou compte",
+  "@createNewAccount": {
+    "description": "Create new account button label"
+  },
+  "password": "Contrasenya",
+  "@password": {
+    "description": "Password field label"
+  },
+  "confirmPassword": "Confirma la contrasenya",
+  "@confirmPassword": {
+    "description": "Confirm password field label"
+  },
+  "passwordStrength": "Força de la contrasenya: {passwordStrengthValue}",
+  "@passwordStrength": {
+    "description": "Text to indicate the password strength",
+    "placeholders": {
+      "passwordStrengthValue": {
+        "description": "The strength of the password as a string",
+        "type": "String",
+        "example": "Weak or Moderate or Strong"
+      }
+    }
+  },
+  "hearUsWhereTitle": "Com vas conèixer Ente? (opcional)",
+  "@hearUsWhereTitle": {
+    "description": "Title asking how user heard about Ente"
+  },
+  "hearUsExplanation": "No fem seguiment de les instal·lacions de l'app. Ens ajudaria saber on ens has trobat!",
+  "@hearUsExplanation": {
+    "description": "Explanation for asking how user heard about Ente"
+  },
+  "signUpTerms": "Estic d'acord amb els <u-terms>termes del servei</u-terms> i la <u-policy>política de privacitat</u-policy>",
+  "@signUpTerms": {
+    "description": "Terms agreement text for sign up"
+  },
+  "termsOfServicesTitle": "Termes",
+  "@termsOfServicesTitle": {
+    "description": "Terms of service title"
+  },
+  "privacyPolicyTitle": "Política de privacitat",
+  "@privacyPolicyTitle": {
+    "description": "Privacy policy title"
+  },
+  "ackPasswordLostWarning": "Entenc que si perdo la meva contrasenya, puc perdre les meves dades ja que les meves dades estan <underline>xifrades d'extrem a extrem</underline>.",
+  "@ackPasswordLostWarning": {
+    "description": "Warning about password loss"
+  },
+  "encryption": "Xifratge",
+  "@encryption": {
+    "description": "Encryption label"
+  },
+  "logInLabel": "Inicia sessió",
+  "@logInLabel": {
+    "description": "Log in button label"
+  },
+  "welcomeBack": "Benvingut de nou!",
+  "@welcomeBack": {
+    "description": "Welcome back message"
+  },
+  "loginTerms": "En fer clic a iniciar sessió, estic d'acord amb els <u-terms>termes del servei</u-terms> i la <u-policy>política de privacitat</u-policy>",
+  "@loginTerms": {
+    "description": "Terms agreement text for login"
+  },
+  "noInternetConnection": "Sense connexió a Internet",
+  "@noInternetConnection": {
+    "description": "No internet connection error message"
+  },
+  "pleaseCheckYourInternetConnectionAndTryAgain": "Comprova la connexió a Internet i torna-ho a intentar.",
+  "@pleaseCheckYourInternetConnectionAndTryAgain": {
+    "description": "Message asking user to check internet connection"
+  },
+  "verificationFailedPleaseTryAgain": "La verificació ha fallat, intenta-ho de nou",
+  "@verificationFailedPleaseTryAgain": {
+    "description": "Verification failed error message"
+  },
+  "recreatePasswordTitle": "Recrea la contrasenya",
+  "@recreatePasswordTitle": {
+    "description": "Title for recreate password dialog"
+  },
+  "recreatePasswordBody": "El dispositiu actual no és prou potent per verificar la teva contrasenya, però podem regenerar-la d'una manera que funcioni amb tots els dispositius.\n\nSi us plau, inicia sessió utilitzant la teva clau de recuperació i regenera la teva contrasenya (pots tornar a utilitzar la mateixa si ho desitges).",
+  "@recreatePasswordBody": {
+    "description": "Body text for recreate password dialog"
+  },
+  "useRecoveryKey": "Usa la clau de recuperació",
+  "@useRecoveryKey": {
+    "description": "Use recovery key button label"
+  },
+  "forgotPassword": "Has oblidat la contrasenya",
+  "@forgotPassword": {
+    "description": "Forgot password link label"
+  },
+  "changeEmail": "Canvia el correu electrònic",
+  "@changeEmail": {
+    "description": "Change email button label"
+  },
+  "verifyEmail": "Verifica el correu electrònic",
+  "@verifyEmail": {
+    "description": "Verify email title"
+  },
+  "weHaveSendEmailTo": "Hem enviat un correu a <green>{email}</green>",
+  "@weHaveSendEmailTo": {
+    "description": "Text to indicate that we have sent a mail to the user",
+    "placeholders": {
+      "email": {
+        "description": "The email address of the user",
+        "type": "String",
+        "example": "example@ente.io"
+      }
+    }
+  },
+  "toResetVerifyEmail": "Per restablir la teva contrasenya, si us plau verifica primer el teu correu electrònic.",
+  "@toResetVerifyEmail": {
+    "description": "Message asking user to verify email before password reset"
+  },
+  "checkInboxAndSpamFolder": "Comprova la teva safata d'entrada (i el correu no desitjat) per completar la verificació",
+  "@checkInboxAndSpamFolder": {
+    "description": "Message asking user to check inbox and spam folder"
+  },
+  "tapToEnterCode": "Toca per introduir el codi",
+  "@tapToEnterCode": {
+    "description": "Hint for entering verification code"
+  },
+  "sendEmail": "Envia correu electrònic",
+  "resendEmail": "Reenviar correu electrònic",
+  "@resendEmail": {
+    "description": "Resend email button label"
+  },
+  "passKeyPendingVerification": "La verificació encara està pendent",
+  "@passKeyPendingVerification": {
+    "description": "Message when passkey verification is pending"
+  },
+  "loginSessionExpired": "Sessió caducada",
+  "@loginSessionExpired": {
+    "description": "Login session expired title"
+  },
+  "loginSessionExpiredDetails": "La teva sessió ha caducat. Torna a iniciar sessió.",
+  "@loginSessionExpiredDetails": {
+    "description": "Login session expired details"
+  },
+  "passkeyAuthTitle": "Verificació per passkey",
+  "@passkeyAuthTitle": {
+    "description": "Passkey authentication title"
+  },
+  "waitingForVerification": "Esperant verificació...",
+  "@waitingForVerification": {
+    "description": "Waiting for verification message"
+  },
+  "tryAgain": "Intenta-ho de nou",
+  "@tryAgain": {
+    "description": "Try again button label"
+  },
+  "checkStatus": "Comprova l'estat",
+  "@checkStatus": {
+    "description": "Check status button label"
+  },
+  "loginWithTOTP": "Inici de sessió amb TOTP",
+  "@loginWithTOTP": {
+    "description": "Login with TOTP button label"
+  },
+  "recoverAccount": "Recupera el compte",
+  "@recoverAccount": {
+    "description": "Recover account button label"
+  },
+  "setPasswordTitle": "Configura la contrasenya",
+  "@setPasswordTitle": {
+    "description": "Set password title"
+  },
+  "changePasswordTitle": "Canvia la contrasenya",
+  "@changePasswordTitle": {
+    "description": "Change password title"
+  },
+  "resetPasswordTitle": "Restableix la contrasenya",
+  "@resetPasswordTitle": {
+    "description": "Reset password title"
+  },
+  "encryptionKeys": "Claus de xifratge",
+  "@encryptionKeys": {
+    "description": "Encryption keys title"
+  },
+  "enterPasswordToEncrypt": "Introdueix una contrasenya que puguem utilitzar per xifrar les teves dades",
+  "@enterPasswordToEncrypt": {
+    "description": "Prompt to enter password for encryption"
+  },
+  "enterNewPasswordToEncrypt": "Introdueix una nova contrasenya que puguem utilitzar per xifrar les teves dades",
+  "@enterNewPasswordToEncrypt": {
+    "description": "Prompt to enter new password for encryption"
+  },
+  "passwordWarning": "No guardem aquesta contrasenya, per tant, si l'oblides, <underline>no podrem desxifrar les teves dades</underline>",
+  "@passwordWarning": {
+    "description": "Warning about password storage"
+  },
+  "howItWorks": "Com funciona",
+  "@howItWorks": {
+    "description": "How it works button label"
+  },
+  "generatingEncryptionKeys": "Generant claus de xifratge...",
+  "@generatingEncryptionKeys": {
+    "description": "Generating encryption keys message"
+  },
+  "passwordChangedSuccessfully": "La contrasenya s'ha canviat amb èxit",
+  "@passwordChangedSuccessfully": {
+    "description": "Password changed successfully message"
+  },
+  "signOutFromOtherDevices": "Tanca sessió en altres dispositius",
+  "@signOutFromOtherDevices": {
+    "description": "Sign out from other devices title"
+  },
+  "signOutOtherBody": "Si creus que algú pot saber la teva contrasenya, pots forçar tots els altres dispositius que usen el teu compte a tancar sessió.",
+  "@signOutOtherBody": {
+    "description": "Sign out other devices explanation"
+  },
+  "signOutOtherDevices": "Tancar sessió en altres dispositius",
+  "@signOutOtherDevices": {
+    "description": "Sign out other devices button label"
+  },
+  "doNotSignOut": "No tancar sessió",
+  "@doNotSignOut": {
+    "description": "Do not sign out button label"
+  },
+  "generatingEncryptionKeysTitle": "Generant claus d'encriptació...",
+  "@generatingEncryptionKeysTitle": {
+    "description": "Generating encryption keys title"
+  },
+  "continueLabel": "Continua",
+  "@continueLabel": {
+    "description": "Continue button label"
+  },
+  "insecureDevice": "Dispositiu no segur",
+  "@insecureDevice": {
+    "description": "Insecure device warning title"
+  },
+  "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": "Ho sentim, no hem pogut generar claus segures en aquest dispositiu.\n\nSi us plau, registra't des d'un altre dispositiu.",
+  "@sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": {
+    "description": "Error message for insecure device"
+  },
+  "recoveryKeyCopiedToClipboard": "La clau de recuperació s'ha copiat al porta-retalls",
+  "@recoveryKeyCopiedToClipboard": {
+    "description": "Recovery key copied message"
+  },
+  "recoveryKey": "Clau de recuperació",
+  "@recoveryKey": {
+    "description": "Recovery key label"
+  },
+  "recoveryKeyOnForgotPassword": "Si oblides la teva contrasenya, l'única manera de recuperar les teves dades és amb aquesta clau.",
+  "@recoveryKeyOnForgotPassword": {
+    "description": "Recovery key importance explanation"
+  },
+  "recoveryKeySaveDescription": "No guardem aquesta clau, si us plau, guarda aquesta clau de 24 paraules en un lloc segur.",
+  "@recoveryKeySaveDescription": {
+    "description": "Recovery key save description"
+  },
+  "doThisLater": "Fes-ho més tard",
+  "@doThisLater": {
+    "description": "Do this later button label"
+  },
+  "saveKey": "Guarda la clau",
+  "@saveKey": {
+    "description": "Save key button label"
+  },
+  "recoveryKeySaved": "Clau de recuperació guardada a la carpeta Descàrregues!",
+  "@recoveryKeySaved": {
+    "description": "Recovery key saved confirmation message"
+  },
+  "noRecoveryKeyTitle": "No tens clau de recuperació?",
+  "@noRecoveryKeyTitle": {
+    "description": "No recovery key title"
+  },
+  "twoFactorAuthTitle": "Autenticació de dos factors",
+  "@twoFactorAuthTitle": {
+    "description": "Two-factor authentication title"
+  },
+  "enterCodeHint": "Introdueix el codi de 6 dígits de\nl'aplicació d'autenticació",
+  "@enterCodeHint": {
+    "description": "Hint for entering 2FA code"
+  },
+  "lostDeviceTitle": "Dispositiu perdut?",
+  "@lostDeviceTitle": {
+    "description": "Lost device title"
+  },
+  "enterRecoveryKeyHint": "Introdueix la teva clau de recuperació",
+  "@enterRecoveryKeyHint": {
+    "description": "Hint for entering recovery key"
+  },
+  "recover": "Recupera",
+  "@recover": {
+    "description": "Recover button label"
+  },
+  "loggingOut": "Tancant sessió...",
+  "@loggingOut": {
+    "description": "Message shown while logging out"
+  },
+  "immediately": "Immediatament",
+  "@immediately": {
+    "description": "Immediately option for auto lock timing"
+  },
+  "appLock": "Bloqueig de l'aplicació",
+  "@appLock": {
+    "description": "App lock setting title"
+  },
+  "autoLock": "Bloqueig automàtic",
+  "@autoLock": {
+    "description": "Auto lock setting title"
+  },
+  "noSystemLockFound": "No s'ha trobat cap bloqueig del sistema",
+  "@noSystemLockFound": {
+    "description": "Error when no system lock is found"
+  },
+  "deviceLockEnablePreSteps": "Per habilitar el bloqueig de dispositiu, configura un codi o bloqueig de pantalla en la configuració del sistema.",
+  "@deviceLockEnablePreSteps": {
+    "description": "Instructions for enabling device lock"
+  },
+  "appLockDescription": "Tria entre el bloqueig predeterminat del dispositiu o un bloqueig personalitzat amb PIN o contrasenya.",
+  "@appLockDescription": {
+    "description": "Description of app lock feature"
+  },
+  "deviceLock": "Bloqueig del dispositiu",
+  "@deviceLock": {
+    "description": "Device lock option title"
+  },
+  "pinLock": "Bloqueig amb PIN",
+  "@pinLock": {
+    "description": "PIN lock option title"
+  },
+  "autoLockFeatureDescription": "Temps després del qual l'app es bloqueja quan es posa en segon pla",
+  "@autoLockFeatureDescription": {
+    "description": "Description of auto lock feature"
+  },
+  "hideContent": "Amaga el contingut",
+  "@hideContent": {
+    "description": "Hide content setting title"
+  },
+  "hideContentDescriptionAndroid": "Amaga el contingut d'aquesta app en el commutador d'apps del sistema i desactiva les captures de pantalla",
+  "@hideContentDescriptionAndroid": {
+    "description": "Description of hide content feature on Android"
+  },
+  "hideContentDescriptioniOS": "Amaga el contingut d'aquesta app en el commutador d'apps del sistema",
+  "@hideContentDescriptioniOS": {
+    "description": "Description of hide content feature on iOS"
+  },
+  "tooManyIncorrectAttempts": "Massa intents incorrectes",
+  "@tooManyIncorrectAttempts": {
+    "description": "Message shown when too many incorrect attempts are made"
+  },
+  "tapToUnlock": "Toca per desbloquejar",
+  "@tapToUnlock": {
+    "description": "Message prompting user to tap to unlock"
+  },
+  "areYouSureYouWantToLogout": "Segur que vols tancar la sessió?",
+  "@areYouSureYouWantToLogout": {
+    "description": "Confirmation message before logout"
+  },
+  "yesLogout": "Sí, tanca la sessió",
+  "@yesLogout": {
+    "description": "Confirmation button for logout"
+  },
+  "authToViewSecrets": "Si us plau, autentica't per veure els teus secrets",
+  "@authToViewSecrets": {
+    "description": "Message prompting authentication to view secrets"
+  },
+  "next": "Següent",
+  "@next": {
+    "description": "Next button label"
+  },
+  "setNewPassword": "Estableix una nova contrasenya",
+  "@setNewPassword": {
+    "description": "Set new password title"
+  },
+  "enterPin": "Introdueix el PIN",
+  "@enterPin": {
+    "description": "Enter PIN prompt"
+  },
+  "setNewPin": "Estableix un nou PIN",
+  "@setNewPin": {
+    "description": "Set new PIN title"
+  },
+  "confirm": "Confirma",
+  "@confirm": {
+    "description": "Confirm button label"
+  },
+  "reEnterPassword": "Torna a introduir la contrasenya",
+  "@reEnterPassword": {
+    "description": "Re-enter password prompt"
+  },
+  "reEnterPin": "Torna a introduir el PIN",
+  "@reEnterPin": {
+    "description": "Re-enter PIN prompt"
+  },
+  "androidBiometricHint": "Verifica la identitat",
+  "@androidBiometricHint": {
+    "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricNotRecognized": "No reconegut. Torna-ho a provar.",
+  "@androidBiometricNotRecognized": {
+    "description": "Message to let the user know that authentication was failed. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricSuccess": "Correcte",
+  "@androidBiometricSuccess": {
+    "description": "Message to let the user know that authentication was successful. It is used on Android side. Maximum 60 characters."
+  },
+  "androidCancelButton": "Cancel·la",
+  "@androidCancelButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on Android side. Maximum 30 characters."
+  },
+  "androidSignInTitle": "Es requereix autenticació",
+  "@androidSignInTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user that they need to scan biometric to continue. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricRequiredTitle": "Biometria necessària",
+  "@androidBiometricRequiredTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user has not set up biometric authentication on their device. It is used on Android side. Maximum 60 characters."
+  },
+  "androidDeviceCredentialsRequiredTitle": "Credencials del dispositiu requerides",
+  "@androidDeviceCredentialsRequiredTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user has not set up credentials authentication on their device. It is used on Android side. Maximum 60 characters."
+  },
+  "androidDeviceCredentialsSetupDescription": "Es requereixen credencials del dispositiu",
+  "@androidDeviceCredentialsSetupDescription": {
+    "description": "Message advising the user to go to the settings and configure device credentials on their device. It shows in a dialog on Android side."
+  },
+  "goToSettings": "Ves a configuració",
+  "@goToSettings": {
+    "description": "Message showed on a button that the user can click to go to settings pages from the current dialog. It is used on both Android and iOS side. Maximum 30 characters."
+  },
+  "androidGoToSettingsDescription": "L'autenticació biomètrica no està configurada al teu dispositiu. Ves a 'Configuració > Seguretat' per afegir autenticació biomètrica.",
+  "@androidGoToSettingsDescription": {
+    "description": "Message advising the user to go to the settings and configure biometric on their device. It shows in a dialog on Android side."
+  },
+  "iOSLockOut": "L'autenticació biomètrica està desactivada. Bloqueja i desbloqueja la pantalla per activar-la.",
+  "@iOSLockOut": {
+    "description": "Message advising the user to re-enable biometrics on their device. It shows in a dialog on iOS side."
+  },
+  "iOSOkButton": "D'acord",
+  "@iOSOkButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
+  },
+  "emailAlreadyRegistered": "El correu electrònic ja està registrat.",
+  "@emailAlreadyRegistered": {
+    "description": "Error message when email is already registered"
+  },
+  "emailNotRegistered": "El correu electrònic no està registrat.",
+  "@emailNotRegistered": {
+    "description": "Error message when email is not registered"
+  },
+  "thisEmailIsAlreadyInUse": "Aquest correu electrònic ja està en ús",
+  "@thisEmailIsAlreadyInUse": {
+    "description": "Error message when email is already in use"
+  },
+  "emailChangedTo": "Correu electrònic canviat a {newEmail}",
+  "@emailChangedTo": {
+    "description": "Message when email has been changed",
+    "placeholders": {
+      "newEmail": {
+        "description": "The new email address",
+        "type": "String",
+        "example": "new@example.com"
+      }
+    }
+  },
+  "authenticationFailedPleaseTryAgain": "Autenticació fallida, intenta-ho de nou",
+  "@authenticationFailedPleaseTryAgain": {
+    "description": "Error message when authentication fails"
+  },
+  "authenticationSuccessful": "Autenticació amb èxit!",
+  "@authenticationSuccessful": {
+    "description": "Success message when authentication is successful"
+  },
+  "sessionExpired": "La sessió ha caducat",
+  "@sessionExpired": {
+    "description": "Error message when session has expired"
+  },
+  "incorrectRecoveryKey": "Clau de recuperació incorrecta",
+  "@incorrectRecoveryKey": {
+    "description": "Error message when recovery key is incorrect"
+  },
+  "theRecoveryKeyYouEnteredIsIncorrect": "La clau de recuperació que has introduït és incorrecta",
+  "@theRecoveryKeyYouEnteredIsIncorrect": {
+    "description": "Detailed error message when recovery key is incorrect"
+  },
+  "twofactorAuthenticationSuccessfullyReset": "Autenticació de dos factors restablerta amb èxit",
+  "@twofactorAuthenticationSuccessfullyReset": {
+    "description": "Message when two-factor authentication is successfully reset"
+  },
+  "yourVerificationCodeHasExpired": "El teu codi de verificació ha expirat",
+  "@yourVerificationCodeHasExpired": {
+    "description": "Error message when verification code has expired"
+  },
+  "incorrectCode": "Codi incorrecte",
+  "@incorrectCode": {
+    "description": "Error message when code is incorrect"
+  },
+  "sorryTheCodeYouveEnteredIsIncorrect": "Ho sentim, el codi que has introduït és incorrecte",
+  "@sorryTheCodeYouveEnteredIsIncorrect": {
+    "description": "Detailed error message when code is incorrect"
+  },
+  "developerSettings": "Configuració de desenvolupador",
+  "@developerSettings": {
+    "description": "Label for developerSettings"
+  },
+  "serverEndpoint": "Endpoint del servidor",
+  "@serverEndpoint": {
+    "description": "Label for serverEndpoint"
+  },
+  "invalidEndpoint": "Endpoint no vàlid",
+  "@invalidEndpoint": {
+    "description": "Label for invalidEndpoint"
+  },
+  "invalidEndpointMessage": "Ho sentim, l'endpoint que has introduït no és vàlid. Introdueix un endpoint vàlid i torna-ho a intentar.",
+  "@invalidEndpointMessage": {
+    "description": "Label for invalidEndpointMessage"
+  },
+  "endpointUpdatedMessage": "Extrem actualitzat correctament",
+  "@endpointUpdatedMessage": {
+    "description": "Label for endpointUpdatedMessage"
+  }
+}

@@ -1,0 +1,712 @@
+{
+  "networkHostLookUpErr": "Не вдалося приєднатися до Ente. Будь ласка, перевірте налаштування мережі. Зверніться до нашої команди підтримки, якщо помилка залишиться.",
+  "@networkHostLookUpErr": {
+    "description": "Error message shown when the app cannot connect to Ente due to network host lookup failure"
+  },
+  "networkConnectionRefusedErr": "Не вдалося приєднатися до Ente. Будь ласка, спробуйте ще раз через деякий час. Якщо помилка не зникне, зв'яжіться з нашою командою підтримки.",
+  "@networkConnectionRefusedErr": {
+    "description": "Error message shown when the app cannot connect to Ente due to connection refused"
+  },
+  "itLooksLikeSomethingWentWrongPleaseRetryAfterSome": "Схоже, що щось пішло не так. Будь ласка, спробуйте ще раз через деякий час. Якщо помилка не зникне, зв'яжіться з нашою командою підтримки.",
+  "@itLooksLikeSomethingWentWrongPleaseRetryAfterSome": {
+    "description": "Generic error message for temporary issues"
+  },
+  "error": "Помилка",
+  "@error": {
+    "description": "Generic error title"
+  },
+  "ok": "Ок",
+  "@ok": {
+    "description": "Generic OK button label"
+  },
+  "faq": "Часті питання",
+  "@faq": {
+    "description": "FAQ link label"
+  },
+  "contactSupport": "Звернутися до служби підтримки",
+  "@contactSupport": {
+    "description": "Contact support button label"
+  },
+  "emailYourLogs": "Відправте ваші журнали електронною поштою",
+  "@emailYourLogs": {
+    "description": "Title for emailing logs dialog"
+  },
+  "pleaseSendTheLogsTo": "Будь ласка, надішліть журнали до електронної пошти {toEmail}",
+  "@pleaseSendTheLogsTo": {
+    "description": "Message asking user to send logs to email address",
+    "placeholders": {
+      "toEmail": {
+        "type": "String",
+        "description": "Email address to send logs to"
+      }
+    }
+  },
+  "copyEmailAddress": "Копіювати електронну адресу",
+  "@copyEmailAddress": {
+    "description": "Button to copy email address to clipboard"
+  },
+  "exportLogs": "Експортувати журнал",
+  "@exportLogs": {
+    "description": "Button to export logs"
+  },
+  "cancel": "Скасувати",
+  "@cancel": {
+    "description": "Cancel button label"
+  },
+  "reportABug": "Повідомити про помилку",
+  "@reportABug": {
+    "description": "Label for reporting a bug"
+  },
+  "customEndpoint": "Приєднано до {endpoint}",
+  "@customEndpoint": {
+    "description": "Text showing user is connected to a custom endpoint",
+    "placeholders": {
+      "endpoint": {
+        "type": "String",
+        "description": "URL of the custom endpoint"
+      }
+    }
+  },
+  "save": "Зберегти",
+  "@save": {
+    "description": "Label for save button"
+  },
+  "send": "Надіслати",
+  "@send": {
+    "description": "Label for send button"
+  },
+  "saveOrSendDescription": "Чи хочете ви зберегти це до свого сховища (типово тека Downloads), чи надіслати його в інші застосунки?",
+  "@saveOrSendDescription": {
+    "description": "Description text asking user if they want to save to storage or share with other apps"
+  },
+  "saveOnlyDescription": "Чи хочете Ви зберегти це до свого сховища (тека Downloads за замовчуванням)?",
+  "@saveOnlyDescription": {
+    "description": "Description text asking user if they want to save to storage (for platforms that don't support sharing)"
+  },
+  "email": "Адреса електронної пошти",
+  "@email": {
+    "description": "Email field label"
+  },
+  "verify": "Перевірити",
+  "@verify": {
+    "description": "Verify button label"
+  },
+  "invalidEmailTitle": "Хибна адреса електронної пошти",
+  "@invalidEmailTitle": {
+    "description": "Title for invalid email error dialog"
+  },
+  "invalidEmailMessage": "Введіть дійсну адресу електронної пошти.",
+  "@invalidEmailMessage": {
+    "description": "Message for invalid email error dialog"
+  },
+  "pleaseWait": "Будь ласка, зачекайте...",
+  "@pleaseWait": {
+    "description": "Please wait message"
+  },
+  "verifyPassword": "Підтвердження пароля",
+  "@verifyPassword": {
+    "description": "Verify password button label"
+  },
+  "incorrectPasswordTitle": "Невірний пароль",
+  "@incorrectPasswordTitle": {
+    "description": "Title for incorrect password error"
+  },
+  "pleaseTryAgain": "Будь ласка, спробуйте ще раз",
+  "@pleaseTryAgain": {
+    "description": "Message asking user to try again"
+  },
+  "enterPassword": "Введіть пароль",
+  "@enterPassword": {
+    "description": "Enter password field label"
+  },
+  "enterYourPasswordHint": "Введіть свій пароль",
+  "@enterYourPasswordHint": {
+    "description": "Hint for password field"
+  },
+  "activeSessions": "Активні сеанси",
+  "@activeSessions": {
+    "description": "Title for active sessions page"
+  },
+  "oops": "От халепа",
+  "@oops": {
+    "description": "Oops error title"
+  },
+  "somethingWentWrongPleaseTryAgain": "Щось пішло не так, спробуйте, будь ласка, знову",
+  "@somethingWentWrongPleaseTryAgain": {
+    "description": "Generic error message"
+  },
+  "thisWillLogYouOutOfThisDevice": "Це призведе до виходу на цьому пристрої!",
+  "@thisWillLogYouOutOfThisDevice": {
+    "description": "Warning message for logging out of current device"
+  },
+  "thisWillLogYouOutOfTheFollowingDevice": "Це призведе до виходу на наступному пристрої:",
+  "@thisWillLogYouOutOfTheFollowingDevice": {
+    "description": "Warning message for logging out of another device"
+  },
+  "terminateSession": "Припинити сеанс?",
+  "@terminateSession": {
+    "description": "Title for terminate session dialog"
+  },
+  "terminate": "Припинити",
+  "@terminate": {
+    "description": "Terminate button label"
+  },
+  "thisDevice": "Цей пристрій",
+  "@thisDevice": {
+    "description": "Label for current device"
+  },
+  "createAccount": "Створити обліковий запис",
+  "@createAccount": {
+    "description": "Create account button label"
+  },
+  "weakStrength": "Слабкий",
+  "@weakStrength": {
+    "description": "Weak password strength label"
+  },
+  "moderateStrength": "Помірний",
+  "@moderateStrength": {
+    "description": "Moderate password strength label"
+  },
+  "strongStrength": "Надійний",
+  "@strongStrength": {
+    "description": "Strong password strength label"
+  },
+  "deleteAccount": "Видалити обліковий запис",
+  "@deleteAccount": {
+    "description": "Delete account button label"
+  },
+  "deleteAccountQuery": "Нам дуже шкода, що Ви залишаєте нас. Чи Ви зіткнулися з якоюсь проблемою?",
+  "@deleteAccountQuery": {
+    "description": "Message asking user why they want to delete account"
+  },
+  "yesSendFeedbackAction": "Так, надіслати відгук",
+  "@yesSendFeedbackAction": {
+    "description": "Button to confirm sending feedback"
+  },
+  "noDeleteAccountAction": "Ні, видаліть мій обліковий запис",
+  "@noDeleteAccountAction": {
+    "description": "Button to proceed with account deletion"
+  },
+  "initiateAccountDeleteTitle": "Будь ласка, авторизуйтесь, щоб розпочати видалення облікового запису",
+  "@initiateAccountDeleteTitle": {
+    "description": "Title for authentication dialog before account deletion"
+  },
+  "confirmAccountDeleteTitle": "Підтвердіть видалення облікового запису",
+  "@confirmAccountDeleteTitle": {
+    "description": "Title for account deletion confirmation dialog"
+  },
+  "confirmAccountDeleteMessage": "Цей обліковий запис є зв'язаним з іншими програмами Ente, якщо ви використовуєте якісь з них.\n\nВаші завантажені дані у всіх програмах Ente будуть заплановані до видалення, а обліковий запис буде видалено назавжди.",
+  "@confirmAccountDeleteMessage": {
+    "description": "Message warning about account deletion consequences"
+  },
+  "delete": "Видалити",
+  "@delete": {
+    "description": "Delete button label"
+  },
+  "createNewAccount": "Створити новий обліковий запис",
+  "@createNewAccount": {
+    "description": "Create new account button label"
+  },
+  "password": "Пароль",
+  "@password": {
+    "description": "Password field label"
+  },
+  "confirmPassword": "Підтвердити пароль",
+  "@confirmPassword": {
+    "description": "Confirm password field label"
+  },
+  "passwordStrength": "Сила пароля: {passwordStrengthValue}",
+  "@passwordStrength": {
+    "description": "Text to indicate the password strength",
+    "placeholders": {
+      "passwordStrengthValue": {
+        "description": "The strength of the password as a string",
+        "type": "String",
+        "example": "Weak or Moderate or Strong"
+      }
+    }
+  },
+  "hearUsWhereTitle": "Як ви дізналися про Ente? (опціонально)",
+  "@hearUsWhereTitle": {
+    "description": "Title asking how user heard about Ente"
+  },
+  "hearUsExplanation": "Ми не відстежуємо встановлення застосунків. Але, якщо ви скажете нам, де ви нас знайшли, це допоможе!",
+  "@hearUsExplanation": {
+    "description": "Explanation for asking how user heard about Ente"
+  },
+  "signUpTerms": "Я приймаю <u-terms>умови використання</u-terms> і <u-policy>політику конфіденційності</u-policy>",
+  "@signUpTerms": {
+    "description": "Terms agreement text for sign up"
+  },
+  "termsOfServicesTitle": "Умови",
+  "@termsOfServicesTitle": {
+    "description": "Terms of service title"
+  },
+  "privacyPolicyTitle": "Політика конфіденційності",
+  "@privacyPolicyTitle": {
+    "description": "Privacy policy title"
+  },
+  "ackPasswordLostWarning": "Я розумію, що якщо я втрачу свій пароль, я можу втратити свої дані, тому що вони є захищені <underline>наскрізним шифруванням</underline>.",
+  "@ackPasswordLostWarning": {
+    "description": "Warning about password loss"
+  },
+  "encryption": "Шифрування",
+  "@encryption": {
+    "description": "Encryption label"
+  },
+  "logInLabel": "Увійти",
+  "@logInLabel": {
+    "description": "Log in button label"
+  },
+  "welcomeBack": "З поверненням!",
+  "@welcomeBack": {
+    "description": "Welcome back message"
+  },
+  "loginTerms": "Натискаючи «Увійти», я приймаю <u-terms>умови використання</u-terms> і <u-policy>політику конфіденційності</u-policy>",
+  "@loginTerms": {
+    "description": "Terms agreement text for login"
+  },
+  "noInternetConnection": "Немає підключення до Інтернету",
+  "@noInternetConnection": {
+    "description": "No internet connection error message"
+  },
+  "pleaseCheckYourInternetConnectionAndTryAgain": "Будь ласка, перевірте підключення до Інтернету та спробуйте ще раз.",
+  "@pleaseCheckYourInternetConnectionAndTryAgain": {
+    "description": "Message asking user to check internet connection"
+  },
+  "verificationFailedPleaseTryAgain": "Перевірка не вдалася, спробуйте ще",
+  "@verificationFailedPleaseTryAgain": {
+    "description": "Verification failed error message"
+  },
+  "recreatePasswordTitle": "Повторно створити пароль",
+  "@recreatePasswordTitle": {
+    "description": "Title for recreate password dialog"
+  },
+  "recreatePasswordBody": "Поточний пристрій не є достатньо потужним для підтвердження пароля, але ми можемо відновити його таким чином, щоб він працював на всіх пристроях.\n\nБудь ласка, увійдіть за допомогою вашого ключа відновлення і відновіть ваш пароль (ви можете знову використати той самий пароль, якщо бажаєте).",
+  "@recreatePasswordBody": {
+    "description": "Body text for recreate password dialog"
+  },
+  "useRecoveryKey": "Застосувати ключ відновлення",
+  "@useRecoveryKey": {
+    "description": "Use recovery key button label"
+  },
+  "forgotPassword": "Нагадати пароль",
+  "@forgotPassword": {
+    "description": "Forgot password link label"
+  },
+  "changeEmail": "Змінити адресу електронної пошти",
+  "@changeEmail": {
+    "description": "Change email button label"
+  },
+  "verifyEmail": "Підтвердити електронну адресу",
+  "@verifyEmail": {
+    "description": "Verify email title"
+  },
+  "weHaveSendEmailTo": "Ми надіслали листа на адресу електронної пошти <green>{email}</green>",
+  "@weHaveSendEmailTo": {
+    "description": "Text to indicate that we have sent a mail to the user",
+    "placeholders": {
+      "email": {
+        "description": "The email address of the user",
+        "type": "String",
+        "example": "example@ente.io"
+      }
+    }
+  },
+  "toResetVerifyEmail": "Щоб скинути пароль, будь ласка, спочатку підтвердіть адресу своєї електронної пошти.",
+  "@toResetVerifyEmail": {
+    "description": "Message asking user to verify email before password reset"
+  },
+  "checkInboxAndSpamFolder": "Будь ласка, перевірте вашу скриньку електронної пошти (та спам), щоб завершити перевірку",
+  "@checkInboxAndSpamFolder": {
+    "description": "Message asking user to check inbox and spam folder"
+  },
+  "tapToEnterCode": "Натисніть, щоб ввести код",
+  "@tapToEnterCode": {
+    "description": "Hint for entering verification code"
+  },
+  "sendEmail": "Надіслати електронного листа",
+  "resendEmail": "Повторно надіслати лист на електронну пошту",
+  "@resendEmail": {
+    "description": "Resend email button label"
+  },
+  "passKeyPendingVerification": "Підтвердження все ще в процесі",
+  "@passKeyPendingVerification": {
+    "description": "Message when passkey verification is pending"
+  },
+  "loginSessionExpired": "Час сеансу минув",
+  "@loginSessionExpired": {
+    "description": "Login session expired title"
+  },
+  "loginSessionExpiredDetails": "Термін дії вашого сеансу завершився. Будь ласка, увійдіть знову.",
+  "@loginSessionExpiredDetails": {
+    "description": "Login session expired details"
+  },
+  "passkeyAuthTitle": "Перевірка секретного ключа",
+  "@passkeyAuthTitle": {
+    "description": "Passkey authentication title"
+  },
+  "waitingForVerification": "Очікується підтвердження...",
+  "@waitingForVerification": {
+    "description": "Waiting for verification message"
+  },
+  "tryAgain": "Спробуйте ще раз",
+  "@tryAgain": {
+    "description": "Try again button label"
+  },
+  "checkStatus": "Перевірити стан",
+  "@checkStatus": {
+    "description": "Check status button label"
+  },
+  "loginWithTOTP": "Увійти за допомогою TOTP",
+  "@loginWithTOTP": {
+    "description": "Login with TOTP button label"
+  },
+  "recoverAccount": "Відновити обліковий запис",
+  "@recoverAccount": {
+    "description": "Recover account button label"
+  },
+  "setPasswordTitle": "Встановити пароль",
+  "@setPasswordTitle": {
+    "description": "Set password title"
+  },
+  "changePasswordTitle": "Змінити пароль",
+  "@changePasswordTitle": {
+    "description": "Change password title"
+  },
+  "resetPasswordTitle": "Скинути пароль",
+  "@resetPasswordTitle": {
+    "description": "Reset password title"
+  },
+  "encryptionKeys": "Ключі шифрування",
+  "@encryptionKeys": {
+    "description": "Encryption keys title"
+  },
+  "enterPasswordToEncrypt": "Введіть пароль, який ми зможемо використати для шифрування ваших даних",
+  "@enterPasswordToEncrypt": {
+    "description": "Prompt to enter password for encryption"
+  },
+  "enterNewPasswordToEncrypt": "Введіть новий пароль, який ми зможемо використати для шифрування ваших даних",
+  "@enterNewPasswordToEncrypt": {
+    "description": "Prompt to enter new password for encryption"
+  },
+  "passwordWarning": "Ми не зберігаємо цей пароль, тому, якщо ви його забудете, <underline>ми не зможемо розшифрувати Ваші дані</underline>",
+  "@passwordWarning": {
+    "description": "Warning about password storage"
+  },
+  "howItWorks": "Як це працює",
+  "@howItWorks": {
+    "description": "How it works button label"
+  },
+  "generatingEncryptionKeys": "Створення ключів шифрування...",
+  "@generatingEncryptionKeys": {
+    "description": "Generating encryption keys message"
+  },
+  "passwordChangedSuccessfully": "Пароль успішно змінено",
+  "@passwordChangedSuccessfully": {
+    "description": "Password changed successfully message"
+  },
+  "signOutFromOtherDevices": "Вийти на інших пристроях",
+  "@signOutFromOtherDevices": {
+    "description": "Sign out from other devices title"
+  },
+  "signOutOtherBody": "Якщо ви думаєте, що хтось може знати ваш пароль, ви можете примусити всі інші пристрої, які використовують ваш обліковий запис, вийти з нього.",
+  "@signOutOtherBody": {
+    "description": "Sign out other devices explanation"
+  },
+  "signOutOtherDevices": "Вийти на інших пристроях",
+  "@signOutOtherDevices": {
+    "description": "Sign out other devices button label"
+  },
+  "doNotSignOut": "Не виходити",
+  "@doNotSignOut": {
+    "description": "Do not sign out button label"
+  },
+  "generatingEncryptionKeysTitle": "Створення ключів шифрування...",
+  "@generatingEncryptionKeysTitle": {
+    "description": "Generating encryption keys title"
+  },
+  "continueLabel": "Продовжити",
+  "@continueLabel": {
+    "description": "Continue button label"
+  },
+  "insecureDevice": "Незахищений пристрій",
+  "@insecureDevice": {
+    "description": "Insecure device warning title"
+  },
+  "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": "На жаль, нам не вдалося згенерувати захищені ключі на цьому пристрої.\n\nБудь ласка, увійдіть з іншого пристрою.",
+  "@sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": {
+    "description": "Error message for insecure device"
+  },
+  "recoveryKeyCopiedToClipboard": "Ключ відновлення скопійований в буфер обміну",
+  "@recoveryKeyCopiedToClipboard": {
+    "description": "Recovery key copied message"
+  },
+  "recoveryKey": "Ключ відновлення",
+  "@recoveryKey": {
+    "description": "Recovery key label"
+  },
+  "recoveryKeyOnForgotPassword": "Якщо ви забудете свій пароль, то єдиний спосіб відновити ваші дані – за допомогою цього ключа.",
+  "@recoveryKeyOnForgotPassword": {
+    "description": "Recovery key importance explanation"
+  },
+  "recoveryKeySaveDescription": "Ми не зберігаємо цей ключ, будь ласка, збережіть цей ключ з 24 слів в надійному місці.",
+  "@recoveryKeySaveDescription": {
+    "description": "Recovery key save description"
+  },
+  "doThisLater": "Зробити це пізніше",
+  "@doThisLater": {
+    "description": "Do this later button label"
+  },
+  "saveKey": "Зберегти ключ",
+  "@saveKey": {
+    "description": "Save key button label"
+  },
+  "recoveryKeySaved": "Ключ відновлення збережений у теці Downloads!",
+  "@recoveryKeySaved": {
+    "description": "Recovery key saved confirmation message"
+  },
+  "noRecoveryKeyTitle": "Немає ключа відновлення?",
+  "@noRecoveryKeyTitle": {
+    "description": "No recovery key title"
+  },
+  "twoFactorAuthTitle": "Двоетапна автентифікація",
+  "@twoFactorAuthTitle": {
+    "description": "Two-factor authentication title"
+  },
+  "enterCodeHint": "Введіть нижче шестизначний код із застосунку для автентифікації",
+  "@enterCodeHint": {
+    "description": "Hint for entering 2FA code"
+  },
+  "lostDeviceTitle": "Загубили пристрій?",
+  "@lostDeviceTitle": {
+    "description": "Lost device title"
+  },
+  "enterRecoveryKeyHint": "Введіть ваш ключ відновлення",
+  "@enterRecoveryKeyHint": {
+    "description": "Hint for entering recovery key"
+  },
+  "recover": "Відновлення",
+  "@recover": {
+    "description": "Recover button label"
+  },
+  "loggingOut": "Вихід із системи...",
+  "@loggingOut": {
+    "description": "Message shown while logging out"
+  },
+  "immediately": "Негайно",
+  "@immediately": {
+    "description": "Immediately option for auto lock timing"
+  },
+  "appLock": "Блокування",
+  "@appLock": {
+    "description": "App lock setting title"
+  },
+  "autoLock": "Автоблокування",
+  "@autoLock": {
+    "description": "Auto lock setting title"
+  },
+  "noSystemLockFound": "Не знайдено системного блокування",
+  "@noSystemLockFound": {
+    "description": "Error when no system lock is found"
+  },
+  "deviceLockEnablePreSteps": "Для увімкнення блокування програми, будь ласка, налаштуйте пароль пристрою або блокування екрана в системних налаштуваннях.",
+  "@deviceLockEnablePreSteps": {
+    "description": "Instructions for enabling device lock"
+  },
+  "appLockDescription": "Виберіть між типовим екраном блокування вашого пристрою та власним екраном блокування з PIN-кодом або паролем.",
+  "@appLockDescription": {
+    "description": "Description of app lock feature"
+  },
+  "deviceLock": "Блокування пристрою",
+  "@deviceLock": {
+    "description": "Device lock option title"
+  },
+  "pinLock": "PIN-код",
+  "@pinLock": {
+    "description": "PIN lock option title"
+  },
+  "autoLockFeatureDescription": "Час, через який застосунок буде заблоковано після розміщення у фоновому режимі",
+  "@autoLockFeatureDescription": {
+    "description": "Description of auto lock feature"
+  },
+  "hideContent": "Приховати вміст",
+  "@hideContent": {
+    "description": "Hide content setting title"
+  },
+  "hideContentDescriptionAndroid": "Приховує вміст програми у перемикачі застосунків і вимикає знімки екрану",
+  "@hideContentDescriptionAndroid": {
+    "description": "Description of hide content feature on Android"
+  },
+  "hideContentDescriptioniOS": "Приховує вміст у перемикачі застосунків",
+  "@hideContentDescriptioniOS": {
+    "description": "Description of hide content feature on iOS"
+  },
+  "tooManyIncorrectAttempts": "Завелика кількість невірних спроб",
+  "@tooManyIncorrectAttempts": {
+    "description": "Message shown when too many incorrect attempts are made"
+  },
+  "tapToUnlock": "Доторкніться, щоб розблокувати",
+  "@tapToUnlock": {
+    "description": "Message prompting user to tap to unlock"
+  },
+  "areYouSureYouWantToLogout": "Ви впевнені, що хочете вийти з системи?",
+  "@areYouSureYouWantToLogout": {
+    "description": "Confirmation message before logout"
+  },
+  "yesLogout": "Так, вийти з системи",
+  "@yesLogout": {
+    "description": "Confirmation button for logout"
+  },
+  "authToViewSecrets": "Будь ласка, пройдіть автентифікацію, щоб переглянути ваші секретні коди",
+  "@authToViewSecrets": {
+    "description": "Message prompting authentication to view secrets"
+  },
+  "next": "Наступний",
+  "@next": {
+    "description": "Next button label"
+  },
+  "setNewPassword": "Встановити новий пароль",
+  "@setNewPassword": {
+    "description": "Set new password title"
+  },
+  "enterPin": "Введіть PIN-код",
+  "@enterPin": {
+    "description": "Enter PIN prompt"
+  },
+  "setNewPin": "Встановити новий PIN-код",
+  "@setNewPin": {
+    "description": "Set new PIN title"
+  },
+  "confirm": "Підтвердити",
+  "@confirm": {
+    "description": "Confirm button label"
+  },
+  "reEnterPassword": "Введіть пароль ще раз",
+  "@reEnterPassword": {
+    "description": "Re-enter password prompt"
+  },
+  "reEnterPin": "Введіть PIN-код ще раз",
+  "@reEnterPin": {
+    "description": "Re-enter PIN prompt"
+  },
+  "androidBiometricHint": "Підтвердити ідентифікацію",
+  "@androidBiometricHint": {
+    "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricNotRecognized": "Не розпізнано. Спробуйте ще раз.",
+  "@androidBiometricNotRecognized": {
+    "description": "Message to let the user know that authentication was failed. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricSuccess": "Успіх",
+  "@androidBiometricSuccess": {
+    "description": "Message to let the user know that authentication was successful. It is used on Android side. Maximum 60 characters."
+  },
+  "androidCancelButton": "Скасувати",
+  "@androidCancelButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on Android side. Maximum 30 characters."
+  },
+  "androidSignInTitle": "Необхідна автентифікація",
+  "@androidSignInTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user that they need to scan biometric to continue. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricRequiredTitle": "Потрібна біометрична автентифікація",
+  "@androidBiometricRequiredTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user has not set up biometric authentication on their device. It is used on Android side. Maximum 60 characters."
+  },
+  "androidDeviceCredentialsRequiredTitle": "Необхідні облікові дані пристрою",
+  "@androidDeviceCredentialsRequiredTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user has not set up credentials authentication on their device. It is used on Android side. Maximum 60 characters."
+  },
+  "androidDeviceCredentialsSetupDescription": "Необхідні облікові дані пристрою",
+  "@androidDeviceCredentialsSetupDescription": {
+    "description": "Message advising the user to go to the settings and configure device credentials on their device. It shows in a dialog on Android side."
+  },
+  "goToSettings": "Перейти до налаштувань",
+  "@goToSettings": {
+    "description": "Message showed on a button that the user can click to go to settings pages from the current dialog. It is used on both Android and iOS side. Maximum 30 characters."
+  },
+  "androidGoToSettingsDescription": "Біометрична автентифікація не налаштована на вашому пристрої. Перейдіть в «Налаштування > Безпека», щоб додати біометричну автентифікацію.",
+  "@androidGoToSettingsDescription": {
+    "description": "Message advising the user to go to the settings and configure biometric on their device. It shows in a dialog on Android side."
+  },
+  "iOSLockOut": "Біометрична автентифікація вимкнена. Будь ласка, заблокуйте і розблокуйте свій екран, щоб увімкнути її.",
+  "@iOSLockOut": {
+    "description": "Message advising the user to re-enable biometrics on their device. It shows in a dialog on iOS side."
+  },
+  "iOSOkButton": "OK",
+  "@iOSOkButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
+  },
+  "thisEmailIsAlreadyInUse": "Ця адреса електронної пошти вже використовується",
+  "@thisEmailIsAlreadyInUse": {
+    "description": "Error message when email is already in use"
+  },
+  "emailChangedTo": "Адресу електронної пошти змінено на {newEmail}",
+  "@emailChangedTo": {
+    "description": "Message when email has been changed",
+    "placeholders": {
+      "newEmail": {
+        "description": "The new email address",
+        "type": "String",
+        "example": "new@example.com"
+      }
+    }
+  },
+  "authenticationFailedPleaseTryAgain": "Автентифікація не пройдена. Будь ласка, спробуйте ще раз",
+  "@authenticationFailedPleaseTryAgain": {
+    "description": "Error message when authentication fails"
+  },
+  "authenticationSuccessful": "Автентифікацію виконано!",
+  "@authenticationSuccessful": {
+    "description": "Success message when authentication is successful"
+  },
+  "sessionExpired": "Час сеансу минув",
+  "@sessionExpired": {
+    "description": "Error message when session has expired"
+  },
+  "incorrectRecoveryKey": "Неправильний ключ відновлення",
+  "@incorrectRecoveryKey": {
+    "description": "Error message when recovery key is incorrect"
+  },
+  "theRecoveryKeyYouEnteredIsIncorrect": "Ви ввели неправильний ключ відновлення",
+  "@theRecoveryKeyYouEnteredIsIncorrect": {
+    "description": "Detailed error message when recovery key is incorrect"
+  },
+  "twofactorAuthenticationSuccessfullyReset": "Двоетапна автентифікація успішно скинута",
+  "@twofactorAuthenticationSuccessfullyReset": {
+    "description": "Message when two-factor authentication is successfully reset"
+  },
+  "yourVerificationCodeHasExpired": "Час дії коду підтвердження минув",
+  "@yourVerificationCodeHasExpired": {
+    "description": "Error message when verification code has expired"
+  },
+  "incorrectCode": "Невірний код",
+  "@incorrectCode": {
+    "description": "Error message when code is incorrect"
+  },
+  "sorryTheCodeYouveEnteredIsIncorrect": "Вибачте, але введений вами код є невірним",
+  "@sorryTheCodeYouveEnteredIsIncorrect": {
+    "description": "Detailed error message when code is incorrect"
+  },
+  "developerSettings": "Налаштування розробника",
+  "@developerSettings": {
+    "description": "Label for developerSettings"
+  },
+  "serverEndpoint": "Кінцева точка сервера",
+  "@serverEndpoint": {
+    "description": "Label for serverEndpoint"
+  },
+  "invalidEndpoint": "Некоректна кінцева точка",
+  "@invalidEndpoint": {
+    "description": "Label for invalidEndpoint"
+  },
+  "invalidEndpointMessage": "Вибачте, введена вами кінцева точка є недійсною. Введіть дійсну кінцеву точку та спробуйте ще раз.",
+  "@invalidEndpointMessage": {
+    "description": "Label for invalidEndpointMessage"
+  },
+  "endpointUpdatedMessage": "Точка входу успішно оновлена",
+  "@endpointUpdatedMessage": {
+    "description": "Label for endpointUpdatedMessage"
+  }
+}
