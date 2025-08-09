@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import "package:flutter/services.dart";
 import "package:flutter_svg/svg.dart";
 import "package:photos/ente_theme_data.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -35,6 +36,24 @@ class ImageEditorTuneBar extends StatefulWidget with SimpleConfigsAccess {
 class _ImageEditorTuneBarState extends State<ImageEditorTuneBar>
     with ImageEditorConvertedConfigs, SimpleConfigsAccessState {
   TuneEditorState get tuneEditor => widget.editor;
+
+  final Map<int, double> _lastValues = {};
+
+  void _handleTuneItemTap(int index) {
+    if (tuneEditor.selectedIndex == index) {
+      final currentValue = tuneEditor.tuneAdjustmentMatrix[index].value;
+      if (currentValue != 0) {
+        _lastValues[index] = currentValue;
+        tuneEditor.onChanged(0);
+      } else if (_lastValues.containsKey(index)) {
+        tuneEditor.onChanged(_lastValues[index]!);
+      }
+    } else {
+      tuneEditor.setState(() {
+        tuneEditor.selectedIndex = index;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,11 +96,7 @@ class _ImageEditorTuneBarState extends State<ImageEditorTuneBar>
                       value: tuneEditor.tuneAdjustmentMatrix[index].value,
                       max: item.max,
                       min: item.min,
-                      onTap: () {
-                        tuneEditor.setState(() {
-                          tuneEditor.selectedIndex = index;
-                        });
-                      },
+                      onTap: () => _handleTuneItemTap(index),
                     );
                   }),
                 ),
@@ -224,7 +239,10 @@ class _CircularProgressWithValueState extends State<CircularProgressWithValue>
   @override
   void didUpdateWidget(CircularProgressWithValue oldWidget) {
     super.didUpdateWidget(oldWidget);
-
+    if ((oldWidget.value < 0 && widget.value >= 0) ||
+        (oldWidget.value > 0 && widget.value <= 0)) {
+      HapticFeedback.mediumImpact();
+    }
     if (oldWidget.value != widget.value) {
       _previousValue = oldWidget.value;
       _progressAnimation = Tween<double>(
@@ -303,11 +321,11 @@ class _CircularProgressWithValueState extends State<CircularProgressWithValue>
               shape: BoxShape.circle,
               color: showValue || widget.isSelected
                   ? progressColor.withOpacity(0.2)
-                  : colorTheme.backgroundElevated2,
+                  : Theme.of(context).colorScheme.editorBackgroundColor,
               border: Border.all(
                 color: widget.isSelected
                     ? progressColor.withOpacity(0.4)
-                    : colorTheme.backgroundElevated2,
+                    : Theme.of(context).colorScheme.editorBackgroundColor,
                 width: 2,
               ),
             ),
@@ -395,7 +413,7 @@ class _TuneAdjustWidget extends StatelessWidget {
               margin: const EdgeInsets.symmetric(horizontal: 20),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(25),
-                color: colorScheme.backgroundElevated2,
+                color: Theme.of(context).colorScheme.editorBackgroundColor,
               ),
             ),
           ),
@@ -410,7 +428,8 @@ class _TuneAdjustWidget extends StatelessWidget {
                 overlayShape: const RoundSliderOverlayShape(overlayRadius: 0),
                 activeTrackColor:
                     Theme.of(context).colorScheme.imageEditorPrimaryColor,
-                inactiveTrackColor: colorScheme.backgroundElevated2,
+                inactiveTrackColor:
+                    Theme.of(context).colorScheme.editorBackgroundColor,
                 trackShape: const _CenterBasedTrackShape(),
                 trackHeight: 24,
               ),
