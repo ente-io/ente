@@ -1762,5 +1762,10 @@
   "thePersonWillNotBeDisplayed": "لن يتم عرض هذا الشخص في قسم الأشخاص بعد الآن. الصور ستبقى كما هي دون تغيير.",
   "areYouSureYouWantToMergeThem": "هل أنت متأكد من رغبتك في دمجهم؟",
   "allUnnamedGroupsWillBeMergedIntoTheSelectedPerson": "سيتم دمج جميع المجموعات غير المسماة مع الشخص المحدد. يمكن التراجع عن هذا الإجراء لاحقًا من خلال نظرة عامة على سجل الاقتراحات التابع لهذا الشخص.",
-  "yesIgnore": "نعم، تجاهل"
+  "yesIgnore": "نعم، تجاهل",
+  "thisWeek": "هذا الأسبوع",
+  "lastWeek": "الأسبوع الماضي",
+  "thisMonth": "هذا الشهر",
+  "thisYear": "هذه السنة",
+  "day": "اليوم"
 }
