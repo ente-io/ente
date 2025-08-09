@@ -227,6 +227,12 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                 background: colorScheme.backgroundBase,
               ),
               emojiEditor: EmojiEditorTheme(
+                bottomActionBarConfig: BottomActionBarConfig(
+                  showSearchViewButton: true,
+                  buttonColor: colorScheme.backgroundBase,
+                  buttonIconColor: colorScheme.tabIcon,
+                  backgroundColor: colorScheme.backgroundBase,
+                ),
                 backgroundColor: colorScheme.backgroundBase,
               ),
             ),
