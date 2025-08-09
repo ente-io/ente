@@ -10,6 +10,7 @@ import "package:photos/utils/isolate/isolate_operations.dart";
 import "package:photos/utils/isolate/super_isolate.dart";
 import "package:synchronized/synchronized.dart";
 
+@pragma('vm:entry-point')
 class MLComputer extends SuperIsolate {
   @override
   Logger get logger => _logger;
