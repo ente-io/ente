@@ -87,10 +87,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
   @override
   Widget build(BuildContext context) {
     final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
-
-    // Initialize theme-aware color
-    final colorScheme = getEnteColorScheme(context);
-    _validFieldValueColor = colorScheme.fillFaint.withOpacity(0.5);
+    _validFieldValueColor = const Color.fromRGBO(45, 194, 98, 0.2);
 
     FloatingActionButtonLocation? fabLocation() {
       if (isKeypadOpen) {
@@ -232,8 +229,9 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                             null);
                       },
                       decoration: InputDecoration(
-                        fillColor:
-                            _isPasswordValid ? _validFieldValueColor : null,
+                        fillColor: _isPasswordValid
+                            ? _validFieldValueColor
+                            : getEnteColorScheme(context).fillFaint,
                         filled: true,
                         hintText: context.strings.password,
                         contentPadding: const EdgeInsets.all(20),
@@ -295,8 +293,9 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                       onEditingComplete: () =>
                           TextInput.finishAutofillContext(),
                       decoration: InputDecoration(
-                        fillColor:
-                            _passwordsMatch ? _validFieldValueColor : null,
+                        fillColor: _passwordsMatch
+                            ? _validFieldValueColor
+                            : getEnteColorScheme(context).fillFaint,
                         filled: true,
                         hintText: context.strings.confirmPassword,
                         contentPadding: const EdgeInsets.symmetric(
