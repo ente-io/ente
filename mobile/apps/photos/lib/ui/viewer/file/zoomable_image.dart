@@ -410,13 +410,18 @@ class _ZoomableImageState extends State<ZoomableImage> {
       precacheImage(
         imageProvider,
         context,
-        onError: (exception, _) async {
-          _logger
-              .info(exception.toString() + ". Filename: ${_photo.displayName}");
+        onError: (exception, s) async {
           if (exception.toString().contains(
-                "Codec failed to produce an image, possibly due to invalid image data",
-              )) {
-            unawaited(_loadInSupportedFormat(file));
+                    "Codec failed to produce an image, possibly due to invalid image data",
+                  ) ||
+              exception.toString().contains(
+                    "Could not decompress image.",
+                  )) {
+            unawaited(_loadInSupportedFormat(file, e));
+          } else {
+            _logger.warning(
+              "Failed to load image ${_photo.displayName} with error: $exception",
+            );
           }
         },
       ).then((value) {
@@ -471,8 +476,13 @@ class _ZoomableImageState extends State<ZoomableImage> {
 
   bool _isGIF() => _photo.displayName.toLowerCase().endsWith(".gif");
 
-  Future<void> _loadInSupportedFormat(File file) async {
-    _logger.info("Compressing ${_photo.displayName} to viewable format");
+  Future<void> _loadInSupportedFormat(
+    File file,
+    Object unsupportedErr,
+  ) async {
+    _logger.info(
+      "Compressing ${_photo.displayName} to viewable format due to $unsupportedErr",
+    );
     _convertToSupportedFormat = true;
 
     Uint8List? compressedFile;
