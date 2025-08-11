@@ -590,7 +590,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                         child: isSelected
                             ? ColorFiltered(
                                 colorFilter: ColorFilter.mode(
-                                  Colors.black.withValues(alpha: 0.4),
+                                  Colors.black.withAlpha((0.4 * 255).toInt()),
                                   BlendMode.darken,
                                 ),
                                 child: ThumbnailWidget(
@@ -668,7 +668,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         decoration: BoxDecoration(
-          color: colorScheme.warning500.withValues(alpha: 0.1),
+          color: colorScheme.warning500.withAlpha((0.1 * 255).toInt()),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
