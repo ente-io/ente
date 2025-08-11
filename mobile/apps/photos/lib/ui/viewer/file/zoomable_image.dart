@@ -502,7 +502,11 @@ class _ZoomableImageState extends State<ZoomableImage> {
         quality: 85,
       );
     } else {
-      compressedFile = await FlutterImageCompress.compressWithFile(file.path);
+      compressedFile = await FlutterImageCompress.compressWithFile(
+        file.path,
+        minHeight: 8000,
+        minWidth: 8000,
+      );
     }
 
     if (compressedFile != null) {
