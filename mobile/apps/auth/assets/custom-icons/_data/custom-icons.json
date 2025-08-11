@@ -1993,6 +1993,8 @@
     {
       "title": "ISC2",
       "slug": "isc2"
-    }
+    },
+      "title": "Allegro",
+      "slug": "allegro"
   ]
 }
