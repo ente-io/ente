@@ -221,6 +221,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                 background: colorScheme.backgroundBase,
               ),
               paintingEditor: PaintingEditorTheme(
+                initialColor: const Color(0xFF00FFFF),
                 background: colorScheme.backgroundBase,
               ),
               textEditor: const TextEditorTheme(
