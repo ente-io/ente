@@ -63,8 +63,7 @@ Future<dynamic> isolateFunction(
 ) async {
   switch (function) {
     case IsolateOperation.bulkVectorSearch:
-      final initRust = args["initRust"] as bool? ?? false;
-      if (initRust) await RustLib.init();
+      await _ensureRustLoaded();
       final clipFloat32 = args["clipFloat32"] as List<Float32List>;
       final exact = args["exact"] as bool;
 
@@ -199,9 +198,26 @@ Future<dynamic> isolateFunction(
 
     /// Caching
     case IsolateOperation.clearAllIsolateCache:
+      _ensureRustDisposed();
       _isolateCache.clear();
       return true;
 
     /// Cases for Caching stop here
+  }
+}
+
+Future<void> _ensureRustLoaded() async {
+  final bool loaded = _isolateCache["rustLibLoaded"] as bool? ?? false;
+  if (!loaded) {
+    await RustLib.init();
+    _isolateCache["rustLibLoaded"] = true;
+  }
+}
+
+void _ensureRustDisposed() {
+  final bool loaded = _isolateCache["rustLibLoaded"] as bool? ?? false;
+  if (loaded) {
+    RustLib.dispose();
+    _isolateCache.remove("rustLibLoaded");
   }
 }

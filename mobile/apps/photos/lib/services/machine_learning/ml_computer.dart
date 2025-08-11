@@ -29,8 +29,6 @@ class MLComputer extends SuperIsolate {
   @override
   bool get shouldAutomaticDispose => false;
 
-  bool _isRustInit = false;
-
   // Singleton pattern
   MLComputer._privateConstructor();
   static final MLComputer instance = MLComputer._privateConstructor();
@@ -44,9 +42,7 @@ class MLComputer extends SuperIsolate {
       final result = await runInIsolate(IsolateOperation.bulkVectorSearch, {
         "clipFloat32": clipFloat32,
         "exact": exact,
-        "initRust": !_isRustInit,
       });
-      _isRustInit = true;
       return result;
     } catch (e, s) {
       _logger.severe("Could not run bulk vector search in MLComputer", e, s);
@@ -160,10 +156,5 @@ class MLComputer extends SuperIsolate {
       );
       rethrow;
     }
-  }
-
-  @override
-  Future<void> onDispose() async {
-    _isRustInit = false;
   }
 }
