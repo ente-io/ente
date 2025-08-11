@@ -723,16 +723,21 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
 
   Future<void> _deleteFilesLogic(Set<EnteFile> filesToDelete) async {
     _selectedFiles.unSelectAll(filesToDelete);
+    final groupsToRemove = <SimilarFiles>{};
     for (final file in filesToDelete) {
       for (final similarGroup in _similarFilesList) {
         if (similarGroup.containsFile(file)) {
           similarGroup.removeFile(file);
           if (similarGroup.isEmpty) {
-            _similarFilesList.remove(similarGroup);
+            groupsToRemove.add(similarGroup);
           }
         }
       }
     }
+    for (final group in groupsToRemove) {
+      _similarFilesList.remove(group);
+    }
+
     setState(() {});
     await deleteFilesFromRemoteOnly(context, filesToDelete.toList());
   }
