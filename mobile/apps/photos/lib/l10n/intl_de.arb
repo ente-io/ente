@@ -1800,5 +1800,24 @@
   "automaticallyAnalyzeAndSplitGrouping": "Wir analysieren die Gruppierung automatisch, um festzustellen, ob mehrere Personen vorhanden sind, und trennen sie erneut. Dies kann ein paar Sekunden dauern.",
   "layout": "Layout",
   "day": "Tag",
-  "peopleAutoAddDesc": "Wähle die Personen, die du automatisch zum Album hinzufügen möchtest"
+  "peopleAutoAddDesc": "Wähle die Personen, die du automatisch zum Album hinzufügen möchtest",
+  "undo": "Rückgängig",
+  "redo": "Wiederherstellen",
+  "filter": "Filter",
+  "adjust": "Anpassen",
+  "draw": "Zeichnen",
+  "sticker": "Sticker",
+  "brushColor": "Pinselfarbe",
+  "font": "Schriftart",
+  "background": "Hintergrund",
+  "align": "Ausrichten",
+  "addedToAlbums": "{count, plural, =1{Erfolgreich zu einem Album hinzugefügt} other{Erfolgreich zu {count} Alben hinzugefügt}}",
+  "@addedToAlbums": {
+    "description": "Message shown when items are added to albums",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }
