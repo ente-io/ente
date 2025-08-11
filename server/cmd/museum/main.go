@@ -423,7 +423,7 @@ func main() {
 
 	publicCollectionAPI := server.Group("/public-collection")
 	publicCollectionAPI.Use(rateLimiter.GlobalRateLimiter(), collectionLinkMiddleware.Authenticate(urlSanitizer))
-	fileLinkApi := server.GET("/file-link")
+	fileLinkApi := server.Group("/file-link")
 	fileLinkApi.Use(rateLimiter.GlobalRateLimiter(), fileLinkMiddleware.Authenticate(urlSanitizer))
 
 	healthCheckHandler := &api.HealthCheckHandler{

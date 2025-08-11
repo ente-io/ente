@@ -70,6 +70,10 @@
       ]
     },
     {
+      "title": "AnimeZ.to",
+      "slug": "animez"
+    },
+    {
       "title": "Ankama",
       "slug": "ankama"
     },
@@ -121,6 +125,10 @@
     },
     {
       "title": "availity"
+    },
+    {
+      "title": "AvistaZ.to",
+      "slug": "avistaz"
     },
     {
       "title": "AzurHosts",
@@ -323,6 +331,14 @@
       "title": "Capacities"
     },
     {
+      "title": "Capcom",
+      "slug": "capcom",
+      "hex": "0D4DA2",
+      "altNames": [
+        "Capcom Co., Ltd."
+      ]
+    },
+    {
       "title": "Carta",
       "altNames": [
         "Carta.com"
@@ -359,6 +375,10 @@
     },
     {
       "title": "Chucklefish"
+    },
+    {
+      "title": "CinemaZ.to",
+      "slug": "cinemaz"
     },
     {
       "title": "Clipper",
@@ -611,6 +631,10 @@
         "Exaroton"
       ],
       "hex": "17AB17"
+    },
+    {
+      "title": "ExoticaZ.to",
+      "slug": "exoticaz"
     },
     {
       "title": "Experian",
@@ -1332,6 +1356,10 @@
       "slug": "privacy"
     },
     {
+      "title": "PrivateHD.to",
+      "slug": "privatehd"
+    },
+    {
       "title": "Proton"
     },
     {
@@ -1807,7 +1835,7 @@
       "title": "Warner Bros.",
       "slug": "warner_bros",
       "altNames": [
-          "Warner Brothers"
+        "Warner Brothers"
       ]
     },
     {
@@ -1820,7 +1848,7 @@
       "title": "WEB.DE",
       "slug": "web_de"
     },
-     {
+    {
       "title": "WeMod",
       "slug": "wemod",
       "altNames": [

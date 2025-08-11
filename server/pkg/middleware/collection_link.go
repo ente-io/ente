@@ -5,9 +5,10 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
+	"net/http"
+
 	public2 "github.com/ente-io/museum/pkg/controller/public"
 	"github.com/ente-io/museum/pkg/repo/public"
-	"net/http"
 
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/controller"
@@ -43,7 +44,7 @@ func (m *CollectionLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context
 	return func(c *gin.Context) {
 		accessToken := auth.GetAccessToken(c)
 		if accessToken == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing accessToken"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing accessToken", "context": "album_link"})
 			return
 		}
 		clientIP := network.GetClientIP(c)
