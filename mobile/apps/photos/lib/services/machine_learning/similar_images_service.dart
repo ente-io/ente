@@ -5,13 +5,13 @@ import "package:flutter/foundation.dart" show kDebugMode;
 import "package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart"
     show Uint64List;
 import 'package:logging/logging.dart';
-import "package:photos/db/ml/clip_vector_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/extensions/stop_watch.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/ml/vector.dart";
 import "package:photos/models/similar_files.dart";
+import "package:photos/services/machine_learning/ml_computer.dart";
 import "package:photos/services/search_service.dart";
 
 class SimilarImagesService {
@@ -24,9 +24,9 @@ class SimilarImagesService {
   /// Returns a list of SimilarFiles, where each SimilarFiles object contains
   /// a list of files that are perceptually similar
   Future<List<SimilarFiles>> getSimilarFiles(
-    double distanceThreshold,
-    {bool exact = false,}
-  ) async {
+    double distanceThreshold, {
+    bool exact = false,
+  }) async {
     try {
       final now = DateTime.now();
       final List<SimilarFiles> result =
@@ -66,11 +66,9 @@ class SimilarImagesService {
     w?.log("getAllClipVectors");
 
     // Run bulk vector search
-    final (vectorKeys, distances) =
-        await ClipVectorDB.instance.bulkSearchVectors(
+    final (vectorKeys, distances) = await MLComputer.instance.bulkVectorSearch(
       clipFloat32,
-      BigInt.from(100),
-      exact: exact,
+      exact,
     );
     w?.log("bulkSearchVectors");
 
