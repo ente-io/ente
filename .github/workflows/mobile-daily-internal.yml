@@ -87,10 +87,9 @@ jobs:
                   echo "✅ Changelog valid:"
                   cat "$OUTPUT_FILE"
                   
-                  # Store changelog for later use
-                  echo "CHANGELOG<<EOF" >> $GITHUB_ENV
-                  cat "$OUTPUT_FILE" >> $GITHUB_ENV
-                  echo "EOF" >> $GITHUB_ENV
+                  # Store changelog for later use - Simple and reliable method
+                  CHANGELOG=$(cat "$OUTPUT_FILE" | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/"/\\"/g')
+                  echo "CHANGELOG=${CHANGELOG}" >> $GITHUB_ENV
 
             - name: Setup keys
               uses: timheuer/base64-to-file@v1
