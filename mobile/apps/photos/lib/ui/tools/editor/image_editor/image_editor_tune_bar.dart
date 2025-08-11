@@ -241,7 +241,7 @@ class _CircularProgressWithValueState extends State<CircularProgressWithValue>
     super.didUpdateWidget(oldWidget);
     if ((oldWidget.value < 0 && widget.value >= 0) ||
         (oldWidget.value > 0 && widget.value <= 0)) {
-      HapticFeedback.mediumImpact();
+      HapticFeedback.vibrate();
     }
     if (oldWidget.value != widget.value) {
       _previousValue = oldWidget.value;
