@@ -218,7 +218,7 @@ class VideoPreviewService {
           "${keyfile.path}\n");
 
       _logger.info(
-        'Generating HLS Playlist ${enteFile.displayName} at $prefix/output.m3u8}',
+        'Generating HLS Playlist ${enteFile.displayName} at $prefix/output.m3u8',
       );
 
       final reencodeVideo =
