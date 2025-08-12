@@ -54,6 +54,18 @@ jobs:
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                   command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/photos web/apps/photos/out
 
+            - name: Build custom-albums
+              run: yarn build:photos
+              env:
+                  NEXT_PUBLIC_ENTE_ONLY_SERVE_ALBUMS_APP: 1
+
+            - name: Publish custom-albums
+              uses: cloudflare/wrangler-action@v3
+              with:
+                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/custom-albums web/apps/photos/out
+
             - name: Build accounts
               run: yarn build:accounts
 

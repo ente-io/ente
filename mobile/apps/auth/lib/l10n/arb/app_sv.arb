@@ -19,7 +19,7 @@
   "pleaseVerifyDetails": "Kontrollera dina detaljer och försök igen",
   "codeIssuerHint": "Utfärdare",
   "codeSecretKeyHint": "Secret Key",
-  "secret": "Säkerhets nyckel",
+  "secret": "Säkerhetsnyckel",
   "all": "Alla",
   "notes": "Anteckningar",
   "notesLengthLimit": "Anteckningar kan vara högst {count} tecken långa",
