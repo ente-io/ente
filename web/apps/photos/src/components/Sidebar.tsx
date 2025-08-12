@@ -9,6 +9,7 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import NorthEastIcon from "@mui/icons-material/NorthEast";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import {
+    Alert,
     Box,
     Dialog,
     DialogContent,
@@ -1026,7 +1027,6 @@ const DomainSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
             onRootClose={handleRootClose}
             // TODO: CD: Translations
             title={pt("Custom domains")}
-            // caption={pt("Your albums, your domain")}
             caption="Use your own domain when sharing"
         >
             <DomainSettingsContents />
@@ -1034,8 +1034,9 @@ const DomainSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     );
 };
 
-// Separate component to reset state on back.
+// Separate component to reset state on going back.
 const DomainSettingsContents: React.FC = () => {
+    const userDetails = useUserDetailsSnapshot();
     const { customDomain, customDomainCNAME } = useSettingsSnapshot();
 
     const formik = useFormik({
@@ -1060,10 +1061,18 @@ const DomainSettingsContents: React.FC = () => {
         },
     });
 
+    const disableShare =
+        !userDetails || !isSubscriptionActivePaid(userDetails.subscription);
+
     // TODO: CD: help
 
     return (
         <Stack sx={{ px: 2, py: "12px" }}>
+            {disableShare && (
+                <Alert severity="warning">
+                    {t("sharing_disabled_for_free_accounts")}
+                </Alert>
+            )}
             <DomainItem title={pt("Link your domain")} ordinal={pt("1")}>
                 <form onSubmit={formik.handleSubmit}>
                     <TextField
@@ -1074,7 +1083,7 @@ const DomainSettingsContents: React.FC = () => {
                         fullWidth
                         autoFocus={true}
                         margin="dense"
-                        disabled={formik.isSubmitting}
+                        disabled={disableShare || formik.isSubmitting}
                         error={!!formik.errors.domain}
                         helperText={
                             formik.errors.domain ??
@@ -1087,10 +1096,11 @@ const DomainSettingsContents: React.FC = () => {
                     <LoadingButton
                         fullWidth
                         type="submit"
+                        disabled={disableShare}
                         loading={formik.isSubmitting}
                         color="accent"
                     >
-                        {customDomain ? pt("Update") : pt("Save")}
+                        {customDomain ? t("update") : t("save")}
                     </LoadingButton>
                 </form>
             </DomainItem>
