@@ -1,10 +1,10 @@
 import "dart:async";
 import "dart:io";
 import "dart:math";
-import "dart:typed_data";
 import 'dart:ui' as ui show Image;
 
 import 'package:flutter/material.dart';
+import "package:flutter/services.dart";
 import "package:flutter_image_compress/flutter_image_compress.dart";
 import "package:flutter_svg/svg.dart";
 import "package:logging/logging.dart";
@@ -176,17 +176,18 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
     final isLightMode = Theme.of(context).brightness == Brightness.light;
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      backgroundColor: colorScheme.backgroundBase,
-      body: PopScope(
-        canPop: false,
-        onPopInvoked: (didPop) {
-          if (didPop) return;
-          editorKey.currentState?.disablePopScope = true;
-          _showExitConfirmationDialog(context);
-        },
-        child: ProImageEditor.file(
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (didPop) return;
+        editorKey.currentState?.disablePopScope = true;
+        _showExitConfirmationDialog(context);
+      },
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        resizeToAvoidBottomInset: false,
+        backgroundColor: colorScheme.backgroundBase,
+        body: ProImageEditor.file(
           key: editorKey,
           widget.file,
           callbacks: ProImageEditorCallbacks(
@@ -205,6 +206,14 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
           ),
           configs: ProImageEditorConfigs(
             imageEditorTheme: ImageEditorTheme(
+              uiOverlayStyle: SystemUiOverlayStyle(
+                systemNavigationBarContrastEnforced: true,
+                systemNavigationBarColor: Colors.transparent,
+                statusBarBrightness:
+                    isLightMode ? Brightness.dark : Brightness.light,
+                statusBarIconBrightness:
+                    isLightMode ? Brightness.dark : Brightness.light,
+              ),
               appBarBackgroundColor: colorScheme.backgroundBase,
               background: colorScheme.backgroundBase,
               bottomBarBackgroundColor: colorScheme.backgroundBase,
@@ -212,6 +221,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                 background: colorScheme.backgroundBase,
               ),
               paintingEditor: PaintingEditorTheme(
+                initialColor: const Color(0xFF00FFFF),
                 background: colorScheme.backgroundBase,
               ),
               textEditor: const TextEditorTheme(
@@ -227,6 +237,12 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                 background: colorScheme.backgroundBase,
               ),
               emojiEditor: EmojiEditorTheme(
+                bottomActionBarConfig: BottomActionBarConfig(
+                  showSearchViewButton: true,
+                  buttonColor: colorScheme.backgroundBase,
+                  buttonIconColor: colorScheme.tabIcon,
+                  backgroundColor: colorScheme.backgroundBase,
+                ),
                 backgroundColor: colorScheme.backgroundBase,
               ),
             ),
