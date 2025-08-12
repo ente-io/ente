@@ -65,6 +65,25 @@ func (r *Repository) DomainOwner(ctx context.Context, domain string) (*int64, er
 	return &userID, nil
 }
 
+func (r *Repository) GetDomain(ctx context.Context, userID int64) (*string, error) {
+	// Fetch the custom domain for the user
+	rows := r.DB.QueryRowContext(ctx, `SELECT key_value FROM remote_store
+	   WHERE user_id = $1 AND key_name = $2`,
+		userID,            // $1
+		ente.CustomDomain, // $2
+	)
+	var domain string
+	err := rows.Scan(&domain)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, stacktrace.Propagate(err, "failed to fetch custom domain")
+	}
+	return &domain, nil
+
+}
+
 // GetValue fetches and return the value for given user_id and key
 func (r *Repository) GetValue(ctx context.Context, userID int64, key string) (string, error) {
 	rows := r.DB.QueryRowContext(ctx, `SELECT key_value FROM remote_store

@@ -5,7 +5,12 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
+	"github.com/ente-io/museum/pkg/repo/remotestore"
+	"github.com/gin-contrib/requestid"
+	"github.com/spf13/viper"
 	"net/http"
+	"net/url"
+	"strings"
 
 	public2 "github.com/ente-io/museum/pkg/controller/public"
 	"github.com/ente-io/museum/pkg/repo/public"
@@ -35,6 +40,7 @@ type CollectionLinkMiddleware struct {
 	Cache                *cache.Cache
 	BillingCtrl          *controller.BillingController
 	DiscordController    *discord.DiscordController
+	RemoteStoreRepo      *remotestore.Repository
 }
 
 // Authenticate returns a middle ware that extracts the `X-Auth-Access-Token`
@@ -65,7 +71,7 @@ func (m *CollectionLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context
 				return
 			}
 			// validate if user still has active paid subscription
-			if err = m.validateOwnersSubscription(publicCollectionSummary.CollectionID); err != nil {
+			if err = m.validateOwnersSubscription(c, publicCollectionSummary.CollectionID); err != nil {
 				logrus.WithError(err).Warn("failed to verify active paid subscription")
 				c.AbortWithStatusJSON(http.StatusGone, gin.H{"error": "no active subscription"})
 				return
@@ -115,12 +121,17 @@ func (m *CollectionLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context
 		c.Next()
 	}
 }
-func (m *CollectionLinkMiddleware) validateOwnersSubscription(cID int64) error {
+func (m *CollectionLinkMiddleware) validateOwnersSubscription(c *gin.Context, cID int64) error {
 	userID, err := m.CollectionRepo.GetOwnerID(cID)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
-	return m.BillingCtrl.HasActiveSelfOrFamilySubscription(userID, false)
+	err = m.BillingCtrl.HasActiveSelfOrFamilySubscription(userID, false)
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to validate owners subscription")
+	}
+	m.validateOrigin(c, userID)
+	return nil
 }
 
 func (m *CollectionLinkMiddleware) isDeviceLimitReached(ctx context.Context,
@@ -175,6 +186,43 @@ func (m *CollectionLinkMiddleware) validatePassword(c *gin.Context, reqPath stri
 		return ente.ErrAuthenticationRequired
 	}
 	return m.PublicCollectionCtrl.ValidateJWTToken(c, accessTokenJWT, *collectionSummary.PassHash)
+}
+
+func (m *CollectionLinkMiddleware) validateOrigin(c *gin.Context, ownerID int64) {
+	origin := c.Request.Header.Get("Origin")
+
+	if origin == "" || origin == viper.GetString("apps.public-albums") {
+		return
+	}
+	reqId := requestid.Get(c)
+	logger := logrus.WithFields(logrus.Fields{
+		"ownerID": ownerID,
+		"req_id":  reqId,
+		"origin":  origin,
+	})
+	alertMessage := fmt.Sprintf("custom domain check failed %s", reqId)
+	domain, err := m.RemoteStoreRepo.GetDomain(c, ownerID)
+	if err != nil {
+		logger.WithError(err).Error("failed to fetch custom domain for owner")
+		m.DiscordController.NotifyPotentialAbuse(alertMessage)
+		return
+	}
+	if domain == nil || *domain == "" {
+		logger.Warn("custom domain is nil or empty")
+		m.DiscordController.NotifyPotentialAbuse(alertMessage)
+		return
+	}
+	parse, err := url.Parse(origin)
+	if err != nil {
+		logger.WithError(err).Error("failed to parse origin URL")
+		m.DiscordController.NotifyPotentialAbuse(alertMessage + " - failed to parse origin URL")
+		return
+	}
+	if !strings.Contains(strings.ToLower(parse.Host), strings.ToLower(*domain)) {
+		logger.Warnf("custom domain check failed for owner %d, origin %s, domain %s", ownerID, origin, *domain)
+		m.DiscordController.NotifyPotentialAbuse(alertMessage)
+	}
+	return
 }
 
 func computeHashKeyForList(list []string, delim string) string {
