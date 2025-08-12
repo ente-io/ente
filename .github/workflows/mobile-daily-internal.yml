@@ -56,7 +56,7 @@ jobs:
               run: |
                   mkdir -p whatsnew
                   CHANGELOG_FILE="scripts/changes.txt"
-                  OUTPUT_FILE="whatsnew/en-US.txt"
+                  OUTPUT_FILE="whatsnew/whatsnew-en-US"
 
                   # Use provided changelog or fallback
                   if [ -f "$CHANGELOG_FILE" ]; then
@@ -92,7 +92,7 @@ jobs:
                   echo "CHANGELOG=${CHANGELOG_PLAYSTORE}" >> $GITHUB_ENV
                   
                   # Store changelog for Discord (with proper newlines)
-                  CHANGELOG_DISCORD=$(cat "$OUTPUT_FILE" | sed 's/"/\\"/g')
+                  CHANGELOG_DISCORD=$(cat "$CHANGELOG_FILE" | sed 's/"/\\"/g')
                   echo "CHANGELOG_DISCORD<<EOF" >> $GITHUB_ENV
                   echo "$CHANGELOG_DISCORD" >> $GITHUB_ENV
                   echo "EOF" >> $GITHUB_ENV
