@@ -488,7 +488,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                         } else {
                           // Select all files in this group
                           _selectedFiles.selectAll(
-                            similarFiles.files.toSet(),
+                            similarFiles.files.sublist(1).toSet(),
                           );
                         }
                       });
@@ -762,7 +762,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         child: Text(
           unselectAll
               ? "Unselect all" // TODO: lau: extract string
-              : "Select all", // TODO: lau: extract string
+              : "Select extra", // TODO: lau: extract string
           style: textTheme.smallMuted.copyWith(
             color: unselectAll ? Colors.white : colorScheme.textMuted,
           ),
