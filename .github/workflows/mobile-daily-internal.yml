@@ -87,9 +87,15 @@ jobs:
                   echo "✅ Changelog valid:"
                   cat "$OUTPUT_FILE"
                   
-                  # Store changelog for later use - Simple and reliable method
-                  CHANGELOG=$(cat "$OUTPUT_FILE" | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/"/\\"/g')
-                  echo "CHANGELOG=${CHANGELOG}" >> $GITHUB_ENV
+                  # Store changelog for Play Store (with escaped newlines)
+                  CHANGELOG_PLAYSTORE=$(cat "$OUTPUT_FILE" | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/"/\\"/g')
+                  echo "CHANGELOG=${CHANGELOG_PLAYSTORE}" >> $GITHUB_ENV
+                  
+                  # Store changelog for Discord (with proper newlines)
+                  CHANGELOG_DISCORD=$(cat "$OUTPUT_FILE" | sed 's/"/\\"/g')
+                  echo "CHANGELOG_DISCORD<<EOF" >> $GITHUB_ENV
+                  echo "$CHANGELOG_DISCORD" >> $GITHUB_ENV
+                  echo "EOF" >> $GITHUB_ENV
 
             - name: Setup keys
               uses: timheuer/base64-to-file@v1
@@ -129,5 +135,5 @@ jobs:
                       **Download:** [Play Store](https://play.google.com/store/apps/details?id=io.ente.photos)
 
                       **Changes:**
-                      ${{ env.CHANGELOG }}
+                      ${{ env.CHANGELOG_DISCORD }}
                   color: 0x00ff00
