@@ -267,7 +267,7 @@ class VideoPreviewService {
 
       _logger.info(command);
 
-      final map = await IsolatedFfmpegService.runFfmpeg(
+      final playlistGenResult = await IsolatedFfmpegService.runFfmpeg(
         // input file path
         '-i "${file.path}" ' +
             // main params for streaming
@@ -281,12 +281,12 @@ class VideoPreviewService {
         },
       );
 
-      final returnCode = map["returnCode"] as int?;
+      final playlistGenReturnCode = playlistGenResult["returnCode"] as int?;
 
       String? objectId;
       int? objectSize;
 
-      if (ReturnCode.success == returnCode) {
+      if (ReturnCode.success == playlistGenReturnCode) {
         try {
           _items[enteFile.uploadedFileID!] = PreviewItem(
             status: PreviewItemStatus.uploading,
@@ -305,7 +305,7 @@ class VideoPreviewService {
           objectSize = result.$2;
 
           // Fetch resolution of generated stream by decrypting a single frame
-          final map2 = await IsolatedFfmpegService.runFfmpeg(
+          final playlistFrameResult = await IsolatedFfmpegService.runFfmpeg(
             '-allowed_extensions ALL -i "$prefix/output.m3u8" -frames:v 1 -c copy "$prefix/frame.ts"',
           ).onError(
             (error, stackTrace) {
@@ -317,16 +317,17 @@ class VideoPreviewService {
               return {};
             },
           );
-          final returnCode2 = map2["returnCode"] as int?;
+          final playlistFrameReturnCode =
+              playlistFrameResult["returnCode"] as int?;
           int? width, height;
           try {
-            if (ReturnCode.success == returnCode2) {
-              FFProbeProps? props2;
+            if (ReturnCode.success == playlistFrameReturnCode) {
+              FFProbeProps? playlistFrameProps;
               final file2 = File("$prefix/frame.ts");
 
-              props2 = await getVideoPropsAsync(file2);
-              width = props2?.width;
-              height = props2?.height;
+              playlistFrameProps = await getVideoPropsAsync(file2);
+              width = playlistFrameProps?.width;
+              height = playlistFrameProps?.height;
             }
           } catch (err, sT) {
             _logger.warning("Failed to fetch resolution of stream", err, sT);
@@ -346,13 +347,13 @@ class VideoPreviewService {
           error = "Failed to upload video preview\nError: $err";
           _logger.shout("Something went wrong with preview upload", err, sT);
         }
-      } else if (ReturnCode.cancel == returnCode) {
+      } else if (ReturnCode.cancel == playlistGenReturnCode) {
         _logger.warning("FFmpeg command cancelled");
         error = "FFmpeg command cancelled";
       } else {
-        final output = map["output"] as String?;
+        final output = playlistGenResult["output"] as String?;
         _logger.shout(
-          "FFmpeg command failed with return code $returnCode",
+          "FFmpeg command failed with return code $playlistGenReturnCode",
           output ?? "Error not found",
         );
         error = "Failed to generate video preview\nError: $output";
