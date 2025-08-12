@@ -226,6 +226,25 @@ class ClipVectorDB {
     }
   }
 
+  Future<(Uint64List, List<Uint64List>, List<Float32List>)> bulkSearchWithKeys(
+    Uint64List potentialKeys,
+    BigInt count, {
+    bool exact = false,
+  }) async {
+    final db = await _vectorDB;
+    try {
+      final result = await db.bulkSearchKeys(
+        potentialKeys: potentialKeys,
+        count: count,
+        exact: exact,
+      );
+      return result;
+    } catch (e, s) {
+      _logger.severe("Error bulk searching vectors with potential keys", e, s);
+      rethrow;
+    }
+  }
+
   Future<Map<String, List<QueryResult>>> computeBulkSimilarities(
     Map<String, List<double>> textQueryToEmbeddingMap,
     Map<String, double> minimumSimilarityMap,
