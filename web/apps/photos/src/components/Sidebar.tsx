@@ -17,6 +17,7 @@ import {
     Skeleton,
     Stack,
     styled,
+    TextField,
     Tooltip,
     useColorScheme,
 } from "@mui/material";
@@ -35,10 +36,10 @@ import {
     RowButtonGroupHint,
     RowSwitch,
 } from "ente-base/components/RowButton";
-import { SingleInputForm } from "ente-base/components/SingleInputForm";
 import { SpacedRow } from "ente-base/components/containers";
 import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import {
     SidebarDrawer,
     TitledNestedSidebarDrawer,
@@ -113,6 +114,7 @@ import {
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { initiateEmail, openURL } from "ente-new/photos/utils/web";
 import { wait } from "ente-utils/promise";
+import { useFormik } from "formik";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, {
@@ -1007,6 +1009,22 @@ const DomainSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
 }) => {
     const { customDomain, customDomainCNAME } = useSettingsSnapshot();
 
+    const formik = useFormik({
+        initialValues: { domain: customDomain ?? "" },
+        onSubmit: async (values, { setFieldError }) => {
+            const domain = values.domain;
+            const setValueFieldError = (message: string) =>
+                setFieldError("domain", message);
+
+            try {
+                await updateCustomDomain(domain);
+            } catch (e) {
+                log.error(`Failed to submit input ${domain}`, e);
+                setValueFieldError(t("generic_error"));
+            }
+        },
+    });
+
     const handleRootClose = () => {
         onClose();
         onRootClose();
@@ -1023,18 +1041,32 @@ const DomainSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
             <Stack sx={{ px: 2, py: "12px" }}>
                 <DomainItem title={pt("Link your domain")} ordinal={pt("1")}>
                     <Typography sx={{ color: "text.muted" }}>
-                        Any domain or subdomain you own
+                        {pt("Any domain or subdomain you own")}
                     </Typography>
-                    <SingleInputForm
-                        label={t("Domain")}
-                        placeholder={ut("photos.example.org")}
-                        initialValue={customDomain}
-                        submitButtonColor="accent"
-                        submitButtonTitle={
-                            customDomain ? pt("Update") : pt("Save")
-                        }
-                        onSubmit={updateCustomDomain}
-                    />
+                    <form onSubmit={formik.handleSubmit}>
+                        <TextField
+                            name="domain"
+                            value={formik.values.domain}
+                            onChange={formik.handleChange}
+                            type={"text"}
+                            fullWidth
+                            autoFocus={true}
+                            margin="normal"
+                            disabled={formik.isSubmitting}
+                            error={!!formik.errors.domain}
+                            helperText={formik.errors.domain ?? " "}
+                            label={t("Domain")}
+                            placeholder={ut("photos.example.org")}
+                        />
+                        <LoadingButton
+                            fullWidth
+                            type="submit"
+                            loading={formik.isSubmitting}
+                            color="accent"
+                        >
+                            {customDomain ? pt("Update") : pt("Save")}
+                        </LoadingButton>
+                    </form>
                 </DomainItem>
                 <Divider sx={{ mt: 4, mb: 1 }} />
                 <DomainItem title={pt("Add DNS entry")} ordinal={pt("2")}>
@@ -1049,7 +1081,7 @@ const DomainSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                     </Typography>
                 </DomainItem>
                 <Divider sx={{ mt: 6, mb: 1 }} />
-                <DomainItem title={ut("🎉")} ordinal={pt("3")}>
+                <DomainItem title={ut("🎉")} ordinal={pt("3")} isEmoji>
                     <Typography sx={{ color: "text.muted" }}>
                         Within 1 hour, your public albums will be accessible via
                         your domain!
@@ -1072,11 +1104,13 @@ const DomainSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
 interface DomainSectionProps {
     title: string;
     ordinal: string;
+    isEmoji?: boolean;
 }
 
 const DomainItem: React.FC<React.PropsWithChildren<DomainSectionProps>> = ({
     title,
     ordinal,
+    isEmoji,
     children,
 }) => (
     <Stack>
@@ -1084,7 +1118,7 @@ const DomainItem: React.FC<React.PropsWithChildren<DomainSectionProps>> = ({
             direction="row"
             sx={{ alignItems: "center", justifyContent: "space-between" }}
         >
-            <Typography variant="h4">{title}</Typography>
+            <Typography variant={isEmoji ? "h3" : "h6"}>{title}</Typography>
             <Typography
                 variant="h1"
                 sx={{
