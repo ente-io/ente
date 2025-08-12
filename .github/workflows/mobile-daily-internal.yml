@@ -43,7 +43,7 @@ jobs:
                   CURRENT_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
                   VERSION_NAME=$(echo $CURRENT_VERSION | cut -d'+' -f1)
                   CURRENT_BUILD=$(echo $CURRENT_VERSION | cut -d'+' -f2)
-                  NEW_BUILD=$((CURRENT_BUILD + 1))
+                  NEW_BUILD=$((CURRENT_BUILD + ${{ github.run_number }}))
                   NEW_VERSION="${VERSION_NAME}+${NEW_BUILD}"
 
                   sed -i "s/^version: .*/version: $NEW_VERSION/" pubspec.yaml
