@@ -1,0 +1,15 @@
+{
+	email custom-domains@ente.io
+	on_demand_tls {
+		ask https://api.ente.io/custom-domain
+	}
+}
+
+https:// {
+	tls {
+		on_demand
+	}
+	reverse_proxy https://custom-albums.ente.io {
+		header_up Host {upstream_hostport}
+	}
+}
