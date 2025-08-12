@@ -5,12 +5,13 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
-	"github.com/ente-io/museum/pkg/repo/remotestore"
-	"github.com/gin-contrib/requestid"
-	"github.com/spf13/viper"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/ente-io/museum/pkg/repo/remotestore"
+	"github.com/gin-contrib/requestid"
+	"github.com/spf13/viper"
 
 	public2 "github.com/ente-io/museum/pkg/controller/public"
 	"github.com/ente-io/museum/pkg/repo/public"
@@ -222,7 +223,6 @@ func (m *CollectionLinkMiddleware) validateOrigin(c *gin.Context, ownerID int64)
 		logger.Warnf("custom domain check failed for owner %d, origin %s, domain %s", ownerID, origin, *domain)
 		m.DiscordController.NotifyPotentialAbuse(alertMessage)
 	}
-	return
 }
 
 func computeHashKeyForList(list []string, delim string) string {
