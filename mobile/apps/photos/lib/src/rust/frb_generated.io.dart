@@ -75,6 +75,14 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   (
     Uint64List,
+    List<Uint64List>,
+    List<Float32List>
+  ) dco_decode_record_list_prim_u_64_strict_list_list_prim_u_64_strict_list_list_prim_f_32_strict(
+      dynamic raw);
+
+  @protected
+  (
+    Uint64List,
     Float32List
   ) dco_decode_record_list_prim_u_64_strict_list_prim_f_32_strict(dynamic raw);
 
@@ -142,6 +150,14 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   (List<Uint64List>, List<Float32List>)
       sse_decode_record_list_list_prim_u_64_strict_list_list_prim_f_32_strict(
           SseDeserializer deserializer);
+
+  @protected
+  (
+    Uint64List,
+    List<Uint64List>,
+    List<Float32List>
+  ) sse_decode_record_list_prim_u_64_strict_list_list_prim_u_64_strict_list_list_prim_f_32_strict(
+      SseDeserializer deserializer);
 
   @protected
   (Uint64List, Float32List)
@@ -219,6 +235,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_record_list_list_prim_u_64_strict_list_list_prim_f_32_strict(
       (List<Uint64List>, List<Float32List>) self, SseSerializer serializer);
+
+  @protected
+  void
+      sse_encode_record_list_prim_u_64_strict_list_list_prim_u_64_strict_list_list_prim_f_32_strict(
+          (Uint64List, List<Uint64List>, List<Float32List>) self,
+          SseSerializer serializer);
 
   @protected
   void sse_encode_record_list_prim_u_64_strict_list_prim_f_32_strict(

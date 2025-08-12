@@ -74,7 +74,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.11.1';
 
   @override
-  int get rustContentHash => 1543559173;
+  int get rustContentHash => 1360671619;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -100,6 +100,13 @@ abstract class RustLibApi extends BaseApi {
 
   Future<BigInt> crateApiUsearchApiVectorDbBulkRemoveVectors(
       {required VectorDb that, required Uint64List keys});
+
+  Future<(Uint64List, List<Uint64List>, List<Float32List>)>
+      crateApiUsearchApiVectorDbBulkSearchKeys(
+          {required VectorDb that,
+          required Uint64List potentialKeys,
+          required BigInt count,
+          required bool exact});
 
   Future<(List<Uint64List>, List<Float32List>)>
       crateApiUsearchApiVectorDbBulkSearchVectors(
@@ -273,6 +280,41 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<(Uint64List, List<Uint64List>, List<Float32List>)>
+      crateApiUsearchApiVectorDbBulkSearchKeys(
+          {required VectorDb that,
+          required Uint64List potentialKeys,
+          required BigInt count,
+          required bool exact}) {
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVectorDB(
+            that, serializer);
+        sse_encode_list_prim_u_64_strict(potentialKeys, serializer);
+        sse_encode_usize(count, serializer);
+        sse_encode_bool(exact, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 5, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData:
+            sse_decode_record_list_prim_u_64_strict_list_list_prim_u_64_strict_list_list_prim_f_32_strict,
+        decodeErrorData: null,
+      ),
+      constMeta: kCrateApiUsearchApiVectorDbBulkSearchKeysConstMeta,
+      argValues: [that, potentialKeys, count, exact],
+      apiImpl: this,
+    ));
+  }
+
+  TaskConstMeta get kCrateApiUsearchApiVectorDbBulkSearchKeysConstMeta =>
+      const TaskConstMeta(
+        debugName: "VectorDb_bulk_search_keys",
+        argNames: ["that", "potentialKeys", "count", "exact"],
+      );
+
+  @override
   Future<(List<Uint64List>, List<Float32List>)>
       crateApiUsearchApiVectorDbBulkSearchVectors(
           {required VectorDb that,
@@ -288,7 +330,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         sse_encode_usize(count, serializer);
         sse_encode_bool(exact, serializer);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 5, port: port_);
+            funcId: 6, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData:
@@ -317,7 +359,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that, serializer);
         sse_encode_u_64(key, serializer);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 6, port: port_);
+            funcId: 7, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_bool,
@@ -343,7 +385,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVectorDB(
             that, serializer);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 7, port: port_);
+            funcId: 8, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_unit,
@@ -370,7 +412,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVectorDB(
             that, serializer);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 8, port: port_);
+            funcId: 9, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData:
@@ -399,7 +441,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that, serializer);
         sse_encode_u_64(key, serializer);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 9, port: port_);
+            funcId: 10, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_list_prim_f_32_strict,
@@ -425,7 +467,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         final serializer = SseSerializer(generalizedFrbRustBinding);
         sse_encode_String(filePath, serializer);
         sse_encode_usize(dimensions, serializer);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 10)!;
+        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 11)!;
       },
       codec: SseCodec(
         decodeSuccessData:
@@ -454,7 +496,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             that, serializer);
         sse_encode_u_64(key, serializer);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 11, port: port_);
+            funcId: 12, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_usize,
@@ -480,7 +522,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVectorDB(
             that, serializer);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 12, port: port_);
+            funcId: 13, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_unit,
@@ -513,7 +555,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         sse_encode_usize(count, serializer);
         sse_encode_bool(exact, serializer);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 13, port: port_);
+            funcId: 14, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData:
@@ -538,7 +580,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       callFfi: () {
         final serializer = SseSerializer(generalizedFrbRustBinding);
         sse_encode_String(name, serializer);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 14)!;
+        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 15)!;
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_String,
@@ -561,7 +603,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       callFfi: (port_) {
         final serializer = SseSerializer(generalizedFrbRustBinding);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 15, port: port_);
+            funcId: 16, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_unit,
@@ -680,6 +722,25 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     return (
       dco_decode_list_list_prim_u_64_strict(arr[0]),
       dco_decode_list_list_prim_f_32_strict(arr[1]),
+    );
+  }
+
+  @protected
+  (
+    Uint64List,
+    List<Uint64List>,
+    List<Float32List>
+  ) dco_decode_record_list_prim_u_64_strict_list_list_prim_u_64_strict_list_list_prim_f_32_strict(
+      dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 3) {
+      throw Exception('Expected 3 elements, got ${arr.length}');
+    }
+    return (
+      dco_decode_list_prim_u_64_strict(arr[0]),
+      dco_decode_list_list_prim_u_64_strict(arr[1]),
+      dco_decode_list_list_prim_f_32_strict(arr[2]),
     );
   }
 
@@ -853,6 +914,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  (
+    Uint64List,
+    List<Uint64List>,
+    List<Float32List>
+  ) sse_decode_record_list_prim_u_64_strict_list_list_prim_u_64_strict_list_list_prim_f_32_strict(
+      SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    final var_field0 = sse_decode_list_prim_u_64_strict(deserializer);
+    final var_field1 = sse_decode_list_list_prim_u_64_strict(deserializer);
+    final var_field2 = sse_decode_list_list_prim_f_32_strict(deserializer);
+    return (var_field0, var_field1, var_field2);
+  }
+
+  @protected
   (Uint64List, Float32List)
       sse_decode_record_list_prim_u_64_strict_list_prim_f_32_strict(
           SseDeserializer deserializer) {
@@ -1021,6 +1096,17 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void
+      sse_encode_record_list_prim_u_64_strict_list_list_prim_u_64_strict_list_list_prim_f_32_strict(
+          (Uint64List, List<Uint64List>, List<Float32List>) self,
+          SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_list_prim_u_64_strict(self.$1, serializer);
+    sse_encode_list_list_prim_u_64_strict(self.$2, serializer);
+    sse_encode_list_list_prim_f_32_strict(self.$3, serializer);
+  }
+
+  @protected
   void sse_encode_record_list_prim_u_64_strict_list_prim_f_32_strict(
       (Uint64List, Float32List) self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
@@ -1107,6 +1193,13 @@ class VectorDbImpl extends RustOpaque implements VectorDb {
   Future<BigInt> bulkRemoveVectors({required Uint64List keys}) =>
       RustLib.instance.api
           .crateApiUsearchApiVectorDbBulkRemoveVectors(that: this, keys: keys);
+
+  Future<(Uint64List, List<Uint64List>, List<Float32List>)> bulkSearchKeys(
+          {required Uint64List potentialKeys,
+          required BigInt count,
+          required bool exact}) =>
+      RustLib.instance.api.crateApiUsearchApiVectorDbBulkSearchKeys(
+          that: this, potentialKeys: potentialKeys, count: count, exact: exact);
 
   Future<(List<Uint64List>, List<Float32List>)> bulkSearchVectors(
           {required List<Float32List> queries,

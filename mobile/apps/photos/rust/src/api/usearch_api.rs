@@ -118,6 +118,38 @@ impl VectorDB {
         (keys, distances)
     }
 
+    pub fn bulk_search_keys(
+        &self,
+        potential_keys: &Vec<u64>,
+        count: usize,
+        exact: bool,
+    ) -> (Vec<u64>, Vec<Vec<u64>>, Vec<Vec<f32>>) {
+        // let max_contained_keys = potential_keys.len();
+        let mut contained_keys = Vec::new();
+        let mut queries = Vec::new();
+
+        for key in potential_keys {
+            let contains: bool = self.index.contains(*key);
+            if contains {
+                let embedding = self.get_vector(*key);
+                contained_keys.push(*key);
+                queries.push(embedding);
+            }
+        }
+
+        let mut closeby_keys = Vec::new();
+        let mut distances = Vec::new();
+        for query in &queries {
+            let (keys_result, distances_result) = self.search_vectors(query, count, exact);
+            closeby_keys.push(keys_result);
+            distances.push(distances_result);
+        }
+        if contained_keys.len() != closeby_keys.len() {
+            panic!("The number of contained keys does not match the number of keys");
+        }
+        (contained_keys, closeby_keys, distances)
+    }
+
     /// Check if a vector with the given key exists in the index.
     /// `true` if the index contains the vector with the given key, `false` otherwise.
     pub fn contains_vector(&self, key: u64) -> bool {
