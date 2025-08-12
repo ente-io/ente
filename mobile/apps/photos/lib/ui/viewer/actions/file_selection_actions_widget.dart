@@ -1,7 +1,5 @@
 import "dart:async";
 
-import 'package:fast_base58/fast_base58.dart';
-import "package:flutter/cupertino.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import "package:local_auth/local_auth.dart";
@@ -851,12 +849,9 @@ class _FileSelectionActionsWidgetState
 
   Future<void> _sendLink() async {
     if (_cachedCollectionForSharedLink != null) {
-      final String collectionKey = Base58Encode(
-        CollectionsService.instance
-            .getCollectionKey(_cachedCollectionForSharedLink!.id),
+      final String url = CollectionsService.instance.getPublicUrl(
+        _cachedCollectionForSharedLink!,
       );
-      final String url =
-          "${_cachedCollectionForSharedLink!.publicURLs.first.url}#$collectionKey";
       unawaited(Clipboard.setData(ClipboardData(text: url)));
       await shareImageAndUrl(
         placeholderBytes,

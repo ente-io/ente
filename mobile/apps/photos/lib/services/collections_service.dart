@@ -753,6 +753,15 @@ class CollectionsService {
     return _cachedKeys[collectionID]!;
   }
 
+  String getPublicUrl(Collection c) {
+    final PublicURL url = c.publicURLs.firstOrNull!;
+    final String collectionKey = Base58Encode(
+      CollectionsService.instance.getCollectionKey(c.id),
+    );
+    final String urlValue = "${url.url}#$collectionKey";
+    return urlValue;
+  }
+
   Uint8List _getAndCacheDecryptedKey(
     Collection collection, {
     String source = "",
