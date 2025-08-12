@@ -7,6 +7,9 @@ import (
 	"fmt"
 	"net/http"
 
+	public2 "github.com/ente-io/museum/pkg/controller/public"
+	"github.com/ente-io/museum/pkg/repo/public"
+
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/controller"
 	"github.com/ente-io/museum/pkg/controller/discord"
@@ -24,24 +27,24 @@ import (
 var passwordWhiteListedURLs = []string{"/public-collection/info", "/public-collection/report-abuse", "/public-collection/verify-password"}
 var whitelistedCollectionShareIDs = []int64{111}
 
-// AccessTokenMiddleware intercepts and authenticates incoming requests
-type AccessTokenMiddleware struct {
-	PublicCollectionRepo *repo.PublicCollectionRepository
-	PublicCollectionCtrl *controller.PublicCollectionController
+// CollectionLinkMiddleware intercepts and authenticates incoming requests
+type CollectionLinkMiddleware struct {
+	CollectionLinkRepo   *public.CollectionLinkRepo
+	PublicCollectionCtrl *public2.CollectionLinkController
 	CollectionRepo       *repo.CollectionRepository
 	Cache                *cache.Cache
 	BillingCtrl          *controller.BillingController
 	DiscordController    *discord.DiscordController
 }
 
-// AccessTokenAuthMiddleware returns a middle ware that extracts the `X-Auth-Access-Token`
+// Authenticate returns a middle ware that extracts the `X-Auth-Access-Token`
 // within the header of a request and uses it to validate the access token and set the
 // ente.PublicAccessContext with auth.PublicAccessKey as key
-func (m *AccessTokenMiddleware) AccessTokenAuthMiddleware(urlSanitizer func(_ *gin.Context) string) gin.HandlerFunc {
+func (m *CollectionLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context) string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		accessToken := auth.GetAccessToken(c)
 		if accessToken == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing accessToken"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing accessToken", "context": "album_link"})
 			return
 		}
 		clientIP := network.GetClientIP(c)
@@ -52,7 +55,7 @@ func (m *AccessTokenMiddleware) AccessTokenAuthMiddleware(urlSanitizer func(_ *g
 		cacheKey := computeHashKeyForList([]string{accessToken, clientIP, userAgent}, ":")
 		cachedValue, cacheHit := m.Cache.Get(cacheKey)
 		if !cacheHit {
-			publicCollectionSummary, err = m.PublicCollectionRepo.GetCollectionSummaryByToken(c, accessToken)
+			publicCollectionSummary, err = m.CollectionLinkRepo.GetCollectionSummaryByToken(c, accessToken)
 			if err != nil {
 				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
 				return
@@ -112,7 +115,7 @@ func (m *AccessTokenMiddleware) AccessTokenAuthMiddleware(urlSanitizer func(_ *g
 		c.Next()
 	}
 }
-func (m *AccessTokenMiddleware) validateOwnersSubscription(cID int64) error {
+func (m *CollectionLinkMiddleware) validateOwnersSubscription(cID int64) error {
 	userID, err := m.CollectionRepo.GetOwnerID(cID)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
@@ -120,7 +123,7 @@ func (m *AccessTokenMiddleware) validateOwnersSubscription(cID int64) error {
 	return m.BillingCtrl.HasActiveSelfOrFamilySubscription(userID, false)
 }
 
-func (m *AccessTokenMiddleware) isDeviceLimitReached(ctx context.Context,
+func (m *CollectionLinkMiddleware) isDeviceLimitReached(ctx context.Context,
 	collectionSummary ente.PublicCollectionSummary, ip string, ua string) (bool, error) {
 	// skip deviceLimit check & record keeping for requests via CF worker
 	if network.IsCFWorkerIP(ip) {
@@ -128,7 +131,7 @@ func (m *AccessTokenMiddleware) isDeviceLimitReached(ctx context.Context,
 	}
 
 	sharedID := collectionSummary.ID
-	hasAccessedInPast, err := m.PublicCollectionRepo.AccessedInPast(ctx, sharedID, ip, ua)
+	hasAccessedInPast, err := m.CollectionLinkRepo.AccessedInPast(ctx, sharedID, ip, ua)
 	if err != nil {
 		return false, stacktrace.Propagate(err, "")
 	}
@@ -136,17 +139,17 @@ func (m *AccessTokenMiddleware) isDeviceLimitReached(ctx context.Context,
 	if hasAccessedInPast {
 		return false, nil
 	}
-	count, err := m.PublicCollectionRepo.GetUniqueAccessCount(ctx, sharedID)
+	count, err := m.CollectionLinkRepo.GetUniqueAccessCount(ctx, sharedID)
 	if err != nil {
 		return false, stacktrace.Propagate(err, "failed to get unique access count")
 	}
 
 	deviceLimit := int64(collectionSummary.DeviceLimit)
-	if deviceLimit == controller.DeviceLimitThreshold {
-		deviceLimit = controller.DeviceLimitThresholdMultiplier * controller.DeviceLimitThreshold
+	if deviceLimit == public2.DeviceLimitThreshold {
+		deviceLimit = public2.DeviceLimitThresholdMultiplier * public2.DeviceLimitThreshold
 	}
 
-	if count >= controller.DeviceLimitWarningThreshold {
+	if count >= public2.DeviceLimitWarningThreshold {
 		if !array.Int64InList(sharedID, whitelistedCollectionShareIDs) {
 			m.DiscordController.NotifyPotentialAbuse(
 				fmt.Sprintf("Album exceeds warning threshold: {CollectionID: %d, ShareID: %d}",
@@ -157,12 +160,12 @@ func (m *AccessTokenMiddleware) isDeviceLimitReached(ctx context.Context,
 	if deviceLimit > 0 && count >= deviceLimit {
 		return true, nil
 	}
-	err = m.PublicCollectionRepo.RecordAccessHistory(ctx, sharedID, ip, ua)
+	err = m.CollectionLinkRepo.RecordAccessHistory(ctx, sharedID, ip, ua)
 	return false, stacktrace.Propagate(err, "failed to record access history")
 }
 
 // validatePassword will verify if the user is provided correct password for the public album
-func (m *AccessTokenMiddleware) validatePassword(c *gin.Context, reqPath string,
+func (m *CollectionLinkMiddleware) validatePassword(c *gin.Context, reqPath string,
 	collectionSummary ente.PublicCollectionSummary) error {
 	if array.StringInList(reqPath, passwordWhiteListedURLs) {
 		return nil

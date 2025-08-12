@@ -5,7 +5,7 @@ on:
         branches: [main]
         paths:
             # Run workflow when auth's intl_en.arb is changed
-            - "auth/lib/l10n/arb/app_en.arb"
+            - "mobile/apps/auth/lib/l10n/arb/app_en.arb"
             # Or the workflow itself is changed
             - ".github/workflows/auth-crowdin.yml"
 

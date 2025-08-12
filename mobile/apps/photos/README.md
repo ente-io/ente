@@ -10,12 +10,12 @@ commit](https://github.com/ente-io/ente/commit/a8cdc811fd20ca4289d8e779c97f08ef5
 
         Hello world
 
-To know more about Ente, see [our main README](../README.md) or visit
+To know more about Ente, see [our main README](../../../README.md) or visit
 [ente.io](https://ente.io).
 
-To use Ente Photos on the web, see [../web](../web/README.md). To use Ente
-Photos on the desktop, see [../desktop](../desktop/README.md). There is a also a
-[CLI tool](../cli/README.md) for easy / automated exports.
+To use Ente Photos on the web, see [../../../web](../../../web/README.md). To use Ente
+Photos on the desktop, see [../../../desktop](../../../desktop/README.md). There is a also a
+[CLI tool](../../../cli/README.md) for easy / automated exports.
 
 If you're looking for Ente Auth instead, see [../auth](../auth/README.md).
 
@@ -32,16 +32,16 @@ without relying on third party stores.
 You can alternatively install the build from PlayStore or F-Droid.
 
 <a href="https://play.google.com/store/apps/details?id=io.ente.photos">
-  <img height="59" src="../.github/assets/play-store-badge.png">
+  <img height="59" src="../../../.github/assets/play-store-badge.png">
 </a>
 <a href="https://f-droid.org/packages/io.ente.photos.fdroid/">
-  <img height="59" src="../.github/assets/f-droid-badge.png">
+  <img height="59" src="../../../.github/assets/f-droid-badge.png">
 </a>
 
 ### iOS
 
 <a href="https://apps.apple.com/in/app/ente-photos/id1542026904">
-  <img height="59" src="../.github/assets/app-store-badge.svg">
+  <img height="59" src="../../../.github/assets/app-store-badge.svg">
 </a>
 
 ## 🧑‍💻 Building from source
@@ -102,4 +102,4 @@ apksigner verify --print-certs <path_to_apk>
 
 ## 💚 Contribute
 
-For more ways to contribute, see [../CONTRIBUTING.md](../CONTRIBUTING.md).
+For more ways to contribute, see [../../../CONTRIBUTING.md](../../../CONTRIBUTING.md).

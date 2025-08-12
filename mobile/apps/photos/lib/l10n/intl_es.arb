@@ -1776,13 +1776,5 @@
   "same": "Igual",
   "different": "Diferente",
   "sameperson": "la misma persona?",
-  "cLTitle1": "Editor de imágenes avanzado",
-  "cLDesc1": "Estamos lanzando un nuevo y avanzado editor de imágenes que añade más marcos de recorte, presets de filtros para ediciones rápidas, opciones de ajuste fino incluyendo saturación, contraste, brillo, temperatura y mucho más. El nuevo editor también incluye la capacidad de dibujar en tus fotos y añadir emojis como stickers.",
-  "cLTitle2": "Álbumes inteligentes",
-  "cLDesc2": "Ahora puedes añadir automáticamente fotos de personas seleccionadas a cualquier álbum. Solo ve al álbum y selecciona \"auto-añadir personas\" desde el menú overflow. Si se usa junto con un álbum compartido, puedes compartir fotos con cero clics.",
-  "cLTitle3": "Galería mejorada",
-  "cLDesc3": "Hemos añadido la capacidad de agrupar tu galería por semanas, meses y años. Ahora puedes personalizar tu galería para que se vea exactamente como quieres con estas nuevas opciones de agrupación, junto con cuadrículas personalizadas.",
-  "cLTitle4": "Desplazamiento más rápido",
-  "cLDesc4": "Junto con un montón de mejoras internas para mejorar la experiencia de desplazamiento de la galería, también hemos rediseñado la barra de desplazamiento para mostrar marcadores, permitiéndote saltar rápidamente a través de la línea de tiempo.",
   "indexingPausedStatusDescription": "La indexación está pausada. Se reanudará automáticamente cuando el dispositivo esté listo. El dispositivo se considera listo cuando su nivel de batería, la salud de la batería y temperatura están en un rango saludable."
 }

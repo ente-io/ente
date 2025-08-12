@@ -519,7 +519,8 @@ class FileUploader {
         DateTime.now().microsecondsSinceEpoch,
       );
     } catch (e) {
-      _logger.warning("Lock was already taken for " + file.toString());
+      final lockInfo = await _uploadLocks.getLockData(lockKey);
+      _logger.warning("Lock was already taken ($lockInfo) for " + file.tag);
       throw LockAlreadyAcquiredError();
     }
 

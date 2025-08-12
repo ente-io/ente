@@ -4,7 +4,7 @@ on:
     # Run on every pull request (open or push to it) that changes auth/
     pull_request:
         paths:
-            - "auth/**"
+            - "mobile/apps/auth/**"
             - ".github/workflows/auth-lint.yml"
 
 env:

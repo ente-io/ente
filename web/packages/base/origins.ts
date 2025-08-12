@@ -97,3 +97,9 @@ export const isCustomAlbumsAppOrigin =
  */
 export const albumsAppOrigin = () =>
     process.env.NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT ?? "https://albums.ente.io";
+
+/**
+ * Return true if this build is meant to only serve public albums.
+ */
+export const shouldOnlyServeAlbumsApp =
+    !!process.env.NEXT_PUBLIC_ENTE_ONLY_SERVE_ALBUMS_APP;

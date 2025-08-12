@@ -1,5 +1,4 @@
 import 'package:collection/collection.dart';
-import 'package:fast_base58/fast_base58.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import "package:photos/extensions/user_extension.dart";
@@ -170,11 +169,8 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
           ),
         );
       } else {
-        final String collectionKey = Base58Encode(
-          CollectionsService.instance.getCollectionKey(widget.collection.id),
-        );
         final String url =
-            "${widget.collection.publicURLs.first.url}#$collectionKey";
+            CollectionsService.instance.getPublicUrl(widget.collection);
         children.addAll(
           [
             MenuItemWidget(
