@@ -1105,13 +1105,6 @@ const DomainSettingsContents: React.FC = () => {
                         {customDomainCNAME}
                     </Typography>
                 </Typography>
-            </DomainItem>
-            <Divider sx={{ mt: 5, mb: 2, opacity: 0.5 }} />
-            <DomainItem title={ut("🎉")} ordinal={pt("3")} isEmoji>
-                <Typography sx={{ color: "text.muted", mt: 2 }}>
-                    Within 1 hour, your public albums will be accessible via
-                    your domain!
-                </Typography>
                 <Typography sx={{ color: "text.muted", mt: 3 }}>
                     For more information, see
                     <Typography component="span" sx={{ color: "accent.main" }}>
@@ -1126,13 +1119,11 @@ const DomainSettingsContents: React.FC = () => {
 interface DomainSectionProps {
     title: string;
     ordinal: string;
-    isEmoji?: boolean;
 }
 
 const DomainItem: React.FC<React.PropsWithChildren<DomainSectionProps>> = ({
     title,
     ordinal,
-    isEmoji,
     children,
 }) => (
     <Stack>
@@ -1140,7 +1131,7 @@ const DomainItem: React.FC<React.PropsWithChildren<DomainSectionProps>> = ({
             direction="row"
             sx={{ alignItems: "center", justifyContent: "space-between" }}
         >
-            <Typography variant={isEmoji ? "h3" : "h6"}>{title}</Typography>
+            <Typography variant="h6">{title}</Typography>
             <Typography
                 variant="h1"
                 sx={{
