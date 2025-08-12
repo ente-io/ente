@@ -3,7 +3,7 @@ package ente
 import (
 	"fmt"
 	"github.com/ente-io/stacktrace"
-	"net/url"
+	"regexp"
 	"strings"
 )
 
@@ -119,22 +119,28 @@ func (k FlagKey) IsValidValue(value string) error {
 		return stacktrace.Propagate(NewBadRequestWithMessage(fmt.Sprintf("value %s is not allowed", value)), "value not allowed")
 	}
 	if k == CustomDomain && value != "" {
-		if !isValidCustomDomainURL(value) {
-			return stacktrace.Propagate(NewBadRequestWithMessage(fmt.Sprintf("invalid domain fmt: %s", value)), "url with https://. Also, tt should not end with trailing dash.")
+		if err := isValidDomainWithoutScheme(value); err != nil {
+			return stacktrace.Propagate(err, "invalid custom domain")
 		}
 	}
 	return nil
 }
 
-func isValidCustomDomainURL(input string) bool {
-	if !strings.HasPrefix(input, "https://") || strings.HasSuffix(input, "/") {
-		return false
-	}
+var domainRegex = regexp.MustCompile(`^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$`)
 
-	u, err := url.Parse(input)
-	if err != nil || u.Scheme != "https" || u.Host == "" {
-		return false
+func isValidDomainWithoutScheme(input string) error {
+	trimmed := strings.TrimSpace(input)
+	if trimmed != input {
+		return NewBadRequestWithMessage("domain contains leading or trailing spaces")
 	}
-
-	return true
+	if trimmed == "" {
+		return NewBadRequestWithMessage("domain is empty")
+	}
+	if strings.Contains(trimmed, "://") {
+		return NewBadRequestWithMessage("domain should not contain scheme (e.g., http:// or https://)")
+	}
+	if !domainRegex.MatchString(trimmed) {
+		return NewBadRequestWithMessage(fmt.Sprintf("invalid domain format: %s", trimmed))
+	}
+	return nil
 }
