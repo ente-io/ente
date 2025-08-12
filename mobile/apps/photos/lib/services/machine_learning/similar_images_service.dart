@@ -10,6 +10,7 @@ import 'package:photos/models/file/file.dart';
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/similar_files.dart";
 import "package:photos/services/machine_learning/ml_computer.dart";
+import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/search_service.dart";
 
 class SimilarImagesService {
@@ -65,6 +66,24 @@ class SimilarImagesService {
     final Uint64List potentialKeys = Uint64List.fromList(fileIDs);
     w?.log("getAllFilesForSearch");
 
+    // Get mapping of fileIDs to corresponding personIDs
+    final fileIDToPersonIDs = <int, Set<String>>{};
+    final dbPersonClusterInfo = await mlDataDB.getPersonToClusterIdToFaceIds();
+    for (final personID in dbPersonClusterInfo.keys) {
+      final clusterInfo = dbPersonClusterInfo[personID]!;
+      for (final faceIDs in clusterInfo.values) {
+        for (final faceID in faceIDs) {
+          final fileID = getFileIdFromFaceId<int>(faceID);
+          if (allFileIdsToFile.containsKey(fileID)) {
+            fileIDToPersonIDs
+                .putIfAbsent(fileID, () => <String>{})
+                .add(personID);
+          }
+        }
+      }
+    }
+    w?.log("getFileIDToPersonIDs");
+
     // Run bulk vector search
     final (keys, vectorKeys, distances) =
         await MLComputer.instance.bulkVectorSearchWithKeys(
@@ -86,21 +105,22 @@ class SimilarImagesService {
       final otherFileIDs = vectorKeys[i];
       final distancesToFiles = distances[i];
       final similarFilesList = <EnteFile>[];
+      final personIDs = fileIDToPersonIDs[fileID] ?? <String>{};
       double furthestDistance = 0.0;
       for (int j = 0; j < otherFileIDs.length; j++) {
         final otherFileID = otherFileIDs[j].toInt();
         if (otherFileID == fileID) continue;
-        final distance = distancesToFiles[j];
-        if (distance > distanceThreshold) {
-          break;
-        } else {
-          furthestDistance = max(furthestDistance, distance);
-        }
         if (alreadyUsedFileIDs.contains(otherFileID)) continue;
+        final distance = distancesToFiles[j];
+        if (distance > distanceThreshold) break;
         final otherFile = allFileIdsToFile[otherFileID];
-        if (otherFile != null && otherFile.uploadedFileID != null) {
-          similarFilesList.add(otherFile);
+        if (otherFile == null || otherFile.uploadedFileID == null) {
+          continue;
         }
+        final otherPersonIDs = fileIDToPersonIDs[otherFileID] ?? <String>{};
+        if (!setsAreEqual(personIDs, otherPersonIDs)) continue;
+        similarFilesList.add(otherFile);
+        furthestDistance = max(furthestDistance, distance);
       }
       if (similarFilesList.isNotEmpty) {
         similarFilesList.add(firstLoopFile);
@@ -122,4 +142,8 @@ class SimilarImagesService {
 
     return allSimilarFiles;
   }
+}
+
+bool setsAreEqual(Set<String> set1, Set<String> set2) {
+  return set1.length == set2.length && set1.containsAll(set2);
 }
