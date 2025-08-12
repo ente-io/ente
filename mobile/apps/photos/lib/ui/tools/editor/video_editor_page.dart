@@ -74,7 +74,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         trimStyle: TrimSliderStyle(
           onTrimmedColor: const ColorScheme.dark().videoPlayerPrimaryColor,
           onTrimmingColor: const ColorScheme.dark().videoPlayerPrimaryColor,
-          background: Theme.of(context).colorScheme.videoPlayerBackgroundColor,
+          background: Theme.of(context).colorScheme.editorBackgroundColor,
           positionLineColor:
               Theme.of(context).colorScheme.videoPlayerBorderColor,
           lineColor: Theme.of(context)
