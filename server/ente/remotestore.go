@@ -17,14 +17,14 @@ type GetValueResponse struct {
 }
 
 type UpdateKeyValueRequest struct {
-	Key   string `json:"key" binding:"required"`
-	Value string `json:"value" binding:"required"`
+	Key   string  `json:"key" binding:"required"`
+	Value *string `json:"value" binding:"required"`
 }
 
 type AdminUpdateKeyValueRequest struct {
-	UserID int64  `json:"userID" binding:"required"`
-	Key    string `json:"key" binding:"required"`
-	Value  string `json:"value" binding:"required"`
+	UserID int64   `json:"userID" binding:"required"`
+	Key    string  `json:"key" binding:"required"`
+	Value  *string `json:"value" binding:"required"`
 }
 
 type FeatureFlagResponse struct {

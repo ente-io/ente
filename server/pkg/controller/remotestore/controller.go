@@ -26,10 +26,10 @@ func (c *Controller) InsertOrUpdate(ctx *gin.Context, request ente.UpdateKeyValu
 	if err := c._validateRequest(userID, request.Key, request.Value, false); err != nil {
 		return err
 	}
-	if request.Value == "" && ente.FlagKey(request.Key).CanRemove() {
+	if *request.Value == "" && ente.FlagKey(request.Key).CanRemove() {
 		return c.Repo.RemoveKey(ctx, userID, request.Key)
 	}
-	return c.Repo.InsertOrUpdate(ctx, userID, request.Key, request.Value)
+	return c.Repo.InsertOrUpdate(ctx, userID, request.Key, *request.Value)
 }
 
 // RemoveKey removes the key from remote store
@@ -48,7 +48,7 @@ func (c *Controller) AdminInsertOrUpdate(ctx *gin.Context, request ente.AdminUpd
 	if err := c._validateRequest(request.UserID, request.Key, request.Value, true); err != nil {
 		return err
 	}
-	return c.Repo.InsertOrUpdate(ctx, request.UserID, request.Key, request.Value)
+	return c.Repo.InsertOrUpdate(ctx, request.UserID, request.Key, *request.Value)
 }
 
 func (c *Controller) Get(ctx *gin.Context, req ente.GetValueRequest) (*ente.GetValueResponse, error) {
@@ -108,10 +108,14 @@ func (c *Controller) DomainOwner(ctx *gin.Context, domain string) (*int64, error
 	return c.Repo.DomainOwner(ctx, domain)
 }
 
-func (c *Controller) _validateRequest(userID int64, key, value string, byAdmin bool) error {
+func (c *Controller) _validateRequest(userID int64, key string, valuePtr *string, byAdmin bool) error {
 	if !ente.IsValidFlagKey(key) {
 		return stacktrace.Propagate(ente.NewBadRequestWithMessage(fmt.Sprintf("key %s is not allowed", key)), "invalid flag key")
 	}
+	if valuePtr == nil {
+		return stacktrace.Propagate(ente.NewBadRequestWithMessage("value is missing"), "value is nil")
+	}
+	value := *valuePtr
 	flag := ente.FlagKey(key)
 	if err := flag.IsValidValue(value); err != nil {
 		return stacktrace.Propagate(err, "")
