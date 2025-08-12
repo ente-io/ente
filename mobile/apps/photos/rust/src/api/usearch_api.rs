@@ -83,12 +83,7 @@ impl VectorDB {
         self.save_index();
     }
 
-    pub fn search_vectors(
-        &self,
-        query: &Vec<f32>,
-        count: usize,
-        exact: bool,
-    ) -> (Vec<u64>, Vec<f32>) {
+    pub fn search_vectors(&self, query: &[f32], count: usize, exact: bool) -> (Vec<u64>, Vec<f32>) {
         let matches = if exact {
             self.index
                 .exact_search(query, count)
@@ -124,29 +119,41 @@ impl VectorDB {
         count: usize,
         exact: bool,
     ) -> (Vec<u64>, Vec<Vec<u64>>, Vec<Vec<f32>>) {
-        // let max_contained_keys = potential_keys.len();
-        let mut contained_keys = Vec::new();
-        let mut queries = Vec::new();
+        let dimensions = self.index.dimensions();
+        let mut embedding_data = vec![0.0f32; potential_keys.len() * dimensions];
+        let mut contained_keys = Vec::with_capacity(potential_keys.len());
+        let mut actual_query_count = 0;
 
+        // Fill embeddings directly into flat storage using slices
         for key in potential_keys {
-            let contains: bool = self.index.contains(*key);
-            if contains {
-                let embedding = self.get_vector(*key);
+            if self.index.contains(*key) {
+                let start_idx = actual_query_count * dimensions;
+                let end_idx = start_idx + dimensions;
+                let embedding_slice = &mut embedding_data[start_idx..end_idx];
+
+                self.index
+                    .get(*key, embedding_slice)
+                    .expect("Failed to get vector");
                 contained_keys.push(*key);
-                queries.push(embedding);
+                actual_query_count += 1;
             }
         }
+        embedding_data.truncate(actual_query_count * dimensions);
 
-        let mut closeby_keys = Vec::new();
-        let mut distances = Vec::new();
-        for query in &queries {
-            let (keys_result, distances_result) = self.search_vectors(query, count, exact);
-            closeby_keys.push(keys_result);
-            distances.push(distances_result);
+        let max_result_size = std::cmp::min(self.index.size(), count);
+        let mut closeby_keys = vec![Vec::with_capacity(max_result_size); actual_query_count];
+        let mut distances = vec![Vec::with_capacity(max_result_size); actual_query_count];
+
+        // Search using slices and fill pre-allocated containers
+        for i in 0..actual_query_count {
+            let start_idx = i * dimensions;
+            let end_idx = start_idx + dimensions;
+            let query_slice = &embedding_data[start_idx..end_idx];
+            let (keys_result, distances_result) = self.search_vectors(query_slice, count, exact);
+            closeby_keys[i] = keys_result;
+            distances[i] = distances_result;
         }
-        if contained_keys.len() != closeby_keys.len() {
-            panic!("The number of contained keys does not match the number of keys");
-        }
+
         (contained_keys, closeby_keys, distances)
     }
 
