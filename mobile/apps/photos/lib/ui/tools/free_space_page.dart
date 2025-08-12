@@ -56,7 +56,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
     final informationTextStyle = TextStyle(
       fontSize: 14,
       height: 1.3,
-      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
       fontWeight: FontWeight.w500,
     );
     final isLightMode = Theme.of(context).brightness == Brightness.light;
@@ -71,12 +71,12 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
             isLightMode
                 ? Image.asset(
                     'assets/loading_photos_background.png',
-                    color: Colors.white.withOpacity(0.4),
+                    color: Colors.white.withValues(alpha: 0.4),
                     colorBlendMode: BlendMode.modulate,
                   )
                 : Image.asset(
                     'assets/loading_photos_background_dark.png',
-                    color: Colors.white.withOpacity(0.25),
+                    color: Colors.white.withValues(alpha: 0.25),
                   ),
             Padding(
               padding: const EdgeInsets.only(top: 16),

@@ -350,7 +350,10 @@ class FeatureItemWidget extends StatelessWidget {
               subText,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.5),
                 fontSize: 16,
               ),
             ),

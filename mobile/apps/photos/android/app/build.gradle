@@ -34,6 +34,7 @@ android {
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
+        coreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
@@ -132,7 +133,7 @@ flutter {
     source = "../.."
 }
 
-dependencies {
+dependencies {  
     implementation 'io.sentry:sentry-android:2.0.0'
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.21'
     implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0'
@@ -142,7 +143,7 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
-
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 
     constraints {
         implementation("androidx.work:work-runtime:2.8.1") {
