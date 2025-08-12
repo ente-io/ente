@@ -1,1 +1,2 @@
+- Aman: Fixed bottom nav bar color in light theme, resolved paint editor's initial color, and added tap-to-reset with haptics for tune adjustments (brightness/exposure)
 - Gracefully handle heic rendering on Android
