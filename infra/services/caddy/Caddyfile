@@ -9,5 +9,7 @@ https:// {
 	tls {
 		on_demand
 	}
-	reverse_proxy custom-albums.ente.io:443
+	reverse_proxy https://custom-albums.ente.io {
+		header_up Host {upstream_hostport}
+	}
 }
