@@ -68,10 +68,6 @@
       ]
     },
     {
-      "title": "AnimeZ.to",
-      "slug": "animez"
-    },
-    {
       "title": "Ankama",
       "slug": "ankama"
     },
@@ -90,13 +86,6 @@
       "title": "AR24",
       "altNames": [
         "Docaposte AR24"
-      ]
-    },
-    {
-      "title": "Art Fight",
-      "slug": "art_fight",
-      "altNames": [
-        "ArtFight"
       ]
     },
     {
@@ -165,14 +154,6 @@
       "altNames": [
         "Battle net",
         "Blizzard"
-      ]
-    },
-    {
-      "title": "BBS.NGA",
-      "slug": "bbs_nga",
-      "altNames": [
-        "NGA玩家社区",
-        "NGA社区"
       ]
     },
     {
@@ -477,25 +458,6 @@
         "c wallet",
         "cwallet.com"
       ]
-    },
-    {
-      "title": "U.S. Department of Homeland Security",
-      "slug": "us_dhs",
-      "altNames": [
-        "DHS",
-        "dhs",
-        "United States Department of Homeland Security",
-        "uscis",
-        "USCIS",
-        "U.S. Citizenship and Immigration Services",
-        "cbp",
-        "CBP",
-        "U.S. Customs and Border Protection",
-        "U.S. Immigration and Customs Enforcement",
-        "ice",
-        "ICE"
-      ],
-      "hex": "005189"
     },
     {
       "title": "DCS",
@@ -1538,9 +1500,6 @@
     },
     {
       "title": "Skinport"
-    },
-    {
-      "title": "Smogon"
     },
     {
       "title": "SMSPool",
