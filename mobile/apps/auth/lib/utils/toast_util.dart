@@ -48,7 +48,7 @@ void showToast(
       child: toastChild,
       gravity: ToastGravity.BOTTOM,
       toastDuration: const Duration(seconds: 2),
-      positionedToastBuilder: (context, child) {
+      positionedToastBuilder: (context, child, _) {
         final double currentInset = MediaQuery.of(context).viewInsets.bottom;
         return Positioned(
           left: 16,
