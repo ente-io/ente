@@ -18,17 +18,17 @@ extension GroupTypeExtension on GroupType {
   String get name {
     switch (this) {
       case GroupType.day:
-        return "day";
+        return "Day";
       case GroupType.week:
-        return "week";
+        return "Week";
       case GroupType.month:
-        return "month";
+        return "Month";
       case GroupType.size:
-        return "size";
+        return "Size";
       case GroupType.year:
-        return "year";
+        return "Year";
       case GroupType.none:
-        return "none";
+        return "None";
     }
   }
 
@@ -39,30 +39,22 @@ extension GroupTypeExtension on GroupType {
         this == GroupType.year;
   }
 
-  bool showGroupHeader() {
-    if (this == GroupType.size || this == GroupType.none) {
-      return false;
-    }
-    return true;
-  }
+  bool showGroupHeader() => timeGrouping();
 
-  String getTitle(BuildContext context, EnteFile file, {EnteFile? lastFile}) {
+  bool showScrollbarDivisions() => timeGrouping();
+
+  String getTitle(
+    BuildContext context,
+    EnteFile file,
+  ) {
     if (this == GroupType.day) {
       return _getDayTitle(context, file.creationTime!);
     } else if (this == GroupType.week) {
-      // return weeks starting date to end date based on file
-      final date = DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
-      final startOfWeek = date.subtract(Duration(days: date.weekday - 1));
-      final endOfWeek = startOfWeek.add(const Duration(days: 6));
-      return "${DateFormat.MMMd(Localizations.localeOf(context).languageCode).format(startOfWeek)} - ${DateFormat.MMMd(Localizations.localeOf(context).languageCode).format(endOfWeek)}, ${endOfWeek.year}";
+      return _getWeekTitle(context, file.creationTime!);
     } else if (this == GroupType.year) {
-      final date = DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
-      return DateFormat.y(Localizations.localeOf(context).languageCode)
-          .format(date);
+      return _getYearTitle(context, file.creationTime!);
     } else if (this == GroupType.month) {
-      final date = DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
-      return DateFormat.yMMM(Localizations.localeOf(context).languageCode)
-          .format(date);
+      return _getMonthTitle(context, file.creationTime!);
     } else {
       throw UnimplementedError("getTitle not implemented for $this");
     }
@@ -194,5 +186,56 @@ extension GroupTypeExtension on GroupType {
       return DateFormat.MMMEd(Localizations.localeOf(context).languageCode)
           .format(date);
     }
+  }
+
+  String _getWeekTitle(BuildContext context, int timestamp) {
+    final date = DateTime.fromMicrosecondsSinceEpoch(timestamp);
+    final now = DateTime.now();
+
+    // Check if it's the current week
+    final startOfWeek = date.subtract(Duration(days: date.weekday - 1));
+    final nowStartOfWeek = now.subtract(Duration(days: now.weekday - 1));
+
+    if (startOfWeek.year == nowStartOfWeek.year &&
+        startOfWeek.month == nowStartOfWeek.month &&
+        startOfWeek.day == nowStartOfWeek.day) {
+      return S.of(context).thisWeek;
+    }
+
+    // Check if it's the previous week
+    final lastWeekStart = nowStartOfWeek.subtract(const Duration(days: 7));
+    if (startOfWeek.year == lastWeekStart.year &&
+        startOfWeek.month == lastWeekStart.month &&
+        startOfWeek.day == lastWeekStart.day) {
+      return S.of(context).lastWeek;
+    }
+
+    // Return formatted week range
+    final endOfWeek = startOfWeek.add(const Duration(days: 6));
+    return "${DateFormat.MMMd(Localizations.localeOf(context).languageCode).format(startOfWeek)} - ${DateFormat.MMMd(Localizations.localeOf(context).languageCode).format(endOfWeek)}, ${endOfWeek.year}";
+  }
+
+  String _getMonthTitle(BuildContext context, int timestamp) {
+    final date = DateTime.fromMicrosecondsSinceEpoch(timestamp);
+    final now = DateTime.now();
+
+    if (date.year == now.year && date.month == now.month) {
+      return S.of(context).thisMonth;
+    }
+
+    return DateFormat.yMMM(Localizations.localeOf(context).languageCode)
+        .format(date);
+  }
+
+  String _getYearTitle(BuildContext context, int timestamp) {
+    final date = DateTime.fromMicrosecondsSinceEpoch(timestamp);
+    final now = DateTime.now();
+
+    if (date.year == now.year) {
+      return S.of(context).thisYear;
+    }
+
+    return DateFormat.y(Localizations.localeOf(context).languageCode)
+        .format(date);
   }
 }

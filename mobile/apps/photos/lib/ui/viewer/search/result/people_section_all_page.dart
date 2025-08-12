@@ -95,12 +95,14 @@ class SelectablePersonSearchExample extends StatelessWidget {
   final GenericSearchResult searchResult;
   final double size;
   final SelectedPeople selectedPeople;
+  final bool isDefaultFace;
 
   const SelectablePersonSearchExample({
     super.key,
     required this.searchResult,
     required this.selectedPeople,
     this.size = 102,
+    this.isDefaultFace = false,
   });
 
   void _handleTap(BuildContext context) {
@@ -192,7 +194,10 @@ class SelectablePersonSearchExample extends StatelessWidget {
                                 searchResult.previewThumbnail()!,
                                 shouldShowSyncStatus: false,
                               )
-                            : FaceSearchResult(searchResult);
+                            : FaceSearchResult(
+                                searchResult,
+                                isDefaultFace: isDefaultFace,
+                              );
                       } else {
                         child = const NoThumbnailWidget(
                           addBorder: false,
@@ -301,8 +306,13 @@ class SelectablePersonSearchExample extends StatelessWidget {
 
 class FaceSearchResult extends StatelessWidget {
   final SearchResult searchResult;
+  final bool isDefaultFace;
 
-  const FaceSearchResult(this.searchResult, {super.key});
+  const FaceSearchResult(
+    this.searchResult, {
+    super.key,
+    this.isDefaultFace = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -313,6 +323,7 @@ class FaceSearchResult extends StatelessWidget {
       key: params.containsKey(kPersonWidgetKey)
           ? ValueKey(params[kPersonWidgetKey])
           : ValueKey(params[kPersonParamID] ?? params[kClusterParamId]),
+      keepAlive: isDefaultFace,
     );
   }
 }
@@ -346,7 +357,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
   @override
   void initState() {
     super.initState();
-    sectionData = getResults();
+    sectionData = getResults(init: true);
 
     final streamsToListenTo = SectionType.face.viewAllUpdateEvents();
     for (Stream<Event> stream in streamsToListenTo) {
@@ -375,7 +386,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
     }
   }
 
-  Future<List<GenericSearchResult>> getResults() async {
+  Future<List<GenericSearchResult>> getResults({bool init = false}) async {
     final allFaces = await SearchService.instance
         .getAllFace(null, minClusterSize: kMinimumClusterSizeAllFaces);
     normalFaces.clear();
@@ -399,6 +410,21 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
       results.removeWhere(
         (element) => element.params[kPersonParamID] == null,
       );
+
+      if (init) {
+        // sort widget.selectedPeople first
+        results.sort((a, b) {
+          final aIndex = widget.selectedPeople?.personIds
+                  .contains(a.params[kPersonParamID]) ??
+              false;
+          final bIndex = widget.selectedPeople?.personIds
+                  .contains(b.params[kPersonParamID]) ??
+              false;
+          if (aIndex && !bIndex) return -1;
+          if (!aIndex && bIndex) return 1;
+          return a.name().compareTo(b.name());
+        });
+      }
     }
     _isLoaded = true;
     return results;
@@ -486,6 +512,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                               searchResult: normalFaces[index],
                               size: itemSize,
                               selectedPeople: widget.selectedPeople!,
+                              isDefaultFace: true,
                             )
                           : PersonSearchExample(
                               searchResult: normalFaces[index],
@@ -525,6 +552,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                                 searchResult: extraFaces[index],
                                 size: itemSize,
                                 selectedPeople: widget.selectedPeople!,
+                                isDefaultFace: false,
                               )
                             : PersonSearchExample(
                                 searchResult: extraFaces[index],

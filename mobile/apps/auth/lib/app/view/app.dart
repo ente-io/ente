@@ -199,9 +199,11 @@ class _AppState extends State<App>
     switch (menuItem.key) {
       case 'hide_window':
         windowManager.hide();
+        windowManager.setSkipTaskbar(true);
         break;
       case 'show_window':
         windowManager.show();
+        windowManager.setSkipTaskbar(false);
         break;
       case 'exit_app':
         windowManager.destroy();

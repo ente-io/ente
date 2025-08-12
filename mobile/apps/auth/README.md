@@ -19,16 +19,16 @@ without relying on third party stores.
 You can alternatively install the build from PlayStore or F-Droid.
 
 <a href="https://play.google.com/store/apps/details?id=io.ente.auth">
-  <img height="59" src="../.github/assets/play-store-badge.png">
+  <img height="59" src="../../../.github/assets/play-store-badge.png">
 </a>
 <a href="https://f-droid.org/packages/io.ente.auth/">
-  <img height="59" src="../.github/assets/f-droid-badge.png">
+  <img height="59" src="../../../.github/assets/f-droid-badge.png">
 </a>
 
 ### iOS / Apple Silicon macOS
 
 <a href="https://apps.apple.com/us/app/ente-authenticator/id6444121398">
-  <img height="59" src="../.github/assets/app-store-badge.svg">
+  <img height="59" src="../../../.github/assets/app-store-badge.svg">
 </a>
 
 ### Desktop
@@ -44,7 +44,7 @@ or managing your secrets, please use our mobile or desktop app.
 
 ## 🧑‍💻 Build from source
 
-1. [Install Flutter v3.29.3](https://flutter.dev/docs/get-started/install).
+1. [Install Flutter v3.32.8](https://flutter.dev/docs/get-started/install).
 
 2. Pull in all submodules with `git submodule update --init --recursive`
 
@@ -98,7 +98,7 @@ more, see [docs/adding-icons](docs/adding-icons.md).
 The best way to support this project is by checking out [Ente
 Photos](../mobile/README.md) or spreading the word.
 
-For more ways to contribute, see [../CONTRIBUTING.md](../CONTRIBUTING.md).
+For more ways to contribute, see [../../../CONTRIBUTING.md](../../../CONTRIBUTING.md).
 
 ## Certificate Fingerprints
 
@@ -113,4 +113,4 @@ apksigner verify --print-certs <path_to_apk>
 ## ⭐️ About
 
 To know more about Ente and the ways to get in touch or seek help, see [our main
-README](../README.md) or visit [ente.io](https://ente.io).
+README](../../../README.md) or visit [ente.io](https://ente.io).

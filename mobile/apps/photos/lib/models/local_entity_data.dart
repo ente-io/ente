@@ -20,7 +20,7 @@ class LocalEntityData {
   Map<String, dynamic> toJson() {
     return {
       "id": id,
-      "type": type.typeToString(),
+      "type": type.name,
       "data": data,
       "ownerID": ownerID,
       "updatedAt": updatedAt,
@@ -30,7 +30,7 @@ class LocalEntityData {
   factory LocalEntityData.fromJson(Map<String, dynamic> json) {
     return LocalEntityData(
       id: json["id"],
-      type: typeFromString(json["type"]),
+      type: entityTypeFromString(json["type"]),
       data: json["data"],
       ownerID: json["ownerID"] as int,
       updatedAt: json["updatedAt"] as int,

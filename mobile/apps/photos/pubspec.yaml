@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 1.1.54+1084
+version: 1.2.1+1205
 publish_to: none
 
 environment:
@@ -103,6 +103,7 @@ dependencies:
   # If not resolved and we need to upgrade, write a migration script.
   flutter_secure_storage: ^9.2.4
   flutter_sodium:
+  flutter_spinkit: ^5.2.1
   flutter_staggered_grid_view: ^0.7.0
   flutter_svg: ^2.0.10+1
   flutter_timezone: ^4.1.0
@@ -113,7 +114,6 @@ dependencies:
   html_unescape: ^2.0.0
   http: ^1.1.0
   image: ^4.0.17
-  image_editor: ^1.6.0
   in_app_purchase: ^3.0.7
   intl: ^0.19.0
   latlong2: ^0.9.0
@@ -173,6 +173,7 @@ dependencies:
     git:
       url: https://github.com/ente-io/privacy_screen.git
       ref: v2-only
+  pro_image_editor: ^6.0.0
   receive_sharing_intent: # pub.dev is behind
     git:
       url: https://github.com/KasemJaffer/receive_sharing_intent.git
@@ -183,7 +184,7 @@ dependencies:
   sentry_flutter: ^8.14.1
   share_plus: ^11.0.0
   shared_preferences: ^2.0.5
-  sqflite: ^2.3.0
+  sqflite: ^2.4.2
   sqflite_migration: ^0.3.0
   sqlite3_flutter_libs: ^0.5.20
   sqlite_async: ^0.11.7
@@ -223,7 +224,7 @@ dependency_overrides:
     git:
       url: https://github.com/ente-io/flutter_sodium
       ref: v2-embeddings-only
-  intl: 0.18.1
+  intl: ^0.20.2
   js: ^0.6.7
   media_kit: # update media_kit* if there is any update
     git:
@@ -340,6 +341,7 @@ flutter:
   assets:
     - assets/
     - assets/video-editor/
+    - assets/image-editor/
     - assets/icons/
     - assets/launcher_icon/
   fonts:

@@ -11,6 +11,7 @@ class AppDelegate: FlutterAppDelegate {
   }
     
   override func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+    NSApp.setActivationPolicy(.accessory)
     return false
   }
 }

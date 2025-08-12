@@ -8,11 +8,11 @@ import "package:ml_linalg/dtype.dart";
 import "package:ml_linalg/vector.dart";
 import "package:photos/generated/protos/ente/common/vector.pb.dart";
 import "package:photos/models/base/id.dart";
-import "package:photos/services/isolate_functions.dart";
-import "package:photos/services/isolate_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_db_info_for_clustering.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
+import "package:photos/utils/isolate/isolate_operations.dart";
+import "package:photos/utils/isolate/super_isolate.dart";
 
 class FaceInfo {
   final String faceID;
@@ -61,6 +61,7 @@ class ClusteringResult {
   }
 }
 
+@pragma('vm:entry-point')
 class FaceClusteringService extends SuperIsolate {
   @override
   Logger get logger => _logger;
@@ -507,7 +508,8 @@ ClusteringResult _runCompleteClustering(Map args) {
           EVector.fromBuffer(entry.value).values,
           dtype: DType.float32,
         ),
-        fileCreationTime: fileIDToCreationTime?[getFileIdFromFaceId<int>(entry.key)],
+        fileCreationTime:
+            fileIDToCreationTime?[getFileIdFromFaceId<int>(entry.key)],
       ),
     );
   }

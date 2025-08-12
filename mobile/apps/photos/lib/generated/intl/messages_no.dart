@@ -293,7 +293,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Vi har sendt en e-post til <green>${email}</green>";
 
   static String m116(count) =>
-      "${Intl.plural(count, other: '${count} år siden')}";
+      "${Intl.plural(count, one: '${count} år siden', other: '${count} år siden')}";
 
   static String m117(name) => "Du og ${name}";
 

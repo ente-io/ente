@@ -2,14 +2,15 @@ import 'dart:async';
 
 import "package:logging/logging.dart";
 import "package:photos/models/ml/vector.dart";
-import "package:photos/services/isolate_functions.dart";
-import "package:photos/services/isolate_service.dart";
 import "package:photos/services/machine_learning/ml_constants.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_encoder.dart";
 import "package:photos/services/machine_learning/semantic_search/query_result.dart";
 import "package:photos/services/remote_assets_service.dart";
+import "package:photos/utils/isolate/isolate_operations.dart";
+import "package:photos/utils/isolate/super_isolate.dart";
 import "package:synchronized/synchronized.dart";
 
+@pragma('vm:entry-point')
 class MLComputer extends SuperIsolate {
   @override
   Logger get logger => _logger;

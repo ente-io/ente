@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/ente-io/museum/pkg/repo/public"
 	"strings"
 
 	"github.com/ente-io/museum/ente"
@@ -32,10 +33,11 @@ type FileWithUpdatedAt struct {
 }
 
 type TrashRepository struct {
-	DB         *sql.DB
-	ObjectRepo *ObjectRepository
-	FileRepo   *FileRepository
-	QueueRepo  *QueueRepository
+	DB           *sql.DB
+	ObjectRepo   *ObjectRepository
+	FileRepo     *FileRepository
+	QueueRepo    *QueueRepository
+	FileLinkRepo *public.FileLinkRepository
 }
 
 func (t *TrashRepository) InsertItems(ctx context.Context, tx *sql.Tx, userID int64, items []ente.TrashItemRequest) error {
@@ -156,6 +158,13 @@ func (t *TrashRepository) TrashFiles(fileIDs []int64, userID int64, trash ente.T
 		return stacktrace.Propagate(err, "")
 	}
 	err = tx.Commit()
+
+	if err == nil {
+		removeLinkErr := t.FileLinkRepo.DisableLinkForFiles(ctx, fileIDs)
+		if removeLinkErr != nil {
+			return stacktrace.Propagate(removeLinkErr, "failed to disable file links for files being trashed")
+		}
+	}
 	return stacktrace.Propagate(err, "")
 }
 
@@ -338,7 +347,7 @@ func (t *TrashRepository) GetTimeStampForLatestNonDeletedEntry(userID int64) (*i
 // GetUserIDToFileIDsMapForDeletion returns map of userID to fileIds, where the file ids which should be deleted by now
 func (t *TrashRepository) GetUserIDToFileIDsMapForDeletion() (map[int64][]int64, error) {
 	rows, err := t.DB.Query(`SELECT user_id, file_id FROM trash 
-			WHERE delete_by <= $1  AND is_deleted = FALSE AND is_restored = FALSE limit $2`,
+			WHERE delete_by <= $1  AND is_deleted IS FALSE AND is_restored IS FALSE limit $2`,
 		time.Microseconds(), TrashDiffLimit)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")

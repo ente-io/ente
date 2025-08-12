@@ -8,6 +8,7 @@ import "package:photos/theme/ente_theme.dart";
 class SelectionActionButton extends StatelessWidget {
   final String labelText;
   final IconData? icon;
+  final Widget? iconWidget;
   final String? svgAssetPath;
   final VoidCallback? onTap;
   final bool shouldShow;
@@ -17,13 +18,14 @@ class SelectionActionButton extends StatelessWidget {
     required this.onTap,
     this.icon,
     this.svgAssetPath,
+    this.iconWidget,
     this.shouldShow = true,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    assert(icon != null || svgAssetPath != null);
+    assert(icon != null || iconWidget != null || svgAssetPath != null);
     return AnimatedSize(
       duration: const Duration(milliseconds: 350),
       curve: Curves.easeInOutCirc,
@@ -35,6 +37,7 @@ class SelectionActionButton extends StatelessWidget {
                 icon: icon,
                 onTap: onTap,
                 svgAssetPath: svgAssetPath,
+                iconWidget: iconWidget,
               )
             : const SizedBox(
                 height: 60,
@@ -48,12 +51,14 @@ class _Body extends StatefulWidget {
   final String labelText;
   final IconData? icon;
   final String? svgAssetPath;
+  final Widget? iconWidget;
   final VoidCallback? onTap;
   const _Body({
     required this.labelText,
     required this.onTap,
     this.icon,
     this.svgAssetPath,
+    this.iconWidget,
   });
 
   @override
@@ -128,22 +133,24 @@ class __BodyState extends State<_Body> {
                       ],
                     ),
                   )
+                else if (widget.svgAssetPath != null)
+                  SvgPicture.asset(
+                    widget.svgAssetPath!,
+                    colorFilter: ColorFilter.mode(
+                      getEnteColorScheme(context).textMuted,
+                      BlendMode.srcIn,
+                    ),
+                    width: 24,
+                    height: 24,
+                  )
+                else if (widget.iconWidget != null)
+                  widget.iconWidget!
                 else
-                  widget.svgAssetPath != null
-                      ? SvgPicture.asset(
-                          widget.svgAssetPath!,
-                          colorFilter: ColorFilter.mode(
-                            getEnteColorScheme(context).textMuted,
-                            BlendMode.srcIn,
-                          ),
-                          width: 24,
-                          height: 24,
-                        )
-                      : Icon(
-                          widget.icon,
-                          size: 24,
-                          color: getEnteColorScheme(context).textMuted,
-                        ),
+                  Icon(
+                    widget.icon,
+                    size: 24,
+                    color: getEnteColorScheme(context).textMuted,
+                  ),
                 const SizedBox(height: 4),
                 Text(
                   widget.labelText,

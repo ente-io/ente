@@ -53,18 +53,22 @@ Future<DecodedImage> decodeImageFromPath(
   final Map<String, IfdTag> exifData = await readExifFromBytes(imageData);
   final int orientation =
       exifData['Image Orientation']?.values.firstAsInt() ?? 1;
+  final format = imagePath.split('.').last.toLowerCase();
   if (orientation > 1 && includeRgbaBytes) {
-    _logger.severe("Image EXIF orientation $orientation is not supported");
-    throw Exception(
-      'UnhandledExifOrientation: exif orientation $orientation',
-    );
+    if (format == 'heic' || format == 'heif') {
+      _logger
+          .info("Decoding HEIC/HEIF image with EXIF orientation $orientation");
+    } else {
+      _logger.warning(
+        "Decoding image with EXIF orientation $orientation, for format $format",
+      );
+    }
   }
 
   late Image image;
   try {
     image = await decodeImageFromData(imageData);
   } catch (e, s) {
-    final format = imagePath.split('.').last;
     _logger.info(
       'Cannot decode $format on ${Platform.isAndroid ? "Android" : "iOS"}, converting to jpeg',
     );
