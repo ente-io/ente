@@ -60,6 +60,8 @@ class FlagService {
 
   String get castUrl => flags.castUrl;
 
+  String get customDomain => flags.customDomain;
+
   bool hasSyncedAccountFlags() {
     return _prefs.containsKey("remote_flags");
   }
