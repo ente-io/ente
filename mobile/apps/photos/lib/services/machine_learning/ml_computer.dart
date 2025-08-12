@@ -50,6 +50,24 @@ class MLComputer extends SuperIsolate {
     }
   }
 
+  Future<(Uint64List, List<Uint64List>, List<Float32List>)>
+      bulkVectorSearchWithKeys(
+    Uint64List potentialKeys,
+    bool exact,
+  ) async {
+    try {
+      final result =
+          await runInIsolate(IsolateOperation.bulkVectorSearchWithKeys, {
+        "potentialKeys": potentialKeys,
+        "exact": exact,
+      });
+      return result;
+    } catch (e, s) {
+      _logger.severe("Could not run bulk vector search in MLComputer", e, s);
+      rethrow;
+    }
+  }
+
   Future<List<double>> runClipText(String query) async {
     try {
       await _ensureLoadedClipTextModel();

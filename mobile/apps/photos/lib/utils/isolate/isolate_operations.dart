@@ -1,5 +1,6 @@
 import 'dart:typed_data' show Uint8List, Float32List;
 
+import "package:flutter_rust_bridge/flutter_rust_bridge.dart" show Uint64List;
 import "package:ml_linalg/linalg.dart";
 import "package:photos/db/ml/clip_vector_db.dart";
 import "package:photos/models/ml/face/box.dart";
@@ -45,6 +46,9 @@ enum IsolateOperation {
   /// [MLComputer]
   bulkVectorSearch,
 
+  /// [MLComputer]
+  bulkVectorSearchWithKeys,
+
   /// [FaceClusteringService]
   linearIncrementalClustering,
 
@@ -62,6 +66,17 @@ Future<dynamic> isolateFunction(
   Map<String, dynamic> args,
 ) async {
   switch (function) {
+    case IsolateOperation.bulkVectorSearchWithKeys:
+      await _ensureRustLoaded();
+      final potentialKeys = args["potentialKeys"] as Uint64List;
+      final exact = args["exact"] as bool;
+
+      return ClipVectorDB.instance.bulkSearchWithKeys(
+        potentialKeys,
+        BigInt.from(100),
+        exact: exact,
+      );
+
     case IsolateOperation.bulkVectorSearch:
       await _ensureRustLoaded();
       final clipFloat32 = args["clipFloat32"] as List<Float32List>;
