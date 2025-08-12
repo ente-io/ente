@@ -51,6 +51,7 @@ import {
     type ModalVisibilityProps,
 } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
+import { isHTTPErrorWithStatus } from "ente-base/http";
 import {
     getLocaleInUse,
     pt,
@@ -1020,7 +1021,13 @@ const DomainSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                 await updateCustomDomain(domain);
             } catch (e) {
                 log.error(`Failed to submit input ${domain}`, e);
-                setValueFieldError(t("generic_error"));
+                if (isHTTPErrorWithStatus(e, 400)) {
+                    setValueFieldError(pt("Invalid domain"));
+                } else if (isHTTPErrorWithStatus(e, 409)) {
+                    setValueFieldError(pt("Domain already linked by a user"));
+                } else {
+                    setValueFieldError(t("generic_error"));
+                }
             }
         },
     });
@@ -1040,9 +1047,6 @@ const DomainSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
         >
             <Stack sx={{ px: 2, py: "12px" }}>
                 <DomainItem title={pt("Link your domain")} ordinal={pt("1")}>
-                    <Typography sx={{ color: "text.muted" }}>
-                        {pt("Any domain or subdomain you own")}
-                    </Typography>
                     <form onSubmit={formik.handleSubmit}>
                         <TextField
                             name="domain"
@@ -1051,12 +1055,16 @@ const DomainSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                             type={"text"}
                             fullWidth
                             autoFocus={true}
-                            margin="normal"
+                            margin="dense"
                             disabled={formik.isSubmitting}
                             error={!!formik.errors.domain}
-                            helperText={formik.errors.domain ?? " "}
+                            helperText={
+                                formik.errors.domain ??
+                                pt("Any domain or subdomain you own")
+                            }
                             label={t("Domain")}
                             placeholder={ut("photos.example.org")}
+                            sx={{ mb: 2 }}
                         />
                         <LoadingButton
                             fullWidth
@@ -1068,7 +1076,7 @@ const DomainSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                         </LoadingButton>
                     </form>
                 </DomainItem>
-                <Divider sx={{ mt: 4, mb: 1 }} />
+                <Divider sx={{ mt: 4, mb: 2, opacity: 0.5 }} />
                 <DomainItem title={pt("Add DNS entry")} ordinal={pt("2")}>
                     <Typography sx={{ color: "text.muted" }}>
                         On your DNS provider, add a CNAME from your domain to{" "}
@@ -1080,9 +1088,9 @@ const DomainSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                         </Typography>
                     </Typography>
                 </DomainItem>
-                <Divider sx={{ mt: 6, mb: 1 }} />
+                <Divider sx={{ mt: 5, mb: 2, opacity: 0.5 }} />
                 <DomainItem title={ut("🎉")} ordinal={pt("3")} isEmoji>
-                    <Typography sx={{ color: "text.muted" }}>
+                    <Typography sx={{ color: "text.muted", mt: 2 }}>
                         Within 1 hour, your public albums will be accessible via
                         your domain!
                     </Typography>
