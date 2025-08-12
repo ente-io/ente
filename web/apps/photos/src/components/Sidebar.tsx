@@ -824,43 +824,50 @@ const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                         />
                     </RowButtonGroup>
                 )}
-                <RowButton
-                    label={pt("Custom domains")}
-                    endIcon={
-                        <Stack
-                            direction="row"
-                            sx={{ alignSelf: "stretch", alignItems: "center" }}
-                        >
-                            <Box
-                                sx={{
-                                    width: "8px",
-                                    bgcolor: "stroke.faint",
-                                    alignSelf: "stretch",
-                                    mr: 0.5,
-                                }}
-                            />
-                            <Box
-                                sx={{
-                                    width: "8px",
-                                    bgcolor: "stroke.muted",
-                                    alignSelf: "stretch",
-                                    mr: 0.5,
-                                }}
-                            />
-                            <Box
-                                sx={{
-                                    width: "8px",
-                                    bgcolor: "stroke.base",
-                                    alignSelf: "stretch",
-                                    opacity: 0.3,
-                                    mr: 1.5,
-                                }}
-                            />
-                            <ChevronRightIcon />
-                        </Stack>
-                    }
-                    onClick={showDomainSettings}
-                />
+                {
+                    /* TODO: CD */ process.env.NEXT_PUBLIC_ENTE_WIP_CD && (
+                        <RowButton
+                            label={pt("Custom domains")}
+                            endIcon={
+                                <Stack
+                                    direction="row"
+                                    sx={{
+                                        alignSelf: "stretch",
+                                        alignItems: "center",
+                                    }}
+                                >
+                                    <Box
+                                        sx={{
+                                            width: "8px",
+                                            bgcolor: "stroke.faint",
+                                            alignSelf: "stretch",
+                                            mr: 0.5,
+                                        }}
+                                    />
+                                    <Box
+                                        sx={{
+                                            width: "8px",
+                                            bgcolor: "stroke.muted",
+                                            alignSelf: "stretch",
+                                            mr: 0.5,
+                                        }}
+                                    />
+                                    <Box
+                                        sx={{
+                                            width: "8px",
+                                            bgcolor: "stroke.base",
+                                            alignSelf: "stretch",
+                                            opacity: 0.3,
+                                            mr: 1.5,
+                                        }}
+                                    />
+                                    <ChevronRightIcon />
+                                </Stack>
+                            }
+                            onClick={showDomainSettings}
+                        />
+                    )
+                }
                 <RowButton
                     endIcon={<ChevronRightIcon />}
                     label={t("map")}
@@ -1008,6 +1015,27 @@ const DomainSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     onClose,
     onRootClose,
 }) => {
+    const handleRootClose = () => {
+        onClose();
+        onRootClose();
+    };
+
+    return (
+        <TitledNestedSidebarDrawer
+            {...{ open, onClose }}
+            onRootClose={handleRootClose}
+            // TODO: CD: Translations
+            title={pt("Custom domains")}
+            // caption={pt("Your albums, your domain")}
+            caption="Use your own domain when sharing"
+        >
+            <DomainSettingsContents />
+        </TitledNestedSidebarDrawer>
+    );
+};
+
+// Separate component to reset state on back.
+const DomainSettingsContents: React.FC = () => {
     const { customDomain, customDomainCNAME } = useSettingsSnapshot();
 
     const formik = useFormik({
@@ -1032,80 +1060,66 @@ const DomainSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
         },
     });
 
-    const handleRootClose = () => {
-        onClose();
-        onRootClose();
-    };
+    // TODO: CD: help
 
     return (
-        <TitledNestedSidebarDrawer
-            {...{ open, onClose }}
-            onRootClose={handleRootClose}
-            title={pt("Custom domains")}
-            // caption={pt("Your albums, your domain")}
-            caption="Use your own domain when sharing"
-        >
-            <Stack sx={{ px: 2, py: "12px" }}>
-                <DomainItem title={pt("Link your domain")} ordinal={pt("1")}>
-                    <form onSubmit={formik.handleSubmit}>
-                        <TextField
-                            name="domain"
-                            value={formik.values.domain}
-                            onChange={formik.handleChange}
-                            type={"text"}
-                            fullWidth
-                            autoFocus={true}
-                            margin="dense"
-                            disabled={formik.isSubmitting}
-                            error={!!formik.errors.domain}
-                            helperText={
-                                formik.errors.domain ??
-                                pt("Any domain or subdomain you own")
-                            }
-                            label={t("Domain")}
-                            placeholder={ut("photos.example.org")}
-                            sx={{ mb: 2 }}
-                        />
-                        <LoadingButton
-                            fullWidth
-                            type="submit"
-                            loading={formik.isSubmitting}
-                            color="accent"
-                        >
-                            {customDomain ? pt("Update") : pt("Save")}
-                        </LoadingButton>
-                    </form>
-                </DomainItem>
-                <Divider sx={{ mt: 4, mb: 2, opacity: 0.5 }} />
-                <DomainItem title={pt("Add DNS entry")} ordinal={pt("2")}>
-                    <Typography sx={{ color: "text.muted" }}>
-                        On your DNS provider, add a CNAME from your domain to{" "}
-                        <Typography
-                            component="span"
-                            sx={{ fontWeight: "bold", color: "text.base" }}
-                        >
-                            {customDomainCNAME}
-                        </Typography>
+        <Stack sx={{ px: 2, py: "12px" }}>
+            <DomainItem title={pt("Link your domain")} ordinal={pt("1")}>
+                <form onSubmit={formik.handleSubmit}>
+                    <TextField
+                        name="domain"
+                        value={formik.values.domain}
+                        onChange={formik.handleChange}
+                        type={"text"}
+                        fullWidth
+                        autoFocus={true}
+                        margin="dense"
+                        disabled={formik.isSubmitting}
+                        error={!!formik.errors.domain}
+                        helperText={
+                            formik.errors.domain ??
+                            pt("Any domain or subdomain you own")
+                        }
+                        label={t("Domain")}
+                        placeholder={ut("photos.example.org")}
+                        sx={{ mb: 2 }}
+                    />
+                    <LoadingButton
+                        fullWidth
+                        type="submit"
+                        loading={formik.isSubmitting}
+                        color="accent"
+                    >
+                        {customDomain ? pt("Update") : pt("Save")}
+                    </LoadingButton>
+                </form>
+            </DomainItem>
+            <Divider sx={{ mt: 4, mb: 2, opacity: 0.5 }} />
+            <DomainItem title={pt("Add DNS entry")} ordinal={pt("2")}>
+                <Typography sx={{ color: "text.muted" }}>
+                    On your DNS provider, add a CNAME from your domain to{" "}
+                    <Typography
+                        component="span"
+                        sx={{ fontWeight: "bold", color: "text.base" }}
+                    >
+                        {customDomainCNAME}
                     </Typography>
-                </DomainItem>
-                <Divider sx={{ mt: 5, mb: 2, opacity: 0.5 }} />
-                <DomainItem title={ut("🎉")} ordinal={pt("3")} isEmoji>
-                    <Typography sx={{ color: "text.muted", mt: 2 }}>
-                        Within 1 hour, your public albums will be accessible via
-                        your domain!
+                </Typography>
+            </DomainItem>
+            <Divider sx={{ mt: 5, mb: 2, opacity: 0.5 }} />
+            <DomainItem title={ut("🎉")} ordinal={pt("3")} isEmoji>
+                <Typography sx={{ color: "text.muted", mt: 2 }}>
+                    Within 1 hour, your public albums will be accessible via
+                    your domain!
+                </Typography>
+                <Typography sx={{ color: "text.muted", mt: 3 }}>
+                    For more information, see
+                    <Typography component="span" sx={{ color: "accent.main" }}>
+                        {" help "}
                     </Typography>
-                    <Typography sx={{ color: "text.muted", mt: 3 }}>
-                        For more information, see
-                        <Typography
-                            component="span"
-                            sx={{ color: "accent.main" }}
-                        >
-                            {" help "}
-                        </Typography>
-                    </Typography>
-                </DomainItem>
-            </Stack>
-        </TitledNestedSidebarDrawer>
+                </Typography>
+            </DomainItem>
+        </Stack>
     );
 };
 
