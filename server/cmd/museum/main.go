@@ -793,7 +793,7 @@ func main() {
 	privateAPI.DELETE("/remote-store/:key", remoteStoreHandler.RemoveKey)
 	privateAPI.GET("/remote-store", remoteStoreHandler.GetKey)
 	privateAPI.GET("/remote-store/feature-flags", remoteStoreHandler.GetFeatureFlags)
-	privateAPI.GET("/custom-domain", remoteStoreHandler.CheckDomain)
+	publicAPI.GET("/custom-domain", remoteStoreHandler.CheckDomain)
 
 	pushHandler := &api.PushHandler{PushController: pushController}
 	privateAPI.POST("/push/token", pushHandler.AddToken)
