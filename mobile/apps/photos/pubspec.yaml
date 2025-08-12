@@ -248,9 +248,6 @@ dependency_overrides:
       url: https://github.com/ente-io/packages.git
       ref: android_video_roation_fix
       path: packages/video_player/video_player/
-  video_thumbnail: # update source if there is any update
-    git:
-      url: https://github.com/ente-io/video_thumbnail_fork.git
   watcher: ^1.1.0
   win32: "5.10.1"
 
