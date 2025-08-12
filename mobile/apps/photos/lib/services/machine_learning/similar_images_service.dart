@@ -1,5 +1,4 @@
 import "dart:math" show max;
-import "dart:typed_data" show Float32List;
 
 import "package:flutter/foundation.dart" show kDebugMode;
 import "package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart"
@@ -9,7 +8,6 @@ import "package:photos/db/ml/db.dart";
 import "package:photos/extensions/stop_watch.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file/file_type.dart";
-import "package:photos/models/ml/vector.dart";
 import "package:photos/models/similar_files.dart";
 import "package:photos/services/machine_learning/ml_computer.dart";
 import "package:photos/services/search_service.dart";
@@ -52,37 +50,28 @@ class SimilarImagesService {
     await mlDataDB.checkMigrateFillClipVectorDB();
     w?.log("checkMigrateFillClipVectorDB");
 
-    // Get the embeddings ready for vector search
-    final List<EmbeddingVector> allImageEmbeddings =
-        await MLDataDB.instance.getAllClipVectors();
-    final clipFloat32 = allImageEmbeddings
-        .map(
-          (value) => Float32List.fromList(value.vector.toList()),
-        )
-        .toList();
-    final keys = Uint64List.fromList(
-      allImageEmbeddings.map((e) => BigInt.from(e.fileID)).toList(),
-    );
-    w?.log("getAllClipVectors");
-
-    // Run bulk vector search
-    final (vectorKeys, distances) = await MLComputer.instance.bulkVectorSearch(
-      clipFloat32,
-      exact,
-    );
-    w?.log("bulkSearchVectors");
-
-    // Get all files, and create a map of fileID to file
+    // Get all files, and all potential embedding IDs, and create a map of fileID to file
     final allFiles = Set<EnteFile>.from(
       await SearchService.instance.getAllFilesForSearch(),
     );
     final allFileIdsToFile = <int, EnteFile>{};
+    final fileIDs = <int>[];
     for (final file in allFiles) {
       if (file.uploadedFileID != null && file.fileType != FileType.video) {
         allFileIdsToFile[file.uploadedFileID!] = file;
+        fileIDs.add(file.uploadedFileID!);
       }
     }
+    final Uint64List potentialKeys = Uint64List.fromList(fileIDs);
     w?.log("getAllFilesForSearch");
+
+    // Run bulk vector search
+    final (keys, vectorKeys, distances) =
+        await MLComputer.instance.bulkVectorSearchWithKeys(
+      potentialKeys,
+      exact,
+    );
+    w?.log("bulkSearchVectors");
 
     // Run through the vector search results and create SimilarFiles objects
     final alreadyUsedFileIDs = <int>{};
