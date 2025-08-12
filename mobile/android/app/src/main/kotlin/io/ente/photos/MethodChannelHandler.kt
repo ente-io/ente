@@ -62,6 +62,70 @@ class MethodChannelHandler {
                     Log.d("UpEnte", "Retrieved current username from native SharedPreferences: $username")
                     result.success(username)
                 }
+                "openGalleryApp" -> {
+                    try {
+                        Log.d("UpEnte", "Opening gallery app")
+                        val intent = Intent().apply {
+                            component = android.content.ComponentName(
+                                "com.android.gallery3d", 
+                                "com.android.gallery3d.app.GalleryActivity"
+                            )
+                            putExtra("up_photos", "false")
+                        }
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        context.startActivity(intent)
+                        
+                        // After opening gallery app, destroy the current app
+                        Log.d("UpEnte", "Gallery app opened, now destroying current app")
+                        try {
+                            // First try to finish the activity cleanly
+                            val mainActivity = context as? android.app.Activity
+                            if (mainActivity != null) {
+                                mainActivity.finishAndRemoveTask()
+                            }
+                            
+                            // Always kill the process to ensure complete destruction
+                            android.os.Process.killProcess(android.os.Process.myPid())
+                        } catch (destroyException: Exception) {
+                            Log.e("UpEnte", "Failed to destroy app after opening gallery", destroyException)
+                            // Even if there's an error, try to kill the process
+                            try {
+                                android.os.Process.killProcess(android.os.Process.myPid())
+                            } catch (killException: Exception) {
+                                Log.e("UpEnte", "Failed to kill process as fallback", killException)
+                            }
+                        }
+                        
+                        result.success(true)
+                    } catch (e: Exception) {
+                        Log.e("UpEnte", "Failed to open gallery app", e)
+                        result.error("GALLERY_APP_ERROR", "Failed to open gallery app", e.message)
+                    }
+                }
+                "destroyApp" -> {
+                    try {
+                        Log.d("UpEnte", "Destroying app completely")
+                        // First try to finish the activity cleanly
+                        val mainActivity = context as? android.app.Activity
+                        if (mainActivity != null) {
+                            mainActivity.finishAndRemoveTask()
+                        }
+                        
+                        // Always kill the process to ensure complete destruction
+                        android.os.Process.killProcess(android.os.Process.myPid())
+                        
+                        result.success(true)
+                    } catch (e: Exception) {
+                        Log.e("UpEnte", "Failed to destroy app", e)
+                        // Even if there's an error, try to kill the process
+                        try {
+                            android.os.Process.killProcess(android.os.Process.myPid())
+                        } catch (killException: Exception) {
+                            Log.e("UpEnte", "Failed to kill process as fallback", killException)
+                        }
+                        result.error("DESTROY_APP_ERROR", "Failed to destroy app", e.message)
+                    }
+                }
                 else -> {
                     result.notImplemented()
                 }

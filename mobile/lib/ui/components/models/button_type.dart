@@ -12,7 +12,8 @@ enum ButtonType {
   tertiaryCritical,
   trailingIconPrimary,
   trailingIconSecondary,
-  tertiary;
+  tertiary,
+  text;
 
   bool get isPrimary =>
       this == ButtonType.primary || this == ButtonType.trailingIconPrimary;
@@ -45,6 +46,9 @@ enum ButtonType {
       return colorScheme.warning700;
     }
     if (this == ButtonType.tertiaryCritical) {
+      return Colors.transparent;
+    }
+    if (this == ButtonType.text) {
       return Colors.transparent;
     }
     return Colors.transparent;
@@ -126,6 +130,9 @@ enum ButtonType {
     if (this == ButtonType.tertiaryCritical) {
       return colorScheme.warning500;
     }
+    if (this == ButtonType.text) {
+      return colorScheme.primary500;  // Blue text color
+    }
     //fallback
     return colorScheme.strokeBase;
   }
@@ -167,6 +174,9 @@ enum ButtonType {
     }
     if (this == ButtonType.tertiaryCritical) {
       return textTheme.bodyBold.copyWith(color: warning500);
+    }
+    if (this == ButtonType.text) {
+      return textTheme.bodyBold.copyWith(color: const Color(0xFF475CC7));  // Blue text color
     }
     //fallback
     return textTheme.bodyBold;

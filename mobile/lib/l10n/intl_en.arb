@@ -1739,5 +1739,7 @@
   "cLFamilyPlanDesc": "You can now set limits on how much storage your family members can use.",
   "cLBulkEdit": "Bulk Edit dates",
   "cLBulkEditDesc": "You can now select multiple photos, and edit date/time for all of them with one quick action. Shifting dates is also supported.",
-  "curatedMemories": "Curated memories"
+  "curatedMemories": "Curated memories",
+  "limitedGallery": "Limited Gallery",
+  "exit": "Exit"
 }

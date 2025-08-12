@@ -14,7 +14,6 @@ import 'package:photos/ui/settings/app_version_widget.dart';
 import 'package:photos/ui/settings/backup/backup_section_widget.dart';
 import 'package:photos/ui/settings/debug/debug_section_widget.dart';
 import "package:photos/ui/settings/debug/ml_debug_section_widget.dart";
-import "package:photos/ui/settings/developer_settings_widget.dart";
 import 'package:photos/ui/settings/general_section_widget.dart';
 import 'package:photos/ui/settings/inherited_settings_state.dart';
 import 'package:photos/ui/settings/security_section_widget.dart';
@@ -115,7 +114,7 @@ class SettingsPage extends StatelessWidget {
       contents.addAll([sectionSpacing, const MLDebugSectionWidget()]);
     }
     contents.add(const AppVersionWidget());
-    contents.add(const DeveloperSettingsWidget());
+    // contents.add(const DeveloperSettingsWidget());
     contents.add(
       const Padding(
         padding: EdgeInsets.only(bottom: 60),

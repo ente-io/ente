@@ -8,12 +8,16 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/account_configured_event.dart';
+import 'package:photos/generated/l10n.dart';
 import 'package:photos/main.dart';
 import 'package:photos/models/account/Account.dart';
 import 'package:photos/models/api/user/key_attributes.dart';
 import 'package:photos/models/api/user/key_gen_result.dart';
 import 'package:photos/services/account/user_service.dart';
+import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/tabs/home_widget.dart';
+import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/network_util.dart';
 
 final Logger _logger = Logger('LoadingPage');
 
@@ -57,6 +61,13 @@ class _LoadingPageState extends State<LoadingPage> {
       return;
     }
 
+    // Check internet connectivity before attempting login
+    if (!await hasInternetConnectivity()) {
+      _logger.warning("No internet connectivity available for login");
+      await _showNoInternetDialog();
+      return;
+    }
+
     await Fluttertoast.showToast(msg: "Logging in...");
 
     try {
@@ -97,7 +108,8 @@ class _LoadingPageState extends State<LoadingPage> {
         _logger.info("Decryption succeeded");
       } catch (e, s) {
         _logger.info("Decryption failed", e, s);
-        rethrow;
+        await _showAuthenticationErrorDialog();
+        return;
       }
 
       if (!Configuration.instance.hasConfiguredAccount() || Configuration.instance.getToken() == null) {
@@ -116,6 +128,13 @@ class _LoadingPageState extends State<LoadingPage> {
   }
 
   Future<void> _attemptRegistration(Account account) async {
+    // Check internet connectivity before attempting registration
+    if (!await hasInternetConnectivity()) {
+      _logger.warning("No internet connectivity available for registration");
+      await _showNoInternetDialog();
+      return;
+    }
+
     try {
       _logger.info("Attempting fallback registration for ${account.username}");
       await Fluttertoast.showToast(msg: "Registering account...");
@@ -127,13 +146,13 @@ class _LoadingPageState extends State<LoadingPage> {
       if (response == null) {
         _logger.info("sendOttForAutomation (register) returned empty");
         await Fluttertoast.showToast(msg: "Registration failed");
-        await _handleAutomatedLoginFailure("Failed to retrieve token for registration");
+        await _showAuthenticationErrorDialog();
         return;
       }
       if (response["token"] == null) {
         _logger.info("sendOttForAutomation (register) returned null token");
         await Fluttertoast.showToast(msg: "Registration failed");
-        await _handleAutomatedLoginFailure("Failed to retrieve token for registration");
+        await _showAuthenticationErrorDialog();
         return;
       }
 
@@ -156,7 +175,8 @@ class _LoadingPageState extends State<LoadingPage> {
     } catch (e, s) {
       _logger.info("Automated registration failed", e, s);
       await Fluttertoast.showToast(msg: "Registration failed");
-      await _handleAutomatedLoginFailure("Automated registration failed");
+      await _showAuthenticationErrorDialog();
+      return;
     }
   }
 
@@ -239,6 +259,78 @@ class _LoadingPageState extends State<LoadingPage> {
         MaterialPageRoute(builder: (_) => const HomeWidget()),
         (_) => false,
       );
+    }
+  }
+
+  Future<void> _showNoInternetDialog() async {
+    _logger.warning("Showing no internet connectivity dialog");
+    
+    final choice = await showChoiceActionSheet(
+      context,
+      title: S.of(context).noInternetConnection,
+      body: S.of(context).noInternetConnectionContinueToLimitedGalleryOrExit,
+      firstButtonLabel: S.of(context).limitedGallery,
+      secondButtonLabel: S.of(context).exit,
+      firstButtonType: ButtonType.primary,
+      secondButtonType: ButtonType.text,
+      isDismissible: false,
+      firstButtonOnTap: () async {
+        // Clear all configuration and sensitive data
+        await Configuration.instance.logout(autoLogout: true);
+        // Open gallery app via method channel
+        try {
+          await _channel.invokeMethod('openGalleryApp');
+        } catch (e) {
+          _logger.warning("Failed to open gallery app: $e");
+        }
+      },
+      secondButtonOnTap: () async {
+        // Clear all configuration and sensitive data
+        await Configuration.instance.logout(autoLogout: true);
+        // Close the app completely via native method
+        await _channel.invokeMethod('destroyApp');
+      },
+    );
+    
+    // If dialog is dismissed somehow, still perform logout
+    if (choice == null) {
+      await Configuration.instance.logout(autoLogout: true);
+    }
+  }
+
+  Future<void> _showAuthenticationErrorDialog() async {
+    _logger.warning("Showing authentication error dialog");
+    
+    final choice = await showChoiceActionSheet(
+      context,
+      title: "Something went wrong",
+      body: "An error occurred during authentication. Would you like to continue to the limited gallery?",
+      firstButtonLabel: S.of(context).limitedGallery,
+      secondButtonLabel: S.of(context).exit,
+      firstButtonType: ButtonType.primary,
+      secondButtonType: ButtonType.text,
+      isDismissible: false,
+      firstButtonOnTap: () async {
+        // Clear all configuration and sensitive data
+        await Configuration.instance.logout(autoLogout: true);
+        // Open gallery app via method channel
+        try {
+          await _channel.invokeMethod('openGalleryApp');
+        } catch (e) {
+          _logger.warning("Failed to open gallery app: $e");
+        }
+      },
+      secondButtonOnTap: () async {
+        // Clear all configuration and sensitive data
+        await Configuration.instance.logout(autoLogout: true);
+        // Close the app completely via native method
+        await _channel.invokeMethod('destroyApp');
+      },
+    );
+    
+    // If dialog is dismissed somehow, still perform logout
+    if (choice == null) {
+      await Configuration.instance.logout(autoLogout: true);
     }
   }
 

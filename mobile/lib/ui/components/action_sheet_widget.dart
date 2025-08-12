@@ -87,7 +87,7 @@ class ActionSheetWidget extends StatelessWidget {
           child: ClipRRect(
             borderRadius: const BorderRadius.all(Radius.circular(8)),
             child: Container(
-              color: backgroundElevated2Dark,
+              color: dialogBackground,
               child: Padding(
                 padding: EdgeInsets.fromLTRB(
                   24,
@@ -160,7 +160,11 @@ class ContentContainerWidget extends StatelessWidget {
             : Text(
                 title!,
                 style: textTheme.largeBold
-                    .copyWith(color: textBaseDark), //constant color
+                    .copyWith(
+                      color: dialogTextColor,
+                      fontWeight: FontWeight.w700, // Bold
+                    ), //constant color
+                textAlign: TextAlign.center,
               ),
         title == null || bodyMissing
             ? const SizedBox.shrink()
@@ -173,7 +177,8 @@ class ContentContainerWidget extends StatelessWidget {
                     : Text(
                         body!,
                         style: textTheme.body
-                            .copyWith(color: textMutedDark), //constant color
+                            .copyWith(color: dialogTextColor), //constant color
+                        textAlign: TextAlign.center,
                       ))
             : Icon(
                 Icons.check_outlined,
@@ -189,7 +194,7 @@ class ContentContainerWidget extends StatelessWidget {
                 child: Text(
                   bodyHighlight!,
                   style: textTheme.body
-                      .copyWith(color: textBaseDark), //constant color
+                      .copyWith(color: dialogTextColor), //constant color
                 ),
               )
             : const SizedBox.shrink(),

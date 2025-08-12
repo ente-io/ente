@@ -16,3 +16,14 @@ Future<bool> canUseHighBandwidth() async {
       Configuration.instance.shouldBackupOverMobileData();
   return canUploadUnderCurrentNetworkConditions || canDownloadOverMobileData;
 }
+
+/// Check if there's internet connectivity available
+Future<bool> hasInternetConnectivity() async {
+  final List<ConnectivityResult> connections =
+      await (Connectivity().checkConnectivity());
+  
+  // Check if any connection type is available (wifi, mobile, ethernet, etc.)
+  return connections.isNotEmpty && 
+         connections.any((connection) => 
+           connection != ConnectivityResult.none,);
+}

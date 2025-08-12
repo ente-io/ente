@@ -41,8 +41,8 @@ class LoginActivity : AppCompatActivity() {
                     account = AccountModel(
                         servicePassword,
                         upToken,
-                        "$usernameRaw@matrix.unpluggedsystems.app",
-//                        "$usernameRaw",
+//                        "$usernameRaw@matrix.unpluggedsystems.app",
+                        usernameRaw,
                     )
                 }
 

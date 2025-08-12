@@ -8669,6 +8669,36 @@ class S {
     );
   }
 
+  /// `Please check your internet connection and try again.`
+  String get noInternetConnectionContinueToLimitedGalleryOrExit {
+    return Intl.message(
+      'No internet connection. Continue to limited gallery or exit?',
+      name: 'noInternetConnectionContinueToLimitedGalleryOrExit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please check your internet connection and try again.`
+  String get exit {
+    return Intl.message(
+      'Exit',
+      name: 'exit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Limited Gallery`
+  String get limitedGallery {
+    return Intl.message(
+      'Limited Gallery',
+      name: 'limitedGallery',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Sign out from other devices`
   String get signOutFromOtherDevices {
     return Intl.message(
