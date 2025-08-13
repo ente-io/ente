@@ -27,6 +27,10 @@ export const sidebar = [
                         link: "/photos/features/collect",
                     },
                     {
+                        text: "Custom domains",
+                        link: "/photos/features/custom-domains",
+                    },
+                    {
                         text: "Deduplicate",
                         link: "/photos/features/deduplicate",
                     },
