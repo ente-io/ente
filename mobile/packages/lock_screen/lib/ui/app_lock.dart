@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:ente_lock_screen/lock_screen_settings.dart';
+import "package:ente_lock_screen/lock_screen_settings.dart";
 import 'package:flutter/material.dart';
 
 /// A widget which handles app lifecycle events for showing and hiding a lock screen.

@@ -39,7 +39,7 @@ final lightThemeData = ThemeData(
     bodyLarge: const TextStyle(color: Colors.orange),
   ),
   cardColor: const Color.fromRGBO(250, 250, 250, 1.0),
-  dialogTheme: const DialogTheme().copyWith(
+  dialogTheme: const DialogThemeData().copyWith(
     backgroundColor: const Color.fromRGBO(250, 250, 250, 1.0), //
     titleTextStyle: const TextStyle(
       color: Colors.black,
@@ -143,7 +143,7 @@ final darkThemeData = ThemeData(
     elevation: 0,
   ),
   cardColor: const Color.fromRGBO(10, 15, 15, 1.0),
-  dialogTheme: const DialogTheme().copyWith(
+  dialogTheme: const DialogThemeData().copyWith(
     backgroundColor: const Color.fromRGBO(15, 15, 15, 1.0),
     titleTextStyle: const TextStyle(
       color: Colors.white,

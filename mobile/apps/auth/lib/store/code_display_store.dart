@@ -75,7 +75,7 @@ class CodeDisplayStore {
       builder: (BuildContext context) {
         return EditTagDialog(tag: tag);
       },
-      barrierColor: Colors.black.withOpacity(0.85),
+      barrierColor: Colors.black.withValues(alpha: 0.85),
       barrierDismissible: false,
     );
   }

@@ -26,7 +26,7 @@ dependencies:
   fluttertoast: ^8.1.1
   modal_bottom_sheet: ^3.0.0
   shared_preferences: ^2.5.3
-  window_manager: ^0.4.2
+  window_manager: ^0.5.0
 
 dev_dependencies:
   flutter_lints: ^5.0.0

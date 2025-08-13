@@ -96,8 +96,9 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
                   style: TextStyle(
                     decoration: TextDecoration.underline,
                     fontSize: 12,
-                    color:
-                        getEnteColorScheme(context).textBase.withOpacity(0.9),
+                    color: getEnteColorScheme(context)
+                        .textBase
+                        .withValues(alpha: 0.9),
                   ),
                 ),
               ),

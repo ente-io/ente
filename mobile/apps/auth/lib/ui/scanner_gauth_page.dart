@@ -6,7 +6,7 @@ import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/settings/data/import/google_auth_import.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:flutter/material.dart';
-import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
+import 'package:qr_code_scanner/qr_code_scanner.dart'; 
 
 class ScannerGoogleAuthPage extends StatefulWidget {
   const ScannerGoogleAuthPage({super.key});

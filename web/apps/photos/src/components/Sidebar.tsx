@@ -17,6 +17,7 @@ import {
     Skeleton,
     Stack,
     styled,
+    TextField,
     Tooltip,
     useColorScheme,
 } from "@mui/material";
@@ -38,6 +39,7 @@ import {
 import { SpacedRow } from "ente-base/components/containers";
 import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
+import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import {
     SidebarDrawer,
     TitledNestedSidebarDrawer,
@@ -49,8 +51,10 @@ import {
     type ModalVisibilityProps,
 } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
+import { isHTTPErrorWithStatus } from "ente-base/http";
 import {
     getLocaleInUse,
+    pt,
     setLocaleInUse,
     supportedLocales,
     ut,
@@ -88,6 +92,7 @@ import {
     isDevBuildAndUser,
     pullSettings,
     updateCFProxyDisabledPreference,
+    updateCustomDomain,
     updateMapEnabled,
 } from "ente-new/photos/services/settings";
 import {
@@ -110,6 +115,7 @@ import {
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { initiateEmail, openURL } from "ente-new/photos/utils/web";
 import { wait } from "ente-utils/promise";
+import { useFormik } from "formik";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, {
@@ -776,6 +782,8 @@ const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     onClose,
     onRootClose,
 }) => {
+    const { show: showDomainSettings, props: domainSettingsVisibilityProps } =
+        useModalVisibility();
     const { show: showMapSettings, props: mapSettingsVisibilityProps } =
         useModalVisibility();
     const {
@@ -816,6 +824,50 @@ const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                         />
                     </RowButtonGroup>
                 )}
+                {
+                    /* TODO: CD */ process.env.NEXT_PUBLIC_ENTE_WIP_CD && (
+                        <RowButton
+                            label={pt("Custom domains")}
+                            endIcon={
+                                <Stack
+                                    direction="row"
+                                    sx={{
+                                        alignSelf: "stretch",
+                                        alignItems: "center",
+                                    }}
+                                >
+                                    <Box
+                                        sx={{
+                                            width: "8px",
+                                            bgcolor: "stroke.faint",
+                                            alignSelf: "stretch",
+                                            mr: 0.5,
+                                        }}
+                                    />
+                                    <Box
+                                        sx={{
+                                            width: "8px",
+                                            bgcolor: "stroke.muted",
+                                            alignSelf: "stretch",
+                                            mr: 0.5,
+                                        }}
+                                    />
+                                    <Box
+                                        sx={{
+                                            width: "8px",
+                                            bgcolor: "stroke.base",
+                                            alignSelf: "stretch",
+                                            opacity: 0.3,
+                                            mr: 1.5,
+                                        }}
+                                    />
+                                    <ChevronRightIcon />
+                                </Stack>
+                            }
+                            onClick={showDomainSettings}
+                        />
+                    )
+                }
                 <RowButton
                     endIcon={<ChevronRightIcon />}
                     label={t("map")}
@@ -836,6 +888,10 @@ const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                     </RowButtonGroup>
                 )}
             </Stack>
+            <DomainSettings
+                {...domainSettingsVisibilityProps}
+                onRootClose={onRootClose}
+            />
             <MapSettings
                 {...mapSettingsVisibilityProps}
                 onRootClose={onRootClose}
@@ -953,6 +1009,152 @@ const ThemeSelector = () => {
         </Stack>
     );
 };
+
+const DomainSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
+    open,
+    onClose,
+    onRootClose,
+}) => {
+    const handleRootClose = () => {
+        onClose();
+        onRootClose();
+    };
+
+    return (
+        <TitledNestedSidebarDrawer
+            {...{ open, onClose }}
+            onRootClose={handleRootClose}
+            // TODO: CD: Translations
+            title={pt("Custom domains")}
+            // caption={pt("Your albums, your domain")}
+            caption="Use your own domain when sharing"
+        >
+            <DomainSettingsContents />
+        </TitledNestedSidebarDrawer>
+    );
+};
+
+// Separate component to reset state on back.
+const DomainSettingsContents: React.FC = () => {
+    const { customDomain, customDomainCNAME } = useSettingsSnapshot();
+
+    const formik = useFormik({
+        initialValues: { domain: customDomain ?? "" },
+        onSubmit: async (values, { setFieldError }) => {
+            const domain = values.domain;
+            const setValueFieldError = (message: string) =>
+                setFieldError("domain", message);
+
+            try {
+                await updateCustomDomain(domain);
+            } catch (e) {
+                log.error(`Failed to submit input ${domain}`, e);
+                if (isHTTPErrorWithStatus(e, 400)) {
+                    setValueFieldError(pt("Invalid domain"));
+                } else if (isHTTPErrorWithStatus(e, 409)) {
+                    setValueFieldError(pt("Domain already linked by a user"));
+                } else {
+                    setValueFieldError(t("generic_error"));
+                }
+            }
+        },
+    });
+
+    // TODO: CD: help
+
+    return (
+        <Stack sx={{ px: 2, py: "12px" }}>
+            <DomainItem title={pt("Link your domain")} ordinal={pt("1")}>
+                <form onSubmit={formik.handleSubmit}>
+                    <TextField
+                        name="domain"
+                        value={formik.values.domain}
+                        onChange={formik.handleChange}
+                        type={"text"}
+                        fullWidth
+                        autoFocus={true}
+                        margin="dense"
+                        disabled={formik.isSubmitting}
+                        error={!!formik.errors.domain}
+                        helperText={
+                            formik.errors.domain ??
+                            pt("Any domain or subdomain you own")
+                        }
+                        label={t("Domain")}
+                        placeholder={ut("photos.example.org")}
+                        sx={{ mb: 2 }}
+                    />
+                    <LoadingButton
+                        fullWidth
+                        type="submit"
+                        loading={formik.isSubmitting}
+                        color="accent"
+                    >
+                        {customDomain ? pt("Update") : pt("Save")}
+                    </LoadingButton>
+                </form>
+            </DomainItem>
+            <Divider sx={{ mt: 4, mb: 2, opacity: 0.5 }} />
+            <DomainItem title={pt("Add DNS entry")} ordinal={pt("2")}>
+                <Typography sx={{ color: "text.muted" }}>
+                    On your DNS provider, add a CNAME from your domain to{" "}
+                    <Typography
+                        component="span"
+                        sx={{ fontWeight: "bold", color: "text.base" }}
+                    >
+                        {customDomainCNAME}
+                    </Typography>
+                </Typography>
+            </DomainItem>
+            <Divider sx={{ mt: 5, mb: 2, opacity: 0.5 }} />
+            <DomainItem title={ut("🎉")} ordinal={pt("3")} isEmoji>
+                <Typography sx={{ color: "text.muted", mt: 2 }}>
+                    Within 1 hour, your public albums will be accessible via
+                    your domain!
+                </Typography>
+                <Typography sx={{ color: "text.muted", mt: 3 }}>
+                    For more information, see
+                    <Typography component="span" sx={{ color: "accent.main" }}>
+                        {" help "}
+                    </Typography>
+                </Typography>
+            </DomainItem>
+        </Stack>
+    );
+};
+
+interface DomainSectionProps {
+    title: string;
+    ordinal: string;
+    isEmoji?: boolean;
+}
+
+const DomainItem: React.FC<React.PropsWithChildren<DomainSectionProps>> = ({
+    title,
+    ordinal,
+    isEmoji,
+    children,
+}) => (
+    <Stack>
+        <Stack
+            direction="row"
+            sx={{ alignItems: "center", justifyContent: "space-between" }}
+        >
+            <Typography variant={isEmoji ? "h3" : "h6"}>{title}</Typography>
+            <Typography
+                variant="h1"
+                sx={{
+                    minWidth: "28px",
+                    textAlign: "center",
+                    color: "stroke.faint",
+                }}
+            >
+                {ordinal}
+            </Typography>
+        </Stack>
+        {children}
+    </Stack>
+);
 
 const MapSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     open,

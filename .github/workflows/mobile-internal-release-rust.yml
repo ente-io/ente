@@ -1,10 +1,10 @@
-name: "Internal release (photos)"
+name: "Internal release (photos with rust)"
 
 on:
     workflow_dispatch: # Allow manually running the action
 
 env:
-    FLUTTER_VERSION: "3.24.3"
+    FLUTTER_VERSION: "3.32.8"
     RUST_VERSION: "1.85.1"
 
 permissions:

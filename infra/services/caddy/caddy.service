@@ -1,0 +1,17 @@
+[Unit]
+Documentation=https://caddyserver.com/docs/running
+Requires=docker.service
+After=docker.service
+
+[Service]
+ExecStartPre=docker pull caddy
+ExecStartPre=-docker stop caddy
+ExecStartPre=-docker rm caddy
+ExecStart=docker run --name caddy \
+    --cap-add NET_ADMIN \
+    -p 80:80 -p 443:443 -p 443:443/udp \
+    -v /root/caddy/conf:/etc/caddy \
+    -v /root/caddy/data:/data \
+    -v /root/caddy/config:/config \
+    caddy
+ExecReload=docker exec -w /etc/caddy caddy caddy reload

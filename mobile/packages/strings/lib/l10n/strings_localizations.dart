@@ -102,13 +102,15 @@ import 'strings_localizations_zh.dart';
 /// property.
 abstract class StringsLocalizations {
   StringsLocalizations(String locale)
-      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
   static StringsLocalizations of(BuildContext context) {
     return Localizations.of<StringsLocalizations>(
-        context, StringsLocalizations)!;
+      context,
+      StringsLocalizations,
+    )!;
   }
 
   static const LocalizationsDelegate<StringsLocalizations> delegate =
@@ -126,11 +128,11 @@ abstract class StringsLocalizations {
   /// of delegates is preferred or required.
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
       <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
@@ -176,7 +178,7 @@ abstract class StringsLocalizations {
     Locale('vi'),
     Locale('zh'),
     Locale('zh', 'CN'),
-    Locale('zh', 'TW')
+    Locale('zh', 'TW'),
   ];
 
   /// Error message shown when the app cannot connect to Ente due to network host lookup failure
@@ -1303,53 +1305,54 @@ class _StringsLocalizationsDelegate
   @override
   Future<StringsLocalizations> load(Locale locale) {
     return SynchronousFuture<StringsLocalizations>(
-        lookupStringsLocalizations(locale));
+      lookupStringsLocalizations(locale),
+    );
   }
 
   @override
   bool isSupported(Locale locale) => <String>[
-        'ar',
-        'be',
-        'bg',
-        'ca',
-        'cs',
-        'da',
-        'de',
-        'el',
-        'en',
-        'es',
-        'et',
-        'fa',
-        'fi',
-        'fr',
-        'gu',
-        'he',
-        'hi',
-        'hu',
-        'id',
-        'it',
-        'ja',
-        'ka',
-        'km',
-        'ko',
-        'lt',
-        'lv',
-        'ml',
-        'nl',
-        'pl',
-        'pt',
-        'ro',
-        'ru',
-        'sk',
-        'sl',
-        'sr',
-        'sv',
-        'ti',
-        'tr',
-        'uk',
-        'vi',
-        'zh'
-      ].contains(locale.languageCode);
+    'ar',
+    'be',
+    'bg',
+    'ca',
+    'cs',
+    'da',
+    'de',
+    'el',
+    'en',
+    'es',
+    'et',
+    'fa',
+    'fi',
+    'fr',
+    'gu',
+    'he',
+    'hi',
+    'hu',
+    'id',
+    'it',
+    'ja',
+    'ka',
+    'km',
+    'ko',
+    'lt',
+    'lv',
+    'ml',
+    'nl',
+    'pl',
+    'pt',
+    'ro',
+    'ru',
+    'sk',
+    'sl',
+    'sr',
+    'sv',
+    'ti',
+    'tr',
+    'uk',
+    'vi',
+    'zh',
+  ].contains(locale.languageCode);
 
   @override
   bool shouldReload(_StringsLocalizationsDelegate old) => false;
@@ -1457,8 +1460,9 @@ StringsLocalizations lookupStringsLocalizations(Locale locale) {
   }
 
   throw FlutterError(
-      'StringsLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-      'an issue with the localizations generation tool. Please file an issue '
-      'on GitHub with a reproducible sample app and the gen-l10n configuration '
-      'that was used.');
+    'StringsLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.',
+  );
 }

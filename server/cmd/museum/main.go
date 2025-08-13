@@ -98,6 +98,7 @@ func main() {
 	}
 
 	viper.SetDefault("apps.public-albums", "https://albums.ente.io")
+	viper.SetDefault("apps.custom-domain.cname", "my.ente.io")
 	viper.SetDefault("apps.public-locker", "https://locker.ente.io")
 	viper.SetDefault("apps.accounts", "https://accounts.ente.io")
 	viper.SetDefault("apps.cast", "https://cast.ente.io")
@@ -213,7 +214,6 @@ func main() {
 	commonBillController := commonbilling.NewController(emailNotificationCtrl, storagBonusRepo, userRepo, usageRepo, billingRepo)
 	appStoreController := controller.NewAppStoreController(defaultPlan,
 		billingRepo, fileRepo, userRepo, commonBillController)
-	remoteStoreController := &remoteStoreCtrl.Controller{Repo: remoteStoreRepository}
 	playStoreController := controller.NewPlayStoreController(defaultPlan,
 		billingRepo, fileRepo, userRepo, storagBonusRepo, commonBillController)
 	stripeController := controller.NewStripeController(plans, stripeClients,
@@ -222,6 +222,8 @@ func main() {
 		appStoreController, playStoreController, stripeController,
 		discordController, emailNotificationCtrl,
 		billingRepo, userRepo, usageRepo, storagBonusRepo, commonBillController)
+	remoteStoreController := &remoteStoreCtrl.Controller{Repo: remoteStoreRepository, BillingCtrl: billingController}
+
 	pushController := controller.NewPushController(pushRepo, taskLockingRepo, hostName)
 	mailingListsController := controller.NewMailingListsController()
 
@@ -376,6 +378,7 @@ func main() {
 		Cache:                accessTokenCache,
 		BillingCtrl:          billingController,
 		DiscordController:    discordController,
+		RemoteStoreRepo:      remoteStoreRepository,
 	}
 	fileLinkMiddleware := &middleware.FileLinkMiddleware{
 		FileLinkRepo:      fileLinkRepo,
@@ -423,7 +426,7 @@ func main() {
 
 	publicCollectionAPI := server.Group("/public-collection")
 	publicCollectionAPI.Use(rateLimiter.GlobalRateLimiter(), collectionLinkMiddleware.Authenticate(urlSanitizer))
-	fileLinkApi := server.GET("/file-link")
+	fileLinkApi := server.Group("/file-link")
 	fileLinkApi.Use(rateLimiter.GlobalRateLimiter(), fileLinkMiddleware.Authenticate(urlSanitizer))
 
 	healthCheckHandler := &api.HealthCheckHandler{
@@ -788,8 +791,10 @@ func main() {
 	remoteStoreHandler := &api.RemoteStoreHandler{Controller: remoteStoreController}
 
 	privateAPI.POST("/remote-store/update", remoteStoreHandler.InsertOrUpdate)
+	privateAPI.DELETE("/remote-store/:key", remoteStoreHandler.RemoveKey)
 	privateAPI.GET("/remote-store", remoteStoreHandler.GetKey)
 	privateAPI.GET("/remote-store/feature-flags", remoteStoreHandler.GetFeatureFlags)
+	publicAPI.GET("/custom-domain", remoteStoreHandler.CheckDomain)
 
 	pushHandler := &api.PushHandler{PushController: pushController}
 	privateAPI.POST("/push/token", pushHandler.AddToken)

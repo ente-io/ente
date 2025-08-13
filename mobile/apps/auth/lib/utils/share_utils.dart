@@ -91,9 +91,11 @@ Future<ShareResult> shareText(
 }) async {
   try {
     final sharePosOrigin = _sharePosOrigin(context, key);
-    return Share.share(
-      text,
-      sharePositionOrigin: sharePosOrigin,
+    return SharePlus.instance.share(
+      ShareParams(
+        text: text,
+        sharePositionOrigin: sharePosOrigin,
+      ),
     );
   } catch (e, s) {
     Logger("ShareUtil").severe("failed to share text", e, s);
