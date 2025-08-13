@@ -9,6 +9,7 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/models/similar_files.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/collections_service.dart";
 import "package:photos/services/machine_learning/similar_images_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/common/loading_widget.dart";
@@ -707,7 +708,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         isCritical: true,
         firstButtonOnTap: () async {
           try {
-            await _deleteFilesLogic(filesToDelete);
+            await _deleteFilesLogic(filesToDelete, true);
           } catch (e, s) {
             _logger.severe("Failed to delete files", e, s);
             if (flagService.internalUser) {
@@ -717,20 +718,51 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         },
       );
     } else {
-      await _deleteFilesLogic(filesToDelete);
+      await _deleteFilesLogic(filesToDelete, true);
     }
   }
 
-  Future<void> _deleteFilesLogic(Set<EnteFile> filesToDelete) async {
-    _selectedFiles.unSelectAll(filesToDelete);
+  Future<void> _deleteFilesLogic(
+    Set<EnteFile> filesToDelete,
+    bool createSymlink,
+  ) async {
+    if (filesToDelete.isEmpty) {
+      return;
+    }
+    final Map<int, List<EnteFile>> collectionToFilesToAddMap = {};
+    final allDeleteFiles = <EnteFile>{};
     final groupsToRemove = <SimilarFiles>{};
-    for (final file in filesToDelete) {
-      for (final similarGroup in _similarFilesList) {
+    for (final similarGroup in _similarFilesList) {
+      final groupDeleteFiles = <EnteFile>{};
+      for (final file in filesToDelete) {
         if (similarGroup.containsFile(file)) {
           similarGroup.removeFile(file);
+          groupDeleteFiles.add(file);
+          allDeleteFiles.add(file);
           if (similarGroup.isEmpty) {
-            groupsToRemove.add(similarGroup);
+            break;
           }
+        }
+      }
+      if (similarGroup.files.length <= 1) {
+        groupsToRemove.add(similarGroup);
+      }
+      if (groupDeleteFiles.isNotEmpty) {
+        filesToDelete.removeAll(groupDeleteFiles);
+      }
+      if (!similarGroup.isEmpty && createSymlink) {
+        final filesToKeep = similarGroup.files;
+        final collectionIDs =
+            filesToKeep.map((file) => file.collectionID).toSet();
+        for (final deletedFile in groupDeleteFiles) {
+          final collectionID = deletedFile.collectionID;
+          if (collectionIDs.contains(collectionID) || collectionID == null) {
+            continue;
+          }
+          if (!collectionToFilesToAddMap.containsKey(collectionID)) {
+            collectionToFilesToAddMap[collectionID] = [];
+          }
+          collectionToFilesToAddMap[collectionID]!.addAll(filesToKeep);
         }
       }
     }
@@ -738,8 +770,18 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       _similarFilesList.remove(group);
     }
 
+    if (createSymlink) {
+      for (final collectionID in collectionToFilesToAddMap.keys) {
+        await CollectionsService.instance.addSilentlyToCollection(
+          collectionID,
+          collectionToFilesToAddMap[collectionID]!,
+        );
+      }
+    }
+
+    _selectedFiles.unSelectAll(allDeleteFiles);
     setState(() {});
-    await deleteFilesFromRemoteOnly(context, filesToDelete.toList());
+    await deleteFilesFromRemoteOnly(context, allDeleteFiles.toList());
   }
 
   Widget _getSmallSelectButton(bool unselectAll, void Function() onTap) {
