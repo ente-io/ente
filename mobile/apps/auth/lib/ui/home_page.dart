@@ -90,6 +90,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+
     _codeSortKey = PreferenceService.instance.codeSortKey();
     _textController.addListener(_applyFilteringAndRefresh);
     _loadCodes();

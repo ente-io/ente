@@ -991,18 +991,18 @@ packages:
     dependency: "direct main"
     description:
       name: local_auth_android
-      sha256: "5351c7eea8823de28e37d8b7b3e386d944b80f2a77edb91a5707fb97a41fc1b1"
+      sha256: "8bba79f4f0f7bc812fce2ca20915d15618c37721246ba6c3ef2aa7a763a90cf2"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.45"
+    version: "1.0.47"
   local_auth_darwin:
     dependency: "direct main"
     description:
       name: local_auth_darwin
-      sha256: "6d2950da311d26d492a89aeb247c72b4653ddc93601ea36a84924a396806d49c"
+      sha256: "630996cd7b7f28f5ab92432c4b35d055dd03a747bc319e5ffbb3c4806a3e50d2"
       url: "https://pub.dev"
     source: hosted
-    version: "1.4.1"
+    version: "1.4.3"
   local_auth_platform_interface:
     dependency: transitive
     description:
