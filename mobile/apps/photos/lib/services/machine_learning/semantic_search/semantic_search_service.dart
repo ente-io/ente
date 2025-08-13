@@ -1,6 +1,4 @@
 import "dart:async" show Timer, unawaited;
-import "dart:developer" as dev show log;
-import "dart:math" show min;
 import "dart:ui" show Image;
 
 import "package:flutter/foundation.dart";
@@ -149,11 +147,13 @@ class SemanticSearchService {
       },
     );
     final queryResults = similarityResults[query]!;
-    // print query for top ten scores
-    for (int i = 0; i < min(10, queryResults.length); i++) {
-      final result = queryResults[i];
-      dev.log("Query: $query, Score: ${result.score}, index $i");
-    }
+    // Uncomment if needed for debugging: print query for top ten scores
+    // if (kDebugMode) {
+    //   for (int i = 0; i < min(10, queryResults.length); i++) {
+    //     final result = queryResults[i];
+    //     dev.log("Query: $query, Score: ${result.score}, index $i");
+    //   }
+    // }
 
     final Map<int, double> fileIDToScoreMap = {};
     for (final result in queryResults) {
@@ -265,6 +265,13 @@ class SemanticSearchService {
     required Map<String, double> minimumSimilarityMap,
   }) async {
     final startTime = DateTime.now();
+    // Uncomment if needed for debugging: print query embeddings
+    // if (kDebugMode) {
+    //   for (final queryText in textQueryToEmbeddingMap.keys) {
+    //     final embedding = textQueryToEmbeddingMap[queryText]!;
+    //     dev.log("CLIPTEXT Query: $queryText, embedding: $embedding");
+    //   }
+    // }
     await _cacheClipVectors();
     final Map<String, List<QueryResult>> queryResults = await MLComputer
         .instance
