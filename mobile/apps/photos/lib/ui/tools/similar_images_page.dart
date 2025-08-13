@@ -800,18 +800,10 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       initialValue: _sortKey.index,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(24, 6, 24, 6),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            sortOptionText(_sortKey),
-            const Padding(padding: EdgeInsets.only(left: 4)),
-            Icon(
-              Icons.sort,
-              color: colorScheme.strokeBase,
-              size: 20,
-            ),
-          ],
+        child: Icon(
+          Icons.sort,
+          color: colorScheme.strokeBase,
+          size: 20,
         ),
       ),
       onSelected: (int index) {
