@@ -29,14 +29,14 @@ The custom domains feature requires the ability to publicly share albums which f
 
 The setup involves two steps:
 
-1. Letting Ente know about the domain you wish to use for serving your public links.
-2. Updating your DNS settings to point your domain (or subdomain) to **my.ente.io**.
+1. Letting Ente know about the domain you wish to use for serving your public links
+2. Updating your DNS settings to point your domain (or subdomain) to **my.ente.io**
 
-For people who are comfortable with changing DNS settings on their domain provider, this entire process is very simple and should be done in a few minutes. For people who are not comfortable with changing DNS, we will provide a more detailed breakdown below.
+For people who are comfortable with changing DNS settings on their domain provider, this entire process is very simple will take a minute. For people who are not comfortable with changing DNS, we will provide a more detailed breakdown below.
 
 Let's dive in.
 
-To make the process concrete, let's assume we're trying to use `pics.example.org` as our custom domain. Note that there is no restriction to use a subdomain, a top level domain can be used as a custom domain too. That is, either of `example.org` or `subdomain.example.org` is fine, Ente will work with both.
+To make the process concrete, let's assume we're trying to use _pics.example.org_ as our custom domain. Note that there is no restriction to use a subdomain, a top level domain can be used as a custom domain too. That is, either of _example.org_ or _subdomain.example.org_ is fine, Ente will work with both.
 
 ### Step 1 - Link your domain
 
@@ -52,13 +52,11 @@ Head over to Preferences > Custom domains, in the domain field enter "pics.examp
 
 The second step is to add a CNAME entry in your DNS provider that forwards requests for pics.example.org (replace with your subdomain) to **my.ente.io**.
 
-Specifically, you need to add a `CNAME record` from the domain (or subdomain) of your choice to `my.ente.io`. You can leave the TTL at its default.
+Specifically, you need to add a `CNAME record` from the domain (or subdomain) of your choice to `my.ente.io`. You can leave the `TTL` at its default.
 
-|---|---|
-| Record Type | CNAME |
-| Key | The subdomain you're using, e.g `pics` |
-| Value | `my.ente.io` |
-| TTL | Auto (or your provider's default) |
+| Record Type |            Name            |        Value | TTL            |
+| ----------- | :------------------------: | -----------: | -------------- |
+| CNAME       | Your subdomain, e.g `pics` | `my.ente.io` | Auto (default) |
 
 The exact steps for doing this depend on the DNS provider that you're using.
 
@@ -66,7 +64,15 @@ The exact steps for doing this depend on the DNS provider that you're using.
 
 As concrete examples, here is how this step would look for Cloudflare:
 
+![Adding a CNAME for custom domain in Cloudflare](cf.png)
+
 And here is how it would look for Namecheap:
+
+![Adding a CNAME for custom domain in Namecheap](nc.png)
+
+> [!NOTE]
+>
+> The examples are using "pics" as the subdomain, but that's just an example, you can use anything you like (or use "@" if you'd like to use the root domain itself).
 
 The time it takes for DNS records to update is dependent on your DNS provider. Usually the changes should start reflecting within a few minutes, and should almost always reflect within an hour.
 
@@ -86,6 +92,6 @@ Using is trivial. When you go to an album's sharing options and copy the link to
 
 To stop using your custom domain, we need to undo the two steps we did during setup.
 
-1. Unlink your domain in Ente. This can be done just by going to Preferences > Custom Domains, clearing the value in the Domain input and pressing Save.
+1. Unlink your domain in Ente. This can be done just by going to Preferences > Custom Domains, clearing the value in the "Domain" input and pressing "Update".
 
 2. Remove the CNAME record you added during setup in your DNS provider.
