@@ -18,7 +18,7 @@ dependencies:
     path: ../../packages/strings
   ente_ui:
     path: ../../packages/ui
-  file_saver: ^0.3.0
+  file_saver: 0.3.0
   flutter:
     sdk: flutter
   flutter_email_sender: ^7.0.0

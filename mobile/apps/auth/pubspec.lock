@@ -1144,10 +1144,11 @@ packages:
   move_to_background:
     dependency: "direct main"
     description:
-      name: move_to_background
-      sha256: "00caad17a6ce149910777131503f43f8ed80025681f94684e3a6a87d979b914c"
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: v2-only
+      resolved-ref: "0cdfeed654d79636eff0c57110f3f6ad5801ba2f"
+      url: "https://github.com/ente-io/move_to_background.git"
+    source: git
     version: "1.0.2"
   native_dio_adapter:
     dependency: "direct main"
@@ -1389,14 +1390,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
-  qr_code_scanner:
+  qr_code_scanner_plus:
     dependency: "direct main"
     description:
-      name: qr_code_scanner
-      sha256: f23b68d893505a424f0bd2e324ebea71ed88465d572d26bb8d2e78a4749591fd
+      name: qr_code_scanner_plus
+      sha256: "39696b50d277097ee4d90d4292de36f38c66213a4f5216a06b2bdd2b63117859"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.1"
+    version: "2.0.10+1"
   qr_flutter:
     dependency: "direct main"
     description:

@@ -91,7 +91,10 @@ dependencies:
   local_auth_darwin: ^1.2.2
   logging: ^1.0.1
   modal_bottom_sheet: ^3.0.0
-  move_to_background: ^1.0.2
+  move_to_background: # no updates in git, replace package
+    git:
+      url: https://github.com/ente-io/move_to_background.git
+      ref: v2-only
   native_dio_adapter: ^1.4.0
   otp: ^3.1.1
   package_info_plus: ^8.0.2
@@ -102,7 +105,7 @@ dependencies:
   pointycastle: ^3.7.3
   privacy_screen: ^0.0.6
   protobuf: ^4.1.0
-  qr_code_scanner: ^1.0.1
+  qr_code_scanner_plus: ^2.0.10+1
   qr_flutter: ^4.1.0 
   sentry: ^8.14.2
   sentry_flutter: ^8.14.2

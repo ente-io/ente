@@ -43,14 +43,14 @@ class PlatformUtil {
       if (Platform.isAndroid || Platform.isIOS) {
         await FileSaver.instance.saveAs(
           name: fileName,
-          fileExtension: extension,
+          ext: extension,
           bytes: bytes,
           mimeType: type,
         );
       } else {
         await FileSaver.instance.saveFile(
           name: fileName,
-          fileExtension: extension,
+          ext: extension,
           bytes: bytes,
           mimeType: type,
         );
