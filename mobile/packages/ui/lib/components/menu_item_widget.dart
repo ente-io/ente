@@ -31,6 +31,7 @@ class MenuItemWidget extends StatefulWidget {
   final double trailingExtraMargin;
   final FutureVoidCallback? onTap;
   final VoidCallback? onDoubleTap;
+  final VoidCallback? onLongPress;
   final Color? menuItemColor;
   final bool alignCaptionedTextToLeft;
 
@@ -74,6 +75,7 @@ class MenuItemWidget extends StatefulWidget {
     this.trailingExtraMargin = 0.0,
     this.onTap,
     this.onDoubleTap,
+    this.onLongPress,
     this.menuItemColor,
     this.alignCaptionedTextToLeft = false,
     this.singleBorderRadius = 4.0,
@@ -144,6 +146,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
         : GestureDetector(
             onTap: _onTap,
             onDoubleTap: widget.onDoubleTap,
+            onLongPress: widget.onLongPress,
             onTapDown: _onTapDown,
             onTapUp: _onTapUp,
             onTapCancel: _onCancel,
@@ -264,7 +267,9 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
   }
 
   bool hasPassedGestureCallbacks() {
-    return widget.onDoubleTap != null || widget.onTap != null;
+    return widget.onDoubleTap != null ||
+        widget.onTap != null ||
+        widget.onLongPress != null;
   }
 
   void _onTapUp(details) {
