@@ -45,7 +45,8 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
     invalidAttemptCount = _lockscreenSetting.getInvalidAttemptCount();
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      final Object? args = ModalRoute.of(context)?.settings.arguments;
+      final Map<String, dynamic>? args =
+          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
       _isManualPresentation = args?['manual'] as bool? ?? false;
       _suppressAutoPrompt = _isManualPresentation;
       if (!_isManualPresentation) {
