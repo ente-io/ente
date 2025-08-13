@@ -125,6 +125,8 @@ abstract class SuperIsolate {
       final answerPort = ReceivePort();
 
       _activeTasks++;
+      // TODO: remove it after we're done
+      logger.info("new activity ${operation.name}, activeTasks $_activeTasks");
       final taskID = newIsolateTaskID(operation.name);
       _mainSendPort.send([taskID, operation.index, args, answerPort.sendPort]);
 
@@ -148,6 +150,8 @@ abstract class SuperIsolate {
         }
       });
       _activeTasks--;
+      // TODO: remove it after we're done
+      logger.info("new activity ${operation.name}, activeTasks $_activeTasks");
 
       return completer.future;
     });
