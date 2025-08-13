@@ -127,6 +127,9 @@ class SimilarImagesService {
         for (final file in similarFilesList) {
           alreadyUsedFileIDs.add(file.uploadedFileID!);
         }
+        similarFilesList.sort((a, b) {
+          return a.displayName.length.compareTo(b.displayName.length);
+        });
         final similarFiles = SimilarFiles(
           similarFilesList,
           furthestDistance,
@@ -135,10 +138,6 @@ class SimilarImagesService {
       }
     }
     w?.log("going through files");
-
-    // Sort the similar files by total size in descending order
-    allSimilarFiles.sort((a, b) => b.totalSize.compareTo(a.totalSize));
-    w?.log("sort similar files");
 
     return allSimilarFiles;
   }
