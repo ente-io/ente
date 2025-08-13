@@ -11,8 +11,6 @@ import (
 	"github.com/lib/pq"
 )
 
-const BaseShareURL = "https://albums.ente.io/?t=%s"
-
 // CollectionLinkRepo defines the methods for inserting, updating and
 // retrieving entities related to public collections
 type CollectionLinkRepo struct {

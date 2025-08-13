@@ -2,12 +2,13 @@ PODS:
   - app_links (1.0.0):
     - FlutterMacOS
   - connectivity_plus (0.0.1):
-    - Flutter
     - FlutterMacOS
   - cupertino_http (0.0.1):
     - Flutter
     - FlutterMacOS
   - device_info_plus (0.0.1):
+    - FlutterMacOS
+  - file_picker (0.0.1):
     - FlutterMacOS
   - file_saver (0.0.1):
     - FlutterMacOS
@@ -18,7 +19,7 @@ PODS:
     - FlutterMacOS
   - flutter_local_notifications (0.0.1):
     - FlutterMacOS
-  - flutter_secure_storage_macos (6.1.1):
+  - flutter_secure_storage_macos (6.1.3):
     - FlutterMacOS
   - FlutterMacOS (1.0.0)
   - local_auth_darwin (0.0.1):
@@ -32,7 +33,7 @@ PODS:
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
-  - screen_retriever (0.0.1):
+  - screen_retriever_macos (0.0.1):
     - FlutterMacOS
   - Sentry/HybridSDK (8.46.0)
   - sentry_flutter (8.14.2):
@@ -46,39 +47,44 @@ PODS:
     - FlutterMacOS
   - sodium_libs (2.2.1):
     - FlutterMacOS
-  - sqflite (0.0.3):
+  - sqflite_darwin (0.0.4):
     - Flutter
     - FlutterMacOS
-  - "sqlite3 (3.46.1+1)":
-    - "sqlite3/common (= 3.46.1+1)"
-  - "sqlite3/common (3.46.1+1)"
-  - "sqlite3/dbstatvtab (3.46.1+1)":
+  - sqlite3 (3.50.1):
+    - sqlite3/common (= 3.50.1)
+  - sqlite3/common (3.50.1)
+  - sqlite3/dbstatvtab (3.50.1):
     - sqlite3/common
-  - "sqlite3/fts5 (3.46.1+1)":
+  - sqlite3/fts5 (3.50.1):
     - sqlite3/common
-  - "sqlite3/perf-threadsafe (3.46.1+1)":
+  - sqlite3/math (3.50.1):
     - sqlite3/common
-  - "sqlite3/rtree (3.46.1+1)":
+  - sqlite3/perf-threadsafe (3.50.1):
+    - sqlite3/common
+  - sqlite3/rtree (3.50.1):
     - sqlite3/common
   - sqlite3_flutter_libs (0.0.1):
+    - Flutter
     - FlutterMacOS
-    - "sqlite3 (~> 3.46.0+1)"
+    - sqlite3 (~> 3.50.1)
     - sqlite3/dbstatvtab
     - sqlite3/fts5
+    - sqlite3/math
     - sqlite3/perf-threadsafe
     - sqlite3/rtree
   - tray_manager (0.0.1):
     - FlutterMacOS
   - url_launcher_macos (0.0.1):
     - FlutterMacOS
-  - window_manager (0.2.0):
+  - window_manager (0.5.0):
     - FlutterMacOS
 
 DEPENDENCIES:
   - app_links (from `Flutter/ephemeral/.symlinks/plugins/app_links/macos`)
-  - connectivity_plus (from `Flutter/ephemeral/.symlinks/plugins/connectivity_plus/darwin`)
+  - connectivity_plus (from `Flutter/ephemeral/.symlinks/plugins/connectivity_plus/macos`)
   - cupertino_http (from `Flutter/ephemeral/.symlinks/plugins/cupertino_http/darwin`)
   - device_info_plus (from `Flutter/ephemeral/.symlinks/plugins/device_info_plus/macos`)
+  - file_picker (from `Flutter/ephemeral/.symlinks/plugins/file_picker/macos`)
   - file_saver (from `Flutter/ephemeral/.symlinks/plugins/file_saver/macos`)
   - flutter_inappwebview_macos (from `Flutter/ephemeral/.symlinks/plugins/flutter_inappwebview_macos/macos`)
   - flutter_local_authentication (from `Flutter/ephemeral/.symlinks/plugins/flutter_local_authentication/macos`)
@@ -89,13 +95,13 @@ DEPENDENCIES:
   - objective_c (from `Flutter/ephemeral/.symlinks/plugins/objective_c/macos`)
   - package_info_plus (from `Flutter/ephemeral/.symlinks/plugins/package_info_plus/macos`)
   - path_provider_foundation (from `Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin`)
-  - screen_retriever (from `Flutter/ephemeral/.symlinks/plugins/screen_retriever/macos`)
+  - screen_retriever_macos (from `Flutter/ephemeral/.symlinks/plugins/screen_retriever_macos/macos`)
   - sentry_flutter (from `Flutter/ephemeral/.symlinks/plugins/sentry_flutter/macos`)
   - share_plus (from `Flutter/ephemeral/.symlinks/plugins/share_plus/macos`)
   - shared_preferences_foundation (from `Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/darwin`)
   - sodium_libs (from `Flutter/ephemeral/.symlinks/plugins/sodium_libs/macos`)
-  - sqflite (from `Flutter/ephemeral/.symlinks/plugins/sqflite/darwin`)
-  - sqlite3_flutter_libs (from `Flutter/ephemeral/.symlinks/plugins/sqlite3_flutter_libs/macos`)
+  - sqflite_darwin (from `Flutter/ephemeral/.symlinks/plugins/sqflite_darwin/darwin`)
+  - sqlite3_flutter_libs (from `Flutter/ephemeral/.symlinks/plugins/sqlite3_flutter_libs/darwin`)
   - tray_manager (from `Flutter/ephemeral/.symlinks/plugins/tray_manager/macos`)
   - url_launcher_macos (from `Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos`)
   - window_manager (from `Flutter/ephemeral/.symlinks/plugins/window_manager/macos`)
@@ -110,11 +116,13 @@ EXTERNAL SOURCES:
   app_links:
     :path: Flutter/ephemeral/.symlinks/plugins/app_links/macos
   connectivity_plus:
-    :path: Flutter/ephemeral/.symlinks/plugins/connectivity_plus/darwin
+    :path: Flutter/ephemeral/.symlinks/plugins/connectivity_plus/macos
   cupertino_http:
     :path: Flutter/ephemeral/.symlinks/plugins/cupertino_http/darwin
   device_info_plus:
     :path: Flutter/ephemeral/.symlinks/plugins/device_info_plus/macos
+  file_picker:
+    :path: Flutter/ephemeral/.symlinks/plugins/file_picker/macos
   file_saver:
     :path: Flutter/ephemeral/.symlinks/plugins/file_saver/macos
   flutter_inappwebview_macos:
@@ -135,8 +143,8 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/package_info_plus/macos
   path_provider_foundation:
     :path: Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin
-  screen_retriever:
-    :path: Flutter/ephemeral/.symlinks/plugins/screen_retriever/macos
+  screen_retriever_macos:
+    :path: Flutter/ephemeral/.symlinks/plugins/screen_retriever_macos/macos
   sentry_flutter:
     :path: Flutter/ephemeral/.symlinks/plugins/sentry_flutter/macos
   share_plus:
@@ -145,10 +153,10 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/darwin
   sodium_libs:
     :path: Flutter/ephemeral/.symlinks/plugins/sodium_libs/macos
-  sqflite:
-    :path: Flutter/ephemeral/.symlinks/plugins/sqflite/darwin
+  sqflite_darwin:
+    :path: Flutter/ephemeral/.symlinks/plugins/sqflite_darwin/darwin
   sqlite3_flutter_libs:
-    :path: Flutter/ephemeral/.symlinks/plugins/sqlite3_flutter_libs/macos
+    :path: Flutter/ephemeral/.symlinks/plugins/sqlite3_flutter_libs/darwin
   tray_manager:
     :path: Flutter/ephemeral/.symlinks/plugins/tray_manager/macos
   url_launcher_macos:
@@ -157,33 +165,34 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/window_manager/macos
 
 SPEC CHECKSUMS:
-  app_links: 9028728e32c83a0831d9db8cf91c526d16cc5468
-  connectivity_plus: 3f6c9057f4cd64198dc826edfb0542892f825343
+  app_links: afe860c55c7ef176cea7fb630a2b7d7736de591d
+  connectivity_plus: 4adf20a405e25b42b9c9f87feff8f4b6fde18a4e
   cupertino_http: 94ac07f5ff090b8effa6c5e2c47871d48ab7c86c
   device_info_plus: b0fafc687fb901e2af612763340f1b0d4352f8e5
+  file_picker: 7584aae6fa07a041af2b36a2655122d42f578c1a
   file_saver: e35bd97de451dde55ff8c38862ed7ad0f3418d0f
   flutter_inappwebview_macos: c2d68649f9f8f1831bfcd98d73fd6256366d9d1d
   flutter_local_authentication: 2f9a2682f498abcc12d7e9729b5007a947170fdc
-  flutter_local_notifications: 453432cd6399a07d072885bc7828fb2307868856
-  flutter_secure_storage_macos: b2d62a774c23b060f0b99d0173b0b36abb4a8632
+  flutter_local_notifications: 13862b132e32eb858dea558a86d45d08daeacfe7
+  flutter_secure_storage_macos: 7f45e30f838cf2659862a4e4e3ee1c347c2b3b54
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
-  local_auth_darwin: 553ce4f9b16d3fdfeafce9cf042e7c9f77c1c391
+  local_auth_darwin: d2e8c53ef0c4f43c646462e3415432c4dab3ae19
   objective_c: ec13431e45ba099cb734eb2829a5c1cd37986cba
   OrderedSet: e539b66b644ff081c73a262d24ad552a69be3a94
-  package_info_plus: a8a591e70e87ce97ce5d21b2594f69cea9e0312f
+  package_info_plus: f0052d280d17aa382b932f399edf32507174e870
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
-  screen_retriever: 4f97c103641aab8ce183fa5af3b87029df167936
+  screen_retriever_macos: 452e51764a9e1cdb74b3c541238795849f21557f
   Sentry: da60d980b197a46db0b35ea12cb8f39af48d8854
   sentry_flutter: 27892878729f42701297c628eb90e7c6529f3684
-  share_plus: 11c7b7fa7020465584eca3ff6392c5bc1e399d6e
+  share_plus: 510bf0af1a42cd602274b4629920c9649c52f4cc
   shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
   sodium_libs: b9459e5bfc1185349f43472e79fc5d8e526b2bda
-  sqflite: c35dad70033b8862124f8337cc994a809fcd9fa3
-  sqlite3: 0bb0e6389d824e40296f531b858a2a0b71c0d2fb
-  sqlite3_flutter_libs: 03311aede9d32fb2d24e32bebb8cd01c3b2e6239
+  sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
+  sqlite3: 1d85290c3321153511f6e900ede7a1608718bbd5
+  sqlite3_flutter_libs: e7fc8c9ea2200ff3271f08f127842131746b70e2
   tray_manager: a104b5c81b578d83f3c3d0f40a997c8b10810166
   url_launcher_macos: 0fba8ddabfc33ce0a9afe7c5fef5aab3d8d2d673
-  window_manager: 1d01fa7ac65a6e6f83b965471b1a7fdd3f06166c
+  window_manager: b729e31d38fb04905235df9ea896128991cad99e
 
 PODFILE CHECKSUM: 6ff827273ace187339fc5d3684072a26ad85c298
 

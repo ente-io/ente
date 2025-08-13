@@ -345,7 +345,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                                     currentIndex: value,
                                     selectedColor: Colors.white,
                                     unselectedColor:
-                                        Colors.white.withOpacity(0.4),
+                                        Colors.white.withValues(alpha: 0.4),
                                     duration: duration,
                                     animationController: (controller) {
                                       _progressAnimationController = controller;

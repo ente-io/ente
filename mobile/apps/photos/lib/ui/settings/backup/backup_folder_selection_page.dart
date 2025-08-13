@@ -271,8 +271,11 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                   final t = dragAnimation.value;
                   final elevation = lerpDouble(0, 8, t)!;
                   final themeColor = Theme.of(context).colorScheme.onSurface;
-                  final color =
-                      Color.lerp(themeColor, themeColor.withOpacity(0.8), t);
+                  final color = Color.lerp(
+                    themeColor,
+                    themeColor.withValues(alpha: 0.8),
+                    t,
+                  );
                   return SizeFadeTransition(
                     sizeFraction: 0.7,
                     curve: Curves.easeInOut,
@@ -359,7 +362,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                                 : Theme.of(context)
                                     .colorScheme
                                     .onSurface
-                                    .withOpacity(0.7),
+                                    .withValues(alpha: 0.7),
                           ),
                           overflow: TextOverflow.ellipsis,
                           maxLines: 2,

@@ -1,7 +1,9 @@
 import "dart:io";
 
 import "package:ente_auth/l10n/l10n.dart";
+import "package:ente_auth/theme/colors.dart";
 import "package:ente_auth/theme/ente_theme.dart";
+import "package:ente_auth/theme/text_style.dart";
 import "package:ente_auth/ui/settings/lock_screen/custom_pin_keypad.dart";
 import "package:ente_auth/utils/lock_screen_settings.dart";
 import "package:flutter/material.dart";
@@ -89,7 +91,7 @@ class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
     );
   }
 
-  Widget _getBody(colorTheme, textTheme) {
+  Widget _getBody(EnteColorScheme colorTheme, EnteTextTheme textTheme) {
     return Center(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -107,10 +109,10 @@ class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
                     shape: BoxShape.circle,
                     gradient: LinearGradient(
                       colors: [
-                        Colors.grey.shade500.withOpacity(0.2),
-                        Colors.grey.shade50.withOpacity(0.1),
-                        Colors.grey.shade400.withOpacity(0.2),
-                        Colors.grey.shade300.withOpacity(0.4),
+                        Colors.grey.shade500.withValues(alpha: 0.2),
+                        Colors.grey.shade50.withValues(alpha: 0.1),
+                        Colors.grey.shade400.withValues(alpha: 0.2),
+                        Colors.grey.shade300.withValues(alpha: 0.4),
                       ],
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
