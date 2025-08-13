@@ -184,10 +184,13 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
   // only runs for android
   await _homeWidgetSync(true);
 
-  // await MLService.instance.init();
-  // await PersonService.init(entityService, MLDataDB.instance, prefs);
-  // await MLService.instance.runAllML(force: true);
-  await smartAlbumsService.syncSmartAlbums();
+  final isDeviceHealthy = await computeController.isDeviceHealthyFuture();
+  if (isDeviceHealthy) {
+    await MLService.instance.init();
+    await PersonService.init(entityService, MLDataDB.instance, prefs);
+    await MLService.instance.runAllML(force: true);
+    await smartAlbumsService.syncSmartAlbums();
+  }
 }
 
 Future<void> _init(bool isBackground, {String via = ''}) async {

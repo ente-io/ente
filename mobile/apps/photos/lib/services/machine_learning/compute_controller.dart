@@ -8,6 +8,7 @@ import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/compute_control_event.dart";
+import "package:photos/main.dart";
 import "package:thermal/thermal.dart";
 
 enum _ComputeRunState {
@@ -42,6 +43,13 @@ class ComputeController {
 
   ComputeController() {
     _logger.info('ComputeController constructor');
+
+    // we don't need listeners to be initialized in background
+    if (isProcessBg) {
+      _logger.info('init done ');
+      return;
+    }
+
     _startInteractionTimer(kDefaultInteractionTimeout);
     if (Platform.isIOS) {
       if (kDebugMode) {
@@ -71,6 +79,8 @@ class ComputeController {
   }
 
   bool requestCompute({bool ml = false, bool stream = false}) {
+    // TODO: Remove after testing
+    return false;
     _logger.info("Requesting compute: ml: $ml, stream: $stream");
     if (!_isDeviceHealthy || !_canRunGivenUserInteraction()) {
       _logger.info("Device not healthy or user interacting, denying request.");
@@ -173,6 +183,25 @@ class ComputeController {
   void _resetTimer() {
     _userInteractionTimer.cancel();
     _startInteractionTimer(kDefaultInteractionTimeout);
+  }
+
+  Future<bool> isDeviceHealthyFuture() async {
+    if (!isProcessBg) return isDeviceHealthy;
+
+    // Update Thermal status
+    _lastThermalStatus = await _thermal.thermalStatus;
+
+    // Update Battery info and device health
+    if (Platform.isIOS) {
+      _iosLastBatteryInfo = await BatteryInfoPlugin().iosBatteryInfo;
+      _isDeviceHealthy = _computeIsiOSDeviceHealthy();
+    } else {
+      _androidLastBatteryInfo = await BatteryInfoPlugin().androidBatteryInfo;
+      _isDeviceHealthy = _computeIsAndroidDeviceHealthy();
+    }
+
+    _logger.info("Device health status: $_isDeviceHealthy");
+    return _isDeviceHealthy;
   }
 
   void _onAndroidBatteryStateUpdate(AndroidBatteryInfo? batteryInfo) {

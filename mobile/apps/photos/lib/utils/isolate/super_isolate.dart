@@ -145,8 +145,14 @@ abstract class SuperIsolate {
           final exception = Exception(errorMessage);
           final stackTrace = StackTrace.fromString(errorStackTrace);
           completer.completeError(exception, stackTrace);
+          logger.warning(
+            "operation ${operation.name}, completed with warnings",
+            errorMessage,
+            errorStackTrace,
+          );
         } else {
           completer.complete(data);
+          logger.info("operation ${operation.name}, completed successfully");
         }
       });
       _activeTasks--;
