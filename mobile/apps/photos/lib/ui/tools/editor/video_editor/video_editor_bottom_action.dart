@@ -31,7 +31,7 @@ class VideoEditorBottomAction extends StatelessWidget {
             height: 48,
             width: 48,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.videoPlayerBackgroundColor,
+              color: Theme.of(context).colorScheme.editorBackgroundColor,
               shape: BoxShape.circle,
               border: Border.all(
                 color: isSelected

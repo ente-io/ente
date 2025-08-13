@@ -17,8 +17,9 @@ import (
 )
 
 const (
-	PublicAccessKey = "X-Public-Access-ID"
-	CastContext     = "X-Cast-Context"
+	PublicAccessKey   = "X-Public-Access-ID"
+	FileLinkAccessKey = "X-Public-FileLink-Access-ID"
+	CastContext       = "X-Cast-Context"
 )
 
 // GenerateRandomBytes returns securely generated random bytes.
@@ -120,6 +121,8 @@ func GetCastToken(c *gin.Context) string {
 	return token
 }
 
+// GetAccessTokenJWT fetches the JWT access token from the request header or query parameters.
+// This token is issued by server on password verification of links that are protected by password.
 func GetAccessTokenJWT(c *gin.Context) string {
 	token := c.GetHeader("X-Auth-Access-Token-JWT")
 	if token == "" {
@@ -130,6 +133,10 @@ func GetAccessTokenJWT(c *gin.Context) string {
 
 func MustGetPublicAccessContext(c *gin.Context) ente.PublicAccessContext {
 	return c.MustGet(PublicAccessKey).(ente.PublicAccessContext)
+}
+
+func MustGetFileLinkAccessContext(c *gin.Context) *ente.FileLinkAccessContext {
+	return c.MustGet(FileLinkAccessKey).(*ente.FileLinkAccessContext)
 }
 
 func GetCastCtx(c *gin.Context) cast.AuthContext {

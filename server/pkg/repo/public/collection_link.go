@@ -1,4 +1,4 @@
-package repo
+package public
 
 import (
 	"context"
@@ -11,31 +11,29 @@ import (
 	"github.com/lib/pq"
 )
 
-const BaseShareURL = "https://albums.ente.io/?t=%s"
-
-// PublicCollectionRepository defines the methods for inserting, updating and
+// CollectionLinkRepo defines the methods for inserting, updating and
 // retrieving entities related to public collections
-type PublicCollectionRepository struct {
+type CollectionLinkRepo struct {
 	DB        *sql.DB
 	albumHost string
 }
 
-// NewPublicCollectionRepository ..
-func NewPublicCollectionRepository(db *sql.DB, albumHost string) *PublicCollectionRepository {
+// NewCollectionLinkRepository ..
+func NewCollectionLinkRepository(db *sql.DB, albumHost string) *CollectionLinkRepo {
 	if albumHost == "" {
 		albumHost = "https://albums.ente.io"
 	}
-	return &PublicCollectionRepository{
+	return &CollectionLinkRepo{
 		DB:        db,
 		albumHost: albumHost,
 	}
 }
 
-func (pcr *PublicCollectionRepository) GetAlbumUrl(token string) string {
+func (pcr *CollectionLinkRepo) GetAlbumUrl(token string) string {
 	return fmt.Sprintf("%s/?t=%s", pcr.albumHost, token)
 }
 
-func (pcr *PublicCollectionRepository) Insert(ctx context.Context,
+func (pcr *CollectionLinkRepo) Insert(ctx context.Context,
 	cID int64, token string, validTill int64, deviceLimit int, enableCollect bool, enableJoin *bool) error {
 	// default value for enableJoin is true
 	join := true
@@ -51,7 +49,7 @@ func (pcr *PublicCollectionRepository) Insert(ctx context.Context,
 	return stacktrace.Propagate(err, "failed to insert")
 }
 
-func (pcr *PublicCollectionRepository) DisableSharing(ctx context.Context, cID int64) error {
+func (pcr *CollectionLinkRepo) DisableSharing(ctx context.Context, cID int64) error {
 	_, err := pcr.DB.ExecContext(ctx, `UPDATE public_collection_tokens SET is_disabled = true where 
                                                              collection_id = $1 and is_disabled = false`, cID)
 	return stacktrace.Propagate(err, "failed to disable sharing")
@@ -59,7 +57,7 @@ func (pcr *PublicCollectionRepository) DisableSharing(ctx context.Context, cID i
 
 // GetCollectionToActivePublicURLMap will return map of collectionID to PublicURLs which are not disabled yet.
 // Note: The url could be expired or deviceLimit is already reached
-func (pcr *PublicCollectionRepository) GetCollectionToActivePublicURLMap(ctx context.Context, collectionIDs []int64) (map[int64][]ente.PublicURL, error) {
+func (pcr *CollectionLinkRepo) GetCollectionToActivePublicURLMap(ctx context.Context, collectionIDs []int64) (map[int64][]ente.PublicURL, error) {
 	rows, err := pcr.DB.QueryContext(ctx, `SELECT collection_id, access_token, valid_till, device_limit, enable_download, enable_collect, enable_join, pw_nonce, mem_limit, ops_limit FROM 
                                                    public_collection_tokens WHERE collection_id = ANY($1) and is_disabled = FALSE`,
 		pq.Array(collectionIDs))
@@ -92,26 +90,26 @@ func (pcr *PublicCollectionRepository) GetCollectionToActivePublicURLMap(ctx con
 	return result, nil
 }
 
-// GetActivePublicCollectionToken will return ente.PublicCollectionToken for given collection ID
+// GetActiveCollectionLinkRow will return ente.CollectionLinkRow for given collection ID
 // Note: The token could be expired or deviceLimit is already reached
-func (pcr *PublicCollectionRepository) GetActivePublicCollectionToken(ctx context.Context, collectionID int64) (ente.PublicCollectionToken, error) {
+func (pcr *CollectionLinkRepo) GetActiveCollectionLinkRow(ctx context.Context, collectionID int64) (ente.CollectionLinkRow, error) {
 	row := pcr.DB.QueryRowContext(ctx, `SELECT id, collection_id, access_token, valid_till, device_limit, 
        is_disabled, pw_hash, pw_nonce, mem_limit, ops_limit, enable_download, enable_collect, enable_join FROM 
                                                    public_collection_tokens WHERE collection_id = $1 and is_disabled = FALSE`,
 		collectionID)
 
 	//defer rows.Close()
-	ret := ente.PublicCollectionToken{}
+	ret := ente.CollectionLinkRow{}
 	err := row.Scan(&ret.ID, &ret.CollectionID, &ret.Token, &ret.ValidTill, &ret.DeviceLimit,
 		&ret.IsDisabled, &ret.PassHash, &ret.Nonce, &ret.MemLimit, &ret.OpsLimit, &ret.EnableDownload, &ret.EnableCollect, &ret.EnableJoin)
 	if err != nil {
-		return ente.PublicCollectionToken{}, stacktrace.Propagate(err, "")
+		return ente.CollectionLinkRow{}, stacktrace.Propagate(err, "")
 	}
 	return ret, nil
 }
 
 // UpdatePublicCollectionToken will update the row for corresponding public collection token
-func (pcr *PublicCollectionRepository) UpdatePublicCollectionToken(ctx context.Context, pct ente.PublicCollectionToken) error {
+func (pcr *CollectionLinkRepo) UpdatePublicCollectionToken(ctx context.Context, pct ente.CollectionLinkRow) error {
 	_, err := pcr.DB.ExecContext(ctx, `UPDATE public_collection_tokens SET valid_till = $1, device_limit = $2, 
                                     pw_hash = $3, pw_nonce = $4, mem_limit = $5, ops_limit = $6, enable_download = $7, enable_collect = $8, enable_join = $9 
                                 where id = $10`,
@@ -119,7 +117,7 @@ func (pcr *PublicCollectionRepository) UpdatePublicCollectionToken(ctx context.C
 	return stacktrace.Propagate(err, "failed to update public collection token")
 }
 
-func (pcr *PublicCollectionRepository) RecordAbuseReport(ctx context.Context, accessCtx ente.PublicAccessContext,
+func (pcr *CollectionLinkRepo) RecordAbuseReport(ctx context.Context, accessCtx ente.PublicAccessContext,
 	url string, reason string, details ente.AbuseReportDetails) error {
 	_, err := pcr.DB.ExecContext(ctx, `INSERT INTO public_abuse_report 
     (share_id, ip, user_agent, url, reason, details) VALUES ($1, $2, $3, $4, $5, $6) 
@@ -128,7 +126,7 @@ func (pcr *PublicCollectionRepository) RecordAbuseReport(ctx context.Context, ac
 	return stacktrace.Propagate(err, "failed to record abuse report")
 }
 
-func (pcr *PublicCollectionRepository) GetAbuseReportCount(ctx context.Context, accessCtx ente.PublicAccessContext) (int64, error) {
+func (pcr *CollectionLinkRepo) GetAbuseReportCount(ctx context.Context, accessCtx ente.PublicAccessContext) (int64, error) {
 	row := pcr.DB.QueryRowContext(ctx, `SELECT count(*) FROM public_abuse_report WHERE share_id = $1`, accessCtx.ID)
 	var count int64 = 0
 	err := row.Scan(&count)
@@ -138,7 +136,7 @@ func (pcr *PublicCollectionRepository) GetAbuseReportCount(ctx context.Context, 
 	return count, nil
 }
 
-func (pcr *PublicCollectionRepository) GetUniqueAccessCount(ctx context.Context, shareId int64) (int64, error) {
+func (pcr *CollectionLinkRepo) GetUniqueAccessCount(ctx context.Context, shareId int64) (int64, error) {
 	row := pcr.DB.QueryRowContext(ctx, `SELECT count(*) FROM public_collection_access_history WHERE share_id = $1`, shareId)
 	var count int64 = 0
 	err := row.Scan(&count)
@@ -148,7 +146,7 @@ func (pcr *PublicCollectionRepository) GetUniqueAccessCount(ctx context.Context,
 	return count, nil
 }
 
-func (pcr *PublicCollectionRepository) RecordAccessHistory(ctx context.Context, shareID int64, ip string, ua string) error {
+func (pcr *CollectionLinkRepo) RecordAccessHistory(ctx context.Context, shareID int64, ip string, ua string) error {
 	_, err := pcr.DB.ExecContext(ctx, `INSERT INTO public_collection_access_history 
     (share_id, ip, user_agent) VALUES ($1, $2, $3) 
     ON CONFLICT ON CONSTRAINT unique_access_sid_ip_ua DO NOTHING;`,
@@ -157,7 +155,7 @@ func (pcr *PublicCollectionRepository) RecordAccessHistory(ctx context.Context, 
 }
 
 // AccessedInPast returns true if the given ip, ua agent combination has accessed the url in the past
-func (pcr *PublicCollectionRepository) AccessedInPast(ctx context.Context, shareID int64, ip string, ua string) (bool, error) {
+func (pcr *CollectionLinkRepo) AccessedInPast(ctx context.Context, shareID int64, ip string, ua string) (bool, error) {
 	row := pcr.DB.QueryRowContext(ctx, `select share_id from public_collection_access_history where share_id =$1 and ip = $2 and user_agent = $3`,
 		shareID, ip, ua)
 	var tempID int64
@@ -168,7 +166,7 @@ func (pcr *PublicCollectionRepository) AccessedInPast(ctx context.Context, share
 	return true, stacktrace.Propagate(err, "failed to record access history")
 }
 
-func (pcr *PublicCollectionRepository) GetCollectionSummaryByToken(ctx context.Context, accessToken string) (ente.PublicCollectionSummary, error) {
+func (pcr *CollectionLinkRepo) GetCollectionSummaryByToken(ctx context.Context, accessToken string) (ente.PublicCollectionSummary, error) {
 	row := pcr.DB.QueryRowContext(ctx,
 		`SELECT sct.id, sct.collection_id, sct.is_disabled, sct.valid_till, sct.device_limit, sct.pw_hash,
        sct.created_at, sct.updated_at, count(ah.share_id) 
@@ -185,7 +183,7 @@ func (pcr *PublicCollectionRepository) GetCollectionSummaryByToken(ctx context.C
 	return result, nil
 }
 
-func (pcr *PublicCollectionRepository) GetActivePublicTokenForUser(ctx context.Context, userID int64) ([]int64, error) {
+func (pcr *CollectionLinkRepo) GetActivePublicTokenForUser(ctx context.Context, userID int64) ([]int64, error) {
 	rows, err := pcr.DB.QueryContext(ctx, `select pt.collection_id from public_collection_tokens pt left join collections c on pt.collection_id = c.collection_id where pt.is_disabled = FALSE and c.owner_id= $1;`, userID)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
@@ -204,7 +202,7 @@ func (pcr *PublicCollectionRepository) GetActivePublicTokenForUser(ctx context.C
 }
 
 // CleanupAccessHistory public_collection_access_history where public_collection_tokens is disabled and the last updated time is older than 30 days
-func (pcr *PublicCollectionRepository) CleanupAccessHistory(ctx context.Context) error {
+func (pcr *CollectionLinkRepo) CleanupAccessHistory(ctx context.Context) error {
 	_, err := pcr.DB.ExecContext(ctx, `DELETE FROM public_collection_access_history WHERE share_id IN (SELECT id FROM public_collection_tokens WHERE is_disabled = TRUE AND updated_at < (now_utc_micro_seconds() - (24::BIGINT * 30 * 60 * 60 * 1000 * 1000)))`)
 	if err != nil {
 		return stacktrace.Propagate(err, "failed to clean up public collection access history")

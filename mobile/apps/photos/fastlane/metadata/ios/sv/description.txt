@@ -1,33 +1,33 @@
-Ente är en enkel app för att automatiskt säkerhetskopiera och organisera dina foton och videor.
+Ente är en smidig app för att automatiskt säkerhetskopiera och organisera dina foton och videor.
 
 Om du har letat efter ett integritetsvänligt alternativ för att bevara dina minnen, har du kommit rätt. Med Ente lagras de end-to-end-krypterat (e2ee). Det betyder att endast du kan se dem.
 
-We have apps across all platforms, and your photos will seamlessly sync between all your devices in an end-to-end encrypted (e2ee) manner.
+Vi har appar på alla plattformar och dina foton synkroniseras sömlöst mellan alla dina enheter via end-to-end-kryptering (e2ee).
 
-Ente also makes it simple to share your albums with your loved ones. You can either share them directly with other Ente users, end-to-end encrypted; or with publicly viewable links.
+Ente gör det också enkelt att dela dina album med dina nära och kära. Du kan antingen dela dem direkt med andra Ente användare (end-to-end-krypterade), eller med publikt synliga länkar.
 
-Your encrypted data is stored across multiple locations, including a fall-out shelter in Paris. We take posterity seriously and make it easy to ensure that your memories outlive you.
+Din krypterade data lagras på flera platser, inklusive ett skyddsrum i Paris. Vi tar eftervärlden på allvar och gör det enkelt att se till att dina minnen överlever dig.
 
-We are here to make the safest photos app ever, come join our journey!
+Vi är här för att skapa den säkraste foto-appen någonsin, kom och häng med på vår resa!
 
-FEATURES
-- Original quality backups, because every pixel is important
-- Family plans, so you can share storage with your family
-- Shared folders, in case you want your partner to enjoy your "Camera" clicks
-- Album links, that can be protected with a password and set to expire
-- Ability to free up space, by removing files that have been safely backed up
-- Image editor, to add finishing touches
-- Favorite, hide and relive your memories, for they are precious
-- One-click import from all major storage providers
-- Dark theme, because your photos look good in it
-- 2FA, 3FA, biometric auth
-- and a LOT more!
+FUNKTIONER
+- Säkerhetskopior av originalkvalitet, eftersom varje pixel är viktig
+- Familjeabonnemang, så att du kan dela lagring med din familj
+- Delade mappar, om du vill att din partner ska njuta av dina "Kamera-klick"
+- Albumlänkar, som kan skyddas med ett lösenord och automatiska förfallodatum
+- Möjlighet att frigöra utrymme, genom att ta bort filer som redan har säkerhetskopierats
+- Bildredigerare, för att lägga till en finishing touch
+- Favoritmarkera, göm, och återupplev dina värdefulla minnen
+- Import med ett klick från alla större lagringsleverantörer
+- Mörkt tema, eftersom dina bilder ser bra ut i det
+- 2FA, 3FA, biometrisk autentisering
+- och MYCKET mer!
 
-PRICING
-We don't offer forever free plans, because it is important to us that we remain sustainable and withstand the test of time. Instead we offer affordable plans that you can freely share with your family. You can find more information at ente.io.
+PRISER
+Vi erbjuder inte gratisabonnemang för alltid, eftersom det är viktigt för oss att vi förblir hållbara och tål tidens prövning. Istället erbjuder vi prisvärda abonnemang som du fritt kan dela med din familj. Mer information hittar du på ente.io.
 
 SUPPORT
-We take pride in offering human support. If you are our paid customer, you can reach out to team@ente.io and expect a response from our team within 24 hours.
+Vi är stolta över att erbjuda support med riktiga personer. Om du är en betalande kund, kan du nå ut till team@ente.io och förvänta dig ett svar från vårt team inom 24 timmar.
 
 VILLKOR
 https://ente.io/terms

@@ -40,13 +40,13 @@ func (w WebCommonJWTClaim) Valid() error {
 	return nil
 }
 
-// PublicAlbumPasswordClaim refer to token granted post public album password verification
-type PublicAlbumPasswordClaim struct {
+// LinkPasswordClaim refer to token granted post link password verification
+type LinkPasswordClaim struct {
 	PassHash   string `json:"passKey"`
 	ExpiryTime int64  `json:"expiryTime"`
 }
 
-func (c PublicAlbumPasswordClaim) Valid() error {
+func (c LinkPasswordClaim) Valid() error {
 	if c.ExpiryTime < time.Microseconds() {
 		return errors.New("token expired")
 	}

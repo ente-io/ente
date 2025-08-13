@@ -1,4 +1,3 @@
-import "package:fast_base58/fast_base58.dart";
 import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
@@ -45,10 +44,7 @@ class _EmptyAlbumStateNewState extends State<CollectPhotosBottomButtons> {
   }
 
   Future<void> _shareAlbumUrl() async {
-    final String collectionKey = Base58Encode(
-      CollectionsService.instance.getCollectionKey(widget.c.id),
-    );
-    final String url = "${widget.c.publicURLs.first.url}#$collectionKey";
+    final String url = CollectionsService.instance.getPublicUrl(widget.c);
     await shareAlbumLinkWithPlaceholder(
       context,
       widget.c,

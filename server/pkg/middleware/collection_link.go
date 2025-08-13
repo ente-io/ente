@@ -6,6 +6,15 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"net/http"
+	"net/url"
+	"strings"
+
+	"github.com/ente-io/museum/pkg/repo/remotestore"
+	"github.com/gin-contrib/requestid"
+	"github.com/spf13/viper"
+
+	public2 "github.com/ente-io/museum/pkg/controller/public"
+	"github.com/ente-io/museum/pkg/repo/public"
 
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/controller"
@@ -24,24 +33,25 @@ import (
 var passwordWhiteListedURLs = []string{"/public-collection/info", "/public-collection/report-abuse", "/public-collection/verify-password"}
 var whitelistedCollectionShareIDs = []int64{111}
 
-// AccessTokenMiddleware intercepts and authenticates incoming requests
-type AccessTokenMiddleware struct {
-	PublicCollectionRepo *repo.PublicCollectionRepository
-	PublicCollectionCtrl *controller.PublicCollectionController
+// CollectionLinkMiddleware intercepts and authenticates incoming requests
+type CollectionLinkMiddleware struct {
+	CollectionLinkRepo   *public.CollectionLinkRepo
+	PublicCollectionCtrl *public2.CollectionLinkController
 	CollectionRepo       *repo.CollectionRepository
 	Cache                *cache.Cache
 	BillingCtrl          *controller.BillingController
 	DiscordController    *discord.DiscordController
+	RemoteStoreRepo      *remotestore.Repository
 }
 
-// AccessTokenAuthMiddleware returns a middle ware that extracts the `X-Auth-Access-Token`
+// Authenticate returns a middle ware that extracts the `X-Auth-Access-Token`
 // within the header of a request and uses it to validate the access token and set the
 // ente.PublicAccessContext with auth.PublicAccessKey as key
-func (m *AccessTokenMiddleware) AccessTokenAuthMiddleware(urlSanitizer func(_ *gin.Context) string) gin.HandlerFunc {
+func (m *CollectionLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context) string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		accessToken := auth.GetAccessToken(c)
 		if accessToken == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing accessToken"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing accessToken", "context": "album_link"})
 			return
 		}
 		clientIP := network.GetClientIP(c)
@@ -52,7 +62,7 @@ func (m *AccessTokenMiddleware) AccessTokenAuthMiddleware(urlSanitizer func(_ *g
 		cacheKey := computeHashKeyForList([]string{accessToken, clientIP, userAgent}, ":")
 		cachedValue, cacheHit := m.Cache.Get(cacheKey)
 		if !cacheHit {
-			publicCollectionSummary, err = m.PublicCollectionRepo.GetCollectionSummaryByToken(c, accessToken)
+			publicCollectionSummary, err = m.CollectionLinkRepo.GetCollectionSummaryByToken(c, accessToken)
 			if err != nil {
 				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
 				return
@@ -62,7 +72,7 @@ func (m *AccessTokenMiddleware) AccessTokenAuthMiddleware(urlSanitizer func(_ *g
 				return
 			}
 			// validate if user still has active paid subscription
-			if err = m.validateOwnersSubscription(publicCollectionSummary.CollectionID); err != nil {
+			if err = m.validateOwnersSubscription(c, publicCollectionSummary.CollectionID); err != nil {
 				logrus.WithError(err).Warn("failed to verify active paid subscription")
 				c.AbortWithStatusJSON(http.StatusGone, gin.H{"error": "no active subscription"})
 				return
@@ -112,15 +122,20 @@ func (m *AccessTokenMiddleware) AccessTokenAuthMiddleware(urlSanitizer func(_ *g
 		c.Next()
 	}
 }
-func (m *AccessTokenMiddleware) validateOwnersSubscription(cID int64) error {
+func (m *CollectionLinkMiddleware) validateOwnersSubscription(c *gin.Context, cID int64) error {
 	userID, err := m.CollectionRepo.GetOwnerID(cID)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
-	return m.BillingCtrl.HasActiveSelfOrFamilySubscription(userID, false)
+	err = m.BillingCtrl.HasActiveSelfOrFamilySubscription(userID, false)
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to validate owners subscription")
+	}
+	m.validateOrigin(c, userID)
+	return nil
 }
 
-func (m *AccessTokenMiddleware) isDeviceLimitReached(ctx context.Context,
+func (m *CollectionLinkMiddleware) isDeviceLimitReached(ctx context.Context,
 	collectionSummary ente.PublicCollectionSummary, ip string, ua string) (bool, error) {
 	// skip deviceLimit check & record keeping for requests via CF worker
 	if network.IsCFWorkerIP(ip) {
@@ -128,7 +143,7 @@ func (m *AccessTokenMiddleware) isDeviceLimitReached(ctx context.Context,
 	}
 
 	sharedID := collectionSummary.ID
-	hasAccessedInPast, err := m.PublicCollectionRepo.AccessedInPast(ctx, sharedID, ip, ua)
+	hasAccessedInPast, err := m.CollectionLinkRepo.AccessedInPast(ctx, sharedID, ip, ua)
 	if err != nil {
 		return false, stacktrace.Propagate(err, "")
 	}
@@ -136,17 +151,17 @@ func (m *AccessTokenMiddleware) isDeviceLimitReached(ctx context.Context,
 	if hasAccessedInPast {
 		return false, nil
 	}
-	count, err := m.PublicCollectionRepo.GetUniqueAccessCount(ctx, sharedID)
+	count, err := m.CollectionLinkRepo.GetUniqueAccessCount(ctx, sharedID)
 	if err != nil {
 		return false, stacktrace.Propagate(err, "failed to get unique access count")
 	}
 
 	deviceLimit := int64(collectionSummary.DeviceLimit)
-	if deviceLimit == controller.DeviceLimitThreshold {
-		deviceLimit = controller.DeviceLimitThresholdMultiplier * controller.DeviceLimitThreshold
+	if deviceLimit == public2.DeviceLimitThreshold {
+		deviceLimit = public2.DeviceLimitThresholdMultiplier * public2.DeviceLimitThreshold
 	}
 
-	if count >= controller.DeviceLimitWarningThreshold {
+	if count >= public2.DeviceLimitWarningThreshold {
 		if !array.Int64InList(sharedID, whitelistedCollectionShareIDs) {
 			m.DiscordController.NotifyPotentialAbuse(
 				fmt.Sprintf("Album exceeds warning threshold: {CollectionID: %d, ShareID: %d}",
@@ -157,12 +172,12 @@ func (m *AccessTokenMiddleware) isDeviceLimitReached(ctx context.Context,
 	if deviceLimit > 0 && count >= deviceLimit {
 		return true, nil
 	}
-	err = m.PublicCollectionRepo.RecordAccessHistory(ctx, sharedID, ip, ua)
+	err = m.CollectionLinkRepo.RecordAccessHistory(ctx, sharedID, ip, ua)
 	return false, stacktrace.Propagate(err, "failed to record access history")
 }
 
 // validatePassword will verify if the user is provided correct password for the public album
-func (m *AccessTokenMiddleware) validatePassword(c *gin.Context, reqPath string,
+func (m *CollectionLinkMiddleware) validatePassword(c *gin.Context, reqPath string,
 	collectionSummary ente.PublicCollectionSummary) error {
 	if array.StringInList(reqPath, passwordWhiteListedURLs) {
 		return nil
@@ -172,6 +187,42 @@ func (m *AccessTokenMiddleware) validatePassword(c *gin.Context, reqPath string,
 		return ente.ErrAuthenticationRequired
 	}
 	return m.PublicCollectionCtrl.ValidateJWTToken(c, accessTokenJWT, *collectionSummary.PassHash)
+}
+
+func (m *CollectionLinkMiddleware) validateOrigin(c *gin.Context, ownerID int64) {
+	origin := c.Request.Header.Get("Origin")
+
+	if origin == "" || origin == viper.GetString("apps.public-albums") {
+		return
+	}
+	reqId := requestid.Get(c)
+	logger := logrus.WithFields(logrus.Fields{
+		"ownerID": ownerID,
+		"req_id":  reqId,
+		"origin":  origin,
+	})
+	alertMessage := fmt.Sprintf("custom domain check failed %s", reqId)
+	domain, err := m.RemoteStoreRepo.GetDomain(c, ownerID)
+	if err != nil {
+		logger.WithError(err).Error("failed to fetch custom domain for owner")
+		m.DiscordController.NotifyPotentialAbuse(alertMessage)
+		return
+	}
+	if domain == nil || *domain == "" {
+		logger.Warn("custom domain is nil or empty")
+		m.DiscordController.NotifyPotentialAbuse(alertMessage)
+		return
+	}
+	parse, err := url.Parse(origin)
+	if err != nil {
+		logger.WithError(err).Error("failed to parse origin URL")
+		m.DiscordController.NotifyPotentialAbuse(alertMessage + " - failed to parse origin URL")
+		return
+	}
+	if !strings.Contains(strings.ToLower(parse.Host), strings.ToLower(*domain)) {
+		logger.Warnf("custom domain check failed for owner %d, origin %s, domain %s", ownerID, origin, *domain)
+		m.DiscordController.NotifyPotentialAbuse(alertMessage)
+	}
 }
 
 func computeHashKeyForList(list []string, delim string) string {

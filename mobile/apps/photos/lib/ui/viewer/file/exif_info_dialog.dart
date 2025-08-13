@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
@@ -61,7 +60,7 @@ class ExifInfoDialog extends StatelessWidget {
           }
           return Container(
             padding: const EdgeInsets.all(2),
-            color: Colors.white.withOpacity(0.05),
+            color: Colors.white.withValues(alpha: 0.05),
             child: Center(
               child: Padding(
                 padding: const EdgeInsets.all(4),
@@ -76,7 +75,7 @@ class ExifInfoDialog extends StatelessWidget {
                     color: Theme.of(context)
                         .colorScheme
                         .onSurface
-                        .withOpacity(0.7),
+                        .withValues(alpha: 0.7),
                   ),
                 ),
               ),

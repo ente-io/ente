@@ -13,6 +13,8 @@ class RemoteFlags {
   final bool betaUser;
   final bool enableMobMultiPart;
   final String castUrl;
+  final String customDomain;
+  final String customDomainCNAME;
 
   RemoteFlags({
     required this.enableStripe,
@@ -24,8 +26,11 @@ class RemoteFlags {
     required this.betaUser,
     required this.enableMobMultiPart,
     required this.castUrl,
+    required this.customDomain,
+    required this.customDomainCNAME,
   });
 
+  // CopyWith
   RemoteFlags copyWith({
     bool? enableStripe,
     bool? disableCFWorker,
@@ -36,6 +41,8 @@ class RemoteFlags {
     bool? betaUser,
     bool? enableMobMultiPart,
     String? castUrl,
+    String? customDomain,
+    String? customDomainCNAME,
   }) {
     return RemoteFlags(
       enableStripe: enableStripe ?? this.enableStripe,
@@ -47,6 +54,8 @@ class RemoteFlags {
       betaUser: betaUser ?? this.betaUser,
       enableMobMultiPart: enableMobMultiPart ?? this.enableMobMultiPart,
       castUrl: castUrl ?? this.castUrl,
+      customDomain: customDomain ?? this.customDomain,
+      customDomainCNAME: customDomainCNAME ?? this.customDomainCNAME,
     );
   }
 
@@ -60,6 +69,8 @@ class RemoteFlags {
     betaUser: kDebugMode,
     enableMobMultiPart: false,
     castUrl: "https://cast.ente.io",
+    customDomain: "",
+    customDomainCNAME: "my.ente.io",
   );
 
   String toJson() => json.encode(toMap());
@@ -91,6 +102,9 @@ class RemoteFlags {
       enableMobMultiPart:
           map['enableMobMultiPart'] ?? defaultValue.enableMobMultiPart,
       castUrl: map['castUrl'] ?? defaultValue.castUrl,
+      customDomain: map['customDomain'] ?? defaultValue.customDomain,
+      customDomainCNAME:
+          map['customDomainCNAME'] ?? defaultValue.customDomainCNAME,
     );
   }
 }

@@ -5,6 +5,7 @@ import (
 	fileData "github.com/ente-io/museum/ente/filedata"
 	"github.com/ente-io/museum/pkg/controller/collections"
 	"github.com/ente-io/museum/pkg/controller/filedata"
+	"github.com/ente-io/museum/pkg/controller/public"
 	"net/http"
 	"strconv"
 
@@ -20,7 +21,7 @@ import (
 
 // PublicCollectionHandler exposes request handlers for publicly accessible collections
 type PublicCollectionHandler struct {
-	Controller             *controller.PublicCollectionController
+	Controller             *public.CollectionLinkController
 	FileCtrl               *controller.FileController
 	CollectionCtrl         *collections.CollectionController
 	FileDataCtrl           *filedata.Controller
