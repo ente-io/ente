@@ -42,7 +42,7 @@ class _LocalBackupSettingsPageState extends State<LocalBackupSettingsPage> {
       _backupPath = directoryPath;
     });
 
-    LocalBackupService.instance.triggerAutomaticBackup();   //whenever backup path is set, we trigger
+    await LocalBackupService.instance.triggerAutomaticBackup();   //whenever backup path is set, we trigger
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
           content: Text('Location updated and initial backup created!'),),
@@ -80,7 +80,7 @@ class _LocalBackupSettingsPageState extends State<LocalBackupSettingsPage> {
 
                     if (value == true) { //if toggle was on: trigger backup
                       if (_backupPath != null) {  //ensuring path was set
-                        LocalBackupService.instance.triggerAutomaticBackup();
+                       await LocalBackupService.instance.triggerAutomaticBackup();
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                               content: Text('Initial backup created!'),),
@@ -147,10 +147,10 @@ class _LocalBackupSettingsPageState extends State<LocalBackupSettingsPage> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.orange.withOpacity(0.1),
+                        color: Colors.orange.withAlpha(26),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: Colors.orange.withOpacity(0.3),
+                          color: Colors.orange.withAlpha(77),
                           width: 1,
                         ),
                       ),

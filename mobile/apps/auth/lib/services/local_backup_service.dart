@@ -32,7 +32,7 @@ class LocalBackupService {
 
       if (backupContent.trim().isEmpty) return;
 
-      final fileName = 'ente-auth-auto-backup.txt';
+      const fileName = 'ente-auth-auto-backup.txt';
       final filePath = '$backupPath/$fileName';
       final backupFile = File(filePath);
       await backupFile.writeAsString(backupContent);
