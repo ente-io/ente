@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/ente-io/museum/pkg/controller"
 	"github.com/spf13/viper"
 
 	"github.com/ente-io/museum/ente"
@@ -15,23 +16,39 @@ import (
 
 // Controller is interface for exposing business logic related to for remote store
 type Controller struct {
-	Repo *remotestore.Repository
+	Repo        *remotestore.Repository
+	BillingCtrl *controller.BillingController
 }
 
 // InsertOrUpdate the key's value
 func (c *Controller) InsertOrUpdate(ctx *gin.Context, request ente.UpdateKeyValueRequest) error {
-	if err := _validateRequest(request.Key, request.Value, false); err != nil {
+	userID := auth.GetUserID(ctx.Request.Header)
+	if err := c._validateRequest(userID, request.Key, request.Value, false); err != nil {
 		return err
 	}
+	if *request.Value == "" && ente.FlagKey(request.Key).CanRemove() {
+		return c.Repo.RemoveKey(ctx, userID, request.Key)
+	}
+	return c.Repo.InsertOrUpdate(ctx, userID, request.Key, *request.Value)
+}
+
+// RemoveKey removes the key from remote store
+func (c *Controller) RemoveKey(ctx *gin.Context, key string) error {
 	userID := auth.GetUserID(ctx.Request.Header)
-	return c.Repo.InsertOrUpdate(ctx, userID, request.Key, request.Value)
+	if valid := ente.IsValidFlagKey(key); !valid {
+		return stacktrace.Propagate(ente.NewBadRequestWithMessage(fmt.Sprintf("key %s is not allowed", key)), "invalid flag key")
+	}
+	if !ente.FlagKey(key).CanRemove() {
+		return stacktrace.Propagate(ente.NewBadRequestWithMessage(fmt.Sprintf("key %s is not removable", key)), "key not removable")
+	}
+	return c.Repo.RemoveKey(ctx, userID, key)
 }
 
 func (c *Controller) AdminInsertOrUpdate(ctx *gin.Context, request ente.AdminUpdateKeyValueRequest) error {
-	if err := _validateRequest(request.Key, request.Value, true); err != nil {
+	if err := c._validateRequest(request.UserID, request.Key, request.Value, true); err != nil {
 		return err
 	}
-	return c.Repo.InsertOrUpdate(ctx, request.UserID, request.Key, request.Value)
+	return c.Repo.InsertOrUpdate(ctx, request.UserID, request.Key, *request.Value)
 }
 
 func (c *Controller) Get(ctx *gin.Context, req ente.GetValueRequest) (*ente.GetValueResponse, error) {
@@ -61,12 +78,10 @@ func (c *Controller) GetFeatureFlags(ctx *gin.Context) (*ente.FeatureFlagRespons
 		// except internal user.rt
 		EnableMobMultiPart: true,
 		CastUrl:            viper.GetString("apps.cast"),
+		CustomDomainCNAME:  viper.GetString("apps.custom-domain.cname"),
 	}
 	for key, value := range values {
 		flag := ente.FlagKey(key)
-		if !flag.IsBoolType() {
-			continue
-		}
 		switch flag {
 		case ente.RecoveryKeyVerified:
 			response.RecoveryKeyVerified = value == "true"
@@ -80,21 +95,40 @@ func (c *Controller) GetFeatureFlags(ctx *gin.Context) (*ente.FeatureFlagRespons
 			response.InternalUser = value == "true"
 		case ente.IsBetaUser:
 			response.BetaUser = value == "true"
+		case ente.CustomDomain:
+			if value != "" {
+				response.CustomDomain = &value
+			}
 		}
 	}
 	return response, nil
 }
 
-func _validateRequest(key, value string, byAdmin bool) error {
+func (c *Controller) DomainOwner(ctx *gin.Context, domain string) (*int64, error) {
+	return c.Repo.DomainOwner(ctx, domain)
+}
+
+func (c *Controller) _validateRequest(userID int64, key string, valuePtr *string, byAdmin bool) error {
+	if !ente.IsValidFlagKey(key) {
+		return stacktrace.Propagate(ente.NewBadRequestWithMessage(fmt.Sprintf("key %s is not allowed", key)), "invalid flag key")
+	}
+	if valuePtr == nil {
+		return stacktrace.Propagate(ente.NewBadRequestWithMessage("value is missing"), "value is nil")
+	}
+	value := *valuePtr
 	flag := ente.FlagKey(key)
+	if err := flag.IsValidValue(value); err != nil {
+		return stacktrace.Propagate(err, "")
+	}
 	if !flag.UserEditable() && !byAdmin {
 		return stacktrace.Propagate(ente.NewBadRequestWithMessage(fmt.Sprintf("key %s is not user editable", key)), "key not user editable")
 	}
 	if byAdmin && !flag.IsAdminEditable() {
 		return stacktrace.Propagate(ente.NewBadRequestWithMessage(fmt.Sprintf("key %s is not admin editable", key)), "key not admin editable")
 	}
-	if flag.IsBoolType() && value != "true" && value != "false" {
-		return stacktrace.Propagate(ente.NewBadRequestWithMessage(fmt.Sprintf("value %s is not allowed", value)), "value not allowed")
+
+	if flag.NeedSubscription() {
+		return c.BillingCtrl.HasActiveSelfOrFamilySubscription(userID, true)
 	}
 	return nil
 }

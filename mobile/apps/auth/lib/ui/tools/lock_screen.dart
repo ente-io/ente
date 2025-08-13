@@ -96,10 +96,10 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
                           shape: BoxShape.circle,
                           gradient: LinearGradient(
                             colors: [
-                              Colors.grey.shade500.withOpacity(0.2),
-                              Colors.grey.shade50.withOpacity(0.1),
-                              Colors.grey.shade400.withOpacity(0.2),
-                              Colors.grey.shade300.withOpacity(0.4),
+                              Colors.grey.shade500.withValues(alpha: 0.2),
+                              Colors.grey.shade50.withValues(alpha: 0.1),
+                              Colors.grey.shade400.withValues(alpha: 0.2),
+                              Colors.grey.shade300.withValues(alpha: 0.4),
                             ],
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,

@@ -82,6 +82,7 @@ class _MapViewState extends State<MapView> {
                   }
                 : null,
             initialCenter: widget.center,
+            backgroundColor: const Color.fromARGB(255, 246, 246, 246),
             minZoom: widget.minZoom,
             maxZoom: widget.maxZoom,
             interactionOptions: InteractionOptions(
@@ -96,9 +97,7 @@ class _MapViewState extends State<MapView> {
               ),
             ),
             onPositionChanged: (position, hasGesture) {
-              if (position.bounds != null) {
-                onChange(position.bounds!);
-              }
+              onChange(position.visibleBounds);
             },
           ),
           children: [

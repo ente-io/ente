@@ -345,7 +345,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                 },
               ),
               mainEditor: CustomWidgetsMainEditor(
-                removeLayerArea: (key, rebuildStream) {
+                removeLayerArea: (key, __, rebuildStream) {
                   return ReactiveCustomWidget(
                     key: key,
                     builder: (context) {

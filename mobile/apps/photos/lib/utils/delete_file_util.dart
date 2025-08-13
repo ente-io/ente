@@ -605,7 +605,7 @@ Future<List<String>> deleteLocalFilesInBatches(
     builder: (context) {
       return dialog;
     },
-    barrierColor: Colors.black.withOpacity(0.85),
+    barrierColor: Colors.black.withValues(alpha: 0.85),
   );
   final batchSize = min(
     max(minimumBatchSize, (localIDs.length / minimumParts).round()),
