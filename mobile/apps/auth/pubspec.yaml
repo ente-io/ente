@@ -1,7 +1,7 @@
 
 name: ente_auth
 description: ente two-factor authenticator
-version: 4.4.3+443
+version: 4.4.6+446
 publish_to: none
 
 environment:
@@ -25,9 +25,27 @@ dependencies:
   dotted_border: ^3.1.0
   dropdown_button2: ^2.3.9
   email_validator: ^3.0.0
+  ente_accounts:
+    path: ../../packages/accounts
+  ente_base:
+    path: ../../packages/base
+  ente_configuration:
+    path: ../../packages/configuration
   ente_crypto_dart:
     git:
       url: https://github.com/ente-io/ente_crypto_dart.git
+  ente_events:
+    path: ../../packages/events 
+  ente_lock_screen:
+    path: ../../packages/lock_screen
+  ente_logging:
+    path: ../../packages/logging
+  ente_network:
+    path: ../../packages/network
+  ente_strings:
+    path: ../../packages/strings
+  ente_ui:
+    path: ../../packages/ui
   event_bus: ^2.0.0
   expandable: ^5.0.1
   expansion_tile_card: ^3.0.0
@@ -47,11 +65,7 @@ dependencies:
   flutter_email_sender: ^7.0.0
   # revert to pub.dev when merged
   # https://github.com/pichillilorenzo/flutter_inappwebview/pull/2548
-  flutter_inappwebview:
-    git:
-      url: https://github.com/pichillilorenzo/flutter_inappwebview.git
-      path: flutter_inappwebview
-      ref: 3e6c4c4a25340cd363af9d38891d88498b90be26
+  flutter_inappwebview: ^6.1.4
   flutter_launcher_icons: ^0.14.1
   flutter_local_authentication:
     git:
@@ -77,7 +91,10 @@ dependencies:
   local_auth_darwin: ^1.2.2
   logging: ^1.0.1
   modal_bottom_sheet: ^3.0.0
-  move_to_background: ^1.0.2
+  move_to_background: # no updates in git, replace package
+    git:
+      url: https://github.com/ente-io/move_to_background.git
+      ref: v2-only
   native_dio_adapter: ^1.4.0
   otp: ^3.1.1
   package_info_plus: ^8.0.2
@@ -88,7 +105,7 @@ dependencies:
   pointycastle: ^3.7.3
   privacy_screen: ^0.0.6
   protobuf: ^4.1.0
-  qr_code_scanner: ^1.0.1
+  qr_code_scanner_plus: ^2.0.10+1
   qr_flutter: ^4.1.0 
   sentry: ^8.14.2
   sentry_flutter: ^8.14.2

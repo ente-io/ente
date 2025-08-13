@@ -1,8 +1,6 @@
 import 'dart:io';
 
 import 'package:ente_auth/app/view/app.dart';
-import 'package:ente_auth/core/event_bus.dart';
-import 'package:ente_auth/core/logging/super_logging.dart';
 import 'package:ente_auth/events/icons_changed_event.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/locale.dart';
@@ -16,6 +14,8 @@ import 'package:ente_auth/ui/settings/common_settings.dart';
 import 'package:ente_auth/ui/settings/language_picker.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
+import 'package:ente_events/event_bus.dart';
+import 'package:ente_logging/logging.dart';
 import 'package:flutter/material.dart';
 
 class AdvancedSectionWidget extends StatefulWidget {

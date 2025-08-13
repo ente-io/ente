@@ -1,0 +1,90 @@
+{
+  "ok": "સારું",
+  "@ok": {
+    "description": "Generic OK button label"
+  },
+  "contactSupport": "સહાયતા માટે સંપર્ક કરો",
+  "@contactSupport": {
+    "description": "Contact support button label"
+  },
+  "cancel": "રદ કરો",
+  "@cancel": {
+    "description": "Cancel button label"
+  },
+  "reportABug": "બગની જાણ કરો",
+  "@reportABug": {
+    "description": "Label for reporting a bug"
+  },
+  "email": "ઇમેઇલ",
+  "@email": {
+    "description": "Email field label"
+  },
+  "pleaseWait": "કૃપા કરીને રાહ જુવો...",
+  "@pleaseWait": {
+    "description": "Please wait message"
+  },
+  "verifyPassword": "પાસવર્ડ ચકાસો",
+  "@verifyPassword": {
+    "description": "Verify password button label"
+  },
+  "incorrectPasswordTitle": "ખોટો પાસવર્ડ",
+  "@incorrectPasswordTitle": {
+    "description": "Title for incorrect password error"
+  },
+  "enterPassword": "પાસવર્ડ દાખલ કરો",
+  "@enterPassword": {
+    "description": "Enter password field label"
+  },
+  "delete": "કાઢી નાખો",
+  "@delete": {
+    "description": "Delete button label"
+  },
+  "welcomeBack": "ફરી તમારુ સ્વાગત છે!",
+  "@welcomeBack": {
+    "description": "Welcome back message"
+  },
+  "useRecoveryKey": "પુનઃપ્રાપ્તિ કીનો ઉપયોગ કરો",
+  "@useRecoveryKey": {
+    "description": "Use recovery key button label"
+  },
+  "changeEmail": "ઈ - મેઈલ બદલો",
+  "@changeEmail": {
+    "description": "Change email button label"
+  },
+  "generatingEncryptionKeysTitle": "એન્ક્રિપ્શન ચાવીઓ જનરેટ કરી રહ્યાં છીએ...",
+  "@generatingEncryptionKeysTitle": {
+    "description": "Generating encryption keys title"
+  },
+  "recoveryKey": "પુનઃપ્રાપ્તિ ચાવી",
+  "@recoveryKey": {
+    "description": "Recovery key label"
+  },
+  "loggingOut": "લૉગ આઉટ થઈ રહ્યું છે...",
+  "@loggingOut": {
+    "description": "Message shown while logging out"
+  },
+  "androidBiometricSuccess": "સફળતા",
+  "@androidBiometricSuccess": {
+    "description": "Message to let the user know that authentication was successful. It is used on Android side. Maximum 60 characters."
+  },
+  "androidCancelButton": "રદ કરો",
+  "@androidCancelButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on Android side. Maximum 30 characters."
+  },
+  "androidSignInTitle": "પ્રમાણીકરણ જરૂરી છે",
+  "@androidSignInTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user that they need to scan biometric to continue. It is used on Android side. Maximum 60 characters."
+  },
+  "goToSettings": "સેટિંગ માં જાઓ",
+  "@goToSettings": {
+    "description": "Message showed on a button that the user can click to go to settings pages from the current dialog. It is used on both Android and iOS side. Maximum 30 characters."
+  },
+  "iOSOkButton": "બરાબર",
+  "@iOSOkButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
+  },
+  "sessionExpired": "સત્ર સમાપ્ત થયુ",
+  "@sessionExpired": {
+    "description": "Error message when session has expired"
+  }
+}

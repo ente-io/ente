@@ -1,5 +1,5 @@
-import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/events/icons_changed_event.dart';
+import 'package:ente_events/event_bus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum CodeSortKey {

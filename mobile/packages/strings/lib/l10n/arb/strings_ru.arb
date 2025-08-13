@@ -1,0 +1,724 @@
+{
+  "networkHostLookUpErr": "Не удается подключиться к Ente, пожалуйста, проверьте настройки своей сети и обратитесь в службу поддержки, если ошибка повторится.",
+  "@networkHostLookUpErr": {
+    "description": "Error message shown when the app cannot connect to Ente due to network host lookup failure"
+  },
+  "networkConnectionRefusedErr": "Не удается подключиться к Ente, пожалуйста, повторите попытку через некоторое время. Если ошибка не устраняется, обратитесь в службу поддержки.",
+  "@networkConnectionRefusedErr": {
+    "description": "Error message shown when the app cannot connect to Ente due to connection refused"
+  },
+  "itLooksLikeSomethingWentWrongPleaseRetryAfterSome": "Похоже, что-то пошло не так. Пожалуйста, повторите попытку через некоторое время. Если ошибка повторится, обратитесь в нашу службу поддержки.",
+  "@itLooksLikeSomethingWentWrongPleaseRetryAfterSome": {
+    "description": "Generic error message for temporary issues"
+  },
+  "error": "Ошибка",
+  "@error": {
+    "description": "Generic error title"
+  },
+  "ok": "Ок",
+  "@ok": {
+    "description": "Generic OK button label"
+  },
+  "faq": "ЧаВо",
+  "@faq": {
+    "description": "FAQ link label"
+  },
+  "contactSupport": "Связаться с поддержкой",
+  "@contactSupport": {
+    "description": "Contact support button label"
+  },
+  "emailYourLogs": "Отправить свои журналы",
+  "@emailYourLogs": {
+    "description": "Title for emailing logs dialog"
+  },
+  "pleaseSendTheLogsTo": "Пожалуйста, отправьте журналы на \n{toEmail}",
+  "@pleaseSendTheLogsTo": {
+    "description": "Message asking user to send logs to email address",
+    "placeholders": {
+      "toEmail": {
+        "type": "String",
+        "description": "Email address to send logs to"
+      }
+    }
+  },
+  "copyEmailAddress": "Копировать адрес электронной почты",
+  "@copyEmailAddress": {
+    "description": "Button to copy email address to clipboard"
+  },
+  "exportLogs": "Экспорт журналов",
+  "@exportLogs": {
+    "description": "Button to export logs"
+  },
+  "cancel": "Отмена",
+  "@cancel": {
+    "description": "Cancel button label"
+  },
+  "reportABug": "Сообщить об ошибке",
+  "@reportABug": {
+    "description": "Label for reporting a bug"
+  },
+  "customEndpoint": "Подключено к {endpoint}",
+  "@customEndpoint": {
+    "description": "Text showing user is connected to a custom endpoint",
+    "placeholders": {
+      "endpoint": {
+        "type": "String",
+        "description": "URL of the custom endpoint"
+      }
+    }
+  },
+  "save": "Сохранить",
+  "@save": {
+    "description": "Label for save button"
+  },
+  "send": "Отправить",
+  "@send": {
+    "description": "Label for send button"
+  },
+  "saveOrSendDescription": "Вы хотите сохранить это в хранилище (папку загрузок по умолчанию) или отправить в другие приложения?",
+  "@saveOrSendDescription": {
+    "description": "Description text asking user if they want to save to storage or share with other apps"
+  },
+  "saveOnlyDescription": "Вы хотите сохранить это в хранилище (по умолчанию папка загрузок)?",
+  "@saveOnlyDescription": {
+    "description": "Description text asking user if they want to save to storage (for platforms that don't support sharing)"
+  },
+  "enterNewEmailHint": "Введите ваш новый адрес электронной почты",
+  "@enterNewEmailHint": {
+    "description": "Hint text for entering new email address"
+  },
+  "email": "Электронная почта",
+  "@email": {
+    "description": "Email field label"
+  },
+  "verify": "Подтвердить",
+  "@verify": {
+    "description": "Verify button label"
+  },
+  "invalidEmailTitle": "Неверный адрес электронной почты",
+  "@invalidEmailTitle": {
+    "description": "Title for invalid email error dialog"
+  },
+  "invalidEmailMessage": "Пожалуйста, введите действительный адрес электронной почты.",
+  "@invalidEmailMessage": {
+    "description": "Message for invalid email error dialog"
+  },
+  "pleaseWait": "Пожалуйста, подождите...",
+  "@pleaseWait": {
+    "description": "Please wait message"
+  },
+  "verifyPassword": "Подтверждение пароля",
+  "@verifyPassword": {
+    "description": "Verify password button label"
+  },
+  "incorrectPasswordTitle": "Неправильный пароль",
+  "@incorrectPasswordTitle": {
+    "description": "Title for incorrect password error"
+  },
+  "pleaseTryAgain": "Пожалуйста, попробуйте ещё раз",
+  "@pleaseTryAgain": {
+    "description": "Message asking user to try again"
+  },
+  "enterPassword": "Введите пароль",
+  "@enterPassword": {
+    "description": "Enter password field label"
+  },
+  "enterYourPasswordHint": "Введите пароль",
+  "@enterYourPasswordHint": {
+    "description": "Hint for password field"
+  },
+  "activeSessions": "Активные сеансы",
+  "@activeSessions": {
+    "description": "Title for active sessions page"
+  },
+  "oops": "Ой",
+  "@oops": {
+    "description": "Oops error title"
+  },
+  "somethingWentWrongPleaseTryAgain": "Что-то пошло не так. Попробуйте еще раз",
+  "@somethingWentWrongPleaseTryAgain": {
+    "description": "Generic error message"
+  },
+  "thisWillLogYouOutOfThisDevice": "Вы выйдете из этого устройства!",
+  "@thisWillLogYouOutOfThisDevice": {
+    "description": "Warning message for logging out of current device"
+  },
+  "thisWillLogYouOutOfTheFollowingDevice": "Вы выйдете из списка следующих устройств:",
+  "@thisWillLogYouOutOfTheFollowingDevice": {
+    "description": "Warning message for logging out of another device"
+  },
+  "terminateSession": "Завершить сеанс?",
+  "@terminateSession": {
+    "description": "Title for terminate session dialog"
+  },
+  "terminate": "Завершить",
+  "@terminate": {
+    "description": "Terminate button label"
+  },
+  "thisDevice": "Это устройство",
+  "@thisDevice": {
+    "description": "Label for current device"
+  },
+  "createAccount": "Создать аккаунт",
+  "@createAccount": {
+    "description": "Create account button label"
+  },
+  "weakStrength": "Слабый",
+  "@weakStrength": {
+    "description": "Weak password strength label"
+  },
+  "moderateStrength": "Средний",
+  "@moderateStrength": {
+    "description": "Moderate password strength label"
+  },
+  "strongStrength": "Сильный",
+  "@strongStrength": {
+    "description": "Strong password strength label"
+  },
+  "deleteAccount": "Удалить аккаунт",
+  "@deleteAccount": {
+    "description": "Delete account button label"
+  },
+  "deleteAccountQuery": "Нам будет жаль, если вы уйдете. Вы столкнулись с какой-то проблемой?",
+  "@deleteAccountQuery": {
+    "description": "Message asking user why they want to delete account"
+  },
+  "yesSendFeedbackAction": "Да, отправить отзыв",
+  "@yesSendFeedbackAction": {
+    "description": "Button to confirm sending feedback"
+  },
+  "noDeleteAccountAction": "Нет, удалить аккаунт",
+  "@noDeleteAccountAction": {
+    "description": "Button to proceed with account deletion"
+  },
+  "initiateAccountDeleteTitle": "Пожалуйста, авторизуйтесь, чтобы начать удаление аккаунта",
+  "@initiateAccountDeleteTitle": {
+    "description": "Title for authentication dialog before account deletion"
+  },
+  "confirmAccountDeleteTitle": "Подтвердить удаление аккаунта",
+  "@confirmAccountDeleteTitle": {
+    "description": "Title for account deletion confirmation dialog"
+  },
+  "confirmAccountDeleteMessage": "Эта учетная запись связана с другими приложениями Ente, если вы ими пользуетесь.\n\nЗагруженные вами данные во всех приложениях Ente будут запланированы к удалению, а ваша учетная запись будет удалена без возможности восстановления.",
+  "@confirmAccountDeleteMessage": {
+    "description": "Message warning about account deletion consequences"
+  },
+  "delete": "Удалить",
+  "@delete": {
+    "description": "Delete button label"
+  },
+  "createNewAccount": "Создать новый аккаунт",
+  "@createNewAccount": {
+    "description": "Create new account button label"
+  },
+  "password": "Пароль",
+  "@password": {
+    "description": "Password field label"
+  },
+  "confirmPassword": "Подтвердить пароль",
+  "@confirmPassword": {
+    "description": "Confirm password field label"
+  },
+  "passwordStrength": "Мощность пароля: {passwordStrengthValue}",
+  "@passwordStrength": {
+    "description": "Text to indicate the password strength",
+    "placeholders": {
+      "passwordStrengthValue": {
+        "description": "The strength of the password as a string",
+        "type": "String",
+        "example": "Weak or Moderate or Strong"
+      }
+    }
+  },
+  "hearUsWhereTitle": "Как вы узнали о Ente? (необязательно)",
+  "@hearUsWhereTitle": {
+    "description": "Title asking how user heard about Ente"
+  },
+  "hearUsExplanation": "Мы не отслеживаем установки приложений. Было бы полезно, если бы вы сказали, где нас нашли!",
+  "@hearUsExplanation": {
+    "description": "Explanation for asking how user heard about Ente"
+  },
+  "signUpTerms": "Я согласен с <u-terms>условиями предоставления услуг</u-terms> и <u-policy>политикой конфиденциальности</u-policy>",
+  "@signUpTerms": {
+    "description": "Terms agreement text for sign up"
+  },
+  "termsOfServicesTitle": "Условия использования",
+  "@termsOfServicesTitle": {
+    "description": "Terms of service title"
+  },
+  "privacyPolicyTitle": "Политика конфиденциальности",
+  "@privacyPolicyTitle": {
+    "description": "Privacy policy title"
+  },
+  "ackPasswordLostWarning": "Я понимаю, что если я потеряю свой пароль, я могу потерять свои данные, так как мои данные в <underline>сквозном шифровании</underline>.",
+  "@ackPasswordLostWarning": {
+    "description": "Warning about password loss"
+  },
+  "encryption": "Шифрование",
+  "@encryption": {
+    "description": "Encryption label"
+  },
+  "logInLabel": "Войти",
+  "@logInLabel": {
+    "description": "Log in button label"
+  },
+  "welcomeBack": "С возвращением!",
+  "@welcomeBack": {
+    "description": "Welcome back message"
+  },
+  "loginTerms": "Нажимая на логин, я принимаю <u-terms>условия использования</u-terms> и <u-policy>политику конфиденциальности</u-policy>",
+  "@loginTerms": {
+    "description": "Terms agreement text for login"
+  },
+  "noInternetConnection": "Нет подключения к Интернету",
+  "@noInternetConnection": {
+    "description": "No internet connection error message"
+  },
+  "pleaseCheckYourInternetConnectionAndTryAgain": "Проверьте подключение к Интернету и повторите попытку.",
+  "@pleaseCheckYourInternetConnectionAndTryAgain": {
+    "description": "Message asking user to check internet connection"
+  },
+  "verificationFailedPleaseTryAgain": "Проверка не удалась, попробуйте еще раз",
+  "@verificationFailedPleaseTryAgain": {
+    "description": "Verification failed error message"
+  },
+  "recreatePasswordTitle": "Пересоздать пароль",
+  "@recreatePasswordTitle": {
+    "description": "Title for recreate password dialog"
+  },
+  "recreatePasswordBody": "Текущее устройство недостаточно мощно для верификации пароля, но мы можем регенерировать так, как это работает со всеми устройствами.\n\nПожалуйста, войдите, используя ваш ключ восстановления и сгенерируйте ваш пароль (вы можете использовать тот же пароль, если пожелаете).",
+  "@recreatePasswordBody": {
+    "description": "Body text for recreate password dialog"
+  },
+  "useRecoveryKey": "Использовать ключ восстановления",
+  "@useRecoveryKey": {
+    "description": "Use recovery key button label"
+  },
+  "forgotPassword": "Забыл пароль",
+  "@forgotPassword": {
+    "description": "Forgot password link label"
+  },
+  "changeEmail": "Изменить адрес электронной почты",
+  "@changeEmail": {
+    "description": "Change email button label"
+  },
+  "verifyEmail": "Подтвердить адрес электронной почты",
+  "@verifyEmail": {
+    "description": "Verify email title"
+  },
+  "weHaveSendEmailTo": "Мы отправили письмо на <green>{email}</green>",
+  "@weHaveSendEmailTo": {
+    "description": "Text to indicate that we have sent a mail to the user",
+    "placeholders": {
+      "email": {
+        "description": "The email address of the user",
+        "type": "String",
+        "example": "example@ente.io"
+      }
+    }
+  },
+  "toResetVerifyEmail": "Подтвердите адрес электронной почты, чтобы сбросить пароль.",
+  "@toResetVerifyEmail": {
+    "description": "Message asking user to verify email before password reset"
+  },
+  "checkInboxAndSpamFolder": "Пожалуйста, проверьте свой почтовый ящик (и спам) для завершения верификации",
+  "@checkInboxAndSpamFolder": {
+    "description": "Message asking user to check inbox and spam folder"
+  },
+  "tapToEnterCode": "Нажмите, чтобы ввести код",
+  "@tapToEnterCode": {
+    "description": "Hint for entering verification code"
+  },
+  "sendEmail": "Отправить электронное письмо",
+  "resendEmail": "Отправить письмо еще раз",
+  "@resendEmail": {
+    "description": "Resend email button label"
+  },
+  "passKeyPendingVerification": "Верификация еще не завершена",
+  "@passKeyPendingVerification": {
+    "description": "Message when passkey verification is pending"
+  },
+  "loginSessionExpired": "Сессия недействительна",
+  "@loginSessionExpired": {
+    "description": "Login session expired title"
+  },
+  "loginSessionExpiredDetails": "Сессия истекла. Войдите снова.",
+  "@loginSessionExpiredDetails": {
+    "description": "Login session expired details"
+  },
+  "passkeyAuthTitle": "Проверка с помощью ключа доступа",
+  "@passkeyAuthTitle": {
+    "description": "Passkey authentication title"
+  },
+  "waitingForVerification": "Ожидание подтверждения...",
+  "@waitingForVerification": {
+    "description": "Waiting for verification message"
+  },
+  "tryAgain": "Попробовать снова",
+  "@tryAgain": {
+    "description": "Try again button label"
+  },
+  "checkStatus": "Проверить статус",
+  "@checkStatus": {
+    "description": "Check status button label"
+  },
+  "loginWithTOTP": "Войти с помощью TOTP",
+  "@loginWithTOTP": {
+    "description": "Login with TOTP button label"
+  },
+  "recoverAccount": "Восстановить аккаунт",
+  "@recoverAccount": {
+    "description": "Recover account button label"
+  },
+  "setPasswordTitle": "Поставить пароль",
+  "@setPasswordTitle": {
+    "description": "Set password title"
+  },
+  "changePasswordTitle": "Изменить пароль",
+  "@changePasswordTitle": {
+    "description": "Change password title"
+  },
+  "resetPasswordTitle": "Сбросить пароль",
+  "@resetPasswordTitle": {
+    "description": "Reset password title"
+  },
+  "encryptionKeys": "Ключи шифрования",
+  "@encryptionKeys": {
+    "description": "Encryption keys title"
+  },
+  "enterPasswordToEncrypt": "Введите пароль, который мы можем использовать для шифрования ваших данных",
+  "@enterPasswordToEncrypt": {
+    "description": "Prompt to enter password for encryption"
+  },
+  "enterNewPasswordToEncrypt": "Введите новый пароль, который мы можем использовать для шифрования ваших данных",
+  "@enterNewPasswordToEncrypt": {
+    "description": "Prompt to enter new password for encryption"
+  },
+  "passwordWarning": "Мы не храним этот пароль, поэтому если вы забудете его, <underline>мы не сможем расшифровать ваши данные</underline>",
+  "@passwordWarning": {
+    "description": "Warning about password storage"
+  },
+  "howItWorks": "Как это работает",
+  "@howItWorks": {
+    "description": "How it works button label"
+  },
+  "generatingEncryptionKeys": "Генерируем ключи шифрования...",
+  "@generatingEncryptionKeys": {
+    "description": "Generating encryption keys message"
+  },
+  "passwordChangedSuccessfully": "Пароль успешно изменён",
+  "@passwordChangedSuccessfully": {
+    "description": "Password changed successfully message"
+  },
+  "signOutFromOtherDevices": "Выйти из других устройств",
+  "@signOutFromOtherDevices": {
+    "description": "Sign out from other devices title"
+  },
+  "signOutOtherBody": "Если вы думаете, что кто-то может знать ваш пароль, вы можете принудительно выйти из всех устройств.",
+  "@signOutOtherBody": {
+    "description": "Sign out other devices explanation"
+  },
+  "signOutOtherDevices": "Выйти из других устройств",
+  "@signOutOtherDevices": {
+    "description": "Sign out other devices button label"
+  },
+  "doNotSignOut": "Не выходить",
+  "@doNotSignOut": {
+    "description": "Do not sign out button label"
+  },
+  "generatingEncryptionKeysTitle": "Генерируем ключи шифрования...",
+  "@generatingEncryptionKeysTitle": {
+    "description": "Generating encryption keys title"
+  },
+  "continueLabel": "Далее",
+  "@continueLabel": {
+    "description": "Continue button label"
+  },
+  "insecureDevice": "Небезопасное устройство",
+  "@insecureDevice": {
+    "description": "Insecure device warning title"
+  },
+  "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": "К сожалению, мы не смогли сгенерировать безопасные ключи на этом устройстве.\n\nПожалуйста, зарегистрируйтесь с другого устройства.",
+  "@sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": {
+    "description": "Error message for insecure device"
+  },
+  "recoveryKeyCopiedToClipboard": "Ключ восстановления скопирован в буфер обмена",
+  "@recoveryKeyCopiedToClipboard": {
+    "description": "Recovery key copied message"
+  },
+  "recoveryKey": "Ключ восстановления",
+  "@recoveryKey": {
+    "description": "Recovery key label"
+  },
+  "recoveryKeyOnForgotPassword": "Если вы забыли свой пароль, то восстановить данные можно только с помощью этого ключа.",
+  "@recoveryKeyOnForgotPassword": {
+    "description": "Recovery key importance explanation"
+  },
+  "recoveryKeySaveDescription": "Мы не храним этот ключ, пожалуйста, сохраните этот ключ в безопасном месте.",
+  "@recoveryKeySaveDescription": {
+    "description": "Recovery key save description"
+  },
+  "doThisLater": "Сделать позже",
+  "@doThisLater": {
+    "description": "Do this later button label"
+  },
+  "saveKey": "Сохранить ключ",
+  "@saveKey": {
+    "description": "Save key button label"
+  },
+  "recoveryKeySaved": "Ключ восстановления сохранён в папке Загрузки!",
+  "@recoveryKeySaved": {
+    "description": "Recovery key saved confirmation message"
+  },
+  "noRecoveryKeyTitle": "Нет ключа восстановления?",
+  "@noRecoveryKeyTitle": {
+    "description": "No recovery key title"
+  },
+  "twoFactorAuthTitle": "Двухфакторная аутентификация",
+  "@twoFactorAuthTitle": {
+    "description": "Two-factor authentication title"
+  },
+  "enterCodeHint": "Введите 6-значный код из\nвашего приложения-аутентификатора",
+  "@enterCodeHint": {
+    "description": "Hint for entering 2FA code"
+  },
+  "lostDeviceTitle": "Потеряно устройство?",
+  "@lostDeviceTitle": {
+    "description": "Lost device title"
+  },
+  "enterRecoveryKeyHint": "Введите ключ восстановления",
+  "@enterRecoveryKeyHint": {
+    "description": "Hint for entering recovery key"
+  },
+  "recover": "Восстановить",
+  "@recover": {
+    "description": "Recover button label"
+  },
+  "loggingOut": "Выходим...",
+  "@loggingOut": {
+    "description": "Message shown while logging out"
+  },
+  "immediately": "Немедленно",
+  "@immediately": {
+    "description": "Immediately option for auto lock timing"
+  },
+  "appLock": "Блокировка приложения",
+  "@appLock": {
+    "description": "App lock setting title"
+  },
+  "autoLock": "Автоблокировка",
+  "@autoLock": {
+    "description": "Auto lock setting title"
+  },
+  "noSystemLockFound": "Системная блокировка не найдена",
+  "@noSystemLockFound": {
+    "description": "Error when no system lock is found"
+  },
+  "deviceLockEnablePreSteps": "Чтобы включить блокировку устройства, пожалуйста, настройте пароль или блокировку экрана в настройках системы.",
+  "@deviceLockEnablePreSteps": {
+    "description": "Instructions for enabling device lock"
+  },
+  "appLockDescription": "Выберите между экраном блокировки вашего устройства и пользовательским экраном блокировки с PIN-кодом или паролем.",
+  "@appLockDescription": {
+    "description": "Description of app lock feature"
+  },
+  "deviceLock": "Блокировка устройства",
+  "@deviceLock": {
+    "description": "Device lock option title"
+  },
+  "pinLock": "Pin блокировка",
+  "@pinLock": {
+    "description": "PIN lock option title"
+  },
+  "autoLockFeatureDescription": "Время в фоне, после которого приложение блокируется",
+  "@autoLockFeatureDescription": {
+    "description": "Description of auto lock feature"
+  },
+  "hideContent": "Скрыть содержимое",
+  "@hideContent": {
+    "description": "Hide content setting title"
+  },
+  "hideContentDescriptionAndroid": "Скрывает содержимое приложения в переключателе приложений и отключает скриншоты",
+  "@hideContentDescriptionAndroid": {
+    "description": "Description of hide content feature on Android"
+  },
+  "hideContentDescriptioniOS": "Скрывает содержимое приложения в переключателе приложений",
+  "@hideContentDescriptioniOS": {
+    "description": "Description of hide content feature on iOS"
+  },
+  "tooManyIncorrectAttempts": "Слишком много неудачных попыток",
+  "@tooManyIncorrectAttempts": {
+    "description": "Message shown when too many incorrect attempts are made"
+  },
+  "tapToUnlock": "Нажмите для разблокировки",
+  "@tapToUnlock": {
+    "description": "Message prompting user to tap to unlock"
+  },
+  "areYouSureYouWantToLogout": "Вы уверены, что хотите выйти?",
+  "@areYouSureYouWantToLogout": {
+    "description": "Confirmation message before logout"
+  },
+  "yesLogout": "Да, выйти",
+  "@yesLogout": {
+    "description": "Confirmation button for logout"
+  },
+  "authToViewSecrets": "Пожалуйста, авторизуйтесь для просмотра ваших секретов",
+  "@authToViewSecrets": {
+    "description": "Message prompting authentication to view secrets"
+  },
+  "next": "Далее",
+  "@next": {
+    "description": "Next button label"
+  },
+  "setNewPassword": "Задать новый пароль",
+  "@setNewPassword": {
+    "description": "Set new password title"
+  },
+  "enterPin": "Введите PIN",
+  "@enterPin": {
+    "description": "Enter PIN prompt"
+  },
+  "setNewPin": "Установите новый PIN",
+  "@setNewPin": {
+    "description": "Set new PIN title"
+  },
+  "confirm": "Подтвердить",
+  "@confirm": {
+    "description": "Confirm button label"
+  },
+  "reEnterPassword": "Подтвердите пароль",
+  "@reEnterPassword": {
+    "description": "Re-enter password prompt"
+  },
+  "reEnterPin": "Введите PIN-код ещё раз",
+  "@reEnterPin": {
+    "description": "Re-enter PIN prompt"
+  },
+  "androidBiometricHint": "Подтвердите личность",
+  "@androidBiometricHint": {
+    "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricNotRecognized": "Не распознано. Попробуйте еще раз.",
+  "@androidBiometricNotRecognized": {
+    "description": "Message to let the user know that authentication was failed. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricSuccess": "Успешно",
+  "@androidBiometricSuccess": {
+    "description": "Message to let the user know that authentication was successful. It is used on Android side. Maximum 60 characters."
+  },
+  "androidCancelButton": "Отменить",
+  "@androidCancelButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on Android side. Maximum 30 characters."
+  },
+  "androidSignInTitle": "Требуется аутентификация",
+  "@androidSignInTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user that they need to scan biometric to continue. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricRequiredTitle": "Требуется биометрия",
+  "@androidBiometricRequiredTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user has not set up biometric authentication on their device. It is used on Android side. Maximum 60 characters."
+  },
+  "androidDeviceCredentialsRequiredTitle": "Требуются учетные данные устройства",
+  "@androidDeviceCredentialsRequiredTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user has not set up credentials authentication on their device. It is used on Android side. Maximum 60 characters."
+  },
+  "androidDeviceCredentialsSetupDescription": "Требуются учетные данные устройства",
+  "@androidDeviceCredentialsSetupDescription": {
+    "description": "Message advising the user to go to the settings and configure device credentials on their device. It shows in a dialog on Android side."
+  },
+  "goToSettings": "Перейдите к настройкам",
+  "@goToSettings": {
+    "description": "Message showed on a button that the user can click to go to settings pages from the current dialog. It is used on both Android and iOS side. Maximum 30 characters."
+  },
+  "androidGoToSettingsDescription": "Биометрическая аутентификация не настроена на вашем устройстве. Перейдите в \"Настройки > Безопасность\", чтобы добавить биометрическую аутентификацию.",
+  "@androidGoToSettingsDescription": {
+    "description": "Message advising the user to go to the settings and configure biometric on their device. It shows in a dialog on Android side."
+  },
+  "iOSLockOut": "Биометрическая аутентификация отключена. Пожалуйста, заблокируйте и разблокируйте экран, чтобы включить ее.",
+  "@iOSLockOut": {
+    "description": "Message advising the user to re-enable biometrics on their device. It shows in a dialog on iOS side."
+  },
+  "iOSOkButton": "ОК",
+  "@iOSOkButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
+  },
+  "emailAlreadyRegistered": "Адрес электронной почты уже зарегистрирован.",
+  "@emailAlreadyRegistered": {
+    "description": "Error message when email is already registered"
+  },
+  "emailNotRegistered": "Адрес электронной почты не зарегистрирован.",
+  "@emailNotRegistered": {
+    "description": "Error message when email is not registered"
+  },
+  "thisEmailIsAlreadyInUse": "Этот адрес электронной почты уже используется",
+  "@thisEmailIsAlreadyInUse": {
+    "description": "Error message when email is already in use"
+  },
+  "emailChangedTo": "Адрес электронной почты изменен на {newEmail}",
+  "@emailChangedTo": {
+    "description": "Message when email has been changed",
+    "placeholders": {
+      "newEmail": {
+        "description": "The new email address",
+        "type": "String",
+        "example": "new@example.com"
+      }
+    }
+  },
+  "authenticationFailedPleaseTryAgain": "Аутентификация не удалась, попробуйте еще раз",
+  "@authenticationFailedPleaseTryAgain": {
+    "description": "Error message when authentication fails"
+  },
+  "authenticationSuccessful": "Аутентификация прошла успешно!",
+  "@authenticationSuccessful": {
+    "description": "Success message when authentication is successful"
+  },
+  "sessionExpired": "Сеанс истек",
+  "@sessionExpired": {
+    "description": "Error message when session has expired"
+  },
+  "incorrectRecoveryKey": "Неправильный ключ восстановления",
+  "@incorrectRecoveryKey": {
+    "description": "Error message when recovery key is incorrect"
+  },
+  "theRecoveryKeyYouEnteredIsIncorrect": "Введен неправильный ключ восстановления",
+  "@theRecoveryKeyYouEnteredIsIncorrect": {
+    "description": "Detailed error message when recovery key is incorrect"
+  },
+  "twofactorAuthenticationSuccessfullyReset": "Двухфакторная аутентификация успешно сброшена",
+  "@twofactorAuthenticationSuccessfullyReset": {
+    "description": "Message when two-factor authentication is successfully reset"
+  },
+  "yourVerificationCodeHasExpired": "Срок действия вашего проверочного кода истек",
+  "@yourVerificationCodeHasExpired": {
+    "description": "Error message when verification code has expired"
+  },
+  "incorrectCode": "Неверный код",
+  "@incorrectCode": {
+    "description": "Error message when code is incorrect"
+  },
+  "sorryTheCodeYouveEnteredIsIncorrect": "Извините, введенный вами код неверный",
+  "@sorryTheCodeYouveEnteredIsIncorrect": {
+    "description": "Detailed error message when code is incorrect"
+  },
+  "developerSettings": "Настройки разработчика",
+  "@developerSettings": {
+    "description": "Label for developerSettings"
+  },
+  "serverEndpoint": "Конечная точка сервера",
+  "@serverEndpoint": {
+    "description": "Label for serverEndpoint"
+  },
+  "invalidEndpoint": "Неверная конечная точка",
+  "@invalidEndpoint": {
+    "description": "Label for invalidEndpoint"
+  },
+  "invalidEndpointMessage": "Извините, введенная вами конечная точка неверна. Пожалуйста, введите корректную конечную точку и повторите попытку.",
+  "@invalidEndpointMessage": {
+    "description": "Label for invalidEndpointMessage"
+  },
+  "endpointUpdatedMessage": "Конечная точка успешно обновлена",
+  "@endpointUpdatedMessage": {
+    "description": "Label for endpointUpdatedMessage"
+  }
+}

@@ -4,13 +4,14 @@ import 'dart:io';
 import 'package:ente_auth/models/authenticator/auth_entity.dart';
 import 'package:ente_auth/models/authenticator/local_auth_entity.dart';
 import 'package:ente_auth/utils/directory_utils.dart';
+import 'package:ente_base/ente_base.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
-class AuthenticatorDB {
+class AuthenticatorDB extends EnteBaseDatabase {
   static const _databaseName = "ente.authenticator.db";
   static const _databaseVersion = 1;
 

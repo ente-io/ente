@@ -4,9 +4,7 @@ import 'dart:math';
 
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/errors.dart';
-import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/events/codes_updated_event.dart';
-import 'package:ente_auth/events/signed_in_event.dart';
 import 'package:ente_auth/events/trigger_logout_event.dart';
 import 'package:ente_auth/gateway/authenticator.dart';
 import 'package:ente_auth/models/authenticator/auth_entity.dart';
@@ -17,6 +15,8 @@ import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/store/authenticator_db.dart';
 import 'package:ente_auth/store/offline_authenticator_db.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:ente_events/event_bus.dart';
+import 'package:ente_events/models/signed_in_event.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
