@@ -5,9 +5,6 @@ import (
 	"database/sql"
 	b64 "encoding/base64"
 	"fmt"
-	"github.com/ente-io/museum/pkg/controller/collections"
-	publicCtrl "github.com/ente-io/museum/pkg/controller/public"
-	"github.com/ente-io/museum/pkg/repo/public"
 	"net/http"
 	"os"
 	"os/signal"
@@ -16,6 +13,10 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/ente-io/museum/pkg/controller/collections"
+	publicCtrl "github.com/ente-io/museum/pkg/controller/public"
+	"github.com/ente-io/museum/pkg/repo/public"
 
 	"github.com/ente-io/museum/ente/base"
 	"github.com/ente-io/museum/pkg/controller/emergency"
@@ -223,7 +224,7 @@ func main() {
 		appStoreController, playStoreController, stripeController,
 		discordController, emailNotificationCtrl,
 		billingRepo, userRepo, usageRepo, storagBonusRepo, commonBillController)
-	remoteStoreController := &remoteStoreCtrl.Controller{Repo: remoteStoreRepository, BillingCtrl: billingController}
+	remoteStoreController = &remoteStoreCtrl.Controller{Repo: remoteStoreRepository, BillingCtrl: billingController}
 
 	pushController := controller.NewPushController(pushRepo, taskLockingRepo, hostName)
 	mailingListsController := controller.NewMailingListsController()
