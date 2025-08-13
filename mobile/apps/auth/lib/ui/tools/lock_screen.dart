@@ -46,11 +46,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       final Object? args = ModalRoute.of(context)?.settings.arguments;
-      if (args is Map && args['manual'] is bool) {
-        _isManualPresentation = args['manual'] as bool;
-      } else {
-        _isManualPresentation = false;
-      }
+      _isManualPresentation = args?['manual'] as bool? ?? false;
       _suppressAutoPrompt = _isManualPresentation;
       if (!_isManualPresentation) {
         _showLockScreen(source: "postFrameInit");
