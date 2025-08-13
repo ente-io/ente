@@ -372,6 +372,21 @@
   "deleteFromBoth": "Usuń z obu",
   "newAlbum": "Nowy album",
   "albums": "Albumy",
+  "memoryCount": "{count, plural, =0{brak wspomnień} one{{formattedCount} wspomnienie} few{{formattedCount} wspomnienia} many{{formattedCount} wspomnień} other{{formattedCount} wspomnień}}",
+  "@memoryCount": {
+    "description": "The text to display the number of memories",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      },
+      "formattedCount": {
+        "type": "String",
+        "example": "11.513, 11,511"
+      }
+    }
+  },
   "selectedPhotos": "Wybrano {count}",
   "@selectedPhotos": {
     "description": "Display the number of selected photos",
@@ -779,6 +794,14 @@
   "share": "Udostępnij",
   "unhideToAlbum": "Odkryj do albumu",
   "restoreToAlbum": "Przywróć do albumu",
+  "moveItem": "{count, plural, =1 {Przenieś element} few {Przenieś elementy} many {Przenieś elementów} other {Przenieś elementów}}",
+  "@moveItem": {
+    "description": "Page title while moving one or more items to an album"
+  },
+  "addItem": "{count, plural, =1 {Dodaj element} few {Dodaj elementy} many {Dodaj elementów} other {Dodaj elementów}}",
+  "@addItem": {
+    "description": "Page title while adding one or more items to album"
+  },
   "createOrSelectAlbum": "Utwórz lub wybierz album",
   "selectAlbum": "Wybierz album",
   "searchByAlbumNameHint": "Nazwa albumu",
@@ -876,6 +899,7 @@
   "authToViewYourMemories": "Prosimy uwierzytelnić się, aby wyświetlić swoje wspomnienia",
   "unlock": "Odblokuj",
   "freeUpSpace": "Zwolnij miejsce",
+  "freeUpSpaceSaving": "{count, plural, =1 {Może zostać usunięty z urządzenia, aby zwolnić {formattedSize}} many {Może być usuniętych z urządzenia, aby zwolnić {formattedSize}} other {Mogą być usunięte z urządzenia, aby zwolnić {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 plikowi} other {{formattedNumber} plikom}} w tym albumie została bezpiecznie utworzona kopia zapasowa",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -903,6 +927,18 @@
         "content": "{formattedNumber}",
         "example": "1,000",
         "type": "String"
+      }
+    }
+  },
+  "@freeUpSpaceSaving": {
+    "description": "Text to tell user how much space they can free up by deleting items from the device"
+  },
+  "freeUpAccessPostDelete": "Nadal możesz mieć dostęp {count, plural, =1 {do tego} other {do tych}} na Ente tak długo, jak masz aktywną subskrypcję",
+  "@freeUpAccessPostDelete": {
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
       }
     }
   },
@@ -1233,6 +1269,8 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Szybko szukaj osób po imieniu",
+  "addViewers": "{count, plural, =0 {Dodaj widza} =1 {Dodaj widza} other {Dodaj widzów}}",
+  "addCollaborators": "{count, plural, =0 {Dodaj współuczestnika} =1 {Dodaj współuczestnika} other {Dodaj współuczestników}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Naciśnij i przytrzymaj e-mail, aby zweryfikować szyfrowanie end-to-end.",
   "developerSettingsWarning": "Czy na pewno chcesz zmodyfikować ustawienia programisty?",
   "developerSettings": "Ustawienia dla programistów",
@@ -1365,6 +1403,16 @@
   "enableMachineLearningBanner": "Włącz nauczanie maszynowe dla magicznego wyszukiwania i rozpoznawania twarzy",
   "searchDiscoverEmptySection": "Obrazy będą wyświetlane tutaj po zakończeniu przetwarzania i synchronizacji",
   "searchPersonsEmptySection": "Osoby będą wyświetlane tutaj po zakończeniu przetwarzania i synchronizacji",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {Dodano 0 widzów} =1 {Dodano 1 widza} other {Dodano {count} widzów}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to an album."
+  },
   "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Dodano 0 współuczestników} =1 {Dodano 1 współuczestnika} other {Dodano {count} współuczestników}}",
   "@collaboratorsSuccessfullyAdded": {
     "placeholders": {
@@ -1440,6 +1488,15 @@
   },
   "currentlyRunning": "aktualnie uruchomiony",
   "ignored": "ignorowane",
+  "photosCount": "{count, plural, =0 {0 zdjęć} =1 {1 zdjęcie} few {{count} zdjęcia} many {{count} zdjęć} other {{count} zdjęć}}",
+  "@photosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "file": "Plik",
   "searchSectionsLengthMismatch": "Niezgodność długości sekcji: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
@@ -1539,6 +1596,7 @@
   "joinAlbumSubtextViewer": "aby dodać to do udostępnionych albumów",
   "join": "Dołącz",
   "linkEmail": "Połącz adres e-mail",
+  "link": "Połącz",
   "noEnteAccountExclamation": "Brak konta Ente!",
   "orPickFromYourContacts": "lub wybierz ze swoich kontaktów",
   "emailDoesNotHaveEnteAccount": "{email} nie posiada konta Ente.",
@@ -1559,6 +1617,7 @@
       }
     }
   },
+  "reassignMe": "Przypisz \"Mnie\" ponownie",
   "me": "Ja",
   "linkEmailToContactBannerCaption": "aby szybciej udostępniać",
   "@linkEmailToContactBannerCaption": {
@@ -1586,6 +1645,7 @@
     }
   },
   "selectYourFace": "Wybierz swoją twarz",
+  "reassigningLoading": "Ponowne przypisywanie...",
   "reassignedToName": "Ponownie przypisano cię do {name}",
   "@reassignedToName": {
     "placeholders": {
@@ -1597,12 +1657,19 @@
   "saveChangesBeforeLeavingQuestion": "Zapisać zmiany przed wyjściem?",
   "dontSave": "Nie zapisuj",
   "thisIsMeExclamation": "To ja!",
+  "linkPerson": "Połącz osobę",
+  "linkPersonCaption": "dla lepszych doświadczeń podczas udostępniania",
+  "@linkPersonCaption": {
+    "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
+  },
   "videoStreaming": "Streamowalne wideo",
   "processingVideos": "Przetwarzanie wideo",
+  "streamDetails": "Szczegóły transmisji",
   "processing": "Przetwarzanie",
   "queued": "W kolejce",
   "ineligible": "Nie kwalifikuje się",
   "failed": "Nie powiodło się",
+  "playStream": "Odtwórz transmisję",
   "playOriginal": "Odtwórz oryginał",
   "joinAlbumConfirmationDialogBody": "Dołączenie do albumu sprawi, że Twój e-mail będzie widoczny dla jego uczestników.",
   "pleaseWaitThisWillTakeAWhile": "Prosimy czekać, to może zająć chwilę.",
@@ -1619,13 +1686,25 @@
   "moveSelectedPhotosToOneDate": "Przenieś wybrane zdjęcia na jedną datę",
   "shiftDatesAndTime": "Zmień daty i czas",
   "photosKeepRelativeTimeDifference": "Zdjęcia zachowują względną różnicę czasu",
+  "photocountPhotos": "{count, plural, =0 {Brak zdjęć} =1 {1 zdjęcie} few {{count} zdjęcia} many {{count} zdjęć} other {{count} zdjęć}}",
+  "@photocountPhotos": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "appIcon": "Ikona aplikacji",
   "notThisPerson": "Nie ta osoba?",
   "selectedItemsWillBeRemovedFromThisPerson": "Wybrane elementy zostaną usunięte z tej osoby, ale nie zostaną usunięte z Twojej biblioteki.",
   "throughTheYears": "{dateFormat} przez lata",
   "thisWeekThroughTheYears": "Ten tydzień przez lata",
+  "thisWeekXYearsAgo": "{count, plural, =1 {W tym tygodniu, {count} rok temu} few {W tym tygodniu, {count} lata temu} many {W tym tygodniu, {count} lat temu} other {W tym tygodniu, {count} lat temu}}",
   "youAndThem": "Ty i {name}",
   "admiringThem": "Podziwianie {name}",
+  "embracingThem": "Obejmowanie {name}",
+  "partyWithThem": "Impreza z {name}",
   "hikingWithThem": "Wędrówka z {name}",
   "feastingWithThem": "Ucztowanie z {name}",
   "selfiesWithThem": "Selfie z {name}",
@@ -1638,6 +1717,7 @@
   "personIsAge": "{name} ma {age} lat!",
   "personTurningAge": "{name} wkrótce będzie mieć {age} lat",
   "lastTimeWithThem": "Ostatnio z {name}",
+  "tripToLocation": "Wyjazd do {location}",
   "tripInYear": "Podróż w {year}",
   "lastYearsTrip": "Zeszłoroczna podróż",
   "sunrise": "Na horyzoncie",
@@ -1655,6 +1735,7 @@
   "peopleWidgetDesc": "Wybierz osoby, które chcesz zobaczyć na ekranie głównym.",
   "albumsWidgetDesc": "Wybierz albumy, które chcesz zobaczyć na ekranie głównym.",
   "memoriesWidgetDesc": "Wybierz rodzaj wspomnień, które chcesz zobaczyć na ekranie głównym.",
+  "smartMemories": "Inteligentne wspomnienia",
   "pastYearsMemories": "Wspomnienia z ubiegłych lat",
   "deleteMultipleAlbumDialog": "Usunąć również zdjęcia (i filmy) obecne w tych albumach {count} z <bold>wszystkich</bold> innych albumów, których są częścią?",
   "addParticipants": "Dodaj uczestników",
@@ -1695,7 +1776,56 @@
   "same": "Identyczne",
   "different": "Inne",
   "sameperson": "Ta sama osoba?",
+  "cLTitle1": "Zaawansowany Edytor Obrazów",
+  "cLDesc1": "Wydajemy nowy i zaawansowany edytor obrazów, który dodaje więcej klatek przycinania, filtry dla szybkich edycji, precyzyjne opcje dostrajania, w tym nasycenie, kontrast, jasność, temperatura i wiele więcej. Nowy edytor zawiera również możliwość rysowania zdjęć i dodawania emotikonów jako naklejki.",
+  "cLTitle2": "Inteligentne Albumy",
+  "cLDesc2": "Teraz możesz automatycznie dodawać zdjęcia wybranych osób do dowolnego albumu. Po prostu przejdź do albumu i wybierz \"automatycznie dodaj osoby\" z menu przepełnienia. Jeśli używane razem z udostępnionym albumem, możesz udostępniać zdjęcia bez żadnych kliknięć.",
+  "cLTitle3": "Ulepszona Galeria",
+  "cLDesc3": "Dodaliśmy możliwość grupowania Twojej galerii po tygodniach, miesiącach i latach. Możesz teraz spersonalizować swoją galerię, aby dokładnie wyglądać w ten sposób z nowymi opcjami grupowania, wraz z niestandardowymi siatkami",
+  "cLTitle4": "Szybsze Przewijanie",
+  "cLDesc4": "Wraz z kilkoma ulepszeniami w celu poprawy doświadczenia galerii, przeprojektowaliśmy również pasek przewijania, aby pokazywać znaczniki, umożliwiając szybki skok po osi czasu.",
   "indexingPausedStatusDescription": "Indeksowanie zostało wstrzymane. Zostanie automatycznie wznowione, gdy urządzenie będzie gotowe. Urządzenie uznaje się za gotowe, gdy poziom baterii, stan jej zdrowia oraz status termiczny znajdują się w bezpiecznym zakresie.",
+  "thisWeek": "Ten tydzień",
+  "lastWeek": "Zeszły tydzień",
+  "thisMonth": "Ten miesiąc",
+  "thisYear": "Ten rok",
+  "groupBy": "Grupuj według",
   "faceThumbnailGenerationFailed": "Nie można wygenerować miniaturek twarzy",
-  "fileAnalysisFailed": "Nie można przeanalizować pliku"
+  "fileAnalysisFailed": "Nie można przeanalizować pliku",
+  "editAutoAddPeople": "Edytuj automatyczne dodawanie osób",
+  "autoAddPeople": "Automatycznie dodaj osoby",
+  "autoAddToAlbum": "Automatycznie dodaj do albumu",
+  "shouldRemoveFilesSmartAlbumsDesc": "Czy pliki związane z osobą, które zostały wcześniej wybrane w inteligentnych albumach, powinny zostać usunięte?",
+  "addingPhotos": "Dodawanie zdjęć",
+  "gettingReady": "Przygotowywanie",
+  "addSomePhotosDesc1": "Dodaj jakieś zdjęcia lub wybierz ",
+  "addSomePhotosDesc2": "znane twarze",
+  "addSomePhotosDesc3": "\nzaczynając od",
+  "ignorePerson": "Ignoruj osobę",
+  "mixedGrouping": "Grupowanie mieszane?",
+  "analysis": "Analiza",
+  "doesGroupContainMultiplePeople": "Czy ta grupa zawiera wiele osób?",
+  "automaticallyAnalyzeAndSplitGrouping": "Automatycznie przeanalizujemy grupę, aby ustalić, czy jest wiele osób i oddzielimy ich ponownie. Może to potrwać kilka sekund.",
+  "layout": "Układ",
+  "day": "Dzień",
+  "peopleAutoAddDesc": "Wybierz osoby, które chcesz automatycznie dodać do albumu",
+  "undo": "Cofnij",
+  "redo": "Ponów",
+  "filter": "Filtruj",
+  "adjust": "Dostosuj",
+  "draw": "Rysuj",
+  "sticker": "Naklejka",
+  "brushColor": "Kolor Pędzla",
+  "font": "Czcionka",
+  "background": "Tło",
+  "align": "Wyrównaj",
+  "addedToAlbums": "{count, plural, =1{Pomyślnie dodano do 1 albumu} other{Pomyślnie dodano do {count} albumów}}",
+  "@addedToAlbums": {
+    "description": "Message shown when items are added to albums",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }
