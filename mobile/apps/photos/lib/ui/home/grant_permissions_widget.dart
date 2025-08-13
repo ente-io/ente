@@ -44,7 +44,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
                     isLightMode
                         ? Image.asset(
                             'assets/loading_photos_background.png',
-                            color: Colors.white.withOpacity(0.4),
+                            color: Colors.white.withValues(alpha: 0.4),
                             colorBlendMode: BlendMode.modulate,
                           )
                         : Image.asset(

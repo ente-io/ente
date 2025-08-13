@@ -95,6 +95,9 @@ apps:
     accounts:
     # Default is https://family.ente.io
     family:
+    custom-domain:
+        # Default is my.ente.io
+        cname:
 
 # Database connection parameters
 db:

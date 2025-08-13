@@ -173,7 +173,7 @@ class VideoOverlayDuration extends StatelessWidget {
             padding: EdgeInsets.only(bottom: inset, right: inset),
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.3),
+                color: Colors.black.withValues(alpha: 0.3),
                 borderRadius: iconFallback ? null : BorderRadius.circular(8.0),
                 shape: iconFallback ? BoxShape.circle : BoxShape.rectangle,
               ),
@@ -256,7 +256,7 @@ class FileOverlayText extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.bottomCenter,
           end: Alignment.topCenter,
-          colors: [Colors.black.withOpacity(0.33), Colors.transparent],
+          colors: [Colors.black.withValues(alpha: 0.33), Colors.transparent],
         ),
       ),
       alignment: Alignment.bottomCenter,

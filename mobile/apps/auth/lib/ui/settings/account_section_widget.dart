@@ -56,7 +56,7 @@ class AccountSectionWidget extends StatelessWidget {
               builder: (BuildContext context) {
                 return const ChangeEmailDialog();
               },
-              barrierColor: Colors.black.withOpacity(0.85),
+              barrierColor: Colors.black.withValues(alpha: 0.85),
               barrierDismissible: false,
             );
           }

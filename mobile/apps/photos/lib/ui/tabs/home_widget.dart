@@ -230,7 +230,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                 updateService.getLatestVersionInfo(),
               );
             },
-            barrierColor: Colors.black.withOpacity(0.85),
+            barrierColor: Colors.black.withValues(alpha: 0.85),
           );
           updateService.resetUpdateAvailableShownTime();
         }
