@@ -15,6 +15,7 @@ import {
     DialogContent,
     Divider,
     IconButton,
+    Link,
     Skeleton,
     Stack,
     styled,
@@ -825,50 +826,43 @@ const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                         />
                     </RowButtonGroup>
                 )}
-                {
-                    /* TODO: CD */ process.env.NEXT_PUBLIC_ENTE_WIP_CD && (
-                        <RowButton
-                            label={pt("Custom domains")}
-                            endIcon={
-                                <Stack
-                                    direction="row"
-                                    sx={{
-                                        alignSelf: "stretch",
-                                        alignItems: "center",
-                                    }}
-                                >
-                                    <Box
-                                        sx={{
-                                            width: "8px",
-                                            bgcolor: "stroke.faint",
-                                            alignSelf: "stretch",
-                                            mr: 0.5,
-                                        }}
-                                    />
-                                    <Box
-                                        sx={{
-                                            width: "8px",
-                                            bgcolor: "stroke.muted",
-                                            alignSelf: "stretch",
-                                            mr: 0.5,
-                                        }}
-                                    />
-                                    <Box
-                                        sx={{
-                                            width: "8px",
-                                            bgcolor: "stroke.base",
-                                            alignSelf: "stretch",
-                                            opacity: 0.3,
-                                            mr: 1.5,
-                                        }}
-                                    />
-                                    <ChevronRightIcon />
-                                </Stack>
-                            }
-                            onClick={showDomainSettings}
-                        />
-                    )
-                }
+                <RowButton
+                    label={pt("Custom domains")}
+                    endIcon={
+                        <Stack
+                            direction="row"
+                            sx={{ alignSelf: "stretch", alignItems: "center" }}
+                        >
+                            <Box
+                                sx={{
+                                    width: "8px",
+                                    bgcolor: "stroke.faint",
+                                    alignSelf: "stretch",
+                                    mr: 0.5,
+                                }}
+                            />
+                            <Box
+                                sx={{
+                                    width: "8px",
+                                    bgcolor: "stroke.muted",
+                                    alignSelf: "stretch",
+                                    mr: 0.5,
+                                }}
+                            />
+                            <Box
+                                sx={{
+                                    width: "8px",
+                                    bgcolor: "stroke.base",
+                                    alignSelf: "stretch",
+                                    opacity: 0.3,
+                                    mr: 1.5,
+                                }}
+                            />
+                            <ChevronRightIcon />
+                        </Stack>
+                    }
+                    onClick={showDomainSettings}
+                />
                 <RowButton
                     endIcon={<ChevronRightIcon />}
                     label={t("map")}
@@ -1027,7 +1021,7 @@ const DomainSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
             onRootClose={handleRootClose}
             // TODO: CD: Translations
             title={pt("Custom domains")}
-            caption="Use your own domain when sharing"
+            caption={pt("Use your own domain when sharing")}
         >
             <DomainSettingsContents />
         </TitledNestedSidebarDrawer>
@@ -1064,8 +1058,6 @@ const DomainSettingsContents: React.FC = () => {
     const disableShare =
         !userDetails || !isSubscriptionActivePaid(userDetails.subscription);
 
-    // TODO: CD: help
-
     return (
         <Stack sx={{ px: 2, py: "12px" }}>
             {disableShare && (
@@ -1089,7 +1081,7 @@ const DomainSettingsContents: React.FC = () => {
                             formik.errors.domain ??
                             pt("Any domain or subdomain you own")
                         }
-                        label={t("Domain")}
+                        label={pt("Domain")}
                         placeholder={ut("photos.example.org")}
                         sx={{ mb: 2 }}
                     />
@@ -1116,10 +1108,15 @@ const DomainSettingsContents: React.FC = () => {
                     </Typography>
                 </Typography>
                 <Typography sx={{ color: "text.muted", mt: 3 }}>
-                    For more information, see
-                    <Typography component="span" sx={{ color: "accent.main" }}>
-                        {" help "}
-                    </Typography>
+                    For more information, see{" "}
+                    <Link
+                        href="https://help.ente.io/photos/features/custom-domains/"
+                        target="_blank"
+                        rel="noopener"
+                        color="accent"
+                    >
+                        {t("help").toLocaleLowerCase()}
+                    </Link>
                 </Typography>
             </DomainItem>
         </Stack>
