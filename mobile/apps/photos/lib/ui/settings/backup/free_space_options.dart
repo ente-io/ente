@@ -188,38 +188,41 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                                 const SizedBox(
                                   height: 24,
                                 ),
-                                MenuItemWidget(
-                                  captionedTextWidget:
-                                      const CaptionedTextWidget(
-                                    title:
-                                        "Similar images", // TODO: lau: extract string
+                                if (flagService.enableVectorDb)
+                                  MenuItemWidget(
+                                    captionedTextWidget:
+                                        const CaptionedTextWidget(
+                                      title:
+                                          "Similar images", // TODO: lau: extract string
+                                    ),
+                                    menuItemColor: colorScheme.fillFaint,
+                                    trailingWidget: Icon(
+                                      Icons.chevron_right_outlined,
+                                      color: colorScheme.strokeBase,
+                                    ),
+                                    singleBorderRadius: 8,
+                                    alignCaptionedTextToLeft: true,
+                                    trailingIconIsMuted: true,
+                                    showOnlyLoadingState: true,
+                                    onTap: () async {
+                                      await routeToPage(
+                                        context,
+                                        const SimilarImagesPage(),
+                                      );
+                                    },
                                   ),
-                                  menuItemColor: colorScheme.fillFaint,
-                                  trailingWidget: Icon(
-                                    Icons.chevron_right_outlined,
-                                    color: colorScheme.strokeBase,
+                                if (flagService.enableVectorDb)
+                                  const Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: MenuSectionDescriptionWidget(
+                                      content:
+                                          "Use AI to find images that look similar to each other.", // TODO: lau: extract string
+                                    ),
                                   ),
-                                  singleBorderRadius: 8,
-                                  alignCaptionedTextToLeft: true,
-                                  trailingIconIsMuted: true,
-                                  showOnlyLoadingState: true,
-                                  onTap: () async {
-                                    await routeToPage(
-                                      context,
-                                      const SimilarImagesPage(),
-                                    );
-                                  },
-                                ),
-                                const Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: MenuSectionDescriptionWidget(
-                                    content:
-                                        "Use AI to find images that look similar to each other.", // TODO: lau: extract string
+                                if (flagService.enableVectorDb)
+                                  const SizedBox(
+                                    height: 24,
                                   ),
-                                ),
-                                const SizedBox(
-                                  height: 24,
-                                ),
                                 MenuItemWidget(
                                   captionedTextWidget: CaptionedTextWidget(
                                     title: S.of(context).viewLargeFiles,
