@@ -35,9 +35,9 @@ import "package:photos/services/collections_service.dart";
 import "package:photos/services/language_service.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
-import "package:photos/services/machine_learning/ml_computer.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/search_service.dart";
+import "package:photos/utils/text_embeddings_util.dart";
 
 class MemoriesResult {
   final List<SmartMemory> memories;
@@ -103,24 +103,18 @@ class SmartMemoriesService {
         'allImageEmbeddings has ${allImageEmbeddings.length} entries $t',
       );
 
-      const String clipPositiveQuery =
-          'Photo of a precious and nostalgic memory radiating warmth, vibrant energy, or quiet beauty — alive with color, light, or emotion';
-      final clipPositiveTextVector = Vector.fromList(
-        await MLComputer.instance.runClipText(clipPositiveQuery),
-      );
-      final Map<PeopleActivity, Vector> clipPeopleActivityVectors = {};
-      for (final peopleActivity in PeopleActivity.values) {
-        clipPeopleActivityVectors[peopleActivity] ??= Vector.fromList(
-          await MLComputer.instance.runClipText(activityQuery(peopleActivity)),
+      // Load pre-computed text embeddings from assets
+      final textEmbeddings = await loadTextEmbeddingsFromAssets();
+      if (textEmbeddings == null) {
+        _logger.severe('Failed to load pre-computed text embeddings');
+        throw Exception(
+          'Failed to load pre-computed text embeddings',
         );
       }
-      final Map<ClipMemoryType, Vector> clipMemoryTypeVectors = {};
-      for (final clipMemoryType in ClipMemoryType.values) {
-        clipMemoryTypeVectors[clipMemoryType] ??= Vector.fromList(
-          await MLComputer.instance.runClipText(clipQuery(clipMemoryType)),
-        );
-      }
-      _logger.info('clipPositiveTextVector and clipPeopleActivityVectors $t');
+      _logger.info('Using pre-computed text embeddings from assets');
+      final clipPositiveTextVector = textEmbeddings.clipPositiveVector;
+      final clipPeopleActivityVectors = textEmbeddings.peopleActivityVectors;
+      final clipMemoryTypeVectors = textEmbeddings.clipMemoryTypeVectors;
 
       final local = await getLocale();
       final languageCode = local?.languageCode ?? "en";
