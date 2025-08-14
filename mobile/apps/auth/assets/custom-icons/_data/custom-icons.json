@@ -1509,6 +1509,10 @@
       "title": "Skinport"
     },
     {
+      "title": "Skyscanner",
+      "hex": "0770E3"
+    },
+    {
       "title": "SMSPool",
       "slug": "sms_pool_net",
       "altNames": [
