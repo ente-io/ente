@@ -685,5 +685,17 @@
     "person_favorites": "{{name}} избранных",
     "shared_favorites": "Общие избранные",
     "added_by_name": "Добавлено {{name}}",
-    "unowned_files_not_processed": "Файлы, добавленные другими пользователями, не были обработаны"
+    "unowned_files_not_processed": "Файлы, добавленные другими пользователями, не были обработаны",
+    "custom_domains": "",
+    "custom_domains_desc": "",
+    "link_your_domain": "",
+    "domain": "",
+    "domain_help": "",
+    "invalid_domain": "",
+    "already_linked_domain": "",
+    "add_dns_entry": "",
+    "add_dns_entry_hint": "",
+    "custom_domains_help": "",
+    "num_1": "",
+    "num_2": ""
 }

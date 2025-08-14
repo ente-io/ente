@@ -34,10 +34,25 @@ final $typed_data.Uint8List fileMLDescriptor = $convert.base64Decode(
 const FileFaces$json = {
   '1': 'FileFaces',
   '2': [
-    {'1': 'faces', '3': 1, '4': 3, '5': 11, '6': '.ente.ml.Face', '10': 'faces'},
+    {
+      '1': 'faces',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.ente.ml.Face',
+      '10': 'faces'
+    },
     {'1': 'height', '3': 2, '4': 1, '5': 5, '9': 0, '10': 'height', '17': true},
     {'1': 'width', '3': 3, '4': 1, '5': 5, '9': 1, '10': 'width', '17': true},
-    {'1': 'version', '3': 4, '4': 1, '5': 5, '9': 2, '10': 'version', '17': true},
+    {
+      '1': 'version',
+      '3': 4,
+      '4': 1,
+      '5': 5,
+      '9': 2,
+      '10': 'version',
+      '17': true
+    },
     {'1': 'error', '3': 5, '4': 1, '5': 9, '9': 3, '10': 'error', '17': true},
   ],
   '8': [
@@ -54,4 +69,3 @@ final $typed_data.Uint8List fileFacesDescriptor = $convert.base64Decode(
     'dodBgCIAEoBUgAUgZoZWlnaHSIAQESGQoFd2lkdGgYAyABKAVIAVIFd2lkdGiIAQESHQoHdmVy'
     'c2lvbhgEIAEoBUgCUgd2ZXJzaW9uiAEBEhkKBWVycm9yGAUgASgJSANSBWVycm9yiAEBQgkKB1'
     '9oZWlnaHRCCAoGX3dpZHRoQgoKCF92ZXJzaW9uQggKBl9lcnJvcg==');
-

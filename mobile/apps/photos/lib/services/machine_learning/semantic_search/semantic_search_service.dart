@@ -273,9 +273,11 @@ class SemanticSearchService {
     //   }
     // }
     await _cacheClipVectors();
-    final Map<String, List<QueryResult>> queryResults = await MLComputer
-        .instance
-        .computeBulkSimilarities(textQueryToEmbeddingMap, minimumSimilarityMap);
+    final Map<String, List<QueryResult>> queryResults =
+        await MLComputer.instance.computeBulkSimilarities(
+      textQueryToEmbeddingMap,
+      minimumSimilarityMap,
+    );
     final endTime = DateTime.now();
     _logger.info(
       "computingSimilarities took for ${textQueryToEmbeddingMap.length} queries " +

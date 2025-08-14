@@ -14,6 +14,7 @@ import {
     DialogContent,
     Divider,
     IconButton,
+    Link,
     Skeleton,
     Stack,
     styled,
@@ -54,7 +55,6 @@ import { useBaseContext } from "ente-base/context";
 import { isHTTPErrorWithStatus } from "ente-base/http";
 import {
     getLocaleInUse,
-    pt,
     setLocaleInUse,
     supportedLocales,
     ut,
@@ -824,50 +824,43 @@ const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                         />
                     </RowButtonGroup>
                 )}
-                {
-                    /* TODO: CD */ process.env.NEXT_PUBLIC_ENTE_WIP_CD && (
-                        <RowButton
-                            label={pt("Custom domains")}
-                            endIcon={
-                                <Stack
-                                    direction="row"
-                                    sx={{
-                                        alignSelf: "stretch",
-                                        alignItems: "center",
-                                    }}
-                                >
-                                    <Box
-                                        sx={{
-                                            width: "8px",
-                                            bgcolor: "stroke.faint",
-                                            alignSelf: "stretch",
-                                            mr: 0.5,
-                                        }}
-                                    />
-                                    <Box
-                                        sx={{
-                                            width: "8px",
-                                            bgcolor: "stroke.muted",
-                                            alignSelf: "stretch",
-                                            mr: 0.5,
-                                        }}
-                                    />
-                                    <Box
-                                        sx={{
-                                            width: "8px",
-                                            bgcolor: "stroke.base",
-                                            alignSelf: "stretch",
-                                            opacity: 0.3,
-                                            mr: 1.5,
-                                        }}
-                                    />
-                                    <ChevronRightIcon />
-                                </Stack>
-                            }
-                            onClick={showDomainSettings}
-                        />
-                    )
-                }
+                <RowButton
+                    label={t("custom_domains")}
+                    endIcon={
+                        <Stack
+                            direction="row"
+                            sx={{ alignSelf: "stretch", alignItems: "center" }}
+                        >
+                            <Box
+                                sx={{
+                                    width: "8px",
+                                    bgcolor: "stroke.faint",
+                                    alignSelf: "stretch",
+                                    mr: 0.5,
+                                }}
+                            />
+                            <Box
+                                sx={{
+                                    width: "8px",
+                                    bgcolor: "stroke.muted",
+                                    alignSelf: "stretch",
+                                    mr: 0.5,
+                                }}
+                            />
+                            <Box
+                                sx={{
+                                    width: "8px",
+                                    bgcolor: "stroke.base",
+                                    alignSelf: "stretch",
+                                    opacity: 0.3,
+                                    mr: 1.5,
+                                }}
+                            />
+                            <ChevronRightIcon />
+                        </Stack>
+                    }
+                    onClick={showDomainSettings}
+                />
                 <RowButton
                     endIcon={<ChevronRightIcon />}
                     label={t("map")}
@@ -1024,17 +1017,15 @@ const DomainSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
         <TitledNestedSidebarDrawer
             {...{ open, onClose }}
             onRootClose={handleRootClose}
-            // TODO: CD: Translations
-            title={pt("Custom domains")}
-            // caption={pt("Your albums, your domain")}
-            caption="Use your own domain when sharing"
+            title={t("custom_domains")}
+            caption={t("custom_domains_desc")}
         >
             <DomainSettingsContents />
         </TitledNestedSidebarDrawer>
     );
 };
 
-// Separate component to reset state on back.
+// Separate component to reset state on going back.
 const DomainSettingsContents: React.FC = () => {
     const { customDomain, customDomainCNAME } = useSettingsSnapshot();
 
@@ -1050,9 +1041,11 @@ const DomainSettingsContents: React.FC = () => {
             } catch (e) {
                 log.error(`Failed to submit input ${domain}`, e);
                 if (isHTTPErrorWithStatus(e, 400)) {
-                    setValueFieldError(pt("Invalid domain"));
+                    setValueFieldError(t("invalid_domain"));
+                } else if (isHTTPErrorWithStatus(e, 402)) {
+                    setValueFieldError(t("sharing_disabled_for_free_accounts"));
                 } else if (isHTTPErrorWithStatus(e, 409)) {
-                    setValueFieldError(pt("Domain already linked by a user"));
+                    setValueFieldError(t("already_linked_domain"));
                 } else {
                     setValueFieldError(t("generic_error"));
                 }
@@ -1060,11 +1053,9 @@ const DomainSettingsContents: React.FC = () => {
         },
     });
 
-    // TODO: CD: help
-
     return (
         <Stack sx={{ px: 2, py: "12px" }}>
-            <DomainItem title={pt("Link your domain")} ordinal={pt("1")}>
+            <DomainItem title={t("link_your_domain")} ordinal={t("num_1")}>
                 <form onSubmit={formik.handleSubmit}>
                     <TextField
                         name="domain"
@@ -1076,11 +1067,8 @@ const DomainSettingsContents: React.FC = () => {
                         margin="dense"
                         disabled={formik.isSubmitting}
                         error={!!formik.errors.domain}
-                        helperText={
-                            formik.errors.domain ??
-                            pt("Any domain or subdomain you own")
-                        }
-                        label={t("Domain")}
+                        helperText={formik.errors.domain ?? t("domain_help")}
+                        label={t("domain")}
                         placeholder={ut("photos.example.org")}
                         sx={{ mb: 2 }}
                     />
@@ -1090,33 +1078,43 @@ const DomainSettingsContents: React.FC = () => {
                         loading={formik.isSubmitting}
                         color="accent"
                     >
-                        {customDomain ? pt("Update") : pt("Save")}
+                        {customDomain ? t("update") : t("save")}
                     </LoadingButton>
                 </form>
             </DomainItem>
             <Divider sx={{ mt: 4, mb: 2, opacity: 0.5 }} />
-            <DomainItem title={pt("Add DNS entry")} ordinal={pt("2")}>
+            <DomainItem title={t("add_dns_entry")} ordinal={t("num_2")}>
                 <Typography sx={{ color: "text.muted" }}>
-                    On your DNS provider, add a CNAME from your domain to{" "}
-                    <Typography
-                        component="span"
-                        sx={{ fontWeight: "bold", color: "text.base" }}
-                    >
-                        {customDomainCNAME}
-                    </Typography>
-                </Typography>
-            </DomainItem>
-            <Divider sx={{ mt: 5, mb: 2, opacity: 0.5 }} />
-            <DomainItem title={ut("🎉")} ordinal={pt("3")} isEmoji>
-                <Typography sx={{ color: "text.muted", mt: 2 }}>
-                    Within 1 hour, your public albums will be accessible via
-                    your domain!
+                    <Trans
+                        i18nKey="add_dns_entry_hint"
+                        components={{
+                            b: (
+                                <Typography
+                                    component="span"
+                                    sx={{
+                                        fontWeight: "bold",
+                                        color: "text.base",
+                                    }}
+                                />
+                            ),
+                        }}
+                        values={{ host: customDomainCNAME }}
+                    />
                 </Typography>
                 <Typography sx={{ color: "text.muted", mt: 3 }}>
-                    For more information, see
-                    <Typography component="span" sx={{ color: "accent.main" }}>
-                        {" help "}
-                    </Typography>
+                    <Trans
+                        i18nKey="custom_domains_help"
+                        components={{
+                            a: (
+                                <Link
+                                    href="https://help.ente.io/photos/features/custom-domains/"
+                                    target="_blank"
+                                    rel="noopener"
+                                    color="accent"
+                                />
+                            ),
+                        }}
+                    />
                 </Typography>
             </DomainItem>
         </Stack>
@@ -1126,13 +1124,11 @@ const DomainSettingsContents: React.FC = () => {
 interface DomainSectionProps {
     title: string;
     ordinal: string;
-    isEmoji?: boolean;
 }
 
 const DomainItem: React.FC<React.PropsWithChildren<DomainSectionProps>> = ({
     title,
     ordinal,
-    isEmoji,
     children,
 }) => (
     <Stack>
@@ -1140,7 +1136,7 @@ const DomainItem: React.FC<React.PropsWithChildren<DomainSectionProps>> = ({
             direction="row"
             sx={{ alignItems: "center", justifyContent: "space-between" }}
         >
-            <Typography variant={isEmoji ? "h3" : "h6"}>{title}</Typography>
+            <Typography variant="h6">{title}</Typography>
             <Typography
                 variant="h1"
                 sx={{

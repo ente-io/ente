@@ -1359,6 +1359,13 @@
       ]
     },
     {
+      "title": "RaiderIO",
+      "slug": "raider_io",
+      "altNames": [
+        "raider.io"
+      ]
+    },
+    {
       "title": "Raindrop.io",
       "slug": "raindrop_io",
       "altNames": [
@@ -1500,6 +1507,10 @@
     },
     {
       "title": "Skinport"
+    },
+    {
+      "title": "Skyscanner",
+      "hex": "0770E3"
     },
     {
       "title": "SMSPool",

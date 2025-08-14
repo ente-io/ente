@@ -26,24 +26,29 @@ class EVector extends $pb.GeneratedMessage {
     return $result;
   }
   EVector._() : super();
-  factory EVector.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory EVector.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory EVector.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory EVector.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'EVector', package: const $pb.PackageName(_omitMessageNames ? '' : 'ente.common'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'EVector',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'ente.common'),
+      createEmptyInstance: create)
     ..p<$core.double>(1, _omitFieldNames ? '' : 'values', $pb.PbFieldType.KD)
-    ..hasRequiredFields = false
-  ;
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   EVector clone() => EVector()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  EVector copyWith(void Function(EVector) updates) => super.copyWith((message) => updates(message as EVector)) as EVector;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  EVector copyWith(void Function(EVector) updates) =>
+      super.copyWith((message) => updates(message as EVector)) as EVector;
 
   $pb.BuilderInfo get info_ => _i;
 
@@ -52,13 +57,14 @@ class EVector extends $pb.GeneratedMessage {
   EVector createEmptyInstance() => create();
   static $pb.PbList<EVector> createRepeated() => $pb.PbList<EVector>();
   @$core.pragma('dart2js:noInline')
-  static EVector getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<EVector>(create);
+  static EVector getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<EVector>(create);
   static EVector? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.List<$core.double> get values => $_getList(0);
 }
 
-
 const _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
-const _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');
+const _omitMessageNames =
+    $core.bool.fromEnvironment('protobuf.omit_message_names');
