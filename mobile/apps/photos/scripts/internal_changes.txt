@@ -1,3 +1,4 @@
+- Similar images debug screen (Settings > Backup > Free up space > Similar images)
 - (prtk) Upgrade Flutter version to 3.32.8
 - (prtk) Run FFMpeg in an isolate
 - Neeraj: Handle custom domain links
