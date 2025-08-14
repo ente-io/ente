@@ -43,6 +43,7 @@ import 'package:photos/services/sync/remote_sync_service.dart';
 import "package:photos/services/sync/sync_service.dart";
 import "package:photos/services/video_preview_service.dart";
 import "package:photos/services/wake_lock_service.dart";
+import "package:photos/src/rust/frb_generated.dart";
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/ui/tools/lock_screen.dart';
 import "package:photos/utils/email_util.dart";
@@ -65,6 +66,7 @@ bool _stopHearBeat = false;
 
 void main() async {
   debugRepaintRainbowEnabled = false;
+  await RustLib.init();
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
 

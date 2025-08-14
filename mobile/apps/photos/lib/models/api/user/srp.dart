@@ -5,7 +5,6 @@ class SetupSRPRequest {
   final String srpA;
   final bool isUpdate;
 
-
   SetupSRPRequest({
     required this.srpUserID,
     required this.srpSalt,
@@ -82,6 +81,7 @@ class CompleteSRPSetupRequest {
     );
   }
 }
+
 class SrpAttributes {
   final String srpUserID;
   final String srpSalt;

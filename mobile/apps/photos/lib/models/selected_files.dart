@@ -79,8 +79,10 @@ class SelectedFiles extends ChangeNotifier {
     return false;
   }
 
-  void clearAll() {
-    Bus.instance.fire(ClearSelectionsEvent());
+  void clearAll({bool fireEvent = true}) {
+    if (fireEvent) {
+      Bus.instance.fire(ClearSelectionsEvent());
+    }
     lastSelectionOperationFiles.addAll(files);
     files.clear();
     notifyListeners();
