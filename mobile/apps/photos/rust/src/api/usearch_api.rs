@@ -60,7 +60,7 @@ impl VectorDB {
         }
     }
 
-    pub fn add_vector(&self, key: u64, vector: &Vec<f32>) {
+    pub fn add_vector(&self, key: u64, vector: &[f32]) {
         if self.contains_vector(key) {
             self.remove_vector(key);
         } else {
