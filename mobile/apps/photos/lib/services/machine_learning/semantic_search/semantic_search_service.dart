@@ -265,6 +265,7 @@ class SemanticSearchService {
     required Map<String, double> minimumSimilarityMap,
   }) async {
     final startTime = DateTime.now();
+    // Uncomment if needed for debugging: print query embeddings
     // if (kDebugMode) {
     //   for (final queryText in textQueryToEmbeddingMap.keys) {
     //     final embedding = textQueryToEmbeddingMap[queryText]!;
