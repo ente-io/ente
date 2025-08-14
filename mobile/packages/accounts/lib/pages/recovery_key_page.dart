@@ -8,6 +8,7 @@ import 'package:ente_configuration/constants.dart';
 import 'package:ente_strings/ente_strings.dart';
 import 'package:ente_ui/components/buttons/gradient_button.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
+import "package:ente_ui/theme/ente_theme_data.dart";
 import 'package:ente_ui/utils/toast_util.dart';
 import 'package:ente_utils/platform_util.dart';
 import 'package:ente_utils/share_utils.dart';
@@ -250,6 +251,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
         SizedBox(
           height: 56,
           child: ElevatedButton(
+            style: Theme.of(context).colorScheme.optionalActionButtonStyle,
             onPressed: () async {
               await _saveKeys();
             },
