@@ -685,5 +685,17 @@
     "person_favorites": "{{name}} đã thích",
     "shared_favorites": "Những mục thích đã chia sẻ",
     "added_by_name": "Được thêm bởi {{name}}",
-    "unowned_files_not_processed": "Các tệp được thêm bởi người dùng khác không được xử lý"
+    "unowned_files_not_processed": "Các tệp được thêm bởi người dùng khác không được xử lý",
+    "custom_domains": "",
+    "custom_domains_desc": "",
+    "link_your_domain": "",
+    "domain": "",
+    "domain_help": "",
+    "invalid_domain": "",
+    "already_linked_domain": "",
+    "add_dns_entry": "",
+    "add_dns_entry_hint": "",
+    "custom_domains_help": "",
+    "num_1": "",
+    "num_2": ""
 }
