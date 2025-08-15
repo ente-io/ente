@@ -519,5 +519,17 @@
   "algorithm": "Algorithm",
   "type": "Type",
   "period": "Period",
-  "digits": "Digits"
+  "digits": "Digits",
+  "localBackupSettingsTitle": "Local Backup Settings",
+  "enableAutomaticBackups": "Enable Automatic Backups",
+  "backupLocation": "Backup Location",
+  "backupLocationDescription": "Select a folder to save backups. Backups run automatically when entries are added, deleted, or edited.",
+  "currentLocation": "Current Location:",
+  "notSetPleaseChooseLocation": "Not set. Please choose a location.",
+  "chooseLocation": "Choose Location",
+  "securityNotice": "Security Notice",
+  "backupSecurityNotice": "This encrypted backup holds your 2FA keys. If lost, you may not be able to recover your accounts. Keep it safe!",
+  "locationUpdatedAndBackupCreated": "Location updated and initial backup created!",
+  "initialBackupCreated": "Initial backup created!",
+  "pleaseChooseBackupLocation": "Please choose a backup location."
 }

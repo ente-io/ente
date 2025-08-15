@@ -11,7 +11,6 @@ import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/locale.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
 import 'package:ente_auth/services/billing_service.dart';
-import 'package:ente_auth/services/local_backup_service.dart';
 import 'package:ente_auth/services/notification_service.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/services/update_service.dart';
@@ -154,7 +153,6 @@ Future<void> _init(bool bool, {String? via}) async {
 
   await PreferenceService.instance.init();
   await CodeStore.instance.init();
-  await LocalBackupService.instance.init();
   await CodeDisplayStore.instance.init();
   await Configuration.instance.init();
   await Network.instance.init();

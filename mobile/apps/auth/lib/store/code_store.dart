@@ -239,6 +239,27 @@ class CodeStore {
       _isOfflineImportRunning = false;
     }
   }
+
+  Future<String> getCodesForExport() async {
+  final allCodes = await getAllCodes(sortCodes: false);
+  String data = "";
+  for (final code in allCodes) {
+    if (code.hasError) continue;
+    data += "${code.toOTPAuthUrlFormat()}\n";
+  }
+  return data;
+}
+
+
+
+
+
+
+
+
+
+
+
 }
 
 enum AddResult {
