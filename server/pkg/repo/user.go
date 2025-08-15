@@ -374,7 +374,8 @@ func (repo *UserRepository) GetPaidUsersWhoAreExceedingStorageQuota() ([]ente.Us
 			if refBonusStorage > (subStorage + addOnBonusStorage) {
 				refBonusStorage = subStorage + addOnBonusStorage
 			}
-			if (storageConsumed) <= (95 * (subStorage + refBonusStorage + addOnBonusStorage) / 100) {
+			totalStorageQuota := subStorage + refBonusStorage + addOnBonusStorage
+			if storageConsumed <= (95*totalStorageQuota/100) || storageConsumed >= totalStorageQuota {
 				continue
 			}
 		}
