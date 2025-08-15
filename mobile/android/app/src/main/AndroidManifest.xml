@@ -18,7 +18,7 @@
             android:exported="true"
             android:hardwareAccelerated="true"
             android:launchMode="singleTask"
-            android:theme="@style/LaunchTheme"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             android:windowSoftInputMode="adjustResize">
             <!-- This activity can be launched by other apps via these specific intents -->
             <intent-filter>

@@ -9,7 +9,6 @@ import "package:photos/service_locator.dart";
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/settings/about_section_widget.dart';
-import 'package:photos/ui/settings/account_section_widget.dart';
 import 'package:photos/ui/settings/app_version_widget.dart';
 import 'package:photos/ui/settings/backup/backup_section_widget.dart';
 import 'package:photos/ui/settings/debug/debug_section_widget.dart';
@@ -84,8 +83,6 @@ class SettingsPage extends StatelessWidget {
         const StorageCardWidget(),
         const SizedBox(height: 16), // Add margin between storage card and backup section
         const BackupSectionWidget(),
-        sectionSpacing,
-        const AccountSectionWidget(),
         sectionSpacing,
       ]);
     }

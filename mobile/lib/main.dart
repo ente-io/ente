@@ -116,8 +116,12 @@ Future<void> main() async {
 Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
   return await _runWithLogs(() async {
     _logger.info("Starting app in foreground");
-    await _init(false, via: 'mainMethod');
+    
+    // Initialize services
     final Locale? locale = await getLocale(noFallback: true);
+    await _init(false, via: 'mainMethod');
+    
+    // Start main app after initialization
     runApp(
       AppLock(
         builder: (args) =>
@@ -265,22 +269,23 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     SearchService.instance.init();
     FileDataService.instance.init(preferences);
 
-    _logger.info("FileUploader init $tlog");
-    await FileUploader.instance.init(preferences, isBackground);
-    _logger.info("FileUploader init done $tlog");
-
-    _logger.info("LocalSyncService init $tlog");
-    await LocalSyncService.instance.init(preferences);
-    _logger.info("LocalSyncService init done $tlog");
+    _logger.info("Starting parallel initialization $tlog");
+    
+    // Run independent services in parallel (only those that return Future)
+    await Future.wait([
+      FileUploader.instance.init(preferences, isBackground),
+      LocalSyncService.instance.init(preferences),
+      SyncService.instance.init(preferences),
+      PersonService.init(entityService, MLDataDB.instance, preferences),
+    ]);
+    
+    // Initialize services that don't return Future
+    HomeWidgetService.instance.init(preferences);
+    
+    _logger.info("Parallel initialization done $tlog");
 
     RemoteSyncService.instance.init(preferences);
     _logger.info("RemoteFileMLService done $tlog");
-
-    _logger.info("SyncService init $tlog");
-    await SyncService.instance.init(preferences);
-    _logger.info("SyncService init done $tlog");
-
-    await HomeWidgetService.instance.init(preferences);
 
     if (!isBackground) {
       await _scheduleFGHomeWidgetSync();
@@ -298,11 +303,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     PreviewVideoStore.instance.init(preferences);
     unawaited(SemanticSearchService.instance.init());
     unawaited(MLService.instance.init());
-    await PersonService.init(
-      entityService,
-      MLDataDB.instance,
-      preferences,
-    );
     EnteWakeLockService.instance.init(preferences);
     logLocalSettings();
     initComplete = true;
