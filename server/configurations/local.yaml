@@ -248,6 +248,8 @@ smtp:
     # Optional override for the sender name in the emails. If specified, it will
     # be used for all emails sent by the instance (default is email specific).
     sender-name:
+    # Optional encryption method. If tls or ssl is chosen, encryption is enabled.
+    encryption:
 
 # Zoho Zeptomail config (optional)
 #
