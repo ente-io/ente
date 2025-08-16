@@ -171,16 +171,19 @@ smtp:
     email:
     # Optional name for sender
     sender-name:
+    # Optional encryption
+    encryption:
 ```
 
 | Variable           | Description                  | Default |
-| ------------------ | ---------------------------- | ------- |
+|--------------------|------------------------------| ------- |
 | `smtp.host`        | SMTP server host             |         |
 | `smtp.port`        | SMTP server port             |         |
 | `smtp.username`    | SMTP auth username           |         |
 | `smtp.password`    | SMTP auth password           |         |
 | `smtp.email`       | Sender email address         |         |
 | `smtp.sender-name` | Custom name for email sender |         |
+| `smtp.encryption`  | Encryption method (tls, ssl) |         |
 | `transmail.key`    | Zeptomail API key            |         |
 
 ### WebAuthn Passkey Support
