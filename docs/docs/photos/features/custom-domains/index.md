@@ -66,7 +66,7 @@ As concrete examples, here is how this step would look for Cloudflare:
 
 ![Adding a CNAME for custom domain in Cloudflare](cf.png)
 
-And here is how it would look for Namecheap:
+Note that orange proxy option is off. And here is how it would look for Namecheap:
 
 ![Adding a CNAME for custom domain in Namecheap](nc.png)
 
@@ -78,7 +78,15 @@ The time it takes for DNS records to update is dependent on your DNS provider. U
 
 Once the DNS changes have been applied, then you can take any public link to your shared albums, replace `albums.ente.io` with your choice (e.g. `pics.example.org`), and the link will still work.
 
-You don't need to do this manually though, the apps will do it for you. More on this in the next section.
+You don't need to do this manually though, the apps will do it for you. More on this in the next section. But first, some troubleshooting tips.
+
+### Troubleshooting
+
+If your domain is not working, go through the following checklist.
+
+- The CNAME should be from your domain to my.ente.io, not the other way around. That is, `pics.example.org => my.ente.io`.
+
+- If you're using Cloudflare DNS, make sure that the "Orange" proxy status toggle is off, and the Proxy status is the "Grey" DNS only.
 
 ## Using
 

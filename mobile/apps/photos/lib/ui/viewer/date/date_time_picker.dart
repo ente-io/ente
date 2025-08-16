@@ -3,7 +3,8 @@ import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 
-Future<DateTime?> showDatePickerSheet(BuildContext context, {
+Future<DateTime?> showDatePickerSheet(
+  BuildContext context, {
   required DateTime initialDate,
   DateTime? maxDate,
   DateTime? minDate,

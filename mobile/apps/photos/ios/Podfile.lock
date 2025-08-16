@@ -284,6 +284,7 @@ DEPENDENCIES:
   - photo_manager (from `.symlinks/plugins/photo_manager/ios`)
   - privacy_screen (from `.symlinks/plugins/privacy_screen/ios`)
   - receive_sharing_intent (from `.symlinks/plugins/receive_sharing_intent/ios`)
+  - rust_lib_photos (from `.symlinks/plugins/rust_lib_photos/ios`)
   - sentry_flutter (from `.symlinks/plugins/sentry_flutter/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
@@ -407,6 +408,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/privacy_screen/ios"
   receive_sharing_intent:
     :path: ".symlinks/plugins/receive_sharing_intent/ios"
+  rust_lib_photos:
+    :path: ".symlinks/plugins/rust_lib_photos/ios"
   sentry_flutter:
     :path: ".symlinks/plugins/sentry_flutter/ios"
   share_plus:

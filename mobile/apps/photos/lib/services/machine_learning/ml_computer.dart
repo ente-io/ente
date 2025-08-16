@@ -1,5 +1,8 @@
 import 'dart:async';
+import "dart:typed_data" show Float32List;
 
+import "package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart"
+    show Uint64List;
 import "package:logging/logging.dart";
 import "package:photos/models/ml/vector.dart";
 import "package:photos/services/machine_learning/ml_constants.dart";
@@ -31,6 +34,40 @@ class MLComputer extends SuperIsolate {
   MLComputer._privateConstructor();
   static final MLComputer instance = MLComputer._privateConstructor();
   factory MLComputer() => instance;
+
+  Future<(List<Uint64List>, List<Float32List>)> bulkVectorSearch(
+    List<Float32List> clipFloat32,
+    bool exact,
+  ) async {
+    try {
+      final result = await runInIsolate(IsolateOperation.bulkVectorSearch, {
+        "clipFloat32": clipFloat32,
+        "exact": exact,
+      });
+      return result;
+    } catch (e, s) {
+      _logger.severe("Could not run bulk vector search in MLComputer", e, s);
+      rethrow;
+    }
+  }
+
+  Future<(Uint64List, List<Uint64List>, List<Float32List>)>
+      bulkVectorSearchWithKeys(
+    Uint64List potentialKeys,
+    bool exact,
+  ) async {
+    try {
+      final result =
+          await runInIsolate(IsolateOperation.bulkVectorSearchWithKeys, {
+        "potentialKeys": potentialKeys,
+        "exact": exact,
+      });
+      return result;
+    } catch (e, s) {
+      _logger.severe("Could not run bulk vector search in MLComputer", e, s);
+      rethrow;
+    }
+  }
 
   Future<List<double>> runClipText(String query) async {
     try {
