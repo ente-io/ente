@@ -125,6 +125,8 @@ abstract class SuperIsolate {
       final answerPort = ReceivePort();
 
       _activeTasks++;
+      // TODO: remove it after we're done
+      logger.info("new activity ${operation.name}, activeTasks $_activeTasks");
       final taskID = newIsolateTaskID(operation.name);
       _mainSendPort.send([taskID, operation.index, args, answerPort.sendPort]);
 
@@ -143,11 +145,19 @@ abstract class SuperIsolate {
           final exception = Exception(errorMessage);
           final stackTrace = StackTrace.fromString(errorStackTrace);
           completer.completeError(exception, stackTrace);
+          logger.warning(
+            "operation ${operation.name}, completed with warnings",
+            errorMessage,
+            errorStackTrace,
+          );
         } else {
           completer.complete(data);
+          logger.info("operation ${operation.name}, completed successfully");
         }
       });
       _activeTasks--;
+      // TODO: remove it after we're done
+      logger.info("new activity ${operation.name}, activeTasks $_activeTasks");
 
       return completer.future;
     });
