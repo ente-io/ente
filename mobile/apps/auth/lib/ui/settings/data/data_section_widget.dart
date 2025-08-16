@@ -10,6 +10,7 @@ import 'package:ente_auth/ui/settings/common_settings.dart';
 import 'package:ente_auth/ui/settings/data/duplicate_code_page.dart';
 import 'package:ente_auth/ui/settings/data/export_widget.dart';
 import 'package:ente_auth/ui/settings/data/import_page.dart';
+import 'package:ente_auth/ui/settings/data/local_backup_settings_page.dart'; //for local backup
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:flutter/material.dart';
@@ -27,6 +28,10 @@ class DataSectionWidget extends StatelessWidget {
       selectionOptionsWidget: _getSectionOptions(context),
       leadingIcon: Icons.key_outlined,
     );
+  }
+
+  Future<void> _handleLocalBackupClick(BuildContext context) async {
+    await routeToPage(context, const LocalBackupSettingsPage());
   }
 
   Column _getSectionOptions(BuildContext context) {
@@ -84,6 +89,17 @@ class DataSectionWidget extends StatelessWidget {
             context,
             DuplicateCodePage(duplicateCodes: duplicateCodes),
           );
+        },
+      ),
+      MenuItemWidget(
+        captionedTextWidget: const CaptionedTextWidget(
+          title: "Local Backup",
+        ),
+        pressedColor: getEnteColorScheme(context).fillFaint,
+        trailingIcon: Icons.chevron_right_outlined,
+        trailingIconIsMuted: true,
+        onTap: () async {
+          await _handleLocalBackupClick(context);
         },
       ),
       sectionOptionSpacing,
