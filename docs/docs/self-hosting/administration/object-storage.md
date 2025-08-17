@@ -73,15 +73,15 @@ You can configure this for individual buckets over defining top-level configurat
 
 A sample configuration for `b2-eu-cen` is provided, which can be used for other 2 buckets as well:
 
-``` yaml
-    b2-eu-cen:
-        are_local_buckets: true
-        use_path_style_urls: true
-        key: <key>
-        secret: <secret>
-        endpoint: localhost:3200
-        region: eu-central-2
-        bucket: b2-eu-cen
+```yaml
+b2-eu-cen:
+    are_local_buckets: true
+    use_path_style_urls: true
+    key: <key>
+    secret: <secret>
+    endpoint: localhost:3200
+    region: eu-central-2
+    bucket: b2-eu-cen
 ```
 
 ## CORS (Cross-Origin Resource Sharing)

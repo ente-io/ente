@@ -111,11 +111,11 @@ and [troubleshooting](/self-hosting/troubleshooting/uploads) sections.
 
 | Variable                               | Description                                  | Default |
 | -------------------------------------- | -------------------------------------------- | ------- |
-| `s3.b2-eu-cen`                         | Primary hot storage bucket configuration                |         |
+| `s3.b2-eu-cen`                         | Primary hot storage bucket configuration     |         |
 | `s3.wasabi-eu-central-2-v3.compliance` | Whether to disable compliance lock on delete | `true`  |
-| `s3.scw-eu-fr-v3`                      | Cold storage bucket configuration                 |         |
-| `s3.wasabi-eu-central-2-v3`       | Secondary hot storage configuration                        |         |
-| `s3.are_local_buckets`                 |            | `true` |
+| `s3.scw-eu-fr-v3`                      | Cold storage bucket configuration            |         |
+| `s3.wasabi-eu-central-2-v3`            | Secondary hot storage configuration          |         |
+| `s3.are_local_buckets`                 |                                              | `true`  |
 | `s3.use_path_style_urls`               | Enable path-style URLs for MinIO             | `false` |
 
 ### Encryption Keys
