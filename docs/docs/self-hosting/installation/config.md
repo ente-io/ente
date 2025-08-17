@@ -96,8 +96,8 @@ provide correct credentials for proper connectivity within Museum.
 The `s3` section within `museum.yaml` is by default configured to use local
 MinIO buckets when using `quickstart.sh` or Docker Compose.
 
-If you wish to use an external S3 provider, you can edit the configuration with
-your provider's credentials, and set `s3.are_local_buckets` to `false`.
+If you wish to use an external S3 provider with SSL, you can edit the configuration with
+your provider's credentials, and set `s3.are_local_buckets` to `false`. Additionally, you can configure this for specific buckets in the corresponding bucket sections in the Compose file.
 
 If you are using default MinIO, it is accessible at port `3200`. Web Console can
 be accessed by enabling port `3201` in the Compose file.
@@ -111,11 +111,11 @@ and [troubleshooting](/self-hosting/troubleshooting/uploads) sections.
 
 | Variable                               | Description                                  | Default |
 | -------------------------------------- | -------------------------------------------- | ------- |
-| `s3.b2-eu-cen`                         | Primary hot storage S3 config                |         |
+| `s3.b2-eu-cen`                         | Primary hot storage bucket configuration                |         |
 | `s3.wasabi-eu-central-2-v3.compliance` | Whether to disable compliance lock on delete | `true`  |
-| `s3.scw-eu-fr-v3`                      | Optional secondary S3 config                 |         |
-| `s3.wasabi-eu-central-2-derived`       | Derived data storage                         |         |
-| `s3.are_local_buckets`                 | Use local MinIO-compatible storage           | `false` |
+| `s3.scw-eu-fr-v3`                      | Cold storage bucket configuration                 |         |
+| `s3.wasabi-eu-central-2-v3`       | Secondary hot storage configuration                        |         |
+| `s3.are_local_buckets`                 |            | `true` |
 | `s3.use_path_style_urls`               | Enable path-style URLs for MinIO             | `false` |
 
 ### Encryption Keys
