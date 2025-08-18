@@ -55,8 +55,6 @@ class HomeWidgetService {
 
   final Logger _logger = Logger((HomeWidgetService).toString());
   final computeLock = Lock();
-  SharedPreferences? prefs;
-
   bool _isAppGroupSet = false;
 
   Future<void> setAppGroup({String id = iOSGroupIDMemory}) async {
