@@ -1,0 +1,724 @@
+{
+  "networkHostLookUpErr": "Nem lehet csatlakozni az Ente-hez. Kérjük, ellenőrizze a hálózati beállításokat, és ha a hiba továbbra is fennáll, forduljon az ügyfélszolgálathoz.",
+  "@networkHostLookUpErr": {
+    "description": "Error message shown when the app cannot connect to Ente due to network host lookup failure"
+  },
+  "networkConnectionRefusedErr": "Nem lehet csatlakozni az Ente-hez, próbálja újra egy idő után. Ha a hiba továbbra is fennáll, forduljon az ügyfélszolgálathoz.",
+  "@networkConnectionRefusedErr": {
+    "description": "Error message shown when the app cannot connect to Ente due to connection refused"
+  },
+  "itLooksLikeSomethingWentWrongPleaseRetryAfterSome": "Úgy tűnik, valami hiba történt. Kérjük, próbálja újra egy idő után. Ha a hiba továbbra is fennáll, forduljon ügyfélszolgálatunkhoz.",
+  "@itLooksLikeSomethingWentWrongPleaseRetryAfterSome": {
+    "description": "Generic error message for temporary issues"
+  },
+  "error": "Hiba",
+  "@error": {
+    "description": "Generic error title"
+  },
+  "ok": "OK",
+  "@ok": {
+    "description": "Generic OK button label"
+  },
+  "faq": "GY. I. K.",
+  "@faq": {
+    "description": "FAQ link label"
+  },
+  "contactSupport": "Lépj kapcsolatba az Ügyfélszolgálattal",
+  "@contactSupport": {
+    "description": "Contact support button label"
+  },
+  "emailYourLogs": "E-mailben küldje el naplóit",
+  "@emailYourLogs": {
+    "description": "Title for emailing logs dialog"
+  },
+  "pleaseSendTheLogsTo": "Kérjük, küldje el a naplókat erre az e-mail címre\n{toEmail}",
+  "@pleaseSendTheLogsTo": {
+    "description": "Message asking user to send logs to email address",
+    "placeholders": {
+      "toEmail": {
+        "type": "String",
+        "description": "Email address to send logs to"
+      }
+    }
+  },
+  "copyEmailAddress": "E-mail cím másolása",
+  "@copyEmailAddress": {
+    "description": "Button to copy email address to clipboard"
+  },
+  "exportLogs": "Naplófájlok exportálása",
+  "@exportLogs": {
+    "description": "Button to export logs"
+  },
+  "cancel": "Mégse",
+  "@cancel": {
+    "description": "Cancel button label"
+  },
+  "reportABug": "Hiba bejelentése",
+  "@reportABug": {
+    "description": "Label for reporting a bug"
+  },
+  "customEndpoint": "Csatlakozva a következőhöz: {endpoint}",
+  "@customEndpoint": {
+    "description": "Text showing user is connected to a custom endpoint",
+    "placeholders": {
+      "endpoint": {
+        "type": "String",
+        "description": "URL of the custom endpoint"
+      }
+    }
+  },
+  "save": "Mentés",
+  "@save": {
+    "description": "Label for save button"
+  },
+  "send": "Küldés",
+  "@send": {
+    "description": "Label for send button"
+  },
+  "saveOrSendDescription": "El szeretné menteni ezt a tárhelyére (alapértelmezés szerint a Letöltések mappába), vagy elküldi más alkalmazásoknak?",
+  "@saveOrSendDescription": {
+    "description": "Description text asking user if they want to save to storage or share with other apps"
+  },
+  "saveOnlyDescription": "El szeretné menteni ezt a tárhelyére (alapértelmezés szerint a Letöltések mappába)?",
+  "@saveOnlyDescription": {
+    "description": "Description text asking user if they want to save to storage (for platforms that don't support sharing)"
+  },
+  "enterNewEmailHint": "Add meg az új e-mail címed",
+  "@enterNewEmailHint": {
+    "description": "Hint text for entering new email address"
+  },
+  "email": "E-mail",
+  "@email": {
+    "description": "Email field label"
+  },
+  "verify": "Hitelesítés",
+  "@verify": {
+    "description": "Verify button label"
+  },
+  "invalidEmailTitle": "Érvénytelen e-mail cím",
+  "@invalidEmailTitle": {
+    "description": "Title for invalid email error dialog"
+  },
+  "invalidEmailMessage": "Kérjük, adjon meg egy érvényes e-mail címet.",
+  "@invalidEmailMessage": {
+    "description": "Message for invalid email error dialog"
+  },
+  "pleaseWait": "Kérem várjon...",
+  "@pleaseWait": {
+    "description": "Please wait message"
+  },
+  "verifyPassword": "Jelszó megerősítése",
+  "@verifyPassword": {
+    "description": "Verify password button label"
+  },
+  "incorrectPasswordTitle": "Érvénytelen jelszó",
+  "@incorrectPasswordTitle": {
+    "description": "Title for incorrect password error"
+  },
+  "pleaseTryAgain": "Kérjük, próbálja meg újra",
+  "@pleaseTryAgain": {
+    "description": "Message asking user to try again"
+  },
+  "enterPassword": "Adja meg a jelszót",
+  "@enterPassword": {
+    "description": "Enter password field label"
+  },
+  "enterYourPasswordHint": "Adja meg a jelszavát",
+  "@enterYourPasswordHint": {
+    "description": "Hint for password field"
+  },
+  "activeSessions": "Aktív munkamenetek",
+  "@activeSessions": {
+    "description": "Title for active sessions page"
+  },
+  "oops": "Hoppá",
+  "@oops": {
+    "description": "Oops error title"
+  },
+  "somethingWentWrongPleaseTryAgain": "Hiba történt. Kérjük, próbálkozz újra",
+  "@somethingWentWrongPleaseTryAgain": {
+    "description": "Generic error message"
+  },
+  "thisWillLogYouOutOfThisDevice": "Ezzel kijelentkezik erről az eszközről!",
+  "@thisWillLogYouOutOfThisDevice": {
+    "description": "Warning message for logging out of current device"
+  },
+  "thisWillLogYouOutOfTheFollowingDevice": "Ezzel kijelentkezik a következő eszközről:",
+  "@thisWillLogYouOutOfTheFollowingDevice": {
+    "description": "Warning message for logging out of another device"
+  },
+  "terminateSession": "Megszakítja a munkamenetet?",
+  "@terminateSession": {
+    "description": "Title for terminate session dialog"
+  },
+  "terminate": "Befejezés",
+  "@terminate": {
+    "description": "Terminate button label"
+  },
+  "thisDevice": "Ez az eszköz",
+  "@thisDevice": {
+    "description": "Label for current device"
+  },
+  "createAccount": "Felhasználó létrehozás",
+  "@createAccount": {
+    "description": "Create account button label"
+  },
+  "weakStrength": "Gyenge",
+  "@weakStrength": {
+    "description": "Weak password strength label"
+  },
+  "moderateStrength": "Mérsékelt",
+  "@moderateStrength": {
+    "description": "Moderate password strength label"
+  },
+  "strongStrength": "Erős",
+  "@strongStrength": {
+    "description": "Strong password strength label"
+  },
+  "deleteAccount": "Fiók törlése",
+  "@deleteAccount": {
+    "description": "Delete account button label"
+  },
+  "deleteAccountQuery": "Szomorúan tapasztaljuk. Problémába ütköztél?",
+  "@deleteAccountQuery": {
+    "description": "Message asking user why they want to delete account"
+  },
+  "yesSendFeedbackAction": "Igen, visszajelzés küldése",
+  "@yesSendFeedbackAction": {
+    "description": "Button to confirm sending feedback"
+  },
+  "noDeleteAccountAction": "Fiók végleges törlése",
+  "@noDeleteAccountAction": {
+    "description": "Button to proceed with account deletion"
+  },
+  "initiateAccountDeleteTitle": "Kérjük, hitelesítse magát a fiók törlésének kezdeményezéséhez",
+  "@initiateAccountDeleteTitle": {
+    "description": "Title for authentication dialog before account deletion"
+  },
+  "confirmAccountDeleteTitle": "Fiók törlésének megerősítése",
+  "@confirmAccountDeleteTitle": {
+    "description": "Title for account deletion confirmation dialog"
+  },
+  "confirmAccountDeleteMessage": "Ez a fiók össze van kapcsolva más Ente-alkalmazásokkal, ha használ ilyet.\n\nA feltöltött adataid törlését ütemezzük az összes Ente alkalmazásban, és a fiókod véglegesen törlésre kerül.",
+  "@confirmAccountDeleteMessage": {
+    "description": "Message warning about account deletion consequences"
+  },
+  "delete": "Törlés",
+  "@delete": {
+    "description": "Delete button label"
+  },
+  "createNewAccount": "Új fiók létrehozása",
+  "@createNewAccount": {
+    "description": "Create new account button label"
+  },
+  "password": "Jelszó",
+  "@password": {
+    "description": "Password field label"
+  },
+  "confirmPassword": "Jelszó megerősítése",
+  "@confirmPassword": {
+    "description": "Confirm password field label"
+  },
+  "passwordStrength": "Jelszó erőssége: {passwordStrengthValue}",
+  "@passwordStrength": {
+    "description": "Text to indicate the password strength",
+    "placeholders": {
+      "passwordStrengthValue": {
+        "description": "The strength of the password as a string",
+        "type": "String",
+        "example": "Weak or Moderate or Strong"
+      }
+    }
+  },
+  "hearUsWhereTitle": "Honnan hallottál Ente-ről? (opcionális)",
+  "@hearUsWhereTitle": {
+    "description": "Title asking how user heard about Ente"
+  },
+  "hearUsExplanation": "Nem követjük nyomon az alkalmazástelepítéseket. Segítene, ha elmondaná, hol talált ránk!",
+  "@hearUsExplanation": {
+    "description": "Explanation for asking how user heard about Ente"
+  },
+  "signUpTerms": "Elfogadom az <u-terms>szolgáltatási feltételeket</u-terms> és az <u-policy>adatvédelmi irányelveket</u-policy>",
+  "@signUpTerms": {
+    "description": "Terms agreement text for sign up"
+  },
+  "termsOfServicesTitle": "Használati feltételek",
+  "@termsOfServicesTitle": {
+    "description": "Terms of service title"
+  },
+  "privacyPolicyTitle": "Adatvédelmi irányelvek",
+  "@privacyPolicyTitle": {
+    "description": "Privacy policy title"
+  },
+  "ackPasswordLostWarning": "Tudomásul veszem, hogy ha elveszítem a jelszavamat, elveszíthetem az adataimat, mivel adataim <underline>végponttól végpontig titkosítva vannak</underline>.",
+  "@ackPasswordLostWarning": {
+    "description": "Warning about password loss"
+  },
+  "encryption": "Titkosítás",
+  "@encryption": {
+    "description": "Encryption label"
+  },
+  "logInLabel": "Bejelentkezés",
+  "@logInLabel": {
+    "description": "Log in button label"
+  },
+  "welcomeBack": "Köszöntjük ismét!",
+  "@welcomeBack": {
+    "description": "Welcome back message"
+  },
+  "loginTerms": "A bejelentkezés gombra kattintva elfogadom az <u-terms>szolgáltatási feltételeket</u-terms> és az <u-policy>adatvédelmi irányelveket</u-policy>",
+  "@loginTerms": {
+    "description": "Terms agreement text for login"
+  },
+  "noInternetConnection": "Nincs internet kapcsolat",
+  "@noInternetConnection": {
+    "description": "No internet connection error message"
+  },
+  "pleaseCheckYourInternetConnectionAndTryAgain": "Kérjük, ellenőrizze az internetkapcsolatát, és próbálja meg újra.",
+  "@pleaseCheckYourInternetConnectionAndTryAgain": {
+    "description": "Message asking user to check internet connection"
+  },
+  "verificationFailedPleaseTryAgain": "Az ellenőrzés sikertelen, próbálja újra",
+  "@verificationFailedPleaseTryAgain": {
+    "description": "Verification failed error message"
+  },
+  "recreatePasswordTitle": "Új jelszó létrehozása",
+  "@recreatePasswordTitle": {
+    "description": "Title for recreate password dialog"
+  },
+  "recreatePasswordBody": "A jelenlegi eszköz nem elég erős a jelszavának ellenőrzéséhez, de újra tudjuk úgy generálni, hogy az minden eszközzel működjön.\n\nKérjük, jelentkezzen be helyreállítási kulcsával, és állítsa be újra jelszavát (ha szeretné, újra használhatja ugyanazt).",
+  "@recreatePasswordBody": {
+    "description": "Body text for recreate password dialog"
+  },
+  "useRecoveryKey": "Helyreállítási kulcs használata",
+  "@useRecoveryKey": {
+    "description": "Use recovery key button label"
+  },
+  "forgotPassword": "Elfelejtett jelszó",
+  "@forgotPassword": {
+    "description": "Forgot password link label"
+  },
+  "changeEmail": "E-mail cím módosítása",
+  "@changeEmail": {
+    "description": "Change email button label"
+  },
+  "verifyEmail": "E-mail cím megerősítése",
+  "@verifyEmail": {
+    "description": "Verify email title"
+  },
+  "weHaveSendEmailTo": "E-mailt küldtünk a következő címre: <green>{email}</green>",
+  "@weHaveSendEmailTo": {
+    "description": "Text to indicate that we have sent a mail to the user",
+    "placeholders": {
+      "email": {
+        "description": "The email address of the user",
+        "type": "String",
+        "example": "example@ente.io"
+      }
+    }
+  },
+  "toResetVerifyEmail": "Jelszava visszaállításához először igazolja e-mail-címét.",
+  "@toResetVerifyEmail": {
+    "description": "Message asking user to verify email before password reset"
+  },
+  "checkInboxAndSpamFolder": "Kérjük, ellenőrizze beérkező leveleit (és spam mappát) az ellenőrzés befejezéséhez",
+  "@checkInboxAndSpamFolder": {
+    "description": "Message asking user to check inbox and spam folder"
+  },
+  "tapToEnterCode": "Koppintson a kód beírásához",
+  "@tapToEnterCode": {
+    "description": "Hint for entering verification code"
+  },
+  "sendEmail": "E-mail küldése",
+  "resendEmail": "E-mail újraküldése",
+  "@resendEmail": {
+    "description": "Resend email button label"
+  },
+  "passKeyPendingVerification": "Az ellenőrzés még függőben van",
+  "@passKeyPendingVerification": {
+    "description": "Message when passkey verification is pending"
+  },
+  "loginSessionExpired": "Lejárt a munkamenet",
+  "@loginSessionExpired": {
+    "description": "Login session expired title"
+  },
+  "loginSessionExpiredDetails": "A munkameneted lejárt. Kérem lépjen be újra.",
+  "@loginSessionExpiredDetails": {
+    "description": "Login session expired details"
+  },
+  "passkeyAuthTitle": "Álkulcs megerősítése",
+  "@passkeyAuthTitle": {
+    "description": "Passkey authentication title"
+  },
+  "waitingForVerification": "Várakozás az ellenőrzésre...",
+  "@waitingForVerification": {
+    "description": "Waiting for verification message"
+  },
+  "tryAgain": "Próbáld újra",
+  "@tryAgain": {
+    "description": "Try again button label"
+  },
+  "checkStatus": "Állapot ellenőrzése",
+  "@checkStatus": {
+    "description": "Check status button label"
+  },
+  "loginWithTOTP": "Bejelentkezés TOTP-vel",
+  "@loginWithTOTP": {
+    "description": "Login with TOTP button label"
+  },
+  "recoverAccount": "Fiók visszaállítása",
+  "@recoverAccount": {
+    "description": "Recover account button label"
+  },
+  "setPasswordTitle": "Jelszó beállítás",
+  "@setPasswordTitle": {
+    "description": "Set password title"
+  },
+  "changePasswordTitle": "Jelszó módosítás",
+  "@changePasswordTitle": {
+    "description": "Change password title"
+  },
+  "resetPasswordTitle": "Jelszó visszaállítás",
+  "@resetPasswordTitle": {
+    "description": "Reset password title"
+  },
+  "encryptionKeys": "Titkosító kulcsok",
+  "@encryptionKeys": {
+    "description": "Encryption keys title"
+  },
+  "enterPasswordToEncrypt": "Adjon meg egy jelszót, amellyel titkosíthatjuk adatait",
+  "@enterPasswordToEncrypt": {
+    "description": "Prompt to enter password for encryption"
+  },
+  "enterNewPasswordToEncrypt": "Adjon meg egy új jelszót, amellyel titkosíthatjuk adatait",
+  "@enterNewPasswordToEncrypt": {
+    "description": "Prompt to enter new password for encryption"
+  },
+  "passwordWarning": "Ezt a jelszót nem tároljuk, így ha elfelejti, <underline>nem tudjuk visszafejteni adatait</underline>",
+  "@passwordWarning": {
+    "description": "Warning about password storage"
+  },
+  "howItWorks": "Hogyan működik",
+  "@howItWorks": {
+    "description": "How it works button label"
+  },
+  "generatingEncryptionKeys": "Titkosító kulcsok generálása...",
+  "@generatingEncryptionKeys": {
+    "description": "Generating encryption keys message"
+  },
+  "passwordChangedSuccessfully": "A jelszó sikeresen meg lett változtatva",
+  "@passwordChangedSuccessfully": {
+    "description": "Password changed successfully message"
+  },
+  "signOutFromOtherDevices": "Jelentkezzen ki más eszközökről",
+  "@signOutFromOtherDevices": {
+    "description": "Sign out from other devices title"
+  },
+  "signOutOtherBody": "Ha úgy gondolja, hogy valaki ismeri jelszavát, kényszerítheti a fiókját használó összes többi eszközt a kijelentkezésre.",
+  "@signOutOtherBody": {
+    "description": "Sign out other devices explanation"
+  },
+  "signOutOtherDevices": "Jelentkezzen ki a többi eszközről",
+  "@signOutOtherDevices": {
+    "description": "Sign out other devices button label"
+  },
+  "doNotSignOut": "Ne jelentkezzen ki",
+  "@doNotSignOut": {
+    "description": "Do not sign out button label"
+  },
+  "generatingEncryptionKeysTitle": "Titkosítási kulcs generálása...",
+  "@generatingEncryptionKeysTitle": {
+    "description": "Generating encryption keys title"
+  },
+  "continueLabel": "Folytatás",
+  "@continueLabel": {
+    "description": "Continue button label"
+  },
+  "insecureDevice": "Nem biztonságos eszköz",
+  "@insecureDevice": {
+    "description": "Insecure device warning title"
+  },
+  "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": "Sajnáljuk, nem tudtunk biztonságos kulcsokat generálni ezen az eszközön.\n\nkérjük, regisztráljon egy másik eszközről.",
+  "@sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": {
+    "description": "Error message for insecure device"
+  },
+  "recoveryKeyCopiedToClipboard": "A helyreállítási kulcs a vágólapra másolva",
+  "@recoveryKeyCopiedToClipboard": {
+    "description": "Recovery key copied message"
+  },
+  "recoveryKey": "Visszaállítási kulcs",
+  "@recoveryKey": {
+    "description": "Recovery key label"
+  },
+  "recoveryKeyOnForgotPassword": "Ha elfelejti jelszavát, csak ezzel a kulccsal tudja visszaállítani adatait.",
+  "@recoveryKeyOnForgotPassword": {
+    "description": "Recovery key importance explanation"
+  },
+  "recoveryKeySaveDescription": "Ezt a kulcsot nem tároljuk, kérjük, őrizze meg ezt a 24 szavas kulcsot egy biztonságos helyen.",
+  "@recoveryKeySaveDescription": {
+    "description": "Recovery key save description"
+  },
+  "doThisLater": "Később",
+  "@doThisLater": {
+    "description": "Do this later button label"
+  },
+  "saveKey": "Mentés",
+  "@saveKey": {
+    "description": "Save key button label"
+  },
+  "recoveryKeySaved": "A helyreállítási kulcs a Letöltések mappába mentve!",
+  "@recoveryKeySaved": {
+    "description": "Recovery key saved confirmation message"
+  },
+  "noRecoveryKeyTitle": "Nincs helyreállítási kulcs?",
+  "@noRecoveryKeyTitle": {
+    "description": "No recovery key title"
+  },
+  "twoFactorAuthTitle": "Kétlépcsős hitelesítés (2FA)",
+  "@twoFactorAuthTitle": {
+    "description": "Two-factor authentication title"
+  },
+  "enterCodeHint": "Írja be a 6 számjegyű kódot a hitelesítő alkalmazásból",
+  "@enterCodeHint": {
+    "description": "Hint for entering 2FA code"
+  },
+  "lostDeviceTitle": "Elveszett a készüléked?",
+  "@lostDeviceTitle": {
+    "description": "Lost device title"
+  },
+  "enterRecoveryKeyHint": "Visszaállító kód megadása",
+  "@enterRecoveryKeyHint": {
+    "description": "Hint for entering recovery key"
+  },
+  "recover": "Visszaállít",
+  "@recover": {
+    "description": "Recover button label"
+  },
+  "loggingOut": "Kijelentkezés...",
+  "@loggingOut": {
+    "description": "Message shown while logging out"
+  },
+  "immediately": "Azonnal",
+  "@immediately": {
+    "description": "Immediately option for auto lock timing"
+  },
+  "appLock": "Alkalmazások zárolása",
+  "@appLock": {
+    "description": "App lock setting title"
+  },
+  "autoLock": "Automatikus lezárás",
+  "@autoLock": {
+    "description": "Auto lock setting title"
+  },
+  "noSystemLockFound": "Nem található rendszerzár",
+  "@noSystemLockFound": {
+    "description": "Error when no system lock is found"
+  },
+  "deviceLockEnablePreSteps": "Az eszközzár engedélyezéséhez állítsa be az eszköz jelszavát vagy a zárképernyőt a rendszerbeállításokban.",
+  "@deviceLockEnablePreSteps": {
+    "description": "Instructions for enabling device lock"
+  },
+  "appLockDescription": "Válasszon az eszköz alapértelmezett zárolási képernyője és a PIN-kóddal vagy jelszóval rendelkező egyéni zárolási képernyő között.",
+  "@appLockDescription": {
+    "description": "Description of app lock feature"
+  },
+  "deviceLock": "Eszköz lezárás",
+  "@deviceLock": {
+    "description": "Device lock option title"
+  },
+  "pinLock": "PIN feloldás",
+  "@pinLock": {
+    "description": "PIN lock option title"
+  },
+  "autoLockFeatureDescription": "Az az idő, amely elteltével az alkalmazás zárolásra kerül, miután a háttérbe került",
+  "@autoLockFeatureDescription": {
+    "description": "Description of auto lock feature"
+  },
+  "hideContent": "Tartalom elrejtése",
+  "@hideContent": {
+    "description": "Hide content setting title"
+  },
+  "hideContentDescriptionAndroid": "Elrejti az alkalmazás tartalmát az alkalmazásváltóban, és letiltja a képernyőképeket",
+  "@hideContentDescriptionAndroid": {
+    "description": "Description of hide content feature on Android"
+  },
+  "hideContentDescriptioniOS": "Elrejti az alkalmazás tartalmát az alkalmazásváltóban",
+  "@hideContentDescriptioniOS": {
+    "description": "Description of hide content feature on iOS"
+  },
+  "tooManyIncorrectAttempts": "Túl sok helytelen próbálkozás",
+  "@tooManyIncorrectAttempts": {
+    "description": "Message shown when too many incorrect attempts are made"
+  },
+  "tapToUnlock": "Koppintson a feloldáshoz",
+  "@tapToUnlock": {
+    "description": "Message prompting user to tap to unlock"
+  },
+  "areYouSureYouWantToLogout": "Biztos benne, hogy kijelentkezik?",
+  "@areYouSureYouWantToLogout": {
+    "description": "Confirmation message before logout"
+  },
+  "yesLogout": "Igen, kijelentkezés",
+  "@yesLogout": {
+    "description": "Confirmation button for logout"
+  },
+  "authToViewSecrets": "A titkos kulcsok megtekintéséhez hitelesítse magát",
+  "@authToViewSecrets": {
+    "description": "Message prompting authentication to view secrets"
+  },
+  "next": "Következő",
+  "@next": {
+    "description": "Next button label"
+  },
+  "setNewPassword": "Új jelszó beállítása",
+  "@setNewPassword": {
+    "description": "Set new password title"
+  },
+  "enterPin": "PIN kód megadása",
+  "@enterPin": {
+    "description": "Enter PIN prompt"
+  },
+  "setNewPin": "Új PIN kód beállítása",
+  "@setNewPin": {
+    "description": "Set new PIN title"
+  },
+  "confirm": "Megerősítés",
+  "@confirm": {
+    "description": "Confirm button label"
+  },
+  "reEnterPassword": "Írja be újra a jelszót",
+  "@reEnterPassword": {
+    "description": "Re-enter password prompt"
+  },
+  "reEnterPin": "Írja be újra a PIN-kódot",
+  "@reEnterPin": {
+    "description": "Re-enter PIN prompt"
+  },
+  "androidBiometricHint": "Személyazonosság ellenőrzése",
+  "@androidBiometricHint": {
+    "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricNotRecognized": "Nem felismerhető. Próbáld újra.",
+  "@androidBiometricNotRecognized": {
+    "description": "Message to let the user know that authentication was failed. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricSuccess": "Sikeres",
+  "@androidBiometricSuccess": {
+    "description": "Message to let the user know that authentication was successful. It is used on Android side. Maximum 60 characters."
+  },
+  "androidCancelButton": "Mégse",
+  "@androidCancelButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on Android side. Maximum 30 characters."
+  },
+  "androidSignInTitle": "Hitelesítés szükséges",
+  "@androidSignInTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user that they need to scan biometric to continue. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricRequiredTitle": "Biometria szükséges",
+  "@androidBiometricRequiredTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user has not set up biometric authentication on their device. It is used on Android side. Maximum 60 characters."
+  },
+  "androidDeviceCredentialsRequiredTitle": "Az eszköz hitelesítő adatai szükségesek",
+  "@androidDeviceCredentialsRequiredTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user has not set up credentials authentication on their device. It is used on Android side. Maximum 60 characters."
+  },
+  "androidDeviceCredentialsSetupDescription": "Az eszköz hitelesítő adatai szükségesek",
+  "@androidDeviceCredentialsSetupDescription": {
+    "description": "Message advising the user to go to the settings and configure device credentials on their device. It shows in a dialog on Android side."
+  },
+  "goToSettings": "Beállítások megnyitása",
+  "@goToSettings": {
+    "description": "Message showed on a button that the user can click to go to settings pages from the current dialog. It is used on both Android and iOS side. Maximum 30 characters."
+  },
+  "androidGoToSettingsDescription": "A biometrikus hitelesítés nincs beállítva az eszközön. A biometrikus hitelesítés hozzáadásához lépjen a 'Beállítások > Biztonság' menüpontra.",
+  "@androidGoToSettingsDescription": {
+    "description": "Message advising the user to go to the settings and configure biometric on their device. It shows in a dialog on Android side."
+  },
+  "iOSLockOut": "A biometrikus hitelesítés ki van kapcsolva. Az engedélyezéséhez zárja le és oldja fel a képernyőt.",
+  "@iOSLockOut": {
+    "description": "Message advising the user to re-enable biometrics on their device. It shows in a dialog on iOS side."
+  },
+  "iOSOkButton": "OK",
+  "@iOSOkButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
+  },
+  "emailAlreadyRegistered": "Ez az e-mai cím már regisztrálva van.",
+  "@emailAlreadyRegistered": {
+    "description": "Error message when email is already registered"
+  },
+  "emailNotRegistered": "Ez az e-mail cím nincs regisztrálva.",
+  "@emailNotRegistered": {
+    "description": "Error message when email is not registered"
+  },
+  "thisEmailIsAlreadyInUse": "Ez az e-mail már használatban van",
+  "@thisEmailIsAlreadyInUse": {
+    "description": "Error message when email is already in use"
+  },
+  "emailChangedTo": "Az e-mail cím módosítva erre: {newEmail}",
+  "@emailChangedTo": {
+    "description": "Message when email has been changed",
+    "placeholders": {
+      "newEmail": {
+        "description": "The new email address",
+        "type": "String",
+        "example": "new@example.com"
+      }
+    }
+  },
+  "authenticationFailedPleaseTryAgain": "A hitelesítés sikertelen, próbálja újra",
+  "@authenticationFailedPleaseTryAgain": {
+    "description": "Error message when authentication fails"
+  },
+  "authenticationSuccessful": "Sikeres hitelesítés!",
+  "@authenticationSuccessful": {
+    "description": "Success message when authentication is successful"
+  },
+  "sessionExpired": "A munkamenet lejárt",
+  "@sessionExpired": {
+    "description": "Error message when session has expired"
+  },
+  "incorrectRecoveryKey": "Helytelen helyreállítási kulcs",
+  "@incorrectRecoveryKey": {
+    "description": "Error message when recovery key is incorrect"
+  },
+  "theRecoveryKeyYouEnteredIsIncorrect": "A megadott helyreállítási kulcs helytelen",
+  "@theRecoveryKeyYouEnteredIsIncorrect": {
+    "description": "Detailed error message when recovery key is incorrect"
+  },
+  "twofactorAuthenticationSuccessfullyReset": "A kétfaktoros hitelesítés visszaállítása sikeres",
+  "@twofactorAuthenticationSuccessfullyReset": {
+    "description": "Message when two-factor authentication is successfully reset"
+  },
+  "yourVerificationCodeHasExpired": "Ez az ellenőrző kód lejárt",
+  "@yourVerificationCodeHasExpired": {
+    "description": "Error message when verification code has expired"
+  },
+  "incorrectCode": "Helytelen kód",
+  "@incorrectCode": {
+    "description": "Error message when code is incorrect"
+  },
+  "sorryTheCodeYouveEnteredIsIncorrect": "Sajnáljuk, a megadott kód helytelen",
+  "@sorryTheCodeYouveEnteredIsIncorrect": {
+    "description": "Detailed error message when code is incorrect"
+  },
+  "developerSettings": "Fejlesztői beállítások",
+  "@developerSettings": {
+    "description": "Label for developerSettings"
+  },
+  "serverEndpoint": "Szerver végpont",
+  "@serverEndpoint": {
+    "description": "Label for serverEndpoint"
+  },
+  "invalidEndpoint": "Érvénytelen végpont",
+  "@invalidEndpoint": {
+    "description": "Label for invalidEndpoint"
+  },
+  "invalidEndpointMessage": "Sajnáljuk, a megadott végpont érvénytelen. Adjon meg egy érvényes végpontot, és próbálja újra.",
+  "@invalidEndpointMessage": {
+    "description": "Label for invalidEndpointMessage"
+  },
+  "endpointUpdatedMessage": "A végpont sikeresen frissítve",
+  "@endpointUpdatedMessage": {
+    "description": "Label for endpointUpdatedMessage"
+  }
+}
