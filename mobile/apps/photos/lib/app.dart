@@ -90,6 +90,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   }
 
   void _checkForWidgetLaunch() {
+    _logger.info("Checking for widget launch");
     hw.HomeWidget.initiallyLaunchedFromHomeWidget().then(
       (uri) => HomeWidgetService.instance.onLaunchFromWidget(uri, context),
     );

@@ -39,12 +39,7 @@ class AlbumHomeWidgetService {
 
   // Properties
   final Logger _logger = Logger((AlbumHomeWidgetService).toString());
-  late final SharedPreferences _prefs;
-
-  // Initialization
-  void init(SharedPreferences prefs) {
-    _prefs = prefs;
-  }
+  SharedPreferences get _prefs => HomeWidgetService.instance.prefs;
 
   // Public methods
   List<int>? getSelectedAlbumIds() {

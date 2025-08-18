@@ -55,16 +55,12 @@ class HomeWidgetService {
 
   final Logger _logger = Logger((HomeWidgetService).toString());
   final computeLock = Lock();
+  late final SharedPreferences prefs;
 
   void init(SharedPreferences prefs) {
+    _logger.info("Initializing HomeWidgetService");
     setAppGroupID(iOSGroupIDMemory);
-    _initializeWidgetServices(prefs);
-  }
-
-  void _initializeWidgetServices(SharedPreferences prefs) {
-    AlbumHomeWidgetService.instance.init(prefs);
-    PeopleHomeWidgetService.instance.init(prefs);
-    MemoryHomeWidgetService.instance.init(prefs);
+    this.prefs = prefs;
   }
 
   void setAppGroupID(String id) {
