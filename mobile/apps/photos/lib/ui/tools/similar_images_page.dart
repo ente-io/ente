@@ -469,30 +469,11 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                         .toSet();
                     final bool allFilesFromGroupSelected =
                         groupSelectedFiles.length == similarFiles.length;
-                    final hasAnySelection = _selectedFiles.files.isNotEmpty;
-                    final allGroupFilesSelected = similarFiles.files.every(
-                      (file) => _selectedFiles.isFileSelected(file),
-                    );
-
                     if (groupSelectedFiles.isNotEmpty) {
                       return _getSmallDeleteButton(
                         groupSelectedFiles,
                         allFilesFromGroupSelected,
                       );
-                    } else if (hasAnySelection) {
-                      return _getSmallSelectButton(allGroupFilesSelected, () {
-                        if (allGroupFilesSelected) {
-                          // Unselect all files in this group
-                          _selectedFiles.unSelectAll(
-                            similarFiles.files.toSet(),
-                          );
-                        } else {
-                          // Select all files in this group
-                          _selectedFiles.selectAll(
-                            similarFiles.files.sublist(1).toSet(),
-                          );
-                        }
-                      });
                     }
                     return const SizedBox.shrink();
                   },
@@ -782,35 +763,6 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     _selectedFiles.unSelectAll(allDeleteFiles);
     setState(() {});
     await deleteFilesFromRemoteOnly(context, allDeleteFiles.toList());
-  }
-
-  Widget _getSmallSelectButton(bool unselectAll, void Function() onTap) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 8,
-          vertical: 8,
-        ),
-        decoration: BoxDecoration(
-          color: unselectAll
-              ? getEnteColorScheme(context).primary500
-              : getEnteColorScheme(context).strokeFaint,
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: Text(
-          unselectAll
-              ? "Unselect all" // TODO: lau: extract string
-              : "Select extra", // TODO: lau: extract string
-          style: textTheme.smallMuted.copyWith(
-            color: unselectAll ? Colors.white : colorScheme.textMuted,
-          ),
-        ),
-      ),
-    );
   }
 
   Widget _getSortMenu() {
