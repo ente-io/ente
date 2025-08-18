@@ -129,7 +129,9 @@ class SimilarImagesService {
         }
         // show highest quality files first
         similarFilesList.sort((a, b) {
-          return (b.fileSize ?? 0).compareTo(a.fileSize ?? 0);
+          final sizeComparison = (b.fileSize ?? 0).compareTo(a.fileSize ?? 0);
+          if (sizeComparison != 0) return sizeComparison;
+          return a.displayName.compareTo(b.displayName);
         });
         final similarFiles = SimilarFiles(
           similarFilesList,
