@@ -89,8 +89,9 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     _checkForWidgetLaunch();
   }
 
-  void _checkForWidgetLaunch() {
-    hw.HomeWidget.initiallyLaunchedFromHomeWidget().then(
+  Future<void> _checkForWidgetLaunch() async {
+    await HomeWidgetService.instance.setAppGroup();
+    await hw.HomeWidget.initiallyLaunchedFromHomeWidget().then(
       (uri) => HomeWidgetService.instance.onLaunchFromWidget(uri, context),
     );
     hw.HomeWidget.widgetClicked.listen(
