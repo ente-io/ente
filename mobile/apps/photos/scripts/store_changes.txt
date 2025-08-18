@@ -1,3 +1,4 @@
+- Fix Widget tap on iOS
 - Added similar images debug screen (Settings > Backup > Free up space > Similar images)
 - Added support for custom domain links
 - Image editor fixes:  
