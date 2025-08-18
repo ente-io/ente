@@ -232,10 +232,10 @@ packages:
     dependency: "direct main"
     description:
       name: file_saver
-      sha256: "448b1e30142cffe52f37ee085ea9ca50670d5425bb09b649d193549b2dcf6e26"
+      sha256: "9d93db09bd4da9e43238f9dd485360fc51a5c138eea5ef5f407ec56e58079ac0"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.0"
+    version: "0.3.1"
   fixnum:
     dependency: transitive
     description:
