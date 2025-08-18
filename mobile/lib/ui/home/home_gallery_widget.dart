@@ -89,27 +89,16 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
           ignoredCollectionIDs: collectionsToHide,
           ignoreSavedFiles: true,
         );
-        if (hasSelectedAllForBackup) {
-          result = await FilesDB.instance.getAllLocalAndUploadedFiles(
-            creationStartTime,
-            creationEndTime,
-            ownerID!,
-            limit: limit,
-            asc: asc,
-            filterOptions: filterOptions,
-            ignoreSharedFiles: _shouldHideSharedItems,
-          );
-        } else {
-          result = await FilesDB.instance.getAllPendingOrUploadedFiles(
-            creationStartTime,
-            creationEndTime,
-            ownerID!,
-            limit: limit,
-            asc: asc,
-            filterOptions: filterOptions,
-            ignoreSharedFiles: _shouldHideSharedItems,
-          );
-        }
+        // Always show local photos regardless of backup settings
+        result = await FilesDB.instance.getAllLocalAndUploadedFiles(
+          creationStartTime,
+          creationEndTime,
+          ownerID!,
+          limit: limit,
+          asc: asc,
+          filterOptions: filterOptions,
+          ignoreSharedFiles: _shouldHideSharedItems,
+        );
 
         return result;
       },
