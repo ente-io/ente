@@ -1776,6 +1776,14 @@
   "same": "Gleich",
   "different": "Verschieden",
   "sameperson": "Dieselbe Person?",
+  "cLTitle1": "Erweiterte Bildbearbeitung",
+  "cLDesc1": "Wir veröffentlichen eine neue und erweiterte Bildbearbeitung, die mehr Bildzuschnitte ermöglicht, vordefinierte Filter für schnelleres Bearbeiten bietet, sowie die Feinabstimmung von Sättigung, Kontrast, Helligkeit und vielem mehr erlaubt. Der neue Editor erlaubt außerdem das Zeichnen auf den Fotos oder das Hinzufügen von Emojis als Sticker.",
+  "cLTitle2": "Intelligente Alben",
+  "cLDesc2": "Du kannst jetzt automatisch Fotos von ausgewählten Personen zu jedem Album hinzufügen. Öffne einfach das Album und wähle \"Personen automatisch hinzufügen\" aus dem Menü. Zusammen mit einem geteilten Album kannst Du Fotos mit null Klicks teilen.",
+  "cLTitle3": "Verbesserte Galerie",
+  "cLDesc3": "Wir haben die Möglichkeit hinzugefügt, Alben nach Wochen, Monaten und Jahren zu gruppieren. Du kannst jetzt die Galerie mit diesen neuen Gruppierungs-Optionen so anpassen, dass sie genau so aussieht, wie Du möchtest, zusammen mit angepassten Rastern",
+  "cLTitle4": "Schnelleres Scrollen",
+  "cLDesc4": "Zusammen mit einem Schwung Änderungen unter der Haube, um das Erlebnis beim Scrollen der Galerie zu verbessern, haben wir außerdem den Scrollbalken mit Markern neu gestaltet, um es Dir zu ermöglichen, schnell in der Zeitleiste zu springen.",
   "indexingPausedStatusDescription": "Die Indizierung ist pausiert. Sie wird automatisch fortgesetzt, wenn das Gerät bereit ist. Das Gerät wird als bereit angesehen, wenn sich der Akkustand, die Akkugesundheit und der thermische Zustand in einem gesunden Bereich befinden.",
   "thisWeek": "Diese Woche",
   "lastWeek": "Letzte Woche",
@@ -1800,5 +1808,24 @@
   "automaticallyAnalyzeAndSplitGrouping": "Wir analysieren die Gruppierung automatisch, um festzustellen, ob mehrere Personen vorhanden sind, und trennen sie erneut. Dies kann ein paar Sekunden dauern.",
   "layout": "Layout",
   "day": "Tag",
-  "peopleAutoAddDesc": "Wähle die Personen, die du automatisch zum Album hinzufügen möchtest"
+  "peopleAutoAddDesc": "Wähle die Personen, die du automatisch zum Album hinzufügen möchtest",
+  "undo": "Rückgängig",
+  "redo": "Wiederherstellen",
+  "filter": "Filter",
+  "adjust": "Anpassen",
+  "draw": "Zeichnen",
+  "sticker": "Sticker",
+  "brushColor": "Pinselfarbe",
+  "font": "Schriftart",
+  "background": "Hintergrund",
+  "align": "Ausrichten",
+  "addedToAlbums": "{count, plural, =1{Erfolgreich zu einem Album hinzugefügt} other{Erfolgreich zu {count} Alben hinzugefügt}}",
+  "@addedToAlbums": {
+    "description": "Message shown when items are added to albums",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

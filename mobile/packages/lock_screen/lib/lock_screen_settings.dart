@@ -95,7 +95,6 @@ class LockScreenSettings {
 
   Future<void> setHideAppContent(bool hideContent) async {
     if (PlatformUtil.isDesktop()) return;
-    final bool isLightMode = _preferences.getBool(kIsLightMode) ?? true;
     !hideContent
         ? PrivacyScreen.instance.disable()
         : await PrivacyScreen.instance.enable(
@@ -105,11 +104,8 @@ class LockScreenSettings {
             androidOptions: const PrivacyAndroidOptions(
               enableSecure: true,
             ),
-            backgroundColor:
-                isLightMode ? const Color(0xffffffff) : const Color(0xff000000),
-            blurEffect: isLightMode
-                ? PrivacyBlurEffect.extraLight
-                : PrivacyBlurEffect.extraLight,
+            backgroundColor: const Color(0xff000000),
+            blurEffect: PrivacyBlurEffect.extraLight,
           );
     await _preferences.setBool(keyHideAppContent, hideContent);
   }

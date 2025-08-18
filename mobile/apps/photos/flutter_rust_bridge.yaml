@@ -1,0 +1,8 @@
+rust_input: crate::api
+rust_root: rust/
+dart_output: lib/src/rust
+
+dart_preamble: |
+  // ignore_for_file: require_trailing_commas
+
+web: false

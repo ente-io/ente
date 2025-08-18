@@ -1,4 +1,3 @@
-
 class GeneralFaceMlException implements Exception {
   final String message;
 

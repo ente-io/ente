@@ -46,25 +46,27 @@ You can alternatively install the build from PlayStore or F-Droid.
 
 ## 🧑‍💻 Building from source
 
-1. [Install Flutter v3.32.8](https://flutter.dev/docs/get-started/install).
+1. Install [Flutter v3.32.8](https://flutter.dev/docs/get-started/install) and [Rust](https://www.rust-lang.org/tools/install).
 
-2. Pull in all submodules with `git submodule update --init --recursive`
+2. Install [Flutter Rust Bridge](https://cjycode.com/flutter_rust_bridge/) with `cargo install flutter_rust_bridge_codegen`
 
-3. Enable repo git hooks `git config core.hooksPath hooks`
+3. Pull in all submodules with `git submodule update --init --recursive`
 
-4. If using Visual Studio Code, add the [Flutter
+4. Enable repo git hooks `git config core.hooksPath hooks`
+
+5. If using Visual Studio Code, add the [Flutter
    Intl](https://marketplace.visualstudio.com/items?itemName=localizely.flutter-intl)
    extension
 
-5. On Android:
+6. On Android:
 
-   * For development, run `flutter run -t lib/main.dart --flavor independent`
+   - For development, run `flutter run -t lib/main.dart --flavor independent`
 
-   * For building APK, [setup your
+   - For building APK, [setup your
      keystore](https://docs.flutter.dev/deployment/android#create-an-upload-keystore)
      and run `flutter build apk --release --flavor independent`
 
-6. For iOS, run `flutter build ios`
+7. For iOS, run `flutter build ios`
 
 Some common issues and troubleshooting tips are in [docs/dev](docs/dev.md).
 
@@ -88,11 +90,12 @@ issue](https://github.com/ente-io/ente/issues/new?title=Request+for+New+Language
 to have it added.
 
 ## Certificate Fingerprints
- 
+
 - **SHA1**: E1:60:10:18:B6:B0:2E:A3:74:6F:90:67:50:30:29:75:0E:EF:6D:39
 - **SHA256**: 35:ED:56:81:B7:0B:B3:BD:35:D9:0D:85:6A:F5:69:4C:50:4D:EF:46:AA:D8:3F:77:7B:1C:67:5C:F4:51:35:0B
 
 To verify these fingerprints, use the following command:
+
 ```bash
 apksigner verify --print-certs <path_to_apk>
 ```

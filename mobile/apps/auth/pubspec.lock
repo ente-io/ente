@@ -540,10 +540,10 @@ packages:
     dependency: "direct main"
     description:
       name: file_saver
-      sha256: "448b1e30142cffe52f37ee085ea9ca50670d5425bb09b649d193549b2dcf6e26"
+      sha256: "9d93db09bd4da9e43238f9dd485360fc51a5c138eea5ef5f407ec56e58079ac0"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.0"
+    version: "0.3.1"
   fixnum:
     dependency: "direct main"
     description:
@@ -555,10 +555,11 @@ packages:
   fk_user_agent:
     dependency: "direct main"
     description:
-      name: fk_user_agent
-      sha256: fd6c94e120786985a292d12f61422a581f4e851148d5940af38b819357b8ad0d
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: "458046cd9a88924e5074d96ba45397219d53b230"
+      resolved-ref: "458046cd9a88924e5074d96ba45397219d53b230"
+      url: "https://github.com/flutter-fast-kit/fk_user_agent"
+    source: git
     version: "2.1.0"
   flutter:
     dependency: "direct main"
@@ -1145,9 +1146,9 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: v2-only
-      resolved-ref: "0cdfeed654d79636eff0c57110f3f6ad5801ba2f"
-      url: "https://github.com/ente-io/move_to_background.git"
+      ref: "91e4d1a9c55b28bf93425d1f12faf410efc1e48d"
+      resolved-ref: "91e4d1a9c55b28bf93425d1f12faf410efc1e48d"
+      url: "https://github.com/Sayegh7/move_to_background"
     source: git
     version: "1.0.2"
   native_dio_adapter:
@@ -1393,11 +1394,12 @@ packages:
   qr_code_scanner_plus:
     dependency: "direct main"
     description:
-      name: qr_code_scanner_plus
-      sha256: "39696b50d277097ee4d90d4292de36f38c66213a4f5216a06b2bdd2b63117859"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.10+1"
+      path: "."
+      ref: a2d31633d4744f72ada87cfa85d221358ab082af
+      resolved-ref: a2d31633d4744f72ada87cfa85d221358ab082af
+      url: "https://github.com/juliuscanute/qr_code_scanner"
+    source: git
+    version: "1.0.0"
   qr_flutter:
     dependency: "direct main"
     description:
