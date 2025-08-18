@@ -561,6 +561,16 @@
       "slug": "enom"
     },
     {
+      "title": "Epic",
+      "hex": "BB003A",
+      "altNames": [
+        "Epic EMR",
+	      "Epic PRD",
+        "Haiku",
+	      "Epic Haiku"
+      ]
+    },
+    {
       "title": "Epic Games",
       "slug": "epic_games",
       "hex": "000000"
