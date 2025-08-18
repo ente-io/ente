@@ -127,8 +127,9 @@ class SimilarImagesService {
         for (final file in similarFilesList) {
           alreadyUsedFileIDs.add(file.uploadedFileID!);
         }
+        // show highest quality files first
         similarFilesList.sort((a, b) {
-          return a.displayName.length.compareTo(b.displayName.length);
+          return (b.fileSize ?? 0).compareTo(a.fileSize ?? 0);
         });
         final similarFiles = SimilarFiles(
           similarFilesList,
