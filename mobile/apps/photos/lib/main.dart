@@ -174,7 +174,6 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
   // Misc Services
   await UserService.instance.init();
   NotificationService.instance.init(prefs);
-  if (Platform.isAndroid) HomeWidgetService.instance.init(prefs);
 
   // Begin Execution
   // only runs for android
@@ -268,8 +267,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("SyncService init $tlog");
     await SyncService.instance.init(preferences);
     _logger.info("SyncService init done $tlog");
-
-    HomeWidgetService.instance.init(preferences);
 
     if (!isBackground) {
       await _scheduleFGHomeWidgetSync();

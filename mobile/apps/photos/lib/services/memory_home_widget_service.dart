@@ -31,12 +31,7 @@ class MemoryHomeWidgetService {
 
   // Properties
   final Logger _logger = Logger((MemoryHomeWidgetService).toString());
-  late final SharedPreferences _prefs;
-
-  // Initialization
-  void init(SharedPreferences prefs) {
-    _prefs = prefs;
-  }
+  SharedPreferences get _prefs => ServiceLocator.instance.prefs;
 
   // Preference getters and setters
   bool? hasLastYearMemoriesSelected() {
