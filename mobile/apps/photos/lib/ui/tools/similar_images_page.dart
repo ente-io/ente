@@ -254,6 +254,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       children: [
         Expanded(
           child: ListView.builder(
+            cacheExtent: 400,
             itemCount: _similarFilesList.length + 1, // +1 for header
             itemBuilder: (context, index) {
               if (index == 0) {

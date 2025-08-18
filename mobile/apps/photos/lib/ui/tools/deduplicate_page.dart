@@ -134,6 +134,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       children: [
         Expanded(
           child: ListView.builder(
+            cacheExtent: 400,
             itemBuilder: (context, index) {
               if (index == 0) {
                 return const SizedBox.shrink();
