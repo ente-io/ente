@@ -224,6 +224,8 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     Computer.shared().turnOn(workersCount: 4).ignore();
     CryptoUtil.init();
 
+    HomeWidgetService.instance.init(preferences);
+
     _logger.info("Lockscreen init $tlog");
     unawaited(LockScreenSettings.instance.init(preferences));
 
@@ -268,8 +270,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("SyncService init $tlog");
     await SyncService.instance.init(preferences);
     _logger.info("SyncService init done $tlog");
-
-    HomeWidgetService.instance.init(preferences);
 
     if (!isBackground) {
       await _scheduleFGHomeWidgetSync();
