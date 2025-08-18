@@ -174,7 +174,6 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
   // Misc Services
   await UserService.instance.init();
   NotificationService.instance.init(prefs);
-  if (Platform.isAndroid) HomeWidgetService.instance.init(prefs);
 
   // Begin Execution
   // only runs for android
@@ -223,8 +222,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     // Start workers asynchronously. No need to wait for them to start
     Computer.shared().turnOn(workersCount: 4).ignore();
     CryptoUtil.init();
-
-    HomeWidgetService.instance.init(preferences);
 
     _logger.info("Lockscreen init $tlog");
     unawaited(LockScreenSettings.instance.init(preferences));

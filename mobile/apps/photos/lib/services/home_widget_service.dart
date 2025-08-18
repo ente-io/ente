@@ -55,19 +55,24 @@ class HomeWidgetService {
 
   final Logger _logger = Logger((HomeWidgetService).toString());
   final computeLock = Lock();
-  late final SharedPreferences prefs;
+  SharedPreferences? prefs;
 
-  void init(SharedPreferences prefs) {
-    _logger.info("Initializing HomeWidgetService");
-    setAppGroupID(iOSGroupIDMemory);
-    this.prefs = prefs;
+  bool _isAppGroupSet = false;
+
+  Future<void> setAppGroup() async {
+    if (_isAppGroupSet) return;
+    _logger.info("Setting app group id");
+    await setAppGroupID(iOSGroupIDMemory);
+    _isAppGroupSet = true;
   }
 
-  void setAppGroupID(String id) {
-    hw.HomeWidget.setAppGroupId(id).ignore();
+  Future<void> setAppGroupID(String id) async {
+    if (!Platform.isIOS) return;
+    await hw.HomeWidget.setAppGroupId(id);
   }
 
   Future<void> initHomeWidget([bool isBg = false]) async {
+    await setAppGroup();
     await AlbumHomeWidgetService.instance.initAlbumHomeWidget(isBg);
     await PeopleHomeWidgetService.instance.initPeopleHomeWidget();
     await MemoryHomeWidgetService.instance.initMemoryHomeWidget();
@@ -214,7 +219,7 @@ class HomeWidgetService {
 
   Future<void> clearWidget(bool autoLogout) async {
     if (autoLogout) {
-      setAppGroupID(iOSGroupIDMemory);
+      await setAppGroup();
     }
 
     await Future.wait([

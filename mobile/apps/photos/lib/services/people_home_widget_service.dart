@@ -35,7 +35,7 @@ class PeopleHomeWidgetService {
 
   // Properties
   final Logger _logger = Logger((PeopleHomeWidgetService).toString());
-  SharedPreferences get _prefs => HomeWidgetService.instance.prefs;
+  SharedPreferences get _prefs => ServiceLocator.instance.prefs;
   final peopleChangedLock = Lock();
 
   // Public methods
