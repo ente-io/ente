@@ -59,16 +59,16 @@ class HomeWidgetService {
 
   bool _isAppGroupSet = false;
 
-  Future<void> setAppGroup() async {
-    if (_isAppGroupSet) return;
+  Future<void> setAppGroup({String id = iOSGroupIDMemory}) async {
+    if (!Platform.isIOS || _isAppGroupSet) return;
     _logger.info("Setting app group id");
-    await setAppGroupID(iOSGroupIDMemory);
+    await hw.HomeWidget.setAppGroupId(id).catchError(
+      (error) {
+        _logger.severe("Failed to set app group ID: $error");
+        return null;
+      },
+    );
     _isAppGroupSet = true;
-  }
-
-  Future<void> setAppGroupID(String id) async {
-    if (!Platform.isIOS) return;
-    await hw.HomeWidget.setAppGroupId(id);
   }
 
   Future<void> initHomeWidget([bool isBg = false]) async {
