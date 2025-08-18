@@ -6,8 +6,8 @@ import "package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart"
 import 'package:logging/logging.dart';
 import "package:photos/db/ml/db.dart";
 import "package:photos/extensions/stop_watch.dart";
+import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
-import "package:photos/models/file/file_type.dart";
 import "package:photos/models/similar_files.dart";
 import "package:photos/services/machine_learning/ml_computer.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
@@ -58,7 +58,7 @@ class SimilarImagesService {
     final allFileIdsToFile = <int, EnteFile>{};
     final fileIDs = <int>[];
     for (final file in allFiles) {
-      if (file.uploadedFileID != null && file.fileType != FileType.video) {
+      if (file.uploadedFileID != null && file.isOwner && !file.isVideo) {
         allFileIdsToFile[file.uploadedFileID!] = file;
         fileIDs.add(file.uploadedFileID!);
       }
