@@ -8,7 +8,7 @@
     <application
         android:label="Ente Locker"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/icon_blue">
         <activity
             android:name=".MainActivity"
             android:exported="true"
