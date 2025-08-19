@@ -317,11 +317,6 @@ class _LockScreenState extends State<LockScreen>
   }
 
   Future<void> _showLockScreen({String source = ''}) async {
-    if (!await Configuration.instance.shouldShowLockScreen() &&
-        !localSettings.isOnGuestView()) {
-      return;
-    }
-
     final int currentTimestamp = DateTime.now().millisecondsSinceEpoch;
     _logger.info("Showing lock screen $source $currentTimestamp");
     try {
