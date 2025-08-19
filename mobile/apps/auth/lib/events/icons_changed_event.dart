@@ -1,3 +1,3 @@
-import 'package:ente_auth/events/event.dart';
+import 'package:ente_events/models/event.dart';
 
 class IconsChangedEvent extends Event {}

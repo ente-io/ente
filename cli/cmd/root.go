@@ -2,10 +2,11 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/ente-io/cli/pkg"
-	"github.com/spf13/cobra/doc"
 	"os"
 	"runtime"
+
+	"github.com/ente-io/cli/pkg"
+	"github.com/spf13/cobra/doc"
 
 	"github.com/spf13/viper"
 
@@ -20,11 +21,6 @@ var ctrl *pkg.ClICtrl
 var rootCmd = &cobra.Command{
 	Use:   "ente",
 	Short: "CLI tool for exporting your photos from ente.io",
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Sprintf("Hello World")
-	},
 }
 
 func GenerateDocs() error {
