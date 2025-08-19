@@ -9,8 +9,7 @@ import "package:photos/utils/navigation_util.dart";
 class HeaderErrorWidget extends StatelessWidget {
   final Error? _error;
 
-  const HeaderErrorWidget({super.key, required Error? error})
-      : _error = error;
+  const HeaderErrorWidget({super.key, required Error? error}) : _error = error;
 
   @override
   Widget build(BuildContext context) {

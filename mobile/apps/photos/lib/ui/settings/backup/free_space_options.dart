@@ -22,6 +22,7 @@ import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/tools/debug/app_storage_viewer.dart";
 import "package:photos/ui/tools/deduplicate_page.dart";
 import "package:photos/ui/tools/free_space_page.dart";
+import "package:photos/ui/tools/similar_images_page.dart";
 import "package:photos/ui/viewer/gallery/large_files_page.dart";
 import "package:photos/utils/dialog_util.dart";
 import 'package:photos/utils/navigation_util.dart';
@@ -187,6 +188,41 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                                 const SizedBox(
                                   height: 24,
                                 ),
+                                if (flagService.enableVectorDb)
+                                  MenuItemWidget(
+                                    captionedTextWidget:
+                                        const CaptionedTextWidget(
+                                      title:
+                                          "Similar images", // TODO: lau: extract string
+                                    ),
+                                    menuItemColor: colorScheme.fillFaint,
+                                    trailingWidget: Icon(
+                                      Icons.chevron_right_outlined,
+                                      color: colorScheme.strokeBase,
+                                    ),
+                                    singleBorderRadius: 8,
+                                    alignCaptionedTextToLeft: true,
+                                    trailingIconIsMuted: true,
+                                    showOnlyLoadingState: true,
+                                    onTap: () async {
+                                      await routeToPage(
+                                        context,
+                                        const SimilarImagesPage(),
+                                      );
+                                    },
+                                  ),
+                                if (flagService.enableVectorDb)
+                                  const Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: MenuSectionDescriptionWidget(
+                                      content:
+                                          "Use AI to find images that look similar to each other.", // TODO: lau: extract string
+                                    ),
+                                  ),
+                                if (flagService.enableVectorDb)
+                                  const SizedBox(
+                                    height: 24,
+                                  ),
                                 MenuItemWidget(
                                   captionedTextWidget: CaptionedTextWidget(
                                     title: S.of(context).viewLargeFiles,

@@ -35,4 +35,3 @@ final $typed_data.Uint8List centerBoxDescriptor = $convert.base64Decode(
     'CglDZW50ZXJCb3gSEQoBeBgBIAEoAkgAUgF4iAEBEhEKAXkYAiABKAJIAVIBeYgBARIbCgZoZW'
     'lnaHQYAyABKAJIAlIGaGVpZ2h0iAEBEhkKBXdpZHRoGAQgASgCSANSBXdpZHRoiAEBQgQKAl94'
     'QgQKAl95QgkKB19oZWlnaHRCCAoGX3dpZHRo');
-

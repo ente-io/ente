@@ -1,0 +1,62 @@
+{
+  "ok": "ശരി",
+  "@ok": {
+    "description": "Generic OK button label"
+  },
+  "cancel": "റദ്ദാക്കുക",
+  "@cancel": {
+    "description": "Cancel button label"
+  },
+  "email": "ഇമെയിൽ",
+  "@email": {
+    "description": "Email field label"
+  },
+  "verify": "പരിശോധിക്കുക",
+  "@verify": {
+    "description": "Verify button label"
+  },
+  "verifyPassword": "പാസ്‌വേഡ് സ്ഥിരീകരിക്കുക",
+  "@verifyPassword": {
+    "description": "Verify password button label"
+  },
+  "incorrectPasswordTitle": "തെറ്റായ പാസ്‌വേഡ്",
+  "@incorrectPasswordTitle": {
+    "description": "Title for incorrect password error"
+  },
+  "createNewAccount": "പുതിയ അക്കൗണ്ട് സൃഷ്ടിക്കുക",
+  "@createNewAccount": {
+    "description": "Create new account button label"
+  },
+  "confirmPassword": "പാസ്വേഡ് സ്ഥിരീകരിക്കുക",
+  "@confirmPassword": {
+    "description": "Confirm password field label"
+  },
+  "welcomeBack": "വീണ്ടും സ്വാഗതം!",
+  "@welcomeBack": {
+    "description": "Welcome back message"
+  },
+  "changeEmail": "ഇമെയിൽ മാറ്റുക",
+  "@changeEmail": {
+    "description": "Change email button label"
+  },
+  "verifyEmail": "ഇമെയിൽ സ്ഥിരീകരിക്കുക",
+  "@verifyEmail": {
+    "description": "Verify email title"
+  },
+  "twoFactorAuthTitle": "ടു-ഫാക്ടർ ആധികാരികത",
+  "@twoFactorAuthTitle": {
+    "description": "Two-factor authentication title"
+  },
+  "enterCodeHint": "നിങ്ങളുടെ ഓതന്റിക്കേറ്റർ ആപ്പിൽ നിന്നുള്ള 6 അക്ക കോഡ് നൽകുക",
+  "@enterCodeHint": {
+    "description": "Hint for entering 2FA code"
+  },
+  "emailAlreadyRegistered": "ഇമെയിൽ ഇതിനകം രജിസ്റ്റർ ചെയ്തിട്ടുണ്ട്.",
+  "@emailAlreadyRegistered": {
+    "description": "Error message when email is already registered"
+  },
+  "emailNotRegistered": "ഇമെയിൽ രജിസ്റ്റർ ചെയ്തിട്ടില്ല.",
+  "@emailNotRegistered": {
+    "description": "Error message when email is not registered"
+  }
+}

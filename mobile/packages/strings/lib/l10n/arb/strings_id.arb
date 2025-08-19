@@ -1,0 +1,724 @@
+{
+  "networkHostLookUpErr": "Tidak dapat terhubung ke Ente. Mohon periksa kembali koneksi internet Anda dan hubungi tim bantuan kami jika galat masih ada.",
+  "@networkHostLookUpErr": {
+    "description": "Error message shown when the app cannot connect to Ente due to network host lookup failure"
+  },
+  "networkConnectionRefusedErr": "Sepertinya ada yang salah. Mohon coba lagi setelah beberapa waktu. Jika galat masih ada, Anda dapat menghubungi tim bantuan kami.",
+  "@networkConnectionRefusedErr": {
+    "description": "Error message shown when the app cannot connect to Ente due to connection refused"
+  },
+  "itLooksLikeSomethingWentWrongPleaseRetryAfterSome": "Sepertinya ada yang salah. Mohon coba lagi setelah beberapa waktu. Jika galat masih ada, Anda dapat menghubungi tim bantuan kami.",
+  "@itLooksLikeSomethingWentWrongPleaseRetryAfterSome": {
+    "description": "Generic error message for temporary issues"
+  },
+  "error": "Kesalahan",
+  "@error": {
+    "description": "Generic error title"
+  },
+  "ok": "Oke",
+  "@ok": {
+    "description": "Generic OK button label"
+  },
+  "faq": "Pertanyaan yang sering ditanyakan",
+  "@faq": {
+    "description": "FAQ link label"
+  },
+  "contactSupport": "Hubungi dukungan",
+  "@contactSupport": {
+    "description": "Contact support button label"
+  },
+  "emailYourLogs": "Kirimkan log Anda melalui surel",
+  "@emailYourLogs": {
+    "description": "Title for emailing logs dialog"
+  },
+  "pleaseSendTheLogsTo": "Mohon kirim log ke {toEmail}",
+  "@pleaseSendTheLogsTo": {
+    "description": "Message asking user to send logs to email address",
+    "placeholders": {
+      "toEmail": {
+        "type": "String",
+        "description": "Email address to send logs to"
+      }
+    }
+  },
+  "copyEmailAddress": "Salin alamat surel",
+  "@copyEmailAddress": {
+    "description": "Button to copy email address to clipboard"
+  },
+  "exportLogs": "Ekspor log",
+  "@exportLogs": {
+    "description": "Button to export logs"
+  },
+  "cancel": "Batal",
+  "@cancel": {
+    "description": "Cancel button label"
+  },
+  "reportABug": "Laporkan bug",
+  "@reportABug": {
+    "description": "Label for reporting a bug"
+  },
+  "customEndpoint": "Terhubung ke {endpoint}",
+  "@customEndpoint": {
+    "description": "Text showing user is connected to a custom endpoint",
+    "placeholders": {
+      "endpoint": {
+        "type": "String",
+        "description": "URL of the custom endpoint"
+      }
+    }
+  },
+  "save": "Simpan",
+  "@save": {
+    "description": "Label for save button"
+  },
+  "send": "Kirim",
+  "@send": {
+    "description": "Label for send button"
+  },
+  "saveOrSendDescription": "Anda ingin menyimpan kode ke penyimpanan Anda (folder pilihan bawaan adalah folder Downloads) atau Anda ingin kirimkan ke aplikasi lain?",
+  "@saveOrSendDescription": {
+    "description": "Description text asking user if they want to save to storage or share with other apps"
+  },
+  "saveOnlyDescription": "Anda ingin menyimpan kode ke penyimpanan Anda (folder pilihan bawaan adalah folder Downloads)",
+  "@saveOnlyDescription": {
+    "description": "Description text asking user if they want to save to storage (for platforms that don't support sharing)"
+  },
+  "enterNewEmailHint": "Masukkan alamat email baru anda",
+  "@enterNewEmailHint": {
+    "description": "Hint text for entering new email address"
+  },
+  "email": "Email",
+  "@email": {
+    "description": "Email field label"
+  },
+  "verify": "Verifikasi",
+  "@verify": {
+    "description": "Verify button label"
+  },
+  "invalidEmailTitle": "Alamat email tidak valid",
+  "@invalidEmailTitle": {
+    "description": "Title for invalid email error dialog"
+  },
+  "invalidEmailMessage": "Harap masukkan alamat email yang valid.",
+  "@invalidEmailMessage": {
+    "description": "Message for invalid email error dialog"
+  },
+  "pleaseWait": "Mohon tunggu...",
+  "@pleaseWait": {
+    "description": "Please wait message"
+  },
+  "verifyPassword": "Verifikasi kata sandi",
+  "@verifyPassword": {
+    "description": "Verify password button label"
+  },
+  "incorrectPasswordTitle": "Kata sandi salah",
+  "@incorrectPasswordTitle": {
+    "description": "Title for incorrect password error"
+  },
+  "pleaseTryAgain": "Harap coba lagi",
+  "@pleaseTryAgain": {
+    "description": "Message asking user to try again"
+  },
+  "enterPassword": "Masukkan kata sandi",
+  "@enterPassword": {
+    "description": "Enter password field label"
+  },
+  "enterYourPasswordHint": "Masukkan kata sandi Anda",
+  "@enterYourPasswordHint": {
+    "description": "Hint for password field"
+  },
+  "activeSessions": "Sesi aktif",
+  "@activeSessions": {
+    "description": "Title for active sessions page"
+  },
+  "oops": "Ups",
+  "@oops": {
+    "description": "Oops error title"
+  },
+  "somethingWentWrongPleaseTryAgain": "Ada yang salah. Mohon coba kembali",
+  "@somethingWentWrongPleaseTryAgain": {
+    "description": "Generic error message"
+  },
+  "thisWillLogYouOutOfThisDevice": "Langkah ini akan mengeluarkan Anda dari gawai ini!",
+  "@thisWillLogYouOutOfThisDevice": {
+    "description": "Warning message for logging out of current device"
+  },
+  "thisWillLogYouOutOfTheFollowingDevice": "Langkah ini akan mengeluarkan Anda dari gawai berikut:",
+  "@thisWillLogYouOutOfTheFollowingDevice": {
+    "description": "Warning message for logging out of another device"
+  },
+  "terminateSession": "Akhiri sesi?",
+  "@terminateSession": {
+    "description": "Title for terminate session dialog"
+  },
+  "terminate": "Akhiri",
+  "@terminate": {
+    "description": "Terminate button label"
+  },
+  "thisDevice": "Gawai ini",
+  "@thisDevice": {
+    "description": "Label for current device"
+  },
+  "createAccount": "Buat akun",
+  "@createAccount": {
+    "description": "Create account button label"
+  },
+  "weakStrength": "Lemah",
+  "@weakStrength": {
+    "description": "Weak password strength label"
+  },
+  "moderateStrength": "Sedang",
+  "@moderateStrength": {
+    "description": "Moderate password strength label"
+  },
+  "strongStrength": "Kuat",
+  "@strongStrength": {
+    "description": "Strong password strength label"
+  },
+  "deleteAccount": "Hapus akun",
+  "@deleteAccount": {
+    "description": "Delete account button label"
+  },
+  "deleteAccountQuery": "Kami akan merasa kehilangan Anda. Apakah Anda menghadapi masalah?",
+  "@deleteAccountQuery": {
+    "description": "Message asking user why they want to delete account"
+  },
+  "yesSendFeedbackAction": "Ya, kirim umpan balik",
+  "@yesSendFeedbackAction": {
+    "description": "Button to confirm sending feedback"
+  },
+  "noDeleteAccountAction": "Tidak, hapus akun",
+  "@noDeleteAccountAction": {
+    "description": "Button to proceed with account deletion"
+  },
+  "initiateAccountDeleteTitle": "Harap autentikasi untuk memulai penghapusan akun",
+  "@initiateAccountDeleteTitle": {
+    "description": "Title for authentication dialog before account deletion"
+  },
+  "confirmAccountDeleteTitle": "Konfirmasikan penghapusan akun",
+  "@confirmAccountDeleteTitle": {
+    "description": "Title for account deletion confirmation dialog"
+  },
+  "confirmAccountDeleteMessage": "Akun ini terhubung dengan aplikasi Ente yang lain (jika Anda pakai).\n\nData yang Anda unggah di seluruh aplikasi Ente akan dijadwalkan untuk dihapus. Akun Anda juga akan dihapus secara permanen.",
+  "@confirmAccountDeleteMessage": {
+    "description": "Message warning about account deletion consequences"
+  },
+  "delete": "Hapus",
+  "@delete": {
+    "description": "Delete button label"
+  },
+  "createNewAccount": "Buat akun baru",
+  "@createNewAccount": {
+    "description": "Create new account button label"
+  },
+  "password": "Kata Sandi",
+  "@password": {
+    "description": "Password field label"
+  },
+  "confirmPassword": "Konfirmasi kata sandi",
+  "@confirmPassword": {
+    "description": "Confirm password field label"
+  },
+  "passwordStrength": "Tingkat kekuatan kata sandi: {passwordStrengthValue}",
+  "@passwordStrength": {
+    "description": "Text to indicate the password strength",
+    "placeholders": {
+      "passwordStrengthValue": {
+        "description": "The strength of the password as a string",
+        "type": "String",
+        "example": "Weak or Moderate or Strong"
+      }
+    }
+  },
+  "hearUsWhereTitle": "Dari mana Anda menemukan Ente? (opsional)",
+  "@hearUsWhereTitle": {
+    "description": "Title asking how user heard about Ente"
+  },
+  "hearUsExplanation": "Kami tidak melacak penginstalan aplikasi kami. Akan sangat membantu kami bila Anda memberitahu kami dari mana Anda mengetahui Ente!",
+  "@hearUsExplanation": {
+    "description": "Explanation for asking how user heard about Ente"
+  },
+  "signUpTerms": "Saya menyetujui <u-terms>syarat dan ketentuan</u-terms> serta <u-policy>kebijakan privasi</u-policy> Ente",
+  "@signUpTerms": {
+    "description": "Terms agreement text for sign up"
+  },
+  "termsOfServicesTitle": "Ketentuan",
+  "@termsOfServicesTitle": {
+    "description": "Terms of service title"
+  },
+  "privacyPolicyTitle": "Kebijakan Privasi",
+  "@privacyPolicyTitle": {
+    "description": "Privacy policy title"
+  },
+  "ackPasswordLostWarning": "Saya mengerti bahwa jika saya lupa kata sandi saya, data saya dapat hilang karena data saya <underline>terenkripsi secara end-to-end</underline>.",
+  "@ackPasswordLostWarning": {
+    "description": "Warning about password loss"
+  },
+  "encryption": "Enkripsi",
+  "@encryption": {
+    "description": "Encryption label"
+  },
+  "logInLabel": "Masuk akun",
+  "@logInLabel": {
+    "description": "Log in button label"
+  },
+  "welcomeBack": "Selamat datang kembali!",
+  "@welcomeBack": {
+    "description": "Welcome back message"
+  },
+  "loginTerms": "Dengan menekan masuk akun, saya menyetujui <u-terms>syarat dan ketentuan</u-terms> serta <u-policy>kebijakan privasi</u-policy> Ente",
+  "@loginTerms": {
+    "description": "Terms agreement text for login"
+  },
+  "noInternetConnection": "Tiada koneksi internet",
+  "@noInternetConnection": {
+    "description": "No internet connection error message"
+  },
+  "pleaseCheckYourInternetConnectionAndTryAgain": "Mohon periksa koneksi internet Anda dan coba kembali.",
+  "@pleaseCheckYourInternetConnectionAndTryAgain": {
+    "description": "Message asking user to check internet connection"
+  },
+  "verificationFailedPleaseTryAgain": "Gagal memverifikasi. Mohon coba lagi",
+  "@verificationFailedPleaseTryAgain": {
+    "description": "Verification failed error message"
+  },
+  "recreatePasswordTitle": "Membuat kembali kata sandi",
+  "@recreatePasswordTitle": {
+    "description": "Title for recreate password dialog"
+  },
+  "recreatePasswordBody": "Gawai Anda saat ini tidak dapat memverifikasi kata sandi Anda. Namun, kami dapat membuat ulang dengan cara yang dapat digunakan pada semua gawai.\n\nMohon masuk log dengan kunci pemulihan dan buat ulang kata sandi Anda (kata sandi yang sama diperbolehkan).",
+  "@recreatePasswordBody": {
+    "description": "Body text for recreate password dialog"
+  },
+  "useRecoveryKey": "Gunakan kunci pemulihan",
+  "@useRecoveryKey": {
+    "description": "Use recovery key button label"
+  },
+  "forgotPassword": "Lupa kata sandi",
+  "@forgotPassword": {
+    "description": "Forgot password link label"
+  },
+  "changeEmail": "Ubah alamat email",
+  "@changeEmail": {
+    "description": "Change email button label"
+  },
+  "verifyEmail": "Verifikasi email",
+  "@verifyEmail": {
+    "description": "Verify email title"
+  },
+  "weHaveSendEmailTo": "Kami telah mengirimkan sebuah posel ke <green>{email}</green>",
+  "@weHaveSendEmailTo": {
+    "description": "Text to indicate that we have sent a mail to the user",
+    "placeholders": {
+      "email": {
+        "description": "The email address of the user",
+        "type": "String",
+        "example": "example@ente.io"
+      }
+    }
+  },
+  "toResetVerifyEmail": "Untuk mengatur ulang kata sandi, mohon verifikasi surel Anda terlebih dahulu.",
+  "@toResetVerifyEmail": {
+    "description": "Message asking user to verify email before password reset"
+  },
+  "checkInboxAndSpamFolder": "Mohon cek",
+  "@checkInboxAndSpamFolder": {
+    "description": "Message asking user to check inbox and spam folder"
+  },
+  "tapToEnterCode": "Ketuk untuk memasukkan kode",
+  "@tapToEnterCode": {
+    "description": "Hint for entering verification code"
+  },
+  "sendEmail": "Kirim surel",
+  "resendEmail": "Kirim ulang surel",
+  "@resendEmail": {
+    "description": "Resend email button label"
+  },
+  "passKeyPendingVerification": "Verifikasi tertunda",
+  "@passKeyPendingVerification": {
+    "description": "Message when passkey verification is pending"
+  },
+  "loginSessionExpired": "Sesi sudah berakhir",
+  "@loginSessionExpired": {
+    "description": "Login session expired title"
+  },
+  "loginSessionExpiredDetails": "Sesi Anda sudah berakhir. Mohon masuk log kembali.",
+  "@loginSessionExpiredDetails": {
+    "description": "Login session expired details"
+  },
+  "passkeyAuthTitle": "Verifikasi passkey",
+  "@passkeyAuthTitle": {
+    "description": "Passkey authentication title"
+  },
+  "waitingForVerification": "Menantikan verifikasi...",
+  "@waitingForVerification": {
+    "description": "Waiting for verification message"
+  },
+  "tryAgain": "Coba lagi",
+  "@tryAgain": {
+    "description": "Try again button label"
+  },
+  "checkStatus": "Periksa status",
+  "@checkStatus": {
+    "description": "Check status button label"
+  },
+  "loginWithTOTP": "Masuk menggunakan TOTP",
+  "@loginWithTOTP": {
+    "description": "Login with TOTP button label"
+  },
+  "recoverAccount": "Pulihkan akun",
+  "@recoverAccount": {
+    "description": "Recover account button label"
+  },
+  "setPasswordTitle": "Atur kata sandi",
+  "@setPasswordTitle": {
+    "description": "Set password title"
+  },
+  "changePasswordTitle": "Ubah kata sandi",
+  "@changePasswordTitle": {
+    "description": "Change password title"
+  },
+  "resetPasswordTitle": "Atur ulang kata sandi",
+  "@resetPasswordTitle": {
+    "description": "Reset password title"
+  },
+  "encryptionKeys": "Kunci enkripsi",
+  "@encryptionKeys": {
+    "description": "Encryption keys title"
+  },
+  "enterPasswordToEncrypt": "Masukkan kata sandi yang dapat kami gunakan untuk mengenkripsi data Anda",
+  "@enterPasswordToEncrypt": {
+    "description": "Prompt to enter password for encryption"
+  },
+  "enterNewPasswordToEncrypt": "Masukkan kata sandi baru yang dapat kami gunakan untuk mengenkripsi data Anda",
+  "@enterNewPasswordToEncrypt": {
+    "description": "Prompt to enter new password for encryption"
+  },
+  "passwordWarning": "Kami tidak menyimpan kata sandi Anda. Jika Anda lupa, <underline>kami tidak dapat mendekripsi data Anda</underline>",
+  "@passwordWarning": {
+    "description": "Warning about password storage"
+  },
+  "howItWorks": "Cara kerjanya",
+  "@howItWorks": {
+    "description": "How it works button label"
+  },
+  "generatingEncryptionKeys": "Sedang membuat kunci enkripsi...",
+  "@generatingEncryptionKeys": {
+    "description": "Generating encryption keys message"
+  },
+  "passwordChangedSuccessfully": "Kata sandi sukses diubah",
+  "@passwordChangedSuccessfully": {
+    "description": "Password changed successfully message"
+  },
+  "signOutFromOtherDevices": "Keluar dari gawai yang lain",
+  "@signOutFromOtherDevices": {
+    "description": "Sign out from other devices title"
+  },
+  "signOutOtherBody": "Jika Anda pikir seseorang mungkin mengetahui kata sandi Anda, Anda dapat mengeluarkan akun Anda pada semua gawai",
+  "@signOutOtherBody": {
+    "description": "Sign out other devices explanation"
+  },
+  "signOutOtherDevices": "Keluar akun pada gawai yang lain",
+  "@signOutOtherDevices": {
+    "description": "Sign out other devices button label"
+  },
+  "doNotSignOut": "Jangan keluar",
+  "@doNotSignOut": {
+    "description": "Do not sign out button label"
+  },
+  "generatingEncryptionKeysTitle": "Sedang membuat kunci enkripsi...",
+  "@generatingEncryptionKeysTitle": {
+    "description": "Generating encryption keys title"
+  },
+  "continueLabel": "Lanjutkan",
+  "@continueLabel": {
+    "description": "Continue button label"
+  },
+  "insecureDevice": "Perangkat tidak aman",
+  "@insecureDevice": {
+    "description": "Insecure device warning title"
+  },
+  "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": "Maaf, kami tidak dapat membuat kunci yang aman pada perangkat ini.\n\nHarap mendaftar dengan perangkat lain.",
+  "@sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": {
+    "description": "Error message for insecure device"
+  },
+  "recoveryKeyCopiedToClipboard": "Kunci pemulihan disalin ke papan klip",
+  "@recoveryKeyCopiedToClipboard": {
+    "description": "Recovery key copied message"
+  },
+  "recoveryKey": "Kunci pemulihan",
+  "@recoveryKey": {
+    "description": "Recovery key label"
+  },
+  "recoveryKeyOnForgotPassword": "Jika Anda lupa kata sandi, satu-satunya cara memulihkan data Anda adalah dengan kunci ini.",
+  "@recoveryKeyOnForgotPassword": {
+    "description": "Recovery key importance explanation"
+  },
+  "recoveryKeySaveDescription": "Kami tidak menyimpan kunci ini, jadi harap simpan kunci yang berisi 24 kata ini dengan aman.",
+  "@recoveryKeySaveDescription": {
+    "description": "Recovery key save description"
+  },
+  "doThisLater": "Lakukan lain kali",
+  "@doThisLater": {
+    "description": "Do this later button label"
+  },
+  "saveKey": "Simpan kunci",
+  "@saveKey": {
+    "description": "Save key button label"
+  },
+  "recoveryKeySaved": "Kunci pemulihan sudah tersimpan di folder 'Downloads'!",
+  "@recoveryKeySaved": {
+    "description": "Recovery key saved confirmation message"
+  },
+  "noRecoveryKeyTitle": "Tidak punya kunci pemulihan?",
+  "@noRecoveryKeyTitle": {
+    "description": "No recovery key title"
+  },
+  "twoFactorAuthTitle": "Autentikasi dua langkah",
+  "@twoFactorAuthTitle": {
+    "description": "Two-factor authentication title"
+  },
+  "enterCodeHint": "Masukkan kode 6 digit dari aplikasi autentikator Anda",
+  "@enterCodeHint": {
+    "description": "Hint for entering 2FA code"
+  },
+  "lostDeviceTitle": "Perangkat hilang?",
+  "@lostDeviceTitle": {
+    "description": "Lost device title"
+  },
+  "enterRecoveryKeyHint": "Masukkan kunci pemulihan Anda",
+  "@enterRecoveryKeyHint": {
+    "description": "Hint for entering recovery key"
+  },
+  "recover": "Pulihkan",
+  "@recover": {
+    "description": "Recover button label"
+  },
+  "loggingOut": "Mengeluarkan akun...",
+  "@loggingOut": {
+    "description": "Message shown while logging out"
+  },
+  "immediately": "Segera",
+  "@immediately": {
+    "description": "Immediately option for auto lock timing"
+  },
+  "appLock": "Kunci aplikasi",
+  "@appLock": {
+    "description": "App lock setting title"
+  },
+  "autoLock": "Kunci otomatis",
+  "@autoLock": {
+    "description": "Auto lock setting title"
+  },
+  "noSystemLockFound": "Tidak ditemukan kunci sistem",
+  "@noSystemLockFound": {
+    "description": "Error when no system lock is found"
+  },
+  "deviceLockEnablePreSteps": "Pasang kunci sandi atau kunci layar pada pengaturan sistem untuk menyalakan Pengunci Gawai.",
+  "@deviceLockEnablePreSteps": {
+    "description": "Instructions for enabling device lock"
+  },
+  "appLockDescription": "Pilih layar kunci bawaan gawai Anda ATAU layar kunci kustom dengan PIN atau kata sandi.",
+  "@appLockDescription": {
+    "description": "Description of app lock feature"
+  },
+  "deviceLock": "Kunci perangkat",
+  "@deviceLock": {
+    "description": "Device lock option title"
+  },
+  "pinLock": "PIN",
+  "@pinLock": {
+    "description": "PIN lock option title"
+  },
+  "autoLockFeatureDescription": "Durasi waktu aplikasi akan terkunci setelah aplikasi ditutup",
+  "@autoLockFeatureDescription": {
+    "description": "Description of auto lock feature"
+  },
+  "hideContent": "Sembunyikan isi",
+  "@hideContent": {
+    "description": "Hide content setting title"
+  },
+  "hideContentDescriptionAndroid": "Menyembunyikan konten aplikasi di pemilih aplikasi dan menonaktifkan tangkapan layar",
+  "@hideContentDescriptionAndroid": {
+    "description": "Description of hide content feature on Android"
+  },
+  "hideContentDescriptioniOS": "Menyembunyikan konten aplikasi di pemilih aplikasi",
+  "@hideContentDescriptioniOS": {
+    "description": "Description of hide content feature on iOS"
+  },
+  "tooManyIncorrectAttempts": "Terlalu banyak percobaan yang salah",
+  "@tooManyIncorrectAttempts": {
+    "description": "Message shown when too many incorrect attempts are made"
+  },
+  "tapToUnlock": "Ketuk untuk membuka",
+  "@tapToUnlock": {
+    "description": "Message prompting user to tap to unlock"
+  },
+  "areYouSureYouWantToLogout": "Anda yakin ingin keluar dari akun ini?",
+  "@areYouSureYouWantToLogout": {
+    "description": "Confirmation message before logout"
+  },
+  "yesLogout": "Ya, keluar akun",
+  "@yesLogout": {
+    "description": "Confirmation button for logout"
+  },
+  "authToViewSecrets": "Harap lakukan autentikasi untuk melihat rahasia Anda",
+  "@authToViewSecrets": {
+    "description": "Message prompting authentication to view secrets"
+  },
+  "next": "Selanjutnya",
+  "@next": {
+    "description": "Next button label"
+  },
+  "setNewPassword": "Pasang kata sandi baru",
+  "@setNewPassword": {
+    "description": "Set new password title"
+  },
+  "enterPin": "Masukkan PIN",
+  "@enterPin": {
+    "description": "Enter PIN prompt"
+  },
+  "setNewPin": "Pasang PIN yang baru",
+  "@setNewPin": {
+    "description": "Set new PIN title"
+  },
+  "confirm": "Konfirmasikan",
+  "@confirm": {
+    "description": "Confirm button label"
+  },
+  "reEnterPassword": "Masukkan kembali kata sandi",
+  "@reEnterPassword": {
+    "description": "Re-enter password prompt"
+  },
+  "reEnterPin": "Masukkan kembali PIN",
+  "@reEnterPin": {
+    "description": "Re-enter PIN prompt"
+  },
+  "androidBiometricHint": "Verifikasikan identitas Anda",
+  "@androidBiometricHint": {
+    "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricNotRecognized": "Tidak dikenal. Coba lagi.",
+  "@androidBiometricNotRecognized": {
+    "description": "Message to let the user know that authentication was failed. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricSuccess": "Sukses",
+  "@androidBiometricSuccess": {
+    "description": "Message to let the user know that authentication was successful. It is used on Android side. Maximum 60 characters."
+  },
+  "androidCancelButton": "Batalkan",
+  "@androidCancelButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on Android side. Maximum 30 characters."
+  },
+  "androidSignInTitle": "Autentikasi diperlukan",
+  "@androidSignInTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user that they need to scan biometric to continue. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricRequiredTitle": "Biometrik diperlukan",
+  "@androidBiometricRequiredTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user has not set up biometric authentication on their device. It is used on Android side. Maximum 60 characters."
+  },
+  "androidDeviceCredentialsRequiredTitle": "Kredensial perangkat diperlukan",
+  "@androidDeviceCredentialsRequiredTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user has not set up credentials authentication on their device. It is used on Android side. Maximum 60 characters."
+  },
+  "androidDeviceCredentialsSetupDescription": "Kredensial perangkat diperlukan",
+  "@androidDeviceCredentialsSetupDescription": {
+    "description": "Message advising the user to go to the settings and configure device credentials on their device. It shows in a dialog on Android side."
+  },
+  "goToSettings": "Pergi ke pengaturan",
+  "@goToSettings": {
+    "description": "Message showed on a button that the user can click to go to settings pages from the current dialog. It is used on both Android and iOS side. Maximum 30 characters."
+  },
+  "androidGoToSettingsDescription": "Tidak ada autentikasi biometrik pada gawai Anda. Buka 'Pengaturan > Keamanan' untuk menambahkan autentikasi biometrik pada gawai Anda.",
+  "@androidGoToSettingsDescription": {
+    "description": "Message advising the user to go to the settings and configure biometric on their device. It shows in a dialog on Android side."
+  },
+  "iOSLockOut": "Autentikasi biometrik dimatikan. Kunci dan buka layar Anda untuk menyalakan autentikasi biometrik.",
+  "@iOSLockOut": {
+    "description": "Message advising the user to re-enable biometrics on their device. It shows in a dialog on iOS side."
+  },
+  "iOSOkButton": "Oke",
+  "@iOSOkButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
+  },
+  "emailAlreadyRegistered": "Email sudah terdaftar.",
+  "@emailAlreadyRegistered": {
+    "description": "Error message when email is already registered"
+  },
+  "emailNotRegistered": "Email belum terdaftar.",
+  "@emailNotRegistered": {
+    "description": "Error message when email is not registered"
+  },
+  "thisEmailIsAlreadyInUse": "Surel ini sudah dipakai!",
+  "@thisEmailIsAlreadyInUse": {
+    "description": "Error message when email is already in use"
+  },
+  "emailChangedTo": "Surel sudah diganti menjadi {newEmail}",
+  "@emailChangedTo": {
+    "description": "Message when email has been changed",
+    "placeholders": {
+      "newEmail": {
+        "description": "The new email address",
+        "type": "String",
+        "example": "new@example.com"
+      }
+    }
+  },
+  "authenticationFailedPleaseTryAgain": "Gagal mengautentikasi. Mohon coba lagi",
+  "@authenticationFailedPleaseTryAgain": {
+    "description": "Error message when authentication fails"
+  },
+  "authenticationSuccessful": "Sukses mengautentikasi!",
+  "@authenticationSuccessful": {
+    "description": "Success message when authentication is successful"
+  },
+  "sessionExpired": "Sesi berakhir",
+  "@sessionExpired": {
+    "description": "Error message when session has expired"
+  },
+  "incorrectRecoveryKey": "Kunci pemulihan takbenar",
+  "@incorrectRecoveryKey": {
+    "description": "Error message when recovery key is incorrect"
+  },
+  "theRecoveryKeyYouEnteredIsIncorrect": "Kunci pemulihan yang Anda masukkan takbenar",
+  "@theRecoveryKeyYouEnteredIsIncorrect": {
+    "description": "Detailed error message when recovery key is incorrect"
+  },
+  "twofactorAuthenticationSuccessfullyReset": "Autentikasi dwifaktor sukses diatur ulang",
+  "@twofactorAuthenticationSuccessfullyReset": {
+    "description": "Message when two-factor authentication is successfully reset"
+  },
+  "yourVerificationCodeHasExpired": "Kode verifikasi Anda telah kedaluwarsa",
+  "@yourVerificationCodeHasExpired": {
+    "description": "Error message when verification code has expired"
+  },
+  "incorrectCode": "Kode takbenar",
+  "@incorrectCode": {
+    "description": "Error message when code is incorrect"
+  },
+  "sorryTheCodeYouveEnteredIsIncorrect": "Maaf, kode yang Anda masukkan takbenar",
+  "@sorryTheCodeYouveEnteredIsIncorrect": {
+    "description": "Detailed error message when code is incorrect"
+  },
+  "developerSettings": "Pengaturan Pengembang",
+  "@developerSettings": {
+    "description": "Label for developerSettings"
+  },
+  "serverEndpoint": "Peladen endpoint",
+  "@serverEndpoint": {
+    "description": "Label for serverEndpoint"
+  },
+  "invalidEndpoint": "Endpoint takvalid",
+  "@invalidEndpoint": {
+    "description": "Label for invalidEndpoint"
+  },
+  "invalidEndpointMessage": "Maaf, endpoint yang Anda masukkan takvalid. Mohon masukkan endpoint yang valid, lalu coba kembali.",
+  "@invalidEndpointMessage": {
+    "description": "Label for invalidEndpointMessage"
+  },
+  "endpointUpdatedMessage": "Endpoint berhasil diubah",
+  "@endpointUpdatedMessage": {
+    "description": "Label for endpointUpdatedMessage"
+  }
+}

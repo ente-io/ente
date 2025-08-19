@@ -1,0 +1,6 @@
+arb-dir: lib/l10n/arb
+template-arb-file: strings_en.arb
+output-localization-file: strings_localizations.dart
+output-class: StringsLocalizations
+output-dir: lib/l10n
+nullable-getter: false

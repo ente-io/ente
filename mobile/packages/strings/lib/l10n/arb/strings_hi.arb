@@ -1,0 +1,102 @@
+{
+  "ok": "ठीक है",
+  "@ok": {
+    "description": "Generic OK button label"
+  },
+  "faq": "अक्सर किये गए सवाल",
+  "@faq": {
+    "description": "FAQ link label"
+  },
+  "contactSupport": "सपोर्ट टीम से संपर्क करें",
+  "@contactSupport": {
+    "description": "Contact support button label"
+  },
+  "cancel": "रद्द करें",
+  "@cancel": {
+    "description": "Cancel button label"
+  },
+  "reportABug": "बग रिपोर्ट करें",
+  "@reportABug": {
+    "description": "Label for reporting a bug"
+  },
+  "verify": "सत्यापित करें",
+  "@verify": {
+    "description": "Verify button label"
+  },
+  "pleaseWait": "कृपया प्रतीक्षा करें...",
+  "@pleaseWait": {
+    "description": "Please wait message"
+  },
+  "verifyPassword": "पासवर्ड सत्यापित करें",
+  "@verifyPassword": {
+    "description": "Verify password button label"
+  },
+  "incorrectPasswordTitle": "ग़लत पासवर्ड",
+  "@incorrectPasswordTitle": {
+    "description": "Title for incorrect password error"
+  },
+  "pleaseTryAgain": "कृपया पुन: प्रयास करें",
+  "@pleaseTryAgain": {
+    "description": "Message asking user to try again"
+  },
+  "enterYourPasswordHint": "अपना पासवर्ड दर्ज करें",
+  "@enterYourPasswordHint": {
+    "description": "Hint for password field"
+  },
+  "oops": "ओह",
+  "@oops": {
+    "description": "Oops error title"
+  },
+  "delete": "हटाएं",
+  "@delete": {
+    "description": "Delete button label"
+  },
+  "welcomeBack": "आपका पुनः स्वागत है!",
+  "@welcomeBack": {
+    "description": "Welcome back message"
+  },
+  "useRecoveryKey": "रिकवरी कुंजी का उपयोग करें",
+  "@useRecoveryKey": {
+    "description": "Use recovery key button label"
+  },
+  "forgotPassword": "पासवर्ड भूल गए",
+  "@forgotPassword": {
+    "description": "Forgot password link label"
+  },
+  "changeEmail": "ईमेल बदलें",
+  "@changeEmail": {
+    "description": "Change email button label"
+  },
+  "verifyEmail": "ईमेल सत्यापित करें",
+  "@verifyEmail": {
+    "description": "Verify email title"
+  },
+  "generatingEncryptionKeysTitle": "एन्क्रिप्शन कुंजियाँ उत्पन्न हो रही हैं...",
+  "@generatingEncryptionKeysTitle": {
+    "description": "Generating encryption keys title"
+  },
+  "recoveryKey": "पुनःप्राप्ति कुंजी",
+  "@recoveryKey": {
+    "description": "Recovery key label"
+  },
+  "twoFactorAuthTitle": "दो-चरणीय प्रमाणीकरण |",
+  "@twoFactorAuthTitle": {
+    "description": "Two-factor authentication title"
+  },
+  "loggingOut": "लॉग आउट हो रहा है...",
+  "@loggingOut": {
+    "description": "Message shown while logging out"
+  },
+  "emailAlreadyRegistered": "ईमेल पहले से ही पंजीकृत है।",
+  "@emailAlreadyRegistered": {
+    "description": "Error message when email is already registered"
+  },
+  "emailNotRegistered": "ईमेल पंजीकृत नहीं है।",
+  "@emailNotRegistered": {
+    "description": "Error message when email is not registered"
+  },
+  "sessionExpired": "सत्र की अवधि समाप्त",
+  "@sessionExpired": {
+    "description": "Error message when session has expired"
+  }
+}
