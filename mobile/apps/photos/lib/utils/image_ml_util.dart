@@ -7,6 +7,7 @@ import "dart:ui";
 import "package:exif_reader/exif_reader.dart";
 import 'package:flutter/painting.dart' as paint show decodeImageFromList;
 import "package:flutter_image_compress/flutter_image_compress.dart";
+import 'package:image/image.dart' as img_pkg;
 import "package:logging/logging.dart";
 import 'package:ml_linalg/linalg.dart';
 import "package:photos/models/ml/face/box.dart";
@@ -53,7 +54,45 @@ Future<DecodedImage> decodeImageFromPath(
   String imagePath, {
   required bool includeRgbaBytes,
   required bool includeDartUiImage,
+  bool inBackground = false,
 }) async {
+  if (inBackground) {
+    if (includeDartUiImage) {
+      _logger.severe(
+        "Decoding image in background with Dart UI Image is not possible!",
+      );
+      throw Exception(
+        "Decoding image in background with Dart UI Image is not possible!",
+      );
+    }
+    if (!includeRgbaBytes) {
+      _logger.severe(
+        "Decoding image in background but not returning anything",
+      );
+      throw Exception(
+        "Decoding image in background but not returning anything",
+      );
+    }
+    final image = await img_pkg.decodeImageFile(imagePath);
+    final imageData = image?.data;
+    if (imageData == null) {
+      _logger.severe(
+        "Failed to decode image from file: $imagePath using image package",
+      );
+      throw Exception(
+        "Failed to decode image from file: $imagePath using image package",
+      );
+    }
+    final bytes = imageData.getBytes(order: img_pkg.ChannelOrder.rgba);
+    final dimensions = Dimensions(
+      width: image!.width,
+      height: image.height,
+    );
+    return DecodedImage(
+      dimensions: dimensions,
+      rawRgbaBytes: bytes,
+    );
+  }
   final imageData = await File(imagePath).readAsBytes();
 
   final Map<String, IfdTag> exifData = await readExifFromBytes(imageData);
