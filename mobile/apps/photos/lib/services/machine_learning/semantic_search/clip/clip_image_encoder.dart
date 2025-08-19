@@ -86,6 +86,9 @@ class ClipImageEncoder extends MlModel {
     Float32List inputList,
   ) async {
     final OnnxDart plugin = OnnxDart();
+    _logger.info(
+      "Running Clip image predict using OnnxDart plugin with input size ${inputList.length}",
+    );
     final result = await plugin.predict(
       inputList,
       _modelName,

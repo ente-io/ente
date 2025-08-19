@@ -307,11 +307,18 @@ class SemanticSearchService {
     Uint8List rawRgbaBytes,
     int clipImageAddress,
   ) async {
+    _logger.info(
+      "Running Clip image encoding for file ID: $enteFileID",
+    );
     final embedding = await ClipImageEncoder.predict(
       dimensions,
       rawRgbaBytes,
       clipImageAddress,
       enteFileID,
+    );
+
+    _logger.info(
+      "Clip image encoding completed for file ID: $enteFileID",
     );
 
     final clipResult = ClipResult(fileID: enteFileID, embedding: embedding);

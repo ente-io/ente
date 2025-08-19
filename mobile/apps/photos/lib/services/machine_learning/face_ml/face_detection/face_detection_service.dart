@@ -54,11 +54,18 @@ class FaceDetectionService extends MlModel {
       'sessionAddress should be valid',
     );
 
+    _logger.info(
+      "Running face detection for image with size ${dimensions.width}x${dimensions.height}",
+    );
+
     final startTime = DateTime.now();
 
     final (inputImageList, scaledSize) = await preprocessImageYoloFace(
       dimensions,
       rawRgbaBytes,
+    );
+    _logger.info(
+      "Preprocessed image to input list of size ${inputImageList.length} with scaled size $scaledSize",
     );
     final preprocessingTime = DateTime.now();
     final preprocessingMs =
@@ -68,8 +75,14 @@ class FaceDetectionService extends MlModel {
     List<List<List<double>>>? nestedResults = [];
     try {
       if (MlModel.usePlatformPlugin) {
+        _logger.info(
+          "Running inference using platform plugin",
+        );
         nestedResults = await _runPlatformPluginPredict(inputImageList);
       } else {
+        _logger.info(
+          "Running inference using ONNX runtime",
+        );
         nestedResults = _runFFIBasedPredict(
           sessionAddress,
           inputImageList,
@@ -116,9 +129,15 @@ class FaceDetectionService extends MlModel {
     final inputs = {'input': inputOrt};
     final runOptions = OrtRunOptions();
     final session = OrtSession.fromAddress(sessionAddress);
+    _logger.info(
+      "Running face detection using ONNX runtime with input size ${inputImageList.length}",
+    );
     final List<OrtValue?> outputs = session.run(runOptions, inputs);
     final result =
         outputs[0]?.value as List<List<List<double>>>; // [1, 25200, 16]
+    _logger.info(
+      "Finished running face detection using ONNX runtime",
+    );
     inputOrt.release();
     runOptions.release();
     for (var element in outputs) {
@@ -132,9 +151,16 @@ class FaceDetectionService extends MlModel {
     Float32List inputImageList,
   ) async {
     final OnnxDart plugin = OnnxDart();
+    _logger.info(
+      "Running face detection using OnnxDart plugin with input size ${inputImageList.length}",
+    );
     final result = await plugin.predict(
       inputImageList,
       _modelName,
+    );
+
+    _logger.info(
+      "Finished running face detection using OnnxDart plugin",
     );
 
     final int resultLength = result!.length;

@@ -125,10 +125,10 @@ abstract class SuperIsolate {
       final answerPort = ReceivePort();
 
       _activeTasks++;
-      // TODO: remove it after we're done
-      logger.info("new activity ${operation.name}, activeTasks $_activeTasks");
       final taskID = newIsolateTaskID(operation.name);
       _mainSendPort.send([taskID, operation.index, args, answerPort.sendPort]);
+
+      logger.info("Activity ${operation.name} started");
 
       answerPort.listen((receivedMessage) {
         if (receivedMessage['taskID'] != taskID) {
@@ -138,6 +138,7 @@ abstract class SuperIsolate {
         final logs = receivedMessage['logs'] as List<String>;
         IsolateLogger.handLogStringsToMainLogger(logs);
         final data = receivedMessage['data'];
+
         if (data is Map && data.containsKey('error')) {
           // Handle the error
           final errorMessage = data['error'];
@@ -145,19 +146,13 @@ abstract class SuperIsolate {
           final exception = Exception(errorMessage);
           final stackTrace = StackTrace.fromString(errorStackTrace);
           completer.completeError(exception, stackTrace);
-          logger.warning(
-            "operation ${operation.name}, completed with warnings",
-            errorMessage,
-            errorStackTrace,
-          );
+          logger.severe("Activity ${operation.name} failed");
         } else {
           completer.complete(data);
-          logger.info("operation ${operation.name}, completed successfully");
+          logger.info("Activity ${operation.name} completed");
         }
+        _activeTasks--;
       });
-      _activeTasks--;
-      // TODO: remove it after we're done
-      logger.info("new activity ${operation.name}, activeTasks $_activeTasks");
 
       return completer.future;
     });

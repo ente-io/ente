@@ -163,6 +163,7 @@ class ComputeController {
   }
 
   void _fireControlEvent() {
+    return;
     final shouldRunCompute = _isDeviceHealthy && _canRunGivenUserInteraction();
     if (shouldRunCompute != _canRunCompute) {
       _canRunCompute = shouldRunCompute;

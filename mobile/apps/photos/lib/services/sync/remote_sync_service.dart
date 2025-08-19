@@ -95,6 +95,10 @@ class RemoteSyncService {
   }
 
   Future<void> sync({bool silently = false}) async {
+    // TODO: remove
+    // if (!isProcessBg) {
+    //   return;
+    // }
     if (!_config.hasConfiguredAccount()) {
       _logger.info("Skipping remote sync since account is not configured");
       return;
@@ -377,10 +381,9 @@ class RemoteSyncService {
         localIDsToSync.removeAll(alreadyClaimedLocalIDs);
         if (alreadyClaimedLocalIDs.isNotEmpty && !_hasCleanupStaleEntry) {
           try {
-          await _db.removeQueuedLocalFiles(alreadyClaimedLocalIDs);
-          } catch(e, s) {
-            _logger.severe("removeQueuedLocalFiles failed",e,s);
-            
+            await _db.removeQueuedLocalFiles(alreadyClaimedLocalIDs);
+          } catch (e, s) {
+            _logger.severe("removeQueuedLocalFiles failed", e, s);
           }
         }
       }
