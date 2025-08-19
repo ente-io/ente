@@ -21,7 +21,7 @@ services:
     command: "TCP-LISTEN:3200,fork,reuseaddr TCP:minio:3200"
 
   postgres:
-    image: postgres:15
+    image: postgres:15-trixie
     env_file:
       - .env
     # Wait for postgres to accept connections before starting museum.
