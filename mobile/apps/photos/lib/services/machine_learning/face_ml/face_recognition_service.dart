@@ -1,11 +1,11 @@
 import "dart:async" show unawaited;
 import "dart:typed_data" show Uint8List, Float32List;
-import "dart:ui" show Image;
 
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/diff_sync_complete_event.dart";
 import "package:photos/events/people_changed_event.dart";
+import "package:photos/models/ml/face/dimension.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/detection.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart";
@@ -73,7 +73,7 @@ class FaceRecognitionService {
 
   static Future<List<FaceResult>> runFacesPipeline(
     int enteFileID,
-    Image image,
+    Dimensions dim,
     Uint8List rawRgbaBytes,
     int faceDetectionAddress,
     int faceEmbeddingAddress,
@@ -81,14 +81,20 @@ class FaceRecognitionService {
     final faceResults = <FaceResult>[];
     final startTime = DateTime.now();
 
+    _logger.info(
+      "Starting runFacesPipeline with fileID $enteFileID",
+    );
     // Get the faces
     final List<FaceDetectionRelative> faceDetectionResult =
         await _detectFacesSync(
       enteFileID,
-      image,
+      dim,
       rawRgbaBytes,
       faceDetectionAddress,
       faceResults,
+    );
+    _logger.info(
+      "Detected ${faceDetectionResult.length} faces in image with fileID $enteFileID",
     );
     final detectFacesTime = DateTime.now();
     final detectFacesMs = detectFacesTime.difference(startTime).inMilliseconds;
@@ -101,9 +107,12 @@ class FaceRecognitionService {
       return [];
     }
 
+    _logger.info(
+      "Detected ${faceDetectionResult.length} faces, proceeding to alignment and embedding",
+    );
     // Align the faces
     final Float32List faceAlignmentResult = await _alignFacesSync(
-      image,
+      dim,
       rawRgbaBytes,
       faceDetectionResult,
       faceResults,
@@ -112,6 +121,9 @@ class FaceRecognitionService {
     final alignFacesMs =
         alignFacesTime.difference(detectFacesTime).inMilliseconds;
 
+    _logger.info(
+      "Aligned ${faceDetectionResult.length} faces in image with fileID $enteFileID",
+    );
     // Get the embeddings of the faces
     await _embedFacesSync(
       faceAlignmentResult,
@@ -133,18 +145,25 @@ class FaceRecognitionService {
   /// Runs face recognition on the given image data.
   static Future<List<FaceDetectionRelative>> _detectFacesSync(
     int fileID,
-    Image image,
+    Dimensions dimensions,
     Uint8List rawRgbaBytes,
     int interpreterAddress,
     List<FaceResult> faceResults,
   ) async {
     try {
+      _logger.info(
+        "Running face detection for fileID $fileID with interpreter at $interpreterAddress",
+      );
       // Get the bounding boxes of the faces
       final List<FaceDetectionRelative> faces =
           await FaceDetectionService.predict(
-        image,
+        dimensions,
         rawRgbaBytes,
         interpreterAddress,
+      );
+
+      _logger.info(
+        "Detected ${faces.length} faces in image with fileID $fileID",
       );
 
       // Add detected faces to the faceResults
@@ -169,7 +188,7 @@ class FaceRecognitionService {
   /// Aligns multiple faces from the given image data.
   /// Returns a list of the aligned faces as image data.
   static Future<Float32List> _alignFacesSync(
-    Image image,
+    Dimensions dim,
     Uint8List rawRgbaBytes,
     List<FaceDetectionRelative> faces,
     List<FaceResult> faceResults,
@@ -177,7 +196,7 @@ class FaceRecognitionService {
     try {
       final (alignedFaces, alignmentResults, _, blurValues, _) =
           await preprocessToMobileFaceNetFloat32List(
-        image,
+        dim,
         rawRgbaBytes,
         faces,
       );
