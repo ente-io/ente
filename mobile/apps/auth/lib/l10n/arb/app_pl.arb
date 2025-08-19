@@ -45,7 +45,7 @@
   "timeBasedKeyType": "Oparte na czasie (TOTP)",
   "counterBasedKeyType": "Oparte na liczniku (HOTP)",
   "saveAction": "Zapisz",
-  "nextTotpTitle": "następny",
+  "nextTotpTitle": "dalej",
   "deleteCodeTitle": "Usunąć kod?",
   "deleteCodeMessage": "Czy na pewno chcesz usunąć ten kod? Ta akcja jest nieodwracalna.",
   "trashCode": "Przenieść kod do kosza?",
