@@ -128,52 +128,69 @@ func (repo *FileRepository) Create(
 
 // CreateMetaFile creates an entry in the database for the given file
 func (repo *FileRepository) CreateMetaFile(
-	file ente.File,
+	metaFile ente.MetaFile,
 	collectionOwnerID int64,
 	app ente.App,
-) (ente.File, error) {
+) (*ente.File, error) {
 	ctx := context.Background()
 	tx, err := repo.DB.BeginTx(ctx, nil)
 	if err != nil {
-		return file, stacktrace.Propagate(err, "")
+		return nil, stacktrace.Propagate(err, "")
 	}
-	if file.OwnerID != collectionOwnerID {
-		return file, stacktrace.Propagate(errors.New("both file and collection should belong to same owner"), "")
+	if metaFile.OwnerID != collectionOwnerID {
+		return nil, stacktrace.Propagate(errors.New("both file and collection should belong to same owner"), "")
 	}
+
 	var fileID int64
+	info := &ente.FileInfo{
+		FileSize:      0,
+		ThumbnailSize: 0,
+	}
 	err = tx.QueryRowContext(ctx, `INSERT INTO files
 			(owner_id, encrypted_metadata,
 			file_decryption_header, thumbnail_decryption_header, metadata_decryption_header,
 			magic_metadata, pub_magic_metadata, info, updation_time)
 			VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING file_id`,
-		file.OwnerID, file.Metadata.EncryptedData, file.File.DecryptionHeader,
-		file.Thumbnail.DecryptionHeader, file.Metadata.DecryptionHeader,
-		file.MagicMetadata, file.PubicMagicMetadata, file.Info,
-		file.UpdationTime).Scan(&fileID)
+		metaFile.OwnerID, metaFile.Metadata.EncryptedData, "",
+		"", metaFile.Metadata.DecryptionHeader,
+		metaFile.MagicMetadata, metaFile.PubicMagicMetadata, info,
+		metaFile.UpdationTime).Scan(&fileID)
 	if err != nil {
 		tx.Rollback()
-		return file, stacktrace.Propagate(err, "")
+		return nil, stacktrace.Propagate(err, "")
 	}
-	file.ID = fileID
+
 	_, err = tx.ExecContext(ctx, `INSERT INTO collection_files
 			(collection_id, file_id, encrypted_key, key_decryption_nonce, is_deleted, updation_time, c_owner_id, f_owner_id)
-			VALUES($1, $2, $3, $4, $5, $6, $7, $8)`, file.CollectionID, file.ID,
-		file.EncryptedKey, file.KeyDecryptionNonce, false, file.UpdationTime, file.OwnerID, collectionOwnerID)
+			VALUES($1, $2, $3, $4, $5, $6, $7, $8)`, metaFile.CollectionID, metaFile.ID,
+		metaFile.EncryptedKey, metaFile.KeyDecryptionNonce, false, metaFile.UpdationTime, metaFile.OwnerID, collectionOwnerID)
 	if err != nil {
 		tx.Rollback()
-		return file, stacktrace.Propagate(err, "")
+		return nil, stacktrace.Propagate(err, "")
 	}
 	_, err = tx.ExecContext(ctx, `UPDATE collections SET updation_time = $1
-			WHERE collection_id = $2`, file.UpdationTime, file.CollectionID)
+			WHERE collection_id = $2`, metaFile.UpdationTime, metaFile.CollectionID)
 	if err != nil {
 		tx.Rollback()
-		return file, stacktrace.Propagate(err, "")
+		return nil, stacktrace.Propagate(err, "")
 	}
 	err = tx.Commit()
 	if err != nil {
-		return file, stacktrace.Propagate(err, "")
+		return nil, stacktrace.Propagate(err, "")
 	}
-	return file, stacktrace.Propagate(err, "")
+	var file ente.File = ente.File{
+		ID:                 fileID,
+		UpdationTime:       metaFile.UpdationTime,
+		OwnerID:            metaFile.OwnerID,
+		Metadata:           metaFile.Metadata,
+		PubicMagicMetadata: metaFile.PubicMagicMetadata,
+		MagicMetadata:      metaFile.MagicMetadata,
+		EncryptedKey:       metaFile.EncryptedKey,
+		KeyDecryptionNonce: metaFile.KeyDecryptionNonce,
+		Info:               info,
+		CollectionID:       collectionOwnerID,
+	}
+	return &file, stacktrace.Propagate(err, "")
 }
 
 // markAsNeedingReplication inserts new entries in object_copies, setting the
