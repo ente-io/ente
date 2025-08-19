@@ -37,7 +37,9 @@ enum SortKey {
 }
 
 class SimilarImagesPage extends StatefulWidget {
-  const SimilarImagesPage({super.key});
+  final bool debugScreen;
+
+  const SimilarImagesPage({super.key, this.debugScreen = false});
 
   @override
   State<SimilarImagesPage> createState() => _SimilarImagesPageState();
@@ -63,6 +65,10 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   void initState() {
     super.initState();
     _selectedFiles = SelectedFiles();
+
+    if (!widget.debugScreen) {
+      _findSimilarImages();
+    }
   }
 
   @override
