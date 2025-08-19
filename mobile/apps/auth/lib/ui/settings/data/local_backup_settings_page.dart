@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/local_backup_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
@@ -5,6 +8,7 @@ import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalBackupSettingsPage extends StatefulWidget {
@@ -34,25 +38,41 @@ class _LocalBackupSettingsPageState extends State<LocalBackupSettingsPage> {
     });
   }
 
-  // opens directory picker
-  Future<void> _pickAndSaveBackupLocation() async {
-  String? directoryPath = await FilePicker.platform.getDirectoryPath();
-
-  if (directoryPath != null) {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('autoBackupPath', directoryPath);
-    setState(() {
-      _backupPath = directoryPath;
-    });
-
-    await LocalBackupService.instance.triggerAutomaticBackup();   //whenever backup path is set, we trigger
-    final l10n = context.l10n;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(l10n.locationUpdatedAndBackupCreated),),
-    );
+  Future<String> _getDefaultBackupPath() async {
+  Directory? dir;
+  if (Platform.isAndroid) {
+    dir = await getExternalStorageDirectory();
+    //so default path would be /storage/emulated/0/Android/data/io.ente.auth/files/Downloads
+    return '${dir!.path}/Downloads/EnteAuthBackups';
+  } else {
+    // Fallback for iOS and other platforms
+    dir = await getDownloadsDirectory();
+    return '${dir!.path}/EnteAuthBackups';
   }
 }
+
+  // opens directory picker
+  Future<void> _pickAndSaveBackupLocation() async {
+    //to fetch the current backup path
+    final prefs = await SharedPreferences.getInstance();
+
+    String? directoryPath = await FilePicker.platform.getDirectoryPath();
+
+    if (directoryPath != null) {
+      await prefs.setString('autoBackupPath', directoryPath);
+      setState(() {
+        _backupPath = directoryPath;
+      });
+
+      await LocalBackupService.instance.triggerAutomaticBackup();
+      final l10n = context.l10n;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.locationUpdatedAndBackupCreated),
+        ),
+      );
+    }
+  }
 
 Future<void> _showSetPasswordDialog() async {
   final l10n = context.l10n;
@@ -63,21 +83,48 @@ Future<void> _showSetPasswordDialog() async {
     hintText: l10n.enterPassword,
     isPasswordInput: true,
     onSubmit: (String password) async {
-      if (password.length < 8) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Password must be at least 8 characters long.')),
-        );
-        return;
-      }
-      
-      // to store the backup password securely
-      const storage = FlutterSecureStorage();
-      await storage.write(key: 'autoBackupPassword', value: password);
-      
+  if (password.length < 8) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(l10n.passwordTooShort),
+    ),
+  );
+  return;
+}
+  const storage = FlutterSecureStorage();
+  await storage.write(key: 'autoBackupPassword', value: password);
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setBool('isAutoBackupEnabled', true);
+
+  String? finalBackupPath = _backupPath;
+
+  if (finalBackupPath == null) {
+    try {
+      finalBackupPath = await _getDefaultBackupPath();
+      await Directory(finalBackupPath).create(recursive: true);
+      await prefs.setString('autoBackupPath', finalBackupPath);
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Backup password saved successfully!')),
-      );
-    },
+  SnackBar(
+    content: Text(l10n.noDefaultBackupFolder),
+  ),
+);
+
+      await prefs.setBool('isAutoBackupEnabled', false);
+      return;
+    }
+  }
+
+  setState(() {
+    _isBackupEnabled = true;
+    _backupPath = finalBackupPath;
+  });
+
+  await LocalBackupService.instance.triggerAutomaticBackup();
+ScaffoldMessenger.of(context).showSnackBar(
+  SnackBar(content: Text(l10n.initialBackupCreated)),
+);
+},
   );
 }
 
@@ -88,7 +135,8 @@ Future<void> _showSetPasswordDialog() async {
       appBar: AppBar(
         title: Text(l10n.localBackupSettingsTitle),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
+        child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,36 +148,26 @@ Future<void> _showSetPasswordDialog() async {
                   l10n.enableAutomaticBackups,
                   style: getEnteTextTheme(context).largeBold,
                 ),
-                Switch(
-                  value: _isBackupEnabled,
-                  activeColor: Colors.white,
-                  onChanged: (value) async {
-                    final l10n = context.l10n;
-                    final prefs = await SharedPreferences.getInstance();
-                    await prefs.setBool('isAutoBackupEnabled', value);
-                    setState(() {
-                      _isBackupEnabled = value;
-                    });
+                Switch.adaptive(
+  value: _isBackupEnabled,
+  activeColor: Theme.of(context).colorScheme.enteTheme.colorScheme.primary400,
+  activeTrackColor: Theme.of(context).colorScheme.enteTheme.colorScheme.primary300,
+  inactiveTrackColor: Theme.of(context).colorScheme.enteTheme.colorScheme.fillMuted,
+  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+  onChanged: (value) async {
+  final prefs = await SharedPreferences.getInstance();
 
-                    if (value == true) { //if toggle was on: trigger backup
-                      if (_backupPath != null) {  //ensuring path was set
-                       await LocalBackupService.instance.triggerAutomaticBackup();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(l10n.initialBackupCreated),),
-                        );
-                      } 
-                      else {
-                        // we ask user to set a backup location
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content:
-                              Text(l10n.pleaseChooseBackupLocation),),
-                        );
-                      }
-                    }
-                  },
-                ),
+  if (value == true) {
+    //when toggle is ON, show password dialog
+    await _showSetPasswordDialog();
+  } else {
+    await prefs.setBool('isAutoBackupEnabled', false);
+    setState(() {
+      _isBackupEnabled = false;
+    });
+  }
+},
+),
               ],
             ),
             const SizedBox(height: 20),
@@ -158,35 +196,43 @@ Future<void> _showSetPasswordDialog() async {
                           style: getEnteTextTheme(context).body,
                         ),
                         const SizedBox(height: 4),
-                        Text(
-                          _backupPath ?? l10n.notSetPleaseChooseLocation,
-                          style: getEnteTextTheme(context).small.copyWith(
-                                color: _backupPath != null
-                                    ? null
-                                    : Colors.grey,
-                              ),
-                        ),
+if (_backupPath != null)
+  Text(
+    _backupPath!,
+    style: getEnteTextTheme(context).small,
+  )
+else
+  FutureBuilder<String>(
+    future: _getDefaultBackupPath(),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return Text(
+          "Loading default location...",
+          style: getEnteTextTheme(context).small.copyWith(color: Colors.grey),
+        );
+      } else if (snapshot.hasError) {
+        return Text(
+          "Could not determine location.",
+          style: getEnteTextTheme(context).small.copyWith(color: Colors.red),
+        );
+
+      } else {
+        return Text(
+          snapshot.data ?? '',
+          style: getEnteTextTheme(context).small.copyWith(color: Colors.grey),
+        );
+      }
+    },
+  ),
                         const SizedBox(height: 30),
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
                             onPressed: _pickAndSaveBackupLocation,
-                            child: Text(l10n.chooseLocation),
+                            child: Text(l10n.changeLocation),
                           ),
                         ),
 
-                        const SizedBox(height: 10),
-    SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Theme.of(context).colorScheme.secondary,
-          foregroundColor: Theme.of(context).colorScheme.onSecondary,
-        ),
-        onPressed: _showSetPasswordDialog,
-        child: const Text('Set Backup Password'),
-      ),
-    ),
 
                       ],
                     ),
@@ -238,6 +284,7 @@ Future<void> _showSetPasswordDialog() async {
             ),
           ],
         ),
+      ),
       ),
     );
   }

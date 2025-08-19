@@ -65,6 +65,27 @@ class CodeStore {
     return true;
   }
 
+  Future<void> updateCode(Code originalCode, Code updatedCode, {bool shouldSync = true}) async {
+    if (updatedCode.generatedID == null) return; 
+
+    await _authenticatorService.updateEntry(
+      updatedCode.generatedID!,
+      updatedCode.toOTPAuthUrlFormat(),
+      shouldSync, 
+      _authenticatorService.getAccountMode(),
+    );
+    Bus.instance.fire(CodesUpdatedEvent());
+
+    final bool isMajorChange = originalCode.issuer != updatedCode.issuer ||
+        originalCode.account != updatedCode.account ||
+        originalCode.secret != updatedCode.secret ||
+        originalCode.display.note != updatedCode.display.note;
+        
+    if (isMajorChange) {
+      LocalBackupService.instance.triggerAutomaticBackup().ignore();
+    }
+  }
+
   Future<List<Code>> getAllCodes({
     AccountMode? accountMode,
     bool sortCodes = true,
@@ -96,7 +117,6 @@ class CodeStore {
     }
 
     if (sortCodes) {
-      // sort codes by issuer,account
       codes.sort((firstCode, secondCode) {
         if (secondCode.isPinned && !firstCode.isPinned) return 1;
         if (!secondCode.isPinned && firstCode.isPinned) return -1;
@@ -122,12 +142,15 @@ class CodeStore {
     AccountMode? accountMode,
     List<Code>? existingAllCodes,
   }) async {
+
     final mode = accountMode ?? _authenticatorService.getAccountMode();
     final allCodes = existingAllCodes ?? (await getAllCodes(accountMode: mode));
     bool isExistingCode = false;
     bool hasSameCode = false;
+
     for (final existingCode in allCodes) {
       if (existingCode.hasError) continue;
+
       if (code.generatedID != null &&
           existingCode.generatedID == code.generatedID) {
         isExistingCode = true;
@@ -156,9 +179,9 @@ class CodeStore {
         shouldSync,
         mode,
       );
+      LocalBackupService.instance.triggerAutomaticBackup().ignore();
     }
     Bus.instance.fire(CodesUpdatedEvent());
-    LocalBackupService.instance.triggerAutomaticBackup().ignore();
     return result;
   }
 
@@ -217,7 +240,6 @@ class CodeStore {
           'importingCode: genID ${eachCode.generatedID} & isAlreadyPresent $alreadyPresent',
         );
         if (!alreadyPresent) {
-          // Avoid conflict with generatedID of online codes
           eachCode.generatedID = null;
           final AddResult result = await CodeStore.instance.addCode(
             eachCode,
@@ -249,16 +271,6 @@ class CodeStore {
   }
   return data;
 }
-
-
-
-
-
-
-
-
-
-
 
 }
 
