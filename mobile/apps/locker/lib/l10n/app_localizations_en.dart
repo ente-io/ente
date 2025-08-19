@@ -381,30 +381,157 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deletingFile => 'Deleting file...';
 
   @override
-  String get addInformation => 'Add information';
+  String get changeEmail => 'Change email';
 
   @override
-  String get addInformationDialogSubtitle =>
-      'Choose the type of information you want to add';
+  String get authToChangeYourEmail =>
+      'Please authenticate to change your email';
 
   @override
-  String get physicalDocument => 'Physical document';
+  String get changePasswordTitle => 'Change password';
 
   @override
-  String get physicalDocumentDescription =>
-      'Save information about documents and items in the real world.';
+  String get authToChangeYourPassword =>
+      'Please authenticate to change your password';
 
   @override
-  String get emergencyContact => 'Emergency contact';
+  String get recoveryKey => 'Recovery key';
 
   @override
-  String get emergencyContactDescription =>
-      'Save information about important contacts.';
+  String get ok => 'Ok';
 
   @override
-  String get accountCredential => 'Account credential';
+  String get logout => 'Logout';
 
   @override
-  String get accountCredentialDescription =>
-      'Save information about your important account credentials.';
+  String get deleteAccount => 'Delete account';
+
+  @override
+  String get areYouSureYouWantToLogout => 'Are you sure you want to logout?';
+
+  @override
+  String get yesLogout => 'Yes, logout';
+
+  @override
+  String get changePassword => 'Change password';
+
+  @override
+  String get authToViewYourRecoveryKey =>
+      'Please authenticate to view your recovery key';
+
+  @override
+  String get account => 'Account';
+
+  @override
+  String get security => 'Security';
+
+  @override
+  String get emailVerificationToggle => 'Email verification';
+
+  @override
+  String get authToChangeEmailVerificationSetting =>
+      'Please authenticate to change email verification';
+
+  @override
+  String get passkey => 'Passkey';
+
+  @override
+  String get authenticateGeneric => 'Please authenticate';
+
+  @override
+  String get somethingWentWrong => 'Something went wrong';
+
+  @override
+  String get appLock => 'App lock';
+
+  @override
+  String get warning => 'Warning';
+
+  @override
+  String get appLockOfflineModeWarning =>
+      'You have chosen to proceed without backups. If you forget your applock, you will be locked out from accessing your data.';
+
+  @override
+  String get authToChangeLockscreenSetting =>
+      'Please authenticate to change lockscreen setting';
+
+  @override
+  String get authToViewPasskey => 'Please authenticate to view passkey';
+
+  @override
+  String get theme => 'Theme';
+
+  @override
+  String get lightTheme => 'Light';
+
+  @override
+  String get darkTheme => 'Dark';
+
+  @override
+  String get systemTheme => 'System';
+
+  @override
+  String get settings => 'Settings';
+
+  @override
+  String get about => 'About';
+
+  @override
+  String get weAreOpenSource => 'We are open source!';
+
+  @override
+  String get privacy => 'Privacy';
+
+  @override
+  String get terms => 'Terms';
+
+  @override
+  String get termsOfServicesTitle => 'Terms';
+
+  @override
+  String get support => 'Support';
+
+  @override
+  String get contactSupport => 'Contact support';
+
+  @override
+  String get help => 'Help';
+
+  @override
+  String get suggestFeatures => 'Suggest features';
+
+  @override
+  String get reportABug => 'Report a bug';
+
+  @override
+  String get reportBug => 'Report bug';
+
+  @override
+  String get social => 'Social';
+
+  @override
+  String rateUsOnStore(Object storeName) {
+    return 'Rate us on $storeName';
+  }
+
+  @override
+  String get blog => 'Blog';
+
+  @override
+  String get merchandise => 'Merchandise';
+
+  @override
+  String get twitter => 'Twitter';
+
+  @override
+  String get mastodon => 'Mastodon';
+
+  @override
+  String get matrix => 'Matrix';
+
+  @override
+  String get discord => 'Discord';
+
+  @override
+  String get reddit => 'Reddit';
 }

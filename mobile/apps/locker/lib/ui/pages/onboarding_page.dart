@@ -7,6 +7,7 @@ import 'package:ente_ui/components/buttons/gradient_button.dart';
 import 'package:ente_ui/components/developer_settings_widget.dart';
 import "package:ente_ui/pages/developer_settings_page.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
+import "package:ente_ui/theme/ente_theme_data.dart";
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:flutter/material.dart';
 import 'package:locker/l10n/l10n.dart';
@@ -103,12 +104,15 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                       .textTheme
                                       .titleLarge!
                                       .copyWith(
-                                        color: Colors.white38,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onBoardingBodyColor,
                                       ),
                                 ),
                               ],
                             ),
                           ),
+                          const SizedBox(height: 100),
                           Container(
                             width: double.infinity,
                             padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -125,19 +129,14 @@ class _OnboardingPageState extends State<OnboardingPage> {
                             child: Hero(
                               tag: "log_in",
                               child: ElevatedButton(
-                                style: ElevatedButton.styleFrom().copyWith(
-                                  shape: WidgetStateProperty.all<
-                                      RoundedRectangleBorder>(
-                                    RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(32.0),
-                                    ),
-                                  ),
-                                ),
+                                style: Theme.of(context)
+                                    .colorScheme
+                                    .optionalActionButtonStyle,
                                 onPressed: _navigateToSignInPage,
                                 child: Text(
                                   l10n.existingUser,
                                   style: const TextStyle(
-                                    color: Colors.white, // same for both themes
+                                    color: Colors.black, // same for both themes
                                   ),
                                 ),
                               ),

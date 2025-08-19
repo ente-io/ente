@@ -9,6 +9,10 @@ const int android11SDKINT = 30;
 const mnemonicKeyWordCount = 24;
 
 const kDefaultProductionEndpoint = 'https://api.ente.io';
+const String githubDiscussionsUrl =
+    "https://github.com/ente-io/ente/discussions";
+
+const supportEmail = 'support@ente.io';
 
 final tempDirCleanUpInterval = kDebugMode
     ? const Duration(hours: 1).inMicroseconds
