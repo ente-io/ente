@@ -724,53 +724,299 @@ abstract class AppLocalizations {
   /// **'Deleting file...'**
   String get deletingFile;
 
-  /// No description provided for @addInformation.
+  /// No description provided for @changeEmail.
   ///
   /// In en, this message translates to:
-  /// **'Add information'**
-  String get addInformation;
+  /// **'Change email'**
+  String get changeEmail;
 
-  /// No description provided for @addInformationDialogSubtitle.
+  /// No description provided for @authToChangeYourEmail.
   ///
   /// In en, this message translates to:
-  /// **'Choose the type of information you want to add'**
-  String get addInformationDialogSubtitle;
+  /// **'Please authenticate to change your email'**
+  String get authToChangeYourEmail;
 
-  /// No description provided for @physicalDocument.
+  /// No description provided for @changePasswordTitle.
   ///
   /// In en, this message translates to:
-  /// **'Physical document'**
-  String get physicalDocument;
+  /// **'Change password'**
+  String get changePasswordTitle;
 
-  /// No description provided for @physicalDocumentDescription.
+  /// No description provided for @authToChangeYourPassword.
   ///
   /// In en, this message translates to:
-  /// **'Save information about documents and items in the real world.'**
-  String get physicalDocumentDescription;
+  /// **'Please authenticate to change your password'**
+  String get authToChangeYourPassword;
 
-  /// No description provided for @emergencyContact.
+  /// No description provided for @recoveryKey.
   ///
   /// In en, this message translates to:
-  /// **'Emergency contact'**
-  String get emergencyContact;
+  /// **'Recovery key'**
+  String get recoveryKey;
 
-  /// No description provided for @emergencyContactDescription.
+  /// No description provided for @ok.
   ///
   /// In en, this message translates to:
-  /// **'Save information about important contacts.'**
-  String get emergencyContactDescription;
+  /// **'Ok'**
+  String get ok;
 
-  /// No description provided for @accountCredential.
+  /// No description provided for @logout.
   ///
   /// In en, this message translates to:
-  /// **'Account credential'**
-  String get accountCredential;
+  /// **'Logout'**
+  String get logout;
 
-  /// No description provided for @accountCredentialDescription.
+  /// No description provided for @deleteAccount.
   ///
   /// In en, this message translates to:
-  /// **'Save information about your important account credentials.'**
-  String get accountCredentialDescription;
+  /// **'Delete account'**
+  String get deleteAccount;
+
+  /// No description provided for @areYouSureYouWantToLogout.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to logout?'**
+  String get areYouSureYouWantToLogout;
+
+  /// No description provided for @yesLogout.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, logout'**
+  String get yesLogout;
+
+  /// No description provided for @changePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Change password'**
+  String get changePassword;
+
+  /// No description provided for @authToViewYourRecoveryKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Please authenticate to view your recovery key'**
+  String get authToViewYourRecoveryKey;
+
+  /// No description provided for @account.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get account;
+
+  /// No description provided for @security.
+  ///
+  /// In en, this message translates to:
+  /// **'Security'**
+  String get security;
+
+  /// No description provided for @emailVerificationToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Email verification'**
+  String get emailVerificationToggle;
+
+  /// No description provided for @authToChangeEmailVerificationSetting.
+  ///
+  /// In en, this message translates to:
+  /// **'Please authenticate to change email verification'**
+  String get authToChangeEmailVerificationSetting;
+
+  /// No description provided for @passkey.
+  ///
+  /// In en, this message translates to:
+  /// **'Passkey'**
+  String get passkey;
+
+  /// No description provided for @authenticateGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Please authenticate'**
+  String get authenticateGeneric;
+
+  /// No description provided for @somethingWentWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong'**
+  String get somethingWentWrong;
+
+  /// No description provided for @appLock.
+  ///
+  /// In en, this message translates to:
+  /// **'App lock'**
+  String get appLock;
+
+  /// No description provided for @warning.
+  ///
+  /// In en, this message translates to:
+  /// **'Warning'**
+  String get warning;
+
+  /// No description provided for @appLockOfflineModeWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'You have chosen to proceed without backups. If you forget your applock, you will be locked out from accessing your data.'**
+  String get appLockOfflineModeWarning;
+
+  /// No description provided for @authToChangeLockscreenSetting.
+  ///
+  /// In en, this message translates to:
+  /// **'Please authenticate to change lockscreen setting'**
+  String get authToChangeLockscreenSetting;
+
+  /// No description provided for @authToViewPasskey.
+  ///
+  /// In en, this message translates to:
+  /// **'Please authenticate to view passkey'**
+  String get authToViewPasskey;
+
+  /// No description provided for @theme.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get theme;
+
+  /// No description provided for @lightTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get lightTheme;
+
+  /// No description provided for @darkTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get darkTheme;
+
+  /// No description provided for @systemTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get systemTheme;
+
+  /// No description provided for @settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settings;
+
+  /// No description provided for @about.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get about;
+
+  /// No description provided for @weAreOpenSource.
+  ///
+  /// In en, this message translates to:
+  /// **'We are open source!'**
+  String get weAreOpenSource;
+
+  /// No description provided for @privacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy'**
+  String get privacy;
+
+  /// No description provided for @terms.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms'**
+  String get terms;
+
+  /// No description provided for @termsOfServicesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms'**
+  String get termsOfServicesTitle;
+
+  /// No description provided for @support.
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get support;
+
+  /// No description provided for @contactSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact support'**
+  String get contactSupport;
+
+  /// No description provided for @help.
+  ///
+  /// In en, this message translates to:
+  /// **'Help'**
+  String get help;
+
+  /// No description provided for @suggestFeatures.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggest features'**
+  String get suggestFeatures;
+
+  /// No description provided for @reportABug.
+  ///
+  /// In en, this message translates to:
+  /// **'Report a bug'**
+  String get reportABug;
+
+  /// No description provided for @reportBug.
+  ///
+  /// In en, this message translates to:
+  /// **'Report bug'**
+  String get reportBug;
+
+  /// No description provided for @social.
+  ///
+  /// In en, this message translates to:
+  /// **'Social'**
+  String get social;
+
+  /// No description provided for @rateUsOnStore.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate us on {storeName}'**
+  String rateUsOnStore(Object storeName);
+
+  /// No description provided for @blog.
+  ///
+  /// In en, this message translates to:
+  /// **'Blog'**
+  String get blog;
+
+  /// No description provided for @merchandise.
+  ///
+  /// In en, this message translates to:
+  /// **'Merchandise'**
+  String get merchandise;
+
+  /// No description provided for @twitter.
+  ///
+  /// In en, this message translates to:
+  /// **'Twitter'**
+  String get twitter;
+
+  /// No description provided for @mastodon.
+  ///
+  /// In en, this message translates to:
+  /// **'Mastodon'**
+  String get mastodon;
+
+  /// No description provided for @matrix.
+  ///
+  /// In en, this message translates to:
+  /// **'Matrix'**
+  String get matrix;
+
+  /// No description provided for @discord.
+  ///
+  /// In en, this message translates to:
+  /// **'Discord'**
+  String get discord;
+
+  /// No description provided for @reddit.
+  ///
+  /// In en, this message translates to:
+  /// **'Reddit'**
+  String get reddit;
 }
 
 class _AppLocalizationsDelegate

@@ -9,6 +9,8 @@ import 'package:ente_lock_screen/ui/app_lock.dart';
 import 'package:ente_lock_screen/ui/lock_screen.dart';
 import 'package:ente_logging/logging.dart';
 import 'package:ente_network/network.dart';
+import "package:ente_strings/l10n/strings_localizations.dart";
+import "package:ente_ui/theme/theme_config.dart";
 import 'package:ente_ui/utils/window_listener_service.dart';
 import 'package:ente_utils/platform_util.dart';
 import "package:flutter/material.dart";
@@ -84,6 +86,7 @@ Future<void> _initSystemTray() async {
 }
 
 Future<void> _runInForeground() async {
+  AppThemeConfig.initialize(EnteApp.locker);
   final savedThemeMode = _themeMode(await AdaptiveTheme.getThemeMode());
   return await _runWithLogs(() async {
     _logger.info("Starting app in foreground");
@@ -102,7 +105,10 @@ Future<void> _runInForeground() async {
         locale: locale,
         savedThemeMode: savedThemeMode,
         supportedLocales: appSupportedLocales,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        localizationsDelegates: const [
+          ...StringsLocalizations.localizationsDelegates,
+          ...AppLocalizations.localizationsDelegates,
+        ],
         localeListResolutionCallback: localResolutionCallBack,
       ),
     );
