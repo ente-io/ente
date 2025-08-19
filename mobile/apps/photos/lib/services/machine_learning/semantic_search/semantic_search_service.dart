@@ -1,5 +1,4 @@
 import "dart:async" show Timer, unawaited;
-import "dart:ui" show Image;
 
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
@@ -10,6 +9,7 @@ import "package:photos/db/ml/db.dart";
 import 'package:photos/events/embedding_updated_event.dart';
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/clip.dart";
+import "package:photos/models/ml/face/dimension.dart";
 import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
@@ -303,12 +303,12 @@ class SemanticSearchService {
 
   static Future<ClipResult> runClipImage(
     int enteFileID,
-    Image image,
+    Dimensions dimensions,
     Uint8List rawRgbaBytes,
     int clipImageAddress,
   ) async {
     final embedding = await ClipImageEncoder.predict(
-      image,
+      dimensions,
       rawRgbaBytes,
       clipImageAddress,
       enteFileID,
