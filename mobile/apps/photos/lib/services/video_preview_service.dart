@@ -23,11 +23,13 @@ import "package:photos/models/base/id.dart";
 import "package:photos/models/ffmpeg/ffprobe_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
+import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/models/preview/playlist_data.dart";
 import "package:photos/models/preview/preview_item.dart";
 import "package:photos/models/preview/preview_item_status.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
+import "package:photos/services/file_magic_service.dart";
 import "package:photos/services/filedata/model/file_data.dart";
 import "package:photos/services/isolated_ffmpeg_service.dart";
 import "package:photos/ui/notification/toast.dart";
@@ -39,6 +41,14 @@ import "package:photos/utils/network_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 const _maxRetryCount = 3;
+
+class StreamingStatus {
+  final double netProcessedItems;
+  final int processed;
+  final int total;
+
+  StreamingStatus(this.netProcessedItems, this.processed, this.total);
+}
 
 class VideoPreviewService {
   final _logger = Logger("VideoPreviewService");
@@ -101,6 +111,27 @@ class VideoPreviewService {
       return true;
     } catch (_) {
       return false;
+    }
+  }
+
+  Future<StreamingStatus> getStatus() async {
+    try {
+      final filesDB = FilesDB.instance;
+      final int totalRemoteVideos = await filesDB.remoteVideosCount();
+      final int processed = fileDataService.previewIds.length;
+      final skippedVideosCount = await filesDB.skippedVideosCount();
+
+      final netTotal = totalRemoteVideos - skippedVideosCount;
+
+      final double netProcessedItems =
+          netTotal == 0 ? 0 : (processed / netTotal).clamp(0, 1);
+      final status =
+          StreamingStatus(netProcessedItems, processed, totalRemoteVideos);
+      _logger.info("Streaming Status: $status");
+      return status;
+    } catch (e, s) {
+      _logger.severe('Error getting ML status', e, s);
+      rethrow;
     }
   }
 
@@ -776,6 +807,8 @@ class VideoPreviewService {
             _logger.info(
               "[init] Ignoring file ${enteFile.displayName} for preview due to codec",
             );
+            await FileMagicService.instance
+                .updatePublicMagicMetadata([enteFile], {streamVersionKey: 1});
             return (props, skipFile, file);
           }
         }

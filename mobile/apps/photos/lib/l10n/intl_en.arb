@@ -1827,5 +1827,8 @@
         "type": "int"
       }
     }
-  }
+  },
+  "videosProcessed": "Videos processed",
+  "totalVideos": "Total videos",
+  "videoStreamingDescription": "Video streaming allows you to play videos without downloading them first. This is useful for large videos that you don't want to store on your device."
 }

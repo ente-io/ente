@@ -1,4 +1,5 @@
 import "dart:async";
+import "dart:convert" show jsonDecode;
 import "dart:io";
 
 import "package:computer/computer.dart";
@@ -1757,6 +1758,60 @@ class FilesDB with SqlDbBase {
       ids.add(result[columnUploadedFileID] as int);
     }
     return ids.length;
+  }
+
+  Future<int> remoteVideosCount() async {
+    final db = await instance.sqliteAsyncDB;
+    final results = await db.getAll(
+      '''
+      SELECT DISTINCT $columnUploadedFileID FROM $filesTable
+      WHERE  $columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1
+      AND $columnFileType = ?
+    ''',
+      [
+        getInt(FileType.video),
+      ],
+    );
+    final ids = <int>{};
+    for (final result in results) {
+      ids.add(result[columnUploadedFileID] as int);
+    }
+    return ids.length;
+  }
+
+  Future<int> skippedVideosCount() async {
+    // skipped because video size > 500 MB || duration > 60
+    final db = await instance.sqliteAsyncDB;
+    final results = await db.getAll(
+      '''
+      SELECT DISTINCT $columnUploadedFileID FROM $filesTable
+      WHERE  $columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1
+      AND (($columnFileSize IS NOT NULL AND $columnFileSize > 524288000)
+      OR ($columnDuration IS NOT NULL AND $columnDuration > 60))
+      AND $columnFileType = ?
+    ''',
+      [getInt(FileType.video)],
+    );
+
+    int length = results.length;
+
+    // get video files <= 10 MB
+    final results2 = await db.getAll('''
+      SELECT DISTINCT $columnUploadedFileID FROM $filesTable
+      WHERE  $columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1
+      AND ($columnFileSize IS NOT NULL AND $columnFileSize <= 10485760)
+      AND $columnFileType = ?
+    ''', [
+      getInt(FileType.video),
+    ]);
+    for (final result in results2) {
+      // decode pub magic metadata and check sv == 1
+      final pubMagicEncodedJson = result[columnPubMMdEncodedJson];
+      final pubMagicMetadata = jsonDecode(pubMagicEncodedJson);
+      if (pubMagicMetadata['sv'] == 1) length++;
+    }
+
+    return length;
   }
 
   ///Returns "columnName1 = ?, columnName2 = ?, ..."
