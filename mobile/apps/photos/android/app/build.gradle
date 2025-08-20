@@ -1,0 +1,156 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id "dev.flutter.flutter-gradle-plugin"
+    id 'org.jetbrains.kotlin.plugin.serialization' version '2.1.10'
+}
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        localProperties.load(reader)
+    }
+}
+
+def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
+if (flutterVersionCode == null) {
+    flutterVersionCode = '1'
+}
+
+def flutterVersionName = localProperties.getProperty('flutter.versionName')
+if (flutterVersionName == null) {
+    flutterVersionName = '1.0'
+}
+
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+android {
+    namespace = "io.ente.photos"
+    compileSdk = 36
+    ndkVersion = "28.0.13004108"
+
+    compileOptions {
+        coreLibraryDesugaringEnabled = true
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8
+    }
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+    
+    lintOptions {
+        disable 'InvalidPackage'
+        warningsAsErrors false
+        checkReleaseBuilds false
+    }
+
+    defaultConfig {
+        applicationId = "io.ente.photos"
+        minSdk = 26
+        targetSdk = 35
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
+        consumerProguardFiles 'proguard-rules.pro'
+    }
+
+    signingConfigs {
+       release {
+           storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : System.getenv("SIGNING_KEY_PATH") ? file(System.getenv("SIGNING_KEY_PATH")) : null
+           keyAlias keystoreProperties['keyAlias'] ? keystoreProperties['keyAlias'] : System.getenv("SIGNING_KEY_ALIAS")
+           keyPassword keystoreProperties['keyPassword'] ? keystoreProperties['keyPassword'] : System.getenv("SIGNING_KEY_PASSWORD")
+           storePassword keystoreProperties['storePassword'] ? keystoreProperties['storePassword'] : System.getenv("SIGNING_STORE_PASSWORD")
+       }
+    }
+    
+    flavorDimensions "default"
+    productFlavors {
+        independent {
+            dimension "default"
+            applicationIdSuffix ".independent"
+        }
+        dev {
+            dimension "default"
+            applicationIdSuffix ".dev"
+        }
+        playstore {
+            dimension "default"
+        }
+        fdroid {
+            dimension "default"
+            applicationIdSuffix ".fdroid"
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+        }
+        debug {
+          applicationIdSuffix '.debug'
+          versionNameSuffix "-debug"
+          externalNativeBuild {
+            cmake {
+              arguments "-DANDROID_PACKAGE_NAME=${android.defaultConfig.applicationId}${applicationIdSuffix}"
+            }
+          }
+        }
+    }
+
+    android.applicationVariants.all { variant ->
+        if (variant.flavorName == "fdroid") {
+            variant.outputs.all { output ->
+                output.outputFileName = "app-fdroid-release.apk"
+            }
+        }
+    }
+}
+
+rootProject.allprojects {
+    subprojects {
+        project.configurations.all {
+            resolutionStrategy.eachDependency { details ->
+                if (details.requested.group == 'com.github.bumptech.glide'
+                        && details.requested.name.contains('glide')) {
+                    details.useVersion "4.15.1"
+            }
+          }
+        }
+    }
+}
+
+flutter {
+    source = "../.."
+}
+
+dependencies {  
+    implementation 'io.sentry:sentry-android:2.0.0'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.21'
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0'
+    implementation 'com.android.support:multidex:1.0.3'
+    implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
+    implementation 'com.microsoft.onnxruntime:onnxruntime-android:1.8.1'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test:runner:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+
+    constraints {
+        implementation("androidx.work:work-runtime:2.8.1") {
+            because("Align work-runtime versions")
+        }
+        implementation("androidx.work:work-runtime-ktx:2.8.1") {
+            because("Align work-runtime-ktx versions")
+        }
+    }
+}

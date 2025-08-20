@@ -1,40 +1,43 @@
+// TODO: Audit this file
 import { AllAlbums } from "components/Collections/AllAlbums";
-import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
-import { CollectionShare } from "components/Collections/CollectionShare";
-import { TimeStampListItem } from "components/FileList";
+import {
+    CollectionShare,
+    type CollectionShareProps,
+} from "components/Collections/CollectionShare";
+import type { FileListHeaderOrFooter } from "components/FileList";
 import { useModalVisibility } from "ente-base/components/utils/modal";
+import {
+    isSaveCancelled,
+    isSaveComplete,
+    type SaveGroup,
+} from "ente-gallery/components/utils/save-groups";
+import { sortFiles } from "ente-gallery/utils/file";
 import type { Collection } from "ente-media/collection";
+import type { EnteFile } from "ente-media/file";
 import {
     GalleryBarImpl,
     type GalleryBarImplProps,
 } from "ente-new/photos/components/gallery/BarImpl";
 import { PeopleHeader } from "ente-new/photos/components/gallery/PeopleHeader";
-import { ALL_SECTION } from "ente-new/photos/services/collection";
+import type { CollectionSummary } from "ente-new/photos/services/collection-summary";
 import {
-    areOnlySystemCollections,
     collectionsSortBy,
-    isSystemCollection,
-    shouldShowOnCollectionBar,
+    haveOnlySystemCollections,
+    PseudoCollectionID,
     type CollectionsSortBy,
     type CollectionSummaries,
-} from "ente-new/photos/services/collection/ui";
-import { getData, removeData } from "ente-shared/storage/localStorage";
+} from "ente-new/photos/services/collection-summary";
 import { includes } from "ente-utils/type-guards";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { sortCollectionSummaries } from "services/collectionService";
-import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
-import {
-    FilesDownloadProgressAttributes,
-    isFilesDownloadCancelled,
-    isFilesDownloadCompleted,
-} from "../FilesDownloadProgress";
 import { AlbumCastDialog } from "./AlbumCastDialog";
-import { CollectionHeader } from "./CollectionHeader";
+import {
+    CollectionHeader,
+    type CollectionHeaderProps,
+} from "./CollectionHeader";
 
-type CollectionsProps = Omit<
+type GalleryBarAndListHeaderProps = Omit<
     GalleryBarImplProps,
     | "collectionSummaries"
-    | "hiddenCollectionSummaries"
     | "onSelectCollectionID"
     | "collectionsSortBy"
     | "onChangeCollectionsSortBy"
@@ -44,26 +47,27 @@ type CollectionsProps = Omit<
      * When `true`, the bar is be hidden altogether.
      */
     shouldHide: boolean;
-    collectionSummaries: CollectionSummaries;
+    barCollectionSummaries: CollectionSummaries;
     activeCollection: Collection;
     setActiveCollectionID: (collectionID: number) => void;
-    hiddenCollectionSummaries: CollectionSummaries;
-    setCollectionNamerAttributes: SetCollectionNamerAttributes;
-    setPhotoListHeader: (value: TimeStampListItem) => void;
-    filesDownloadProgressAttributesList: FilesDownloadProgressAttributes[];
-    setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
-};
+    setFileListHeader: (header: FileListHeaderOrFooter) => void;
+    saveGroups: SaveGroup[];
+} & Pick<CollectionHeaderProps, "onRemotePull" | "onAddSaveGroup"> &
+    Pick<
+        CollectionShareProps,
+        "user" | "emailByUserID" | "shareSuggestionEmails" | "setBlockingLoad"
+    >;
 
 /**
  * The gallery bar, the header for the list items, and state for any associated
  * dialogs that might be triggered by actions on either the bar or the header..
  *
  * This component manages the sticky horizontally scrollable bar shown at the
- * top of the gallery, AND the non-sticky header shown below the bar, at the top
- * of the actual list of items.
+ * top of the gallery, AND the (non-sticky) header shown below the bar, at the
+ * top of the actual list of items.
  *
  * These are disparate views - indeed, the list header is not even a child of
- * this component but is instead proxied via {@link setPhotoListHeader}. Still,
+ * this component but is instead proxied via {@link setFileListHeader}. Still,
  * having this intermediate wrapper component allows us to move some of the
  * common concerns shared by both the gallery bar and list header (e.g. some
  * dialogs that can be invoked from both places) into this file instead of
@@ -72,22 +76,27 @@ type CollectionsProps = Omit<
  * TODO: Once the gallery code is better responsibilitied out, consider moving
  * this code back inline into the gallery.
  */
-export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
+export const GalleryBarAndListHeader: React.FC<
+    GalleryBarAndListHeaderProps
+> = ({
     shouldHide,
     mode,
     onChangeMode,
-    collectionSummaries,
+    user,
+    barCollectionSummaries: toShowCollectionSummaries,
     activeCollection,
     activeCollectionID,
     setActiveCollectionID,
-    hiddenCollectionSummaries,
+    setBlockingLoad,
     people,
+    saveGroups,
     activePerson,
+    emailByUserID,
+    shareSuggestionEmails,
+    onRemotePull,
+    onAddSaveGroup,
     onSelectPerson,
-    setCollectionNamerAttributes,
-    setPhotoListHeader,
-    filesDownloadProgressAttributesList,
-    setFilesDownloadProgressAttributesCreator,
+    setFileListHeader,
 }) => {
     const { show: showAllAlbums, props: allAlbumsVisibilityProps } =
         useModalVisibility();
@@ -99,19 +108,11 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
     const [collectionsSortBy, setCollectionsSortBy] =
         useCollectionsSortByLocalState("updation-time-desc");
 
-    const toShowCollectionSummaries = useMemo(
-        () =>
-            mode == "hidden-albums"
-                ? hiddenCollectionSummaries
-                : collectionSummaries,
-        [mode, hiddenCollectionSummaries, collectionSummaries],
-    );
-
     const shouldBeHidden = useMemo(
         () =>
             shouldHide ||
-            (areOnlySystemCollections(toShowCollectionSummaries) &&
-                activeCollectionID === ALL_SECTION),
+            (haveOnlySystemCollections(toShowCollectionSummaries) &&
+                activeCollectionID === PseudoCollectionID.all),
         [shouldHide, toShowCollectionSummaries, activeCollectionID],
     );
 
@@ -125,33 +126,29 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
     );
 
     const isActiveCollectionDownloadInProgress = useCallback(() => {
-        const attributes = filesDownloadProgressAttributesList.find(
-            (attr) => attr.collectionID === activeCollectionID,
+        const group = saveGroups.find(
+            (g) => g.collectionSummaryID === activeCollectionID,
         );
-        return (
-            attributes &&
-            !isFilesDownloadCancelled(attributes) &&
-            !isFilesDownloadCompleted(attributes)
-        );
-    }, [activeCollectionID, filesDownloadProgressAttributesList]);
+        return !!group && !isSaveComplete(group) && !isSaveCancelled(group);
+    }, [saveGroups, activeCollectionID]);
 
     useEffect(() => {
         if (shouldHide) return;
 
-        setPhotoListHeader({
-            item:
+        setFileListHeader({
+            component:
                 mode != "people" ? (
                     <CollectionHeader
                         {...{
                             activeCollection,
                             setActiveCollectionID,
-                            setCollectionNamerAttributes,
-                            setFilesDownloadProgressAttributesCreator,
                             isActiveCollectionDownloadInProgress,
+                            onRemotePull,
+                            onAddSaveGroup,
                         }}
-                        collectionSummary={toShowCollectionSummaries.get(
-                            activeCollectionID,
-                        )}
+                        collectionSummary={
+                            toShowCollectionSummaries.get(activeCollectionID!)!
+                        }
                         onCollectionShare={showCollectionShare}
                         onCollectionCast={showCollectionCast}
                     />
@@ -163,9 +160,9 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                 ) : (
                     <></>
                 ),
-            tag: "header",
             height: 68,
         });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
         shouldHide,
         mode,
@@ -175,7 +172,7 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
         activePerson,
         showCollectionShare,
         showCollectionCast,
-        // TODO-Cluster
+        // TODO: Cluster
         // This causes a loop since it is an array dep
         // people,
     ]);
@@ -199,15 +196,15 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                 onSelectCollectionID={setActiveCollectionID}
                 onChangeCollectionsSortBy={setCollectionsSortBy}
                 onShowAllAlbums={showAllAlbums}
-                collectionSummaries={sortedCollectionSummaries.filter((x) =>
-                    shouldShowOnCollectionBar(x.type),
+                collectionSummaries={sortedCollectionSummaries.filter(
+                    (cs) => !cs.attributes.has("hideFromCollectionBar"),
                 )}
             />
 
             <AllAlbums
                 {...allAlbumsVisibilityProps}
                 collectionSummaries={sortedCollectionSummaries.filter(
-                    (x) => !isSystemCollection(x.type),
+                    (cs) => !cs.attributes.has("system"),
                 )}
                 onSelectCollectionID={setActiveCollectionID}
                 onChangeCollectionsSortBy={setCollectionsSortBy}
@@ -216,10 +213,17 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
             />
             <CollectionShare
                 {...collectionShareVisibilityProps}
-                collectionSummary={toShowCollectionSummaries.get(
-                    activeCollectionID,
-                )}
+                collectionSummary={
+                    toShowCollectionSummaries.get(activeCollectionID!)!
+                }
                 collection={activeCollection}
+                {...{
+                    user,
+                    emailByUserID,
+                    shareSuggestionEmails,
+                    setBlockingLoad,
+                    onRemotePull,
+                }}
             />
             <AlbumCastDialog
                 {...collectionCastVisibilityProps}
@@ -240,35 +244,7 @@ const useCollectionsSortByLocalState = (initialValue: CollectionsSortBy) => {
 
     useEffect(() => {
         const value = localStorage.getItem(key);
-        if (value) {
-            if (includes(collectionsSortBy, value)) setValue(value);
-        } else {
-            // Older versions of this code used to store the value in a
-            // different place and format. Migrate if needed.
-            //
-            // This migration added Sep 2024, can be removed after a bit (esp
-            // since it effectively runs on each app start). (tag: Migration).
-            const oldData = getData("collectionSortBy");
-            if (oldData) {
-                let newValue: CollectionsSortBy | undefined;
-                switch (oldData.value) {
-                    case 0:
-                        newValue = "name";
-                        break;
-                    case 1:
-                        newValue = "creation-time-asc";
-                        break;
-                    case 2:
-                        newValue = "updation-time-desc";
-                        break;
-                }
-                if (newValue) {
-                    localStorage.setItem(key, newValue);
-                    setValue(newValue);
-                }
-                removeData("collectionSortBy");
-            }
-        }
+        if (value && includes(collectionsSortBy, value)) setValue(value);
     }, []);
 
     const setter = (value: CollectionsSortBy) => {
@@ -277,4 +253,42 @@ const useCollectionsSortByLocalState = (initialValue: CollectionsSortBy) => {
     };
 
     return [value, setter] as const;
+};
+
+const sortCollectionSummaries = (
+    collectionSummaries: CollectionSummary[],
+    by: CollectionsSortBy,
+) =>
+    collectionSummaries
+        .sort((a, b) => {
+            switch (by) {
+                case "name":
+                    return a.name.localeCompare(b.name);
+                case "creation-time-asc":
+                    return (
+                        -1 *
+                        compareCollectionsLatestFile(b.latestFile, a.latestFile)
+                    );
+                case "updation-time-desc":
+                    return (b.updationTime ?? 0) - (a.updationTime ?? 0);
+            }
+        })
+        .sort((a, b) => b.sortPriority - a.sortPriority);
+
+const compareCollectionsLatestFile = (
+    first: EnteFile | undefined,
+    second: EnteFile | undefined,
+) => {
+    if (!first) {
+        return 1;
+    } else if (!second) {
+        return -1;
+    } else {
+        const sortedFiles = sortFiles([first, second]);
+        if (sortedFiles[0]?.id !== first.id) {
+            return 1;
+        } else {
+            return -1;
+        }
+    }
 };

@@ -1,6 +1,6 @@
 import { authenticatedRequestHeaders, ensureOk } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 /**
  * [Note: Remote store]
@@ -40,11 +40,10 @@ export const fetchFeatureFlags = async () => {
  * If the key is not present in the remote store, return {@link defaultValue}.
  */
 export const getRemoteValue = async (key: string, defaultValue: string) => {
-    const url = await apiURL("/remote-store");
-    const params = new URLSearchParams({ key, defaultValue });
-    const res = await fetch(`${url}?${params.toString()}`, {
-        headers: await authenticatedRequestHeaders(),
-    });
+    const res = await fetch(
+        await apiURL("/remote-store", { key, defaultValue }),
+        { headers: await authenticatedRequestHeaders() },
+    );
     ensureOk(res);
     return GetRemoteStoreResponse.parse(await res.json())?.value;
 };

@@ -1,22 +1,21 @@
 import { styled } from "@mui/material";
 import { isSameDay } from "ente-base/date";
 import { formattedDate } from "ente-base/i18n-date";
+import type { AddSaveGroup } from "ente-gallery/components/utils/save-groups";
 import {
     FileViewer,
     type FileViewerProps,
 } from "ente-gallery/components/viewer/FileViewer";
+import { downloadAndSaveFiles } from "ente-gallery/services/save";
 import type { Collection } from "ente-media/collection";
-import { EnteFile } from "ente-media/file";
-import {
-    moveToTrash,
-    TRASH_SECTION,
-} from "ente-new/photos/services/collection";
+import type { EnteFile } from "ente-media/file";
+import { fileCreationTime, fileFileName } from "ente-media/file-metadata";
+import { moveToTrash } from "ente-new/photos/services/collection";
+import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
 import { useCallback, useMemo, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
-import uploadManager from "services/upload/uploadManager";
-import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
-import { downloadSingleFile } from "utils/file";
+import { uploadManager } from "services/upload-manager";
 import {
     FileList,
     type FileListAnnotatedFile,
@@ -39,26 +38,34 @@ export type FileListWithViewerProps = {
      * Not set in the context of the shared albums app.
      */
     onMarkTempDeleted?: (files: EnteFile[]) => void;
-    setFilesDownloadProgressAttributesCreator?: SetFilesDownloadProgressAttributesCreator;
     /**
      * Called when the visibility of the file viewer dialog changes.
      */
     onSetOpenFileViewer?: (open: boolean) => void;
     /**
-     * Called when an action in the file viewer requires us to sync with remote.
+     * Called when an action in the file viewer requires us to perform a full
+     * pull from remote.
      */
-    onSyncWithRemote: () => Promise<void>;
+    onRemotePull: () => Promise<void>;
+    /**
+     * A function that can be used to create a UI notification to track the
+     * progress of user-initiated download, and to cancel it if needed.
+     */
+    onAddSaveGroup: AddSaveGroup;
 } & Pick<
     FileListProps,
     | "mode"
     | "modePlus"
-    | "showAppDownloadBanner"
-    | "selectable"
+    | "header"
+    | "footer"
+    | "disableGrouping"
+    | "enableSelect"
     | "selected"
     | "setSelected"
     | "activeCollectionID"
     | "activePersonID"
     | "favoriteFileIDs"
+    | "emailByUserID"
 > &
     Pick<
         FileViewerProps,
@@ -69,6 +76,7 @@ export type FileListWithViewerProps = {
         | "collectionNameByID"
         | "pendingFavoriteUpdates"
         | "pendingVisibilityUpdates"
+        | "onRemoteFilesPull"
         | "onVisualFeedback"
         | "onToggleFavorite"
         | "onFileVisibilityUpdate"
@@ -84,26 +92,30 @@ export type FileListWithViewerProps = {
 export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
     mode,
     modePlus,
+    header,
+    footer,
     user,
     files,
     enableDownload,
-    showAppDownloadBanner,
-    selectable,
+    disableGrouping,
+    enableSelect,
     selected,
     setSelected,
     activeCollectionID,
     activePersonID,
     favoriteFileIDs,
+    emailByUserID,
     isInIncomingSharedCollection,
     isInHiddenSection,
     fileNormalCollectionIDs,
     collectionNameByID,
     pendingFavoriteUpdates,
     pendingVisibilityUpdates,
-    setFilesDownloadProgressAttributesCreator,
     onSetOpenFileViewer,
-    onSyncWithRemote,
+    onRemotePull,
+    onRemoteFilesPull,
     onVisualFeedback,
+    onAddSaveGroup,
     onToggleFavorite,
     onFileVisibilityUpdate,
     onMarkTempDeleted,
@@ -122,35 +134,35 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
         [files],
     );
 
-    const handleThumbnailClick = useCallback((index: number) => {
-        setCurrentIndex(index);
-        setOpenFileViewer(true);
-        onSetOpenFileViewer?.(true);
-    }, []);
+    const handleThumbnailClick = useCallback(
+        (index: number) => {
+            setCurrentIndex(index);
+            setOpenFileViewer(true);
+            onSetOpenFileViewer?.(true);
+        },
+        [onSetOpenFileViewer],
+    );
 
     const handleCloseFileViewer = useCallback(() => {
         onSetOpenFileViewer?.(false);
         setOpenFileViewer(false);
-    }, []);
+    }, [onSetOpenFileViewer]);
 
-    const handleTriggerSyncWithRemote = useCallback(
-        () => void onSyncWithRemote(),
-        [onSyncWithRemote],
+    const handleTriggerRemotePull = useCallback(
+        () => void onRemotePull(),
+        [onRemotePull],
     );
 
     const handleDownload = useCallback(
-        (file: EnteFile) => {
-            const setSingleFileDownloadProgress =
-                setFilesDownloadProgressAttributesCreator!(file.metadata.title);
-            void downloadSingleFile(file, setSingleFileDownloadProgress);
-        },
-        [setFilesDownloadProgressAttributesCreator],
+        (file: EnteFile) =>
+            downloadAndSaveFiles([file], fileFileName(file), onAddSaveGroup),
+        [onAddSaveGroup],
     );
 
     const handleDelete = useMemo(() => {
         return onMarkTempDeleted
             ? (file: EnteFile) =>
-                  moveToTrash([file]).then(() => onMarkTempDeleted?.([file]))
+                  moveToTrash([file]).then(() => onMarkTempDeleted([file]))
             : undefined;
     }, [onMarkTempDeleted]);
 
@@ -158,7 +170,7 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
         (editedFile: File, collection: Collection, enteFile: EnteFile) => {
             uploadManager.prepareForNewUpload();
             uploadManager.showUploadProgressDialog();
-            uploadManager.uploadFile(editedFile, collection, enteFile);
+            void uploadManager.uploadFile(editedFile, collection, enteFile);
         },
         [],
     );
@@ -172,13 +184,17 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                         {...{
                             mode,
                             modePlus,
-                            showAppDownloadBanner,
-                            selectable,
+                            header,
+                            footer,
+                            user,
+                            disableGrouping,
+                            enableSelect,
                             selected,
                             setSelected,
                             activeCollectionID,
                             activePersonID,
                             favoriteFileIDs,
+                            emailByUserID,
                         }}
                         onItemClick={handleThumbnailClick}
                     />
@@ -189,7 +205,9 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                 onClose={handleCloseFileViewer}
                 initialIndex={currentIndex}
                 disableDownload={!enableDownload}
-                isInTrashSection={activeCollectionID === TRASH_SECTION}
+                isInTrashSection={
+                    activeCollectionID == PseudoCollectionID.trash
+                }
                 {...{
                     user,
                     files,
@@ -200,13 +218,14 @@ export const FileListWithViewer: React.FC<FileListWithViewerProps> = ({
                     collectionNameByID,
                     pendingFavoriteUpdates,
                     pendingVisibilityUpdates,
+                    onRemoteFilesPull,
                     onVisualFeedback,
                     onToggleFavorite,
                     onFileVisibilityUpdate,
                     onSelectCollection,
                     onSelectPerson,
                 }}
-                onTriggerSyncWithRemote={handleTriggerSyncWithRemote}
+                onTriggerRemotePull={handleTriggerRemotePull}
                 onDownload={handleDownload}
                 onDelete={handleDelete}
                 onSaveEditedImageCopy={handleSaveEditedImageCopy}
@@ -223,8 +242,8 @@ const Container = styled("div")`
 /**
  * See: [Note: Timeline date string]
  */
-const fileTimelineDateString = (item: EnteFile) => {
-    const date = new Date(item.metadata.creationTime / 1000);
+const fileTimelineDateString = (file: EnteFile) => {
+    const date = new Date(fileCreationTime(file) / 1000);
     return isSameDay(date, new Date())
         ? t("today")
         : isSameDay(date, new Date(Date.now() - 24 * 60 * 60 * 1000))

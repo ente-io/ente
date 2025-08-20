@@ -1,33 +1,30 @@
+import CheckIcon from "@mui/icons-material/Check";
 import { Alert, Box, TextField } from "@mui/material";
 import {
     AccountsPageContents,
     AccountsPageFooter,
     AccountsPageTitle,
 } from "ente-accounts/components/layouts/centered-paper";
+import { useRedirectIfNeedsCredentials } from "ente-accounts/components/utils/use-redirect";
 import { appHomeRoute } from "ente-accounts/services/redirect";
 import { changeEmail, sendOTT } from "ente-accounts/services/user";
 import { LinkButton } from "ente-base/components/LinkButton";
 import { LoadingButton } from "ente-base/components/mui/LoadingButton";
 import { isHTTPErrorWithStatus } from "ente-base/http";
 import log from "ente-base/log";
-import { VerticallyCentered } from "ente-shared/components/Container";
-import { getData, setLSUser } from "ente-shared/storage/localStorage";
-import { Formik, type FormikHelpers } from "formik";
+import { useFormik } from "formik";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { Trans } from "react-i18next";
-import * as Yup from "yup";
+import { z } from "zod/v4";
 
+/**
+ * A page that allows a user to change the email address associated with their
+ * Ente account.
+ */
 const Page: React.FC = () => {
-    const router = useRouter();
-
-    useEffect(() => {
-        const user = getData("user");
-        if (!user?.token) {
-            void router.push("/");
-        }
-    }, [router]);
+    useRedirectIfNeedsCredentials("/change-email");
 
     return (
         <AccountsPageContents>
@@ -39,161 +36,147 @@ const Page: React.FC = () => {
 
 export default Page;
 
-interface formValues {
-    email: string;
-    ott?: string;
-}
-
 const ChangeEmailForm: React.FC = () => {
-    const [loading, setLoading] = useState(false);
-    const [ottInputVisible, setShowOttInputVisibility] = useState(false);
-    const [email, setEmail] = useState<string | null>(null);
-    const [showMessage, setShowMessage] = useState(false);
+    const [requestedEmail, setRequestedEmail] = useState("");
+    const [showSentConfirmation, setShowSentConfirmation] = useState(false);
 
     const router = useRouter();
 
-    const requestOTT = async (
-        { email }: formValues,
-        { setFieldError }: FormikHelpers<formValues>,
-    ) => {
-        try {
-            setLoading(true);
-            await sendOTT(email, "change");
-            setEmail(email);
-            setShowOttInputVisibility(true);
-            setShowMessage(true);
-            // TODO: What was this meant to focus on? The ref referred to an
-            // Form element that was removed. Is this still needed.
-            // setTimeout(() => {
-            //     ottInputRef.current?.focus();
-            // }, 250);
-        } catch (e) {
-            log.error(e);
-            setFieldError(
-                "email",
-                isHTTPErrorWithStatus(e, 403)
-                    ? t("email_already_taken")
-                    : t("generic_error"),
-            );
-        }
-        setLoading(false);
-    };
+    const redirectToAppHome = useCallback(() => {
+        void router.push(appHomeRoute);
+    }, [router]);
 
-    const requestEmailChange = async (
-        { email, ott }: formValues,
-        { setFieldError }: FormikHelpers<formValues>,
-    ) => {
-        try {
-            setLoading(true);
-            await changeEmail(email, ott!);
-            await setLSUser({ ...getData("user"), email });
-            setLoading(false);
-            void goToApp();
-        } catch (e) {
-            log.error(e);
-            setLoading(false);
-            setFieldError("ott", t("incorrect_code"));
-        }
-    };
+    const formik = useFormik({
+        initialValues: { email: "", ott: "" },
+        onSubmit: async ({ email, ott }, { setFieldError }) => {
+            if (!email) {
+                setFieldError("email", t("required"));
+                return;
+            }
 
-    const goToApp = () => router.push(appHomeRoute);
+            if (!z.email().safeParse(email).success) {
+                setFieldError("email", t("invalid_email_error"));
+                return;
+            }
+
+            if (!requestedEmail) {
+                try {
+                    await sendOTT(email, "change");
+                } catch (e) {
+                    log.error("Could not send OTT for email change", e);
+                    setFieldError(
+                        "email",
+                        isHTTPErrorWithStatus(e, 403)
+                            ? t("email_already_taken")
+                            : t("generic_error"),
+                    );
+                    return;
+                }
+
+                setRequestedEmail(email);
+                setShowSentConfirmation(true);
+            } else {
+                if (!ott) {
+                    setFieldError("ott", t("required"));
+                    return;
+                }
+
+                try {
+                    await changeEmail(email, ott);
+                } catch (e) {
+                    log.error("Could not change email", e);
+                    setFieldError(
+                        "ott",
+                        isHTTPErrorWithStatus(e, 401)
+                            ? t("incorrect_code")
+                            : isHTTPErrorWithStatus(e, 410)
+                              ? t("expired_code_error")
+                              : t("generic_error"),
+                    );
+                    return;
+                }
+
+                redirectToAppHome();
+            }
+        },
+    });
 
     return (
-        <Formik<formValues>
-            initialValues={{ email: "" }}
-            validationSchema={
-                ottInputVisible
-                    ? Yup.object().shape({
-                          email: Yup.string()
-                              .email(t("invalid_email_error"))
-                              .required(t("required")),
-                          ott: Yup.string().required(t("required")),
-                      })
-                    : Yup.object().shape({
-                          email: Yup.string()
-                              .email(t("invalid_email_error"))
-                              .required(t("required")),
-                      })
-            }
-            validateOnChange={false}
-            validateOnBlur={false}
-            onSubmit={!ottInputVisible ? requestOTT : requestEmailChange}
-        >
-            {({ values, errors, handleChange, handleSubmit }) => (
-                <>
-                    {showMessage && (
-                        <Alert
-                            color="success"
-                            onClose={() => setShowMessage(false)}
-                        >
-                            <Trans
-                                i18nKey="email_sent"
-                                components={{
-                                    a: (
-                                        <Box
-                                            component={"span"}
-                                            sx={{ color: "text.muted" }}
-                                        />
-                                    ),
-                                }}
-                                values={{ email }}
-                            />
-                        </Alert>
-                    )}
-                    <form noValidate onSubmit={handleSubmit}>
-                        <VerticallyCentered>
-                            <TextField
-                                fullWidth
-                                type="email"
-                                label={t("enter_email")}
-                                value={values.email}
-                                onChange={handleChange("email")}
-                                error={Boolean(errors.email)}
-                                helperText={errors.email}
-                                autoFocus
-                                disabled={loading}
-                                slotProps={{
-                                    input: { readOnly: ottInputVisible },
-                                }}
-                            />
-                            {ottInputVisible && (
-                                <TextField
-                                    fullWidth
-                                    type="text"
-                                    label={t("verification_code")}
-                                    value={values.ott}
-                                    onChange={handleChange("ott")}
-                                    error={Boolean(errors.ott)}
-                                    helperText={errors.ott}
-                                    disabled={loading}
+        <>
+            {requestedEmail && showSentConfirmation && (
+                <Alert
+                    icon={<CheckIcon fontSize="inherit" />}
+                    severity="success"
+                    onClose={() => setShowSentConfirmation(false)}
+                >
+                    <Trans
+                        i18nKey="email_sent"
+                        components={{
+                            a: (
+                                <Box
+                                    component={"span"}
+                                    sx={{ color: "text.muted" }}
                                 />
-                            )}
-                            <LoadingButton
-                                fullWidth
-                                color="accent"
-                                type="submit"
-                                sx={{ mt: 2, mb: 4 }}
-                                loading={loading}
-                            >
-                                {!ottInputVisible ? t("send_otp") : t("verify")}
-                            </LoadingButton>
-                        </VerticallyCentered>
-                    </form>
-
-                    <AccountsPageFooter>
-                        {ottInputVisible && (
-                            <LinkButton
-                                onClick={() => setShowOttInputVisibility(false)}
-                            >
-                                {t("change_email")}?
-                            </LinkButton>
-                        )}
-                        <LinkButton onClick={goToApp}>
-                            {t("go_back")}
-                        </LinkButton>
-                    </AccountsPageFooter>
-                </>
+                            ),
+                        }}
+                        values={{ email: requestedEmail }}
+                    />
+                </Alert>
             )}
-        </Formik>
+            <form onSubmit={formik.handleSubmit}>
+                <TextField
+                    name="email"
+                    type="email"
+                    label={t("enter_email")}
+                    value={formik.values.email}
+                    onChange={formik.handleChange}
+                    error={!!formik.errors.email}
+                    // See: [Note: Use space as default TextField helperText]
+                    //
+                    // Also, we only need keep the extra space until the email
+                    // has been entered (since the email field is read only
+                    // after that).
+                    helperText={
+                        formik.errors.email ?? (requestedEmail ? "" : " ")
+                    }
+                    disabled={formik.isSubmitting}
+                    autoFocus
+                    fullWidth
+                    slotProps={{ input: { readOnly: !!requestedEmail } }}
+                />
+                {requestedEmail && (
+                    <TextField
+                        name="ott"
+                        type="text"
+                        label={t("verification_code")}
+                        value={formik.values.ott}
+                        onChange={formik.handleChange}
+                        error={!!formik.errors.ott}
+                        helperText={formik.errors.ott ?? " "}
+                        disabled={formik.isSubmitting}
+                        fullWidth
+                    />
+                )}
+                <LoadingButton
+                    type="submit"
+                    color="accent"
+                    fullWidth
+                    loading={formik.isSubmitting}
+                    sx={{ mt: 1, mb: 3 }}
+                >
+                    {!requestedEmail ? t("send_otp") : t("verify")}
+                </LoadingButton>
+            </form>
+            <AccountsPageFooter>
+                {requestedEmail && (
+                    <LinkButton onClick={() => setRequestedEmail("")}>
+                        {t("change_email")}?
+                    </LinkButton>
+                )}
+                <LinkButton onClick={redirectToAppHome}>
+                    {t("go_back")}
+                </LinkButton>
+            </AccountsPageFooter>
+        </>
     );
 };

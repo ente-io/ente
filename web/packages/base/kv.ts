@@ -4,6 +4,8 @@ import log from "./log";
 /**
  * Key value store schema.
  *
+ * [Note: KV DB]
+ *
  * The use IndexedDB to store arbitrary key-value pairs. The functional
  * motivation is to allow these to also be accessed from web workers (local
  * storage is limited to the main thread).
@@ -136,7 +138,7 @@ export const getKV = async (key: string) => {
     return db.get("kv", key);
 };
 
-export const _getKV = async <T extends string | number | boolean>(
+const _getKV = async <T extends string | number | boolean>(
     key: string,
     type: string,
 ): Promise<T | undefined> => {

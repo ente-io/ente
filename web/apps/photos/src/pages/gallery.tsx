@@ -1,28 +1,30 @@
+// TODO: Audit this file (the code here is mostly fine, but needs revisiting
+// the file it depends on have been audited and their interfaces fixed).
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-floating-promises */
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
-import { IconButton, Stack, Typography } from "@mui/material";
+import { IconButton, Link, Stack, Typography } from "@mui/material";
 import { AuthenticateUser } from "components/AuthenticateUser";
-import CollectionNamer, {
-    CollectionNamerAttributes,
-} from "components/Collections/CollectionNamer";
 import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
-import { Export } from "components/Export";
-import { TimeStampListItem } from "components/FileList";
+import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
+import type { FileListHeaderOrFooter } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
-import {
-    FilesDownloadProgress,
-    FilesDownloadProgressAttributes,
-} from "components/FilesDownloadProgress";
 import { FixCreationTime } from "components/FixCreationTime";
-import GalleryEmptyState from "components/GalleryEmptyState";
 import { Sidebar } from "components/Sidebar";
-import { Upload, type UploadTypeSelectorIntent } from "components/Upload";
-import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
+import { Upload } from "components/Upload";
 import { sessionExpiredDialogAttributes } from "ente-accounts/components/utils/dialog";
+import {
+    getAndClearIsFirstLogin,
+    getAndClearJustSignedUp,
+} from "ente-accounts/services/accounts-db";
 import { stashRedirect } from "ente-accounts/services/redirect";
+import { isSessionInvalid } from "ente-accounts/services/session";
+import { ensureLocalUser } from "ente-accounts/services/user";
 import type { MiniDialogAttributes } from "ente-base/components/MiniDialog";
 import { NavbarBase } from "ente-base/components/Navbar";
+import { SingleInputDialog } from "ente-base/components/SingleInputDialog";
 import { CenteredRow } from "ente-base/components/containers";
 import { TranslucentLoadingOverlay } from "ente-base/components/loaders";
 import type { ButtonishProps } from "ente-base/components/mui";
@@ -32,122 +34,102 @@ import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import log from "ente-base/log";
+import {
+    clearSessionStorage,
+    haveMasterKeyInSession,
+    masterKeyFromSession,
+} from "ente-base/session";
+import { savedAuthToken } from "ente-base/token";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
+import { type UploadTypeSelectorIntent } from "ente-gallery/components/Upload";
+import { useSaveGroups } from "ente-gallery/components/utils/save-groups";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
-import {
-    updateRemotePrivateMagicMetadata,
-    type ItemVisibility,
-} from "ente-media/file-metadata";
+import { type ItemVisibility } from "ente-media/file-metadata";
 import {
     CollectionSelector,
     type CollectionSelectorAttributes,
 } from "ente-new/photos/components/CollectionSelector";
+import { Export } from "ente-new/photos/components/Export";
 import { PlanSelector } from "ente-new/photos/components/PlanSelector";
 import {
     SearchBar,
     type SearchBarProps,
 } from "ente-new/photos/components/SearchBar";
+import {
+    SelectedFileOptions,
+    type CollectionOp,
+    type FileOp,
+} from "ente-new/photos/components/SelectedFileOptions";
 import { WhatsNew } from "ente-new/photos/components/WhatsNew";
 import {
+    GalleryEmptyState,
     PeopleEmptyState,
     SearchResultsHeader,
+    type RemotePullOpts,
 } from "ente-new/photos/components/gallery";
 import {
-    constructUserIDToEmailMap,
-    createShareeSuggestionEmails,
+    findCollectionCreatingUncategorizedIfNeeded,
+    performCollectionOp,
+    validateKey,
 } from "ente-new/photos/components/gallery/helpers";
 import {
     useGalleryReducer,
     type GalleryBarMode,
 } from "ente-new/photos/components/gallery/reducer";
+import { notifyOthersFilesDialogAttributes } from "ente-new/photos/components/utils/dialog-attributes";
 import { useIsOffline } from "ente-new/photos/components/utils/use-is-offline";
-import { usePeopleStateSnapshot } from "ente-new/photos/components/utils/use-snapshot";
+import {
+    usePeopleStateSnapshot,
+    useUserDetailsSnapshot,
+} from "ente-new/photos/components/utils/use-snapshot";
 import { shouldShowWhatsNew } from "ente-new/photos/services/changelog";
 import {
-    ALL_SECTION,
-    DUMMY_UNCATEGORIZED_COLLECTION,
+    addToFavoritesCollection,
+    createAlbum,
+    removeFromCollection,
+    removeFromFavoritesCollection,
 } from "ente-new/photos/services/collection";
-import { areOnlySystemCollections } from "ente-new/photos/services/collection/ui";
-import { getAllLocalCollections } from "ente-new/photos/services/collections";
 import {
-    getLocalFiles,
-    getLocalTrashedFiles,
-} from "ente-new/photos/services/files";
+    haveOnlySystemCollections,
+    PseudoCollectionID,
+} from "ente-new/photos/services/collection-summary";
+import exportService from "ente-new/photos/services/export";
+import { updateFilesVisibility } from "ente-new/photos/services/file";
+import {
+    savedCollectionFiles,
+    savedCollections,
+    savedTrashItems,
+} from "ente-new/photos/services/photos-fdb";
+import {
+    postPullFiles,
+    prePullFiles,
+    pullFiles,
+} from "ente-new/photos/services/pull";
 import {
     filterSearchableFiles,
-    setSearchCollectionsAndFiles,
+    updateSearchCollectionsAndFiles,
 } from "ente-new/photos/services/search";
 import type { SearchOption } from "ente-new/photos/services/search/types";
 import { initSettings } from "ente-new/photos/services/settings";
 import {
-    postCollectionAndFilesSync,
-    preCollectionAndFilesSync,
-    syncCollectionAndFiles,
-} from "ente-new/photos/services/sync";
-import {
-    initUserDetailsOrTriggerSync,
     redirectToCustomerPortal,
-    userDetailsSnapshot,
+    savedUserDetailsOrTriggerPull,
     verifyStripeSubscription,
 } from "ente-new/photos/services/user-details";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
-import { FlexWrapper } from "ente-shared/components/Container";
-import { getRecoveryKey } from "ente-shared/crypto/helpers";
-import { CustomError } from "ente-shared/error";
-import { getData } from "ente-shared/storage/localStorage";
-import {
-    getToken,
-    isFirstLogin,
-    justSignedUp,
-    setIsFirstLogin,
-    setJustSignedUp,
-} from "ente-shared/storage/localStorage/helpers";
-import { clearKeys, getKey } from "ente-shared/storage/sessionStorage";
+import { PromiseQueue } from "ente-utils/promise";
 import { t } from "i18next";
 import { useRouter, type NextRouter } from "next/router";
-import { createContext, useCallback, useEffect, useRef, useState } from "react";
-import { FileWithPath } from "react-dropzone";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { FileWithPath } from "react-dropzone";
 import { Trans } from "react-i18next";
+import { uploadManager } from "services/upload-manager";
 import {
-    addToFavorites,
-    createAlbum,
-    createUnCategorizedCollection,
-    removeFromFavorites,
-} from "services/collectionService";
-import exportService from "services/export";
-import uploadManager from "services/upload/uploadManager";
-import { isTokenValid } from "services/userService";
-import {
-    GalleryContextType,
-    SelectedState,
-    SetFilesDownloadProgressAttributes,
-    SetFilesDownloadProgressAttributesCreator,
-} from "types/gallery";
-import {
-    getSelectedCollection,
-    handleCollectionOp,
-    type CollectionOp,
-} from "utils/collection";
-import { getSelectedFiles, handleFileOp, type FileOp } from "utils/file";
-
-const defaultGalleryContext: GalleryContextType = {
-    setActiveCollectionID: () => null,
-    syncWithRemote: () => null,
-    setBlockingLoad: () => null,
-    photoListHeader: null,
-    user: null,
-    userIDToEmailMap: null,
-    emailList: null,
-    openHiddenSection: () => null,
-    isClipSearchResult: null,
-    selectedFile: null,
-    setSelectedFiles: () => null,
-};
-
-export const GalleryContext = createContext<GalleryContextType>(
-    defaultGalleryContext,
-);
+    getSelectedFiles,
+    performFileOp,
+    type SelectedState,
+} from "utils/file";
 
 /**
  * The default view for logged in users.
@@ -175,29 +157,23 @@ const Page: React.FC = () => {
         ownCount: 0,
         count: 0,
         collectionID: 0,
-        context: { mode: "albums", collectionID: ALL_SECTION },
+        context: { mode: "albums", collectionID: PseudoCollectionID.all },
     });
     const [blockingLoad, setBlockingLoad] = useState(false);
-    const [collectionNamerAttributes, setCollectionNamerAttributes] =
-        useState<CollectionNamerAttributes>(null);
-    const [collectionNamerView, setCollectionNamerView] = useState(false);
     const [shouldDisableDropzone, setShouldDisableDropzone] = useState(false);
     const [dragAndDropFiles, setDragAndDropFiles] = useState<FileWithPath[]>(
         [],
     );
     const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
 
-    const syncInProgress = useRef(false);
-    const syncInterval = useRef<ReturnType<typeof setInterval> | undefined>(
-        undefined,
-    );
-    const resync = useRef<{ force: boolean; silent: boolean } | undefined>(
-        undefined,
-    );
-
-    const [userIDToEmailMap, setUserIDToEmailMap] =
-        useState<Map<number, string>>(null);
-    const [emailList, setEmailList] = useState<string[]>(null);
+    /**
+     * A queue to serialize calls to {@link remoteFilesPull}.
+     */
+    const remoteFilesPullQueue = useRef(new PromiseQueue<void>());
+    /**
+     * A queue to serialize calls to {@link remotePull}.
+     */
+    const remotePullQueue = useRef(new PromiseQueue<void>());
 
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
     const [uploadTypeSelectorIntent, setUploadTypeSelectorIntent] =
@@ -208,24 +184,30 @@ const Page: React.FC = () => {
     const [fixCreationTimeFiles, setFixCreationTimeFiles] = useState<
         EnteFile[]
     >([]);
-
-    const peopleState = usePeopleStateSnapshot();
-
-    const [isClipSearchResult, setIsClipSearchResult] =
-        useState<boolean>(false);
-
-    // The (non-sticky) header shown at the top of the gallery items.
-    const [photoListHeader, setPhotoListHeader] =
-        useState<TimeStampListItem>(null);
-
-    const [
-        filesDownloadProgressAttributesList,
-        setFilesDownloadProgressAttributesList,
-    ] = useState<FilesDownloadProgressAttributes[]>([]);
+    const [fileListHeader, setFileListHeader] = useState<
+        FileListHeaderOrFooter | undefined
+    >(undefined);
 
     const [openCollectionSelector, setOpenCollectionSelector] = useState(false);
     const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
         useState<CollectionSelectorAttributes | undefined>();
+
+    const userDetails = useUserDetailsSnapshot();
+    const peopleState = usePeopleStateSnapshot();
+
+    const { saveGroups, onAddSaveGroup, onRemoveSaveGroup } = useSaveGroups();
+    const [, setPostCreateAlbumOp] = useState<CollectionOp | undefined>(
+        undefined,
+    );
+
+    /**
+     * The last time (epoch milliseconds) when we prompted the user for their
+     * password when opening the hidden section.
+     *
+     * This is used to implement a grace window, where we don't reprompt them
+     * for their password for the same purpose again and again.
+     */
+    const lastAuthenticationForHiddenTimestamp = useRef<number>(0);
 
     const { show: showSidebar, props: sidebarVisibilityProps } =
         useModalVisibility();
@@ -241,6 +223,8 @@ const Page: React.FC = () => {
         show: showAuthenticateUser,
         props: authenticateUserVisibilityProps,
     } = useModalVisibility();
+    const { show: showAlbumNameInput, props: albumNameInputVisibilityProps } =
+        useModalVisibility();
 
     const onAuthenticateCallback = useRef<(() => void) | undefined>(undefined);
 
@@ -256,10 +240,6 @@ const Page: React.FC = () => {
     // Local aliases.
     const {
         user,
-        familyData,
-        normalCollections,
-        normalFiles,
-        hiddenFiles,
         favoriteFileIDs,
         collectionNameByID,
         fileNormalCollectionIDs,
@@ -278,109 +258,122 @@ const Page: React.FC = () => {
             : state.view?.activeCollectionSummaryID;
     const activeCollection =
         state.view?.type == "people" ? undefined : state.view?.activeCollection;
+    const activeCollectionSummary =
+        state.view?.type == "people"
+            ? undefined
+            : state.view?.activeCollectionSummary;
     const activePerson =
         state.view?.type == "people" ? state.view.activePerson : undefined;
     const activePersonID = activePerson?.id;
+
+    // TODO: Move into reducer
+    const barCollectionSummaries = useMemo(
+        () =>
+            barMode == "hidden-albums"
+                ? state.hiddenCollectionSummaries
+                : state.normalCollectionSummaries,
+        [
+            barMode,
+            state.hiddenCollectionSummaries,
+            state.normalCollectionSummaries,
+        ],
+    );
 
     if (process.env.NEXT_PUBLIC_ENTE_TRACE) console.log("render", state);
 
     const router = useRouter();
 
-    // Ensure that the keys in local storage are not malformed by verifying that
-    // the recoveryKey can be decrypted with the masterKey.
-    // Note: This is not bullet-proof.
-    const validateKey = async () => {
-        try {
-            await getRecoveryKey();
-            return true;
-        } catch {
-            logout();
-            return false;
-        }
-    };
-
     useEffect(() => {
-        const key = getKey("encryptionKey");
-        const token = getToken();
-        if (!key || !token) {
-            stashRedirect("/gallery");
-            router.push("/");
-            return;
-        }
-        preloadImage("/images/subscription-card-background");
         const electron = globalThis.electron;
-        const main = async () => {
-            const valid = await validateKey();
-            if (!valid) {
+        let syncIntervalID: ReturnType<typeof setInterval> | undefined;
+
+        void (async () => {
+            if (!haveMasterKeyInSession() || !(await savedAuthToken())) {
+                // If we don't have master key or auth token, reauthenticate.
+                stashRedirect("/gallery");
+                router.push("/");
                 return;
             }
+
+            if (!(await validateKey())) {
+                // If we have credentials but they can't be decrypted, reset.
+                //
+                // This code is never expected to run, it is only kept as a
+                // safety valve.
+                logout();
+                return;
+            }
+
+            // We are logged in and everything looks fine. Proceed with page
+            // load initialization.
+
+            // One time inits.
+            preloadImage("/images/subscription-card-background");
             initSettings();
-            await initUserDetailsOrTriggerSync();
             setupSelectAllKeyBoardShortcutHandler();
+
+            // Show the initial state while the rest of the sequence proceeds.
             dispatch({ type: "showAll" });
-            setIsFirstLoad(isFirstLogin());
-            if (justSignedUp()) {
+
+            // If this is the user's first login on this client, then show them
+            // a message informing the that the initial load might take time.
+            setIsFirstLoad(getAndClearIsFirstLogin());
+
+            // If the user created a new account on this client, show them the
+            // plan options.
+            if (getAndClearJustSignedUp()) {
                 showPlanSelector();
             }
-            setIsFirstLogin(false);
-            const user = getData("user");
-            // TODO: Pass entire snapshot to reducer?
-            const familyData = userDetailsSnapshot()?.familyData;
+
+            // Initialize the reducer.
+            const user = ensureLocalUser();
+            const userDetails = await savedUserDetailsOrTriggerPull();
             dispatch({
                 type: "mount",
                 user,
-                familyData,
-                collections: await getAllLocalCollections(),
-                normalFiles: await getLocalFiles("normal"),
-                hiddenFiles: await getLocalFiles("hidden"),
-                trashedFiles: await getLocalTrashedFiles(),
+                familyData: userDetails?.familyData,
+                collections: await savedCollections(),
+                collectionFiles: await savedCollectionFiles(),
+                trashItems: await savedTrashItems(),
             });
-            await syncWithRemote(true);
+
+            // Fetch data from remote.
+            await remotePull();
+
+            // Clear the first load message if needed.
             setIsFirstLoad(false);
-            setJustSignedUp(false);
-            syncInterval.current = setInterval(
-                () => syncWithRemote(false, true),
+
+            // Start the interval that does a periodic pull.
+            syncIntervalID = setInterval(
+                () => remotePull({ silent: true }),
                 5 * 60 * 1000 /* 5 minutes */,
             );
+
             if (electron) {
-                electron.onMainWindowFocus(() => syncWithRemote(false, true));
+                electron.onMainWindowFocus(() => remotePull({ silent: true }));
                 if (await shouldShowWhatsNew(electron)) showWhatsNew();
             }
-        };
-        main();
+        })();
+
         return () => {
-            clearInterval(syncInterval.current);
+            clearInterval(syncIntervalID);
             if (electron) electron.onMainWindowFocus(undefined);
         };
     }, []);
 
     useEffect(() => {
-        setSearchCollectionsAndFiles({
-            collections: normalCollections,
-            files: normalFiles,
-        });
-    }, [normalCollections, normalFiles]);
-
-    useEffect(() => {
-        if (!user || !normalCollections) {
-            return;
+        // Only act on updates after the initial mount has completed.
+        if (state.user && userDetails) {
+            dispatch({ type: "setUserDetails", userDetails });
         }
-        setUserIDToEmailMap(constructUserIDToEmailMap(user, normalCollections));
-        setEmailList(
-            createShareeSuggestionEmails(user, normalCollections, familyData),
-        );
-    }, [user, normalCollections, familyData]);
-
-    useEffect(() => {
-        collectionNamerAttributes && setCollectionNamerView(true);
-    }, [collectionNamerAttributes]);
+    }, [state.user, userDetails]);
 
     useEffect(() => {
         if (typeof activeCollectionID == "undefined" || !router.isReady) {
             return;
         }
         let collectionURL = "";
-        if (activeCollectionID !== ALL_SECTION) {
+        if (activeCollectionID !== PseudoCollectionID.all) {
             // TODO: Is this URL param even used?
             collectionURL = `?collection=${activeCollectionID}`;
         }
@@ -389,7 +382,7 @@ const Page: React.FC = () => {
     }, [activeCollectionID, router.isReady]);
 
     useEffect(() => {
-        if (router.isReady && getKey("encryptionKey")) {
+        if (router.isReady && haveMasterKeyInSession()) {
             handleSubscriptionCompletionRedirectIfNeeded(
                 showMiniDialog,
                 showLoadingBar,
@@ -399,20 +392,33 @@ const Page: React.FC = () => {
     }, [router.isReady]);
 
     useEffect(() => {
+        updateSearchCollectionsAndFiles(
+            state.collections,
+            state.collectionFiles,
+            state.hiddenCollectionIDs,
+            state.hiddenFileIDs,
+        );
+    }, [
+        state.collections,
+        state.collectionFiles,
+        state.hiddenCollectionIDs,
+        state.hiddenFileIDs,
+    ]);
+
+    useEffect(() => {
         dispatch({ type: "setPeopleState", peopleState });
     }, [peopleState]);
 
     useEffect(() => {
         if (isInSearchMode && state.searchSuggestion) {
-            setPhotoListHeader({
-                height: 104,
-                item: (
+            setFileListHeader({
+                component: (
                     <SearchResultsHeader
                         searchSuggestion={state.searchSuggestion}
                         fileCount={state.searchResults?.length ?? 0}
                     />
                 ),
-                tag: "header",
+                height: 104,
             });
         }
     }, [isInSearchMode, state.searchSuggestion, state.searchResults]);
@@ -447,16 +453,16 @@ const Page: React.FC = () => {
             // - We haven't fetched the user yet;
             !user ||
             // - There is nothing to select;
-            !filteredFiles?.length ||
+            !filteredFiles.length ||
             // - Any of the modals are open.
             uploadTypeSelectorView ||
             openCollectionSelector ||
-            collectionNamerView ||
             sidebarVisibilityProps.open ||
             planSelectorVisibilityProps.open ||
             fixCreationTimeVisibilityProps.open ||
             exportVisibilityProps.open ||
             authenticateUserVisibilityProps.open ||
+            albumNameInputVisibilityProps.open ||
             isFileViewerOpen
         ) {
             return;
@@ -481,13 +487,14 @@ const Page: React.FC = () => {
                 selected.ownCount++;
             }
             selected.count++;
+            // @ts-expect-error Selection code needs type fixing
             selected[item.id] = true;
         });
         setSelected(selected);
     };
 
     const clearSelection = () => {
-        if (!selected?.count) {
+        if (!selected.count) {
             return;
         }
         setSelected({
@@ -515,105 +522,101 @@ const Page: React.FC = () => {
     // pressing a keyboard shortcut which doesn't have an immediate on-screen
     // impact). In these cases, we tickle the loading bar at the top to
     // acknowledge that their action.
-    //
-    // TODO: Move to the new "GalleryContext"?
     const handleVisualFeedback = useCallback(() => {
         showLoadingBar();
         setTimeout(hideLoadingBar, 0);
     }, [showLoadingBar, hideLoadingBar]);
 
-    const handleFileAndCollectionSyncWithRemote = useCallback(async () => {
-        const didUpdateFiles = await syncCollectionAndFiles({
-            onSetCollections: (
-                collections,
-                normalCollections,
-                hiddenCollections,
-            ) =>
-                dispatch({
-                    type: "setCollections",
-                    collections,
-                    normalCollections,
-                    hiddenCollections,
+    /**
+     * Pull latest collections, collection files and trash items from remote.
+     *
+     * This wraps the vanilla {@link pullFiles} with two adornments:
+     *
+     * 1. Any local database updates due to the pull are also reflected in state
+     *    updates to the Gallery's reducer.
+     *
+     * 2. Parallel calls are serialized so that there is only one invocation of
+     *    the underlying {@link pullFiles} at a time.
+     *
+     * [Note: Full remote pull vs files pull]
+     *
+     * For interactive operations, if we know that our operation will not have
+     * other transitive effects beyond collections, collection files and trash,
+     * this is a better option as compared to a full remote pull since it
+     * involves a lesser number of API requests (and thus, time).
+     */
+    const remoteFilesPull = useCallback(
+        () =>
+            remoteFilesPullQueue.current.add(() =>
+                pullFiles({
+                    onSetCollections: (collections) =>
+                        dispatch({ type: "setCollections", collections }),
+                    onSetCollectionFiles: (collectionFiles) =>
+                        dispatch({
+                            type: "setCollectionFiles",
+                            collectionFiles,
+                        }),
+                    onSetTrashedItems: (trashItems) =>
+                        dispatch({ type: "setTrashItems", trashItems }),
+                    onDidUpdateCollectionFiles: () =>
+                        exportService.onLocalFilesUpdated(),
                 }),
-            onResetNormalFiles: (files) =>
-                dispatch({ type: "setNormalFiles", files }),
-            onFetchNormalFiles: (files) =>
-                dispatch({ type: "fetchNormalFiles", files }),
-            onResetHiddenFiles: (files) =>
-                dispatch({ type: "setHiddenFiles", files }),
-            onFetchHiddenFiles: (files) =>
-                dispatch({ type: "fetchHiddenFiles", files }),
-            onResetTrashedFiles: (files) =>
-                dispatch({ type: "setTrashedFiles", files }),
-        });
-        if (didUpdateFiles) {
-            exportService.onLocalFilesUpdated();
-        }
-    }, []);
+            ),
+        [],
+    );
 
-    const handleSyncWithRemote = useCallback(
-        async (force = false, silent = false) => {
-            if (!navigator.onLine) return;
-            if (syncInProgress.current && !force) {
-                resync.current = { force, silent };
-                return;
-            }
-            const isForced = syncInProgress.current && force;
-            syncInProgress.current = true;
-            try {
-                const token = getToken();
-                if (!token) {
+    /**
+     * Perform a serialized full remote pull, also updating our component state
+     * to match the updates to the local database.
+     *
+     * See {@link remoteFilesPull} for the general concept. This is a similar
+     * wrapper over the full remote pull sequence which also adds pre-flight
+     * checks (e.g. to ensure that the user's session has not expired).
+     *
+     * This method will usually not throw; exceptions during the pull itself are
+     * caught. This is so that this promise can be unguardedly awaited without
+     * failing the main operations it forms the tail end of: the remote changes
+     * would've already been successfully applied, and possibly transient pull
+     * failures should get resolved on the next retry.
+     */
+    const remotePull = useCallback(
+        async (opts?: RemotePullOpts) =>
+            remotePullQueue.current.add(async () => {
+                const { silent } = opts ?? {};
+
+                // Pre-flight checks.
+                if (!navigator.onLine) return;
+                if (await isSessionInvalid()) {
+                    showSessionExpiredDialog();
                     return;
                 }
-                const tokenValid = await isTokenValid(token);
-                if (!tokenValid) {
-                    throw new Error(CustomError.SESSION_EXPIRED);
+                if (!(await masterKeyFromSession())) {
+                    clearSessionStorage();
+                    router.push("/credentials");
+                    return;
                 }
-                !silent && showLoadingBar();
-                await preCollectionAndFilesSync();
-                await handleFileAndCollectionSyncWithRemote();
-                // syncWithRemote is called with the force flag set to true before
-                // doing an upload. So it is possible, say when resuming a pending
-                // upload, that we get two syncWithRemotes happening in parallel.
-                //
-                // Do the non-file-related sync only for one of these parallel ones.
-                if (!isForced) {
-                    await postCollectionAndFilesSync();
+
+                // The pull itself.
+                try {
+                    if (!silent) showLoadingBar();
+                    await prePullFiles();
+                    await remoteFilesPull();
+                    await postPullFiles();
+                } catch (e) {
+                    log.error("Remote pull failed", e);
+                } finally {
+                    dispatch({ type: "clearUnsyncedState" });
+                    if (!silent) hideLoadingBar();
                 }
-            } catch (e) {
-                switch (e.message) {
-                    case CustomError.SESSION_EXPIRED:
-                        showSessionExpiredDialog();
-                        break;
-                    case CustomError.KEY_MISSING:
-                        clearKeys();
-                        router.push("/credentials");
-                        break;
-                    default:
-                        log.error("syncWithRemote failed", e);
-                }
-            } finally {
-                dispatch({ type: "clearUnsyncedState" });
-                !silent && hideLoadingBar();
-            }
-            syncInProgress.current = false;
-            if (resync.current) {
-                const { force, silent } = resync.current;
-                setTimeout(() => handleSyncWithRemote(force, silent), 0);
-                resync.current = undefined;
-            }
-        },
+            }),
         [
             showLoadingBar,
             hideLoadingBar,
             router,
             showSessionExpiredDialog,
-            handleFileAndCollectionSyncWithRemote,
+            remoteFilesPull,
         ],
     );
-
-    // Alias for existing code.
-    const syncWithRemote = handleSyncWithRemote;
 
     const setupSelectAllKeyBoardShortcutHandler = () => {
         const handleKeyUp = (e: KeyboardEvent) => {
@@ -634,189 +637,260 @@ const Page: React.FC = () => {
         };
     };
 
-    const setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator =
-        useCallback((folderName, collectionID, isHidden) => {
-            const id = Math.random();
-            const updater: SetFilesDownloadProgressAttributes = (value) => {
-                setFilesDownloadProgressAttributesList((prev) => {
-                    const attributes = prev?.find((attr) => attr.id === id);
-                    const updatedAttributes =
-                        typeof value == "function"
-                            ? value(attributes)
-                            : { ...attributes, ...value };
-                    const updatedAttributesList = attributes
-                        ? prev.map((attr) =>
-                              attr.id === id ? updatedAttributes : attr,
-                          )
-                        : [...prev, updatedAttributes];
-
-                    return updatedAttributesList;
-                });
-            };
-            updater({
-                id,
-                folderName,
-                collectionID,
-                isHidden,
-                canceller: null,
-                total: 0,
-                success: 0,
-                failed: 0,
-                downloadDirPath: null,
-            });
-            return updater;
-        }, []);
-
-    const collectionOpsHelper =
-        (op: CollectionOp) => async (collection: Collection) => {
+    const handleRemoveFilesFromCollection = (collection: Collection) => {
+        void (async () => {
             showLoadingBar();
+            let notifyOthersFiles = false;
             try {
                 setOpenCollectionSelector(false);
                 const selectedFiles = getSelectedFiles(selected, filteredFiles);
-                const toProcessFiles =
-                    op == "remove"
-                        ? selectedFiles
-                        : selectedFiles.filter(
-                              (file) => file.ownerID === user.id,
-                          );
-                if (toProcessFiles.length > 0) {
-                    await handleCollectionOp(
-                        op,
-                        collection,
-                        toProcessFiles,
-                        selected.collectionID,
-                    );
-                }
+                const processedCount = await removeFromCollection(
+                    collection,
+                    selectedFiles,
+                );
+                notifyOthersFiles = processedCount != selectedFiles.length;
                 clearSelection();
-                await syncWithRemote(false, true);
+                await remotePull({ silent: true });
             } catch (e) {
                 onGenericError(e);
             } finally {
                 hideLoadingBar();
             }
-        };
 
-    const fileOpHelper = (op: FileOp) => async () => {
-        showLoadingBar();
-        try {
-            // passing files here instead of filteredData for hide ops because we want to move all files copies to hidden collection
-            const selectedFiles = getSelectedFiles(
-                selected,
-                op == "hide" ? normalFiles : filteredFiles,
-            );
-            const toProcessFiles =
-                op == "download"
-                    ? selectedFiles
-                    : selectedFiles.filter((file) => file.ownerID === user.id);
-            if (toProcessFiles.length > 0) {
-                await handleFileOp(
-                    op,
-                    toProcessFiles,
-                    handleMarkTempDeleted,
-                    () => dispatch({ type: "clearTempDeleted" }),
-                    (files) => dispatch({ type: "markTempHidden", files }),
-                    () => dispatch({ type: "clearTempHidden" }),
-                    (files) => {
-                        setFixCreationTimeFiles(files);
-                        showFixCreationTime();
-                    },
-                    setFilesDownloadProgressAttributesCreator,
-                );
+            if (notifyOthersFiles) {
+                showMiniDialog(notifyOthersFilesDialogAttributes());
             }
-            clearSelection();
-            await syncWithRemote(false, true);
-        } catch (e) {
-            onGenericError(e);
-        } finally {
-            hideLoadingBar();
-        }
+        })();
     };
 
-    const showCreateCollectionModal = (op: CollectionOp) => {
-        const callback = async (collectionName: string) => {
-            try {
+    const createOnSelectForCollectionOp =
+        (op: CollectionOp) => (selectedCollection: Collection) => {
+            void (async () => {
                 showLoadingBar();
-                const collection = await createAlbum(collectionName);
-                await collectionOpsHelper(op)(collection);
+                try {
+                    setOpenCollectionSelector(false);
+                    const selectedFiles = getSelectedFiles(
+                        selected,
+                        filteredFiles,
+                    );
+                    const userFiles = selectedFiles.filter(
+                        // If a selection is happening, there must be a user.
+                        (f) => f.ownerID == user!.id,
+                    );
+                    const sourceCollectionID = selected.collectionID;
+                    if (userFiles.length > 0) {
+                        await performCollectionOp(
+                            op,
+                            selectedCollection,
+                            userFiles,
+                            sourceCollectionID,
+                        );
+                    }
+                    // See: [Note: Add and move of non-user files]
+                    if (userFiles.length != selectedFiles.length) {
+                        showMiniDialog(notifyOthersFilesDialogAttributes());
+                    }
+                    clearSelection();
+                    await remotePull({ silent: true });
+                } catch (e) {
+                    onGenericError(e);
+                } finally {
+                    hideLoadingBar();
+                }
+            })();
+        };
+
+    const createOnCreateForCollectionOp = useCallback(
+        (op: CollectionOp) => {
+            setPostCreateAlbumOp(op);
+            return showAlbumNameInput;
+        },
+        [showAlbumNameInput],
+    );
+
+    const handleAlbumNameSubmit = useCallback(
+        async (name: string) => {
+            const collection = await createAlbum(name);
+            setPostCreateAlbumOp((postCreateAlbumOp) => {
+                // The function returned by createHandleCollectionOp does its
+                // own progress and error reporting, defer to that.
+                createOnSelectForCollectionOp(postCreateAlbumOp!)(collection);
+                return undefined;
+            });
+        },
+        [createOnSelectForCollectionOp],
+    );
+
+    const createFileOpHandler = (op: FileOp) => () => {
+        void (async () => {
+            showLoadingBar();
+            try {
+                // When hiding use all non-hidden files instead of the filtered
+                // files since we want to move all files copies to the hidden
+                // collection.
+                const opFiles =
+                    op == "hide"
+                        ? state.collectionFiles.filter(
+                              (f) => !state.hiddenFileIDs.has(f.id),
+                          )
+                        : filteredFiles;
+                const selectedFiles = getSelectedFiles(selected, opFiles);
+                const toProcessFiles =
+                    op == "download"
+                        ? selectedFiles
+                        : selectedFiles.filter(
+                              // There'll be a user if files are being selected.
+                              (file) => file.ownerID == user!.id,
+                          );
+                if (toProcessFiles.length > 0) {
+                    await performFileOp(
+                        op,
+                        toProcessFiles,
+                        onAddSaveGroup,
+                        handleMarkTempDeleted,
+                        () => dispatch({ type: "clearTempDeleted" }),
+                        (files) => dispatch({ type: "markTempHidden", files }),
+                        () => dispatch({ type: "clearTempHidden" }),
+                        (files) => {
+                            setFixCreationTimeFiles(files);
+                            showFixCreationTime();
+                        },
+                    );
+                }
+                // Apart from download, the other operations currently only work
+                // on the user's own files.
+                //
+                // See: [Note: Add and move of non-user files].
+                if (toProcessFiles.length != selectedFiles.length) {
+                    showMiniDialog(notifyOthersFilesDialogAttributes());
+                }
+                clearSelection();
+                await remotePull({ silent: true });
             } catch (e) {
                 onGenericError(e);
             } finally {
                 hideLoadingBar();
             }
-        };
-        return () =>
-            setCollectionNamerAttributes({
-                title: t("new_album"),
-                buttonText: t("create"),
-                autoFilledName: "",
-                callback,
-            });
+        })();
     };
 
     const handleSelectSearchOption = (
         searchOption: SearchOption | undefined,
     ) => {
-        const type = searchOption?.suggestion.type;
-        if (type == "collection" || type == "person") {
+        if (searchOption) {
+            const type = searchOption.suggestion.type;
             if (type == "collection") {
                 dispatch({
                     type: "showCollectionSummary",
                     collectionSummaryID: searchOption.suggestion.collectionID,
                 });
-            } else {
+            } else if (type == "person") {
                 dispatch({
                     type: "showPerson",
                     personID: searchOption.suggestion.person.id,
                 });
+            } else {
+                dispatch({
+                    type: "enterSearchMode",
+                    searchSuggestion: searchOption.suggestion,
+                });
             }
-        } else if (searchOption) {
-            dispatch({
-                type: "enterSearchMode",
-                searchSuggestion: searchOption.suggestion,
-            });
         } else {
             dispatch({ type: "exitSearch" });
         }
-        setIsClipSearchResult(type == "clip");
     };
 
     const openUploader = (intent?: UploadTypeSelectorIntent) => {
-        if (!uploadManager.shouldAllowNewUpload()) {
-            return;
-        }
+        if (uploadManager.isUploadInProgress()) return;
         setUploadTypeSelectorView(true);
         setUploadTypeSelectorIntent(intent ?? "upload");
     };
 
-    const handleSetActiveCollectionID = (
-        collectionSummaryID: number | undefined,
-    ) => dispatch({ type: "showCollectionSummary", collectionSummaryID });
+    const handleShowCollectionSummaryWithID = useCallback(
+        (collectionSummaryID: number | undefined) => {
+            // Trigger a pull of the latest data from remote when opening the trash.
+            //
+            // This is needed for a specific scenario:
+            //
+            // 1. User deletes a collection, selecting the option to delete files.
+            // 2. Museum acks, and then client does a trash pull.
+            //
+            // This trash pull will not contain the files that belonged to the
+            // collection that got deleted because the collection deletion is a
+            // asynchronous operation.
+            //
+            // So the user might not see the entry for the just deleted file if they
+            // were to go to the trash meanwhile (until the next pull happens). To
+            // avoid this, we trigger a trash pull whenever it is opened.
+            if (collectionSummaryID == PseudoCollectionID.trash) {
+                void remoteFilesPull();
+            }
+
+            dispatch({ type: "showCollectionSummary", collectionSummaryID });
+        },
+        [],
+    );
+
+    /**
+     * Switch to gallery view to show a collection or pseudo-collection.
+     *
+     * @param collectionSummaryID The ID of the {@link CollectionSummary} to
+     * show. If not provided, show the "All" section.
+     *
+     * @param isHidden If `true`, then any reauthentication as appropriate
+     * before switching to the hidden section of the app is performed first
+     * before before switching to the relevant collection or pseudo-collection.
+     */
+    const showCollectionSummary = useCallback(
+        async (
+            collectionSummaryID: number | undefined,
+            isHiddenCollectionSummary: boolean | undefined,
+        ) => {
+            const lastAuthAt = lastAuthenticationForHiddenTimestamp.current;
+            if (
+                isHiddenCollectionSummary &&
+                barMode != "hidden-albums" &&
+                Date.now() - lastAuthAt > 5 * 60 * 1e3 /* 5 minutes */
+            ) {
+                await authenticateUser();
+                lastAuthenticationForHiddenTimestamp.current = Date.now();
+            }
+            handleShowCollectionSummaryWithID(collectionSummaryID);
+        },
+        [authenticateUser, handleShowCollectionSummaryWithID, barMode],
+    );
+
+    const handleSidebarShowCollectionSummary = showCollectionSummary;
+
+    const handleDownloadStatusNotificationsShowCollectionSummary = useCallback(
+        (
+            collectionSummaryID: number | undefined,
+            isHiddenCollectionSummary: boolean | undefined,
+        ) => {
+            void showCollectionSummary(
+                collectionSummaryID,
+                isHiddenCollectionSummary,
+            );
+        },
+        [showCollectionSummary],
+    );
 
     const handleChangeBarMode = (mode: GalleryBarMode) =>
         mode == "people"
             ? dispatch({ type: "showPeople" })
             : dispatch({ type: "showAlbums" });
 
-    const openHiddenSection: GalleryContextType["openHiddenSection"] = (
-        callback,
-    ) => {
-        authenticateUser().then(() => {
-            dispatch({ type: "showHidden" });
-            callback?.();
-        });
-    };
-
-    const handleToggleFavorite = useCallback(
+    const handleFileViewerToggleFavorite = useCallback(
         async (file: EnteFile) => {
             const fileID = file.id;
             const isFavorite = favoriteFileIDs.has(fileID);
 
             dispatch({ type: "addPendingFavoriteUpdate", fileID });
             try {
-                await (isFavorite ? removeFromFavorites : addToFavorites)(
-                    file,
-                    true,
-                );
+                const action = isFavorite
+                    ? removeFromFavoritesCollection
+                    : addToFavoritesCollection;
+                await action([file]);
                 dispatch({
                     type: "unsyncedFavoriteUpdate",
                     fileID,
@@ -826,7 +900,7 @@ const Page: React.FC = () => {
                 dispatch({ type: "removePendingFavoriteUpdate", fileID });
             }
         },
-        [favoriteFileIDs],
+        [user, favoriteFileIDs],
     );
 
     const handleFileViewerFileVisibilityUpdate = useCallback(
@@ -834,14 +908,27 @@ const Page: React.FC = () => {
             const fileID = file.id;
             dispatch({ type: "addPendingVisibilityUpdate", fileID });
             try {
-                const privateMagicMetadata =
-                    await updateRemotePrivateMagicMetadata(file, {
-                        visibility,
-                    });
+                await updateFilesVisibility([file], visibility);
+                // [Note: Interactive updates to file metadata]
+                //
+                // 1. Update the remote metadata.
+                //
+                // 2. Construct a fake a metadata object with the updates
+                //    reflected in it.
+                //
+                // 3. The caller (eventually) triggers a remote pull in the
+                //    background, but meanwhile uses this updated metadata.
+                //
+                // TODO: Replace with files pull?
                 dispatch({
                     type: "unsyncedPrivateMagicMetadataUpdate",
                     fileID,
-                    privateMagicMetadata,
+                    privateMagicMetadata: {
+                        ...file.magicMetadata,
+                        count: file.magicMetadata?.count ?? 0,
+                        version: (file.magicMetadata?.version ?? 0) + 1,
+                        data: { ...file.magicMetadata?.data, visibility },
+                    },
                 });
             } finally {
                 dispatch({ type: "removePendingVisibilityUpdate", fileID });
@@ -882,6 +969,14 @@ const Page: React.FC = () => {
         [],
     );
 
+    const showAppDownloadFooter =
+        state.collectionFiles.length < 30 && !isInSearchMode;
+
+    const fileListFooter = useMemo(
+        () => (showAppDownloadFooter ? createAppDownloadFooter() : undefined),
+        [showAppDownloadFooter],
+    );
+
     const showSelectionBar =
         selected.count > 0 && selected.collectionID === activeCollectionID;
 
@@ -893,260 +988,229 @@ const Page: React.FC = () => {
     }
 
     return (
-        <GalleryContext.Provider
-            value={{
-                ...defaultGalleryContext,
-                setActiveCollectionID: handleSetActiveCollectionID,
-                syncWithRemote,
-                setBlockingLoad,
-                photoListHeader,
-                userIDToEmailMap,
-                user,
-                emailList,
-                openHiddenSection,
-                isClipSearchResult,
-                selectedFile: selected,
-                setSelectedFiles: setSelected,
-            }}
+        <FullScreenDropZone
+            message={
+                watchFolderView ? t("watch_folder_dropzone_hint") : undefined
+            }
+            disabled={shouldDisableDropzone}
+            onDrop={setDragAndDropFiles}
         >
-            <FullScreenDropZone
-                message={
-                    watchFolderView
-                        ? t("watch_folder_dropzone_hint")
-                        : undefined
+            {blockingLoad && <TranslucentLoadingOverlay />}
+            <PlanSelector
+                {...planSelectorVisibilityProps}
+                setLoading={(v) => setBlockingLoad(v)}
+            />
+            <CollectionSelector
+                open={openCollectionSelector}
+                onClose={handleCloseCollectionSelector}
+                attributes={collectionSelectorAttributes}
+                collectionSummaries={normalCollectionSummaries}
+                collectionForCollectionSummaryID={(id) =>
+                    findCollectionCreatingUncategorizedIfNeeded(
+                        state.collections,
+                        id,
+                    )
                 }
-                disabled={shouldDisableDropzone}
-                onDrop={setDragAndDropFiles}
+            />
+            <DownloadStatusNotifications
+                {...{ saveGroups, onRemoveSaveGroup }}
+                onShowCollectionSummary={
+                    handleDownloadStatusNotificationsShowCollectionSummary
+                }
+            />
+            <FixCreationTime
+                {...fixCreationTimeVisibilityProps}
+                files={fixCreationTimeFiles}
+                onRemotePull={remotePull}
+            />
+            <NavbarBase
+                sx={[
+                    {
+                        mb: "12px",
+                        px: "24px",
+                        "@media (width < 720px)": { px: "4px" },
+                    },
+                    showSelectionBar && { borderColor: "accent.main" },
+                ]}
             >
-                {blockingLoad && <TranslucentLoadingOverlay />}
-                <PlanSelector
-                    {...planSelectorVisibilityProps}
-                    setLoading={(v) => setBlockingLoad(v)}
-                />
-                <CollectionNamer
-                    show={collectionNamerView}
-                    onHide={setCollectionNamerView.bind(null, false)}
-                    attributes={collectionNamerAttributes}
-                />
-                <CollectionSelector
-                    open={openCollectionSelector}
-                    onClose={handleCloseCollectionSelector}
-                    attributes={collectionSelectorAttributes}
-                    collectionSummaries={normalCollectionSummaries}
-                    collectionForCollectionID={(id) =>
-                        findCollectionCreatingUncategorizedIfNeeded(
-                            normalCollections,
-                            id,
-                        )
-                    }
-                />
-                <FilesDownloadProgress
-                    attributesList={filesDownloadProgressAttributesList}
-                    setAttributesList={setFilesDownloadProgressAttributesList}
-                />
-                <FixCreationTime
-                    {...fixCreationTimeVisibilityProps}
-                    files={fixCreationTimeFiles}
-                />
-                <NavbarBase
-                    sx={[
-                        {
-                            mb: "12px",
-                            px: "24px",
-                            "@media (width < 720px)": { px: "4px" },
-                        },
-                        showSelectionBar && { borderColor: "accent.main" },
-                    ]}
-                >
-                    {showSelectionBar ? (
-                        <SelectedFileOptions
-                            handleCollectionOp={collectionOpsHelper}
-                            handleFileOp={fileOpHelper}
-                            showCreateCollectionModal={
-                                showCreateCollectionModal
-                            }
-                            onOpenCollectionSelector={
-                                handleOpenCollectionSelector
-                            }
-                            count={selected.count}
-                            ownCount={selected.ownCount}
-                            clearSelection={clearSelection}
-                            barMode={barMode}
-                            activeCollectionID={activeCollectionID}
-                            selectedCollection={getSelectedCollection(
-                                selected.collectionID,
-                                normalCollections,
-                            )}
-                            isFavoriteCollection={
-                                normalCollectionSummaries.get(
-                                    activeCollectionID,
-                                )?.type == "favorites"
-                            }
-                            isUncategorizedCollection={
-                                normalCollectionSummaries.get(
-                                    activeCollectionID,
-                                )?.type == "uncategorized"
-                            }
-                            isIncomingSharedCollection={
-                                normalCollectionSummaries.get(
-                                    activeCollectionID,
-                                )?.type == "incomingShareCollaborator" ||
-                                normalCollectionSummaries.get(
-                                    activeCollectionID,
-                                )?.type == "incomingShareViewer"
-                            }
-                            isInSearchMode={isInSearchMode}
-                            isInHiddenSection={barMode == "hidden-albums"}
-                        />
-                    ) : barMode == "hidden-albums" ? (
-                        <HiddenSectionNavbarContents
-                            onBack={() => dispatch({ type: "showAlbums" })}
-                        />
-                    ) : (
-                        <NormalNavbarContents
-                            {...{ isInSearchMode }}
-                            onSidebar={showSidebar}
-                            onUpload={openUploader}
-                            onShowSearchInput={() =>
-                                dispatch({ type: "enterSearchMode" })
-                            }
-                            onSelectSearchOption={handleSelectSearchOption}
-                            onSelectPeople={() =>
-                                dispatch({ type: "showPeople" })
-                            }
-                            onSelectPerson={handleSelectPerson}
-                        />
-                    )}
-                </NavbarBase>
-                {isFirstLoad && <FirstLoadMessage />}
-                {isOffline && <OfflineMessage />}
-
-                <GalleryBarAndListHeader
-                    {...{
-                        activeCollection,
-                        activeCollectionID,
-                        activePerson,
-                        setCollectionNamerAttributes,
-                        setPhotoListHeader,
-                        setFilesDownloadProgressAttributesCreator,
-                        filesDownloadProgressAttributesList,
-                    }}
-                    mode={barMode}
-                    shouldHide={isInSearchMode}
-                    collectionSummaries={normalCollectionSummaries}
-                    hiddenCollectionSummaries={state.hiddenCollectionSummaries}
-                    people={
-                        (state.view.type == "people"
-                            ? state.view.visiblePeople
-                            : undefined) ?? []
-                    }
-                    onChangeMode={handleChangeBarMode}
-                    setActiveCollectionID={handleSetActiveCollectionID}
-                    onSelectPerson={handleSelectPerson}
-                />
-
-                <Upload
-                    activeCollection={activeCollection}
-                    syncWithRemote={syncWithRemote}
-                    closeUploadTypeSelector={setUploadTypeSelectorView.bind(
-                        null,
-                        false,
-                    )}
-                    onOpenCollectionSelector={handleOpenCollectionSelector}
-                    onCloseCollectionSelector={handleCloseCollectionSelector}
-                    setLoading={setBlockingLoad}
-                    setCollectionNamerAttributes={setCollectionNamerAttributes}
-                    setShouldDisableDropzone={setShouldDisableDropzone}
-                    onUploadFile={(file) =>
-                        dispatch({ type: "uploadNormalFile", file })
-                    }
-                    onShowPlanSelector={showPlanSelector}
-                    setCollections={(collections) =>
-                        dispatch({ type: "setNormalCollections", collections })
-                    }
-                    isFirstUpload={areOnlySystemCollections(
-                        normalCollectionSummaries,
-                    )}
-                    showSessionExpiredMessage={showSessionExpiredDialog}
-                    {...{
-                        dragAndDropFiles,
-                        uploadTypeSelectorIntent,
-                        uploadTypeSelectorView,
-                    }}
-                />
-                <Sidebar
-                    {...sidebarVisibilityProps}
-                    collectionSummaries={normalCollectionSummaries}
-                    onShowPlanSelector={showPlanSelector}
-                    onShowExport={showExport}
-                    onAuthenticateUser={authenticateUser}
-                />
-                <WhatsNew {...whatsNewVisibilityProps} />
-                {!isInSearchMode &&
-                !isFirstLoad &&
-                !normalFiles?.length &&
-                !hiddenFiles?.length &&
-                activeCollectionID === ALL_SECTION ? (
-                    <GalleryEmptyState openUploader={openUploader} />
-                ) : !isInSearchMode &&
-                  !isFirstLoad &&
-                  state.view.type == "people" &&
-                  !state.view.activePerson ? (
-                    <PeopleEmptyState />
-                ) : (
-                    <FileListWithViewer
-                        mode={barMode}
-                        modePlus={isInSearchMode ? "search" : barMode}
-                        user={user}
-                        files={filteredFiles}
-                        enableDownload={true}
-                        showAppDownloadBanner={
-                            normalFiles.length < 30 && !isInSearchMode
+                {showSelectionBar ? (
+                    <SelectedFileOptions
+                        barMode={barMode}
+                        isInSearchMode={isInSearchMode}
+                        collection={
+                            isInSearchMode ? undefined : activeCollection
                         }
-                        selectable={true}
-                        selected={selected}
-                        setSelected={setSelected}
-                        activeCollectionID={activeCollectionID}
-                        activePersonID={activePerson?.id}
-                        isInIncomingSharedCollection={
-                            normalCollectionSummaries.get(activeCollectionID)
-                                ?.type == "incomingShareCollaborator" ||
-                            normalCollectionSummaries.get(activeCollectionID)
-                                ?.type == "incomingShareViewer"
+                        collectionSummary={
+                            isInSearchMode ? undefined : activeCollectionSummary
                         }
-                        isInHiddenSection={barMode == "hidden-albums"}
+                        selectedFileCount={selected.count}
+                        selectedOwnFileCount={selected.ownCount}
+                        onClearSelection={clearSelection}
+                        onRemoveFilesFromCollection={
+                            handleRemoveFilesFromCollection
+                        }
+                        onOpenCollectionSelector={handleOpenCollectionSelector}
                         {...{
-                            favoriteFileIDs,
-                            collectionNameByID,
-                            fileNormalCollectionIDs,
-                            pendingFavoriteUpdates,
-                            pendingVisibilityUpdates,
+                            createOnCreateForCollectionOp,
+                            createOnSelectForCollectionOp,
+                            createFileOpHandler,
                         }}
-                        setFilesDownloadProgressAttributesCreator={
-                            setFilesDownloadProgressAttributesCreator
+                    />
+                ) : barMode == "hidden-albums" ? (
+                    <HiddenSectionNavbarContents
+                        onBack={() => dispatch({ type: "showAlbums" })}
+                    />
+                ) : (
+                    <NormalNavbarContents
+                        {...{ isInSearchMode }}
+                        onSidebar={showSidebar}
+                        onUpload={openUploader}
+                        onShowSearchInput={() =>
+                            dispatch({ type: "enterSearchMode" })
                         }
-                        onToggleFavorite={handleToggleFavorite}
-                        onFileVisibilityUpdate={
-                            handleFileViewerFileVisibilityUpdate
-                        }
-                        onMarkTempDeleted={handleMarkTempDeleted}
-                        onSetOpenFileViewer={setIsFileViewerOpen}
-                        onSyncWithRemote={handleSyncWithRemote}
-                        onVisualFeedback={handleVisualFeedback}
-                        onSelectCollection={handleSelectCollection}
+                        onSelectSearchOption={handleSelectSearchOption}
+                        onSelectPeople={() => dispatch({ type: "showPeople" })}
                         onSelectPerson={handleSelectPerson}
                     />
                 )}
-                <Export
-                    {...exportVisibilityProps}
-                    allCollectionsNameByID={collectionNameByID}
+            </NavbarBase>
+            {isFirstLoad && <FirstLoadMessage />}
+            {isOffline && <OfflineMessage />}
+
+            <GalleryBarAndListHeader
+                {...{
+                    user,
+                    // TODO: These are incorrect assertions, the types of the
+                    // component need to be updated.
+                    activeCollection: activeCollection!,
+                    activeCollectionID: activeCollectionID!,
+                    activePerson,
+                    setFileListHeader,
+                    saveGroups,
+                    onAddSaveGroup,
+                }}
+                mode={barMode}
+                shouldHide={isInSearchMode}
+                barCollectionSummaries={barCollectionSummaries}
+                emailByUserID={state.emailByUserID}
+                shareSuggestionEmails={state.shareSuggestionEmails}
+                people={
+                    (state.view?.type == "people"
+                        ? state.view.visiblePeople
+                        : undefined) ?? []
+                }
+                onChangeMode={handleChangeBarMode}
+                setBlockingLoad={setBlockingLoad}
+                setActiveCollectionID={handleShowCollectionSummaryWithID}
+                onRemotePull={remotePull}
+                onSelectPerson={handleSelectPerson}
+            />
+
+            <Upload
+                {...{
+                    user,
+                    dragAndDropFiles,
+                    uploadTypeSelectorIntent,
+                    uploadTypeSelectorView,
+                }}
+                isFirstUpload={haveOnlySystemCollections(
+                    normalCollectionSummaries,
+                )}
+                activeCollection={activeCollection}
+                closeUploadTypeSelector={setUploadTypeSelectorView.bind(
+                    null,
+                    false,
+                )}
+                setLoading={setBlockingLoad}
+                setShouldDisableDropzone={setShouldDisableDropzone}
+                onRemotePull={remotePull}
+                onRemoteFilesPull={remoteFilesPull}
+                onOpenCollectionSelector={handleOpenCollectionSelector}
+                onCloseCollectionSelector={handleCloseCollectionSelector}
+                onUploadFile={(file) => dispatch({ type: "uploadFile", file })}
+                onShowPlanSelector={showPlanSelector}
+                onShowSessionExpiredDialog={showSessionExpiredDialog}
+            />
+            <Sidebar
+                {...sidebarVisibilityProps}
+                normalCollectionSummaries={normalCollectionSummaries}
+                uncategorizedCollectionSummaryID={
+                    state.uncategorizedCollectionSummaryID
+                }
+                onShowPlanSelector={showPlanSelector}
+                onShowCollectionSummary={handleSidebarShowCollectionSummary}
+                onShowExport={showExport}
+                onAuthenticateUser={authenticateUser}
+            />
+            <WhatsNew {...whatsNewVisibilityProps} />
+            {!isInSearchMode &&
+            !isFirstLoad &&
+            !state.collectionFiles.length &&
+            activeCollectionID === PseudoCollectionID.all ? (
+                <GalleryEmptyState
+                    isUploadInProgress={uploadManager.isUploadInProgress()}
+                    onUpload={openUploader}
                 />
-                <AuthenticateUser
-                    {...authenticateUserVisibilityProps}
-                    onAuthenticate={onAuthenticateCallback.current!}
+            ) : !isInSearchMode &&
+              !isFirstLoad &&
+              state.view?.type == "people" &&
+              !state.view.activePerson ? (
+                <PeopleEmptyState />
+            ) : (
+                <FileListWithViewer
+                    mode={barMode}
+                    modePlus={isInSearchMode ? "search" : barMode}
+                    header={fileListHeader}
+                    footer={fileListFooter}
+                    user={user}
+                    files={filteredFiles}
+                    enableDownload={true}
+                    disableGrouping={state.searchSuggestion?.type == "clip"}
+                    enableSelect={true}
+                    selected={selected}
+                    setSelected={setSelected}
+                    // TODO: Incorrect assertion, need to update the type
+                    activeCollectionID={activeCollectionID!}
+                    activePersonID={activePerson?.id}
+                    isInIncomingSharedCollection={activeCollectionSummary?.attributes.has(
+                        "sharedIncoming",
+                    )}
+                    isInHiddenSection={barMode == "hidden-albums"}
+                    {...{
+                        favoriteFileIDs,
+                        collectionNameByID,
+                        fileNormalCollectionIDs,
+                        pendingFavoriteUpdates,
+                        pendingVisibilityUpdates,
+                        onAddSaveGroup,
+                    }}
+                    emailByUserID={state.emailByUserID}
+                    onToggleFavorite={handleFileViewerToggleFavorite}
+                    onFileVisibilityUpdate={
+                        handleFileViewerFileVisibilityUpdate
+                    }
+                    onMarkTempDeleted={handleMarkTempDeleted}
+                    onSetOpenFileViewer={setIsFileViewerOpen}
+                    onRemotePull={remotePull}
+                    onRemoteFilesPull={remoteFilesPull}
+                    onVisualFeedback={handleVisualFeedback}
+                    onSelectCollection={handleSelectCollection}
+                    onSelectPerson={handleSelectPerson}
                 />
-            </FullScreenDropZone>
-        </GalleryContext.Provider>
+            )}
+            <Export {...exportVisibilityProps} {...{ collectionNameByID }} />
+            <AuthenticateUser
+                {...authenticateUserVisibilityProps}
+                onAuthenticate={onAuthenticateCallback.current!}
+            />
+            <SingleInputDialog
+                {...albumNameInputVisibilityProps}
+                title={t("new_album")}
+                label={t("album_name")}
+                submitButtonTitle={t("create")}
+                onSubmit={handleAlbumNameSubmit}
+            />
+        </FullScreenDropZone>
     );
 };
 
@@ -1173,7 +1237,7 @@ const OfflineMessage: React.FC = () => (
  * Preload all three variants of a responsive image.
  */
 const preloadImage = (imgBasePath: string) => {
-    const srcset = [];
+    const srcset: string[] = [];
     for (let i = 1; i <= 3; i++) srcset.push(`${imgBasePath}/${i}x.png ${i}x`);
     new Image().srcset = srcset.join(",");
 };
@@ -1208,7 +1272,7 @@ const SidebarButton: React.FC<ButtonishProps> = ({ onClick }) => (
 );
 
 const UploadButton: React.FC<ButtonishProps> = ({ onClick }) => {
-    const disabled = !uploadManager.shouldAllowNewUpload();
+    const disabled = uploadManager.isUploadInProgress();
     const isSmallWidth = useIsSmallWidth();
 
     const icon = <FileUploadOutlinedIcon />;
@@ -1241,16 +1305,15 @@ const HiddenSectionNavbarContents: React.FC<
         direction="row"
         sx={(theme) => ({
             gap: "24px",
-            width: "100%",
+            flex: 1,
+            alignItems: "center",
             background: theme.vars.palette.background.default,
         })}
     >
         <IconButton onClick={onBack}>
             <ArrowBackIcon />
         </IconButton>
-        <FlexWrapper>
-            <Typography>{t("section_hidden")}</Typography>
-        </FlexWrapper>
+        <Typography sx={{ flex: 1 }}>{t("section_hidden")}</Typography>
     </Stack>
 );
 
@@ -1261,11 +1324,11 @@ const HiddenSectionNavbarContents: React.FC<
  *
  * Check if these query parameters exist, and if so, act on them appropriately.
  */
-export async function handleSubscriptionCompletionRedirectIfNeeded(
+const handleSubscriptionCompletionRedirectIfNeeded = async (
     showMiniDialog: (attributes: MiniDialogAttributes) => void,
     showLoadingBar: () => void,
     router: NextRouter,
-) {
+) => {
     const { session_id: sessionID, status, reason } = router.query;
 
     if (status == "success") {
@@ -1276,7 +1339,7 @@ export async function handleSubscriptionCompletionRedirectIfNeeded(
                 message: (
                     <Trans
                         i18nKey="subscription_purchase_success"
-                        values={{ date: subscription?.expiryTime }}
+                        values={{ date: subscription.expiryTime }}
                     />
                 ),
                 continue: { text: t("ok") },
@@ -1289,7 +1352,7 @@ export async function handleSubscriptionCompletionRedirectIfNeeded(
             );
         }
     } else if (status == "fail") {
-        log.error(`Subscription purchase failed: ${reason}`);
+        log.error(`Subscription purchase failed`, reason);
         switch (reason) {
             case "canceled":
                 showMiniDialog({
@@ -1330,20 +1393,40 @@ export async function handleSubscriptionCompletionRedirectIfNeeded(
                 );
         }
     }
-}
-
-/**
- * Return the {@link Collection} (from amongst {@link collections}) with the
- * given {@link collectionID}. As a special case, if collection ID is the
- * placeholder ID of the uncategorized collection, create it and then return it.
- */
-const findCollectionCreatingUncategorizedIfNeeded = async (
-    collections: Collection[],
-    collectionID: number,
-) => {
-    if (collectionID == DUMMY_UNCATEGORIZED_COLLECTION) {
-        return await createUnCategorizedCollection();
-    } else {
-        return collections.find((c) => c.id === collectionID);
-    }
 };
+
+const createAppDownloadFooter = (): FileListHeaderOrFooter => ({
+    component: (
+        <Typography
+            variant="small"
+            sx={{
+                alignSelf: "flex-end",
+                marginInline: "auto",
+                marginBlock: 0.75,
+                textAlign: "center",
+                color: "text.faint",
+            }}
+        >
+            <Trans
+                i18nKey={"install_mobile_app"}
+                components={{
+                    a: (
+                        <Link
+                            href="https://play.google.com/store/apps/details?id=io.ente.photos"
+                            target="_blank"
+                            rel="noopener"
+                        />
+                    ),
+                    b: (
+                        <Link
+                            href="https://apps.apple.com/in/app/ente-photos/id1542026904"
+                            target="_blank"
+                            rel="noopener"
+                        />
+                    ),
+                }}
+            />
+        </Typography>
+    ),
+    height: 90,
+});

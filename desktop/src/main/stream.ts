@@ -7,16 +7,14 @@ import fs from "node:fs/promises";
 import { Writable } from "node:stream";
 import { pathToFileURL } from "node:url";
 import log from "./log";
-import {
-    ffmpegConvertToMP4,
-    ffmpegGenerateHLSPlaylistAndSegments,
-    type FFmpegGenerateHLSPlaylistAndSegmentsResult,
-} from "./services/ffmpeg";
+import { ffmpegUtilityProcess } from "./services/ffmpeg";
+import { type FFmpegGenerateHLSPlaylistAndSegmentsResult } from "./services/ffmpeg-worker";
 import { markClosableZip, openZip } from "./services/zip";
 import { writeStream } from "./utils/stream";
 import {
     deleteTempFile,
     deleteTempFileIgnoringErrors,
+    makeFileForStreamOrPathOrZipItem,
     makeTempFilePath,
 } from "./utils/temp";
 
@@ -78,7 +76,7 @@ const handleStreamRequest = async (request: Request): Promise<Response> => {
                     case "convert-to-mp4":
                         return handleConvertToMP4Write(request);
                     case "generate-hls":
-                        return handleGenerateHLSWrite(request);
+                        return handleGenerateHLSWrite(request, searchParams);
                     default:
                         return new Response(`Unknown op ${op}`, {
                             status: 404,
@@ -122,6 +120,7 @@ const handleRead = async (path: string) => {
         res.headers.set("Content-Length", `${fileSize}`);
 
         // Add the file's last modified time (as epoch milliseconds).
+        // See: [Note: Integral last modified time]
         const mtimeMs = stat.mtime.getTime();
         res.headers.set("X-Last-Modified-Ms", `${mtimeMs}`);
     }
@@ -230,12 +229,14 @@ export const clearPendingVideoResults = () => pendingVideoResults.clear();
  * See also: [Note: IPC streams]
  */
 const handleConvertToMP4Write = async (request: Request) => {
+    const worker = await ffmpegUtilityProcess();
+
     const inputTempFilePath = await makeTempFilePath();
     await writeStream(inputTempFilePath, request.body!);
 
     const outputTempFilePath = await makeTempFilePath("mp4");
     try {
-        await ffmpegConvertToMP4(inputTempFilePath, outputTempFilePath);
+        await worker.ffmpegConvertToMP4(inputTempFilePath, outputTempFilePath);
     } catch (e) {
         log.error("Conversion to MP4 failed", e);
         await deleteTempFileIgnoringErrors(outputTempFilePath);
@@ -246,7 +247,7 @@ const handleConvertToMP4Write = async (request: Request) => {
 
     const token = randomUUID();
     pendingVideoResults.set(token, outputTempFilePath);
-    return new Response(JSON.stringify([token]), { status: 200 });
+    return new Response(token, { status: 200 });
 };
 
 const handleVideoRead = async (token: string) => {
@@ -274,32 +275,83 @@ const handleVideoDone = async (token: string) => {
  * See: [Note: Convert to MP4] for the general architecture of commands that do
  * renderer <-> main I/O using streams.
  *
- * The difference here is that we the conversion generates two streams - one for
- * the HLS playlist itself, and one for the file containing the encrypted and
- * transcoded video chunks. So instead of returning a single token, we return a
- * JSON array containing two tokens so that the renderer can read them off
- * separately.
+ * The difference here is that we the conversion generates two streams^ - one
+ * for the HLS playlist itself, and one for the file containing the encrypted
+ * and transcoded video chunks. The video stream we write to the pre-signed
+ * object upload URL(s), and then we return a JSON object containing the token
+ * for the playlist, and other metadata for use by the renderer.
+ *
+ * ^ if the video doesn't require a stream to be generated (e.g. it is very
+ *   small and already uses a compatible codec) then a HTT 204 is returned and
+ *   no stream is generated.
  */
-const handleGenerateHLSWrite = async (request: Request) => {
-    const inputTempFilePath = await makeTempFilePath();
-    await writeStream(inputTempFilePath, request.body!);
+const handleGenerateHLSWrite = async (
+    request: Request,
+    params: URLSearchParams,
+) => {
+    const fileID = parseInt(params.get("fileID") ?? "", 10);
+    const fetchURL = params.get("fetchURL");
+    const authToken = params.get("authToken");
+    if (!fileID || !fetchURL || !authToken) throw new Error("Missing params");
 
-    const outputFilePathPrefix = await makeTempFilePath();
-    let paths: FFmpegGenerateHLSPlaylistAndSegmentsResult;
-    try {
-        paths = await ffmpegGenerateHLSPlaylistAndSegments(
-            inputTempFilePath,
-            outputFilePathPrefix,
-        );
-    } finally {
-        await deleteTempFileIgnoringErrors(inputTempFilePath);
+    let inputItem: Parameters<typeof makeFileForStreamOrPathOrZipItem>[0];
+    const path = params.get("path");
+    if (path) {
+        inputItem = path;
+    } else {
+        const zipPath = params.get("zipPath");
+        const entryName = params.get("entryName");
+        if (zipPath && entryName) {
+            inputItem = [zipPath, entryName];
+        } else {
+            const body = request.body;
+            if (!body) throw new Error("Missing body");
+            inputItem = body;
+        }
     }
 
-    const playlistToken = randomUUID();
-    const videoToken = randomUUID();
-    pendingVideoResults.set(playlistToken, paths.playlistPath);
-    pendingVideoResults.set(videoToken, paths.videoPath);
-    return new Response(JSON.stringify([playlistToken, videoToken]), {
-        status: 200,
-    });
+    const worker = await ffmpegUtilityProcess();
+
+    const {
+        path: inputFilePath,
+        isFileTemporary: isInputFileTemporary,
+        writeToTemporaryFile: writeToTemporaryInputFile,
+    } = await makeFileForStreamOrPathOrZipItem(inputItem);
+
+    const outputFilePathPrefix = await makeTempFilePath();
+    let result: FFmpegGenerateHLSPlaylistAndSegmentsResult | undefined;
+    try {
+        await writeToTemporaryInputFile();
+
+        result = await worker.ffmpegGenerateHLSPlaylistAndSegments(
+            inputFilePath,
+            outputFilePathPrefix,
+            fileID,
+            fetchURL,
+            authToken,
+        );
+
+        if (!result) {
+            // This video doesn't require stream generation.
+            return new Response(null, { status: 204 });
+        }
+
+        const { playlistPath, dimensions, videoSize, videoObjectID } = result;
+
+        const playlistToken = randomUUID();
+        pendingVideoResults.set(playlistToken, playlistPath);
+
+        return new Response(
+            JSON.stringify({
+                playlistToken,
+                dimensions,
+                videoSize,
+                videoObjectID,
+            }),
+            { status: 200 },
+        );
+    } finally {
+        if (isInputFileTemporary)
+            await deleteTempFileIgnoringErrors(inputFilePath);
+    }
 };

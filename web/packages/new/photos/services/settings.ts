@@ -2,13 +2,17 @@
  * @file Storage (in-memory, local, remote) and update of various settings.
  */
 
+import { savedPartialLocalUser } from "ente-accounts/services/accounts-db";
 import { isDevBuild } from "ente-base/env";
-import { localUser } from "ente-base/local-user";
 import log from "ente-base/log";
 import { updateShouldDisableCFUploadProxy } from "ente-gallery/services/upload";
 import { nullToUndefined } from "ente-utils/transform";
-import { z } from "zod";
-import { fetchFeatureFlags, updateRemoteFlag } from "./remote-store";
+import { z } from "zod/v4";
+import {
+    fetchFeatureFlags,
+    updateRemoteFlag,
+    updateRemoteValue,
+} from "./remote-store";
 
 /**
  * In-memory flags that tracks various settings.
@@ -22,12 +26,12 @@ import { fetchFeatureFlags, updateRemoteFlag } from "./remote-store";
  * 1. On app start, the initial are read from local storage in
  *    {@link initSettings}.
  *
- * 2. During the remote sync, remote flags are fetched and saved in local
+ * 2. During the remote pull, remote flags are fetched and saved in local
  *    storage, and the in-memory state updated to reflect the latest values
- *    ({@link syncSettings}).
+ *    ({@link pullSettings}).
  *
  * 3. Updating a value also cause an unconditional fetch and update
- *    ({@link syncSettings}).
+ *    ({@link pullSettings}).
  *
  * 4. The individual getter functions for the flags (e.g.
  *    {@link isInternalUser}) return the in-memory values, and so are suitable
@@ -66,6 +70,24 @@ export interface Settings {
      * Default: "https://cast.ente.io"
      */
     castURL: string;
+
+    /**
+     * Set to the domain (host, e.g. "photos.example.org") that the user wishes
+     * to use for sharing their public albums.
+     *
+     * An empty string is treated as `undefined`.
+     */
+    customDomain?: string;
+
+    /**
+     * The URL we should ask the user to CNAME their {@link customDomain} to
+     * for wiring up their domain to the public albums app.
+     *
+     * See also `apps.custom-domain.cname` in `server/local.yaml`.
+     *
+     * Default: "my.ente.io"
+     */
+    customDomainCNAME: string;
 }
 
 const createDefaultSettings = (): Settings => ({
@@ -73,6 +95,7 @@ const createDefaultSettings = (): Settings => ({
     mapEnabled: false,
     cfUploadProxyDisabled: false,
     castURL: "https://cast.ente.io",
+    customDomainCNAME: "my.ente.io",
 });
 
 /**
@@ -120,7 +143,7 @@ export const logoutSettings = () => {
  * Fetch remote flags from remote and save them in local storage for subsequent
  * lookup. Then use the results to update our in memory state if needed.
  */
-export const syncSettings = async () => {
+export const pullSettings = async () => {
     const jsonString = await fetchFeatureFlags().then((res) => res.text());
     // Do a parse as a sanity check before saving the string contents.
     FeatureFlags.parse(JSON.parse(jsonString));
@@ -147,6 +170,8 @@ const FeatureFlags = z.object({
     betaUser: z.boolean().nullish().transform(nullToUndefined),
     mapEnabled: z.boolean().nullish().transform(nullToUndefined),
     castUrl: z.string().nullish().transform(nullToUndefined),
+    customDomain: z.string().nullish().transform(nullToUndefined),
+    customDomainCNAME: z.string().nullish().transform(nullToUndefined),
 });
 
 type FeatureFlags = z.infer<typeof FeatureFlags>;
@@ -158,6 +183,9 @@ const syncSettingsSnapshotWithLocalStorage = () => {
     settings.mapEnabled = flags?.mapEnabled || false;
     settings.cfUploadProxyDisabled = savedCFProxyDisabled();
     if (flags?.castUrl) settings.castURL = flags.castUrl;
+    if (flags?.customDomain) settings.customDomain = flags.customDomain;
+    if (flags?.customDomainCNAME)
+        settings.customDomainCNAME = flags.customDomainCNAME;
     setSettingsSnapshot(settings);
 };
 
@@ -188,16 +216,25 @@ const setSettingsSnapshot = (snapshot: Settings) => {
 };
 
 /**
- * Return `true` if this is a development build, and the current user is marked
- * as an "development" user.
+ * Return `true` if this is a development build, and the current user (if any)
+ * is marked as an "development" user.
  *
  * Emails that end in "@ente.io" are considered as dev users.
  */
 export const isDevBuildAndUser = () => isDevBuild && isDevUserViaEmail();
 
-const isDevUserViaEmail = () => {
-    const user = localUser();
-    return !!user?.email.endsWith("@ente.io");
+const isDevUserViaEmail = () =>
+    !!savedPartialLocalUser()?.email?.endsWith("@ente.io");
+
+/**
+ * Persist the user's custom domain preference both locally and on remote.
+ *
+ * Setting the value to a blank string is equivalent to deleting the custom
+ * domain value altogether.
+ */
+export const updateCustomDomain = async (customDomain: string) => {
+    await updateRemoteValue("customDomain", customDomain);
+    return pullSettings();
 };
 
 /**
@@ -205,7 +242,7 @@ const isDevUserViaEmail = () => {
  */
 export const updateMapEnabled = async (isEnabled: boolean) => {
     await updateRemoteFlag("mapEnabled", isEnabled);
-    return syncSettings();
+    return pullSettings();
 };
 
 const cfProxyDisabledKey = "cfProxyDisabled";

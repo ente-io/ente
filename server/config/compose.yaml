@@ -1,0 +1,79 @@
+services:
+  museum:
+    build:
+      context: ..
+    ports:
+      - 8080:8080 # Museum/API
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    volumes:
+      - ./museum.yaml:/museum.yaml:ro
+      - ./data:/data:ro
+
+  # Resolve "localhost:3200" in the museum container to the minio container.
+  socat:
+    image: alpine/socat
+    network_mode: service:museum
+    depends_on: [museum]
+    command: "TCP-LISTEN:3200,fork,reuseaddr TCP:minio:3200"
+
+  postgres:
+    image: postgres:15-trixie
+    env_file:
+      - .env
+    # Wait for postgres to accept connections before starting museum.
+    healthcheck:
+      test: pg_isready -q -d ${POSTGRES_DB} -U ${POSTGRES_USER}
+      start_period: 30s
+      start_interval: 1s
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  minio:
+    image: minio/minio
+    ports:
+      - 3200:3200 # MinIO API
+      # - 3201:3201 # MinIO Console (uncomment to access externally)
+    env_file:
+      - .env
+    command: server /data --address ":3200" --console-address ":3201"
+    volumes:
+      - minio-data:/data
+    post_start:
+      - command: |
+          sh -c '
+          #!/bin/sh
+
+          while ! mc alias set h0 http://minio:3200 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD} 2>/dev/null
+          do
+            echo "Waiting for minio..."
+            sleep 0.5
+          done
+
+          cd /data
+
+          mc mb -p b2-eu-cen
+          mc mb -p wasabi-eu-central-2-v3
+          mc mb -p scw-eu-fr-v3
+          '
+
+  ente-web:
+    build:
+      context: ../../web    
+    ports:
+      - 3000:3000
+      - 3001:3001
+      - 3002:3002
+      - 3003:3003
+      - 3004:3004
+    environment:
+      - NODE_ENV=development
+    env_file:
+      - .env
+
+volumes:
+  postgres-data:
+  minio-data:

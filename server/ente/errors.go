@@ -97,8 +97,8 @@ var ErrUserDeleted = errors.New("user account has been deleted")
 // ErrLockUnavailable is thrown when a lock could not be acquired
 var ErrLockUnavailable = errors.New("could not acquire lock")
 
-// ErrActiveLinkAlreadyExists is thrown when the collection already has active public link
-var ErrActiveLinkAlreadyExists = errors.New("Collection already has active public link")
+// ErrActiveLinkAlreadyExists is thrown when an active link already exists for entity
+var ErrActiveLinkAlreadyExists = errors.New("link already exists for this entity")
 
 // ErrNotImplemented indicates that the action that we tried to perform is not
 // available at this museum instance. e.g. this could be something that is not
@@ -175,6 +175,11 @@ var ErrMaxPasskeysReached = ApiError{
 	Code:           MaxPasskeysReached,
 	Message:        "Max passkeys limit reached",
 	HttpStatusCode: http.StatusConflict,
+}
+var ErrPassProtectedResource = ApiError{
+	Code:           "PASS_PROTECTED_RESOURCE",
+	Message:        "This resource is password protected",
+	HttpStatusCode: http.StatusForbidden,
 }
 
 var ErrCastPermissionDenied = ApiError{
@@ -275,6 +280,14 @@ func NewBadRequestWithMessage(message string) *ApiError {
 	return &ApiError{
 		Code:           BadRequest,
 		HttpStatusCode: http.StatusBadRequest,
+		Message:        message,
+	}
+}
+
+func NewPermissionDeniedError(message string) *ApiError {
+	return &ApiError{
+		Code:           "PERMISSION_DENIED",
+		HttpStatusCode: http.StatusForbidden,
 		Message:        message,
 	}
 }

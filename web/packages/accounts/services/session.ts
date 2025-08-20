@@ -1,10 +1,20 @@
+import {
+    savedOriginalKeyAttributes,
+    savedSRPAttributes,
+} from "ente-accounts/services/accounts-db";
+import type { KeyAttributes } from "ente-accounts/services/user";
 import { authenticatedRequestHeaders, HTTPError } from "ente-base/http";
-import { ensureLocalUser } from "ente-base/local-user";
+import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
-import { getData } from "ente-shared/storage/localStorage";
-import type { KeyAttributes } from "ente-shared/user/types";
-import type { SRPAttributes } from "./srp-remote";
-import { getSRPAttributes } from "./srp-remote";
+import { savedAuthToken } from "ente-base/token";
+import { nullToUndefined } from "ente-utils/transform";
+import { z } from "zod/v4";
+import { getSRPAttributes, type SRPAttributes } from "./srp";
+import {
+    ensureLocalUser,
+    putUserKeyAttributes,
+    RemoteKeyAttributes,
+} from "./user";
 
 type SessionValidity =
     | { status: "invalid" }
@@ -14,6 +24,14 @@ type SessionValidity =
           updatedKeyAttributes: KeyAttributes;
           updatedSRPAttributes: SRPAttributes;
       };
+
+const SessionValidityResponse = z.object({
+    hasSetKeys: z.boolean(),
+    /**
+     * Will not be present if {@link hasSetKeys} is `false`.
+     */
+    keyAttributes: RemoteKeyAttributes.nullish().transform(nullToUndefined),
+});
 
 /**
  * Check if the local token and/or key attributes we have are still valid.
@@ -70,22 +88,15 @@ export const checkSessionValidity = async (): Promise<SessionValidity> => {
         else throw new HTTPError(res);
     }
 
-    // See if the response contains keyAttributes (they might not for older
-    // deployments).
-    const json = await res.json();
-    if (
-        "keyAttributes" in json &&
-        typeof json.keyAttributes == "object" &&
-        json.keyAttributes !== null
-    ) {
-        // Assume it is a `KeyAttributes`.
-        //
-        // Enhancement: Convert this to a zod validation.
-        const remoteKeyAttributes = json.keyAttributes as KeyAttributes;
+    // See if the response contains keyAttributes (it will not if `hasSetKeys`
+    // in the response is `false`).
+    const { keyAttributes } = SessionValidityResponse.parse(await res.json());
+    if (keyAttributes) {
+        const remoteKeyAttributes = keyAttributes;
 
         // We should have these values locally if we reach here.
         const email = ensureLocalUser().email;
-        const localSRPAttributes = getData("srpAttributes")!;
+        const localSRPAttributes = savedSRPAttributes()!;
 
         // Fetch the remote SRP attributes.
         //
@@ -113,6 +124,54 @@ export const checkSessionValidity = async (): Promise<SessionValidity> => {
         }
     }
 
-    // The token is still valid (to the best of our ascertainable knowledge).
+    // The token is still valid.
     return { status: "valid" };
+};
+
+/**
+ * Return `true` if the user does not have a saved auth token, of it is no
+ * longer valid. If needed, also update the key attributes at remote.
+ *
+ * This is a subset of {@link checkSessionValidity} that has been tailored for
+ * use during each remote pull, to detect if the user has been logged out
+ * elsewhere.
+ *
+ * @returns `true` if either we don't have an auth token, or if remote tells us
+ * that the auth token (and the associated session) has been invalidated. In all
+ * other cases, return `false`.
+ *
+ * In particular, this function doesn't throw and instead returns `false` on
+ * errors. This is because returning `true` will trigger a blocking alert that
+ * ends in logging the user out, and we don't want to log the user out on on
+ * e.g. transient network issues.
+ */
+export const isSessionInvalid = async (): Promise<boolean> => {
+    const token = await savedAuthToken();
+    if (!token) {
+        return true; /* No saved token, session is invalid */
+    }
+
+    try {
+        const res = await fetch(await apiURL("/users/session-validity/v2"), {
+            headers: await authenticatedRequestHeaders(),
+        });
+        if (!res.ok) {
+            if (res.status == 401) return true; /* session is no longer valid */
+            else throw new HTTPError(res);
+        }
+
+        const { hasSetKeys } = SessionValidityResponse.parse(await res.json());
+        if (!hasSetKeys) {
+            const originalKeyAttributes = savedOriginalKeyAttributes();
+            if (originalKeyAttributes)
+                await putUserKeyAttributes(originalKeyAttributes);
+        }
+    } catch (e) {
+        log.warn("Failed to check session validity", e);
+        // Don't logout user on potentially transient errors.
+        return false;
+    }
+
+    // Everything seems ok.
+    return false;
 };

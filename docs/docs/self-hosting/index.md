@@ -1,113 +1,93 @@
 ---
-title: Self Hosting
-description: Getting started self hosting Ente Photos and/or Ente Auth
+title: Quickstart - Self-hosting
+description: Getting started with self-hosting Ente
 ---
 
-# Self Hosting
+# Quickstart
 
-The entire source code for Ente is open source, including the servers. This is
-the same code we use for our own cloud service.
+If you're looking to spin up Ente on your server, you are in the right place!
 
-> [!TIP]
->
-> To get some context, you might find our
-> [blog post](https://ente.io/blog/open-sourcing-our-server/) announcing the
-> open sourcing of our server useful.
+Our entire source code,
+[including the server](https://ente.io/blog/open-sourcing-our-server/) is open
+source. This is the same code we use on production.
 
-## Getting started - Quickstart
+For a quick preview, make sure your system meets the requirements mentioned
+below. After trying the preview, you can explore other ways of self-hosting Ente
+on your server as described in the documentation.
 
-Install [Docker](https://www.docker.com). Then, paste the following command in a
-your terminal:
+## Requirements
+
+- A system with at least 1 GB of RAM and 1 CPU core
+- [Docker Compose](https://docs.docker.com/compose/)
+
+> For more details, check out the
+> [requirements page](/self-hosting/installation/requirements).
+
+## Set up the server
+
+Run this command on your terminal to setup Ente.
 
 ```sh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ente-io/ente/main/server/quickstart.sh)"
 ```
 
-> [!TIP]
->
-> For more details about what this does, see [the quickstart
-> README](https://github.com/ente-io/ente/blob/main/server/docs/quickstart.md).
+This creates a directory `my-ente` in the current working directory, prompts to
+start the cluster with needed containers after pulling the images required to
+run Ente.
 
-That's about it. If you open http://localhost:3000 from the machine where the
-server is running, you will be able to create an account on a Ente Photos web
-app. This web app will be connecting to the server running on your local machine
-at `localhost:8080`.
+::: info
 
-To complete your account registration you need to enter a 6-digit verification
-code. These can be found in the server logs which should already be shown in
-your quickstart terminal. Otherwise you can open the server logs with the
-following command from inside the `my-ente` folder:
+Make sure to modify the default values in `compose.yaml` and `museum.yaml` if
+you wish to change endpoints, bucket configuration or server configuration.
 
-```sh
-sudo docker compose logs
-```
+:::
 
-In the logs, find the code at the end of a message that resembles the following:
-```sh
-museum    | INFO[0102]email.go:130 sendViaTransmail Skipping sending email to email@example.com: *Verification code: 112089*
-```
+## Try the web app
 
-There are [prebuilt apps](https://ente.io/download) for iPad, iPhone, Android,
-Linux, Mac, and Windows. These can easily be configured to use your [custom
-self-hosted server](guides/custom-server/).
+Open Ente Photos web app at `http://<machine-ip>:3000` (or
+`http://localhost:3000` if using on same local machine). Select **Don't have an
+account?** to create a new user.
 
-## Getting started - From source
+Follow the prompts to sign up.
 
-The quickstart method above uses pre-built images. Alternatively, if you want to
-build the self hosted server images from source, you can use the steps in this
-section.
+<div style="display: flex; gap: 10px;">
+  <img alt="Onboarding screen" src="/onboarding.png" style="width: 50%; height: auto;">
+  <img alt="Sign up page" src="/sign-up.png" style="width: 50%; height: auto;">
+</div>
 
-#### Installing Docker
+Enter the verification code by checking the cluster logs using
+`sudo docker compose logs`.
 
-Refer to
-[How to install Docker from the APT repository](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository)
-for detailed instructions.
+![Verification Code](/otp.png)
 
-#### Start the server
+Upload a picture via the web user interface.
 
-```sh
-git clone https://github.com/ente-io/ente
-cd ente/server
-docker compose up --build
-```
+Alternatively, if using Ente Auth, get started by adding an account (assuming
+you are running Ente Auth at `http://<machine-ip>:3002` or
+`http://localhost:3002`).
 
-Install the necessary dependencies for running the web client
+## Try the mobile app
 
-```sh
-# installing npm and yarn
+You can install Ente Photos from [here](/photos/faq/installing) and Ente Auth
+from [here](/auth/faq/installing).
 
-sudo apt update
-sudo apt install nodejs npm
-sudo npm install -g yarn // to install yarn globally
-```
+Connect to your server from
+[mobile apps](/self-hosting/installation/post-install/#step-6-configure-apps-to-use-your-server).
 
-Then in a separate terminal, you can run (e.g) the web client
+## What next?
 
-```sh
-cd ente/web
-yarn install
-NEXT_PUBLIC_ENTE_ENDPOINT=http://localhost:8080 yarn dev
-```
+You may wish to install using a different way for your needs. Check the
+"Installation" section for information regarding that.
 
-> If you want to build the mobile apps from source, see the instructions
-> [here](guides/mobile-build).
+You can import your pictures from Google Takeout or from other services to Ente
+Photos. For more information, check out our
+[migration guide](/photos/migration/) for more information.
 
-## Next steps
+You can import your codes from other authenticator providers to Ente Auth. Check
+out our [migration guide](/auth/migration/) for more information.
 
-- More details about the server are in its
-  [README](https://github.com/ente-io/ente/tree/main/server#readme)
+## Queries?
 
-- More details about running the server (with or without Docker) are in
-  [RUNNING](https://github.com/ente-io/ente/blob/main/server/RUNNING.md)
-
-- If you have questions around self-hosting that are not answered in any of the
-  existing documentation, you can ask in our
-  [GitHub Discussions](https://github.com/ente-io/ente/discussions). **Please
-  remember to search first if the query has been already asked and answered.**
-
-## Contributing!
-
-One particular way in which you can help is by adding new [guides](guides/) on
-this help site. The documentation is written in Markdown and adding new pages is
-[easy](https://github.com/ente-io/ente/tree/main/docs#readme). Editing existing
-pages is even easier: at the bottom of each page is an _Edit this page_ link.
+If you need support, please ask on our community
+[Discord](https://ente.io/discord) or start a discussion on
+[GitHub](https://github.com/ente-io/ente/discussions/).

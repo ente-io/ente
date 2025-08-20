@@ -66,8 +66,10 @@ import type { IpcRendererEvent } from "electron";
 import type {
     AppUpdate,
     CollectionMapping,
+    FFmpegCommand,
     FolderWatch,
     PendingUploads,
+    UtilityProcessType,
     ZipItem,
 } from "./types/ipc";
 
@@ -111,10 +113,11 @@ const logout = () => {
     return ipcRenderer.invoke("logout");
 };
 
-const masterKeyB64 = () => ipcRenderer.invoke("masterKeyB64");
+const masterKeyFromSafeStorage = () =>
+    ipcRenderer.invoke("masterKeyFromSafeStorage");
 
-const saveMasterKeyB64 = (masterKeyB64: string) =>
-    ipcRenderer.invoke("saveMasterKeyB64", masterKeyB64);
+const saveMasterKeyInSafeStorage = (masterKey: string) =>
+    ipcRenderer.invoke("saveMasterKeyInSafeStorage", masterKey);
 
 const lastShownChangelogVersion = () =>
     ipcRenderer.invoke("lastShownChangelogVersion");
@@ -183,47 +186,53 @@ const fsWriteFileViaBackup = (path: string, contents: string) =>
 
 const fsIsDir = (dirPath: string) => ipcRenderer.invoke("fsIsDir", dirPath);
 
+const fsStatMtime = (path: string) => ipcRenderer.invoke("fsStatMtime", path);
+
 // - Conversion
 
 const convertToJPEG = (imageData: Uint8Array) =>
     ipcRenderer.invoke("convertToJPEG", imageData);
 
 const generateImageThumbnail = (
-    dataOrPathOrZipItem: Uint8Array | string | ZipItem,
+    pathOrZipItem: string | ZipItem,
     maxDimension: number,
     maxSize: number,
 ) =>
     ipcRenderer.invoke(
         "generateImageThumbnail",
-        dataOrPathOrZipItem,
+        pathOrZipItem,
         maxDimension,
         maxSize,
     );
 
 const ffmpegExec = (
-    command: string[],
-    dataOrPathOrZipItem: Uint8Array | string | ZipItem,
+    command: FFmpegCommand,
+    pathOrZipItem: string | ZipItem,
     outputFileExtension: string,
 ) =>
     ipcRenderer.invoke(
         "ffmpegExec",
         command,
-        dataOrPathOrZipItem,
+        pathOrZipItem,
         outputFileExtension,
     );
 
-// - ML
+const ffmpegDetermineVideoDuration = (pathOrZipItem: string | ZipItem) =>
+    ipcRenderer.invoke("ffmpegDetermineVideoDuration", pathOrZipItem);
 
-const createMLWorker = () => {
+// - Utility processes
+
+const triggerCreateUtilityProcess = (type: UtilityProcessType) => {
+    const portEvent = `utilityProcessPort/${type}`;
     const l = (event: IpcRendererEvent) => {
         void windowLoaded.then(() => {
             // "*"" is the origin to send to.
-            window.postMessage("createMLWorker/port", "*", event.ports);
-            ipcRenderer.off("createMLWorker/port", l);
+            window.postMessage(portEvent, "*", event.ports);
+            ipcRenderer.off(portEvent, l);
         });
     };
-    ipcRenderer.on("createMLWorker/port", l);
-    ipcRenderer.send("createMLWorker");
+    ipcRenderer.on(portEvent, l);
+    ipcRenderer.send("triggerCreateUtilityProcess", type);
 };
 
 // - Watch
@@ -289,11 +298,11 @@ const pendingUploads = () => ipcRenderer.invoke("pendingUploads");
 const setPendingUploads = (pendingUploads: PendingUploads) =>
     ipcRenderer.invoke("setPendingUploads", pendingUploads);
 
-const markUploadedFiles = (paths: PendingUploads["filePaths"]) =>
-    ipcRenderer.invoke("markUploadedFiles", paths);
+const markUploadedFile = (path: string, associatedPath?: string) =>
+    ipcRenderer.invoke("markUploadedFile", path, associatedPath);
 
-const markUploadedZipItems = (items: PendingUploads["zipItems"]) =>
-    ipcRenderer.invoke("markUploadedZipItems", items);
+const markUploadedZipItem = (item: ZipItem, associatedItem?: ZipItem) =>
+    ipcRenderer.invoke("markUploadedZipItem", item, associatedItem);
 
 const clearPendingUploads = () => ipcRenderer.invoke("clearPendingUploads");
 
@@ -350,8 +359,8 @@ contextBridge.exposeInMainWorld("electron", {
     selectDirectory,
     pathForFile,
     logout,
-    masterKeyB64,
-    saveMasterKeyB64,
+    masterKeyFromSafeStorage,
+    saveMasterKeyInSafeStorage,
     lastShownChangelogVersion,
     setLastShownChangelogVersion,
     isAutoLaunchEnabled,
@@ -378,6 +387,7 @@ contextBridge.exposeInMainWorld("electron", {
         writeFile: fsWriteFile,
         writeFileViaBackup: fsWriteFileViaBackup,
         isDir: fsIsDir,
+        statMtime: fsStatMtime,
         findFiles: fsFindFiles,
     },
 
@@ -386,10 +396,11 @@ contextBridge.exposeInMainWorld("electron", {
     convertToJPEG,
     generateImageThumbnail,
     ffmpegExec,
+    ffmpegDetermineVideoDuration,
 
     // - ML
 
-    createMLWorker,
+    triggerCreateUtilityProcess,
 
     // - Watch
 
@@ -410,7 +421,7 @@ contextBridge.exposeInMainWorld("electron", {
     pathOrZipItemSize,
     pendingUploads,
     setPendingUploads,
-    markUploadedFiles,
-    markUploadedZipItems,
+    markUploadedFile,
+    markUploadedZipItem,
     clearPendingUploads,
 });

@@ -99,3 +99,17 @@ If you do want to run it from the command line, you can do so by passing the
 
 For more details, see this upstream issue on
 [electron](https://github.com/electron/electron/issues/17972).
+
+### Application reporting offline despite Internet connectivity
+
+Due to unreliability of usage of `navigator.onLine` in Linux, the app may report that you are offline, even though the internet connection is functional.
+
+You can resolve the issue by adding a dummy network interface using the following command:
+
+```shell
+ip link add dummy0 type dummy
+ip addr add 10.10.10.1/24 dev dummy0
+ip link set dummy0 up
+```
+
+Once the interface is up, Ente correctly detects that the system is online.

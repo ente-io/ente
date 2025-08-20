@@ -5,6 +5,7 @@ import (
 	fileData "github.com/ente-io/museum/ente/filedata"
 	"github.com/ente-io/museum/pkg/controller/collections"
 	"github.com/ente-io/museum/pkg/controller/filedata"
+	"github.com/ente-io/museum/pkg/controller/public"
 	"net/http"
 	"strconv"
 
@@ -20,7 +21,7 @@ import (
 
 // PublicCollectionHandler exposes request handlers for publicly accessible collections
 type PublicCollectionHandler struct {
-	Controller             *controller.PublicCollectionController
+	Controller             *public.CollectionLinkController
 	FileCtrl               *controller.FileController
 	CollectionCtrl         *collections.CollectionController
 	FileDataCtrl           *filedata.Controller
@@ -77,6 +78,10 @@ func (h *PublicCollectionHandler) GetFileData(c *gin.Context) {
 	resp, err := h.FileDataCtrl.GetFileData(c, *collectionOwner, req)
 	if err != nil {
 		handler.Error(c, err)
+		return
+	}
+	if resp == nil {
+		c.Status(http.StatusNoContent)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{

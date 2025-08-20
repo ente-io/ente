@@ -9,7 +9,7 @@ on:
             - "photos-v*"
 
 env:
-    FLUTTER_VERSION: "3.24.3"
+    FLUTTER_VERSION: "3.32.8"
 
 permissions:
     contents: write
@@ -20,7 +20,7 @@ jobs:
 
         defaults:
             run:
-                working-directory: mobile
+                working-directory: mobile/apps/photos
 
         steps:
             - name: Checkout code and submodules
@@ -62,5 +62,5 @@ jobs:
             - name: Create a draft GitHub release
               uses: ncipollo/release-action@v1
               with:
-                  artifacts: "mobile/build/app/outputs/flutter-apk/ente-${{ github.ref_name }}.apk,mobile/build/app/outputs/flutter-apk/sha256sum"
+                  artifacts: "mobile/apps/photos/build/app/outputs/flutter-apk/ente-${{ github.ref_name }}.apk,mobile/apps/photos/build/app/outputs/flutter-apk/sha256sum"
                   draft: true

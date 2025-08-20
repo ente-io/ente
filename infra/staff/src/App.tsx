@@ -10,10 +10,10 @@ import "./App.css";
 import FamilyTableComponent from "./components/FamilyComponentTable";
 import StorageBonusTableComponent from "./components/StorageBonusTableComponent";
 import TokensTableComponent from "./components/TokenTableComponent";
-import type { UserData } from "./components/UserComponent";
 import UserComponent from "./components/UserComponent";
 import duckieimage from "./components/duckie.png";
 import { apiOrigin } from "./services/support";
+import type { UserData, UserResponse } from "./types";
 
 export let email = "";
 export let token = "";
@@ -28,38 +28,6 @@ export const setToken = (newToken: string) => {
 
 export const getEmail = () => email;
 export const getToken = () => token;
-
-interface User {
-    ID: string;
-    email: string;
-    creationTime: number;
-}
-
-interface Subscription {
-    productID: string;
-    paymentProvider: string;
-    expiryTime: number;
-    storage: number;
-}
-
-interface Security {
-    isEmailMFAEnabled: boolean;
-    isTwoFactorEnabled: boolean;
-    passkeys: string;
-    passkeyCount: number;
-    canDisableEmailMFA: boolean;
-}
-
-interface UserResponse {
-    user: User;
-    subscription: Subscription;
-    authCodes?: number;
-    details?: {
-        usage?: number;
-        storageBonus?: number;
-        profileData: Security;
-    };
-}
 
 const App: React.FC = () => {
     const [localEmail, setLocalEmail] = useState<string>("");
@@ -139,7 +107,7 @@ const App: React.FC = () => {
             console.log("API Response:", userDataResponse);
 
             const extractedUserData: UserData = {
-                User: {
+                user: {
                     "User ID": userDataResponse.user.ID || "None",
                     Email: userDataResponse.user.email || "None",
                     "Creation time":
@@ -147,7 +115,7 @@ const App: React.FC = () => {
                             userDataResponse.user.creationTime / 1000,
                         ).toLocaleString() || "None",
                 },
-                Storage: {
+                storage: {
                     Total: userDataResponse.subscription.storage
                         ? userDataResponse.subscription.storage >= 1024 ** 3
                             ? `${(userDataResponse.subscription.storage / 1024 ** 3).toFixed(2)} GB`
@@ -166,7 +134,7 @@ const App: React.FC = () => {
                                 : `${(userDataResponse.details.storageBonus / 1024 ** 2).toFixed(2)} MB`
                             : "None",
                 },
-                Subscription: {
+                subscription: {
                     "Product ID":
                         userDataResponse.subscription.productID || "None",
                     Provider:
@@ -176,7 +144,7 @@ const App: React.FC = () => {
                             userDataResponse.subscription.expiryTime / 1000,
                         ).toLocaleString() || "None",
                 },
-                Security: {
+                security: {
                     "Email MFA": userDataResponse.details?.profileData
                         .isEmailMFAEnabled
                         ? "Enabled"

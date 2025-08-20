@@ -19,22 +19,40 @@ import {
     AccountsPageFooter,
 } from "./layouts/centered-paper";
 
-export const PasswordHeader: React.FC<React.PropsWithChildren> = ({
-    children,
-}) => {
-    return (
-        <Header_>
-            <Typography variant="h3">{t("password")}</Typography>
-            <Typography sx={{ color: "text.faint" }}>{children}</Typography>
-        </Header_>
-    );
-};
+interface HeaderCaptionProps {
+    /**
+     * If specified, then a caption to display below the title (which is
+     * expected to be passed as the `children`).
+     *
+     * The components which use the {@link HeaderCaptionProps} that they'll have
+     * the same height irrespective of whether or not the caption is provided.
+     * This allows us to use this component to get a similar look across various
+     * pages in the login flow (some of which have a caption, some which not).
+     */
+    caption?: string;
+}
 
-const PasskeyHeader: React.FC<React.PropsWithChildren> = ({ children }) => {
+export const PasswordHeader: React.FC<HeaderCaptionProps> = (props) => (
+    <AccountsPageTitleWithCaption {...props}>
+        {t("password")}
+    </AccountsPageTitleWithCaption>
+);
+
+const PasskeyHeader: React.FC<HeaderCaptionProps> = (props) => (
+    <AccountsPageTitleWithCaption {...props}>
+        {t("passkey")}
+    </AccountsPageTitleWithCaption>
+);
+
+export const AccountsPageTitleWithCaption: React.FC<
+    React.PropsWithChildren<HeaderCaptionProps>
+> = ({ caption, children }) => {
     return (
         <Header_>
-            <Typography variant="h3">{t("passkey")}</Typography>
-            <Typography sx={{ color: "text.faint" }}>{children}</Typography>
+            <Typography variant="h3">{children}</Typography>
+            <Typography sx={{ color: "text.faint" }}>
+                {caption ?? ""}
+            </Typography>
         </Header_>
     );
 };
@@ -123,7 +141,7 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
 
     return (
         <AccountsPageContents>
-            <PasskeyHeader>{email ?? ""}</PasskeyHeader>
+            <PasskeyHeader caption={email} />
 
             <VerifyingPasskeyMiddle>
                 <VerifyingPasskeyStatus>

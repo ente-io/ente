@@ -17,6 +17,7 @@ import {
     Typography,
     type ModalProps,
 } from "@mui/material";
+import type { LocalUser } from "ente-accounts/services/user";
 import { isDesktop } from "ente-base/app";
 import { SpacedRow } from "ente-base/components/containers";
 import { InlineErrorIndicator } from "ente-base/components/ErrorIndicator";
@@ -29,7 +30,6 @@ import { type ModalVisibilityProps } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import { lowercaseExtension } from "ente-base/file-name";
 import { formattedListJoin, ut } from "ente-base/i18n";
-import type { LocalUser } from "ente-base/local-user";
 import log from "ente-base/log";
 import {
     FileInfo,
@@ -37,7 +37,7 @@ import {
     type FileInfoProps,
 } from "ente-gallery/components/FileInfo";
 import type { Collection } from "ente-media/collection";
-import { fileVisibility, ItemVisibility } from "ente-media/file-metadata";
+import { fileFileName, ItemVisibility } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import type { EnteFile } from "ente-media/file.js";
 import { isHEICExtension, needsJPEGConversion } from "ente-media/formats";
@@ -63,7 +63,6 @@ import {
     moreButtonID,
     moreMenuID,
     resetMoreMenuButtonOnMenuClose,
-    shouldUsePlayerV2,
     type FileViewerPhotoSwipeDelegate,
 } from "./photoswipe";
 
@@ -200,19 +199,32 @@ export type FileViewerProps = ModalVisibilityProps & {
     fileNormalCollectionIDs?: FileInfoProps["fileCollectionIDs"];
     /**
      * Called when there was some update performed within the file viewer that
-     * necessitates us to sync with remote again to fetch the latest updates.
+     * necessitates us to pull the latest updates with remote.
      *
-     * This is called lazily, and at most once, when the file viewer is closing
-     * if any changes were made in the file info panel of the file viewer for
-     * any of the files that the user was viewing (e.g. if they changed the
-     * caption). Those changes have already been applied to both remote and to
-     * the in-memory file object used by the file viewer; this callback is to
-     * trigger a sync so that our local database also gets up to speed.
+     * This is called  when the file viewer is closing if any changes were made
+     * in the file info panel of the file viewer for any of the files that the
+     * user was viewing (e.g. if they changed the caption).
+     *
+     * Those changes have already been applied to both remote, and likely
+     * already also to our local state via {@link onRemoteFilesPull}. This this
+     * callback is to trigger a full pull so that any discrepancies in local
+     * database also gets up to speed if needed.
      *
      * If we're in a context where edits are not possible, e.g. {@link user} is
-     * not defined, then this prop is not used.
+     * not defined, then this prop is not used and need not be provided.
      */
-    onTriggerSyncWithRemote?: () => void;
+    onTriggerRemotePull?: () => void;
+    /**
+     * Called when an action in the file viewer requires us to pull the local
+     * files and collections with remote.
+     *
+     * Unlike {@link onTriggerRemotePull}, which is a trigger, this function
+     * returns a promise that will settle once the pull has completed, and thus
+     * can be used in interactive operations that indicate activity to the user.
+     *
+     * See also: [Note: Full remote pull vs files pull]
+     */
+    onRemoteFilesPull?: () => Promise<void>;
     /**
      * Called when the user performs an action which does not otherwise have any
      * immediate visual impact, to acknowledge it.
@@ -286,7 +298,8 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     pendingVisibilityUpdates,
     fileNormalCollectionIDs,
     collectionNameByID,
-    onTriggerSyncWithRemote,
+    onTriggerRemotePull,
+    onRemoteFilesPull,
     onVisualFeedback,
     onToggleFavorite,
     onFileVisibilityUpdate,
@@ -346,14 +359,17 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
     const [isFullscreen, setIsFullscreen] = useState(false);
 
-    // If `true`, then we need to trigger a sync with remote when we close.
-    const [, setNeedsSync] = useState(false);
+    // If `true`, then we need to trigger a pull from remote when we close.
+    const [, setNeedsRemotePull] = useState(false);
 
-    const handleNeedsRemoteSync = useCallback(() => setNeedsSync(true), []);
+    const handleNeedsRemotePull = useCallback(
+        () => setNeedsRemotePull(true),
+        [],
+    );
 
     const handleClose = useCallback(() => {
-        setNeedsSync((needSync) => {
-            if (needSync) onTriggerSyncWithRemote?.();
+        setNeedsRemotePull((needsPull) => {
+            if (needsPull) onTriggerRemotePull?.();
             return false;
         });
         setOpenFileInfo(false);
@@ -364,7 +380,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         setOpenConfirmDelete(false);
         setOpenShortcuts(false);
         onClose();
-    }, [onTriggerSyncWithRemote, onClose]);
+    }, [onTriggerRemotePull, onClose]);
 
     const handleViewInfo = useCallback(
         (annotatedFile: FileViewerAnnotatedFile) => {
@@ -428,7 +444,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     const handleDelete = async () => {
         const file = activeAnnotatedFile!.file;
         await onDelete!(file);
-        handleNeedsRemoteSync();
+        handleNeedsRemotePull();
     };
 
     // Not memoized since it uses the frequently changing `activeAnnotatedFile`.
@@ -593,8 +609,8 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         ({ file }: FileViewerAnnotatedFile) =>
             onToggleFavorite!(file)
                 .catch(onGenericError)
-                .finally(handleNeedsRemoteSync),
-        [onToggleFavorite, onGenericError, handleNeedsRemoteSync],
+                .finally(handleNeedsRemotePull),
+        [onToggleFavorite, onGenericError, handleNeedsRemotePull],
     );
 
     const updateFullscreenStatus = useCallback(() => {
@@ -616,9 +632,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     }, [handleMoreMenuCloseIfNeeded]);
 
     const handleShortcutsClose = useCallback(() => setOpenShortcuts(false), []);
-
-    // TODO: Unused translation t("convert") - can be removed post the upcoming
-    // streaming changes as they'll provides the equiv.
 
     const shouldIgnoreKeyboardEvent = useCallback(() => {
         // Don't handle keydowns if any of the modals are open.
@@ -658,7 +671,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 file &&
                 activeAnnotatedFile.annotation.showArchive
             ) {
-                switch (fileVisibility(file)) {
+                switch (file.magicMetadata?.data.visibility) {
                     case undefined:
                     case ItemVisibility.visible:
                         isArchived = false;
@@ -678,7 +691,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                             ? ItemVisibility.visible
                             : ItemVisibility.archived,
                     )
-                        .then(handleNeedsRemoteSync)
+                        .then(handleNeedsRemotePull)
                         .catch(onGenericError);
                 };
             }
@@ -688,7 +701,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             pendingVisibilityUpdates,
             onFileVisibilityUpdate,
             onGenericError,
-            handleNeedsRemoteSync,
+            handleNeedsRemotePull,
             handleMoreMenuCloseIfNeeded,
             activeAnnotatedFile,
         ]);
@@ -766,61 +779,31 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         performKeyAction,
     ]);
 
-    // Update the active annotated file, if needed, on updates to files or
-    // favoriteFileIDs.
+    // Handle updates to files.
     //
-    // If the active annotated file is no longer being shown, move to the next
-    // slide if possible, or close the viewer otherwise.
+    // See: [Note: Updates to the files prop for FileViewer]
     useEffect(() => {
-        setActiveAnnotatedFile((af) => {
-            // Do nothing if we're not showing a file (we might not be open).
-            if (!af) return af;
-
-            if (files.length) {
-                const updatedFile = files.find(({ id }) => id == af?.file.id);
-                if (updatedFile) {
-                    // Modify the active annotated file if we found a file with
-                    // the same ID in the (possibly) updated files array.
-                    //
-                    // Note the omission of the PhotoSwipe refresh: we don't
-                    // refresh the PhotoSwipe dialog itself since that would
-                    // cause the user to lose their pan / zoom etc.
-                    //
-                    // This is not correct in its full generality, but it works
-                    // fine in the specific cases we would need to handle:
-                    //
-                    // - In case of delete, we'll not get to this code branch.
-                    //
-                    // - In case of toggling archive, just updating the file
-                    //   attribute is enough, the UI state is derived from it;
-                    //   none of the other attributes of the annotated file
-                    //   currently depend on the archive status change.
-                    af = { ...af, file: updatedFile };
-                } else {
-                    // Refreshing the current slide after the current file has
-                    // gone will show the subsequent slide (since that would've
-                    // now moved down to the current index).
-                    //
-                    // However, we might've been the last slide, in which case
-                    // we need to go back one slide first. To determine this,
-                    // also pass the expected count of files to our PhotoSwipe
-                    // wrapper.
-                    psRef.current?.refreshCurrentSlideContent(files.length);
-                }
-            } else {
-                // If there are no more files left, close the viewer.
-                handleClose();
-            }
-
-            return af;
-        });
+        if (!files.length) {
+            // If there are no more files left, close the viewer.
+            handleClose();
+        } else {
+            psRef.current?.refreshSlideOnFilesUpdateIfNeeded();
+        }
     }, [handleClose, files]);
 
     useEffect(() => {
-        if (open) {
+        // This effect might get triggered when the none of the files that were
+        // being shown are eligible to be shown anymore. e.g. suppose we are the
+        // archiveItems pseudo-collection, and the only archived file there is
+        // marked as unarchived by the user within the file viewer.
+        //
+        // In such cases, don't attempt to refresh since that causes various
+        // invariants (like the existence of a "currentFile") to get broken
+        // inside the `FileViewerPhotoSwipe` implementation.
+        if (open && files.length) {
             psRef.current?.refreshCurrentSlideFavoriteButtonIfNeeded();
         }
-    }, [favoriteFileIDs, pendingFavoriteUpdates, open]);
+    }, [favoriteFileIDs, pendingFavoriteUpdates, files, open]);
 
     useEffect(() => {
         if (open) {
@@ -829,7 +812,6 @@ export const FileViewer: React.FC<FileViewerProps> = ({
 
             const pswp = new FileViewerPhotoSwipe({
                 initialIndex,
-                disableDownload,
                 haveUser,
                 delegate: delegateRef.current!,
                 onClose: () => {
@@ -869,10 +851,24 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         handleMore,
     ]);
 
-    const handleUpdateCaption = useCallback((updatedFile: EnteFile) => {
-        updateItemDataAlt(updatedFile);
-        psRef.current!.refreshCurrentSlideContent();
-    }, []);
+    const handleFileMetadataUpdate = useMemo(() => {
+        return onRemoteFilesPull
+            ? async () => {
+                  // Wait for the files pull to complete.
+                  await onRemoteFilesPull();
+                  // Set the flag to trigger the full pull later.
+                  handleNeedsRemotePull();
+              }
+            : undefined;
+    }, [onRemoteFilesPull, handleNeedsRemotePull]);
+
+    const handleUpdateCaption = useCallback(
+        (fileID: number, newCaption: string) => {
+            updateItemDataAlt(fileID, newCaption);
+            psRef.current!.refreshCurrentSlideContent();
+        },
+        [],
+    );
 
     useEffect(updateFullscreenStatus, [updateFullscreenStatus]);
 
@@ -891,11 +887,11 @@ export const FileViewer: React.FC<FileViewerProps> = ({
                 allowMap={haveUser}
                 showCollections={haveUser && !isInHiddenSection}
                 fileCollectionIDs={fileNormalCollectionIDs}
-                collectionNameByID={collectionNameByID}
-                onNeedsRemoteSync={handleNeedsRemoteSync}
+                onFileMetadataUpdate={handleFileMetadataUpdate}
                 onUpdateCaption={handleUpdateCaption}
                 onSelectCollection={handleSelectCollection}
                 onSelectPerson={handleSelectPerson}
+                {...{ collectionNameByID }}
             />
             <MoreMenu
                 open={!!moreMenuAnchorEl}
@@ -1152,22 +1148,12 @@ const Shortcuts: React.FC<ShortcutsProps> = ({
             <Shortcut action={t("close")} shortcut={ut("Esc")} />
             <Shortcut
                 action={formattedListJoin([t("previous"), t("next")])}
-                shortcut={
-                    // TODO(HLS):
-                    shouldUsePlayerV2()
-                        ? `${formattedListJoin([ut("←"), ut("→")])} ${ut("(Option/Alt)")}`
-                        : formattedListJoin([ut("←"), ut("→")])
-                }
+                shortcut={`${formattedListJoin([ut("←"), ut("→")])} ${ut("(Option/Alt)")}`}
             />
-            {
-                /* TODO(HLS): */
-                shouldUsePlayerV2() && (
-                    <Shortcut
-                        action={t("video_seek")}
-                        shortcut={formattedListJoin([ut("←"), ut("→")])}
-                    />
-                )
-            }
+            <Shortcut
+                action={t("video_seek")}
+                shortcut={formattedListJoin([ut("←"), ut("→")])}
+            />
             <Shortcut
                 action={t("zoom")}
                 shortcut={formattedListJoin([t("mouse_scroll"), t("pinch")])}
@@ -1184,15 +1170,10 @@ const Shortcuts: React.FC<ShortcutsProps> = ({
                 action={t("pan")}
                 shortcut={formattedListJoin([ut("W A S D"), t("drag")])}
             />
-            {
-                /* TODO(HLS): */
-                shouldUsePlayerV2() && (
-                    <Shortcut
-                        action={formattedListJoin([t("play"), t("pause")])}
-                        shortcut={ut("Space")}
-                    />
-                )
-            }
+            <Shortcut
+                action={formattedListJoin([t("play"), t("pause")])}
+                shortcut={ut("Space")}
+            />
             <Shortcut action={t("toggle_live")} shortcut={ut("Space")} />
             <Shortcut action={t("toggle_audio")} shortcut={ut("M")} />
             {haveUser && (
@@ -1260,7 +1241,7 @@ const fileIsEditableImage = (file: EnteFile) => {
     // Only images are editable.
     if (file.metadata.fileType !== FileType.image) return false;
 
-    const extension = lowercaseExtension(file.metadata.title);
+    const extension = lowercaseExtension(fileFileName(file));
     // Assume it is editable;
     let isRenderable = true;
     if (extension && needsJPEGConversion(extension)) {

@@ -1,13 +1,16 @@
-import { encryptBlobB64 } from "ente-base/crypto";
+import { encryptBlob } from "ente-base/crypto";
+import type { EncryptedBlobB64 } from "ente-base/crypto/types";
 import {
     authenticatedPublicAlbumsRequestHeaders,
     authenticatedRequestHeaders,
     ensureOk,
+    retryEnsuringHTTPOk,
     type PublicAlbumsCredentials,
 } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
 import type { EnteFile } from "ente-media/file";
-import { z } from "zod";
+import { nullToUndefined } from "ente-utils/transform";
+import { z } from "zod/v4";
 
 /**
  * [Note: File data APIs]
@@ -43,6 +46,29 @@ const RemoteFileData = z.object({
      * crypto layer.
      */
     decryptionHeader: z.string(),
+    /**
+     * The epoch microseconds when this file data entry was last upserted.
+     *
+     * [Note: PUT "mldata" version check]
+     *
+     * When PUT-ting mldata onto remote, the client is expected to pass the
+     * updated at of the existing {@link RemoteFileData} which it is updating
+     * (this field), or 0 if the client is creating a new entity.
+     *
+     * This allows remote to detect and reject cases where the client is trying
+     * to overwrite a version it hasn't yet pulled.
+     *
+     * About the optionality of this field: Newer museums are expected to always
+     * provide the {@link updatedAt} in the response, but for ease of self
+     * hosters we don't take a hard dependency on the latest museum and instead
+     * allow this field to be optional. When it is not present, effectively
+     * we'll pass 0 as {@link lastUpdatedAt} in the "mldata" PUT API call, but
+     * since it's an old museum it'll anyway ignore it.
+     *
+     * > This note was added May 2025, and the optionality can be removed in a
+     * > few months when museums should've updated (tag: Migration).
+     */
+    updatedAt: z.number().nullish().transform(nullToUndefined),
 });
 
 type RemoteFileData = z.infer<typeof RemoteFileData>;
@@ -100,7 +126,13 @@ export const fetchFileData = async (
     fileID: number,
     publicAlbumsCredentials?: PublicAlbumsCredentials,
 ): Promise<RemoteFileData | undefined> => {
-    const params = new URLSearchParams({ type, fileID: fileID.toString() });
+    const params = new URLSearchParams({
+        type,
+        fileID: fileID.toString(),
+        // Ask museum to respond with 204 instead of 404 if no playlist exists
+        // for the given file.
+        preferNoContent: "true",
+    });
 
     let res: Response;
     if (publicAlbumsCredentials) {
@@ -116,9 +148,126 @@ export const fetchFileData = async (
         });
     }
 
+    if (res.status == 204) return undefined;
+    // We're passing `preferNoContent` so the expected response is 204, but this
+    // might be a self hoster running an older museum that does not recognize
+    // that flag, so retain the old behavior. This fallback can be removed in a
+    // few months (tag: Migration, note added May 2025).
     if (res.status == 404) return undefined;
     ensureOk(res);
     return z.object({ data: RemoteFileData }).parse(await res.json()).data;
+};
+
+/**
+ * An entry in the response to the `/files/data/status-diff`. The actual
+ * structure has more fields, there are just the fields we are interested in.
+ */
+const RemoteFDStatus = z.object({
+    /**
+     * The ID of the file whose file data we're querying.
+     */
+    fileID: z.number(),
+    /**
+     * Expected to be one of {@link FileDataType}
+     */
+    type: z.string(),
+    /**
+     * `true` if the file data has been deleted.
+     *
+     * This can be true in the in-progress partial deletion case, which the file
+     * data deletion has been processed but the file deletion has not yet been
+     * processed.
+     */
+    isDeleted: z.boolean(),
+    /**
+     * The epoch microseconds when this file data entry was added or updated.
+     */
+    updatedAt: z.number(),
+});
+
+/**
+ * A paginated part of the result set sent by remote during
+ * {@link syncUpdatedFileDataFileIDs}.
+ */
+export interface UpdatedFileDataFileIDsPage {
+    /**
+     * The IDs of files for which a file data entry has been created or updated.
+     */
+    fileIDs: Set<number>;
+    /**
+     * The latest updatedAt (epoch microseconds) time obtained from remote in
+     * this batch being fetched (from amongst all of the files in the batch, not
+     * just those that were filtered to be part of {@link fileIDs}).
+     */
+    lastUpdatedAt: number;
+}
+
+/**
+ * Fetch the IDs of files for which new file data entries of the given
+ * {@link type} have been created or updated since the given {@link sinceTime}.
+ *
+ * The interaction with remote is paginated, with the {@link onPage} callback
+ * being called as each page of new data is received.
+ *
+ * @param type The {@link FileDataType} for which we want to check for creation
+ * or updates.
+ *
+ * @param lastUpdatedAt Epoch microseconds. This is used to ask remote to
+ * provide us only entries whose {@link updatedAt} is more than the given value.
+ * Set this to zero to start from the beginning.
+ *
+ * @param onPage A callback invoked for each page of results received from
+ * remote. It is passed the fileIDs received in the batch under consideration,
+ * and the largest of the updated time for all entries (irrespective of
+ * {@link type}) in that batch.
+ *
+ * ----
+ *
+ * [Note: Pruning stale status-diff entries]
+ *
+ * Unlike other "diff" APIs, the diff API used here won't return tombstone
+ * entries for deleted files. This is not a problem because there are no current
+ * cases where existing playlists or ML indexes get deleted (unless the
+ * underlying file is deleted). See: [Note: Caching HLS playlist data].
+ *
+ * Note that the "/files/data/status-diff" includes entries for files that are
+ * in trash. This means that, while not a practical problem (because it's just
+ * numeric ids), the number of fileIDs we store locally can grow unbounded as
+ * files move to trash and then get deleted. So to prune them, we also add a
+ * hook to the /trash/v2/diff processing, and prune any locally saved file IDs
+ * which have been deleted from trash.
+ */
+export const syncUpdatedFileDataFileIDs = async (
+    type: FileDataType,
+    lastUpdatedAt: number,
+    onPage: (page: UpdatedFileDataFileIDsPage) => Promise<void>,
+): Promise<void> => {
+    while (true) {
+        const res = await fetch(await apiURL("/files/data/status-diff"), {
+            method: "POST",
+            headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify({ lastUpdatedAt }),
+        });
+        ensureOk(res);
+        const diff = z
+            .object({ diff: RemoteFDStatus.array().nullish() })
+            .parse(await res.json()).diff;
+        if (diff?.length) {
+            const fileIDs = new Set<number>();
+            for (const fd of diff) {
+                lastUpdatedAt = Math.max(lastUpdatedAt, fd.updatedAt);
+                // While we could prune isDeleted entries here, we can also rely
+                // on the pruning that happens when the trash gets synced. See:
+                // [Note: Pruning stale status-diff entries]
+                if (fd.type == type && !fd.isDeleted) {
+                    fileIDs.add(fd.fileID);
+                }
+            }
+            await onPage({ fileIDs, lastUpdatedAt });
+        } else {
+            break;
+        }
+    }
 };
 
 /**
@@ -134,13 +283,17 @@ export const fetchFileData = async (
  *
  * @param data The binary data to upload. The exact contents of the data are
  * {@link type} specific.
+ *
+ * @param lastUpdatedAt The {@link updatedAt} of the {@link RemoteFileData}
+ * which we are updating, or 0 to indicate a new entity.
  */
 export const putFileData = async (
     file: EnteFile,
     type: FileDataType,
     data: Uint8Array,
+    lastUpdatedAt: number,
 ) => {
-    const { encryptedData, decryptionHeader } = await encryptBlobB64(
+    const { encryptedData, decryptionHeader } = await encryptBlob(
         data,
         file.key,
     );
@@ -153,6 +306,7 @@ export const putFileData = async (
             type,
             encryptedData,
             decryptionHeader,
+            lastUpdatedAt,
         }),
     });
     ensureOk(res);
@@ -169,7 +323,7 @@ export const putFileData = async (
  * context of the public albums app. If these are not specified, then the
  * credentials of the logged in user are used.
  *
- * @returns the (presigned) URL to the preview data, or undefined if there is
+ * @returns the (pre-signed) URL to the preview data, or undefined if there is
  * not preview data of the given type for the given file yet.
  *
  * [Note: File data vs file preview data]
@@ -225,36 +379,6 @@ export const fetchFilePreviewData = async (
     return z.object({ url: z.string() }).parse(await res.json()).url;
 };
 
-const FilePrevieDataUploadURLResponse = z.object({
-    /**
-     * The objectID with which this uploaded data can be referred to post upload
-     * (e.g. when invoking {@link putVideoData}).
-     */
-    objectID: z.string(),
-    /**
-     * A presigned URL that can be used to upload the file.
-     */
-    url: z.string(),
-});
-
-/**
- * Obtain a presigned URL that can be used to upload the "file preview data" of
- * type "vid_preview" (the file containing the encrypted video segments which
- * the "vid_preview" HLS playlist for the file would refer to).
- */
-export const getFilePreviewDataUploadURL = async (file: EnteFile) => {
-    const params = new URLSearchParams({
-        fileID: `${file.id}`,
-        type: "vid_preview",
-    });
-    const url = await apiURL("/files/data/preview-upload-url");
-    const res = await fetch(`${url}?${params.toString()}`, {
-        headers: await authenticatedRequestHeaders(),
-    });
-    ensureOk(res);
-    return FilePrevieDataUploadURLResponse.parse(await res.json());
-};
-
 /**
  * Update the video data associated with the given file to remote.
  *
@@ -272,8 +396,8 @@ export const getFilePreviewDataUploadURL = async (file: EnteFile) => {
  *
  * @param file {@link EnteFile} which this data is associated with.
  *
- * @param playlistData The playlist data, suitably encoded in a form ready for
- * encryption.
+ * @param encryptedPlaylist The encrypted playlist data (along with the nonce
+ * used during encryption).
  *
  * @param objectID Object ID of an already uploaded "file preview data" (see
  * {@link getFilePreviewDataUploadURL}).
@@ -283,25 +407,22 @@ export const getFilePreviewDataUploadURL = async (file: EnteFile) => {
  */
 export const putVideoData = async (
     file: EnteFile,
-    playlistData: Uint8Array,
+    encryptedPlaylist: EncryptedBlobB64,
     objectID: string,
     objectSize: number,
-) => {
-    const { encryptedData, decryptionHeader } = await encryptBlobB64(
-        playlistData,
-        file.key,
+) =>
+    retryEnsuringHTTPOk(
+        async () =>
+            fetch(await apiURL("/files/video-data"), {
+                method: "PUT",
+                headers: await authenticatedRequestHeaders(),
+                body: JSON.stringify({
+                    fileID: file.id,
+                    objectID,
+                    objectSize,
+                    playlist: encryptedPlaylist.encryptedData,
+                    playlistHeader: encryptedPlaylist.decryptionHeader,
+                }),
+            }),
+        { retryProfile: "background" },
     );
-
-    const res = await fetch(await apiURL("/files/video-data"), {
-        method: "PUT",
-        headers: await authenticatedRequestHeaders(),
-        body: JSON.stringify({
-            fileID: file.id,
-            objectID,
-            objectSize,
-            playlist: encryptedData,
-            playlistHeader: decryptionHeader,
-        }),
-    });
-    ensureOk(res);
-};

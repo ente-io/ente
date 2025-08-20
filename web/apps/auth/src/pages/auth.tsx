@@ -22,24 +22,26 @@ import {
 import { useBaseContext } from "ente-base/context";
 import { isHTTP401Error } from "ente-base/http";
 import log from "ente-base/log";
-import { masterKeyFromSessionIfLoggedIn } from "ente-base/session";
+import { masterKeyFromSession } from "ente-base/session";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useState } from "react";
 import { generateOTPs, type Code } from "services/code";
-import { getAuthCodes } from "services/remote";
+import { getAuthCodesAndTimeOffset } from "services/remote";
+import { prettyFormatCode } from "utils/format";
 
 const Page: React.FC = () => {
     const { logout, showMiniDialog } = useBaseContext();
 
     const router = useRouter();
     const [codes, setCodes] = useState<Code[]>([]);
+    const [timeOffset, setTimeOffset] = useState(0);
     const [hasFetched, setHasFetched] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
 
     useEffect(() => {
         const fetchCodes = async () => {
-            const masterKey = await masterKeyFromSessionIfLoggedIn();
+            const masterKey = await masterKeyFromSession();
             if (!masterKey) {
                 stashRedirect("/auth");
                 void router.push("/");
@@ -47,7 +49,10 @@ const Page: React.FC = () => {
             }
 
             try {
-                setCodes(await getAuthCodes(masterKey));
+                const { codes, timeOffset } =
+                    await getAuthCodesAndTimeOffset(masterKey);
+                setCodes(codes);
+                setTimeOffset(timeOffset ?? 0);
             } catch (e) {
                 log.error("Failed to fetch codes", e);
                 if (isHTTP401Error(e))
@@ -117,7 +122,10 @@ const Page: React.FC = () => {
                         </Box>
                     ) : (
                         filteredCodes.map((code) => (
-                            <CodeDisplay key={code.id} code={code} />
+                            <CodeDisplay
+                                key={code.id}
+                                {...{ code, timeOffset }}
+                            />
                         ))
                     )}
                 </Box>
@@ -162,9 +170,10 @@ const AuthNavbar: React.FC = () => {
 
 interface CodeDisplayProps {
     code: Code;
+    timeOffset: number;
 }
 
-const CodeDisplay: React.FC<CodeDisplayProps> = ({ code }) => {
+const CodeDisplay: React.FC<CodeDisplayProps> = ({ code, timeOffset }) => {
     const [otp, setOTP] = useState("");
     const [nextOTP, setNextOTP] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
@@ -172,13 +181,13 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ code }) => {
 
     const regen = useCallback(() => {
         try {
-            const [m, n] = generateOTPs(code);
+            const [m, n] = generateOTPs(code, timeOffset);
             setOTP(m);
             setNextOTP(n);
         } catch (e) {
             setErrorMessage(e instanceof Error ? e.message : String(e));
         }
-    }, [code]);
+    }, [code, timeOffset]);
 
     const copyCode = () =>
         void navigator.clipboard.writeText(otp).then(() => {
@@ -191,7 +200,8 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ code }) => {
         regen();
 
         const periodMs = code.period * 1000;
-        const timeToNextCode = periodMs - (Date.now() % periodMs);
+        const timeToNextCode =
+            periodMs - ((Date.now() + timeOffset) % periodMs);
 
         let interval: ReturnType<typeof setInterval> | undefined;
         // Wait until we are at the start of the next code period, and then
@@ -204,7 +214,7 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ code }) => {
         }, timeToNextCode);
 
         return () => interval && clearInterval(interval);
-    }, [code, regen]);
+    }, [code, timeOffset, regen]);
 
     return (
         <Box sx={{ p: 1 }}>
@@ -212,7 +222,11 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ code }) => {
                 <UnparseableCode {...{ code, errorMessage }} />
             ) : (
                 <ButtonBase component="div" onClick={copyCode}>
-                    <OTPDisplay {...{ code, otp, nextOTP }} />
+                    <OTPDisplay
+                        {...{ code, timeOffset }}
+                        otp={prettyFormatCode(otp)}
+                        nextOTP={prettyFormatCode(nextOTP)}
+                    />
                     <Snackbar
                         open={openCopied}
                         message={t("copied")}
@@ -232,13 +246,14 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ code }) => {
     );
 };
 
-interface OTPDisplayProps {
-    code: Code;
-    otp: string;
-    nextOTP: string;
-}
+type OTPDisplayProps = CodeValidityBarProps & { otp: string; nextOTP: string };
 
-const OTPDisplay: React.FC<OTPDisplayProps> = ({ code, otp, nextOTP }) => {
+const OTPDisplay: React.FC<OTPDisplayProps> = ({
+    code,
+    timeOffset,
+    otp,
+    nextOTP,
+}) => {
     return (
         <Box
             sx={(theme) => ({
@@ -247,7 +262,7 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({ code, otp, nextOTP }) => {
                 overflow: "hidden",
             })}
         >
-            <CodeValidityBar code={code} />
+            <CodeValidityBar {...{ code, timeOffset }} />
             <Stack
                 direction="row"
                 sx={{
@@ -295,16 +310,21 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({ code, otp, nextOTP }) => {
 
 interface CodeValidityBarProps {
     code: Code;
+    timeOffset: number;
 }
 
-const CodeValidityBar: React.FC<CodeValidityBarProps> = ({ code }) => {
+const CodeValidityBar: React.FC<CodeValidityBarProps> = ({
+    code,
+    timeOffset,
+}) => {
     const theme = useTheme();
     const [progress, setProgress] = useState(code.type == "hotp" ? 1 : 0);
 
     useEffect(() => {
         const advance = () => {
             const us = code.period * 1e6;
-            const timeRemaining = us - ((Date.now() * 1000) % us);
+            const timeRemaining =
+                us - (((Date.now() + timeOffset) * 1000) % us);
             setProgress(timeRemaining / us);
         };
 
@@ -312,7 +332,7 @@ const CodeValidityBar: React.FC<CodeValidityBarProps> = ({ code }) => {
             code.type == "hotp" ? undefined : setInterval(advance, 10);
 
         return () => ticker && clearInterval(ticker);
-    }, [code]);
+    }, [code, timeOffset]);
 
     const progressColor =
         progress > 0.4
@@ -384,10 +404,7 @@ const Footer: React.FC = () => {
     return (
         <Stack sx={{ my: "4rem", gap: 2, alignItems: "center" }}>
             <Typography>{t("auth_download_mobile_app")}</Typography>
-            <a
-                href="https://github.com/ente-io/ente/tree/main/auth#-download"
-                download
-            >
+            <a href="https://ente.io/auth/#download-auth" download>
                 <Button color="accent">{t("download")}</Button>
             </a>
         </Stack>

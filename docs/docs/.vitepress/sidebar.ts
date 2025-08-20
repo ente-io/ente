@@ -27,6 +27,10 @@ export const sidebar = [
                         link: "/photos/features/collect",
                     },
                     {
+                        text: "Custom domains",
+                        link: "/photos/features/custom-domains/",
+                    },
+                    {
                         text: "Deduplicate",
                         link: "/photos/features/deduplicate",
                     },
@@ -52,6 +56,10 @@ export const sidebar = [
                         link: "/photos/features/machine-learning",
                     },
                     { text: "Map", link: "/photos/features/map" },
+                    {
+                        text: "Notifications",
+                        link: "/photos/features/notifications",
+                    },
                     {
                         text: "Passkeys",
                         link: "/photos/features/passkeys",
@@ -182,6 +190,7 @@ export const sidebar = [
         text: "Auth",
         items: [
             { text: "Introduction", link: "/auth/" },
+            { text: "Features", link: "/auth/features/" },
             {
                 text: "FAQ",
                 collapsed: true,
@@ -202,27 +211,28 @@ export const sidebar = [
                 text: "Migration",
                 collapsed: true,
                 items: [
-                    { text: "Introduction", link: "/auth/migration-guides/" },
+                    { text: "Introduction", link: "/auth/migration/" },
                     {
                         text: "From Authy",
-                        link: "/auth/migration-guides/authy/",
+                        link: "/auth/migration/authy/",
                     },
                     {
                         text: "From Steam",
-                        link: "/auth/migration-guides/steam/",
+                        link: "/auth/migration/steam/",
                     },
                     {
                         text: "From others",
-                        link: "/auth/migration-guides/import",
+                        link: "/auth/migration/import",
                     },
                     {
                         text: "Exporting your data",
-                        link: "/auth/migration-guides/export",
+                        link: "/auth/migration/export",
                     },
                 ],
             },
             {
                 text: "Troubleshooting",
+                collapsed: true,
                 items: [
                     {
                         text: "Windows login",
@@ -233,112 +243,123 @@ export const sidebar = [
         ],
     },
     {
-        text: "Self hosting",
+        text: "Self-hosting",
         collapsed: true,
         items: [
-            { text: "Getting started", link: "/self-hosting/" },
             {
-                text: "System requirements",
-                link: "/self-hosting/guides/system-requirements",
+                text: "Quickstart",
+                link: "/self-hosting/",
             },
             {
-                text: "Guides",
+                text: "Installation",
+                collapsed: true,
                 items: [
-                    { text: "Introduction", link: "/self-hosting/guides/" },
                     {
-                        text: "Connect to custom server",
-                        link: "/self-hosting/guides/custom-server/",
+                        text: "Requirements",
+                        link: "/self-hosting/installation/requirements",
                     },
                     {
-                        text: "Hosting the web app",
-                        link: "/self-hosting/guides/web-app",
+                        text: "Quickstart script (Recommended)",
+                        link: "/self-hosting/installation/quickstart",
                     },
                     {
-                        text: "Configuring S3",
-                        link: "/self-hosting/guides/configuring-s3",
+                        text: "Docker Compose",
+                        link: "/self-hosting/installation/compose",
                     },
                     {
-                        text: "Hosting Ente with external S3 (Community)",
-                        link: "/self-hosting/guides/external-s3",
+                        text: "Manual setup (without Docker)",
+                        link: "/self-hosting/installation/manual",
                     },
                     {
-                        text: "DB migration",
-                        link: "/self-hosting/guides/db-migration",
+                        text: "Environment variables and defaults",
+                        link: "/self-hosting/installation/env-var",
                     },
                     {
-                        text: "Hosting Ente without Docker",
-                        link: "/self-hosting/guides/standalone-ente",
+                        text: "Configuration",
+                        link: "/self-hosting/installation/config",
                     },
                     {
-                        text: "Ente via Tailscale (Community)",
-                        link: "/self-hosting/guides/Tailscale.md",
+                        text: "Post-installation steps",
+                        link: "/self-hosting/installation/post-install/",
                     },
                     {
-                        text: "Configure CLI for Self Hosted Instance",
-                        link: "/self-hosting/guides/selfhost-cli",
-                    },
-                    {
-                        text: "Administering your server",
-                        link: "/self-hosting/guides/admin",
-                    },
-
-                    {
-                        text: "Mobile build",
-                        link: "/self-hosting/guides/mobile-build",
+                        text: "Upgrade",
+                        link: "/self-hosting/installation/upgrade",
                     },
                 ],
             },
             {
-                text: "FAQ",
+                text: "Administration",
+                collapsed: true,
                 items: [
-                    { text: "General", link: "/self-hosting/faq/" },
                     {
-                        text: "Verification code",
-                        link: "/self-hosting/faq/otp",
+                        text: "User management",
+                        link: "/self-hosting/administration/users",
                     },
                     {
-                        text: "Shared albums",
-                        link: "/self-hosting/faq/sharing",
+                        text: "Reverse proxy",
+                        link: "/self-hosting/administration/reverse-proxy",
                     },
                     {
-                        text: "Backups",
-                        link: "/self-hosting/faq/backup",
+                        text: "Object storage",
+                        link: "/self-hosting/administration/object-storage",
+                    },
+                    {
+                        text: "Ente CLI",
+                        link: "/self-hosting/administration/cli",
+                    },
+                    {
+                        text: "Backup",
+                        link: "/self-hosting/administration/backup",
+                    },
+                ],
+            },
+            {
+                text: "Development",
+                collapsed: true,
+                items: [
+                    {
+                        text: "Building mobile apps",
+                        link: "/self-hosting/development/mobile-build",
+                    },
+                ],
+            },
+            {
+                text: "Community Guides",
+                collapsed: true,
+                items: [
+                    {
+                        text: "Ente via Tailscale",
+                        link: "/self-hosting/guides/tailscale",
+                    },
+                    {
+                        text: "Running Ente using systemd",
+                        link: "/self-hosting/guides/systemd",
                     },
                 ],
             },
             {
                 text: "Troubleshooting",
+                collapsed: true,
                 items: [
                     {
                         text: "General",
                         link: "/self-hosting/troubleshooting/misc",
                     },
                     {
-                        text: "Uploads",
-                        link: "/self-hosting/troubleshooting/uploads",
-                    },
-                    {
                         text: "Docker / quickstart",
                         link: "/self-hosting/troubleshooting/docker",
                     },
                     {
-                        text: "Yarn",
-                        link: "/self-hosting/troubleshooting/yarn",
+                        text: "Uploads",
+                        link: "/self-hosting/troubleshooting/uploads",
                     },
                     {
-                        text: "Ente CLI Secrets",
-                        link: "/self-hosting/troubleshooting/keyring",
+                        text: "Ente CLI",
+                        link: "/self-hosting/troubleshooting/cli",
                     },
                 ],
             },
         ],
-    },
-    {
-        text: "About",
-        link: "/about/",
-    },
-    {
-        text: "Contribute",
-        link: "/about/contribute",
     },
 ];

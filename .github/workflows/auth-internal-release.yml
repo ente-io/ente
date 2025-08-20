@@ -4,7 +4,7 @@ on:
     workflow_dispatch: # Allow manually running the action
 
 env:
-    FLUTTER_VERSION: "3.24.3"
+    FLUTTER_VERSION: "3.32.8"
 
 permissions:
     contents: write
@@ -15,7 +15,7 @@ jobs:
 
         defaults:
             run:
-                working-directory: auth
+                working-directory: mobile/apps/auth
 
         steps:
             - name: Checkout code and submodules
@@ -55,7 +55,7 @@ jobs:
               with:
                   serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
                   packageName: io.ente.auth
-                  releaseFiles: auth/build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
+                  releaseFiles: mobile/apps/auth/build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
                   track: internal
 
             - name: Notify Discord

@@ -7,9 +7,10 @@ description: Frequently asked questions about keeping extra backups of your data
 
 ## How can I backup my data in a local drive outside Ente?
 
-You can use our CLI tool or our desktop app to set up exports of your data
-to your local drive. This way, you can use Ente in your day to day use, with an additional guarantee that a copy of your original photos and videos are
-always available on your machine.
+You can use our CLI tool or our desktop app to set up exports of your data to
+your local drive. This way, you can use Ente in your day to day use, with an
+additional guarantee that a copy of your original photos and videos are always
+available on your machine.
 
 - You can use [Ente's CLI](https://github.com/ente-io/ente/tree/main/cli#export)
   to export your data in a cron job to a location of your choice. The exports
@@ -21,7 +22,7 @@ always available on your machine.
   background without you needing to run any other cron jobs. See
   [migration/export](/photos/migration/export/) for more details.
 
-## Does the exported data preserve folder structure?
+## Does the exported data preserve album structure?
 
 Yes. When you export your data for local backup, it will maintain the exact
 album structure how you have set up within Ente.

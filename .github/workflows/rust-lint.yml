@@ -1,0 +1,44 @@
+name: "Lint (rust)"
+
+on:
+    # Run on every pull request (open or push to it) that changes rust/
+    pull_request:
+        paths:
+            - "rust/**"
+            - ".github/workflows/rust-lint.yml"
+
+permissions:
+    contents: read
+
+# Cancel in-progress lint runs when a new commit is pushed.
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+env:
+    RUSTFLAGS: -D warnings
+
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: rust
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Cache
+              uses: actions/cache@v4
+              with:
+                  path: |
+                      ~/.cargo/registry
+                      ~/.cargo/git
+                      target
+                  key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+            - run: cargo fmt --check
+
+            - run: cargo clippy --all-targets --all-features
+
+            - run: cargo build

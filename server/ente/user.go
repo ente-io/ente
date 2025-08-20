@@ -1,7 +1,8 @@
 package ente
 
 const (
-	OTTTemplate = "ott.html"
+	OTTTemplate       = "ott.html"
+	OTTMobileTemplate = "ott_mobile.html"
 
 	ChangeEmailOTTTemplate = "ott_change_email.html"
 	EmailChangedTemplate   = "email_changed.html"
@@ -30,7 +31,9 @@ type User struct {
 type SendOTTRequest struct {
 	Email   string `json:"email"`
 	Client  string `json:"client"`
-	Purpose string `json:"purpose"`
+	Purpose string `json:"purpose"
+	// Mobile indicates whether the request is coming from a mobile client`
+	Mobile bool `json:"mobile"`
 }
 
 // EmailVerificationRequest represents an email verification request

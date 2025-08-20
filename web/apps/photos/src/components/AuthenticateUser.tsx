@@ -1,4 +1,11 @@
+import { VerifyMasterPasswordForm } from "ente-accounts/components/VerifyMasterPasswordForm";
 import { checkSessionValidity } from "ente-accounts/services/session";
+import {
+    ensureLocalUser,
+    ensureSavedKeyAttributes,
+    type KeyAttributes,
+    type LocalUser,
+} from "ente-accounts/services/user";
 import {
     TitledMiniDialog,
     type MiniDialogAttributes,
@@ -6,11 +13,6 @@ import {
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import { useBaseContext } from "ente-base/context";
 import log from "ente-base/log";
-import VerifyMasterPasswordForm, {
-    type VerifyMasterPasswordFormProps,
-} from "ente-shared/components/VerifyMasterPasswordForm";
-import { getData } from "ente-shared/storage/localStorage";
-import type { KeyAttributes, User } from "ente-shared/user/types";
 import { t } from "i18next";
 import { useCallback, useEffect, useState } from "react";
 
@@ -30,11 +32,34 @@ type AuthenticateUserProps = ModalVisibilityProps & {
 export const AuthenticateUser: React.FC<AuthenticateUserProps> = ({
     open,
     onClose,
+    ...rest
+}) => (
+    <TitledMiniDialog
+        open={open}
+        onClose={onClose}
+        sx={{ position: "absolute" }}
+        title={t("password")}
+    >
+        <AuthenticateUserDialogContents {...{ open, onClose }} {...rest} />
+    </TitledMiniDialog>
+);
+
+/**
+ * The contents of the {@link AuthenticateUser} dialog.
+ *
+ * See: [Note: MUI dialog state] for why this is a separate component.
+ */
+const AuthenticateUserDialogContents: React.FC<AuthenticateUserProps> = ({
+    open,
+    onClose,
     onAuthenticate,
 }) => {
-    const { logout, showMiniDialog, onGenericError } = useBaseContext();
-    const [user, setUser] = useState<User>();
-    const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
+    const { logout, showMiniDialog } = useBaseContext();
+
+    const [user, setUser] = useState<LocalUser | undefined>();
+    const [keyAttributes, setKeyAttributes] = useState<
+        KeyAttributes | undefined
+    >(undefined);
 
     // This is a altered version of the check we do on the password verification
     // screen, except here it don't try to overwrite local state and instead
@@ -55,62 +80,32 @@ export const AuthenticateUser: React.FC<AuthenticateUserProps> = ({
             // potentially transient issues.
             log.warn("Ignoring error when determining session validity", e);
         }
-    }, [logout, showMiniDialog]);
+    }, [logout, showMiniDialog, onClose]);
 
     useEffect(() => {
-        const main = async () => {
-            try {
-                const user = getData("user");
-                if (!user) {
-                    throw Error("User not found");
-                }
-                setUser(user);
-                const keyAttributes = getData("keyAttributes");
-                if (
-                    (!user?.token && !user?.encryptedToken) ||
-                    (keyAttributes && !keyAttributes.memLimit)
-                ) {
-                    throw Error("User not logged in");
-                } else if (!keyAttributes) {
-                    throw Error("Key attributes not found");
-                } else {
-                    setKeyAttributes(keyAttributes);
-                }
-            } catch (e) {
-                onClose();
-                onGenericError(e);
-            }
-        };
-        main();
+        setUser(ensureLocalUser());
+        setKeyAttributes(ensureSavedKeyAttributes());
     }, []);
 
     useEffect(() => {
-        // Do a non-blocking validation of the session, but show the dialog to
-        // the user.
+        // Do a non-blocking validation of the session whenever we show the
+        // dialog to the user.
         if (open) void validateSession();
-    }, [open]);
+    }, [open, validateSession]);
 
-    const useMasterPassword: VerifyMasterPasswordFormProps["callback"] =
-        async () => {
-            onClose();
-            onAuthenticate();
-        };
+    // They'll be read from disk shortly.
+    if (!user || !keyAttributes) return <></>;
 
     return (
-        <TitledMiniDialog
-            open={open}
-            onClose={onClose}
-            sx={{ position: "absolute" }}
-            title={t("password")}
-        >
-            <VerifyMasterPasswordForm
-                buttonText={t("authenticate")}
-                callback={useMasterPassword}
-                user={user}
-                keyAttributes={keyAttributes}
-                submitButtonProps={{ sx: { mb: 0 } }}
-            />
-        </TitledMiniDialog>
+        <VerifyMasterPasswordForm
+            userEmail={user.email}
+            keyAttributes={keyAttributes}
+            submitButtonTitle={t("authenticate")}
+            onVerify={() => {
+                onClose();
+                onAuthenticate();
+            }}
+        />
     );
 };
 

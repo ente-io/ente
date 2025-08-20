@@ -28,6 +28,7 @@ export const PasswordStrengthHint: React.FC<PasswordStrengthHintProps> = ({
             variant="small"
             sx={{
                 mt: "8px",
+                mx: "2px",
                 alignSelf: "flex-start",
                 whiteSpace: "pre",
                 color: "var(--et-color)",
@@ -35,7 +36,7 @@ export const PasswordStrengthHint: React.FC<PasswordStrengthHintProps> = ({
             style={{ "--et-color": color } as React.CSSProperties}
         >
             {password
-                ? t("passphrase_strength", { context: passwordStrength })
+                ? t("password_strength", { context: passwordStrength })
                 : /* empty space + white-space: pre to prevent layout shift. */
                   " "}
         </Typography>

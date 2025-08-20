@@ -2,17 +2,7 @@
     "extends": "ente-build-config/tsconfig-next.json",
     "compilerOptions": {
         /* Set the base directory from which to resolve bare module names. */
-        "baseUrl": "./src",
-
-        /* Override tsconfig-next.json (TODO: Remove all of us) */
-        "verbatimModuleSyntax": false,
-        "noImplicitAny": false,
-        "noUnusedLocals": false,
-        "noUnusedParameters": false,
-        "noImplicitReturns": false,
-        "noUncheckedIndexedAccess": false,
-        "strictNullChecks": false,
-        "useUnknownInCatchVariables": false
+        "baseUrl": "./src"
     },
     "include": [
         "next-env.d.ts",

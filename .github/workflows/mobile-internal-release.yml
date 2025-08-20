@@ -1,10 +1,11 @@
-name: "Internal release (photos)"
+name: "Old Internal release (photos)"
 
 on:
     workflow_dispatch: # Allow manually running the action
 
 env:
-    FLUTTER_VERSION: "3.24.3"
+    FLUTTER_VERSION: "3.32.8"
+    RUST_VERSION: "1.85.1"
 
 permissions:
     contents: write
@@ -15,7 +16,7 @@ jobs:
 
         defaults:
             run:
-                working-directory: mobile
+                working-directory: mobile/apps/photos
 
         steps:
             - name: Checkout code and submodules
@@ -34,6 +35,14 @@ jobs:
                   channel: "stable"
                   flutter-version: ${{ env.FLUTTER_VERSION  }}
                   cache: true
+
+            - name: Install Rust ${{ env.RUST_VERSION }}
+              uses: dtolnay/rust-toolchain@master
+              with:
+                  toolchain: ${{ env.RUST_VERSION }}
+
+            - name: Install Flutter Rust Bridge
+              run: cargo install flutter_rust_bridge_codegen
 
             - name: Setup keys
               uses: timheuer/base64-to-file@v1
@@ -55,7 +64,7 @@ jobs:
               with:
                   serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
                   packageName: io.ente.photos
-                  releaseFiles: mobile/build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
+                  releaseFiles: mobile/apps/photos/build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
                   track: internal
 
             - name: Notify Discord
@@ -63,6 +72,6 @@ jobs:
               with:
                   webhook: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK }}
                   nodetail: true
-                  title: "🏆 Internal release available for Photos"
+                  title: "🏆 Internal release Photos (Branch: ${{ github.ref_name }})"
                   description: "[Download](https://play.google.com/store/apps/details?id=io.ente.photos)"
                   color: 0x00ff00

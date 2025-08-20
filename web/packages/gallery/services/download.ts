@@ -1,8 +1,8 @@
 import { blobCache, type BlobCache } from "ente-base/blob-cache";
 import {
+    decryptBlobBytes,
     decryptStreamBytes,
     decryptStreamChunk,
-    decryptThumbnail,
     initChunkDecryption,
 } from "ente-base/crypto";
 import {
@@ -12,10 +12,11 @@ import {
     retryEnsuringHTTPOk,
     type PublicAlbumsCredentials,
 } from "ente-base/http";
-import { ensureAuthToken } from "ente-base/local-user";
 import log from "ente-base/log";
-import { customAPIOrigin } from "ente-base/origins";
+import { apiURL, customAPIOrigin } from "ente-base/origins";
+import { ensureAuthToken } from "ente-base/token";
 import type { EnteFile } from "ente-media/file";
+import { fileFileName } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { decodeLivePhoto } from "ente-media/live-photo";
 import { playableVideoURL, renderableImageBlob } from "./convert";
@@ -197,7 +198,9 @@ class DownloadManager {
      * Set the credentials that should be used for download files when we're
      * running in the context of the public albums app.
      */
-    setPublicAlbumsCredentials(credentials: PublicAlbumsCredentials) {
+    setPublicAlbumsCredentials(
+        credentials: PublicAlbumsCredentials | undefined,
+    ) {
         this.publicAlbumsCredentials = credentials;
     }
 
@@ -295,7 +298,7 @@ class DownloadManager {
             this._downloadThumbnail(file),
         );
         const decryptionHeader = file.thumbnail.decryptionHeader;
-        return decryptThumbnail({ encryptedData, decryptionHeader }, file.key);
+        return decryptBlobBytes({ encryptedData, decryptionHeader }, file.key);
     };
 
     private async _downloadThumbnail(file: EnteFile) {
@@ -343,8 +346,8 @@ class DownloadManager {
      * This is a convenience abstraction over {@link fileStream} that converts
      * it into a {@link Blob}.
      */
-    async fileBlob(file: EnteFile) {
-        return this.fileStream(file).then((s) => new Response(s).blob());
+    async fileBlob(file: EnteFile, opts?: FileDownloadOpts) {
+        return this.fileStream(file, opts).then((s) => new Response(s).blob());
     }
 
     /**
@@ -356,9 +359,12 @@ class DownloadManager {
      * cached for subsequent use.
      *
      * @param file The {@link EnteFile} whose data we want.
+     *
+     * @param opts Optional options to modify the download.
      */
     async fileStream(
         file: EnteFile,
+        opts?: FileDownloadOpts,
     ): Promise<ReadableStream<Uint8Array> | null> {
         const cachedURL = this.fileURLPromises.get(file.id);
         if (cachedURL) {
@@ -372,7 +378,7 @@ class DownloadManager {
             }
         }
 
-        return this.downloadFile(file);
+        return this.downloadFile(file, opts);
     }
 
     /**
@@ -397,14 +403,15 @@ class DownloadManager {
 
     private async downloadFile(
         file: EnteFile,
+        opts?: FileDownloadOpts,
     ): Promise<ReadableStream<Uint8Array> | null> {
         log.info(`download attempted for file id ${file.id}`);
 
-        const res = await wrapErrors(() => this._downloadFile(file));
+        const res = await wrapErrors(() => this._downloadFile(file, opts));
 
         if (
-            file.metadata.fileType === FileType.image ||
-            file.metadata.fileType === FileType.livePhoto
+            file.metadata.fileType == FileType.image ||
+            file.metadata.fileType == FileType.livePhoto
         ) {
             const encryptedData = new Uint8Array(
                 await wrapErrors(() => res.arrayBuffer()),
@@ -423,8 +430,7 @@ class DownloadManager {
 
         const onDownloadProgress = this.trackDownloadProgress(
             file.id,
-            // TODO: Is info supposed to be optional though?
-            file.info?.fileSize ?? 0,
+            file.info?.fileSize,
         );
 
         const contentLength =
@@ -506,18 +512,26 @@ class DownloadManager {
         });
     }
 
-    private async _downloadFile(file: EnteFile) {
+    /**
+     * Download the full contents of {@link file}, automatically choosing the
+     * credentials for the logged in user or the public albums depending on the
+     * current app context we are in.
+     */
+    private async _downloadFile(file: EnteFile, opts?: FileDownloadOpts) {
         if (this.publicAlbumsCredentials) {
             return publicAlbums_downloadFile(
                 file,
                 this.publicAlbumsCredentials,
             );
         } else {
-            return photos_downloadFile(file);
+            return photos_downloadFile(file, opts);
         }
     }
 
-    private trackDownloadProgress(fileID: number, fileSize: number) {
+    private trackDownloadProgress(
+        fileID: number,
+        fileSize: number | undefined,
+    ) {
         return (event: { loaded: number; total: number }) => {
             if (isNaN(event.total) || event.total === 0) {
                 if (!fileSize) {
@@ -601,7 +615,7 @@ const createRenderableSourceURLs = async (
 ): Promise<RenderableSourceURLs> => {
     const originalFileURL = await originalFileURLPromise;
     const fileBlob = await fetch(originalFileURL).then((res) => res.blob());
-    const fileName = file.metadata.title;
+    const fileName = fileFileName(file);
     const fileType = file.metadata.fileType;
 
     switch (fileType) {
@@ -630,16 +644,16 @@ const createRenderableSourceURLs = async (
 
             const videoURL = () =>
                 playableVideoURL(
+                    file,
                     livePhoto.videoFileName,
                     new Blob([livePhoto.videoData]),
-                    { fileType },
                 );
 
             return { type: "livePhoto", imageURL, originalImageBlob, videoURL };
         }
 
         case FileType.video: {
-            const videoURL = await playableVideoURL(fileName, fileBlob);
+            const videoURL = await playableVideoURL(file, fileName, fileBlob);
             return { type: "video", videoURL };
         }
 
@@ -676,7 +690,28 @@ const photos_downloadThumbnail = async (file: EnteFile) => {
     return new Uint8Array(await res.arrayBuffer());
 };
 
-const photos_downloadFile = async (file: EnteFile): Promise<Response> => {
+interface FileDownloadOpts {
+    /**
+     * `true` if the request is for a background task. These are considered less
+     * latency sensitive than user initiated interactive requests.
+     *
+     * See: [Note: User initiated vs background downloads of files].
+     *
+     * This parameter is ignored for requests made when using public albums
+     * credentials to download files; those are always considered interactive.
+     */
+    background?: boolean;
+}
+
+/**
+ * Download the full contents of the given {@link EnteFile}
+ */
+const photos_downloadFile = async (
+    file: EnteFile,
+    opts?: FileDownloadOpts,
+): Promise<Response> => {
+    const { background } = opts ?? {};
+
     const customOrigin = await customAPIOrigin();
 
     // [Note: Passing credentials for self-hosted file fetches]
@@ -711,17 +746,24 @@ const photos_downloadFile = async (file: EnteFile): Promise<Response> => {
     //    credentials in the "X-Auth-Token".
     //
     // 2. The proxy then does both the original steps: (a). Use the credentials
-    //    to get the pre signed URL, and (b) fetch that pre signed URL and
+    //    to get the pre-signed URL, and (b) fetch that pre-signed URL and
     //    stream back the response.
+    //
+    // [Note: User initiated vs background downloads of files]
+    //
+    // The faster proxy approach is used for interactive requests to reduce the
+    // latency for the user (e.g. when the user is waiting to see a full
+    // resolution file). It can be faster than a direct connection as the proxy
+    // is network-nearer to the user (See: [Note: Faster uploads via workers])
+    //
+    // For background processing (e.g., ML indexing, HLS generation), the direct
+    // S3 connection (as what'd happen when self hosting) gets used.
 
     const getFile = async () => {
-        if (customOrigin) {
+        if (customOrigin || background) {
             const token = await ensureAuthToken();
-            const params = new URLSearchParams({ token });
-            return fetch(
-                `${customOrigin}/files/download/${file.id}?${params.toString()}`,
-                { headers: publicRequestHeaders() },
-            );
+            const url = await apiURL(`/files/download/${file.id}`, { token });
+            return fetch(url, { headers: publicRequestHeaders() });
         } else {
             return fetch(`https://files.ente.io/?fileID=${file.id}`, {
                 headers: await authenticatedRequestHeaders(),
@@ -748,7 +790,7 @@ const publicAlbums_downloadThumbnail = async (
             const { accessToken, accessTokenJWT } = credentials;
             const params = new URLSearchParams({
                 accessToken,
-                ...(accessTokenJWT ? { accessTokenJWT } : {}),
+                ...(accessTokenJWT && { accessTokenJWT }),
             });
             return fetch(
                 `${customOrigin}/public-collection/files/preview/${file.id}?${params.toString()}`,
@@ -781,7 +823,7 @@ const publicAlbums_downloadFile = async (
             const { accessToken, accessTokenJWT } = credentials;
             const params = new URLSearchParams({
                 accessToken,
-                ...(accessTokenJWT ? { accessTokenJWT } : {}),
+                ...(accessTokenJWT && { accessTokenJWT }),
             });
             return fetch(
                 `${customOrigin}/public-collection/files/download/${file.id}?${params.toString()}`,

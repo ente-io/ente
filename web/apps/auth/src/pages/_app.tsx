@@ -1,8 +1,9 @@
 import "@fontsource-variable/inter";
 import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
+import { savedLocalUser } from "ente-accounts/services/accounts-db";
 import { accountLogout } from "ente-accounts/services/logout";
-import { clientPackageName, staticAppTitle } from "ente-base/app";
+import { staticAppTitle } from "ente-base/app";
 import { CustomHead } from "ente-base/components/Head";
 import {
     LoadingIndicator,
@@ -18,9 +19,6 @@ import {
 import { authTheme } from "ente-base/components/utils/theme";
 import { BaseContext, deriveBaseContext } from "ente-base/context";
 import { logStartupBanner } from "ente-base/log-web";
-import HTTPService from "ente-shared/network/HTTPService";
-import { getData } from "ente-shared/storage/localStorage";
-import type { User } from "ente-shared/user/types";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
 import React, { useCallback, useEffect, useMemo } from "react";
@@ -33,9 +31,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
 
     useEffect(() => {
-        const user = getData("user") as User | undefined | null;
-        logStartupBanner(user?.id);
-        HTTPService.setHeaders({ "X-Client-Package": clientPackageName });
+        logStartupBanner(savedLocalUser()?.id);
     }, []);
 
     const logout = useCallback(() => {

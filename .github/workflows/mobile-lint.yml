@@ -4,11 +4,11 @@ on:
     # Run on every pull request (open or push to it) that changes mobile/
     pull_request:
         paths:
-            - "mobile/**"
+            - "mobile/apps/photos/**"
             - ".github/workflows/mobile-lint.yml"
 
 env:
-    FLUTTER_VERSION: "3.24.3"
+    FLUTTER_VERSION: "3.32.8"
 
 permissions:
     contents: read
@@ -18,7 +18,7 @@ jobs:
         runs-on: ubuntu-latest
         defaults:
             run:
-                working-directory: mobile
+                working-directory: mobile/apps/photos
         steps:
             - name: Checkout code and submodules
               uses: actions/checkout@v4

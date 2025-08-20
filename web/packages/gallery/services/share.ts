@@ -33,7 +33,7 @@ export const appendCollectionKeyToShareURL = async (
  * Extract the collection key from a public URL.
  *
  * This is the inverse of {@link appendCollectionKeyToShareURL}, returning the
- * base 64 string representation of the collection key.
+ * base64 string representation of the collection key.
  *
  *     collection key (bytes)
  *       => appendCollectionKeytoShareURL (base 64 => base 58)

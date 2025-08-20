@@ -15,6 +15,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"io"
 	"os"
+	"strings"
 	stime "time"
 )
 
@@ -41,6 +42,48 @@ func (c *Controller) getUploadURL(dc string, objectKey string) (*ente.UploadURL,
 		ObjectKey: objectKey,
 		URL:       url,
 	}, nil
+}
+func (c *Controller) getMultiPartUploadURL(dc string, objectKey string, count *int64) (*ente.MultipartUploadURLs, error) {
+	s3Client := c.S3Config.GetS3Client(dc)
+	bucket := c.S3Config.GetBucket(dc)
+	r, err := s3Client.CreateMultipartUpload(&s3.CreateMultipartUploadInput{
+		Bucket: bucket,
+		Key:    &objectKey,
+	})
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	err = c.ObjectCleanupController.AddMultipartTempObjectKey(objectKey, *r.UploadId, dc)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	multipartUploadURLs := ente.MultipartUploadURLs{ObjectKey: objectKey}
+	urls := make([]string, 0)
+	for i := int64(1); i <= *count; i++ {
+		partReq, _ := s3Client.UploadPartRequest(&s3.UploadPartInput{
+			Bucket:     bucket,
+			Key:        &objectKey,
+			UploadId:   r.UploadId,
+			PartNumber: &i,
+		})
+		partUrl, partUrlErr := partReq.Presign(PreSignedRequestValidityDuration)
+		if partUrlErr != nil {
+			return nil, stacktrace.Propagate(partUrlErr, "")
+		}
+		urls = append(urls, partUrl)
+	}
+	multipartUploadURLs.PartURLs = urls
+	r2, _ := s3Client.CompleteMultipartUploadRequest(&s3.CompleteMultipartUploadInput{
+		Bucket:   bucket,
+		Key:      &objectKey,
+		UploadId: r.UploadId,
+	})
+	url, err := r2.Presign(PreSignedRequestValidityDuration)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	multipartUploadURLs.CompleteURL = url
+	return &multipartUploadURLs, nil
 }
 
 func (c *Controller) signedUrlGet(dc string, objectKey string) (*ente.UploadURL, error) {
@@ -86,10 +129,18 @@ func (c *Controller) uploadObject(obj fileData.S3FileMetadata, objectKey string,
 		Key:    &objectKey,
 		Body:   bytes.NewReader(embeddingObj),
 	}
-	result, err := uploader.Upload(&up)
+	var err error
+	var result *s3manager.UploadOutput
+	for retries := 0; retries < 3; retries++ {
+		result, err = uploader.Upload(&up)
+		if err == nil || !strings.Contains(err.Error(), "connection reset by peer") {
+			break
+		}
+		stime.Sleep(50 * stime.Millisecond)
+	}
 	if err != nil {
 		log.Error(err)
-		return -1, stacktrace.Propagate(err, "")
+		return -1, stacktrace.Propagate(err, "metadata upload failed")
 	}
 	log.Infof("Uploaded to bucket %s", result.Location)
 	return int64(len(embeddingObj)), nil

@@ -1,6 +1,6 @@
 {
     "name": "ente",
-    "version": "1.7.12-beta",
+    "version": "1.7.15-beta",
     "private": true,
     "description": "Desktop client for Ente Photos",
     "repository": "github:ente-io/photos-desktop",
@@ -21,9 +21,6 @@
         "lint-fix": "yarn prettier --write --log-level warn . && yarn eslint && yarn tsc",
         "prepare": "node scripts/vips.js"
     },
-    "resolutions": {
-        "jackspeak": "2.1.1"
-    },
     "dependencies": {
         "any-shell-escape": "^0.1.1",
         "auto-launch": "^5.0.6",
@@ -31,32 +28,32 @@
         "clip-bpe-js": "^0.0.6",
         "comlink": "^4.4.2",
         "compare-versions": "^6.1.1",
-        "electron-log": "^5.3.3",
+        "electron-log": "^5.4.1",
         "electron-store": "^8.2.0",
-        "electron-updater": "^6.6.2",
+        "electron-updater": "^6.6.5",
         "ffmpeg-static": "^5.2.0",
         "lru-cache": "^11.1.0",
         "next-electron-server": "^1.0.0",
         "node-stream-zip": "^1.15.0",
-        "onnxruntime-node": "^1.20.1"
+        "onnxruntime-node": "1.22.0-rev",
+        "zod": "^3.25.67"
     },
     "devDependencies": {
-        "@eslint/js": "^9.24.0",
-        "@tsconfig/node22": "^22.0.1",
+        "@eslint/js": "^9.30.1",
+        "@tsconfig/node22": "^22.0.2",
         "@types/auto-launch": "^5.0.5",
-        "@types/ffmpeg-static": "^3.0.3",
         "ajv": "^8.17.1",
-        "concurrently": "^9.1.2",
+        "concurrently": "^9.2.0",
         "cross-env": "^7.0.3",
-        "electron": "^35.1.4",
-        "electron-builder": "^26.0.12",
+        "electron": "^37.1.0",
+        "electron-builder": "26.0.14",
         "eslint": "^9",
-        "prettier": "3.5.3",
+        "prettier": "3.6.2",
         "prettier-plugin-organize-imports": "^4.1.0",
-        "prettier-plugin-packagejson": "^2.5.10",
-        "shx": "^0.3.4",
+        "prettier-plugin-packagejson": "^2.5.17",
+        "shx": "^0.4.0",
         "typescript": "^5.8.3",
-        "typescript-eslint": "^8.29.1"
+        "typescript-eslint": "^8.35.1"
     },
     "packageManager": "yarn@1.22.22",
     "productName": "ente"

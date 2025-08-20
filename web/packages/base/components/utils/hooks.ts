@@ -1,4 +1,5 @@
 import { useMediaQuery, useTheme } from "@mui/material";
+import { useCallback, useState } from "react";
 
 /**
  * Return true if the screen width is classified as a small size. This is often
@@ -25,3 +26,27 @@ export const useIsSmallWidth = () =>
  */
 export const useIsTouchscreen = () =>
     useMediaQuery("(hover: none) and (pointer: coarse)", { noSsr: true });
+
+/**
+ * A hook that manages a transient "copied" state.
+ *
+ * @param text The text to copy.
+ *
+ * @returns a tuple containing a boolean {@link copied} indicating if a copy has
+ * just successfully happened, and a function {@link onCopy} to trigger the
+ * copy.
+ */
+export const useClipboardCopy = (
+    text: string,
+): [copied: boolean, onCopy: () => void] => {
+    const [copied, setCopied] = useState(false);
+
+    const handleCopyLink = useCallback(() => {
+        void navigator.clipboard.writeText(text).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1000);
+        });
+    }, [text]);
+
+    return [copied, handleCopyLink];
+};

@@ -8,11 +8,11 @@ import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import {
     fileCreationPhotoDate,
+    fileFileName,
     fileLocation,
-    filePublicMagicMetadata,
 } from "ente-media/file-metadata";
 import { nullToUndefined } from "ente-utils/transform";
-import { z } from "zod";
+import { z } from "zod/v4";
 import type { NamedPerson } from "../ml/people";
 import {
     pullUserEntities,
@@ -46,10 +46,11 @@ export class SearchWorker {
     /**
      * Fetch any state we might need when the actual search happens.
      *
-     * @param masterKey The user's master key. Web workers do not have access to
-     * session storage so this key needs to be passed to us explicitly.
+     * @param masterKey The user's master key (as a base64 string). Web workers
+     * do not have access to session storage so this key needs to be passed to
+     * us explicitly.
      */
-    async sync(masterKey: Uint8Array) {
+    async sync(masterKey: string) {
         // Let the cities fetch complete async. And do it only once per app
         // startup (this list is static and doesn't change).
         if (this.cities.length == 0) {
@@ -85,9 +86,10 @@ export class SearchWorker {
     ) {
         return suggestionsForString(
             s,
-            // Case insensitive word prefix match, considering underscores also
-            // as a word separator.
-            new RegExp("(\\b|_)" + s, "i"),
+            // Case insensitive word prefix match.  Note that \b doesn't work
+            // with unicode characters, so we use instead a set of common
+            // punctuation (and spaces) to discern the word boundary.
+            new RegExp("(^|[\\s.,!?\"'-_])" + s, "i"),
             searchString,
             this.collectionsAndFiles,
             this.people,
@@ -176,7 +178,7 @@ const fileNameSuggestion = (
     const sn = Number(s) || undefined;
 
     const fileIDs = files
-        .filter(({ id, metadata }) => id === sn || re.test(metadata.title))
+        .filter((f) => f.id === sn || re.test(fileFileName(f)))
         .map((f) => f.id);
 
     return fileIDs.length
@@ -371,7 +373,7 @@ const isMatchingFile = (file: EnteFile, suggestion: SearchSuggestion) => {
             return suggestion.collectionID === file.collectionID;
 
         case "fileType":
-            return suggestion.fileType === file.metadata.fileType;
+            return suggestion.fileType == file.metadata.fileType;
 
         case "fileName":
             return suggestion.fileIDs.includes(file.id);
@@ -382,7 +384,7 @@ const isMatchingFile = (file: EnteFile, suggestion: SearchSuggestion) => {
         case "date":
             return isDateComponentsMatch(
                 suggestion.dateComponents,
-                fileCreationPhotoDate(file, filePublicMagicMetadata(file)),
+                fileCreationPhotoDate(file),
             );
 
         case "location": {
@@ -429,10 +431,6 @@ const defaultCityRadius = 10;
 const kmsPerDegree = 111.16;
 
 const isInsideLocationTag = (location: Location, locationTag: LocationTag) =>
-    // See: [Note: strict mode migration]
-    //
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     isWithinRadius(location, locationTag.centerPoint, locationTag.radius);
 
 const isInsideCity = (location: Location, city: City) =>

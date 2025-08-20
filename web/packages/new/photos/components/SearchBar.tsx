@@ -13,10 +13,13 @@ import {
     useTheme,
     type Theme,
 } from "@mui/material";
-import { assertionFailed } from "ente-base/assert";
 import { EnteLogo, EnteLogoBox } from "ente-base/components/EnteLogo";
 import type { ButtonishProps } from "ente-base/components/mui";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
+import {
+    hlsGenerationStatusSnapshot,
+    isHLSGenerationSupported,
+} from "ente-gallery/services/video";
 import { ItemCard, PreviewItemTile } from "ente-new/photos/components/Tiles";
 import { isMLSupported, mlStatusSnapshot } from "ente-new/photos/services/ml";
 import { searchOptionsForString } from "ente-new/photos/services/search";
@@ -38,6 +41,7 @@ import AsyncSelect from "react-select/async";
 import { SearchPeopleList } from "./PeopleList";
 import { UnstyledButton } from "./UnstyledButton";
 import {
+    useHLSGenerationStatusSnapshot,
     useMLStatusSnapshot,
     usePeopleStateSnapshot,
 } from "./utils/use-snapshot";
@@ -79,7 +83,7 @@ export interface SearchBarProps {
     /**
      * Called when the user selects a person shown in the empty state view.
      */
-    onSelectPerson: (personID: string | undefined) => void;
+    onSelectPerson: (personID: string) => void;
 }
 
 /**
@@ -206,7 +210,7 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
         onSelectPeople();
     };
 
-    const handleSelectPerson = (personID: string | undefined) => {
+    const handleSelectPerson = (personID: string) => {
         resetSearch();
         onSelectPerson(personID);
     };
@@ -382,11 +386,26 @@ const shouldShowEmptyState = (inputValue: string) => {
     // Don't show empty state if the user has entered search input.
     if (inputValue) return false;
 
-    // Don't show empty state if there is no ML related information.
-    if (!isMLSupported) return false;
+    // Don't show empty state if there is no ML related information AND we're
+    // not processing videos.
 
-    const status = mlStatusSnapshot();
-    if (!status || status.phase == "disabled") return false;
+    if (!isMLSupported && !isHLSGenerationSupported) {
+        // Neither of ML or HLS generation is supported on current client. This
+        // is the code path for web.
+        return false;
+    }
+
+    const mlStatus = mlStatusSnapshot();
+    const vpStatus = hlsGenerationStatusSnapshot();
+    if (
+        (!mlStatus || mlStatus.phase == "disabled") &&
+        (!vpStatus?.enabled || vpStatus.status != "processing")
+    ) {
+        // ML is either not supported or currently disabled AND video processing
+        // is either not supported or currently not happening. Don't show the
+        // empty state.
+        return false;
+    }
 
     // Show it otherwise.
     return true;
@@ -401,15 +420,18 @@ const EmptyState: React.FC<
 > = ({ onSelectPeople, onSelectPerson }) => {
     const mlStatus = useMLStatusSnapshot();
     const people = usePeopleStateSnapshot()?.visiblePeople;
-
-    if (!mlStatus || mlStatus.phase == "disabled") {
-        // The preflight check should've prevented us from coming here.
-        assertionFailed();
-        return <></>;
-    }
+    const vpStatus = useHLSGenerationStatusSnapshot();
 
     let label: string | undefined;
-    switch (mlStatus.phase) {
+    switch (mlStatus?.phase) {
+        case undefined:
+        case "disabled":
+        case "done":
+            // If ML is not running, see if video processing is.
+            if (vpStatus?.enabled && vpStatus.status == "processing") {
+                label = t("processing_videos_status");
+            }
+            break;
         case "scheduled":
             label = t("indexing_scheduled");
             break;
@@ -422,6 +444,12 @@ const EmptyState: React.FC<
         case "clustering":
             label = t("indexing_people");
             break;
+    }
+
+    // If ML is disabled and we're not video processing, then don't show the
+    // empty state content.
+    if ((!mlStatus || mlStatus.phase == "disabled") && !label) {
+        return <></>;
     }
 
     return (
@@ -473,7 +501,11 @@ const OptionContents = ({ data: option }: { data: SearchOption }) => (
         >
             <Box>
                 <Typography
-                    sx={{ fontWeight: "medium", wordBreak: "break-word" }}
+                    sx={{
+                        color: "text.base",
+                        fontWeight: "medium",
+                        wordBreak: "break-word",
+                    }}
                 >
                     {option.suggestion.label}
                 </Typography>

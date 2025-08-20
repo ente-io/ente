@@ -3,9 +3,14 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { CssBaseline, Typography } from "@mui/material";
 import { styled, ThemeProvider } from "@mui/material/styles";
 import { useNotification } from "components/utils/hooks-app";
-import { clientPackageName, isDesktop, staticAppTitle } from "ente-base/app";
+import {
+    isLocalStorageAndIndexedDBMismatch,
+    savedLocalUser,
+    savedPartialLocalUser,
+} from "ente-accounts/services/accounts-db";
+import { isDesktop, staticAppTitle } from "ente-base/app";
 import { CenteredRow } from "ente-base/components/containers";
-import { CustomHead } from "ente-base/components/Head";
+import { CustomHeadPhotosOrAlbums } from "ente-base/components/Head";
 import {
     LoadingIndicator,
     TranslucentLoadingOverlay,
@@ -21,7 +26,11 @@ import { photosTheme } from "ente-base/components/utils/theme";
 import { BaseContext, deriveBaseContext } from "ente-base/context";
 import log from "ente-base/log";
 import { logStartupBanner } from "ente-base/log-web";
-import { AppUpdate } from "ente-base/types/ipc";
+import type { AppUpdate } from "ente-base/types/ipc";
+import {
+    initVideoProcessing,
+    isHLSGenerationSupported,
+} from "ente-gallery/services/video";
 import { Notification } from "ente-new/photos/components/Notification";
 import { ThemedLoadingBar } from "ente-new/photos/components/ThemedLoadingBar";
 import {
@@ -29,21 +38,15 @@ import {
     updateReadyToInstallDialogAttributes,
 } from "ente-new/photos/components/utils/download";
 import { useLoadingBar } from "ente-new/photos/components/utils/use-loading-bar";
+import { resumeExportsIfNeeded } from "ente-new/photos/services/export";
 import { runMigrations } from "ente-new/photos/services/migration";
 import { initML, isMLSupported } from "ente-new/photos/services/ml";
 import { getFamilyPortalRedirectURL } from "ente-new/photos/services/user-details";
 import { PhotosAppContext } from "ente-new/photos/types/context";
-import HTTPService from "ente-shared/network/HTTPService";
-import {
-    getData,
-    isLocalStorageAndIndexedDBMismatch,
-} from "ente-shared/storage/localStorage";
-import type { User } from "ente-shared/user/types";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { resumeExportsIfNeeded } from "services/export";
 import { photosLogout } from "services/logout";
 
 import "photoswipe/dist/photoswipe.css";
@@ -65,13 +68,12 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const logout = useCallback(() => void photosLogout(), []);
 
     useEffect(() => {
-        const user = getData("user") as User | undefined | null;
-        logStartupBanner(user?.id);
-        HTTPService.setHeaders({ "X-Client-Package": clientPackageName });
+        logStartupBanner(savedLocalUser()?.id);
         void isLocalStorageAndIndexedDBMismatch().then((mismatch) => {
             if (mismatch) {
                 log.error("Logging out (IndexedDB and local storage mismatch)");
-                return logout();
+                logout();
+                return;
             } else {
                 return runMigrations();
             }
@@ -80,15 +82,18 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     useEffect(() => {
         const electron = globalThis.electron;
-        if (!electron) return;
+        if (!electron) return undefined;
 
         // Attach various listeners for events sent to us by the Node.js layer.
         // This is for events that we should listen for always, not just when
         // the user is logged in.
 
         const handleOpenEnteURL = (url: string) => {
-            if (url.startsWith("ente://app")) router.push(url);
-            else log.info(`Ignoring unhandled open request for URL ${url}`);
+            if (url.startsWith("ente://app")) {
+                void router.push(url);
+            } else {
+                log.info(`Ignoring unhandled open request for URL ${url}`);
+            }
         };
 
         const showUpdateDialog = (update: AppUpdate) => {
@@ -108,6 +113,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         };
 
         if (isMLSupported) initML();
+        if (isHLSGenerationSupported) void initVideoProcessing();
 
         electron.onOpenEnteURL(handleOpenEnteURL);
         electron.onAppUpdateAvailable(showUpdateDialog);
@@ -116,7 +122,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
             electron.onOpenEnteURL(undefined);
             electron.onAppUpdateAvailable(undefined);
         };
-    }, []);
+    }, [router, showMiniDialog, showNotification]);
 
     useEffect(() => {
         if (isDesktop) void resumeExportsIfNeeded();
@@ -125,11 +131,20 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useEffect(() => {
         const query = new URLSearchParams(window.location.search);
         const needsFamilyRedirect = query.get("redirect") == "families";
-        if (needsFamilyRedirect && getData("user")?.token)
+        if (needsFamilyRedirect && savedPartialLocalUser()?.token)
             redirectToFamilyPortal();
 
-        router.events.on("routeChangeStart", () => {
-            if (needsFamilyRedirect && getData("user")?.token) {
+        // Creating this inline, we need this on debug only and temporarily. Can
+        // remove the debug print itself after a while.
+        interface NROptions {
+            shallow: boolean;
+        }
+        router.events.on("routeChangeStart", (url: string, o: NROptions) => {
+            if (process.env.NEXT_PUBLIC_ENTE_TRACE_RT) {
+                log.debug(() => [o.shallow ? "route-shallow" : "route", url]);
+            }
+
+            if (needsFamilyRedirect && savedPartialLocalUser()?.token) {
                 redirectToFamilyPortal();
 
                 // https://github.com/vercel/next.js/issues/2476#issuecomment-573460710
@@ -137,6 +152,8 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 throw "Aborting route change, redirection in process....";
             }
         });
+        // TODO:
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const baseContext = useMemo(
@@ -164,7 +181,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     return (
         <ThemeProvider theme={photosTheme}>
-            <CustomHead {...{ title }} />
+            <CustomHeadPhotosOrAlbums {...{ title }} />
             <CssBaseline enableColorScheme />
 
             <ThemedLoadingBar ref={loadingBarRef} />

@@ -1,10 +1,15 @@
 package user
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
+	enteJWT "github.com/ente-io/museum/ente/jwt"
 	"github.com/ente-io/museum/pkg/controller/collections"
 	"github.com/ente-io/museum/pkg/repo/two_factor_recovery"
+	util "github.com/ente-io/museum/pkg/utils"
+	"github.com/ente-io/museum/pkg/utils/time"
+	"github.com/ulule/limiter/v3"
 	"strings"
 
 	cache2 "github.com/ente-io/museum/ente/cache"
@@ -53,6 +58,8 @@ type UserController struct {
 	HardCodedOTT           HardCodedOTT
 	UserCache              *cache2.UserCache
 	UserCacheController    *usercache.Controller
+	SRPLimiter             *limiter.Limiter
+	OTTLimiter             *limiter.Limiter
 }
 
 const (
@@ -118,6 +125,8 @@ func NewUserController(
 	userCache *cache2.UserCache,
 	userCacheController *usercache.Controller,
 ) *UserController {
+	srpLimiter := util.NewRateLimiter("100-H")
+	ottLimiter := util.NewRateLimiter("100-H")
 	return &UserController{
 		UserRepo:               userRepo,
 		UsageRepo:              usageRepo,
@@ -143,6 +152,8 @@ func NewUserController(
 		HardCodedOTT:           ReadHardCodedOTTFromConfig(),
 		UserCache:              userCache,
 		UserCacheController:    userCacheController,
+		SRPLimiter:             srpLimiter,
+		OTTLimiter:             ottLimiter,
 	}
 }
 
@@ -271,7 +282,7 @@ func (c *UserController) HandleAccountDeletion(ctx *gin.Context, userID int64, l
 		return nil, stacktrace.Propagate(err, "")
 	}
 
-	go c.NotifyAccountDeletion(email, isSubscriptionCancelled)
+	go c.NotifyAccountDeletion(userID, email, isSubscriptionCancelled)
 
 	return &ente.DeleteAccountResponse{
 		IsSubscriptionCancelled: isSubscriptionCancelled,
@@ -280,23 +291,70 @@ func (c *UserController) HandleAccountDeletion(ctx *gin.Context, userID int64, l
 
 }
 
-func (c *UserController) NotifyAccountDeletion(userEmail string, isSubscriptionCancelled bool) {
+func (c *UserController) NotifyAccountDeletion(userID int64, userEmail string, isSubscriptionCancelled bool) {
 	template := AccountDeletedEmailTemplate
 	if !isSubscriptionCancelled {
 		template = AccountDeletedWithActiveSubscriptionEmailTemplate
 	}
+	recoverToken, err2 := c.GetJWTTokenForClaim(&enteJWT.WebCommonJWTClaim{
+		UserID:     userID,
+		ExpiryTime: time.MicrosecondsAfterDays(7),
+		ClaimScope: enteJWT.RestoreAccount.Ptr(),
+		Email:      userEmail,
+	})
+	if err2 != nil {
+		logrus.WithError(err2).Error("failed to generate recover token")
+		return
+	}
+
+	templateData := make(map[string]interface{})
+	templateData["AccountRecoveryLink"] = fmt.Sprintf("%s/users/recover-account?token=%s", "https://api.ente.io", recoverToken)
 	err := email.SendTemplatedEmail([]string{userEmail}, "ente", "team@ente.io",
-		AccountDeletedEmailSubject, template, nil, nil)
+		AccountDeletedEmailSubject, template, templateData, nil)
 	if err != nil {
 		logrus.WithError(err).Errorf("Failed to send the account deletion email to %s", userEmail)
 	}
 }
+func (c *UserController) HandleSelfAccountRecovery(ctx *gin.Context, token string) error {
+	jwtToken, err := c.ValidateJWTToken(token, enteJWT.RestoreAccount)
+	if err != nil {
+		return stacktrace.Propagate(ente.NewPermissionDeniedError("invalid token"), fmt.Sprintf("failed to validate jwt token: %s", err.Error()))
+	}
+	if jwtToken.UserID == 0 || jwtToken.Email == "" {
+		return stacktrace.Propagate(ente.NewBadRequestError(&ente.ApiErrorParams{
+			Message: "Invalid token",
+		}), "userID or email is empty")
+	}
+	if jwtToken.ExpiryTime < time.Microseconds() {
+		return stacktrace.Propagate(ente.NewBadRequestError(&ente.ApiErrorParams{
+			Message: "Token expired",
+		}), "")
+	}
+	// check if account is already recovered
+	if user, userErr := c.UserRepo.Get(jwtToken.UserID); userErr == nil {
+		if strings.EqualFold(user.Email, jwtToken.Email) {
+			logrus.WithField("userID", jwtToken.UserID).Error("account is already recovered")
+			return nil
+		}
+	}
+	return c.HandleAccountRecovery(ctx, ente.RecoverAccountRequest{
+		UserID:  jwtToken.UserID,
+		EmailID: jwtToken.Email,
+	})
+}
 
 func (c *UserController) HandleAccountRecovery(ctx *gin.Context, req ente.RecoverAccountRequest) error {
+	logger := logrus.WithFields(logrus.Fields{
+		"req_id":  ctx.GetString("req_id"),
+		"req_ctx": "account_recovery",
+		"email":   req.EmailID,
+		"userID":  req.UserID,
+	})
+	logger.Info("initiating account recovery")
 	_, err := c.UserRepo.Get(req.UserID)
 	if err == nil {
 		return stacktrace.Propagate(ente.NewBadRequestError(&ente.ApiErrorParams{
-			Message: "User ID is linked to undeleted account",
+			Message: "account is already recovered or userID is linked to another active account",
 		}), "")
 	}
 	if !errors.Is(err, ente.ErrUserDeleted) {
@@ -304,6 +362,9 @@ func (c *UserController) HandleAccountRecovery(ctx *gin.Context, req ente.Recove
 	}
 	// check if the user keyAttributes are still available
 	if _, keyErr := c.UserRepo.GetKeyAttributes(req.UserID); keyErr != nil {
+		if errors.Is(keyErr, sql.ErrNoRows) {
+			return stacktrace.Propagate(ente.NewBadRequestWithMessage("account can not be recovered now"), "")
+		}
 		return stacktrace.Propagate(keyErr, "keyAttributes missing? Account can not be recovered")
 	}
 	email := strings.ToLower(req.EmailID)

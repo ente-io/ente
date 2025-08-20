@@ -10,62 +10,115 @@
  * is a needed for fast refresh to work.
  */
 
-import type { Collection } from "ente-media/collection";
-import type { FamilyData } from "ente-new/photos/services/user-details";
-import type { User } from "ente-shared/user/types";
+import { getUserRecoveryKey } from "ente-accounts/services/recovery-key";
+import log from "ente-base/log";
+import { type Collection } from "ente-media/collection";
+import { type EnteFile } from "ente-media/file";
+import { type CollectionOp } from "ente-new/photos/components/SelectedFileOptions";
+import {
+    addToCollection,
+    moveFromCollection,
+    moveToCollection,
+    restoreToCollection,
+} from "ente-new/photos/services/collection";
+import { createUncategorizedCollection } from "../../services/collection";
+import { PseudoCollectionID } from "../../services/collection-summary";
 
-export const constructUserIDToEmailMap = (
-    user: User,
-    collections: Collection[],
-): Map<number, string> => {
-    const userIDToEmailMap = new Map<number, string>();
-    collections.forEach((item) => {
-        const { owner, sharees } = item;
-        if (user.id !== owner.id && owner.email) {
-            userIDToEmailMap.set(owner.id, owner.email);
-        }
-        // Not sure about its nullability currently, revisit after auditing the
-        // type for Collection.
-        //
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (sharees) {
-            sharees.forEach((item) => {
-                if (item.id !== user.id)
-                    userIDToEmailMap.set(item.id, item.email);
-            });
-        }
-    });
-    return userIDToEmailMap;
+/**
+ * Ensure that the keys in local storage are not malformed by verifying that the
+ * recoveryKey can be decrypted with the masterKey.
+ *
+ * This is not meant to be bullet proof, but more like an extra sanity check.
+ *
+ * @returns `true` if the sanity check passed, otherwise `false`. Since failure
+ * is not expected, the caller should {@link logout} on `false` to avoid
+ * continuing with an unexpected local state.
+ */
+export const validateKey = async () => {
+    try {
+        await getUserRecoveryKey();
+        return true;
+    } catch (e) {
+        log.warn("Failed to validate key" /*, caller will logout */, e);
+        return false;
+    }
 };
 
 /**
- * Create a list of emails that are shown as suggestions to the user when they
- * are trying to share albums with specific users.
+ * Return the {@link Collection} (from amongst {@link collections}) with the
+ * given {@link collectionSummaryID}.
+ *
+ * As a special case, if the given {@link collectionSummaryID} is the ID of the
+ * placeholder uncategorized collection, create a new uncategorized collection
+ * and then return it.
+ *
+ * This is used in the context of the collection summary, so one of the two
+ * cases must be true.
  */
-export const createShareeSuggestionEmails = (
-    user: User,
+export const findCollectionCreatingUncategorizedIfNeeded = async (
     collections: Collection[],
-    familyData: FamilyData | undefined,
-): string[] => {
-    const emails = collections
-        .map(({ owner, sharees }) => {
-            if (owner.email && owner.id != user.id) {
-                return [owner.email];
-            } else {
-                // Not sure about its nullability currently, revisit after auditing the
-                // type for Collection.
-                //
-                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-                return (sharees ?? []).map((sharee) => sharee.email);
-            }
-        })
-        .flat();
+    collectionSummaryID: number,
+): Promise<Collection> =>
+    collectionSummaryID == PseudoCollectionID.uncategorizedPlaceholder
+        ? createUncategorizedCollection()
+        : // Null assert since the collection selector should only
+          // show "selectable" normalCollectionSummaries.
+          //
+          // See: [Note: Picking from selectable collection summaries].
+          collections.find(({ id }) => id == collectionSummaryID)!;
 
-    // Add family members.
-    if (familyData) {
-        const family = familyData.members.map((member) => member.email);
-        emails.push(...family);
+/**
+ * Perform a "collection operation" on the selected file(s).
+ *
+ * @param op The {@link CollectionOp} to perform, e.g. "add", "restore".
+ *
+ * @param selectedCollection The existing or new collection selected by the
+ * user. This serves as the target of the operation.
+ *
+ * @param selectedUserFiles The files selected by the user, on which the
+ * operation should be performed. Currently these need to all belong to the
+ * user.
+ *
+ * @param sourceCollectionID In the case of a "move", the operation is always
+ * expected to happen in the context of an existing collection, which serves as
+ * the source collection for the move. In such a case, the caller should provide
+ * this argument, using the collection ID of the collection in which the
+ * selection occurred.
+ *
+ * [Note: Add and move of non-user files]
+ *
+ * Currently, all {@link selectedUserFiles} need to belong to the user. This is
+ * because adds and move cannot be performed on remote across ownership
+ * boundaries directly.
+ *
+ * Enhancement: The mobile client has support for adding and moving such files.
+ * It does so by creating a copy, but using hash checks to avoid a copy if not
+ * needed. Implement these. This is a bit non-trivial since the mobile client
+ * then also adds various heuristics to omit the display of the "doubled" files
+ * in the all section etc.
+ */
+export const performCollectionOp = async (
+    op: CollectionOp,
+    selectedCollection: Collection,
+    selectedUserFiles: EnteFile[],
+    sourceCollectionID: number | undefined,
+): Promise<void> => {
+    switch (op) {
+        case "add":
+            await addToCollection(selectedCollection, selectedUserFiles);
+            break;
+        case "move":
+            await moveFromCollection(
+                sourceCollectionID!,
+                selectedCollection,
+                selectedUserFiles,
+            );
+            break;
+        case "restore":
+            await restoreToCollection(selectedCollection, selectedUserFiles);
+            break;
+        case "unhide":
+            await moveToCollection(selectedCollection, selectedUserFiles);
+            break;
     }
-
-    return [...new Set(emails.filter((email) => email != user.email))];
 };

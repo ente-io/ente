@@ -155,19 +155,19 @@
     bottom: 0px;
     right: 0;
     margin: 20px 24px;
-    padding-inline: 16px;
     border-radius: 3px;
     /* Same opacity as the other controls. */
     color: rgb(255 255 255 / 0.85);
     background-color: rgb(0 0 0 / 0.2);
     backdrop-filter: blur(10px);
-    text-align: right;
     max-width: 375px;
     max-height: 200px;
     p {
+        margin: 12px 17px;
         /* 4 lines max, ellipsis on overflow. */
         word-break: break-word;
         overflow: hidden;
+        text-overflow: ellipsis;
         display: -webkit-box;
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 4;
@@ -354,10 +354,10 @@ media-settings-menu {
 /* Hide the caption when hovering over the video controls (and when the settings
    menu is open) since they occupy similar real estate as the caption. */
 body:has(
-        media-time-range[mediapreviewtime],
-        media-controller:not([mediapaused]),
-        media-settings-menu:not([hidden])
-    ) {
+    media-time-range[mediapreviewtime],
+    media-controller:not([mediapaused]),
+    media-settings-menu:not([hidden])
+) {
     & .pswp-ente .pswp__caption {
         display: none;
     }

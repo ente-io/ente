@@ -3,9 +3,9 @@
  * needs to be in a separate file to allow fast refresh.
  */
 
+import type { EmailOrSRPVerificationResponse } from "ente-accounts/services/user";
 import { useModalVisibility } from "ente-base/components/utils/modal";
 import { useCallback, useMemo, useRef } from "react";
-import type { UserVerificationResponse } from "../../services/user";
 import type { SecondFactorType } from "../SecondFactorChoice";
 
 /**
@@ -39,7 +39,7 @@ export const useSecondFactorChoiceIfNeeded = () => {
     );
 
     const userVerificationResultAfterResolvingSecondFactorChoice = useCallback(
-        async (response: UserVerificationResponse) => {
+        async (response: EmailOrSRPVerificationResponse) => {
             const {
                 twoFactorSessionID: _twoFactorSessionIDV1,
                 twoFactorSessionIDV2: _twoFactorSessionIDV2,

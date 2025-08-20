@@ -44,8 +44,7 @@ jobs:
                   # If triggered by a tag, checkout photosd-$tag from the source
                   # repository. Otherwise checkout $source (default: "main").
                   repository: ente-io/ente
-                  ref:
-                      "${{ startsWith(github.ref, 'refs/tags/v') &&
+                  ref: "${{ startsWith(github.ref, 'refs/tags/v') &&
                       format('photosd-{0}', github.ref_name) || ( inputs.source
                       || 'main' ) }}"
 
@@ -110,9 +109,13 @@ jobs:
               env:
                   # macOS notarization credentials key details
                   APPLE_ID: ${{ secrets.APPLE_ID }}
-                  APPLE_APP_SPECIFIC_PASSWORD:
-                      ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+                  APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
                   APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+                  # Windows Azure Trusted Signing related values
+                  # https://www.electron.build/code-signing-win#using-azure-trusted-signing-beta
+                  AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+                  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+                  AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
                   # Default is "draft", but since our nightly builds update
                   # existing pre-releases, set this to "prerelease".
                   EP_PRE_RELEASE: true

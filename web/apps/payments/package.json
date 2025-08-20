@@ -9,15 +9,15 @@
         "preview": "vite preview --port 3001"
     },
     "dependencies": {
-        "@stripe/stripe-js": "^1.17.0",
+        "@stripe/stripe-js": "1.54.2",
         "react": "^19.1.0",
         "react-dom": "^19.1.0"
     },
     "devDependencies": {
-        "@types/react": "^19.1.0",
-        "@types/react-dom": "^19.1.1",
-        "@vitejs/plugin-react": "^4.3.4",
+        "@types/react": "^19.1.8",
+        "@types/react-dom": "^19.1.6",
+        "@vitejs/plugin-react": "^4.6.0",
         "ente-build-config": "*",
-        "vite": "^6.2.5"
+        "vite": "^7.0.0"
     }
 }

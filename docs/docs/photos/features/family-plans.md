@@ -1,7 +1,6 @@
 ---
 title: Family plans
-description:
-    Share your Ente Photos plan with your family members with no extra cost
+description: Share your Ente Photos plan with your family members with no extra cost
 ---
 
 # Family plans
@@ -24,19 +23,19 @@ In brief,
 
 ## Storage Limits
 
-If you're an admin of a family, you will be able to set storage limits for the 
+If you're an admin of a family, you will be able to set storage limits for the
 members in your family plan.
 
-In brief, 
+In brief,
 
-- For example, once you set a limit of 10GB for a member, their Storage
-  quota for uploading photos will be limited to 10GB.
+- For example, once you set a limit of 10GB for a member, their Storage quota
+  for uploading photos will be limited to 10GB.
 
-- Once the invited member accepts the Family invite, you will be able to see 
-  an edit icon in the Members List. Click on it to setup a family limit.
+- Once the invited member accepts the Family invite, you will be able to see an
+  edit icon in the Members List. Click on it to setup a family limit.
 
 - If the admin has set a limit for any user, that limit value will be prefilled
-  in the input box. 
+  in the input box.
 
-- If you want to remove any storage limit from a members account, you 
-  can click on the "Remove Limit" and they can upload photos without any limit. 
+- If you want to remove any storage limit from a members account, you can click
+  on the "Remove Limit" and they can upload photos without any limit.

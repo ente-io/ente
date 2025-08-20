@@ -21,17 +21,23 @@ export const apiOrigin = async () =>
  *
  * @param queryParams An optional object containing query params. This is
  * appended to the generated URL after funneling it through
- * {@link URLSearchParams}.
+ * {@link URLSearchParams}. Each value can be a `string` or `number` or
+ * `boolean` - all of which are converted to `string`s by using `toString`
+ *
+ * > The boolean stringification yields "true" or "false".
  *
  * @returns path prefixed by {@link apiOrigin}.
  */
 export const apiURL = async (
     path: string,
-    queryParams?: Record<string, string>,
+    queryParams?: Record<string, string | number | boolean>,
 ) => {
     let url = (await apiOrigin()) + path;
     if (queryParams) {
-        const params = new URLSearchParams(queryParams);
+        const stringQP = Object.fromEntries(
+            Object.entries(queryParams).map(([k, v]) => [k, v.toString()]),
+        );
+        const params = new URLSearchParams(stringQP);
         url = `${url}?${params.toString()}`;
     }
     return url;
@@ -76,6 +82,13 @@ export const uploaderOrigin = async () =>
     (await customAPIOrigin()) ?? "https://uploader.ente.io";
 
 /**
+ * A static build time constant that is `true` if {@link albumsAppOrigin} has
+ * been customized.
+ */
+export const isCustomAlbumsAppOrigin =
+    !!process.env.NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT;
+
+/**
  * Return the origin that serves public albums.
  *
  * Defaults to our production instance, "https://albums.ente.io", but can be
@@ -84,3 +97,9 @@ export const uploaderOrigin = async () =>
  */
 export const albumsAppOrigin = () =>
     process.env.NEXT_PUBLIC_ENTE_ALBUMS_ENDPOINT ?? "https://albums.ente.io";
+
+/**
+ * Return true if this build is meant to only serve public albums.
+ */
+export const shouldOnlyServeAlbumsApp =
+    !!process.env.NEXT_PUBLIC_ENTE_ONLY_SERVE_ALBUMS_APP;

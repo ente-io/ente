@@ -1,7 +1,6 @@
-import type { Theme } from "@mui/material";
+import type { Theme, TypographyVariantsOptions } from "@mui/material";
 import { createTheme } from "@mui/material";
-import type { Components } from "@mui/material/styles/components";
-import type { TypographyOptions } from "@mui/material/styles/createTypography";
+import type { Components } from "@mui/material/styles";
 import type { AppName } from "ente-base/app";
 
 const getTheme = (appName: AppName): Theme => {
@@ -126,7 +125,12 @@ const getColors = (appName: AppName) => ({
         },
     },
     ...{
-        accent: appName == "auth" ? _colors.accentAuth : _colors.accentPhotos,
+        accent:
+            appName == "auth"
+                ? _colors.accentAuth
+                : appName == "locker"
+                  ? _colors.accentLocker
+                  : _colors.accentPhotos,
     },
 });
 
@@ -140,6 +144,7 @@ const getColors = (appName: AppName) => ({
 const _colors = {
     accentPhotos: { dark: "#00b33c", main: "#1db954", light: "#01de4d" },
     accentAuth: { dark: "#8e0fcb", main: "#9610d6", light: "#8e2de2" },
+    accentLocker: { dark: "#615bff", main: "#5ba8ff", light: "#5bf9ff" },
     fixed: {
         white: "#fff",
         black: "#000",
@@ -411,7 +416,7 @@ const getColorSchemes = (colors: ReturnType<typeof getColors>) => ({
  * to bother with the light variant (though for consistency of specifying every
  * value, we alias it the same weight as regular, 500).
  */
-const typography: TypographyOptions = {
+const typography: TypographyVariantsOptions = {
     fontFamily: '"Inter Variable", sans-serif',
     fontWeightLight: 500,
     fontWeightRegular: 500 /* CSS baseline reset sets this as the default */,
@@ -500,13 +505,26 @@ const components: Components = {
 
     MuiDialog: {
         defaultProps: {
-            // [Note: Overzealous Chrome? Complicated ARIA?]
+            // [Note: Workarounds for unactionable ARIA warnings]
             //
-            // This is required to prevent console errors about aria-hiding a
-            // focused button when the dialog is closed.
+            // This is required to prevent console warnings about aria-hiding a
+            // focused button when the dialog is closed. e.g. Select a file,
+            // delete it. On closing the confirmation dialog, the error appears.
             //
-            // - https://github.com/mui/material-ui/issues/43106#issuecomment-2314809028
+            // The default is supposed to already be false, but setting this
+            // again seems to help. But sometimes we need to set this to `true`
+            // to prevent the warning. And sometimes neither helps, and we need
+            // to add random setTimeouts.
+            //
+            // Angular, Bootstrap, MUI, shadcn: all seem to be emitting these
+            // warning (just search the web). I'm don't know if this is just
+            // someone at Chrome deciding to emit spurious warnings without
+            // understanding the flow, or if none of these libraries have
+            // managed to implement the ARIA spec properly yet (which says more
+            // about the spec than about the libraries).
+            //
             // - https://issues.chromium.org/issues/392121909
+            // - https://github.com/mui/material-ui/issues/43106#issuecomment-2314809028
             closeAfterTransition: false,
         },
         styleOverrides: {
@@ -552,11 +570,26 @@ const components: Components = {
     MuiPaper: {
         styleOverrides: {
             root: {
-                // MUI applies a semi-transparent background image for elevation
-                // in dark mode. Remove it to match background for our designs.
-                backgroundImage: "none",
-                // Use our paper shadow.
-                boxShadow: "var(--mui-palette-boxShadow-paper)",
+                variants: [
+                    {
+                        // Use our "paper" shadow for elevated Paper.
+                        props: { variant: "elevation" },
+                        style: {
+                            // MUI applies a semi-transparent background image
+                            // for elevation in dark mode. Remove it to match
+                            // background for our designs.
+                            backgroundImage: "none",
+                            // Use our paper shadow.
+                            boxShadow: "var(--mui-palette-boxShadow-paper)",
+                        },
+                    },
+                    {
+                        // Undo the effects of variant "elevation" case above
+                        // case when elevation is 0.
+                        props: { elevation: 0 },
+                        style: { boxShadow: "none" },
+                    },
+                ],
             },
         },
     },
@@ -682,11 +715,8 @@ const components: Components = {
                         props: { color: "secondary" },
                         style: { color: "var(--mui-palette-stroke-muted)" },
                     },
-                    {
-                        props: { color: "disabled" },
-                        style: { color: "var(--mui-palette-stroke-faint)" },
-                    },
                 ],
+                "&.Mui-disabled": { color: "var(--mui-palette-stroke-faint)" },
             },
         },
     },
@@ -708,6 +738,13 @@ const components: Components = {
                 // notification popups).
                 borderRadius: "8px",
             },
+        },
+    },
+
+    MuiAlert: {
+        defaultProps: {
+            // Use the outlined variant by default (instead of "standard").
+            variant: "outlined",
         },
     },
 };
@@ -733,3 +770,8 @@ export const authTheme = getTheme("auth");
  * This is the same as the dark theme for the photos app.
  */
 export const castTheme = getTheme("cast");
+
+/**
+ * The MUI {@link Theme} to use for the locker app.
+ */
+export const lockerTheme = getTheme("locker");

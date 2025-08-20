@@ -1,23 +1,22 @@
-import { TwoFactorAuthorizationResponse } from "ente-accounts/services/user";
-import { clientPackageName, isDesktop } from "ente-base/app";
-import { sharedCryptoWorker } from "ente-base/crypto";
 import {
-    encryptToB64,
-    generateEncryptionKey,
-} from "ente-base/crypto/libsodium";
+    saveKeyAttributes,
+    updateSavedLocalUser,
+} from "ente-accounts/services/accounts-db";
+import {
+    resetSavedLocalUserTokens,
+    TwoFactorAuthorizationResponse,
+} from "ente-accounts/services/user";
+import { clientPackageName, isDesktop } from "ente-base/app";
+import { encryptBox, generateKey } from "ente-base/crypto";
 import {
     authenticatedRequestHeaders,
     ensureOk,
     HTTPError,
     publicRequestHeaders,
 } from "ente-base/http";
-import log from "ente-base/log";
 import { apiURL } from "ente-base/origins";
-import { getRecoveryKey } from "ente-shared/crypto/helpers";
-import HTTPService from "ente-shared/network/HTTPService";
-import { getData, setData, setLSUser } from "ente-shared/storage/localStorage";
-import { getToken } from "ente-shared/storage/localStorage/helpers";
-import { z } from "zod";
+import { z } from "zod/v4";
+import { getUserRecoveryKey } from "./recovery-key";
 import { unstashRedirect } from "./redirect";
 
 /**
@@ -106,26 +105,17 @@ export const openPasskeyVerificationURL = ({
  * see and their manage their passkeys.
  */
 export const openAccountsManagePasskeysPage = async () => {
-    // Check if the user has passkey recovery enabled
-    const recoveryEnabled = await isPasskeyRecoveryEnabled();
-    if (!recoveryEnabled) {
+    // Check if the user has passkey recovery enabled.
+    const { isPasskeyRecoveryEnabled } = await getTwoFactorRecoveryStatus();
+    if (!isPasskeyRecoveryEnabled) {
         // If not, enable it for them by creating the necessary recovery
         // information to prevent them from getting locked out.
-        const recoveryKey = await getRecoveryKey();
-
-        const resetSecret = await generateEncryptionKey();
-
-        const cryptoWorker = await sharedCryptoWorker();
-        const encryptionResult = await encryptToB64(
+        const resetSecret = await generateKey();
+        const { encryptedData, nonce } = await encryptBox(
             resetSecret,
-            await cryptoWorker.fromHex(recoveryKey),
+            await getUserRecoveryKey(),
         );
-
-        await configurePasskeyRecovery(
-            resetSecret,
-            encryptionResult.encryptedData,
-            encryptionResult.nonce,
-        );
+        await configurePasskeyRecovery(resetSecret, encryptedData, nonce);
     }
 
     // Redirect to the Ente Accounts app where they can view and add and manage
@@ -137,50 +127,47 @@ export const openAccountsManagePasskeysPage = async () => {
     window.open(`${accountsURL}/passkeys?${params.toString()}`);
 };
 
-export const isPasskeyRecoveryEnabled = async () => {
-    try {
-        const token = getToken();
+const TwoFactorRecoveryStatus = z.object({
+    /**
+     * `true` if the passkey recovery setup has been completed.
+     */
+    isPasskeyRecoveryEnabled: z.boolean(),
+});
 
-        const resp = await HTTPService.get(
-            await apiURL("/users/two-factor/recovery-status"),
-            {},
-            { "X-Auth-Token": token },
-        );
-
-        if (typeof resp.data == "undefined") {
-            throw Error("request failed");
-        }
-
-        return resp.data.isPasskeyRecoveryEnabled as boolean;
-    } catch (e) {
-        log.error("failed to get passkey recovery status", e);
-        throw e;
-    }
+/**
+ * Obtain the second factor recovery status from remote.
+ */
+export const getTwoFactorRecoveryStatus = async () => {
+    const res = await fetch(await apiURL("/users/two-factor/recovery-status"), {
+        headers: await authenticatedRequestHeaders(),
+    });
+    ensureOk(res);
+    return TwoFactorRecoveryStatus.parse(await res.json());
 };
 
+/**
+ * Allow the user to bypass their passkeys by saving the provided recovery
+ * credentials on remote.
+ */
 const configurePasskeyRecovery = async (
     secret: string,
     userSecretCipher: string,
     userSecretNonce: string,
-) => {
-    try {
-        const token = getToken();
-
-        const resp = await HTTPService.post(
+) =>
+    ensureOk(
+        await fetch(
             await apiURL("/users/two-factor/passkeys/configure-recovery"),
-            { secret, userSecretCipher, userSecretNonce },
-            undefined,
-            { "X-Auth-Token": token },
-        );
-
-        if (typeof resp.data == "undefined") {
-            throw Error("request failed");
-        }
-    } catch (e) {
-        log.error("failed to configure passkey recovery", e);
-        throw e;
-    }
-};
+            {
+                method: "POST",
+                headers: await authenticatedRequestHeaders(),
+                body: JSON.stringify({
+                    secret,
+                    userSecretCipher,
+                    userSecretNonce,
+                }),
+            },
+        ),
+    );
 
 /**
  * Fetch an Ente Accounts specific JWT token.
@@ -232,11 +219,10 @@ export const passkeySessionExpiredErrorMessage = "Passkey session has expired";
 export const checkPasskeyVerificationStatus = async (
     sessionID: string,
 ): Promise<TwoFactorAuthorizationResponse | undefined> => {
-    const url = await apiURL("/users/two-factor/passkeys/get-token");
-    const params = new URLSearchParams({ sessionID });
-    const res = await fetch(`${url}?${params.toString()}`, {
-        headers: publicRequestHeaders(),
-    });
+    const res = await fetch(
+        await apiURL("/users/two-factor/passkeys/get-token", { sessionID }),
+        { headers: publicRequestHeaders() },
+    );
     if (!res.ok) {
         if (res.status == 404 || res.status == 410)
             throw new Error(passkeySessionExpiredErrorMessage);
@@ -259,12 +245,36 @@ export const checkPasskeyVerificationStatus = async (
 export const saveCredentialsAndNavigateTo = async (
     response: TwoFactorAuthorizationResponse,
 ) => {
-    // This method somewhat duplicates `saveCredentialsAndNavigateTo` in the
-    // /passkeys/finish page.
+    // [Note: Ending the passkey flow]
+    //
+    // The implementation of this function is similar to that of the
+    // `saveQueryCredentialsAndNavigateTo` on the "/passkeys/finish" page.
+    //
+    // This one, `saveCredentialsAndNavigateTo`, is used when the user presses
+    // the check verification status button on the page that triggered the
+    // passkey flow (when they're using the desktop app).
+    //
+    // The other one, `saveQueryCredentialsAndNavigateTo`, is used when the user
+    // goes through the passkey flow in the browser itself (when they are using
+    // the web app).
+
+    clearInflightPasskeySessionID();
+
     const { id, encryptedToken, keyAttributes } = response;
 
-    await setLSUser({ ...getData("user"), encryptedToken, id });
-    setData("keyAttributes", keyAttributes!);
+    await resetSavedLocalUserTokens(id, encryptedToken);
+    updateSavedLocalUser({ passkeySessionID: undefined });
+    saveKeyAttributes(keyAttributes);
 
     return unstashRedirect() ?? "/credentials";
+};
+
+/**
+ * Remove the inflight passkey session ID, if any, present in session storage.
+ *
+ * This should be called whenever we get back control from the passkey app to
+ * clean up after ourselves.
+ */
+export const clearInflightPasskeySessionID = () => {
+    sessionStorage.removeItem("inflightPasskeySessionID");
 };

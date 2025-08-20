@@ -12,20 +12,20 @@ import { Ellipsized2LineTypography } from "ente-base/components/Typography";
 import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { CollectionsSortOptions } from "ente-new/photos/components/CollectionsSortOptions";
 import {
-    IMAGE_CONTAINER_MAX_WIDTH,
-    MIN_COLUMNS,
-} from "ente-new/photos/components/FileList";
-import {
     BarItemTile,
     ItemCard,
     TileTextOverlay,
 } from "ente-new/photos/components/Tiles";
 import { FocusVisibleUnstyledButton } from "ente-new/photos/components/UnstyledButton";
+import {
+    thumbnailLayoutMinColumns,
+    thumbnailMaxWidth,
+} from "ente-new/photos/components/utils/thumbnail-grid-layout";
 import type {
     CollectionSummary,
-    CollectionSummaryType,
+    CollectionSummaryAttribute,
     CollectionsSortBy,
-} from "ente-new/photos/services/collection/ui";
+} from "ente-new/photos/services/collection-summary";
 import type { Person } from "ente-new/photos/services/ml/people";
 import { t } from "i18next";
 import React, {
@@ -146,7 +146,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     >(
         (ref) => {
             listContainerRef.current = ref;
-            if (!ref) return;
+            if (!ref) return undefined;
 
             // Listen for scrolls and resize.
             ref.addEventListener("scroll", updateScrollState);
@@ -300,7 +300,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
 
 const BarWrapper = styled("div")`
     padding-inline: 24px;
-    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
+    @media (max-width: ${thumbnailMaxWidth * thumbnailLayoutMinColumns}px) {
         padding-inline: 4px;
     }
     margin-block-end: 16px;
@@ -528,7 +528,7 @@ const CardText: React.FC<React.PropsWithChildren> = ({ children }) => (
 );
 
 interface CollectionBarCardIconProps {
-    attributes: CollectionSummaryType[];
+    attributes: Set<CollectionSummaryAttribute>;
 }
 
 const CollectionBarCardIcon: React.FC<CollectionBarCardIconProps> = ({
@@ -538,18 +538,18 @@ const CollectionBarCardIcon: React.FC<CollectionBarCardIconProps> = ({
     // will be true simultaneously even in the rarest of cases (a pinned and
     // shared album that is also archived), and there is enough space for 3.
     <CollectionBarCardIcon_>
-        {attributes.includes("favorites") && <FavoriteRoundedIcon />}
-        {attributes.includes("pinned") && (
+        {attributes.has("userFavorites") && <FavoriteRoundedIcon />}
+        {attributes.has("pinned") && (
             // Need && to override the 20px set in the container.
             <PushPinIcon sx={{ "&&": { fontSize: "18px" } }} />
         )}
-        {(attributes.includes("outgoingShare") ||
-            attributes.includes("incomingShareViewer") ||
-            attributes.includes("incomingShareCollaborator")) && <PeopleIcon />}
-        {attributes.includes("sharedOnlyViaLink") && <LinkIcon />}
-        {attributes.includes("archived") && (
-            <ArchiveIcon sx={{ opacity: 0.48 }} />
-        )}
+        {attributes.has("shared") &&
+            (attributes.has("sharedOnlyViaLink") ? (
+                <LinkIcon />
+            ) : (
+                <PeopleIcon />
+            ))}
+        {attributes.has("archived") && <ArchiveIcon sx={{ opacity: 0.48 }} />}
     </CollectionBarCardIcon_>
 );
 

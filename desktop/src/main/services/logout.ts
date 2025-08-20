@@ -3,6 +3,7 @@ import log from "../log";
 import { clearPendingVideoResults } from "../stream";
 import { clearStores } from "./store";
 import { watchReset } from "./watch";
+import { terminateUtilityProcesses } from "./workers";
 import { clearOpenZipCache } from "./zip";
 
 /**
@@ -35,5 +36,10 @@ export const logout = (watcher: FSWatcher) => {
         clearOpenZipCache();
     } catch (e) {
         ignoreError("zip cache", e);
+    }
+    try {
+        terminateUtilityProcesses();
+    } catch (e) {
+        ignoreError("utility processes", e);
     }
 };

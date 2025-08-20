@@ -1,30 +1,50 @@
-import { decryptBlob } from "ente-base/crypto";
+import { ensureLocalUser } from "ente-accounts/services/user";
+import { isDesktop } from "ente-base/app";
+import { assertionFailed } from "ente-base/assert";
+import { decryptBlobBytes, encryptBlob } from "ente-base/crypto";
 import type { EncryptedBlob } from "ente-base/crypto/types";
-import {
-    retryEnsuringHTTPOkOr4xx,
-    type PublicAlbumsCredentials,
-} from "ente-base/http";
+import { ensureElectron } from "ente-base/electron";
+import { isHTTP4xxError, type PublicAlbumsCredentials } from "ente-base/http";
+import { getKV, getKVB, getKVN, setKV } from "ente-base/kv";
 import log from "ente-base/log";
-import type { Electron } from "ente-base/types/ipc";
-import type { EnteFile } from "ente-media/file";
+import { apiURL } from "ente-base/origins";
+import { ensureAuthToken } from "ente-base/token";
+import { uniqueFilesByID } from "ente-gallery/utils/file";
+import { fileLogID, type EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
-import { settingsSnapshot } from "ente-new/photos/services/settings";
+import { updateFilePublicMagicMetadata } from "ente-new/photos/services/file";
+import { savedCollectionFiles } from "ente-new/photos/services/photos-fdb";
+import { savedTrashItemFileIDs } from "ente-new/photos/services/trash";
 import { gunzip, gzip } from "ente-new/photos/utils/gzip";
+import { randomSample } from "ente-utils/array";
 import { ensurePrecondition } from "ente-utils/ensure";
-import { z } from "zod";
+import { wait } from "ente-utils/promise";
+import { z } from "zod/v4";
 import {
+    initiateGenerateHLS,
     readVideoStream,
     videoStreamDone,
-    writeVideoStream,
+    type GenerateHLSResult,
 } from "../utils/native-stream";
-import { downloadManager } from "./download";
+import { downloadManager, isNetworkDownloadError } from "./download";
 import {
     fetchFileData,
     fetchFilePreviewData,
-    getFilePreviewDataUploadURL,
     putVideoData,
+    syncUpdatedFileDataFileIDs,
 } from "./file-data";
-import type { UploadItem } from "./upload";
+import {
+    fileSystemUploadItemIfUnchanged,
+    type FileSystemUploadItem,
+    type ProcessableUploadItem,
+    type TimestampedFileSystemUploadItem,
+} from "./upload";
+
+export type HLSGenerationEnabledStatus = "processing" | "idle";
+
+export type HLSGenerationStatus =
+    | { enabled: false }
+    | { enabled: true; status?: HLSGenerationEnabledStatus };
 
 interface VideoProcessingQueueItem {
     /**
@@ -33,10 +53,18 @@ interface VideoProcessingQueueItem {
      */
     file: EnteFile;
     /**
-     * The contents of the {@link file} as the newly uploaded {@link UploadItem}.
+     * The {@link TimestampedFileSystemUploadItem} when available for the newly
+     * uploaded {@link file}.
+     *
+     * It will be present when this queue item was enqueued during a upload from
+     * the current client. If present, this serves as an optimization allowing
+     * us to directly read the file off the user's file system.
      */
-    uploadItem: UploadItem;
+    timestampedUploadItem?: TimestampedFileSystemUploadItem;
 }
+
+const idleWaitInitial = 10 * 1000; /* 10 sec */
+const idleWaitMax = idleWaitInitial * 2 ** 6; /* 640 sec */
 
 /**
  * Internal in-memory state shared by the functions in this module.
@@ -45,13 +73,59 @@ interface VideoProcessingQueueItem {
  */
 class VideoState {
     /**
-     * Queue of videos waiting to be processed.
+     * `true` if the generation of HLS streams has been enabled on this client.
      */
-    videoProcessingQueue: VideoProcessingQueueItem[] = [];
+    isHLSGenerationEnabled = false;
+    /**
+     * Subscriptions to {@link HLSGenerationStatus} updates attached using
+     * {@link hlsGenerationStatusSubscribe}.
+     */
+    hlsGenerationStatusListeners: (() => void)[] = [];
+    /**
+     * Snapshot of the {@link HLSGenerationStatus} returned by the
+     * {@link hlsGenerationStatusSnapshot} function.
+     */
+    hlsGenerationStatusSnapshot: HLSGenerationStatus | undefined;
+    /**
+     * Value of the {@link status} field in the last
+     * {@link hlsGenerationStatusSnapshot}.
+     */
+    lastEnabledStatus: HLSGenerationEnabledStatus | undefined;
+    /**
+     * Queue of recently uploaded items waiting to be processed.
+     */
+    liveQueue: VideoProcessingQueueItem[] = [];
     /**
      * Active queue processor, if any.
      */
     queueProcessor: Promise<void> | undefined;
+    /**
+     * A promise that the main processing loop waits for in addition to the idle
+     * timeout. Can be resolved using {@link resolveTick}.
+     */
+    tick: Promise<void> | undefined;
+    /**
+     * A function that can be called to resolve {@link tick}.
+     *
+     * See: [Note: Exiting idle wait of processing loop].
+     */
+    resolveTick: (() => void) | undefined;
+    /**
+     * The time to sleep if nothing is pending.
+     *
+     * Goes from {@link idleWaitInitial} to {@link idleWaitMax} in doublings.
+     * Reset back to {@link idleWaitInitial} in case of any activity.
+     */
+    idleWait = idleWaitInitial;
+    /**
+     * `true` if we have synced at least once with remote.
+     *
+     * We use this to gate the processing of the backfill queue to avoid
+     * unnecessarily picking up files that have already been indexed elsewhere
+     * (we'll still check before processing them, but still that's unnecessary
+     * work this flag can save us).
+     */
+    haveSyncedOnce = false;
 }
 
 /**
@@ -71,6 +145,122 @@ export const resetVideoState = () => {
     _state = new VideoState();
 };
 
+/**
+ * A function that can be used to subscribe to updates in the HLS generation
+ * settings and status.
+ *
+ * See: [Note: Snapshots and useSyncExternalStore].
+ */
+export const hlsGenerationStatusSubscribe = (
+    onChange: () => void,
+): (() => void) => {
+    _state.hlsGenerationStatusListeners.push(onChange);
+    return () => {
+        _state.hlsGenerationStatusListeners =
+            _state.hlsGenerationStatusListeners.filter((l) => l != onChange);
+    };
+};
+
+/**
+ * Return the last know, cached {@link HLSGenerationStatus}.
+ *
+ * See also {@link hlsGenerationStatusSubscribe}.
+ *
+ * This function can be safely called even if {@link isHLSGenerationSupported}
+ * is `false` (in such cases, it will always return `undefined`). This is so
+ * that it can be unconditionally called as part of a React hook.
+ *
+ * A return value of `undefined` indicates that the HLS generation subsystem has
+ * not been initialized yet.
+ */
+export const hlsGenerationStatusSnapshot = () =>
+    _state.hlsGenerationStatusSnapshot;
+
+const setHLSGenerationStatusSnapshot = (snapshot: HLSGenerationStatus) => {
+    _state.hlsGenerationStatusSnapshot = snapshot;
+    _state.hlsGenerationStatusListeners.forEach((l) => l());
+};
+
+/**
+ * A variant of {@link setHLSGenerationStatusSnapshot} that only triggers an
+ * update of the snapshot if the enabled state is different from the last known
+ * enabled state.
+ */
+const updateSnapshotIfNeeded = (
+    status: HLSGenerationEnabledStatus | undefined,
+) => {
+    const enabled = _state.isHLSGenerationEnabled;
+    if (enabled && status != _state.lastEnabledStatus) {
+        _state.lastEnabledStatus = status;
+        setHLSGenerationStatusSnapshot({ enabled, status });
+    }
+};
+
+/**
+ * Return `true` if this client is capable of generating HLS streams for
+ * uploaded videos.
+ */
+export const isHLSGenerationSupported = isDesktop;
+
+/**
+ * Initialize the video processing subsystem unless the user has disabled HLS
+ * generation in settings.
+ */
+export const initVideoProcessing = async () => {
+    let enabled = false;
+    if (await savedGenerateHLS()) enabled = true;
+
+    _state.isHLSGenerationEnabled = enabled;
+
+    // Update snapshot to reflect the enabled setting. The status will get
+    // filled in when we tick.
+    setHLSGenerationStatusSnapshot({ enabled });
+};
+
+/**
+ * Return the persisted user preference for HLS generation.
+ */
+const savedGenerateHLS = async () => await getKVB("generateHLS");
+
+/**
+ * Update the persisted user preference for HLS generation.
+ *
+ * Use {@link savedGenerateHLS} to get the persisted value back.
+ */
+const saveGenerateHLS = (enabled: boolean) => setKV("generateHLS", enabled);
+
+/**
+ * Enable or disable (toggle) the HLS generation on this client.
+ *
+ * When HLS generation is enabled, this client will process videos to generate a
+ * streamable variant of them.
+ *
+ * Precondition: {@link isHLSGenerationSupported} must be `true`.
+ */
+export const toggleHLSGeneration = async () => {
+    if (!isHLSGenerationSupported) {
+        assertionFailed();
+        return;
+    }
+
+    const enabled = !_state.isHLSGenerationEnabled;
+
+    // Clear transient fields.
+    _state.lastEnabledStatus = undefined;
+
+    // Update disk.
+    await saveGenerateHLS(enabled);
+    // Update in memory.
+    _state.isHLSGenerationEnabled = enabled;
+
+    // Update snapshot. Right now we only set the enabled setting. The status
+    // will get filled in when we tick.
+    setHLSGenerationStatusSnapshot({ enabled });
+
+    // Wake up the processor if needed.
+    if (enabled) tickNow();
+};
+
 export interface HLSPlaylistData {
     /** A data URL to a HLS playlist that streams the video. */
     playlistURL: string;
@@ -79,6 +269,11 @@ export interface HLSPlaylistData {
     /** The height of the video (px). */
     height: number;
 }
+
+/**
+ * See: [Note: Caching HLS playlist data] for the semantics of "skip".
+ */
+export type HLSPlaylistDataForFile = HLSPlaylistData | "skip" | undefined;
 
 /**
  * Return a HLS playlist that can be used to stream playback of then given video
@@ -104,39 +299,43 @@ export interface HLSPlaylistData {
  *
  * - If a file has a corresponding HLS playlist, then currently there is no
  *   scenario (apart from file deletion, where the playlist also gets deleted)
- *   where the playlist is updated or deleted after being created. There is a
- *   limit to the validity of the presigned chunk URLs within the playlist we
- *   create which we do handle (`createHLSPlaylistItemDataValidity`), but the
- *   original playlist itself does not change. In particular, a positive result
- *   ("this file has a playlist") can be cached indefinitely.
+ *   where the playlist is deleted after being created. There is a limit to the
+ *   validity of the pre-signed chunk URLs within the playlist we create (which
+ *   we do handle, see `createHLSPlaylistItemDataValidity`), but the original
+ *   playlist itself does not change. Updates are technically possible, but
+ *   apart from a misbehaving client, are not expected (and should be no-ops in
+ *   the rare cases they happen, since effectively same playlist should get
+ *   regenerated again). All in all, this means that a positive result ("this
+ *   file has a playlist") can be cached indefinitely.
  *
- * - If a file does not have a HLS playlist, and it is eligible for being
- *   streamed (e.g. it is not too small where the streaming overhead is not
- *   required), then a client (this one, or a different one) can process it at
- *   any arbitrary time. So the negative result ("this file does not have a
+ * - If a file does not have a HLS playlist, it might be because it is not
+ *   eligible for being streamed (e.g. it is already small and in a compatible
+ *   codec). See [Note: Marking files which do not need video processing] for
+ *   more details of this case. In particular, we can cache this state in memory
+ *   indefinitely too, since there isn't a current case where either this
+ *   eligibility can change, or the client gain the ability to handle them
+ *   without restarting.
+ *
+ * - Finally, if a file does not have an HLS playlist but and it is eligible for
+ *   being streamed, then a client (this one, or a different one) can process it
+ *   at any arbitrary time. So the negative result ("this file does not have a
  *   playlist") cannot be cached.
  *
- * So while we can easily cache the first case ("this file has a playlist"), we
- * need to deal with the second case ("this file does not have a playlist") a
- * bit more intricately:
- *
- * - If running in the context of a logged in user (e.g. photos app), we can use
- *   the "/files/data/status-diff" API to be notified of any modifications to
- *   the second case for the user's own files. This status-diff happens during
- *   the regular "sync", and we can use that as a cue to selectively prune cache
- *   entries for the second case (but can otherwise indefinitely cache it).
- *
- * - If the file is a shared file, the status-diff will not return it. And if
- *   we're not running in the context of a logged in user (e.g. the public
- *   albums app), then there is no status-diff to do. For these two scenarios,
- *   we thus mark the cached values as "transient" and always recheck for a
- *   playlist when opening the slide.
+ * So while we can easily cache the first case ("this file has a playlist") and
+ * second case ("this file doesn't need a streaming variant"), we need to deal
+ * with the third case ("this file does not have a playlist") by marking the
+ * cached values as "transient" and always recheck for a playlist when opening
+ * the slide.
  */
 export const hlsPlaylistDataForFile = async (
     file: EnteFile,
     publicAlbumsCredentials?: PublicAlbumsCredentials,
-): Promise<HLSPlaylistData | undefined> => {
+): Promise<HLSPlaylistDataForFile> => {
     ensurePrecondition(file.metadata.fileType == FileType.video);
+
+    if (file.pubMagicMetadata?.data.sv == 1) {
+        return "skip";
+    }
 
     const playlistFileData = await fetchFileData(
         "vid_preview",
@@ -150,14 +349,7 @@ export const hlsPlaylistDataForFile = async (
         playlist: playlistTemplate,
         width,
         height,
-    } = await decryptPlaylistJSON(
-        // See: [Note: strict mode migration]
-        //
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        playlistFileData,
-        file,
-    );
+    } = await decryptPlaylistJSON(playlistFileData, file);
 
     // A playlist format the current client does not understand.
     if (type != "hls_video") return undefined;
@@ -281,7 +473,7 @@ const decryptPlaylistJSON = async (
     encryptedPlaylist: EncryptedBlob,
     file: EnteFile,
 ) => {
-    const decryptedBytes = await decryptBlob(encryptedPlaylist, file.key);
+    const decryptedBytes = await decryptBlobBytes(encryptedPlaylist, file.key);
     const jsonString = await gunzip(decryptedBytes);
     return PlaylistJSON.parse(JSON.parse(jsonString));
 };
@@ -303,75 +495,404 @@ const blobToDataURL = (blob: Blob) =>
     });
 
 /**
+ * Return the (persistent) {@link Set} containing the ids of the files which
+ * have already been processed for generating their streaming variant.
+ *
+ * {@link savedProcessedVideoFileIDs} and its sibling
+ * {@link savedFailedVideoFileIDs} are mutually exclusive - that is, a file ID
+ * will be present in only one of them at max. We maintain that invariant in the
+ * higher level `mark*` functions when updating either of these persisted sets.
+ *
+ * The data is retrieved from persistent storage (KV DB), where it is stored as
+ * an array.
+ */
+const savedProcessedVideoFileIDs = () =>
+    // See: [Note: Avoiding Zod parsing for large DB arrays]
+    getKV("videoPreviewProcessedFileIDs").then((v) => new Set(v as number[]));
+
+/**
+ * Return the (persistent) {@link Set} containing the ids of the files for which
+ * an attempt to generate a streaming variant failed locally.
+ *
+ * @see also {@link savedProcessedVideoFileIDs}.
+ */
+const savedFailedVideoFileIDs = () =>
+    // See: [Note: Avoiding Zod parsing for large DB arrays]
+    getKV("videoPreviewFailedFileIDs").then((v) => new Set(v as number[]));
+
+/**
+ * Update the persisted set of IDs of files which have already been processed
+ * and have a video preview generated (either on this client, or elsewhere).
+ *
+ * @see also {@link savedProcessedVideoFileIDs}.
+ */
+const saveProcessedVideoFileIDs = (videoFileIDs: Set<number>) =>
+    setKV("videoPreviewProcessedFileIDs", Array.from(videoFileIDs));
+
+/**
+ * Update the persisted set of IDs of files for which attempt to generate a
+ * video preview failed on this client.
+ *
+ * @see also {@link savedProcessedVideoFileIDs}.
+ */
+const saveFailedVideoFileIDs = (videoFileIDs: Set<number>) =>
+    setKV("videoPreviewFailedFileIDs", Array.from(videoFileIDs));
+
+/**
+ * Mark the provided file ID as having been processed to generate a video
+ * preview.
+ *
+ * The mark is persisted locally in IndexedDB (KV DB), so will persist across
+ * app restarts (but not across logouts).
+ *
+ * @see also {@link savedProcessedVideoFileIDs}.
+ */
+const markProcessedVideoFileID = async (fileID: number) => {
+    const savedIDs = await savedProcessedVideoFileIDs();
+    const failedIDs = await savedFailedVideoFileIDs();
+    savedIDs.add(fileID);
+    if (failedIDs.delete(fileID)) await saveFailedVideoFileIDs(failedIDs);
+    await saveProcessedVideoFileIDs(savedIDs);
+};
+
+/**
+ * Mark multiple file IDs as processed. Plural variant of
+ * {@link markProcessedVideoFileID}.
+ */
+const markProcessedVideoFileIDs = async (fileIDs: Set<number>) => {
+    const savedIDs = await savedProcessedVideoFileIDs();
+    const failedIDs = await savedFailedVideoFileIDs();
+    await Promise.all([
+        saveProcessedVideoFileIDs(savedIDs.union(fileIDs)),
+        saveFailedVideoFileIDs(failedIDs.difference(fileIDs)),
+    ]);
+};
+
+/**
+ * Mark the provided file as having failed in a non-transient manner when we
+ * tried processing it to generate a video preview on this client.
+ *
+ * Similar to [Note: Transient and permanent indexing failures], we attempt to
+ * separate failures into two categories - transients, which leave no mark no
+ * the DB so that the file eventually gets retried; and permanent, where we keep
+ * a persistent record of failure so that this client does not go into a loop
+ * reattempting preview generation for the specific unprocessable (to the best
+ * of the current client's ability) item.
+ *
+ * The mark is local only, and will be reset on logout, or if another client
+ * with a different able is able to process it.
+ */
+const markFailedVideoFile = async (file: EnteFile) => {
+    log.info(`Generate HLS for ${fileLogID(file)} | failed`);
+    const failedIDs = await savedFailedVideoFileIDs();
+    failedIDs.add(file.id);
+    await saveFailedVideoFileIDs(failedIDs);
+};
+
+/**
+ * Return the persisted time when we last synced processed file IDs with remote.
+ *
+ * The returned value is an epoch millisecond value suitable to be passed to
+ * {@link syncUpdatedFileDataFileIDs}.
+ */
+const savedSyncLastUpdatedAt = () => getKVN("videoPreviewSyncLastUpdatedAt");
+
+/**
+ * Update the persisted timestamp used for syncing processed file IDs with
+ * remote.
+ *
+ * Use {@link savedSyncLastUpdatedAt} to get the persisted value back.
+ */
+const saveSyncLastUpdatedAt = (lastUpdatedAt: number) =>
+    setKV("videoPreviewSyncLastUpdatedAt", lastUpdatedAt);
+
+/**
+ * Fetch IDs of files from remote that have been processed by other clients
+ * since the last time we checked.
+ */
+const pullProcessedFileIDs = async () =>
+    syncUpdatedFileDataFileIDs(
+        "vid_preview",
+        (await savedSyncLastUpdatedAt()) ?? 0,
+        async ({ fileIDs, lastUpdatedAt }) => {
+            await Promise.all([
+                markProcessedVideoFileIDs(fileIDs),
+                saveSyncLastUpdatedAt(lastUpdatedAt),
+            ]);
+        },
+    );
+
+/**
+ * Remove any saved entries for file IDs which were previously in trash but now
+ * have been permanently deleted.
+ *
+ * This is called when processing the trash diff. It gives us a hook to clear
+ * these IDs from our video processing related local state.
+ *
+ * See: [Note: Pruning stale status-diff entries]
+ *
+ * It is a no-op when we're running in the context of the web app (since it
+ * doesn't currently process videos, so doesn't need to keep any local state for
+ * that purpose).
+ */
+export const videoPrunePermanentlyDeletedFileIDsIfNeeded = async (
+    deletedFileIDs: Set<number>,
+) => {
+    if (!isHLSGenerationSupported) return;
+
+    const existing = await savedProcessedVideoFileIDs();
+    if (existing.size > 0) {
+        const updated = existing.difference(deletedFileIDs);
+        if (updated.size != existing.size) {
+            await saveProcessedVideoFileIDs(updated);
+        }
+    }
+};
+
+/**
+ * If video processing is enabled, trigger a pull from remote and then proceed
+ * with any subsequent backfill queue processing of pending videos.
+ *
+ * This function is intended to be called during a full remote pull (See: [Note:
+ * Remote pull]). It is a no-op if video processing is not enabled or eligible
+ * on this device. Otherwise it pulls the list of already processed file IDs
+ * with remote.
+ *
+ * At this point it also triggers processing of the backfill (if needed), but
+ * doesn't wait for it to complete (which might take a time for big libraries).
+ *
+ * Calling it when a backfill has already been triggered by a previous sync is
+ * also a no-op. However, a backfill does not start until at least one pull of
+ * file IDs has been completed with remote, to avoid picking up work on file IDs
+ * that have already been processed elsewhere.
+ */
+export const videoProcessingSyncIfNeeded = async () => {
+    if (!isHLSGenerationSupported) return;
+
+    // The `haveSyncedOnce` flag tracks whether or not a sync has happened for
+    // the app, and is not specific to video processing. We always set it even
+    // if HLS generation is currently disabled so that we can immediately start
+    // processing the backfill if it gets video processing gets enabled during
+    // the app's session, without waiting for the next sync to happen.
+    _state.haveSyncedOnce = true;
+
+    if (!isHLSGenerationEnabled()) return;
+
+    await pullProcessedFileIDs();
+
+    tickNow(); /* if not already ticking */
+};
+
+/**
  * Create a streamable HLS playlist for a video uploaded from this client.
  *
  * This function is called by the uploader when it uploads a new file from this
  * client, allowing us to create its streamable variant without needing to
  * redownload the video.
  *
- * Note that this is an optimization. Even if we don't process the video at this
- * time (e.g. if the video processor can't keep up with the uploads), we will
- * eventually process it later as part of a backfill.
+ * It only does the processing if we're running in the context of the desktop
+ * app as the video processing is resource intensive. In particular, processing
+ * large videos with the Wasm ffmpeg implementation can cause the app to crash,
+ * on mobile devices (see https://github.com/ffmpegwasm/ffmpeg.wasm/issues/851).
+ * In contrast, the desktop app can us the efficient native FFmpeg integration.
+ *
+ * Note that this function is an optimization. Even if we don't process the
+ * video at this time (e.g. if the video processor can't keep up with the
+ * uploads), we will eventually process it later as part of a backfill.
  *
  * @param file The {@link EnteFile} that got uploaded (video or otherwise).
  *
- * @param uploadItem The item that was uploaded. This can be used to get at the
- * contents of the file that got uploaded.
+ * @param processableUploadItem The item that was uploaded. This can be used to
+ * read the contents of the file that got uploaded directly from disk instead of
+ * needing to download it again.
  */
 export const processVideoNewUpload = (
     file: EnteFile,
-    uploadItem: UploadItem,
+    processableUploadItem: ProcessableUploadItem,
 ) => {
-    // TODO(HLS):
-    if (!isVideoProcessingEnabled()) return;
-    if (file.metadata.fileType !== FileType.video) return;
-    if (!electron) {
-        // Processing very large videos with the current ffmpeg Wasm
-        // implementation can cause the app to crash, esp. on mobile devices
-        // (e.g. https://github.com/ffmpegwasm/ffmpeg.wasm/issues/851).
-        //
-        // So the video processing only happpens in the desktop app, which uses
-        // the much more efficient native ffmpeg integration.
-        return;
-    }
-
-    if (_state.videoProcessingQueue.length > 50) {
-        // Drop new requests if the queue can't keep up to avoid the app running
-        // out of memory by keeping hold of too many (potentially huge) video
-        // blobs. These items will later get processed as part of a backfill.
-        log.info("Will process new video upload later (backlog too big)");
+    if (!isHLSGenerationSupported) return;
+    if (!isHLSGenerationEnabled()) return;
+    if (file.metadata.fileType != FileType.video) return;
+    if (processableUploadItem instanceof File) {
+        // While the types don't guarantee it, we really shouldn't be getting
+        // here. The only time a processableUploadItem can be File when we're
+        // running in the desktop app is when an edited image copy is being
+        // saved. But we've already checked above that the file which was
+        // uploaded was a video.
+        assertionFailed();
         return;
     }
 
     // Enqueue the item.
-    _state.videoProcessingQueue.push({ file, uploadItem });
+    _state.liveQueue.push({
+        file,
+        timestampedUploadItem: processableUploadItem,
+    });
 
-    // Tickle the processor if it isn't already running.
-    _state.queueProcessor ??= processQueue(electron);
+    // Interrupt any idle timeouts if any, go go.
+    tickNow();
 };
 
-export const isVideoProcessingEnabled = () =>
-    process.env.NEXT_PUBLIC_ENTE_WIP_VIDEO_STREAMING &&
-    settingsSnapshot().isInternalUser;
+/**
+ * If {@link processQueue} is not already running, start it.
+ *
+ * If there is an existing {@link resolveTick} so that if perchance
+ * {@link processQueue} was waiting on an idle timeout, it wakes up now.
+ *
+ * Also create a new {@link tick} and {@link resolveTick} pair for use by
+ * subsequent calls to {@link tickNow}
+ */
+const tickNow = () => {
+    // See: [Note: Exiting idle wait of processing loop] for what this function
+    // is trying to do.
 
-const processQueue = async (electron: Electron) => {
-    while (_state.videoProcessingQueue.length) {
-        try {
-            await processQueueItem(
-                _state.videoProcessingQueue.shift()!,
-                electron,
-            );
-        } catch (e) {
-            log.error("Video processing failed", e);
-            // Ignore this unprocessable item. Currently this function only runs
-            // post upload, so this item will later get processed as part of the
-            // backfill.
-            //
-            // TODO(HLS): When processing the backfill itself, we'll need a way
-            // to mark this item as failed.
+    // Resolve the existing tick (if any).
+    if (_state.resolveTick) _state.resolveTick();
+
+    // Create a new resolvable pair.
+    _state.tick = new Promise((r) => (_state.resolveTick = r));
+
+    // Start the processor if it isn't already running.
+    _state.queueProcessor ??= processQueue();
+};
+
+export const isHLSGenerationEnabled = () => _state.isHLSGenerationEnabled;
+
+/**
+ * The video processing loop goes through videos one by one, preferring items in
+ * the liveQueue, otherwise working for a backlog item. If there are no items to
+ * process, it goes on an idle timeout. The {@link resolveTick} state property
+ * can be used to tickle it out of sleep.
+ *
+ * [Note: Exiting idle wait of processing loop]
+ *
+ * The following toy example illustrates the overall mechanism:
+ *
+ *     let resolveTick
+ *     let tick = new Promise((r) => (resolveTick = r));
+ *
+ *     const tickNow = () => {
+ *         resolveTick();
+ *         tick = new Promise((r) => (resolveTick = r));
+ *     }
+ *
+ *     const f = async () => {
+ *         for (let i of [1, 2, 3, 4, 5]) {
+ *             const wait = new Promise((r) => setTimeout(r, i * 1e3));
+ *             await Promise.race([wait, tick]);
+ *         }
+ *     }
+ *
+ *     f()
+ *
+ *     setTimeout(tickNow, 2500);
+ *     setTimeout(tickNow, 5000);
+ *     setTimeout(tickNow, 5500);
+ *
+ * The `Promise.race([wait, tick])` means that the loop will proceed to the next
+ * item either if the timeout expires, or if tick resolves. Thus the same
+ * function can handle both the internally determined processing of backfill
+ * batches, and the externally triggered processing of live uploads.
+ */
+const processQueue = async () => {
+    if (!isHLSGenerationSupported || !isHLSGenerationEnabled()) {
+        assertionFailed(); /* we shouldn't have come here */
+        return;
+    }
+
+    const userID = ensureLocalUser().id;
+
+    // We mark failures in the local DB for in expected failure mode. As an
+    // additional protection against loops in unforeseen scenarios, keep a
+    // transient in-memory list of IDs which shouldn't be looped.
+    const transientFailedFileIDs = new Set<number>();
+
+    let bq: typeof _state.liveQueue | undefined;
+    while (isHLSGenerationEnabled()) {
+        let item = _state.liveQueue.shift();
+        if (!item) {
+            // Initialize or refill queue.
+            if (!bq?.length) {
+                if (_state.haveSyncedOnce) {
+                    bq = await backfillQueue(userID);
+                } else {
+                    log.info("Not attempting backfill until first sync");
+                }
+            }
+            // Take item if queue is not empty.
+            if (bq?.length) item = bq.pop();
+        }
+        if (item && !transientFailedFileIDs.has(item.file.id)) {
+            updateSnapshotIfNeeded("processing");
+
+            try {
+                await processQueueItem(item);
+                await markProcessedVideoFileID(item.file.id);
+                // Reset the idle wait on success.
+                _state.idleWait = idleWaitInitial;
+            } catch (e) {
+                // This will get retried again at some point later.
+                log.error(`Failed to process video ${fileLogID(item.file)}`, e);
+                transientFailedFileIDs.add(item.file.id);
+            }
+        } else {
+            // There are no more items in either the live queue or backlog.
+            // Go to sleep (for increasingly longer durations, capped at a
+            // maximum).
+            updateSnapshotIfNeeded("idle");
+
+            const idleWait = _state.idleWait;
+            _state.idleWait = Math.min(idleWait * 2, idleWaitMax);
+
+            // `tick` allows the sleep to be interrupted when there is
+            // potential activity.
+            if (!_state.tick) assertionFailed();
+            const tick = _state.tick!;
+
+            log.debug(() => ["gen-hls", { idleWait }]);
+            await Promise.race([tick, wait(idleWait)]);
         }
     }
+
+    updateSnapshotIfNeeded(undefined);
+
     _state.queueProcessor = undefined;
+};
+
+/**
+ * Return the next batch of videos that need to be processed.
+ *
+ * If there is nothing pending, return an empty array.
+ *
+ * @param userID The ID of the currently logged in user. This is used to filter
+ * the files to only include those that are owned by the user.
+ */
+const backfillQueue = async (
+    userID: number,
+): Promise<VideoProcessingQueueItem[]> => {
+    const allCollectionFiles = await savedCollectionFiles();
+    const localTrashFileIDs = await savedTrashItemFileIDs();
+    const videoFiles = uniqueFilesByID(
+        allCollectionFiles.filter(
+            (f) =>
+                // Only files the user owns.
+                f.ownerID == userID &&
+                // Only videos.
+                f.metadata.fileType == FileType.video &&
+                // Not in trash.
+                !localTrashFileIDs.has(f.id) &&
+                // See: [Note: Marking files which do not need video processing]
+                f.pubMagicMetadata?.data.sv != 1,
+        ),
+    );
+
+    const doneIDs = (await savedProcessedVideoFileIDs()).union(
+        await savedFailedVideoFileIDs(),
+    );
+    const pendingVideoFiles = videoFiles.filter((f) => !doneIDs.has(f.id));
+
+    const batch = randomSample(pendingVideoFiles, 50);
+    return batch.map((file) => ({ file }));
 };
 
 /**
@@ -393,110 +914,145 @@ const processQueue = async (electron: Electron) => {
  *
  * 3. Both the generated video and the HLS playlist are then uploaded, E2EE.
  */
-const processQueueItem = async (
-    { file, uploadItem }: VideoProcessingQueueItem,
-    electron: Electron,
-) => {
-    log.debug(() => ["gen-hls", { file, uploadItem }]);
+const processQueueItem = async ({
+    file,
+    timestampedUploadItem,
+}: VideoProcessingQueueItem) => {
+    const electron = ensureElectron();
 
-    const fileBlob = await fetchOriginalVideoBlob(file, uploadItem);
+    log.debug(() => ["gen-hls", { file, timestampedUploadItem }]);
 
-    // TODO(HLS):
-    const tokens = await writeVideoStream(electron, "generate-hls", fileBlob!);
-    const [playlistToken, videoToken] = [tokens[0]!, tokens[1]!];
+    const playlistFileData = await fetchFileData("vid_preview", file.id);
+    if (playlistFileData) {
+        // Since video processing for even an individual item can take
+        // substantial time, it is possible that an item might've gotten
+        // processed on a different client in the interval between us enqueuing
+        // it and us getting here.
+        //
+        // Bail out early to avoid unnecessary duplicate work.
+        log.info(`Generate HLS for ${fileLogID(file)} | already-processed`);
+        return;
+    }
 
+    const uploadItem = timestampedUploadItem
+        ? await fileSystemUploadItemIfUnchanged(
+              timestampedUploadItem,
+              electron.fs.statMtime,
+          )
+        : undefined;
+
+    let sourceVideo: FileSystemUploadItem | ReadableStream | undefined =
+        uploadItem;
+    if (!sourceVideo) {
+        try {
+            sourceVideo = (await downloadManager.fileStream(file, {
+                background: true,
+            }))!;
+        } catch (e) {
+            if (!isNetworkDownloadError(e)) await markFailedVideoFile(file);
+            throw e;
+        }
+    }
+
+    // [Note: Upload HLS video segment from node side]
+    //
+    // The generated video can be huge (multi-GB), too large to read it into
+    // memory as an arrayBuffer.
+    //
+    // One option was to chain the video stream response (from the node side)
+    // directly into a fetch request to `objectUploadURL`, however that requires
+    // HTTP/2 (our servers support it, but self hosters' might not). Also that
+    // approach won't work with retries on transient failures unless we
+    // duplicate the stream beforehand, which invalidates the point of
+    // streaming.
+    //
+    // Another mid-way option was to do it partially here - obtain the pre-signed
+    // upload URLs here (since we already have the rest of the scaffolding to
+    // make API requests), and then provide this pre-signed URL to the node side
+    // so that it can directly upload the generated video segments.
+    //
+    // However, that then gets into a issue for multipart uploads since we don't
+    // know the size of the generated HLS video segment file beforehand. We can
+    // try to estimate it, and that is indeed what we started off with, and that
+    // approach worked fine too.
+    //
+    // However, estimates being estimates, it felt better to make things more
+    // deterministic by moving the request for the pre-signed URLs also to the
+    // desktop app side. This also sidesteps the issue of passing along too much
+    // data (the multipart upload URLs) as request params to the desktop app.
+    // There was no specific issue again, it just felt that doing everything in
+    // the desktop app is more simple and straightforward (at the cost of
+    // needing set up of some API request scaffolding on the desktop side).
+    //
+    // Below we prepare the things that we need to pass to the desktop app to
+    // allow it to make the API request for obtaining pre-signed upload URLs.
+    const fetchURL = await apiURL("/files/data/preview-upload-url");
+    const authToken = await ensureAuthToken();
+
+    log.info(`Generate HLS for ${fileLogID(file)} | start`);
+
+    let res: GenerateHLSResult | undefined;
     try {
-        const playlistBlob = await readVideoStream(
+        res = await initiateGenerateHLS(
             electron,
-            playlistToken,
-        ).then((res) => res.blob());
-
-        const { objectID, url: objectUploadURL } =
-            await getFilePreviewDataUploadURL(file);
-
-        // TOOD(HLS): Move this to the node side.
-        const videoBlob = await readVideoStream(electron, videoToken).then(
-            (res) => res.blob(),
+            sourceVideo,
+            file.id,
+            fetchURL,
+            authToken,
         );
+    } catch (e) {
+        // Failures during stream generation on the native side are expected to
+        // happen in two cases:
+        //
+        // 1. There is something specific to this video that doesn't work with
+        //    the current HLS generation pipeline (the ffmpeg invocation).
+        //
+        // 2. The upload of the generated video fails.
+        //
+        // The native side code already retries failures for case 2 (except HTTP
+        // 4xx errors). Thus, usually we should come here only for case 1, and
+        // retrying the same video again will not work either.
+        await markFailedVideoFile(file);
+        throw e;
+    }
 
-        const objectSize = videoBlob.size;
+    if (!res) {
+        log.info(`Generate HLS for ${fileLogID(file)} | not-required`);
+        // See: [Note: Marking files which do not need video processing]
+        await updateFilePublicMagicMetadata(file, { sv: 1 });
+        return;
+    }
 
-        // Video conversion is non-trivial effort, and the video segment file
-        // we're uploading is potentially very large, so add retries to avoid
-        // the need to redo everything in case of transient errors.
-        await retryEnsuringHTTPOkOr4xx(() =>
-            fetch(objectUploadURL, { method: "PUT", body: videoBlob }),
+    const { playlistToken, dimensions, videoSize, videoObjectID } = res;
+    try {
+        const playlist = await readVideoStream(electron, playlistToken).then(
+            (res) => res.text(),
         );
 
         const playlistData = await encodePlaylistJSON({
             type: "hls_video",
-            playlist: await playlistBlob.text(),
-            // TODO(HLS): Critical, fix this before any use.
-            width: 1280,
-            // TODO(HLS): Critical, fix this before any use.
-            height: 720,
-            size: objectSize,
+            playlist,
+            ...dimensions,
+            size: videoSize,
         });
 
-        await putVideoData(file, playlistData, objectID, objectSize);
-    } finally {
-        await Promise.all([
-            videoStreamDone(electron, playlistToken),
-            videoStreamDone(electron, videoToken),
-        ]);
-    }
-};
+        const encryptedPlaylist = await encryptBlob(playlistData, file.key);
 
-/**
- * Return a blob containing the contents of the given video file.
- *
- * The blob is either constructed using the given {@link uploadItem} if present,
- * otherwise it is downloaded from remote.
- *
- * @param file An {@link EnteFile} of type {@link FileType.video}.
- *
- * @param uploadItem If we're called during the upload process, then this will
- * be set to the {@link UploadItem} that was uploaded. This way, we can directly
- * use the on-disk file instead of needing to download the original from remote.
- */
-const fetchOriginalVideoBlob = async (
-    file: EnteFile,
-    uploadItem: UploadItem | undefined,
-): Promise<Blob | ReadableStream | null> =>
-    uploadItem
-        ? fetchOriginalVideoUploadItemBlob(file, uploadItem)
-        : await downloadManager.fileStream(file);
-
-const fetchOriginalVideoUploadItemBlob = (
-    _: EnteFile,
-    uploadItem: UploadItem,
-) => {
-    // TODO(HLS): Commented below is the implementation that the eventual
-    // desktop only conversion would need to handle - the conversion logic would
-    // need to move to the desktop side to allow it to handle large videos.
-    //
-    // Meanwhile during development, we assume we're on the happy web-only cases
-    // (dragging and dropping a file). All this code is behind a development
-    // feature flag, so it is not going to impact end users.
-
-    if (typeof uploadItem == "string" || Array.isArray(uploadItem)) {
-        throw new Error("Not implemented");
-        // const { response, lastModifiedMs } = await readStream(
-        //     ensureElectron(),
-        //     uploadItem,
-        // );
-        // const path = typeof uploadItem == "string" ? uploadItem : uploadItem[1];
-        // // This function will not be called for videos, and for images
-        // // it is reasonable to read the entire stream into memory here.
-        // return new File([await response.arrayBuffer()], basename(path), {
-        //     lastModified: lastModifiedMs,
-        // });
-    } else {
-        if (uploadItem instanceof File) {
-            return uploadItem;
-        } else {
-            return uploadItem.file;
+        try {
+            await putVideoData(
+                file,
+                encryptedPlaylist,
+                videoObjectID,
+                videoSize,
+            );
+        } catch (e) {
+            if (isHTTP4xxError(e)) await markFailedVideoFile(file);
+            throw e;
         }
+
+        log.info(`Generate HLS for ${fileLogID(file)} | done`);
+    } finally {
+        await videoStreamDone(electron, playlistToken);
     }
 };
 

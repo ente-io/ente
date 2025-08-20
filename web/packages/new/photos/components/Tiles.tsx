@@ -2,6 +2,7 @@ import AddIcon from "@mui/icons-material/Add";
 import { Stack, styled, Typography } from "@mui/material";
 import { CenteredFill, Overlay } from "ente-base/components/containers";
 import type { ButtonishProps } from "ente-base/components/mui";
+import log from "ente-base/log";
 import { downloadManager } from "ente-gallery/services/download";
 import { type EnteFile } from "ente-media/file";
 import {
@@ -65,7 +66,7 @@ export const ItemCard: React.FC<React.PropsWithChildren<ItemCardProps>> = ({
     const [coverImageURL, setCoverImageURL] = useState<string | undefined>();
 
     useEffect(() => {
-        if (!coverFile) return;
+        if (!coverFile) return undefined;
 
         let didCancel = false;
 
@@ -76,7 +77,10 @@ export const ItemCard: React.FC<React.PropsWithChildren<ItemCardProps>> = ({
         } else {
             void downloadManager
                 .renderableThumbnailURL(coverFile, isScrolling)
-                .then((url) => !didCancel && setCoverImageURL(url));
+                .then((url) => !didCancel && setCoverImageURL(url))
+                .catch((e: unknown) => {
+                    log.warn("Failed to fetch thumbnail", e);
+                });
         }
 
         return () => {

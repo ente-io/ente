@@ -1,155 +1,101 @@
+import { Divider } from "@mui/material";
 import {
     AccountsPageContents,
     AccountsPageFooter,
     AccountsPageTitle,
 } from "ente-accounts/components/layouts/centered-paper";
-import SetPasswordForm, {
-    type SetPasswordFormProps,
-} from "ente-accounts/components/SetPasswordForm";
 import { appHomeRoute, stashRedirect } from "ente-accounts/services/redirect";
-import {
-    convertBase64ToBuffer,
-    convertBufferToBase64,
-    generateSRPClient,
-    generateSRPSetupAttributes,
-} from "ente-accounts/services/srp";
-import {
-    getSRPAttributes,
-    startSRPSetup,
-    updateSRPAndKeys,
-} from "ente-accounts/services/srp-remote";
-import type { UpdatedKey } from "ente-accounts/services/user";
+import { changePassword, type LocalUser } from "ente-accounts/services/user";
 import { LinkButton } from "ente-base/components/LinkButton";
-import { sharedCryptoWorker } from "ente-base/crypto";
-import {
-    generateAndSaveIntermediateKeyAttributes,
-    generateLoginSubKey,
-    saveKeyInSessionStore,
-} from "ente-shared/crypto/helpers";
-import { getData, setData } from "ente-shared/storage/localStorage";
-import { getActualKey } from "ente-shared/user";
-import type { KEK, KeyAttributes, User } from "ente-shared/user/types";
+import { LoadingIndicator } from "ente-base/components/loaders";
+import { deriveKeyInsufficientMemoryErrorMessage } from "ente-base/crypto/types";
+import log from "ente-base/log";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+    NewPasswordForm,
+    type NewPasswordFormProps,
+} from "../components/NewPasswordForm";
+import { savedLocalUser } from "../services/accounts-db";
 
+/**
+ * A page that allows a user to reset or change their password.
+ *
+ * See: [Note: Login pages]
+ */
 const Page: React.FC = () => {
-    const [token, setToken] = useState<string>();
-    const [user, setUser] = useState<User>();
+    const [user, setUser] = useState<LocalUser | undefined>(undefined);
 
     const router = useRouter();
 
+    // We're invoked with the "?op=reset" query parameter in the recovery flow.
+    const isReset = router.query.op == "reset";
+
     useEffect(() => {
-        const user = getData("user");
-        setUser(user);
-        if (!user?.token) {
-            stashRedirect("/change-password");
-            void router.push("/");
+        const user = savedLocalUser();
+        if (user) {
+            setUser(user);
         } else {
-            setToken(user.token);
+            stashRedirect("/change-password");
+            void router.replace("/");
         }
     }, [router]);
 
-    const onSubmit: SetPasswordFormProps["callback"] = async (
-        passphrase,
-        setFieldError,
-    ) => {
-        const cryptoWorker = await sharedCryptoWorker();
-        const key = await getActualKey();
-        const keyAttributes: KeyAttributes = getData("keyAttributes");
-        const kekSalt = await cryptoWorker.generateSaltToDeriveKey();
-        let kek: KEK;
-        try {
-            kek = await cryptoWorker.deriveSensitiveKey(passphrase, kekSalt);
-        } catch {
-            setFieldError("confirm", t("password_generation_failed"));
-            return;
-        }
-        const encryptedKeyAttributes = await cryptoWorker.encryptToB64(
-            key,
-            kek.key,
-        );
-        const updatedKey: UpdatedKey = {
-            kekSalt,
-            encryptedKey: encryptedKeyAttributes.encryptedData,
-            keyDecryptionNonce: encryptedKeyAttributes.nonce,
-            opsLimit: kek.opsLimit,
-            memLimit: kek.memLimit,
-        };
-
-        const loginSubKey = await generateLoginSubKey(kek.key);
-
-        const { srpUserID, srpSalt, srpVerifier } =
-            await generateSRPSetupAttributes(loginSubKey);
-
-        const srpClient = await generateSRPClient(
-            srpSalt,
-            srpUserID,
-            loginSubKey,
-        );
-
-        const srpA = convertBufferToBase64(srpClient.computeA());
-
-        const { setupID, srpB } = await startSRPSetup(token!, {
-            srpUserID,
-            srpSalt,
-            srpVerifier,
-            srpA,
-        });
-
-        srpClient.setB(convertBase64ToBuffer(srpB));
-
-        const srpM1 = convertBufferToBase64(srpClient.computeM1());
-
-        await updateSRPAndKeys(token!, {
-            setupID,
-            srpM1,
-            updatedKeyAttr: updatedKey,
-        });
-
-        // Update the SRP attributes that are stored locally.
-        if (user?.email) {
-            const srpAttributes = await getSRPAttributes(user.email);
-            if (srpAttributes) {
-                setData("srpAttributes", srpAttributes);
-            }
-        }
-
-        const updatedKeyAttributes = Object.assign(keyAttributes, updatedKey);
-        await generateAndSaveIntermediateKeyAttributes(
-            passphrase,
-            updatedKeyAttributes,
-            key,
-        );
-
-        await saveKeyInSessionStore("encryptionKey", key);
-
-        redirectToAppHome();
-    };
-
-    const redirectToAppHome = () => {
-        setData("showBackButton", { value: true });
-        void router.push(appHomeRoute);
-    };
-
-    // TODO: Handle the case where user is not loaded yet.
-    return (
-        <AccountsPageContents>
-            <AccountsPageTitle>{t("change_password")}</AccountsPageTitle>
-            <SetPasswordForm
-                userEmail={user?.email ?? ""}
-                callback={onSubmit}
-                buttonText={t("change_password")}
-            />
-            {(getData("showBackButton")?.value ?? true) && (
-                <AccountsPageFooter>
-                    <LinkButton onClick={router.back}>
-                        {t("go_back")}
-                    </LinkButton>
-                </AccountsPageFooter>
-            )}
-        </AccountsPageContents>
+    return user ? (
+        <PageContents {...{ user, isReset }} />
+    ) : (
+        <LoadingIndicator />
     );
 };
 
 export default Page;
+
+interface PageContentsProps {
+    user: LocalUser;
+    /**
+     * True if the password is being reset during the account recovery flow.
+     */
+    isReset: boolean;
+}
+
+const PageContents: React.FC<PageContentsProps> = ({ user, isReset }) => {
+    const router = useRouter();
+
+    const handleSubmit: NewPasswordFormProps["onSubmit"] = useCallback(
+        async (password, setPasswordsFieldError) =>
+            changePassword(password)
+                .then(() => void router.push(appHomeRoute))
+                .catch((e: unknown) => {
+                    log.error("Could not change password", e);
+                    setPasswordsFieldError(
+                        e instanceof Error &&
+                            e.message == deriveKeyInsufficientMemoryErrorMessage
+                            ? t("password_generation_failed")
+                            : t("generic_error"),
+                    );
+                }),
+        [router],
+    );
+
+    return (
+        <AccountsPageContents>
+            <AccountsPageTitle>{t("change_password")}</AccountsPageTitle>
+            <NewPasswordForm
+                userEmail={user.email}
+                submitButtonTitle={t("change_password")}
+                onSubmit={handleSubmit}
+            />
+            {!isReset && (
+                <>
+                    <Divider sx={{ mt: 1 }} />
+                    <AccountsPageFooter>
+                        <LinkButton onClick={router.back}>
+                            {t("go_back")}
+                        </LinkButton>
+                    </AccountsPageFooter>
+                </>
+            )}
+        </AccountsPageContents>
+    );
+};

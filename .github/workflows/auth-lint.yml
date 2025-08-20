@@ -4,11 +4,11 @@ on:
     # Run on every pull request (open or push to it) that changes auth/
     pull_request:
         paths:
-            - "auth/**"
+            - "mobile/apps/auth/**"
             - ".github/workflows/auth-lint.yml"
 
 env:
-    FLUTTER_VERSION: "3.24.3"
+    FLUTTER_VERSION: "3.32.8"
 
 permissions:
     contents: read
@@ -18,7 +18,7 @@ jobs:
         runs-on: ubuntu-latest
         defaults:
             run:
-                working-directory: auth
+                working-directory: mobile/apps/auth
         steps:
             - name: Checkout code and submodules
               uses: actions/checkout@v4

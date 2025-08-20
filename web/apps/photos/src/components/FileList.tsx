@@ -1,75 +1,127 @@
 import AlbumOutlinedIcon from "@mui/icons-material/AlbumOutlined";
 import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
-import { Box, Checkbox, Link, Typography, styled } from "@mui/material";
-import Avatar from "components/pages/gallery/Avatar";
+import { Box, Checkbox, Typography, styled } from "@mui/material";
+import Avatar from "components/Avatar";
+import type { LocalUser } from "ente-accounts/services/user";
 import { assertionFailed } from "ente-base/assert";
 import { Overlay } from "ente-base/components/containers";
-import { isSameDay } from "ente-base/date";
 import { formattedDateRelative } from "ente-base/i18n-date";
+import log from "ente-base/log";
 import { downloadManager } from "ente-gallery/services/download";
-import { EnteFile, enteFileDeletionDate } from "ente-media/file";
+import type { EnteFile } from "ente-media/file";
+import { fileDurationString } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
-import {
-    GAP_BTW_TILES,
-    IMAGE_CONTAINER_MAX_HEIGHT,
-    IMAGE_CONTAINER_MAX_WIDTH,
-    MIN_COLUMNS,
-} from "ente-new/photos/components/FileList";
 import type { GalleryBarMode } from "ente-new/photos/components/gallery/reducer";
 import {
     LoadingThumbnail,
     StaticThumbnail,
 } from "ente-new/photos/components/PlaceholderThumbnails";
 import { TileBottomTextOverlay } from "ente-new/photos/components/Tiles";
-import { TRASH_SECTION } from "ente-new/photos/services/collection";
-import { FlexWrapper } from "ente-shared/components/Container";
-import { t } from "i18next";
-import memoize from "memoize-one";
-import { GalleryContext } from "pages/gallery";
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
-import { Trans } from "react-i18next";
 import {
-    VariableSizeList as List,
-    ListChildComponentProps,
+    computeThumbnailGridLayoutParams,
+    thumbnailGap,
+    type ThumbnailGridLayoutParams,
+} from "ente-new/photos/components/utils/thumbnail-grid-layout";
+import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
+import { batch } from "ente-utils/array";
+import { t } from "i18next";
+import React, {
+    memo,
+    useCallback,
+    useDeferredValue,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
+import {
+    VariableSizeList,
     areEqual,
+    type ListChildComponentProps,
 } from "react-window";
-import { SelectedState } from "types/gallery";
-import { shouldShowAvatar } from "utils/file";
+import { type SelectedState } from "utils/file";
 import {
     handleSelectCreator,
     handleSelectCreatorMulti,
 } from "utils/photoFrame";
-import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 
-export const DATE_CONTAINER_HEIGHT = 48;
-export const SPACE_BTW_DATES = 44;
-
-const SPACE_BTW_DATES_TO_IMAGE_CONTAINER_WIDTH_RATIO = 0.244;
-
-const FOOTER_HEIGHT = 90;
-const ALBUM_FOOTER_HEIGHT = 75;
-const ALBUM_FOOTER_HEIGHT_WITH_REFERRAL = 113;
-
-export type FileListItemTag = "header" | "publicAlbumsFooter" | "date" | "file";
-
-export interface TimeStampListItem {
+/**
+ * A component with an explicit height suitable for being plugged in as the
+ * {@link header} or {@link footer} of the {@link FileList}.
+ */
+export interface FileListHeaderOrFooter {
     /**
-     * An optional {@link FileListItemTag} that can be used to identify item
-     * types for conditional behaviour.
+     * The component itself.
      */
-    tag?: FileListItemTag;
-    items?: FileListAnnotatedFile[];
-    itemStartIndex?: number;
-    date?: string;
-    dates?: { date: string; span: number }[];
-    groups?: number[];
-    item?: any;
-    id?: string;
-    height?: number;
-    fileSize?: number;
-    fileCount?: number;
+    component: React.ReactNode;
+    /**
+     * The height of the component (in px).
+     */
+    height: number;
+    /**
+     * By default, all items in the {@link FileList}, including headers and
+     * footers injected using this type, get an inline margin.
+     *
+     * Set this property to `true` to omit this default margin, and instead
+     * have the component extend to the container's edges.
+     */
+    extendToInlineEdges?: boolean;
 }
+
+/**
+ * Data needed to render each row in the variable size list that comprises the
+ * file list.
+ */
+type FileListItem =
+    | {
+          type: "file";
+          /**
+           * The height of the row that will render this item.
+           */
+          height: number;
+          /**
+           * Groups of items that are shown in the row.
+           *
+           * Each group spans multiple columns (the number of columns being given by
+           * the length of {@link annotatedFiles} or the {@link span}). Groups are
+           * separated by gaps.
+           */
+          groups: {
+              /**
+               * The annotated files in this group.
+               */
+              annotatedFiles: FileListAnnotatedFile[];
+              /**
+               * The index of the first annotated file in the component's global list
+               * of annotated files.
+               */
+              annotatedFilesStartIndex: number;
+          }[];
+      }
+    | {
+          type: "date";
+          height: number;
+          groups: {
+              /**
+               * The date string to show.
+               */
+              date: string;
+              /**
+               * The number of columns to span.
+               */
+              dateSpan: number;
+          }[];
+      }
+    | {
+          type: "span";
+          height: number;
+          /**
+           * The React component that is the rendered representation of the item.
+           */
+          component: React.ReactNode;
+          extendToInlineEdges?: boolean;
+      };
 
 export interface FileListAnnotatedFile {
     file: EnteFile;
@@ -90,6 +142,19 @@ export interface FileListAnnotatedFile {
     timelineDateString: string;
 }
 
+/**
+ * A file augmented with the date when it will be permanently deleted.
+ *
+ * See: [Note: Files in trash pseudo collection have deleteBy]
+ */
+export type EnteTrashFile = EnteFile & {
+    /**
+     * Timestamp (epoch microseconds) when the trash item (and its corresponding
+     * {@link EnteFile}) will be permanently deleted.
+     */
+    deleteBy?: number;
+};
+
 export interface FileListProps {
     /** The height we should occupy (needed since the list is virtualized). */
     height: number;
@@ -107,8 +172,38 @@ export interface FileListProps {
      * another mode in which the gallery operates.
      */
     modePlus?: GalleryBarMode | "search";
-    showAppDownloadBanner?: boolean;
-    selectable?: boolean;
+    /**
+     * An optional component shown before all the items in the list.
+     *
+     * It is not sticky, and scrolls along with the content of the list.
+     */
+    header?: FileListHeaderOrFooter;
+    /**
+     * An optional component shown after all the items in the list.
+     *
+     * It is not sticky, and scrolls along with the content of the list.
+     */
+    footer?: FileListHeaderOrFooter;
+    /**
+     * The logged in user, if any.
+     *
+     * This is only expected to be present when the listing is shown within the
+     * photos app, where we have a logged in user. The public albums app can
+     * omit this prop.
+     */
+    user?: LocalUser;
+    /**
+     * If `true`, then the default behaviour of grouping files by their date is
+     * suppressed.
+     *
+     * This behaviour is used when showing magic search results.
+     */
+    disableGrouping?: boolean;
+    /**
+     * If `true`, then the user can select files in the listing by clicking on
+     * their thumbnails (and other range selection mechanisms).
+     */
+    enableSelect?: boolean;
     setSelected: (
         selected: SelectedState | ((selected: SelectedState) => SelectedState),
     ) => void;
@@ -123,6 +218,13 @@ export interface FileListProps {
      * Not set in the context of the shared albums app.
      */
     favoriteFileIDs?: Set<number>;
+    /**
+     * A map from known Ente user IDs to their emails.
+     *
+     * This is only expected in the context of the photos app, and will be
+     * omitted when running in the public albums app.
+     */
+    emailByUserID?: Map<number, string>;
     /**
      * Called when the user activates the thumbnail at the given {@link index}.
      *
@@ -140,506 +242,216 @@ export const FileList: React.FC<FileListProps> = ({
     width,
     mode,
     modePlus,
+    header,
+    footer,
+    user,
     annotatedFiles,
-    showAppDownloadBanner,
-    selectable,
+    disableGrouping,
+    enableSelect,
     selected,
     setSelected,
     activeCollectionID,
     activePersonID,
     favoriteFileIDs,
+    emailByUserID,
     onItemClick,
 }) => {
-    const galleryContext = useContext(GalleryContext);
-    const publicCollectionGalleryContext = useContext(
-        PublicCollectionGalleryContext,
+    const [_items, setItems] = useState<FileListItem[]>([]);
+    const items = useDeferredValue(_items);
+
+    const [rangeStartIndex, setRangeStartIndex] = useState<number | undefined>(
+        undefined,
     );
-
-    const [timeStampList, setTimeStampList] = useState<TimeStampListItem[]>([]);
-    const refreshInProgress = useRef(false);
-    const shouldRefresh = useRef(false);
-    const listRef = useRef(null);
-
+    const [hoverIndex, setHoverIndex] = useState<number | undefined>(undefined);
+    const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
     // Timeline date strings for which all photos have been selected.
     //
     // See: [Note: Timeline date string]
     const [checkedTimelineDateStrings, setCheckedTimelineDateStrings] =
-        useState(new Set());
+        useState(new Set<string>());
 
-    const [rangeStart, setRangeStart] = useState(null);
-    const [currentHover, setCurrentHover] = useState(null);
-    const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
+    const listRef = useRef<VariableSizeList | null>(null);
 
-    const fittableColumns = getFractionFittableColumns(width);
-    let columns = Math.floor(fittableColumns);
-
-    let skipMerge = false;
-    if (columns < MIN_COLUMNS) {
-        columns = MIN_COLUMNS;
-        skipMerge = true;
-    }
-    const shrinkRatio = getShrinkRatio(width, columns);
-    const listItemHeight =
-        IMAGE_CONTAINER_MAX_HEIGHT * shrinkRatio + GAP_BTW_TILES;
-
-    const refreshList = () => {
-        listRef.current?.resetAfterIndex(0);
-    };
+    const layoutParams = useMemo(
+        () => computeThumbnailGridLayoutParams(width),
+        [width],
+    );
 
     useEffect(() => {
-        const main = () => {
-            if (refreshInProgress.current) {
-                shouldRefresh.current = true;
-                return;
-            }
-            refreshInProgress.current = true;
-            let timeStampList: TimeStampListItem[] = [];
+        // Since width and height are dependencies, there might be too many
+        // updates to the list during a resize. The list computation too, while
+        // fast, is non-trivial.
+        //
+        // To avoid these issues, the we use `useDeferredValue`: if it gets
+        // another update when processing one, React will restart the background
+        // rerender from scratch.
 
-            if (galleryContext.photoListHeader) {
-                timeStampList.push(
-                    getPhotoListHeader(galleryContext.photoListHeader),
-                );
-            } else if (publicCollectionGalleryContext.photoListHeader) {
-                timeStampList.push(
-                    getPhotoListHeader(
-                        publicCollectionGalleryContext.photoListHeader,
-                    ),
-                );
-            }
-            if (galleryContext.isClipSearchResult) {
-                noGrouping(timeStampList);
-            } else {
-                groupByTime(timeStampList);
-            }
+        let items: FileListItem[] = [];
 
-            if (!skipMerge) {
-                timeStampList = mergeTimeStampList(timeStampList, columns);
-            }
-            if (timeStampList.length === 1) {
-                timeStampList.push(getEmptyListItem());
-            }
-            timeStampList.push(getVacuumItem(timeStampList));
-            if (publicCollectionGalleryContext.credentials) {
-                if (publicCollectionGalleryContext.photoListFooter) {
-                    timeStampList.push(
-                        getPhotoListFooter(
-                            publicCollectionGalleryContext.photoListFooter,
+        if (header) items.push(asFullSpanFileListItem(header));
+
+        const { isSmallerLayout, columns } = layoutParams;
+        const fileItemHeight = layoutParams.itemHeight + layoutParams.gap;
+        if (disableGrouping) {
+            items = items.concat(
+                batch(annotatedFiles, columns).map(
+                    (batchFiles, batchIndex) => ({
+                        height: fileItemHeight,
+                        type: "file",
+                        groups: [
+                            {
+                                annotatedFiles: batchFiles,
+                                annotatedFilesStartIndex: batchIndex * columns,
+                            },
+                        ],
+                    }),
+                ),
+            );
+        } else {
+            // A running counter of files that have been pushed into items, and
+            // a function to push them (incrementing the counter).
+            let fileIndex = 0;
+            const createFileItem = (splits: FileListAnnotatedFile[][]) =>
+                ({
+                    height: fileItemHeight,
+                    type: "file",
+                    groups: splits.map((split) => {
+                        const group = {
+                            annotatedFiles: split,
+                            annotatedFilesStartIndex: fileIndex,
+                        };
+                        fileIndex += split.length;
+                        return group;
+                    }),
+                }) satisfies FileListItem;
+
+            const pushItemsFromSplits = (splits: FileListAnnotatedFile[][]) => {
+                if (splits.length > 1) {
+                    // If we get here, the combined number of files across
+                    // splits is less than the number of columns.
+                    items.push({
+                        height: dateListItemHeight,
+                        type: "date",
+                        groups: splits.map((s) => ({
+                            date: s[0]!.timelineDateString,
+                            dateSpan: s.length,
+                        })),
+                    });
+                    items.push(createFileItem(splits));
+                } else {
+                    // A single group of files, but the number of such files
+                    // might be more than what fits a single row.
+                    items.push({
+                        height: dateListItemHeight,
+                        type: "date",
+                        groups: splits.map((s) => ({
+                            date: s[0]!.timelineDateString,
+                            dateSpan: columns,
+                        })),
+                    });
+                    items = items.concat(
+                        batch(splits[0]!, columns).map((batchFiles) =>
+                            createFileItem([batchFiles]),
                         ),
                     );
                 }
-                timeStampList.push(getAlbumsFooter());
-            } else if (showAppDownloadBanner) {
-                timeStampList.push(getAppDownloadFooter());
-            }
+            };
 
-            setTimeStampList(timeStampList);
-            refreshInProgress.current = false;
-            if (shouldRefresh.current) {
-                shouldRefresh.current = false;
-                setTimeout(main, 0);
+            const spaceBetweenDatesToImageContainerWidthRatio = 0.244;
+
+            let pendingSplits = new Array<FileListAnnotatedFile[]>();
+            for (const split of splitByDate(annotatedFiles)) {
+                const filledColumns = pendingSplits.reduce(
+                    (a, s) => a + s.length,
+                    0,
+                );
+                const incomingColumns = split.length;
+
+                // Check if the files in this split can be added to same row.
+                if (
+                    !isSmallerLayout &&
+                    filledColumns +
+                        incomingColumns +
+                        Math.ceil(
+                            pendingSplits.length *
+                                spaceBetweenDatesToImageContainerWidthRatio,
+                        ) <=
+                        columns
+                ) {
+                    pendingSplits.push(split);
+                    continue;
+                }
+
+                if (pendingSplits.length) pushItemsFromSplits(pendingSplits);
+                pendingSplits = [split];
             }
-        };
-        main();
+            if (pendingSplits.length) pushItemsFromSplits(pendingSplits);
+        }
+
+        if (!annotatedFiles.length) {
+            items.push({
+                height: height - 48,
+                type: "span",
+                component: (
+                    <NoFilesListItem>
+                        <Typography sx={{ color: "text.faint" }}>
+                            {t("nothing_here")}
+                        </Typography>
+                    </NoFilesListItem>
+                ),
+            });
+        }
+
+        let leftoverHeight = height - (footer?.height ?? 0);
+        for (const item of items) {
+            leftoverHeight -= item.height;
+            if (leftoverHeight <= 0) break;
+        }
+        if (leftoverHeight > 0) {
+            items.push({
+                height: leftoverHeight,
+                type: "span",
+                component: <></>,
+            });
+        }
+
+        if (footer) items.push(asFullSpanFileListItem(footer));
+
+        setItems(items);
     }, [
         width,
         height,
+        header,
+        footer,
         annotatedFiles,
-        galleryContext.photoListHeader,
-        publicCollectionGalleryContext.photoListHeader,
-        galleryContext.isClipSearchResult,
+        disableGrouping,
+        layoutParams,
     ]);
 
     useEffect(() => {
-        setTimeStampList((timeStampList) => {
-            timeStampList = timeStampList ?? [];
-            const hasHeader = timeStampList[0]?.tag == "header";
-            if (hasHeader) {
-                return timeStampList;
-            }
-            if (galleryContext.photoListHeader) {
-                return [
-                    getPhotoListHeader(galleryContext.photoListHeader),
-                    ...timeStampList,
-                ];
-            } else if (publicCollectionGalleryContext.photoListHeader) {
-                return [
-                    getPhotoListHeader(
-                        publicCollectionGalleryContext.photoListHeader,
-                    ),
-                    ...timeStampList,
-                ];
-            } else {
-                return timeStampList;
-            }
-        });
-    }, [
-        galleryContext.photoListHeader,
-        publicCollectionGalleryContext.photoListHeader,
-    ]);
+        // Refresh list
+        listRef.current?.resetAfterIndex(0);
+    }, [items]);
 
     useEffect(() => {
-        setTimeStampList((timeStampList) => {
-            timeStampList = timeStampList ?? [];
-            const hasFooter =
-                timeStampList.length > 0 &&
-                timeStampList[timeStampList.length - 1]?.tag ==
-                    "publicAlbumsFooter";
-            if (hasFooter) {
-                return timeStampList;
-            }
-            if (publicCollectionGalleryContext.credentials) {
-                if (publicCollectionGalleryContext.photoListFooter) {
-                    return [
-                        ...timeStampList,
-                        getPhotoListFooter(
-                            publicCollectionGalleryContext.photoListFooter,
-                        ),
-                        getAlbumsFooter(),
-                    ];
-                }
-            } else if (showAppDownloadBanner) {
-                return [...timeStampList, getAppDownloadFooter()];
-            } else {
-                return timeStampList;
-            }
-        });
-    }, [
-        publicCollectionGalleryContext.credentials,
-        showAppDownloadBanner,
-        publicCollectionGalleryContext.photoListFooter,
-    ]);
-
-    useEffect(() => {
-        refreshList();
-    }, [timeStampList]);
-
-    const groupByTime = (timeStampList: TimeStampListItem[]) => {
-        let listItemIndex = 0;
-        let currentDate;
-        annotatedFiles.forEach((item, index) => {
-            if (
-                !currentDate ||
-                !isSameDay(
-                    new Date(item.file.metadata.creationTime / 1000),
-                    new Date(currentDate),
-                )
-            ) {
-                currentDate = item.file.metadata.creationTime / 1000;
-
-                timeStampList.push({
-                    tag: "date",
-                    date: item.timelineDateString,
-                    id: currentDate.toString(),
-                });
-                timeStampList.push({
-                    tag: "file",
-                    items: [item],
-                    itemStartIndex: index,
-                });
-                listItemIndex = 1;
-            } else if (listItemIndex < columns) {
-                timeStampList[timeStampList.length - 1].items.push(item);
-                listItemIndex++;
-            } else {
-                listItemIndex = 1;
-                timeStampList.push({
-                    tag: "file",
-                    items: [item],
-                    itemStartIndex: index,
-                });
-            }
-        });
-    };
-
-    const noGrouping = (timeStampList: TimeStampListItem[]) => {
-        let listItemIndex = columns;
-        annotatedFiles.forEach((item, index) => {
-            if (listItemIndex < columns) {
-                timeStampList[timeStampList.length - 1].items.push(item);
-                listItemIndex++;
-            } else {
-                listItemIndex = 1;
-                timeStampList.push({
-                    tag: "file",
-                    items: [item],
-                    itemStartIndex: index,
-                });
-            }
-        });
-    };
-
-    const getPhotoListHeader = (photoListHeader) => {
-        return {
-            ...photoListHeader,
-            item: (
-                <ListItemContainer span={columns}>
-                    {photoListHeader.item}
-                </ListItemContainer>
-            ),
-        };
-    };
-
-    const getPhotoListFooter = (photoListFooter) => {
-        return {
-            ...photoListFooter,
-            item: (
-                <ListItemContainer span={columns}>
-                    {photoListFooter.item}
-                </ListItemContainer>
-            ),
-        };
-    };
-
-    const getEmptyListItem = () => {
-        return {
-            item: (
-                <NothingContainer span={columns}>
-                    <Typography sx={{ color: "text.faint" }}>
-                        {t("nothing_here")}
-                    </Typography>
-                </NothingContainer>
-            ),
-            id: "empty-list-banner",
-            height: height - 48,
-        };
-    };
-
-    const getVacuumItem = (timeStampList) => {
-        let footerHeight;
-        if (publicCollectionGalleryContext.credentials) {
-            footerHeight = publicCollectionGalleryContext.referralCode
-                ? ALBUM_FOOTER_HEIGHT_WITH_REFERRAL
-                : ALBUM_FOOTER_HEIGHT;
-        } else {
-            footerHeight = FOOTER_HEIGHT;
-        }
-        const fileListHeight = (() => {
-            let sum = 0;
-            const getCurrentItemSize = getItemSize(timeStampList);
-            for (let i = 0; i < timeStampList.length; i++) {
-                sum += getCurrentItemSize(i);
-                if (height - sum <= footerHeight) {
-                    break;
-                }
-            }
-            return sum;
-        })();
-        return {
-            item: <></>,
-            height: Math.max(height - fileListHeight - footerHeight, 0),
-        };
-    };
-
-    const getAppDownloadFooter = (): TimeStampListItem => ({
-        tag: "publicAlbumsFooter",
-        height: FOOTER_HEIGHT,
-        item: (
-            <FooterContainer span={columns}>
-                <Typography variant="small" sx={{ color: "text.faint" }}>
-                    <Trans
-                        i18nKey={"install_mobile_app"}
-                        components={{
-                            a: (
-                                <Link
-                                    href="https://play.google.com/store/apps/details?id=io.ente.photos"
-                                    target="_blank"
-                                    rel="noopener"
-                                />
-                            ),
-                            b: (
-                                <Link
-                                    href="https://apps.apple.com/in/app/ente-photos/id1542026904"
-                                    target="_blank"
-                                    rel="noopener"
-                                />
-                            ),
-                        }}
-                    />
-                </Typography>
-            </FooterContainer>
-        ),
-    });
-
-    const getAlbumsFooter = (): TimeStampListItem => ({
-        tag: "publicAlbumsFooter",
-        height: publicCollectionGalleryContext.referralCode
-            ? ALBUM_FOOTER_HEIGHT_WITH_REFERRAL
-            : ALBUM_FOOTER_HEIGHT,
-        item: (
-            <AlbumFooterContainer
-                span={columns}
-                hasReferral={!!publicCollectionGalleryContext.referralCode}
-            >
-                {/* Make the entire area tappable, otherwise it is hard to
-                    get at on mobile devices. */}
-                <Box sx={{ width: "100%" }}>
-                    <Link
-                        color="text.base"
-                        sx={{ "&:hover": { color: "inherit" } }}
-                        target="_blank"
-                        href={"https://ente.io"}
-                    >
-                        <Typography variant="small">
-                            <Trans
-                                i18nKey="shared_using"
-                                components={{
-                                    a: (
-                                        <Typography
-                                            variant="small"
-                                            component="span"
-                                            sx={{ color: "accent.main" }}
-                                        />
-                                    ),
-                                }}
-                                values={{ url: "ente.io" }}
-                            />
-                        </Typography>
-                    </Link>
-                    {publicCollectionGalleryContext.referralCode ? (
-                        <FullStretchContainer>
-                            <Typography
-                                sx={{
-                                    marginTop: "12px",
-                                    padding: "8px",
-                                    color: "accent.contrastText",
-                                }}
-                            >
-                                <Trans
-                                    i18nKey={"sharing_referral_code"}
-                                    values={{
-                                        referralCode:
-                                            publicCollectionGalleryContext.referralCode,
-                                    }}
-                                />
-                            </Typography>
-                        </FullStretchContainer>
-                    ) : null}
-                </Box>
-            </AlbumFooterContainer>
-        ),
-    });
-
-    /**
-     * Checks and merge multiple dates into a single row.
-     */
-    const mergeTimeStampList = (
-        items: TimeStampListItem[],
-        columns: number,
-    ): TimeStampListItem[] => {
-        const newList: TimeStampListItem[] = [];
-        let index = 0;
-        let newIndex = 0;
-        while (index < items.length) {
-            const currItem = items[index];
-            // If the current item is of type time, then it is not part of an ongoing date.
-            // So, there is a possibility of merge.
-            if (currItem.tag == "date") {
-                // If new list pointer is not at the end of list then
-                // we can add more items to the same list.
-                if (newList[newIndex]) {
-                    // Check if items can be added to same list
-                    if (
-                        newList[newIndex + 1].items.length +
-                            items[index + 1].items.length +
-                            Math.ceil(
-                                newList[newIndex].dates.length *
-                                    SPACE_BTW_DATES_TO_IMAGE_CONTAINER_WIDTH_RATIO,
-                            ) <=
-                        columns
-                    ) {
-                        newList[newIndex].dates.push({
-                            date: currItem.date,
-                            span: items[index + 1].items.length,
-                        });
-                        newList[newIndex + 1].items = [
-                            ...newList[newIndex + 1].items,
-                            ...items[index + 1].items,
-                        ];
-                        index += 2;
-                    } else {
-                        // Adding items would exceed the number of columns.
-                        // So, move new list pointer to the end. Hence, in next iteration,
-                        // items will be added to a new list.
-                        newIndex += 2;
-                    }
-                } else {
-                    // New list pointer was at the end of list so simply add new items to the list.
-                    newList.push({
-                        ...currItem,
-                        date: null,
-                        dates: [
-                            {
-                                date: currItem.date,
-                                span: items[index + 1].items.length,
-                            },
-                        ],
-                    });
-                    newList.push(items[index + 1]);
-                    index += 2;
-                }
-            } else {
-                // Merge cannot happen. Simply add all items to new list
-                // and set new list point to the end of list.
-                newList.push(currItem);
-                index++;
-                newIndex = newList.length;
-            }
-        }
-        for (let i = 0; i < newList.length; i++) {
-            const currItem = newList[i];
-            const nextItem = newList[i + 1];
-            if (currItem.tag == "date") {
-                if (currItem.dates.length > 1) {
-                    currItem.groups = currItem.dates.map((item) => item.span);
-                    nextItem.groups = currItem.groups;
-                }
-            }
-        }
-        return newList;
-    };
-
-    const getItemSize = (timeStampList) => (index) => {
-        switch (timeStampList[index].tag) {
-            case "date":
-                return DATE_CONTAINER_HEIGHT;
-            case "file":
-                return listItemHeight;
-            default:
-                return timeStampList[index].height;
-        }
-    };
-
-    const generateKey = (index) => {
-        switch (timeStampList[index].tag) {
-            case "file":
-                return `${timeStampList[index].items[0].file.id}-${
-                    timeStampList[index].items.slice(-1)[0].file.id
-                }`;
-            default:
-                return `${timeStampList[index].id}-${index}`;
-        }
-    };
-
-    useEffect(() => {
-        // Nothing to do here if nothing is selected.
-        if (!galleryContext.selectedFile) return;
-
-        const notSelectedFiles = (annotatedFiles ?? []).filter(
-            (item) => !galleryContext.selectedFile[item.file.id],
+        const notSelectedFiles = annotatedFiles.filter(
+            (af) => !selected[af.file.id],
         );
 
+        // Get dates of files which were manually unselected.
         const unselectedDates = new Set(
-            notSelectedFiles.map((item) => item.timelineDateString),
-        ); // to get file's date which were manually unselected
-
-        const localSelectedFiles = (annotatedFiles ?? []).filter(
-            // to get files which were manually selected
-            (item) => !unselectedDates.has(item.timelineDateString),
+            notSelectedFiles.map((af) => af.timelineDateString),
         );
 
+        // Get files which were manually selected.
+        const localSelectedFiles = annotatedFiles.filter(
+            (af) => !unselectedDates.has(af.timelineDateString),
+        );
+
+        // Get dates of files which were manually selected.
         const localSelectedDates = new Set(
-            localSelectedFiles.map((item) => item.timelineDateString),
-        ); // to get file's date which were manually selected
+            localSelectedFiles.map((af) => af.timelineDateString),
+        );
 
         setCheckedTimelineDateStrings((prev) => {
             const checked = new Set(prev);
@@ -651,80 +463,81 @@ export const FileList: React.FC<FileListProps> = ({
             localSelectedDates.forEach((date) => checked.add(date));
             return checked;
         });
-    }, [galleryContext.selectedFile]);
+    }, [annotatedFiles, selected]);
 
-    const handleSelectMulti = handleSelectCreatorMulti(
-        galleryContext.setSelectedFiles,
-        mode,
-        galleryContext?.user?.id,
-        activeCollectionID,
-        activePersonID,
+    const handleSelectMulti = useMemo(
+        () =>
+            handleSelectCreatorMulti(
+                setSelected,
+                mode,
+                user?.id,
+                activeCollectionID,
+                activePersonID,
+            ),
+        [setSelected, mode, user?.id, activeCollectionID, activePersonID],
     );
 
-    const onChangeSelectAllCheckBox = (date: string) => {
-        const next = new Set(checkedTimelineDateStrings);
-        let isDateSelected: boolean;
-        if (!next.has(date)) {
-            next.add(date);
-            isDateSelected = true;
-        } else {
-            next.delete(date);
-            isDateSelected = false;
-        }
-        setCheckedTimelineDateStrings(next);
+    const onChangeSelectAllCheckBox = useCallback(
+        (date: string) => {
+            const next = new Set(checkedTimelineDateStrings);
+            let isDateSelected: boolean;
+            if (!next.has(date)) {
+                next.add(date);
+                isDateSelected = true;
+            } else {
+                next.delete(date);
+                isDateSelected = false;
+            }
+            setCheckedTimelineDateStrings(next);
 
-        const filesOnADay = annotatedFiles?.filter(
-            (item) => item.timelineDateString === date,
-        ); // all files on a checked/unchecked day
+            // All files on a checked/unchecked day.
+            const filesOnADay = annotatedFiles.filter(
+                (af) => af.timelineDateString === date,
+            );
 
-        handleSelectMulti(filesOnADay.map((af) => af.file))(isDateSelected);
-    };
+            handleSelectMulti(filesOnADay.map((af) => af.file))(isDateSelected);
+        },
+        [annotatedFiles, checkedTimelineDateStrings, handleSelectMulti],
+    );
 
     const handleSelect = useMemo(
         () =>
             handleSelectCreator(
                 setSelected,
                 mode,
-                galleryContext.user?.id,
+                user?.id,
                 activeCollectionID,
                 activePersonID,
-                setRangeStart,
+                setRangeStartIndex,
             ),
-        [
-            setSelected,
-            mode,
-            galleryContext.user?.id,
-            activeCollectionID,
-            activePersonID,
-        ],
+        [setSelected, mode, user?.id, activeCollectionID, activePersonID],
     );
 
-    const onHoverOver = (index: number) => () => {
-        setCurrentHover(index);
-    };
+    const handleRangeSelect = useCallback(
+        (index: number) => {
+            if (rangeStartIndex === undefined || rangeStartIndex == index)
+                return;
 
-    const handleRangeSelect = (index: number) => () => {
-        if (typeof rangeStart != "undefined" && rangeStart !== index) {
-            const direction =
-                (index - rangeStart) / Math.abs(index - rangeStart);
+            const direction = index > rangeStartIndex ? 1 : -1;
             let checked = true;
             for (
-                let i = rangeStart;
+                let i = rangeStartIndex;
                 (index - i) * direction >= 0;
                 i += direction
             ) {
-                checked = checked && !!selected[annotatedFiles[i].file.id];
+                checked = checked && !!selected[annotatedFiles[i]!.file.id];
             }
             for (
-                let i = rangeStart;
+                let i = rangeStartIndex;
                 (index - i) * direction > 0;
                 i += direction
             ) {
-                handleSelect(annotatedFiles[i].file)(!checked);
+                handleSelect(annotatedFiles[i]!.file)(!checked);
             }
-            handleSelect(annotatedFiles[index].file, index)(!checked);
-        }
-    };
+            handleSelect(annotatedFiles[index]!.file, index)(!checked);
+        },
+        [annotatedFiles, selected, rangeStartIndex, handleSelect],
+    );
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -749,135 +562,147 @@ export const FileList: React.FC<FileListProps> = ({
     }, []);
 
     useEffect(() => {
-        if (selected.count === 0) {
-            setRangeStart(null);
-        }
+        if (selected.count == 0) setRangeStartIndex(undefined);
     }, [selected]);
 
-    const getThumbnail = (
-        { file }: FileListAnnotatedFile,
-        index: number,
-        isScrolling: boolean,
-    ) => (
-        <FileThumbnail
-            key={`tile-${file.id}-selected-${selected[file.id] ?? false}`}
-            file={file}
-            onClick={() => onItemClick(index)}
-            selectable={selectable}
-            onSelect={handleSelect(file, index)}
-            selected={
-                (!mode
-                    ? selected.collectionID === activeCollectionID
-                    : mode == selected.context?.mode &&
-                      (selected.context.mode == "people"
-                          ? selected.context.personID == activePersonID
-                          : selected.context.collectionID ==
-                            activeCollectionID)) && selected[file.id]
-            }
-            selectOnClick={selected.count > 0}
-            onHover={onHoverOver(index)}
-            onRangeSelect={handleRangeSelect(index)}
-            isRangeSelectActive={isShiftKeyPressed && selected.count > 0}
-            isInsSelectRange={
-                (index >= rangeStart && index <= currentHover) ||
-                (index >= currentHover && index <= rangeStart)
-            }
-            activeCollectionID={activeCollectionID}
-            showPlaceholder={isScrolling}
-            isFav={favoriteFileIDs?.has(file.id)}
-        />
-    );
-
-    const renderListItem = (
-        listItem: TimeStampListItem,
-        isScrolling: boolean,
-    ) => {
-        // Enhancement: This logic doesn't work on the shared album screen, the
-        // galleryContext.selectedFile is always null there.
-        const haveSelection = (galleryContext.selectedFile?.count ?? 0) > 0;
-        switch (listItem.tag) {
-            case "date":
-                return listItem.dates ? (
-                    listItem.dates
-                        .map((item) => [
-                            <DateContainer key={item.date} span={item.span}>
+    const renderListItem = useCallback(
+        (item: FileListItem, isScrolling: boolean) => {
+            const haveSelection = selected.count > 0;
+            switch (item.type) {
+                case "date":
+                    return intersperseWithGaps(
+                        item.groups,
+                        ({ date, dateSpan }) => [
+                            <DateListItem key={date} span={dateSpan}>
                                 {haveSelection && (
                                     <Checkbox
-                                        key={item.date}
-                                        name={item.date}
+                                        key={date}
+                                        name={date}
                                         checked={checkedTimelineDateStrings.has(
-                                            item.date,
+                                            date,
                                         )}
                                         onChange={() =>
-                                            onChangeSelectAllCheckBox(item.date)
+                                            onChangeSelectAllCheckBox(date)
                                         }
                                         size="small"
                                         sx={{ pl: 0 }}
                                     />
                                 )}
-                                {item.date}
-                            </DateContainer>,
-                            <div key={`${item.date}-gap`} />,
-                        ])
-                        .flat()
-                ) : (
-                    <DateContainer span={columns}>
-                        {haveSelection && (
-                            <Checkbox
-                                key={listItem.date}
-                                name={listItem.date}
-                                checked={checkedTimelineDateStrings.has(
-                                    listItem.date,
-                                )}
-                                onChange={() =>
-                                    onChangeSelectAllCheckBox(listItem.date)
-                                }
-                                size="small"
-                                sx={{ pl: 0 }}
-                            />
-                        )}
-                        {listItem.date}
-                    </DateContainer>
-                );
-            case "file": {
-                const ret = listItem.items.map((item, idx) =>
-                    getThumbnail(
-                        item,
-                        listItem.itemStartIndex + idx,
-                        isScrolling,
-                    ),
-                );
-                if (listItem.groups) {
-                    let sum = 0;
-                    for (let i = 0; i < listItem.groups.length - 1; i++) {
-                        sum = sum + listItem.groups[i];
-                        ret.splice(
-                            sum,
-                            0,
-                            <div
-                                key={`${listItem.items[0].file.id}-gap-${i}`}
-                            />,
-                        );
-                        sum += 1;
-                    }
-                }
-                return ret;
+                                {date}
+                            </DateListItem>,
+                        ],
+                        ({ date }) => <div key={`${date}-gap`} />,
+                    );
+                case "file":
+                    return intersperseWithGaps(
+                        item.groups,
+                        ({ annotatedFiles, annotatedFilesStartIndex }) =>
+                            annotatedFiles.map((annotatedFile, j) => {
+                                const file = annotatedFile.file;
+                                const index = annotatedFilesStartIndex + j;
+                                return (
+                                    <FileThumbnail
+                                        key={`tile-${file.id}-selected-${selected[file.id] ?? false}`}
+                                        {...{
+                                            user,
+                                            emailByUserID,
+                                            enableSelect,
+                                        }}
+                                        file={file}
+                                        selected={
+                                            (!mode
+                                                ? selected.collectionID ===
+                                                  activeCollectionID
+                                                : mode ==
+                                                      selected.context?.mode &&
+                                                  (selected.context.mode ==
+                                                  "people"
+                                                      ? selected.context
+                                                            .personID ==
+                                                        activePersonID
+                                                      : selected.context
+                                                            .collectionID ==
+                                                        activeCollectionID)) &&
+                                            !!selected[file.id]
+                                        }
+                                        selectOnClick={selected.count > 0}
+                                        isRangeSelectActive={
+                                            isShiftKeyPressed &&
+                                            selected.count > 0
+                                        }
+                                        isInSelectRange={
+                                            rangeStartIndex !== undefined &&
+                                            hoverIndex !== undefined &&
+                                            ((index >= rangeStartIndex &&
+                                                index <= hoverIndex) ||
+                                                (index >= hoverIndex &&
+                                                    index <= rangeStartIndex))
+                                        }
+                                        activeCollectionID={activeCollectionID}
+                                        showPlaceholder={isScrolling}
+                                        isFav={!!favoriteFileIDs?.has(file.id)}
+                                        onClick={() => onItemClick(index)}
+                                        onSelect={handleSelect(file, index)}
+                                        onHover={() => setHoverIndex(index)}
+                                        onRangeSelect={() =>
+                                            handleRangeSelect(index)
+                                        }
+                                    />
+                                );
+                            }),
+                        ({ annotatedFilesStartIndex }) => (
+                            <div key={`${annotatedFilesStartIndex}-gap`} />
+                        ),
+                    );
+                case "span":
+                    return item.component;
             }
-            default:
-                return listItem.item;
-        }
-    };
+        },
+        [
+            activeCollectionID,
+            activePersonID,
+            checkedTimelineDateStrings,
+            emailByUserID,
+            favoriteFileIDs,
+            handleRangeSelect,
+            handleSelect,
+            hoverIndex,
+            isShiftKeyPressed,
+            mode,
+            onChangeSelectAllCheckBox,
+            onItemClick,
+            rangeStartIndex,
+            enableSelect,
+            selected,
+            user,
+        ],
+    );
 
-    if (!timeStampList?.length) {
+    const itemData = useMemo(
+        () => ({ items, layoutParams, renderListItem }),
+        [items, layoutParams, renderListItem],
+    );
+
+    const itemSize = useCallback(
+        (index: number) => itemData.items[index]!.height,
+        [itemData],
+    );
+
+    const itemKey = useCallback((index: number, itemData: FileListItemData) => {
+        const item = itemData.items[index]!;
+        switch (item.type) {
+            case "date":
+                return `date-${item.groups[0]!.date}-${index}`;
+            case "file":
+                return `file-${item.groups[0]!.annotatedFilesStartIndex}-${index}`;
+            case "span":
+                return `span-${index}`;
+        }
+    }, []);
+
+    if (!items.length) {
         return <></>;
     }
-
-    const itemData = createItemData(
-        timeStampList,
-        columns,
-        shrinkRatio,
-        renderListItem,
-    );
 
     // The old, mode unaware, behaviour.
     let key = `${activeCollectionID}`;
@@ -896,223 +721,185 @@ export const FileList: React.FC<FileListProps> = ({
     }
 
     return (
-        <List
+        <VariableSizeList
             key={key}
-            itemData={itemData}
             ref={listRef}
-            itemSize={getItemSize(timeStampList)}
-            height={height}
-            width={width}
-            itemCount={timeStampList.length}
-            itemKey={generateKey}
+            {...{ width, height, itemData, itemSize, itemKey }}
+            itemCount={items.length}
             overscanCount={3}
             useIsScrolling
         >
-            {PhotoListRow}
-        </List>
+            {FileListRow}
+        </VariableSizeList>
     );
 };
 
-const ListItem = styled("div")`
+/**
+ * Return a new array of splits, each split containing {@link annotatedFiles}
+ * which have the same {@link timelineDateString}.
+ */
+const splitByDate = (annotatedFiles: FileListAnnotatedFile[]) =>
+    annotatedFiles.reduce(
+        (splits, annotatedFile) => (
+            splits.at(-1)?.at(0)?.timelineDateString ==
+            annotatedFile.timelineDateString
+                ? splits.at(-1)?.push(annotatedFile)
+                : splits.push([annotatedFile]),
+            splits
+        ),
+        new Array<FileListAnnotatedFile[]>(),
+    );
+
+/**
+ * For each element of {@link xs}, obtain an array by applying {@link f},
+ * then obtain a gap element by applying {@link g}. Return a flattened array
+ * containing all of these, except the trailing gap.
+ */
+const intersperseWithGaps = <T, U>(
+    xs: T[],
+    f: (x: T) => U[],
+    g: (x: T) => U,
+) => {
+    const ys = xs.map((x) => [...f(x), g(x)]).flat();
+    return ys.slice(0, ys.length - 1);
+};
+
+/**
+ * A list item container that spans the full width.
+ */
+const FullSpanListItem = styled("div")`
     display: flex;
+    align-items: center;
+`;
+
+const NoFilesListItem = styled(FullSpanListItem)`
+    min-height: 100%;
     justify-content: center;
 `;
 
-const getTemplateColumns = (
-    columns: number,
-    shrinkRatio: number,
-    groups?: number[],
-): string => {
-    if (groups) {
-        // need to confirm why this was there
-        // const sum = groups.reduce((acc, item) => acc + item, 0);
-        // if (sum < columns) {
-        //     groups[groups.length - 1] += columns - sum;
-        // }
-        return groups
-            .map(
-                (x) =>
-                    `repeat(${x}, ${IMAGE_CONTAINER_MAX_WIDTH * shrinkRatio}px)`,
-            )
-            .join(` ${SPACE_BTW_DATES}px `);
-    } else {
-        return `repeat(${columns},${
-            IMAGE_CONTAINER_MAX_WIDTH * shrinkRatio
-        }px)`;
-    }
-};
+/**
+ * Convert a {@link FileListHeaderOrFooter} into a {@link FileListItem}
+ * that spans the entire width available to the row.
+ */
+const asFullSpanFileListItem = ({
+    component,
+    ...rest
+}: FileListHeaderOrFooter): FileListItem => ({
+    ...rest,
+    type: "span",
+    component: <FullSpanListItem>{component}</FullSpanListItem>,
+});
 
-function getFractionFittableColumns(width: number): number {
-    return (
-        (width - 2 * getGapFromScreenEdge(width) + GAP_BTW_TILES) /
-        (IMAGE_CONTAINER_MAX_WIDTH + GAP_BTW_TILES)
-    );
-}
-
-function getGapFromScreenEdge(width: number) {
-    if (width > MIN_COLUMNS * IMAGE_CONTAINER_MAX_WIDTH) {
-        return 24;
-    } else {
-        return 4;
-    }
-}
-
-function getShrinkRatio(width: number, columns: number) {
-    return (
-        (width -
-            2 * getGapFromScreenEdge(width) -
-            (columns - 1) * GAP_BTW_TILES) /
-        (columns * IMAGE_CONTAINER_MAX_WIDTH)
-    );
-}
-
-const ListContainer = styled(Box, {
-    shouldForwardProp: (propName) => propName != "gridTemplateColumns",
-})<{ gridTemplateColumns: string }>`
-    display: grid;
-    grid-template-columns: ${(props) => props.gridTemplateColumns};
-    grid-column-gap: ${GAP_BTW_TILES}px;
-    width: 100%;
-    padding: 0 24px;
-    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
-        padding: 0 4px;
-    }
+/**
+ * An grid item, spanning {@link span} columns.
+ */
+const GridSpanListItem = styled("div")<{ span: number }>`
+    grid-column: span ${({ span }) => span};
+    display: flex;
+    align-items: center;
 `;
 
-const ListItemContainer = styled(FlexWrapper)<{ span: number }>`
-    grid-column: span ${(props) => props.span};
-`;
+/**
+ * The fixed height (in px) of {@link DateListItem}.
+ */
+const dateListItemHeight = 48;
 
-const DateContainer = styled(ListItemContainer)(
+const DateListItem = styled(GridSpanListItem)(
     ({ theme }) => `
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    height: ${DATE_CONTAINER_HEIGHT}px;
+    height: ${dateListItemHeight}px;
     color: ${theme.vars.palette.text.muted};
 `,
 );
 
-const FooterContainer = styled(ListItemContainer)`
-    margin-bottom: 0.75rem;
-    @media (max-width: 540px) {
-        font-size: 12px;
-        margin-bottom: 0.5rem;
-    }
-    text-align: center;
-    justify-content: center;
-    align-items: flex-end;
-    margin-top: calc(2rem + 20px);
-`;
-
-const AlbumFooterContainer = styled(ListItemContainer, {
-    shouldForwardProp: (propName) => propName != "hasReferral",
-})<{ hasReferral: boolean }>`
-    margin-top: 48px;
-    margin-bottom: ${({ hasReferral }) => (!hasReferral ? `10px` : "0px")};
-    text-align: center;
-    justify-content: center;
-`;
-
-const FullStretchContainer = styled("div")(
-    ({ theme }) => `
-    margin: 0 -24px;
-    width: calc(100% + 46px);
-    left: -24px;
-    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
-        margin: 0 -4px;
-        width: calc(100% + 6px);
-        left: -4px;
-    }
-    background-color: ${theme.vars.palette.accent.main};
-`,
-);
-
-const NothingContainer = styled(ListItemContainer)`
-    text-align: center;
-    justify-content: center;
-`;
-
-interface ItemData {
-    timeStampList: TimeStampListItem[];
-    columns: number;
-    shrinkRatio: number;
+interface FileListItemData {
+    items: FileListItem[];
+    layoutParams: ThumbnailGridLayoutParams;
     renderListItem: (
-        timeStampListItem: TimeStampListItem,
-        isScrolling?: boolean,
-    ) => React.JSX.Element;
+        item: FileListItem,
+        isScrolling: boolean,
+    ) => React.ReactNode;
 }
 
-const createItemData = memoize(
-    (
-        timeStampList: TimeStampListItem[],
-        columns: number,
-        shrinkRatio: number,
-        renderListItem: (
-            timeStampListItem: TimeStampListItem,
-            isScrolling?: boolean,
-        ) => React.JSX.Element,
-    ): ItemData => ({ timeStampList, columns, shrinkRatio, renderListItem }),
-);
-
-const PhotoListRow = React.memo(
+const FileListRow = memo(
     ({
         index,
         style,
         isScrolling,
         data,
-    }: ListChildComponentProps<ItemData>) => {
-        const { timeStampList, columns, shrinkRatio, renderListItem } = data;
+    }: ListChildComponentProps<FileListItemData>) => {
+        const { items, layoutParams, renderListItem } = data;
+        const { itemWidth, paddingInline, gap } = layoutParams;
+
+        const item = items[index]!;
+        const itemSpans = (() => {
+            switch (item.type) {
+                case "date":
+                    return item.groups.map((g) => g.dateSpan);
+                case "file":
+                    return item.groups.map((g) => g.annotatedFiles.length);
+                case "span":
+                    return [];
+            }
+        })();
+        const px =
+            item.type == "span" && item.extendToInlineEdges ? 0 : paddingInline;
+
         return (
-            <ListItem style={style}>
-                <ListContainer
-                    gridTemplateColumns={getTemplateColumns(
-                        columns,
-                        shrinkRatio,
-                        timeStampList[index].groups,
-                    )}
-                >
-                    {renderListItem(timeStampList[index], isScrolling)}
-                </ListContainer>
-            </ListItem>
+            <Box
+                style={style}
+                sx={[
+                    { width: "100%", paddingInline: `${px}px` },
+                    itemSpans.length > 0 && {
+                        display: "grid",
+                        gridTemplateColumns: itemSpans
+                            .map((x) => `repeat(${x}, ${itemWidth}px)`)
+                            .join(" 44px "),
+                        columnGap: `${gap}px`,
+                    },
+                ]}
+            >
+                {renderListItem(item, !!isScrolling)}
+            </Box>
         );
     },
     areEqual,
 );
 
-interface FileThumbnailProps {
+type FileThumbnailProps = {
     file: EnteFile;
-    onClick: () => void;
-    selectable: boolean;
     selected: boolean;
-    onSelect: (checked: boolean) => void;
-    onHover: () => void;
-    onRangeSelect: () => void;
     isRangeSelectActive: boolean;
     selectOnClick: boolean;
-    isInsSelectRange: boolean;
+    isInSelectRange: boolean;
     activeCollectionID: number;
     showPlaceholder: boolean;
     isFav: boolean;
-}
+    onClick: () => void;
+    onSelect: (checked: boolean) => void;
+    onHover: () => void;
+    onRangeSelect: () => void;
+} & Pick<FileListProps, "user" | "emailByUserID" | "enableSelect">;
 
 const FileThumbnail: React.FC<FileThumbnailProps> = ({
     file,
-    onClick,
-    selectable,
+    user,
+    enableSelect,
     selected,
-    onSelect,
     selectOnClick,
-    onHover,
-    onRangeSelect,
     isRangeSelectActive,
-    isInsSelectRange,
+    isInSelectRange,
     isFav,
+    emailByUserID,
     activeCollectionID,
     showPlaceholder,
+    onClick,
+    onSelect,
+    onHover,
+    onRangeSelect,
 }) => {
-    const galleryContext = useContext(GalleryContext);
-
     const [imageURL, setImageURL] = useState<string | undefined>(undefined);
     const [isLongPressing, setIsLongPressing] = useState(false);
 
@@ -1141,7 +928,10 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
 
         void downloadManager
             .renderableThumbnailURL(file, showPlaceholder)
-            .then((url) => !didCancel && setImageURL(url));
+            .then((url) => !didCancel && setImageURL(url))
+            .catch((e: unknown) => {
+                log.warn("Failed to fetch thumbnail", e);
+            });
 
         return () => {
             didCancel = true;
@@ -1156,13 +946,13 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
                 onSelect(!selected);
             }
         } else if (imageURL) {
-            onClick?.();
+            onClick();
         }
     };
 
     const handleSelect: React.ChangeEventHandler<HTMLInputElement> = (e) => {
         if (isRangeSelectActive) {
-            onRangeSelect?.();
+            onRangeSelect();
         } else {
             onSelect(e.target.checked);
         }
@@ -1174,20 +964,25 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
         }
     };
 
+    // See: [Note: Files in trash pseudo collection have deleteBy]
+    const deleteBy =
+        activeCollectionID == PseudoCollectionID.trash &&
+        (file as EnteTrashFile).deleteBy;
+
     return (
         <FileThumbnail_
             key={`thumb-${file.id}}`}
             onClick={handleClick}
             onMouseEnter={handleHover}
             disabled={!imageURL}
-            {...(selectable ? longPressHandlers : {})}
+            {...(enableSelect && longPressHandlers)}
         >
-            {selectable && (
+            {enableSelect && (
                 <Check
                     type="checkbox"
                     checked={selected}
                     onChange={handleSelect}
-                    $active={isRangeSelectActive && isInsSelectRange}
+                    $active={isRangeSelectActive && isInSelectRange}
                     onClick={(e) => e.stopPropagation()}
                 />
             )}
@@ -1198,21 +993,19 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
             ) : (
                 <LoadingThumbnail />
             )}
-            {file.metadata.fileType === FileType.livePhoto ? (
+            {file.metadata.fileType == FileType.livePhoto ? (
                 <FileTypeIndicatorOverlay>
-                    <AlbumOutlinedIcon />
+                    <AlbumOutlinedIcon fontSize="small" />
                 </FileTypeIndicatorOverlay>
             ) : (
-                file.metadata.fileType === FileType.video && (
-                    <FileTypeIndicatorOverlay>
-                        <PlayCircleOutlineOutlinedIcon />
-                    </FileTypeIndicatorOverlay>
+                file.metadata.fileType == FileType.video && (
+                    <VideoDurationOverlay duration={fileDurationString(file)} />
                 )
             )}
             {selected && <SelectedOverlay />}
-            {shouldShowAvatar(file, galleryContext.user) && (
+            {shouldShowAvatar(file, user) && (
                 <AvatarOverlay>
-                    <Avatar file={file} />
+                    <Avatar {...{ user, file, emailByUserID }} />
                 </AvatarOverlay>
             )}
             {isFav && (
@@ -1225,14 +1018,12 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
                 className="preview-card-hover-overlay"
                 checked={selected}
             />
-            {isRangeSelectActive && isInsSelectRange && (
-                <InSelectRangeOverlay />
-            )}
+            {isRangeSelectActive && isInSelectRange && <InSelectRangeOverlay />}
 
-            {activeCollectionID === TRASH_SECTION && file.isTrashed && (
+            {deleteBy && (
                 <TileBottomTextOverlay>
                     <Typography variant="small">
-                        {formattedDateRelative(enteFileDeletionDate(file))}
+                        {formattedDateRelative(deleteBy)}
                     </Typography>
                 </TileBottomTextOverlay>
             )}
@@ -1243,7 +1034,7 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
 const FileThumbnail_ = styled("div")<{ disabled: boolean }>`
     display: flex;
     width: fit-content;
-    margin-bottom: ${GAP_BTW_TILES}px;
+    margin-bottom: ${thumbnailGap}px;
     min-width: 100%;
     overflow: hidden;
     position: relative;
@@ -1400,3 +1191,35 @@ const SelectedOverlay = styled(Overlay)(
     border-radius: 4px;
 `,
 );
+
+interface VideoDurationOverlayProps {
+    duration: string | undefined;
+}
+
+const VideoDurationOverlay: React.FC<VideoDurationOverlayProps> = ({
+    duration,
+}) => (
+    <FileTypeIndicatorOverlay>
+        {duration ? (
+            <Typography variant="mini">{duration}</Typography>
+        ) : (
+            <PlayCircleOutlineOutlinedIcon fontSize="small" />
+        )}
+    </FileTypeIndicatorOverlay>
+);
+
+/**
+ * Return `true` if the owner or uploader name avatar indicator should be shown
+ * for the given {@link file}.
+ */
+const shouldShowAvatar = (file: EnteFile, user: LocalUser | undefined) => {
+    // Public albums app.
+    if (!user) return false;
+    // A file shared with the user.
+    if (file.ownerID != user.id) return true;
+    // A public collected file (i.e. a file owned by the user, uploaded by an
+    // named guest via a public collect link)
+    if (file.pubMagicMetadata?.data.uploaderName) return true;
+    // Regular file.
+    return false;
+};

@@ -1,19 +1,24 @@
 import { Box, Stack, Typography, styled } from "@mui/material";
 import { LoginContents } from "ente-accounts/components/LoginContents";
 import { SignUpContents } from "ente-accounts/components/SignUpContents";
+import { savedPartialLocalUser } from "ente-accounts/services/accounts-db";
 import { CenteredFill, CenteredRow } from "ente-base/components/containers";
 import { EnteLogo } from "ente-base/components/EnteLogo";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { useBaseContext } from "ente-base/context";
-import log from "ente-base/log";
-import { albumsAppOrigin, customAPIHost } from "ente-base/origins";
+import {
+    albumsAppOrigin,
+    customAPIHost,
+    shouldOnlyServeAlbumsApp,
+} from "ente-base/origins";
+import {
+    masterKeyFromSession,
+    updateSessionFromElectronSafeStorageIfNeeded,
+} from "ente-base/session";
+import { savedAuthToken } from "ente-base/token";
+import { canAccessIndexedDB } from "ente-gallery/services/files-db";
 import { DevSettings } from "ente-new/photos/components/DevSettings";
-import { saveKeyInSessionStore } from "ente-shared/crypto/helpers";
-import localForage from "ente-shared/storage/localForage";
-import { getData } from "ente-shared/storage/localStorage";
-import { getToken } from "ente-shared/storage/localStorage/helpers";
-import { getKey } from "ente-shared/storage/sessionStorage";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -34,76 +39,48 @@ const Page: React.FC = () => {
     );
 
     useEffect(() => {
-        refreshHost();
-        const currentURL = new URL(window.location.href);
-        const albumsURL = new URL(albumsAppOrigin());
-        currentURL.pathname = router.pathname;
-        if (
-            currentURL.host === albumsURL.host &&
-            currentURL.pathname != "/shared-albums"
-        ) {
-            handleAlbumsRedirect(currentURL);
-        } else {
-            handleNormalRedirect();
-        }
-    }, [refreshHost]);
-
-    const handleAlbumsRedirect = async (currentURL: URL) => {
-        const end = currentURL.hash.lastIndexOf("&");
-        const hash = currentURL.hash.slice(1, end !== -1 ? end : undefined);
-        await router.replace({
-            pathname: "/shared-albums",
-            search: currentURL.search,
-            hash: hash,
-        });
-        await initLocalForage();
-    };
-
-    const handleNormalRedirect = async () => {
-        const user = getData("user");
-        let key = getKey("encryptionKey");
-        const electron = globalThis.electron;
-        if (!key && electron) {
-            try {
-                key = await electron.masterKeyB64();
-            } catch (e) {
-                log.error("Failed to read master key from safe storage", e);
+        void (async () => {
+            refreshHost();
+            const currentURL = new URL(window.location.href);
+            const albumsURL = new URL(albumsAppOrigin());
+            currentURL.pathname = router.pathname;
+            if (
+                (shouldOnlyServeAlbumsApp ||
+                    currentURL.host == albumsURL.host) &&
+                currentURL.pathname != "/shared-albums"
+            ) {
+                const end = currentURL.hash.lastIndexOf("&");
+                const hash = currentURL.hash.slice(
+                    1,
+                    end !== -1 ? end : undefined,
+                );
+                await router.replace({
+                    pathname: "/shared-albums",
+                    search: currentURL.search,
+                    hash: hash,
+                });
+            } else {
+                await updateSessionFromElectronSafeStorageIfNeeded();
+                if (
+                    (await masterKeyFromSession()) &&
+                    (await savedAuthToken())
+                ) {
+                    await router.push("/gallery");
+                } else if (savedPartialLocalUser()?.email) {
+                    await router.push("/verify");
+                }
             }
-            if (key) {
-                await saveKeyInSessionStore("encryptionKey", key, true);
+            if (!(await canAccessIndexedDB())) {
+                showMiniDialog({
+                    title: t("error"),
+                    message: t("local_storage_not_accessible"),
+                    nonClosable: true,
+                    cancel: false,
+                });
             }
-        }
-        const token = getToken();
-        if (key && token) {
-            await router.push("/gallery");
-        } else if (user?.email) {
-            await router.push("/verify");
-        }
-        await initLocalForage();
-        setLoading(false);
-    };
-
-    const initLocalForage = async () => {
-        try {
-            await localForage.ready();
-        } catch (e) {
-            log.error("Local storage is not accessible", e);
-            showMiniDialog({
-                title: t("error"),
-                message: t("LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE"),
-                nonClosable: true,
-                cancel: false,
-            });
-        } finally {
             setLoading(false);
-        }
-    };
-
-    const signUp = () => setShowLogin(false);
-    const login = () => setShowLogin(true);
-
-    const redirectToSignupPage = () => router.push("/signup");
-    const redirectToLoginPage = () => router.push("/login");
+        })();
+    }, [showMiniDialog, router, refreshHost]);
 
     return (
         <TappableContainer onMaybeChangeHost={refreshHost}>
@@ -120,11 +97,13 @@ const Page: React.FC = () => {
                     <MobileBox>
                         <FocusVisibleButton
                             color="accent"
-                            onClick={redirectToSignupPage}
+                            onClick={() => router.push("/signup")}
                         >
                             {t("new_to_ente")}
                         </FocusVisibleButton>
-                        <FocusVisibleButton onClick={redirectToLoginPage}>
+                        <FocusVisibleButton
+                            onClick={() => router.push("/login")}
+                        >
                             {t("existing_user")}
                         </FocusVisibleButton>
                         <MobileBoxFooter {...{ host }} />
@@ -141,11 +120,13 @@ const Page: React.FC = () => {
                         <Stack sx={{ width: "320px", py: 4, gap: 4 }}>
                             {showLogin ? (
                                 <LoginContents
-                                    {...{ onSignUp: signUp, host }}
+                                    {...{ host }}
+                                    onSignUp={() => setShowLogin(false)}
                                 />
                             ) : (
                                 <SignUpContents
-                                    {...{ router, onLogin: login, host }}
+                                    {...{ router, host }}
+                                    onLogin={() => setShowLogin(true)}
                                 />
                             )}
                         </Stack>
@@ -308,7 +289,7 @@ const DesktopBox = styled(CenteredRow)`
 
 const Slideshow: React.FC = () => {
     const [selectedIndex, setSelectedIndex] = useState(0);
-    const containerRef = useRef<HTMLDivElement | undefined>(undefined);
+    const containerRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
         const intervalID = setInterval(() => {

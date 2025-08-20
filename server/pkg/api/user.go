@@ -40,7 +40,7 @@ func (h *UserHandler) SendOTT(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Email id is missing"))
 		return
 	}
-	err := h.UserController.SendEmailOTT(c, email, request.Purpose)
+	err := h.UserController.SendEmailOTT(c, email, request.Purpose, request.Mobile)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
@@ -540,6 +540,24 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+func (h *UserHandler) SelfAccountRecovery(c *gin.Context) {
+	token := c.Query("token")
+	if token == "" {
+		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("token missing"), "token is required"))
+		return
+	}
+	err := h.UserController.HandleSelfAccountRecovery(c, token)
+	if err != nil {
+		logrus.WithError(err).
+			WithFields(logrus.Fields{
+				"req_id": requestid.Get(c),
+			}).Warning("Failed to handle self account recovery")
+		c.HTML(http.StatusOK, "account_recovery_error.html", gin.H{})
+		return
+	}
+	c.HTML(http.StatusOK, "account_recovered.html", gin.H{})
+}
+
 // GetSRPAttributes returns the SRP attributes for a user
 func (h *UserHandler) GetSRPAttributes(c *gin.Context) {
 	var request ente.GetSRPAttributesRequest
@@ -553,6 +571,10 @@ func (h *UserHandler) GetSRPAttributes(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
+	logrus.WithFields(logrus.Fields{
+		"email":       request.Email,
+		"srp_user_id": response.SRPUserID,
+	}).Info("Sending SRP attributes")
 	c.JSON(http.StatusOK, gin.H{"attributes": response})
 }
 

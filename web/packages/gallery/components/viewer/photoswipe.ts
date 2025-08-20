@@ -1,8 +1,6 @@
 import log from "ente-base/log";
-import { albumsAppOrigin } from "ente-base/origins";
 import type { EnteFile } from "ente-media/file";
 import { FileType } from "ente-media/file-type";
-import { settingsSnapshot } from "ente-new/photos/services/settings";
 import "hls-video-element";
 import { t } from "i18next";
 import "media-chrome";
@@ -92,10 +90,7 @@ export interface FileViewerPhotoSwipeDelegate {
     ) => void;
 }
 
-type FileViewerPhotoSwipeOptions = Pick<
-    FileViewerProps,
-    "initialIndex" | "disableDownload"
-> & {
+type FileViewerPhotoSwipeOptions = Pick<FileViewerProps, "initialIndex"> & {
     /**
      * `true` if we're running in the context of a logged in user, and so
      * various actions that modify the file should be shown.
@@ -163,19 +158,6 @@ export const moreButtonID = "ente-pswp-more-button";
  */
 export const moreMenuID = "ente-pswp-more-menu";
 
-// TODO(HLS):
-let _shouldUsePlayerV2: boolean | undefined;
-export const shouldUsePlayerV2 = () =>
-    // Enable for internal users and public albums
-    (_shouldUsePlayerV2 ??=
-        settingsSnapshot().isInternalUser || isPublicAlbumApp());
-
-const isPublicAlbumApp = () => {
-    const currentURL = new URL(window.location.href);
-    const albumsURL = new URL(albumsAppOrigin());
-    return currentURL.host == albumsURL.host;
-};
-
 /**
  * A wrapper over {@link PhotoSwipe} to tailor its interface for use by our file
  * viewer.
@@ -206,7 +188,6 @@ export class FileViewerPhotoSwipe {
 
     constructor({
         initialIndex,
-        disableDownload,
         haveUser,
         delegate,
         onClose,
@@ -252,8 +233,8 @@ export class FileViewerPhotoSwipe {
             // leave this at the default (true) and then swipe between slides
             // fast, or show MUI drawers etc.
             //
-            // See: [Note: Overzealous Chrome? Complicated ARIA?], but time with
-            // a different library.
+            // See: [Note: Workarounds for unactionable ARIA warnings], but time
+            // with a different library.
             trapFocus: false,
             // Set the index within files that we should open to. Subsequent
             // updates to the index will be tracked by PhotoSwipe internally.
@@ -305,7 +286,11 @@ export class FileViewerPhotoSwipe {
         const currentAnnotatedFile = () => {
             const file = currentFile();
             let annotatedFile = _currentAnnotatedFile;
-            if (!annotatedFile || annotatedFile.file.id != file.id) {
+            if (
+                !annotatedFile ||
+                annotatedFile.file.id != file.id ||
+                annotatedFile.file.updationTime != file.updationTime
+            ) {
                 annotatedFile = onAnnotate(file, currSlideData());
                 _currentAnnotatedFile = annotatedFile;
             }
@@ -313,6 +298,92 @@ export class FileViewerPhotoSwipe {
         };
 
         const currentFileAnnotation = () => currentAnnotatedFile().annotation;
+
+        /**
+         * [Note: Updates to the files prop for FileViewer]
+         *
+         * This function is called when the list of underlying files changes.
+         *
+         * These updates can be possibly spurious, since the list changes on
+         * identity and not deep equality. Or they might be real but affect a
+         * file that is not currently being shown.
+         *
+         * Apart from those cases, there are real updates that effect us:
+         *
+         * - If the file that was previously being shown is no longer being
+         *   shown (e.g. it was deleted, or if the marked it archived in a
+         *   context like "All" where archived files are not being shown), move
+         *   to the next slide if possible, or close the viewer otherwise (e.g.
+         *   user deleted the last one).
+         *
+         * - If the file that was previously being shown has moved to a new
+         *   index (e.g. user changed the date in the file info panel), go to
+         *   that new index.
+         *
+         * - If the file is still the same but the underlying file's updation
+         *   time has changed (e.g. the user changed the name of the file in the
+         *   file info panel), refresh the annotated file data cached by the
+         *   viewer.
+         *
+         * When handling these cases, the intent is to minimize the need to call
+         * `refreshSlideContent` as much as possible since that would cause the
+         * zoom and pan state to be reset too.
+         */
+        this.refreshSlideOnFilesUpdateIfNeeded = () => {
+            const prevFileID = _currentAnnotatedFile?.file.id;
+            if (!prevFileID) return;
+
+            const files = delegate.getFiles();
+            const newFileCount = files.length;
+
+            const newFile = files[pswp.currIndex];
+            if (!newFile || newFile.id != prevFileID) {
+                // File is either no longer there, or has moved.
+                //
+                // In either case, after repositioning ourselves to the new
+                // index we also need to refresh the next (or both) neighbours.
+                //
+                // E.g. assume item at index 3 was removed. After refreshing,
+                // the contents of the item previously at index 4, and now at
+                // index 3, would be displayed. But the preloaded slide next to
+                // us (showing item at index 4) would already be displaying the
+                // same item, so that also needs to be refreshed to displaying
+                // the item previously at index 5 (now at index 4).
+
+                const newIndex = files.findIndex(({ id }) => id == prevFileID);
+
+                if (newIndex == -1) {
+                    // File is no longer present.
+                    const i = pswp.currIndex;
+
+                    if (i >= newFileCount) {
+                        // If the last slide was removed, take one step back
+                        // first (the code that calls us ensures that we don't
+                        // get called if there are no more slides left).
+                        this.pswp.prev();
+                    }
+
+                    // Refresh the slide at current index (the erstwhile
+                    // neighbour), and refresh its subsequent neighbour (to get
+                    // the new neighbour).
+                    pswp.refreshSlideContent(i);
+                    pswp.refreshSlideContent(i + 1 == newFileCount ? 0 : i + 1);
+                } else {
+                    // File has moved. Go to new index, and also refresh both
+                    // its neighbours.
+                    const i = newIndex;
+
+                    pswp.goTo(i);
+                    pswp.refreshSlideContent(i == 0 ? newFileCount - 1 : i - 1);
+                    pswp.refreshSlideContent(i + 1 == newFileCount ? 0 : i + 1);
+                }
+            } else {
+                // Calling `currentAnnotatedFile` has the side effect of
+                // refreshing the cached annotated file if the `updationTime`
+                // has changed.
+                currentAnnotatedFile();
+            }
+        };
 
         /**
          * File (ID)s for which we should render the original, non-streamable,
@@ -334,37 +405,29 @@ export class FileViewerPhotoSwipe {
 
             const videoQuality = intendedVideoQualityForFileID(file.id);
 
-            const itemData = itemDataForFile(file, { videoQuality }, () =>
-                pswp.refreshSlideContent(index),
-            );
+            const itemData = itemDataForFile(file, { videoQuality }, () => {
+                // When we get updated item data,
+                // 1. Clear cached data.
+                _currentAnnotatedFile = undefined;
+                // 2. Request a refresh.
+                pswp.refreshSlideContent(index);
+            });
 
-            if (itemData.fileType === FileType.video) {
+            if (itemData.fileType == FileType.video) {
                 const { videoPlaylistURL, videoURL } = itemData;
-                if (
-                    videoPlaylistURL &&
-                    shouldUsePlayerV2() &&
-                    videoQuality == "auto"
-                ) {
+                if (videoPlaylistURL && videoQuality == "auto") {
                     const mcID = `ente-mc-hls-${file.id}`;
                     return {
                         ...itemData,
                         html: hlsVideoHTML(videoPlaylistURL, mcID),
                         mediaControllerID: mcID,
                     };
-                } else if (videoURL && shouldUsePlayerV2()) {
+                } else if (videoURL) {
                     const mcID = `ente-mc-orig-${file.id}`;
                     return {
                         ...itemData,
                         html: videoHTML(videoURL, mcID),
                         mediaControllerID: mcID,
-                    };
-                } else if (videoURL) {
-                    return {
-                        ...itemData,
-                        html: videoHTMLBrowserControls(
-                            videoURL,
-                            !!disableDownload,
-                        ),
                     };
                 }
             }
@@ -381,9 +444,32 @@ export class FileViewerPhotoSwipe {
         });
 
         /**
-         * Last state of the live photo playback toggle.
+         * File IDs for which we've already done initial live photo playback
+         * attempts in the current session (invocation of file viewer).
+         *
+         * This not only allows us to skip triggering initial playback when
+         * coming back to the same slide again (a behavioural choice), it also
+         * allows us to skip retriggering playback when decoding of the image
+         * component completes (a functional need).
          */
-        let livePhotoPlay = true;
+        const livePhotoInitialVisitedFileIDs = new Set<number>();
+
+        /**
+         * Last state of the live photo playback on initial display.
+         */
+        let livePhotoPlayInitial = true;
+
+        /**
+         * Set to the event listener that will be called at the end of the
+         * initial playback of a live photo on the currently displayed slide.
+         *
+         * This will be present only during the initial playback (it will be
+         * cleared when initial playback completes), and can also thus be used
+         * as a pseudo `isPlayingLivePhotoInitial`.
+         */
+        let livePhotoPlayInitialEndedEvent:
+            | { listener: () => void; video: HTMLVideoElement }
+            | undefined;
 
         /**
          * Last state of the live photo muted toggle.
@@ -402,21 +488,127 @@ export class FileViewerPhotoSwipe {
 
         /**
          * Update the state of the given {@link videoElement} and the
-         * {@link livePhotoPlayButtonElement} to reflect {@link livePhotoPlay}.
+         * {@link livePhotoPlayButtonElement} to reflect
+         * {@link livePhotoPlayInitial}.
+         *
+         * [Note: Live photo playback]
+         *
+         * 1. When opening a live photo, play it once unless
+         *    {@link livePhotoPlayInitial} is disabled. This is the behaviour
+         *    controlled by the {@link livePhotoUpdatePlayInitial} function.
+         *
+         * 2. If the user toggles playback of during the initial video playback,
+         *    then remember their choice for the current session (invocation of
+         *    file viewer) by disabling {@link livePhotoPlayInitial}.
+         *
+         * 3. Also keep track of which files have already been initial played in
+         *    the current session (using {@link livePhotoInitialVisitedFileIDs}).
+         *
+         * 3. Post initial playback, user can play the video again in a loop by
+         *    activating the {@link livePhotoPlayButtonElement}, which triggers
+         *    the {@link livePhotoUpdatePlayToggle} function (and also resets
+         *    {@link livePhotoPlayInitial}).
          */
-        const livePhotoUpdatePlay = (video: HTMLVideoElement) => {
+        const livePhotoUpdatePlayInitial = (video: HTMLVideoElement) => {
+            livePhotoUpdateUIState(video);
+
+            // Ignore if we've already visited this file.
+            const currFileID = currSlideData().fileID;
+            if (livePhotoInitialVisitedFileIDs.has(currFileID)) {
+                return;
+            }
+
+            // Otherwise mark it as visited.
+            livePhotoInitialVisitedFileIDs.add(currFileID);
+
+            // Remove any loop attributes we might've inherited from a
+            // previously displayed live photos elements on the current slide.
+            video.removeAttribute("loop");
+
+            // Clear any other initial playback listeners.
+            if (livePhotoPlayInitialEndedEvent) {
+                const { video, listener } = livePhotoPlayInitialEndedEvent;
+                video.removeEventListener("ended", listener);
+                livePhotoPlayInitialEndedEvent = undefined;
+            }
+
+            if (livePhotoPlayInitial) {
+                // Initial playback is enabled - Play the video once.
+                //
+                // There are a few playback cases (initial, resumed, adjacent
+                // slide with a reused video element, new slide with a new video
+                // element). Always start at the beginning in all cases for user
+                // the feel the app is responding consistently.
+                video.currentTime = 0;
+                void abortablePlayVideo(video);
+                video.style.display = "initial";
+                const listener = () => {
+                    livePhotoPlayInitialEndedEvent = undefined;
+                    livePhotoUpdateUIState(video);
+                };
+                livePhotoPlayInitialEndedEvent = { video, listener };
+                video.addEventListener("ended", listener, { once: true });
+            } else {
+                video.pause();
+            }
+
+            livePhotoUpdateUIState(video);
+        };
+
+        const livePhotoUpdateUIState = (video: HTMLVideoElement) => {
             const button = livePhotoPlayButtonElement;
             if (button) showIf(button, true);
 
-            if (livePhotoPlay) {
-                button?.classList.remove("pswp-ente-off");
-                void abortablePlayVideo(video);
-                video.style.display = "initial";
-            } else {
+            if (video.paused || video.ended) {
                 button?.classList.add("pswp-ente-off");
-                video.pause();
                 video.style.display = "none";
+            } else {
+                button?.classList.remove("pswp-ente-off");
+                video.style.display = "initial";
             }
+        };
+
+        /**
+         * See: [Note: Live photo playback]
+         *
+         * This function handles the playback toggled via an explicit user
+         * action (button activation or keyboard shortcut).
+         */
+        const livePhotoUpdatePlayToggle = (video: HTMLVideoElement) => {
+            if (video.paused || video.ended) {
+                // Add the loop attribute.
+                video.setAttribute("loop", "");
+
+                // Take an explicit playback trigger as a signal to reset the
+                // initial playback flag.
+                //
+                // This is the only way for the user to reset the initial
+                // playback state (short of repopening the file viewer).
+                livePhotoPlayInitial = true;
+
+                video.currentTime = 0;
+                void abortablePlayVideo(video);
+            } else {
+                // Remove the loop attribute (not necessarily needed because we
+                // remove it on slide change too, but good to clean up after
+                // ourselves).
+                video.removeAttribute("loop");
+
+                // If we're in the middle of the initial playback, remember the
+                // user's choice to disable autoplay.
+                if (livePhotoPlayInitialEndedEvent) {
+                    livePhotoPlayInitial = false;
+
+                    // And reset the event handler.
+                    const { video, listener } = livePhotoPlayInitialEndedEvent;
+                    video.removeEventListener("ended", listener);
+                    livePhotoPlayInitialEndedEvent = undefined;
+                }
+
+                video.pause();
+            }
+
+            livePhotoUpdateUIState(video);
         };
 
         /**
@@ -470,8 +662,7 @@ export class FileViewerPhotoSwipe {
             const video = livePhotoVideoOnSlide(pswp.currSlide);
             if (!buttonElement || !video) return;
 
-            livePhotoPlay = !livePhotoPlay;
-            livePhotoUpdatePlay(video);
+            livePhotoUpdatePlayToggle(video);
         };
 
         /**
@@ -530,17 +721,6 @@ export class FileViewerPhotoSwipe {
                 } else {
                     control.removeAttribute("mediacontroller");
                 }
-            }
-
-            // TODO(HLS): Temporary gate
-            if (!shouldUsePlayerV2()) {
-                const qualityMenu =
-                    container?.querySelector("#ente-quality-menu");
-                if (qualityMenu instanceof MediaChromeMenu) {
-                    // Hide the auto option
-                    qualityMenu.radioGroupItems[0]!.hidden = true;
-                }
-                return;
             }
 
             const qualityMenu = container?.querySelector("#ente-quality-menu");
@@ -642,10 +822,12 @@ export class FileViewerPhotoSwipe {
                 updateVideoControlsAndPlayback(currSlideData());
             }
 
-            // Rest of this function deals with live photos.
+            if (fileType != FileType.livePhoto || !videoURL) {
+                // Not a live photo, or its video hasn't loaded yet.
+                return;
+            }
 
-            if (fileType != FileType.livePhoto) return;
-            if (!videoURL) return;
+            // Rest of this function deals with live photos.
 
             // This slide is displaying a live photo. Append a video element to
             // show its video part.
@@ -672,7 +854,7 @@ export class FileViewerPhotoSwipe {
             // already been called, but now "contentAppend" is happening.
 
             if (currSlideData().fileID == fileID) {
-                livePhotoUpdatePlay(video);
+                livePhotoUpdatePlayInitial(video);
                 livePhotoUpdateMute(video);
             }
         });
@@ -756,17 +938,9 @@ export class FileViewerPhotoSwipe {
         let videoVideoEl: HTMLVideoElement | undefined;
 
         /**
-         * Callback attached to video playback events when showing video files.
-         *
-         * These are needed to hide the caption when a video is playing on a
-         * file of type video.
+         * The epoch time (milliseconds) when the latest slide change happened.
          */
-        let onVideoPlayback: (() => void) | undefined;
-
-        /**
-         * The DOM element showing the caption for the current file.
-         */
-        let captionElement: HTMLElement | undefined;
+        let lastSlideChangeEpochMilli = Date.now();
 
         pswp.on("change", () => {
             const itemData = currSlideData();
@@ -784,19 +958,6 @@ export class FileViewerPhotoSwipe {
                 }
             });
 
-            // Clear existing listeners, if any.
-            if (videoVideoEl && onVideoPlayback) {
-                videoVideoEl.removeEventListener("play", onVideoPlayback);
-                videoVideoEl.removeEventListener("pause", onVideoPlayback);
-                videoVideoEl.removeEventListener("ended", onVideoPlayback);
-                videoVideoEl = undefined;
-                onVideoPlayback = undefined;
-            }
-
-            // Reset.
-            showIf(captionElement!, true);
-
-            // Attach new listeners, if needed.
             if (itemData.fileType == FileType.video) {
                 // We use content.element instead of container here because
                 // pswp.currSlide.container.getElementsByTagName("video") does
@@ -807,18 +968,11 @@ export class FileViewerPhotoSwipe {
                 // pause the video in "contentDeactivate".
                 const contentElement = pswp.currSlide?.content.element;
                 videoVideoEl = queryVideoElement(contentElement) ?? undefined;
-
-                if (videoVideoEl) {
-                    onVideoPlayback = () => {
-                        if (!shouldUsePlayerV2())
-                            showIf(captionElement!, !!videoVideoEl?.paused);
-                    };
-
-                    videoVideoEl.addEventListener("play", onVideoPlayback);
-                    videoVideoEl.addEventListener("pause", onVideoPlayback);
-                    videoVideoEl.addEventListener("ended", onVideoPlayback);
-                }
+            } else {
+                videoVideoEl = undefined;
             }
+
+            lastSlideChangeEpochMilli = Date.now();
         });
 
         /**
@@ -841,16 +995,6 @@ export class FileViewerPhotoSwipe {
          * the current slide.
          */
         const videoToggleMuteIfPossible = () => {
-            // TODO(HLS): Temporary gate
-            if (!shouldUsePlayerV2()) {
-                const video = videoVideoEl;
-                if (!video) return;
-
-                video.muted = !video.muted;
-
-                return;
-            }
-
             // Go via the media chrome mute button when muting, because
             // otherwise the local storage that the media chrome internally
             // manages ('media-chrome-pref-muted' which can be 'true' or
@@ -902,6 +1046,7 @@ export class FileViewerPhotoSwipe {
         const handleToggleFavoriteIfEnabled = () => {
             if (
                 haveUser &&
+                currentAnnotatedFile().annotation.showFavorite &&
                 !delegate.isFavoritePending(currentAnnotatedFile())
             ) {
                 handleToggleFavorite();
@@ -985,7 +1130,7 @@ export class FileViewerPhotoSwipe {
                     pswp.on("change", () => {
                         const video = livePhotoVideoOnSlide(pswp.currSlide);
                         if (video) {
-                            livePhotoUpdatePlay(video);
+                            livePhotoUpdatePlayInitial(video);
                         } else {
                             // Not a live photo, or its video hasn't loaded yet.
                             showIf(buttonElement, false);
@@ -1131,7 +1276,6 @@ export class FileViewerPhotoSwipe {
                 // the p, and the padding on the div.
                 html: "<div><p></p></div>",
                 onInit: (element, pswp) => {
-                    captionElement = element;
                     pswp.on("change", () => {
                         const { fileType, alt } = currSlideData();
                         element.querySelector("p")!.innerText = alt ?? "";
@@ -1173,23 +1317,47 @@ export class FileViewerPhotoSwipe {
 
         const handleNextSlide = () => pswp.next();
 
+        /**
+         * The arrow keys are used both for navigating through slides, and for
+         * scrubbing through the video.
+         *
+         * When on a video, the navigation requires the option prefix (since
+         * scrubbing through the video is a more common requirement). However
+         * this breaks the user's flow when they are navigating between slides
+         * fast by using the arrow keys - they land on a video and the
+         * navigation stops.
+         *
+         * So as a special case, we keep using arrow keys for navigation for the
+         * first 700 milliseconds when the user lands on a slide.
+         */
+        const isUserLikelyNavigatingBetweenSlides = () =>
+            Date.now() - lastSlideChangeEpochMilli < 700; /* ms */
+
         const handleSeekBackOrPreviousSlide = () => {
-            // TODO(HLS): Behind temporary flag
-            // const vid = videoVideoEl;
-            const vid = shouldUsePlayerV2() ? videoVideoEl : undefined;
-            if (vid) {
-                vid.currentTime = Math.max(vid.currentTime - 5, 0);
+            const video = videoVideoEl;
+            if (
+                video &&
+                !isUserLikelyNavigatingBetweenSlides() &&
+                // If the video is at the beginning, then use the left arrow to
+                // move to the preview slide.
+                video.currentTime > 0
+            ) {
+                video.currentTime = Math.max(video.currentTime - 5, 0);
             } else {
                 handlePreviousSlide();
             }
         };
 
         const handleSeekForwardOrNextSlide = () => {
-            // TODO(HLS): Behind temporary flag
-            // const vid = videoVideoEl;
-            const vid = shouldUsePlayerV2() ? videoVideoEl : undefined;
-            if (vid) {
-                vid.currentTime = vid.currentTime + 5;
+            const video = videoVideoEl;
+            if (
+                video &&
+                !isUserLikelyNavigatingBetweenSlides() &&
+                // If the video has ended, then use right arrow to move to the
+                // next slide.
+                !video.ended
+            ) {
+                video.currentTime = video.currentTime + 5;
             } else {
                 handleNextSlide();
             }
@@ -1455,19 +1623,16 @@ export class FileViewerPhotoSwipe {
 
     /**
      * Reload the current slide, asking the data source for its data afresh.
-     *
-     * @param expectedFileCount The count of files that we expect to show after
-     * the refresh. If provided, this is used to (circle) go back to the first
-     * slide when the slide which we were at previously is not available anymore
-     * (e.g. when deleting the last file in a sequence).
      */
-    refreshCurrentSlideContent(expectedFileCount?: number) {
-        if (expectedFileCount && this.pswp.currIndex >= expectedFileCount) {
-            this.pswp.goTo(0);
-        } else {
-            this.pswp.refreshSlideContent(this.pswp.currIndex);
-        }
+    refreshCurrentSlideContent() {
+        this.pswp.refreshSlideContent(this.pswp.currIndex);
     }
+
+    /**
+     * Ask the delegate for the files information afresh, and perform the
+     * sequence described in [Note: Updates to the files prop for FileViewer].
+     */
+    refreshSlideOnFilesUpdateIfNeeded: () => void;
 
     /**
      * Refresh the favorite button (if indeed it is visible at all) on the
@@ -1478,13 +1643,6 @@ export class FileViewerPhotoSwipe {
      */
     refreshCurrentSlideFavoriteButtonIfNeeded: () => void;
 }
-
-const videoHTMLBrowserControls = (url: string, disableDownload: boolean) => `
-<video controls ${disableDownload && "controlsList=nodownload"} oncontextmenu="return false;">
-  <source src="${url}" />
-  Your browser does not support video playback.
-</video>
-`;
 
 // Requires the following imports to register the Web components we use:
 //
@@ -1576,7 +1734,7 @@ const hlsVideoControlsHTML = () => `
 // playsinline will play the video inline on mobile browsers (where the default
 // is to open a full screen player).
 const livePhotoVideoHTML = (videoURL: string) => `
-<video loop muted playsinline oncontextmenu="return false;">
+<video muted playsinline oncontextmenu="return false;">
   <source src="${videoURL}" />
 </video>
 `;

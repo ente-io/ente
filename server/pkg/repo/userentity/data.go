@@ -14,12 +14,17 @@ import (
 
 // Create inserts a new  entry
 func (r *Repository) Create(ctx context.Context, userID int64, entry model.EntityDataRequest) (string, error) {
-	idPrt, err := entry.Type.GetNewID()
-	if err != nil {
-		return "", stacktrace.Propagate(err, "failed to generate new id")
+	var id string
+	if entry.ID != nil {
+		id = *entry.ID
+	} else {
+		idPrt, err := entry.Type.GetNewID()
+		if err != nil {
+			return "", stacktrace.Propagate(err, "failed to generate new id")
+		}
+		id = *idPrt
 	}
-	id := *idPrt
-	err = r.DB.QueryRow(`INSERT into entity_data(
+	err := r.DB.QueryRow(`INSERT into entity_data(
                          id,
                          user_id,
                          type,

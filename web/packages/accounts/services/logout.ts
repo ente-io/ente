@@ -2,8 +2,7 @@ import { clearBlobCaches } from "ente-base/blob-cache";
 import { clearKVDB } from "ente-base/kv";
 import { clearLocalStorage } from "ente-base/local-storage";
 import log from "ente-base/log";
-import localForage from "ente-shared/storage/localForage";
-import { clearKeys } from "ente-shared/storage/sessionStorage";
+import { clearSessionStorage } from "ente-base/session";
 import { clearStashedRedirect } from "./redirect";
 import { remoteLogoutIfNeeded } from "./user";
 
@@ -34,7 +33,7 @@ export const accountLogout = async () => {
         ignoreError("In-memory store", e);
     }
     try {
-        clearKeys();
+        clearSessionStorage();
     } catch (e) {
         ignoreError("Session storage", e);
     }
@@ -42,11 +41,6 @@ export const accountLogout = async () => {
         clearLocalStorage();
     } catch (e) {
         ignoreError("Local storage", e);
-    }
-    try {
-        await localForage.clear();
-    } catch (e) {
-        ignoreError("Local forage", e);
     }
     try {
         await clearBlobCaches();
@@ -78,11 +72,6 @@ export const logoutClearStateAgain = async () => {
         clearLocalStorage();
     } catch (e) {
         ignoreError("Local storage", e);
-    }
-    try {
-        await localForage.clear();
-    } catch (e) {
-        ignoreError("Local forage", e);
     }
     try {
         await clearKVDB();

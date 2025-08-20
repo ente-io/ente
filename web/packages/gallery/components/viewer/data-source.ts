@@ -4,13 +4,11 @@ import { downloadManager } from "ente-gallery/services/download";
 import { extractRawExif, parseExif } from "ente-gallery/services/exif";
 import {
     hlsPlaylistDataForFile,
-    type HLSPlaylistData,
+    type HLSPlaylistDataForFile,
 } from "ente-gallery/services/video";
 import type { EnteFile } from "ente-media/file";
-import { fileCaption } from "ente-media/file-metadata";
 import { FileType } from "ente-media/file-type";
 import { ensureString } from "ente-utils/ensure";
-import { shouldUsePlayerV2 } from "./photoswipe";
 
 /**
  * This is a subset of the fields expected by PhotoSwipe itself (see the
@@ -70,8 +68,10 @@ export type ItemData = PhotoSwipeSlideData & {
     fileID: number;
     /**
      * The {@link EnteFile} type of the file whose data we are.
+     *
+     * Expected to be one of {@link FileType}.
      */
-    fileType: FileType;
+    fileType: number;
     /**
      * The renderable object URL of the image associated with the file.
      *
@@ -403,12 +403,15 @@ export const forgetItemDataForFileIDIfNeeded = (fileID: number) => {
  * Update the alt attribute of the {@link ItemData}, if any, associated with the
  * given {@link EnteFile}.
  *
- * @param updatedFile The file whose caption was updated.
+ * @param fileID The ID of the file whose {@link alt} attribute we want to
+ * update.
+ *
+ * @param newAlt The new value of the {@link alt} attribute.
  */
-export const updateItemDataAlt = (updatedFile: EnteFile) => {
-    const itemData = _state.itemDataByFileID.get(updatedFile.id);
+export const updateItemDataAlt = (fileID: number, newAlt: string) => {
+    const itemData = _state.itemDataByFileID.get(fileID);
     if (itemData) {
-        itemData.alt = fileCaption(updatedFile);
+        itemData.alt = newAlt;
     }
 };
 
@@ -435,7 +438,7 @@ const enqueueUpdates = async (
     const update = (itemData: Partial<ItemData>, validTill?: Date) => {
         // Use the file's caption as its alt text (in addition to using it as
         // the visible caption).
-        const alt = fileCaption(file);
+        const alt = file.pubMagicMetadata?.data.caption;
 
         _state.itemDataByFileID.set(file.id, {
             ...itemData,
@@ -453,10 +456,14 @@ const enqueueUpdates = async (
 
     const updateVideo = (
         videoURL: string | undefined,
-        hlsPlaylistData: HLSPlaylistData | undefined,
+        hlsPlaylistData: HLSPlaylistDataForFile,
     ) => {
         const videoURLD = videoURL ? { videoURL } : {};
-        if (hlsPlaylistData) {
+        // See: [Note: Caching HLS playlist data]
+        //
+        // In brief, there are three cases:
+        if (typeof hlsPlaylistData == "object") {
+            // 1. If we have a playlist, we can cache it
             const {
                 playlistURL: videoPlaylistURL,
                 width,
@@ -467,22 +474,9 @@ const enqueueUpdates = async (
                 createHLSPlaylistItemDataValidity(),
             );
         } else {
-            if (shouldUsePlayerV2()) {
-                // See: [Note: Caching HLS playlist data]
-                //
-                // TODO(HLS): As an optimization, we can handle the logged in vs
-                // public albums case separately once we have the status-diff
-                // state, we don't need to mark status-diff case as transient.
-                //
-                // Note that setting the transient flag is not too expensive,
-                // since the underlying videoURL is still cached by the download
-                // manager. So effectively, under normal circumstance, it just
-                // adds one API call (to recheck if an HLS playlist now exists
-                // for the given file).
-                update({ ...videoURLD, isTransient: true });
-            } else {
-                update(videoURLD);
-            }
+            // 2. if the file is not eligible ("skip"), we can cache it.
+            // 3. Otherwise it's transient and shouldn't be cached indefinitely.
+            update({ ...videoURLD, isTransient: hlsPlaylistData != "skip" });
         }
     };
 
@@ -503,8 +497,16 @@ const enqueueUpdates = async (
         const thumbnailData = await withDimensionsIfPossible(
             ensureString(thumbnailURL),
         );
+
+        // If the aspect ratio of the original file matches the aspect ratio of
+        // the thumbnail, then render the thumbnail using the original's
+        // dimensions for a better visual experience.
+        const { width, height } = thumbnailDimensions(thumbnailData, file);
+
         update({
             ...thumbnailData,
+            width,
+            height,
             isContentLoading: true,
             isContentZoomable: false,
         });
@@ -523,16 +525,18 @@ const enqueueUpdates = async (
     }
 
     try {
-        // TODO(HLS):
-        let hlsPlaylistData: HLSPlaylistData | undefined;
-        if (shouldUsePlayerV2() && file.metadata.fileType == FileType.video) {
+        let hlsPlaylistData: HLSPlaylistDataForFile;
+        if (file.metadata.fileType == FileType.video) {
             hlsPlaylistData = await hlsPlaylistDataForFile(
                 file,
                 downloadManager.publicAlbumsCredentials,
             );
             // We have a HLS playlist, and the user didn't request the original.
             // Early return so that we don't initiate a fetch for the original.
-            if (hlsPlaylistData && opts?.videoQuality != "original") {
+            if (
+                typeof hlsPlaylistData == "object" &&
+                opts?.videoQuality != "original"
+            ) {
                 updateVideo(undefined, hlsPlaylistData);
                 return;
             }
@@ -631,10 +635,32 @@ const withDimensionsIfPossible = (
     });
 
 /**
- * Return a new validity for a HLS playlist containing presigned URLs.
+ * Return the dimensions to use for the thumbnail associated with {@link file}.
+ *
+ * If the aspect ratio of the thumbnail is (approximately) equal to that of the
+ * dimensions we have on record for the original image (obtained from the file
+ * metadata), then use the dimensions of the original image in lieu of the
+ * thumbnail dimensions for a more graceful transition during image loads.
+ */
+const thumbnailDimensions = (
+    { width: thumbnailWidth, height: thumbnailHeight }: Partial<ItemData>,
+    file: EnteFile,
+) => {
+    const { w: imageWidth, h: imageHeight } = file.pubMagicMetadata?.data ?? {};
+    if (thumbnailWidth && thumbnailHeight && imageWidth && imageHeight) {
+        const arThumb = thumbnailWidth / thumbnailHeight;
+        const arImage = imageWidth / imageHeight;
+        if (Math.abs(arThumb - arImage) < 0.1) {
+            return { width: imageWidth, height: imageHeight };
+        }
+    }
+    return { width: thumbnailWidth, height: thumbnailHeight };
+};
+/**
+ * Return a new validity for a HLS playlist containing pre-signed URLs.
  *
  * The content chunks in HLS playlist generated by
- * {@link hlsPlaylistDataForFile} use presigned URLs generated by remote (see
+ * {@link hlsPlaylistDataForFile} use pre-signed URLs generated by remote (see
  * `PreSignedRequestValidityDuration` in the museum source). These have a
  * validity of 7 days. We keep a 2 day buffer, and consider any item data that
  * uses such playlist as stale after 5 days.
@@ -697,15 +723,15 @@ export const updateFileInfoExifIfNeeded = async (itemData: ItemData) => {
     // We already have it available.
     if (_state.fileInfoExifByFileID.has(fileID)) return;
 
-    const updateNotifyAndReturn = (exifData: FileInfoExif) => {
+    const update = (exifData: FileInfoExif) => {
         _state.fileInfoExifByFileID.set(fileID, exifData);
         _state.exifObserverByFileID.get(fileID)?.(exifData);
-        return exifData;
     };
 
     // For videos, insert a placeholder.
-    if (fileType === FileType.video) {
-        return updateNotifyAndReturn(createPlaceholderFileInfoExif());
+    if (fileType == FileType.video) {
+        update(createPlaceholderFileInfoExif());
+        return;
     }
 
     // This is not a video, but the original image is not available yet.
@@ -715,12 +741,12 @@ export const updateFileInfoExifIfNeeded = async (itemData: ItemData) => {
         const file = new File([originalImageBlob], "");
         const tags = await extractRawExif(file);
         const parsed = parseExif(tags);
-        return updateNotifyAndReturn({ tags, parsed });
+        update({ tags, parsed });
     } catch (e) {
         log.error("Failed to extract exif", e);
         // Save the empty placeholder exif corresponding to the file, no point
         // in unnecessarily retrying this, it will deterministically fail again.
-        return updateNotifyAndReturn(createPlaceholderFileInfoExif());
+        update(createPlaceholderFileInfoExif());
     }
 };
 

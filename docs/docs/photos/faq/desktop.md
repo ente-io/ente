@@ -15,7 +15,8 @@ to manually update the software.
 
 ### Upload errors
 
-**How do I identify which files experienced upload issues within the desktop app?**
+**How do I identify which files experienced upload issues within the desktop
+app?**
 
 Check the sections within the upload progress bar for "Failed Uploads," "Ignored
 Uploads," and "Unsuccessful Uploads."
@@ -33,6 +34,5 @@ be specific to your distro (e.g. `xdg-desktop-menu forceupdate`).
 
 > [!NOTE]
 >
-> If you're using an AppImage and not seeing the icon, you'll need to [enable
-> AppImage desktop
-> integration](/photos/troubleshooting/desktop-install/#appimage-desktop-integration).
+> If you're using an AppImage and not seeing the icon, you'll need to
+> [enable AppImage desktop integration](/photos/troubleshooting/desktop-install/#appimage-desktop-integration).

@@ -10,7 +10,7 @@ set -e
 dcv=""
 if command -v docker >/dev/null
 then
-    dcv=`docker compose version --short 2>/dev/null`
+    dcv=`docker compose version --short 2>/dev/null || echo`
 fi
 
 if test -z "$dcv"
@@ -79,6 +79,12 @@ services:
     volumes:
       - ./museum.yaml:/museum.yaml:ro
       - ./data:/data:ro
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/ping"]
+      interval: 60s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
 
   # Resolve "localhost:3200" in the museum container to the minio container.
   socat:
@@ -96,9 +102,10 @@ services:
       - 3002:3002 # Public albums
       # - 3003:3003 # Auth
       # - 3004:3004 # Cast
-    # environment:
-    #   ENTE_API_ORIGIN: http://localhost:8080
-    #   ENTE_ALBUMS_ORIGIN: https://localhost:3002
+    # Modify these values to your custom subdomains, if using any
+    environment:
+      ENTE_API_ORIGIN: http://localhost:8080
+      ENTE_ALBUMS_ORIGIN: https://localhost:3002
 
   postgres:
     image: postgres:15
@@ -117,6 +124,8 @@ services:
     image: minio/minio
     ports:
       - 3200:3200 # MinIO API
+      # Uncomment to enable MinIO Web UI      
+      # - 3201:3201
     environment:
       MINIO_ROOT_USER: $minio_user
       MINIO_ROOT_PASSWORD: $minio_pass
@@ -128,7 +137,7 @@ services:
           sh -c '
           #!/bin/sh
 
-          while ! mc config host add h0 http://minio:3200 $minio_user $minio_pass 2>/dev/null
+          while ! mc alias set h0 http://minio:3200 $minio_user $minio_pass 2>/dev/null
           do
             echo "Waiting for minio..."
             sleep 0.5
@@ -150,13 +159,6 @@ printf " \033[1;32mN\033[0m   Created \033[1mcompose.yaml\033[0m\n"
 sleep 1
 
 cat <<EOF >museum.yaml
-key:
-      encryption: $museum_key
-      hash: $museum_hash
-
-jwt:
-      secret: $museum_jwt_secret
-
 db:
       host: postgres
       port: 5432
@@ -165,14 +167,23 @@ db:
       password: $pg_pass
 
 s3:
+      # Top-level configuration for buckets, you can override by specifying these configuration in the desired bucket.
+      # Set this to false if using external object storage bucket or bucket with SSL
       are_local_buckets: true
+      # Set this to false if using subdomain-style URL. This is set to true for ensuring compatibility with MinIO when SSL is enabled.
+      use_path_style_urls: true
       b2-eu-cen:
+         # Uncomment the below configuration to override the top-level configuration 
+         # are_local_buckets: true
+         # use_path_style_urls: true
          key: $minio_user
          secret: $minio_pass
          endpoint: localhost:3200
          region: eu-central-2
          bucket: b2-eu-cen
       wasabi-eu-central-2-v3:
+         # are_local_buckets: true
+         # use_path_style_urls: true
          key: $minio_user
          secret: $minio_pass
          endpoint: localhost:3200
@@ -180,20 +191,47 @@ s3:
          bucket: wasabi-eu-central-2-v3
          compliance: false
       scw-eu-fr-v3:
+         # are_local_buckets: true
+         # use_path_style_urls: true
          key: $minio_user
          secret: $minio_pass
          endpoint: localhost:3200
          region: eu-central-2
          bucket: scw-eu-fr-v3
+
+# Specify the base endpoints for various web apps
+apps:
+    # If you're running a self hosted instance and wish to serve public links,
+    # set this to the URL where your albums web app is running.
+    public-albums: http://localhost:3002
+    cast: http://localhost:3004
+    # Set this to the URL where your accounts web app is running, primarily used for
+    # passkey based 2FA.
+    accounts: http://localhost:3001
+
+key:
+      encryption: $museum_key
+      hash: $museum_hash
+
+jwt:
+      secret: $museum_jwt_secret
 EOF
 
 printf " \033[1;32mT\033[0m   Created \033[1mmuseum.yaml\033[0m\n"
 sleep 1
 
-printf " \033[1;32mE\033[0m   Starting docker compose\n"
-printf "\nAfter the cluster has started, open web app at \033[1mhttp://localhost:3000\033[0m\n"
-printf "(Verification code will be in the logs here)\n\n"
+printf " \033[1;32mE\033[0m   Do you want to start Ente? (y/n) [n]: "
+read -r choice
 
-sleep 1
-
-docker compose up
+if [[ "$choice" =~ ^[Yy]$ ]]; then
+    printf "\nStarting docker compose\n"
+    printf "\nAfter the cluster has started, open web app at \033[1mhttp://localhost:3000\033[0m\n"
+    printf "(Verification code will be in the logs here)\n\n"
+    docker compose up
+else
+    printf "\nTo start the cluster:\n"
+    printf " \033[1;32m$\033[0m   cd my-ente\n"
+    printf " \033[1;32m$\033[0m   docker compose up\n"
+    printf "\nAfter the cluster has started, open web app at \033[1mhttp://localhost:3000\033[0m\n"
+    printf "(Verification code will be in the logs here)\n\n"
+fi

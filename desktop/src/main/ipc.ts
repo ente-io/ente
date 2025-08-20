@@ -13,8 +13,10 @@ import type { BrowserWindow } from "electron";
 import { ipcMain } from "electron/main";
 import type {
     CollectionMapping,
+    FFmpegCommand,
     FolderWatch,
     PendingUploads,
+    UtilityProcessType,
     ZipItem,
 } from "../types/ipc";
 import { logToDisk } from "./log";
@@ -30,7 +32,7 @@ import {
     openLogDirectory,
     selectDirectory,
 } from "./services/dir";
-import { ffmpegExec } from "./services/ffmpeg";
+import { ffmpegDetermineVideoDuration, ffmpegExec } from "./services/ffmpeg";
 import {
     fsExists,
     fsFindFiles,
@@ -40,23 +42,23 @@ import {
     fsRename,
     fsRm,
     fsRmdir,
+    fsStatMtime,
     fsWriteFile,
     fsWriteFileViaBackup,
 } from "./services/fs";
 import { convertToJPEG, generateImageThumbnail } from "./services/image";
 import { logout } from "./services/logout";
-import { createMLWorker } from "./services/ml";
 import {
     lastShownChangelogVersion,
-    masterKeyB64,
-    saveMasterKeyB64,
+    masterKeyFromSafeStorage,
+    saveMasterKeyInSafeStorage,
     setLastShownChangelogVersion,
 } from "./services/store";
 import {
     clearPendingUploads,
     listZipItems,
-    markUploadedFiles,
-    markUploadedZipItems,
+    markUploadedFile,
+    markUploadedZipItem,
     pathOrZipItemSize,
     pendingUploads,
     setPendingUploads,
@@ -68,6 +70,7 @@ import {
     watchUpdateIgnoredFiles,
     watchUpdateSyncedFiles,
 } from "./services/watch";
+import { triggerCreateUtilityProcess } from "./services/workers";
 
 /**
  * Listen for IPC events sent/invoked by the renderer process, and route them to
@@ -105,10 +108,12 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle("selectDirectory", () => selectDirectory());
 
-    ipcMain.handle("masterKeyB64", () => masterKeyB64());
+    ipcMain.handle("masterKeyFromSafeStorage", () =>
+        masterKeyFromSafeStorage(),
+    );
 
-    ipcMain.handle("saveMasterKeyB64", (_, masterKeyB64: string) =>
-        saveMasterKeyB64(masterKeyB64),
+    ipcMain.handle("saveMasterKeyInSafeStorage", (_, masterKey: string) =>
+        saveMasterKeyInSafeStorage(masterKey),
     );
 
     ipcMain.handle("lastShownChangelogVersion", () =>
@@ -163,6 +168,8 @@ export const attachIPCHandlers = () => {
 
     ipcMain.handle("fsIsDir", (_, dirPath: string) => fsIsDir(dirPath));
 
+    ipcMain.handle("fsStatMtime", (_, path: string) => fsStatMtime(path));
+
     ipcMain.handle("fsFindFiles", (_, folderPath: string) =>
         fsFindFiles(folderPath),
     );
@@ -177,20 +184,26 @@ export const attachIPCHandlers = () => {
         "generateImageThumbnail",
         (
             _,
-            dataOrPathOrZipItem: Uint8Array | string | ZipItem,
+            pathOrZipItem: string | ZipItem,
             maxDimension: number,
             maxSize: number,
-        ) => generateImageThumbnail(dataOrPathOrZipItem, maxDimension, maxSize),
+        ) => generateImageThumbnail(pathOrZipItem, maxDimension, maxSize),
     );
 
     ipcMain.handle(
         "ffmpegExec",
         (
             _,
-            command: string[],
-            dataOrPathOrZipItem: Uint8Array | string | ZipItem,
+            command: FFmpegCommand,
+            pathOrZipItem: string | ZipItem,
             outputFileExtension: string,
-        ) => ffmpegExec(command, dataOrPathOrZipItem, outputFileExtension),
+        ) => ffmpegExec(command, pathOrZipItem, outputFileExtension),
+    );
+
+    ipcMain.handle(
+        "ffmpegDetermineVideoDuration",
+        (_, pathOrZipItem: string | ZipItem) =>
+            ffmpegDetermineVideoDuration(pathOrZipItem),
     );
 
     // - Upload
@@ -210,13 +223,15 @@ export const attachIPCHandlers = () => {
     );
 
     ipcMain.handle(
-        "markUploadedFiles",
-        (_, paths: PendingUploads["filePaths"]) => markUploadedFiles(paths),
+        "markUploadedFile",
+        (_, path: string, associatedPath: string | undefined) =>
+            markUploadedFile(path, associatedPath),
     );
 
     ipcMain.handle(
-        "markUploadedZipItems",
-        (_, items: PendingUploads["zipItems"]) => markUploadedZipItems(items),
+        "markUploadedZipItem",
+        (_, item: ZipItem, associatedItem: ZipItem | undefined) =>
+            markUploadedZipItem(item, associatedItem),
     );
 
     ipcMain.handle("clearPendingUploads", () => clearPendingUploads());
@@ -227,9 +242,11 @@ export const attachIPCHandlers = () => {
  * the main window to do their thing.
  */
 export const attachMainWindowIPCHandlers = (mainWindow: BrowserWindow) => {
-    // - ML
+    // - Utility processes
 
-    ipcMain.on("createMLWorker", () => createMLWorker(mainWindow));
+    ipcMain.on("triggerCreateUtilityProcess", (_, type: UtilityProcessType) =>
+        triggerCreateUtilityProcess(type, mainWindow),
+    );
 };
 
 /**

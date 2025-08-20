@@ -2,7 +2,7 @@ package user
 
 import (
 	"fmt"
-
+	"github.com/ente-io/museum/ente"
 	enteJWT "github.com/ente-io/museum/ente/jwt"
 	"github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/stacktrace"
@@ -17,13 +17,18 @@ func (c *UserController) GetJWTToken(userID int64, scope enteJWT.ClaimScope) (st
 	if scope == enteJWT.ACCOUNTS {
 		tokenExpiry = time.NMinFromNow(30)
 	}
-	// Create a new token object, specifying signing method and the claims
-	// you would like it to contain.
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &enteJWT.WebCommonJWTClaim{
+	claim := enteJWT.WebCommonJWTClaim{
 		UserID:     userID,
 		ExpiryTime: tokenExpiry,
 		ClaimScope: &scope,
-	})
+	}
+	return c.GetJWTTokenForClaim(&claim)
+}
+
+func (c *UserController) GetJWTTokenForClaim(claim *enteJWT.WebCommonJWTClaim) (string, error) {
+	// Create a new token object, specifying signing method and the claims
+	// you would like it to contain.
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
 	// Sign and get the complete encoded token as a string using the secret
 	tokenString, err := token.SignedString(c.JwtSecret)
 
@@ -33,7 +38,7 @@ func (c *UserController) GetJWTToken(userID int64, scope enteJWT.ClaimScope) (st
 	return tokenString, nil
 }
 
-func (c *UserController) ValidateJWTToken(jwtToken string, scope enteJWT.ClaimScope) (int64, error) {
+func (c *UserController) ValidateJWTToken(jwtToken string, scope enteJWT.ClaimScope) (*enteJWT.WebCommonJWTClaim, error) {
 	token, err := jwt.ParseWithClaims(jwtToken, &enteJWT.WebCommonJWTClaim{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, stacktrace.Propagate(fmt.Errorf("unexpected signing method: %v", token.Header["alg"]), "")
@@ -41,14 +46,17 @@ func (c *UserController) ValidateJWTToken(jwtToken string, scope enteJWT.ClaimSc
 		return c.JwtSecret, nil
 	})
 	if err != nil {
-		return -1, stacktrace.Propagate(err, "JWT parsed failed")
+		if ve, ok := err.(*jwt.ValidationError); ok && ve.Error() == "token expired" {
+			return nil, stacktrace.Propagate(ente.NewBadRequestWithMessage("token expired"), "")
+		}
+		return nil, stacktrace.Propagate(err, "JWT parsed failed")
 	}
 	claims, ok := token.Claims.(*enteJWT.WebCommonJWTClaim)
 	if ok && token.Valid {
 		if claims.GetScope() != scope {
-			return -1, stacktrace.Propagate(fmt.Errorf("recived claimScope %s is different than expected scope: %s", claims.GetScope(), scope), "")
+			return nil, stacktrace.Propagate(fmt.Errorf("recived claimScope %s is different than expected scope: %s", claims.GetScope(), scope), "")
 		}
-		return claims.UserID, nil
+		return claims, nil
 	}
-	return -1, stacktrace.Propagate(err, "JWT claim failed")
+	return nil, stacktrace.Propagate(err, "JWT claim failed")
 }

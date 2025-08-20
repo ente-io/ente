@@ -1,8 +1,26 @@
 # CHANGELOG
 
-## v1.7.12 (Unreleased)
+## v1.7.15 (Unreleased)
 
 - .
+
+## v1.7.14
+
+- Increase file size limit to 10 GB.
+
+## v1.7.13
+
+- Generate streams for videos (beta)
+
+    > Streamable videos can be enabled in Preferences. For more details, see the
+    > [video streaming FAQ](https://help.ente.io/photos/faq/video-streaming).
+
+- Support Turkish translations.
+
+## v1.7.12
+
+- Improved video player with streaming support (for already processed videos).
+- Support Arabic translations.
 
 ## v1.7.11
 

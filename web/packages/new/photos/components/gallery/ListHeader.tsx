@@ -38,8 +38,8 @@ interface GalleryItemsSummaryProps {
 }
 
 /**
- * A component suitable for being used as a (non-sticky) summary displayed on
- * top of the of a list of photos (or other items) shown in the gallery.
+ * A component suitable for being used as a summary displayed on top of the of a
+ * list of photos (or other items) shown in the gallery.
  */
 export const GalleryItemsSummary: React.FC<GalleryItemsSummaryProps> = ({
     name,

@@ -1,15 +1,16 @@
 import { expose, wrap } from "comlink";
-import { clientPackageName } from "ente-base/app";
+import { clientIdentifier } from "ente-base/app";
 import { assertionFailed } from "ente-base/assert";
-import { isHTTP4xxError } from "ente-base/http";
+import { isHTTP4xxError, isHTTPErrorWithStatus } from "ente-base/http";
 import log from "ente-base/log";
 import { logUnhandledErrorsAndRejectionsInWorker } from "ente-base/log-web";
 import type { ElectronMLWorker } from "ente-base/types/ipc";
 import { isNetworkDownloadError } from "ente-gallery/services/download";
-import type { UploadItem } from "ente-gallery/services/upload";
+import type { ProcessableUploadItem } from "ente-gallery/services/upload";
 import { fileLogID, type EnteFile } from "ente-media/file";
+import { savedTrashItemFileIDs } from "ente-new/photos/services/trash";
 import { wait } from "ente-utils/promise";
-import { getAllLocalFiles, getLocalTrashedFiles } from "../files";
+import { savedCollectionFiles } from "../photos-fdb";
 import {
     createImageBitmapAndData,
     fetchRenderableBlob,
@@ -29,8 +30,8 @@ import {
 } from "./cluster";
 import { saveFaceCrops } from "./crop";
 import {
-    getIndexableFileIDs,
     markIndexingFailed,
+    readNextIndexableFileIDs,
     savedFaceIndexes,
     saveIndexes,
     updateAssumingLocalFiles,
@@ -64,11 +65,17 @@ const idleDurationStart = 5; /* 5 seconds */
 const idleDurationMax = 16 * 60; /* 16 minutes */
 
 interface IndexableItem {
-    /** The {@link EnteFile} to (potentially) index. */
+    /**
+     * The {@link EnteFile} to (potentially) index.
+     */
     file: EnteFile;
-    /** If the file was uploaded from the current client, then its contents. */
-    uploadItem: UploadItem | undefined;
-    /** The existing ML data on remote corresponding to this file. */
+    /**
+     * If the file was uploaded from the current client, then its contents.
+     */
+    processableUploadItem: ProcessableUploadItem | undefined;
+    /**
+     * The existing ML data (if any) on remote corresponding to this file.
+     */
     remoteMLData: RemoteMLData | undefined;
 }
 
@@ -173,29 +180,17 @@ export class MLWorker {
     /**
      * Called when a file is uploaded from the current client.
      *
-     * This is a great opportunity to index since we already have the in-memory
-     * representation of the file's contents with us and won't need to download
-     * the file from remote.
+     * This is a great opportunity to index since we already have the file with
+     * us and won't need to download the file from remote.
      */
-    onUpload(file: EnteFile, uploadItem: UploadItem) {
+    onUpload(file: EnteFile, processableUploadItem: ProcessableUploadItem) {
         // Add the recently uploaded file to the live indexing queue.
-        //
-        // Limit the queue to some maximum so that we don't keep growing
-        // indefinitely (and cause memory pressure) if the speed of uploads is
-        // exceeding the speed of indexing.
-        //
-        // In general, we can be sloppy with the items in the live queue (as
-        // long as we're not systematically ignoring it). This is because the
-        // live queue is just an optimization: if a file doesn't get indexed via
-        // the live queue, it'll later get indexed anyway when we backfill.
-        if (this.liveQ.length < 200) {
-            // The file is just being uploaded, and so will not have any
-            // pre-existing ML data on remote.
-            this.liveQ.push({ file, uploadItem, remoteMLData: undefined });
-            this.wakeUp();
-        } else {
-            log.debug(() => "Ignoring upload item since liveQ is full");
-        }
+        this.liveQ.push({
+            file,
+            processableUploadItem,
+            remoteMLData: undefined,
+        });
+        this.wakeUp();
     }
 
     /**
@@ -242,13 +237,15 @@ export class MLWorker {
         // If there is items remaining,
         if (items.length > 0) {
             // Index them.
-            const allSuccess = await indexNextBatch(
+            const indexedCount = await indexNextBatch(
                 items,
                 this.electron!,
                 this.delegate,
             );
-            if (allSuccess) {
-                // Everything is running smoothly. Reset the idle duration.
+            if (indexedCount > 0) {
+                // We made some progress, so there are no complete blockers
+                // (e.g. network being offline). Reset the idle duration and
+                // move on to the next batch (if any).
                 this.idleDuration = idleDurationStart;
                 // And tick again.
                 scheduleTick();
@@ -307,7 +304,7 @@ export class MLWorker {
         // Return files after annotating them with their existing ML data.
         return Array.from(fileByID, ([id, file]) => ({
             file,
-            uploadItem: undefined,
+            processableUploadItem: undefined,
             remoteMLData: mlDataByID.get(id),
         }));
     }
@@ -321,13 +318,13 @@ export class MLWorker {
      * after we have fetched the latest cgroups from remote (so that we do no
      * overwrite any remote updates).
      *
-     * @param masterKey The user's master key, required for updating remote
-     * cgroups if needed.
+     * @param masterKey The user's master key (as a base64 string), required for
+     * updating remote cgroups if needed.
      */
-    async clusterFaces(masterKey: Uint8Array) {
+    async clusterFaces(masterKey: string) {
         const { clusters, modifiedClusterIDs } = await _clusterFaces(
             await savedFaceIndexes(),
-            await getAllLocalFiles(),
+            await savedCollectionFiles(),
             (progress) => this.updateClusteringProgress(progress),
         );
         await reconcileClusters(clusters, modifiedClusterIDs, masterKey);
@@ -354,11 +351,7 @@ logUnhandledErrorsAndRejectionsInWorker();
 /**
  * Index the given batch of items.
  *
- * Returns `false` to indicate that either an error occurred, or that we cannot
- * currently process files since we don't have network connectivity.
- *
- * Which means that when it returns true, all is well and if there are more
- * things pending to process, we should chug along at full speed.
+ * @returns the count of items which were indexed.
  */
 const indexNextBatch = async (
     items: IndexableItem[],
@@ -370,7 +363,7 @@ const indexNextBatch = async (
     // were able to upload just a bit ago but don't have network now.
     if (!self.navigator.onLine) {
         log.info("Skipping ML indexing since we are not online");
-        return false;
+        return 0;
     }
 
     // Keep track if any of the items failed.
@@ -417,14 +410,16 @@ const indexNextBatch = async (
     // Clear any cached CLIP indexes, since now we might have new ones.
     clearCachedCLIPIndexes();
 
+    const indexedCount = items.length - failureCount;
+
     log.info(
         failureCount > 0
-            ? `Indexed ${items.length - failureCount} files (${failureCount} failed)`
+            ? `Indexed ${indexedCount} files (${failureCount} failed)`
             : `Indexed ${items.length} files`,
     );
 
-    // Return true if nothing failed.
-    return failureCount == 0;
+    // Return the count of indexed files.
+    return indexedCount;
 };
 
 /**
@@ -441,18 +436,16 @@ const indexNextBatch = async (
 const syncWithLocalFilesAndGetFilesToIndex = async (
     count: number,
 ): Promise<Map<number, EnteFile>> => {
-    const localFiles = await getAllLocalFiles();
-    const localFileByID = new Map(localFiles.map((f) => [f.id, f]));
-
-    const localTrashFileIDs = (await getLocalTrashedFiles()).map((f) => f.id);
+    const collectionFiles = await savedCollectionFiles();
+    const fileByID = new Map(collectionFiles.map((f) => [f.id, f]));
 
     await updateAssumingLocalFiles(
-        Array.from(localFileByID.keys()),
-        localTrashFileIDs,
+        Array.from(fileByID.keys()),
+        await savedTrashItemFileIDs(),
     );
 
-    const fileIDsToIndex = await getIndexableFileIDs(count);
-    return new Map(fileIDsToIndex.map((id) => [id, localFileByID.get(id)!]));
+    const fileIDsToIndex = await readNextIndexableFileIDs(count);
+    return new Map(fileIDsToIndex.map((id) => [id, fileByID.get(id)!]));
 };
 
 /**
@@ -494,7 +487,7 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
  * then remote will return a 413 Request Entity Too Large).
  */
 const index = async (
-    { file, uploadItem, remoteMLData }: IndexableItem,
+    { file, processableUploadItem, remoteMLData }: IndexableItem,
     electron: ElectronMLWorker,
 ) => {
     const f = fileLogID(file);
@@ -544,7 +537,11 @@ const index = async (
 
     let renderableBlob: Blob;
     try {
-        renderableBlob = await fetchRenderableBlob(file, uploadItem, electron);
+        renderableBlob = await fetchRenderableBlob(
+            file,
+            processableUploadItem,
+            electron,
+        );
     } catch (e) {
         // Network errors are transient and shouldn't be marked.
         //
@@ -594,13 +591,13 @@ const index = async (
 
         const remoteFaceIndex = existingRemoteFaceIndex ?? {
             version: faceIndexingVersion,
-            client: clientPackageName,
+            client: clientIdentifier,
             ...faceIndex,
         };
 
         const remoteCLIPIndex = existingRemoteCLIPIndex ?? {
             version: clipIndexingVersion,
-            client: clientPackageName,
+            client: clientIdentifier,
             ...clipIndex,
         };
 
@@ -618,10 +615,18 @@ const index = async (
         log.debug(() => ["Uploading ML data", rawMLData]);
 
         try {
-            await putMLData(file, rawMLData);
+            const lastUpdatedAt = remoteMLData?.updatedAt ?? 0;
+            await putMLData(file, rawMLData, lastUpdatedAt);
         } catch (e) {
             // See: [Note: Transient and permanent indexing failures]
-            if (isHTTP4xxError(e)) await markIndexingFailed(fileID);
+            if (isHTTP4xxError(e)) {
+                // 409 Conflict indicates that we tried overwriting existing
+                // mldata. Don't mark it as a failure, the file has already been
+                // processed.
+                if (!isHTTPErrorWithStatus(e, 409)) {
+                    await markIndexingFailed(fileID);
+                }
+            }
             throw e;
         }
 

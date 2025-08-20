@@ -17,6 +17,7 @@ import (
 
 	"github.com/ente-io/museum/ente"
 	emailCtrl "github.com/ente-io/museum/pkg/controller/email"
+	timeUtil "github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/museum/pkg/repo"
 	"github.com/ente-io/museum/pkg/utils/billing"
 	"github.com/ente-io/museum/pkg/utils/email"
@@ -233,11 +234,14 @@ func (c *StripeController) handleCheckoutSessionCompleted(event stripe.Event, co
 			log.Warn("Webhook is reporting an outdated purchase that was already verified stripeSubscription:", stripeSubscription.ID)
 			return ente.StripeEventLog{UserID: userID, StripeSubscription: stripeSubscription, Event: event}, nil
 		}
+		isUpgradingFromFreePlan := currentSubscription.ProductID == ente.FreePlanProductID
+		if isUpgradingFromFreePlan {
+			newSubscription.UpgradedAt = timeUtil.Microseconds()
+		}
 		err = c.BillingRepo.ReplaceSubscription(
 			currentSubscription.ID,
 			newSubscription,
 		)
-		isUpgradingFromFreePlan := currentSubscription.ProductID == ente.FreePlanProductID
 		if isUpgradingFromFreePlan {
 			go func() {
 				cur := currency.MustParseISO(string(session.Currency))

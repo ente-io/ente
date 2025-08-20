@@ -54,9 +54,11 @@ The root `package.json` also has a convenience dev dependency:
 > For example, ideally we'd just have specified the react dependencies in
 > _ente-base_, but that leads to missing peer dependency warnings in our other
 > packages, so we need to need to repeat them. For now, we manually ensure that
-> all of them use the same version. Additionally, we pin the versions of the
-> react types using the resolutions field in the top level `package.json`, to
-> avoid type errors because of multiple versions of react types being in scope.
+> all of them use the same version.
+>
+> Additionally, we pin the versions of the react types using the resolutions
+> field in the top level `package.json`, to avoid type errors because of
+> multiple versions of react types being in scope.
 
 ## Cryptography
 
@@ -202,20 +204,26 @@ via [@fontsource-variable/inter](https://fontsource.org/fonts/inter/install).
 
 - [debounce](https://github.com/sindresorhus/debounce) and its
   promise-supporting sibling
-  [pDebounce](https://github.com/sindresorhus/p-debounce) are used for
+  [p-debounce](https://github.com/sindresorhus/p-debounce) are used for
   debouncing operations (See also: `[Note: Throttle and debounce]`).
+
+- [bip39](https://github.com/bitcoinjs/bip39) is used for generating the 24-word
+  recovery key mnemonic.
 
 - [zxcvbn](https://github.com/dropbox/zxcvbn) is used for password strength
   estimation.
 
+- [fast-srp-hap](https://github.com/homebridge/fast-srp) is used for the maths
+  underlying the SRP protocol.
+
 ## Media
 
-- [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm) is used to run FFmpeg
-  in the browser using WebAssembly (Wasm). Note that this is substantially
-  slower than native ffmpeg (the desktop app can, and does, bundle the faster
-  native ffmpeg implementation too).
+- [@ffmpeg/ffmpeg](https://github.com/ffmpegwasm/ffmpeg.wasm) is used to run
+  FFmpeg in the browser using WebAssembly (Wasm). Note that this is
+  substantially slower than native ffmpeg (the desktop app can, and does, bundle
+  the faster native ffmpeg implementation too).
 
-- [ExifReader](https://github.com/mattiasw/ExifReader) is used for Exif parsing.
+- [exifreader](https://github.com/mattiasw/ExifReader) is used for Exif parsing.
 
 - [jszip](https://github.com/Stuk/jszip) is used for reading zip files in the
   web code (Live photos are zip files under the hood). Note that the desktop app
@@ -232,11 +240,10 @@ via [@fontsource-variable/inter](https://fontsource.org/fonts/inter/install).
 
 ## Photos app specific
 
-- [PhotoSwipe](https://photoswipe.com) provides the base image viewer on top of
+- [photoswipe](https://photoswipe.com) provides the base image viewer on top of
   which we've built our file viewer.
 
 - For streaming video (HLS), we use three libraries:
-
     1. [media-chrome](https://github.com/muxinc/media-chrome) provides custom
        video controls which we use when playing HLS playlists (we use custom
        controls to provide a standardized UX across browsers, but really the
@@ -252,10 +259,7 @@ via [@fontsource-variable/inter](https://fontsource.org/fonts/inter/install).
        do not have native support for HLS playlists).
 
 - [react-dropzone](https://github.com/react-dropzone/react-dropzone/) is a React
-  hook to create a drag-and-drop input zone. Note that we pin to the last
-  version in the 14.2 series, since if we use 14.3 onwards (I tested till
-  14.3.5) then we are unable to get back a path from the file by using the
-  `webUtils.getPathForFile` function provided by Electron.
+  hook to create a drag-and-drop input zone.
 
 - [sanitize-filename](https://github.com/parshap/node-sanitize-filename) is for
   converting arbitrary strings into strings that are suitable for being used as
@@ -264,8 +268,8 @@ via [@fontsource-variable/inter](https://fontsource.org/fonts/inter/install).
 - [chrono-node](https://github.com/wanasit/chrono) is used for parsing natural
   language queries into dates for showing search results.
 
-- [matrix](https://github.com/mljs/matrix) is mathematical matrix abstraction by
-  the machine learning code. It is used alongwith
+- [ml-matrix](https://github.com/mljs/matrix) is mathematical matrix abstraction
+  by the machine learning code. It is used alongwith
   [similarity-transformation](https://github.com/shaileshpandit/similarity-transformation-js)
   during face alignment.
 
@@ -282,3 +286,20 @@ via [@fontsource-variable/inter](https://fontsource.org/fonts/inter/install).
 - However, otpauth doesn't support steam OTPs. For these, we need to compute the
   SHA-1, and we use the same library, `jssha` that `otpauth` uses since it is
   already part of our bundle (transitively).
+
+## Pinned
+
+- `otpauth` is pinned to 9.2.4 since subsequent versions changed the underlying
+  hash library, which requires a change in the steam OTP generation code.
+
+- `react-dropzone` is pinned to the 14.2.10, the last version in the 14.2
+  series, since if we use 14.3 onwards (I tested till 14.3.5) then we are unable
+  to get back a path from the file by using the `webUtils.getPathForFile`
+  function provided by Electron. See:
+  https://github.com/react-dropzone/react-dropzone/issues/1411
+
+- `@stripe/stripe-js` is pinned to the latest 1.x (it works as it is currently,
+  migrating to newer major versions requires headspace since it _might_ also
+  require museum changes).
+
+- `file-type` is pinned to 16.5.4 since subsequent versions are ESM only.

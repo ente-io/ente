@@ -1,0 +1,1831 @@
+{
+  "@@locale ": "en",
+  "enterYourEmailAddress": "Nhập địa chỉ email của bạn",
+  "enterYourNewEmailAddress": "Nhập địa chỉ email mới của bạn",
+  "accountWelcomeBack": "Chào mừng bạn trở lại!",
+  "emailAlreadyRegistered": "Email đã được đăng ký.",
+  "emailNotRegistered": "Email chưa được đăng ký.",
+  "email": "Email",
+  "cancel": "Hủy",
+  "verify": "Xác minh",
+  "invalidEmailAddress": "Địa chỉ email không hợp lệ",
+  "enterValidEmail": "Vui lòng nhập một địa chỉ email hợp lệ.",
+  "deleteAccount": "Xóa tài khoản",
+  "askDeleteReason": "Lý do chính bạn xóa tài khoản là gì?",
+  "deleteAccountFeedbackPrompt": "Chúng tôi rất tiếc khi thấy bạn rời đi. Vui lòng chia sẻ phản hồi của bạn để giúp chúng tôi cải thiện.",
+  "feedback": "Phản hồi",
+  "kindlyHelpUsWithThisInformation": "Mong bạn giúp chúng tôi thông tin này",
+  "confirmDeletePrompt": "Có, tôi muốn xóa vĩnh viễn tài khoản này và tất cả dữ liệu.",
+  "confirmAccountDeletion": "Xác nhận xóa tài khoản",
+  "deleteAccountPermanentlyButton": "Xóa tài khoản vĩnh viễn",
+  "yourAccountHasBeenDeleted": "Tài khoản của bạn đã bị xóa",
+  "selectReason": "Chọn lý do",
+  "deleteReason1": "Nó thiếu một tính năng quan trọng mà tôi cần",
+  "deleteReason2": "Ứng dụng hoặc một tính năng không hoạt động như tôi muốn",
+  "deleteReason3": "Tôi tìm thấy một dịch vụ khác mà tôi thích hơn",
+  "deleteReason4": "Lý do không có trong danh sách",
+  "sendEmail": "Gửi email",
+  "deleteRequestSLAText": "Yêu cầu của bạn sẽ được xử lý trong vòng 72 giờ.",
+  "deleteEmailRequest": "Vui lòng gửi email đến <warning>account-deletion@ente.io</warning> từ địa chỉ email đã đăng ký của bạn.",
+  "entePhotosPerm": "Ente <i>cần quyền để</i> lưu giữ ảnh của bạn",
+  "ok": "Được",
+  "createAccount": "Tạo tài khoản",
+  "createNewAccount": "Tạo tài khoản mới",
+  "password": "Mật khẩu",
+  "confirmPassword": "Xác nhận mật khẩu",
+  "activeSessions": "Phiên hoạt động",
+  "oops": "Ốii!",
+  "somethingWentWrongPleaseTryAgain": "Có gì đó không ổn, vui lòng thử lại",
+  "thisWillLogYouOutOfThisDevice": "Bạn sẽ đăng xuất khỏi thiết bị này!",
+  "thisWillLogYouOutOfTheFollowingDevice": "Bạn cũng sẽ đăng xuất khỏi những thiết bị sau:",
+  "terminateSession": "Kết thúc phiên? ",
+  "terminate": "Kết thúc",
+  "thisDevice": "Thiết bị này",
+  "recoverButton": "Khôi phục",
+  "recoverySuccessful": "Khôi phục thành công!",
+  "decrypting": "Đang giải mã...",
+  "incorrectRecoveryKeyTitle": "Mã khôi phục không chính xác",
+  "incorrectRecoveryKeyBody": "Mã khôi phục bạn nhập không chính xác",
+  "forgotPassword": "Quên mật khẩu",
+  "enterYourRecoveryKey": "Nhập mã khôi phục của bạn",
+  "noRecoveryKey": "Không có mã khôi phục?",
+  "sorry": "Xin lỗi",
+  "noRecoveryKeyNoDecryption": "Do tính chất của giao thức mã hóa đầu cuối, không thể giải mã dữ liệu của bạn mà không có mật khẩu hoặc mã khôi phục",
+  "verifyEmail": "Xác minh email",
+  "toResetVerifyEmail": "Để đặt lại mật khẩu, vui lòng xác minh email của bạn trước.",
+  "checkInboxAndSpamFolder": "Vui lòng kiểm tra hộp thư đến (và thư rác) để hoàn tất xác minh",
+  "tapToEnterCode": "Nhấn để nhập mã",
+  "resendEmail": "Gửi lại email",
+  "weHaveSendEmailTo": "Chúng tôi đã gửi một email đến <green>{email}</green>",
+  "@weHaveSendEmailTo": {
+    "description": "Text to indicate that we have sent a mail to the user",
+    "placeholders": {
+      "email": {
+        "description": "The email address of the user",
+        "type": "String",
+        "example": "example@ente.io"
+      }
+    }
+  },
+  "setPasswordTitle": "Đặt mật khẩu",
+  "changePasswordTitle": "Thay đổi mật khẩu",
+  "resetPasswordTitle": "Đặt lại mật khẩu",
+  "encryptionKeys": "Khóa mã hóa",
+  "passwordWarning": "Chúng tôi không lưu trữ mật khẩu này, nên nếu bạn quên, <underline>chúng tôi không thể giải mã dữ liệu của bạn</underline>",
+  "enterPasswordToEncrypt": "Vui lòng nhập một mật khẩu dùng để mã hóa dữ liệu của bạn",
+  "enterNewPasswordToEncrypt": "Vui lòng nhập một mật khẩu mới để mã hóa dữ liệu của bạn",
+  "weakStrength": "Yếu",
+  "strongStrength": "Mạnh",
+  "moderateStrength": "Trung bình",
+  "passwordStrength": "Độ mạnh mật khẩu: {passwordStrengthValue}",
+  "@passwordStrength": {
+    "description": "Text to indicate the password strength",
+    "placeholders": {
+      "passwordStrengthValue": {
+        "description": "The strength of the password as a string",
+        "type": "String",
+        "example": "Weak or Moderate or Strong"
+      }
+    },
+    "message": "Password Strength: {passwordStrengthText}"
+  },
+  "passwordChangedSuccessfully": "Đã thay đổi mật khẩu thành công",
+  "generatingEncryptionKeys": "Đang mã hóa...",
+  "pleaseWait": "Vui lòng chờ...",
+  "continueLabel": "Tiếp tục",
+  "insecureDevice": "Thiết bị không an toàn",
+  "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": "Rất tiếc, chúng tôi không thể tạo khóa an toàn trên thiết bị này.\n\nVui lòng đăng ký từ một thiết bị khác.",
+  "howItWorks": "Cách thức hoạt động",
+  "encryption": "Mã hóa",
+  "ackPasswordLostWarning": "Tôi hiểu rằng nếu mất mật khẩu, dữ liệu của tôi sẽ mất vì nó được <underline>mã hóa đầu cuối</underline>.",
+  "privacyPolicyTitle": "Chính sách bảo mật",
+  "termsOfServicesTitle": "Điều khoản",
+  "signUpTerms": "Tôi đồng ý với <u-terms>điều khoản</u-terms> và <u-policy>chính sách bảo mật</u-policy>",
+  "logInLabel": "Đăng nhập",
+  "loginTerms": "Nhấn vào đăng nhập, tôi đồng ý với <u-terms>điều khoản</u-terms> và <u-policy>chính sách bảo mật</u-policy>",
+  "changeEmail": "Đổi email",
+  "enterYourPassword": "Nhập mật khẩu của bạn",
+  "welcomeBack": "Chào mừng trở lại!",
+  "contactSupport": "Liên hệ hỗ trợ",
+  "incorrectPasswordTitle": "Mật khẩu không đúng",
+  "pleaseTryAgain": "Vui lòng thử lại",
+  "recreatePasswordTitle": "Tạo lại mật khẩu",
+  "useRecoveryKey": "Dùng mã khôi phục",
+  "recreatePasswordBody": "Thiết bị hiện tại không đủ mạnh để xác minh mật khẩu của bạn, nhưng chúng tôi có thể tạo lại để nó hoạt động với tất cả thiết bị.\n\nVui lòng đăng nhập bằng mã khôi phục và tạo lại mật khẩu (bạn có thể dùng lại mật khẩu cũ nếu muốn).",
+  "verifyPassword": "Xác minh mật khẩu",
+  "recoveryKey": "Mã khôi phục",
+  "recoveryKeyOnForgotPassword": "Nếu bạn quên mật khẩu, cách duy nhất để khôi phục dữ liệu của bạn là dùng mã này.",
+  "recoveryKeySaveDescription": "Chúng tôi không lưu trữ mã này, nên hãy lưu nó ở nơi an toàn.",
+  "doThisLater": "Để sau",
+  "saveKey": "Lưu mã",
+  "recoveryKeyCopiedToClipboard": "Đã sao chép mã khôi phục vào bộ nhớ tạm",
+  "recoverAccount": "Khôi phục tài khoản",
+  "recover": "Khôi phục",
+  "dropSupportEmail": "Vui lòng gửi email đến {supportEmail} từ địa chỉ email đã đăng ký của bạn",
+  "@dropSupportEmail": {
+    "placeholders": {
+      "supportEmail": {
+        "description": "The support email address",
+        "type": "String",
+        "example": "support@ente.io"
+      }
+    }
+  },
+  "twofactorSetup": "Cài đặt xác minh 2 bước",
+  "enterCode": "Nhập mã",
+  "scanCode": "Quét mã",
+  "codeCopiedToClipboard": "Mã đã được sao chép vào bộ nhớ tạm",
+  "copypasteThisCodentoYourAuthenticatorApp": "Chép & dán mã này\nvào ứng dụng xác thực của bạn",
+  "tapToCopy": "nhấn để sao chép",
+  "scanThisBarcodeWithnyourAuthenticatorApp": "Quét mã vạch này bằng\nứng dụng xác thực của bạn",
+  "enterThe6digitCodeFromnyourAuthenticatorApp": "Nhập mã 6 chữ số từ\nứng dụng xác thực của bạn",
+  "confirm": "Xác nhận",
+  "setupComplete": "Cài đặt hoàn tất",
+  "saveYourRecoveryKeyIfYouHaventAlready": "Lưu mã khôi phục của bạn nếu bạn chưa làm",
+  "thisCanBeUsedToRecoverYourAccountIfYou": "Chúng có thể giúp khôi phục tài khoản của bạn nếu bạn mất xác thực 2 bước",
+  "twofactorAuthenticationPageTitle": "Xác thực 2 bước",
+  "lostDevice": "Mất thiết bị?",
+  "verifyingRecoveryKey": "Đang xác minh mã khôi phục...",
+  "recoveryKeyVerified": "Mã khôi phục đã được xác minh",
+  "recoveryKeySuccessBody": "Tuyệt! Mã khôi phục của bạn hợp lệ. Cảm ơn đã xác minh.\n\nNhớ lưu giữ mã khôi phục của bạn ở nơi an toàn.",
+  "invalidRecoveryKey": "Mã khôi phục không hợp lệ. Vui lòng đảm bảo nó chứa 24 từ, và đúng chính tả từng từ.\n\nNếu bạn nhập loại mã khôi phục cũ, hãy đảm bảo nó dài 64 ký tự, và kiểm tra từng ký tự.",
+  "invalidKey": "Mã không hợp lệ",
+  "tryAgain": "Thử lại",
+  "viewRecoveryKey": "Xem mã khôi phục",
+  "confirmRecoveryKey": "Xác nhận mã khôi phục",
+  "recoveryKeyVerifyReason": "Mã khôi phục là cách duy nhất để khôi phục ảnh của bạn nếu bạn quên mật khẩu. Bạn có thể xem mã khôi phục của mình trong Cài đặt > Tài khoản.\n\nVui lòng nhập mã khôi phục của bạn ở đây để xác minh rằng bạn đã lưu nó đúng cách.",
+  "confirmYourRecoveryKey": "Xác nhận mã khôi phục của bạn",
+  "addViewer": "Thêm người xem",
+  "addCollaborator": "Thêm cộng tác viên",
+  "addANewEmail": "Thêm một email mới",
+  "orPickAnExistingOne": "Hoặc chọn một cái có sẵn",
+  "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum": "Cộng tác viên có thể thêm ảnh và video vào album chia sẻ.",
+  "enterEmail": "Nhập email",
+  "albumOwner": "Chủ sở hữu",
+  "@albumOwner": {
+    "description": "Role of the album owner"
+  },
+  "you": "Bạn",
+  "collaborator": "Cộng tác viên",
+  "addMore": "Thêm nhiều hơn",
+  "@addMore": {
+    "description": "Button text to add more collaborators/viewers"
+  },
+  "viewer": "Người xem",
+  "remove": "Xóa",
+  "removeParticipant": "Xóa người tham gia",
+  "@removeParticipant": {
+    "description": "menuSectionTitle for removing a participant"
+  },
+  "manage": "Quản lý",
+  "addedAs": "Đã thêm như",
+  "changePermissions": "Thay đổi quyền?",
+  "yesConvertToViewer": "Có, chuyển thành người xem",
+  "cannotAddMorePhotosAfterBecomingViewer": "{user} sẽ không thể thêm ảnh vào album này\n\nHọ vẫn có thể xóa ảnh đã thêm bởi họ",
+  "allowAddingPhotos": "Cho phép thêm ảnh",
+  "@allowAddingPhotos": {
+    "description": "Switch button to enable uploading photos to a public link"
+  },
+  "allowAddPhotosDescription": "Cho phép người có liên kết thêm ảnh vào album chia sẻ.",
+  "passwordLock": "Khóa bằng mật khẩu",
+  "canNotOpenTitle": "Không thể mở album này",
+  "canNotOpenBody": "Rất tiếc, album này không thể mở trong ứng dụng.",
+  "disableDownloadWarningTitle": "Xin lưu ý",
+  "disableDownloadWarningBody": "Người xem vẫn có thể chụp màn hình hoặc sao chép ảnh của bạn bằng các công cụ bên ngoài",
+  "allowDownloads": "Cho phép tải xuống",
+  "linkDeviceLimit": "Giới hạn thiết bị",
+  "noDeviceLimit": "Không có",
+  "@noDeviceLimit": {
+    "description": "Text to indicate that there is limit on number of devices"
+  },
+  "linkExpiry": "Hết hạn liên kết",
+  "linkExpired": "Hết hạn",
+  "linkEnabled": "Đã bật",
+  "linkNeverExpires": "Không bao giờ",
+  "expiredLinkInfo": "Liên kết này đã hết hạn. Vui lòng chọn thời gian hết hạn mới hoặc tắt tính năng hết hạn liên kết.",
+  "setAPassword": "Đặt mật khẩu",
+  "lockButtonLabel": "Khóa",
+  "enterPassword": "Nhập mật khẩu",
+  "removeLink": "Xóa liên kết",
+  "manageLink": "Quản lý liên kết",
+  "linkExpiresOn": "Liên kết sẽ hết hạn vào {expiryTime}",
+  "albumUpdated": "Album đã được cập nhật",
+  "never": "Không bao giờ",
+  "custom": "Tùy chỉnh",
+  "@custom": {
+    "description": "Label for setting custom value for link expiry"
+  },
+  "after1Hour": "Sau 1 giờ",
+  "after1Day": "Sau 1 ngày",
+  "after1Week": "Sau 1 tuần",
+  "after1Month": "Sau 1 tháng",
+  "after1Year": "Sau 1 năm",
+  "manageParticipants": "Quản lý",
+  "albumParticipantsCount": "{count, plural, =0 {Không có người tham gia} =1 {1 người tham gia} other {{count} Người tham gia}}",
+  "@albumParticipantsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    },
+    "description": "Number of participants in an album, including the album owner."
+  },
+  "collabLinkSectionDescription": "Tạo một liên kết cho phép mọi người thêm và xem ảnh trong album chia sẻ của bạn mà không cần ứng dụng hoặc tài khoản Ente. Phù hợp để thu thập ảnh sự kiện.",
+  "collectPhotos": "Thu thập ảnh",
+  "collaborativeLink": "Liên kết cộng tác",
+  "shareWithNonenteUsers": "Chia sẻ với người không dùng Ente",
+  "createPublicLink": "Tạo liên kết công khai",
+  "sendLink": "Gửi liên kết",
+  "copyLink": "Sao chép liên kết",
+  "linkHasExpired": "Liên kết đã hết hạn",
+  "publicLinkEnabled": "Liên kết công khai đã được bật",
+  "shareALink": "Chia sẻ một liên kết",
+  "sharedAlbumSectionDescription": "Tạo album chia sẻ và cộng tác với người dùng Ente khác, bao gồm người dùng gói miễn phí.",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Chia sẻ với những người cụ thể} =1 {Chia sẻ với 1 người} other {Chia sẻ với {numberOfPeople} người}}",
+  "@shareWithPeopleSectionTitle": {
+    "placeholders": {
+      "numberOfPeople": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "thisIsYourVerificationId": "Đây là ID xác minh của bạn",
+  "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Ai đó chia sẻ album với bạn nên thấy cùng một ID trên thiết bị của họ.",
+  "howToViewShareeVerificationID": "Hãy chỉ họ nhấn giữ địa chỉ email của họ trên màn hình cài đặt, và xác minh rằng ID trên cả hai thiết bị khớp nhau.",
+  "thisIsPersonVerificationId": "Đây là ID xác minh của {email}",
+  "@thisIsPersonVerificationId": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@ente.io"
+      }
+    }
+  },
+  "verificationId": "ID xác minh",
+  "verifyEmailID": "Xác minh {email}",
+  "emailNoEnteAccount": "{email} không có tài khoản Ente.\n\nGửi họ một lời mời để chia sẻ ảnh.",
+  "shareMyVerificationID": "Đây là ID xác minh của tôi: {verificationID} cho ente.io.",
+  "shareTextConfirmOthersVerificationID": "Chào, bạn có thể xác nhận rằng đây là ID xác minh ente.io của bạn: {verificationID}",
+  "somethingWentWrong": "Có gì đó không ổn",
+  "sendInvite": "Gửi lời mời",
+  "shareTextRecommendUsingEnte": "Tải Ente để chúng ta có thể dễ dàng chia sẻ ảnh và video chất lượng gốc\n\nhttps://ente.io",
+  "done": "Xong",
+  "applyCodeTitle": "Áp dụng mã",
+  "enterCodeDescription": "Nhập mã do bạn bè cung cấp để nhận thêm dung lượng miễn phí cho cả hai",
+  "apply": "Áp dụng",
+  "failedToApplyCode": "Không thể áp dụng mã",
+  "enterReferralCode": "Nhập mã giới thiệu",
+  "codeAppliedPageTitle": "Mã đã được áp dụng",
+  "changeYourReferralCode": "Thay đổi mã giới thiệu của bạn",
+  "change": "Thay đổi",
+  "unavailableReferralCode": "Rất tiếc, mã này không khả dụng.",
+  "codeChangeLimitReached": "Rất tiếc, bạn đã đạt hạn mức thay đổi mã.",
+  "onlyFamilyAdminCanChangeCode": "Vui lòng liên hệ {familyAdminEmail} để thay đổi mã của bạn.",
+  "storageInGB": "{storageAmountInGB} GB",
+  "claimed": "Đã nhận",
+  "@claimed": {
+    "description": "Used to indicate storage claimed, like 10GB Claimed"
+  },
+  "details": "Chi tiết",
+  "claimMore": "Nhận thêm!",
+  "theyAlsoGetXGb": "Họ cũng nhận được {storageAmountInGB} GB",
+  "freeStorageOnReferralSuccess": "{storageAmountInGB} GB mỗi khi ai đó đăng ký gói trả phí và áp dụng mã của bạn",
+  "shareTextReferralCode": "Mã giới thiệu Ente: {referralCode} \n\nÁp dụng nó trong Cài đặt → Chung → Giới thiệu để nhận thêm {referralStorageInGB} GB miễn phí sau khi bạn đăng ký gói trả phí\n\nhttps://ente.io",
+  "claimFreeStorage": "Nhận thêm dung lượng",
+  "inviteYourFriends": "Mời bạn bè của bạn",
+  "failedToFetchReferralDetails": "Không thể lấy thông tin giới thiệu. Vui lòng thử lại sau.",
+  "referralStep1": "1. Đưa mã này cho bạn bè của bạn",
+  "referralStep2": "2. Họ đăng ký gói trả phí",
+  "referralStep3": "3. Cả hai nhận thêm {storageInGB} GB* miễn phí",
+  "referralsAreCurrentlyPaused": "Giới thiệu hiện đang tạm dừng",
+  "youCanAtMaxDoubleYourStorage": "* Bạn có thể tối đa ×2 dung lượng của mình",
+  "claimedStorageSoFar": "{isFamilyMember, select, true {Gia đình bạn đã nhận thêm {storageAmountInGb} GB tính đến hiện tại} false {Bạn đã nhận thêm {storageAmountInGb} GB tính đến hiện tại} other {Bạn đã nhận thêm {storageAmountInGb} GB tính đến hiện tại!}}",
+  "@claimedStorageSoFar": {
+    "placeholders": {
+      "isFamilyMember": {
+        "type": "String",
+        "example": "true"
+      },
+      "storageAmountInGb": {
+        "type": "int",
+        "example": "10"
+      }
+    }
+  },
+  "faq": "Câu hỏi thường gặp",
+  "help": "Trợ giúp",
+  "oopsSomethingWentWrong": "Ốii!, có gì đó không ổn",
+  "peopleUsingYourCode": "Người dùng mã của bạn",
+  "eligible": "đủ điều kiện",
+  "total": "tổng",
+  "codeUsedByYou": "Mã bạn đã dùng",
+  "freeStorageClaimed": "Dung lượng miễn phí đã nhận",
+  "freeStorageUsable": "Dung lượng miễn phí có thể dùng",
+  "usableReferralStorageInfo": "Dung lượng có thể dùng bị giới hạn bởi gói hiện tại của bạn. Dung lượng nhận thêm vượt hạn mức sẽ tự động có thể dùng khi bạn nâng cấp gói.",
+  "removeFromAlbumTitle": "Xóa khỏi album?",
+  "removeFromAlbum": "Xóa khỏi album",
+  "itemsWillBeRemovedFromAlbum": "Các mục đã chọn sẽ bị xóa khỏi album này",
+  "removeShareItemsWarning": "Vài mục mà bạn đang xóa được thêm bởi người khác, và bạn sẽ mất quyền truy cập vào chúng",
+  "addingToFavorites": "Đang thêm vào mục yêu thích...",
+  "removingFromFavorites": "Đang xóa khỏi mục yêu thích...",
+  "sorryCouldNotAddToFavorites": "Xin lỗi, không thể thêm vào mục yêu thích!",
+  "sorryCouldNotRemoveFromFavorites": "Xin lỗi, không thể xóa khỏi mục yêu thích!",
+  "subscribeToEnableSharing": "Bạn phải dùng gói trả phí mới có thể chia sẻ.",
+  "subscribe": "Đăng ký gói",
+  "canOnlyRemoveFilesOwnedByYou": "Chỉ có thể xóa các tệp thuộc sở hữu của bạn",
+  "deleteSharedAlbum": "Xóa album chia sẻ?",
+  "deleteAlbum": "Xóa album",
+  "deleteAlbumDialog": "Xóa luôn ảnh (và video) trong album này <bold>khỏi toàn bộ album khác</bold> cũng đang chứa chúng?",
+  "deleteSharedAlbumDialogBody": "Album sẽ bị xóa với tất cả mọi người\n\nBạn sẽ mất quyền truy cập vào các ảnh chia sẻ trong album này mà thuộc sở hữu của người khác",
+  "yesRemove": "Có, xóa",
+  "creatingLink": "Đang tạo liên kết...",
+  "removeWithQuestionMark": "Xóa?",
+  "removeParticipantBody": "{userEmail} sẽ bị xóa khỏi album chia sẻ này\n\nBất kỳ ảnh nào được thêm bởi họ cũng sẽ bị xóa khỏi album",
+  "keepPhotos": "Giữ ảnh",
+  "deletePhotos": "Xóa ảnh",
+  "inviteToEnte": "Mời sử dụng Ente",
+  "removePublicLink": "Xóa liên kết công khai",
+  "disableLinkMessage": "Xóa liên kết công khai dùng để truy cập \"{albumName}\".",
+  "sharing": "Đang chia sẻ...",
+  "youCannotShareWithYourself": "Bạn không thể chia sẻ với chính mình",
+  "archive": "Lưu trữ",
+  "createAlbumActionHint": "Nhấn giữ để chọn ảnh và nhấn + để tạo album",
+  "importing": "Đang nhập....",
+  "failedToLoadAlbums": "Không thể tải album",
+  "hidden": "Ẩn",
+  "authToViewYourHiddenFiles": "Vui lòng xác thực để xem các tệp ẩn",
+  "authToViewTrashedFiles": "Vui lòng xác thực để xem các tệp đã xóa",
+  "trash": "Thùng rác",
+  "uncategorized": "Chưa phân loại",
+  "videoSmallCase": "video",
+  "photoSmallCase": "ảnh",
+  "singleFileDeleteHighlight": "Nó sẽ bị xóa khỏi tất cả album.",
+  "singleFileInBothLocalAndRemote": "Tệp {fileType} này có trong cả Ente và thiết bị của bạn.",
+  "singleFileInRemoteOnly": "Tệp {fileType} này sẽ bị xóa khỏi Ente.",
+  "singleFileDeleteFromDevice": "Tệp {fileType} này sẽ bị xóa khỏi thiết bị của bạn.",
+  "deleteFromEnte": "Xóa khỏi Ente",
+  "yesDelete": "Có, xóa",
+  "movedToTrash": "Đã cho vào thùng rác",
+  "deleteFromDevice": "Xóa khỏi thiết bị",
+  "deleteFromBoth": "Xóa khỏi cả hai",
+  "newAlbum": "Album mới",
+  "albums": "Album",
+  "memoryCount": "{count, plural, =0{chưa có kỷ niệm} other{{formattedCount} kỷ niệm}}",
+  "@memoryCount": {
+    "description": "The text to display the number of memories",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      },
+      "formattedCount": {
+        "type": "String",
+        "example": "11.513, 11,511"
+      }
+    }
+  },
+  "selectedPhotos": "{count} đã chọn",
+  "@selectedPhotos": {
+    "description": "Display the number of selected photos",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "5",
+        "type": "int"
+      }
+    }
+  },
+  "selectedPhotosWithYours": "{count} đã chọn ({yourCount} là của bạn)",
+  "@selectedPhotosWithYours": {
+    "description": "Display the number of selected photos, including the number of selected photos owned by the user",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "12",
+        "type": "int"
+      },
+      "yourCount": {
+        "example": "2",
+        "type": "int"
+      }
+    }
+  },
+  "advancedSettings": "Nâng cao",
+  "@advancedSettings": {
+    "description": "The text to display in the advanced settings section"
+  },
+  "photoGridSize": "Kích thước lưới ảnh",
+  "manageDeviceStorage": "Quản lý bộ nhớ đệm của thiết bị",
+  "manageDeviceStorageDesc": "Xem và xóa bộ nhớ đệm trên thiết bị.",
+  "machineLearning": "Học máy",
+  "mlConsent": "Bật học máy",
+  "mlConsentTitle": "Bật học máy?",
+  "mlConsentDescription": "Nếu bạn bật học máy, Ente sẽ trích xuất thông tin như hình dạng khuôn mặt từ các tệp, gồm cả những tệp mà bạn được chia sẻ.\n\nViệc này sẽ diễn ra trên thiết bị của bạn, với mọi thông tin sinh trắc học tạo ra đều được mã hóa đầu cuối.",
+  "mlConsentPrivacy": "Vui lòng nhấn vào đây để biết thêm chi tiết về tính năng này trong chính sách quyền riêng tư của chúng tôi",
+  "mlConsentConfirmation": "Tôi hiểu và muốn bật học máy",
+  "magicSearch": "Tìm kiếm vi diệu",
+  "discover": "Khám phá",
+  "@discover": {
+    "description": "The text to display for the discover section under which we show receipts, screenshots, sunsets, greenery, etc."
+  },
+  "discover_identity": "Nhận dạng",
+  "discover_screenshots": "Ảnh chụp màn hình",
+  "discover_receipts": "Biên lai",
+  "discover_notes": "Ghi chú",
+  "discover_memes": "Meme",
+  "discover_visiting_cards": "Danh thiếp",
+  "discover_babies": "Em bé",
+  "discover_pets": "Thú cưng",
+  "discover_selfies": "Selfie",
+  "discover_wallpapers": "Hình nền",
+  "discover_food": "Thức ăn",
+  "discover_celebrations": "Lễ kỷ niệm",
+  "discover_sunset": "Hoàng hôn",
+  "discover_hills": "Đồi",
+  "discover_greenery": "Cây cối",
+  "mlIndexingDescription": "Lưu ý rằng việc học máy sẽ khiến tốn băng thông và pin nhiều hơn cho đến khi tất cả mục được lập chỉ mục. Hãy sử dụng ứng dụng máy tính để lập chỉ mục nhanh hơn. Mọi kết quả sẽ được tự động đồng bộ.",
+  "loadingModel": "Đang tải mô hình...",
+  "waitingForWifi": "Đang chờ WiFi...",
+  "status": "Trạng thái",
+  "indexedItems": "Các mục đã lập chỉ mục",
+  "pendingItems": "Các mục đang chờ",
+  "clearIndexes": "Xóa chỉ mục",
+  "selectFoldersForBackup": "Chọn thư mục để sao lưu",
+  "selectedFoldersWillBeEncryptedAndBackedUp": "Các thư mục đã chọn sẽ được mã hóa và sao lưu",
+  "unselectAll": "Bỏ chọn tất cả",
+  "selectAll": "Chọn tất cả",
+  "skip": "Bỏ qua",
+  "updatingFolderSelection": "Đang cập nhật lựa chọn thư mục...",
+  "itemCount": "{count, plural, other{{count} mục}}",
+  "deleteItemCount": "{count, plural, =1 {Xóa {count} mục} other {Xóa {count} mục}}",
+  "duplicateItemsGroup": "{count} tệp, {formattedSize} mỗi tệp",
+  "@duplicateItemsGroup": {
+    "description": "Display the number of duplicate files and their size",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "12",
+        "type": "int"
+      },
+      "formattedSize": {
+        "example": "2.3 MB",
+        "type": "String"
+      }
+    }
+  },
+  "showMemories": "Xem lại kỷ niệm",
+  "yearsAgo": "{count, plural, other{{count} năm trước}}",
+  "backupSettings": "Cài đặt sao lưu",
+  "backupStatus": "Trạng thái sao lưu",
+  "backupStatusDescription": "Các mục đã được sao lưu sẽ hiển thị ở đây",
+  "backupOverMobileData": "Sao lưu với dữ liệu di động",
+  "backupVideos": "Sao lưu video",
+  "disableAutoLock": "Vô hiệu hóa khóa tự động",
+  "deviceLockExplanation": "Vô hiệu hóa khóa màn hình thiết bị khi Ente đang ở chế độ nền và có một bản sao lưu đang diễn ra. Điều này thường không cần thiết, nhưng có thể giúp tải lên các tệp lớn và tệp nhập của các thư viện lớn xong nhanh hơn.",
+  "about": "Giới thiệu",
+  "weAreOpenSource": "Chúng tôi là mã nguồn mở!",
+  "privacy": "Bảo mật",
+  "terms": "Điều khoản",
+  "checkForUpdates": "Kiểm tra cập nhật",
+  "checkStatus": "Kiểm tra trạng thái",
+  "checking": "Đang kiểm tra...",
+  "youAreOnTheLatestVersion": "Bạn đang sử dụng phiên bản mới nhất",
+  "account": "Tài khoản",
+  "manageSubscription": "Quản lý gói",
+  "authToChangeYourEmail": "Vui lòng xác thực để đổi email",
+  "changePassword": "Đổi mật khẩu",
+  "authToChangeYourPassword": "Vui lòng xác thực để đổi mật khẩu",
+  "emailVerificationToggle": "Xác minh email",
+  "authToChangeEmailVerificationSetting": "Vui lòng xác thực để đổi cài đặt xác minh email",
+  "exportYourData": "Xuất dữ liệu của bạn",
+  "logout": "Đăng xuất",
+  "authToInitiateAccountDeletion": "Vui lòng xác thực để bắt đầu xóa tài khoản",
+  "areYouSureYouWantToLogout": "Bạn có chắc muốn đăng xuất không?",
+  "yesLogout": "Có, đăng xuất",
+  "aNewVersionOfEnteIsAvailable": "Ente có phiên bản mới.",
+  "update": "Cập nhật",
+  "installManually": "Cài đặt thủ công",
+  "criticalUpdateAvailable": "Cập nhật quan trọng có sẵn",
+  "updateAvailable": "Cập nhật có sẵn",
+  "ignoreUpdate": "Bỏ qua",
+  "downloading": "Đang tải xuống...",
+  "cannotDeleteSharedFiles": "Không thể xóa các tệp đã chia sẻ",
+  "theDownloadCouldNotBeCompleted": "Không thể hoàn tất tải xuống",
+  "retry": "Thử lại",
+  "backedUpFolders": "Thư mục đã sao lưu",
+  "backup": "Sao lưu",
+  "freeUpDeviceSpace": "Giải phóng dung lượng thiết bị",
+  "freeUpDeviceSpaceDesc": "Tiết kiệm dung lượng thiết bị của bạn bằng cách xóa các tệp đã được sao lưu.",
+  "allClear": "✨ Tất cả đã xong",
+  "noDeviceThatCanBeDeleted": "Bạn không có tệp nào có thể xóa trên thiết bị này",
+  "removeDuplicates": "Xóa trùng lặp",
+  "removeDuplicatesDesc": "Xem và xóa các tệp bị trùng lặp.",
+  "viewLargeFiles": "Tệp lớn",
+  "viewLargeFilesDesc": "Xem các tệp đang chiếm nhiều dung lượng nhất.",
+  "noDuplicates": "✨ Không có trùng lặp",
+  "youveNoDuplicateFilesThatCanBeCleared": "Bạn không có tệp nào bị trùng để xóa",
+  "success": "Thành công",
+  "rateUs": "Đánh giá chúng tôi",
+  "remindToEmptyDeviceTrash": "Hãy xóa luôn \"Đã xóa gần đây\" từ \"Cài đặt\" -> \"Lưu trữ\" để lấy lại dung lượng đã giải phóng",
+  "youHaveSuccessfullyFreedUp": "Bạn đã giải phóng thành công {storageSaved}!",
+  "@youHaveSuccessfullyFreedUp": {
+    "description": "The text to display when the user has successfully freed up storage",
+    "type": "text",
+    "placeholders": {
+      "storageSaved": {
+        "example": "1.2 GB",
+        "type": "String"
+      }
+    }
+  },
+  "remindToEmptyEnteTrash": "Hãy xóa luôn \"Thùng rác\" của bạn để lấy lại dung lượng đã giải phóng",
+  "sparkleSuccess": "✨ Thành công",
+  "duplicateFileCountWithStorageSaved": "Bạn đã dọn dẹp {count, plural, other{{count} tệp bị trùng lặp}}, lấy lại ({storageSaved}!)",
+  "@duplicateFileCountWithStorageSaved": {
+    "description": "The text to display when the user has successfully cleaned up duplicate files",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      },
+      "storageSaved": {
+        "example": "1.2 GB",
+        "type": "String"
+      }
+    }
+  },
+  "familyPlans": "Gói gia đình",
+  "referrals": "Giới thiệu",
+  "notifications": "Thông báo",
+  "sharedPhotoNotifications": "Ảnh chia sẻ mới",
+  "sharedPhotoNotificationsExplanation": "Nhận thông báo khi ai đó thêm ảnh vào album chia sẻ mà bạn tham gia.",
+  "advanced": "Nâng cao",
+  "general": "Chung",
+  "security": "Bảo mật",
+  "authToViewYourRecoveryKey": "Vui lòng xác thực để xem mã khôi phục",
+  "twofactor": "Xác thực 2 bước",
+  "authToConfigureTwofactorAuthentication": "Vui lòng xác thực để cấu hình xác thực 2 bước",
+  "lockscreen": "Khóa màn hình",
+  "authToChangeLockscreenSetting": "Vui lòng xác thực để thay đổi cài đặt khóa màn hình",
+  "viewActiveSessions": "Xem phiên hoạt động",
+  "authToViewYourActiveSessions": "Vui lòng xác thực để xem các phiên hoạt động",
+  "disableTwofactor": "Tắt xác thực 2 bước",
+  "confirm2FADisable": "Bạn có chắc muốn tắt xác thực 2 bước không?",
+  "no": "Không",
+  "yes": "Có",
+  "social": "Mạng xã hội",
+  "rateUsOnStore": "Đánh giá chúng tôi trên {storeName}",
+  "blog": "Blog",
+  "merchandise": "Vật phẩm",
+  "twitter": "Twitter",
+  "mastodon": "Mastodon",
+  "matrix": "Matrix",
+  "discord": "Discord",
+  "reddit": "Reddit",
+  "yourStorageDetailsCouldNotBeFetched": "Không thể lấy chi tiết dung lượng của bạn",
+  "reportABug": "Báo lỗi",
+  "reportBug": "Báo lỗi",
+  "suggestFeatures": "Đề xuất tính năng",
+  "support": "Hỗ trợ",
+  "theme": "Chủ đề",
+  "lightTheme": "Sáng",
+  "darkTheme": "Tối",
+  "systemTheme": "Giống hệ thống",
+  "freeTrial": "Dùng thử miễn phí",
+  "selectYourPlan": "Chọn gói của bạn",
+  "enteSubscriptionPitch": "Ente lưu giữ kỷ niệm của bạn, vì vậy chúng luôn có sẵn, ngay cả khi bạn mất thiết bị.",
+  "enteSubscriptionShareWithFamily": "Bạn có thể thêm gia đình vào gói của mình.",
+  "currentUsageIs": "Dung lượng hiện tại ",
+  "@currentUsageIs": {
+    "description": "This text is followed by storage usage",
+    "examples": {
+      "0": "Current usage is 1.2 GB"
+    },
+    "type": "text"
+  },
+  "faqs": "Câu hỏi thường gặp",
+  "renewsOn": "Gia hạn gói vào {endDate}",
+  "freeTrialValidTill": "Dùng thử miễn phí áp dụng đến {endDate}",
+  "validTill": "Áp dụng đến {endDate}",
+  "addOnValidTill": "Gói bổ sung {storageAmount} áp dụng đến {endDate}",
+  "playStoreFreeTrialValidTill": "Dùng thử miễn phí áp dụng đến {endDate}.\nBạn có thể chọn gói trả phí sau đó.",
+  "subWillBeCancelledOn": "Gói của bạn sẽ bị hủy vào {endDate}",
+  "subscription": "Gói đăng ký",
+  "paymentDetails": "Chi tiết thanh toán",
+  "manageFamily": "Quản lý gia đình",
+  "contactToManageSubscription": "Vui lòng liên hệ với chúng tôi qua support@ente.io để quản lý gói {provider} của bạn.",
+  "renewSubscription": "Gia hạn gói",
+  "cancelSubscription": "Hủy gói",
+  "areYouSureYouWantToRenew": "Bạn có chắc muốn gia hạn không?",
+  "yesRenew": "Có, Gia hạn",
+  "areYouSureYouWantToCancel": "Bạn có chắc muốn hủy không?",
+  "yesCancel": "Có, hủy",
+  "failedToRenew": "Gia hạn không thành công",
+  "failedToCancel": "Hủy không thành công",
+  "twoMonthsFreeOnYearlyPlans": "Nhận 2 tháng miễn phí với các gói theo năm",
+  "monthly": "Theo tháng",
+  "@monthly": {
+    "description": "The text to display for monthly plans",
+    "type": "text"
+  },
+  "yearly": "Theo năm",
+  "@yearly": {
+    "description": "The text to display for yearly plans",
+    "type": "text"
+  },
+  "confirmPlanChange": "Xác nhận thay đổi gói",
+  "areYouSureYouWantToChangeYourPlan": "Bạn có chắc muốn thay đổi gói của mình không?",
+  "youCannotDowngradeToThisPlan": "Bạn không thể đổi xuống gói này",
+  "cancelOtherSubscription": "Vui lòng hủy gói hiện tại của bạn từ {paymentProvider} trước",
+  "@cancelOtherSubscription": {
+    "description": "The text to display when the user has an existing subscription from a different payment provider",
+    "type": "text",
+    "placeholders": {
+      "paymentProvider": {
+        "example": "Apple",
+        "type": "String"
+      }
+    }
+  },
+  "optionalAsShortAsYouLike": "Tùy chọn, ngắn dài tùy ý...",
+  "send": "Gửi",
+  "askCancelReason": "Gói của bạn đã bị hủy. Bạn có muốn chia sẻ lý do không?",
+  "thankYouForSubscribing": "Cảm ơn bạn đã đăng ký gói!",
+  "yourPurchaseWasSuccessful": "Bạn đã giao dịch thành công",
+  "yourPlanWasSuccessfullyUpgraded": "Gói của bạn đã được nâng cấp thành công",
+  "yourPlanWasSuccessfullyDowngraded": "Gói của bạn đã được hạ cấp thành công",
+  "yourSubscriptionWasUpdatedSuccessfully": "Gói của bạn đã được cập nhật thành công",
+  "googlePlayId": "ID Google Play",
+  "appleId": "ID Apple",
+  "playstoreSubscription": "Gói PlayStore",
+  "appstoreSubscription": "Gói AppStore",
+  "subAlreadyLinkedErrMessage": "ID {id} của bạn đã được liên kết với một tài khoản Ente khác.\nNếu bạn muốn sử dụng ID {id} này với tài khoản này, vui lòng liên hệ bộ phận hỗ trợ của chúng tôi.",
+  "visitWebToManage": "Vui lòng truy cập web.ente.io để quản lý gói đăng ký",
+  "couldNotUpdateSubscription": "Không thể cập nhật gói",
+  "pleaseContactSupportAndWeWillBeHappyToHelp": "Vui lòng liên hệ support@ente.io và chúng tôi rất sẵn sàng giúp đỡ!",
+  "paymentFailed": "Thanh toán thất bại",
+  "paymentFailedTalkToProvider": "Vui lòng trao đổi với bộ phận hỗ trợ {providerName} nếu bạn đã bị tính phí",
+  "@paymentFailedTalkToProvider": {
+    "description": "The text to display when the payment failed",
+    "type": "text",
+    "placeholders": {
+      "providerName": {
+        "example": "AppStore|PlayStore",
+        "type": "String"
+      }
+    }
+  },
+  "continueOnFreeTrial": "Tiếp tục dùng thử miễn phí",
+  "areYouSureYouWantToExit": "Bạn có chắc muốn thoát không?",
+  "thankYou": "Cảm ơn bạn",
+  "failedToVerifyPaymentStatus": "Không thể xác minh trạng thái thanh toán",
+  "pleaseWaitForSometimeBeforeRetrying": "Vui lòng chờ một chút trước khi thử lại",
+  "paymentFailedMessage": "Rất tiếc, bạn đã thanh toán không thành công. Vui lòng liên hệ hỗ trợ và chúng tôi sẽ giúp bạn!",
+  "youAreOnAFamilyPlan": "Bạn đang dùng gói gia đình!",
+  "contactFamilyAdmin": "Vui lòng liên hệ <green>{familyAdminEmail}</green> để quản lý gói của bạn",
+  "leaveFamily": "Rời khỏi gia đình",
+  "areYouSureThatYouWantToLeaveTheFamily": "Bạn có chắc muốn rời khỏi gói gia đình không?",
+  "leave": "Rời",
+  "rateTheApp": "Đánh giá ứng dụng",
+  "startBackup": "Bắt đầu sao lưu",
+  "noPhotosAreBeingBackedUpRightNow": "Hiện tại không có ảnh nào đang được sao lưu",
+  "preserveMore": "Lưu giữ nhiều hơn",
+  "grantFullAccessPrompt": "Vui lòng cho phép truy cập vào tất cả ảnh trong ứng dụng Cài đặt",
+  "allowPermTitle": "Cho phép truy cập ảnh",
+  "allowPermBody": "Vui lòng cho phép truy cập vào ảnh của bạn từ Cài đặt để Ente có thể hiển thị và sao lưu thư viện của bạn.",
+  "openSettings": "Mở Cài đặt",
+  "selectMorePhotos": "Chọn thêm ảnh",
+  "existingUser": "Người dùng hiện tại",
+  "privateBackups": "Sao lưu riêng tư",
+  "forYourMemories": "cho những kỷ niệm của bạn",
+  "endtoendEncryptedByDefault": "Mã hóa đầu cuối theo mặc định",
+  "safelyStored": "Lưu trữ an toàn",
+  "atAFalloutShelter": "ở hầm trú ẩn hạt nhân",
+  "designedToOutlive": "Được thiết kế để trường tồn",
+  "available": "Có sẵn",
+  "everywhere": "mọi nơi",
+  "androidIosWebDesktop": "Android, iOS, Web, Desktop",
+  "mobileWebDesktop": "Di động, Web, Desktop",
+  "newToEnte": "Mới dùng Ente",
+  "pleaseLoginAgain": "Vui lòng đăng nhập lại",
+  "autoLogoutMessage": "Do sự cố kỹ thuật, bạn đã bị đăng xuất. Chúng tôi xin lỗi vì sự bất tiện.",
+  "yourSubscriptionHasExpired": "Gói của bạn đã hết hạn",
+  "storageLimitExceeded": "Đã vượt hạn mức lưu trữ",
+  "upgrade": "Nâng cấp",
+  "raiseTicket": "Yêu cầu hỗ trợ",
+  "@raiseTicket": {
+    "description": "Button text for raising a support tickets in case of unhandled errors during backup",
+    "type": "text"
+  },
+  "backupFailed": "Sao lưu thất bại",
+  "sorryBackupFailedDesc": "Rất tiếc, không thể sao lưu tệp vào lúc này, chúng tôi sẽ thử lại sau.",
+  "couldNotBackUpTryLater": "Chúng tôi không thể sao lưu dữ liệu của bạn.\nChúng tôi sẽ thử lại sau.",
+  "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "Ente chỉ có thể mã hóa và lưu giữ tệp nếu bạn cấp quyền truy cập chúng",
+  "pleaseGrantPermissions": "Vui lòng cấp quyền",
+  "grantPermission": "Cấp quyền",
+  "privateSharing": "Chia sẻ riêng tư",
+  "shareOnlyWithThePeopleYouWant": "Chỉ chia sẻ với những người bạn muốn",
+  "usePublicLinksForPeopleNotOnEnte": "Dùng liên kết công khai cho những người không dùng Ente",
+  "allowPeopleToAddPhotos": "Cho phép mọi người thêm ảnh",
+  "shareAnAlbumNow": "Chia sẻ ngay một album",
+  "collectEventPhotos": "Thu thập ảnh sự kiện",
+  "sessionExpired": "Phiên đã hết hạn",
+  "loggingOut": "Đang đăng xuất...",
+  "@onDevice": {
+    "description": "The text displayed above folders/albums stored on device",
+    "type": "text"
+  },
+  "onDevice": "Trên thiết bị",
+  "@onEnte": {
+    "description": "The text displayed above albums backed up to Ente",
+    "type": "text"
+  },
+  "onEnte": "Trên <branding>ente</branding>",
+  "name": "Tên",
+  "newest": "Mới nhất",
+  "lastUpdated": "Mới cập nhật",
+  "deleteEmptyAlbums": "Xóa album trống",
+  "deleteEmptyAlbumsWithQuestionMark": "Xóa album trống?",
+  "deleteAlbumsDialogBody": "Tất cả album trống sẽ bị xóa. Sẽ hữu ích khi bạn muốn giảm bớt sự lộn xộn trong danh sách album của mình.",
+  "deleteProgress": "Đang xóa {currentlyDeleting} / {totalCount}",
+  "genericProgress": "Đang xử lý {currentlyProcessing} / {totalCount}",
+  "@genericProgress": {
+    "description": "Generic progress text to display when processing multiple items",
+    "type": "text",
+    "placeholders": {
+      "currentlyProcessing": {
+        "example": "1",
+        "type": "int"
+      },
+      "totalCount": {
+        "example": "10",
+        "type": "int"
+      }
+    }
+  },
+  "permanentlyDelete": "Xóa vĩnh viễn",
+  "canOnlyCreateLinkForFilesOwnedByYou": "Chỉ có thể tạo liên kết cho các tệp thuộc sở hữu của bạn",
+  "publicLinkCreated": "Liên kết công khai đã được tạo",
+  "youCanManageYourLinksInTheShareTab": "Bạn có thể quản lý các liên kết của mình trong tab chia sẻ.",
+  "linkCopiedToClipboard": "Liên kết đã được sao chép vào bộ nhớ tạm",
+  "restore": "Khôi phục",
+  "@restore": {
+    "description": "Display text for an action which triggers a restore of item from trash",
+    "type": "text"
+  },
+  "moveToAlbum": "Chuyển đến album",
+  "unhide": "Hiện lại",
+  "unarchive": "Bỏ lưu trữ",
+  "favorite": "Thích",
+  "removeFromFavorite": "Xóa khỏi mục đã thích",
+  "shareLink": "Chia sẻ liên kết",
+  "createCollage": "Tạo ảnh ghép",
+  "saveCollage": "Lưu ảnh ghép",
+  "collageSaved": "Ảnh ghép đã được lưu vào thư viện",
+  "collageLayout": "Bố cục",
+  "addToEnte": "Thêm vào Ente",
+  "addToAlbum": "Thêm vào album",
+  "delete": "Xóa",
+  "hide": "Ẩn",
+  "share": "Chia sẻ",
+  "unhideToAlbum": "Hiện lại trong album",
+  "restoreToAlbum": "Khôi phục vào album",
+  "moveItem": "{count, plural, =1 {Di chuyển mục} other {Di chuyển các mục}}",
+  "@moveItem": {
+    "description": "Page title while moving one or more items to an album"
+  },
+  "addItem": "{count, plural, =1 {Thêm mục} other {Thêm các mục}}",
+  "@addItem": {
+    "description": "Page title while adding one or more items to album"
+  },
+  "createOrSelectAlbum": "Tạo hoặc chọn album",
+  "selectAlbum": "Chọn album",
+  "searchByAlbumNameHint": "Tên album",
+  "albumTitle": "Tiêu đề album",
+  "enterAlbumName": "Nhập tên album",
+  "restoringFiles": "Đang khôi phục tệp...",
+  "movingFilesToAlbum": "Đang di chuyển tệp vào album...",
+  "unhidingFilesToAlbum": "Đang hiện lại tệp trong album",
+  "canNotUploadToAlbumsOwnedByOthers": "Không thể tải lên album thuộc sở hữu của người khác",
+  "uploadingFilesToAlbum": "Đang tải tệp lên album...",
+  "addedSuccessfullyTo": "Đã thêm thành công vào {albumName}",
+  "movedSuccessfullyTo": "Đã di chuyển thành công đến {albumName}",
+  "thisAlbumAlreadyHDACollaborativeLink": "Album này đã có một liên kết cộng tác",
+  "collaborativeLinkCreatedFor": "Liên kết cộng tác đã được tạo cho {albumName}",
+  "askYourLovedOnesToShare": "Hãy gợi ý những người thân yêu của bạn chia sẻ",
+  "invite": "Mời",
+  "shareYourFirstAlbum": "Chia sẻ album đầu tiên của bạn",
+  "sharedWith": "Chia sẻ với {emailIDs}",
+  "sharedWithMe": "Chia sẻ với tôi",
+  "sharedByMe": "Chia sẻ bởi tôi",
+  "doubleYourStorage": "Nhân đôi dung lượng",
+  "referFriendsAnd2xYourPlan": "Giới thiệu bạn bè để được ×2 dung lượng gói của bạn",
+  "shareAlbumHint": "Mở album và nhấn nút chia sẻ ở góc trên bên phải để chia sẻ.",
+  "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Trên các mục là số ngày còn lại trước khi xóa vĩnh viễn",
+  "trashDaysLeft": "{count, plural, =0 {Sắp xóa} =1 {1 ngày} other {{count} ngày}}",
+  "@trashDaysLeft": {
+    "description": "Text to indicate number of days remaining before permanent deletion",
+    "placeholders": {
+      "count": {
+        "example": "1|2|3",
+        "type": "int"
+      }
+    }
+  },
+  "deleteAll": "Xóa tất cả",
+  "renameAlbum": "Đổi tên album",
+  "convertToAlbum": "Chuyển đổi thành album",
+  "setCover": "Đặt ảnh bìa",
+  "@setCover": {
+    "description": "Text to set cover photo for an album"
+  },
+  "sortAlbumsBy": "Sắp xếp theo",
+  "sortNewestFirst": "Mới nhất trước",
+  "sortOldestFirst": "Cũ nhất trước",
+  "rename": "Đổi tên",
+  "leaveSharedAlbum": "Rời album được chia sẻ?",
+  "leaveAlbum": "Rời khỏi album",
+  "photosAddedByYouWillBeRemovedFromTheAlbum": "Ảnh bạn đã thêm sẽ bị xóa khỏi album",
+  "youveNoFilesInThisAlbumThatCanBeDeleted": "Bạn không có tệp nào có thể xóa trong album này",
+  "youDontHaveAnyArchivedItems": "Bạn không có mục nào đã lưu trữ.",
+  "ignoredFolderUploadReason": "Một số tệp trong album này bị bỏ qua khi tải lên vì chúng đã bị xóa trước đó từ Ente.",
+  "resetIgnoredFiles": "Đặt lại các tệp bị bỏ qua",
+  "deviceFilesAutoUploading": "Các tệp được thêm vào album thiết bị này sẽ tự động được tải lên Ente.",
+  "turnOnBackupForAutoUpload": "Bật sao lưu để tự động tải lên các tệp được thêm vào thư mục thiết bị này lên Ente.",
+  "noHiddenPhotosOrVideos": "Không có ảnh hoặc video ẩn",
+  "toHideAPhotoOrVideo": "Để ẩn một ảnh hoặc video",
+  "openTheItem": "• Mở mục",
+  "clickOnTheOverflowMenu": "• Nhấn vào menu xổ xuống",
+  "click": "• Nhấn",
+  "nothingToSeeHere": "Ở đây không có gì để xem! 👀",
+  "unarchiveAlbum": "Bỏ lưu trữ album",
+  "archiveAlbum": "Lưu trữ album",
+  "calculating": "Đang tính toán...",
+  "pleaseWaitDeletingAlbum": "Vui lòng chờ, đang xóa album",
+  "searchByExamples": "• Tên album (vd: \"Camera\")\n• Loại tệp (vd: \"Video\", \".gif\")\n• Năm và tháng (vd: \"2022\", \"Tháng Một\")\n• Ngày lễ (vd: \"Giáng Sinh\")\n• Mô tả ảnh (vd: “#vui”)",
+  "youCanTrySearchingForADifferentQuery": "Bạn có thể thử tìm kiếm một truy vấn khác.",
+  "noResultsFound": "Không tìm thấy kết quả",
+  "addedBy": "Được thêm bởi {emailOrName}",
+  "loadingExifData": "Đang lấy thông số Exif...",
+  "viewAllExifData": "Xem thông số Exif",
+  "noExifData": "Không có Exif",
+  "thisImageHasNoExifData": "Ảnh này không có thông số Exif",
+  "exif": "Exif",
+  "noResults": "Không có kết quả",
+  "weDontSupportEditingPhotosAndAlbumsThatYouDont": "Chúng tôi chưa hỗ trợ chỉnh sửa ảnh và album không phải bạn sở hữu",
+  "failedToFetchOriginalForEdit": "Không thể lấy bản gốc để chỉnh sửa",
+  "close": "Đóng",
+  "setAs": "Đặt làm",
+  "fileSavedToGallery": "Tệp đã được lưu vào thư viện",
+  "filesSavedToGallery": "Các tệp đã được lưu vào thư viện",
+  "fileFailedToSaveToGallery": "Không thể lưu tệp vào thư viện",
+  "download": "Tải xuống",
+  "pressAndHoldToPlayVideo": "Nhấn giữ để phát video",
+  "pressAndHoldToPlayVideoDetailed": "Nhấn giữ ảnh để phát video",
+  "downloadFailed": "Tải xuống thất bại",
+  "deduplicateFiles": "Xóa trùng lặp",
+  "deselectAll": "Bỏ chọn tất cả",
+  "reviewDeduplicateItems": "Vui lòng xem qua và xóa các mục mà bạn tin là trùng lặp.",
+  "clubByCaptureTime": "Xếp theo thời gian chụp",
+  "clubByFileName": "Xếp theo tên tệp",
+  "count": "Số lượng",
+  "totalSize": "Tổng dung lượng",
+  "longpressOnAnItemToViewInFullscreen": "Nhấn giữ một mục để xem toàn màn hình",
+  "decryptingVideo": "Đang giải mã video...",
+  "authToViewYourMemories": "Vui lòng xác thực để xem kỷ niệm",
+  "unlock": "Mở khóa",
+  "freeUpSpace": "Giải phóng dung lượng",
+  "freeUpSpaceSaving": "{count, plural, =1 {Xóa chúng khỏi thiết bị để giải phóng {formattedSize}} other {Xóa chúng khỏi thiết bị để giải phóng {formattedSize}}}",
+  "filesBackedUpInAlbum": "{count, plural, other {{formattedNumber} tệp}} trong album đã được sao lưu an toàn",
+  "@filesBackedUpInAlbum": {
+    "description": "Text to tell user how many files have been backed up in the album",
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      },
+      "formattedNumber": {
+        "content": "{formattedNumber}",
+        "example": "1,000",
+        "type": "String"
+      }
+    }
+  },
+  "filesBackedUpFromDevice": "{count, plural, other {{formattedNumber} tệp}} trên thiết bị đã được sao lưu an toàn",
+  "@filesBackedUpFromDevice": {
+    "description": "Text to tell user how many files have been backed up from this device",
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      },
+      "formattedNumber": {
+        "content": "{formattedNumber}",
+        "example": "1,000",
+        "type": "String"
+      }
+    }
+  },
+  "@freeUpSpaceSaving": {
+    "description": "Text to tell user how much space they can free up by deleting items from the device"
+  },
+  "freeUpAccessPostDelete": "Bạn vẫn có thể truy cập {count, plural, =1 {chúng} other {chúng}} trên Ente, miễn là gói của bạn còn hiệu lực",
+  "@freeUpAccessPostDelete": {
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      }
+    }
+  },
+  "freeUpAmount": "Giải phóng {sizeInMBorGB}",
+  "thisEmailIsAlreadyInUse": "Email này đã được sử dụng",
+  "incorrectCode": "Mã không chính xác",
+  "authenticationFailedPleaseTryAgain": "Xác thực không thành công, vui lòng thử lại",
+  "verificationFailedPleaseTryAgain": "Xác minh không thành công, vui lòng thử lại",
+  "authenticating": "Đang xác thực...",
+  "authenticationSuccessful": "Xác thực thành công!",
+  "incorrectRecoveryKey": "Mã khôi phục không chính xác",
+  "theRecoveryKeyYouEnteredIsIncorrect": "Mã khôi phục bạn nhập không chính xác",
+  "twofactorAuthenticationSuccessfullyReset": "Xác thực 2 bước đã được đặt lại thành công",
+  "pleaseVerifyTheCodeYouHaveEntered": "Vui lòng xác minh mã bạn đã nhập",
+  "pleaseContactSupportIfTheProblemPersists": "Vui lòng liên hệ bộ phận hỗ trợ nếu vấn đề vẫn tiếp diễn",
+  "twofactorAuthenticationHasBeenDisabled": "Xác thực 2 bước đã bị vô hiệu hóa",
+  "sorryTheCodeYouveEnteredIsIncorrect": "Rất tiếc, mã bạn nhập không chính xác",
+  "yourVerificationCodeHasExpired": "Mã xác minh của bạn đã hết hạn",
+  "emailChangedTo": "Email đã được đổi thành {newEmail}",
+  "verifying": "Đang xác minh...",
+  "disablingTwofactorAuthentication": "Đang vô hiệu hóa xác thực 2 bước...",
+  "allMemoriesPreserved": "Tất cả kỷ niệm đã được lưu giữ",
+  "loadingGallery": "Đang tải thư viện...",
+  "syncing": "Đang đồng bộ...",
+  "encryptingBackup": "Đang mã hóa sao lưu...",
+  "syncStopped": "Đồng bộ hóa đã dừng",
+  "syncProgress": "{completed}/{total} kỷ niệm đã được lưu giữ",
+  "uploadingMultipleMemories": "Đang lưu giữ {count} kỷ niệm...",
+  "@uploadingMultipleMemories": {
+    "description": "Text to tell user how many memories are being preserved",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "uploadingSingleMemory": "Đang lưu giữ 1 kỷ niệm...",
+  "@syncProgress": {
+    "description": "Text to tell user how many memories have been preserved",
+    "placeholders": {
+      "completed": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "archiving": "Đang lưu trữ...",
+  "unarchiving": "Đang bỏ lưu trữ...",
+  "successfullyArchived": "Lưu trữ thành công",
+  "successfullyUnarchived": "Bỏ lưu trữ thành công",
+  "renameFile": "Đổi tên tệp",
+  "enterFileName": "Nhập tên tệp",
+  "filesDeleted": "Tệp đã bị xóa",
+  "selectedFilesAreNotOnEnte": "Các tệp đã chọn không có trên Ente",
+  "thisActionCannotBeUndone": "Không thể hoàn tác thao tác này",
+  "emptyTrash": "Xóa sạch thùng rác?",
+  "permDeleteWarning": "Tất cả các mục trong thùng rác sẽ bị xóa vĩnh viễn\n\nKhông thể hoàn tác thao tác này",
+  "empty": "Xóa sạch",
+  "couldNotFreeUpSpace": "Không thể giải phóng dung lượng",
+  "permanentlyDeleteFromDevice": "Xóa vĩnh viễn khỏi thiết bị?",
+  "someOfTheFilesYouAreTryingToDeleteAre": "Một số tệp bạn đang cố gắng xóa chỉ có trên thiết bị của bạn và không thể khôi phục nếu bị xóa",
+  "theyWillBeDeletedFromAllAlbums": "Nó sẽ bị xóa khỏi tất cả album.",
+  "someItemsAreInBothEnteAndYourDevice": "Một số mục có trên cả Ente và thiết bị của bạn.",
+  "selectedItemsWillBeDeletedFromAllAlbumsAndMoved": "Các tệp đã chọn sẽ bị xóa khỏi tất cả album và cho vào thùng rác.",
+  "theseItemsWillBeDeletedFromYourDevice": "Các mục này sẽ bị xóa khỏi thiết bị của bạn.",
+  "itLooksLikeSomethingWentWrongPleaseRetryAfterSome": "Có vẻ đã xảy ra sự cố. Vui lòng thử lại sau ít phút. Nếu lỗi vẫn tiếp diễn, hãy liên hệ với đội ngũ hỗ trợ của chúng tôi.",
+  "error": "Lỗi",
+  "tempErrorContactSupportIfPersists": "Có vẻ đã xảy ra sự cố. Vui lòng thử lại sau ít phút. Nếu lỗi vẫn tiếp diễn, hãy liên hệ với đội ngũ hỗ trợ của chúng tôi.",
+  "networkHostLookUpErr": "Không thể kết nối với Ente, vui lòng kiểm tra cài đặt mạng của bạn và liên hệ với bộ phận hỗ trợ nếu lỗi vẫn tiếp diễn.",
+  "networkConnectionRefusedErr": "Không thể kết nối với Ente, vui lòng thử lại sau ít phút. Nếu lỗi vẫn tiếp diễn, hãy liên hệ với bộ phận hỗ trợ.",
+  "cachedData": "Dữ liệu đã lưu trong bộ nhớ đệm",
+  "clearCaches": "Xóa bộ nhớ cache",
+  "remoteImages": "Ảnh bên ngoài",
+  "remoteVideos": "Video bên ngoài",
+  "remoteThumbnails": "Ảnh thu nhỏ bên ngoài",
+  "pendingSync": "Đồng bộ hóa đang chờ",
+  "localGallery": "Thư viện cục bộ",
+  "todaysLogs": "Nhật ký hôm nay",
+  "viewLogs": "Xem nhật ký",
+  "logsDialogBody": "Gửi file nhật ký để chúng tôi có thể phân tích lỗi mà bạn gặp. Lưu ý rằng, trong nhật ký lỗi sẽ bao gồm tên các tệp để giúp theo dõi vấn đề với từng tệp cụ thể.",
+  "preparingLogs": "Đang ghi nhật ký...",
+  "emailYourLogs": "Gửi nhật ký qua email",
+  "pleaseSendTheLogsTo": "Vui lòng gửi nhật ký đến \n{toEmail}",
+  "copyEmailAddress": "Sao chép địa chỉ email",
+  "exportLogs": "Xuất nhật ký",
+  "pleaseEmailUsAt": "Vui lòng gửi email cho chúng tôi tại {toEmail}",
+  "dismiss": "Bỏ qua",
+  "didYouKnow": "Bạn có biết?",
+  "loadingMessage": "Đang tải ảnh của bạn...",
+  "loadMessage1": "Bạn có thể chia sẻ gói của mình với gia đình",
+  "loadMessage2": "Chúng tôi đã lưu giữ hơn 200 triệu kỷ niệm cho đến hiện tại",
+  "loadMessage3": "Chúng tôi giữ 3 bản sao dữ liệu của bạn, một cái lưu ở hầm trú ẩn hạt nhân",
+  "loadMessage4": "Tất cả các ứng dụng của chúng tôi đều là mã nguồn mở",
+  "loadMessage5": "Mã nguồn và mã hóa của chúng tôi đã được kiểm nghiệm ngoại bộ",
+  "loadMessage6": "Bạn có thể chia sẻ liên kết đến album của mình với những người thân yêu",
+  "loadMessage7": "Các ứng dụng di động của chúng tôi chạy ngầm để mã hóa và sao lưu bất kỳ ảnh nào bạn mới chụp",
+  "loadMessage8": "web.ente.io có một trình tải lên mượt mà",
+  "loadMessage9": "Chúng tôi sử dụng Xchacha20Poly1305 để mã hóa dữ liệu của bạn",
+  "photoDescriptions": "Mô tả ảnh",
+  "fileTypesAndNames": "Loại tệp và tên",
+  "location": "Vị trí",
+  "moments": "Khoảnh khắc",
+  "searchFaceEmptySection": "Người sẽ được hiển thị ở đây khi quá trình xử lý hoàn tất",
+  "searchDatesEmptySection": "Tìm kiếm theo ngày, tháng hoặc năm",
+  "searchLocationEmptySection": "Xếp nhóm những ảnh được chụp gần kề nhau",
+  "searchPeopleEmptySection": "Mời mọi người, và bạn sẽ thấy tất cả ảnh mà họ chia sẻ ở đây",
+  "searchAlbumsEmptySection": "Album",
+  "searchFileTypesAndNamesEmptySection": "Loại tệp và tên",
+  "searchCaptionEmptySection": "Thêm mô tả như \"#phượt\" trong thông tin ảnh để tìm nhanh thấy chúng ở đây",
+  "language": "Ngôn ngữ",
+  "selectLanguage": "Chọn ngôn ngữ",
+  "locationName": "Tên vị trí",
+  "addLocation": "Thêm vị trí",
+  "groupNearbyPhotos": "Nhóm ảnh gần nhau",
+  "kiloMeterUnit": "km",
+  "addLocationButton": "Thêm",
+  "radius": "Bán kính",
+  "locationTagFeatureDescription": "Thẻ vị trí sẽ giúp xếp nhóm tất cả ảnh được chụp gần kề nhau",
+  "galleryMemoryLimitInfo": "Mỗi thư viện chứa tối đa 1000 ảnh và video",
+  "save": "Lưu",
+  "centerPoint": "Tâm điểm",
+  "pickCenterPoint": "Chọn tâm điểm",
+  "useSelectedPhoto": "Sử dụng ảnh đã chọn",
+  "resetToDefault": "Đặt lại mặc định",
+  "@resetToDefault": {
+    "description": "Button text to reset cover photo to default"
+  },
+  "edit": "Chỉnh sửa",
+  "deleteLocation": "Xóa vị trí",
+  "rotateLeft": "Xoay trái",
+  "flip": "Lật",
+  "rotateRight": "Xoay phải",
+  "saveCopy": "Lưu bản sao",
+  "light": "Độ sáng",
+  "color": "Màu sắc",
+  "yesDiscardChanges": "Có, bỏ qua thay đổi",
+  "doYouWantToDiscardTheEditsYouHaveMade": "Bạn có muốn bỏ qua các chỉnh sửa đã thực hiện không?",
+  "saving": "Đang lưu...",
+  "editsSaved": "Chỉnh sửa đã được lưu",
+  "oopsCouldNotSaveEdits": "Ốii!, không thể lưu chỉnh sửa",
+  "distanceInKMUnit": "km",
+  "@distanceInKMUnit": {
+    "description": "Unit for distance in km"
+  },
+  "dayToday": "Hôm nay",
+  "dayYesterday": "Hôm qua",
+  "storage": "Dung lượng",
+  "usedSpace": "Dung lượng đã dùng",
+  "storageBreakupFamily": "Gia đình",
+  "storageBreakupYou": "Bạn",
+  "@storageBreakupYou": {
+    "description": "Label to indicate how much storage you are using when you are part of a family plan"
+  },
+  "storageUsageInfo": "{usedAmount} {usedStorageUnit} / {totalAmount} {totalStorageUnit} đã dùng",
+  "@storageUsageInfo": {
+    "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
+  },
+  "availableStorageSpace": "{freeAmount} {storageUnit} trống",
+  "appVersion": "Phiên bản: {versionValue}",
+  "verifyIDLabel": "Xác minh",
+  "fileInfoAddDescHint": "Thêm mô tả...",
+  "editLocationTagTitle": "Chỉnh sửa vị trí",
+  "setLabel": "Đặt",
+  "@setLabel": {
+    "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
+  },
+  "setRadius": "Đặt bán kính",
+  "familyPlanPortalTitle": "Gia đình",
+  "familyPlanOverview": "Thêm 5 thành viên gia đình vào gói hiện tại của bạn mà không phải trả thêm phí.\n\nMỗi thành viên có không gian riêng tư của mình và không thể xem tệp của nhau trừ khi được chia sẻ.\n\nGói gia đình có sẵn cho người dùng Ente gói trả phí.\n\nĐăng ký ngay để bắt đầu!",
+  "androidBiometricHint": "Xác minh danh tính",
+  "@androidBiometricHint": {
+    "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricNotRecognized": "Không nhận diện được. Thử lại.",
+  "@androidBiometricNotRecognized": {
+    "description": "Message to let the user know that authentication was failed. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricSuccess": "Thành công",
+  "@androidBiometricSuccess": {
+    "description": "Message to let the user know that authentication was successful. It is used on Android side. Maximum 60 characters."
+  },
+  "androidCancelButton": "Hủy",
+  "@androidCancelButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on Android side. Maximum 30 characters."
+  },
+  "androidSignInTitle": "Yêu cầu xác thực",
+  "@androidSignInTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user that they need to scan biometric to continue. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricRequiredTitle": "Yêu cầu sinh trắc học",
+  "@androidBiometricRequiredTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user has not set up biometric authentication on their device. It is used on Android side. Maximum 60 characters."
+  },
+  "androidDeviceCredentialsRequiredTitle": "Yêu cầu thông tin xác thực thiết bị",
+  "@androidDeviceCredentialsRequiredTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user has not set up credentials authentication on their device. It is used on Android side. Maximum 60 characters."
+  },
+  "androidDeviceCredentialsSetupDescription": "Yêu cầu thông tin xác thực thiết bị",
+  "@androidDeviceCredentialsSetupDescription": {
+    "description": "Message advising the user to go to the settings and configure device credentials on their device. It shows in a dialog on Android side."
+  },
+  "goToSettings": "Đi đến cài đặt",
+  "@goToSettings": {
+    "description": "Message showed on a button that the user can click to go to settings pages from the current dialog. It is used on both Android and iOS side. Maximum 30 characters."
+  },
+  "androidGoToSettingsDescription": "Xác thực sinh trắc học chưa được thiết lập trên thiết bị của bạn. Đi đến 'Cài đặt > Bảo mật' để thêm xác thực sinh trắc học.",
+  "@androidGoToSettingsDescription": {
+    "description": "Message advising the user to go to the settings and configure biometric on their device. It shows in a dialog on Android side."
+  },
+  "iOSLockOut": "Xác thực sinh trắc học đã bị vô hiệu hóa. Vui lòng khóa và mở khóa màn hình của bạn để kích hoạt lại.",
+  "@iOSLockOut": {
+    "description": "Message advising the user to re-enable biometrics on their device. It shows in a dialog on iOS side."
+  },
+  "iOSGoToSettingsDescription": "Xác thực sinh trắc học chưa được thiết lập trên thiết bị của bạn. Vui lòng kích hoạt Touch ID hoặc Face ID.",
+  "@iOSGoToSettingsDescription": {
+    "description": "Message advising the user to go to the settings and configure Biometrics for their device. It shows in a dialog on iOS side."
+  },
+  "iOSOkButton": "OK",
+  "@iOSOkButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
+  },
+  "openstreetmapContributors": "Người đóng góp OpenStreetMap",
+  "hostedAtOsmFrance": "Được lưu trữ tại OSM Pháp",
+  "map": "Bản đồ",
+  "@map": {
+    "description": "Label for the map view"
+  },
+  "maps": "Bản đồ",
+  "enableMaps": "Kích hoạt Bản đồ",
+  "enableMapsDesc": "Ảnh của bạn sẽ hiển thị trên bản đồ thế giới.\n\nBản đồ được lưu trữ bởi OpenStreetMap và vị trí chính xác ảnh của bạn không bao giờ được chia sẻ.\n\nBạn có thể tắt tính năng này bất cứ lúc nào từ Cài đặt.",
+  "quickLinks": "Liên kết nhanh",
+  "selectItemsToAdd": "Chọn mục để thêm",
+  "addSelected": "Thêm mục đã chọn",
+  "addFromDevice": "Thêm từ thiết bị",
+  "addPhotos": "Thêm ảnh",
+  "noPhotosFoundHere": "Không tìm thấy ảnh ở đây",
+  "zoomOutToSeePhotos": "Phóng to để xem ảnh",
+  "noImagesWithLocation": "Không có ảnh với vị trí",
+  "unpinAlbum": "Bỏ ghim album",
+  "pinAlbum": "Ghim album",
+  "create": "Tạo",
+  "viewAll": "Xem tất cả",
+  "nothingSharedWithYouYet": "Bạn chưa được chia sẻ gì",
+  "noAlbumsSharedByYouYet": "Bạn chưa chia sẻ album nào",
+  "sharedWithYou": "Được chia sẻ với bạn",
+  "sharedByYou": "Được chia sẻ bởi bạn",
+  "inviteYourFriendsToEnte": "Mời bạn bè dùng Ente",
+  "failedToDownloadVideo": "Không thể tải video",
+  "hiding": "Đang ẩn...",
+  "unhiding": "Đang hiện...",
+  "successfullyHid": "Đã ẩn thành công",
+  "successfullyUnhid": "Đã hiện thành công",
+  "crashReporting": "Báo cáo sự cố",
+  "resumableUploads": "Cho phép tải lên tiếp tục",
+  "addToHiddenAlbum": "Thêm vào album ẩn",
+  "moveToHiddenAlbum": "Di chuyển đến album ẩn",
+  "fileTypes": "Loại tệp",
+  "deleteConfirmDialogBody": "Tài khoản này được liên kết với các ứng dụng Ente khác, nếu bạn có dùng. Dữ liệu bạn đã tải lên, trên tất cả ứng dụng Ente, sẽ được lên lịch để xóa, và tài khoản của bạn sẽ bị xóa vĩnh viễn.",
+  "hearUsWhereTitle": "Bạn biết Ente từ đâu? (tùy chọn)",
+  "hearUsExplanation": "Chúng tôi không theo dõi cài đặt ứng dụng, nên nếu bạn bật mí bạn tìm thấy chúng tôi từ đâu sẽ rất hữu ích!",
+  "viewAddOnButton": "Xem tiện ích mở rộng",
+  "addOns": "Tiện ích mở rộng",
+  "addOnPageSubtitle": "Chi tiết về tiện ích mở rộng",
+  "yourMap": "Bản đồ của bạn",
+  "modifyYourQueryOrTrySearchingFor": "Chỉnh sửa truy vấn của bạn, hoặc thử tìm",
+  "blackFridaySale": "Giảm giá Black Friday",
+  "upto50OffUntil4thDec": "Giảm tới 50%, đến ngày 4 Tháng 12.",
+  "photos": "Ảnh",
+  "videos": "Video",
+  "livePhotos": "Ảnh động",
+  "searchHint1": "Tìm kiếm nhanh, trên thiết bị",
+  "searchHint2": "Ngày chụp, mô tả ảnh",
+  "searchHint3": "Album, tên tệp và loại",
+  "searchHint4": "Vị trí",
+  "searchHint5": "Sắp ra mắt: Nhận diện khuôn mặt & tìm kiếm vi diệu ✨",
+  "addYourPhotosNow": "Thêm ảnh của bạn ngay bây giờ",
+  "searchResultCount": "{count, plural, other{{count} kết quả đã tìm thấy}}",
+  "@searchResultCount": {
+    "description": "Text to tell user how many results were found for their search query",
+    "placeholders": {
+      "count": {
+        "example": "1|2|3",
+        "type": "int"
+      }
+    }
+  },
+  "faces": "Khuôn mặt",
+  "people": "Người",
+  "contents": "Nội dung",
+  "addNew": "Thêm mới",
+  "@addNew": {
+    "description": "Text to add a new item (location tag, album, caption etc)"
+  },
+  "contacts": "Danh bạ",
+  "noInternetConnection": "Không có kết nối internet",
+  "pleaseCheckYourInternetConnectionAndTryAgain": "Vui lòng kiểm tra kết nối internet của bạn và thử lại.",
+  "signOutFromOtherDevices": "Đăng xuất khỏi các thiết bị khác",
+  "signOutOtherBody": "Nếu bạn nghĩ rằng ai đó biết mật khẩu của bạn, hãy ép tài khoản của bạn đăng xuất khỏi tất cả thiết bị khác đang sử dụng.",
+  "signOutOtherDevices": "Đăng xuất khỏi các thiết bị khác",
+  "doNotSignOut": "Không đăng xuất",
+  "editLocation": "Chỉnh sửa vị trí",
+  "selectALocation": "Chọn một vị trí",
+  "selectALocationFirst": "Chọn một vị trí trước",
+  "changeLocationOfSelectedItems": "Thay đổi vị trí của các mục đã chọn?",
+  "editsToLocationWillOnlyBeSeenWithinEnte": "Các chỉnh sửa vị trí sẽ chỉ thấy được trong Ente",
+  "cleanUncategorized": "Dọn dẹp chưa phân loại",
+  "cleanUncategorizedDescription": "Xóa khỏi mục Chưa phân loại với tất cả tệp đang xuất hiện trong các album khác",
+  "waitingForVerification": "Đang chờ xác minh...",
+  "passkey": "Khóa truy cập",
+  "passkeyAuthTitle": "Xác minh khóa truy cập",
+  "loginWithTOTP": "Đăng nhập bằng TOTP",
+  "passKeyPendingVerification": "Xác minh vẫn đang chờ",
+  "loginSessionExpired": "Phiên đăng nhập đã hết hạn",
+  "loginSessionExpiredDetails": "Phiên đăng nhập của bạn đã hết hạn. Vui lòng đăng nhập lại.",
+  "verifyPasskey": "Xác minh khóa truy cập",
+  "playOnTv": "Phát album trên TV",
+  "pair": "Kết nối",
+  "deviceNotFound": "Không tìm thấy thiết bị",
+  "castInstruction": "Truy cập cast.ente.io trên thiết bị bạn muốn kết nối.\n\nNhập mã dưới đây để phát album trên TV của bạn.",
+  "deviceCodeHint": "Nhập mã",
+  "joinDiscord": "Tham gia Discord",
+  "locations": "Vị trí",
+  "addAName": "Thêm một tên",
+  "findThemQuickly": "Tìm họ nhanh chóng",
+  "@findThemQuickly": {
+    "description": "Subtitle to indicate that the user can find people quickly by name"
+  },
+  "findPeopleByName": "Tìm nhanh người theo tên",
+  "addViewers": "{count, plural, =0 {Thêm người xem} =1 {Thêm người xem} other {Thêm người xem}}",
+  "addCollaborators": "{count, plural, =0 {Thêm cộng tác viên} =1 {Thêm cộng tác viên} other {Thêm cộng tác viên}}",
+  "longPressAnEmailToVerifyEndToEndEncryption": "Nhấn giữ một email để xác minh mã hóa đầu cuối.",
+  "developerSettingsWarning": "Bạn có chắc muốn thay đổi cài đặt Nhà phát triển không?",
+  "developerSettings": "Cài đặt Nhà phát triển",
+  "serverEndpoint": "Điểm cuối máy chủ",
+  "invalidEndpoint": "Điểm cuối không hợp lệ",
+  "invalidEndpointMessage": "Xin lỗi, điểm cuối bạn nhập không hợp lệ. Vui lòng nhập một điểm cuối hợp lệ và thử lại.",
+  "endpointUpdatedMessage": "Điểm cuối đã được cập nhật thành công",
+  "customEndpoint": "Đã kết nối với {endpoint}",
+  "createCollaborativeLink": "Tạo liên kết cộng tác",
+  "search": "Tìm kiếm",
+  "enterPersonName": "Nhập tên người",
+  "editEmailAlreadyLinked": "Email này đã được liên kết với {name} trước.",
+  "viewPersonToUnlink": "Xem {name} để hủy liên kết",
+  "enterName": "Nhập tên",
+  "savePerson": "Lưu người",
+  "editPerson": "Chỉnh sửa người",
+  "mergedPhotos": "Hợp nhất ảnh",
+  "orMergeWithExistingPerson": "Hoặc hợp nhất với hiện có",
+  "enterDateOfBirth": "Sinh nhật (tùy chọn)",
+  "birthday": "Sinh nhật",
+  "removePersonLabel": "Xóa nhãn người",
+  "autoPairDesc": "Kết nối tự động chỉ hoạt động với các thiết bị hỗ trợ Chromecast.",
+  "manualPairDesc": "Kết nối bằng PIN hoạt động với bất kỳ màn hình nào bạn muốn.",
+  "connectToDevice": "Kết nối với thiết bị",
+  "autoCastDialogBody": "Bạn sẽ thấy các thiết bị phát khả dụng ở đây.",
+  "autoCastiOSPermission": "Hãy chắc rằng quyền Mạng cục bộ đã được bật cho ứng dụng Ente Photos, trong Cài đặt.",
+  "noDeviceFound": "Không tìm thấy thiết bị",
+  "stopCastingTitle": "Dừng phát",
+  "stopCastingBody": "Bạn có muốn dừng phát không?",
+  "castIPMismatchTitle": "Không thể phát album",
+  "castIPMismatchBody": "Hãy chắc rằng bạn đang dùng chung mạng với TV.",
+  "pairingComplete": "Kết nối hoàn tất",
+  "savingEdits": "Đang lưu chỉnh sửa...",
+  "autoPair": "Kết nối tự động",
+  "pairWithPin": "Kết nối bằng PIN",
+  "faceRecognition": "Nhận diện khuôn mặt",
+  "foundFaces": "Đã tìm thấy khuôn mặt",
+  "clusteringProgress": "Tiến trình phân cụm",
+  "trim": "Cắt",
+  "crop": "Cắt xén",
+  "rotate": "Xoay",
+  "left": "Trái",
+  "right": "Phải",
+  "whatsNew": "Có gì mới",
+  "reviewSuggestions": "Xem gợi ý",
+  "review": "Xem lại",
+  "useAsCover": "Đặt làm ảnh bìa",
+  "notPersonLabel": "Không phải {name}?",
+  "@notPersonLabel": {
+    "description": "Label to indicate that the person in the photo is not the person whose name is mentioned",
+    "placeholders": {
+      "name": {
+        "content": "{name}",
+        "type": "String"
+      }
+    }
+  },
+  "enable": "Bật",
+  "enabled": "Bật",
+  "moreDetails": "Thông tin thêm",
+  "enableMLIndexingDesc": "Ente hỗ trợ học máy trên-thiết-bị nhằm nhận diện khuôn mặt, tìm kiếm vi diệu và các tính năng tìm kiếm nâng cao khác",
+  "magicSearchHint": "Tìm kiếm vi diệu cho phép tìm ảnh theo nội dung của chúng, ví dụ: 'xe hơi', 'xe hơi đỏ', 'Ferrari'",
+  "panorama": "Panorama",
+  "reenterPassword": "Nhập lại mật khẩu",
+  "reenterPin": "Nhập lại PIN",
+  "deviceLock": "Khóa thiết bị",
+  "pinLock": "Khóa PIN",
+  "next": "Tiếp theo",
+  "setNewPassword": "Đặt mật khẩu mới",
+  "enterPin": "Nhập PIN",
+  "setNewPin": "Đặt PIN mới",
+  "appLock": "Khóa ứng dụng",
+  "noSystemLockFound": "Không tìm thấy khóa hệ thống",
+  "tapToUnlock": "Nhấn để mở khóa",
+  "tooManyIncorrectAttempts": "Thử sai nhiều lần",
+  "videoInfo": "Thông tin video",
+  "autoLock": "Khóa tự động",
+  "immediately": "Lập tức",
+  "autoLockFeatureDescription": "Sau thời gian này, ứng dụng sẽ khóa sau khi được chạy ở chế độ nền",
+  "hideContent": "Ẩn nội dung",
+  "hideContentDescriptionAndroid": "Ẩn nội dung ứng dụng trong trình chuyển đổi ứng dụng và vô hiệu hóa chụp màn hình",
+  "hideContentDescriptionIos": "Ẩn nội dung ứng dụng trong trình chuyển đổi ứng dụng",
+  "passwordStrengthInfo": "Độ mạnh của mật khẩu được tính toán dựa trên độ dài của mật khẩu, các ký tự đã sử dụng và liệu mật khẩu có xuất hiện trong 10.000 mật khẩu được sử dụng nhiều nhất hay không",
+  "noQuickLinksSelected": "Không có liên kết nhanh nào được chọn",
+  "pleaseSelectQuickLinksToRemove": "Vui lòng chọn liên kết nhanh để xóa",
+  "removePublicLinks": "Xóa liên kết công khai",
+  "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "Liên kết công khai của tất cả các liên kết nhanh đã chọn sẽ bị xóa.",
+  "guestView": "Chế độ khách",
+  "guestViewEnablePreSteps": "Để bật chế độ khách, vui lòng thiết lập mã khóa thiết bị hoặc khóa màn hình trong cài đặt hệ thống của bạn.",
+  "nameTheAlbum": "Đặt tên cho album",
+  "collectPhotosDescription": "Tạo một liên kết nơi bạn bè của bạn có thể tải lên ảnh với chất lượng gốc.",
+  "collect": "Thu thập",
+  "appLockDescriptions": "Chọn giữa màn hình khóa mặc định của thiết bị và màn hình khóa tùy chỉnh với PIN hoặc mật khẩu.",
+  "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Để bật khóa ứng dụng, vui lòng thiết lập mã khóa thiết bị hoặc khóa màn hình trong cài đặt hệ thống của bạn.",
+  "authToViewPasskey": "Vui lòng xác thực để xem khóa truy cập",
+  "loopVideoOn": "Phát video lặp lại",
+  "loopVideoOff": "Dừng phát video lặp lại",
+  "localSyncErrorMessage": "Có vẻ như có điều gì đó không ổn vì đồng bộ ảnh cục bộ đang tốn nhiều thời gian hơn mong đợi. Vui lòng liên hệ đội ngũ hỗ trợ của chúng tôi",
+  "showPerson": "Hiện người",
+  "sort": "Sắp xếp",
+  "mostRecent": "Mới nhất",
+  "mostRelevant": "Liên quan nhất",
+  "loadingYourPhotos": "Đang tải ảnh của bạn...",
+  "processingImport": "Đang xử lý {folderName}...",
+  "personName": "Tên người",
+  "addNewPerson": "Thêm người mới",
+  "addNameOrMerge": "Thêm tên hoặc hợp nhất",
+  "mergeWithExisting": "Hợp nhất với người đã có",
+  "newPerson": "Người mới",
+  "addName": "Thêm tên",
+  "add": "Thêm",
+  "extraPhotosFoundFor": "Tìm thấy ảnh bổ sung cho {text}",
+  "@extraPhotosFoundFor": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "extraPhotosFound": "Tìm thấy ảnh bổ sung",
+  "configuration": "Cấu hình",
+  "localIndexing": "Chỉ mục cục bộ",
+  "processed": "Đã xử lý",
+  "resetPerson": "Xóa",
+  "areYouSureYouWantToResetThisPerson": "Bạn có chắc muốn đặt lại người này không?",
+  "allPersonGroupingWillReset": "Tất cả nhóm của người này sẽ được đặt lại, và bạn sẽ mất tất cả các gợi ý đã được tạo ra cho người này",
+  "yesResetPerson": "Có, đặt lại người",
+  "onlyThem": "Chỉ họ",
+  "checkingModels": "Đang kiểm tra mô hình...",
+  "enableMachineLearningBanner": "Bật học máy để tìm kiếm vi diệu và nhận diện khuôn mặt",
+  "searchDiscoverEmptySection": "Ảnh sẽ được hiển thị ở đây sau khi xử lý và đồng bộ hoàn tất",
+  "searchPersonsEmptySection": "Người sẽ được hiển thị ở đây sau khi hoàn tất xử lý và đồng bộ",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {Chưa thêm người xem} =1 {Đã thêm 1 người xem} other {Đã thêm {count} người xem}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to an album."
+  },
+  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Chưa có cộng tác viên} =1 {Đã thêm 1 cộng tác viên} other {Đã thêm {count} cộng tác viên}}",
+  "@collaboratorsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of collaborators that were successfully added to an album."
+  },
+  "accountIsAlreadyConfigured": "Tài khoản đã được cấu hình.",
+  "sessionIdMismatch": "Mã phiên không khớp",
+  "@sessionIdMismatch": {
+    "description": "In passkey page, deeplink is ignored because of session ID mismatch."
+  },
+  "failedToFetchActiveSessions": "Không thể lấy phiên hoạt động",
+  "@failedToFetchActiveSessions": {
+    "description": "In session page, warn user (in toast) that active sessions could not be fetched."
+  },
+  "failedToRefreshStripeSubscription": "Không thể làm mới gói",
+  "failedToPlayVideo": "Không thể phát video",
+  "uploadIsIgnoredDueToIgnorereason": "Tải lên bị bỏ qua do {ignoreReason}",
+  "@uploadIsIgnoredDueToIgnorereason": {
+    "placeholders": {
+      "ignoreReason": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "typeOfGallerGallerytypeIsNotSupportedForRename": "Loại thư viện {galleryType} không được hỗ trợ đổi tên",
+  "@typeOfGallerGallerytypeIsNotSupportedForRename": {
+    "placeholders": {
+      "galleryType": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "tapToUploadIsIgnoredDue": "Nhấn để tải lên, tải lên hiện tại bị bỏ qua do {ignoreReason}",
+  "@tapToUploadIsIgnoredDue": {
+    "description": "Shown in upload icon widet, inside a tooltip.",
+    "placeholders": {
+      "ignoreReason": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "tapToUpload": "Nhấn để tải lên",
+  "@tapToUpload": {
+    "description": "Shown in upload icon widet, inside a tooltip."
+  },
+  "info": "Thông tin",
+  "addFiles": "Thêm tệp",
+  "castAlbum": "Phát album",
+  "imageNotAnalyzed": "Hình ảnh chưa được phân tích",
+  "noFacesFound": "Không tìm thấy khuôn mặt",
+  "fileNotUploadedYet": "Tệp chưa được tải lên",
+  "noSuggestionsForPerson": "Không có gợi ý cho {personName}",
+  "@noSuggestionsForPerson": {
+    "placeholders": {
+      "personName": {
+        "type": "String",
+        "example": "Alice"
+      }
+    }
+  },
+  "month": "tháng",
+  "yearShort": "năm",
+  "@yearShort": {
+    "description": "Appears in pricing page (/yr)"
+  },
+  "currentlyRunning": "đang chạy",
+  "ignored": "bỏ qua",
+  "photosCount": "{count, plural, =0 {Chưa có ảnh} =1 {1 ảnh} other {{count} ảnh}}",
+  "@photosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "file": "Tệp",
+  "searchSectionsLengthMismatch": "Độ dài các phần không khớp: {snapshotLength} != {searchLength}",
+  "@searchSectionsLengthMismatch": {
+    "description": "Appears in search tab page",
+    "placeholders": {
+      "snapshotLength": {
+        "type": "int",
+        "example": "1"
+      },
+      "searchLength": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "selectMailApp": "Chọn ứng dụng email",
+  "selectAllShort": "Tất cả",
+  "@selectAllShort": {
+    "description": "Text that appears in bottom right when you start to select multiple photos. When clicked, it selects all photos."
+  },
+  "selectCoverPhoto": "Chọn ảnh bìa",
+  "newLocation": "Vị trí mới",
+  "faceNotClusteredYet": "Khuôn mặt chưa được phân cụm, vui lòng quay lại sau",
+  "theLinkYouAreTryingToAccessHasExpired": "Liên kết mà bạn truy cập đã hết hạn.",
+  "openFile": "Mở tệp",
+  "backupFile": "Sao lưu tệp",
+  "openAlbumInBrowser": "Mở album trong trình duyệt",
+  "openAlbumInBrowserTitle": "Vui lòng sử dụng ứng dụng web để thêm ảnh vào album này",
+  "allow": "Cho phép",
+  "allowAppToOpenSharedAlbumLinks": "Cho phép ứng dụng mở liên kết album chia sẻ",
+  "seePublicAlbumLinksInApp": "Xem liên kết album công khai trong ứng dụng",
+  "emergencyContacts": "Liên hệ khẩn cấp",
+  "acceptTrustInvite": "Chấp nhận lời mời",
+  "declineTrustInvite": "Từ chối lời mời",
+  "removeYourselfAsTrustedContact": "Gỡ bỏ bạn khỏi liên hệ tin cậy",
+  "legacy": "Thừa kế",
+  "legacyPageDesc": "Thừa kế cho phép các liên hệ tin cậy truy cập tài khoản của bạn khi bạn qua đời.",
+  "legacyPageDesc2": "Các liên hệ tin cậy có thể khởi động quá trình khôi phục tài khoản, và nếu không bị chặn trong vòng 30 ngày, có thể đặt lại mật khẩu và truy cập tài khoản của bạn.",
+  "legacyAccounts": "Tài khoản thừa kế",
+  "trustedContacts": "Liên hệ tin cậy",
+  "addTrustedContact": "Thêm liên hệ tin cậy",
+  "removeInvite": "Gỡ bỏ lời mời",
+  "recoveryWarning": "Một liên hệ tin cậy đang cố gắng truy cập tài khoản của bạn",
+  "rejectRecovery": "Từ chối khôi phục",
+  "recoveryInitiated": "Quá trình khôi phục đã được khởi động",
+  "recoveryInitiatedDesc": "Bạn có thể truy cập tài khoản sau {days} ngày. Một thông báo sẽ được gửi đến {email}.",
+  "@recoveryInitiatedDesc": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "30"
+      },
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "cancelAccountRecovery": "Hủy khôi phục",
+  "recoveryAccount": "Khôi phục tài khoản",
+  "cancelAccountRecoveryBody": "Bạn có chắc muốn hủy khôi phục không?",
+  "startAccountRecoveryTitle": "Bắt đầu khôi phục",
+  "whyAddTrustContact": "Liên hệ tin cậy có thể giúp khôi phục dữ liệu của bạn.",
+  "recoveryReady": "Bạn có thể khôi phục tài khoản của {email} bằng cách đặt lại mật khẩu mới.",
+  "@recoveryReady": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "recoveryWarningBody": "{email} đang cố gắng khôi phục tài khoản của bạn.",
+  "trustedInviteBody": "Bạn đã được mời làm người thừa kế của {email}.",
+  "warning": "Cảnh báo",
+  "proceed": "Tiếp tục",
+  "confirmAddingTrustedContact": "Bạn sắp thêm {email} làm liên hệ tin cậy. Họ sẽ có thể khôi phục tài khoản của bạn nếu bạn không hoạt động trong {numOfDays} ngày.",
+  "@confirmAddingTrustedContact": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "legacyInvite": "{email} đã mời bạn trở thành một liên hệ tin cậy",
+  "authToManageLegacy": "Vui lòng xác thực để quản lý các liên hệ tin cậy",
+  "useDifferentPlayerInfo": "Phát video gặp vấn đề? Nhấn giữ tại đây để thử một trình phát khác.",
+  "hideSharedItemsFromHomeGallery": "Ẩn các mục được chia sẻ khỏi thư viện chính",
+  "gallery": "Thư viện",
+  "joinAlbum": "Tham gia album",
+  "joinAlbumSubtext": "để xem và thêm ảnh của bạn",
+  "joinAlbumSubtextViewer": "để thêm vào album được chia sẻ",
+  "join": "Tham gia",
+  "linkEmail": "Liên kết email",
+  "link": "Liên kết",
+  "noEnteAccountExclamation": "Chưa có tài khoản Ente!",
+  "orPickFromYourContacts": "hoặc chọn từ danh bạ",
+  "emailDoesNotHaveEnteAccount": "{email} chưa có tài khoản Ente.",
+  "@emailDoesNotHaveEnteAccount": {
+    "description": "Shown when email doesn't have an Ente account",
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "accountOwnerPersonAppbarTitle": "{title} (Tôi)",
+  "@accountOwnerPersonAppbarTitle": {
+    "description": "Title of appbar for account owner person",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "reassignMe": "Chỉ định lại \"Tôi\"",
+  "me": "Tôi",
+  "linkEmailToContactBannerCaption": "để chia sẻ nhanh hơn",
+  "@linkEmailToContactBannerCaption": {
+    "description": "Caption for the 'Link email' title. It should be a continuation of the 'Link email' title. Just like how 'Link email' + 'for faster sharing' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
+  },
+  "selectPersonToLink": "Chọn người để liên kết",
+  "linkPersonToEmail": "Liên kết người với {email}",
+  "@linkPersonToEmail": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "linkPersonToEmailConfirmation": "Việc này sẽ liên kết {personName} với {email}",
+  "@linkPersonToEmailConfirmation": {
+    "description": "Confirmation message when linking a person to an email",
+    "placeholders": {
+      "personName": {
+        "type": "String"
+      },
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "selectYourFace": "Chọn khuôn mặt bạn",
+  "reassigningLoading": "Đang chỉ định lại...",
+  "reassignedToName": "Đã chỉ định lại bạn thành {name}",
+  "@reassignedToName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "saveChangesBeforeLeavingQuestion": "Lưu thay đổi trước khi rời?",
+  "dontSave": "Không lưu",
+  "thisIsMeExclamation": "Đây là tôi!",
+  "linkPerson": "Liên kết người",
+  "linkPersonCaption": "để trải nghiệm chia sẻ tốt hơn",
+  "@linkPersonCaption": {
+    "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
+  },
+  "videoStreaming": "Phát trực tuyến video",
+  "processingVideos": "Đang xử lý video",
+  "streamDetails": "Chi tiết phát",
+  "processing": "Đang xử lý",
+  "queued": "Đang chờ",
+  "ineligible": "Không đủ điều kiện",
+  "failed": "Không thành công",
+  "playStream": "Phát trực tiếp",
+  "playOriginal": "Phát tệp gốc",
+  "joinAlbumConfirmationDialogBody": "Tham gia một album sẽ khiến email của bạn hiển thị với những người tham gia khác.",
+  "pleaseWaitThisWillTakeAWhile": "Vui lòng chờ, có thể mất một lúc.",
+  "editTime": "Chỉnh sửa thời gian",
+  "selectTime": "Chọn thời gian",
+  "selectDate": "Chọn ngày",
+  "previous": "Trước",
+  "selectOneDateAndTimeForAll": "Chọn một ngày và giờ cho tất cả",
+  "selectStartOfRange": "Chọn phạm vi bắt đầu",
+  "thisWillMakeTheDateAndTimeOfAllSelected": "Thao tác này sẽ làm cho ngày và giờ của tất cả ảnh được chọn đều giống nhau.",
+  "allWillShiftRangeBasedOnFirst": "Đây là ảnh đầu tiên trong nhóm. Các ảnh được chọn khác sẽ tự động thay đổi dựa theo ngày mới này",
+  "newRange": "Phạm vi mới",
+  "selectOneDateAndTime": "Chọn một ngày và giờ",
+  "moveSelectedPhotosToOneDate": "Di chuyển ảnh đã chọn đến một ngày",
+  "shiftDatesAndTime": "Di chuyển ngày và giờ",
+  "photosKeepRelativeTimeDifference": "Ảnh giữ nguyên chênh lệch thời gian tương đối",
+  "photocountPhotos": "{count, plural, =0 {Chưa có ảnh} =1 {1 ảnh} other {{count} ảnh}}",
+  "@photocountPhotos": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "appIcon": "Biểu tượng ứng dụng",
+  "notThisPerson": "Không phải người này?",
+  "selectedItemsWillBeRemovedFromThisPerson": "Các mục đã chọn sẽ bị xóa khỏi người này, nhưng không bị xóa khỏi thư viện của bạn.",
+  "throughTheYears": "{dateFormat} qua các năm",
+  "thisWeekThroughTheYears": "Tuần này qua các năm",
+  "thisWeekXYearsAgo": "{count, plural, =1 {Tuần này, {count} năm trước} other {Tuần này, {count} năm trước}}",
+  "youAndThem": "Bạn và {name}",
+  "admiringThem": "Ngưỡng mộ {name}",
+  "embracingThem": "Yêu mến {name}",
+  "partyWithThem": "Quẩy với {name}",
+  "hikingWithThem": "Leo núi với {name}",
+  "feastingWithThem": "Tiệc tùng với {name}",
+  "selfiesWithThem": "Selfie với {name}",
+  "posingWithThem": "Làm dáng với {name}",
+  "backgroundWithThem": "Ngắm cảnh với {name}",
+  "sportsWithThem": "Chơi thể thao với {name}",
+  "roadtripWithThem": "Đi bộ với {name}",
+  "spotlightOnYourself": "Tập trung vào bản thân bạn",
+  "spotlightOnThem": "Tập trung vào {name}",
+  "personIsAge": "{name} đã {age} tuổi!",
+  "personTurningAge": "{name} sắp {age} tuổi",
+  "lastTimeWithThem": "Lần cuối với {name}",
+  "tripToLocation": "Phượt ở {location}",
+  "tripInYear": "Phượt năm {year}",
+  "lastYearsTrip": "Phượt năm ngoái",
+  "sunrise": "Đường chân trời",
+  "mountains": "Đồi núi",
+  "greenery": "Cây cối",
+  "beach": "Cát và biển",
+  "city": "Trong thành phố",
+  "moon": "Ánh trăng",
+  "onTheRoad": "Trên đường",
+  "food": "Ăn chơi",
+  "pets": "Thú cưng",
+  "curatedMemories": "Kỷ niệm đáng nhớ",
+  "widgets": "Tiện ích",
+  "memories": "Kỷ niệm",
+  "peopleWidgetDesc": "Chọn những người bạn muốn thấy trên màn hình chính của mình.",
+  "albumsWidgetDesc": "Chọn những album bạn muốn thấy trên màn hình chính của mình.",
+  "memoriesWidgetDesc": "Chọn những loại kỷ niệm bạn muốn thấy trên màn hình chính của mình.",
+  "smartMemories": "Gợi nhớ kỷ niệm",
+  "pastYearsMemories": "Kỷ niệm năm ngoái",
+  "deleteMultipleAlbumDialog": "Xóa luôn ảnh (và video) trong {count} album này <bold>khỏi toàn bộ album khác</bold> cũng đang chứa chúng?",
+  "addParticipants": "Thêm người tham gia",
+  "selectedAlbums": "{count} đã chọn",
+  "actionNotSupportedOnFavouritesAlbum": "Hành động không áp dụng trong album Đã thích",
+  "onThisDayMemories": "Kỷ niệm hôm nay",
+  "onThisDay": "Vào ngày này",
+  "lookBackOnYourMemories": "Xem lại kỷ niệm của bạn 🌄",
+  "newPhotosEmoji": " mới 📸",
+  "sorryWeHadToPauseYourBackups": "Rất tiếc, chúng tôi phải dừng sao lưu cho bạn",
+  "clickToInstallOurBestVersionYet": "Nhấn để cài đặt phiên bản tốt nhất",
+  "onThisDayNotificationExplanation": "Nhắc về những kỷ niệm ngày này trong những năm trước.",
+  "addMemoriesWidgetPrompt": "Thêm tiện ích kỷ niệm vào màn hình chính và quay lại đây để tùy chỉnh.",
+  "addAlbumWidgetPrompt": "Thêm tiện ích album vào màn hình chính và quay lại đây để tùy chỉnh.",
+  "addPeopleWidgetPrompt": "Thêm tiện ích người vào màn hình chính và quay lại đây để tùy chỉnh.",
+  "birthdayNotifications": "Thông báo sinh nhật",
+  "receiveRemindersOnBirthdays": "Nhắc khi đến sinh nhật của ai đó. Nhấn vào thông báo sẽ đưa bạn đến ảnh của người sinh nhật.",
+  "happyBirthday": "Chúc mừng sinh nhật! 🥳",
+  "birthdays": "Sinh nhật",
+  "wishThemAHappyBirthday": "Chúc {name} sinh nhật vui vẻ! 🎉",
+  "areYouSureRemoveThisFaceFromPerson": "Bạn có chắc muốn xóa khuôn mặt này khỏi người này không?",
+  "otherDetectedFaces": "Những khuôn mặt khác được phát hiện",
+  "areThey": "Họ có phải là ",
+  "questionmark": "?",
+  "saveAsAnotherPerson": "Lưu như một người khác",
+  "showLessFaces": "Hiện ít khuôn mặt hơn",
+  "showMoreFaces": "Hiện nhiều khuôn mặt hơn",
+  "ignore": "Bỏ qua",
+  "merge": "Hợp nhất",
+  "reset": "Đặt lại",
+  "areYouSureYouWantToIgnoreThisPerson": "Bạn có chắc muốn bỏ qua người này?",
+  "areYouSureYouWantToIgnoreThesePersons": "Bạn có chắc muốn bỏ qua những người này?",
+  "thePersonGroupsWillNotBeDisplayed": "Nhóm người sẽ không được hiển thị trong phần người nữa. Ảnh sẽ vẫn được giữ nguyên.",
+  "thePersonWillNotBeDisplayed": "Người sẽ không được hiển thị trong phần người nữa. Ảnh sẽ vẫn được giữ nguyên.",
+  "areYouSureYouWantToMergeThem": "Bạn có chắc muốn hợp nhất họ?",
+  "allUnnamedGroupsWillBeMergedIntoTheSelectedPerson": "Tất cả nhóm không có tên sẽ được hợp nhất vào người đã chọn. Điều này vẫn có thể được hoàn tác từ tổng quan lịch sử đề xuất của người đó.",
+  "yesIgnore": "Có, bỏ qua",
+  "same": "Chính xác",
+  "different": "Khác",
+  "sameperson": "Cùng một người?",
+  "cLTitle1": "Trình chỉnh sửa ảnh nâng cao",
+  "cLDesc1": "Chúng tôi phát hành một trình chỉnh sửa ảnh tân tiến, bổ sung thêm cắt ảnh, bộ lọc có sẵn để chỉnh sửa nhanh, các tùy chọn tinh chỉnh bao gồm độ bão hòa, độ tương phản, độ sáng, độ ấm và nhiều hơn nữa. Trình chỉnh sửa mới cũng bao gồm khả năng vẽ lên ảnh và thêm emoji dưới dạng nhãn dán.",
+  "cLTitle2": "Album thông minh",
+  "cLDesc2": "Giờ đây, bạn có thể tự động thêm ảnh của những người đã chọn vào bất kỳ album nào. Chỉ cần mở album và chọn \"Tự động thêm người\" trong menu. Nếu sử dụng cùng với album chia sẻ, bạn có thể chia sẻ ảnh mà không cần tốn công.",
+  "cLTitle3": "Cải tiến Thư viện ảnh",
+  "cLDesc3": "Chúng tôi bổ sung tính năng phân nhóm thư viện ảnh theo tuần, tháng và năm. Giờ đây, bạn có thể tùy chỉnh thư viện ảnh theo đúng ý muốn với các tùy chọn mới này, cùng với các lưới tùy chỉnh.",
+  "cLTitle4": "Cuộn nhanh hơn",
+  "cLDesc4": "Cùng với một loạt cải tiến ngầm nhằm nâng cao trải nghiệm cuộn thư viện, chúng tôi cũng đã thiết kế lại thanh cuộn để hiển thị các điểm đánh dấu, cho phép bạn nhanh chóng nhảy cóc trên dòng thời gian.",
+  "indexingPausedStatusDescription": "Lập chỉ mục bị tạm dừng. Nó sẽ tự động tiếp tục khi thiết bị đã sẵn sàng. Thiết bị được coi là sẵn sàng khi mức pin, tình trạng pin và trạng thái nhiệt độ nằm trong phạm vi tốt.",
+  "thisWeek": "Tuần này",
+  "lastWeek": "Tuần trước",
+  "thisMonth": "Tháng này",
+  "thisYear": "Năm nay",
+  "groupBy": "Phân nhóm theo",
+  "faceThumbnailGenerationFailed": "Không thể tạo ảnh thu nhỏ khuôn mặt",
+  "fileAnalysisFailed": "Không thể xác định tệp",
+  "editAutoAddPeople": "Sửa tự động thêm người",
+  "autoAddPeople": "Tự động thêm người",
+  "autoAddToAlbum": "Tự động thêm vào album",
+  "shouldRemoveFilesSmartAlbumsDesc": "Bạn có muốn xóa các tệp liên quan đến người đã được chọn trước đó trong album thông minh không?",
+  "addingPhotos": "Đang thêm ảnh",
+  "gettingReady": "Chuẩn bị sẵn sàng",
+  "addSomePhotosDesc1": "Thêm vài ảnh hoặc chọn ",
+  "addSomePhotosDesc2": "những khuôn mặt giống nhau",
+  "addSomePhotosDesc3": "\nđể bắt đầu với",
+  "ignorePerson": "Bỏ qua người",
+  "mixedGrouping": "Nhóm hỗn hợp?",
+  "analysis": "Phân tích",
+  "doesGroupContainMultiplePeople": "Nhóm này có chứa nhiều người?",
+  "automaticallyAnalyzeAndSplitGrouping": "Chúng tôi sẽ tự động phân tích nhóm để xác định xem có nhiều người góp mặt hay không và tách họ ra lần nữa. Việc này có thể mất vài giây.",
+  "layout": "Bố cục",
+  "day": "Ngày",
+  "peopleAutoAddDesc": "Chọn những người bạn muốn tự động thêm vào album",
+  "undo": "Hoàn tác",
+  "redo": "Làm lại",
+  "filter": "Bộ lọc",
+  "adjust": "Điều chỉnh",
+  "draw": "Vẽ",
+  "sticker": "Sticker",
+  "brushColor": "Màu cọ",
+  "font": "Phông chữ",
+  "background": "Nền",
+  "align": "Căn chỉnh",
+  "addedToAlbums": "{count, plural, =1{Đã thêm vào 1 album thành công} other{Đã thêm vào {count} album thành công}}",
+  "@addedToAlbums": {
+    "description": "Message shown when items are added to albums",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
+}

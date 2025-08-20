@@ -223,6 +223,9 @@ export const Notification: React.FC<NotificationProps> = ({
                             // Buttons cannot be nested in buttons, so we use a div
                             // here instead.
                             component="div"
+                            // Inherit the color of the parent button instead of
+                            // using the IconButton defaults.
+                            color="inherit"
                             onClick={handleClose}
                             sx={{ bgcolor: "fill.faint" }}
                         >
