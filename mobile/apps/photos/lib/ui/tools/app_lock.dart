@@ -124,6 +124,10 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
         GlobalWidgetsLocalizations.delegate,
       ],
       onGenerateRoute: (settings) {
+        // On Android disabling deep links doesn't work, so this function
+        // also gets triggered like /?generatedId=xyz&mainKey=abcd
+        // Related: https://github.com/flutter/flutter/issues/119938
+
         switch (settings.name) {
           case '/lock-screen':
             return PageRouteBuilder(
@@ -135,7 +139,7 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
                   this.widget.builder(settings.arguments),
             );
         }
-        return PageRouteBuilder(pageBuilder: (_, __, ___) => this._lockScreen);
+        return null;
       },
     );
   }
