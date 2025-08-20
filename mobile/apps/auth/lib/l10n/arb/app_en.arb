@@ -519,5 +519,12 @@
   "algorithm": "Algorithm",
   "type": "Type",
   "period": "Period",
-  "digits": "Digits"
+  "digits": "Digits",
+  "importFromGallery": "Import from gallery",
+  "errorCouldNotReadImage": "Could not read the selected image file.",
+  "errorInvalidQRCode": "Invalid QR Code",
+  "errorInvalidQRCodeBody": "The scanned QR code is not a valid 2FA account.",
+  "errorNoQRCode": "No QR code found",
+  "errorGenericTitle": "An Error Occurred",
+  "errorGenericBody": "An unexpected error occurred while importing."
 }
