@@ -1,5 +1,6 @@
 import 'dart:async';
 import "dart:convert";
+import "dart:io";
 import "dart:math";
 
 import 'package:bip39/bip39.dart' as bip39;
@@ -88,6 +89,7 @@ class UserService {
         data: {
           "email": email,
           "purpose": isChangeEmail ? "change" : purpose ?? "",
+          "mobile": Platform.isIOS || Platform.isAndroid,
         },
       );
       await dialog.hide();
