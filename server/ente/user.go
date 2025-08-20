@@ -31,6 +31,7 @@ type SendOTTRequest struct {
 	Email   string `json:"email"`
 	Client  string `json:"client"`
 	Purpose string `json:"purpose"`
+	Mobile  bool   `json:"mobile,omitempty"`
 }
 
 // EmailVerificationRequest represents an email verification request

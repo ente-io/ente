@@ -82,7 +82,7 @@ func hardcodedOTTForEmail(hardCodedOTT HardCodedOTT, email string) string {
 }
 
 // SendEmailOTT generates and sends an OTT to the provided email address
-func (c *UserController) SendEmailOTT(context *gin.Context, email string, purpose string) error {
+func (c *UserController) SendEmailOTT(context *gin.Context, email string, purpose string, viaMobile bool) error {
 	if err := c.validateSendOTT(context, email, purpose); err != nil {
 		return err
 	}
@@ -119,7 +119,7 @@ func (c *UserController) SendEmailOTT(context *gin.Context, email string, purpos
 			return stacktrace.Propagate(err, "")
 		}
 		log.Info("Added ott for " + emailHash + ": " + ott)
-		err = emailOTT(email, ott, purpose)
+		err = emailOTT(email, ott, purpose, viaMobile)
 		if err != nil {
 			return stacktrace.Propagate(err, "")
 		}
@@ -383,7 +383,7 @@ func (c *UserController) TerminateSession(userID int64, token string) error {
 	return stacktrace.Propagate(c.UserAuthRepo.RemoveToken(userID, token), "")
 }
 
-func emailOTT(to string, ott string, purpose string) error {
+func emailOTT(to string, ott string, purpose string, viaMobile bool) error {
 	var templateName string
 	if purpose == ente.ChangeEmailOTTPurpose {
 		templateName = ente.ChangeEmailOTTTemplate
