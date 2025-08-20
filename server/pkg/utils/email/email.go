@@ -7,6 +7,7 @@ package email
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -47,6 +48,7 @@ func sendViaSMTP(toEmails []string, fromName string, fromEmail string, subject s
 	smtpPassword := viper.GetString("smtp.password")
 	smtpEmail := viper.GetString("smtp.email")
 	smtpSenderName := viper.GetString("smtp.sender-name")
+	smtpEncryption := viper.GetString("smtp.encryption")
 
 	var emailMessage string
 	var auth smtp.Auth = nil
@@ -104,7 +106,7 @@ func sendViaSMTP(toEmails []string, fromName string, fromEmail string, subject s
 
 	// Send the email to each recipient
 	for _, toEmail := range toEmails {
-		err := smtp.SendMail(smtpServer+":"+smtpPort, auth, fromEmail, []string{toEmail}, []byte(emailMessage))
+		err := sendMailWithEncryption(smtpServer, smtpPort, auth, fromEmail, []string{toEmail}, []byte(emailMessage), smtpEncryption)
 		if err != nil {
 			errMsg := err.Error()
 			for i := range knownInvalidEmailErrors {
@@ -117,6 +119,76 @@ func sendViaSMTP(toEmails []string, fromName string, fromEmail string, subject s
 	}
 
 	return nil
+}
+
+// sendMailWithEncryption sends an email with the specified encryption type
+// encryption can be one of:
+// - "tls" or "ssl": Uses TLS/SSL encryption for the entire connection
+// - "" (empty string) or any other value: No encryption
+func sendMailWithEncryption(host, port string, auth smtp.Auth, from string, to []string, msg []byte, encryption string) error {
+	addr := host + ":" + port
+
+	switch strings.ToLower(encryption) {
+	case "tls", "ssl":
+		// For TLS/SSL, establish a secure connection directly
+		tlsConfig := &tls.Config{
+			ServerName: host,
+		}
+		conn, err := tls.Dial("tcp", addr, tlsConfig)
+		if err != nil {
+			return stacktrace.Propagate(err, "failed to establish TLS connection")
+		}
+		defer conn.Close()
+
+		client, err := smtp.NewClient(conn, host)
+		if err != nil {
+			return stacktrace.Propagate(err, "failed to create SMTP client over TLS")
+		}
+		defer client.Close()
+
+		return sendWithClient(client, auth, from, to, msg)
+
+	default:
+		// No encryption, use standard SendMail
+		return smtp.SendMail(addr, auth, from, to, msg)
+	}
+}
+
+// sendWithClient sends an email using an established SMTP client
+func sendWithClient(client *smtp.Client, auth smtp.Auth, from string, to []string, msg []byte) error {
+	if auth != nil {
+		if err := client.Auth(auth); err != nil {
+			return stacktrace.Propagate(err, "authentication failed")
+		}
+	}
+
+	if err := client.Mail(from); err != nil {
+		return stacktrace.Propagate(err, "failed to set sender")
+	}
+
+	for _, addr := range to {
+		if err := client.Rcpt(addr); err != nil {
+			return stacktrace.Propagate(err, "failed to add recipient")
+		}
+	}
+
+	w, err := client.Data()
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to create message writer")
+	}
+
+	_, err = w.Write(msg)
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to write message")
+	}
+
+	err = w.Close()
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to close message writer")
+	}
+
+	err = client.Quit()
+	return stacktrace.Propagate(err, "")
 }
 
 func sendViaTransmail(toEmails []string, fromName string, fromEmail string, subject string, htmlBody string, inlineImages []map[string]interface{}) error {
