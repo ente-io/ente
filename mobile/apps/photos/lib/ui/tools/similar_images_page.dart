@@ -1,5 +1,6 @@
 import "dart:async";
 
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
@@ -84,7 +85,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       appBar: AppBar(
         elevation: 0,
         title: const Text("Similar images"), // TODO: lau: extract string
-        actions: _pageState == SimilarImagesPageState.results
+        actions: _pageState == SimilarImagesPageState.results && kDebugMode
             ? [_getSortMenu()]
             : null,
       ),
@@ -264,19 +265,18 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             itemCount: _similarFilesList.length + 1, // +1 for header
             itemBuilder: (context, index) {
               if (index == 0) {
-                // Header item
-                if (flagService.internalUser) {
+                if (kDebugMode) {
                   return Container(
                     padding: const EdgeInsets.all(16),
                     child: Column(
                       children: [
                         Text(
-                          "(I) Found ${_similarFilesList.length} groups of similar images", // TODO: lau: extract string
+                          "(I) Found ${_similarFilesList.length} groups of similar images",
                           style: textTheme.bodyBold,
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          "(I) Threshold: ${_distanceThreshold.toStringAsFixed(2)}", // TODO: lau: extract string
+                          "(I) Threshold: ${_distanceThreshold.toStringAsFixed(2)}",
                           style: textTheme.miniMuted,
                         ),
                       ],
@@ -459,7 +459,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             children: [
               Text(
                 "${similarFiles.files.length} similar images" +
-                    (flagService.internalUser
+                    (kDebugMode
                         ? " (I: d: ${similarFiles.furthestDistance.toStringAsFixed(3)})"
                         : ""), // TODO: lau: extract string
                 style: textTheme.smallMuted.copyWith(
