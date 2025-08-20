@@ -31,7 +31,7 @@ type User struct {
 type SendOTTRequest struct {
 	Email   string `json:"email"`
 	Client  string `json:"client"`
-	Purpose string `json:"purpose"
+	Purpose string `json:"purpose"`
 	// Mobile indicates whether the request is coming from a mobile client`
 	Mobile bool `json:"mobile"`
 }
