@@ -176,7 +176,7 @@ smtp:
 ```
 
 | Variable           | Description                  | Default |
-|--------------------|------------------------------| ------- |
+| ------------------ | ---------------------------- | ------- |
 | `smtp.host`        | SMTP server host             |         |
 | `smtp.port`        | SMTP server port             |         |
 | `smtp.username`    | SMTP auth username           |         |
