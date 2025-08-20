@@ -84,8 +84,10 @@ class _CustomScrollBarState extends State<CustomScrollBar> {
     }
 
     if (_showScrollbarDivisions) {
-      getIntrinsicSizeOfWidget(const ScrollBarDivider(title: "Temp"), context)
-          .then((size) {
+      getIntrinsicSizeOfWidget(
+        const ScrollBarDivider(title: "Temp"),
+        context,
+      ).then((size) {
         if (mounted) {
           setState(() {
             heightOfScrollbarDivider = size.height;
@@ -114,7 +116,8 @@ class _CustomScrollBarState extends State<CustomScrollBar> {
 
     for (final scrollbarDivision in widget.galleryGroups.scrollbarDivisions) {
       final scrollOffsetOfGroup = widget
-          .galleryGroups.groupIdToScrollOffsetMap[scrollbarDivision.groupID]!;
+          .galleryGroups
+          .groupIdToScrollOffsetMap[scrollbarDivision.groupID]!;
 
       final groupScrollOffsetToUse = scrollOffsetOfGroup - heightOfScrollTrack!;
       if (groupScrollOffsetToUse < 0) {
@@ -142,19 +145,20 @@ class _CustomScrollBarState extends State<CustomScrollBar> {
         final value = (_kScrollbarMinLength - heightOfScrollbarDivider!) / 2;
 
         if (fractionOfGroupScrollOffsetWrtMaxExtent < 0.5) {
-          positionCorrection = value * fractionOfGroupScrollOffsetWrtMaxExtent -
+          positionCorrection =
+              value * fractionOfGroupScrollOffsetWrtMaxExtent -
               (heightOfScrollbarDivider! *
                   fractionOfGroupScrollOffsetWrtMaxExtent);
         } else {
           positionCorrection =
               -value * fractionOfGroupScrollOffsetWrtMaxExtent -
-                  (heightOfScrollbarDivider! *
-                      fractionOfGroupScrollOffsetWrtMaxExtent);
+              (heightOfScrollbarDivider! *
+                  fractionOfGroupScrollOffsetWrtMaxExtent);
         }
 
         final adaptedPosition =
             heightOfScrollTrack! * fractionOfGroupScrollOffsetWrtMaxExtent +
-                positionCorrection;
+            positionCorrection;
 
         result.add(
           (position: adaptedPosition, title: scrollbarDivision.title),
@@ -279,7 +283,7 @@ class ScrollBarDivider extends StatelessWidget {
         // is affected.
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 3,
             offset: const Offset(0, 2),
           ),
