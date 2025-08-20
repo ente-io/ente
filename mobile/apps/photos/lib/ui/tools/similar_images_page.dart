@@ -305,6 +305,11 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         final selectedCount = _selectedFiles.files.length;
         final hasSelectedFiles = selectedCount > 0;
 
+        int totalSize = 0;
+        for (final file in _selectedFiles.files) {
+          totalSize += file.fileSize ?? 0;
+        }
+
         return AnimatedSwitcher(
           duration: const Duration(milliseconds: 200),
           switchInCurve: Curves.easeOut,
@@ -326,7 +331,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                           width: double.infinity,
                           child: ButtonWidget(
                             labelText:
-                                "Delete $selectedCount photos", // TODO: lau: extract string
+                                "Delete $selectedCount photos (${formatBytes(totalSize)})", // TODO: lau: extract string
                             buttonType: ButtonType.critical,
                             onTap: () async {
                               await _deleteFiles(
