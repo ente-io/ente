@@ -466,7 +466,7 @@ packages:
     source: path
     version: "1.0.0"
   ente_utils:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       path: "../../packages/utils"
       relative: true
