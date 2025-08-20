@@ -121,6 +121,7 @@ class SimilarImagesService {
         if (!setsAreEqual(personIDs, otherPersonIDs)) continue;
         similarFilesList.add(otherFile);
         furthestDistance = max(furthestDistance, distance);
+        alreadyUsedFileIDs.add(otherFileID);
       }
       if (similarFilesList.isNotEmpty) {
         similarFilesList.add(firstLoopFile);
