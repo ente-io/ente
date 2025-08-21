@@ -126,14 +126,16 @@ class _OtherContactPageState extends State<OtherContactPage> {
                 // icon: Icons.start_outlined,
                 buttonType: ButtonType.trailingIconPrimary,
                 icon: Icons.start_outlined,
-                labelText: S.of(context).startAccountRecoveryTitle,
+                labelText:
+                    AppLocalizations.of(context).startAccountRecoveryTitle,
                 onTap: widget.contact.isPendingInvite()
                     ? null
                     : () async {
                         final actionResult = await showChoiceActionSheet(
                           context,
-                          title: S.of(context).startAccountRecoveryTitle,
-                          firstButtonLabel: S.of(context).yes,
+                          title: AppLocalizations.of(context)
+                              .startAccountRecoveryTitle,
+                          firstButtonLabel: AppLocalizations.of(context).yes,
                           body: "Are you sure you want to initiate recovery?",
                           isCritical: true,
                         );
@@ -195,14 +197,15 @@ class _OtherContactPageState extends State<OtherContactPage> {
                     recoverySession!.status == "READY"))
               ButtonWidget(
                 buttonType: ButtonType.neutral,
-                labelText: S.of(context).cancelAccountRecovery,
+                labelText: AppLocalizations.of(context).cancelAccountRecovery,
                 shouldSurfaceExecutionStates: false,
                 onTap: () async {
                   final actionResult = await showChoiceActionSheet(
                     context,
-                    title: S.of(context).cancelAccountRecovery,
-                    firstButtonLabel: S.of(context).yes,
-                    body: S.of(context).cancelAccountRecoveryBody,
+                    title: AppLocalizations.of(context).cancelAccountRecovery,
+                    firstButtonLabel: AppLocalizations.of(context).yes,
+                    body:
+                        AppLocalizations.of(context).cancelAccountRecoveryBody,
                     isCritical: true,
                     firstButtonOnTap: () async {
                       await EmergencyContactService.instance.stopRecovery(
@@ -217,11 +220,12 @@ class _OtherContactPageState extends State<OtherContactPage> {
               ),
             SizedBox(height: recoverySession == null ? 48 : 24),
             MenuSectionTitle(
-              title: S.of(context).removeYourselfAsTrustedContact,
+              title:
+                  AppLocalizations.of(context).removeYourselfAsTrustedContact,
             ),
             MenuItemWidget(
               captionedTextWidget: CaptionedTextWidget(
-                title: S.of(context).remove,
+                title: AppLocalizations.of(context).remove,
                 textColor: warning500,
                 makeTextBold: true,
               ),
@@ -263,7 +267,7 @@ class _OtherContactPageState extends State<OtherContactPage> {
           isInAlert: true,
         ),
         ButtonWidget(
-          labelText: S.of(context).cancel,
+          labelText: AppLocalizations.of(context).cancel,
           buttonType: ButtonType.tertiary,
           buttonSize: ButtonSize.large,
           buttonAction: ButtonAction.third,

@@ -227,7 +227,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
                   padding: EdgeInsets.all(8),
                 ),
                 Text(
-                  S.of(context).edit,
+                  AppLocalizations.of(context).edit,
                   style: textTheme.bodyBold,
                 ),
               ],
@@ -242,7 +242,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
                   padding: EdgeInsets.all(8),
                 ),
                 Text(
-                  S.of(context).review,
+                  AppLocalizations.of(context).review,
                   style: textTheme.bodyBold,
                 ),
               ],
@@ -257,7 +257,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
                   padding: EdgeInsets.all(8),
                 ),
                 Text(
-                  S.of(context).setCover,
+                  AppLocalizations.of(context).setCover,
                   style: textTheme.bodyBold,
                 ),
               ],
@@ -289,7 +289,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
                   padding: EdgeInsets.all(8),
                 ),
                 Text(
-                  S.of(context).remove,
+                  AppLocalizations.of(context).remove,
                   style: textTheme.bodyBold,
                 ),
               ],
@@ -308,7 +308,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
                 const Padding(
                   padding: EdgeInsets.all(8),
                 ),
-                Text(S.of(context).showPerson),
+                Text(AppLocalizations.of(context).showPerson),
               ],
             ),
           ),
@@ -354,9 +354,9 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
   Future<void> _resetPerson(BuildContext context) async {
     await showChoiceDialog(
       context,
-      title: S.of(context).areYouSureYouWantToResetThisPerson,
-      body: S.of(context).allPersonGroupingWillReset,
-      firstButtonLabel: S.of(context).yesResetPerson,
+      title: AppLocalizations.of(context).areYouSureYouWantToResetThisPerson,
+      body: AppLocalizations.of(context).allPersonGroupingWillReset,
+      firstButtonLabel: AppLocalizations.of(context).yesResetPerson,
       firstButtonOnTap: () async {
         try {
           await PersonService.instance.deletePerson(person.remoteID);

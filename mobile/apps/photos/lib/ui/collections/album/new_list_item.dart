@@ -39,7 +39,7 @@ class NewAlbumListItemWidget extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(left: 12),
                   child: Text(
-                    S.of(context).newAlbum,
+                    AppLocalizations.of(context).newAlbum,
                     style:
                         textTheme.body.copyWith(color: colorScheme.textMuted),
                   ),

@@ -70,15 +70,14 @@ class AlbumListItemWidget extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 FutureBuilder<int>(
-                  future:
-                      CollectionsService.instance.getFileCount(collection),
+                  future: CollectionsService.instance.getFileCount(collection),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       return Text(
-                        S.of(context).memoryCount(
-                              snapshot.data!,
-                              NumberFormat().format(snapshot.data!),
-                            ),
+                        AppLocalizations.of(context).memoryCount(
+                          snapshot.data!,
+                          NumberFormat().format(snapshot.data!),
+                        ),
                         style: textTheme.small.copyWith(
                           color: colorScheme.textMuted,
                         ),

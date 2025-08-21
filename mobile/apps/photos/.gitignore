@@ -46,3 +46,5 @@ android/app/build/
 
 # FVM Version Cache
 .fvm/
+
+lib/generated/intl/app_localizations*.dart

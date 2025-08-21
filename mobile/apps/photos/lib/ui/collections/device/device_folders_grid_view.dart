@@ -110,7 +110,7 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
                     );
             } else if (snapshot.hasError) {
               _logger.severe("failed to load device gallery", snapshot.error);
-              return Text(S.of(context).failedToLoadAlbums);
+              return Text(AppLocalizations.of(context).failedToLoadAlbums);
             } else {
               return const EnteLoadingWidget();
             }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import "package:flutter_svg/svg.dart";
 import "package:photos/ente_theme_data.dart";
 import "package:photos/generated/l10n.dart";
- import "package:photos/theme/ente_theme.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:pro_image_editor/models/editor_configs/pro_image_editor_configs.dart";
 
 class ImageEditorAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -44,7 +44,7 @@ class ImageEditorAppBar extends StatelessWidget implements PreferredSizeWidget {
               enableUndo ? close() : Navigator.of(context).pop();
             },
             child: Text(
-              S.of(context).cancel,
+              AppLocalizations.of(context).cancel,
               style: getEnteTextTheme(context).body,
             ),
           ),
@@ -53,7 +53,7 @@ class ImageEditorAppBar extends StatelessWidget implements PreferredSizeWidget {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 IconButton(
-                  tooltip: S.of(context).undo,
+                  tooltip: AppLocalizations.of(context).undo,
                   onPressed: () {
                     undo != null ? undo!() : null;
                   },
@@ -67,7 +67,7 @@ class ImageEditorAppBar extends StatelessWidget implements PreferredSizeWidget {
                 ),
                 const SizedBox(width: 12),
                 IconButton(
-                  tooltip: S.of(context).redo,
+                  tooltip: AppLocalizations.of(context).redo,
                   onPressed: () {
                     redo != null ? redo!() : null;
                   },
@@ -89,7 +89,9 @@ class ImageEditorAppBar extends StatelessWidget implements PreferredSizeWidget {
               key: ValueKey(isMainEditor ? 'save_copy' : 'done'),
               onPressed: done,
               child: Text(
-                isMainEditor ? S.of(context).saveCopy : S.of(context).done,
+                isMainEditor
+                    ? AppLocalizations.of(context).saveCopy
+                    : AppLocalizations.of(context).done,
                 style: getEnteTextTheme(context).body.copyWith(
                       color: isMainEditor
                           ? (enableUndo

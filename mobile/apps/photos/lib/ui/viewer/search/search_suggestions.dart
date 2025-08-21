@@ -121,7 +121,7 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
   Widget build(BuildContext context) {
     String title;
     final resultsCount = searchResultWidgets.length;
-    title = S.of(context).searchResultCount(resultsCount);
+    title = AppLocalizations.of(context).searchResultCount(resultsCount);
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(

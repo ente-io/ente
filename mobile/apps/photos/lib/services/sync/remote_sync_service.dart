@@ -1032,7 +1032,7 @@ class RemoteSyncService {
           'creating notification for ${collection?.displayName} '
           'shared: $sharedFilesIDs, collected: $collectedFilesIDs files',
         );
-        final s = await LanguageService.s;
+        final s = await LanguageService.locals;
         // ignore: unawaited_futures
         NotificationService.instance.showNotification(
           collection!.displayName,

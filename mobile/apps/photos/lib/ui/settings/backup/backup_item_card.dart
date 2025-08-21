@@ -145,14 +145,15 @@ class _BackupItemCardState extends State<BackupItemCard> {
                   onPressed: () {
                     showDialogWidget(
                       context: context,
-                      body: S.of(context).sorryBackupFailedDesc,
-                      title: S.of(context).backupFailed,
+                      body: AppLocalizations.of(context).sorryBackupFailedDesc,
+                      title: AppLocalizations.of(context).backupFailed,
                       icon: Icons.error_outline_outlined,
                       isDismissible: true,
                       buttons: [
                         ButtonWidget(
                           buttonType: ButtonType.primary,
-                          labelText: S.of(context).contactSupport,
+                          labelText:
+                              AppLocalizations.of(context).contactSupport,
                           buttonAction: ButtonAction.second,
                           onTap: () async {
                             _logger.warning(
@@ -161,7 +162,7 @@ class _BackupItemCardState extends State<BackupItemCard> {
                             );
                             await sendLogs(
                               context,
-                              S.of(context).contactSupport,
+                              AppLocalizations.of(context).contactSupport,
                               "support@ente.io",
                               postShare: () {},
                             );
@@ -169,7 +170,7 @@ class _BackupItemCardState extends State<BackupItemCard> {
                         ),
                         ButtonWidget(
                           buttonType: ButtonType.secondary,
-                          labelText: S.of(context).ok,
+                          labelText: AppLocalizations.of(context).ok,
                           buttonAction: ButtonAction.first,
                           onTap: () async {
                             Navigator.of(context).pop();

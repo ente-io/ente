@@ -53,7 +53,7 @@ class _VideoTrimPageState extends State<VideoTrimPage> {
             const SizedBox(height: 40),
             VideoEditorNavigationOptions(
               color: Theme.of(context).colorScheme.videoPlayerPrimaryColor,
-              secondaryText: S.of(context).done,
+              secondaryText: AppLocalizations.of(context).done,
               onPrimaryPressed: () {
                 // reset trim
                 widget.controller.updateTrim(minTrim, maxTrim);
