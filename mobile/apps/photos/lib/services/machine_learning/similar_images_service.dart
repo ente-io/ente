@@ -107,6 +107,11 @@ class SimilarImagesService {
         needsFullRefresh = true;
       }
 
+      // Check condition: less than 1000 files
+      if (currentFileIDs.length < 1000) {
+        needsFullRefresh = true;
+      }
+
       // Check condition: cache is older than a month
       if (DateTime.fromMillisecondsSinceEpoch(cachedData.cachedTime)
           .isBefore(DateTime.now().subtract(const Duration(days: 30)))) {
@@ -177,7 +182,7 @@ class SimilarImagesService {
     final currentFileIDsSet = currentFileIDs.map((id) => id.toInt()).toSet();
     final deletedFiles = cachedFileIDs.difference(currentFileIDsSet);
 
-    // Step 1: Clean up deleted files from existing groups
+    // Clean up deleted files from existing groups
     if (deletedFiles.isNotEmpty) {
       for (final group in existingGroups) {
         final filesInGroupToDelete = [];
@@ -194,13 +199,13 @@ class SimilarImagesService {
     // Remove empty groups
     existingGroups.removeWhere((group) => group.length <= 1);
 
-    // Step 2: Identify new files
+    // Identify new files
     final newFileIDs = currentFileIDsSet.difference(cachedFileIDs);
     if (newFileIDs.isEmpty) {
       return existingGroups;
     }
 
-    // Step 3: Search only new files
+    // Search only new files
     final newFileIDsList = Uint64List.fromList(newFileIDs.toList());
     final (keys, vectorKeys, distances) =
         await MLComputer.instance.bulkVectorSearchWithKeys(
@@ -209,7 +214,7 @@ class SimilarImagesService {
     );
     final keysList = keys.map((key) => key.toInt()).toList();
 
-    // Step 4: Try to assign new files to existing groups
+    // Try to assign new files to existing groups
     final unassignedNewFilesIndices = <int>{};
     final unassignedNewFileIDs = <int>{};
     for (int i = 0; i < keysList.length; i++) {
@@ -250,7 +255,7 @@ class SimilarImagesService {
       }
     }
 
-    // Step 5: Check if unassigned new files form groups among themselves
+    // Check if unassigned new files form groups among themselves
     if (unassignedNewFilesIndices.isNotEmpty) {
       final alreadyUsedNewFiles = <int>{};
       for (final searchIndex in unassignedNewFilesIndices) {
