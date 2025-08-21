@@ -251,6 +251,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
   }
 
   void _onTapDown(details) {
+    final theme = Theme.of(context);
     if (executionStateNotifier.value == ExecutionState.inProgress ||
         executionStateNotifier.value == ExecutionState.successful) {
       return;

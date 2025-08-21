@@ -19,6 +19,7 @@ class AppUpdateDialog extends StatefulWidget {
 class _AppUpdateDialogState extends State<AppUpdateDialog> {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final List<Widget> changelog = [];
     final enteTextTheme = EnteTheme.getTextTheme(theme);
     final enteColor = EnteTheme.getColorScheme(theme);

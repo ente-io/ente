@@ -2,6 +2,7 @@ import "dart:async";
 import "dart:math";
 
 import "package:flutter/cupertino.dart";
+import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/collection_updated_event.dart";
@@ -62,6 +63,7 @@ class _AlbumHorizontalListState extends State<AlbumHorizontalList> {
     return FutureBuilder<List<Collection>>(
       future: widget.collectionsFuture(),
       builder: (context, snapshot) {
+        final theme = Theme.of(context);
         if (snapshot.hasError) {
           _logger.severe("failed to fetch albums", snapshot.error);
           return Text(AppLocalizations.of(context).somethingWentWrong);

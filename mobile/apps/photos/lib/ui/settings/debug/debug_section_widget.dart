@@ -25,6 +25,7 @@ class DebugSectionWidget extends StatelessWidget {
   }
 
   Widget _getSectionOptions(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       children: [
         sectionOptionSpacing,

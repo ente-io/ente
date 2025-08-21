@@ -1,4 +1,4 @@
-import "package:flutter/widgets.dart";
+import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 
@@ -9,6 +9,7 @@ class CollageLayoutHeading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Align(
       alignment: Alignment.centerLeft,
       child: Padding(

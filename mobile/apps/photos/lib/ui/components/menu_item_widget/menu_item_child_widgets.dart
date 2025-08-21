@@ -79,6 +79,7 @@ class _TrailingWidgetState extends State<TrailingWidget> {
   }
 
   void _setTrailingIcon() {
+    final theme = Theme.of(context);
     if (widget.trailingIcon != null) {
       trailingWidget = Padding(
         padding: EdgeInsets.only(
@@ -148,6 +149,7 @@ class LeadingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(right: 10),
       child: SizedBox(

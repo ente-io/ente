@@ -55,6 +55,7 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     Color selectionColor = Colors.white;
     if (_isFileSelected &&
         widget.file.isUploaded &&

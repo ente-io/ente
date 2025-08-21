@@ -26,6 +26,7 @@ showAddLocationSheet(
   String name = '',
   double radius = defaultRadiusValue,
 }) {
+  final theme = Theme.of(context);
   showBarModalBottomSheet(
     context: context,
     builder: (context) {

@@ -41,6 +41,7 @@ class _SubscriptionPlanWidgetState extends State<SubscriptionPlanWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final brightness = _platformDispatcher.platformBrightness;
     final numAndUnit = convertBytesToNumberAndUnit(widget.storage);
     final String storageValue = numAndUnit.$1.toString();

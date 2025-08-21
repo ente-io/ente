@@ -60,6 +60,7 @@ class OSMFranceTileAttributes extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final textTheme = EnteTheme.getTextTheme(theme).tinyBold;
     return MapAttributionWidget(
       alignment: AttributionAlignment.bottomLeft,

@@ -11,6 +11,7 @@ class SettingsTitleBarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final inheritedDetails = InheritedUserDetails.of(context);
     final userDetails = inheritedDetails?.userDetails;
     bool isCached = false;

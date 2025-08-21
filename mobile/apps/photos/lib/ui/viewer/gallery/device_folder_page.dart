@@ -248,6 +248,7 @@ class ResetIgnoredFilesWidget extends StatefulWidget {
 class _ResetIgnoredFilesWidgetState extends State<ResetIgnoredFilesWidget> {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       children: [
         const SizedBox(height: 24),

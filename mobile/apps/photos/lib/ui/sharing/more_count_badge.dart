@@ -65,6 +65,7 @@ class MoreCountWidget extends StatelessWidget {
     BuildContext context,
     MoreCountType type,
   ) {
+    final theme = Theme.of(context);
     final enteTextTheme = EnteTheme.getTextTheme(theme);
     switch (type) {
       case MoreCountType.small:

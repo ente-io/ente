@@ -1,6 +1,6 @@
 import "dart:typed_data";
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
@@ -73,6 +73,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
     super.build(
       context,
     ); // Calling super.build for AutomaticKeepAliveClientMixin
+    final theme = Theme.of(context);
 
     return FutureBuilder<Uint8List?>(
       future: faceCropFuture,

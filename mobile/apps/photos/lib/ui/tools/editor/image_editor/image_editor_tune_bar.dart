@@ -171,7 +171,8 @@ class TuneItem extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               label,
-              style: EnteTheme.getTextTheme(theme).small,
+              // Added local theme retrieval for text style
+              style: EnteTheme.getTextTheme(Theme.of(context)).small,
               textAlign: TextAlign.center,
             ),
           ],

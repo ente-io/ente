@@ -195,8 +195,11 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
                             captionedTextWidget: CaptionedTextWidget(
                               title: AppLocalizations.of(context).clearCaches,
                             ),
+                            // Added Theme.of(context) retrieval for color scheme
+                            // ignore: no_leading_underscores_for_local_identifiers
                             menuItemColor:
-                                EnteTheme.getColorScheme(theme).fillFaint,
+                                EnteTheme.getColorScheme(Theme.of(context))
+                                    .fillFaint,
                             singleBorderRadius: 8,
                             alwaysShowSuccessState: true,
                             onTap: () async {

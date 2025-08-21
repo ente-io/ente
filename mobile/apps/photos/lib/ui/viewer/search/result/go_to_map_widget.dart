@@ -11,6 +11,7 @@ class GoToMap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: () async {
         final bool result = await requestForMapEnable(context);

@@ -374,6 +374,7 @@ class GoToMapWithBG extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final enteTextTheme = EnteTheme.getTextTheme(theme);
     return Padding(
       padding: EdgeInsets.symmetric(

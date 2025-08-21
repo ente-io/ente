@@ -42,6 +42,7 @@ class _VerifyIdentifyDialogState extends State<VerifyIdentifyDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final textStyle = EnteTheme.getTextTheme(theme);
     final String subTitle = widget.self
         ? AppLocalizations.of(context).thisIsYourVerificationId

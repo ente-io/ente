@@ -146,6 +146,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
     final file = widget.file;
     final bool isFileOwner =
         file.ownerID == null || file.ownerID == _currentUserID;
+    final theme = Theme.of(context);
 
     //Make sure the bottom most tile is always the same one, that is it should
     //not be rendered only if a condition is met.

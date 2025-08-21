@@ -1,6 +1,6 @@
 import "dart:typed_data";
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import "package:photos/db/ml/db.dart";
 import 'package:photos/models/file/file.dart';
@@ -59,6 +59,7 @@ class _FileFaceWidgetState extends State<FileFaceWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return FutureBuilder<Uint8List?>(
       future: faceCropFuture,
       builder: (context, snapshot) {

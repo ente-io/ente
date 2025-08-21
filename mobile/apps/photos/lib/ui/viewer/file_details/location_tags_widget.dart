@@ -103,6 +103,7 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
   }
 
   Future<List<Widget>> _getLocationTags() async {
+    final theme = Theme.of(context);
     // await Future.delayed(const Duration(seconds: 1));
     final locationTags =
         await locationService.enclosingLocationTags(widget.file.location!);
@@ -200,6 +201,7 @@ class _InfoMapState extends State<InfoMap> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: ClipRRect(

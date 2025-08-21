@@ -23,6 +23,7 @@ class DividerWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final dividerColor = divColorHasBlur
         ? EnteTheme.getColorScheme(theme).blurStrokeFaint
         : EnteTheme.getColorScheme(theme).strokeFaint;

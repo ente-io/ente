@@ -628,6 +628,7 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     _logger.info("Building home_Widget with tab $_selectedTabIndex");
     bool isSettingsOpen = false;
     final enableDrawer = LocalSyncService.instance.hasCompletedFirstImport();
@@ -772,6 +773,7 @@ class _HomeWidgetState extends State<HomeWidget> {
           child: ValueListenableBuilder(
             valueListenable: isOnSearchTabNotifier,
             builder: (context, value, child) {
+              final theme = Theme.of(context);
               return Container(
                 decoration: value
                     ? BoxDecoration(

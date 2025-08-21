@@ -56,6 +56,7 @@ class _AppIconSelectionScreenState extends State<AppIconSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       body: CustomScrollView(
         primary: false,
@@ -133,6 +134,7 @@ class _AppIconTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: GestureDetector(

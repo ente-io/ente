@@ -152,6 +152,7 @@ class MapAttributionWidgetState extends State<MapAttributionWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final persistentAttributionItems = [
       ...List<Widget>.from(
         widget.attributions.whereType<LogoSourceAttribution>(),

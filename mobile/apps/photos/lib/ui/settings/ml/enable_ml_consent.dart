@@ -36,6 +36,7 @@ class _EnableMachineLearningConsentState
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       body: CustomScrollView(
         primary: false,

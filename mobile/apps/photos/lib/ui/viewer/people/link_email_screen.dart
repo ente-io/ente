@@ -67,6 +67,7 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     isKeypadOpen = MediaQuery.viewInsetsOf(context).bottom > 100;
 
     return Scaffold(

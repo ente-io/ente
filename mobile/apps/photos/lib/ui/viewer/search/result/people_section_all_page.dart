@@ -441,6 +441,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final smallFontSize = EnteTheme.getTextTheme(theme).small.fontSize!;
     final textScaleFactor =
         MediaQuery.textScalerOf(context).scale(smallFontSize) / smallFontSize;

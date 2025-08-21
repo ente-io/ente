@@ -41,6 +41,7 @@ class _PreviewPropertiesItemWidgetState
   }
 
   Future<void> _getSection() async {
+    final theme = Theme.of(context);
     final textStyle = EnteTheme.getTextTheme(theme).miniMuted;
     final subSectionWidgets = <Widget>[];
 

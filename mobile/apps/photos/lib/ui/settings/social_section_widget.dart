@@ -97,6 +97,7 @@ class SocialsMenuItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return MenuItemWidget(
       captionedTextWidget: CaptionedTextWidget(
         title: text,

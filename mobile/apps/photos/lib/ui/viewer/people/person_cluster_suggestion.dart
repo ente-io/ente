@@ -72,6 +72,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(context.l10n.reviewSuggestions),
@@ -174,6 +175,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                           vertical: 20,
                         ),
                         child: _buildSuggestionView(
+                          theme,
                           clusterID,
                           distance,
                           usingMean,
@@ -387,6 +389,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
   }
 
   Widget _buildSuggestionView(
+    ThemeData theme,
     String clusterID,
     double distance,
     bool usingMean,

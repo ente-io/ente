@@ -16,6 +16,7 @@ class AddedByWidget extends StatelessWidget {
     if (!file.isUploaded) {
       return const SizedBox.shrink();
     }
+    final theme = Theme.of(context);
     String? addedBy;
     if (file.isOwner && file.isCollect) {
       addedBy = file.uploaderName;

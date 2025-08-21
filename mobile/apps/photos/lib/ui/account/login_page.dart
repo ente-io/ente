@@ -240,7 +240,9 @@ class _LoginPageState extends State<LoginPage> {
     if (_emailIsValid) {
       _emailInputFieldColor = const Color.fromRGBO(45, 194, 98, 0.2);
     } else {
-      _emailInputFieldColor = EnteTheme.getColorScheme(theme).fillFaint;
+      // Using Theme.of(context) directly since this method is outside build and 'theme' isn't stored.
+      _emailInputFieldColor =
+          EnteTheme.getColorScheme(Theme.of(context)).fillFaint;
     }
   }
 }

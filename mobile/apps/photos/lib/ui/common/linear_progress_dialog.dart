@@ -54,6 +54,7 @@ class LinearProgressDialogState extends State<LinearProgressDialog>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return PopScope(
       canPop: false,
       child: AlertDialog(

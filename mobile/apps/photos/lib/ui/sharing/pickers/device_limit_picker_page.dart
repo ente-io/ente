@@ -88,6 +88,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
         _menuItemForPicker(initialDeviceLimit),
       );
     }
+    final theme = Theme.of(context);
     for (int deviceLimit in publicLinkDeviceLimits) {
       items.add(
         _menuItemForPicker(deviceLimit),
@@ -107,6 +108,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
   }
 
   Widget _menuItemForPicker(int deviceLimit) {
+    final theme = Theme.of(context);
     return MenuItemWidget(
       key: ValueKey(deviceLimit),
       menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,

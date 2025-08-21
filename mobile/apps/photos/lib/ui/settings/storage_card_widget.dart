@@ -52,6 +52,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final inheritedUserDetails = InheritedUserDetails.of(context);
     final userDetails = inheritedUserDetails?.userDetails;
 
@@ -76,13 +77,14 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
         onTapDown: (details) => _isStorageCardPressed.value = true,
         onTapCancel: () => _isStorageCardPressed.value = false,
         onTapUp: (details) => _isStorageCardPressed.value = false,
-        child: containerForUserDetails(userDetails),
+        child: containerForUserDetails(userDetails, theme),
       );
     }
   }
 
   Widget containerForUserDetails(
     UserDetails? userDetails,
+    ThemeData theme,
   ) {
     return Stack(
       children: [
@@ -92,7 +94,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
         ),
         Positioned.fill(
           child: userDetails is UserDetails
-              ? _userDetails(userDetails)
+              ? _userDetails(userDetails, theme)
               : const EnteLoadingWidget(
                   color: strokeBaseDark,
                 ),
@@ -118,7 +120,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
     );
   }
 
-  Widget _userDetails(UserDetails userDetails) {
+  Widget _userDetails(UserDetails userDetails, ThemeData theme) {
     const hundredMBinBytes = 107374182;
     const oneTBinBytes = 1073741824000;
     showFamilyBreakup = userDetails.isPartOfFamily();

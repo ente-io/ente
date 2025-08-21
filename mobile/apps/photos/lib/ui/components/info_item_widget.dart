@@ -27,6 +27,7 @@ class InfoItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final children = <Widget>[];
     if (title != null) {
       children.addAll([

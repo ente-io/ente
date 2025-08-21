@@ -86,7 +86,7 @@ class _AddContactPage extends State<AddContactPage> {
           const SizedBox(height: 4),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: _getEmailField(),
+            child: _getEmailField(theme),
           ),
           if (isEmailListEmpty)
             const Expanded(child: SizedBox.shrink())
@@ -270,7 +270,7 @@ class _AddContactPage extends State<AddContactPage> {
     setState(() => {});
   }
 
-  Widget _getEmailField() {
+  Widget _getEmailField(ThemeData theme) {
     return TextFormField(
       controller: _textController,
       focusNode: textFieldFocusNode,

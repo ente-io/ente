@@ -88,6 +88,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final bool filesAreSelected = widget.selectedFiles.files.isNotEmpty;
     final bool albumsAreSelected = widget.selectedAlbums.albums.isNotEmpty;
     final enteColorScheme = EnteTheme.getColorScheme(theme);

@@ -68,6 +68,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -76,12 +77,12 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
           iconButtonType: IconButtonType.secondary,
         ),
         const SizedBox(width: 12),
-        _buildContent(),
+        _buildContent(theme),
       ],
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(ThemeData theme) {
     if (_isLoading) {
       return const Expanded(
         child: Padding(
@@ -122,14 +123,14 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
                   ),
                 ),
               ),
-              _editStateButton(),
+              _editStateButton(theme),
             ],
           ),
           const SizedBox(height: 20),
           if (_defaultFaces.isNotEmpty) _buildFaceGrid(_defaultFaces),
           if (_remainingFaces.isNotEmpty) ...[
             const SizedBox(height: 16),
-            _buildRemainingFacesSection(),
+            _buildRemainingFacesSection(theme),
           ],
         ],
       ),
@@ -236,7 +237,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     );
   }
 
-  Widget _buildRemainingFacesSection() {
+  Widget _buildRemainingFacesSection(ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -274,7 +275,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     );
   }
 
-  Widget _editStateButton() {
+  Widget _editStateButton(ThemeData theme) {
     return SizedBox(
       height: 36,
       child: _isEditMode

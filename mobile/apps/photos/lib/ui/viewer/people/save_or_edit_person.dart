@@ -95,6 +95,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return PopScope(
       canPop: !(changed && _inputName.isNotEmpty),
       onPopInvokedWithResult: (bool didPop, Object? result) async {
@@ -335,7 +336,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                           },
                         ),
                         const SizedBox(height: 32),
-                        if (!widget.isEditing) _getPersonItems(),
+                        if (!widget.isEditing) _getPersonItems(theme),
                         if (widget.isEditing)
                           Align(
                             alignment: Alignment.centerLeft,
@@ -421,7 +422,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
     });
   }
 
-  Widget _getPersonItems() {
+  Widget _getPersonItems(ThemeData theme) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 12, 4, 0),
       child: StreamBuilder<List<(PersonEntity, EnteFile)>>(
@@ -750,6 +751,7 @@ class _EmailSectionState extends State<_EmailSection> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     const limitCountTo = 5;
     final avatarSize = getAvatarSize(AvatarType.small);
     final overlapPadding = getOverlapPadding(AvatarType.small);

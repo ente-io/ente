@@ -9,6 +9,7 @@ class EmptyHiddenWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final EnteTextTheme enteTextTheme = EnteTheme.getTextTheme(theme);
     final EnteColorScheme enteColorScheme = EnteTheme.getColorScheme(theme);
     return Padding(
@@ -99,6 +100,7 @@ class EmptyHiddenTextWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Text(
       text,
       textAlign: TextAlign.center,

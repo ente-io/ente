@@ -62,6 +62,7 @@ class _RecommendedFiltersForAppbarState
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     if (_recommendations.isEmpty) {
       return const SizedBox.shrink();
     }

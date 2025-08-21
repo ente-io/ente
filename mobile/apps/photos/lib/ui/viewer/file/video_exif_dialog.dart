@@ -43,6 +43,7 @@ class VideoExifDialog extends StatelessWidget {
   }
 
   Widget _buildGeneralInfo(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -96,6 +97,7 @@ class VideoExifDialog extends StatelessWidget {
   }
 
   Widget _buildStreamInfo(BuildContext context, Map<String, dynamic> stream) {
+    final theme = Theme.of(context);
     String titleString = stream['type']?.toString().toUpperCase() ?? '';
     final codeName = stream['codec_name']?.toString().toUpperCase() ?? '';
     if (codeName != 'NULL' && codeName.isNotEmpty) {
@@ -134,6 +136,7 @@ class VideoExifDialog extends StatelessWidget {
     FFProbeProps data,
     String? dataKey,
   ) {
+    final theme = Theme.of(context);
     final propData = data.propData;
     rowName = rowName.replaceAll('_', ' ');
     rowName = rowName[0].toUpperCase() + rowName.substring(1);

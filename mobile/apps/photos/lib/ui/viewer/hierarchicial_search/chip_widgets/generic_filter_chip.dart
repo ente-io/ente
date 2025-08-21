@@ -27,6 +27,7 @@ class GenericFilterChip extends StatefulWidget {
 class _GenericFilterChipState extends State<GenericFilterChip> {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: () {
         if (widget.isApplied) {

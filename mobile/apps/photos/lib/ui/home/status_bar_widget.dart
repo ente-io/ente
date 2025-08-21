@@ -95,6 +95,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       children: [
         HomeHeaderWidget(

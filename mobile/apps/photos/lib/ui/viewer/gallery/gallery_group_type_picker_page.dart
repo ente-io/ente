@@ -91,6 +91,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     items.clear();
     for (final groupType in groupTypes) {
       items.add(
@@ -111,6 +112,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
   }
 
   Widget _menuItemForPicker(GroupType groupType) {
+    final theme = Theme.of(context);
     return MenuItemWidget(
       key: ValueKey(groupType.name),
       menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,

@@ -63,6 +63,7 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
   }
 
   Widget _menuItem(BuildContext context, AdaptiveThemeMode themeMode) {
+    final theme = Theme.of(context);
     late String themeName;
     switch (themeMode) {
       case AdaptiveThemeMode.light:

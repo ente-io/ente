@@ -361,7 +361,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
                   child: Text(
                     AppLocalizations.of(context).hearUsWhereTitle,
-                    style: getEnteTextTheme(context).smallFaint,
+                    style: EnteTheme.getTextTheme(theme).smallFaint,
                   ),
                 ),
                 const SizedBox(height: 4),

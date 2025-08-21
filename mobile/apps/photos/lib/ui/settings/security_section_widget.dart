@@ -68,6 +68,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
   }
 
   Widget _getSectionOptions(BuildContext context) {
+    final theme = Theme.of(context);
     final Completer completer = Completer();
     final List<Widget> children = [];
     if (_config.hasConfiguredAccount()) {

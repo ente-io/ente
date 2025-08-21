@@ -159,7 +159,8 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                     decoration: BoxDecoration(
                       boxShadow: [
                         BoxShadow(
-                          color: EnteTheme.getColorScheme(theme).backgroundBase,
+                          color: EnteTheme.getColorScheme(Theme.of(context))
+                              .backgroundBase,
                           blurRadius: 24,
                           offset: const Offset(0, -8),
                           spreadRadius: 4,

@@ -18,6 +18,7 @@ class ChildSubscriptionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final String familyAdmin = userDetails.familyData!.members!
         .firstWhere((element) => element.isAdmin)
         .email;

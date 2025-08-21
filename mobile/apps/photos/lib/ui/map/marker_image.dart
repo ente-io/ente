@@ -12,6 +12,7 @@ class MarkerImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final bgColor = EnteTheme.getColorScheme(theme).backgroundElevated2;
     return Container(
       decoration: BoxDecoration(boxShadow: shadowMenuLight),

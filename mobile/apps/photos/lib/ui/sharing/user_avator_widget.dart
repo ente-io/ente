@@ -87,6 +87,7 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final double size = getAvatarSize(widget.type);
     return _personID != null
         ? Container(
@@ -233,6 +234,7 @@ class _FirstLetterCircularAvatarState
     BuildContext context,
     AvatarType type,
   ) {
+    final theme = Theme.of(context);
     final enteTextTheme = EnteTheme.getTextTheme(theme);
     switch (type) {
       case AvatarType.small:

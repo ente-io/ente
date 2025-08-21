@@ -250,6 +250,7 @@ class _UpdateLocationInfoState extends State<UpdateLocationInfo> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return AnimatedCrossFade(
       duration: const Duration(milliseconds: 200),
       firstCurve: Curves.easeInOutExpo,

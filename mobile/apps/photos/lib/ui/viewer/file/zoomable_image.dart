@@ -123,6 +123,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
     } else {
       _loadLocalImage(context);
     }
+    final theme = Theme.of(context);
     Widget content;
 
     if (_imageProvider != null) {

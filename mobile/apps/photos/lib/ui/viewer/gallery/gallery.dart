@@ -829,6 +829,7 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return currentGroupId != null
         ? ValueListenableBuilder(
             valueListenable: _enlargeHeader,

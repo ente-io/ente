@@ -25,6 +25,7 @@ class DeviceFolderItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final isBackedUp = deviceCollection.shouldBackup;
     return GestureDetector(
       child: Column(

@@ -200,6 +200,7 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onVerticalDragUpdate: _isGuestView
           ? null

@@ -49,6 +49,7 @@ class _IconButtonWidgetState extends State<IconButtonWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final bool hasPressedState = widget.onTap != null;
     final colorTheme = EnteTheme.getColorScheme(theme);
     iconStateColor ??
@@ -99,7 +100,7 @@ class _IconButtonWidgetState extends State<IconButtonWidget> {
   }
 
   _onTapDown(details) {
-    final colorTheme = EnteTheme.getColorScheme(theme);
+    final colorTheme = EnteTheme.getColorScheme(Theme.of(context));
     setState(() {
       iconStateColor = widget.pressedColor ??
           (widget.iconButtonType == IconButtonType.rounded

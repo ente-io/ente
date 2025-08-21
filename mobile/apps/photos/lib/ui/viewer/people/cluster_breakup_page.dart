@@ -81,7 +81,8 @@ class _ClusterBreakupPageState extends State<ClusterBreakupPage> {
                         children: <Widget>[
                           Text(
                             "${clusterIDsToFiles[keys[index]]!.length} photos",
-                            style: EnteTheme.getTextTheme(theme).body,
+                            style:
+                                EnteTheme.getTextTheme(Theme.of(context)).body,
                           ),
                         ],
                       ),

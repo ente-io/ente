@@ -160,7 +160,7 @@ class VideoOverlayDuration extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 1),
             child: Text(
               formattedDuration,
-              style: EnteTheme.getTextTheme(theme).small.copyWith(
+              style: EnteTheme.getTextTheme(Theme.of(context)).small.copyWith(
                     color: Colors.white,
                     fontSize: size, // Default font size is 14
                   ),

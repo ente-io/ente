@@ -26,6 +26,7 @@ showEditLocationSheet(
   BuildContext context,
   LocalEntity<LocationTag> locationTagEntity,
 ) {
+  final theme = Theme.of(context);
   showBarModalBottomSheet(
     context: context,
     builder: (context) {

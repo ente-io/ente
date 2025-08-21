@@ -33,6 +33,7 @@ class _PersonClustersPageState extends State<PersonClustersPage> {
   final Logger _logger = Logger("_PersonClustersState");
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.person.data.name),
@@ -245,6 +246,7 @@ class __ClusterWrapperForGirdState extends State<_ClusterWrapperForGird> {
   bool _isVisible = false;
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final loadingColor = EnteTheme.getColorScheme(theme).strokeMuted;
     return VisibilityDetector(
       key: ValueKey(widget.clusterID),

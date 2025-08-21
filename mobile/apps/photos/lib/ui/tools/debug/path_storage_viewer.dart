@@ -58,25 +58,30 @@ class _PathStorageViewerState extends State<PathStorageViewer> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return FutureBuilder<DirectoryStat>(
       future: getDirectoryStat(Directory(widget.item.path)),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          return _buildMenuItemWidget(snapshot.data, null);
+          return _buildMenuItemWidget(theme, snapshot.data, null);
         } else if (snapshot.hasError) {
           _logger.severe(
             "Failed to get state for ${widget.item.title}",
             snapshot.error,
           );
-          return _buildMenuItemWidget(null, snapshot.error);
+          return _buildMenuItemWidget(theme, null, snapshot.error);
         } else {
-          return _buildMenuItemWidget(null, null);
+          return _buildMenuItemWidget(theme, null, null);
         }
       },
     );
   }
 
-  Widget _buildMenuItemWidget(DirectoryStat? stat, Object? err) {
+  Widget _buildMenuItemWidget(
+    ThemeData theme,
+    DirectoryStat? stat,
+    Object? err,
+  ) {
     return MenuItemWidget(
       key: UniqueKey(),
       alignCaptionedTextToLeft: true,

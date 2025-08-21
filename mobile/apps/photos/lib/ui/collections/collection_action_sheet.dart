@@ -108,7 +108,9 @@ void showCollectionActionSheet(
       ),
     ),
     topControl: const SizedBox.shrink(),
-    backgroundColor: EnteTheme.getColorScheme(theme).backgroundElevated,
+    // Use current theme (cannot rely on an existing 'theme' variable here)
+    backgroundColor:
+        EnteTheme.getColorScheme(Theme.of(context)).backgroundElevated,
     barrierColor: backdropFaintDark,
     enableDrag: true,
   );
@@ -170,6 +172,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final filesCount = widget.sharedFiles != null
         ? widget.sharedFiles!.length
         : widget.selectedPeople != null

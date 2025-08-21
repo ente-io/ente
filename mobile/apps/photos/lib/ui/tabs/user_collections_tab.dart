@@ -101,13 +101,14 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     super.build(context);
     _logger.info("Building, trigger: $_loadReason");
     return FutureBuilder<List<Collection>>(
       future: CollectionsService.instance.getCollectionForOnEnteSection(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          return _getCollectionsGalleryWidget(snapshot.data!);
+          return _getCollectionsGalleryWidget(theme, snapshot.data!);
         } else if (snapshot.hasError) {
           return Text(snapshot.error.toString());
         } else {
@@ -117,7 +118,10 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
     );
   }
 
-  Widget _getCollectionsGalleryWidget(List<Collection> collections) {
+  Widget _getCollectionsGalleryWidget(
+    ThemeData theme,
+    List<Collection> collections,
+  ) {
     final TextStyle trashAndHiddenTextStyle =
         Theme.of(context).textTheme.titleMedium!.copyWith(
               color: Theme.of(context)

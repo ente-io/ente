@@ -107,6 +107,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
         _menuItemForPicker(locale),
       );
     }
+    final theme = Theme.of(context);
     if (!foundMatch && kDebugMode) {
       items.insert(
         0,
@@ -179,6 +180,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
   }
 
   Widget _menuItemForPicker(Locale locale) {
+    final theme = Theme.of(context);
     return MenuItemWidget(
       key: ValueKey(locale.toString()),
       menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,

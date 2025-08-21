@@ -26,14 +26,15 @@ class AccountSectionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return ExpandableMenuItemWidget(
       title: AppLocalizations.of(context).account,
-      selectionOptionsWidget: _getSectionOptions(context),
+      selectionOptionsWidget: _getSectionOptions(context, theme),
       leadingIcon: Icons.account_circle_outlined,
     );
   }
 
-  Column _getSectionOptions(BuildContext context) {
+  Column _getSectionOptions(BuildContext context, ThemeData theme) {
     return Column(
       children: [
         sectionOptionSpacing,

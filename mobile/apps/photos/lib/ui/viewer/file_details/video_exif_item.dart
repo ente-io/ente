@@ -45,6 +45,7 @@ class _VideoProbeInfoState extends State<VideoExifRowItem> {
     EnteFile file,
     FFProbeProps? props,
   ) async {
+    final theme = Theme.of(context);
     late final String label;
     late final VoidCallback? onTap;
     if (props?.propData == null) {

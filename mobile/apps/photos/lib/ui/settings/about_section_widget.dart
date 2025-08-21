@@ -25,6 +25,7 @@ class AboutSectionWidget extends StatelessWidget {
   }
 
   Widget _getSectionOptions(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       children: [
         sectionOptionSpacing,
@@ -111,6 +112,7 @@ class AboutMenuItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return MenuItemWidget(
       captionedTextWidget: CaptionedTextWidget(
         title: title,

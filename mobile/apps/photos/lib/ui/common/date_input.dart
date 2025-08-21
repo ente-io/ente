@@ -144,6 +144,7 @@ class _DatePickerFieldState extends State<DatePickerField> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return TextFormField(
       controller: _controller,
       onChanged: (value) => _tryParseDate(value),

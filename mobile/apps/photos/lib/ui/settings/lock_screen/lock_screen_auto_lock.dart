@@ -92,6 +92,7 @@ class _AutoLockItemsState extends State<AutoLockItems> {
         _menuItemForPicker(autoLockDuration),
       );
     }
+    final theme = Theme.of(context);
     items = addSeparators(
       items,
       DividerWidget(
@@ -106,6 +107,7 @@ class _AutoLockItemsState extends State<AutoLockItems> {
   }
 
   Widget _menuItemForPicker(Duration autoLockTime) {
+    final theme = Theme.of(context);
     return MenuItemWidget(
       key: ValueKey(autoLockTime),
       menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,

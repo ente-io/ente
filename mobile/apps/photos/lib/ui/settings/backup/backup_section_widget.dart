@@ -29,6 +29,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
   }
 
   Widget _getSectionOptions(BuildContext context) {
+    final theme = Theme.of(context);
     final List<Widget> sectionOptions = [
       sectionOptionSpacing,
       MenuItemWidget(

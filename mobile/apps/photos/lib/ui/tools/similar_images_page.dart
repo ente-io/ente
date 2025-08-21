@@ -355,6 +355,8 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   }
 
   Widget _getBottomActionButtons() {
+    // Added local theme retrieval for background color usage
+    final theme = Theme.of(context);
     return ListenableBuilder(
       listenable: _selectedFiles,
       builder: (context, _) {

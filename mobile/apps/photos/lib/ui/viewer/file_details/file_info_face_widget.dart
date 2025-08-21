@@ -110,7 +110,7 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
                 ),
               ),
             ),
-            if (isEditMode) _buildEditIcon(context),
+            if (isEditMode) _buildEditIcon(context, theme),
           ],
         ),
         const SizedBox(height: 8),
@@ -278,7 +278,7 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
     }
   }
 
-  Widget _buildEditIcon(BuildContext context) {
+  Widget _buildEditIcon(BuildContext context, ThemeData theme) {
     return Positioned(
       right: -5,
       top: -5,

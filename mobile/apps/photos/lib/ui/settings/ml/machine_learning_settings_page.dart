@@ -81,6 +81,7 @@ class _MachineLearningSettingsPageState
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final hasEnabled = flagService.hasGrantedMLConsent;
     return Scaffold(
       body: CustomScrollView(
@@ -366,6 +367,7 @@ class _ModelLoadingStateState extends State<ModelLoadingState> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       children: [
         MenuSectionTitle(title: AppLocalizations.of(context).status),

@@ -73,6 +73,7 @@ class ValidityWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final List<Bonus> addOnBonus = bonusData?.getAddOnBonuses() ?? <Bonus>[];
     if (currentSubscription == null ||
         (currentSubscription!.isFreePlan() && addOnBonus.isEmpty)) {
@@ -132,6 +133,7 @@ class AddOnBonusValidity extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final endDate =
         DateFormat.yMMMd(Localizations.localeOf(context).languageCode).format(
       DateTime.fromMicrosecondsSinceEpoch(bonus.validTill),

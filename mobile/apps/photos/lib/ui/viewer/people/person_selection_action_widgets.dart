@@ -56,6 +56,7 @@ class _LinkContactToPersonSelectionPageState
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     _logger.info("Building LinkContactToPersonSelectionPage");
     final smallFontSize = EnteTheme.getTextTheme(theme).small.fontSize!;
     final textScaleFactor =
@@ -230,6 +231,7 @@ class _ReassignMeSelectionPageState extends State<ReassignMeSelectionPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     _logger.info("Building ReassignMeSelectionPage");
     final smallFontSize = EnteTheme.getTextTheme(theme).small.fontSize!;
     final textScaleFactor =
@@ -370,6 +372,7 @@ class _RoundedPersonFaceWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: onTap,
       child: Column(

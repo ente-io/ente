@@ -181,8 +181,10 @@ class __BodyState extends State<_Body> {
 
     double maxWidth = 0.0;
     for (String word in words) {
-      final width =
-          computeWidthOfWord(word, EnteTheme.getTextTheme(theme).miniMuted);
+      final width = computeWidthOfWord(
+        word,
+        EnteTheme.getTextTheme(Theme.of(context)).miniMuted,
+      );
       if (width > maxWidth) {
         maxWidth = width;
       }

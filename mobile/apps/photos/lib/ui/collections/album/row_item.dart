@@ -48,6 +48,7 @@ class AlbumRowItemWidget extends StatelessWidget {
         tag +
         "_" +
         c.id.toString();
+    final theme = Theme.of(context);
     final enteTextTheme = EnteTheme.getTextTheme(theme);
     final Widget? linkIcon = c.hasLink && isOwner
         ? Icon(

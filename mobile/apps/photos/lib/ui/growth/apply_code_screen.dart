@@ -154,6 +154,7 @@ class _ApplyCodeScreenState extends State<ApplyCodeScreen> {
   }
 
   Widget _getInputField() {
+    final theme = Theme.of(context);
     return TextFormField(
       controller: _textController,
       focusNode: textFieldFocusNode,

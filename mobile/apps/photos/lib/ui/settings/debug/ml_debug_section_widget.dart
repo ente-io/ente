@@ -71,15 +71,16 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return ExpandableMenuItemWidget(
       title: "ML Debug",
-      selectionOptionsWidget: _getSectionOptions(context),
+      selectionOptionsWidget: _getSectionOptions(context, theme),
       leadingIcon: Icons.bug_report_outlined,
       onExpand: (p0) => isExpanded = p0,
     );
   }
 
-  Widget _getSectionOptions(BuildContext context) {
+  Widget _getSectionOptions(BuildContext context, ThemeData theme) {
     logger.info("Building ML Debug section options");
     return Column(
       children: [

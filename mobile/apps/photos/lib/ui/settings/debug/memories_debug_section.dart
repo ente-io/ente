@@ -118,6 +118,7 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: onTapCallback,
       child: Row(
@@ -157,6 +158,7 @@ class MomentRecommendation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final heroTag = momentSearchResult.heroTag() +
         (momentSearchResult.previewThumbnail()?.tag ?? "");
     final enteTextTheme = EnteTheme.getTextTheme(theme);

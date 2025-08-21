@@ -80,6 +80,7 @@ class _EmptyAlbumStateNewState extends State<CollectPhotosBottomButtons> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return SafeArea(
       child: ValueListenableBuilder(
         valueListenable: _hasSelectedFilesNotifier,

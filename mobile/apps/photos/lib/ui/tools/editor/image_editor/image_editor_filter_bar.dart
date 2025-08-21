@@ -261,8 +261,8 @@ class _ImageEditorFilterBarState extends State<ImageEditorFilterBar> {
             Text(
               filterName,
               style: isSelected
-                  ? EnteTheme.getTextTheme(theme).smallBold
-                  : EnteTheme.getTextTheme(theme).smallMuted,
+                  ? EnteTheme.getTextTheme(Theme.of(context)).smallBold
+                  : EnteTheme.getTextTheme(Theme.of(context)).smallMuted,
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

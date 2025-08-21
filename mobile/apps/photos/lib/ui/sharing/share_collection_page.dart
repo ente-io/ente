@@ -60,6 +60,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     _sharees = widget.collection.sharees;
     final bool hasUrl = widget.collection.hasLink;
     final children = <Widget>[];
@@ -348,6 +349,7 @@ class EmailItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     if (collection.getSharees().isEmpty) {
       return const SizedBox.shrink();
     } else if (collection.getSharees().length == 1) {

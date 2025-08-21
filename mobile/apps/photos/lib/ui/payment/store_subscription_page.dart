@@ -314,7 +314,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
             padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
             child: Text(
               AppLocalizations.of(context).visitWebToManage,
-              style: EnteTheme.getTextTheme(theme).small.copyWith(
+              style: EnteTheme.getTextTheme(Theme.of(context)).small.copyWith(
                     color: colorScheme.textMuted,
                   ),
             ),

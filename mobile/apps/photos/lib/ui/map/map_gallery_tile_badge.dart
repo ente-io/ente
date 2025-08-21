@@ -20,6 +20,7 @@ class MapGalleryTileBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Positioned(
       top: 0,
       right: 0,

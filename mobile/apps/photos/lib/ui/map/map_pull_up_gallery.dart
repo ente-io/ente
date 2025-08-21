@@ -42,6 +42,7 @@ class _MapPullUpGalleryState extends State<MapPullUpGallery> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final Logger logger = Logger("_MapPullUpGalleryState");
     final screenHeight = MediaQuery.of(context).size.height;
     final unsafeAreaProportion = widget.bottomUnsafeArea / screenHeight;

@@ -32,6 +32,7 @@ Future<dynamic> showAddPhotosSheet(
   BuildContext context,
   Collection collection,
 ) async {
+  final theme = Theme.of(context);
   return await showBarModalBottomSheet(
     context: context,
     builder: (context) {
@@ -60,6 +61,7 @@ class AddPhotosPhotoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final ValueNotifier<bool> isFileSelected = ValueNotifier(false);
     final selectedFiles = SelectedFiles();
     selectedFiles.addListener(() {

@@ -71,6 +71,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final filterSuggestedUsers = _suggestedUsers
         .where(
           (element) =>
@@ -105,7 +106,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
           const SizedBox(height: 4),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: _enterEmailField(),
+            child: _enterEmailField(theme),
           ),
           Expanded(
             child: Padding(
@@ -346,7 +347,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
     setState(() => {});
   }
 
-  Widget _enterEmailField() {
+  Widget _enterEmailField(ThemeData theme) {
     return Row(
       children: [
         Expanded(

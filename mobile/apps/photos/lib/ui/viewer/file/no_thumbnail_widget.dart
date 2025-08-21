@@ -12,6 +12,7 @@ class NoThumbnailWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final enteColorScheme = EnteTheme.getColorScheme(theme);
     return Container(
       decoration: BoxDecoration(

@@ -38,6 +38,7 @@ class _FaceFilterChipState extends State<FaceFilterChip> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Stack(
       clipBehavior: Clip.none,
       children: [

@@ -26,6 +26,7 @@ Future<Location?> showPickCenterPointSheet(
   BuildContext context, {
   String? locationTagName,
 }) async {
+  final theme = Theme.of(context);
   return await showBarModalBottomSheet(
     context: context,
     builder: (context) {
@@ -54,6 +55,7 @@ class PickCenterPointWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final ValueNotifier<bool> isFileSelected = ValueNotifier(false);
     final selectedFiles = SelectedFiles();
     selectedFiles.addListener(() {

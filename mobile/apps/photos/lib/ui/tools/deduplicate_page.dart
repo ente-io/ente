@@ -71,6 +71,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     _sortDuplicates();
     return Scaffold(
       appBar: AppBar(
@@ -78,7 +79,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
         title: Text(AppLocalizations.of(context).deduplicateFiles),
         actions: _duplicates.isNotEmpty ? [_getSortMenu()] : null,
       ),
-      body: _getBody(),
+      body: _getBody(theme),
     );
   }
 
@@ -95,7 +96,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     });
   }
 
-  Widget _getBody() {
+  Widget _getBody(ThemeData theme) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -118,6 +119,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                         child: _getGridView(
                           _duplicates[index],
                           index,
+                          theme,
                         ),
                       );
                     },
@@ -150,7 +152,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                       }
                     },
                   ),
-                  _getDeleteButton(),
+                  _getDeleteButton(theme),
                   const SizedBox(height: crossAxisSpacing / 2),
                 ],
               ),
@@ -214,7 +216,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     );
   }
 
-  Widget _getDeleteButton() {
+  Widget _getDeleteButton(ThemeData theme) {
     int fileCount = 0;
     int totalSize = 0;
     for (int index = 0; index < _duplicates.length; index++) {
@@ -327,7 +329,11 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     }
   }
 
-  Widget _getGridView(DuplicateFiles duplicates, int itemIndex) {
+  Widget _getGridView(
+    DuplicateFiles duplicates,
+    int itemIndex,
+    ThemeData theme,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

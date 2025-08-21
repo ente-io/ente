@@ -228,6 +228,7 @@ class _GroupHeaderWidgetState extends State<GroupHeaderWidget> {
   }
 
   void _showLayoutSettingsOverflowMenu(BuildContext context) {
+    final theme = Theme.of(context);
     showModalBottomSheet(
       context: context,
       backgroundColor: EnteTheme.getColorScheme(theme).backgroundElevated,

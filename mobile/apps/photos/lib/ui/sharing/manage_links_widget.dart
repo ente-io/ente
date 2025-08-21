@@ -45,6 +45,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final isCollectEnabled =
         widget.collection!.publicURLs.firstOrNull?.enableCollect ?? false;
     final isDownloadEnabled =
