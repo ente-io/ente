@@ -4,6 +4,7 @@ import "package:flutter/foundation.dart" show kDebugMode;
 import "package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart"
     show Uint64List;
 import 'package:logging/logging.dart';
+import "package:path_provider/path_provider.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/models/file/extensions/file_props.dart";
@@ -12,6 +13,7 @@ import "package:photos/models/similar_files.dart";
 import "package:photos/services/machine_learning/ml_computer.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/search_service.dart";
+import "package:photos/utils/cache_util.dart";
 
 class SimilarImagesService {
   final _logger = Logger("SimilarImagesService");
@@ -84,6 +86,208 @@ class SimilarImagesService {
     }
     w?.log("getFileIDToPersonIDs");
 
+    // Load cached data
+    final SimilarFilesCache? cachedData = await _readCachedSimilarFiles();
+
+    // Determine if we need full refresh
+    bool needsFullRefresh = false;
+    if (cachedData != null) {
+      final Set<int> cachedFileIDs = cachedData.allCheckedFileIDs;
+      final currentFileIDs = fileIDs.toSet();
+
+      // Check condition 1: New files > 20% of total files
+      final newFileIDs = currentFileIDs.difference(cachedFileIDs);
+      if (newFileIDs.length > currentFileIDs.length * 0.2) {
+        needsFullRefresh = true;
+      }
+
+      // Check condition 2: 20+% of grouped files deleted
+      if (!needsFullRefresh) {
+        final Set<int> cacheGroupedFileIDs =
+            await cachedData.getGroupedFileIDs();
+        final deletedFromGroups = cacheGroupedFileIDs
+            .intersection(cachedFileIDs.difference(currentFileIDs));
+        final totalInGroups = cacheGroupedFileIDs.length;
+        if (totalInGroups > 0 &&
+            deletedFromGroups.length > totalInGroups * 0.2) {
+          needsFullRefresh = true;
+        }
+      }
+    }
+
+    if (cachedData == null || needsFullRefresh) {
+      final result = await _performFullSearch(
+        potentialKeys,
+        allFileIdsToFile,
+        fileIDToPersonIDs,
+        distanceThreshold,
+        exact,
+      );
+      await _cacheSimilarFiles(
+        result,
+        fileIDs.toSet(),
+        distanceThreshold,
+        exact,
+        DateTime.now().millisecondsSinceEpoch,
+      );
+      return result;
+    } else {
+      return await _performIncrementalUpdate(
+        cachedData,
+        potentialKeys,
+        allFileIdsToFile,
+        fileIDToPersonIDs,
+        distanceThreshold,
+        exact,
+      );
+    }
+  }
+
+  Future<List<SimilarFiles>> _performIncrementalUpdate(
+    SimilarFilesCache cachedData,
+    Uint64List currentFileIDs,
+    Map<int, EnteFile> allFileIdsToFile,
+    Map<int, Set<String>> fileIDToPersonIDs,
+    double distanceThreshold,
+    bool exact,
+  ) async {
+    final existingGroups = await cachedData.similarFilesList();
+    final cachedFileIDs = cachedData.allCheckedFileIDs;
+    final currentFileIDsSet = currentFileIDs.map((id) => id.toInt()).toSet();
+    final deletedFiles = currentFileIDsSet.difference(cachedFileIDs);
+
+    // Step 1: Clean up deleted files from existing groups
+    if (deletedFiles.isNotEmpty) {
+      for (final group in existingGroups) {
+        final filesInGroupToDelete = [];
+        for (final fileInGroup in group.files) {
+          if (deletedFiles.contains(fileInGroup.uploadedFileID ?? -1)) {
+            filesInGroupToDelete.add(fileInGroup);
+          }
+        }
+        for (final fileToDelete in filesInGroupToDelete) {
+          group.removeFile(fileToDelete);
+        }
+      }
+    }
+    // Remove empty groups
+    existingGroups.removeWhere((group) => group.length <= 1);
+
+    // Step 2: Identify new files
+    final newFileIDs = currentFileIDsSet.difference(cachedFileIDs);
+    if (newFileIDs.isEmpty) {
+      return existingGroups;
+    }
+
+    // Step 3: Search only new files
+    final newFileIDsList = Uint64List.fromList(newFileIDs.toList());
+    final (keys, vectorKeys, distances) =
+        await MLComputer.instance.bulkVectorSearchWithKeys(
+      newFileIDsList,
+      exact,
+    );
+    final keysList = keys.map((key) => key.toInt()).toList();
+
+    // Step 4: Try to assign new files to existing groups
+    final unassignedNewFilesIndices = <int>{};
+    final unassignedNewFileIDs = <int>{};
+    for (int i = 0; i < keysList.length; i++) {
+      final newFileID = keysList[i].toInt();
+      final newFile = allFileIdsToFile[newFileID];
+      if (newFile == null) continue;
+      final similarFileIDs = vectorKeys[i];
+      final fileDistances = distances[i];
+      final newFilePersonIDs = fileIDToPersonIDs[newFileID] ?? <String>{};
+      bool assigned = false;
+      for (final group in existingGroups) {
+        for (int j = 0; j < similarFileIDs.length; j++) {
+          final otherFileID = similarFileIDs[j].toInt();
+          if (otherFileID == newFileID) continue;
+          final distance = fileDistances[j];
+          if (distance > distanceThreshold) break;
+          if (group.fileIds.contains(otherFileID)) {
+            final otherPersonIDs = fileIDToPersonIDs[otherFileID] ?? <String>{};
+            if (setsAreEqual(newFilePersonIDs, otherPersonIDs)) {
+              group.addFile(newFile);
+              group.furthestDistance = max(group.furthestDistance, distance);
+              group.files.sort((a, b) {
+                final sizeComparison =
+                    (b.fileSize ?? 0).compareTo(a.fileSize ?? 0);
+                if (sizeComparison != 0) return sizeComparison;
+                return a.displayName.compareTo(b.displayName);
+              });
+              assigned = true;
+              break;
+            }
+          }
+        }
+        if (assigned) break;
+      }
+      if (!assigned) {
+        unassignedNewFilesIndices.add(i);
+        unassignedNewFileIDs.add(newFileID);
+      }
+    }
+
+    // Step 5: Check if unassigned new files form groups among themselves
+    if (unassignedNewFilesIndices.isNotEmpty) {
+      final alreadyUsedNewFiles = <int>{};
+      for (final searchIndex in unassignedNewFilesIndices) {
+        final newFileID = keysList[searchIndex];
+        if (alreadyUsedNewFiles.contains(newFileID)) continue;
+        final newFile = allFileIdsToFile[newFileID];
+        if (newFile == null) continue;
+        final similarFileIDs = vectorKeys[searchIndex];
+        final fileDistances = distances[searchIndex];
+        final newFilePersonIDs = fileIDToPersonIDs[newFileID] ?? <String>{};
+        final similarNewFiles = <EnteFile>[];
+        double furthestDistance = 0.0;
+        for (int j = 0; j < similarFileIDs.length; j++) {
+          final otherFileID = similarFileIDs[j].toInt();
+          if (otherFileID == newFileID) continue;
+          if (!unassignedNewFileIDs.contains(otherFileID)) continue;
+          if (alreadyUsedNewFiles.contains(otherFileID)) continue;
+          final distance = fileDistances[j];
+          if (distance > distanceThreshold) break;
+          final otherFile = allFileIdsToFile[otherFileID];
+          if (otherFile == null) continue;
+          final otherPersonIDs = fileIDToPersonIDs[otherFileID] ?? <String>{};
+          if (!setsAreEqual(newFilePersonIDs, otherPersonIDs)) continue;
+          similarNewFiles.add(otherFile);
+          alreadyUsedNewFiles.add(otherFileID);
+          furthestDistance = max(furthestDistance, distance);
+        }
+        if (similarNewFiles.isNotEmpty) {
+          similarNewFiles.add(newFile);
+          alreadyUsedNewFiles.add(newFileID);
+          similarNewFiles.sort((a, b) {
+            final sizeComparison = (b.fileSize ?? 0).compareTo(a.fileSize ?? 0);
+            if (sizeComparison != 0) return sizeComparison;
+            return a.displayName.compareTo(b.displayName);
+          });
+          existingGroups.add(SimilarFiles(similarNewFiles, furthestDistance));
+        }
+      }
+    }
+    await _cacheSimilarFiles(
+      existingGroups,
+      currentFileIDsSet,
+      distanceThreshold,
+      exact,
+      cachedData.cachedTime,
+    );
+
+    return existingGroups;
+  }
+
+  Future<List<SimilarFiles>> _performFullSearch(
+    Uint64List potentialKeys,
+    Map<int, EnteFile> allFileIdsToFile,
+    Map<int, Set<String>> fileIDToPersonIDs,
+    double distanceThreshold,
+    bool exact,
+  ) async {
+    final w = (kDebugMode ? EnteWatch('getSimilarFiles') : null)?..start();
     // Run bulk vector search
     final (keys, vectorKeys, distances) =
         await MLComputer.instance.bulkVectorSearchWithKeys(
@@ -144,6 +348,44 @@ class SimilarImagesService {
     w?.log("going through files");
 
     return allSimilarFiles;
+  }
+
+  Future<String> _getCachePath() async {
+    return (await getApplicationSupportDirectory()).path +
+        "/cache/similar_images_cache";
+  }
+
+  Future<void> _cacheSimilarFiles(
+    List<SimilarFiles> similarGroups,
+    Set<int> allCheckedFileIDs,
+    double distanceThreshold,
+    bool exact,
+    int cachedTimeOfOriginalComputation,
+  ) async {
+    final cachePath = await _getCachePath();
+    final similarGroupsJsonStringList =
+        similarGroups.map((group) => group.toJsonString()).toList();
+    final cacheObject = SimilarFilesCache(
+      similarFilesJsonStringList: similarGroupsJsonStringList,
+      allCheckedFileIDs: allCheckedFileIDs,
+      distanceThreshold: distanceThreshold,
+      exact: exact,
+      cachedTime: cachedTimeOfOriginalComputation,
+    );
+    await writeToJsonFile<SimilarFilesCache>(
+      cachePath,
+      cacheObject,
+      SimilarFilesCache.encodeToJsonString,
+    );
+  }
+
+  Future<SimilarFilesCache?> _readCachedSimilarFiles() async {
+    _logger.info("Reading similar files cache result from disk");
+    final cache = decodeJsonFile<SimilarFilesCache>(
+      await _getCachePath(),
+      SimilarFilesCache.decodeFromJsonString,
+    );
+    return cache;
   }
 }
 
