@@ -105,7 +105,8 @@ func (c *UserController) SendEmailOTT(context *gin.Context, email string, purpos
 		return stacktrace.Propagate(err, "")
 	}
 	// check if user has already requested for more than 10 codes in last 10mins
-	otts, _ := c.UserAuthRepo.GetValidOTTs(emailHash, auth.GetApp(context))
+	app := auth.GetApp(context)
+	otts, _ := c.UserAuthRepo.GetValidOTTs(emailHash, app)
 	if len(otts) >= OTTActiveCodeLimit {
 		msg := "Too many ott requests in a short duration"
 		go c.DiscordController.NotifyPotentialAbuse(msg)
@@ -119,7 +120,7 @@ func (c *UserController) SendEmailOTT(context *gin.Context, email string, purpos
 			return stacktrace.Propagate(err, "")
 		}
 		log.Info("Added ott for " + emailHash + ": " + ott)
-		err = emailOTT(email, ott, purpose, mobile)
+		err = emailOTT(app, email, ott, purpose, mobile)
 		if err != nil {
 			return stacktrace.Propagate(err, "")
 		}
@@ -383,12 +384,12 @@ func (c *UserController) TerminateSession(userID int64, token string) error {
 	return stacktrace.Propagate(c.UserAuthRepo.RemoveToken(userID, token), "")
 }
 
-func emailOTT(to string, ott string, purpose string, mobile bool) error {
+func emailOTT(app ente.App, to string, ott string, purpose string, mobile bool) error {
 	var templateName string
 	if purpose == ente.ChangeEmailOTTPurpose {
 		templateName = ente.ChangeEmailOTTTemplate
 	} else {
-		if mobile {
+		if mobile && app == ente.Photos {
 			templateName = ente.OTTMobileTemplate
 		} else {
 			templateName = ente.OTTTemplate
