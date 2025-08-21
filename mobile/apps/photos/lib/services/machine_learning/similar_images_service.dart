@@ -95,10 +95,17 @@ class SimilarImagesService {
       final Set<int> cachedFileIDs = cachedData.allCheckedFileIDs;
       final currentFileIDs = fileIDs.toSet();
 
-      // Check condition 1: New files > 20% of total files
-      final newFileIDs = currentFileIDs.difference(cachedFileIDs);
-      if (newFileIDs.length > currentFileIDs.length * 0.2) {
+      if (cachedData.distanceThreshold != distanceThreshold ||
+          cachedData.exact != exact) {
         needsFullRefresh = true;
+      }
+
+      // Check condition 1: New files > 20% of total files
+      if (!needsFullRefresh) {
+        final newFileIDs = currentFileIDs.difference(cachedFileIDs);
+        if (newFileIDs.length > currentFileIDs.length * 0.2) {
+          needsFullRefresh = true;
+        }
       }
 
       // Check condition 2: 20+% of grouped files deleted
