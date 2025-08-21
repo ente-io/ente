@@ -424,12 +424,24 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         _similarFilesList.sort((a, b) => b.totalSize.compareTo(a.totalSize));
         break;
       case SortKey.distanceAsc:
-        _similarFilesList
-            .sort((a, b) => a.furthestDistance.compareTo(b.furthestDistance));
+        _similarFilesList.sort((a, b) {
+          final distanceComparison =
+              a.furthestDistance.compareTo(b.furthestDistance);
+          if (distanceComparison != 0) {
+            return distanceComparison;
+          }
+          return b.totalSize.compareTo(a.totalSize);
+        });
         break;
       case SortKey.distanceDesc:
-        _similarFilesList
-            .sort((a, b) => b.furthestDistance.compareTo(a.furthestDistance));
+        _similarFilesList.sort((a, b) {
+          final distanceComparison =
+              b.furthestDistance.compareTo(a.furthestDistance);
+          if (distanceComparison != 0) {
+            return distanceComparison;
+          }
+          return b.totalSize.compareTo(a.totalSize);
+        });
         break;
       case SortKey.count:
         _similarFilesList
