@@ -8,3 +8,49 @@ repository = "https://github.com/ente-io/ente"
 license = "AGPL-3.0-only"
 
 [dependencies]
+# CLI and configuration
+clap = { version = "4.5", features = ["derive", "env"] }
+config = "0.14"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_yaml = "0.9"
+toml = "0.8"
+
+# Async runtime and networking
+tokio = { version = "1.41", features = ["full"] }
+reqwest = { version = "0.12", features = ["json", "stream"] }
+futures = "0.3"
+
+# Cryptography - ONLY libsodium (statically linked)
+libsodium-sys-stable = "1.20"
+base64 = "0.22"
+hex = "0.4"
+zeroize = { version = "1.8", features = ["derive"] }
+
+# SRP authentication
+srp = "0.6"
+num-bigint = "0.4"
+
+# Storage
+sled = "0.34"
+bincode = "1.3"
+
+# Utilities
+thiserror = "2.0"
+anyhow = "1.0"
+log = "0.4"
+env_logger = "0.11"
+dirs = "5.0"
+chrono = "0.4"
+uuid = { version = "1.11", features = ["serde", "v4"] }
+rpassword = "7.3"
+indicatif = "0.17"
+
+# File operations
+walkdir = "2.5"
+zip = "2.2"
+tempfile = "3.14"
+
+[dev-dependencies]
+mockito = "1.6"
+tempdir = "0.3"
