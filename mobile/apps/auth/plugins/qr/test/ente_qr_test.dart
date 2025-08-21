@@ -7,12 +7,11 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 class MockEnteQrPlatform
     with MockPlatformInterfaceMixin
     implements EnteQrPlatform {
-
   @override
   Future<String?> getPlatformVersion() => Future.value('42');
 
   @override
-  Future<QrScanResult> scanQrFromImage(String imagePath) => 
+  Future<QrScanResult> scanQrFromImage(String imagePath) =>
       Future.value(QrScanResult.error('Mock implementation'));
 }
 

@@ -875,21 +875,22 @@ class _HomePageState extends State<HomePage> {
           labelWidget: SpeedDialLabelWidget(context.l10n.enterDetailsManually),
           onTap: _redirectToManualEntryPage,
         ),
-        SpeedDialChild(
-          child: const Icon(Icons.image),
-          backgroundColor: Theme.of(context).colorScheme.fabBackgroundColor,
-          foregroundColor: Theme.of(context).colorScheme.fabForegroundColor,
-          labelWidget: SpeedDialLabelWidget(context.l10n.importFromGallery),
-          onTap: _importFromGallery,
-        ),
-        SpeedDialChild(
-          child: const Icon(Icons.photo_library),
-          backgroundColor: Theme.of(context).colorScheme.fabBackgroundColor,
-          foregroundColor: Theme.of(context).colorScheme.fabForegroundColor,
-          labelWidget:
-              const SpeedDialLabelWidget("Import from Gallery (Native)"),
-          onTap: _importFromGalleryNative,
-        ),
+        if (PlatformUtil.isMobile())
+          SpeedDialChild(
+            child: const Icon(Icons.image),
+            backgroundColor: Theme.of(context).colorScheme.fabBackgroundColor,
+            foregroundColor: Theme.of(context).colorScheme.fabForegroundColor,
+            labelWidget: SpeedDialLabelWidget(context.l10n.importFromGallery),
+            onTap: _importFromGallery,
+          ),
+        if (PlatformUtil.isMobile())
+          SpeedDialChild(
+            child: const Icon(Icons.photo_library),
+            backgroundColor: Theme.of(context).colorScheme.fabBackgroundColor,
+            foregroundColor: Theme.of(context).colorScheme.fabForegroundColor,
+            labelWidget: const SpeedDialLabelWidget("Scan image (Native)"),
+            onTap: _importFromGalleryNative,
+          ),
       ],
     );
   }

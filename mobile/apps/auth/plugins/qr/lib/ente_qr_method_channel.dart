@@ -28,7 +28,8 @@ class MethodChannelEnteQr extends EnteQrPlatform {
       }
 
       // Convert to Map<String, dynamic> safely
-      final Map<String, dynamic> resultMap = Map<String, dynamic>.from(result as Map);
+      final Map<String, dynamic> resultMap =
+          Map<String, dynamic>.from(result as Map);
 
       final bool success = resultMap['success'] as bool? ?? false;
       if (success) {

@@ -8,12 +8,12 @@ class EnteQr {
   }
 
   /// Scans a QR code from an image file at the given path.
-  /// 
+  ///
   /// [imagePath] - The file path to the image containing the QR code
-  /// 
+  ///
   /// Returns a [QrScanResult] containing either the QR code content on success
   /// or an error message on failure.
-  /// 
+  ///
   /// Example:
   /// ```dart
   /// final qr = EnteQr();
