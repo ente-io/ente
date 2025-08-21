@@ -741,6 +741,11 @@
       "title": "Hivelocity"
     },
     {
+  "title": "HRDocumentBox",
+  "slug": "hrdocumentbox", 
+  "altNames": ["HRDocumentBox", "HR Document Box"]
+    },
+    {
       "title": "HSA Bank",
       "slug": "hsa_bank",
       "altNames": [
