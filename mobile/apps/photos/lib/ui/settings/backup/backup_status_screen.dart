@@ -138,8 +138,8 @@ class _BackupStatusScreenState extends State<BackupStatusScreen> {
                       fontSize: 16,
                       height: 20 / 16,
                       color: Theme.of(context).brightness == Brightness.light
-                          ? const Color(0xFF000000).withOpacity(0.7)
-                          : const Color(0xFFFFFFFF).withOpacity(0.7),
+                          ? const Color(0xFF000000).withValues(alpha: 0.7)
+                          : const Color(0xFFFFFFFF).withValues(alpha: 0.7),
                     ),
                   ),
                   const SizedBox(height: 48),

@@ -30,4 +30,3 @@ const EPoint$json = {
 final $typed_data.Uint8List ePointDescriptor = $convert.base64Decode(
     'CgZFUG9pbnQSEQoBeBgBIAEoAkgAUgF4iAEBEhEKAXkYAiABKAJIAVIBeYgBAUIECgJfeEIECg'
     'JfeQ==');
-

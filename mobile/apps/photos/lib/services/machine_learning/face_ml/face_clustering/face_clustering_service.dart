@@ -61,6 +61,7 @@ class ClusteringResult {
   }
 }
 
+@pragma('vm:entry-point')
 class FaceClusteringService extends SuperIsolate {
   @override
   Logger get logger => _logger;

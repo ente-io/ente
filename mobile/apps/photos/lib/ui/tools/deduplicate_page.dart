@@ -29,8 +29,8 @@ class DeduplicatePage extends StatefulWidget {
 }
 
 class _DeduplicatePageState extends State<DeduplicatePage> {
-  static const crossAxisCount = 4;
-  static const crossAxisSpacing = 4.0;
+  static const crossAxisCount = 3;
+  static const crossAxisSpacing = 12.0;
   static const headerRowCount = 3;
 
   final Set<int> selectedGrids = <int>{};
@@ -204,7 +204,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
         text,
         style: Theme.of(context).textTheme.titleMedium!.copyWith(
               fontSize: 14,
-              color: Theme.of(context).iconTheme.color!.withOpacity(0.7),
+              color: Theme.of(context).iconTheme.color!.withValues(alpha: 0.7),
             ),
       );
     }
@@ -277,7 +277,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       width: double.infinity,
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: crossAxisSpacing / 2),
+          padding: const EdgeInsets.symmetric(horizontal: crossAxisSpacing),
           child: TextButton(
             style: OutlinedButton.styleFrom(
               backgroundColor:
@@ -303,7 +303,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                     color: Theme.of(context)
                         .colorScheme
                         .inverseTextColor
-                        .withOpacity(0.7),
+                        .withValues(alpha: 0.7),
                     fontSize: 12,
                   ),
                 ),
@@ -375,7 +375,8 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(2, 4, 2, 12),
+          padding: const EdgeInsets.fromLTRB(
+              crossAxisSpacing, 4, crossAxisSpacing, 12,),
           child: GestureDetector(
             onTap: () {
               if (selectedGrids.contains(itemIndex)) {
@@ -410,7 +411,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: crossAxisSpacing / 2),
+          padding: const EdgeInsets.symmetric(horizontal: crossAxisSpacing),
           child: GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -475,7 +476,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
             child: Hero(
               tag: "deduplicate_" + file.tag,
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(8),
                 child: ThumbnailWidget(
                   file,
                   diskLoadDeferDuration: galleryThumbnailDiskLoadDeferDuration,

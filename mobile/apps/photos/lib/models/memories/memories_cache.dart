@@ -9,14 +9,12 @@ import "package:photos/models/memories/smart_memory.dart";
 import "package:photos/models/memories/smart_memory_constants.dart";
 import "package:photos/models/memories/trip_memory.dart";
 
-const kPersonShowTimeout = Duration(days: 7 * 10);
-const kPersonAndTypeShowTimeout = Duration(days: 7 * 26);
-const kClipShowTimeout = Duration(days: 3 * 10);
-const kTripShowTimeout = Duration(days: 7 * 25);
+const kPersonShowTimeout = Duration(days: 16 * kMemoriesUpdateFrequencyDays);
+const kClipShowTimeout = Duration(days: 10 * kMemoriesUpdateFrequencyDays);
+const kTripShowTimeout = Duration(days: 50 * kMemoriesUpdateFrequencyDays);
 
 final maxShowTimeout = [
       kPersonShowTimeout,
-      kPersonAndTypeShowTimeout,
       kTripShowTimeout,
     ].reduce((value, element) => value > element ? value : element) *
     3;

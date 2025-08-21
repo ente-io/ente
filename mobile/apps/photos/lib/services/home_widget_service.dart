@@ -14,7 +14,6 @@ import 'package:photos/services/memory_home_widget_service.dart';
 import 'package:photos/services/people_home_widget_service.dart';
 import 'package:photos/services/smart_memories_service.dart';
 import 'package:photos/utils/thumbnail_util.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import "package:synchronized/synchronized.dart";
 
 enum WidgetStatus {
@@ -55,23 +54,22 @@ class HomeWidgetService {
 
   final Logger _logger = Logger((HomeWidgetService).toString());
   final computeLock = Lock();
+  bool _isAppGroupSet = false;
 
-  void init(SharedPreferences prefs) {
-    setAppGroupID(iOSGroupIDMemory);
-    _initializeWidgetServices(prefs);
-  }
-
-  void _initializeWidgetServices(SharedPreferences prefs) {
-    AlbumHomeWidgetService.instance.init(prefs);
-    PeopleHomeWidgetService.instance.init(prefs);
-    MemoryHomeWidgetService.instance.init(prefs);
-  }
-
-  void setAppGroupID(String id) {
-    hw.HomeWidget.setAppGroupId(id).ignore();
+  Future<void> setAppGroup({String id = iOSGroupIDMemory}) async {
+    if (!Platform.isIOS || _isAppGroupSet) return;
+    _logger.info("Setting app group id");
+    await hw.HomeWidget.setAppGroupId(id).catchError(
+      (error) {
+        _logger.severe("Failed to set app group ID: $error");
+        return null;
+      },
+    );
+    _isAppGroupSet = true;
   }
 
   Future<void> initHomeWidget([bool isBg = false]) async {
+    await setAppGroup();
     await AlbumHomeWidgetService.instance.initAlbumHomeWidget(isBg);
     await PeopleHomeWidgetService.instance.initPeopleHomeWidget();
     await MemoryHomeWidgetService.instance.initMemoryHomeWidget();
@@ -218,7 +216,7 @@ class HomeWidgetService {
 
   Future<void> clearWidget(bool autoLogout) async {
     if (autoLogout) {
-      setAppGroupID(iOSGroupIDMemory);
+      await setAppGroup();
     }
 
     await Future.wait([

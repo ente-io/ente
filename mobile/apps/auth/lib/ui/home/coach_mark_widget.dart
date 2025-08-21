@@ -1,10 +1,10 @@
 import 'dart:ui';
 
-import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/events/codes_updated_event.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/utils/platform_util.dart';
+import 'package:ente_events/event_bus.dart';
 import 'package:flutter/material.dart';
 
 class CoachMarkWidget extends StatelessWidget {
@@ -23,7 +23,8 @@ class CoachMarkWidget extends StatelessWidget {
           Expanded(
             child: Container(
               width: double.infinity,
-              color: Theme.of(context).colorScheme.surface.withOpacity(0.1),
+              color:
+                  Theme.of(context).colorScheme.surface.withValues(alpha: 0.1),
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
                 child: Row(

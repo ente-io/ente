@@ -16,7 +16,7 @@ FITUR
 - Collaborative albums, so you can pool together photos after a trip
 - Shared folders, in case you want your partner to enjoy your "Camera" clicks
 - Link album, yang bisa dilindungi dengan sandi
-- Ability to free up space, by removing files that have been safely backed up
+Kemampuan untuk membebaskan kapasitas, dengan menghilangkan files yang sudah di back-up dengan aman
 - Human support, because you're worth it
 - Descriptions, so you can caption your memories and find them easily
 - Editor gambar, untuk menyempurnakan fotomu
@@ -33,4 +33,4 @@ HARGA
 Kami tidak menyediakan paket yang gratis seumur hidup, karena penting bagi kami untuk tetap berdiri dan bertahan hingga masa depan. Namun, kami menyediakan paket yang terjangkau, yang bisa kamu bagikan dengan keluargamu. Kamu bisa menemukan informasi lebih lanjut di ente.io.
 
 DUKUNGAN
-We take pride in offering human support. Jika kamu adalah pelanggan berbayar, kamu bisa menghubungi team@ente.io dan menunggu balasan dari tim kami dalam 24 jam.
+Kita bangga untuk menyediakan support berbasis manusia. Jika kamu adalah pelanggan berbayar, kamu bisa menghubungi team@ente.io dan menunggu balasan dari tim kami dalam 24 jam.

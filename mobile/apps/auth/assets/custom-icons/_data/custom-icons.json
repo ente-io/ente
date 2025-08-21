@@ -17,8 +17,7 @@
         "uidai",
         "UIDAI",
         "Unique Identification Authority of India"
-      ],
-      "hex": "FBB401"
+      ]
     },
     {
       "title": "Accredible",
@@ -57,8 +56,7 @@
     },
     {
       "title": "Amtrak",
-      "slug": "amtrak",
-      "hex": "003A5D"
+      "slug": "amtrak"
     },
     {
       "title": "Animal Crossing",
@@ -91,13 +89,6 @@
       ]
     },
     {
-      "title": "Art Fight",
-      "slug": "art_fight",
-      "altNames": [
-        "ArtFight"
-      ]
-    },
-    {
       "title": "Aruba",
       "slug": "aruba",
       "hex": "ef8a33"
@@ -121,6 +112,10 @@
     },
     {
       "title": "availity"
+    },
+    {
+      "title": "AvistaZ.to",
+      "slug": "avistaz"
     },
     {
       "title": "AzurHosts",
@@ -159,14 +154,6 @@
       "altNames": [
         "Battle net",
         "Blizzard"
-      ]
-    },
-    {
-      "title": "BBS.NGA",
-      "slug": "bbs_nga",
-      "altNames": [
-        "NGA玩家社区",
-        "NGA社区"
       ]
     },
     {
@@ -313,14 +300,21 @@
     },
     {
       "title": "Caltrain",
-      "slug": "caltrain",
-      "hex": "E31837"
+      "slug": "caltrain"
     },
     {
       "title": "Canva"
     },
     {
       "title": "Capacities"
+    },
+    {
+      "title": "Capcom",
+      "slug": "capcom",
+      "hex": "0D4DA2",
+      "altNames": [
+        "Capcom Co., Ltd."
+      ]
     },
     {
       "title": "Carta",
@@ -361,14 +355,17 @@
       "title": "Chucklefish"
     },
     {
+      "title": "CinemaZ.to",
+      "slug": "cinemaz"
+    },
+    {
       "title": "Clipper",
       "slug": "clippercard",
       "altNames": [
         "ClipperCard",
         "clipper-card",
         "Clipper Card"
-      ],
-      "hex": "006298"
+      ]
     },
     {
       "title": "CloudAMQP"
@@ -413,8 +410,7 @@
     },
     {
       "title": "Coolify",
-      "slug": "coolify",
-      "hex": "8C52FF"
+      "slug": "coolify"
     },
     {
       "title": "Crowdpear"
@@ -464,25 +460,6 @@
       ]
     },
     {
-      "title": "U.S. Department of Homeland Security",
-      "slug": "us_dhs",
-      "altNames": [
-        "DHS",
-        "dhs",
-        "United States Department of Homeland Security",
-        "uscis",
-        "USCIS",
-        "U.S. Citizenship and Immigration Services",
-        "cbp",
-        "CBP",
-        "U.S. Customs and Border Protection",
-        "U.S. Immigration and Customs Enforcement",
-        "ice",
-        "ICE"
-      ],
-      "hex": "005189"
-    },
-    {
       "title": "DCS",
       "altNames": [
         "Digital Combat Simulator"
@@ -527,8 +504,7 @@
       "altNames": [
         "Domino's",
         "Domino's Pizza"
-      ],
-      "hex": "0B648F"
+      ]
     },
     {
       "title": "Doppler"
@@ -551,8 +527,7 @@
         "Dunkin'",
         "Dunkin",
         "Dunkin Donuts"
-      ],
-      "hex": "C63663"
+      ]
     },
     {
       "title": "eBay"
@@ -613,9 +588,12 @@
       "hex": "17AB17"
     },
     {
+      "title": "ExoticaZ.to",
+      "slug": "exoticaz"
+    },
+    {
       "title": "Experian",
-      "slug": "experian",
-      "hex": "AF1685"
+      "slug": "experian"
     },
     {
       "title": "Fanatical",
@@ -739,8 +717,7 @@
       "altNames": [
         "green man gaming",
         "gmg"
-      ],
-      "hex": "00E205"
+      ]
     },
     {
       "title": "Guideline"
@@ -867,8 +844,7 @@
     },
     {
       "title": "Kayak",
-      "slug": "kayak",
-      "hex": "FF6900"
+      "slug": "kayak"
     },
     {
       "title": "Keygen",
@@ -1065,6 +1041,13 @@
       ]
     },
     {
+      "title": "Mobile01",
+      "slug": "mobile01",
+      "altNames": [
+        "M01"
+      ]
+    },
+    {
       "title": "Mozilla"
     },
     {
@@ -1169,8 +1152,7 @@
       "slug": "njtransit",
       "altNames": [
         "NJ Transit"
-      ],
-      "hex": "1A2B57"
+      ]
     },
     {
       "title": "nordvpn",
@@ -1275,8 +1257,7 @@
       "slug": "pcpartpicker",
       "altNames": [
         "PC Part Picker"
-      ],
-      "hex": "EDA920"
+      ]
     },
     {
       "title": "Peerberry"
@@ -1332,6 +1313,10 @@
       "slug": "privacy"
     },
     {
+      "title": "PrivateHD.to",
+      "slug": "privatehd"
+    },
+    {
       "title": "Proton"
     },
     {
@@ -1378,6 +1363,13 @@
       "altNames": [
         "R10",
         "r10.net"
+      ]
+    },
+    {
+      "title": "RaiderIO",
+      "slug": "raider_io",
+      "altNames": [
+        "raider.io"
       ]
     },
     {
@@ -1482,8 +1474,7 @@
       "altNames": [
         "onlinesbi",
         "State Bank of India"
-      ],
-      "hex": "12A8E0"
+      ]
     },
     {
       "title": "SEI",
@@ -1525,7 +1516,8 @@
       "title": "Skinport"
     },
     {
-      "title": "Smogon"
+      "title": "Skyscanner",
+      "hex": "0770E3"
     },
     {
       "title": "SMSPool",
@@ -1584,8 +1576,7 @@
     },
     {
       "title": "Supercell",
-      "slug": "supercell",
-      "hex": "000000"
+      "slug": "supercell"
     },
     {
       "title": "Surfshark"
@@ -1668,8 +1659,7 @@
       "altNames": [
         "StoryGraph",
         "TheStoryGraph"
-      ],
-      "hex": "15919B"
+      ]
     },
     {
       "title": "tianyiyun",
@@ -1714,6 +1704,15 @@
       ]
     },
     {
+      "title": "TU Dresden",
+      "slug": "tu_dresden",
+      "altNames": [
+        "Technische Universität Dresden",
+        "Dresden University of Technology"
+      ],
+      "hex": "00305d"
+    },
+    {
       "title": "Tweakers"
     },
     {
@@ -1730,7 +1729,7 @@
     {
       "title": "Twitter",
       "altNames": [
-        "X",
+        "X"
       ]
     },
     {
@@ -1798,7 +1797,7 @@
       "title": "Warner Bros.",
       "slug": "warner_bros",
       "altNames": [
-          "Warner Brothers"
+        "Warner Brothers"
       ]
     },
     {
@@ -1811,7 +1810,7 @@
       "title": "WEB.DE",
       "slug": "web_de"
     },
-     {
+    {
       "title": "WeMod",
       "slug": "wemod",
       "altNames": [
@@ -1835,8 +1834,7 @@
         "Washington Metro",
         "DC Metro",
         "Washington Metropolitan Area Transit Authority"
-      ],
-      "hex": "2D2D2D"
+      ]
     },
     {
       "title": "Wolvesville"
@@ -1940,6 +1938,26 @@
     {
       "title": "Co-Wheels",
       "slug": "cowheels"
+    },
+    {
+      "title": "Zivver",
+      "slug": "zivver"
+    },
+    {
+      "title": "Meesman Indexbeleggen",
+      "slug": "meesman"
+    },
+    {
+      "title": "Scouting Nederland",
+      "slug": "scoutingnederland"
+    },
+    {
+      "title": "ISC2",
+      "slug": "isc2"
+    },
+    {
+      "title": "Allegro",
+      "slug": "allegro"
     }
   ]
 }

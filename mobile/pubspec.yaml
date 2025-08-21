@@ -1,0 +1,10 @@
+# This pubspec.yaml is for the root of your monorepo.
+# Its purpose is to lock the version of the melos tool.
+name: ente_workspace
+publish_to: none
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dev_dependencies:
+  melos: ^6.0.0

@@ -327,7 +327,7 @@ interface EncryptedFilePieces {
 
 export interface PotentialLivePhotoAsset {
     fileName: string;
-    fileType: number /* FileType */;
+    fileType: number /* FileType | -1 */;
     collectionID: number;
     uploadItem: UploadItem;
     pathPrefix: UploadPathPrefix | undefined;

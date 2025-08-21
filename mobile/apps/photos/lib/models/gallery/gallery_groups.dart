@@ -224,18 +224,20 @@ class GalleryGroups {
                 int i = 0;
                 while (!endOfListReached) {
                   gridRowChildren.add(
-                    GalleryFileWidget(
+                    RepaintBoundary(
                       key: ValueKey(
                         tagPrefix +
                             filesInGroup[firstIndexOfRowWrtFilesInGroup + i]
                                 .tag,
                       ),
-                      file: filesInGroup[firstIndexOfRowWrtFilesInGroup + i],
-                      selectedFiles: selectedFiles,
-                      limitSelectionToOne: limitSelectionToOne,
-                      tag: tagPrefix,
-                      photoGridSize: crossAxisCount,
-                      currentUserID: currentUserID,
+                      child: GalleryFileWidget(
+                        file: filesInGroup[firstIndexOfRowWrtFilesInGroup + i],
+                        selectedFiles: selectedFiles,
+                        limitSelectionToOne: limitSelectionToOne,
+                        tag: tagPrefix,
+                        photoGridSize: crossAxisCount,
+                        currentUserID: currentUserID,
+                      ),
                     ),
                   );
 
@@ -247,18 +249,20 @@ class GalleryGroups {
               } else {
                 for (int i = 0; i < crossAxisCount; i++) {
                   gridRowChildren.add(
-                    GalleryFileWidget(
+                    RepaintBoundary(
                       key: ValueKey(
                         tagPrefix +
                             filesInGroup[firstIndexOfRowWrtFilesInGroup + i]
                                 .tag,
                       ),
-                      file: filesInGroup[firstIndexOfRowWrtFilesInGroup + i],
-                      selectedFiles: selectedFiles,
-                      limitSelectionToOne: limitSelectionToOne,
-                      tag: tagPrefix,
-                      photoGridSize: crossAxisCount,
-                      currentUserID: currentUserID,
+                      child: GalleryFileWidget(
+                        file: filesInGroup[firstIndexOfRowWrtFilesInGroup + i],
+                        selectedFiles: selectedFiles,
+                        limitSelectionToOne: limitSelectionToOne,
+                        tag: tagPrefix,
+                        photoGridSize: crossAxisCount,
+                        currentUserID: currentUserID,
+                      ),
                     ),
                   );
                 }

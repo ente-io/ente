@@ -44,6 +44,7 @@ import 'package:photos/services/sync/remote_sync_service.dart';
 import "package:photos/services/sync/sync_service.dart";
 import "package:photos/services/video_preview_service.dart";
 import "package:photos/services/wake_lock_service.dart";
+import "package:photos/src/rust/frb_generated.dart";
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/ui/tools/lock_screen.dart';
 import "package:photos/utils/email_util.dart";
@@ -65,6 +66,7 @@ bool _stopHearBeat = false;
 
 void main() async {
   debugRepaintRainbowEnabled = false;
+  await RustLib.init();
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
 
@@ -172,7 +174,6 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
   // Misc Services
   await UserService.instance.init();
   NotificationService.instance.init(prefs);
-  if (Platform.isAndroid) HomeWidgetService.instance.init(prefs);
 
   // Begin Execution
   // only runs for android
@@ -266,8 +267,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("SyncService init $tlog");
     await SyncService.instance.init(preferences);
     _logger.info("SyncService init done $tlog");
-
-    HomeWidgetService.instance.init(preferences);
 
     if (!isBackground) {
       await _scheduleFGHomeWidgetSync();

@@ -154,13 +154,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     Widget? image;
     if (_imageProvider != null) {
       image = Image(
-        image: optimizedImageHeight != null || optimizedImageWidth != null
-            ? ResizeImage(
-                _imageProvider!,
-                width: optimizedImageWidth,
-                height: optimizedImageHeight,
-              )
-            : _imageProvider!,
+        image: _imageProvider!,
         fit: widget.fit,
       );
     }
@@ -252,10 +246,15 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       final cachedThumbnail =
           enteImageCache.getThumb(widget.file, thumbnailLarge512);
       if (cachedThumbnail != null) {
-        _imageProvider = Image.memory(cachedThumbnail).image;
+        _imageProvider = Image.memory(
+          cachedThumbnail,
+          cacheHeight: optimizedImageHeight,
+          cacheWidth: optimizedImageWidth,
+        ).image;
         _hasLoadedThumbnail = true;
         return;
       }
+
       if (widget.serverLoadDeferDuration != null) {
         Future.delayed(widget.serverLoadDeferDuration!, () {
           if (mounted) {
@@ -272,7 +271,11 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     try {
       final thumbnail = await getThumbnailFromServer(widget.file);
       if (mounted) {
-        final imageProvider = Image.memory(thumbnail).image;
+        final imageProvider = Image.memory(
+          thumbnail,
+          cacheHeight: optimizedImageHeight,
+          cacheWidth: optimizedImageWidth,
+        ).image;
         _cacheAndRender(imageProvider);
       }
     } catch (e) {

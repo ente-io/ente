@@ -1,0 +1,8 @@
+# melos_managed_dependency_overrides: ente_base,ente_events,ente_logging
+dependency_overrides:
+  ente_base:
+    path: ../base
+  ente_events:
+    path: ../events
+  ente_logging:
+    path: ../logging

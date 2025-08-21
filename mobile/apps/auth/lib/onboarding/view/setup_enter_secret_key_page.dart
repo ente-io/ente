@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/events/codes_updated_event.dart';
 import "package:ente_auth/l10n/l10n.dart";
 import 'package:ente_auth/models/all_icon_data.dart';
@@ -23,6 +22,7 @@ import 'package:ente_auth/ui/utils/icon_utils.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
+import 'package:ente_events/event_bus.dart';
 import "package:flutter/material.dart";
 import 'package:logging/logging.dart';
 
@@ -332,7 +332,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                                 },
                               );
                             },
-                            barrierColor: Colors.black.withOpacity(0.85),
+                            barrierColor: Colors.black.withValues(alpha: 0.85),
                             barrierDismissible: false,
                           );
                         },

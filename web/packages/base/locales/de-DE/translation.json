@@ -685,5 +685,17 @@
     "person_favorites": "{{name}}s Favoriten",
     "shared_favorites": "Geteilte Favoriten",
     "added_by_name": "Von {{name}} hinzugefügt",
-    "unowned_files_not_processed": "Von anderen Benutzern hinzugefügte Dateien wurden nicht verarbeitet"
+    "unowned_files_not_processed": "Von anderen Benutzern hinzugefügte Dateien wurden nicht verarbeitet",
+    "custom_domains": "",
+    "custom_domains_desc": "",
+    "link_your_domain": "",
+    "domain": "",
+    "domain_help": "",
+    "invalid_domain": "",
+    "already_linked_domain": "",
+    "add_dns_entry": "",
+    "add_dns_entry_hint": "",
+    "custom_domains_help": "",
+    "num_1": "",
+    "num_2": ""
 }

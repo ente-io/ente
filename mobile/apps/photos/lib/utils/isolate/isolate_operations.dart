@@ -1,6 +1,8 @@
-import 'dart:typed_data' show Uint8List;
+import 'dart:typed_data' show Uint8List, Float32List;
 
+import "package:flutter_rust_bridge/flutter_rust_bridge.dart" show Uint64List;
 import "package:ml_linalg/linalg.dart";
+import "package:photos/db/ml/clip_vector_db.dart";
 import "package:photos/models/ml/face/box.dart";
 import "package:photos/models/ml/vector.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart";
@@ -10,6 +12,7 @@ import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_encoder.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_tokenizer.dart";
 import "package:photos/services/machine_learning/semantic_search/query_result.dart";
+import "package:photos/src/rust/frb_generated.dart" show RustLib;
 import "package:photos/utils/image_ml_util.dart";
 import "package:photos/utils/ml_util.dart";
 
@@ -40,6 +43,12 @@ enum IsolateOperation {
   /// [MLComputer]
   computeBulkSimilarities,
 
+  /// [MLComputer]
+  bulkVectorSearch,
+
+  /// [MLComputer]
+  bulkVectorSearchWithKeys,
+
   /// [FaceClusteringService]
   linearIncrementalClustering,
 
@@ -57,6 +66,28 @@ Future<dynamic> isolateFunction(
   Map<String, dynamic> args,
 ) async {
   switch (function) {
+    case IsolateOperation.bulkVectorSearchWithKeys:
+      await _ensureRustLoaded();
+      final potentialKeys = args["potentialKeys"] as Uint64List;
+      final exact = args["exact"] as bool;
+
+      return ClipVectorDB.instance.bulkSearchWithKeys(
+        potentialKeys,
+        BigInt.from(100),
+        exact: exact,
+      );
+
+    case IsolateOperation.bulkVectorSearch:
+      await _ensureRustLoaded();
+      final clipFloat32 = args["clipFloat32"] as List<Float32List>;
+      final exact = args["exact"] as bool;
+
+      return ClipVectorDB.instance.bulkSearchVectors(
+        clipFloat32,
+        BigInt.from(100),
+        exact: exact,
+      );
+
     /// Cases for MLIndexingIsolate start here
 
     /// MLIndexingIsolate
@@ -182,9 +213,26 @@ Future<dynamic> isolateFunction(
 
     /// Caching
     case IsolateOperation.clearAllIsolateCache:
+      _ensureRustDisposed();
       _isolateCache.clear();
       return true;
 
     /// Cases for Caching stop here
+  }
+}
+
+Future<void> _ensureRustLoaded() async {
+  final bool loaded = _isolateCache["rustLibLoaded"] as bool? ?? false;
+  if (!loaded) {
+    await RustLib.init();
+    _isolateCache["rustLibLoaded"] = true;
+  }
+}
+
+void _ensureRustDisposed() {
+  final bool loaded = _isolateCache["rustLibLoaded"] as bool? ?? false;
+  if (loaded) {
+    RustLib.dispose();
+    _isolateCache.remove("rustLibLoaded");
   }
 }

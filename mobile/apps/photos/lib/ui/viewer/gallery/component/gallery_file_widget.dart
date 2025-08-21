@@ -36,6 +36,7 @@ class GalleryFileWidget extends StatefulWidget {
 }
 
 class _GalleryFileWidgetState extends State<GalleryFileWidget> {
+  static const borderRadius = BorderRadius.all(Radius.circular(1));
   late bool _isFileSelected;
 
   @override
@@ -92,7 +93,7 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
               children: [
                 ClipRRect(
                   key: ValueKey(heroTag),
-                  borderRadius: BorderRadius.circular(1),
+                  borderRadius: borderRadius,
                   child: Hero(
                     tag: heroTag,
                     flightShuttleBuilder: (
@@ -104,13 +105,13 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
                     ) =>
                         thumbnailWidget,
                     transitionOnUserGestures: true,
-                    child: ColorFiltered(
-                      colorFilter: const ColorFilter.mode(
-                        Color.fromARGB(102, 0, 0, 0),
-                        BlendMode.darken,
-                      ),
-                      child: thumbnailWidget,
-                    ),
+                    child: thumbnailWidget,
+                  ),
+                ),
+                Container(
+                  decoration: const BoxDecoration(
+                    color: Color.fromARGB(102, 0, 0, 0),
+                    borderRadius: borderRadius,
                   ),
                 ),
                 Positioned(
@@ -126,7 +127,7 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
             )
           : ClipRRect(
               key: ValueKey(heroTag),
-              borderRadius: BorderRadius.circular(1),
+              borderRadius: borderRadius,
               child: Hero(
                 tag: heroTag,
                 flightShuttleBuilder: (

@@ -2,8 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
-import 'package:ente_auth/models/export/ente.dart';
-import 'package:ente_auth/services/local_authentication_service.dart';
+import 'package:ente_auth/models/export/ente.dart'; 
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/dialog_widget.dart';
@@ -14,6 +13,7 @@ import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/share_utils.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:ente_lock_screen/local_authentication_service.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -170,9 +170,14 @@ Future<void> _exportCodes(
         }
         codeFile.writeAsStringSync(fileContent);
         final Size size = MediaQuery.of(context).size;
-        await Share.shareXFiles(
-          [XFile(codeFile.path)],
-          sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
+        await SharePlus.instance.share(
+          ShareParams(
+            files: <XFile>[
+              XFile(codeFile.path, mimeType: 'text/plain'),
+            ],
+            sharePositionOrigin:
+                Rect.fromLTWH(0, 0, size.width, size.height / 2),
+          ),
         );
         Future.delayed(const Duration(seconds: 30), () async {
           if (codeFile.existsSync()) {

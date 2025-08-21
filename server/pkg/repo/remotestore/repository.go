@@ -3,6 +3,9 @@ package remotestore
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"github.com/ente-io/museum/ente"
+	"github.com/lib/pq"
 
 	"github.com/ente-io/stacktrace"
 )
@@ -21,7 +24,64 @@ func (r *Repository) InsertOrUpdate(ctx context.Context, userID int64, key strin
 		key,    // $2 key_name
 		value,  // $3 key_value
 	)
+
+	if err != nil {
+		// Check for unique violation (PostgreSQL error code 23505)
+		var pgErr *pq.Error
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			if pgErr.Constraint == "remote_store_custom_domain_unique_idx" {
+				return ente.NewConflictError("custom domain already exists for another user")
+			}
+		}
+		return stacktrace.Propagate(err, "failed to insert/update")
+	}
 	return stacktrace.Propagate(err, "failed to insert/update")
+}
+
+func (r *Repository) RemoveKey(ctx context.Context, userID int64, key string) error {
+	_, err := r.DB.ExecContext(ctx, `DELETE FROM remote_store
+		WHERE user_id = $1 AND key_name = $2`,
+		userID, // $1
+		key,    // $2
+	)
+	return stacktrace.Propagate(err, "failed to remove key")
+}
+
+func (r *Repository) DomainOwner(ctx context.Context, domain string) (*int64, error) {
+	// Check if the domain is already taken by another user
+	rows := r.DB.QueryRowContext(ctx, `SELECT user_id FROM remote_store
+	   WHERE key_name = $1 AND key_value = $2`,
+		ente.CustomDomain, // $1
+		domain,            // $2
+	)
+	var userID int64
+	err := rows.Scan(&userID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, stacktrace.Propagate(&ente.ErrNotFoundError, "")
+		}
+		return nil, stacktrace.Propagate(err, "failed to fetch domain owner")
+	}
+	return &userID, nil
+}
+
+func (r *Repository) GetDomain(ctx context.Context, userID int64) (*string, error) {
+	// Fetch the custom domain for the user
+	rows := r.DB.QueryRowContext(ctx, `SELECT key_value FROM remote_store
+	   WHERE user_id = $1 AND key_name = $2`,
+		userID,            // $1
+		ente.CustomDomain, // $2
+	)
+	var domain string
+	err := rows.Scan(&domain)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, stacktrace.Propagate(err, "failed to fetch custom domain")
+	}
+	return &domain, nil
+
 }
 
 // GetValue fetches and return the value for given user_id and key

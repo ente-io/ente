@@ -1,6 +1,7 @@
 {
   "@@locale ": "en",
   "enterYourEmailAddress": "Skriv inn e-postadressen din",
+  "enterYourNewEmailAddress": "Skriv inn den nye e-postadressen din",
   "accountWelcomeBack": "Velkommen tilbake!",
   "emailAlreadyRegistered": "E-postadressen er allerede registrert.",
   "emailNotRegistered": "E-postadressen er ikke registrert.",
@@ -721,6 +722,7 @@
     "type": "text"
   },
   "backupFailed": "Sikkerhetskopiering mislyktes",
+  "sorryBackupFailedDesc": "Beklager, vi kunne ikke sikkerhetskopiere denne filen akkurat nå, vil vi prøve på nytt senere.",
   "couldNotBackUpTryLater": "Vi kunne ikke sikkerhetskopiere dine data.\nVi vil prøve på nytt senere.",
   "enteCanEncryptAndPreserveFilesOnlyIfYouGrant": "Ente kan bare kryptere og bevare filer hvis du gir tilgang til dem",
   "pleaseGrantPermissions": "Vennligst gi tillatelser",
@@ -897,6 +899,7 @@
   "authToViewYourMemories": "Vennligst autentiser deg for å se minnene dine",
   "unlock": "Lås opp",
   "freeUpSpace": "Frigjør lagringsplass",
+  "freeUpSpaceSaving": "{count, plural, =1 {Det kan slettes fra enheten for å frigi {formattedSize}} other {De kan slettes fra enheten for å frigjøre {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 fil} other {{formattedNumber} filer}} I dette albumet har blitt sikkerhetskopiert",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -924,6 +927,18 @@
         "content": "{formattedNumber}",
         "example": "1,000",
         "type": "String"
+      }
+    }
+  },
+  "@freeUpSpaceSaving": {
+    "description": "Text to tell user how much space they can free up by deleting items from the device"
+  },
+  "freeUpAccessPostDelete": "Du kan fortsatt få tilgang til {count, plural, =1 {det} other {dem}} på Ente så lenge du har et aktivt abonnement",
+  "@freeUpAccessPostDelete": {
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
       }
     }
   },
@@ -1016,6 +1031,7 @@
   "didYouKnow": "Visste du at?",
   "loadingMessage": "Laster bildene dine...",
   "loadMessage1": "Du kan dele abonnementet med familien din",
+  "loadMessage2": "Vi har bevart over 200 millioner minner så langt",
   "loadMessage3": "Vi beholder 3 kopier av dine data, en i en underjordisk bunker",
   "loadMessage4": "Alle våre apper har åpen kildekode",
   "loadMessage5": "Vår kildekode og kryptografi har blitt revidert eksternt",
@@ -1253,6 +1269,8 @@
     "description": "Subtitle to indicate that the user can find people quickly by name"
   },
   "findPeopleByName": "Finn folk raskt med navn",
+  "addViewers": "{count, plural, =0 {Legg til seer} =1 {Legg til seer} other {Legg til seere}}",
+  "addCollaborators": "{count, plural, =0 {Legg til samarbeidspartner} =1 {Legg til samarbeidspartner} other {Legg til samarbeidspartnere}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Trykk og hold på en e-post for å bekrefte ende-til-ende-kryptering.",
   "developerSettingsWarning": "Er du sikker på at du vil endre utviklerinnstillingene?",
   "developerSettings": "Utviklerinnstillinger",
@@ -1264,6 +1282,8 @@
   "createCollaborativeLink": "Samarbeidslenke",
   "search": "Søk",
   "enterPersonName": "Angi personnavn",
+  "editEmailAlreadyLinked": "Denne e-postadressen er allerede koblet til {name}.",
+  "viewPersonToUnlink": "Vis {name} for å fjerne koblingen",
   "enterName": "Angi navn",
   "savePerson": "Lagre person",
   "editPerson": "Rediger person",
@@ -1383,6 +1403,26 @@
   "enableMachineLearningBanner": "Aktiver maskinlæring for magisk søk og ansiktsgjenkjenning",
   "searchDiscoverEmptySection": "Bilder vil vises her når behandlingen og synkronisering er fullført",
   "searchPersonsEmptySection": "Folk vil vises her når behandling og synkronisering er fullført",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {La til 0 tilskuere} =1 {La til 1 tilskuer} other {La til {count} tilskuer}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to an album."
+  },
+  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {La til 0 samarbeidspartner} =1 {La til 1 samarbeidspartner} other {Lagt til {count} samarbeidspartnere}}",
+  "@collaboratorsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of collaborators that were successfully added to an album."
+  },
   "accountIsAlreadyConfigured": "Kontoen er allerede konfigurert.",
   "sessionIdMismatch": "Økt-ID stemmer ikke",
   "@sessionIdMismatch": {
@@ -1448,6 +1488,15 @@
   },
   "currentlyRunning": "Kjører for øyeblikket",
   "ignored": "ignorert",
+  "photosCount": "{count, plural, =0 {0 bilder} =1 {1 bilde} other {{count} bilder}}",
+  "@photosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
   "file": "Fil",
   "searchSectionsLengthMismatch": "Uoverensstemmelse i seksjonslengde: {snapshotLength} != {searchLength}",
   "@searchSectionsLengthMismatch": {
@@ -1613,6 +1662,7 @@
   "@linkPersonCaption": {
     "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
   },
+  "videoStreaming": "Strømbare videoer",
   "processingVideos": "Behandler videoer",
   "streamDetails": "Strømmedetaljer",
   "processing": "Behandler",
@@ -1678,5 +1728,13 @@
   "moon": "I månelyset",
   "onTheRoad": "På veien igjen",
   "food": "Kulinær glede",
-  "pets": "Pelsvenner"
+  "pets": "Pelsvenner",
+  "curatedMemories": "Kuraterte minner",
+  "widgets": "Moduler",
+  "memories": "Minner",
+  "peopleWidgetDesc": "Velg folkene du ønsker å se på din hjemskjerm.",
+  "albumsWidgetDesc": "Velg albumene du ønsker å se på din hjemskjerm.",
+  "memoriesWidgetDesc": "Velg typen minner du ønsker å se på din hjemskjerm.",
+  "smartMemories": "Smarte minner",
+  "pastYearsMemories": "Tidligere års minner"
 }

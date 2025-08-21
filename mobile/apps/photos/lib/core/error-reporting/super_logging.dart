@@ -1,5 +1,3 @@
-library super_logging;
-
 import 'dart:async';
 import 'dart:collection';
 import 'dart:core';

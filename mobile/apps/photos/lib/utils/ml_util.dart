@@ -12,7 +12,6 @@ import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/ml/clip.dart";
-import "package:photos/models/ml/face/dimension.dart";
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/service_locator.dart";
@@ -462,14 +461,15 @@ Future<MLResult<T>> analyzeImageStatic<T>(Map args) async {
     final startTime = DateTime.now();
 
     // Decode the image once to use for both face detection and alignment
-    final decodedImage =
-        await decodeImageFromPath(imagePath, includeRgbaBytes: true);
-    final image = decodedImage.image;
+    final decodedImage = await decodeImageFromPath(
+      imagePath,
+      includeRgbaBytes: true,
+      includeDartUiImage: false,
+    );
     final rawRgbaBytes = decodedImage.rawRgbaBytes!;
-    final decodedImageSize =
-        Dimensions(height: image.height, width: image.width);
+    final imageDimensions = decodedImage.dimensions;
     final result = MLResult.fromEnteFileID(enteFileID);
-    result.decodedImageSize = decodedImageSize;
+    result.decodedImageSize = imageDimensions;
     final decodeTime = DateTime.now();
     final decodeMs = decodeTime.difference(startTime).inMilliseconds;
 
@@ -478,7 +478,7 @@ Future<MLResult<T>> analyzeImageStatic<T>(Map args) async {
       runFaces
           ? FaceRecognitionService.runFacesPipeline<T>(
               enteFileID,
-              image,
+              imageDimensions,
               rawRgbaBytes,
               faceDetectionAddress,
               faceEmbeddingAddress,
@@ -491,7 +491,7 @@ Future<MLResult<T>> analyzeImageStatic<T>(Map args) async {
       runClip
           ? SemanticSearchService.runClipImage<T>(
               enteFileID,
-              image,
+              imageDimensions,
               rawRgbaBytes,
               clipImageAddress,
             ).then((result) {

@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:ente_crypto/ente_crypto.dart';
-import "package:fast_base58/fast_base58.dart";
 import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
 import "package:photos/generated/l10n.dart";
@@ -54,10 +53,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
         widget.collection!.publicURLs.firstOrNull?.passwordEnabled ?? false;
     final enteColorScheme = getEnteColorScheme(context);
     final PublicURL url = widget.collection!.publicURLs.firstOrNull!;
-    final String collectionKey = Base58Encode(
-      CollectionsService.instance.getCollectionKey(widget.collection!.id),
-    );
-    final String urlValue = "${url.url}#$collectionKey";
+    final String urlValue =
+        CollectionsService.instance.getPublicUrl(widget.collection!);
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
