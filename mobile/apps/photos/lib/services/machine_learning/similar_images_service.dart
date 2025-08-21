@@ -100,7 +100,13 @@ class SimilarImagesService {
         needsFullRefresh = true;
       }
 
-      // Check condition 1: New files > 20% of total files
+      // Check condition: cache is older than a month
+      if (DateTime.fromMillisecondsSinceEpoch(cachedData.cachedTime)
+          .isBefore(DateTime.now().subtract(const Duration(days: 30)))) {
+        needsFullRefresh = true;
+      }
+
+      // Check condition: new files > 20% of total files
       if (!needsFullRefresh) {
         final newFileIDs = currentFileIDs.difference(cachedFileIDs);
         if (newFileIDs.length > currentFileIDs.length * 0.2) {
@@ -108,7 +114,7 @@ class SimilarImagesService {
         }
       }
 
-      // Check condition 2: 20+% of grouped files deleted
+      // Check condition: 20+% of grouped files deleted
       if (!needsFullRefresh) {
         final Set<int> cacheGroupedFileIDs =
             await cachedData.getGroupedFileIDs();
@@ -206,12 +212,12 @@ class SimilarImagesService {
       final fileDistances = distances[i];
       final newFilePersonIDs = fileIDToPersonIDs[newFileID] ?? <String>{};
       bool assigned = false;
-      for (final group in existingGroups) {
-        for (int j = 0; j < similarFileIDs.length; j++) {
-          final otherFileID = similarFileIDs[j].toInt();
-          if (otherFileID == newFileID) continue;
-          final distance = fileDistances[j];
-          if (distance > distanceThreshold) break;
+      for (int j = 0; j < similarFileIDs.length; j++) {
+        final otherFileID = similarFileIDs[j].toInt();
+        if (otherFileID == newFileID) continue;
+        final distance = fileDistances[j];
+        if (distance > distanceThreshold) break;
+        for (final group in existingGroups) {
           if (group.fileIds.contains(otherFileID)) {
             final otherPersonIDs = fileIDToPersonIDs[otherFileID] ?? <String>{};
             if (setsAreEqual(newFilePersonIDs, otherPersonIDs)) {
