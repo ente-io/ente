@@ -221,9 +221,8 @@ class VideoPreviewService {
       _items[enteFile.uploadedFileID!] = PreviewItem(
         status: PreviewItemStatus.compressing,
         file: enteFile,
-        retryCount: forceUpload
-            ? 0
-            : _items[enteFile.uploadedFileID!]?.retryCount ?? 0,
+        retryCount:
+            forceUpload ? 0 : _items[enteFile.uploadedFileID!]?.retryCount ?? 0,
         collectionID: enteFile.collectionID ?? 0,
       );
 
@@ -249,11 +248,9 @@ class VideoPreviewService {
           ? (fileSize * 8) / props!.duration!.inSeconds
           : null;
 
-      final colorTransfer = videoData["color_transfer"]
-          ?.toString()
-          .toLowerCase();
-      final isHDR =
-          colorTransfer != null &&
+      final colorTransfer =
+          videoData["color_transfer"]?.toString().toLowerCase();
+      final isHDR = colorTransfer != null &&
           (colorTransfer == "smpte2084" || colorTransfer == "arib-std-b67");
 
       // create temp file & directory for preview generation
@@ -323,18 +320,17 @@ class VideoPreviewService {
 
       _logger.info(command);
 
-      final playlistGenResult =
-          await IsolatedFfmpegService.runFfmpeg(
-            // input file path
-            '-i "${file.path}" ' +
-                // main params for streaming
-                command +
-                // output file path
-                '$prefix/output.m3u8',
-          ).onError((error, stackTrace) {
-            _logger.warning("FFmpeg command failed", error, stackTrace);
-            return {};
-          });
+      final playlistGenResult = await IsolatedFfmpegService.runFfmpeg(
+        // input file path
+        '-i "${file.path}" ' +
+            // main params for streaming
+            command +
+            // output file path
+            '$prefix/output.m3u8',
+      ).onError((error, stackTrace) {
+        _logger.warning("FFmpeg command failed", error, stackTrace);
+        return {};
+      });
 
       final playlistGenReturnCode = playlistGenResult["returnCode"] as int?;
 
@@ -360,17 +356,16 @@ class VideoPreviewService {
           objectSize = result.$2;
 
           // Fetch resolution of generated stream by decrypting a single frame
-          final playlistFrameResult =
-              await IsolatedFfmpegService.runFfmpeg(
-                '-allowed_extensions ALL -i "$prefix/output.m3u8" -frames:v 1 -c copy "$prefix/frame.ts"',
-              ).onError((error, stackTrace) {
-                _logger.warning(
-                  "FFmpeg command failed for frame",
-                  error,
-                  stackTrace,
-                );
-                return {};
-              });
+          final playlistFrameResult = await IsolatedFfmpegService.runFfmpeg(
+            '-allowed_extensions ALL -i "$prefix/output.m3u8" -frames:v 1 -c copy "$prefix/frame.ts"',
+          ).onError((error, stackTrace) {
+            _logger.warning(
+              "FFmpeg command failed for frame",
+              error,
+              stackTrace,
+            );
+            return {};
+          });
           final playlistFrameReturnCode =
               playlistFrameResult["returnCode"] as int?;
           int? width, height;
@@ -520,13 +515,16 @@ class VideoPreviewService {
     try {
       final encryptionKey = getFileKey(file);
       final playlistContent = playlist.readAsStringSync();
-      final result = await gzipAndEncryptJson({
-        "playlist": playlistContent,
-        'type': 'hls_video',
-        'width': width,
-        'height': height,
-        'size': objectSize,
-      }, encryptionKey);
+      final result = await gzipAndEncryptJson(
+        {
+          "playlist": playlistContent,
+          'type': 'hls_video',
+          'width': width,
+          'height': height,
+          'size': objectSize,
+        },
+        encryptionKey,
+      );
       final _ = await _enteDio.put(
         "/files/video-data",
         data: {
@@ -644,7 +642,8 @@ class VideoPreviewService {
       }
       final videoFile = (await videoCacheManager.getFileFromCache(
         _getVideoPreviewKey(objectID),
-      ))?.file;
+      ))
+          ?.file;
       if (videoFile == null) {
         previewURLResult = previewURLResult ?? await _getPreviewUrl(file);
         if (size != null && size < _maxPreviewSizeLimitForCache) {
@@ -668,13 +667,12 @@ class VideoPreviewService {
       final tempDir = await getTemporaryDirectory();
       final playlistFile = File("${tempDir.path}/${file.uploadedFileID}.m3u8");
       await playlistFile.writeAsString(finalPlaylist);
-      final String log =
-          (StringBuffer()
-                ..write("[CACHE-STATUS] ")
-                ..write("Video: ${videoFile != null ? '✓' : '✗'} | ")
-                ..write("Details: ${detailsCache != null ? '✓' : '✗'} | ")
-                ..write("Playlist: ${playlistCache != null ? '✓' : '✗'}"))
-              .toString();
+      final String log = (StringBuffer()
+            ..write("[CACHE-STATUS] ")
+            ..write("Video: ${videoFile != null ? '✓' : '✗'} | ")
+            ..write("Details: ${detailsCache != null ? '✓' : '✗'} | ")
+            ..write("Playlist: ${playlistCache != null ? '✓' : '✗'}"))
+          .toString();
       _logger.info("Mapped playlist to ${playlistFile.path}, $log");
       final data = PlaylistData(
         preview: playlistFile,
@@ -745,9 +743,8 @@ class VideoPreviewService {
           "${Configuration.instance.getHttpEndpoint()}/public-collection/files/data/preview",
           queryParameters: {
             "fileID": file.uploadedFileID,
-            "type": file.fileType == FileType.video
-                ? "vid_preview"
-                : "img_preview",
+            "type":
+                file.fileType == FileType.video ? "vid_preview" : "img_preview",
           },
           options: Options(
             headers: collectionsService.publicCollectionHeaders(
@@ -761,9 +758,8 @@ class VideoPreviewService {
           "/files/data/preview",
           queryParameters: {
             "fileID": file.uploadedFileID,
-            "type": file.fileType == FileType.video
-                ? "vid_preview"
-                : "img_preview",
+            "type":
+                file.fileType == FileType.video ? "vid_preview" : "img_preview",
           },
         );
         url = (response.data["url"] as String);
@@ -855,9 +851,8 @@ class VideoPreviewService {
     );
 
     final previewIds = fileDataService.previewIds;
-    final allFiles = files
-        .where((file) => previewIds[file.uploadedFileID] == null)
-        .toList();
+    final allFiles =
+        files.where((file) => previewIds[file.uploadedFileID] == null).toList();
 
     // set all video status to in queue
     var n = allFiles.length, i = 0;

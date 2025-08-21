@@ -48,7 +48,7 @@ class _VideoStreamingSettingsPageState
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: S.of(context).videoStreaming,
+              title: AppLocalizations.of(context).videoStreaming,
             ),
             actionIcons: [
               IconButtonWidget(
@@ -70,11 +70,13 @@ class _VideoStreamingSettingsPageState
                   Text.rich(
                     TextSpan(
                       children: [
-                        TextSpan(text: S.of(context).videoStreamingDescription),
+                        TextSpan(
+                          text: AppLocalizations.of(context)
+                              .videoStreamingDescription,
+                        ),
                         const TextSpan(text: " "),
                         TextSpan(
-                          text: S
-                              .of(context)
+                          text: AppLocalizations.of(context)
                               .videoStreamingDescriptionClickable,
                           style: const TextStyle(
                             decoration: TextDecoration.underline,
@@ -85,8 +87,8 @@ class _VideoStreamingSettingsPageState
                     ),
                     textAlign: TextAlign.justify,
                     style: getEnteTextTheme(context).mini.copyWith(
-                      color: getEnteColorScheme(context).textMuted,
-                    ),
+                          color: getEnteColorScheme(context).textMuted,
+                        ),
                   ),
                 ],
               ),
@@ -131,15 +133,13 @@ class _VideoStreamingSettingsPageState
   }
 
   Future<void> openHelp() async {
-    Navigator.of(context)
-        .push(
-          MaterialPageRoute(
-            builder: (BuildContext context) {
-              return WebPage(S.of(context).help, helpUrl);
-            },
-          ),
-        )
-        .ignore();
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (BuildContext context) {
+          return WebPage(AppLocalizations.of(context).help, helpUrl);
+        },
+      ),
+    ).ignore();
   }
 
   Future<void> toggleVideoStreaming() async {
@@ -157,7 +157,7 @@ class _VideoStreamingSettingsPageState
         MenuItemWidget(
           padding: const EdgeInsets.only(left: 8, right: 4),
           captionedTextWidget: CaptionedTextWidget(
-            title: S.of(context).enabled,
+            title: AppLocalizations.of(context).enabled,
           ),
           trailingWidget: ToggleSwitchWidget(
             value: () => hasEnabled,
@@ -211,14 +211,14 @@ class VideoStreamingStatusWidgetState
                   MenuItemWidget(
                     padding: const EdgeInsets.only(left: 8, right: 6),
                     captionedTextWidget: CaptionedTextWidget(
-                      title: S.of(context).processed,
+                      title: AppLocalizations.of(context).processed,
                     ),
                     trailingWidget: Text(
                       total < 1
                           ? 'NA'
                           : netProcessed == 0
-                          ? '0%'
-                          : '${(netProcessed * 100.0).toStringAsFixed(2)}%',
+                              ? '0%'
+                              : '${(netProcessed * 100.0).toStringAsFixed(2)}%',
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                     singleBorderRadius: 8,
@@ -230,10 +230,10 @@ class VideoStreamingStatusWidgetState
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Text(
-                      S.of(context).videoStreamingNote,
+                      AppLocalizations.of(context).videoStreamingNote,
                       style: getEnteTextTheme(context).mini.copyWith(
-                        color: getEnteColorScheme(context).textMuted,
-                      ),
+                            color: getEnteColorScheme(context).textMuted,
+                          ),
                     ),
                   ),
                 ],

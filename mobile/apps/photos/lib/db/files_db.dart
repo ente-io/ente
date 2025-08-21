@@ -449,9 +449,8 @@ class FilesDB with SqlDbBase {
     final withIdParams = <List<Object?>>[];
     const withIdColumnNames = _columnNames;
     final withoutIdParams = <List<Object?>>[];
-    final withoutIdColumns = _columnNames
-        .where((column) => column != columnGeneratedID)
-        .toList();
+    final withoutIdColumns =
+        _columnNames.where((column) => column != columnGeneratedID).toList();
 
     // Sort files into appropriate parameter sets
     for (final file in files) {
@@ -829,8 +828,7 @@ class FilesDB with SqlDbBase {
         '$columnCreationTime <= ? AND $columnOwnerID = ?';
     final List<Object> whereArgs = [startTime, endTime, userID];
 
-    String query =
-        'SELECT * FROM $filesTable WHERE $whereClause ORDER BY '
+    String query = 'SELECT * FROM $filesTable WHERE $whereClause ORDER BY '
         '$columnCreationTime $order, $columnModificationTime $order';
     if (limit != null) {
       query += ' LIMIT ?';
@@ -1013,7 +1011,9 @@ class FilesDB with SqlDbBase {
       DELETE FROM $filesTable
       WHERE $columnLocalID IN ($uploadedPlaceholders) 
       AND ($columnUploadedFileID IS NULL OR $columnUploadedFileID = -1)
-      ''', batch);
+      ''',
+        batch,
+      );
 
       if (r.isNotEmpty) {
         _logger.warning(
@@ -1113,14 +1113,12 @@ class FilesDB with SqlDbBase {
     final db = await instance.sqliteAsyncDB;
     // on iOS, match using localID and fileType. title can either match or
     // might be null based on how the file was imported
-    String query =
-        '''SELECT * FROM $filesTable WHERE ($columnOwnerID = ?  
+    String query = '''SELECT * FROM $filesTable WHERE ($columnOwnerID = ?  
         OR $columnOwnerID IS NULL) AND $columnLocalID = ? 
         AND $columnFileType = ? AND ($columnTitle=? OR $columnTitle IS NULL) ''';
     List<Object> whereArgs = [ownerID, localID, getInt(fileType), title];
     if (Platform.isAndroid) {
-      query =
-          '''SELECT * FROM $filesTable WHERE ($columnOwnerID = ? OR  
+      query = '''SELECT * FROM $filesTable WHERE ($columnOwnerID = ? OR  
           $columnOwnerID IS NULL) AND $columnLocalID = ? AND $columnFileType = ? 
           AND $columnTitle=? AND $columnDeviceFolder= ? ''';
       whereArgs = [ownerID, localID, getInt(fileType), title, deviceFolder];
@@ -1132,7 +1130,7 @@ class FilesDB with SqlDbBase {
   }
 
   Future<Map<String, EnteFile>>
-  getUserOwnedFilesWithSameHashForGivenListOfFiles(
+      getUserOwnedFilesWithSameHashForGivenListOfFiles(
     List<EnteFile> files,
     int userID,
   ) async {
@@ -1278,15 +1276,13 @@ class FilesDB with SqlDbBase {
     final inParam = localIDs.map((id) => "'$id'").join(',');
     final db = await instance.sqliteAsyncDB;
     if (dedupeByLocalID) {
-      query =
-          '''
+      query = '''
       SELECT * FROM $filesTable
       WHERE $columnLocalID IN ($inParam)
       GROUP BY $columnLocalID;
     ''';
     } else {
-      query =
-          '''
+      query = '''
       SELECT * FROM $filesTable
       WHERE $columnLocalID IN ($inParam);
     ''';
@@ -1625,11 +1621,14 @@ class FilesDB with SqlDbBase {
       parameterSets.add([uploadedFileIDToSize[uploadedFileID], uploadedFileID]);
     }
 
-    await db.executeBatch('''
+    await db.executeBatch(
+      '''
       UPDATE $filesTable
       SET $columnFileSize = ?
       WHERE $columnUploadedFileID = ?;
-    ''', parameterSets);
+    ''',
+      parameterSets,
+    );
   }
 
   Future<List<EnteFile>> getAllFilesAfterDate({
@@ -1689,8 +1688,7 @@ class FilesDB with SqlDbBase {
   }) async {
     final db = await instance.sqliteAsyncDB;
     final order = (asc ?? false ? 'ASC' : 'DESC');
-    String query =
-        '''
+    String query = '''
       SELECT * FROM $filesTable 
       WHERE $columnLatitude IS NOT NULL AND $columnLongitude IS NOT NULL AND
       ($columnLatitude IS NOT 0 OR $columnLongitude IS NOT 0) AND 
@@ -1898,22 +1896,23 @@ class FilesDB with SqlDbBase {
   ) async {
     final valuesPlaceholders = List.filled(columnNames.length, "?").join(",");
     final columnNamesJoined = columnNames.join(",");
-    await db.executeBatch('''
+    await db.executeBatch(
+      '''
           INSERT OR ${conflictAlgorithm.name.toUpperCase()} INTO $filesTable($columnNamesJoined) VALUES($valuesPlaceholders)
-                                  ''', parameterSets);
+                                  ''',
+      parameterSets,
+    );
   }
 
   EnteFile _getFileFromRow(Map<String, dynamic> row) {
     final file = EnteFile();
     file.generatedID = row[columnGeneratedID];
     file.localID = row[columnLocalID];
-    file.uploadedFileID = row[columnUploadedFileID] == -1
-        ? null
-        : row[columnUploadedFileID];
+    file.uploadedFileID =
+        row[columnUploadedFileID] == -1 ? null : row[columnUploadedFileID];
     file.ownerID = row[columnOwnerID];
-    file.collectionID = row[columnCollectionID] == -1
-        ? null
-        : row[columnCollectionID];
+    file.collectionID =
+        row[columnCollectionID] == -1 ? null : row[columnCollectionID];
     file.title = row[columnTitle];
     file.deviceFolder = row[columnDeviceFolder];
     if (row[columnLatitude] != null && row[columnLongitude] != null) {
