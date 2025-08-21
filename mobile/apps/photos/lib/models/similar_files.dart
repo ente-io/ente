@@ -54,7 +54,7 @@ class SimilarFiles {
     Map<int, EnteFile> fileMap,
   ) {
     final fileIds = List<int>.from(json['fileIDs']);
-    final furthestDistance = json['distance'].toDouble();
+    final furthestDistance = (json['distance'] as num).toDouble();
 
     final files = <EnteFile>[];
     for (final fileId in fileIds) {
@@ -123,9 +123,9 @@ class SimilarFilesCache {
   ) {
     return SimilarFilesCache(
       similarFilesJsonStringList:
-          json['similarFilesJsonStringList'] as List<String>,
-      allCheckedFileIDs: Set.from(json['allCheckedFileIDs']),
-      distanceThreshold: json['distanceThreshold'] as double,
+          List<String>.from(json['similarFilesJsonStringList']),
+      allCheckedFileIDs: Set<int>.from(json['allCheckedFileIDs']),
+      distanceThreshold: (json['distanceThreshold'] as num).toDouble(),
       exact: json['exact'] as bool,
       cachedTime: json['cachedTime'] as int,
     );
