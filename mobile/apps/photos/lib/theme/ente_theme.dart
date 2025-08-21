@@ -57,3 +57,23 @@ EnteTheme darkTheme = EnteTheme(
   shadowMenu: shadowMenuDark,
   shadowButton: shadowButtonDark,
 );
+
+@Deprecated('Use EnteTheme.getColorScheme instead')
+EnteColorScheme getEnteColorScheme(
+  BuildContext context, {
+  bool inverse = false,
+}) {
+  return inverse
+      ? Theme.of(context).colorScheme.inverseEnteTheme.colorScheme
+      : Theme.of(context).colorScheme.enteTheme.colorScheme;
+}
+
+@Deprecated('Use EnteTheme.getTextTheme instead')
+EnteTextTheme getEnteTextTheme(
+  BuildContext context, {
+  bool inverse = false,
+}) {
+  return inverse
+      ? Theme.of(context).colorScheme.inverseEnteTheme.textTheme
+      : Theme.of(context).colorScheme.enteTheme.textTheme;
+}
