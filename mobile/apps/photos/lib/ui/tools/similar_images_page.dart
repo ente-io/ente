@@ -1,5 +1,6 @@
 import "dart:async";
 
+import "package:flutter/foundation.dart" show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
@@ -13,11 +14,13 @@ import "package:photos/services/collections_service.dart";
 import "package:photos/services/machine_learning/similar_images_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/common/loading_widget.dart";
+import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
+import "package:photos/ui/viewer/gallery/scrollbar/scroll_bar_with_use_notifier.dart";
 import "package:photos/utils/delete_file_util.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -37,7 +40,9 @@ enum SortKey {
 }
 
 class SimilarImagesPage extends StatefulWidget {
-  const SimilarImagesPage({super.key});
+  final bool debugScreen;
+
+  const SimilarImagesPage({super.key, this.debugScreen = false});
 
   @override
   State<SimilarImagesPage> createState() => _SimilarImagesPageState();
@@ -46,7 +51,6 @@ class SimilarImagesPage extends StatefulWidget {
 class _SimilarImagesPageState extends State<SimilarImagesPage> {
   static const crossAxisCount = 3;
   static const crossAxisSpacing = 12.0;
-  static const autoSelectDistanceThreshold = 0.01;
 
   final _logger = Logger("SimilarImagesPage");
   bool _isDisposed = false;
@@ -56,19 +60,31 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   List<SimilarFiles> _similarFilesList = [];
   SortKey _sortKey = SortKey.distanceAsc;
   bool _exactSearch = false;
+  bool _fullRefresh = false;
+  bool _isSelectionSheetOpen = false;
 
   late SelectedFiles _selectedFiles;
+  late ScrollController _scrollController;
+  late ValueNotifier<bool> _scrollbarInUseNotifier;
 
   @override
   void initState() {
     super.initState();
     _selectedFiles = SelectedFiles();
+    _scrollController = ScrollController();
+    _scrollbarInUseNotifier = ValueNotifier<bool>(false);
+
+    if (!widget.debugScreen) {
+      _findSimilarImages();
+    }
   }
 
   @override
   void dispose() {
     _isDisposed = true;
     _selectedFiles.dispose();
+    _scrollController.dispose();
+    _scrollbarInUseNotifier.dispose();
     super.dispose();
   }
 
@@ -171,7 +187,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Exact search", // TODO: lau: extract string
+                "Exact search",
                 style: textTheme.bodyBold,
               ),
               ToggleSwitchWidget(
@@ -180,6 +196,25 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                   if (_isDisposed) return;
                   setState(() {
                     _exactSearch = !_exactSearch;
+                  });
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Full refresh",
+                style: textTheme.bodyBold,
+              ),
+              ToggleSwitchWidget(
+                value: () => _fullRefresh,
+                onChanged: () async {
+                  if (_isDisposed) return;
+                  setState(() {
+                    _fullRefresh = !_fullRefresh;
                   });
                 },
               ),
@@ -253,37 +288,63 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     return Column(
       children: [
         Expanded(
-          child: ListView.builder(
-            itemCount: _similarFilesList.length + 1, // +1 for header
-            itemBuilder: (context, index) {
-              if (index == 0) {
-                // Header item
-                if (flagService.internalUser) {
+          child: ScrollbarWithUseNotifer(
+            controller: _scrollController,
+            inUseNotifier: _scrollbarInUseNotifier,
+            minScrollbarLength: 36.0,
+            interactive: true,
+            thickness: 8,
+            radius: const Radius.circular(4),
+            child: ListView.builder(
+              controller: _scrollController,
+              cacheExtent: 400,
+              itemCount: _similarFilesList.length + 1, // +1 for header
+              itemBuilder: (context, index) {
+                if (index == 0) {
                   return Container(
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     padding: const EdgeInsets.all(16),
-                    child: Column(
+                    decoration: BoxDecoration(
+                      color: colorScheme.fillFaint,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
                       children: [
-                        Text(
-                          "(I) Found ${_similarFilesList.length} groups of similar images", // TODO: lau: extract string
-                          style: textTheme.bodyBold,
+                        Icon(
+                          Icons.photo_library_outlined,
+                          size: 20,
+                          color: colorScheme.textMuted,
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          "(I) Threshold: ${_distanceThreshold.toStringAsFixed(2)}", // TODO: lau: extract string
-                          style: textTheme.miniMuted,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "${_similarFilesList.length} ${_similarFilesList.length == 1 ? 'group' : 'groups'} found", // TODO: lau: extract string
+                                style: textTheme.bodyBold,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                "Review and remove similar images", // TODO: lau: extract string
+                                style: textTheme.miniMuted,
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
                   );
-                } else {
-                  return const SizedBox.shrink();
                 }
-              }
 
-              // Similar files groups (index - 1 because first item is header)
-              final similarFiles = _similarFilesList[index - 1];
-              return _buildSimilarFilesGroup(similarFiles);
-            },
+                // Similar files groups (index - 1 because first item is header)
+                final similarFiles = _similarFilesList[index - 1];
+                return _buildSimilarFilesGroup(similarFiles);
+              },
+            ),
           ),
         ),
         _getBottomActionButtons(),
@@ -298,54 +359,70 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         final selectedCount = _selectedFiles.files.length;
         final hasSelectedFiles = selectedCount > 0;
 
-        return AnimatedSwitcher(
-          duration: const Duration(milliseconds: 200),
-          switchInCurve: Curves.easeOut,
-          switchOutCurve: Curves.easeIn,
-          child: hasSelectedFiles
-              ? SafeArea(
-                  child: Container(
-                    key: const ValueKey('bottom_buttons'),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: crossAxisSpacing,
-                      vertical: 8,
+        int totalSize = 0;
+        for (final file in _selectedFiles.files) {
+          totalSize += file.fileSize ?? 0;
+        }
+
+        return SafeArea(
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: crossAxisSpacing,
+              vertical: 8,
+            ),
+            decoration: BoxDecoration(
+              color: getEnteColorScheme(context).backgroundBase,
+            ),
+            child: AnimatedSwitcher(
+              duration: Duration.zero,
+              child: Column(
+                key: ValueKey(hasSelectedFiles),
+                children: [
+                  if (hasSelectedFiles && !_isSelectionSheetOpen) ...[
+                    SizedBox(
+                      width: double.infinity,
+                      child: ButtonWidget(
+                        labelText:
+                            "Delete $selectedCount photos (${formatBytes(totalSize)})", // TODO: lau: extract string
+                        buttonType: ButtonType.critical,
+                        shouldSurfaceExecutionStates: false,
+                        shouldShowSuccessConfirmation: false,
+                        onTap: () async {
+                          await _deleteFiles(
+                            _selectedFiles.files,
+                            showDialog: true,
+                          );
+                        },
+                      ),
                     ),
-                    decoration: BoxDecoration(
-                      color: getEnteColorScheme(context).backgroundBase,
+                    const SizedBox(height: 8),
+                  ],
+                  if (!_isSelectionSheetOpen)
+                    SizedBox(
+                      width: double.infinity,
+                      child: ButtonWidget(
+                        labelText:
+                            "Selection options", // TODO: lau: extract string
+                        buttonType: ButtonType.secondary,
+                        shouldSurfaceExecutionStates: false,
+                        shouldShowSuccessConfirmation: false,
+                        onTap: () async {
+                          setState(() {
+                            _isSelectionSheetOpen = true;
+                          });
+                          await _showSelectionOptionsSheet();
+                          if (mounted) {
+                            setState(() {
+                              _isSelectionSheetOpen = false;
+                            });
+                          }
+                        },
+                      ),
                     ),
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          width: double.infinity,
-                          child: ButtonWidget(
-                            labelText:
-                                "Delete $selectedCount photos", // TODO: lau: extract string
-                            buttonType: ButtonType.critical,
-                            onTap: () async {
-                              await _deleteFiles(
-                                _selectedFiles.files,
-                                showDialog: true,
-                              );
-                            },
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ButtonWidget(
-                            labelText:
-                                "Unselect all", // TODO: lau: extract string
-                            buttonType: ButtonType.secondary,
-                            onTap: () async {
-                              _selectedFiles.clearAll(fireEvent: false);
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              : const SizedBox.shrink(key: ValueKey('empty')),
+                ],
+              ),
+            ),
+          ),
         );
       },
     );
@@ -361,8 +438,11 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       // You can use _toggleValue here for advanced mode features
       _logger.info("exact mode: $_exactSearch");
 
-      final similarFiles = await SimilarImagesService.instance
-          .getSimilarFiles(_distanceThreshold, exact: _exactSearch);
+      final similarFiles = await SimilarImagesService.instance.getSimilarFiles(
+        _distanceThreshold,
+        exact: _exactSearch,
+        forceRefresh: _fullRefresh,
+      );
       _logger.info(
         "Found ${similarFiles.length} groups of similar images",
       );
@@ -370,7 +450,6 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       _similarFilesList = similarFiles;
       _pageState = SimilarImagesPageState.results;
       _sortSimilarFiles();
-      _autoSelectSimilarFiles();
 
       if (_isDisposed) return;
       setState(() {});
@@ -396,12 +475,24 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         _similarFilesList.sort((a, b) => b.totalSize.compareTo(a.totalSize));
         break;
       case SortKey.distanceAsc:
-        _similarFilesList
-            .sort((a, b) => a.furthestDistance.compareTo(b.furthestDistance));
+        _similarFilesList.sort((a, b) {
+          final distanceComparison =
+              a.furthestDistance.compareTo(b.furthestDistance);
+          if (distanceComparison != 0) {
+            return distanceComparison;
+          }
+          return b.totalSize.compareTo(a.totalSize);
+        });
         break;
       case SortKey.distanceDesc:
-        _similarFilesList
-            .sort((a, b) => b.furthestDistance.compareTo(a.furthestDistance));
+        _similarFilesList.sort((a, b) {
+          final distanceComparison =
+              b.furthestDistance.compareTo(a.furthestDistance);
+          if (distanceComparison != 0) {
+            return distanceComparison;
+          }
+          return b.totalSize.compareTo(a.totalSize);
+        });
         break;
       case SortKey.count:
         _similarFilesList
@@ -412,16 +503,11 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     setState(() {});
   }
 
-  void _autoSelectSimilarFiles() {
+  void _selectFilesByThreshold(double threshold) {
     final filesToSelect = <EnteFile>{};
-    int groupsProcessed = 0;
-    int groupsAutoSelected = 0;
 
     for (final similarFilesGroup in _similarFilesList) {
-      groupsProcessed++;
-      if (similarFilesGroup.furthestDistance < autoSelectDistanceThreshold) {
-        groupsAutoSelected++;
-        // Skip the first file (keep it unselected) and select the rest
+      if (similarFilesGroup.furthestDistance <= threshold) {
         for (int i = 1; i < similarFilesGroup.files.length; i++) {
           filesToSelect.add(similarFilesGroup.files[i]);
         }
@@ -429,15 +515,100 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     }
 
     if (filesToSelect.isNotEmpty) {
+      _selectedFiles.clearAll(fireEvent: false);
       _selectedFiles.selectAll(filesToSelect);
-      _logger.info(
-        "Auto-selected ${filesToSelect.length} files from $groupsAutoSelected/$groupsProcessed groups (threshold: $autoSelectDistanceThreshold)",
-      );
     } else {
-      _logger.info(
-        "No files auto-selected from $groupsProcessed groups (threshold: $autoSelectDistanceThreshold)",
-      );
+      _selectedFiles.clearAll(fireEvent: false);
     }
+  }
+
+  Future<void> _showSelectionOptionsSheet() async {
+    // Calculate how many files fall into each category
+    int exactFiles = 0;
+    int similarFiles = 0;
+    int allFiles = 0;
+
+    for (final group in _similarFilesList) {
+      final duplicateCount = group.files.length - 1; // Exclude the first file
+      allFiles += duplicateCount;
+
+      if (group.furthestDistance <= 0.0) {
+        exactFiles += duplicateCount;
+        similarFiles += duplicateCount;
+      } else if (group.furthestDistance <= 0.02) {
+        similarFiles += duplicateCount;
+      }
+    }
+
+    final String exactLabel = exactFiles > 0
+        ? "Select exact ($exactFiles)" // TODO: lau: extract string
+        : "Select exact"; // TODO: lau: extract string
+
+    final String similarLabel = similarFiles > 0
+        ? "Select similar ($similarFiles)" // TODO: lau: extract string
+        : "Select similar"; // TODO: lau: extract string
+
+    final String allLabel = allFiles > 0
+        ? "Select all ($allFiles)" // TODO: lau: extract string
+        : "Select all"; // TODO: lau: extract string
+
+    await showActionSheet(
+      context: context,
+      title: "Select similar images", // TODO: lau: extract string
+      body:
+          "Choose which similar images to select for deletion", // TODO: lau: extract string
+      buttons: [
+        ButtonWidget(
+          labelText: exactLabel,
+          buttonType: ButtonType.neutral,
+          buttonSize: ButtonSize.large,
+          shouldStickToDarkTheme: true,
+          isInAlert: true,
+          buttonAction: ButtonAction.first,
+          shouldSurfaceExecutionStates: false,
+          onTap: () async {
+            _selectFilesByThreshold(0.0);
+          },
+        ),
+        ButtonWidget(
+          labelText: similarLabel,
+          buttonType: ButtonType.neutral,
+          buttonSize: ButtonSize.large,
+          shouldStickToDarkTheme: true,
+          isInAlert: true,
+          buttonAction: ButtonAction.second,
+          shouldSurfaceExecutionStates: false,
+          onTap: () async {
+            _selectFilesByThreshold(0.02);
+          },
+        ),
+        ButtonWidget(
+          labelText: allLabel,
+          buttonType: ButtonType.neutral,
+          buttonSize: ButtonSize.large,
+          shouldStickToDarkTheme: true,
+          isInAlert: true,
+          buttonAction: ButtonAction.third,
+          shouldSurfaceExecutionStates: false,
+          onTap: () async {
+            _selectFilesByThreshold(0.05);
+          },
+        ),
+        ButtonWidget(
+          labelText: "Clear selection", // TODO: lau: extract string
+          buttonType: ButtonType.secondary,
+          buttonSize: ButtonSize.large,
+          shouldStickToDarkTheme: true,
+          isInAlert: true,
+          buttonAction: ButtonAction.cancel,
+          shouldSurfaceExecutionStates: false,
+          onTap: () async {
+            _selectedFiles.clearAll(fireEvent: false);
+          },
+        ),
+      ],
+      actionSheetType: ActionSheetType.defaultActionSheet,
+    );
   }
 
   Widget _buildSimilarFilesGroup(SimilarFiles similarFiles) {
@@ -452,7 +623,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             children: [
               Text(
                 "${similarFiles.files.length} similar images" +
-                    (flagService.internalUser
+                    (kDebugMode
                         ? " (I: d: ${similarFiles.furthestDistance.toStringAsFixed(3)})"
                         : ""), // TODO: lau: extract string
                 style: textTheme.smallMuted.copyWith(
@@ -469,30 +640,11 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                         .toSet();
                     final bool allFilesFromGroupSelected =
                         groupSelectedFiles.length == similarFiles.length;
-                    final hasAnySelection = _selectedFiles.files.isNotEmpty;
-                    final allGroupFilesSelected = similarFiles.files.every(
-                      (file) => _selectedFiles.isFileSelected(file),
-                    );
-
                     if (groupSelectedFiles.isNotEmpty) {
                       return _getSmallDeleteButton(
                         groupSelectedFiles,
                         allFilesFromGroupSelected,
                       );
-                    } else if (hasAnySelection) {
-                      return _getSmallSelectButton(allGroupFilesSelected, () {
-                        if (allGroupFilesSelected) {
-                          // Unselect all files in this group
-                          _selectedFiles.unSelectAll(
-                            similarFiles.files.toSet(),
-                          );
-                        } else {
-                          // Select all files in this group
-                          _selectedFiles.selectAll(
-                            similarFiles.files.sublist(1).toSet(),
-                          );
-                        }
-                      });
                     }
                     return const SizedBox.shrink();
                   },
@@ -784,35 +936,6 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     await deleteFilesFromRemoteOnly(context, allDeleteFiles.toList());
   }
 
-  Widget _getSmallSelectButton(bool unselectAll, void Function() onTap) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 8,
-          vertical: 8,
-        ),
-        decoration: BoxDecoration(
-          color: unselectAll
-              ? getEnteColorScheme(context).primary500
-              : getEnteColorScheme(context).strokeFaint,
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: Text(
-          unselectAll
-              ? "Unselect all" // TODO: lau: extract string
-              : "Select extra", // TODO: lau: extract string
-          style: textTheme.smallMuted.copyWith(
-            color: unselectAll ? Colors.white : colorScheme.textMuted,
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _getSortMenu() {
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
@@ -823,10 +946,10 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
           text = "Size"; // TODO: lau: extract string
           break;
         case SortKey.distanceAsc:
-          text = "Distance ascending"; // TODO: lau: extract string
+          text = "Similarity (Desc.)"; // TODO: lau: extract string
           break;
         case SortKey.distanceDesc:
-          text = "Distance descending"; // TODO: lau: extract string
+          text = "Similarity (Asc.)"; // TODO: lau: extract string
           break;
         case SortKey.count:
           text = "Count"; // TODO: lau: extract string

@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:io";
 
+import "package:flutter/foundation.dart" show kDebugMode;
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/backup_status.dart";
@@ -207,7 +208,7 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                                     onTap: () async {
                                       await routeToPage(
                                         context,
-                                        const SimilarImagesPage(),
+                                        const SimilarImagesPage(debugScreen: kDebugMode,),
                                       );
                                     },
                                   ),
