@@ -27,7 +27,7 @@ class SaveCollageButton extends StatelessWidget {
     return SafeArea(
       child: ButtonWidget(
         buttonType: ButtonType.neutral,
-        labelText: S.of(context).saveCollage,
+        labelText: AppLocalizations.of(context).saveCollage,
         onTap: () async {
           try {
             final bytes = await controller.capture();
@@ -54,7 +54,7 @@ class SaveCollageButton extends StatelessWidget {
             }));
             final newFile = await EnteFile.fromAsset("ente Collages", newAsset);
             SyncService.instance.sync().ignore();
-            showShortToast(context, S.of(context).collageSaved);
+            showShortToast(context, AppLocalizations.of(context).collageSaved);
             replacePage(
               context,
               DetailPage(
@@ -64,7 +64,10 @@ class SaveCollageButton extends StatelessWidget {
             );
           } catch (e, s) {
             _logger.severe(e, s);
-            showShortToast(context, S.of(context).somethingWentWrong);
+            showShortToast(
+              context,
+              AppLocalizations.of(context).somethingWentWrong,
+            );
           }
         },
         shouldSurfaceExecutionStates: true,

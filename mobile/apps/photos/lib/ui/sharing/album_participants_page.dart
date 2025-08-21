@@ -93,8 +93,8 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
             flexibleSpaceTitle: TitleBarTitleWidget(
               title: widget.collection.displayName,
             ),
-            flexibleSpaceCaption:
-                S.of(context).albumParticipantsCount(participants),
+            flexibleSpaceCaption: AppLocalizations.of(context)
+                .albumParticipantsCount(participants),
           ),
           SliverList(
             delegate: SliverChildBuilderDelegate(
@@ -106,13 +106,13 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                       Column(
                         children: [
                           MenuSectionTitle(
-                            title: S.of(context).albumOwner,
+                            title: AppLocalizations.of(context).albumOwner,
                             iconData: Icons.admin_panel_settings_outlined,
                           ),
                           MenuItemWidget(
                             captionedTextWidget: CaptionedTextWidget(
                               title: isOwner
-                                  ? S.of(context).you
+                                  ? AppLocalizations.of(context).you
                                   : _nameIfAvailableElseEmail(
                                       widget.collection.owner,
                                     ),
@@ -143,7 +143,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                 (context, index) {
                   if (index == 0 && (isOwner || collaborators.isNotEmpty)) {
                     return MenuSectionTitle(
-                      title: S.of(context).collaborator,
+                      title: AppLocalizations.of(context).collaborator,
                       iconData: Icons.edit_outlined,
                     );
                   } else if (index > 0 && index <= collaborators.length) {
@@ -158,7 +158,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                         MenuItemWidget(
                           captionedTextWidget: CaptionedTextWidget(
                             title: isSameAsLoggedInUser
-                                ? S.of(context).you
+                                ? AppLocalizations.of(context).you
                                 : _nameIfAvailableElseEmail(currentUser),
                             makeTextBold: isSameAsLoggedInUser,
                           ),
@@ -197,8 +197,8 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                     return MenuItemWidget(
                       captionedTextWidget: CaptionedTextWidget(
                         title: collaborators.isNotEmpty
-                            ? S.of(context).addMore
-                            : S.of(context).addCollaborator,
+                            ? AppLocalizations.of(context).addMore
+                            : AppLocalizations.of(context).addCollaborator,
                         makeTextBold: true,
                       ),
                       leadingIcon: Icons.add_outlined,
@@ -224,7 +224,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                 (context, index) {
                   if (index == 0 && (isOwner || viewers.isNotEmpty)) {
                     return MenuSectionTitle(
-                      title: S.of(context).viewer,
+                      title: AppLocalizations.of(context).viewer,
                       iconData: Icons.photo_outlined,
                     );
                   } else if (index > 0 && index <= viewers.length) {
@@ -238,7 +238,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                         MenuItemWidget(
                           captionedTextWidget: CaptionedTextWidget(
                             title: isSameAsLoggedInUser
-                                ? S.of(context).you
+                                ? AppLocalizations.of(context).you
                                 : _nameIfAvailableElseEmail(currentUser),
                             makeTextBold: isSameAsLoggedInUser,
                           ),
@@ -277,8 +277,8 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                     return MenuItemWidget(
                       captionedTextWidget: CaptionedTextWidget(
                         title: viewers.isNotEmpty
-                            ? S.of(context).addMore
-                            : S.of(context).addViewer,
+                            ? AppLocalizations.of(context).addMore
+                            : AppLocalizations.of(context).addViewer,
                         makeTextBold: true,
                       ),
                       leadingIcon: Icons.add_outlined,

@@ -97,7 +97,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
-              S.of(context).addANewEmail,
+              AppLocalizations.of(context).addANewEmail,
               style: enteTextTheme.small
                   .copyWith(color: enteColorScheme.textMuted),
             ),
@@ -114,7 +114,8 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                 children: [
                   filterSuggestedUsers.isNotEmpty
                       ? MenuSectionTitle(
-                          title: S.of(context).orPickAnExistingOne,
+                          title:
+                              AppLocalizations.of(context).orPickAnExistingOne,
                         )
                       : const SizedBox.shrink(),
                   Expanded(
@@ -131,8 +132,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                               children: [
                                 filterSuggestedUsers.isNotEmpty
                                     ? MenuSectionDescriptionWidget(
-                                        content: S
-                                            .of(context)
+                                        content: AppLocalizations.of(context)
                                             .longPressAnEmailToVerifyEndToEndEncryption,
                                       )
                                     : const SizedBox.shrink(),
@@ -140,8 +140,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                                   ActionTypesToShow.addCollaborator,
                                 )
                                     ? MenuSectionDescriptionWidget(
-                                        content: S
-                                            .of(context)
+                                        content: AppLocalizations.of(context)
                                             .collaboratorsCanAddPhotosAndVideosToTheSharedAlbum,
                                       )
                                     : const SizedBox.shrink(),
@@ -248,7 +247,8 @@ class _AddParticipantPage extends State<AddParticipantPage> {
         ButtonWidget(
           buttonType: ButtonType.primary,
           buttonSize: ButtonSize.large,
-          labelText: S.of(context).addViewers(_selectedEmails.length),
+          labelText:
+              AppLocalizations.of(context).addViewers(_selectedEmails.length),
           isDisabled: _selectedEmails.isEmpty,
           onTap: () async {
             final results = <bool>[];
@@ -270,7 +270,8 @@ class _AddParticipantPage extends State<AddParticipantPage> {
             final noOfSuccessfullAdds = results.where((e) => e).length;
             showToast(
               context,
-              S.of(context).viewersSuccessfullyAdded(noOfSuccessfullAdds),
+              AppLocalizations.of(context)
+                  .viewersSuccessfullyAdded(noOfSuccessfullAdds),
             );
 
             if (!results.any((e) => e == false) && mounted) {
@@ -290,7 +291,8 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                   ? ButtonType.neutral
                   : ButtonType.primary,
           buttonSize: ButtonSize.large,
-          labelText: S.of(context).addCollaborators(_selectedEmails.length),
+          labelText: AppLocalizations.of(context)
+              .addCollaborators(_selectedEmails.length),
           isDisabled: _selectedEmails.isEmpty,
           onTap: () async {
             // TODO: This is not currently designed for best UX for action on
@@ -316,7 +318,8 @@ class _AddParticipantPage extends State<AddParticipantPage> {
             final noOfSuccessfullAdds = results.where((e) => e).length;
             showToast(
               context,
-              S.of(context).collaboratorsSuccessfullyAdded(noOfSuccessfullAdds),
+              AppLocalizations.of(context)
+                  .collaboratorsSuccessfullyAdded(noOfSuccessfullAdds),
             );
 
             if (!results.any((e) => e == false) && mounted) {
@@ -361,7 +364,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
               ),
               fillColor: EnteTheme.getColorScheme(theme).fillFaint,
               filled: true,
-              hintText: S.of(context).enterEmail,
+              hintText: AppLocalizations.of(context).enterEmail,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
                 vertical: 14,
@@ -399,7 +402,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
         ButtonWidget(
           buttonType: ButtonType.secondary,
           buttonSize: ButtonSize.small,
-          labelText: S.of(context).add,
+          labelText: AppLocalizations.of(context).add,
           isDisabled: !_emailIsValid,
           onTap: () async {
             if (_emailIsValid) {
@@ -463,11 +466,11 @@ class _AddParticipantPage extends State<AddParticipantPage> {
 
   String _getTitle() {
     if (widget.actionTypesToShow.length > 1) {
-      return S.of(context).addParticipants;
+      return AppLocalizations.of(context).addParticipants;
     } else if (widget.actionTypesToShow.first == ActionTypesToShow.addViewer) {
-      return S.of(context).addViewer;
+      return AppLocalizations.of(context).addViewer;
     } else {
-      return S.of(context).addCollaborator;
+      return AppLocalizations.of(context).addCollaborator;
     }
   }
 }

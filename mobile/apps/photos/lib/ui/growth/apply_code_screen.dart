@@ -60,7 +60,7 @@ class _ApplyCodeScreenState extends State<ApplyCodeScreen> {
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: S.of(context).applyCodeTitle,
+              title: AppLocalizations.of(context).applyCodeTitle,
             ),
             actionIcons: [
               IconButtonWidget(
@@ -89,7 +89,7 @@ class _ApplyCodeScreenState extends State<ApplyCodeScreen> {
                         Column(
                           children: [
                             Text(
-                              S.of(context).enterCodeDescription,
+                              AppLocalizations.of(context).enterCodeDescription,
                               style: textStyle.small
                                   .copyWith(color: colorScheme.textMuted),
                             ),
@@ -116,7 +116,7 @@ class _ApplyCodeScreenState extends State<ApplyCodeScreen> {
                     ButtonWidget(
                       buttonType: ButtonType.neutral,
                       buttonSize: ButtonSize.large,
-                      labelText: S.of(context).apply,
+                      labelText: AppLocalizations.of(context).apply,
                       isDisabled: code.trim().length < 4,
                       onTap: () async {
                         try {
@@ -137,7 +137,8 @@ class _ApplyCodeScreenState extends State<ApplyCodeScreen> {
                           showErrorDialogForException(
                             context: context,
                             exception: e as Exception,
-                            apiErrorPrefix: S.of(context).failedToApplyCode,
+                            apiErrorPrefix:
+                                AppLocalizations.of(context).failedToApplyCode,
                           );
                         }
                       },
@@ -167,7 +168,7 @@ class _ApplyCodeScreenState extends State<ApplyCodeScreen> {
         ),
         fillColor: EnteTheme.getColorScheme(theme).fillFaint,
         filled: true,
-        hintText: S.of(context).enterReferralCode,
+        hintText: AppLocalizations.of(context).enterReferralCode,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 14,

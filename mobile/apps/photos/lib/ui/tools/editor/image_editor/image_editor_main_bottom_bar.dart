@@ -91,7 +91,7 @@ class ImageEditorMainBottomBarState extends State<ImageEditorMainBottomBar>
                       children: <Widget>[
                         CircularIconButton(
                           svgPath: "assets/image-editor/image-editor-crop.svg",
-                          label: S.of(context).crop,
+                          label: AppLocalizations.of(context).crop,
                           onTap: () {
                             widget.editor.openCropRotateEditor();
                           },
@@ -99,21 +99,21 @@ class ImageEditorMainBottomBarState extends State<ImageEditorMainBottomBar>
                         CircularIconButton(
                           svgPath:
                               "assets/image-editor/image-editor-filter.svg",
-                          label: S.of(context).filter,
+                          label: AppLocalizations.of(context).filter,
                           onTap: () {
                             widget.editor.openFilterEditor();
                           },
                         ),
                         CircularIconButton(
                           svgPath: "assets/image-editor/image-editor-tune.svg",
-                          label: S.of(context).adjust,
+                          label: AppLocalizations.of(context).adjust,
                           onTap: () {
                             widget.editor.openTuneEditor();
                           },
                         ),
                         CircularIconButton(
                           svgPath: "assets/image-editor/image-editor-paint.svg",
-                          label: S.of(context).draw,
+                          label: AppLocalizations.of(context).draw,
                           onTap: () {
                             widget.editor.openPaintingEditor();
                           },
@@ -121,7 +121,7 @@ class ImageEditorMainBottomBarState extends State<ImageEditorMainBottomBar>
                         CircularIconButton(
                           svgPath:
                               "assets/image-editor/image-editor-sticker.svg",
-                          label: S.of(context).sticker,
+                          label: AppLocalizations.of(context).sticker,
                           onTap: () {
                             widget.editor.openEmojiEditor();
                           },

@@ -57,7 +57,7 @@ class _ManageIndividualParticipantState
                     height: 12,
                   ),
                   TitleBarTitleWidget(
-                    title: S.of(context).manage,
+                    title: AppLocalizations.of(context).manage,
                   ),
                   Text(
                     widget.user.displayName ?? widget.user.email,
@@ -69,10 +69,10 @@ class _ManageIndividualParticipantState
               ),
             ),
             const SizedBox(height: 12),
-            MenuSectionTitle(title: S.of(context).addedAs),
+            MenuSectionTitle(title: AppLocalizations.of(context).addedAs),
             MenuItemWidget(
               captionedTextWidget: CaptionedTextWidget(
-                title: S.of(context).collaborator,
+                title: AppLocalizations.of(context).collaborator,
               ),
               leadingIcon: Icons.edit_outlined,
               menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,
@@ -102,7 +102,7 @@ class _ManageIndividualParticipantState
             ),
             MenuItemWidget(
               captionedTextWidget: CaptionedTextWidget(
-                title: S.of(context).viewer,
+                title: AppLocalizations.of(context).viewer,
               ),
               leadingIcon: Icons.photo_outlined,
               leadingIconColor: EnteTheme.getColorScheme(theme).strokeBase,
@@ -114,13 +114,13 @@ class _ManageIndividualParticipantState
                   : () async {
                       final actionResult = await showChoiceActionSheet(
                         context,
-                        title: S.of(context).changePermissions,
-                        firstButtonLabel: S.of(context).yesConvertToViewer,
-                        body: S
-                            .of(context)
+                        title: AppLocalizations.of(context).changePermissions,
+                        firstButtonLabel:
+                            AppLocalizations.of(context).yesConvertToViewer,
+                        body: AppLocalizations.of(context)
                             .cannotAddMorePhotosAfterBecomingViewer(
-                              widget.user.displayName ?? widget.user.email,
-                            ),
+                          widget.user.displayName ?? widget.user.email,
+                        ),
                         isCritical: true,
                       );
                       if (actionResult?.action != null) {
@@ -152,15 +152,16 @@ class _ManageIndividualParticipantState
               isTopBorderRadiusRemoved: true,
             ),
             MenuSectionDescriptionWidget(
-              content: S
-                  .of(context)
+              content: AppLocalizations.of(context)
                   .collaboratorsCanAddPhotosAndVideosToTheSharedAlbum,
             ),
             const SizedBox(height: 24),
-            MenuSectionTitle(title: S.of(context).removeParticipant),
+            MenuSectionTitle(
+              title: AppLocalizations.of(context).removeParticipant,
+            ),
             MenuItemWidget(
               captionedTextWidget: CaptionedTextWidget(
-                title: S.of(context).remove,
+                title: AppLocalizations.of(context).remove,
                 textColor: warning500,
                 makeTextBold: true,
               ),

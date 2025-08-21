@@ -47,7 +47,7 @@ class _GallerySettingsScreenState extends State<GallerySettingsScreen> {
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: S.of(context).gallery,
+              title: AppLocalizations.of(context).gallery,
             ),
             actionIcons: widget.fromGalleryLayoutSettingsCTA
                 ? null
@@ -86,7 +86,7 @@ class _GallerySettingsScreenState extends State<GallerySettingsScreen> {
                         },
                         child: MenuItemWidget(
                           captionedTextWidget: CaptionedTextWidget(
-                            title: S.of(context).photoGridSize,
+                            title: AppLocalizations.of(context).photoGridSize,
                             subTitle: _photoGridSize.toString(),
                           ),
                           menuItemColor: colorScheme.fillFaint,
@@ -116,7 +116,7 @@ class _GallerySettingsScreenState extends State<GallerySettingsScreen> {
                         },
                         child: MenuItemWidget(
                           captionedTextWidget: CaptionedTextWidget(
-                            title: S.of(context).groupBy,
+                            title: AppLocalizations.of(context).groupBy,
                             subTitle: _groupType,
                           ),
                           menuItemColor: colorScheme.fillFaint,
@@ -136,8 +136,7 @@ class _GallerySettingsScreenState extends State<GallerySettingsScreen> {
                           ? const SizedBox.shrink()
                           : MenuItemWidget(
                               captionedTextWidget: CaptionedTextWidget(
-                                title: S
-                                    .of(context)
+                                title: AppLocalizations.of(context)
                                     .hideSharedItemsFromHomeGallery,
                               ),
                               menuItemColor: colorScheme.fillFaint,

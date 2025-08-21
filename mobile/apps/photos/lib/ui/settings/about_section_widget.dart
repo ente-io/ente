@@ -18,7 +18,7 @@ class AboutSectionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(
-      title: S.of(context).about,
+      title: AppLocalizations.of(context).about,
       selectionOptionsWidget: _getSectionOptions(context),
       leadingIcon: Icons.info_outline,
     );
@@ -30,7 +30,7 @@ class AboutSectionWidget extends StatelessWidget {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: S.of(context).weAreOpenSource,
+            title: AppLocalizations.of(context).weAreOpenSource,
           ),
           pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -42,12 +42,12 @@ class AboutSectionWidget extends StatelessWidget {
         ),
         sectionOptionSpacing,
         AboutMenuItemWidget(
-          title: S.of(context).privacy,
+          title: AppLocalizations.of(context).privacy,
           url: "https://ente.io/privacy",
         ),
         sectionOptionSpacing,
         AboutMenuItemWidget(
-          title: S.of(context).termsOfServicesTitle,
+          title: AppLocalizations.of(context).termsOfServicesTitle,
           url: "https://ente.io/terms",
         ),
         sectionOptionSpacing,
@@ -56,14 +56,16 @@ class AboutSectionWidget extends StatelessWidget {
                 children: [
                   MenuItemWidget(
                     captionedTextWidget: CaptionedTextWidget(
-                      title: S.of(context).checkForUpdates,
+                      title: AppLocalizations.of(context).checkForUpdates,
                     ),
                     pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
                     trailingIcon: Icons.chevron_right_outlined,
                     trailingIconIsMuted: true,
                     onTap: () async {
-                      final dialog =
-                          createProgressDialog(context, S.of(context).checking);
+                      final dialog = createProgressDialog(
+                        context,
+                        AppLocalizations.of(context).checking,
+                      );
                       await dialog.show();
                       final shouldUpdate = await updateService.shouldUpdate();
                       await dialog.hide();
@@ -82,7 +84,7 @@ class AboutSectionWidget extends StatelessWidget {
                       } else {
                         showShortToast(
                           context,
-                          S.of(context).youAreOnTheLatestVersion,
+                          AppLocalizations.of(context).youAreOnTheLatestVersion,
                         );
                       }
                     },

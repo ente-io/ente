@@ -14,7 +14,7 @@ class CollageLayoutHeading extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(8, 20, 0, 4),
         child: Text(
-          S.of(context).collageLayout,
+          AppLocalizations.of(context).collageLayout,
           style: TextStyle(
             color: EnteTheme.getColorScheme(theme).textBase,
           ),

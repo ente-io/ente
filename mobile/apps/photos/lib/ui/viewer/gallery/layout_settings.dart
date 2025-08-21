@@ -133,7 +133,7 @@ class _GalleryLayoutSettingsState extends State<GalleryLayoutSettings> {
                     ),
                     MenuItemWidget(
                       captionedTextWidget: CaptionedTextWidget(
-                        title: S.of(context).custom,
+                        title: AppLocalizations.of(context).custom,
                       ),
                       menuItemColor: colorScheme.fillFaint,
                       alignCaptionedTextToLeft: true,

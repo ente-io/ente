@@ -161,7 +161,7 @@ class _PanoramaViewerScreenState extends State<PanoramaViewerScreen> {
             child: Align(
               alignment: Alignment.bottomRight,
               child: Tooltip(
-                message: S.of(context).panorama,
+                message: AppLocalizations.of(context).panorama,
                 child: Padding(
                   padding: const EdgeInsets.only(
                     top: 12,

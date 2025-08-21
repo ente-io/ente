@@ -25,7 +25,7 @@ class NotificationSettingsScreen extends StatelessWidget {
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: S.of(context).notifications,
+              title: AppLocalizations.of(context).notifications,
             ),
             actionIcons: [
               IconButtonWidget(
@@ -52,7 +52,8 @@ class NotificationSettingsScreen extends StatelessWidget {
                           children: [
                             MenuItemWidget(
                               captionedTextWidget: CaptionedTextWidget(
-                                title: S.of(context).sharedPhotoNotifications,
+                                title: AppLocalizations.of(context)
+                                    .sharedPhotoNotifications,
                               ),
                               menuItemColor: colorScheme.fillFaint,
                               trailingWidget: ToggleSwitchWidget(
@@ -76,14 +77,14 @@ class NotificationSettingsScreen extends StatelessWidget {
                               isGestureDetectorDisabled: true,
                             ),
                             MenuSectionDescriptionWidget(
-                              content: S
-                                  .of(context)
+                              content: AppLocalizations.of(context)
                                   .sharedPhotoNotificationsExplanation,
                             ),
                             sectionOptionSpacing,
                             MenuItemWidget(
                               captionedTextWidget: CaptionedTextWidget(
-                                title: S.of(context).onThisDayMemories,
+                                title: AppLocalizations.of(context)
+                                    .onThisDayMemories,
                               ),
                               menuItemColor: colorScheme.fillFaint,
                               trailingWidget: ToggleSwitchWidget(
@@ -104,14 +105,13 @@ class NotificationSettingsScreen extends StatelessWidget {
                               isGestureDetectorDisabled: true,
                             ),
                             MenuSectionDescriptionWidget(
-                              content: S
-                                  .of(context)
+                              content: AppLocalizations.of(context)
                                   .onThisDayNotificationExplanation,
                             ),
                             sectionOptionSpacing,
                             MenuItemWidget(
                               captionedTextWidget: CaptionedTextWidget(
-                                title: S.of(context).birthdays,
+                                title: AppLocalizations.of(context).birthdays,
                               ),
                               menuItemColor: colorScheme.fillFaint,
                               trailingWidget: ToggleSwitchWidget(
@@ -131,8 +131,8 @@ class NotificationSettingsScreen extends StatelessWidget {
                               isGestureDetectorDisabled: true,
                             ),
                             MenuSectionDescriptionWidget(
-                              content:
-                                  S.of(context).receiveRemindersOnBirthdays,
+                              content: AppLocalizations.of(context)
+                                  .receiveRemindersOnBirthdays,
                             ),
                           ],
                         ),

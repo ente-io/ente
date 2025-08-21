@@ -91,13 +91,14 @@ class _NoResultWidgetState extends State<NoResultWidget> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  S.of(context).noResultsFound,
+                  AppLocalizations.of(context).noResultsFound,
                   style: textTheme.largeBold,
                 ),
                 const SizedBox(height: 6),
                 searchTypeToQuerySuggestion.isNotEmpty
                     ? Text(
-                        S.of(context).modifyYourQueryOrTrySearchingFor,
+                        AppLocalizations.of(context)
+                            .modifyYourQueryOrTrySearchingFor,
                         style: textTheme.smallMuted,
                       )
                     : const SizedBox.shrink(),

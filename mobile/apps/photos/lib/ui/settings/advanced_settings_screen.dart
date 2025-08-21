@@ -27,7 +27,7 @@ class AdvancedSettingsScreen extends StatelessWidget {
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: S.of(context).advancedSettings,
+              title: AppLocalizations.of(context).advancedSettings,
             ),
             actionIcons: [
               IconButtonWidget(
@@ -51,7 +51,7 @@ class AdvancedSettingsScreen extends StatelessWidget {
                     children: [
                       MenuItemWidget(
                         captionedTextWidget: CaptionedTextWidget(
-                          title: S.of(context).machineLearning,
+                          title: AppLocalizations.of(context).machineLearning,
                         ),
                         menuItemColor: colorScheme.fillFaint,
                         trailingWidget: Icon(
@@ -95,7 +95,7 @@ class AdvancedSettingsScreen extends StatelessWidget {
                       ),
                       MenuItemWidget(
                         captionedTextWidget: CaptionedTextWidget(
-                          title: S.of(context).maps,
+                          title: AppLocalizations.of(context).maps,
                         ),
                         menuItemColor: colorScheme.fillFaint,
                         singleBorderRadius: 8,
@@ -111,7 +111,7 @@ class AdvancedSettingsScreen extends StatelessWidget {
                       const SizedBox(height: 24),
                       MenuItemWidget(
                         captionedTextWidget: CaptionedTextWidget(
-                          title: S.of(context).videoStreaming,
+                          title: AppLocalizations.of(context).videoStreaming,
                         ),
                         menuItemColor: colorScheme.fillFaint,
                         singleBorderRadius: 8,
@@ -133,7 +133,7 @@ class AdvancedSettingsScreen extends StatelessWidget {
                       ),
                       MenuItemWidget(
                         captionedTextWidget: CaptionedTextWidget(
-                          title: S.of(context).crashReporting,
+                          title: AppLocalizations.of(context).crashReporting,
                         ),
                         menuItemColor: colorScheme.fillFaint,
                         singleBorderRadius: 8,

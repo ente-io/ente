@@ -138,7 +138,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
     } else if (duration.inSeconds != 0) {
       return "in ${duration.inSeconds} second${duration.inSeconds > 1 ? 's' : ''}";
     } else {
-      return S.of(context).immediately;
+      return AppLocalizations.of(context).immediately;
     }
   }
 
@@ -153,7 +153,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: S.of(context).appLock,
+              title: AppLocalizations.of(context).appLock,
             ),
           ),
           SliverList(
@@ -170,7 +170,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                           children: [
                             MenuItemWidget(
                               captionedTextWidget: CaptionedTextWidget(
-                                title: S.of(context).appLock,
+                                title: AppLocalizations.of(context).appLock,
                               ),
                               alignCaptionedTextToLeft: true,
                               singleBorderRadius: 8,
@@ -192,7 +192,8 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                         right: 12,
                                       ),
                                       child: Text(
-                                        S.of(context).appLockDescriptions,
+                                        AppLocalizations.of(context)
+                                            .appLockDescriptions,
                                         style: textTheme.miniFaint,
                                         textAlign: TextAlign.left,
                                       ),
@@ -214,7 +215,8 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                   children: [
                                     MenuItemWidget(
                                       captionedTextWidget: CaptionedTextWidget(
-                                        title: S.of(context).deviceLock,
+                                        title: AppLocalizations.of(context)
+                                            .deviceLock,
                                       ),
                                       surfaceExecutionStates: false,
                                       alignCaptionedTextToLeft: true,
@@ -234,7 +236,8 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                     ),
                                     MenuItemWidget(
                                       captionedTextWidget: CaptionedTextWidget(
-                                        title: S.of(context).pinLock,
+                                        title: AppLocalizations.of(context)
+                                            .pinLock,
                                       ),
                                       surfaceExecutionStates: false,
                                       alignCaptionedTextToLeft: true,
@@ -252,7 +255,8 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                     ),
                                     MenuItemWidget(
                                       captionedTextWidget: CaptionedTextWidget(
-                                        title: S.of(context).passwordLock,
+                                        title: AppLocalizations.of(context)
+                                            .passwordLock,
                                       ),
                                       surfaceExecutionStates: false,
                                       alignCaptionedTextToLeft: true,
@@ -270,7 +274,8 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                     ),
                                     MenuItemWidget(
                                       captionedTextWidget: CaptionedTextWidget(
-                                        title: S.of(context).autoLock,
+                                        title: AppLocalizations.of(context)
+                                            .autoLock,
                                         subTitle: _formatTime(
                                           Duration(
                                             milliseconds:
@@ -295,8 +300,7 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                         right: 12,
                                       ),
                                       child: Text(
-                                        S
-                                            .of(context)
+                                        AppLocalizations.of(context)
                                             .autoLockFeatureDescription,
                                         style: textTheme.miniFaint,
                                         textAlign: TextAlign.left,
@@ -307,7 +311,8 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                     ),
                                     MenuItemWidget(
                                       captionedTextWidget: CaptionedTextWidget(
-                                        title: S.of(context).hideContent,
+                                        title: AppLocalizations.of(context)
+                                            .hideContent,
                                       ),
                                       alignCaptionedTextToLeft: true,
                                       singleBorderRadius: 8,
@@ -326,11 +331,9 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
                                       ),
                                       child: Text(
                                         Platform.isAndroid
-                                            ? S
-                                                .of(context)
+                                            ? AppLocalizations.of(context)
                                                 .hideContentDescriptionAndroid
-                                            : S
-                                                .of(context)
+                                            : AppLocalizations.of(context)
                                                 .hideContentDescriptionIos,
                                         style: textTheme.miniFaint,
                                         textAlign: TextAlign.left,

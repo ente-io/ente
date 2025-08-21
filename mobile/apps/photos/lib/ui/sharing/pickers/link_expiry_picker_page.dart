@@ -25,7 +25,7 @@ class LinkExpiryPickerPage extends StatelessWidget {
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: S.of(context).linkExpiry,
+              title: AppLocalizations.of(context).linkExpiry,
             ),
           ),
           SliverList(
@@ -69,14 +69,29 @@ class ItemsWidget extends StatefulWidget {
 class _ItemsWidgetState extends State<ItemsWidget> {
   // index, title, milliseconds in future post which link should expire (when >0)
   late final List<Tuple2<String, int>> _expiryOptions = [
-    Tuple2(S.of(context).never, 0),
-    Tuple2(S.of(context).after1Hour, const Duration(hours: 1).inMicroseconds),
-    Tuple2(S.of(context).after1Day, const Duration(days: 1).inMicroseconds),
-    Tuple2(S.of(context).after1Week, const Duration(days: 7).inMicroseconds),
+    Tuple2(AppLocalizations.of(context).never, 0),
+    Tuple2(
+      AppLocalizations.of(context).after1Hour,
+      const Duration(hours: 1).inMicroseconds,
+    ),
+    Tuple2(
+      AppLocalizations.of(context).after1Day,
+      const Duration(days: 1).inMicroseconds,
+    ),
+    Tuple2(
+      AppLocalizations.of(context).after1Week,
+      const Duration(days: 7).inMicroseconds,
+    ),
     // todo: make this time calculation perfect
-    Tuple2(S.of(context).after1Month, const Duration(days: 30).inMicroseconds),
-    Tuple2(S.of(context).after1Year, const Duration(days: 365).inMicroseconds),
-    Tuple2(S.of(context).custom, -1),
+    Tuple2(
+      AppLocalizations.of(context).after1Month,
+      const Duration(days: 30).inMicroseconds,
+    ),
+    Tuple2(
+      AppLocalizations.of(context).after1Year,
+      const Duration(days: 365).inMicroseconds,
+    ),
+    Tuple2(AppLocalizations.of(context).custom, -1),
   ];
 
   @override

@@ -155,7 +155,7 @@ class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
             ),
           ),
           Text(
-            S.of(context).reenterPin,
+            AppLocalizations.of(context).reenterPin,
             style: textTheme.bodyBold,
           ),
           const Padding(padding: EdgeInsets.all(12)),

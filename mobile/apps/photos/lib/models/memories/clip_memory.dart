@@ -62,26 +62,26 @@ String clipQuery(ClipMemoryType clipMemoryType) {
   }
 }
 
-String clipTitle(S s, ClipMemoryType clipMemoryType) {
+String clipTitle(AppLocalizations locals, ClipMemoryType clipMemoryType) {
   switch (clipMemoryType) {
     case ClipMemoryType.sunrise:
-      return s.sunrise;
+      return locals.sunrise;
     case ClipMemoryType.mountains:
-      return s.mountains;
+      return locals.mountains;
     case ClipMemoryType.greenery:
-      return s.greenery;
+      return locals.greenery;
     case ClipMemoryType.beach:
-      return s.beach;
+      return locals.beach;
     case ClipMemoryType.city:
-      return s.city;
+      return locals.city;
     case ClipMemoryType.moon:
-      return s.moon;
+      return locals.moon;
     case ClipMemoryType.onTheRoad:
-      return s.onTheRoad;
+      return locals.onTheRoad;
     case ClipMemoryType.food:
-      return s.food;
+      return locals.food;
     case ClipMemoryType.pets:
-      return s.pets;
+      return locals.pets;
   }
 }
 
@@ -104,7 +104,7 @@ class ClipMemory extends SmartMemory {
         );
 
   @override
-  String createTitle(S s, String languageCode) {
-    return clipTitle(s, clipMemoryType);
+  String createTitle(AppLocalizations locals, String languageCode) {
+    return clipTitle(locals, clipMemoryType);
   }
 }

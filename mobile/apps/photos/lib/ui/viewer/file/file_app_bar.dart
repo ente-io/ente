@@ -172,7 +172,7 @@ class FileAppBarState extends State<FileAppBar> {
           onPressed: () {
             showShortToast(
               context,
-              S.of(context).pressAndHoldToPlayVideoDetailed,
+              AppLocalizations.of(context).pressAndHoldToPlayVideoDetailed,
             );
           },
         ),
@@ -208,7 +208,7 @@ class FileAppBarState extends State<FileAppBar> {
               const Padding(
                 padding: EdgeInsets.all(8),
               ),
-              Text(S.of(context).download),
+              Text(AppLocalizations.of(context).download),
             ],
           ),
         ),
@@ -231,7 +231,9 @@ class FileAppBarState extends State<FileAppBar> {
                 padding: EdgeInsets.all(8),
               ),
               Text(
-                isArchived ? S.of(context).unarchive : S.of(context).archive,
+                isArchived
+                    ? AppLocalizations.of(context).unarchive
+                    : AppLocalizations.of(context).archive,
               ),
             ],
           ),
@@ -253,7 +255,7 @@ class FileAppBarState extends State<FileAppBar> {
               const Padding(
                 padding: EdgeInsets.all(8),
               ),
-              Text(S.of(context).setAs),
+              Text(AppLocalizations.of(context).setAs),
             ],
           ),
         ),
@@ -273,7 +275,7 @@ class FileAppBarState extends State<FileAppBar> {
                 const Padding(
                   padding: EdgeInsets.all(8),
                 ),
-                Text(S.of(context).hide),
+                Text(AppLocalizations.of(context).hide),
               ],
             ),
           ),
@@ -291,7 +293,7 @@ class FileAppBarState extends State<FileAppBar> {
                 const Padding(
                   padding: EdgeInsets.all(8),
                 ),
-                Text(S.of(context).unhide),
+                Text(AppLocalizations.of(context).unhide),
               ],
             ),
           ),
@@ -314,7 +316,7 @@ class FileAppBarState extends State<FileAppBar> {
             const Padding(
               padding: EdgeInsets.all(8),
             ),
-            Text(S.of(context).guestView),
+            Text(AppLocalizations.of(context).guestView),
           ],
         ),
       ),
@@ -352,8 +354,8 @@ class FileAppBarState extends State<FileAppBar> {
                 padding: EdgeInsets.all(8),
               ),
               shouldLoopVideo
-                  ? Text(S.of(context).loopVideoOn)
-                  : Text(S.of(context).loopVideoOff),
+                  ? Text(AppLocalizations.of(context).loopVideoOn)
+                  : Text(AppLocalizations.of(context).loopVideoOff),
             ],
           ),
         ),
@@ -453,7 +455,7 @@ class FileAppBarState extends State<FileAppBar> {
     await dialog.show();
     try {
       await downloadToGallery(file);
-      showToast(context, S.of(context).fileSavedToGallery);
+      showToast(context, AppLocalizations.of(context).fileSavedToGallery);
       await dialog.hide();
     } catch (e) {
       _logger.warning("Failed to save file", e);
@@ -463,7 +465,8 @@ class FileAppBarState extends State<FileAppBar> {
   }
 
   Future<void> _setAs(EnteFile file) async {
-    final dialog = createProgressDialog(context, S.of(context).pleaseWait);
+    final dialog =
+        createProgressDialog(context, AppLocalizations.of(context).pleaseWait);
     await dialog.show();
     try {
       final File? fileToSave = await (getFile(file));
@@ -473,7 +476,10 @@ class FileAppBarState extends State<FileAppBar> {
       final m = MediaExtension();
       final bool result = await m.setAs("file://${fileToSave.path}", "image/*");
       if (result == false) {
-        showShortToast(context, S.of(context).somethingWentWrong);
+        showShortToast(
+          context,
+          AppLocalizations.of(context).somethingWentWrong,
+        );
       }
       await dialog.hide();
     } catch (e) {
@@ -490,8 +496,8 @@ class FileAppBarState extends State<FileAppBar> {
     } else {
       await showErrorDialog(
         context,
-        S.of(context).noSystemLockFound,
-        S.of(context).guestViewEnablePreSteps,
+        AppLocalizations.of(context).noSystemLockFound,
+        AppLocalizations.of(context).guestViewEnablePreSteps,
       );
     }
   }

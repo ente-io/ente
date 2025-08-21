@@ -40,7 +40,7 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(
-      title: S.of(context).theme,
+      title: AppLocalizations.of(context).theme,
       selectionOptionsWidget: _getSectionOptions(context),
       leadingIcon: Theme.of(context).brightness == Brightness.light
           ? Icons.light_mode_outlined
@@ -66,13 +66,13 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
     late String themeName;
     switch (themeMode) {
       case AdaptiveThemeMode.light:
-        themeName = S.of(context).lightTheme;
+        themeName = AppLocalizations.of(context).lightTheme;
         break;
       case AdaptiveThemeMode.dark:
-        themeName = S.of(context).darkTheme;
+        themeName = AppLocalizations.of(context).darkTheme;
         break;
       case AdaptiveThemeMode.system:
-        themeName = S.of(context).systemTheme;
+        themeName = AppLocalizations.of(context).systemTheme;
         break;
     }
     return MenuItemWidget(

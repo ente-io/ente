@@ -61,7 +61,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
   Future<void> saveImage(Uint8List? bytes) async {
     if (bytes == null) return;
 
-    final dialog = createProgressDialog(context, S.of(context).saving);
+    final dialog =
+        createProgressDialog(context, AppLocalizations.of(context).saving);
     await dialog.show();
 
     debugPrint("Image saved with size: ${bytes.length} bytes");
@@ -109,7 +110,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       newFile.generatedID = await FilesDB.instance.insertAndGetId(newFile);
       Bus.instance.fire(LocalPhotosUpdatedEvent([newFile], source: "editSave"));
       unawaited(SyncService.instance.sync());
-      showShortToast(context, S.of(context).editsSaved);
+      showShortToast(context, AppLocalizations.of(context).editsSaved);
       _logger.info("Original file " + widget.originalFile.toString());
       _logger.info("Saved edits to file " + newFile.toString());
       final files = widget.detailPageConfig.files;
@@ -134,7 +135,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       );
     } catch (e, s) {
       await dialog.hide();
-      showToast(context, S.of(context).oopsCouldNotSaveEdits);
+      showToast(context, AppLocalizations.of(context).oopsCouldNotSaveEdits);
       _logger.severe(e, s);
     } finally {
       await PhotoManager.startChangeNotify();
@@ -146,7 +147,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       context: context,
       buttons: [
         ButtonWidget(
-          labelText: S.of(context).yesDiscardChanges,
+          labelText: AppLocalizations.of(context).yesDiscardChanges,
           buttonType: ButtonType.critical,
           buttonSize: ButtonSize.large,
           shouldStickToDarkTheme: true,
@@ -154,7 +155,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
           isInAlert: true,
         ),
         ButtonWidget(
-          labelText: S.of(context).no,
+          labelText: AppLocalizations.of(context).no,
           buttonType: ButtonType.secondary,
           buttonSize: ButtonSize.large,
           buttonAction: ButtonAction.second,
@@ -162,7 +163,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
           isInAlert: true,
         ),
       ],
-      body: S.of(context).doYouWantToDiscardTheEditsYouHaveMade,
+      body: AppLocalizations.of(context).doYouWantToDiscardTheEditsYouHaveMade,
       actionSheetType: ActionSheetType.defaultActionSheet,
     );
     if (actionResult?.action != null &&

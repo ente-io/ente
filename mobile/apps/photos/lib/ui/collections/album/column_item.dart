@@ -89,10 +89,10 @@ class AlbumColumnItemWidget extends StatelessWidget {
                           builder: (context, snapshot) {
                             if (snapshot.hasData) {
                               return Text(
-                                S.of(context).memoryCount(
-                                      snapshot.data!,
-                                      NumberFormat().format(snapshot.data!),
-                                    ),
+                                AppLocalizations.of(context).memoryCount(
+                                  snapshot.data!,
+                                  NumberFormat().format(snapshot.data!),
+                                ),
                                 style: textTheme.miniMuted,
                               );
                             } else {

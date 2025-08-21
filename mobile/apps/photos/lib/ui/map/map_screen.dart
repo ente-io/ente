@@ -101,7 +101,10 @@ class _MapScreenState extends State<MapScreen> {
         );
       }
     } else {
-      showShortToast(context, S.of(context).noImagesWithLocation);
+      showShortToast(
+        context,
+        AppLocalizations.of(context).noImagesWithLocation,
+      );
     }
 
     setState(() {

@@ -86,7 +86,7 @@ Widget getOnEnteSection(BuildContext context) {
   final EnteTextTheme textTheme = EnteTheme.getTextTheme(theme);
 
   return StyledText(
-    text: S.of(context).onEnte,
+    text: AppLocalizations.of(context).onEnte,
     style: TextStyle(
       fontWeight: FontWeight.w600,
       fontFamily: 'Inter',

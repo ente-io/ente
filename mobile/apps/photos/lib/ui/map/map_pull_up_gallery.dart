@@ -147,12 +147,12 @@ class _MapPullUpGalleryState extends State<MapPullUpGallery> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                S.of(context).noPhotosFoundHere,
+                                AppLocalizations.of(context).noPhotosFoundHere,
                                 style: textTheme.large,
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                S.of(context).zoomOutToSeePhotos,
+                                AppLocalizations.of(context).zoomOutToSeePhotos,
                                 style: textTheme.smallFaint,
                               ),
                             ],

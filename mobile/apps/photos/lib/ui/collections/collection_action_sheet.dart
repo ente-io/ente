@@ -55,28 +55,28 @@ String _actionName(
   String text = "";
   switch (type) {
     case CollectionActionType.addFiles:
-      text = S.of(context).addItem(fileCount);
+      text = AppLocalizations.of(context).addItem(fileCount);
       break;
     case CollectionActionType.moveFiles:
-      text = S.of(context).moveItem(fileCount);
+      text = AppLocalizations.of(context).moveItem(fileCount);
       break;
     case CollectionActionType.restoreFiles:
-      text = S.of(context).restoreToAlbum;
+      text = AppLocalizations.of(context).restoreToAlbum;
       break;
     case CollectionActionType.unHide:
-      text = S.of(context).unhideToAlbum;
+      text = AppLocalizations.of(context).unhideToAlbum;
       break;
     case CollectionActionType.shareCollection:
-      text = S.of(context).share;
+      text = AppLocalizations.of(context).share;
       break;
     case CollectionActionType.addToHiddenAlbum:
-      text = S.of(context).addToHiddenAlbum;
+      text = AppLocalizations.of(context).addToHiddenAlbum;
       break;
     case CollectionActionType.moveToHiddenCollection:
-      text = S.of(context).moveToHiddenAlbum;
+      text = AppLocalizations.of(context).moveToHiddenAlbum;
       break;
     case CollectionActionType.autoAddPeople:
-      text = S.of(context).autoAddToAlbum;
+      text = AppLocalizations.of(context).autoAddToAlbum;
       break;
   }
   return text;
@@ -207,8 +207,8 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                             ),
                           ),
                           caption: widget.showOptionToCreateNewAlbum
-                              ? S.of(context).createOrSelectAlbum
-                              : S.of(context).selectAlbum,
+                              ? AppLocalizations.of(context).createOrSelectAlbum
+                              : AppLocalizations.of(context).selectAlbum,
                           showCloseButton: true,
                         ),
                         Padding(
@@ -218,7 +218,8 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                             right: 16,
                           ),
                           child: TextInputWidget(
-                            hintText: S.of(context).searchByAlbumNameHint,
+                            hintText: AppLocalizations.of(context)
+                                .searchByAlbumNameHint,
                             prefixIcon: Icons.search_rounded,
                             onChange: (value) {
                               setState(() {
@@ -270,14 +271,14 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
           key: const ValueKey('add_button'),
           buttonType: ButtonType.primary,
           isInAlert: true,
-          labelText: S.of(context).add,
+          labelText: AppLocalizations.of(context).add,
           shouldSurfaceExecutionStates: false,
           isDisabled: _selectedCollections.isEmpty,
           onTap: () async {
             if (widget.selectedPeople != null) {
               final ProgressDialog? dialog = createProgressDialog(
                 context,
-                S.of(context).uploadingFilesToAlbum,
+                AppLocalizations.of(context).uploadingFilesToAlbum,
                 isDismissible: true,
               );
               await dialog?.show();
@@ -310,7 +311,8 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
             if (result) {
               showShortToast(
                 context,
-                S.of(context).addedToAlbums(_selectedCollections.length),
+                AppLocalizations.of(context)
+                    .addedToAlbums(_selectedCollections.length),
               );
               widget.selectedFiles?.clearAll();
             }

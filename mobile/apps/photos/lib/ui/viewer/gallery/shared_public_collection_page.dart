@@ -160,7 +160,7 @@ class _SharedPublicCollectionPageState
     if (result != null && result.action == ButtonAction.first) {
       final dialog = createProgressDialog(
         context,
-        S.of(context).pleaseWait,
+        AppLocalizations.of(context).pleaseWait,
         isDismissible: true,
       );
       await dialog.show();
@@ -178,7 +178,7 @@ class _SharedPublicCollectionPageState
       } catch (e, s) {
         logger.severe("Failed to join collection", e, s);
         await dialog.hide();
-        showToast(context, S.of(context).somethingWentWrong);
+        showToast(context, AppLocalizations.of(context).somethingWentWrong);
       }
     }
   }

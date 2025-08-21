@@ -69,7 +69,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(40, 0, 40, 0),
                 child: StyledText(
-                  text: S.of(context).entePhotosPerm,
+                  text: AppLocalizations.of(context).entePhotosPerm,
                   style: Theme.of(context)
                       .textTheme
                       .headlineSmall!
@@ -107,7 +107,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
         ),
         child: OutlinedButton(
           key: const ValueKey("grantPermissionButton"),
-          child: Text(S.of(context).grantPermission),
+          child: Text(AppLocalizations.of(context).grantPermission),
           onPressed: () async {
             try {
               final state =

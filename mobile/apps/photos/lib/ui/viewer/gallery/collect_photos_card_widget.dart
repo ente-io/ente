@@ -75,14 +75,14 @@ class _CollectPhotosCardWidgetState extends State<CollectPhotosCardWidget> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      S.of(context).collectPhotos,
+                      AppLocalizations.of(context).collectPhotos,
                       style: textTheme.bodyBold,
                     ),
                     const SizedBox(
                       height: 16,
                     ),
                     Text(
-                      S.of(context).collectPhotosDescription,
+                      AppLocalizations.of(context).collectPhotosDescription,
                       style: textTheme.smallMuted,
                     ),
                     const SizedBox(
@@ -94,7 +94,7 @@ class _CollectPhotosCardWidgetState extends State<CollectPhotosCardWidget> {
                         ButtonWidget(
                           buttonType: ButtonType.primary,
                           buttonSize: ButtonSize.small,
-                          labelText: S.of(context).collect,
+                          labelText: AppLocalizations.of(context).collect,
                           icon: Icons.add_photo_alternate_outlined,
                           shouldShowSuccessConfirmation: false,
                           shouldSurfaceExecutionStates: false,

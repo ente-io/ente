@@ -173,7 +173,7 @@ class _EditDateSheetState extends State<EditDateSheet> {
                   const SizedBox(height: 16),
                   ButtonWidget(
                     buttonType: ButtonType.primary,
-                    labelText: S.of(context).confirm,
+                    labelText: AppLocalizations.of(context).confirm,
                     buttonSize: ButtonSize.large,
                     onTap: () async {
                       final newDate = await _editDates(
@@ -188,7 +188,7 @@ class _EditDateSheetState extends State<EditDateSheet> {
                   const SizedBox(height: 8),
                   ButtonWidget(
                     buttonType: ButtonType.neutral,
-                    labelText: S.of(context).cancel,
+                    labelText: AppLocalizations.of(context).cancel,
                     buttonSize: ButtonSize.large,
                     onTap: () async {
                       Navigator.of(context).pop(null);
@@ -279,8 +279,8 @@ class DateAndTimeWidget extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: Text(
                 selectDate
-                    ? S.of(context).selectOneDateAndTimeForAll
-                    : S.of(context).selectStartOfRange,
+                    ? AppLocalizations.of(context).selectOneDateAndTimeForAll
+                    : AppLocalizations.of(context).selectStartOfRange,
                 style: TextStyle(
                   color: colorScheme.textBase,
                   fontSize: 16,
@@ -293,8 +293,10 @@ class DateAndTimeWidget extends StatelessWidget {
               alignment: Alignment.centerLeft,
               child: Text(
                 selectDate
-                    ? S.of(context).thisWillMakeTheDateAndTimeOfAllSelected
-                    : S.of(context).allWillShiftRangeBasedOnFirst,
+                    ? AppLocalizations.of(context)
+                        .thisWillMakeTheDateAndTimeOfAllSelected
+                    : AppLocalizations.of(context)
+                        .allWillShiftRangeBasedOnFirst,
                 style: TextStyle(
                   color: colorScheme.textFaint,
                   fontSize: 12,
@@ -364,7 +366,7 @@ class DateAndTimeWidget extends StatelessWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                S.of(context).newRange,
+                AppLocalizations.of(context).newRange,
                 style: TextStyle(
                   color: colorScheme.textBase,
                   fontSize: 12,
@@ -471,14 +473,14 @@ class SelectDateOrShiftWidget extends StatelessWidget {
                 color: colorScheme.textBase,
               ),
               title: Text(
-                S.of(context).selectOneDateAndTime,
+                AppLocalizations.of(context).selectOneDateAndTime,
                 style: TextStyle(
                   color: colorScheme.textBase,
                   fontSize: 16,
                 ),
               ),
               subtitle: Text(
-                S.of(context).moveSelectedPhotosToOneDate,
+                AppLocalizations.of(context).moveSelectedPhotosToOneDate,
                 style: TextStyle(
                   color: colorScheme.textFaint,
                   fontSize: 12,
@@ -503,14 +505,14 @@ class SelectDateOrShiftWidget extends StatelessWidget {
                 color: colorScheme.textBase,
               ),
               title: Text(
-                S.of(context).shiftDatesAndTime,
+                AppLocalizations.of(context).shiftDatesAndTime,
                 style: TextStyle(
                   color: colorScheme.textBase,
                   fontSize: 16,
                 ),
               ),
               subtitle: Text(
-                S.of(context).photosKeepRelativeTimeDifference,
+                AppLocalizations.of(context).photosKeepRelativeTimeDifference,
                 style: TextStyle(
                   color: colorScheme.textFaint,
                   fontSize: 12,
@@ -572,7 +574,7 @@ class PhotoDateHeaderWidget extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        S.of(context).photosCount(photoCount),
+                        AppLocalizations.of(context).photosCount(photoCount),
                         style: TextStyle(
                           color: colorScheme.textBase,
                           fontSize: 18,

@@ -1,33 +1,10 @@
 import "package:flutter/widgets.dart";
-import "package:photos/generated/l10n.dart";
+import 'package:photos/generated/intl/app_localizations.dart';
 import "package:shared_preferences/shared_preferences.dart";
 
 extension AppLocalizationsX on BuildContext {
-  S get l10n => S.of(this);
+  AppLocalizations get l10n => AppLocalizations.of(this);
 }
-
-// list of locales which are enabled for auth app.
-// Add more language to the list only when at least 90% of the strings are
-// translated in the corresponding language.
-const List<Locale> appSupportedLocales = <Locale>[
-  Locale('en'),
-  Locale('es'),
-  Locale('de'),
-  Locale('fr'),
-  Locale('it'),
-  Locale('ja'),
-  Locale("nl"),
-  Locale("no"),
-  Locale("pl"),
-  Locale("pt", "BR"),
-  Locale('pt', 'PT'),
-  Locale("ro"),
-  Locale("ru"),
-  Locale("tr"),
-  Locale("uk"),
-  Locale("vi"),
-  Locale("zh", "CN"),
-];
 
 List<Locale> _onDeviceLocales = [];
 Locale? autoDetectedLocale;
@@ -35,12 +12,12 @@ Locale? autoDetectedLocale;
 Locale localResolutionCallBack(deviceLocales, supportedLocales) {
   _onDeviceLocales = deviceLocales;
   final Set<String> languageSupport = {};
-  for (Locale supportedLocale in appSupportedLocales) {
+  for (Locale supportedLocale in AppLocalizations.supportedLocales) {
     languageSupport.add(supportedLocale.languageCode);
   }
   for (Locale locale in deviceLocales) {
     // check if exact local is supported, if yes, return it
-    if (appSupportedLocales.contains(locale)) {
+    if (AppLocalizations.supportedLocales.contains(locale)) {
       autoDetectedLocale = locale;
       return locale;
     }
@@ -90,7 +67,7 @@ Future<Locale?> getLocale({
     } else {
       savedLocale = Locale(savedValue);
     }
-    if (appSupportedLocales.contains(savedLocale)) {
+    if (AppLocalizations.supportedLocales.contains(savedLocale)) {
       return savedLocale;
     }
   }
@@ -104,7 +81,7 @@ Future<Locale?> getLocale({
 }
 
 Future<void> setLocale(Locale locale) async {
-  if (!appSupportedLocales.contains(locale)) {
+  if (!AppLocalizations.supportedLocales.contains(locale)) {
     throw Exception('Locale $locale is not supported by the app');
   }
   final StringBuffer out = StringBuffer(locale.languageCode);

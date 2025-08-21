@@ -83,7 +83,8 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
                       hasError = true;
                       showToast(
                         context,
-                        S.of(context).sorryCouldNotAddToFavorites,
+                        AppLocalizations.of(context)
+                            .sorryCouldNotAddToFavorites,
                       );
                     }
                   } else {
@@ -95,7 +96,8 @@ class _FavoriteWidgetState extends State<FavoriteWidget> {
                       hasError = true;
                       showToast(
                         context,
-                        S.of(context).sorryCouldNotRemoveFromFavorites,
+                        AppLocalizations.of(context)
+                            .sorryCouldNotRemoveFromFavorites,
                       );
                     }
                   }

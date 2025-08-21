@@ -79,8 +79,8 @@ class _VideoStreamChangeWidgetState extends State<VideoStreamChangeWidget> {
                   const SizedBox(width: 2),
                   Text(
                     widget.isPreviewPlayer
-                        ? S.of(context).playOriginal
-                        : S.of(context).playStream,
+                        ? AppLocalizations.of(context).playOriginal
+                        : AppLocalizations.of(context).playStream,
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,

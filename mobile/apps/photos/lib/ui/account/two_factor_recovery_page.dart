@@ -32,7 +32,7 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          S.of(context).recoverAccount,
+          AppLocalizations.of(context).recoverAccount,
           style: const TextStyle(
             fontSize: 18,
           ),
@@ -47,7 +47,7 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
             padding: const EdgeInsets.fromLTRB(60, 0, 60, 0),
             child: TextFormField(
               decoration: InputDecoration(
-                hintText: S.of(context).enterYourRecoveryKey,
+                hintText: AppLocalizations.of(context).enterYourRecoveryKey,
                 contentPadding: const EdgeInsets.all(20),
               ),
               style: const TextStyle(
@@ -82,7 +82,7 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
                       );
                     }
                   : null,
-              child: Text(S.of(context).recover),
+              child: Text(AppLocalizations.of(context).recover),
             ),
           ),
           GestureDetector(
@@ -90,15 +90,16 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
             onTap: () {
               showErrorDialog(
                 context,
-                S.of(context).contactSupport,
-                S.of(context).dropSupportEmail("support@ente.io"),
+                AppLocalizations.of(context).contactSupport,
+                AppLocalizations.of(context)
+                    .dropSupportEmail("support@ente.io"),
               );
             },
             child: Container(
               padding: const EdgeInsets.all(40),
               child: Center(
                 child: Text(
-                  S.of(context).noRecoveryKey,
+                  AppLocalizations.of(context).noRecoveryKey,
                   style: TextStyle(
                     decoration: TextDecoration.underline,
                     fontSize: 12,

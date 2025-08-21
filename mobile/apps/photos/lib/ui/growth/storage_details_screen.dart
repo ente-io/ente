@@ -41,9 +41,9 @@ class _StorageDetailsScreenState extends State<StorageDetailsScreen> {
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: S.of(context).claimFreeStorage,
+              title: AppLocalizations.of(context).claimFreeStorage,
             ),
-            flexibleSpaceCaption: S.of(context).details,
+            flexibleSpaceCaption: AppLocalizations.of(context).details,
             actionIcons: [
               IconButtonWidget(
                 icon: Icons.close_outlined,
@@ -80,7 +80,9 @@ class _StorageDetailsScreenState extends State<StorageDetailsScreen> {
                         }
                         if (snapshot.hasError) {
                           debugPrint(snapshot.error.toString());
-                          return Text(S.of(context).oopsSomethingWentWrong);
+                          return Text(
+                            AppLocalizations.of(context).oopsSomethingWentWrong,
+                          );
                         } else {
                           final BonusDetails data = snapshot.data!;
                           return Padding(
@@ -90,26 +92,30 @@ class _StorageDetailsScreenState extends State<StorageDetailsScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 BonusInfoSection(
-                                  sectionName:
-                                      S.of(context).peopleUsingYourCode,
+                                  sectionName: AppLocalizations.of(context)
+                                      .peopleUsingYourCode,
                                   leftValue: data.refUpgradeCount,
-                                  leftUnitName: S.of(context).eligible,
+                                  leftUnitName:
+                                      AppLocalizations.of(context).eligible,
                                   rightValue: data.refUpgradeCount >= 0
                                       ? data.refCount
                                       : null,
-                                  rightUnitName: S.of(context).total,
+                                  rightUnitName:
+                                      AppLocalizations.of(context).total,
                                   showUnit: data.refCount > 0,
                                 ),
                                 data.hasAppliedCode
                                     ? BonusInfoSection(
                                         sectionName:
-                                            S.of(context).codeUsedByYou,
+                                            AppLocalizations.of(context)
+                                                .codeUsedByYou,
                                         leftValue: 1,
                                         showUnit: false,
                                       )
                                     : const SizedBox.shrink(),
                                 BonusInfoSection(
-                                  sectionName: S.of(context).freeStorageClaimed,
+                                  sectionName: AppLocalizations.of(context)
+                                      .freeStorageClaimed,
                                   leftValue: convertBytesToAbsoluteGBs(
                                     widget.referralView.claimedStorage,
                                   ),
@@ -117,7 +123,8 @@ class _StorageDetailsScreenState extends State<StorageDetailsScreen> {
                                   rightValue: null,
                                 ),
                                 BonusInfoSection(
-                                  sectionName: S.of(context).freeStorageUsable,
+                                  sectionName: AppLocalizations.of(context)
+                                      .freeStorageUsable,
                                   leftValue: convertBytesToAbsoluteGBs(
                                     min(
                                       widget.referralView.claimedStorage,
@@ -136,7 +143,8 @@ class _StorageDetailsScreenState extends State<StorageDetailsScreen> {
                                   height: 24,
                                 ),
                                 Text(
-                                  S.of(context).usableReferralStorageInfo,
+                                  AppLocalizations.of(context)
+                                      .usableReferralStorageInfo,
                                   style: textStyle.small
                                       .copyWith(color: colorScheme.textMuted),
                                 ),

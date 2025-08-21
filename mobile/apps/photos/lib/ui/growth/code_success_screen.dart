@@ -31,7 +31,7 @@ class CodeSuccessScreen extends StatelessWidget {
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: S.of(context).codeAppliedPageTitle,
+              title: AppLocalizations.of(context).codeAppliedPageTitle,
             ),
             actionIcons: [
               IconButtonWidget(
@@ -74,16 +74,19 @@ class CodeSuccessScreen extends StatelessWidget {
                               curve: Curves.easeInOutCubic,
                             ),
                         Text(
-                          S.of(context).storageInGB(
-                                referralView.planInfo.storageInGB,
-                              ),
+                          AppLocalizations.of(context).storageInGB(
+                            referralView.planInfo.storageInGB,
+                          ),
                           style: textStyle.h2Bold,
                         ),
-                        Text(S.of(context).claimed, style: textStyle.bodyMuted),
+                        Text(
+                          AppLocalizations.of(context).claimed,
+                          style: textStyle.bodyMuted,
+                        ),
                         const SizedBox(height: 32),
                         MenuItemWidget(
                           captionedTextWidget: CaptionedTextWidget(
-                            title: S.of(context).details,
+                            title: AppLocalizations.of(context).details,
                           ),
                           menuItemColor: colorScheme.fillFaint,
                           trailingWidget: Icon(
@@ -104,10 +107,11 @@ class CodeSuccessScreen extends StatelessWidget {
                         InkWell(
                           onTap: () {
                             shareText(
-                              S.of(context).shareTextReferralCode(
-                                    referralView.code,
-                                    referralView.planInfo.storageInGB,
-                                  ),
+                              AppLocalizations.of(context)
+                                  .shareTextReferralCode(
+                                referralView.code,
+                                referralView.planInfo.storageInGB,
+                              ),
                             );
                           },
                           child: Container(
@@ -128,14 +132,15 @@ class CodeSuccessScreen extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Text(
-                                    S.of(context).claimMore,
+                                    AppLocalizations.of(context).claimMore,
                                     style: textStyle.body,
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
-                                    S.of(context).freeStorageOnReferralSuccess(
-                                          referralView.planInfo.storageInGB,
-                                        ),
+                                    AppLocalizations.of(context)
+                                        .freeStorageOnReferralSuccess(
+                                      referralView.planInfo.storageInGB,
+                                    ),
                                     style: textStyle.smallMuted,
                                     textAlign: TextAlign.center,
                                   ),
@@ -143,9 +148,9 @@ class CodeSuccessScreen extends StatelessWidget {
                                   ReferralCodeWidget(referralView.code),
                                   const SizedBox(height: 16),
                                   Text(
-                                    S.of(context).theyAlsoGetXGb(
-                                          referralView.planInfo.storageInGB,
-                                        ),
+                                    AppLocalizations.of(context).theyAlsoGetXGb(
+                                      referralView.planInfo.storageInGB,
+                                    ),
                                     style: textStyle.smallMuted,
                                     textAlign: TextAlign.center,
                                   ),

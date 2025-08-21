@@ -27,7 +27,7 @@ class StartBackupHookWidget extends StatelessWidget {
           ),
         ),
         Text(
-          S.of(context).noPhotosAreBeingBackedUpRightNow,
+          AppLocalizations.of(context).noPhotosAreBeingBackedUpRightNow,
           style: Theme.of(context)
               .textTheme
               .bodySmall!
@@ -54,7 +54,7 @@ class StartBackupHookWidget extends StatelessWidget {
                     );
                   }
                 },
-                text: S.of(context).startBackup,
+                text: AppLocalizations.of(context).startBackup,
               ),
             ),
           ),

@@ -18,7 +18,7 @@ class OnThisDayMemory extends SmartMemory {
         );
 
   @override
-  String createTitle(S s, String languageCode) {
-    return s.onThisDay;
+  String createTitle(AppLocalizations locals, String languageCode) {
+    return locals.onThisDay;
   }
 }

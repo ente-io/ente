@@ -34,7 +34,7 @@ class _MemoriesSettingsScreenState extends State<MemoriesSettingsScreen> {
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: S.of(context).memories,
+              title: AppLocalizations.of(context).memories,
             ),
             actionIcons: [
               IconButtonWidget(
@@ -58,7 +58,7 @@ class _MemoriesSettingsScreenState extends State<MemoriesSettingsScreen> {
                     children: [
                       MenuItemWidget(
                         captionedTextWidget: CaptionedTextWidget(
-                          title: S.of(context).showMemories,
+                          title: AppLocalizations.of(context).showMemories,
                         ),
                         menuItemColor: colorScheme.fillFaint,
                         singleBorderRadius: 8,
@@ -84,7 +84,8 @@ class _MemoriesSettingsScreenState extends State<MemoriesSettingsScreen> {
                       memoriesCacheService.curatedMemoriesOption
                           ? MenuItemWidget(
                               captionedTextWidget: CaptionedTextWidget(
-                                title: S.of(context).curatedMemories,
+                                title: AppLocalizations.of(context)
+                                    .curatedMemories,
                               ),
                               menuItemColor: colorScheme.fillFaint,
                               singleBorderRadius: 8,

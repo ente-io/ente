@@ -117,12 +117,12 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
     items.addAll(
       [
         EntePopupMenuItem(
-          S.of(context).ignorePerson,
+          AppLocalizations.of(context).ignorePerson,
           value: ClusterPopupAction.ignore,
           icon: Icons.hide_image_outlined,
         ),
         EntePopupMenuItem(
-          S.of(context).mixedGrouping,
+          AppLocalizations.of(context).mixedGrouping,
           value: ClusterPopupAction.breakupCluster,
           icon: Icons.analytics_outlined,
         ),
@@ -166,9 +166,9 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
   Future<void> _onIgnoredClusterClicked(BuildContext context) async {
     await showChoiceDialog(
       context,
-      title: S.of(context).areYouSureYouWantToIgnoreThisPerson,
-      body: S.of(context).thePersonGroupsWillNotBeDisplayed,
-      firstButtonLabel: S.of(context).confirm,
+      title: AppLocalizations.of(context).areYouSureYouWantToIgnoreThisPerson,
+      body: AppLocalizations.of(context).thePersonGroupsWillNotBeDisplayed,
+      firstButtonLabel: AppLocalizations.of(context).confirm,
       firstButtonOnTap: () async {
         try {
           await ClusterFeedbackService.instance.ignoreCluster(widget.clusterID);
@@ -187,9 +187,9 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
     String biggestClusterID = '';
     await showChoiceDialog(
       context,
-      title: S.of(context).doesGroupContainMultiplePeople,
-      body: S.of(context).automaticallyAnalyzeAndSplitGrouping,
-      firstButtonLabel: S.of(context).confirm,
+      title: AppLocalizations.of(context).doesGroupContainMultiplePeople,
+      body: AppLocalizations.of(context).automaticallyAnalyzeAndSplitGrouping,
+      firstButtonLabel: AppLocalizations.of(context).confirm,
       firstButtonOnTap: () async {
         try {
           final breakupResult = await ClusterFeedbackService.instance
@@ -281,7 +281,7 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
       MaterialPageRoute(
         builder: (context) => ClusterBreakupPage(
           newClusterIDToFiles,
-          S.of(context).analysis,
+          AppLocalizations.of(context).analysis,
         ),
       ),
     );

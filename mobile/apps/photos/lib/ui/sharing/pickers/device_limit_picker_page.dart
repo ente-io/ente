@@ -24,7 +24,7 @@ class DeviceLimitPickerPage extends StatelessWidget {
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: S.of(context).linkDeviceLimit,
+              title: AppLocalizations.of(context).linkDeviceLimit,
             ),
           ),
           SliverList(
@@ -111,7 +111,9 @@ class _ItemsWidgetState extends State<ItemsWidget> {
       key: ValueKey(deviceLimit),
       menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,
       captionedTextWidget: CaptionedTextWidget(
-        title: deviceLimit == 0 ? S.of(context).noDeviceLimit : "$deviceLimit",
+        title: deviceLimit == 0
+            ? AppLocalizations.of(context).noDeviceLimit
+            : "$deviceLimit",
       ),
       trailingIcon: currentDeviceLimit == deviceLimit ? Icons.check : null,
       alignCaptionedTextToLeft: true,

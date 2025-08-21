@@ -89,7 +89,7 @@ class _MachineLearningSettingsPageState
           TitleBarWidget(
             flexibleSpaceTitle: GestureDetector(
               child: TitleBarTitleWidget(
-                title: S.of(context).machineLearning,
+                title: AppLocalizations.of(context).machineLearning,
               ),
               onTap: () {
                 setState(() {
@@ -131,13 +131,13 @@ class _MachineLearningSettingsPageState
                       Padding(
                         padding: const EdgeInsets.only(bottom: 8.0),
                         child: Text(
-                          S.of(context).enableMLIndexingDesc,
+                          AppLocalizations.of(context).enableMLIndexingDesc,
                           textAlign: TextAlign.left,
                           style: EnteTheme.getTextTheme(theme).small,
                         ),
                       ),
                     Text(
-                      S.of(context).mlIndexingDescription,
+                      AppLocalizations.of(context).mlIndexingDescription,
                       textAlign: TextAlign.left,
                       style: EnteTheme.getTextTheme(theme).mini.copyWith(
                             color: EnteTheme.getColorScheme(theme).textMuted,
@@ -187,7 +187,7 @@ class _MachineLearningSettingsPageState
                               MaterialPageRoute(
                                 builder: (BuildContext context) {
                                   return WebPage(
-                                    S.of(context).help,
+                                    AppLocalizations.of(context).help,
                                     "https://help.ente.io/photos/features/machine-learning",
                                   );
                                 },
@@ -197,7 +197,7 @@ class _MachineLearningSettingsPageState
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          S.of(context).magicSearchHint,
+                          AppLocalizations.of(context).magicSearchHint,
                           textAlign: TextAlign.left,
                           style: EnteTheme.getTextTheme(theme).mini.copyWith(
                                 color:
@@ -257,13 +257,13 @@ class _MachineLearningSettingsPageState
     return Column(
       children: [
         ExpandableMenuItemWidget(
-          title: S.of(context).configuration,
+          title: AppLocalizations.of(context).configuration,
           selectionOptionsWidget: Column(
             children: [
               sectionOptionSpacing,
               MenuItemWidget(
                 captionedTextWidget: CaptionedTextWidget(
-                  title: S.of(context).enabled,
+                  title: AppLocalizations.of(context).enabled,
                 ),
                 trailingWidget: ToggleSwitchWidget(
                   value: () => hasEnabled,
@@ -277,7 +277,7 @@ class _MachineLearningSettingsPageState
               sectionOptionSpacing,
               MenuItemWidget(
                 captionedTextWidget: CaptionedTextWidget(
-                  title: S.of(context).localIndexing,
+                  title: AppLocalizations.of(context).localIndexing,
                 ),
                 trailingWidget: ToggleSwitchWidget(
                   value: () => localSettings.isMLLocalIndexingEnabled,
@@ -368,7 +368,7 @@ class _ModelLoadingStateState extends State<ModelLoadingState> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        MenuSectionTitle(title: S.of(context).status),
+        MenuSectionTitle(title: AppLocalizations.of(context).status),
         MenuItemWidget(
           captionedTextWidget: FutureBuilder(
             future: canUseHighBandwidth(),
@@ -377,12 +377,12 @@ class _ModelLoadingStateState extends State<ModelLoadingState> {
                 if (snapshot.data!) {
                   MLIndexingIsolate.instance.triggerModelsDownload();
                   return CaptionedTextWidget(
-                    title: S.of(context).checkingModels,
+                    title: AppLocalizations.of(context).checkingModels,
                     key: const ValueKey("checking_model"),
                   );
                 } else {
                   return CaptionedTextWidget(
-                    title: S.of(context).waitingForWifi,
+                    title: AppLocalizations.of(context).waitingForWifi,
                     key: const ValueKey("waiting_for_wifi"),
                   );
                 }
@@ -458,7 +458,7 @@ class MLStatusWidgetState extends State<MLStatusWidget> {
       children: [
         Row(
           children: [
-            MenuSectionTitle(title: S.of(context).status),
+            MenuSectionTitle(title: AppLocalizations.of(context).status),
             Expanded(child: Container()),
           ],
         ),
@@ -473,7 +473,8 @@ class MLStatusWidgetState extends State<MLStatusWidget> {
 
               if (!_isDeviceHealthy && pendingFiles > 0) {
                 return MenuSectionDescriptionWidget(
-                  content: S.of(context).indexingPausedStatusDescription,
+                  content: AppLocalizations.of(context)
+                      .indexingPausedStatusDescription,
                 );
               }
 
@@ -481,7 +482,7 @@ class MLStatusWidgetState extends State<MLStatusWidget> {
                 children: [
                   MenuItemWidget(
                     captionedTextWidget: CaptionedTextWidget(
-                      title: S.of(context).processed,
+                      title: AppLocalizations.of(context).processed,
                     ),
                     trailingWidget: Text(
                       total < 1
@@ -499,10 +500,11 @@ class MLStatusWidgetState extends State<MLStatusWidget> {
                   MLService.instance.showClusteringIsHappening
                       ? MenuItemWidget(
                           captionedTextWidget: CaptionedTextWidget(
-                            title: S.of(context).clusteringProgress,
+                            title:
+                                AppLocalizations.of(context).clusteringProgress,
                           ),
                           trailingWidget: Text(
-                            S.of(context).currentlyRunning,
+                            AppLocalizations.of(context).currentlyRunning,
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                           singleBorderRadius: 8,
@@ -512,7 +514,8 @@ class MLStatusWidgetState extends State<MLStatusWidget> {
                       : (!hasWifi && pendingFiles > 0)
                           ? MenuItemWidget(
                               captionedTextWidget: CaptionedTextWidget(
-                                title: S.of(context).waitingForWifi,
+                                title:
+                                    AppLocalizations.of(context).waitingForWifi,
                               ),
                               singleBorderRadius: 8,
                               alignCaptionedTextToLeft: true,

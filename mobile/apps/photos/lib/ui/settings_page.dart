@@ -99,8 +99,9 @@ class SettingsPage extends StatelessWidget {
                   child: NotificationWidget(
                     startIcon: Icons.auto_awesome,
                     actionIcon: Icons.arrow_forward_outlined,
-                    text: S.of(context).doubleYourStorage,
-                    subText: S.of(context).referFriendsAnd2xYourPlan,
+                    text: AppLocalizations.of(context).doubleYourStorage,
+                    subText:
+                        AppLocalizations.of(context).referFriendsAnd2xYourPlan,
                     type: NotificationType.goldenBanner,
                     onTap: () async {
                       storageBonusService.markStorageBonusAsDone();

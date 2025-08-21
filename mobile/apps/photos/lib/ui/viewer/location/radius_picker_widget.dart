@@ -95,7 +95,7 @@ class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
                 Expanded(
                   flex: 5,
                   child: Text(
-                    S.of(context).kiloMeterUnit,
+                    AppLocalizations.of(context).kiloMeterUnit,
                     style: textTheme.miniMuted,
                   ),
                 ),
@@ -112,7 +112,10 @@ class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const SizedBox(height: 4),
-                Text(S.of(context).radius, style: textTheme.body),
+                Text(
+                  AppLocalizations.of(context).radius,
+                  style: textTheme.body,
+                ),
                 const SizedBox(height: 16),
                 SizedBox(
                   height: 16,
@@ -179,7 +182,7 @@ class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
   Future<void> _customRadiusOnTap() async {
     final result = await showTextInputDialog(
       context,
-      title: S.of(context).setRadius,
+      title: AppLocalizations.of(context).setRadius,
       onSubmit: (customRadius) async {
         final radius = double.tryParse(customRadius);
         if (radius != null) {
@@ -194,10 +197,10 @@ class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
           throw Exception("Radius is null");
         }
       },
-      submitButtonLabel: S.of(context).setLabel,
+      submitButtonLabel: AppLocalizations.of(context).setLabel,
       textInputFormatter: [NumberWithDecimalInputFormatter(maxValue: 10000)],
       textInputType: const TextInputType.numberWithOptions(decimal: true),
-      message: S.of(context).distanceInKMUnit,
+      message: AppLocalizations.of(context).distanceInKMUnit,
       alignMessage: Alignment.centerRight,
     );
     if (result is Exception) {

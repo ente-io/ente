@@ -18,7 +18,7 @@ class SupportSectionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(
-      title: S.of(context).support,
+      title: AppLocalizations.of(context).support,
       selectionOptionsWidget: _getSectionOptions(context),
       leadingIcon: Icons.help_outline_outlined,
     );
@@ -32,7 +32,7 @@ class SupportSectionWidget extends StatelessWidget {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: S.of(context).contactSupport,
+            title: AppLocalizations.of(context).contactSupport,
           ),
           pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -43,13 +43,13 @@ class SupportSectionWidget extends StatelessWidget {
         ),
         sectionOptionSpacing,
         AboutMenuItemWidget(
-          title: S.of(context).help,
+          title: AppLocalizations.of(context).help,
           url: "https://help.ente.io",
         ),
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: S.of(context).suggestFeatures,
+            title: AppLocalizations.of(context).suggestFeatures,
           ),
           pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -65,13 +65,17 @@ class SupportSectionWidget extends StatelessWidget {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: S.of(context).reportABug,
+            title: AppLocalizations.of(context).reportABug,
           ),
           pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
-            await sendLogs(context, S.of(context).reportBug, bugsEmail);
+            await sendLogs(
+              context,
+              AppLocalizations.of(context).reportBug,
+              bugsEmail,
+            );
           },
           onLongPress: () async {
             final zipFilePath = await getZippedLogsFile(context);

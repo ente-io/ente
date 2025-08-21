@@ -69,7 +69,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
     } catch (e) {
       showShortToast(
         context,
-        S.of(context).somethingWentWrong,
+        AppLocalizations.of(context).somethingWentWrong,
       );
     }
   }
@@ -89,7 +89,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: S.of(context).legacy,
+              title: AppLocalizations.of(context).legacy,
             ),
           ),
           if (info == null)
@@ -159,7 +159,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
                   (context, index) {
                     if (index == 0 && trustedContacts.isNotEmpty) {
                       return MenuSectionTitle(
-                        title: S.of(context).trustedContacts,
+                        title: AppLocalizations.of(context).trustedContacts,
                       );
                     } else if (index > 0 && index <= trustedContacts.length) {
                       final listIndex = index - 1;
@@ -225,7 +225,8 @@ class _EmergencyPageState extends State<EmergencyPage> {
                             const SizedBox(height: 16),
                             ButtonWidget(
                               buttonType: ButtonType.primary,
-                              labelText: S.of(context).addTrustedContact,
+                              labelText: AppLocalizations.of(context)
+                                  .addTrustedContact,
                               shouldSurfaceExecutionStates: false,
                               onTap: () async {
                                 await routeToPage(
@@ -242,8 +243,8 @@ class _EmergencyPageState extends State<EmergencyPage> {
                       return MenuItemWidget(
                         captionedTextWidget: CaptionedTextWidget(
                           title: trustedContacts.isNotEmpty
-                              ? S.of(context).addMore
-                              : S.of(context).addTrustedContact,
+                              ? AppLocalizations.of(context).addMore
+                              : AppLocalizations.of(context).addTrustedContact,
                           makeTextBold: true,
                         ),
                         leadingIcon: Icons.add_outlined,
@@ -380,7 +381,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
         bodyHighlight: "They are yet to accept your invite",
         buttons: [
           ButtonWidget(
-            labelText: S.of(context).removeInvite,
+            labelText: AppLocalizations.of(context).removeInvite,
             buttonType: ButtonType.critical,
             buttonSize: ButtonSize.large,
             buttonAction: ButtonAction.first,
@@ -399,7 +400,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
             isInAlert: true,
           ),
           ButtonWidget(
-            labelText: S.of(context).cancel,
+            labelText: AppLocalizations.of(context).cancel,
             buttonType: ButtonType.tertiary,
             buttonSize: ButtonSize.large,
             buttonAction: ButtonAction.second,
@@ -416,7 +417,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
         bodyHighlight: "They have accepted your invite",
         buttons: [
           ButtonWidget(
-            labelText: S.of(context).remove,
+            labelText: AppLocalizations.of(context).remove,
             buttonType: ButtonType.critical,
             buttonSize: ButtonSize.large,
             buttonAction: ButtonAction.second,
@@ -435,7 +436,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
             isInAlert: true,
           ),
           ButtonWidget(
-            labelText: S.of(context).cancel,
+            labelText: AppLocalizations.of(context).cancel,
             buttonType: ButtonType.tertiary,
             buttonSize: ButtonSize.large,
             buttonAction: ButtonAction.third,
@@ -455,7 +456,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
       context: context,
       buttons: [
         ButtonWidget(
-          labelText: S.of(context).acceptTrustInvite,
+          labelText: AppLocalizations.of(context).acceptTrustInvite,
           buttonType: ButtonType.primary,
           buttonSize: ButtonSize.large,
           shouldStickToDarkTheme: true,
@@ -474,7 +475,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
           isInAlert: true,
         ),
         ButtonWidget(
-          labelText: S.of(context).declineTrustInvite,
+          labelText: AppLocalizations.of(context).declineTrustInvite,
           buttonType: ButtonType.critical,
           buttonSize: ButtonSize.large,
           buttonAction: ButtonAction.second,
@@ -490,7 +491,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
           isInAlert: true,
         ),
         ButtonWidget(
-          labelText: S.of(context).cancel,
+          labelText: AppLocalizations.of(context).cancel,
           buttonType: ButtonType.tertiary,
           buttonSize: ButtonSize.large,
           buttonAction: ButtonAction.third,
@@ -498,7 +499,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
           isInAlert: true,
         ),
       ],
-      body: S.of(context).legacyInvite(contact.user.email),
+      body: AppLocalizations.of(context).legacyInvite(contact.user.email),
       actionSheetType: ActionSheetType.defaultActionSheet,
     );
     return;
@@ -543,7 +544,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
             isInAlert: true,
           ),
         ButtonWidget(
-          labelText: S.of(context).cancel,
+          labelText: AppLocalizations.of(context).cancel,
           buttonType: ButtonType.tertiary,
           buttonSize: ButtonSize.large,
           buttonAction: ButtonAction.third,

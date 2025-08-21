@@ -371,7 +371,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
       buttons: [
         ButtonWidget(
           buttonType: ButtonType.neutral,
-          labelText: S.of(context).save,
+          labelText: AppLocalizations.of(context).save,
           isInAlert: true,
           buttonAction: ButtonAction.first,
           shouldStickToDarkTheme: true,
@@ -402,7 +402,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
         ),
         ButtonWidget(
           buttonType: ButtonType.secondary,
-          labelText: S.of(context).cancel,
+          labelText: AppLocalizations.of(context).cancel,
           isInAlert: true,
           buttonAction: ButtonAction.cancel,
           shouldStickToDarkTheme: true,
@@ -632,7 +632,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
         personClusterID: clusterID,
       );
       if (extraPhotosFound) {
-        showShortToast(context, S.of(context).extraPhotosFound);
+        showShortToast(context, AppLocalizations.of(context).extraPhotosFound);
       }
       Bus.instance.fire(
         PeopleChangedEvent(

@@ -581,7 +581,10 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
         _progressNotifier.value = count / (widget.file.fileSize ?? total);
         if (_progressNotifier.value == 1) {
           if (mounted) {
-            showShortToast(context, S.of(context).decryptingVideo);
+            showShortToast(
+              context,
+              AppLocalizations.of(context).decryptingVideo,
+            );
           }
         }
       },
@@ -592,8 +595,8 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     }).onError((error, stackTrace) {
       showErrorDialog(
         context,
-        S.of(context).error,
-        S.of(context).failedToDownloadVideo,
+        AppLocalizations.of(context).error,
+        AppLocalizations.of(context).failedToDownloadVideo,
       );
     });
   }
@@ -909,7 +912,9 @@ class _VideoDescriptionAndSwitchToMediaKitButton extends StatelessWidget {
                           HapticFeedback.vibrate();
                           elTooltipController.hide();
                         },
-                        child: Text(S.of(context).useDifferentPlayerInfo),
+                        child: Text(
+                          AppLocalizations.of(context).useDifferentPlayerInfo,
+                        ),
                       ),
                       position: ElTooltipPosition.topEnd,
                       color: backgroundElevatedDark,

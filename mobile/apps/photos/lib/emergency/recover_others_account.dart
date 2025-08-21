@@ -78,8 +78,8 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
       }
     }
 
-    String title = S.of(context).setPasswordTitle;
-    title = S.of(context).resetPasswordTitle;
+    String title = AppLocalizations.of(context).setPasswordTitle;
+    title = AppLocalizations.of(context).resetPasswordTitle;
     final theme = Theme.of(context);
     return Scaffold(
       resizeToAvoidBottomInset: isKeypadOpen,
@@ -110,13 +110,13 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
 
   Widget _getBody(String buttonTextAndHeading) {
     final email = widget.sessions.user.email;
-    var passwordStrengthText = S.of(context).weakStrength;
+    var passwordStrengthText = AppLocalizations.of(context).weakStrength;
     var passwordStrengthColor = Colors.redAccent;
     if (_passwordStrength > kStrongPasswordStrengthThreshold) {
-      passwordStrengthText = S.of(context).strongStrength;
+      passwordStrengthText = AppLocalizations.of(context).strongStrength;
       passwordStrengthColor = Colors.greenAccent;
     } else if (_passwordStrength > kMildPasswordStrengthThreshold) {
-      passwordStrengthText = S.of(context).moderateStrength;
+      passwordStrengthText = AppLocalizations.of(context).moderateStrength;
       passwordStrengthColor = Colors.orangeAccent;
     }
     final theme = Theme.of(context);
@@ -166,7 +166,7 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
                       fillColor:
                           _isPasswordValid ? _validFieldValueColor : null,
                       filled: true,
-                      hintText: S.of(context).password,
+                      hintText: AppLocalizations.of(context).password,
                       contentPadding: const EdgeInsets.all(20),
                       border: UnderlineInputBorder(
                         borderSide: BorderSide.none,
@@ -226,7 +226,7 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
                     decoration: InputDecoration(
                       fillColor: _passwordsMatch ? _validFieldValueColor : null,
                       filled: true,
-                      hintText: S.of(context).confirmPassword,
+                      hintText: AppLocalizations.of(context).confirmPassword,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 20,
                         vertical: 20,
@@ -277,7 +277,8 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                     child: Text(
-                      S.of(context).passwordStrength(passwordStrengthText),
+                      AppLocalizations.of(context)
+                          .passwordStrength(passwordStrengthText),
                       style: TextStyle(
                         color: passwordStrengthColor,
                       ),
@@ -295,8 +296,10 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
   }
 
   void _updatePassword() async {
-    final dialog =
-        createProgressDialog(context, S.of(context).generatingEncryptionKeys);
+    final dialog = createProgressDialog(
+      context,
+      AppLocalizations.of(context).generatingEncryptionKeys,
+    );
     await dialog.show();
     try {
       final String password = _passwordController1.text;
@@ -346,7 +349,10 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
         widget.sessions,
       );
       await dialog.hide();
-      showShortToast(context, S.of(context).passwordChangedSuccessfully);
+      showShortToast(
+        context,
+        AppLocalizations.of(context).passwordChangedSuccessfully,
+      );
       Navigator.of(context).pop();
     } catch (e, s) {
       _logger.severe(e, s);

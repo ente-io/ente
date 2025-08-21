@@ -57,7 +57,7 @@ class WidgetSettingsScreen extends StatelessWidget {
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: S.of(context).widgets,
+              title: AppLocalizations.of(context).widgets,
             ),
             actionIcons: [
               IconButtonWidget(
@@ -84,7 +84,7 @@ class WidgetSettingsScreen extends StatelessWidget {
                           children: [
                             MenuItemWidget(
                               captionedTextWidget: CaptionedTextWidget(
-                                title: S.of(context).people,
+                                title: AppLocalizations.of(context).people,
                               ),
                               leadingIconWidget: SvgPicture.asset(
                                 "assets/icons/people-widget-icon.svg",
@@ -101,7 +101,7 @@ class WidgetSettingsScreen extends StatelessWidget {
                             const SizedBox(height: 8),
                             MenuItemWidget(
                               captionedTextWidget: CaptionedTextWidget(
-                                title: S.of(context).albums,
+                                title: AppLocalizations.of(context).albums,
                               ),
                               leadingIconWidget: SvgPicture.asset(
                                 "assets/icons/albums-widget-icon.svg",
@@ -118,7 +118,7 @@ class WidgetSettingsScreen extends StatelessWidget {
                             const SizedBox(height: 8),
                             MenuItemWidget(
                               captionedTextWidget: CaptionedTextWidget(
-                                title: S.of(context).memories,
+                                title: AppLocalizations.of(context).memories,
                               ),
                               leadingIconWidget: SvgPicture.asset(
                                 "assets/icons/memories-widget-icon.svg",

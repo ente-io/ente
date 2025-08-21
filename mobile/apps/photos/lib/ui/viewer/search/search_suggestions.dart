@@ -122,7 +122,7 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
     String title;
     final theme = Theme.of(context);
     final resultsCount = searchResultWidgets.length;
-    title = S.of(context).searchResultCount(resultsCount);
+    title = AppLocalizations.of(context).searchResultCount(resultsCount);
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(

@@ -52,7 +52,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          S.of(context).aNewVersionOfEnteIsAvailable,
+          AppLocalizations.of(context).aNewVersionOfEnteIsAvailable,
           style: enteTextTheme.body.copyWith(color: enteColor.textMuted),
         ),
         const Padding(padding: EdgeInsets.all(8)),
@@ -63,7 +63,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
         const Padding(padding: EdgeInsets.all(8)),
         ButtonWidget(
           buttonType: ButtonType.primary,
-          labelText: S.of(context).download,
+          labelText: AppLocalizations.of(context).download,
           onTap: () async {
             // ignore: unawaited_futures
             launchUrlString(
@@ -75,7 +75,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
         const SizedBox(height: 6),
         ButtonWidget(
           buttonType: ButtonType.secondary,
-          labelText: S.of(context).cancel,
+          labelText: AppLocalizations.of(context).cancel,
           onTap: () async {
             Navigator.of(context).pop();
           },
@@ -101,8 +101,8 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
             ),
             Text(
               shouldForceUpdate
-                  ? S.of(context).criticalUpdateAvailable
-                  : S.of(context).updateAvailable,
+                  ? AppLocalizations.of(context).criticalUpdateAvailable
+                  : AppLocalizations.of(context).updateAvailable,
               style: enteTextTheme.h3Bold,
             ),
           ],
