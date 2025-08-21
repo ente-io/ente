@@ -29,8 +29,10 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
   final Logger _logger = Logger((_VerifyRecoveryPageState).toString());
 
   void _verifyRecoveryKey() async {
-    final dialog =
-        createProgressDialog(context, S.of(context).verifyingRecoveryKey);
+    final dialog = createProgressDialog(
+      context,
+      AppLocalizations.of(context).verifyingRecoveryKey,
+    );
     await dialog.show();
     try {
       final String inputKey = _recoveryKey.text.trim();
@@ -46,8 +48,9 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
           if (e is DioException && e.type == DioExceptionType.connectionError) {
             await showErrorDialog(
               context,
-              S.of(context).noInternetConnection,
-              S.of(context).pleaseCheckYourInternetConnectionAndTryAgain,
+              AppLocalizations.of(context).noInternetConnection,
+              AppLocalizations.of(context)
+                  .pleaseCheckYourInternetConnectionAndTryAgain,
             );
           } else {
             await showGenericErrorDialog(context: context, error: e);
@@ -59,8 +62,8 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
         // todo: change this as per figma once the component is ready
         await showErrorDialog(
           context,
-          S.of(context).recoveryKeyVerified,
-          S.of(context).recoveryKeySuccessBody,
+          AppLocalizations.of(context).recoveryKeyVerified,
+          AppLocalizations.of(context).recoveryKeySuccessBody,
         );
         Navigator.of(context).pop();
       } else {
@@ -69,13 +72,13 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
     } catch (e, s) {
       _logger.severe("failed to verify recovery key", e, s);
       await dialog.hide();
-      final String errMessage = S.of(context).invalidRecoveryKey;
+      final String errMessage = AppLocalizations.of(context).invalidRecoveryKey;
       final result = await showChoiceDialog(
         context,
-        title: S.of(context).invalidKey,
+        title: AppLocalizations.of(context).invalidKey,
         body: errMessage,
-        firstButtonLabel: S.of(context).tryAgain,
-        secondButtonLabel: S.of(context).viewRecoveryKey,
+        firstButtonLabel: AppLocalizations.of(context).tryAgain,
+        secondButtonLabel: AppLocalizations.of(context).viewRecoveryKey,
         secondButtonAction: ButtonAction.second,
       );
       if (result!.action == ButtonAction.second) {
@@ -101,7 +104,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
           context,
           RecoveryKeyPage(
             recoveryKey,
-            S.of(context).ok,
+            AppLocalizations.of(context).ok,
             showAppBar: true,
             onDone: () {
               Navigator.of(context).pop();
@@ -147,14 +150,14 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
                       SizedBox(
                         width: double.infinity,
                         child: Text(
-                          S.of(context).confirmRecoveryKey,
+                          AppLocalizations.of(context).confirmRecoveryKey,
                           style: enteTheme.textTheme.h3Bold,
                           textAlign: TextAlign.left,
                         ),
                       ),
                       const SizedBox(height: 18),
                       Text(
-                        S.of(context).recoveryKeyVerifyReason,
+                        AppLocalizations.of(context).recoveryKeyVerifyReason,
                         style: enteTheme.textTheme.small
                             .copyWith(color: enteTheme.colorScheme.textMuted),
                       ),
@@ -163,7 +166,8 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
                         decoration: InputDecoration(
                           filled: true,
                           fillColor: EnteTheme.getColorScheme(theme).fillFaint,
-                          hintText: S.of(context).enterYourRecoveryKey,
+                          hintText:
+                              AppLocalizations.of(context).enterYourRecoveryKey,
                           contentPadding: const EdgeInsets.all(20),
                           border: UnderlineInputBorder(
                             borderSide: BorderSide.none,
@@ -196,7 +200,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
                             children: [
                               GradientButton(
                                 onTap: _verifyRecoveryKey,
-                                text: S.of(context).confirm,
+                                text: AppLocalizations.of(context).confirm,
                               ),
                               const SizedBox(height: 8),
                             ],

@@ -26,7 +26,7 @@ class GeneralSectionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(
-      title: S.of(context).general,
+      title: AppLocalizations.of(context).general,
       selectionOptionsWidget: _getSectionOptions(context),
       leadingIcon: Icons.graphic_eq,
     );
@@ -38,7 +38,7 @@ class GeneralSectionWidget extends StatelessWidget {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: S.of(context).gallery,
+            title: AppLocalizations.of(context).gallery,
           ),
           pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -50,7 +50,7 @@ class GeneralSectionWidget extends StatelessWidget {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: S.of(context).memories,
+            title: AppLocalizations.of(context).memories,
           ),
           pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -62,7 +62,7 @@ class GeneralSectionWidget extends StatelessWidget {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: S.of(context).referrals,
+            title: AppLocalizations.of(context).referrals,
           ),
           pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -78,7 +78,7 @@ class GeneralSectionWidget extends StatelessWidget {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: S.of(context).familyPlans,
+            title: AppLocalizations.of(context).familyPlans,
           ),
           pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -91,7 +91,7 @@ class GeneralSectionWidget extends StatelessWidget {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget:
-              CaptionedTextWidget(title: S.of(context).language),
+              CaptionedTextWidget(title: AppLocalizations.of(context).language),
           pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
@@ -100,11 +100,10 @@ class GeneralSectionWidget extends StatelessWidget {
             await routeToPage(
               context,
               LanguageSelectorPage(
-                appSupportedLocales,
+                AppLocalizations.supportedLocales,
                 (locale) async {
                   await setLocale(locale);
                   EnteApp.setLocale(context, locale);
-                  unawaited(S.load(locale));
                 },
                 locale,
               ),
@@ -114,7 +113,7 @@ class GeneralSectionWidget extends StatelessWidget {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: S.of(context).notifications,
+            title: AppLocalizations.of(context).notifications,
           ),
           pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -126,7 +125,7 @@ class GeneralSectionWidget extends StatelessWidget {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: S.of(context).widgets,
+            title: AppLocalizations.of(context).widgets,
           ),
           pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -138,7 +137,7 @@ class GeneralSectionWidget extends StatelessWidget {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: S.of(context).advanced,
+            title: AppLocalizations.of(context).advanced,
           ),
           pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,

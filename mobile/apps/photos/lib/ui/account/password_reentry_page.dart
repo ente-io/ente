@@ -90,7 +90,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
         key: const ValueKey("verifyPasswordButton"),
         isKeypadOpen: isKeypadOpen,
         isFormValid: _passwordController.text.isNotEmpty,
-        buttonText: S.of(context).verifyPassword,
+        buttonText: AppLocalizations.of(context).verifyPassword,
         onPressedFunction: () async {
           FocusScope.of(context).unfocus();
           await verifyPassword(_passwordController.text);
@@ -103,7 +103,8 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
 
   Future<void> verifyPassword(String password) async {
     FocusScope.of(context).unfocus();
-    final dialog = createProgressDialog(context, S.of(context).pleaseWait);
+    final dialog =
+        createProgressDialog(context, AppLocalizations.of(context).pleaseWait);
     await dialog.show();
     try {
       final kek = await Configuration.instance.decryptSecretsAndGetKeyEncKey(
@@ -116,9 +117,9 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
       await dialog.hide();
       final dialogChoice = await showChoiceDialog(
         context,
-        title: S.of(context).recreatePasswordTitle,
-        body: S.of(context).recreatePasswordBody,
-        firstButtonLabel: S.of(context).useRecoveryKey,
+        title: AppLocalizations.of(context).recreatePasswordTitle,
+        body: AppLocalizations.of(context).recreatePasswordBody,
+        firstButtonLabel: AppLocalizations.of(context).useRecoveryKey,
       );
       if (dialogChoice!.action == ButtonAction.first) {
         // ignore: unawaited_futures
@@ -136,15 +137,15 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
       await dialog.hide();
       final dialogChoice = await showChoiceDialog(
         context,
-        title: S.of(context).incorrectPasswordTitle,
-        body: S.of(context).pleaseTryAgain,
-        firstButtonLabel: S.of(context).contactSupport,
-        secondButtonLabel: S.of(context).ok,
+        title: AppLocalizations.of(context).incorrectPasswordTitle,
+        body: AppLocalizations.of(context).pleaseTryAgain,
+        firstButtonLabel: AppLocalizations.of(context).contactSupport,
+        secondButtonLabel: AppLocalizations.of(context).ok,
       );
       if (dialogChoice!.action == ButtonAction.first) {
         await sendLogs(
           context,
-          S.of(context).contactSupport,
+          AppLocalizations.of(context).contactSupport,
           "support@ente.io",
           postShare: () {},
         );
@@ -197,7 +198,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                   padding:
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
-                    S.of(context).welcomeBack,
+                    AppLocalizations.of(context).welcomeBack,
                     style: theme.textTheme.headlineMedium,
                   ),
                 ),
@@ -221,7 +222,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                     key: const ValueKey("passwordInputField"),
                     autofillHints: const [AutofillHints.password],
                     decoration: InputDecoration(
-                      hintText: S.of(context).enterYourPassword,
+                      hintText: AppLocalizations.of(context).enterYourPassword,
                       filled: true,
                       fillColor: EnteTheme.getColorScheme(theme).fillFaint,
                       contentPadding: const EdgeInsets.all(20),
@@ -284,7 +285,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                           );
                         },
                         child: Text(
-                          S.of(context).forgotPassword,
+                          AppLocalizations.of(context).forgotPassword,
                           style: theme.textTheme.titleMedium!.copyWith(
                             fontSize: 14,
                             decoration: TextDecoration.underline,
@@ -296,7 +297,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                         onTap: () async {
                           final dialog = createProgressDialog(
                             context,
-                            S.of(context).pleaseWait,
+                            AppLocalizations.of(context).pleaseWait,
                           );
                           await dialog.show();
                           await Configuration.instance.logout();
@@ -305,7 +306,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                               .popUntil((route) => route.isFirst);
                         },
                         child: Text(
-                          S.of(context).changeEmail,
+                          AppLocalizations.of(context).changeEmail,
                           style: theme.textTheme.titleMedium!.copyWith(
                             fontSize: 14,
                             decoration: TextDecoration.underline,

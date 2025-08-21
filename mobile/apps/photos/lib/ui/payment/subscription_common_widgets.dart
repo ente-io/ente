@@ -36,7 +36,7 @@ class _SubscriptionHeaderWidgetState extends State<SubscriptionHeaderWidget> {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Text(
-          S.of(context).enteSubscriptionPitch,
+          AppLocalizations.of(context).enteSubscriptionPitch,
           style: EnteTheme.getTextTheme(theme).smallFaint,
         ),
       );
@@ -47,7 +47,7 @@ class _SubscriptionHeaderWidgetState extends State<SubscriptionHeaderWidget> {
           text: TextSpan(
             children: [
               TextSpan(
-                text: S.of(context).currentUsageIs,
+                text: AppLocalizations.of(context).currentUsageIs,
                 style: textTheme.bodyFaint,
               ),
               TextSpan(
@@ -93,9 +93,9 @@ class ValidityWidget extends StatelessWidget {
       DateTime.fromMicrosecondsSinceEpoch(currentSubscription!.expiryTime),
     );
 
-    var message = S.of(context).renewsOn(endDate);
+    var message = AppLocalizations.of(context).renewsOn(endDate);
     if (currentSubscription!.attributes?.isCancelled ?? false) {
-      message = S.of(context).subWillBeCancelledOn(endDate);
+      message = AppLocalizations.of(context).subWillBeCancelledOn(endDate);
       if (addOnBonus.isNotEmpty) {
         hideSubValidityView = true;
       }
@@ -140,7 +140,7 @@ class AddOnBonusValidity extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 4, bottom: 4),
       child: Text(
-        S.of(context).addOnValidTill(storage, endDate),
+        AppLocalizations.of(context).addOnValidTill(storage, endDate),
         style: EnteTheme.getTextTheme(theme).smallFaint,
         textAlign: TextAlign.center,
       ),
@@ -161,7 +161,7 @@ class SubFaqWidget extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 2, 16, 2),
       child: MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
-          title: S.of(context).faqs,
+          title: AppLocalizations.of(context).faqs,
         ),
         menuItemColor: colorScheme.fillFaint,
         trailingWidget: Icon(
@@ -238,7 +238,7 @@ class _SubscriptionToggleState extends State<SubscriptionToggle> {
                         width: widthOfButton,
                         child: Center(
                           child: Text(
-                            S.of(context).monthly,
+                            AppLocalizations.of(context).monthly,
                             style: textTheme.bodyFaint,
                           ),
                         ),
@@ -257,7 +257,7 @@ class _SubscriptionToggleState extends State<SubscriptionToggle> {
                         width: widthOfButton,
                         child: Center(
                           child: Text(
-                            S.of(context).yearly,
+                            AppLocalizations.of(context).yearly,
                             style: textTheme.bodyFaint,
                           ),
                         ),
@@ -285,8 +285,8 @@ class _SubscriptionToggleState extends State<SubscriptionToggle> {
                       child: Text(
                         key: ValueKey(_isYearly),
                         _isYearly
-                            ? S.of(context).yearly
-                            : S.of(context).monthly,
+                            ? AppLocalizations.of(context).yearly
+                            : AppLocalizations.of(context).monthly,
                         style: textTheme.body,
                       ),
                     ),

@@ -109,7 +109,7 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
     if (locationTags.isEmpty) {
       if (mounted) {
         setState(() {
-          title = S.of(context).addLocation;
+          title = AppLocalizations.of(context).addLocation;
           leadingIcon = Icons.add_location_alt_outlined;
           hasChipButtons = false;
           onTap = () => showAddLocationSheet(
@@ -120,14 +120,14 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
       }
       return [
         Text(
-          S.of(context).groupNearbyPhotos,
+          AppLocalizations.of(context).groupNearbyPhotos,
           style: EnteTheme.getTextTheme(theme).miniBoldMuted,
         ),
       ];
     } else {
       if (mounted) {
         setState(() {
-          title = S.of(context).location;
+          title = AppLocalizations.of(context).location;
           leadingIcon = Icons.pin_drop_outlined;
           hasChipButtons = true;
           onTap = null;
@@ -314,7 +314,7 @@ class _InfoMapState extends State<InfoMap> {
                                 },
                                 child: Center(
                                   child: Text(
-                                    S.of(context).enableMaps,
+                                    AppLocalizations.of(context).enableMaps,
                                     style: EnteTheme.getTextTheme(theme).small,
                                   ),
                                 ),

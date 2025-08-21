@@ -258,7 +258,7 @@ class AlbumCTA extends StatelessWidget {
             ),
             const SizedBox(height: 2),
             Text(
-              S.of(context).addNew,
+              AppLocalizations.of(context).addNew,
               style: EnteTheme.getTextTheme(theme).smallFaint,
             ),
           ],

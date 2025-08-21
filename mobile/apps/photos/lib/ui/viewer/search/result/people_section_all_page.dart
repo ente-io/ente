@@ -457,7 +457,9 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
         } else if (snapshot.hasError) {
           return const Center(child: Icon(Icons.error_outline_rounded));
         } else if (normalFaces.isEmpty && _isLoaded) {
-          return Center(child: Text(S.of(context).noResultsFound + '.'));
+          return Center(
+            child: Text(AppLocalizations.of(context).noResultsFound + '.'),
+          );
         } else {
           final screenWidth = MediaQuery.of(context).size.width;
           final crossAxisCount = (screenWidth / 100).floor();
@@ -611,8 +613,8 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
             children: [
               Text(
                 _showingAllFaces
-                    ? S.of(context).showLessFaces
-                    : S.of(context).showMoreFaces,
+                    ? AppLocalizations.of(context).showLessFaces
+                    : AppLocalizations.of(context).showMoreFaces,
                 style: EnteTheme.getTextTheme(theme).small.copyWith(
                       color: theme.colorScheme.primary,
                     ),

@@ -130,7 +130,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
     );
   }
 
-  Widget _getBody() {
+  Widget _getBody(ThemeData theme) {
     var passwordStrengthText = AppLocalizations.of(context).weakStrength;
     var passwordStrengthColor = Colors.redAccent;
     if (_passwordStrength > kStrongPasswordStrengthThreshold) {

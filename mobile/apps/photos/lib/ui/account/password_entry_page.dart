@@ -98,13 +98,13 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
       }
     }
 
-    String title = S.of(context).setPasswordTitle;
+    String title = AppLocalizations.of(context).setPasswordTitle;
     if (widget.mode == PasswordEntryMode.update) {
-      title = S.of(context).changePasswordTitle;
+      title = AppLocalizations.of(context).changePasswordTitle;
     } else if (widget.mode == PasswordEntryMode.reset) {
-      title = S.of(context).resetPasswordTitle;
+      title = AppLocalizations.of(context).resetPasswordTitle;
     } else if (_volatilePassword != null) {
-      title = S.of(context).encryptionKeys;
+      title = AppLocalizations.of(context).encryptionKeys;
     }
     return Scaffold(
       resizeToAvoidBottomInset: isKeypadOpen,
@@ -141,13 +141,13 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
 
   Widget _getBody(String buttonTextAndHeading, ThemeData theme) {
     final email = Configuration.instance.getEmail();
-    var passwordStrengthText = S.of(context).weakStrength;
+    var passwordStrengthText = AppLocalizations.of(context).weakStrength;
     var passwordStrengthColor = Colors.redAccent;
     if (_passwordStrength > kStrongPasswordStrengthThreshold) {
-      passwordStrengthText = S.of(context).strongStrength;
+      passwordStrengthText = AppLocalizations.of(context).strongStrength;
       passwordStrengthColor = Colors.greenAccent;
     } else if (_passwordStrength > kMildPasswordStrengthThreshold) {
-      passwordStrengthText = S.of(context).moderateStrength;
+      passwordStrengthText = AppLocalizations.of(context).moderateStrength;
       passwordStrengthColor = Colors.orangeAccent;
     }
     if (_volatilePassword != null) {
@@ -171,8 +171,9 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Text(
                     widget.mode == PasswordEntryMode.set
-                        ? S.of(context).enterPasswordToEncrypt
-                        : S.of(context).enterNewPasswordToEncrypt,
+                        ? AppLocalizations.of(context).enterPasswordToEncrypt
+                        : AppLocalizations.of(context)
+                            .enterNewPasswordToEncrypt,
                     textAlign: TextAlign.start,
                     style: theme.textTheme.titleMedium!.copyWith(fontSize: 14),
                   ),
@@ -181,7 +182,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: StyledText(
-                    text: S.of(context).passwordWarning,
+                    text: AppLocalizations.of(context).passwordWarning,
                     style: theme.textTheme.titleMedium!.copyWith(fontSize: 14),
                     tags: {
                       'underline': StyledTextTag(
@@ -217,7 +218,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                           ? _validFieldValueColor
                           : EnteTheme.getColorScheme(theme).fillFaint,
                       filled: true,
-                      hintText: S.of(context).password,
+                      hintText: AppLocalizations.of(context).password,
                       contentPadding: const EdgeInsets.all(20),
                       border: UnderlineInputBorder(
                         borderSide: BorderSide.none,
@@ -279,7 +280,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                           ? _validFieldValueColor
                           : EnteTheme.getColorScheme(theme).fillFaint,
                       filled: true,
-                      hintText: S.of(context).confirmPassword,
+                      hintText: AppLocalizations.of(context).confirmPassword,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 20,
                         vertical: 20,
@@ -330,7 +331,8 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                     child: Text(
-                      S.of(context).passwordStrength(passwordStrengthText),
+                      AppLocalizations.of(context)
+                          .passwordStrength(passwordStrengthText),
                       style: TextStyle(
                         color: passwordStrengthColor,
                       ),
@@ -345,7 +347,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                       MaterialPageRoute(
                         builder: (BuildContext context) {
                           return WebPage(
-                            S.of(context).howItWorks,
+                            AppLocalizations.of(context).howItWorks,
                             "https://ente.io/architecture",
                           );
                         },
@@ -356,7 +358,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: RichText(
                       text: TextSpan(
-                        text: S.of(context).howItWorks,
+                        text: AppLocalizations.of(context).howItWorks,
                         style: theme.textTheme.titleMedium!.copyWith(
                           fontSize: 14,
                           decoration: TextDecoration.underline,
@@ -376,8 +378,10 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
 
   void _updatePassword() async {
     final logOutFromOthers = await logOutFromOtherDevices(context);
-    final dialog =
-        createProgressDialog(context, S.of(context).generatingEncryptionKeys);
+    final dialog = createProgressDialog(
+      context,
+      AppLocalizations.of(context).generatingEncryptionKeys,
+    );
     await dialog.show();
     try {
       final result = await Configuration.instance
@@ -388,7 +392,10 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         logoutOtherDevices: logOutFromOthers,
       );
       await dialog.hide();
-      showShortToast(context, S.of(context).passwordChangedSuccessfully);
+      showShortToast(
+        context,
+        AppLocalizations.of(context).passwordChangedSuccessfully,
+      );
       Navigator.of(context).pop();
       if (widget.mode == PasswordEntryMode.reset) {
         Bus.instance.fire(SubscriptionPurchasedEvent());
@@ -422,8 +429,10 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
   }
 
   Future<void> _showRecoveryCodeDialog(String password) async {
-    final dialog =
-        createProgressDialog(context, S.of(context).generatingEncryptionKeys);
+    final dialog = createProgressDialog(
+      context,
+      AppLocalizations.of(context).generatingEncryptionKeys,
+    );
     await dialog.show();
     try {
       final KeyGenResult result =
@@ -431,7 +440,10 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
       Configuration.instance.resetVolatilePassword();
       await dialog.hide();
       onDone() async {
-        final dialog = createProgressDialog(context, S.of(context).pleaseWait);
+        final dialog = createProgressDialog(
+          context,
+          AppLocalizations.of(context).pleaseWait,
+        );
         await dialog.show();
         try {
           await UserService.instance.setAttributes(result);
@@ -459,7 +471,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         context,
         RecoveryKeyPage(
           result.privateKeyAttributes.recoveryKey,
-          S.of(context).continueLabel,
+          AppLocalizations.of(context).continueLabel,
           showAppBar: false,
           isDismissible: false,
           onDone: onDone,
@@ -473,8 +485,9 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         // ignore: unawaited_futures
         showErrorDialog(
           context,
-          S.of(context).insecureDevice,
-          S.of(context).sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease,
+          AppLocalizations.of(context).insecureDevice,
+          AppLocalizations.of(context)
+              .sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease,
         );
       } else {
         await showGenericErrorDialog(context: context, error: e);

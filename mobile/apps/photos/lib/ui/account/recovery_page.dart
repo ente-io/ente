@@ -44,16 +44,21 @@ class _RecoveryPageState extends State<RecoveryPage> {
       floatingActionButton: DynamicFAB(
         isKeypadOpen: isKeypadOpen,
         isFormValid: _recoveryKey.text.isNotEmpty,
-        buttonText: S.of(context).recoverButton,
+        buttonText: AppLocalizations.of(context).recoverButton,
         onPressedFunction: () async {
           FocusScope.of(context).unfocus();
-          final dialog =
-              createProgressDialog(context, S.of(context).decrypting);
+          final dialog = createProgressDialog(
+            context,
+            AppLocalizations.of(context).decrypting,
+          );
           await dialog.show();
           try {
             await Configuration.instance.recover(_recoveryKey.text.trim());
             await dialog.hide();
-            showShortToast(context, S.of(context).recoverySuccessful);
+            showShortToast(
+              context,
+              AppLocalizations.of(context).recoverySuccessful,
+            );
             // ignore: unawaited_futures
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
@@ -69,14 +74,15 @@ class _RecoveryPageState extends State<RecoveryPage> {
             );
           } catch (e) {
             await dialog.hide();
-            String errMessage = S.of(context).incorrectRecoveryKeyBody;
+            String errMessage =
+                AppLocalizations.of(context).incorrectRecoveryKeyBody;
             if (e is AssertionError) {
               errMessage = '$errMessage : ${e.message}';
             }
             // ignore: unawaited_futures
             showErrorDialog(
               context,
-              S.of(context).incorrectRecoveryKeyTitle,
+              AppLocalizations.of(context).incorrectRecoveryKeyTitle,
               errMessage,
             );
           }
@@ -93,7 +99,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
                   padding:
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
-                    S.of(context).forgotPassword,
+                    AppLocalizations.of(context).forgotPassword,
                     style: theme.textTheme.headlineMedium,
                   ),
                 ),
@@ -103,7 +109,8 @@ class _RecoveryPageState extends State<RecoveryPage> {
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: EnteTheme.getColorScheme(theme).fillFaint,
-                      hintText: S.of(context).enterYourRecoveryKey,
+                      hintText:
+                          AppLocalizations.of(context).enterYourRecoveryKey,
                       contentPadding: const EdgeInsets.all(20),
                       border: UnderlineInputBorder(
                         borderSide: BorderSide.none,
@@ -138,15 +145,16 @@ class _RecoveryPageState extends State<RecoveryPage> {
                       onTap: () {
                         showErrorDialog(
                           context,
-                          S.of(context).sorry,
-                          S.of(context).noRecoveryKeyNoDecryption,
+                          AppLocalizations.of(context).sorry,
+                          AppLocalizations.of(context)
+                              .noRecoveryKeyNoDecryption,
                         );
                       },
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Center(
                           child: Text(
-                            S.of(context).noRecoveryKey,
+                            AppLocalizations.of(context).noRecoveryKey,
                             style: Theme.of(context)
                                 .textTheme
                                 .titleMedium!

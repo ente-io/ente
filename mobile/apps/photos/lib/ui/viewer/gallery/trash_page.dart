@@ -64,7 +64,7 @@ class TrashPage extends StatelessWidget {
           preferredSize: const Size.fromHeight(50.0),
           child: GalleryAppBarWidget(
             appBarType,
-            S.of(context).trash,
+            AppLocalizations.of(context).trash,
             _selectedFiles,
           ),
         ),
@@ -111,8 +111,7 @@ class TrashPage extends StatelessWidget {
           return Padding(
             padding: const EdgeInsets.all(16),
             child: Text(
-              S
-                  .of(context)
+              AppLocalizations.of(context)
                   .itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion,
               style: theme.textTheme.bodySmall!.copyWith(fontSize: 16),
             ),
@@ -152,7 +151,7 @@ class BottomButtonsWidget extends StatelessWidget {
                       horizontal: 16,
                     ),
                     child: Text(
-                      S.of(context).deleteAll,
+                      AppLocalizations.of(context).deleteAll,
                       style: theme.textTheme.titleSmall!.copyWith(
                         color: const Color.fromRGBO(255, 101, 101, 1),
                       ),

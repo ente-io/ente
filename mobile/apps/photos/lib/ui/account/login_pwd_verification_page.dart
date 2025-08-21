@@ -88,7 +88,7 @@ class _LoginPasswordVerificationPageState
         key: const ValueKey("verifyPasswordButton"),
         isKeypadOpen: isKeypadOpen,
         isFormValid: _passwordController.text.isNotEmpty,
-        buttonText: S.of(context).logInLabel,
+        buttonText: AppLocalizations.of(context).logInLabel,
         onPressedFunction: () async {
           FocusScope.of(context).unfocus();
           await verifyPassword(context, _passwordController.text);
@@ -102,7 +102,7 @@ class _LoginPasswordVerificationPageState
   Future<void> verifyPassword(BuildContext context, String password) async {
     final dialog = createProgressDialog(
       context,
-      S.of(context).pleaseWait,
+      AppLocalizations.of(context).pleaseWait,
       isDismissible: true,
     );
     await dialog.show();
@@ -119,8 +119,8 @@ class _LoginPasswordVerificationPageState
         _logger.severe('server reject, failed verify SRP login', e, s);
         await _showContactSupportDialog(
           context,
-          S.of(context).incorrectPasswordTitle,
-          S.of(context).pleaseTryAgain,
+          AppLocalizations.of(context).incorrectPasswordTitle,
+          AppLocalizations.of(context).pleaseTryAgain,
         );
       } else {
         _logger.severe('API failure during SRP login ${e.type}', e, s);
@@ -129,14 +129,15 @@ class _LoginPasswordVerificationPageState
             e.type == DioExceptionType.sendTimeout) {
           await _showContactSupportDialog(
             context,
-            S.of(context).noInternetConnection,
-            S.of(context).pleaseCheckYourInternetConnectionAndTryAgain,
+            AppLocalizations.of(context).noInternetConnection,
+            AppLocalizations.of(context)
+                .pleaseCheckYourInternetConnectionAndTryAgain,
           );
         } else {
           await _showContactSupportDialog(
             context,
-            S.of(context).somethingWentWrong,
-            S.of(context).verificationFailedPleaseTryAgain,
+            AppLocalizations.of(context).somethingWentWrong,
+            AppLocalizations.of(context).verificationFailedPleaseTryAgain,
           );
         }
       }
@@ -156,9 +157,9 @@ class _LoginPasswordVerificationPageState
         // device is not powerful enough to perform derive key
         final dialogChoice = await showChoiceDialog(
           context,
-          title: S.of(context).recreatePasswordTitle,
-          body: S.of(context).recreatePasswordBody,
-          firstButtonLabel: S.of(context).useRecoveryKey,
+          title: AppLocalizations.of(context).recreatePasswordTitle,
+          body: AppLocalizations.of(context).recreatePasswordBody,
+          firstButtonLabel: AppLocalizations.of(context).useRecoveryKey,
         );
         if (dialogChoice!.action == ButtonAction.first) {
           await UserService.instance.sendOtt(
@@ -172,8 +173,8 @@ class _LoginPasswordVerificationPageState
         _logger.severe('unexpected error while verifying password', e, s);
         await _showContactSupportDialog(
           context,
-          S.of(context).oops,
-          S.of(context).verificationFailedPleaseTryAgain,
+          AppLocalizations.of(context).oops,
+          AppLocalizations.of(context).verificationFailedPleaseTryAgain,
         );
       }
     }
@@ -188,13 +189,13 @@ class _LoginPasswordVerificationPageState
       context,
       title: title,
       body: message,
-      firstButtonLabel: S.of(context).contactSupport,
-      secondButtonLabel: S.of(context).ok,
+      firstButtonLabel: AppLocalizations.of(context).contactSupport,
+      secondButtonLabel: AppLocalizations.of(context).ok,
     );
     if (dialogChoice!.action == ButtonAction.first) {
       await sendLogs(
         context,
-        S.of(context).contactSupport,
+        AppLocalizations.of(context).contactSupport,
         "support@ente.io",
         postShare: () {},
       );
@@ -211,7 +212,7 @@ class _LoginPasswordVerificationPageState
                 Padding(
                   padding: const EdgeInsets.only(top: 30, left: 20, right: 20),
                   child: Text(
-                    S.of(context).enterPassword,
+                    AppLocalizations.of(context).enterPassword,
                     style: theme.textTheme.headlineMedium,
                   ),
                 ),
@@ -246,7 +247,7 @@ class _LoginPasswordVerificationPageState
                     key: const ValueKey("passwordInputField"),
                     autofillHints: const [AutofillHints.password],
                     decoration: InputDecoration(
-                      hintText: S.of(context).enterYourPassword,
+                      hintText: AppLocalizations.of(context).enterYourPassword,
                       filled: true,
                       contentPadding: const EdgeInsets.all(20),
                       border: UnderlineInputBorder(
@@ -308,7 +309,7 @@ class _LoginPasswordVerificationPageState
                         },
                         child: Center(
                           child: Text(
-                            S.of(context).forgotPassword,
+                            AppLocalizations.of(context).forgotPassword,
                             style: theme.textTheme.titleMedium!.copyWith(
                               fontSize: 14,
                               decoration: TextDecoration.underline,
@@ -321,7 +322,7 @@ class _LoginPasswordVerificationPageState
                         onTap: () async {
                           final dialog = createProgressDialog(
                             context,
-                            S.of(context).pleaseWait,
+                            AppLocalizations.of(context).pleaseWait,
                           );
                           await dialog.show();
                           await Configuration.instance.logout();
@@ -331,7 +332,7 @@ class _LoginPasswordVerificationPageState
                         },
                         child: Center(
                           child: Text(
-                            S.of(context).changeEmail,
+                            AppLocalizations.of(context).changeEmail,
                             style: theme.textTheme.titleMedium!.copyWith(
                               fontSize: 14,
                               decoration: TextDecoration.underline,

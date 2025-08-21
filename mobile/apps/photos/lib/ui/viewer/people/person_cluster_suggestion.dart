@@ -103,7 +103,8 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
             if (snapshot.data!.isEmpty) {
               return Center(
                 child: Text(
-                  S.of(context).noSuggestionsForPerson(widget.person.data.name),
+                  AppLocalizations.of(context)
+                      .noSuggestionsForPerson(widget.person.data.name),
                   style: EnteTheme.getTextTheme(theme).largeMuted,
                 ),
               );
@@ -239,7 +240,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                               horizontal: 32,
                             ),
                             child: Text(
-                              S.of(context).saveAsAnotherPerson,
+                              AppLocalizations.of(context).saveAsAnotherPerson,
                               style:
                                   EnteTheme.getTextTheme(theme).mini.copyWith(
                                         color: EnteTheme.getColorScheme(theme)
@@ -458,7 +459,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
           );
         } else if (snapshot.hasError) {
           // log the error
-          return Center(child: Text(S.of(context).error));
+          return Center(child: Text(AppLocalizations.of(context).error));
         } else {
           canGiveFeedback = false;
           return const Center(child: CircularProgressIndicator());

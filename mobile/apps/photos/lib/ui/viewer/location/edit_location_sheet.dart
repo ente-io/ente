@@ -100,7 +100,7 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
             padding: const EdgeInsets.only(bottom: 16),
             child: BottomOfTitleBarWidget(
               title: TitleBarTitleWidget(
-                title: S.of(context).editLocationTagTitle,
+                title: AppLocalizations.of(context).editLocationTagTitle,
               ),
             ),
           ),
@@ -120,7 +120,8 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
                           children: [
                             Expanded(
                               child: TextInputWidget(
-                                hintText: S.of(context).locationName,
+                                hintText:
+                                    AppLocalizations.of(context).locationName,
                                 focusNode: _focusNode,
                                 submitNotifier: _submitNotifer,
                                 cancelNotifier: _cancelNotifier,
@@ -149,7 +150,8 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
                                     key: ValueKey(value),
                                     buttonType: ButtonType.secondary,
                                     buttonSize: ButtonSize.small,
-                                    labelText: S.of(context).save,
+                                    labelText:
+                                        AppLocalizations.of(context).save,
                                     isDisabled: value,
                                     onTap: () async {
                                       _focusNode.unfocus();
@@ -196,17 +198,18 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  S.of(context).memoryCount(
-                                        value,
-                                        NumberFormat().format(value),
-                                      ),
+                                  AppLocalizations.of(context).memoryCount(
+                                    value,
+                                    NumberFormat().format(value),
+                                  ),
                                   style: textTheme.body,
                                 ),
                                 if (value > 1000)
                                   Padding(
                                     padding: const EdgeInsets.only(top: 2),
                                     child: Text(
-                                      S.of(context).galleryMemoryLimitInfo,
+                                      AppLocalizations.of(context)
+                                          .galleryMemoryLimitInfo,
                                       style: textTheme.miniMuted,
                                     ),
                                   ),

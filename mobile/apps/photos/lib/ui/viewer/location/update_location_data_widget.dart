@@ -163,7 +163,7 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
                   if (selectedLocation.value == null) {
                     showShortToast(
                       context,
-                      S.of(context).selectALocationFirst,
+                      AppLocalizations.of(context).selectALocationFirst,
                     );
                     return;
                   }
@@ -259,11 +259,11 @@ class _UpdateLocationInfoState extends State<UpdateLocationInfo> {
           ? CrossFadeState.showFirst
           : CrossFadeState.showSecond,
       firstChild: Text(
-        S.of(context).selectALocation,
+        AppLocalizations.of(context).selectALocation,
         style: EnteTheme.getTextTheme(theme).mini,
       ),
       secondChild: Text(
-        S.of(context).editsToLocationWillOnlyBeSeenWithinEnte,
+        AppLocalizations.of(context).editsToLocationWillOnlyBeSeenWithinEnte,
         style: EnteTheme.getTextTheme(theme).mini,
       ),
       layoutBuilder: (topChild, topChildKey, bottomChild, bottomChildKey) {

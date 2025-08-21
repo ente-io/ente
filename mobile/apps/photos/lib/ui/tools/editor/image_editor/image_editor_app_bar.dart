@@ -45,7 +45,7 @@ class ImageEditorAppBar extends StatelessWidget implements PreferredSizeWidget {
               enableUndo ? close() : Navigator.of(context).pop();
             },
             child: Text(
-              S.of(context).cancel,
+              AppLocalizations.of(context).cancel,
               style: EnteTheme.getTextTheme(theme).body,
             ),
           ),
@@ -54,7 +54,7 @@ class ImageEditorAppBar extends StatelessWidget implements PreferredSizeWidget {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 IconButton(
-                  tooltip: S.of(context).undo,
+                  tooltip: AppLocalizations.of(context).undo,
                   onPressed: () {
                     undo != null ? undo!() : null;
                   },
@@ -68,7 +68,7 @@ class ImageEditorAppBar extends StatelessWidget implements PreferredSizeWidget {
                 ),
                 const SizedBox(width: 12),
                 IconButton(
-                  tooltip: S.of(context).redo,
+                  tooltip: AppLocalizations.of(context).redo,
                   onPressed: () {
                     redo != null ? redo!() : null;
                   },
@@ -90,7 +90,9 @@ class ImageEditorAppBar extends StatelessWidget implements PreferredSizeWidget {
               key: ValueKey(isMainEditor ? 'save_copy' : 'done'),
               onPressed: done,
               child: Text(
-                isMainEditor ? S.of(context).saveCopy : S.of(context).done,
+                isMainEditor
+                    ? AppLocalizations.of(context).saveCopy
+                    : AppLocalizations.of(context).done,
                 style: EnteTheme.getTextTheme(theme).body.copyWith(
                       color: isMainEditor
                           ? (enableUndo

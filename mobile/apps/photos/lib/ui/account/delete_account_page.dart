@@ -68,7 +68,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Text(
-                  S.of(context).askDeleteReason,
+                  AppLocalizations.of(context).askDeleteReason,
                   style: EnteTheme.getTextTheme(theme).body,
                 ),
               ),
@@ -111,7 +111,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Text(
-                  S.of(context).deleteAccountFeedbackPrompt,
+                  AppLocalizations.of(context).deleteAccountFeedbackPrompt,
                   style: EnteTheme.getTextTheme(theme).body,
                 ),
               ),
@@ -154,7 +154,8 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          S.of(context).kindlyHelpUsWithThisInformation,
+                          AppLocalizations.of(context)
+                              .kindlyHelpUsWithThisInformation,
                           style: EnteTheme.getTextTheme(theme)
                               .smallBold
                               .copyWith(color: colorScheme.warning700),
@@ -185,7 +186,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         child: Text(
-                          S.of(context).confirmDeletePrompt,
+                          AppLocalizations.of(context).confirmDeletePrompt,
                           style: EnteTheme.getTextTheme(theme).bodyMuted,
                           textAlign: TextAlign.left,
                         ),

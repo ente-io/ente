@@ -130,7 +130,9 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
             snapshot.error,
             snapshot.stackTrace,
           );
-          return Center(child: Text(S.of(context).somethingWentWrong));
+          return Center(
+            child: Text(AppLocalizations.of(context).somethingWentWrong),
+          );
         } else {
           return const EnteLoadingWidget();
         }
@@ -149,9 +151,9 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
             albumsCountInRow;
     const quickLinkTitleHeroTag = "quick_link_title";
     final SectionTitle sharedWithYou =
-        SectionTitle(title: S.of(context).sharedWithYou);
+        SectionTitle(title: AppLocalizations.of(context).sharedWithYou);
     final SectionTitle sharedByYou =
-        SectionTitle(title: S.of(context).sharedByYou);
+        SectionTitle(title: AppLocalizations.of(context).sharedByYou);
     final colorTheme = EnteTheme.getColorScheme(theme);
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
@@ -291,7 +293,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                         Hero(
                           tag: quickLinkTitleHeroTag,
                           child: SectionTitle(
-                            title: S.of(context).quickLinks,
+                            title: AppLocalizations.of(context).quickLinks,
                           ),
                         ),
                         trailingWidget: numberOfQuickLinks > maxQuickLinks

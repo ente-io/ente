@@ -30,7 +30,7 @@ class AddedByWidget extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 4.0, bottom: 4.0, left: 16),
       child: Text(
-        S.of(context).addedBy(addedBy),
+        AppLocalizations.of(context).addedBy(addedBy),
         style: EnteTheme.getTextTheme(theme).miniMuted,
       ),
     );

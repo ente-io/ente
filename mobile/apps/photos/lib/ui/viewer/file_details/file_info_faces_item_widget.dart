@@ -116,7 +116,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
                   height: 24,
                   child: Center(
                     child: Text(
-                      S.of(context).faces,
+                      AppLocalizations.of(context).faces,
                       style: EnteTheme.getTextTheme(theme).small,
                     ),
                   ),
@@ -248,7 +248,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
             child: Row(
               children: [
                 Text(
-                  S.of(context).otherDetectedFaces,
+                  AppLocalizations.of(context).otherDetectedFaces,
                   style: EnteTheme.getTextTheme(theme).miniMuted,
                 ),
                 const Spacer(),
@@ -294,7 +294,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      S.of(context).done,
+                      AppLocalizations.of(context).done,
                       style: EnteTheme.getTextTheme(theme).small.copyWith(
                             color: EnteTheme.getColorScheme(theme).primary500,
                           ),
@@ -445,14 +445,14 @@ enum NoFacesReason {
 String getNoFaceReasonText(BuildContext context, NoFacesReason reason) {
   switch (reason) {
     case NoFacesReason.fileNotUploaded:
-      return S.of(context).fileNotUploadedYet;
+      return AppLocalizations.of(context).fileNotUploadedYet;
     case NoFacesReason.fileNotAnalyzed:
-      return S.of(context).imageNotAnalyzed;
+      return AppLocalizations.of(context).imageNotAnalyzed;
     case NoFacesReason.noFacesFound:
-      return S.of(context).noFacesFound;
+      return AppLocalizations.of(context).noFacesFound;
     case NoFacesReason.faceThumbnailGenerationFailed:
-      return S.of(context).faceThumbnailGenerationFailed;
+      return AppLocalizations.of(context).faceThumbnailGenerationFailed;
     case NoFacesReason.fileAnalysisFailed:
-      return S.of(context).fileAnalysisFailed;
+      return AppLocalizations.of(context).fileAnalysisFailed;
   }
 }

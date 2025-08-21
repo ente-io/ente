@@ -64,7 +64,7 @@ class _AlbumHorizontalListState extends State<AlbumHorizontalList> {
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           _logger.severe("failed to fetch albums", snapshot.error);
-          return Text(S.of(context).somethingWentWrong);
+          return Text(AppLocalizations.of(context).somethingWentWrong);
         } else if (snapshot.hasData) {
           if (snapshot.data!.isEmpty) {
             return const SizedBox.shrink();
@@ -79,7 +79,7 @@ class _AlbumHorizontalListState extends State<AlbumHorizontalList> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   child: Text(
-                    S.of(context).albums,
+                    AppLocalizations.of(context).albums,
                     style: EnteTheme.getTextTheme(theme).large,
                   ),
                 ),

@@ -217,7 +217,7 @@ class _AlbumsSection extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Text(
-              S.of(context).albums,
+              AppLocalizations.of(context).albums,
               style: EnteTheme.getTextTheme(theme).large,
             ),
           ),

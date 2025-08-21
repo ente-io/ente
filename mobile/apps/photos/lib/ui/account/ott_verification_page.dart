@@ -71,7 +71,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
         key: const ValueKey("verifyOttButton"),
         isKeypadOpen: isKeypadOpen,
         isFormValid: _verificationCodeController.text.isNotEmpty,
-        buttonText: S.of(context).verify,
+        buttonText: AppLocalizations.of(context).verify,
         onPressedFunction: () {
           if (widget.isChangeEmail) {
             UserService.instance.changeEmail(
@@ -103,7 +103,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 30, 20, 15),
               child: Text(
-                S.of(context).verifyEmail,
+                AppLocalizations.of(context).verifyEmail,
                 style: theme.textTheme.headlineMedium,
               ),
             ),
@@ -118,7 +118,8 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                         Padding(
                           padding: const EdgeInsets.fromLTRB(0, 0, 0, 12),
                           child: StyledText(
-                            text: S.of(context).weHaveSendEmailTo(widget.email),
+                            text: AppLocalizations.of(context)
+                                .weHaveSendEmailTo(widget.email),
                             style: theme.textTheme.titleMedium!
                                 .copyWith(fontSize: 14),
                             tags: {
@@ -132,12 +133,13 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                         ),
                         widget.isResetPasswordScreen
                             ? Text(
-                                S.of(context).toResetVerifyEmail,
+                                AppLocalizations.of(context).toResetVerifyEmail,
                                 style: theme.textTheme.titleMedium!
                                     .copyWith(fontSize: 14),
                               )
                             : Text(
-                                S.of(context).checkInboxAndSpamFolder,
+                                AppLocalizations.of(context)
+                                    .checkInboxAndSpamFolder,
                                 style: theme.textTheme.titleMedium!
                                     .copyWith(fontSize: 14),
                               ),
@@ -158,7 +160,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                 style: theme.textTheme.titleMedium,
                 decoration: InputDecoration(
                   filled: true,
-                  hintText: S.of(context).tapToEnterCode,
+                  hintText: AppLocalizations.of(context).tapToEnterCode,
                   contentPadding: const EdgeInsets.all(15),
                   border: UnderlineInputBorder(
                     borderSide: BorderSide.none,
@@ -195,7 +197,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                       );
                     },
                     child: Text(
-                      S.of(context).resendEmail,
+                      AppLocalizations.of(context).resendEmail,
                       style: theme.textTheme.titleMedium!.copyWith(
                         fontSize: 14,
                         decoration: TextDecoration.underline,

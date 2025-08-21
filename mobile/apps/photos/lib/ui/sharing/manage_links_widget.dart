@@ -59,7 +59,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
       appBar: AppBar(
         elevation: 0,
         title: Text(
-          S.of(context).manageLink,
+          AppLocalizations.of(context).manageLink,
         ),
       ),
       body: SingleChildScrollView(
@@ -73,7 +73,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   MenuItemWidget(
                     key: ValueKey("Allow collect $isCollectEnabled"),
                     captionedTextWidget: CaptionedTextWidget(
-                      title: S.of(context).allowAddingPhotos,
+                      title: AppLocalizations.of(context).allowAddingPhotos,
                     ),
                     alignCaptionedTextToLeft: true,
                     menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,
@@ -88,18 +88,19 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     ),
                   ),
                   MenuSectionDescriptionWidget(
-                    content: S.of(context).allowAddPhotosDescription,
+                    content:
+                        AppLocalizations.of(context).allowAddPhotosDescription,
                   ),
                   const SizedBox(height: 24),
                   MenuItemWidget(
                     alignCaptionedTextToLeft: true,
                     captionedTextWidget: CaptionedTextWidget(
-                      title: S.of(context).linkExpiry,
+                      title: AppLocalizations.of(context).linkExpiry,
                       subTitle: (url.hasExpiry
                           ? (url.isExpired
-                              ? S.of(context).linkExpired
-                              : S.of(context).linkEnabled)
-                          : S.of(context).linkNeverExpires),
+                              ? AppLocalizations.of(context).linkExpired
+                              : AppLocalizations.of(context).linkEnabled)
+                          : AppLocalizations.of(context).linkNeverExpires),
                       subTitleColor: url.isExpired ? warning500 : null,
                     ),
                     trailingIcon: Icons.chevron_right,
@@ -118,23 +119,23 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   url.hasExpiry
                       ? MenuSectionDescriptionWidget(
                           content: url.isExpired
-                              ? S.of(context).expiredLinkInfo
-                              : S.of(context).linkExpiresOn(
-                                    getFormattedTime(
-                                      context,
-                                      DateTime.fromMicrosecondsSinceEpoch(
-                                        url.validTill,
-                                      ),
+                              ? AppLocalizations.of(context).expiredLinkInfo
+                              : AppLocalizations.of(context).linkExpiresOn(
+                                  getFormattedTime(
+                                    context,
+                                    DateTime.fromMicrosecondsSinceEpoch(
+                                      url.validTill,
                                     ),
                                   ),
+                                ),
                         )
                       : const SizedBox.shrink(),
                   const Padding(padding: EdgeInsets.only(top: 24)),
                   MenuItemWidget(
                     captionedTextWidget: CaptionedTextWidget(
-                      title: S.of(context).linkDeviceLimit,
+                      title: AppLocalizations.of(context).linkDeviceLimit,
                       subTitle: url.deviceLimit == 0
-                          ? S.of(context).noDeviceLimit
+                          ? AppLocalizations.of(context).noDeviceLimit
                           : "${url.deviceLimit}",
                     ),
                     trailingIcon: Icons.chevron_right,
@@ -159,7 +160,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   MenuItemWidget(
                     key: ValueKey("Allow downloads $isDownloadEnabled"),
                     captionedTextWidget: CaptionedTextWidget(
-                      title: S.of(context).allowDownloads,
+                      title: AppLocalizations.of(context).allowDownloads,
                     ),
                     alignCaptionedTextToLeft: true,
                     isBottomBorderRadiusRemoved: true,
@@ -176,8 +177,10 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                           // ignore: unawaited_futures
                           showErrorDialog(
                             context,
-                            S.of(context).disableDownloadWarningTitle,
-                            S.of(context).disableDownloadWarningBody,
+                            AppLocalizations.of(context)
+                                .disableDownloadWarningTitle,
+                            AppLocalizations.of(context)
+                                .disableDownloadWarningBody,
                           );
                         }
                       },
@@ -190,7 +193,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   MenuItemWidget(
                     key: ValueKey("Password lock $isPasswordEnabled"),
                     captionedTextWidget: CaptionedTextWidget(
-                      title: S.of(context).passwordLock,
+                      title: AppLocalizations.of(context).passwordLock,
                     ),
                     alignCaptionedTextToLeft: true,
                     isTopBorderRadiusRemoved: true,
@@ -202,9 +205,11 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                           // ignore: unawaited_futures
                           showTextInputDialog(
                             context,
-                            title: S.of(context).setAPassword,
-                            submitButtonLabel: S.of(context).lockButtonLabel,
-                            hintText: S.of(context).enterPassword,
+                            title: AppLocalizations.of(context).setAPassword,
+                            submitButtonLabel:
+                                AppLocalizations.of(context).lockButtonLabel,
+                            hintText:
+                                AppLocalizations.of(context).enterPassword,
                             isPasswordInput: true,
                             alwaysShowSuccessState: true,
                             onSubmit: (String password) async {
@@ -236,7 +241,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   if (url.isExpired)
                     MenuItemWidget(
                       captionedTextWidget: CaptionedTextWidget(
-                        title: S.of(context).linkHasExpired,
+                        title: AppLocalizations.of(context).linkHasExpired,
                         textColor: EnteTheme.getColorScheme(theme).warning500,
                       ),
                       leadingIcon: Icons.error_outline,
@@ -248,7 +253,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   if (!url.isExpired)
                     MenuItemWidget(
                       captionedTextWidget: CaptionedTextWidget(
-                        title: S.of(context).copyLink,
+                        title: AppLocalizations.of(context).copyLink,
                         makeTextBold: true,
                       ),
                       leadingIcon: Icons.copy,
@@ -258,7 +263,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                         await Clipboard.setData(ClipboardData(text: urlValue));
                         showShortToast(
                           context,
-                          S.of(context).linkCopiedToClipboard,
+                          AppLocalizations.of(context).linkCopiedToClipboard,
                         );
                       },
                       isBottomBorderRadiusRemoved: true,
@@ -272,7 +277,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     MenuItemWidget(
                       key: sendLinkButtonKey,
                       captionedTextWidget: CaptionedTextWidget(
-                        title: S.of(context).sendLink,
+                        title: AppLocalizations.of(context).sendLink,
                         makeTextBold: true,
                       ),
                       leadingIcon: Icons.adaptive.share,
@@ -293,7 +298,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   ),
                   MenuItemWidget(
                     captionedTextWidget: CaptionedTextWidget(
-                      title: S.of(context).removeLink,
+                      title: AppLocalizations.of(context).removeLink,
                       textColor: warning500,
                       makeTextBold: true,
                     ),
@@ -343,14 +348,14 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
     bool showProgressDialog = true,
   }) async {
     final dialog = showProgressDialog
-        ? createProgressDialog(context, S.of(context).pleaseWait)
+        ? createProgressDialog(context, AppLocalizations.of(context).pleaseWait)
         : null;
     await dialog?.show();
     try {
       await CollectionsService.instance
           .updateShareUrl(widget.collection!, prop);
       await dialog?.hide();
-      showShortToast(context, S.of(context).albumUpdated);
+      showShortToast(context, AppLocalizations.of(context).albumUpdated);
       if (mounted) {
         setState(() {});
       }

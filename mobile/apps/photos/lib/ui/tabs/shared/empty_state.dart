@@ -35,7 +35,7 @@ class SharedEmptyStateWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      S.of(context).privateSharing,
+                      AppLocalizations.of(context).privateSharing,
                       style: textTheme.h3Bold,
                       textAlign: TextAlign.start,
                     ),
@@ -44,15 +44,17 @@ class SharedEmptyStateWidget extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         EmptyStateItemWidget(
-                          S.of(context).shareOnlyWithThePeopleYouWant,
+                          AppLocalizations.of(context)
+                              .shareOnlyWithThePeopleYouWant,
                         ),
                         const SizedBox(height: 12),
                         EmptyStateItemWidget(
-                          S.of(context).usePublicLinksForPeopleNotOnEnte,
+                          AppLocalizations.of(context)
+                              .usePublicLinksForPeopleNotOnEnte,
                         ),
                         const SizedBox(height: 12),
                         EmptyStateItemWidget(
-                          S.of(context).allowPeopleToAddPhotos,
+                          AppLocalizations.of(context).allowPeopleToAddPhotos,
                         ),
                       ],
                     ),
@@ -67,7 +69,7 @@ class SharedEmptyStateWidget extends StatelessWidget {
                   children: [
                     ButtonWidget(
                       buttonType: ButtonType.trailingIconPrimary,
-                      labelText: S.of(context).shareAnAlbumNow,
+                      labelText: AppLocalizations.of(context).shareAnAlbumNow,
                       icon: Icons.arrow_forward_outlined,
                       onTap: () async {
                         showCollectionActionSheet(
@@ -79,7 +81,8 @@ class SharedEmptyStateWidget extends StatelessWidget {
                     const SizedBox(height: 6),
                     ButtonWidget(
                       buttonType: ButtonType.trailingIconSecondary,
-                      labelText: S.of(context).collectEventPhotos,
+                      labelText:
+                          AppLocalizations.of(context).collectEventPhotos,
                       icon: Icons.add_photo_alternate_outlined,
                       onTap: () async {
                         await onTapCollectEventPhotos(context);
@@ -88,11 +91,14 @@ class SharedEmptyStateWidget extends StatelessWidget {
                     const SizedBox(height: 6),
                     ButtonWidget(
                       buttonType: ButtonType.trailingIconSecondary,
-                      labelText: S.of(context).inviteYourFriends,
+                      labelText: AppLocalizations.of(context).inviteYourFriends,
                       icon: Icons.ios_share_outlined,
                       onTap: () async {
                         // ignore: unawaited_futures
-                        shareText(S.of(context).shareTextRecommendUsingEnte);
+                        shareText(
+                          AppLocalizations.of(context)
+                              .shareTextRecommendUsingEnte,
+                        );
                       },
                     ),
                   ],
@@ -125,7 +131,7 @@ class OutgoingAlbumEmptyState extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Text(
-                S.of(context).noAlbumsSharedByYouYet,
+                AppLocalizations.of(context).noAlbumsSharedByYouYet,
                 style: EnteTheme.getTextTheme(theme).bodyMuted,
               ),
             ],
@@ -136,12 +142,12 @@ class OutgoingAlbumEmptyState extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
           child: ButtonWidget(
             buttonType: ButtonType.trailingIconPrimary,
-            labelText: S.of(context).shareYourFirstAlbum,
+            labelText: AppLocalizations.of(context).shareYourFirstAlbum,
             icon: Icons.add,
             onTap: () async {
               showToast(
                 context,
-                S.of(context).shareAlbumHint,
+                AppLocalizations.of(context).shareAlbumHint,
               );
               Bus.instance.fire(
                 TabChangedEvent(1, TabChangedEventSource.collectionsPage),
@@ -174,7 +180,7 @@ class IncomingAlbumEmptyState extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Text(
-                S.of(context).nothingSharedWithYouYet,
+                AppLocalizations.of(context).nothingSharedWithYouYet,
                 style: EnteTheme.getTextTheme(theme).bodyMuted,
               ),
             ],
@@ -185,11 +191,13 @@ class IncomingAlbumEmptyState extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
           child: ButtonWidget(
             buttonType: ButtonType.trailingIconPrimary,
-            labelText: S.of(context).inviteYourFriends,
+            labelText: AppLocalizations.of(context).inviteYourFriends,
             icon: Icons.ios_share_outlined,
             onTap: () async {
               // ignore: unawaited_futures
-              shareText(S.of(context).shareTextRecommendUsingEnte);
+              shareText(
+                AppLocalizations.of(context).shareTextRecommendUsingEnte,
+              );
             },
           ),
         ),
