@@ -19,6 +19,7 @@ import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
+import "package:photos/ui/viewer/gallery/scrollbar/scroll_bar_with_use_notifier.dart";
 import "package:photos/utils/delete_file_util.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -61,11 +62,15 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   bool _exactSearch = false;
 
   late SelectedFiles _selectedFiles;
+  late ScrollController _scrollController;
+  late ValueNotifier<bool> _scrollbarInUseNotifier;
 
   @override
   void initState() {
     super.initState();
     _selectedFiles = SelectedFiles();
+    _scrollController = ScrollController();
+    _scrollbarInUseNotifier = ValueNotifier<bool>(false);
 
     if (!widget.debugScreen) {
       _findSimilarImages();
@@ -76,6 +81,8 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   void dispose() {
     _isDisposed = true;
     _selectedFiles.dispose();
+    _scrollController.dispose();
+    _scrollbarInUseNotifier.dispose();
     super.dispose();
   }
 
@@ -260,37 +267,46 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     return Column(
       children: [
         Expanded(
-          child: ListView.builder(
-            cacheExtent: 400,
-            itemCount: _similarFilesList.length + 1, // +1 for header
-            itemBuilder: (context, index) {
-              if (index == 0) {
-                if (kDebugMode) {
-                  return Container(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        Text(
-                          "(I) Found ${_similarFilesList.length} groups of similar images",
-                          style: textTheme.bodyBold,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          "(I) Threshold: ${_distanceThreshold.toStringAsFixed(2)}",
-                          style: textTheme.miniMuted,
-                        ),
-                      ],
-                    ),
-                  );
-                } else {
-                  return const SizedBox.shrink();
+          child: ScrollbarWithUseNotifer(
+            controller: _scrollController,
+            inUseNotifier: _scrollbarInUseNotifier,
+            minScrollbarLength: 36.0,
+            interactive: true,
+            thickness: 8,
+            radius: const Radius.circular(4),
+            child: ListView.builder(
+              controller: _scrollController,
+              cacheExtent: 400,
+              itemCount: _similarFilesList.length + 1, // +1 for header
+              itemBuilder: (context, index) {
+                if (index == 0) {
+                  if (kDebugMode) {
+                    return Container(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          Text(
+                            "(I) Found ${_similarFilesList.length} groups of similar images",
+                            style: textTheme.bodyBold,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            "(I) Threshold: ${_distanceThreshold.toStringAsFixed(2)}",
+                            style: textTheme.miniMuted,
+                          ),
+                        ],
+                      ),
+                    );
+                  } else {
+                    return const SizedBox.shrink();
+                  }
                 }
-              }
 
-              // Similar files groups (index - 1 because first item is header)
-              final similarFiles = _similarFilesList[index - 1];
-              return _buildSimilarFilesGroup(similarFiles);
-            },
+                // Similar files groups (index - 1 because first item is header)
+                final similarFiles = _similarFilesList[index - 1];
+                return _buildSimilarFilesGroup(similarFiles);
+              },
+            ),
           ),
         ),
         _getBottomActionButtons(),
