@@ -20,7 +20,8 @@ class BackupSettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     return Scaffold(
       body: CustomScrollView(
         primary: false,

@@ -37,8 +37,9 @@ class _ManageIndividualParticipantState
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
+    final textTheme = EnteTheme.getTextTheme(theme);
     bool isConvertToViewSuccess = false;
     return Scaffold(
       appBar: AppBar(),
@@ -74,7 +75,7 @@ class _ManageIndividualParticipantState
                 title: S.of(context).collaborator,
               ),
               leadingIcon: Icons.edit_outlined,
-              menuItemColor: getEnteColorScheme(context).fillFaint,
+              menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,
               trailingIcon: widget.user.isCollaborator ? Icons.check : null,
               onTap: widget.user.isCollaborator
                   ? null
@@ -97,15 +98,15 @@ class _ManageIndividualParticipantState
             ),
             DividerWidget(
               dividerType: DividerType.menu,
-              bgColor: getEnteColorScheme(context).fillFaint,
+              bgColor: EnteTheme.getColorScheme(theme).fillFaint,
             ),
             MenuItemWidget(
               captionedTextWidget: CaptionedTextWidget(
                 title: S.of(context).viewer,
               ),
               leadingIcon: Icons.photo_outlined,
-              leadingIconColor: getEnteColorScheme(context).strokeBase,
-              menuItemColor: getEnteColorScheme(context).fillFaint,
+              leadingIconColor: EnteTheme.getColorScheme(theme).strokeBase,
+              menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,
               trailingIcon: widget.user.isViewer ? Icons.check : null,
               showOnlyLoadingState: true,
               onTap: widget.user.isViewer
@@ -165,7 +166,7 @@ class _ManageIndividualParticipantState
               ),
               leadingIcon: Icons.not_interested_outlined,
               leadingIconColor: warning500,
-              menuItemColor: getEnteColorScheme(context).fillFaint,
+              menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,
               surfaceExecutionStates: false,
               onTap: () async {
                 final result = await collectionActions.removeParticipant(

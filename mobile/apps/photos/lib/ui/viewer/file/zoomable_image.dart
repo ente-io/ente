@@ -247,7 +247,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
                                           widget.photo.caption!,
                                           maxLines: 3,
                                           overflow: TextOverflow.ellipsis,
-                                          style: getEnteTextTheme(context)
+                                          style: EnteTheme.getTextTheme(theme)
                                               .mini
                                               .copyWith(
                                                 color: textBaseDark,

@@ -9,8 +9,8 @@ class EmptyHiddenWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final EnteTextTheme enteTextTheme = getEnteTextTheme(context);
-    final EnteColorScheme enteColorScheme = getEnteColorScheme(context);
+    final EnteTextTheme enteTextTheme = EnteTheme.getTextTheme(theme);
+    final EnteColorScheme enteColorScheme = EnteTheme.getColorScheme(theme);
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: SizedBox(
@@ -97,7 +97,7 @@ class EmptyHiddenTextWidget extends StatelessWidget {
       text,
       textAlign: TextAlign.center,
       style: TextStyle(
-        color: getEnteColorScheme(context).textFaint,
+        color: EnteTheme.getColorScheme(theme).textFaint,
       ),
     );
   }

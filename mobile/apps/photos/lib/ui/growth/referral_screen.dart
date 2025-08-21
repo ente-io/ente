@@ -127,8 +127,9 @@ class ReferralWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textStyle = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
+    final textStyle = EnteTheme.getTextTheme(theme);
     final bool isReferralEnabled = referralView.planInfo.isEnabled;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

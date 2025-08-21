@@ -92,7 +92,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: getEnteColorScheme(context).backgroundBase,
+              color: EnteTheme.getColorScheme(theme).backgroundBase,
               spreadRadius: 190,
               blurRadius: 30,
               offset: const Offset(0, 170),

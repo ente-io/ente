@@ -119,7 +119,8 @@ class _SelectAllAlbumsButtonState extends State<SelectAllAlbumsButton> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -154,7 +155,7 @@ class _SelectAllAlbumsButtonState extends State<SelectAllAlbumsButton> {
             children: [
               Text(
                 S.of(context).selectAllShort,
-                style: getEnteTextTheme(context).miniMuted,
+                style: EnteTheme.getTextTheme(theme).miniMuted,
               ),
               const SizedBox(width: 4),
               ListenableBuilder(

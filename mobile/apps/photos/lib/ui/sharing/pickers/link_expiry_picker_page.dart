@@ -91,7 +91,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
       items,
       DividerWidget(
         dividerType: DividerType.menuNoIcon,
-        bgColor: getEnteColorScheme(context).fillFaint,
+        bgColor: EnteTheme.getColorScheme(theme).fillFaint,
       ),
     );
     return Column(
@@ -105,7 +105,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
     Tuple2<String, int> expiryOpiton,
   ) {
     return MenuItemWidget(
-      menuItemColor: getEnteColorScheme(context).fillFaint,
+      menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,
       captionedTextWidget: CaptionedTextWidget(
         title: expiryOpiton.item1,
       ),

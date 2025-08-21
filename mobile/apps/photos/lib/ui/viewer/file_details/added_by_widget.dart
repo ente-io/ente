@@ -31,7 +31,7 @@ class AddedByWidget extends StatelessWidget {
       padding: const EdgeInsets.only(top: 4.0, bottom: 4.0, left: 16),
       child: Text(
         S.of(context).addedBy(addedBy),
-        style: getEnteTextTheme(context).miniMuted,
+        style: EnteTheme.getTextTheme(theme).miniMuted,
       ),
     );
   }

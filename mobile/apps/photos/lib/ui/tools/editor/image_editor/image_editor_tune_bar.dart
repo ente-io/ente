@@ -171,7 +171,7 @@ class TuneItem extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               label,
-              style: getEnteTextTheme(context).small,
+              style: EnteTheme.getTextTheme(theme).small,
               textAlign: TextAlign.center,
             ),
           ],
@@ -298,8 +298,9 @@ class _CircularProgressWithValueState extends State<CircularProgressWithValue>
 
   @override
   Widget build(BuildContext context) {
-    final colorTheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final colorTheme = EnteTheme.getColorScheme(theme);
+    final textTheme = EnteTheme.getTextTheme(theme);
     final displayValue =
         _normalizeValueForDisplay(widget.value, widget.min, widget.max);
     final displayText = displayValue.toString();
@@ -402,7 +403,8 @@ class _TuneAdjustWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     return SizedBox(
       height: 40,
       child: Stack(

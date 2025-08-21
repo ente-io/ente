@@ -23,8 +23,9 @@ class AlbumColumnItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final textTheme = EnteTheme.getTextTheme(theme);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     const sideOfThumbnail = 60.0;
     final isSelected = selectedCollections.contains(collection);
     return AnimatedContainer(
@@ -64,7 +65,7 @@ class AlbumColumnItemWidget extends StatelessWidget {
                           );
                         } else {
                           return const NoThumbnailWidget(
-                            addBorder: false, 
+                            addBorder: false,
                           );
                         }
                       },

@@ -104,7 +104,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
               return Center(
                 child: Text(
                   S.of(context).noSuggestionsForPerson(widget.person.data.name),
-                  style: getEnteTextTheme(context).largeMuted,
+                  style: EnteTheme.getTextTheme(theme).largeMuted,
                 ),
               );
             }
@@ -240,11 +240,12 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                             ),
                             child: Text(
                               S.of(context).saveAsAnotherPerson,
-                              style: getEnteTextTheme(context).mini.copyWith(
-                                    color:
-                                        getEnteColorScheme(context).textMuted,
-                                    decoration: TextDecoration.underline,
-                                  ),
+                              style:
+                                  EnteTheme.getTextTheme(theme).mini.copyWith(
+                                        color: EnteTheme.getColorScheme(theme)
+                                            .textMuted,
+                                        decoration: TextDecoration.underline,
+                                      ),
                             ),
                           ),
                         ),
@@ -398,11 +399,11 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
         if (kDebugMode)
           Text(
             "ClusterID: $clusterID, Distance: ${distance.toStringAsFixed(3)}, usingMean: $usingMean",
-            style: getEnteTextTheme(context).smallMuted,
+            style: EnteTheme.getTextTheme(theme).smallMuted,
           ),
         Text(
           "${widget.person.data.name}?",
-          style: getEnteTextTheme(context).largeMuted,
+          style: EnteTheme.getTextTheme(theme).largeMuted,
         ),
         const SizedBox(height: 24),
         _buildThumbnailWidget(

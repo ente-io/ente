@@ -45,7 +45,8 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     return Scaffold(
       body: CustomScrollView(
         primary: false,
@@ -208,7 +209,9 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                                     onTap: () async {
                                       await routeToPage(
                                         context,
-                                        const SimilarImagesPage(debugScreen: kDebugMode,),
+                                        const SimilarImagesPage(
+                                          debugScreen: kDebugMode,
+                                        ),
                                       );
                                     },
                                   ),

@@ -104,7 +104,8 @@ class _SearchableAppBarState extends State<SearchableAppBar> {
   }
 
   Widget _buildSearchField() {
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     return Container(
       key: const ValueKey('searchBar'),
       alignment: Alignment.center,

@@ -193,7 +193,7 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
                               title: S.of(context).clearCaches,
                             ),
                             menuItemColor:
-                                getEnteColorScheme(context).fillFaint,
+                                EnteTheme.getColorScheme(theme).fillFaint,
                             singleBorderRadius: 8,
                             alwaysShowSuccessState: true,
                             onTap: () async {

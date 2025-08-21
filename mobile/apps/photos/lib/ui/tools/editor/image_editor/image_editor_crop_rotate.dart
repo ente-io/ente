@@ -100,7 +100,7 @@ class _ImageEditorCropRotateBarState extends State<ImageEditorCropRotateBar>
 
   Widget _buildFunctions(BoxConstraints constraints) {
     return BottomAppBar(
-      color: getEnteColorScheme(context).backgroundBase,
+      color: EnteTheme.getColorScheme(theme).backgroundBase,
       padding: EdgeInsets.zero,
       height: editorBottomBarHeight,
       child: Align(
@@ -185,7 +185,8 @@ class CropAspectChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     return GestureDetector(
       onTap: onTap,
       child: Container(

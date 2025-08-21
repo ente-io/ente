@@ -97,7 +97,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
       items,
       DividerWidget(
         dividerType: DividerType.menuNoIcon,
-        bgColor: getEnteColorScheme(context).fillFaint,
+        bgColor: EnteTheme.getColorScheme(theme).fillFaint,
       ),
     );
     return Column(
@@ -109,7 +109,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
   Widget _menuItemForPicker(int deviceLimit) {
     return MenuItemWidget(
       key: ValueKey(deviceLimit),
-      menuItemColor: getEnteColorScheme(context).fillFaint,
+      menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,
       captionedTextWidget: CaptionedTextWidget(
         title: deviceLimit == 0 ? S.of(context).noDeviceLimit : "$deviceLimit",
       ),

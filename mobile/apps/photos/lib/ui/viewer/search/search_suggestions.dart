@@ -120,6 +120,7 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
   @override
   Widget build(BuildContext context) {
     String title;
+    final theme = Theme.of(context);
     final resultsCount = searchResultWidgets.length;
     title = S.of(context).searchResultCount(resultsCount);
     return Scaffold(
@@ -141,12 +142,12 @@ class _SearchSuggestionsWidgetState extends State<SearchSuggestionsWidget> {
                   ? EnteLoadingWidget(
                       size: 14,
                       padding: 4,
-                      color: getEnteColorScheme(context).strokeMuted,
+                      color: EnteTheme.getColorScheme(theme).strokeMuted,
                       alignment: Alignment.topLeft,
                     )
                   : Text(
                       title,
-                      style: getEnteTextTheme(context).largeBold,
+                      style: EnteTheme.getTextTheme(theme).largeBold,
                     ).animate().fadeIn(
                         duration: const Duration(milliseconds: 60),
                         curve: Curves.easeIn,

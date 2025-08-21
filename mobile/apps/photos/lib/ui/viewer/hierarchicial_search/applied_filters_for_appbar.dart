@@ -110,8 +110,10 @@ class _AppliedFiltersForAppbarState extends State<AppliedFiltersForAppbar> {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                getEnteColorScheme(context).backdropBase,
-                getEnteColorScheme(context).backdropBase.withValues(alpha: 0),
+                EnteTheme.getColorScheme(theme).backdropBase,
+                EnteTheme.getColorScheme(theme)
+                    .backdropBase
+                    .withValues(alpha: 0),
               ],
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,

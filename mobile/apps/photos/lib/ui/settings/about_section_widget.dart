@@ -32,7 +32,7 @@ class AboutSectionWidget extends StatelessWidget {
           captionedTextWidget: CaptionedTextWidget(
             title: S.of(context).weAreOpenSource,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -58,7 +58,7 @@ class AboutSectionWidget extends StatelessWidget {
                     captionedTextWidget: CaptionedTextWidget(
                       title: S.of(context).checkForUpdates,
                     ),
-                    pressedColor: getEnteColorScheme(context).fillFaint,
+                    pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
                     trailingIcon: Icons.chevron_right_outlined,
                     trailingIconIsMuted: true,
                     onTap: () async {
@@ -113,7 +113,7 @@ class AboutMenuItemWidget extends StatelessWidget {
       captionedTextWidget: CaptionedTextWidget(
         title: title,
       ),
-      pressedColor: getEnteColorScheme(context).fillFaint,
+      pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
       trailingIcon: Icons.chevron_right_outlined,
       trailingIconIsMuted: true,
       onTap: () async {

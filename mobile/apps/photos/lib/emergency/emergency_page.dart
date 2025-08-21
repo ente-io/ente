@@ -76,7 +76,8 @@ class _EmergencyPageState extends State<EmergencyPage> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     final currentUserID = Configuration.instance.getUserID()!;
     final List<EmergencyContact> othersTrustedContacts =
         info?.othersEmergencyContact ?? [];
@@ -180,7 +181,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
                               currentUserID: currentUserID,
                             ),
                             menuItemColor:
-                                getEnteColorScheme(context).fillFaint,
+                                EnteTheme.getColorScheme(theme).fillFaint,
                             trailingIcon: Icons.chevron_right,
                             trailingIconIsMuted: true,
                             onTap: () async {
@@ -192,7 +193,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
                           ),
                           DividerWidget(
                             dividerType: DividerType.menu,
-                            bgColor: getEnteColorScheme(context).fillFaint,
+                            bgColor: EnteTheme.getColorScheme(theme).fillFaint,
                           ),
                         ],
                       );
@@ -203,13 +204,13 @@ class _EmergencyPageState extends State<EmergencyPage> {
                             const SizedBox(height: 20),
                             Text(
                               context.l10n.legacyPageDesc,
-                              style: getEnteTextTheme(context).body,
+                              style: EnteTheme.getTextTheme(theme).body,
                             ),
                             SizedBox(
                               height: 200,
                               width: 200,
                               child: SvgPicture.asset(
-                                getEnteColorScheme(context).backdropBase ==
+                                EnteTheme.getColorScheme(theme).backdropBase ==
                                         backgroundBaseDark
                                     ? "assets/icons/legacy-light.svg"
                                     : "assets/icons/legacy-dark.svg",
@@ -219,7 +220,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
                             ),
                             Text(
                               context.l10n.legacyPageDesc2,
-                              style: getEnteTextTheme(context).smallMuted,
+                              style: EnteTheme.getTextTheme(theme).smallMuted,
                             ),
                             const SizedBox(height: 16),
                             ButtonWidget(
@@ -247,7 +248,8 @@ class _EmergencyPageState extends State<EmergencyPage> {
                         ),
                         leadingIcon: Icons.add_outlined,
                         surfaceExecutionStates: false,
-                        menuItemColor: getEnteColorScheme(context).fillFaint,
+                        menuItemColor:
+                            EnteTheme.getColorScheme(theme).fillFaint,
                         onTap: () async {
                           await routeToPage(
                             context,
@@ -307,7 +309,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
                               currentUserID: currentUserID,
                             ),
                             menuItemColor:
-                                getEnteColorScheme(context).fillFaint,
+                                EnteTheme.getColorScheme(theme).fillFaint,
                             trailingIcon: Icons.chevron_right,
                             trailingIconIsMuted: true,
                             onTap: () async {
@@ -350,7 +352,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
                               : DividerWidget(
                                   dividerType: DividerType.menu,
                                   bgColor:
-                                      getEnteColorScheme(context).fillFaint,
+                                      EnteTheme.getColorScheme(theme).fillFaint,
                                 ),
                         ],
                       );

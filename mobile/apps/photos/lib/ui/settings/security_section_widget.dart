@@ -129,7 +129,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
             captionedTextWidget: CaptionedTextWidget(
               title: context.l10n.passkey,
             ),
-            pressedColor: getEnteColorScheme(context).fillFaint,
+            pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
             trailingIcon: Icons.chevron_right_outlined,
             trailingIconIsMuted: true,
             onTap: () async {
@@ -184,7 +184,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         captionedTextWidget: CaptionedTextWidget(
           title: S.of(context).viewActiveSessions,
         ),
-        pressedColor: getEnteColorScheme(context).fillFaint,
+        pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
         showOnlyLoadingState: true,

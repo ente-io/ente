@@ -38,7 +38,7 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Bus.instance.fire(OpenedSettingsEvent());
-    final enteColorScheme = getEnteColorScheme(context);
+    final enteColorScheme = EnteTheme.getColorScheme(theme);
     return Scaffold(
       body: Container(
         color: enteColorScheme.backdropMuted,
@@ -51,7 +51,7 @@ class SettingsPage extends StatelessWidget {
 
   Widget _getBody(BuildContext context, EnteColorScheme colorScheme) {
     final hasLoggedIn = Configuration.instance.isLoggedIn();
-    final enteTextTheme = getEnteTextTheme(context);
+    final enteTextTheme = EnteTheme.getTextTheme(theme);
     final List<Widget> contents = [];
     const sectionSpacing = SizedBox(height: 8);
     contents.add(

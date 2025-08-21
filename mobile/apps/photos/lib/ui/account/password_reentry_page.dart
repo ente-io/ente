@@ -223,7 +223,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                     decoration: InputDecoration(
                       hintText: S.of(context).enterYourPassword,
                       filled: true,
-                      fillColor: getEnteColorScheme(context).fillFaint,
+                      fillColor: EnteTheme.getColorScheme(theme).fillFaint,
                       contentPadding: const EdgeInsets.all(20),
                       border: UnderlineInputBorder(
                         borderSide: BorderSide.none,
@@ -264,7 +264,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                   padding: const EdgeInsets.symmetric(vertical: 18),
                   child: Divider(
                     thickness: 1,
-                    color: getEnteColorScheme(context).strokeFaint,
+                    color: EnteTheme.getColorScheme(theme).strokeFaint,
                   ),
                 ),
                 Padding(

@@ -59,7 +59,7 @@ class LinearProgressDialogState extends State<LinearProgressDialog>
       child: AlertDialog(
         title: Text(
           widget.message,
-          style: getEnteTextTheme(context).smallMuted,
+          style: EnteTheme.getTextTheme(theme).smallMuted,
           textAlign: TextAlign.center,
         ),
         content: AnimatedBuilder(

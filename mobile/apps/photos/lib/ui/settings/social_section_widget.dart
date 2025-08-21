@@ -95,7 +95,7 @@ class SocialsMenuItemWidget extends StatelessWidget {
       captionedTextWidget: CaptionedTextWidget(
         title: text,
       ),
-      pressedColor: getEnteColorScheme(context).fillFaint,
+      pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
       trailingIcon: Icons.chevron_right_outlined,
       trailingIconIsMuted: true,
       onTap: () async {

@@ -41,7 +41,7 @@ showEditLocationSheet(
       ),
     ),
     topControl: const SizedBox.shrink(),
-    backgroundColor: getEnteColorScheme(context).backgroundElevated,
+    backgroundColor: EnteTheme.getColorScheme(theme).backgroundElevated,
     barrierColor: backdropFaintDark,
   );
 }
@@ -87,8 +87,9 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final textTheme = EnteTheme.getTextTheme(theme);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     final locationName =
         InheritedLocationTagData.of(context).locationTagEntity!.item.name;
     return Padding(
@@ -119,7 +120,7 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
                           children: [
                             Expanded(
                               child: TextInputWidget(
-                                hintText: S.of(context).locationName, 
+                                hintText: S.of(context).locationName,
                                 focusNode: _focusNode,
                                 submitNotifier: _submitNotifer,
                                 cancelNotifier: _cancelNotifier,

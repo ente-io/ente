@@ -236,7 +236,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
           //               [
           //                 Text(
           //                   "Add location data",
-          //                   style: getEnteTextTheme(context).miniBoldMuted,
+          //                   style: EnteTheme.getTextTheme(theme).miniBoldMuted,
           //                 ),
           //               ],
           //             ),
@@ -248,7 +248,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
           //                     top: Radius.circular(5),
           //                   ),
           //                 ),
-          //                 backgroundColor: getEnteColorScheme(context)
+          //                 backgroundColor: EnteTheme.getColorScheme(theme)
           //                     .backgroundElevated,
           //                 barrierColor: backdropFaintDark,
           //                 context: context,
@@ -328,7 +328,8 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
                 isFlexibleSpaceDisabled: true,
                 title: S.of(context).details,
                 isOnTopOfScreen: false,
-                backgroundColor: getEnteColorScheme(context).backgroundElevated,
+                backgroundColor:
+                    EnteTheme.getColorScheme(theme).backgroundElevated,
                 leading: IconButtonWidget(
                   icon: Icons.expand_more_outlined,
                   iconButtonType: IconButtonType.primary,

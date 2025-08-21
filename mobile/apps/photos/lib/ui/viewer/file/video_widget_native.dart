@@ -374,7 +374,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                                           )
                                         : const SizedBox();
                                   },
-                                  valueListenable: _isPlaybackReady, 
+                                  valueListenable: _isPlaybackReady,
                                 ),
                               ),
                             ),
@@ -671,9 +671,10 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                           Center(
                             child: Text(
                               "${(progress * 100).toStringAsFixed(0)}%",
-                              style: getEnteTextTheme(context).tiny.copyWith(
-                                    color: textBaseDark,
-                                  ),
+                              style:
+                                  EnteTheme.getTextTheme(theme).tiny.copyWith(
+                                        color: textBaseDark,
+                                      ),
                             ),
                           ),
                         ],
@@ -820,7 +821,7 @@ class _SeekBarAndDuration extends StatelessWidget {
                                 file.caption!,
                                 maxLines: 3,
                                 overflow: TextOverflow.ellipsis,
-                                style: getEnteTextTheme(context)
+                                style: EnteTheme.getTextTheme(theme)
                                     .mini
                                     .copyWith(color: textBaseDark),
                               ),
@@ -836,9 +837,7 @@ class _SeekBarAndDuration extends StatelessWidget {
                           curve: Curves.easeInOut,
                           child: Text(
                             secondsToDuration(position ~/ 1000),
-                            style: getEnteTextTheme(
-                              context,
-                            ).mini.copyWith(
+                            style: EnteTheme.getTextTheme(theme).mini.copyWith(
                                   color: textBaseDark,
                                 ),
                           ),
@@ -852,7 +851,7 @@ class _SeekBarAndDuration extends StatelessWidget {
                         ),
                         Text(
                           duration ?? "0:00",
-                          style: getEnteTextTheme(context).mini.copyWith(
+                          style: EnteTheme.getTextTheme(theme).mini.copyWith(
                                 color: textBaseDark,
                               ),
                         ),

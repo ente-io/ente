@@ -48,7 +48,8 @@ class _NoResultWidgetState extends State<NoResultWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final textTheme = EnteTheme.getTextTheme(theme);
     final searchTypeAndSuggestion = <Widget>[];
     searchTypeToQuerySuggestion.forEach(
       (key, value) {

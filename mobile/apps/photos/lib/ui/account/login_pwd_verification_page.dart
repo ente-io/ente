@@ -223,7 +223,7 @@ class _LoginPasswordVerificationPageState
                   ),
                   child: Text(
                     email ?? '',
-                    style: getEnteTextTheme(context).smallMuted,
+                    style: EnteTheme.getTextTheme(theme).smallMuted,
                   ),
                 ),
                 Visibility(
@@ -253,7 +253,7 @@ class _LoginPasswordVerificationPageState
                         borderSide: BorderSide.none,
                         borderRadius: BorderRadius.circular(6),
                       ),
-                      fillColor: getEnteColorScheme(context).fillFaint,
+                      fillColor: EnteTheme.getColorScheme(theme).fillFaint,
                       suffixIcon: _passwordInFocus
                           ? IconButton(
                               icon: Icon(
@@ -289,7 +289,7 @@ class _LoginPasswordVerificationPageState
                   padding: const EdgeInsets.symmetric(vertical: 18),
                   child: Divider(
                     thickness: 1,
-                    color: getEnteColorScheme(context).strokeFaint,
+                    color: EnteTheme.getColorScheme(theme).strokeFaint,
                   ),
                 ),
                 Padding(

@@ -14,7 +14,8 @@ class SearchSuffixIcon extends StatefulWidget {
 class _SearchSuffixIconState extends State<SearchSuffixIcon> {
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 175),
       child: widget.shouldShowSpinner

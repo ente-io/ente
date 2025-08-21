@@ -16,8 +16,9 @@ class FileCaptionReadyOnly extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
+    final textTheme = EnteTheme.getTextTheme(theme);
     return Padding(
       padding: const EdgeInsets.all(4.0),
       child: ConstrainedBox(
@@ -98,8 +99,9 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
     if (hintText.isEmpty) {
       hintText = defaultHintText;
     }
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
+    final textTheme = EnteTheme.getTextTheme(theme);
     return TextField(
       onSubmitted: (value) async {
         await _onDoneClick(context);

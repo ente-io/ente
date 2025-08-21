@@ -84,7 +84,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
           makeTextBold: true,
         ),
         leadingIcon: Icons.add,
-        menuItemColor: getEnteColorScheme(context).fillFaint,
+        menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,
         isTopBorderRadiusRemoved: _sharees.isNotEmpty,
         isBottomBorderRadiusRemoved: true,
         onTap: () async {
@@ -106,7 +106,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
     children.add(
       DividerWidget(
         dividerType: DividerType.menu,
-        bgColor: getEnteColorScheme(context).fillFaint,
+        bgColor: EnteTheme.getColorScheme(theme).fillFaint,
       ),
     );
     children.add(
@@ -116,7 +116,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
           makeTextBold: true,
         ),
         leadingIcon: Icons.add,
-        menuItemColor: getEnteColorScheme(context).fillFaint,
+        menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,
         isTopBorderRadiusRemoved: true,
         onTap: () async {
           // ignore: unawaited_futures
@@ -160,11 +160,11 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
           MenuItemWidget(
             captionedTextWidget: CaptionedTextWidget(
               title: S.of(context).linkHasExpired,
-              textColor: getEnteColorScheme(context).warning500,
+              textColor: EnteTheme.getColorScheme(theme).warning500,
             ),
             leadingIcon: Icons.error_outline,
-            leadingIconColor: getEnteColorScheme(context).warning500,
-            menuItemColor: getEnteColorScheme(context).fillFaint,
+            leadingIconColor: EnteTheme.getColorScheme(theme).warning500,
+            menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,
             isBottomBorderRadiusRemoved: true,
           ),
         );
@@ -179,7 +179,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
                 makeTextBold: true,
               ),
               leadingIcon: Icons.copy,
-              menuItemColor: getEnteColorScheme(context).fillFaint,
+              menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,
               showOnlyLoadingState: true,
               onTap: () async {
                 await Clipboard.setData(ClipboardData(text: url));
@@ -189,7 +189,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
             ),
             DividerWidget(
               dividerType: DividerType.menu,
-              bgColor: getEnteColorScheme(context).fillFaint,
+              bgColor: EnteTheme.getColorScheme(theme).fillFaint,
             ),
             MenuItemWidget(
               key: sendLinkButtonKey,
@@ -198,7 +198,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
                 makeTextBold: true,
               ),
               leadingIcon: Icons.adaptive.share,
-              menuItemColor: getEnteColorScheme(context).fillFaint,
+              menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,
               onTap: () async {
                 // ignore: unawaited_futures
                 await shareAlbumLinkWithPlaceholder(
@@ -219,7 +219,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
         [
           DividerWidget(
             dividerType: DividerType.menu,
-            bgColor: getEnteColorScheme(context).fillFaint,
+            bgColor: EnteTheme.getColorScheme(theme).fillFaint,
           ),
           MenuItemWidget(
             captionedTextWidget: CaptionedTextWidget(
@@ -228,7 +228,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
             ),
             leadingIcon: Icons.link,
             trailingIcon: Icons.navigate_next,
-            menuItemColor: getEnteColorScheme(context).fillFaint,
+            menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,
             trailingIconIsMuted: true,
             onTap: () async {
               // ignore: unawaited_futures
@@ -253,7 +253,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
             makeTextBold: true,
           ),
           leadingIcon: Icons.link,
-          menuItemColor: getEnteColorScheme(context).fillFaint,
+          menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,
           showOnlyLoadingState: true,
           onTap: () async {
             final bool result =
@@ -281,7 +281,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
             makeTextBold: true,
           ),
           leadingIcon: Icons.people_alt_outlined,
-          menuItemColor: getEnteColorScheme(context).fillFaint,
+          menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,
           showOnlyLoadingState: true,
           onTap: () async {
             final bool result = await collectionActions.enableUrl(
@@ -358,7 +358,7 @@ class EmailItemWidget extends StatelessWidget {
               thumbnailView: false,
             ),
             leadingIconSize: 24,
-            menuItemColor: getEnteColorScheme(context).fillFaint,
+            menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,
             trailingIconIsMuted: true,
             trailingIcon: Icons.chevron_right,
             onTap: () async {
@@ -370,7 +370,7 @@ class EmailItemWidget extends StatelessWidget {
           ),
           DividerWidget(
             dividerType: DividerType.menu,
-            bgColor: getEnteColorScheme(context).fillFaint,
+            bgColor: EnteTheme.getColorScheme(theme).fillFaint,
           ),
         ],
       );
@@ -396,7 +396,7 @@ class EmailItemWidget extends StatelessWidget {
             ),
             alignCaptionedTextToLeft: true,
             // leadingIcon: Icons.people_outline,
-            menuItemColor: getEnteColorScheme(context).fillFaint,
+            menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,
             trailingIconIsMuted: true,
             trailingIcon: Icons.chevron_right,
             onTap: () async {
@@ -408,7 +408,7 @@ class EmailItemWidget extends StatelessWidget {
           ),
           DividerWidget(
             dividerType: DividerType.menu,
-            bgColor: getEnteColorScheme(context).fillFaint,
+            bgColor: EnteTheme.getColorScheme(theme).fillFaint,
           ),
         ],
       );

@@ -54,7 +54,8 @@ class _BackupItemCardState extends State<BackupItemCard> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     final hasError = widget.item.error != null;
 
     return GestureDetector(
@@ -140,7 +141,7 @@ class _BackupItemCardState extends State<BackupItemCard> {
                 child: IconButton(
                   icon: Icon(
                     Icons.error_outline,
-                    color: getEnteColorScheme(context).fillBase,
+                    color: EnteTheme.getColorScheme(theme).fillBase,
                   ),
                   onPressed: () {
                     showDialogWidget(

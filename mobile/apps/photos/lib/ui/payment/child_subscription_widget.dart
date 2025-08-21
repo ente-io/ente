@@ -43,7 +43,7 @@ class ChildSubscriptionWidget extends StatelessWidget {
               tags: {
                 'green': StyledTextTag(
                   style: TextStyle(
-                    color: getEnteColorScheme(context).primary500,
+                    color: EnteTheme.getColorScheme(theme).primary500,
                   ),
                 ),
               },

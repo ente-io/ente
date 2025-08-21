@@ -32,12 +32,12 @@ class OnlyThemFilterChip extends StatelessWidget {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: getEnteColorScheme(context).fillFaint,
+          color: EnteTheme.getColorScheme(theme).fillFaint,
           borderRadius: const BorderRadius.all(
             Radius.circular(kFilterChipHeight / 2),
           ),
           border: Border.all(
-            color: getEnteColorScheme(context).strokeFaint,
+            color: EnteTheme.getColorScheme(theme).strokeFaint,
             width: 0.5,
           ),
         ),
@@ -54,7 +54,7 @@ class OnlyThemFilterChip extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 child: Text(
                   S.of(context).onlyThem,
-                  style: getEnteTextTheme(context).miniBold,
+                  style: EnteTheme.getTextTheme(theme).miniBold,
                 ),
               ),
               isApplied ? const SizedBox(width: 2) : const SizedBox.shrink(),
@@ -62,7 +62,7 @@ class OnlyThemFilterChip extends StatelessWidget {
                   ? Icon(
                       Icons.close_rounded,
                       size: 16,
-                      color: getEnteColorScheme(context).textMuted,
+                      color: EnteTheme.getColorScheme(theme).textMuted,
                     )
                   : const SizedBox.shrink(),
             ],

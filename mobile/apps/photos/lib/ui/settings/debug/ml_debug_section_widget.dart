@@ -88,7 +88,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Show pending notifications",
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -107,7 +107,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Clear pending notifications",
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -127,7 +127,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Schedule notification 10 seconds",
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -151,7 +151,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Schedule notification 1 hour",
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -175,7 +175,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Schedule notification 12 hours",
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -199,7 +199,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Do some basic usearch",
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -258,7 +258,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Fill ClipVectorDB",
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -305,7 +305,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Migrate to ClipVectorDB",
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -323,7 +323,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Show ClipVectorDB stats",
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -343,7 +343,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Delete/Empty ClipVectorDB",
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -361,7 +361,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Benchmark Vector DB Face",
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -462,7 +462,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Benchmark Vector DB CLIP",
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -554,7 +554,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Test rust bridge (without vectorDB)",
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -705,7 +705,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Trigger run ML",
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -723,7 +723,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Trigger run indexing",
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -750,7 +750,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               return const SizedBox.shrink();
             },
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -771,7 +771,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Update discover",
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -788,7 +788,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Update memories",
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -808,7 +808,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Clear memories cache",
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -828,7 +828,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Sync person mappings ",
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -846,7 +846,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Show empty indexes",
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -859,7 +859,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Reset faces feedback",
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           alwaysShowSuccessState: true,
@@ -888,7 +888,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Reset faces feedback and clustering",
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -921,7 +921,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Reset all local faces",
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -949,7 +949,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Reset all local clip",
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {

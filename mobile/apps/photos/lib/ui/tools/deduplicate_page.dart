@@ -144,7 +144,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                           padding: const EdgeInsets.all(4),
                           child: Text(
                             value, // Show the value
-                            style: getEnteTextTheme(context).bodyMuted,
+                            style: EnteTheme.getTextTheme(theme).bodyMuted,
                           ),
                         );
                       }
@@ -159,7 +159,8 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
   }
 
   Widget _getSortMenu() {
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final textTheme = EnteTheme.getTextTheme(theme);
     Text sortOptionText(SortKey key) {
       String text = key.toString();
       switch (key) {
@@ -182,7 +183,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
         padding: const EdgeInsets.fromLTRB(24, 6, 24, 6),
         child: Icon(
           Icons.sort,
-          color: getEnteColorScheme(context).strokeBase,
+          color: EnteTheme.getColorScheme(theme).strokeBase,
           size: 20,
         ),
       ),
@@ -238,7 +239,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: getEnteColorScheme(context).backgroundBase,
+                  color: EnteTheme.getColorScheme(theme).backgroundBase,
                 ),
                 child: Column(
                   children: [
@@ -359,7 +360,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                 !selectedGrids.contains(itemIndex)
                     ? Icon(
                         Icons.check_circle_outlined,
-                        color: getEnteColorScheme(context).strokeMuted,
+                        color: EnteTheme.getColorScheme(theme).strokeMuted,
                         size: 24,
                       )
                     : const Icon(

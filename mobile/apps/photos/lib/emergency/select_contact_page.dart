@@ -58,8 +58,9 @@ class _AddContactPage extends State<AddContactPage> {
   @override
   Widget build(BuildContext context) {
     isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
-    final enteTextTheme = getEnteTextTheme(context);
-    final enteColorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final enteTextTheme = EnteTheme.getTextTheme(theme);
+    final enteColorScheme = EnteTheme.getColorScheme(theme);
     final List<User> suggestedUsers = _getSuggestedUser();
     isEmailListEmpty = suggestedUsers.isEmpty;
     return Scaffold(
@@ -126,9 +127,9 @@ class _AddContactPage extends State<AddContactPage> {
                                   type: AvatarType.mini,
                                 ),
                                 menuItemColor:
-                                    getEnteColorScheme(context).fillFaint,
+                                    EnteTheme.getColorScheme(theme).fillFaint,
                                 pressedColor:
-                                    getEnteColorScheme(context).fillFaint,
+                                    EnteTheme.getColorScheme(theme).fillFaint,
                                 trailingIcon:
                                     (selectedEmail == currentUser.email)
                                         ? Icons.check
@@ -150,8 +151,8 @@ class _AddContactPage extends State<AddContactPage> {
                                   ? const SizedBox.shrink()
                                   : DividerWidget(
                                       dividerType: DividerType.menu,
-                                      bgColor:
-                                          getEnteColorScheme(context).fillFaint,
+                                      bgColor: EnteTheme.getColorScheme(theme)
+                                          .fillFaint,
                                     ),
                             ],
                           );
@@ -268,15 +269,15 @@ class _AddContactPage extends State<AddContactPage> {
     return TextFormField(
       controller: _textController,
       focusNode: textFieldFocusNode,
-      style: getEnteTextTheme(context).body,
+      style: EnteTheme.getTextTheme(theme).body,
       autofillHints: const [AutofillHints.email],
       decoration: InputDecoration(
         focusedBorder: OutlineInputBorder(
           borderRadius: const BorderRadius.all(Radius.circular(4.0)),
           borderSide:
-              BorderSide(color: getEnteColorScheme(context).strokeMuted),
+              BorderSide(color: EnteTheme.getColorScheme(theme).strokeMuted),
         ),
-        fillColor: getEnteColorScheme(context).fillFaint,
+        fillColor: EnteTheme.getColorScheme(theme).fillFaint,
         filled: true,
         hintText: S.of(context).enterEmail,
         contentPadding: const EdgeInsets.symmetric(
@@ -289,7 +290,7 @@ class _AddContactPage extends State<AddContactPage> {
         ),
         prefixIcon: Icon(
           Icons.email_outlined,
-          color: getEnteColorScheme(context).strokeMuted,
+          color: EnteTheme.getColorScheme(theme).strokeMuted,
         ),
         suffixIcon: _email == ''
             ? null
@@ -297,7 +298,7 @@ class _AddContactPage extends State<AddContactPage> {
                 onPressed: clearFocus,
                 icon: Icon(
                   Icons.cancel,
-                  color: getEnteColorScheme(context).strokeMuted,
+                  color: EnteTheme.getColorScheme(theme).strokeMuted,
                 ),
               ),
       ),

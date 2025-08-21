@@ -73,7 +73,8 @@ class __BodyState extends State<_Body> {
   @override
   Widget build(BuildContext context) {
     widthOfButton = getWidthOfButton();
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     return GestureDetector(
       onTap: widget.onTap,
       onTapDown: (details) {
@@ -110,7 +111,7 @@ class __BodyState extends State<_Body> {
                     child: Icon(
                       widget.icon,
                       size: 24,
-                      color: getEnteColorScheme(context).primary300,
+                      color: EnteTheme.getColorScheme(theme).primary300,
                       shadows: const [
                         BoxShadow(
                           color: Color.fromARGB(12, 0, 179, 60),
@@ -137,7 +138,7 @@ class __BodyState extends State<_Body> {
                   SvgPicture.asset(
                     widget.svgAssetPath!,
                     colorFilter: ColorFilter.mode(
-                      getEnteColorScheme(context).textMuted,
+                      EnteTheme.getColorScheme(theme).textMuted,
                       BlendMode.srcIn,
                     ),
                     width: 24,
@@ -149,14 +150,14 @@ class __BodyState extends State<_Body> {
                   Icon(
                     widget.icon,
                     size: 24,
-                    color: getEnteColorScheme(context).textMuted,
+                    color: EnteTheme.getColorScheme(theme).textMuted,
                   ),
                 const SizedBox(height: 4),
                 Text(
                   widget.labelText,
                   textAlign: TextAlign.center,
                   //textTheme in [getWidthOfLongestWord] should be same as this
-                  style: getEnteTextTheme(context).miniMuted,
+                  style: EnteTheme.getTextTheme(theme).miniMuted,
                 ),
               ],
             ),
@@ -181,7 +182,7 @@ class __BodyState extends State<_Body> {
     double maxWidth = 0.0;
     for (String word in words) {
       final width =
-          computeWidthOfWord(word, getEnteTextTheme(context).miniMuted);
+          computeWidthOfWord(word, EnteTheme.getTextTheme(theme).miniMuted);
       if (width > maxWidth) {
         maxWidth = width;
       }

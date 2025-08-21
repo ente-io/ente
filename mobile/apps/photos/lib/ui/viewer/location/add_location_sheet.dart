@@ -45,7 +45,7 @@ showAddLocationSheet(
       ),
     ),
     topControl: const SizedBox.shrink(),
-    backgroundColor: getEnteColorScheme(context).backgroundElevated,
+    backgroundColor: EnteTheme.getColorScheme(theme).backgroundElevated,
     barrierColor: backdropFaintDark,
   );
 }
@@ -101,8 +101,9 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final textTheme = EnteTheme.getTextTheme(theme);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 32, 0, 8),
       child: Column(
@@ -129,7 +130,7 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                           children: [
                             Expanded(
                               child: TextInputWidget(
-                                hintText: S.of(context).locationName, 
+                                hintText: S.of(context).locationName,
                                 focusNode: _focusNode,
                                 submitNotifier: _submitNotifer,
                                 cancelNotifier: _cancelNotifier,

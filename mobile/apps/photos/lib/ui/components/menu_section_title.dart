@@ -9,7 +9,8 @@ class MenuSectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     return Padding(
       padding: const EdgeInsets.only(left: 8, top: 6, bottom: 6),
       child: Row(
@@ -24,7 +25,7 @@ class MenuSectionTitle extends StatelessWidget {
           iconData != null ? const SizedBox(width: 8) : const SizedBox.shrink(),
           Text(
             title,
-            style: getEnteTextTheme(context).small.copyWith(
+            style: EnteTheme.getTextTheme(theme).small.copyWith(
                   color: colorScheme.textMuted,
                 ),
           ),

@@ -80,7 +80,7 @@ class _MapPullUpGalleryState extends State<MapPullUpGallery> {
                     GalleryType.searchResults,
                     _selectedFiles,
                     backgroundColor:
-                        getEnteColorScheme(context).backgroundElevated2,
+                        EnteTheme.getColorScheme(theme).backgroundElevated2,
                   ),
                 ),
               ),
@@ -96,8 +96,9 @@ class _MapPullUpGalleryState extends State<MapPullUpGallery> {
     BuildContext context,
     logger,
   ) {
-    final textTheme = getEnteTextTheme(context);
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final textTheme = EnteTheme.getTextTheme(theme);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     return Container(
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
@@ -210,7 +211,8 @@ class DraggableHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     return SingleChildScrollView(
       physics: const ClampingScrollPhysics(),
       controller: scrollController,

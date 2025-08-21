@@ -155,8 +155,9 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
-    colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final textTheme = EnteTheme.getTextTheme(theme);
+    colorScheme = EnteTheme.getColorScheme(theme);
     if (!_isLoading) {
       _isLoading = true;
       _fetchSubData();
@@ -310,7 +311,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
             padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
             child: Text(
               S.of(context).visitWebToManage,
-              style: getEnteTextTheme(context).small.copyWith(
+              style: EnteTheme.getTextTheme(theme).small.copyWith(
                     color: colorScheme.textMuted,
                   ),
             ),

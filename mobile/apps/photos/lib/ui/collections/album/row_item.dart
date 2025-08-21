@@ -48,7 +48,7 @@ class AlbumRowItemWidget extends StatelessWidget {
         tag +
         "_" +
         c.id.toString();
-    final enteTextTheme = getEnteTextTheme(context);
+    final enteTextTheme = EnteTheme.getTextTheme(theme);
     final Widget? linkIcon = c.hasLink && isOwner
         ? Icon(
             Icons.link,
@@ -73,7 +73,7 @@ class AlbumRowItemWidget extends StatelessWidget {
                     cornerSmoothing: _cornerSmoothing,
                   ),
                   child: Container(
-                    color: getEnteColorScheme(context).strokeFaint,
+                    color: EnteTheme.getColorScheme(theme).strokeFaint,
                     width: sideOfThumbnail,
                     height: sideOfThumbnail,
                   ),
@@ -131,7 +131,8 @@ class AlbumRowItemWidget extends StatelessWidget {
                               );
                             } else {
                               return Container(
-                                color: getEnteColorScheme(context).backdropBase,
+                                color: EnteTheme.getColorScheme(theme)
+                                    .backdropBase,
                                 child: const NoThumbnailWidget(
                                   borderRadius: 12,
                                   addBorder: false,

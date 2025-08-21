@@ -278,7 +278,7 @@ class LinkPlaceholder extends StatelessWidget {
                                 child: FittedBox(
                                   child: Text(
                                     "+" "${length - 3}",
-                                    style: getEnteTextTheme(context).h3Bold,
+                                    style: EnteTheme.getTextTheme(theme).h3Bold,
                                   ),
                                 ),
                               ),

@@ -57,21 +57,3 @@ EnteTheme darkTheme = EnteTheme(
   shadowMenu: shadowMenuDark,
   shadowButton: shadowButtonDark,
 );
-
-EnteColorScheme getEnteColorScheme(
-  BuildContext context, {
-  bool inverse = false,
-}) {
-  return inverse
-      ? Theme.of(context).colorScheme.inverseEnteTheme.colorScheme
-      : Theme.of(context).colorScheme.enteTheme.colorScheme;
-}
-
-EnteTextTheme getEnteTextTheme(
-  BuildContext context, {
-  bool inverse = false,
-}) {
-  return inverse
-      ? Theme.of(context).colorScheme.inverseEnteTheme.textTheme
-      : Theme.of(context).colorScheme.enteTheme.textTheme;
-}

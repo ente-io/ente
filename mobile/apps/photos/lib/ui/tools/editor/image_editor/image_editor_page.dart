@@ -175,8 +175,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isLightMode = !EnteTheme.isDark(theme);
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
+    final textTheme = EnteTheme.getTextTheme(theme);
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) {

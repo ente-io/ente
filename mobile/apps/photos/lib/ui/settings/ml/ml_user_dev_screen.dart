@@ -33,7 +33,8 @@ class _MLUserDeveloperOptionsState extends State<MLUserDeveloperOptions> {
   late final IMLDataDB<int> mlDataDB = MLDataDB.instance;
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     return Scaffold(
       body: CustomScrollView(
         primary: false,
@@ -52,8 +53,8 @@ class _MLUserDeveloperOptionsState extends State<MLUserDeveloperOptions> {
                     Text(
                       "Only use if you know what you're doing",
                       textAlign: TextAlign.left,
-                      style: getEnteTextTheme(context).body.copyWith(
-                            color: getEnteColorScheme(context).textMuted,
+                      style: EnteTheme.getTextTheme(theme).body.copyWith(
+                            color: EnteTheme.getColorScheme(theme).textMuted,
                           ),
                     ),
                     const SizedBox(height: 48),

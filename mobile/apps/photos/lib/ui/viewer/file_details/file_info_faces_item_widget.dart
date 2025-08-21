@@ -117,7 +117,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
                   child: Center(
                     child: Text(
                       S.of(context).faces,
-                      style: getEnteTextTheme(context).small,
+                      style: EnteTheme.getTextTheme(theme).small,
                     ),
                   ),
                 ),
@@ -249,7 +249,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
               children: [
                 Text(
                   S.of(context).otherDetectedFaces,
-                  style: getEnteTextTheme(context).miniMuted,
+                  style: EnteTheme.getTextTheme(theme).miniMuted,
                 ),
                 const Spacer(),
                 Padding(
@@ -259,7 +259,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
                         ? Icons.keyboard_arrow_up
                         : Icons.keyboard_arrow_down,
                     size: 16,
-                    color: getEnteColorScheme(context).textMuted,
+                    color: EnteTheme.getColorScheme(theme).textMuted,
                   ),
                 ),
               ],
@@ -288,15 +288,15 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
                         const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
                       border: Border.all(
-                        color: getEnteColorScheme(context).primary500,
+                        color: EnteTheme.getColorScheme(theme).primary500,
                         width: 1,
                       ),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       S.of(context).done,
-                      style: getEnteTextTheme(context).small.copyWith(
-                            color: getEnteColorScheme(context).primary500,
+                      style: EnteTheme.getTextTheme(theme).small.copyWith(
+                            color: EnteTheme.getColorScheme(theme).primary500,
                           ),
                     ),
                   ),

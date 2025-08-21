@@ -84,7 +84,7 @@ class _FileFaceWidgetState extends State<FileFaceWidget> {
           return widget.thumbnailFallback
               ? ThumbnailWidget(widget.file)
               : EnteLoadingWidget(
-                  color: getEnteColorScheme(context).fillMuted,
+                  color: EnteTheme.getColorScheme(theme).fillMuted,
                 );
         }
       },

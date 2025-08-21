@@ -32,8 +32,9 @@ class _StorageDetailsScreenState extends State<StorageDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textStyle = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
+    final textStyle = EnteTheme.getTextTheme(theme);
     return Scaffold(
       body: CustomScrollView(
         primary: false,
@@ -177,8 +178,9 @@ class BonusInfoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textStyle = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
+    final textStyle = EnteTheme.getTextTheme(theme);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

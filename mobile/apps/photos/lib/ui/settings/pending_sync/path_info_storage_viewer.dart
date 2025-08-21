@@ -86,29 +86,29 @@ class _PathInfoStorageViewerState extends State<PathInfoStorageViewer> {
       captionedTextWidget: CaptionedTextWidget(
         title: widget.item.title,
         subTitle: stat != null ? '${stat.fileCount}' : null,
-        subTitleColor: getEnteColorScheme(context).textFaint,
+        subTitleColor: EnteTheme.getColorScheme(theme).textFaint,
       ),
       trailingWidget: stat != null
           ? Padding(
               padding: const EdgeInsets.only(left: 12.0),
               child: Text(
                 formatBytes(stat.size),
-                style: getEnteTextTheme(context)
+                style: EnteTheme.getTextTheme(theme)
                     .small
-                    .copyWith(color: getEnteColorScheme(context).textFaint),
+                    .copyWith(color: EnteTheme.getColorScheme(theme).textFaint),
               ),
             )
           : SizedBox.fromSize(
               size: const Size.square(14),
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                color: getEnteColorScheme(context).strokeMuted,
+                color: EnteTheme.getColorScheme(theme).strokeMuted,
               ),
             ),
       trailingIcon: err != null ? Icons.error_outline_outlined : null,
       trailingIconIsMuted: err != null,
       singleBorderRadius: 8,
-      menuItemColor: getEnteColorScheme(context).fillFaint,
+      menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,
       isBottomBorderRadiusRemoved: widget.removeBottomRadius,
       isTopBorderRadiusRemoved: widget.removeTopRadius,
       showOnlyLoadingState: true,

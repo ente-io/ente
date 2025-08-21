@@ -80,7 +80,7 @@ class _AlbumHorizontalListState extends State<AlbumHorizontalList> {
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   child: Text(
                     S.of(context).albums,
-                    style: getEnteTextTheme(context).large,
+                    style: EnteTheme.getTextTheme(theme).large,
                   ),
                 ),
                 Align(

@@ -50,8 +50,9 @@ class _ApplyCodeScreenState extends State<ApplyCodeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textStyle = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
+    final textStyle = EnteTheme.getTextTheme(theme);
     textFieldFocusNode.requestFocus();
     return Scaffold(
       body: CustomScrollView(
@@ -155,16 +156,16 @@ class _ApplyCodeScreenState extends State<ApplyCodeScreen> {
     return TextFormField(
       controller: _textController,
       focusNode: textFieldFocusNode,
-      style: getEnteTextTheme(context).body,
+      style: EnteTheme.getTextTheme(theme).body,
       inputFormatters: [UpperCaseTextFormatter()],
       textCapitalization: TextCapitalization.sentences,
       decoration: InputDecoration(
         focusedBorder: OutlineInputBorder(
           borderRadius: const BorderRadius.all(Radius.circular(4.0)),
           borderSide:
-              BorderSide(color: getEnteColorScheme(context).strokeMuted),
+              BorderSide(color: EnteTheme.getColorScheme(theme).strokeMuted),
         ),
-        fillColor: getEnteColorScheme(context).fillFaint,
+        fillColor: EnteTheme.getColorScheme(theme).fillFaint,
         filled: true,
         hintText: S.of(context).enterReferralCode,
         contentPadding: const EdgeInsets.symmetric(

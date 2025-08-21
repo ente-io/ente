@@ -74,7 +74,8 @@ class _ContactsSectionState extends State<ContactsSection> {
   @override
   Widget build(BuildContext context) {
     if (_contactSearchResults.isEmpty) {
-      final textTheme = getEnteTextTheme(context);
+      final theme = Theme.of(context);
+      final textTheme = EnteTheme.getTextTheme(theme);
       return Padding(
         padding: const EdgeInsets.only(left: 12, right: 8),
         child: Row(
@@ -166,7 +167,8 @@ class _ContactRecommendationState extends State<ContactRecommendation> {
 
   @override
   Widget build(BuildContext context) {
-    final enteTextTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final enteTextTheme = EnteTheme.getTextTheme(theme);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2.5),
       child: GestureDetector(
@@ -251,7 +253,8 @@ class ContactCTA extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enteColorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final enteColorScheme = EnteTheme.getColorScheme(theme);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2.5),
       child: GestureDetector(
@@ -289,7 +292,7 @@ class ContactCTA extends StatelessWidget {
                 const SizedBox(height: 10.5),
                 Text(
                   S.of(context).invite,
-                  style: getEnteTextTheme(context).smallFaint,
+                  style: EnteTheme.getTextTheme(theme).smallFaint,
                 ),
               ],
             ),

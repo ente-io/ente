@@ -1,3 +1,4 @@
+import "package:flutter/material.dart";
 import 'package:flutter/widgets.dart';
 import 'package:photos/theme/ente_theme.dart';
 
@@ -19,8 +20,9 @@ class ChangeLogEntryWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enteTheme = getEnteTextTheme(context);
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final enteTheme = EnteTheme.getTextTheme(theme);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

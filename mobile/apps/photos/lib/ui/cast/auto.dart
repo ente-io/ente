@@ -27,7 +27,7 @@ class _AutoCastDialogState extends State<AutoCastDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final textStyle = getEnteTextTheme(context);
+    final textStyle = EnteTheme.getTextTheme(theme);
     final AlertDialog alert = AlertDialog(
       title: Text(
         S.of(context).connectToDevice,

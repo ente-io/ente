@@ -86,7 +86,8 @@ class _EditDateSheetState extends State<EditDateSheet> {
       return const SizedBox.shrink();
     }
 
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     DateTime maxDate = DateTime.now();
     if (!selectSingleDate) {
       final maxForward = DateTime.now().difference(endDate);
@@ -262,7 +263,8 @@ class DateAndTimeWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     final locale = Localizations.localeOf(context);
     final String date = DateFormat.yMMMd(locale.toString()).format(dateTime);
     final String time = DateFormat(
@@ -446,7 +448,8 @@ class SelectDateOrShiftWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Container(
@@ -541,7 +544,8 @@ class PhotoDateHeaderWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final photoCount = enteFiles.length;
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     final locale = Localizations.localeOf(context);
     bool multipleFiles = true;
     if (photoCount == 1) {

@@ -146,8 +146,9 @@ class _TextInputWidgetState extends State<TextInputWidget> {
         }
       });
     }
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
+    final textTheme = EnteTheme.getTextTheme(theme);
     var textInputChildren = <Widget>[];
     if (widget.label != null) {
       textInputChildren.add(Text(widget.label!));
@@ -438,7 +439,8 @@ class SuffixIconWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Widget? trailingWidget;
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     if (executionState == ExecutionState.idle ||
         !shouldSurfaceExecutionStates) {
       if (isClearable) {

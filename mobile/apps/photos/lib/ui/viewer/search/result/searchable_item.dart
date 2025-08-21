@@ -30,8 +30,9 @@ class SearchableItemWidget extends StatelessWidget {
     //SearchResultPage
     const additionalPrefix = "searchable_item";
     final heroTagPrefix = additionalPrefix + searchResult.heroTag();
-    final textTheme = getEnteTextTheme(context);
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final textTheme = EnteTheme.getTextTheme(theme);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     final bool isCluster = (searchResult.type() == ResultType.faces &&
         int.tryParse(searchResult.name()) != null);
 
@@ -158,8 +159,9 @@ class SearchableItemPlaceholder extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
+    final textTheme = EnteTheme.getTextTheme(theme);
     return Padding(
       padding: const EdgeInsets.only(right: 1),
       child: GestureDetector(

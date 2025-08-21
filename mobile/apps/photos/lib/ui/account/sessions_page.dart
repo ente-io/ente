@@ -109,7 +109,7 @@ class _SessionsPageState extends State<SessionsPage> {
           ),
         ),
         Divider(
-          color: getEnteColorScheme(context).strokeFaint,
+          color: EnteTheme.getColorScheme(theme).strokeFaint,
         ),
       ],
     );

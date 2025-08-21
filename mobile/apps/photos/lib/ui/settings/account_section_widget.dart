@@ -41,7 +41,7 @@ class AccountSectionWidget extends StatelessWidget {
           captionedTextWidget: CaptionedTextWidget(
             title: S.of(context).manageSubscription,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -53,7 +53,7 @@ class AccountSectionWidget extends StatelessWidget {
           captionedTextWidget: CaptionedTextWidget(
             title: S.of(context).changeEmail,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           showOnlyLoadingState: true,
@@ -82,7 +82,7 @@ class AccountSectionWidget extends StatelessWidget {
           captionedTextWidget: CaptionedTextWidget(
             title: S.of(context).changePassword,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           showOnlyLoadingState: true,
@@ -111,7 +111,7 @@ class AccountSectionWidget extends StatelessWidget {
           captionedTextWidget: CaptionedTextWidget(
             title: S.of(context).recoveryKey,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           showOnlyLoadingState: true,
@@ -148,7 +148,7 @@ class AccountSectionWidget extends StatelessWidget {
           captionedTextWidget: CaptionedTextWidget(
             title: S.of(context).legacy,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           showOnlyLoadingState: true,
@@ -175,7 +175,7 @@ class AccountSectionWidget extends StatelessWidget {
           captionedTextWidget: CaptionedTextWidget(
             title: S.of(context).exportYourData,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -188,7 +188,7 @@ class AccountSectionWidget extends StatelessWidget {
           captionedTextWidget: CaptionedTextWidget(
             title: S.of(context).logout,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -200,7 +200,7 @@ class AccountSectionWidget extends StatelessWidget {
           captionedTextWidget: CaptionedTextWidget(
             title: S.of(context).deleteAccount,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {

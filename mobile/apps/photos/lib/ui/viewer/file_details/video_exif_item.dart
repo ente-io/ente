@@ -66,7 +66,7 @@ class _VideoProbeInfoState extends State<VideoExifRowItem> {
               ),
             ),
             topControl: const SizedBox.shrink(),
-            backgroundColor: getEnteColorScheme(context).backgroundElevated,
+            backgroundColor: EnteTheme.getColorScheme(theme).backgroundElevated,
             barrierColor: backdropFaintDark,
             enableDrag: true,
           );
@@ -79,7 +79,7 @@ class _VideoProbeInfoState extends State<VideoExifRowItem> {
       _onTap = onTap;
     });
     return Future.value([
-      Text(label, style: getEnteTextTheme(context).miniBoldMuted),
+      Text(label, style: EnteTheme.getTextTheme(theme).miniBoldMuted),
     ]);
   }
 }

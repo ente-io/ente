@@ -53,8 +53,9 @@ class _RadiusPickerWidgetState extends State<RadiusPickerWidget> {
   Widget build(BuildContext context) {
     final radiusValues = InheritedLocationTagData.of(context).radiusValues;
     final selectedRadius = widget.selectedRadiusNotifier.value;
-    final textTheme = getEnteTextTheme(context);
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final textTheme = EnteTheme.getTextTheme(theme);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     final roundedRadius = roundRadius(selectedRadius);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,

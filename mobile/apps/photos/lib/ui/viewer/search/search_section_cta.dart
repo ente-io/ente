@@ -13,8 +13,9 @@ class SearchSectionCTAIcon extends StatelessWidget {
     if (sectionType.isCTAVisible == false) {
       return const SizedBox.shrink();
     }
-    final textTheme = getEnteTextTheme(context);
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final textTheme = EnteTheme.getTextTheme(theme);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     return GestureDetector(
       onTap: sectionType.ctaOnTap(context),
       child: SizedBox(
@@ -67,8 +68,9 @@ class SearchSectionEmptyCTAIcon extends StatelessWidget {
     if (sectionType.isCTAVisible == false) {
       return const SizedBox(height: 115);
     }
-    final textTheme = getEnteTextTheme(context);
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final textTheme = EnteTheme.getTextTheme(theme);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     return GestureDetector(
       onTap: sectionType.ctaOnTap(context),
       child: Padding(

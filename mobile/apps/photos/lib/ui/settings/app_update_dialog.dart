@@ -20,8 +20,8 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> changelog = [];
-    final enteTextTheme = getEnteTextTheme(context);
-    final enteColor = getEnteColorScheme(context);
+    final enteTextTheme = EnteTheme.getTextTheme(theme);
+    final enteColor = EnteTheme.getColorScheme(theme);
     for (final log in widget.latestVersionInfo!.changelog) {
       changelog.add(
         Padding(

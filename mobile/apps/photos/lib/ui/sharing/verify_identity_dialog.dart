@@ -42,7 +42,7 @@ class _VerifyIdentifyDialogState extends State<VerifyIdentifyDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final textStyle = getEnteTextTheme(context);
+    final textStyle = EnteTheme.getTextTheme(theme);
     final String subTitle = widget.self
         ? S.of(context).thisIsYourVerificationId
         : S.of(context).thisIsPersonVerificationId(widget.email);
@@ -147,8 +147,9 @@ class _VerifyIdentifyDialogState extends State<VerifyIdentifyDialog> {
   }
 
   Widget _verificationIDWidget(BuildContext context, String publicKey) {
-    final colorScheme = getEnteColorScheme(context);
-    final textStyle = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
+    final textStyle = EnteTheme.getTextTheme(theme);
     final String verificationID = _generateVerificationID(publicKey);
     return DottedBorder(
       color: colorScheme.strokeMuted,

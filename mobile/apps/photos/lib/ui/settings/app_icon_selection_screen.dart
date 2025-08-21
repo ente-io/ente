@@ -103,7 +103,7 @@ class _AppIconSelectionScreenState extends State<AppIconSelectionScreen> {
                 )
               : SliverToBoxAdapter(
                   child: EnteLoadingWidget(
-                    color: getEnteColorScheme(context).strokeMuted,
+                    color: EnteTheme.getColorScheme(theme).strokeMuted,
                   ),
                 ),
         ],
@@ -141,7 +141,7 @@ class _AppIconTile extends StatelessWidget {
         },
         child: Container(
           decoration: BoxDecoration(
-            color: getEnteColorScheme(context).fillFaint,
+            color: EnteTheme.getColorScheme(theme).fillFaint,
             borderRadius: const BorderRadius.all(
               Radius.circular(8),
             ),
@@ -157,9 +157,9 @@ class _AppIconTile extends StatelessWidget {
                 },
                 fillColor: WidgetStateProperty.resolveWith<Color>((states) {
                   if (isSelected) {
-                    return getEnteColorScheme(context).primary700;
+                    return EnteTheme.getColorScheme(theme).primary700;
                   } else {
-                    return getEnteColorScheme(context).fillMuted;
+                    return EnteTheme.getColorScheme(theme).fillMuted;
                   }
                 }),
                 visualDensity: VisualDensity.compact,
@@ -192,8 +192,8 @@ class _AppIconTile extends StatelessWidget {
                         key: ValueKey(isSelected),
                         appIcon.name,
                         style: isSelected
-                            ? getEnteTextTheme(context).bodyBold
-                            : getEnteTextTheme(context).bodyFaint,
+                            ? EnteTheme.getTextTheme(theme).bodyBold
+                            : EnteTheme.getTextTheme(theme).bodyFaint,
                       ),
                     ),
                   ],

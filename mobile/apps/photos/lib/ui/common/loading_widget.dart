@@ -25,7 +25,7 @@ class EnteLoadingWidget extends StatelessWidget {
           child: RepaintBoundary(
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              color: color ?? getEnteColorScheme(context).strokeBase,
+              color: color ?? EnteTheme.getColorScheme(theme).strokeBase,
               strokeCap: StrokeCap.round,
             ),
           ),

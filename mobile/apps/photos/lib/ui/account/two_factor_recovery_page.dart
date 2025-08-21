@@ -28,6 +28,7 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -101,7 +102,7 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
                   style: TextStyle(
                     decoration: TextDecoration.underline,
                     fontSize: 12,
-                    color: getEnteColorScheme(context)
+                    color: EnteTheme.getColorScheme(theme)
                         .textBase
                         .withValues(alpha: 0.9),
                   ),

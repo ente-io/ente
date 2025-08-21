@@ -27,7 +27,7 @@ class SearchResultWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final heroTagPrefix = searchResult.heroTag();
     final theme = Theme.of(context);
-    final textTheme = getEnteTextTheme(context);
+    final textTheme = EnteTheme.getTextTheme(theme);
 
     return SizedBox(
       key: ValueKey(searchResult.hashCode),
@@ -37,7 +37,7 @@ class SearchResultWidget extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: const BorderRadius.all(Radius.circular(4)),
             border: Border.all(
-              color: getEnteColorScheme(context).strokeFainter,
+              color: EnteTheme.getColorScheme(theme).strokeFainter,
             ),
           ),
           child: Row(

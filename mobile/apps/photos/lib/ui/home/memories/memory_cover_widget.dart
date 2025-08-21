@@ -137,7 +137,7 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
                                 child: Center(
                                   child: Text(
                                     title,
-                                    style: getEnteTextTheme(context)
+                                    style: EnteTheme.getTextTheme(theme)
                                         .miniBold
                                         .copyWith(
                                           color: isSeen
@@ -193,7 +193,7 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
                               child: Center(
                                 child: Text(
                                   title,
-                                  style: getEnteTextTheme(context)
+                                  style: EnteTheme.getTextTheme(theme)
                                       .miniBold
                                       .copyWith(
                                         color: Colors.white,

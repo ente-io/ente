@@ -141,8 +141,8 @@ class _CollectionListPageState extends State<CollectionListPage> {
   }
 
   Widget _sortMenu(List<Collection> collections) {
-    final colorTheme = getEnteColorScheme(context);
     final theme = Theme.of(context);
+    final colorTheme = EnteTheme.getColorScheme(theme);
     final isLightMode = !EnteTheme.isDark(theme);
     Widget sortOptionText(AlbumSortKey key) {
       String text = key.toString();

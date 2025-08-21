@@ -80,7 +80,7 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
         title: themeName,
         textStyle: Theme.of(context).colorScheme.enteTheme.textTheme.body,
       ),
-      pressedColor: getEnteColorScheme(context).fillFaint,
+      pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
       isExpandable: false,
       trailingIcon: currentThemeMode == themeMode ? Icons.check : null,
       trailingExtraMargin: 4,

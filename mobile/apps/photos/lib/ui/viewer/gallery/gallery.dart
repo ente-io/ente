@@ -861,7 +861,7 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
                     );
                   },
                   child: ColoredBox(
-                    color: getEnteColorScheme(context).backgroundBase,
+                    color: EnteTheme.getColorScheme(theme).backgroundBase,
                     child: GroupHeaderWidget(
                       title: widget.galleryGroups
                           .groupIdToGroupDataMap[currentGroupId!]!.groupType

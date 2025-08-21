@@ -151,14 +151,14 @@ class _DatePickerFieldState extends State<DatePickerField> {
         focusedBorder: OutlineInputBorder(
           borderRadius: const BorderRadius.all(Radius.circular(8.0)),
           borderSide: BorderSide(
-            color: getEnteColorScheme(context).strokeMuted,
+            color: EnteTheme.getColorScheme(theme).strokeMuted,
           ),
         ),
-        fillColor: getEnteColorScheme(context).fillFaint,
+        fillColor: EnteTheme.getColorScheme(theme).fillFaint,
         filled: true,
         hintText: widget.hintText ??
             "Enter date (DD/MM/YYYY)${widget.isRequired ? '' : ' (optional)'}",
-        hintStyle: getEnteTextTheme(context).bodyFaint,
+        hintStyle: EnteTheme.getTextTheme(theme).bodyFaint,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 14,
@@ -171,8 +171,8 @@ class _DatePickerFieldState extends State<DatePickerField> {
           icon: const Icon(Icons.calendar_today),
           onPressed: _showDatePicker,
           color: _hasError
-              ? getEnteColorScheme(context).warning500
-              : getEnteColorScheme(context).strokeMuted,
+              ? EnteTheme.getColorScheme(theme).warning500
+              : EnteTheme.getColorScheme(theme).strokeMuted,
         ),
       ),
     );

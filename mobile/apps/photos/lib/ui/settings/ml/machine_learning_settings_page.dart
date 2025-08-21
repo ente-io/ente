@@ -133,14 +133,14 @@ class _MachineLearningSettingsPageState
                         child: Text(
                           S.of(context).enableMLIndexingDesc,
                           textAlign: TextAlign.left,
-                          style: getEnteTextTheme(context).small,
+                          style: EnteTheme.getTextTheme(theme).small,
                         ),
                       ),
                     Text(
                       S.of(context).mlIndexingDescription,
                       textAlign: TextAlign.left,
-                      style: getEnteTextTheme(context).mini.copyWith(
-                            color: getEnteColorScheme(context).textMuted,
+                      style: EnteTheme.getTextTheme(theme).mini.copyWith(
+                            color: EnteTheme.getColorScheme(theme).textMuted,
                           ),
                     ),
                   ],
@@ -199,8 +199,9 @@ class _MachineLearningSettingsPageState
                         Text(
                           S.of(context).magicSearchHint,
                           textAlign: TextAlign.left,
-                          style: getEnteTextTheme(context).mini.copyWith(
-                                color: getEnteColorScheme(context).textMuted,
+                          style: EnteTheme.getTextTheme(theme).mini.copyWith(
+                                color:
+                                    EnteTheme.getColorScheme(theme).textMuted,
                               ),
                         ),
                       ],
@@ -391,7 +392,7 @@ class _ModelLoadingStateState extends State<ModelLoadingState> {
           ),
           trailingWidget: EnteLoadingWidget(
             size: 12,
-            color: getEnteColorScheme(context).fillMuted,
+            color: EnteTheme.getColorScheme(theme).fillMuted,
           ),
           singleBorderRadius: 8,
           alignCaptionedTextToLeft: true,

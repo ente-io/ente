@@ -117,7 +117,8 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final enteTheme = Theme.of(context).colorScheme.enteTheme;
+    final theme = Theme.of(context);
+    final enteTheme = theme.colorScheme.enteTheme;
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -161,7 +162,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
                       TextFormField(
                         decoration: InputDecoration(
                           filled: true,
-                          fillColor: getEnteColorScheme(context).fillFaint,
+                          fillColor: EnteTheme.getColorScheme(theme).fillFaint,
                           hintText: S.of(context).enterYourRecoveryKey,
                           contentPadding: const EdgeInsets.all(20),
                           border: UnderlineInputBorder(

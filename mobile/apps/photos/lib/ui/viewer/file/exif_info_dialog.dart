@@ -11,7 +11,8 @@ class ExifInfoDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final textTheme = EnteTheme.getTextTheme(theme);
     return AlertDialog(
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

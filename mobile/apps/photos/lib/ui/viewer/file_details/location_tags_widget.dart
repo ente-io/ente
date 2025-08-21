@@ -89,7 +89,7 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
         //             ),
         //           ),
         //           backgroundColor:
-        //               getEnteColorScheme(context).backgroundElevated,
+        //               EnteTheme.getColorScheme(theme).backgroundElevated,
         //           barrierColor: backdropFaintDark,
         //           context: context,
         //           builder: (context) {
@@ -121,7 +121,7 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
       return [
         Text(
           S.of(context).groupNearbyPhotos,
-          style: getEnteTextTheme(context).miniBoldMuted,
+          style: EnteTheme.getTextTheme(theme).miniBoldMuted,
         ),
       ];
     } else {
@@ -245,7 +245,7 @@ class _InfoMapState extends State<InfoMap> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: getEnteColorScheme(context).strokeFaint,
+                            color: EnteTheme.getColorScheme(theme).strokeFaint,
                           ),
                         ),
                       ),
@@ -285,7 +285,7 @@ class _InfoMapState extends State<InfoMap> {
                                   sigmaY: 2.8,
                                 ),
                                 child: Container(
-                                  color: getEnteColorScheme(context)
+                                  color: EnteTheme.getColorScheme(theme)
                                       .backgroundElevated
                                       .withValues(alpha: 0.5),
                                 ),
@@ -294,8 +294,8 @@ class _InfoMapState extends State<InfoMap> {
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(
-                                    color:
-                                        getEnteColorScheme(context).strokeFaint,
+                                    color: EnteTheme.getColorScheme(theme)
+                                        .strokeFaint,
                                   ),
                                 ),
                               ),
@@ -315,7 +315,7 @@ class _InfoMapState extends State<InfoMap> {
                                 child: Center(
                                   child: Text(
                                     S.of(context).enableMaps,
-                                    style: getEnteTextTheme(context).small,
+                                    style: EnteTheme.getTextTheme(theme).small,
                                   ),
                                 ),
                               ),

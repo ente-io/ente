@@ -17,8 +17,9 @@ class CollectPhotosCardWidget extends StatefulWidget {
 class _CollectPhotosCardWidgetState extends State<CollectPhotosCardWidget> {
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
-    final colorTheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final textTheme = EnteTheme.getTextTheme(theme);
+    final colorTheme = EnteTheme.getColorScheme(theme);
     return Stack(
       children: [
         Positioned(

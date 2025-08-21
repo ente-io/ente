@@ -96,7 +96,7 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
               border: Border.all(
                 color: widget.thumbnailView
                     ? strokeMutedDark
-                    : getEnteColorScheme(context).strokeMuted,
+                    : EnteTheme.getColorScheme(theme).strokeMuted,
                 width: UserAvatarWidget.strokeWidth,
                 strokeAlign: BorderSide.strokeAlignOutside,
               ),
@@ -182,7 +182,8 @@ class _FirstLetterCircularAvatarState
     extends State<_FirstLetterCircularAvatar> {
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     final displayChar =
         (widget.user.displayName == null || widget.user.displayName!.isEmpty)
             ? ((widget.user.email.isEmpty)
@@ -208,7 +209,7 @@ class _FirstLetterCircularAvatarState
         border: Border.all(
           color: widget.thumbnailView
               ? strokeMutedDark
-              : getEnteColorScheme(context).strokeMuted,
+              : EnteTheme.getColorScheme(theme).strokeMuted,
           width: UserAvatarWidget.strokeWidth,
           strokeAlign: BorderSide.strokeAlignOutside,
         ),
@@ -232,7 +233,7 @@ class _FirstLetterCircularAvatarState
     BuildContext context,
     AvatarType type,
   ) {
-    final enteTextTheme = getEnteTextTheme(context);
+    final enteTextTheme = EnteTheme.getTextTheme(theme);
     switch (type) {
       case AvatarType.small:
         return Tuple2(32.0, enteTextTheme.small);
@@ -291,7 +292,8 @@ class _FirstLetterUserAvatarState extends State<FirstLetterUserAvatar> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     final displayChar = (user.displayName == null || user.displayName!.isEmpty)
         ? ((user.email.isEmpty) ? " " : user.email.substring(0, 1))
         : user.displayName!.substring(0, 1);
@@ -308,7 +310,8 @@ class _FirstLetterUserAvatarState extends State<FirstLetterUserAvatar> {
       child: Center(
         child: Text(
           displayChar.toUpperCase(),
-          style: getEnteTextTheme(context).small.copyWith(color: Colors.white),
+          style:
+              EnteTheme.getTextTheme(theme).small.copyWith(color: Colors.white),
         ),
       ),
     );

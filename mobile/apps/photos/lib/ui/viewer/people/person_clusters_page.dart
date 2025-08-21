@@ -100,7 +100,7 @@ class _PersonClustersPageState extends State<PersonClustersPage> {
                               children: <Widget>[
                                 Text(
                                   S.of(context).photosCount(files.length),
-                                  style: getEnteTextTheme(context).body,
+                                  style: EnteTheme.getTextTheme(theme).body,
                                 ),
                                 (index != 0)
                                     ? GestureDetector(
@@ -244,7 +244,7 @@ class __ClusterWrapperForGirdState extends State<_ClusterWrapperForGird> {
   bool _isVisible = false;
   @override
   Widget build(BuildContext context) {
-    final loadingColor = getEnteColorScheme(context).strokeMuted;
+    final loadingColor = EnteTheme.getColorScheme(theme).strokeMuted;
     return VisibilityDetector(
       key: ValueKey(widget.clusterID),
       onVisibilityChanged: (info) {
@@ -295,7 +295,7 @@ class __ClusterWrapperForGirdState extends State<_ClusterWrapperForGird> {
                       widget.files.length,
                       NumberFormat().format(widget.files.length),
                     ),
-                    style: getEnteTextTheme(context).small,
+                    style: EnteTheme.getTextTheme(theme).small,
                     textAlign: TextAlign.center,
                   ),
                 ],

@@ -96,10 +96,10 @@ class _EmptyAlbumStateNewState extends State<CollectPhotosBottomButtons> {
               decoration: BoxDecoration(
                 border: Border(
                   top: BorderSide(
-                    color: getEnteColorScheme(context).strokeFaint,
+                    color: EnteTheme.getColorScheme(theme).strokeFaint,
                   ),
                 ),
-                color: getEnteColorScheme(context).backgroundElevated,
+                color: EnteTheme.getColorScheme(theme).backgroundElevated,
               ),
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 15, 16, 18),
@@ -108,7 +108,8 @@ class _EmptyAlbumStateNewState extends State<CollectPhotosBottomButtons> {
                   children: [
                     Container(
                       decoration: BoxDecoration(
-                        color: getEnteColorScheme(context).backgroundElevated2,
+                        color:
+                            EnteTheme.getColorScheme(theme).backgroundElevated2,
                         borderRadius:
                             const BorderRadius.all(Radius.circular(4)),
                       ),

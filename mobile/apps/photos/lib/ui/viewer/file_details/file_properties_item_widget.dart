@@ -48,7 +48,7 @@ class _FilePropertiesItemWidgetState extends State<FilePropertiesItemWidget> {
   }
 
   Future<List<Widget>> _subTitleSection() async {
-    final textStyle = getEnteTextTheme(context).miniMuted;
+    final textStyle = EnteTheme.getTextTheme(theme).miniMuted;
     final StringBuffer dimString = StringBuffer();
     if (widget.exifData["resolution"] != null &&
         widget.exifData["megaPixels"] != null) {

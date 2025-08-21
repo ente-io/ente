@@ -488,7 +488,7 @@ class _FileSelectionActionsWidgetState
           top: Radius.circular(5),
         ),
       ),
-      backgroundColor: getEnteColorScheme(context).backgroundElevated,
+      backgroundColor: EnteTheme.getColorScheme(theme).backgroundElevated,
       barrierColor: backdropFaintDark,
       topControl: Stack(
         alignment: Alignment.bottomCenter,

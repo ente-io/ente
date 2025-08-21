@@ -34,7 +34,7 @@ class SupportSectionWidget extends StatelessWidget {
           captionedTextWidget: CaptionedTextWidget(
             title: S.of(context).contactSupport,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -51,7 +51,7 @@ class SupportSectionWidget extends StatelessWidget {
           captionedTextWidget: CaptionedTextWidget(
             title: S.of(context).suggestFeatures,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -67,7 +67,7 @@ class SupportSectionWidget extends StatelessWidget {
           captionedTextWidget: CaptionedTextWidget(
             title: S.of(context).reportABug,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {

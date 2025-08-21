@@ -44,7 +44,7 @@ Future<dynamic> showAddPhotosSheet(
       ),
     ),
     topControl: const SizedBox.shrink(),
-    backgroundColor: getEnteColorScheme(context).backgroundElevated,
+    backgroundColor: EnteTheme.getColorScheme(theme).backgroundElevated,
     barrierColor: backdropFaintDark,
     enableDrag: false,
   );
@@ -110,7 +110,7 @@ class AddPhotosPhotoWidget extends StatelessWidget {
                       decoration: BoxDecoration(
                         border: Border(
                           top: BorderSide(
-                            color: getEnteColorScheme(context).strokeFaint,
+                            color: EnteTheme.getColorScheme(theme).strokeFaint,
                           ),
                         ),
                       ),

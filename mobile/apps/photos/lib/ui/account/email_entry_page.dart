@@ -162,7 +162,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     decoration: InputDecoration(
                       fillColor: _emailIsValid
                           ? _validFieldValueColor
-                          : getEnteColorScheme(context).fillFaint,
+                          : EnteTheme.getColorScheme(theme).fillFaint,
                       filled: true,
                       hintText: S.of(context).email,
                       contentPadding: const EdgeInsets.symmetric(
@@ -207,7 +207,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     decoration: InputDecoration(
                       fillColor: _passwordIsValid
                           ? _validFieldValueColor
-                          : getEnteColorScheme(context).fillFaint,
+                          : EnteTheme.getColorScheme(theme).fillFaint,
                       filled: true,
                       hintText: S.of(context).password,
                       contentPadding: const EdgeInsets.symmetric(
@@ -273,7 +273,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     decoration: InputDecoration(
                       fillColor: _passwordsMatch && _passwordIsValid
                           ? _validFieldValueColor
-                          : getEnteColorScheme(context).fillFaint,
+                          : EnteTheme.getColorScheme(theme).fillFaint,
                       filled: true,
                       hintText: S.of(context).confirmPassword,
                       contentPadding: const EdgeInsets.symmetric(
@@ -348,7 +348,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                           Icon(
                             Icons.info_outline,
                             size: 16,
-                            color: getEnteColorScheme(context).fillStrong,
+                            color: EnteTheme.getColorScheme(theme).fillStrong,
                           ),
                         ],
                       ),
@@ -361,7 +361,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
                   child: Text(
                     S.of(context).hearUsWhereTitle,
-                    style: getEnteTextTheme(context).smallFaint,
+                    style: EnteTheme.getTextTheme(theme).smallFaint,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -370,7 +370,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   child: TextFormField(
                     style: theme.textTheme.titleMedium,
                     decoration: InputDecoration(
-                      fillColor: getEnteColorScheme(context).fillFaint,
+                      fillColor: EnteTheme.getColorScheme(theme).fillFaint,
                       filled: true,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
@@ -390,7 +390,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                         },
                         child: Icon(
                           Icons.info_outline_rounded,
-                          color: getEnteColorScheme(context).fillStrong,
+                          color: EnteTheme.getColorScheme(theme).fillStrong,
                         ),
                       ),
                     ),
@@ -404,7 +404,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                 ),
                 Divider(
                   thickness: 1,
-                  color: getEnteColorScheme(context).strokeFaint,
+                  color: EnteTheme.getColorScheme(theme).strokeFaint,
                 ),
                 const SizedBox(height: 12),
                 _getAgreement(theme),

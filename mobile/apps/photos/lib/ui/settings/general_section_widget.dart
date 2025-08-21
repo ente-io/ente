@@ -40,7 +40,7 @@ class GeneralSectionWidget extends StatelessWidget {
           captionedTextWidget: CaptionedTextWidget(
             title: S.of(context).gallery,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -52,7 +52,7 @@ class GeneralSectionWidget extends StatelessWidget {
           captionedTextWidget: CaptionedTextWidget(
             title: S.of(context).memories,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -64,7 +64,7 @@ class GeneralSectionWidget extends StatelessWidget {
           captionedTextWidget: CaptionedTextWidget(
             title: S.of(context).referrals,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -80,7 +80,7 @@ class GeneralSectionWidget extends StatelessWidget {
           captionedTextWidget: CaptionedTextWidget(
             title: S.of(context).familyPlans,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           showOnlyLoadingState: true,
@@ -92,7 +92,7 @@ class GeneralSectionWidget extends StatelessWidget {
         MenuItemWidget(
           captionedTextWidget:
               CaptionedTextWidget(title: S.of(context).language),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -116,7 +116,7 @@ class GeneralSectionWidget extends StatelessWidget {
           captionedTextWidget: CaptionedTextWidget(
             title: S.of(context).notifications,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -128,7 +128,7 @@ class GeneralSectionWidget extends StatelessWidget {
           captionedTextWidget: CaptionedTextWidget(
             title: S.of(context).widgets,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -140,7 +140,7 @@ class GeneralSectionWidget extends StatelessWidget {
           captionedTextWidget: CaptionedTextWidget(
             title: S.of(context).advanced,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {

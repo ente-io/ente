@@ -258,7 +258,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
     setState(() {
       if (widget.pressedColor == null) {
         hasPassedGestureCallbacks()
-            ? menuItemColor = getEnteColorScheme(context).fillFaintPressed
+            ? menuItemColor = EnteTheme.getColorScheme(theme).fillFaintPressed
             : menuItemColor = widget.menuItemColor;
       } else {
         menuItemColor = widget.pressedColor;

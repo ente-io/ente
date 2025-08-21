@@ -30,8 +30,9 @@ class PeopleBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
+    final textTheme = EnteTheme.getTextTheme(theme);
     Color backgroundColor = colorScheme.backgroundElevated2;
     final TextStyle mainTextStyle = textTheme.bodyBold;
     final TextStyle subTextStyle = textTheme.miniMuted;

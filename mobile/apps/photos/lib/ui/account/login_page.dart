@@ -167,7 +167,7 @@ class _LoginPageState extends State<LoginPage> {
                   padding: const EdgeInsets.symmetric(vertical: 18),
                   child: Divider(
                     thickness: 1,
-                    color: getEnteColorScheme(context).strokeFaint,
+                    color: EnteTheme.getColorScheme(theme).strokeFaint,
                   ),
                 ),
                 Padding(
@@ -238,7 +238,7 @@ class _LoginPageState extends State<LoginPage> {
     if (_emailIsValid) {
       _emailInputFieldColor = const Color.fromRGBO(45, 194, 98, 0.2);
     } else {
-      _emailInputFieldColor = getEnteColorScheme(context).fillFaint;
+      _emailInputFieldColor = EnteTheme.getColorScheme(theme).fillFaint;
     }
   }
 }

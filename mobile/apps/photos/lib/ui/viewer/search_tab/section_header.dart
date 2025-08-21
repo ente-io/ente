@@ -11,6 +11,7 @@ class SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: () {
         if (hasMore) {
@@ -29,7 +30,7 @@ class SectionHeader extends StatelessWidget {
             padding: const EdgeInsets.all(12),
             child: Text(
               sectionType.sectionTitle(context),
-              style: getEnteTextTheme(context).largeBold,
+              style: EnteTheme.getTextTheme(theme).largeBold,
             ),
           ),
           hasMore
@@ -39,7 +40,7 @@ class SectionHeader extends StatelessWidget {
                     padding: const EdgeInsets.fromLTRB(24, 12, 12, 12),
                     child: Icon(
                       Icons.chevron_right_outlined,
-                      color: getEnteColorScheme(context).blurStrokePressed,
+                      color: EnteTheme.getColorScheme(theme).blurStrokePressed,
                     ),
                   ),
                 )

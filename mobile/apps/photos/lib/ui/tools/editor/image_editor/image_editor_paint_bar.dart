@@ -65,7 +65,7 @@ class _ImageEditorPaintBarState extends State<ImageEditorPaintBar>
                 padding: const EdgeInsets.only(left: 20.0),
                 child: Text(
                   S.of(context).brushColor,
-                  style: getEnteTextTheme(context).body,
+                  style: EnteTheme.getTextTheme(theme).body,
                 ),
               ),
               const SizedBox(height: 24),

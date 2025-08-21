@@ -307,7 +307,7 @@ class FileAppBarState extends State<FileAppBar> {
             SvgPicture.asset(
               "assets/icons/guest_view_icon.svg",
               colorFilter: ColorFilter.mode(
-                getEnteColorScheme(context).textBase,
+                EnteTheme.getColorScheme(theme).textBase,
                 BlendMode.srcIn,
               ),
             ),

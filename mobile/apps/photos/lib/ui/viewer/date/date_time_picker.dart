@@ -10,7 +10,8 @@ Future<DateTime?> showDatePickerSheet(
   DateTime? minDate,
   bool startWithTime = false,
 }) async {
-  final colorScheme = getEnteColorScheme(context);
+  final theme = Theme.of(context);
+  final colorScheme = EnteTheme.getColorScheme(theme);
   final sheet = Container(
     decoration: BoxDecoration(
       color: colorScheme.backgroundElevated,
@@ -77,7 +78,8 @@ class _DateTimePickerWidgetState extends State<DateTimePickerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     return Container(
       color: colorScheme.backgroundElevated,
       child: Column(

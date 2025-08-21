@@ -40,7 +40,8 @@ class _BlurMenuItemWidgetState extends State<BlurMenuItemWidget> {
   @override
   Widget build(BuildContext context) {
     isDisabled = (widget.onTap == null);
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     return GestureDetector(
       onTap: widget.onTap,
       onTapDown: _onTapDown,
@@ -77,12 +78,13 @@ class _BlurMenuItemWidgetState extends State<BlurMenuItemWidget> {
                                 widget.labelText!,
                                 overflow: TextOverflow.ellipsis,
                                 maxLines: 1,
-                                style:
-                                    getEnteTextTheme(context).bodyBold.copyWith(
-                                          color: isDisabled
-                                              ? colorScheme.textFaint
-                                              : colorScheme.blurTextBase,
-                                        ),
+                                style: EnteTheme.getTextTheme(theme)
+                                    .bodyBold
+                                    .copyWith(
+                                      color: isDisabled
+                                          ? colorScheme.textFaint
+                                          : colorScheme.blurTextBase,
+                                    ),
                               ),
                             ),
                           ],

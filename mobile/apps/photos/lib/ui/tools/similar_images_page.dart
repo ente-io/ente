@@ -114,8 +114,9 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   }
 
   Widget _getSetupView() {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
+    final textTheme = EnteTheme.getTextTheme(theme);
 
     return Padding(
       padding: const EdgeInsets.all(24),
@@ -247,8 +248,9 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   }
 
   Widget _getResultsView() {
-    final textTheme = getEnteTextTheme(context);
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final textTheme = EnteTheme.getTextTheme(theme);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     if (_similarFilesList.isEmpty) {
       return Center(
         child: Column(
@@ -371,7 +373,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
               vertical: 8,
             ),
             decoration: BoxDecoration(
-              color: getEnteColorScheme(context).backgroundBase,
+              color: EnteTheme.getColorScheme(theme).backgroundBase,
             ),
             child: AnimatedSwitcher(
               duration: Duration.zero,
@@ -612,7 +614,8 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   }
 
   Widget _buildSimilarFilesGroup(SimilarFiles similarFiles) {
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final textTheme = EnteTheme.getTextTheme(theme);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: crossAxisSpacing),
       child: Column(
@@ -684,7 +687,8 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     List<EnteFile> allFiles,
     int index,
   ) {
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final textTheme = EnteTheme.getTextTheme(theme);
     return ListenableBuilder(
       listenable: _selectedFiles,
       builder: (context, _) {
@@ -807,8 +811,9 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   }
 
   Widget _getSmallDeleteButton(Set<EnteFile> files, bool showDialog) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
+    final textTheme = EnteTheme.getTextTheme(theme);
 
     if (files.isEmpty) {
       return const SizedBox.shrink();
@@ -937,8 +942,9 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   }
 
   Widget _getSortMenu() {
-    final textTheme = getEnteTextTheme(context);
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final textTheme = EnteTheme.getTextTheme(theme);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     Text sortOptionText(SortKey key) {
       String text = key.toString();
       switch (key) {

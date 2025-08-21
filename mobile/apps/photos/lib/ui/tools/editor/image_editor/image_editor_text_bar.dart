@@ -148,7 +148,8 @@ class _FontPickerWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     if (editor.textEditorConfigs.customTextStyles == null) {
       return const SizedBox.shrink();
     }
@@ -204,7 +205,7 @@ class _BackgroundPickerWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = getEnteColorScheme(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     final isLightMode = !EnteTheme.isDark(theme);
     final backgroundStyles = {
       LayerBackgroundMode.background: {
@@ -323,7 +324,8 @@ class _AlignPickerWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     final alignments = [
       (TextAlign.left, "assets/image-editor/image-editor-text-align-left.svg"),
       (

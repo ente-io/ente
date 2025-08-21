@@ -79,8 +79,9 @@ class _OtherContactPageState extends State<OtherContactPage> {
       );
       waitTill = getFormattedTime(context, dateTime);
     }
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
+    final textTheme = EnteTheme.getTextTheme(theme);
     return Scaffold(
       appBar: AppBar(),
       body: Padding(
@@ -225,7 +226,7 @@ class _OtherContactPageState extends State<OtherContactPage> {
               ),
               leadingIcon: Icons.not_interested_outlined,
               leadingIconColor: warning500,
-              menuItemColor: getEnteColorScheme(context).fillFaint,
+              menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,
               surfaceExecutionStates: false,
               onTap: () async {
                 await showRemoveSheet();

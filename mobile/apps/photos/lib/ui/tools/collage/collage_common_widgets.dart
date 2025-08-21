@@ -16,7 +16,7 @@ class CollageLayoutHeading extends StatelessWidget {
         child: Text(
           S.of(context).collageLayout,
           style: TextStyle(
-            color: getEnteColorScheme(context).textBase,
+            color: EnteTheme.getColorScheme(theme).textBase,
           ),
         ),
       ),

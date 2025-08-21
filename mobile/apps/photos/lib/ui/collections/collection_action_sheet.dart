@@ -108,7 +108,7 @@ void showCollectionActionSheet(
       ),
     ),
     topControl: const SizedBox.shrink(),
-    backgroundColor: getEnteColorScheme(context).backgroundElevated,
+    backgroundColor: EnteTheme.getColorScheme(theme).backgroundElevated,
     barrierColor: backdropFaintDark,
     enableDrag: true,
   );
@@ -241,7 +241,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                         border: Border(
                           top: BorderSide(
                             color: _enableSelection
-                                ? getEnteColorScheme(context).strokeFaint
+                                ? EnteTheme.getColorScheme(theme).strokeFaint
                                 : Colors.transparent,
                           ),
                         ),

@@ -178,7 +178,7 @@ class MapAttributionWidgetState extends State<MapAttributionWidget> {
                       onTap: close,
                       icon: Icons.cancel_outlined,
                       iconButtonType: IconButtonType.primary,
-                      iconColor: getEnteColorScheme(context).strokeBase,
+                      iconColor: EnteTheme.getColorScheme(theme).strokeBase,
                     ))(
                 context,
                 () => setState(() => popupExpanded = false),

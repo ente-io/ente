@@ -207,7 +207,7 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
                                 loadingWidget: Column(
                                   children: [
                                     EnteLoadingWidget(
-                                      color: getEnteColorScheme(context)
+                                      color: EnteTheme.getColorScheme(theme)
                                           .strokeMuted,
                                     ),
                                   ],

@@ -36,7 +36,7 @@ class MapGalleryTileBadge extends StatelessWidget {
         ),
         child: Text(
           formatNumber(size),
-          style: getEnteTextTheme(context).tinyBold,
+          style: EnteTheme.getTextTheme(theme).tinyBold,
         ),
       ),
     );

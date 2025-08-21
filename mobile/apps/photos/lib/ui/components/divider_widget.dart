@@ -24,14 +24,14 @@ class DividerWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dividerColor = divColorHasBlur
-        ? getEnteColorScheme(context).blurStrokeFaint
-        : getEnteColorScheme(context).strokeFaint;
+        ? EnteTheme.getColorScheme(theme).blurStrokeFaint
+        : EnteTheme.getColorScheme(theme).strokeFaint;
 
     if (dividerType == DividerType.solid) {
       return Padding(
         padding: padding ?? EdgeInsets.zero,
         child: Container(
-          color: getEnteColorScheme(context).strokeFaint,
+          color: EnteTheme.getColorScheme(theme).strokeFaint,
           width: double.infinity,
           height: 1,
         ),

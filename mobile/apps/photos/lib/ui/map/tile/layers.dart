@@ -60,12 +60,12 @@ class OSMFranceTileAttributes extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context).tinyBold;
+    final textTheme = EnteTheme.getTextTheme(theme).tinyBold;
     return MapAttributionWidget(
       alignment: AttributionAlignment.bottomLeft,
       showFlutterMapAttribution: false,
       permanentHeight: options.permanentHeight,
-      popupBackgroundColor: getEnteColorScheme(context).backgroundElevated,
+      popupBackgroundColor: EnteTheme.getColorScheme(theme).backgroundElevated,
       popupBorderRadius: options.popupBorderRadius,
       iconSize: options.iconSize,
       attributions: [

@@ -44,7 +44,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
     final double dropDownTextSize = MediaQuery.of(context).size.width - 120;
 
     final theme = Theme.of(context);
-    final colorScheme = getEnteColorScheme(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -69,7 +69,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Text(
                   S.of(context).askDeleteReason,
-                  style: getEnteTextTheme(context).body,
+                  style: EnteTheme.getTextTheme(theme).body,
                 ),
               ),
               const SizedBox(height: 8),
@@ -99,7 +99,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                         width: dropDownTextSize,
                         child: Text(
                           value,
-                          style: getEnteTextTheme(context).smallMuted,
+                          style: EnteTheme.getTextTheme(theme).smallMuted,
                           overflow: TextOverflow.visible,
                         ),
                       ),
@@ -112,12 +112,12 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Text(
                   S.of(context).deleteAccountFeedbackPrompt,
-                  style: getEnteTextTheme(context).body,
+                  style: EnteTheme.getTextTheme(theme).body,
                 ),
               ),
               const SizedBox(height: 8),
               TextFormField(
-                style: getEnteTextTheme(context).smallMuted,
+                style: EnteTheme.getTextTheme(theme).smallMuted,
                 decoration: InputDecoration(
                   enabledBorder: OutlineInputBorder(
                     borderSide:
@@ -155,7 +155,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                         alignment: Alignment.centerLeft,
                         child: Text(
                           S.of(context).kindlyHelpUsWithThisInformation,
-                          style: getEnteTextTheme(context)
+                          style: EnteTheme.getTextTheme(theme)
                               .smallBold
                               .copyWith(color: colorScheme.warning700),
                         ),
@@ -186,7 +186,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         child: Text(
                           S.of(context).confirmDeletePrompt,
-                          style: getEnteTextTheme(context).bodyMuted,
+                          style: EnteTheme.getTextTheme(theme).bodyMuted,
                           textAlign: TextAlign.left,
                         ),
                       ),

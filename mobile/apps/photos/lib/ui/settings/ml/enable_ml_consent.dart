@@ -54,8 +54,8 @@ class _EnableMachineLearningConsentState
                     Text(
                       S.of(context).mlConsentDescription,
                       textAlign: TextAlign.left,
-                      style: getEnteTextTheme(context).body.copyWith(
-                            color: getEnteColorScheme(context).textMuted,
+                      style: EnteTheme.getTextTheme(theme).body.copyWith(
+                            color: EnteTheme.getColorScheme(theme).textMuted,
                           ),
                     ),
                     const SizedBox(height: 12),
@@ -75,8 +75,8 @@ class _EnableMachineLearningConsentState
                       child: Text(
                         S.of(context).mlConsentPrivacy,
                         textAlign: TextAlign.left,
-                        style: getEnteTextTheme(context).body.copyWith(
-                              color: getEnteColorScheme(context).textMuted,
+                        style: EnteTheme.getTextTheme(theme).body.copyWith(
+                              color: EnteTheme.getColorScheme(theme).textMuted,
                               decoration: TextDecoration.underline,
                             ),
                       ),
@@ -106,7 +106,7 @@ class _EnableMachineLearningConsentState
                               },
                               child: Text(
                                 S.of(context).mlConsentConfirmation,
-                                style: getEnteTextTheme(context).bodyMuted,
+                                style: EnteTheme.getTextTheme(theme).bodyMuted,
                                 textAlign: TextAlign.left,
                               ),
                             ),

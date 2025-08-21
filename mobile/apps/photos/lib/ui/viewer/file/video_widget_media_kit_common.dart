@@ -326,7 +326,7 @@ class SeekBarAndDuration extends StatelessWidget {
                         file.caption!,
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
-                        style: getEnteTextTheme(context)
+                        style: EnteTheme.getTextTheme(theme)
                             .mini
                             .copyWith(color: textBaseDark),
                       ),
@@ -341,18 +341,14 @@ class SeekBarAndDuration extends StatelessWidget {
                     if (snapshot.data == null) {
                       return Text(
                         "0:00",
-                        style: getEnteTextTheme(
-                          context,
-                        ).mini.copyWith(
+                        style: EnteTheme.getTextTheme(theme).mini.copyWith(
                               color: textBaseDark,
                             ),
                       );
                     }
                     return Text(
                       secondsToDuration(snapshot.data!.inSeconds),
-                      style: getEnteTextTheme(
-                        context,
-                      ).mini.copyWith(
+                      style: EnteTheme.getTextTheme(theme).mini.copyWith(
                             color: textBaseDark,
                           ),
                     );
@@ -368,9 +364,7 @@ class SeekBarAndDuration extends StatelessWidget {
                   _secondsToDuration(
                     controller!.player.state.duration.inSeconds,
                   ),
-                  style: getEnteTextTheme(
-                    context,
-                  ).mini.copyWith(
+                  style: EnteTheme.getTextTheme(theme).mini.copyWith(
                         color: textBaseDark,
                       ),
                 ),

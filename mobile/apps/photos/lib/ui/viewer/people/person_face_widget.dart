@@ -97,7 +97,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
             );
           }
           return EnteLoadingWidget(
-            color: getEnteColorScheme(context).fillMuted,
+            color: EnteTheme.getColorScheme(theme).fillMuted,
           );
         }
       },

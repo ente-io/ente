@@ -47,7 +47,7 @@ class GoToMap extends StatelessWidget {
               maxLines: 2,
               textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,
-              style: getEnteTextTheme(context).mini,
+              style: EnteTheme.getTextTheme(theme).mini,
             ),
           ],
         ),

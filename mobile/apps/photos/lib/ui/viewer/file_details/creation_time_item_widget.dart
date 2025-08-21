@@ -30,7 +30,7 @@ class _CreationTimeItemState extends State<CreationTimeItem> {
       subtitleSection: Future.value([
         Text(
           getTimeIn12hrFormat(dateTime) + "  " + dateTime.timeZoneName,
-          style: getEnteTextTheme(context).miniMuted,
+          style: EnteTheme.getTextTheme(theme).miniMuted,
         ),
       ]),
       editOnTap: ((widget.file.ownerID == null ||

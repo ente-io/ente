@@ -18,8 +18,9 @@ class TitleBarTitleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
-    final colorTheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final textTheme = EnteTheme.getTextTheme(theme);
+    final colorTheme = EnteTheme.getColorScheme(theme);
     if (title != null) {
       late final Widget widget;
       if (icon != null) {

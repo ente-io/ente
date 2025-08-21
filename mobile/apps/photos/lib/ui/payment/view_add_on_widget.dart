@@ -18,7 +18,7 @@ class ViewAddOnButton extends StatelessWidget {
     if (bonusData?.getAddOnBonuses().isEmpty ?? true) {
       return const SizedBox.shrink();
     }
-    final EnteColorScheme colorScheme = getEnteColorScheme(context);
+    final EnteColorScheme colorScheme = EnteTheme.getColorScheme(theme);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 2, 16, 2),
       child: MenuItemWidget(

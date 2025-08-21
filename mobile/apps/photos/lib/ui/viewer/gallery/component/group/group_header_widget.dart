@@ -67,8 +67,9 @@ class _GroupHeaderWidgetState extends State<GroupHeaderWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
+    final textTheme = EnteTheme.getTextTheme(theme);
     final textStyle =
         widget.gridSize < photoGridSizeMax ? textTheme.body : textTheme.small;
     final double horizontalPadding =
@@ -228,7 +229,7 @@ class _GroupHeaderWidgetState extends State<GroupHeaderWidget> {
   void _showLayoutSettingsOverflowMenu(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: getEnteColorScheme(context).backgroundElevated,
+      backgroundColor: EnteTheme.getColorScheme(theme).backgroundElevated,
       builder: (BuildContext context) {
         return const GalleryLayoutSettings();
       },

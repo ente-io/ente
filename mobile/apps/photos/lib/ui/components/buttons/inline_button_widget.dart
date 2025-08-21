@@ -13,7 +13,7 @@ class InlineButtonWidget extends StatelessWidget {
       onTap: onTap?.call,
       child: Text(
         label,
-        style: textStyle ?? getEnteTextTheme(context).smallMuted,
+        style: textStyle ?? EnteTheme.getTextTheme(theme).smallMuted,
       ),
     );
   }

@@ -32,7 +32,7 @@ class VideoExifDialog extends StatelessWidget {
       data: theme.copyWith(dividerColor: Colors.transparent),
       child: ExpansionTile(
         initiallyExpanded: false,
-        title: Text(title, style: getEnteTextTheme(context).body),
+        title: Text(title, style: EnteTheme.getTextTheme(theme).body),
         childrenPadding: EdgeInsets.zero, // Remove padding around children
         tilePadding: EdgeInsets.zero,
         collapsedShape: const Border(), // Remove border when collapsed
@@ -48,7 +48,7 @@ class VideoExifDialog extends StatelessWidget {
       children: [
         Text(
           context.l10n.videoInfo,
-          style: getEnteTextTheme(context).large,
+          style: EnteTheme.getTextTheme(theme).large,
         ),
         _buildInfoRow(context, 'Creation Time', props, 'creation_time'),
         _buildInfoRow(context, 'Duration', props, 'duration'),
@@ -104,7 +104,7 @@ class VideoExifDialog extends StatelessWidget {
     return ExpansionTile(
       title: Text(
         titleString,
-        style: getEnteTextTheme(context).small,
+        style: EnteTheme.getTextTheme(theme).small,
       ),
       childrenPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 4),
       tilePadding: EdgeInsets.zero,
@@ -159,7 +159,7 @@ class VideoExifDialog extends StatelessWidget {
               width: 150,
               child: Text(
                 rowName,
-                style: getEnteTextTheme(context).smallMuted,
+                style: EnteTheme.getTextTheme(theme).smallMuted,
               ),
             ),
             Expanded(child: Text(value.toString())),

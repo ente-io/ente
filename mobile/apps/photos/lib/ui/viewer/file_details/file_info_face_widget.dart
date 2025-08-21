@@ -84,7 +84,7 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
                     ),
                     side: widget.highlight
                         ? BorderSide(
-                            color: getEnteColorScheme(context).primary700,
+                            color: EnteTheme.getColorScheme(theme).primary700,
                             width: 1.0,
                           )
                         : BorderSide.none,
@@ -290,18 +290,18 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
           height: 20,
           decoration: BoxDecoration(
             color: hasPerson
-                ? getEnteColorScheme(context).warning500
-                : getEnteColorScheme(context).primary500,
+                ? EnteTheme.getColorScheme(theme).warning500
+                : EnteTheme.getColorScheme(theme).primary500,
             shape: BoxShape.circle,
             border: Border.all(
-              color: getEnteColorScheme(context).backgroundBase,
+              color: EnteTheme.getColorScheme(theme).backgroundBase,
               width: 2,
             ),
           ),
           child: Icon(
             hasPerson ? Icons.remove : Icons.add,
             size: 12,
-            color: getEnteColorScheme(context).backgroundBase,
+            color: EnteTheme.getColorScheme(theme).backgroundBase,
           ),
         ),
       ),

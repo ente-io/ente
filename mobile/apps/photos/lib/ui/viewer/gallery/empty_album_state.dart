@@ -58,7 +58,7 @@ class EmptyAlbumState extends StatelessWidget {
                           TextSpan(
                             text: S.of(context).addSomePhotosDesc2,
                             style: TextStyle(
-                              color: getEnteColorScheme(context).primary500,
+                              color: EnteTheme.getColorScheme(theme).primary500,
                             ),
                           ),
                           TextSpan(
@@ -66,7 +66,7 @@ class EmptyAlbumState extends StatelessWidget {
                           ),
                         ],
                       ),
-                      style: getEnteTextTheme(context).smallMuted,
+                      style: EnteTheme.getTextTheme(theme).smallMuted,
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 140),

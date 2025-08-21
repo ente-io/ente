@@ -15,8 +15,8 @@ class CollageItemIcon extends StatelessWidget {
       decoration: BoxDecoration(
         border: Border.all(
           color: isActive
-              ? getEnteColorScheme(context).strokeBase
-              : getEnteColorScheme(context).strokeMuted,
+              ? EnteTheme.getColorScheme(theme).strokeBase
+              : EnteTheme.getColorScheme(theme).strokeMuted,
           width: 2,
         ),
         borderRadius: const BorderRadius.all(Radius.circular(2)),

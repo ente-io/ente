@@ -35,7 +35,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         captionedTextWidget: CaptionedTextWidget(
           title: S.of(context).backedUpFolders,
         ),
-        pressedColor: getEnteColorScheme(context).fillFaint,
+        pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
         onTap: () async {
@@ -52,7 +52,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         captionedTextWidget: CaptionedTextWidget(
           title: S.of(context).backupStatus,
         ),
-        pressedColor: getEnteColorScheme(context).fillFaint,
+        pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
         onTap: () async {
@@ -67,7 +67,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         captionedTextWidget: CaptionedTextWidget(
           title: S.of(context).backupSettings,
         ),
-        pressedColor: getEnteColorScheme(context).fillFaint,
+        pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
         onTap: () async {
@@ -86,7 +86,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           captionedTextWidget: CaptionedTextWidget(
             title: S.of(context).freeUpSpace,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           showOnlyLoadingState: true,

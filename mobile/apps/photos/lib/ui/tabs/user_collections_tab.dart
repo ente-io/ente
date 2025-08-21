@@ -156,7 +156,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                 trailingWidget: IconButtonWidget(
                   icon: Icons.chevron_right,
                   iconButtonType: IconButtonType.secondary,
-                  iconColor: getEnteColorScheme(context).blurStrokePressed,
+                  iconColor: EnteTheme.getColorScheme(theme).blurStrokePressed,
                 ),
               ),
             ),
@@ -181,7 +181,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                 trailingWidget: IconButtonWidget(
                   icon: Icons.chevron_right,
                   iconButtonType: IconButtonType.secondary,
-                  iconColor: getEnteColorScheme(context).blurStrokePressed,
+                  iconColor: EnteTheme.getColorScheme(theme).blurStrokePressed,
                 ),
               ),
             ),
@@ -198,7 +198,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                 : const SliverToBoxAdapter(child: EmptyState()),
             SliverToBoxAdapter(
               child: Divider(
-                color: getEnteColorScheme(context).strokeFaint,
+                color: EnteTheme.getColorScheme(theme).strokeFaint,
               ),
             ),
             const SliverToBoxAdapter(child: SizedBox(height: 12)),

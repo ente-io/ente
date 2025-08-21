@@ -72,7 +72,8 @@ class _LocationsSectionState extends State<LocationsSection> {
   @override
   Widget build(BuildContext context) {
     if (_locationsSearchResults.isEmpty) {
-      final textTheme = getEnteTextTheme(context);
+      final theme = Theme.of(context);
+      final textTheme = EnteTheme.getTextTheme(theme);
       return Padding(
         padding: const EdgeInsets.only(left: 12, right: 8),
         child: Row(
@@ -159,7 +160,8 @@ class LocationRecommendation extends StatelessWidget {
   Widget build(BuildContext context) {
     final heroTag = locationSearchResult.heroTag() +
         (locationSearchResult.previewThumbnail()?.tag ?? "");
-    final enteTextTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final enteTextTheme = EnteTheme.getTextTheme(theme);
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: max(0, 2.5 - outerStrokeWidth)),
       child: GestureDetector(
@@ -372,7 +374,7 @@ class GoToMapWithBG extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enteTextTheme = getEnteTextTheme(context);
+    final enteTextTheme = EnteTheme.getTextTheme(theme);
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: max(0, 2.5 - LocationRecommendation.outerStrokeWidth),
@@ -493,8 +495,9 @@ class LocationCTA extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enteTextTheme = getEnteTextTheme(context);
-    final enteColorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final enteTextTheme = EnteTheme.getTextTheme(theme);
+    final enteColorScheme = EnteTheme.getColorScheme(theme);
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: max(0, 2.5 - LocationRecommendation.outerStrokeWidth),

@@ -43,7 +43,7 @@ class DeviceFolderItem extends StatelessWidget {
                     cornerSmoothing: _cornerSmoothing,
                   ),
                   child: Container(
-                    color: getEnteColorScheme(context).strokeFaint,
+                    color: EnteTheme.getColorScheme(theme).strokeFaint,
                     width: sideOfThumbnail,
                     height: sideOfThumbnail,
                   ),

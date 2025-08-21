@@ -147,9 +147,9 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
                                 type: AvatarType.mini,
                               ),
                               menuItemColor:
-                                  getEnteColorScheme(context).fillFaint,
+                                  EnteTheme.getColorScheme(theme).fillFaint,
                               pressedColor:
-                                  getEnteColorScheme(context).fillFaint,
+                                  EnteTheme.getColorScheme(theme).fillFaint,
                               trailingIcon:
                                   (_selectedEmail == currentUser.email)
                                       ? Icons.check
@@ -171,8 +171,8 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
                                 ? const SizedBox.shrink()
                                 : DividerWidget(
                                     dividerType: DividerType.menu,
-                                    bgColor:
-                                        getEnteColorScheme(context).fillFaint,
+                                    bgColor: EnteTheme.getColorScheme(theme)
+                                        .fillFaint,
                                   ),
                           ],
                         );

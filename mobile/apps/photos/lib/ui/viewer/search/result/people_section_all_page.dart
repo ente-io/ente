@@ -146,6 +146,7 @@ class SelectablePersonSearchExample extends StatelessWidget {
     final borderRadius = 82 * (size / 102);
     final bool isCluster = (searchResult.type() == ResultType.faces &&
         int.tryParse(searchResult.name()) != null);
+    final theme = Theme.of(context);
 
     return ListenableBuilder(
       listenable: selectedPeople,
@@ -180,7 +181,7 @@ class SelectablePersonSearchExample extends StatelessWidget {
                       width: size,
                       height: size,
                       decoration: BoxDecoration(
-                        color: getEnteColorScheme(context).strokeFaint,
+                        color: EnteTheme.getColorScheme(theme).strokeFaint,
                       ),
                     ),
                   ),
@@ -282,7 +283,7 @@ class SelectablePersonSearchExample extends StatelessWidget {
                           maxLines: 1,
                           textAlign: TextAlign.center,
                           overflow: TextOverflow.ellipsis,
-                          style: getEnteTextTheme(context).small,
+                          style: EnteTheme.getTextTheme(theme).small,
                         ),
                       ),
                     )
@@ -293,7 +294,7 @@ class SelectablePersonSearchExample extends StatelessWidget {
                         maxLines: 1,
                         textAlign: TextAlign.center,
                         overflow: TextOverflow.ellipsis,
-                        style: getEnteTextTheme(context).small,
+                        style: EnteTheme.getTextTheme(theme).small,
                       ),
                     ),
             ],
@@ -440,7 +441,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final smallFontSize = getEnteTextTheme(context).small.fontSize!;
+    final smallFontSize = EnteTheme.getTextTheme(theme).small.fontSize!;
     final textScaleFactor =
         MediaQuery.textScalerOf(context).scale(smallFontSize) / smallFontSize;
     const horizontalEdgePadding = 20.0;
@@ -612,7 +613,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                 _showingAllFaces
                     ? S.of(context).showLessFaces
                     : S.of(context).showMoreFaces,
-                style: getEnteTextTheme(context).small.copyWith(
+                style: EnteTheme.getTextTheme(theme).small.copyWith(
                       color: theme.colorScheme.primary,
                     ),
               ),

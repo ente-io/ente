@@ -96,7 +96,7 @@ class _AutoLockItemsState extends State<AutoLockItems> {
       items,
       DividerWidget(
         dividerType: DividerType.menuNoIcon,
-        bgColor: getEnteColorScheme(context).fillFaint,
+        bgColor: EnteTheme.getColorScheme(theme).fillFaint,
       ),
     );
     return Column(
@@ -108,7 +108,7 @@ class _AutoLockItemsState extends State<AutoLockItems> {
   Widget _menuItemForPicker(Duration autoLockTime) {
     return MenuItemWidget(
       key: ValueKey(autoLockTime),
-      menuItemColor: getEnteColorScheme(context).fillFaint,
+      menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,
       captionedTextWidget: CaptionedTextWidget(
         title: _formatTime(autoLockTime),
       ),

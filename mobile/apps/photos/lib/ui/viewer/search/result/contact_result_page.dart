@@ -208,6 +208,7 @@ class _AlbumsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 24, top: 8),
       child: Column(
@@ -217,7 +218,7 @@ class _AlbumsSection extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Text(
               S.of(context).albums,
-              style: getEnteTextTheme(context).large,
+              style: EnteTheme.getTextTheme(theme).large,
             ),
           ),
           Align(

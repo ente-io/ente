@@ -51,12 +51,12 @@ class _FaceFilterChipState extends State<FaceFilterChip> {
           },
           child: Container(
             decoration: BoxDecoration(
-              color: getEnteColorScheme(context).fillFaint,
+              color: EnteTheme.getColorScheme(theme).fillFaint,
               borderRadius: BorderRadius.all(
                 Radius.circular(kFilterChipHeight * scale / 2),
               ),
               border: Border.all(
-                color: getEnteColorScheme(context).strokeFaint,
+                color: EnteTheme.getColorScheme(theme).strokeFaint,
                 width: widget.isInAllFiltersView ? 1 : 0.5,
               ),
             ),
@@ -82,7 +82,7 @@ class _FaceFilterChipState extends State<FaceFilterChip> {
                     ? Icon(
                         Icons.close_rounded,
                         size: 16,
-                        color: getEnteColorScheme(context).textMuted,
+                        color: EnteTheme.getColorScheme(theme).textMuted,
                       )
                     : const SizedBox.shrink(),
                 widget.isApplied && !widget.isInAllFiltersView
@@ -99,9 +99,9 @@ class _FaceFilterChipState extends State<FaceFilterChip> {
                 child: Container(
                   padding: const EdgeInsets.all(1),
                   decoration: BoxDecoration(
-                    color: getEnteColorScheme(context).backgroundElevated2,
+                    color: EnteTheme.getColorScheme(theme).backgroundElevated2,
                     border: Border.all(
-                      color: getEnteColorScheme(context).strokeMuted,
+                      color: EnteTheme.getColorScheme(theme).strokeMuted,
                       width: 0.5,
                     ),
                     borderRadius: BorderRadius.all(
@@ -111,7 +111,7 @@ class _FaceFilterChipState extends State<FaceFilterChip> {
                   child: Icon(
                     Icons.close_rounded,
                     size: 14,
-                    color: getEnteColorScheme(context).textMuted,
+                    color: EnteTheme.getColorScheme(theme).textMuted,
                   ),
                 ),
               )

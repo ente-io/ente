@@ -124,8 +124,8 @@ class SearchWidgetState extends State<SearchWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
     final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     return RepaintBoundary(
       key: widgetKey,
       child: Padding(
@@ -150,7 +150,7 @@ class SearchWidgetState extends State<SearchWidget> {
                     decoration: InputDecoration(
                       hintText: S.of(context).search,
                       filled: true,
-                      fillColor: getEnteColorScheme(context).fillFaint,
+                      fillColor: EnteTheme.getColorScheme(theme).fillFaint,
                       border: const UnderlineInputBorder(
                         borderSide: BorderSide.none,
                       ),

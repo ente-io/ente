@@ -116,7 +116,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
         _showErrorBanner
             ? Divider(
                 height: 8,
-                color: getEnteColorScheme(context).strokeFaint,
+                color: EnteTheme.getColorScheme(theme).strokeFaint,
               )
             : const SizedBox.shrink(),
         _showErrorBanner

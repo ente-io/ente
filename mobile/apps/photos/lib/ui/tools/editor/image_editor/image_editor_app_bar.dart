@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import "package:flutter_svg/svg.dart";
 import "package:photos/ente_theme_data.dart";
 import "package:photos/generated/l10n.dart";
- import "package:photos/theme/ente_theme.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:pro_image_editor/models/editor_configs/pro_image_editor_configs.dart";
 
 class ImageEditorAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -32,7 +32,8 @@ class ImageEditorAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     return AppBar(
       elevation: 0,
       automaticallyImplyLeading: false,
@@ -45,7 +46,7 @@ class ImageEditorAppBar extends StatelessWidget implements PreferredSizeWidget {
             },
             child: Text(
               S.of(context).cancel,
-              style: getEnteTextTheme(context).body,
+              style: EnteTheme.getTextTheme(theme).body,
             ),
           ),
           if (undo != null && redo != null)
@@ -90,7 +91,7 @@ class ImageEditorAppBar extends StatelessWidget implements PreferredSizeWidget {
               onPressed: done,
               child: Text(
                 isMainEditor ? S.of(context).saveCopy : S.of(context).done,
-                style: getEnteTextTheme(context).body.copyWith(
+                style: EnteTheme.getTextTheme(theme).body.copyWith(
                       color: isMainEditor
                           ? (enableUndo
                               ? Theme.of(context)

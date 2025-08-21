@@ -59,7 +59,7 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
     if (_isFileSelected &&
         widget.file.isUploaded &&
         widget.file.ownerID != widget.currentUserID) {
-      final avatarColors = getEnteColorScheme(context).avatarColors;
+      final avatarColors = EnteTheme.getColorScheme(theme).avatarColors;
       selectionColor =
           avatarColors[(widget.file.ownerID!).remainder(avatarColors.length)];
     }

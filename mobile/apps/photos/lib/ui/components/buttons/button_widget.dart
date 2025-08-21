@@ -87,16 +87,17 @@ class ButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final colorScheme =
-        shouldStickToDarkTheme ? darkScheme : getEnteColorScheme(context);
+        shouldStickToDarkTheme ? darkScheme : EnteTheme.getColorScheme(theme);
     final inverseColorScheme = shouldStickToDarkTheme
         ? lightScheme
-        : getEnteColorScheme(context, inverse: true);
+        : EnteTheme.getColorScheme(theme, inverse: true);
     final textTheme =
-        shouldStickToDarkTheme ? darkTextTheme : getEnteTextTheme(context);
+        shouldStickToDarkTheme ? darkTextTheme : EnteTheme.getTextTheme(theme);
     final inverseTextTheme = shouldStickToDarkTheme
         ? lightTextTheme
-        : getEnteTextTheme(context, inverse: true);
+        : EnteTheme.getTextTheme(theme, inverse: true);
     final buttonStyle = CustomButtonStyle(
       //Dummy default values since we need to keep these properties non-nullable
       defaultButtonColor: Colors.transparent,

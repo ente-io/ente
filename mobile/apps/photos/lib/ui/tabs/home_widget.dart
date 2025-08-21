@@ -659,7 +659,7 @@ class _HomeWidgetState extends State<HomeWidget> {
               .fire(TabChangedEvent(0, TabChangedEventSource.backButton));
         },
         child: Scaffold(
-          drawerScrimColor: getEnteColorScheme(context).strokeFainter,
+          drawerScrimColor: EnteTheme.getColorScheme(theme).strokeFainter,
           drawerEnableOpenDragGesture: false,
           //using a hack instead of enabling this as enabling this will create other problems
           drawer: enableDrawer
@@ -687,7 +687,7 @@ class _HomeWidgetState extends State<HomeWidget> {
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(0),
             child: AppBar(
-              backgroundColor: getEnteColorScheme(context).backgroundBase,
+              backgroundColor: EnteTheme.getColorScheme(theme).backgroundBase,
             ),
           ),
           resizeToAvoidBottomInset: false,
@@ -773,7 +773,8 @@ class _HomeWidgetState extends State<HomeWidget> {
               return Container(
                 decoration: value
                     ? BoxDecoration(
-                        color: getEnteColorScheme(context).backgroundElevated,
+                        color:
+                            EnteTheme.getColorScheme(theme).backgroundElevated,
                         boxShadow: shadowFloatFaintLight,
                       )
                     : null,
@@ -872,7 +873,8 @@ class _HomeWidgetState extends State<HomeWidget> {
     if (!show || !Configuration.instance.isLoggedIn()) {
       return;
     }
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     await showBarModalBottomSheet(
       topControl: const SizedBox.shrink(),
       shape: const RoundedRectangleBorder(

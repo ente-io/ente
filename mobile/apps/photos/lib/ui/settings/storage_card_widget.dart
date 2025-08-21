@@ -186,7 +186,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
                   isMobileScreenSmall
                       ? S.of(context).usedSpace
                       : S.of(context).storage,
-                  style: getEnteTextTheme(context)
+                  style: EnteTheme.getTextTheme(theme)
                       .small
                       .copyWith(color: textMutedDark),
                 ),
@@ -195,7 +195,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                   text: TextSpan(
-                    style: getEnteTextTheme(context)
+                    style: EnteTheme.getTextTheme(theme)
                         .h3Bold
                         .copyWith(color: textBaseDark),
                     children: _usedStorageDetails(
@@ -232,7 +232,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
                       : const SizedBox.shrink(),
                   StorageProgressWidget(
                     color: showFamilyBreakup
-                        ? getEnteColorScheme(context).primary300
+                        ? EnteTheme.getColorScheme(theme).primary300
                         : strokeBaseDark,
                     fractionOfStorage:
                         (userDetails.usage / totalStorageInBytes),
@@ -252,13 +252,14 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
                               height: 8.99,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: getEnteColorScheme(context).primary300,
+                                color:
+                                    EnteTheme.getColorScheme(theme).primary300,
                               ),
                             ),
                             const SizedBox(width: 4),
                             Text(
                               S.of(context).storageBreakupYou,
-                              style: getEnteTextTheme(context)
+                              style: EnteTheme.getTextTheme(theme)
                                   .miniBold
                                   .copyWith(color: textBaseDark),
                             ),
@@ -274,7 +275,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
                             const SizedBox(width: 4),
                             Text(
                               S.of(context).storageBreakupFamily,
-                              style: getEnteTextTheme(context)
+                              style: EnteTheme.getTextTheme(theme)
                                   .miniBold
                                   .copyWith(color: textBaseDark),
                             ),
@@ -285,7 +286,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
                     S
                         .of(context)
                         .availableStorageSpace(freeSpace, freeSpaceUnit),
-                    style: getEnteTextTheme(context)
+                    style: EnteTheme.getTextTheme(theme)
                         .mini
                         .copyWith(color: textFaintDark),
                   ),

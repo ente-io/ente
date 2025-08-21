@@ -215,7 +215,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     decoration: InputDecoration(
                       fillColor: _isPasswordValid
                           ? _validFieldValueColor
-                          : getEnteColorScheme(context).fillFaint,
+                          : EnteTheme.getColorScheme(theme).fillFaint,
                       filled: true,
                       hintText: S.of(context).password,
                       contentPadding: const EdgeInsets.all(20),
@@ -277,7 +277,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     decoration: InputDecoration(
                       fillColor: _passwordsMatch
                           ? _validFieldValueColor
-                          : getEnteColorScheme(context).fillFaint,
+                          : EnteTheme.getColorScheme(theme).fillFaint,
                       filled: true,
                       hintText: S.of(context).confirmPassword,
                       contentPadding: const EdgeInsets.symmetric(

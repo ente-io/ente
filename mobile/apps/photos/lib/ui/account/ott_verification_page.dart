@@ -164,7 +164,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                     borderSide: BorderSide.none,
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  fillColor: getEnteColorScheme(context).fillFaint,
+                  fillColor: EnteTheme.getColorScheme(theme).fillFaint,
                 ),
                 controller: _verificationCodeController,
                 autofocus: false,
@@ -177,7 +177,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
             ),
             Divider(
               thickness: 1,
-              color: getEnteColorScheme(context).strokeFaint,
+              color: EnteTheme.getColorScheme(theme).strokeFaint,
             ),
             Padding(
               padding: const EdgeInsets.all(20),

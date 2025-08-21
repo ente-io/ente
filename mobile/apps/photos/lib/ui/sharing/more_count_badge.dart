@@ -19,7 +19,8 @@ class MoreCountWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     final displayChar = "+$count";
     final Color decorationColor = thumbnailView
         ? backgroundElevated2Light
@@ -37,7 +38,7 @@ class MoreCountWidget extends StatelessWidget {
         border: Border.all(
           color: thumbnailView
               ? strokeMutedDark
-              : getEnteColorScheme(context).strokeMuted,
+              : EnteTheme.getColorScheme(theme).strokeMuted,
           width: 1.0,
           strokeAlign: BorderSide.strokeAlignOutside,
         ),
@@ -64,7 +65,7 @@ class MoreCountWidget extends StatelessWidget {
     BuildContext context,
     MoreCountType type,
   ) {
-    final enteTextTheme = getEnteTextTheme(context);
+    final enteTextTheme = EnteTheme.getTextTheme(theme);
     switch (type) {
       case MoreCountType.small:
         return Tuple2(32.0, enteTextTheme.small);

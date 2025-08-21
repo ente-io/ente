@@ -51,7 +51,8 @@ class _MemoriesDebugSectionState extends State<MemoriesDebugSection> {
   @override
   Widget build(BuildContext context) {
     if (_momentsSearchResults.isEmpty) {
-      final textTheme = getEnteTextTheme(context);
+      final theme = Theme.of(context);
+      final textTheme = EnteTheme.getTextTheme(theme);
       return Padding(
         padding: const EdgeInsets.only(left: 12, right: 8),
         child: Row(
@@ -126,7 +127,7 @@ class _SectionHeader extends StatelessWidget {
             padding: const EdgeInsets.all(12),
             child: Text(
               "Smart memories debug (I)",
-              style: getEnteTextTheme(context).largeBold,
+              style: EnteTheme.getTextTheme(theme).largeBold,
             ),
           ),
           Container(
@@ -135,7 +136,7 @@ class _SectionHeader extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(24, 12, 12, 12),
               child: Icon(
                 Icons.chevron_right_outlined,
-                color: getEnteColorScheme(context).blurStrokePressed,
+                color: EnteTheme.getColorScheme(theme).blurStrokePressed,
               ),
             ),
           ),
@@ -158,7 +159,7 @@ class MomentRecommendation extends StatelessWidget {
   Widget build(BuildContext context) {
     final heroTag = momentSearchResult.heroTag() +
         (momentSearchResult.previewThumbnail()?.tag ?? "");
-    final enteTextTheme = getEnteTextTheme(context);
+    final enteTextTheme = EnteTheme.getTextTheme(theme);
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: max(2.5 - _borderWidth, 0)),
       child: GestureDetector(

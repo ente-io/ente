@@ -41,7 +41,7 @@ class _PreviewPropertiesItemWidgetState
   }
 
   Future<void> _getSection() async {
-    final textStyle = getEnteTextTheme(context).miniMuted;
+    final textStyle = EnteTheme.getTextTheme(theme).miniMuted;
     final subSectionWidgets = <Widget>[];
 
     final data = await VideoPreviewService.instance
