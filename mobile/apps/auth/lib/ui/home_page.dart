@@ -35,7 +35,6 @@ import 'package:ente_auth/ui/settings_page.dart';
 import 'package:ente_auth/ui/sort_option_menu.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/platform_util.dart';
-import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_lock_screen/lock_screen_settings.dart';
@@ -48,10 +47,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:image/image.dart' as img;
 import 'package:logging/logging.dart';
 import 'package:move_to_background/move_to_background.dart';
-import 'package:zxing2/qrcode.dart';
 
 class HomePage extends BaseHomePage {
   const HomePage({super.key});
@@ -294,69 +291,6 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<void> _importFromGallery() async {
-    final l10n = AppLocalizations.of(context);
-
-    if (_isImportingFromGallery) {
-      return;
-    }
-
-    setState(() {
-      _isImportingFromGallery = true;
-    });
-
-    try {
-      final FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.image,
-      );
-
-      if (result == null || result.files.single.path == null) {
-        return;
-      }
-
-      final String imagePath = result.files.single.path!;
-      final rawImage = await File(imagePath).readAsBytes();
-      final image = img.decodeImage(rawImage);
-
-      if (image == null) {
-        await showErrorDialog(context, l10n.error, l10n.errorCouldNotReadImage);
-        return;
-      }
-
-      final source = RGBLuminanceSource(
-        image.width,
-        image.height,
-        image.getBytes(order: img.ChannelOrder.rgba).buffer.asInt32List(),
-      );
-      final bitmap = BinaryBitmap(HybridBinarizer(source));
-      final reader = QRCodeReader();
-      final Result decodeResult = reader.decode(bitmap);
-      final String code = decodeResult.text;
-      try {
-        final newCode = Code.fromOTPAuthUrl(code);
-        await CodeStore.instance.addCode(newCode, shouldSync: false);
-      } catch (e) {
-        await showErrorDialog(
-          context,
-          l10n.errorInvalidQRCode,
-          l10n.errorInvalidQRCodeBody,
-        );
-      }
-    } on ReaderException {
-      showToast(context, l10n.errorNoQRCode);
-    } catch (e) {
-      await showErrorDialog(
-        context,
-        l10n.errorGenericTitle,
-        l10n.errorGenericBody,
-      );
-    } finally {
-      setState(() {
-        _isImportingFromGallery = false;
-      });
-    }
-  }
-
   Future<void> _importFromGalleryNative() async {
     final l10n = AppLocalizations.of(context);
 
@@ -364,9 +298,7 @@ class _HomePageState extends State<HomePage> {
       return;
     }
 
-    setState(() {
-      _isImportingFromGallery = true;
-    });
+    _isImportingFromGallery = true;
 
     try {
       final FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -412,9 +344,7 @@ class _HomePageState extends State<HomePage> {
         l10n.errorGenericBody,
       );
     } finally {
-      setState(() {
-        _isImportingFromGallery = false;
-      });
+      _isImportingFromGallery = false;
     }
   }
 
@@ -881,14 +811,6 @@ class _HomePageState extends State<HomePage> {
             backgroundColor: Theme.of(context).colorScheme.fabBackgroundColor,
             foregroundColor: Theme.of(context).colorScheme.fabForegroundColor,
             labelWidget: SpeedDialLabelWidget(context.l10n.importFromGallery),
-            onTap: _importFromGallery,
-          ),
-        if (PlatformUtil.isMobile())
-          SpeedDialChild(
-            child: const Icon(Icons.photo_library),
-            backgroundColor: Theme.of(context).colorScheme.fabBackgroundColor,
-            foregroundColor: Theme.of(context).colorScheme.fabForegroundColor,
-            labelWidget: const SpeedDialLabelWidget("Scan image (Native)"),
             onTap: _importFromGalleryNative,
           ),
       ],
