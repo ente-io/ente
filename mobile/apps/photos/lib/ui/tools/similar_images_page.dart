@@ -1,6 +1,6 @@
 import "dart:async";
 
-import 'package:flutter/foundation.dart' show kDebugMode;
+import "package:flutter/foundation.dart" show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
@@ -93,7 +93,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       appBar: AppBar(
         elevation: 0,
         title: const Text("Similar images"), // TODO: lau: extract string
-        actions: _pageState == SimilarImagesPageState.results && kDebugMode
+        actions: _pageState == SimilarImagesPageState.results
             ? [_getSortMenu()]
             : null,
       ),
@@ -300,26 +300,43 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
               itemCount: _similarFilesList.length + 1, // +1 for header
               itemBuilder: (context, index) {
                 if (index == 0) {
-                  if (kDebugMode) {
-                    return Container(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          Text(
-                            "(I) Found ${_similarFilesList.length} groups of similar images",
-                            style: textTheme.bodyBold,
+                  return Container(
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: colorScheme.fillFaint,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.photo_library_outlined,
+                          size: 20,
+                          color: colorScheme.textMuted,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "${_similarFilesList.length} ${_similarFilesList.length == 1 ? 'group' : 'groups'} found", // TODO: lau: extract string
+                                style: textTheme.bodyBold,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                "Review and remove similar images", // TODO: lau: extract string
+                                style: textTheme.miniMuted,
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            "(I) Threshold: ${_distanceThreshold.toStringAsFixed(2)}",
-                            style: textTheme.miniMuted,
-                          ),
-                        ],
-                      ),
-                    );
-                  } else {
-                    return const SizedBox.shrink();
-                  }
+                        ),
+                      ],
+                    ),
+                  );
                 }
 
                 // Similar files groups (index - 1 because first item is header)
@@ -838,10 +855,10 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
           text = "Size"; // TODO: lau: extract string
           break;
         case SortKey.distanceAsc:
-          text = "Distance ascending"; // TODO: lau: extract string
+          text = "Similarity (Desc.)"; // TODO: lau: extract string
           break;
         case SortKey.distanceDesc:
-          text = "Distance descending"; // TODO: lau: extract string
+          text = "Similarity (Asc.)"; // TODO: lau: extract string
           break;
         case SortKey.count:
           text = "Count"; // TODO: lau: extract string
