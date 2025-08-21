@@ -154,7 +154,7 @@ class SimilarImagesService {
     final existingGroups = await cachedData.similarFilesList();
     final cachedFileIDs = cachedData.allCheckedFileIDs;
     final currentFileIDsSet = currentFileIDs.map((id) => id.toInt()).toSet();
-    final deletedFiles = currentFileIDsSet.difference(cachedFileIDs);
+    final deletedFiles = cachedFileIDs.difference(currentFileIDsSet);
 
     // Step 1: Clean up deleted files from existing groups
     if (deletedFiles.isNotEmpty) {
@@ -192,7 +192,7 @@ class SimilarImagesService {
     final unassignedNewFilesIndices = <int>{};
     final unassignedNewFileIDs = <int>{};
     for (int i = 0; i < keysList.length; i++) {
-      final newFileID = keysList[i].toInt();
+      final newFileID = keysList[i];
       final newFile = allFileIdsToFile[newFileID];
       if (newFile == null) continue;
       final similarFileIDs = vectorKeys[i];
