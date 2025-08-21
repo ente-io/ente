@@ -14,6 +14,7 @@ import "package:photos/services/collections_service.dart";
 import "package:photos/services/machine_learning/similar_images_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/common/loading_widget.dart";
+import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
@@ -50,7 +51,6 @@ class SimilarImagesPage extends StatefulWidget {
 class _SimilarImagesPageState extends State<SimilarImagesPage> {
   static const crossAxisCount = 3;
   static const crossAxisSpacing = 12.0;
-  static const autoSelectDistanceThreshold = 0.01;
 
   final _logger = Logger("SimilarImagesPage");
   bool _isDisposed = false;
@@ -61,6 +61,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   SortKey _sortKey = SortKey.distanceAsc;
   bool _exactSearch = false;
   bool _fullRefresh = false;
+  bool _isSelectionSheetOpen = false;
 
   late SelectedFiles _selectedFiles;
   late ScrollController _scrollController;
@@ -363,54 +364,65 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
           totalSize += file.fileSize ?? 0;
         }
 
-        return AnimatedSwitcher(
-          duration: const Duration(milliseconds: 200),
-          switchInCurve: Curves.easeOut,
-          switchOutCurve: Curves.easeIn,
-          child: hasSelectedFiles
-              ? SafeArea(
-                  child: Container(
-                    key: const ValueKey('bottom_buttons'),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: crossAxisSpacing,
-                      vertical: 8,
+        return SafeArea(
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: crossAxisSpacing,
+              vertical: 8,
+            ),
+            decoration: BoxDecoration(
+              color: getEnteColorScheme(context).backgroundBase,
+            ),
+            child: AnimatedSwitcher(
+              duration: Duration.zero,
+              child: Column(
+                key: ValueKey(hasSelectedFiles),
+                children: [
+                  if (hasSelectedFiles && !_isSelectionSheetOpen) ...[
+                    SizedBox(
+                      width: double.infinity,
+                      child: ButtonWidget(
+                        labelText:
+                            "Delete $selectedCount photos (${formatBytes(totalSize)})", // TODO: lau: extract string
+                        buttonType: ButtonType.critical,
+                        shouldSurfaceExecutionStates: false,
+                        shouldShowSuccessConfirmation: false,
+                        onTap: () async {
+                          await _deleteFiles(
+                            _selectedFiles.files,
+                            showDialog: true,
+                          );
+                        },
+                      ),
                     ),
-                    decoration: BoxDecoration(
-                      color: getEnteColorScheme(context).backgroundBase,
+                    const SizedBox(height: 8),
+                  ],
+                  if (!_isSelectionSheetOpen)
+                    SizedBox(
+                      width: double.infinity,
+                      child: ButtonWidget(
+                        labelText:
+                            "Selection options", // TODO: lau: extract string
+                        buttonType: ButtonType.secondary,
+                        shouldSurfaceExecutionStates: false,
+                        shouldShowSuccessConfirmation: false,
+                        onTap: () async {
+                          setState(() {
+                            _isSelectionSheetOpen = true;
+                          });
+                          await _showSelectionOptionsSheet();
+                          if (mounted) {
+                            setState(() {
+                              _isSelectionSheetOpen = false;
+                            });
+                          }
+                        },
+                      ),
                     ),
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          width: double.infinity,
-                          child: ButtonWidget(
-                            labelText:
-                                "Delete $selectedCount photos (${formatBytes(totalSize)})", // TODO: lau: extract string
-                            buttonType: ButtonType.critical,
-                            onTap: () async {
-                              await _deleteFiles(
-                                _selectedFiles.files,
-                                showDialog: true,
-                              );
-                            },
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ButtonWidget(
-                            labelText:
-                                "Unselect all", // TODO: lau: extract string
-                            buttonType: ButtonType.secondary,
-                            onTap: () async {
-                              _selectedFiles.clearAll(fireEvent: false);
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              : const SizedBox.shrink(key: ValueKey('empty')),
+                ],
+              ),
+            ),
+          ),
         );
       },
     );
@@ -438,7 +450,6 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       _similarFilesList = similarFiles;
       _pageState = SimilarImagesPageState.results;
       _sortSimilarFiles();
-      _autoSelectSimilarFiles();
 
       if (_isDisposed) return;
       setState(() {});
@@ -492,16 +503,11 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     setState(() {});
   }
 
-  void _autoSelectSimilarFiles() {
+  void _selectFilesByThreshold(double threshold) {
     final filesToSelect = <EnteFile>{};
-    int groupsProcessed = 0;
-    int groupsAutoSelected = 0;
 
     for (final similarFilesGroup in _similarFilesList) {
-      groupsProcessed++;
-      if (similarFilesGroup.furthestDistance < autoSelectDistanceThreshold) {
-        groupsAutoSelected++;
-        // Skip the first file (keep it unselected) and select the rest
+      if (similarFilesGroup.furthestDistance <= threshold) {
         for (int i = 1; i < similarFilesGroup.files.length; i++) {
           filesToSelect.add(similarFilesGroup.files[i]);
         }
@@ -509,15 +515,100 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     }
 
     if (filesToSelect.isNotEmpty) {
+      _selectedFiles.clearAll(fireEvent: false);
       _selectedFiles.selectAll(filesToSelect);
-      _logger.info(
-        "Auto-selected ${filesToSelect.length} files from $groupsAutoSelected/$groupsProcessed groups (threshold: $autoSelectDistanceThreshold)",
-      );
     } else {
-      _logger.info(
-        "No files auto-selected from $groupsProcessed groups (threshold: $autoSelectDistanceThreshold)",
-      );
+      _selectedFiles.clearAll(fireEvent: false);
     }
+  }
+
+  Future<void> _showSelectionOptionsSheet() async {
+    // Calculate how many files fall into each category
+    int exactFiles = 0;
+    int similarFiles = 0;
+    int allFiles = 0;
+
+    for (final group in _similarFilesList) {
+      final duplicateCount = group.files.length - 1; // Exclude the first file
+      allFiles += duplicateCount;
+
+      if (group.furthestDistance <= 0.0) {
+        exactFiles += duplicateCount;
+        similarFiles += duplicateCount;
+      } else if (group.furthestDistance <= 0.02) {
+        similarFiles += duplicateCount;
+      }
+    }
+
+    final String exactLabel = exactFiles > 0
+        ? "Select exact ($exactFiles)" // TODO: lau: extract string
+        : "Select exact"; // TODO: lau: extract string
+
+    final String similarLabel = similarFiles > 0
+        ? "Select similar ($similarFiles)" // TODO: lau: extract string
+        : "Select similar"; // TODO: lau: extract string
+
+    final String allLabel = allFiles > 0
+        ? "Select all ($allFiles)" // TODO: lau: extract string
+        : "Select all"; // TODO: lau: extract string
+
+    await showActionSheet(
+      context: context,
+      title: "Select similar images", // TODO: lau: extract string
+      body:
+          "Choose which similar images to select for deletion", // TODO: lau: extract string
+      buttons: [
+        ButtonWidget(
+          labelText: exactLabel,
+          buttonType: ButtonType.neutral,
+          buttonSize: ButtonSize.large,
+          shouldStickToDarkTheme: true,
+          isInAlert: true,
+          buttonAction: ButtonAction.first,
+          shouldSurfaceExecutionStates: false,
+          onTap: () async {
+            _selectFilesByThreshold(0.0);
+          },
+        ),
+        ButtonWidget(
+          labelText: similarLabel,
+          buttonType: ButtonType.neutral,
+          buttonSize: ButtonSize.large,
+          shouldStickToDarkTheme: true,
+          isInAlert: true,
+          buttonAction: ButtonAction.second,
+          shouldSurfaceExecutionStates: false,
+          onTap: () async {
+            _selectFilesByThreshold(0.02);
+          },
+        ),
+        ButtonWidget(
+          labelText: allLabel,
+          buttonType: ButtonType.neutral,
+          buttonSize: ButtonSize.large,
+          shouldStickToDarkTheme: true,
+          isInAlert: true,
+          buttonAction: ButtonAction.third,
+          shouldSurfaceExecutionStates: false,
+          onTap: () async {
+            _selectFilesByThreshold(0.05);
+          },
+        ),
+        ButtonWidget(
+          labelText: "Clear selection", // TODO: lau: extract string
+          buttonType: ButtonType.secondary,
+          buttonSize: ButtonSize.large,
+          shouldStickToDarkTheme: true,
+          isInAlert: true,
+          buttonAction: ButtonAction.cancel,
+          shouldSurfaceExecutionStates: false,
+          onTap: () async {
+            _selectedFiles.clearAll(fireEvent: false);
+          },
+        ),
+      ],
+      actionSheetType: ActionSheetType.defaultActionSheet,
+    );
   }
 
   Widget _buildSimilarFilesGroup(SimilarFiles similarFiles) {
