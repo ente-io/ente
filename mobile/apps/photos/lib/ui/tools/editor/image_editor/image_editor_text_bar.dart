@@ -176,7 +176,7 @@ class _FontPickerWidget extends StatelessWidget {
               decoration: BoxDecoration(
                 color: isSelected
                     ? colorScheme.fillBasePressed
-                    : Theme.of(context).colorScheme.editorBackgroundColor,
+                    : theme.colorScheme.editorBackgroundColor,
                 borderRadius: BorderRadius.circular(25),
               ),
               child: Center(
@@ -212,7 +212,7 @@ class _BackgroundPickerWidget extends StatelessWidget {
         'text': 'Aa',
         'selectedBackgroundColor':
             isLightMode ? colorScheme.fillFaint : Colors.white,
-        'backgroundColor': Theme.of(context).colorScheme.editorBackgroundColor,
+        'backgroundColor': theme.colorScheme.editorBackgroundColor,
         'border': null,
         'textColor': Colors.white,
         'selectedInnerBackgroundColor': Colors.black,
@@ -222,7 +222,7 @@ class _BackgroundPickerWidget extends StatelessWidget {
         'text': 'Aa',
         'selectedBackgroundColor':
             isLightMode ? colorScheme.fillFaint : Colors.white,
-        'backgroundColor': Theme.of(context).colorScheme.editorBackgroundColor,
+        'backgroundColor': theme.colorScheme.editorBackgroundColor,
         'border': null,
         'textColor': Colors.black,
         'selectedInnerBackgroundColor': Colors.transparent,
@@ -232,7 +232,7 @@ class _BackgroundPickerWidget extends StatelessWidget {
         'text': 'Aa',
         'selectedBackgroundColor':
             isLightMode ? colorScheme.fillFaint : Colors.white,
-        'backgroundColor': Theme.of(context).colorScheme.editorBackgroundColor,
+        'backgroundColor': theme.colorScheme.editorBackgroundColor,
         'border': null,
         'textColor': Colors.black,
         'selectedInnerBackgroundColor': Colors.black.withOpacity(0.11),
@@ -244,7 +244,7 @@ class _BackgroundPickerWidget extends StatelessWidget {
         'text': 'Aa',
         'selectedBackgroundColor':
             isLightMode ? colorScheme.fillFaint : Colors.black,
-        'backgroundColor': Theme.of(context).colorScheme.editorBackgroundColor,
+        'backgroundColor': theme.colorScheme.editorBackgroundColor,
         'border':
             isLightMode ? null : Border.all(color: Colors.white, width: 2),
         'textColor': Colors.black,
@@ -358,7 +358,7 @@ class _AlignPickerWidget extends StatelessWidget {
               decoration: BoxDecoration(
                 color: isSelected
                     ? colorScheme.fillBasePressed
-                    : Theme.of(context).colorScheme.editorBackgroundColor,
+                    : theme.colorScheme.editorBackgroundColor,
                 borderRadius: BorderRadius.circular(25),
                 border: isSelected
                     ? Border.all(color: Colors.black, width: 2)

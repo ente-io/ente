@@ -117,10 +117,9 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                       duration: const Duration(milliseconds: 200),
                       gap: 0,
                       tabBorderRadius: 32,
-                      tabBackgroundColor:
-                          Theme.of(context).brightness == Brightness.light
-                              ? strokeFainterLight
-                              : strokeSolidFaintLight,
+                      tabBackgroundColor: theme.brightness == Brightness.light
+                          ? strokeFainterLight
+                          : strokeSolidFaintLight,
                       haptic: false,
                       tabs: [
                         GButton(

@@ -90,7 +90,7 @@ class DeviceFolderItem extends StatelessWidget {
             child: Text(
               deviceCollection.name,
               textAlign: TextAlign.left,
-              style: Theme.of(context).colorScheme.enteTheme.textTheme.small,
+              style: theme.colorScheme.enteTheme.textTheme.small,
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -100,8 +100,7 @@ class DeviceFolderItem extends StatelessWidget {
             child: Text(
               deviceCollection.count.toString(),
               textAlign: TextAlign.left,
-              style:
-                  Theme.of(context).colorScheme.enteTheme.textTheme.miniMuted,
+              style: theme.colorScheme.enteTheme.textTheme.miniMuted,
               overflow: TextOverflow.ellipsis,
             ),
           ),

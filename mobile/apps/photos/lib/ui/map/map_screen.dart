@@ -220,7 +220,7 @@ class _MapScreenState extends State<MapScreen> {
     return Container(
       color: colorScheme.backgroundBase,
       child: Theme(
-        data: Theme.of(context).copyWith(
+        data: theme.copyWith(
           bottomSheetTheme: const BottomSheetThemeData(
             backgroundColor: Colors.transparent,
           ),

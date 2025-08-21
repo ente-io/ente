@@ -70,6 +70,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: widget.isOnboarding
           ? null
@@ -90,7 +91,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                 AppLocalizations.of(context).selectFoldersForBackup,
                 textAlign: TextAlign.left,
                 style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface,
+                  color: theme.colorScheme.onSurface,
                   fontFamily: 'Inter-Bold',
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
@@ -103,8 +104,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
             child: Text(
               AppLocalizations.of(context)
                   .selectedFoldersWillBeEncryptedAndBackedUp,
-              style:
-                  Theme.of(context).textTheme.bodySmall!.copyWith(height: 1.3),
+              style: theme.textTheme.bodySmall!.copyWith(height: 1.3),
             ),
           ),
           const Padding(
@@ -148,7 +148,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                     setState(() {});
                   },
                 ),
-          Expanded(child: _getFolders()),
+          Expanded(child: _getFolders(theme)),
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.only(bottom: 12),
@@ -242,7 +242,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
     }
   }
 
-  Widget _getFolders() {
+  Widget _getFolders(ThemeData theme) {
     if (_deviceCollections == null) {
       return const EnteLoadingWidget();
     }
@@ -272,7 +272,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                 builder: (context, dragAnimation, inDrag) {
                   final t = dragAnimation.value;
                   final elevation = lerpDouble(0, 8, t)!;
-                  final themeColor = Theme.of(context).colorScheme.onSurface;
+                  final themeColor = theme.colorScheme.onSurface;
                   final color = Color.lerp(
                     themeColor,
                     themeColor.withValues(alpha: 0.8),
@@ -286,7 +286,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                       color: color,
                       elevation: elevation,
                       type: MaterialType.transparency,
-                      child: _getFileItem(file),
+                      child: _getFileItem(file, theme),
                     ),
                   );
                 },
@@ -298,7 +298,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
     );
   }
 
-  Widget _getFileItem(DeviceCollection deviceCollection) {
+  Widget _getFileItem(DeviceCollection deviceCollection, ThemeData theme) {
     final isSelected = _selectedDevicePathIDs.contains(deviceCollection.id);
     final importedCount = _pathIDToItemCount != null
         ? _pathIDToItemCount![deviceCollection.id] ?? 0
@@ -308,22 +308,22 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
       child: Container(
         decoration: BoxDecoration(
           border: Border.all(
-            color: Theme.of(context).colorScheme.boxUnSelectColor,
+            color: theme.colorScheme.boxUnSelectColor,
           ),
           borderRadius: const BorderRadius.all(
             Radius.circular(12),
           ),
           // color: isSelected
-          //     ? Theme.of(context).colorScheme.boxSelectColor
-          //     : Theme.of(context).colorScheme.boxUnSelectColor,
+          //     ? theme.colorScheme.boxSelectColor
+          //     : theme.colorScheme.boxUnSelectColor,
           gradient: isSelected
               ? const LinearGradient(
                   colors: [Color(0xFF00DD4D), Color(0xFF43BA6C)],
                 ) //same for both themes
               : LinearGradient(
                   colors: [
-                    Theme.of(context).colorScheme.boxUnSelectColor,
-                    Theme.of(context).colorScheme.boxUnSelectColor,
+                    theme.colorScheme.boxUnSelectColor,
+                    theme.colorScheme.boxUnSelectColor,
                   ],
                 ),
         ),
@@ -380,7 +380,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                           fontSize: 12,
                           color: isSelected
                               ? Colors.white
-                              : Theme.of(context).colorScheme.onSurface,
+                              : theme.colorScheme.onSurface,
                         ),
                       ),
                     ],

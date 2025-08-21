@@ -69,7 +69,7 @@ class LinearProgressDialogState extends State<LinearProgressDialog>
             return LinearProgressIndicator(
               value: _animation.value,
               valueColor: AlwaysStoppedAnimation<Color>(
-                Theme.of(context).colorScheme.greenAlternative,
+                theme.colorScheme.greenAlternative,
               ),
             );
           },

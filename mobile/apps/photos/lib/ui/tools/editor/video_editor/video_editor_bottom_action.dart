@@ -22,6 +22,7 @@ class VideoEditorBottomAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: onPressed,
       behavior: HitTestBehavior.translucent,
@@ -31,11 +32,11 @@ class VideoEditorBottomAction extends StatelessWidget {
             height: 48,
             width: 48,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.editorBackgroundColor,
+              color: theme.colorScheme.editorBackgroundColor,
               shape: BoxShape.circle,
               border: Border.all(
                 color: isSelected
-                    ? Theme.of(context).colorScheme.videoPlayerBorderColor
+                    ? theme.colorScheme.videoPlayerBorderColor
                     : Colors.transparent,
                 width: 1,
               ),
@@ -46,7 +47,7 @@ class VideoEditorBottomAction extends StatelessWidget {
                     ? SvgPicture.asset(
                         svgPath!,
                         colorFilter: ColorFilter.mode(
-                          Theme.of(context).colorScheme.onSurface,
+                          theme.colorScheme.onSurface,
                           BlendMode.srcIn,
                         ),
                       )

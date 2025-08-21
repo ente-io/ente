@@ -75,7 +75,7 @@ class _SessionsPageState extends State<SessionsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _getUAWidget(session),
+                _getUAWidget(session, theme),
                 const Padding(padding: EdgeInsets.all(4)),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -84,9 +84,7 @@ class _SessionsPageState extends State<SessionsPage> {
                       child: Text(
                         session.ip,
                         style: TextStyle(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
+                          color: theme.colorScheme.onSurface
                               .withValues(alpha: 0.8),
                           fontSize: 14,
                         ),
@@ -97,9 +95,7 @@ class _SessionsPageState extends State<SessionsPage> {
                       child: Text(
                         getFormattedTime(context, lastUsedTime),
                         style: TextStyle(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
+                          color: theme.colorScheme.onSurface
                               .withValues(alpha: 0.8),
                           fontSize: 12,
                         ),
@@ -172,7 +168,7 @@ class _SessionsPageState extends State<SessionsPage> {
             const Padding(padding: EdgeInsets.all(8)),
             Text(
               session.ua,
-              style: Theme.of(context).textTheme.bodySmall,
+              style: theme.textTheme.bodySmall,
             ),
           ],
         ),
@@ -203,8 +199,8 @@ class _SessionsPageState extends State<SessionsPage> {
             AppLocalizations.of(context).cancel,
             style: TextStyle(
               color: isLoggingOutFromThisDevice
-                  ? Theme.of(context).colorScheme.greenAlternative
-                  : Theme.of(context).colorScheme.defaultTextColor,
+                  ? theme.colorScheme.greenAlternative
+                  : theme.colorScheme.defaultTextColor,
             ),
           ),
           onPressed: () {
@@ -223,13 +219,13 @@ class _SessionsPageState extends State<SessionsPage> {
     );
   }
 
-  Widget _getUAWidget(Session session) {
+  Widget _getUAWidget(Session session, ThemeData theme) {
     if (session.token == Configuration.instance.getToken()) {
       return Text(
         AppLocalizations.of(context).thisDevice,
         style: TextStyle(
           fontWeight: FontWeight.bold,
-          color: Theme.of(context).colorScheme.greenAlternative,
+          color: theme.colorScheme.greenAlternative,
         ),
       );
     }

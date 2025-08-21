@@ -194,7 +194,7 @@ class CropAspectChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? colorScheme.fillBasePressed
-              : Theme.of(context).colorScheme.editorBackgroundColor,
+              : theme.colorScheme.editorBackgroundColor,
           borderRadius: BorderRadius.circular(25),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

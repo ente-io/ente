@@ -76,6 +76,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -83,11 +84,11 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
           AppLocalizations.of(context).twofactorSetup,
         ),
       ),
-      body: _getBody(),
+      body: _getBody(theme),
     );
   }
 
-  Widget _getBody() {
+  Widget _getBody(ThemeData theme) {
     return SingleChildScrollView(
       reverse: true,
       child: Center(
@@ -99,7 +100,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
               child: Column(
                 children: [
                   TabBar(
-                    labelColor: Theme.of(context).colorScheme.greenAlternative,
+                    labelColor: theme.colorScheme.greenAlternative,
                     unselectedLabelColor: Colors.grey,
                     tabs: [
                       Tab(
@@ -116,7 +117,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
                     child: TabBarView(
                       controller: _tabController,
                       children: [
-                        _getSecretCode(),
+                        _getSecretCode(theme),
                         _getBarCode(),
                       ],
                     ),
@@ -127,7 +128,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
             Divider(
               height: 1,
               thickness: 1,
-              color: Theme.of(context).colorScheme.secondary,
+              color: theme.colorScheme.secondary,
             ),
             _getVerificationWidget(),
           ],
@@ -136,8 +137,8 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
     );
   }
 
-  Widget _getSecretCode() {
-    final Color textColor = Theme.of(context).colorScheme.onSurface;
+  Widget _getSecretCode(ThemeData theme) {
+    final Color textColor = theme.colorScheme.onSurface;
     return GestureDetector(
       onTap: () async {
         await Clipboard.setData(ClipboardData(text: widget.secretCode));

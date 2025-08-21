@@ -67,7 +67,7 @@ class _LockScreenState extends State<LockScreen>
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.logout_outlined),
-          color: Theme.of(context).iconTheme.color,
+          color: theme.iconTheme.color,
           onPressed: () {
             _onLogoutTapped(context);
           },

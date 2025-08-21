@@ -149,7 +149,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
                 Text(
                   _loadingMessage!,
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.subTextColor,
+                    color: theme.colorScheme.subTextColor,
                   ),
                 ),
                 const SizedBox(height: 54),
@@ -160,12 +160,9 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
                       children: [
                         Text(
                           AppLocalizations.of(context).didYouKnow,
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleLarge!
-                              .copyWith(
-                                color: Theme.of(context).colorScheme.greenText,
-                              ),
+                          style: theme.textTheme.titleLarge!.copyWith(
+                            color: theme.colorScheme.greenText,
+                          ),
                         ),
                       ],
                     ),
@@ -180,7 +177,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
                             scrollDirection: Axis.vertical,
                             controller: _pageController,
                             itemBuilder: (context, index) {
-                              return _getMessage(_messages[index]);
+                              return _getMessage(_messages[index], theme);
                             },
                             itemCount: _messages.length,
                             physics: const NeverScrollableScrollPhysics(),
@@ -256,14 +253,12 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
     _messages.add(AppLocalizations.of(context).loadMessage9);
   }
 
-  Widget _getMessage(String text) {
+  Widget _getMessage(String text, ThemeData theme) {
     return Text(
       text,
       textAlign: TextAlign.start,
-      style: Theme.of(context)
-          .textTheme
-          .headlineSmall!
-          .copyWith(color: Theme.of(context).colorScheme.defaultTextColor),
+      style: theme.textTheme.headlineSmall!
+          .copyWith(color: theme.colorScheme.defaultTextColor),
     );
   }
 }

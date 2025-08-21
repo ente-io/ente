@@ -409,7 +409,7 @@ class _ModelLoadingStateState extends State<ModelLoadingState> {
             ),
             trailingWidget: Text(
               '${(entry.value.$1 * 100) ~/ entry.value.$2}%',
-              style: Theme.of(context).textTheme.bodySmall,
+              style: theme.textTheme.bodySmall,
             ),
             singleBorderRadius: 8,
             alignCaptionedTextToLeft: true,
@@ -456,6 +456,7 @@ class MLStatusWidgetState extends State<MLStatusWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       children: [
         Row(
@@ -492,7 +493,7 @@ class MLStatusWidgetState extends State<MLStatusWidget> {
                           : pendingFiles == 0
                               ? '100%'
                               : '${(indexedFiles * 100.0 / total * 1.0).toStringAsFixed(2)}%',
-                      style: Theme.of(context).textTheme.bodySmall,
+                      style: theme.textTheme.bodySmall,
                     ),
                     singleBorderRadius: 8,
                     alignCaptionedTextToLeft: true,
@@ -507,7 +508,7 @@ class MLStatusWidgetState extends State<MLStatusWidget> {
                           ),
                           trailingWidget: Text(
                             AppLocalizations.of(context).currentlyRunning,
-                            style: Theme.of(context).textTheme.bodySmall,
+                            style: theme.textTheme.bodySmall,
                           ),
                           singleBorderRadius: 8,
                           alignCaptionedTextToLeft: true,

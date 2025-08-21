@@ -141,6 +141,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
 
   // show dialog to handle accidental back press.
   Future<bool> _buildPageExitWidget(BuildContext context) async {
+    final theme = Theme.of(context);
     final result = await showDialog(
       useRootNavigator: false,
       context: context,
@@ -160,7 +161,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
             child: Text(
               AppLocalizations.of(context).no,
               style: TextStyle(
-                color: Theme.of(context).colorScheme.greenAlternative,
+                color: theme.colorScheme.greenAlternative,
               ),
             ),
             onPressed: () => Navigator.of(context).pop(false),
@@ -252,6 +253,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
 
   // warn the user to wait for sometime before trying another payment
   Future<dynamic> _showExitPageDialog({String? title, String? content}) {
+    final theme = Theme.of(context);
     return showDialog(
       useRootNavigator: false,
       context: context,
@@ -264,7 +266,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
             child: Text(
               AppLocalizations.of(context).ok,
               style: TextStyle(
-                color: Theme.of(context).colorScheme.greenAlternative,
+                color: theme.colorScheme.greenAlternative,
               ),
             ),
             onPressed: () {

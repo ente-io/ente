@@ -139,10 +139,10 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                 child: StepProgressIndicator(
                   totalSteps: 4,
                   currentStep: 4,
-                  selectedColor: Theme.of(context).colorScheme.greenAlternative,
+                  selectedColor: theme.colorScheme.greenAlternative,
                   roundedEdges: const Radius.circular(10),
                   unselectedColor:
-                      Theme.of(context).colorScheme.stepProgressUnselectedColor,
+                      theme.colorScheme.stepProgressUnselectedColor,
                 ),
               ),
             )

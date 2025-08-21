@@ -361,7 +361,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                     duplicates.files.length,
                     formatBytes(duplicates.size),
                   ),
-                  style: Theme.of(context).textTheme.titleSmall,
+                  style: theme.textTheme.titleSmall,
                 ),
                 !selectedGrids.contains(itemIndex)
                     ? Icon(
@@ -384,7 +384,12 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
             physics: const NeverScrollableScrollPhysics(),
             // to disable GridView's scrolling
             itemBuilder: (context, index) {
-              return _buildFile(context, duplicates.files[index], itemIndex);
+              return _buildFile(
+                context,
+                duplicates.files[index],
+                itemIndex,
+                theme,
+              );
             },
             itemCount: duplicates.files.length,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -399,7 +404,12 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     );
   }
 
-  Widget _buildFile(BuildContext context, EnteFile file, int index) {
+  Widget _buildFile(
+    BuildContext context,
+    EnteFile file,
+    int index,
+    ThemeData theme,
+  ) {
     return GestureDetector(
       onTap: () {
         final files = _duplicates[index].files;
@@ -462,8 +472,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
               CollectionsService.instance
                   .getCollectionByID(file.collectionID!)!
                   .displayName,
-              style:
-                  Theme.of(context).textTheme.bodySmall!.copyWith(fontSize: 12),
+              style: theme.textTheme.bodySmall!.copyWith(fontSize: 12),
               overflow: TextOverflow.ellipsis,
             ),
           ),

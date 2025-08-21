@@ -175,7 +175,7 @@ class _CollectionListPageState extends State<CollectionListPage> {
     }
 
     return Theme(
-      data: Theme.of(context).copyWith(
+      data: theme.copyWith(
         highlightColor: Colors.transparent,
         splashColor: Colors.transparent,
       ),

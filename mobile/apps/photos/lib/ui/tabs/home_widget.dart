@@ -426,6 +426,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   Future<void> _autoLogoutAlert() async {
+    final theme = Theme.of(context);
     final AlertDialog alert = AlertDialog(
       title: Text(AppLocalizations.of(context).sessionExpired),
       content: Text(AppLocalizations.of(context).pleaseLoginAgain),
@@ -434,7 +435,7 @@ class _HomeWidgetState extends State<HomeWidget> {
           child: Text(
             AppLocalizations.of(context).ok,
             style: TextStyle(
-              color: Theme.of(context).colorScheme.greenAlternative,
+              color: theme.colorScheme.greenAlternative,
             ),
           ),
           onPressed: () async {

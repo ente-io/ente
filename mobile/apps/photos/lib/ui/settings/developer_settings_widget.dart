@@ -7,6 +7,7 @@ class DeveloperSettingsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     if (!Configuration.instance.isEnteProduction()) {
       final endpoint = Configuration.instance.getHttpEndpoint();
       final endpointURI = Uri.parse(endpoint);
@@ -15,7 +16,7 @@ class DeveloperSettingsWidget extends StatelessWidget {
         child: Text(
           AppLocalizations.of(context)
               .customEndpoint("${endpointURI.host}:${endpointURI.port}"),
-          style: Theme.of(context).textTheme.bodySmall,
+          style: theme.textTheme.bodySmall,
         ),
       );
     } else {

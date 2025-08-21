@@ -19,12 +19,13 @@ class DynamicFAB extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     if (isKeypadOpen!) {
       return Container(
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Theme.of(context).colorScheme.surface,
+              color: theme.colorScheme.surface,
               spreadRadius: 200,
               blurRadius: 100,
               offset: const Offset(0, 230),
@@ -37,10 +38,8 @@ class DynamicFAB extends StatelessWidget {
           children: [
             FloatingActionButton(
               heroTag: 'FAB',
-              backgroundColor:
-                  Theme.of(context).colorScheme.dynamicFABBackgroundColor,
-              foregroundColor:
-                  Theme.of(context).colorScheme.dynamicFABTextColor,
+              backgroundColor: theme.colorScheme.dynamicFABBackgroundColor,
+              foregroundColor: theme.colorScheme.dynamicFABTextColor,
               onPressed: isFormValid!
                   ? onPressedFunction as void Function()?
                   : () {

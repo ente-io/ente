@@ -93,7 +93,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                     UserService.instance.hasEnabledTwoFactor();
                 if (hasAuthenticated) {
                   if (isTwoFactorEnabled) {
-                    await _disableTwoFactor();
+                    await _disableTwoFactor(theme);
                     completer.isCompleted ? null : completer.complete();
                   } else {
                     await UserService.instance
@@ -218,7 +218,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     );
   }
 
-  Future<void> _disableTwoFactor() async {
+  Future<void> _disableTwoFactor(ThemeData theme) async {
     final AlertDialog alert = AlertDialog(
       title: Text(AppLocalizations.of(context).disableTwofactor),
       content: Text(
@@ -229,7 +229,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           child: Text(
             AppLocalizations.of(context).no,
             style: TextStyle(
-              color: Theme.of(context).colorScheme.greenAlternative,
+              color: theme.colorScheme.greenAlternative,
             ),
           ),
           onPressed: () {

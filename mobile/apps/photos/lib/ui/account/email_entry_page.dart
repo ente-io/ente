@@ -151,7 +151,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
                     AppLocalizations.of(context).createNewAccount,
-                    style: Theme.of(context).textTheme.headlineMedium,
+                    style: theme.textTheme.headlineMedium,
                   ),
                 ),
                 Padding(
@@ -451,10 +451,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
           Expanded(
             child: StyledText(
               text: AppLocalizations.of(context).signUpTerms,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium!
-                  .copyWith(fontSize: 12),
+              style: theme.textTheme.titleMedium!.copyWith(fontSize: 12),
               tags: {
                 'u-terms': StyledTextActionTag(
                   (String? text, Map<String?, String?> attrs) =>
@@ -518,10 +515,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
           Expanded(
             child: StyledText(
               text: AppLocalizations.of(context).ackPasswordLostWarning,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium!
-                  .copyWith(fontSize: 12),
+              style: theme.textTheme.titleMedium!.copyWith(fontSize: 12),
               tags: {
                 'underline': StyledTextActionTag(
                   (String? text, Map<String?, String?> attrs) =>

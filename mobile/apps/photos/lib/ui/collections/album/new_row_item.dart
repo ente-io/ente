@@ -74,7 +74,7 @@ class NewAlbumRowItemWidget extends StatelessWidget {
             child: Container(
               height: height,
               width: width,
-              color: Theme.of(context).brightness == Brightness.light
+              color: theme.brightness == Brightness.light
                   ? colorScheme.backdropBase
                   : colorScheme.backdropFaint,
               child: DottedBorder(

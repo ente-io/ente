@@ -112,7 +112,7 @@ class _BackupItemCardState extends State<BackupItemCard> {
                     style: TextStyle(
                       fontSize: 16,
                       height: 20 / 16,
-                      color: Theme.of(context).brightness == Brightness.light
+                      color: theme.brightness == Brightness.light
                           ? const Color(0xFF000000)
                           : const Color(0xFFFFFFFF),
                     ),
@@ -125,7 +125,7 @@ class _BackupItemCardState extends State<BackupItemCard> {
                     style: TextStyle(
                       fontSize: 14,
                       height: 17 / 14,
-                      color: Theme.of(context).brightness == Brightness.light
+                      color: theme.brightness == Brightness.light
                           ? const Color.fromRGBO(0, 0, 0, 0.7)
                           : const Color.fromRGBO(255, 255, 255, 0.7),
                     ),
@@ -209,7 +209,7 @@ class _BackupItemCardState extends State<BackupItemCard> {
                       height: 24,
                       child: Icon(
                         Icons.history,
-                        color: Theme.of(context).brightness == Brightness.light
+                        color: theme.brightness == Brightness.light
                             ? const Color.fromRGBO(0, 0, 0, .6)
                             : const Color.fromRGBO(255, 255, 255, .6),
                       ),
@@ -231,7 +231,7 @@ class _BackupItemCardState extends State<BackupItemCard> {
                       height: 16,
                       child: CircularProgressIndicator(
                         strokeWidth: 2.0,
-                        color: Theme.of(context).brightness == Brightness.light
+                        color: theme.brightness == Brightness.light
                             ? const Color.fromRGBO(0, 0, 0, .6)
                             : const Color.fromRGBO(255, 255, 255, .6),
                       ),

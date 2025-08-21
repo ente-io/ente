@@ -88,7 +88,7 @@ class _EnableMachineLearningConsentState
                       children: [
                         Checkbox(
                           value: _hasAckedPrivacyPolicy.value,
-                          side: CheckboxTheme.of(context).side,
+                          side: theme.checkboxTheme.side,
                           onChanged: (value) {
                             setState(() {
                               _hasAckedPrivacyPolicy.value = value!;

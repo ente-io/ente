@@ -43,16 +43,17 @@ class _TrashSectionButtonState extends State<TrashSectionButton> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return OutlinedButton(
       style: OutlinedButton.styleFrom(
-        backgroundColor: Theme.of(context).colorScheme.surface,
+        backgroundColor: theme.colorScheme.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
         padding: const EdgeInsets.all(0),
         side: BorderSide(
           width: 0.5,
-          color: Theme.of(context).iconTheme.color!.withValues(alpha: 0.24),
+          color: theme.iconTheme.color!.withValues(alpha: 0.24),
         ),
       ),
       child: SizedBox(
@@ -67,7 +68,7 @@ class _TrashSectionButtonState extends State<TrashSectionButton> {
                 children: [
                   Icon(
                     Icons.delete,
-                    color: Theme.of(context).iconTheme.color,
+                    color: theme.iconTheme.color,
                   ),
                   const Padding(padding: EdgeInsets.all(6)),
                   FutureBuilder<int>(
@@ -80,7 +81,7 @@ class _TrashSectionButtonState extends State<TrashSectionButton> {
                             children: [
                               TextSpan(
                                 text: AppLocalizations.of(context).trash,
-                                style: Theme.of(context).textTheme.titleMedium,
+                                style: theme.textTheme.titleMedium,
                               ),
                               const TextSpan(text: "  \u2022  "),
                               TextSpan(
@@ -97,7 +98,7 @@ class _TrashSectionButtonState extends State<TrashSectionButton> {
                             children: [
                               TextSpan(
                                 text: AppLocalizations.of(context).trash,
-                                style: Theme.of(context).textTheme.titleMedium,
+                                style: theme.textTheme.titleMedium,
                               ),
                               //need to query in db and bring this value
                             ],
@@ -110,7 +111,7 @@ class _TrashSectionButtonState extends State<TrashSectionButton> {
               ),
               Icon(
                 Icons.chevron_right,
-                color: Theme.of(context).iconTheme.color,
+                color: theme.iconTheme.color,
               ),
             ],
           ),

@@ -19,6 +19,7 @@ class VideoRotatePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final rotation = controller.rotation;
     return Scaffold(
       appBar: AppBar(
@@ -61,7 +62,7 @@ class VideoRotatePage extends StatelessWidget {
             ),
             const SizedBox(height: 40),
             VideoEditorNavigationOptions(
-              color: Theme.of(context).colorScheme.videoPlayerPrimaryColor,
+              color: theme.colorScheme.videoPlayerPrimaryColor,
               secondaryText: AppLocalizations.of(context).done,
               onPrimaryPressed: () {
                 while (controller.rotation != rotation) {

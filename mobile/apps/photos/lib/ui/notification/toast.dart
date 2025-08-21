@@ -14,6 +14,7 @@ void showToast(
   ToastGravity gravity = ToastGravity.BOTTOM,
   EasyLoadingToastPosition position = EasyLoadingToastPosition.bottom,
 }) async {
+  final theme = Theme.of(context);
   if (Platform.isAndroid) {
     await Fluttertoast.cancel();
     unawaited(
@@ -22,16 +23,16 @@ void showToast(
         toastLength: toastLength,
         gravity: gravity,
         timeInSecForIosWeb: 1,
-        backgroundColor: Theme.of(context).colorScheme.toastBackgroundColor,
-        textColor: Theme.of(context).colorScheme.toastTextColor,
+        backgroundColor: theme.colorScheme.toastBackgroundColor,
+        textColor: theme.colorScheme.toastTextColor,
         fontSize: 16.0,
       ),
     );
   } else {
     EasyLoading.instance
-      ..backgroundColor = Theme.of(context).colorScheme.toastBackgroundColor
-      ..indicatorColor = Theme.of(context).colorScheme.toastBackgroundColor
-      ..textColor = Theme.of(context).colorScheme.toastTextColor
+      ..backgroundColor = theme.colorScheme.toastBackgroundColor
+      ..indicatorColor = theme.colorScheme.toastBackgroundColor
+      ..textColor = theme.colorScheme.toastTextColor
       ..userInteractions = true
       ..loadingStyle = EasyLoadingStyle.custom;
     unawaited(

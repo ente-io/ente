@@ -23,6 +23,7 @@ class ColorSliderState extends State<ImageEditorColorPicker> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: SizedBox(
@@ -54,7 +55,7 @@ class ColorSliderState extends State<ImageEditorColorPicker> {
                   end: Alignment.centerRight,
                 ),
                 border: Border.all(
-                  color: Theme.of(context).colorScheme.editorBackgroundColor,
+                  color: theme.colorScheme.editorBackgroundColor,
                   width: 6,
                 ),
               ),
@@ -62,7 +63,7 @@ class ColorSliderState extends State<ImageEditorColorPicker> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: SliderTheme(
-                data: SliderTheme.of(context).copyWith(
+                data: theme.sliderTheme.copyWith(
                   trackHeight: 36,
                   thumbShape: _CustomThumbShape(_selectedColor),
                   activeTrackColor: Colors.transparent,

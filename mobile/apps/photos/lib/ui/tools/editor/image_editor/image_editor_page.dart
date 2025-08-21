@@ -232,8 +232,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
               ),
               cropRotateEditor: CropRotateEditorTheme(
                 background: colorScheme.backgroundBase,
-                cropCornerColor:
-                    Theme.of(context).colorScheme.imageEditorPrimaryColor,
+                cropCornerColor: theme.colorScheme.imageEditorPrimaryColor,
               ),
               tuneEditor: TuneEditorTheme(
                 background: colorScheme.backgroundBase,

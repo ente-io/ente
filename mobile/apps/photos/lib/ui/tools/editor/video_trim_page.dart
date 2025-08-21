@@ -24,6 +24,7 @@ class _VideoTrimPageState extends State<VideoTrimPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final minTrim = widget.controller.minTrim;
     final maxTrim = widget.controller.maxTrim;
 
@@ -52,7 +53,7 @@ class _VideoTrimPageState extends State<VideoTrimPage> {
             ..._trimSlider(),
             const SizedBox(height: 40),
             VideoEditorNavigationOptions(
-              color: Theme.of(context).colorScheme.videoPlayerPrimaryColor,
+              color: theme.colorScheme.videoPlayerPrimaryColor,
               secondaryText: AppLocalizations.of(context).done,
               onPrimaryPressed: () {
                 // reset trim

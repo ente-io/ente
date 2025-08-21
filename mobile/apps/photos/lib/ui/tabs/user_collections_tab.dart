@@ -123,13 +123,9 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
     List<Collection> collections,
   ) {
     final TextStyle trashAndHiddenTextStyle =
-        Theme.of(context).textTheme.titleMedium!.copyWith(
-              color: Theme.of(context)
-                  .textTheme
-                  .titleMedium!
-                  .color!
-                  .withValues(alpha: 0.5),
-            );
+        theme.textTheme.titleMedium!.copyWith(
+      color: theme.textTheme.titleMedium!.color!.withValues(alpha: 0.5),
+    );
 
     return Stack(
       alignment: Alignment.bottomCenter,

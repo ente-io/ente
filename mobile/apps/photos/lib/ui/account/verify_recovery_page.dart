@@ -127,7 +127,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          color: Theme.of(context).iconTheme.color,
+          color: theme.iconTheme.color,
           onPressed: () {
             Navigator.of(context).pop();
           },

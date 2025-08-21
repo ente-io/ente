@@ -60,7 +60,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
     final informationTextStyle = TextStyle(
       fontSize: 14,
       height: 1.3,
-      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
+      color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
       fontWeight: FontWeight.w500,
     );
     final isLightMode = !EnteTheme.isDark(theme);

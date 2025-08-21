@@ -320,8 +320,9 @@ class SyncStatusCompletedWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
-      color: Theme.of(context).colorScheme.defaultBackgroundColor,
+      color: theme.colorScheme.defaultBackgroundColor,
       height: kContainerHeight,
       child: Align(
         alignment: Alignment.center,
@@ -335,7 +336,7 @@ class SyncStatusCompletedWidget extends StatelessWidget {
               children: [
                 Icon(
                   Icons.cloud_done_outlined,
-                  color: Theme.of(context).colorScheme.greenAlternative,
+                  color: theme.colorScheme.greenAlternative,
                   size: 22,
                 ),
                 Padding(

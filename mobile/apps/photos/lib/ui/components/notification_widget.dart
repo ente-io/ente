@@ -71,7 +71,7 @@ class NotificationWidget extends StatelessWidget {
           begin: Alignment.bottomCenter,
           end: Alignment.topCenter,
         );
-        boxShadow = Theme.of(context).colorScheme.enteTheme.shadowMenu;
+        boxShadow = theme.colorScheme.enteTheme.shadowMenu;
         break;
       case NotificationType.greenBanner:
         backgroundGradient = LinearGradient(
@@ -83,14 +83,14 @@ class NotificationWidget extends StatelessWidget {
           begin: Alignment.bottomCenter,
           end: Alignment.topCenter,
         );
-        boxShadow = Theme.of(context).colorScheme.enteTheme.shadowMenu;
+        boxShadow = theme.colorScheme.enteTheme.shadowMenu;
         break;
       case NotificationType.notice:
         backgroundColor = colorScheme.backgroundElevated2;
         mainTextStyle = textTheme.bodyBold;
         subTextStyle = textTheme.miniMuted;
         strokeColorScheme = colorScheme;
-        boxShadow = Theme.of(context).colorScheme.enteTheme.shadowMenu;
+        boxShadow = theme.colorScheme.enteTheme.shadowMenu;
         break;
     }
     return Center(
