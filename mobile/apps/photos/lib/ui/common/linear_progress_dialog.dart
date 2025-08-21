@@ -54,12 +54,13 @@ class LinearProgressDialogState extends State<LinearProgressDialog>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return PopScope(
       canPop: false,
       child: AlertDialog(
         title: Text(
           widget.message,
-          style: getEnteTextTheme(context).smallMuted,
+          style: EnteTheme.getTextTheme(theme).smallMuted,
           textAlign: TextAlign.center,
         ),
         content: AnimatedBuilder(
@@ -68,7 +69,7 @@ class LinearProgressDialogState extends State<LinearProgressDialog>
             return LinearProgressIndicator(
               value: _animation.value,
               valueColor: AlwaysStoppedAnimation<Color>(
-                Theme.of(context).colorScheme.greenAlternative,
+                theme.colorScheme.greenAlternative,
               ),
             );
           },

@@ -62,7 +62,8 @@ class _FileTypeSectionState extends State<FileTypeSection> {
   @override
   Widget build(BuildContext context) {
     if (_fileTypesSearchResults.isEmpty) {
-      final textTheme = getEnteTextTheme(context);
+      final theme = Theme.of(context);
+      final textTheme = EnteTheme.getTextTheme(theme);
       return Padding(
         padding: const EdgeInsets.only(left: 12, right: 8),
         child: Row(

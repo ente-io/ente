@@ -23,8 +23,9 @@ class QuickLinkAlbumItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isSelected = selectedQuickLinks.contains(c);
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
+    final textTheme = EnteTheme.getTextTheme(theme);
 
     return AnimatedContainer(
       curve: Curves.easeOut,

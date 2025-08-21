@@ -16,6 +16,7 @@ class AddedByWidget extends StatelessWidget {
     if (!file.isUploaded) {
       return const SizedBox.shrink();
     }
+    final theme = Theme.of(context);
     String? addedBy;
     if (file.isOwner && file.isCollect) {
       addedBy = file.uploaderName;
@@ -31,7 +32,7 @@ class AddedByWidget extends StatelessWidget {
       padding: const EdgeInsets.only(top: 4.0, bottom: 4.0, left: 16),
       child: Text(
         AppLocalizations.of(context).addedBy(addedBy),
-        style: getEnteTextTheme(context).miniMuted,
+        style: EnteTheme.getTextTheme(theme).miniMuted,
       ),
     );
   }

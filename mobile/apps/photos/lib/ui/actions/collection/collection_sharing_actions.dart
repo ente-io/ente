@@ -18,7 +18,7 @@ import 'package:photos/services/account/user_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import 'package:photos/theme/colors.dart';
-import 'package:photos/theme/ente_theme.dart';
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/progress_dialog.dart';
 import "package:photos/ui/common/user_dialogs.dart";
 import 'package:photos/ui/components/action_sheet_widget.dart';
@@ -339,7 +339,8 @@ class CollectionActions {
     BuildContext context,
     List<Collection> collections,
   ) async {
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final textTheme = EnteTheme.getTextTheme(theme);
     final actionResult = await showActionSheet(
       context: context,
       buttons: [
@@ -422,26 +423,27 @@ class CollectionActions {
 
   // deleteCollectionSheet returns true if the album is successfully deleted
   Future<bool> deleteCollectionSheet(
-    BuildContext bContext,
+    BuildContext context,
     Collection collection,
   ) async {
-    final textTheme = getEnteTextTheme(bContext);
+    final theme = Theme.of(context);
+    final textTheme = EnteTheme.getTextTheme(theme);
     final currentUserID = Configuration.instance.getUserID()!;
     if (collection.owner.id != currentUserID) {
       throw AssertionError("Can not delete album owned by others");
     }
     if (collection.hasSharees) {
       final bool confirmDelete =
-          await _confirmSharedAlbumDeletion(bContext, collection);
+          await _confirmSharedAlbumDeletion(context, collection);
       if (!confirmDelete) {
         return false;
       }
     }
     final actionResult = await showActionSheet(
-      context: bContext,
+      context: context,
       buttons: [
         ButtonWidget(
-          labelText: AppLocalizations.of(bContext).keepPhotos,
+          labelText: AppLocalizations.of(context).keepPhotos,
           buttonType: ButtonType.neutral,
           buttonSize: ButtonSize.large,
           buttonAction: ButtonAction.first,
@@ -449,7 +451,7 @@ class CollectionActions {
           isInAlert: true,
           onTap: () async {
             try {
-              await trashCollectionKeepingPhotos(collection, bContext);
+              await trashCollectionKeepingPhotos(collection, context);
             } catch (e, s) {
               logger.severe("Failed to keep photos & delete collection", e, s);
               rethrow;
@@ -457,7 +459,7 @@ class CollectionActions {
           },
         ),
         ButtonWidget(
-          labelText: AppLocalizations.of(bContext).deletePhotos,
+          labelText: AppLocalizations.of(context).deletePhotos,
           buttonType: ButtonType.critical,
           buttonSize: ButtonSize.large,
           buttonAction: ButtonAction.second,
@@ -473,7 +475,7 @@ class CollectionActions {
           },
         ),
         ButtonWidget(
-          labelText: AppLocalizations.of(bContext).cancel,
+          labelText: AppLocalizations.of(context).cancel,
           buttonType: ButtonType.secondary,
           buttonSize: ButtonSize.large,
           buttonAction: ButtonAction.third,
@@ -482,7 +484,7 @@ class CollectionActions {
         ),
       ],
       bodyWidget: StyledText(
-        text: AppLocalizations.of(bContext).deleteAlbumDialog,
+        text: AppLocalizations.of(context).deleteAlbumDialog,
         style: textTheme.body.copyWith(color: textMutedDark),
         tags: {
           'bold': StyledTextTag(
@@ -495,7 +497,7 @@ class CollectionActions {
     if (actionResult?.action != null &&
         actionResult!.action == ButtonAction.error) {
       await showGenericErrorDialog(
-        context: bContext,
+        context: context,
         error: actionResult.exception,
       );
       return false;

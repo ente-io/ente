@@ -1,4 +1,4 @@
-import "package:flutter/widgets.dart";
+import "package:flutter/material.dart";
 import "package:photos/theme/ente_theme.dart";
 
 class CollageItemIcon extends StatelessWidget {
@@ -11,12 +11,13 @@ class CollageItemIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
         border: Border.all(
           color: isActive
-              ? getEnteColorScheme(context).strokeBase
-              : getEnteColorScheme(context).strokeMuted,
+              ? EnteTheme.getColorScheme(theme).strokeBase
+              : EnteTheme.getColorScheme(theme).strokeMuted,
           width: 2,
         ),
         borderRadius: const BorderRadius.all(Radius.circular(2)),

@@ -27,6 +27,7 @@ class SupportSectionWidget extends StatelessWidget {
   Widget _getSectionOptions(BuildContext context) {
     final String bugsEmail =
         Platform.isAndroid ? "android-bugs@ente.io" : "ios-bugs@ente.io";
+    final theme = Theme.of(context);
     return Column(
       children: [
         sectionOptionSpacing,
@@ -34,7 +35,7 @@ class SupportSectionWidget extends StatelessWidget {
           captionedTextWidget: CaptionedTextWidget(
             title: AppLocalizations.of(context).contactSupport,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -51,7 +52,7 @@ class SupportSectionWidget extends StatelessWidget {
           captionedTextWidget: CaptionedTextWidget(
             title: AppLocalizations.of(context).suggestFeatures,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -67,7 +68,7 @@ class SupportSectionWidget extends StatelessWidget {
           captionedTextWidget: CaptionedTextWidget(
             title: AppLocalizations.of(context).reportABug,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {

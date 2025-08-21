@@ -42,13 +42,14 @@ class _ExpandableMenuItemWidgetState extends State<ExpandableMenuItemWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final isAnySectionExpanded =
         InheritedSettingsState.maybeOf(context)?.isAnySectionExpanded ?? false;
     final isCurrentSectionExpanded = expandableController.expanded;
     final isSuppressed = isAnySectionExpanded && !isCurrentSectionExpanded;
 
-    final enteColorScheme = Theme.of(context).colorScheme.enteTheme.colorScheme;
-    final backgroundColor = Theme.of(context).brightness == Brightness.light
+    final enteColorScheme = theme.colorScheme.enteTheme.colorScheme;
+    final backgroundColor = theme.brightness == Brightness.light
         ? enteColorScheme.backgroundElevated2
         : enteColorScheme.backgroundElevated;
     return Padding(

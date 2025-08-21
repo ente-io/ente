@@ -14,7 +14,8 @@ class BasicExifItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final subtitleTextTheme = getEnteTextTheme(context).miniMuted;
+    final theme = Theme.of(context);
+    final subtitleTextTheme = EnteTheme.getTextTheme(theme).miniMuted;
     return InfoItemWidget(
       key: const ValueKey("Basic EXIF"),
       leadingIcon: Icons.camera_outlined,
@@ -81,6 +82,7 @@ class _AllExifItemWidgetState extends State<AllExifItemWidget> {
     EnteFile file,
     Map<String, IfdTag>? exif,
   ) async {
+    final theme = Theme.of(context);
     late final String label;
     late final VoidCallback? onTap;
     if (exif == null) {
@@ -107,7 +109,7 @@ class _AllExifItemWidgetState extends State<AllExifItemWidget> {
       _onTap = onTap;
     });
     return Future.value([
-      Text(label, style: getEnteTextTheme(context).miniBoldMuted),
+      Text(label, style: EnteTheme.getTextTheme(theme).miniBoldMuted),
     ]);
   }
 }

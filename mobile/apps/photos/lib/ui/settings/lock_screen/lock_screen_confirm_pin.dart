@@ -56,8 +56,9 @@ class _LockScreenConfirmPinState extends State<LockScreenConfirmPin> {
 
   @override
   Widget build(BuildContext context) {
-    final colorTheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final colorTheme = EnteTheme.getColorScheme(theme);
+    final textTheme = EnteTheme.getTextTheme(theme);
     return Scaffold(
       appBar: AppBar(
         elevation: 0,

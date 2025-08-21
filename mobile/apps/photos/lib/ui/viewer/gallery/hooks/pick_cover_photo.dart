@@ -23,6 +23,7 @@ Future<int?> showPickCoverPhotoSheet(
   BuildContext context,
   Collection collection,
 ) async {
+  final theme = Theme.of(context);
   return await showBarModalBottomSheet(
     context: context,
     builder: (context) {
@@ -35,7 +36,7 @@ Future<int?> showPickCoverPhotoSheet(
       ),
     ),
     topControl: const SizedBox.shrink(),
-    backgroundColor: getEnteColorScheme(context).backgroundElevated,
+    backgroundColor: EnteTheme.getColorScheme(theme).backgroundElevated,
     barrierColor: backdropFaintDark,
     enableDrag: true,
   );
@@ -51,6 +52,7 @@ class PickCoverPhotoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final ValueNotifier<bool> isFileSelected = ValueNotifier(false);
     final selectedFiles = SelectedFiles();
     selectedFiles.addListener(() {
@@ -137,7 +139,7 @@ class PickCoverPhotoWidget extends StatelessWidget {
                       decoration: BoxDecoration(
                         border: Border(
                           top: BorderSide(
-                            color: getEnteColorScheme(context).strokeFaint,
+                            color: EnteTheme.getColorScheme(theme).strokeFaint,
                           ),
                         ),
                       ),

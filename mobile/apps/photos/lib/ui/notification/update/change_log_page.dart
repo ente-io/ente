@@ -21,7 +21,8 @@ class ChangeLogPage extends StatefulWidget {
 class _ChangeLogPageState extends State<ChangeLogPage> {
   @override
   Widget build(BuildContext context) {
-    final enteColorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final enteColorScheme = EnteTheme.getColorScheme(theme);
     return Scaffold(
       appBar: null,
       body: Container(

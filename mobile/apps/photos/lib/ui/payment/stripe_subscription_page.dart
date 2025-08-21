@@ -125,8 +125,9 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
 
   @override
   Widget build(BuildContext context) {
-    colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    colorScheme = EnteTheme.getColorScheme(theme);
+    final textTheme = EnteTheme.getTextTheme(theme);
 
     return Scaffold(
       appBar: widget.isOnboarding
@@ -138,10 +139,10 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                 child: StepProgressIndicator(
                   totalSteps: 4,
                   currentStep: 4,
-                  selectedColor: Theme.of(context).colorScheme.greenAlternative,
+                  selectedColor: theme.colorScheme.greenAlternative,
                   roundedEdges: const Radius.circular(10),
                   unselectedColor:
-                      Theme.of(context).colorScheme.stepProgressUnselectedColor,
+                      theme.colorScheme.stepProgressUnselectedColor,
                 ),
               ),
             )

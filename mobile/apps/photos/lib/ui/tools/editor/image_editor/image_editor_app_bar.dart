@@ -32,7 +32,8 @@ class ImageEditorAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     return AppBar(
       elevation: 0,
       automaticallyImplyLeading: false,
@@ -45,7 +46,7 @@ class ImageEditorAppBar extends StatelessWidget implements PreferredSizeWidget {
             },
             child: Text(
               AppLocalizations.of(context).cancel,
-              style: getEnteTextTheme(context).body,
+              style: EnteTheme.getTextTheme(theme).body,
             ),
           ),
           if (undo != null && redo != null)
@@ -92,7 +93,7 @@ class ImageEditorAppBar extends StatelessWidget implements PreferredSizeWidget {
                 isMainEditor
                     ? AppLocalizations.of(context).saveCopy
                     : AppLocalizations.of(context).done,
-                style: getEnteTextTheme(context).body.copyWith(
+                style: EnteTheme.getTextTheme(theme).body.copyWith(
                       color: isMainEditor
                           ? (enableUndo
                               ? Theme.of(context)

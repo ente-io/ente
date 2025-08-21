@@ -27,11 +27,12 @@ class VideoExifDialog extends StatelessWidget {
   }
 
   Widget _buildSection(BuildContext context, String title, Widget content) {
+    final theme = Theme.of(context);
     return Theme(
-      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      data: theme.copyWith(dividerColor: Colors.transparent),
       child: ExpansionTile(
         initiallyExpanded: false,
-        title: Text(title, style: getEnteTextTheme(context).body),
+        title: Text(title, style: EnteTheme.getTextTheme(theme).body),
         childrenPadding: EdgeInsets.zero, // Remove padding around children
         tilePadding: EdgeInsets.zero,
         collapsedShape: const Border(), // Remove border when collapsed
@@ -42,12 +43,13 @@ class VideoExifDialog extends StatelessWidget {
   }
 
   Widget _buildGeneralInfo(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           context.l10n.videoInfo,
-          style: getEnteTextTheme(context).large,
+          style: EnteTheme.getTextTheme(theme).large,
         ),
         _buildInfoRow(context, 'Creation Time', props, 'creation_time'),
         _buildInfoRow(context, 'Duration', props, 'duration'),
@@ -95,6 +97,7 @@ class VideoExifDialog extends StatelessWidget {
   }
 
   Widget _buildStreamInfo(BuildContext context, Map<String, dynamic> stream) {
+    final theme = Theme.of(context);
     String titleString = stream['type']?.toString().toUpperCase() ?? '';
     final codeName = stream['codec_name']?.toString().toUpperCase() ?? '';
     if (codeName != 'NULL' && codeName.isNotEmpty) {
@@ -103,7 +106,7 @@ class VideoExifDialog extends StatelessWidget {
     return ExpansionTile(
       title: Text(
         titleString,
-        style: getEnteTextTheme(context).small,
+        style: EnteTheme.getTextTheme(theme).small,
       ),
       childrenPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 4),
       tilePadding: EdgeInsets.zero,
@@ -133,6 +136,7 @@ class VideoExifDialog extends StatelessWidget {
     FFProbeProps data,
     String? dataKey,
   ) {
+    final theme = Theme.of(context);
     final propData = data.propData;
     rowName = rowName.replaceAll('_', ' ');
     rowName = rowName[0].toUpperCase() + rowName.substring(1);
@@ -158,7 +162,7 @@ class VideoExifDialog extends StatelessWidget {
               width: 150,
               child: Text(
                 rowName,
-                style: getEnteTextTheme(context).smallMuted,
+                style: EnteTheme.getTextTheme(theme).smallMuted,
               ),
             ),
             Expanded(child: Text(value.toString())),

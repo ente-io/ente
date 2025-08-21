@@ -144,8 +144,9 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
 
   @override
   Widget build(BuildContext context) {
-    final colorTheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final colorTheme = EnteTheme.getColorScheme(theme);
+    final textTheme = EnteTheme.getTextTheme(theme);
     return Scaffold(
       body: CustomScrollView(
         primary: false,

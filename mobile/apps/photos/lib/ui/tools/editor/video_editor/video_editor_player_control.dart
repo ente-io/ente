@@ -12,6 +12,7 @@ class VideoEditorPlayerControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Hero(
       tag: "video_editor_player_control",
       child: AnimatedBuilder(
@@ -43,7 +44,7 @@ class VideoEditorPlayerControl extends StatelessWidget {
                 vertical: 4,
               ),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.editorBackgroundColor,
+                color: theme.colorScheme.editorBackgroundColor,
                 borderRadius: BorderRadius.circular(56),
               ),
               child: Row(

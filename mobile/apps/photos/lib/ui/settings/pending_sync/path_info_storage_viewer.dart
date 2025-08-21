@@ -58,6 +58,7 @@ class _PathInfoStorageViewerState extends State<PathInfoStorageViewer> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return FutureBuilder<DirectoryStat>(
       future: getDirectoryStat(
         Directory(widget.item.path),
@@ -65,50 +66,54 @@ class _PathInfoStorageViewerState extends State<PathInfoStorageViewer> {
       ),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          return _buildMenuItemWidget(snapshot.data, null);
+          return _buildMenuItemWidget(snapshot.data, null, theme);
         } else if (snapshot.hasError) {
           _logger.severe(
             "Failed to get state for ${widget.item.title}",
             snapshot.error,
           );
-          return _buildMenuItemWidget(null, snapshot.error);
+          return _buildMenuItemWidget(null, snapshot.error, theme);
         } else {
-          return _buildMenuItemWidget(null, null);
+          return _buildMenuItemWidget(null, null, theme);
         }
       },
     );
   }
 
-  Widget _buildMenuItemWidget(DirectoryStat? stat, Object? err) {
+  Widget _buildMenuItemWidget(
+    DirectoryStat? stat,
+    Object? err,
+    ThemeData theme,
+  ) {
     return MenuItemWidget(
       key: UniqueKey(),
       alignCaptionedTextToLeft: true,
       captionedTextWidget: CaptionedTextWidget(
         title: widget.item.title,
         subTitle: stat != null ? '${stat.fileCount}' : null,
-        subTitleColor: getEnteColorScheme(context).textFaint,
+        subTitleColor: EnteTheme.getColorScheme(theme).textFaint,
       ),
       trailingWidget: stat != null
           ? Padding(
               padding: const EdgeInsets.only(left: 12.0),
               child: Text(
                 formatBytes(stat.size),
-                style: getEnteTextTheme(context)
+                style: EnteTheme.getTextTheme(theme)
                     .small
-                    .copyWith(color: getEnteColorScheme(context).textFaint),
+                    .copyWith(color: EnteTheme.getColorScheme(theme).textFaint),
               ),
             )
           : SizedBox.fromSize(
               size: const Size.square(14),
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                color: getEnteColorScheme(context).strokeMuted,
+                color: EnteTheme.getColorScheme(theme).strokeMuted,
               ),
             ),
       trailingIcon: err != null ? Icons.error_outline_outlined : null,
       trailingIconIsMuted: err != null,
       singleBorderRadius: 8,
-      menuItemColor: getEnteColorScheme(context).fillFaint,
+      menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,
       isBottomBorderRadiusRemoved: widget.removeBottomRadius,
       isTopBorderRadiusRemoved: widget.removeTopRadius,
       showOnlyLoadingState: true,

@@ -18,6 +18,7 @@ class ChildSubscriptionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final String familyAdmin = userDetails.familyData!.members!
         .firstWhere((element) => element.isAdmin)
         .email;
@@ -29,7 +30,7 @@ class ChildSubscriptionWidget extends StatelessWidget {
           Center(
             child: Text(
               AppLocalizations.of(context).youAreOnAFamilyPlan,
-              style: Theme.of(context).textTheme.bodyLarge,
+              style: theme.textTheme.bodyLarge,
             ),
           ),
           const Padding(
@@ -40,11 +41,11 @@ class ChildSubscriptionWidget extends StatelessWidget {
             child: StyledText(
               text:
                   AppLocalizations.of(context).contactFamilyAdmin(familyAdmin),
-              style: Theme.of(context).textTheme.bodyLarge,
+              style: theme.textTheme.bodyLarge,
               tags: {
                 'green': StyledTextTag(
                   style: TextStyle(
-                    color: getEnteColorScheme(context).primary500,
+                    color: EnteTheme.getColorScheme(theme).primary500,
                   ),
                 ),
               },
@@ -94,7 +95,7 @@ class ChildSubscriptionWidget extends StatelessWidget {
                       TextSpan(
                         text: AppLocalizations.of(context)
                             .pleaseContactSupportAndWeWillBeHappyToHelp,
-                        style: Theme.of(context).textTheme.bodyMedium,
+                        style: theme.textTheme.bodyMedium,
                       ),
                     ],
                   ),

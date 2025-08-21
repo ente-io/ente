@@ -36,6 +36,7 @@ class _EnableMachineLearningConsentState
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       body: CustomScrollView(
         primary: false,
@@ -54,8 +55,8 @@ class _EnableMachineLearningConsentState
                     Text(
                       AppLocalizations.of(context).mlConsentDescription,
                       textAlign: TextAlign.left,
-                      style: getEnteTextTheme(context).body.copyWith(
-                            color: getEnteColorScheme(context).textMuted,
+                      style: EnteTheme.getTextTheme(theme).body.copyWith(
+                            color: EnteTheme.getColorScheme(theme).textMuted,
                           ),
                     ),
                     const SizedBox(height: 12),
@@ -75,8 +76,8 @@ class _EnableMachineLearningConsentState
                       child: Text(
                         AppLocalizations.of(context).mlConsentPrivacy,
                         textAlign: TextAlign.left,
-                        style: getEnteTextTheme(context).body.copyWith(
-                              color: getEnteColorScheme(context).textMuted,
+                        style: EnteTheme.getTextTheme(theme).body.copyWith(
+                              color: EnteTheme.getColorScheme(theme).textMuted,
                               decoration: TextDecoration.underline,
                             ),
                       ),
@@ -87,7 +88,7 @@ class _EnableMachineLearningConsentState
                       children: [
                         Checkbox(
                           value: _hasAckedPrivacyPolicy.value,
-                          side: CheckboxTheme.of(context).side,
+                          side: theme.checkboxTheme.side,
                           onChanged: (value) {
                             setState(() {
                               _hasAckedPrivacyPolicy.value = value!;
@@ -107,7 +108,7 @@ class _EnableMachineLearningConsentState
                               child: Text(
                                 AppLocalizations.of(context)
                                     .mlConsentConfirmation,
-                                style: getEnteTextTheme(context).bodyMuted,
+                                style: EnteTheme.getTextTheme(theme).bodyMuted,
                                 textAlign: TextAlign.left,
                               ),
                             ),

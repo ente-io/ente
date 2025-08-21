@@ -412,8 +412,9 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
       return const SizedBox.shrink();
     }
 
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
+    final textTheme = EnteTheme.getTextTheme(theme);
 
     return SlideTransition(
       position: _slideAnimation!,
@@ -609,7 +610,8 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
     final files =
         currentSuggestion.filesInCluster.take(personPage ? 4 : 3).toList();
     final thumbnails = <Widget>[];
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final textTheme = EnteTheme.getTextTheme(theme);
 
     final start = personPage ? 0 : -1;
     for (int i = start; i < files.length; i++) {
@@ -633,7 +635,7 @@ class _PersonGallerySuggestionState extends State<PersonGallerySuggestion>
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(32),
                 border: Border.all(
-                  color: getEnteColorScheme(context).strokeFainter,
+                  color: EnteTheme.getColorScheme(theme).strokeFainter,
                   width: 1,
                 ),
               ),

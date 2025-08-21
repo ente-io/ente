@@ -27,6 +27,7 @@ class GenericFilterChip extends StatefulWidget {
 class _GenericFilterChipState extends State<GenericFilterChip> {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: () {
         if (widget.isApplied) {
@@ -40,12 +41,12 @@ class _GenericFilterChipState extends State<GenericFilterChip> {
         height: kFilterChipHeight + 1,
         child: Container(
           decoration: BoxDecoration(
-            color: getEnteColorScheme(context).fillFaint,
+            color: EnteTheme.getColorScheme(theme).fillFaint,
             borderRadius: const BorderRadius.all(
               Radius.circular(kFilterChipHeight / 2),
             ),
             border: Border.all(
-              color: getEnteColorScheme(context).strokeFaint,
+              color: EnteTheme.getColorScheme(theme).strokeFaint,
               width: 0.5,
             ),
           ),
@@ -65,7 +66,7 @@ class _GenericFilterChipState extends State<GenericFilterChip> {
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: Text(
                     widget.label,
-                    style: getEnteTextTheme(context).miniBold,
+                    style: EnteTheme.getTextTheme(theme).miniBold,
                   ),
                 ),
                 widget.isApplied
@@ -75,7 +76,7 @@ class _GenericFilterChipState extends State<GenericFilterChip> {
                     ? Icon(
                         Icons.close_rounded,
                         size: 16,
-                        color: getEnteColorScheme(context).textMuted,
+                        color: EnteTheme.getColorScheme(theme).textMuted,
                       )
                     : const SizedBox.shrink(),
               ],

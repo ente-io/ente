@@ -71,6 +71,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final filterSuggestedUsers = _suggestedUsers
         .where(
           (element) =>
@@ -80,8 +81,8 @@ class _AddParticipantPage extends State<AddParticipantPage> {
         )
         .toList();
     isKeypadOpen = MediaQuery.viewInsetsOf(context).bottom > 100;
-    final enteTextTheme = getEnteTextTheme(context);
-    final enteColorScheme = getEnteColorScheme(context);
+    final enteTextTheme = EnteTheme.getTextTheme(theme);
+    final enteColorScheme = EnteTheme.getColorScheme(theme);
     return Scaffold(
       resizeToAvoidBottomInset: isKeypadOpen,
       appBar: AppBar(
@@ -105,7 +106,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
           const SizedBox(height: 4),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: _enterEmailField(),
+            child: _enterEmailField(theme),
           ),
           Expanded(
             child: Padding(
@@ -165,9 +166,9 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                                 type: AvatarType.mini,
                               ),
                               menuItemColor:
-                                  getEnteColorScheme(context).fillFaint,
+                                  EnteTheme.getColorScheme(theme).fillFaint,
                               pressedColor:
-                                  getEnteColorScheme(context).fillFaint,
+                                  EnteTheme.getColorScheme(theme).fillFaint,
                               trailingIcon:
                                   (_selectedEmails.contains(currentUser.email))
                                       ? Icons.check
@@ -204,8 +205,8 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                                 ? const SizedBox.shrink()
                                 : DividerWidget(
                                     dividerType: DividerType.menu,
-                                    bgColor:
-                                        getEnteColorScheme(context).fillFaint,
+                                    bgColor: EnteTheme.getColorScheme(theme)
+                                        .fillFaint,
                                   ),
                           ],
                         );
@@ -346,22 +347,23 @@ class _AddParticipantPage extends State<AddParticipantPage> {
     setState(() => {});
   }
 
-  Widget _enterEmailField() {
+  Widget _enterEmailField(ThemeData theme) {
     return Row(
       children: [
         Expanded(
           child: TextFormField(
             controller: _textController,
             focusNode: textFieldFocusNode,
-            style: getEnteTextTheme(context).body,
+            style: EnteTheme.getTextTheme(theme).body,
             autofillHints: const [AutofillHints.email],
             decoration: InputDecoration(
               focusedBorder: OutlineInputBorder(
                 borderRadius: const BorderRadius.all(Radius.circular(4.0)),
-                borderSide:
-                    BorderSide(color: getEnteColorScheme(context).strokeMuted),
+                borderSide: BorderSide(
+                  color: EnteTheme.getColorScheme(theme).strokeMuted,
+                ),
               ),
-              fillColor: getEnteColorScheme(context).fillFaint,
+              fillColor: EnteTheme.getColorScheme(theme).fillFaint,
               filled: true,
               hintText: AppLocalizations.of(context).enterEmail,
               contentPadding: const EdgeInsets.symmetric(
@@ -374,7 +376,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
               ),
               prefixIcon: Icon(
                 Icons.email_outlined,
-                color: getEnteColorScheme(context).strokeMuted,
+                color: EnteTheme.getColorScheme(theme).strokeMuted,
               ),
               suffixIcon: _newEmail == ''
                   ? null
@@ -382,7 +384,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                       onPressed: clearFocus,
                       icon: Icon(
                         Icons.cancel,
-                        color: getEnteColorScheme(context).strokeMuted,
+                        color: EnteTheme.getColorScheme(theme).strokeMuted,
                       ),
                     ),
             ),

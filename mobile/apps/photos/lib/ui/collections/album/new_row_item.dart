@@ -23,7 +23,8 @@ class NewAlbumRowItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     return GestureDetector(
       onTap: () async {
         final result = await showTextInputDialog(
@@ -73,7 +74,7 @@ class NewAlbumRowItemWidget extends StatelessWidget {
             child: Container(
               height: height,
               width: width,
-              color: Theme.of(context).brightness == Brightness.light
+              color: theme.brightness == Brightness.light
                   ? colorScheme.backdropBase
                   : colorScheme.backdropFaint,
               child: DottedBorder(
@@ -95,7 +96,7 @@ class NewAlbumRowItemWidget extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             AppLocalizations.of(context).addNew,
-            style: getEnteTextTheme(context).smallFaint,
+            style: EnteTheme.getTextTheme(theme).smallFaint,
           ),
         ],
       ),

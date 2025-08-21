@@ -41,8 +41,9 @@ class NotificationWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    EnteTextTheme textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
+    EnteTextTheme textTheme = EnteTheme.getTextTheme(theme);
     TextStyle mainTextStyle = this.mainTextStyle ?? darkTextTheme.bodyBold;
     TextStyle subTextStyle = darkTextTheme.miniMuted;
     LinearGradient? backgroundGradient;
@@ -54,7 +55,7 @@ class NotificationWidget extends StatelessWidget {
         backgroundColor = warning500;
         break;
       case NotificationType.banner:
-        textTheme = getEnteTextTheme(context);
+        textTheme = EnteTheme.getTextTheme(theme);
         backgroundColor = colorScheme.backgroundElevated2;
         mainTextStyle = textTheme.bodyBold;
         subTextStyle = textTheme.miniMuted;
@@ -70,26 +71,26 @@ class NotificationWidget extends StatelessWidget {
           begin: Alignment.bottomCenter,
           end: Alignment.topCenter,
         );
-        boxShadow = Theme.of(context).colorScheme.enteTheme.shadowMenu;
+        boxShadow = theme.colorScheme.enteTheme.shadowMenu;
         break;
       case NotificationType.greenBanner:
         backgroundGradient = LinearGradient(
           colors: [
-            getEnteColorScheme(context).primary700,
-            getEnteColorScheme(context).primary500,
+            EnteTheme.getColorScheme(theme).primary700,
+            EnteTheme.getColorScheme(theme).primary500,
           ],
           stops: const [0.25, 1],
           begin: Alignment.bottomCenter,
           end: Alignment.topCenter,
         );
-        boxShadow = Theme.of(context).colorScheme.enteTheme.shadowMenu;
+        boxShadow = theme.colorScheme.enteTheme.shadowMenu;
         break;
       case NotificationType.notice:
         backgroundColor = colorScheme.backgroundElevated2;
         mainTextStyle = textTheme.bodyBold;
         subTextStyle = textTheme.miniMuted;
         strokeColorScheme = colorScheme;
-        boxShadow = Theme.of(context).colorScheme.enteTheme.shadowMenu;
+        boxShadow = theme.colorScheme.enteTheme.shadowMenu;
         break;
     }
     return Center(
@@ -186,8 +187,9 @@ class NotificationTipWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
+    final textTheme = EnteTheme.getTextTheme(theme);
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
       decoration: BoxDecoration(
@@ -223,8 +225,9 @@ class NotificationNoteWidget extends StatelessWidget {
   const NotificationNoteWidget(this.note, {super.key});
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
+    final textTheme = EnteTheme.getTextTheme(theme);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(

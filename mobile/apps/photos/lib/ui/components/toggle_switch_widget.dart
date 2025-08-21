@@ -34,7 +34,8 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final enteColorScheme = Theme.of(context).colorScheme.enteTheme.colorScheme;
+    final theme = Theme.of(context);
+    final enteColorScheme = theme.colorScheme.enteTheme.colorScheme;
     final Widget stateIcon = _stateIcon(enteColorScheme);
 
     return Row(

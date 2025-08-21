@@ -152,6 +152,7 @@ class MapAttributionWidgetState extends State<MapAttributionWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final persistentAttributionItems = [
       ...List<Widget>.from(
         widget.attributions.whereType<LogoSourceAttribution>(),
@@ -178,7 +179,7 @@ class MapAttributionWidgetState extends State<MapAttributionWidget> {
                       onTap: close,
                       icon: Icons.cancel_outlined,
                       iconButtonType: IconButtonType.primary,
-                      iconColor: getEnteColorScheme(context).strokeBase,
+                      iconColor: EnteTheme.getColorScheme(theme).strokeBase,
                     ))(
                 context,
                 () => setState(() => popupExpanded = false),
@@ -221,7 +222,7 @@ class MapAttributionWidgetState extends State<MapAttributionWidget> {
                   child: Container(
                     decoration: BoxDecoration(
                       color: widget.popupBackgroundColor ??
-                          Theme.of(context).colorScheme.surface,
+                          theme.colorScheme.surface,
                       border: Border.all(width: 0, style: BorderStyle.none),
                       borderRadius: widget.popupBorderRadius ??
                           BorderRadius.only(

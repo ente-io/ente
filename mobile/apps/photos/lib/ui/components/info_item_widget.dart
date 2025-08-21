@@ -27,14 +27,15 @@ class InfoItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final children = <Widget>[];
     if (title != null) {
       children.addAll([
         Text(
           title!,
           style: hasChipButtons
-              ? getEnteTextTheme(context).miniMuted
-              : getEnteTextTheme(context).small,
+              ? EnteTheme.getTextTheme(theme).miniMuted
+              : EnteTheme.getTextTheme(theme).small,
         ),
         SizedBox(height: hasChipButtons ? 8 : 4),
       ]);
@@ -61,7 +62,7 @@ class InfoItemWidget extends StatelessWidget {
               child = EnteLoadingWidget(
                 padding: biggerSpinner ? 6 : 3,
                 size: biggerSpinner ? 20 : 11,
-                color: getEnteColorScheme(context).strokeMuted,
+                color: EnteTheme.getColorScheme(theme).strokeMuted,
                 alignment:
                     biggerSpinner ? Alignment.center : Alignment.centerLeft,
               );

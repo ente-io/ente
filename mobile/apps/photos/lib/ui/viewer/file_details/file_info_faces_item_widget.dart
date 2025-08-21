@@ -68,6 +68,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -76,12 +77,12 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
           iconButtonType: IconButtonType.secondary,
         ),
         const SizedBox(width: 12),
-        _buildContent(),
+        _buildContent(theme),
       ],
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(ThemeData theme) {
     if (_isLoading) {
       return const Expanded(
         child: Padding(
@@ -117,19 +118,19 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
                   child: Center(
                     child: Text(
                       AppLocalizations.of(context).faces,
-                      style: getEnteTextTheme(context).small,
+                      style: EnteTheme.getTextTheme(theme).small,
                     ),
                   ),
                 ),
               ),
-              _editStateButton(),
+              _editStateButton(theme),
             ],
           ),
           const SizedBox(height: 20),
           if (_defaultFaces.isNotEmpty) _buildFaceGrid(_defaultFaces),
           if (_remainingFaces.isNotEmpty) ...[
             const SizedBox(height: 16),
-            _buildRemainingFacesSection(),
+            _buildRemainingFacesSection(theme),
           ],
         ],
       ),
@@ -236,7 +237,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     );
   }
 
-  Widget _buildRemainingFacesSection() {
+  Widget _buildRemainingFacesSection(ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -249,7 +250,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
               children: [
                 Text(
                   AppLocalizations.of(context).otherDetectedFaces,
-                  style: getEnteTextTheme(context).miniMuted,
+                  style: EnteTheme.getTextTheme(theme).miniMuted,
                 ),
                 const Spacer(),
                 Padding(
@@ -259,7 +260,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
                         ? Icons.keyboard_arrow_up
                         : Icons.keyboard_arrow_down,
                     size: 16,
-                    color: getEnteColorScheme(context).textMuted,
+                    color: EnteTheme.getColorScheme(theme).textMuted,
                   ),
                 ),
               ],
@@ -274,7 +275,7 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     );
   }
 
-  Widget _editStateButton() {
+  Widget _editStateButton(ThemeData theme) {
     return SizedBox(
       height: 36,
       child: _isEditMode
@@ -288,15 +289,15 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
                         const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
                       border: Border.all(
-                        color: getEnteColorScheme(context).primary500,
+                        color: EnteTheme.getColorScheme(theme).primary500,
                         width: 1,
                       ),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       AppLocalizations.of(context).done,
-                      style: getEnteTextTheme(context).small.copyWith(
-                            color: getEnteColorScheme(context).primary500,
+                      style: EnteTheme.getTextTheme(theme).small.copyWith(
+                            color: EnteTheme.getColorScheme(theme).primary500,
                           ),
                     ),
                   ),

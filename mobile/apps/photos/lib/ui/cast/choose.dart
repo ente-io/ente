@@ -19,7 +19,8 @@ class _CastChooseDialogState extends State<CastChooseDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final textStyle = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final textStyle = EnteTheme.getTextTheme(theme);
     final AlertDialog alert = AlertDialog(
       title: Text(
         context.l10n.playOnTv,

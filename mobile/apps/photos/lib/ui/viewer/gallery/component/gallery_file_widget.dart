@@ -55,11 +55,12 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     Color selectionColor = Colors.white;
     if (_isFileSelected &&
         widget.file.isUploaded &&
         widget.file.ownerID != widget.currentUserID) {
-      final avatarColors = getEnteColorScheme(context).avatarColors;
+      final avatarColors = EnteTheme.getColorScheme(theme).avatarColors;
       selectionColor =
           avatarColors[(widget.file.ownerID!).remainder(avatarColors.length)];
     }

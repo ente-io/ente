@@ -1,6 +1,7 @@
 import "dart:async";
 
 import "package:flutter/cupertino.dart";
+import "package:flutter/material.dart";
 import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/details_sheet_event.dart";
@@ -141,7 +142,8 @@ Future<void> showSingleFileDeleteSheet(
 
 Future<void> showDetailsSheet(BuildContext context, EnteFile file) async {
   guardedCheckPanorama(file).ignore();
-  final colorScheme = getEnteColorScheme(context);
+  final theme = Theme.of(context);
+  final colorScheme = EnteTheme.getColorScheme(theme);
   Bus.instance.fire(
     DetailsSheetEvent(
       localID: file.localID,

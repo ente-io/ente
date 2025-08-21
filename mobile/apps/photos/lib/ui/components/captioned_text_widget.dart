@@ -21,8 +21,9 @@ class CaptionedTextWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enteColorScheme = Theme.of(context).colorScheme.enteTheme.colorScheme;
-    final enteTextTheme = Theme.of(context).colorScheme.enteTheme.textTheme;
+    final theme = Theme.of(context);
+    final enteColorScheme = theme.colorScheme.enteTheme.colorScheme;
+    final enteTextTheme = theme.colorScheme.enteTheme.textTheme;
 
     final capitalized = title.capitalizeFirst();
 

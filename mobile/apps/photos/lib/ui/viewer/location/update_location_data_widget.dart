@@ -42,7 +42,8 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
   @override
   Widget build(BuildContext context) {
     Logger("UpdateLocationDataWiget").info("building");
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final textTheme = EnteTheme.getTextTheme(theme);
     return Stack(
       alignment: Alignment.topCenter,
       children: [
@@ -91,7 +92,7 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
             ),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
-              color: getEnteColorScheme(context).backgroundElevated,
+              color: EnteTheme.getColorScheme(theme).backgroundElevated,
               boxShadow: shadowFloatFaintLight,
             ),
             child: ValueListenableBuilder(
@@ -249,6 +250,7 @@ class _UpdateLocationInfoState extends State<UpdateLocationInfo> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return AnimatedCrossFade(
       duration: const Duration(milliseconds: 200),
       firstCurve: Curves.easeInOutExpo,
@@ -259,11 +261,11 @@ class _UpdateLocationInfoState extends State<UpdateLocationInfo> {
           : CrossFadeState.showSecond,
       firstChild: Text(
         AppLocalizations.of(context).selectALocation,
-        style: getEnteTextTheme(context).mini,
+        style: EnteTheme.getTextTheme(theme).mini,
       ),
       secondChild: Text(
         AppLocalizations.of(context).editsToLocationWillOnlyBeSeenWithinEnte,
-        style: getEnteTextTheme(context).mini,
+        style: EnteTheme.getTextTheme(theme).mini,
       ),
       layoutBuilder: (topChild, topChildKey, bottomChild, bottomChildKey) {
         return Stack(

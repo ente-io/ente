@@ -426,6 +426,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   Future<void> _autoLogoutAlert() async {
+    final theme = Theme.of(context);
     final AlertDialog alert = AlertDialog(
       title: Text(AppLocalizations.of(context).sessionExpired),
       content: Text(AppLocalizations.of(context).pleaseLoginAgain),
@@ -434,7 +435,7 @@ class _HomeWidgetState extends State<HomeWidget> {
           child: Text(
             AppLocalizations.of(context).ok,
             style: TextStyle(
-              color: Theme.of(context).colorScheme.greenAlternative,
+              color: theme.colorScheme.greenAlternative,
             ),
           ),
           onPressed: () async {
@@ -628,6 +629,7 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     _logger.info("Building home_Widget with tab $_selectedTabIndex");
     bool isSettingsOpen = false;
     final enableDrawer = LocalSyncService.instance.hasCompletedFirstImport();
@@ -661,7 +663,7 @@ class _HomeWidgetState extends State<HomeWidget> {
               .fire(TabChangedEvent(0, TabChangedEventSource.backButton));
         },
         child: Scaffold(
-          drawerScrimColor: getEnteColorScheme(context).strokeFainter,
+          drawerScrimColor: EnteTheme.getColorScheme(theme).strokeFainter,
           drawerEnableOpenDragGesture: false,
           //using a hack instead of enabling this as enabling this will create other problems
           drawer: enableDrawer
@@ -689,7 +691,7 @@ class _HomeWidgetState extends State<HomeWidget> {
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(0),
             child: AppBar(
-              backgroundColor: getEnteColorScheme(context).backgroundBase,
+              backgroundColor: EnteTheme.getColorScheme(theme).backgroundBase,
             ),
           ),
           resizeToAvoidBottomInset: false,
@@ -772,10 +774,12 @@ class _HomeWidgetState extends State<HomeWidget> {
           child: ValueListenableBuilder(
             valueListenable: isOnSearchTabNotifier,
             builder: (context, value, child) {
+              final theme = Theme.of(context);
               return Container(
                 decoration: value
                     ? BoxDecoration(
-                        color: getEnteColorScheme(context).backgroundElevated,
+                        color:
+                            EnteTheme.getColorScheme(theme).backgroundElevated,
                         boxShadow: shadowFloatFaintLight,
                       )
                     : null,
@@ -874,7 +878,8 @@ class _HomeWidgetState extends State<HomeWidget> {
     if (!show || !Configuration.instance.isLoggedIn()) {
       return;
     }
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     await showBarModalBottomSheet(
       topControl: const SizedBox.shrink(),
       shape: const RoundedRectangleBorder(

@@ -41,6 +41,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final isKeypadOpen = MediaQuery.viewInsetsOf(context).bottom > 100;
+    final theme = Theme.of(context);
 
     FloatingActionButtonLocation? fabLocation() {
       if (isKeypadOpen) {
@@ -56,7 +57,7 @@ class _LoginPageState extends State<LoginPage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          color: Theme.of(context).iconTheme.color,
+          color: theme.iconTheme.color,
           onPressed: () {
             Navigator.of(context).pop();
           },
@@ -110,6 +111,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget _getBody() {
     final l10n = context.l10n;
+    final theme = Theme.of(context);
     return Column(
       children: [
         Expanded(
@@ -121,7 +123,7 @@ class _LoginPageState extends State<LoginPage> {
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
                     l10n.accountWelcomeBack,
-                    style: Theme.of(context).textTheme.headlineMedium,
+                    style: theme.textTheme.headlineMedium,
                   ),
                 ),
                 Padding(
@@ -145,11 +147,8 @@ class _LoginPageState extends State<LoginPage> {
                           ? Icon(
                               Icons.check,
                               size: 20,
-                              color: Theme.of(context)
-                                  .inputDecorationTheme
-                                  .focusedBorder!
-                                  .borderSide
-                                  .color,
+                              color: theme.inputDecorationTheme.focusedBorder!
+                                  .borderSide.color,
                             )
                           : null,
                     ),
@@ -168,7 +167,7 @@ class _LoginPageState extends State<LoginPage> {
                   padding: const EdgeInsets.symmetric(vertical: 18),
                   child: Divider(
                     thickness: 1,
-                    color: getEnteColorScheme(context).strokeFaint,
+                    color: EnteTheme.getColorScheme(theme).strokeFaint,
                   ),
                 ),
                 Padding(
@@ -179,9 +178,7 @@ class _LoginPageState extends State<LoginPage> {
                         flex: 5,
                         child: StyledText(
                           text: AppLocalizations.of(context).loginTerms,
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium!
+                          style: theme.textTheme.titleMedium!
                               .copyWith(fontSize: 12),
                           tags: {
                             'u-terms': StyledTextActionTag(
@@ -243,7 +240,9 @@ class _LoginPageState extends State<LoginPage> {
     if (_emailIsValid) {
       _emailInputFieldColor = const Color.fromRGBO(45, 194, 98, 0.2);
     } else {
-      _emailInputFieldColor = getEnteColorScheme(context).fillFaint;
+      // Using Theme.of(context) directly since this method is outside build and 'theme' isn't stored.
+      _emailInputFieldColor =
+          EnteTheme.getColorScheme(Theme.of(context)).fillFaint;
     }
   }
 }

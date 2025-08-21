@@ -28,6 +28,7 @@ class GradientButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     Widget buttonContent;
     if (iconData == null) {
       buttonContent = Text(
@@ -73,8 +74,8 @@ class GradientButton extends StatelessWidget {
             colors: onTap != null
                 ? linearGradientColors
                 : [
-                    getEnteColorScheme(context).fillMuted,
-                    getEnteColorScheme(context).fillMuted,
+                    EnteTheme.getColorScheme(theme).fillMuted,
+                    EnteTheme.getColorScheme(theme).fillMuted,
                   ],
           ),
           borderRadius: BorderRadius.circular(8),

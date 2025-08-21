@@ -12,8 +12,9 @@ class NewAlbumListItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final textTheme = EnteTheme.getTextTheme(theme);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     const sideOfThumbnail = 60.0;
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -27,7 +28,7 @@ class NewAlbumListItemWidget extends StatelessWidget {
                   child: Container(
                     height: sideOfThumbnail,
                     width: sideOfThumbnail,
-                    color: Theme.of(context).brightness == Brightness.light
+                    color: !EnteTheme.isDark(theme)
                         ? colorScheme.backdropBase
                         : colorScheme.backdropFaint,
                     child: Icon(

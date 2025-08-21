@@ -106,14 +106,14 @@ class TrashPage extends StatelessWidget {
     return FutureBuilder<int>(
       future: TrashDB.instance.count(),
       builder: (context, snapshot) {
+        final theme = Theme.of(context);
         if (snapshot.hasData && snapshot.data! > 0) {
           return Padding(
             padding: const EdgeInsets.all(16),
             child: Text(
               AppLocalizations.of(context)
                   .itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion,
-              style:
-                  Theme.of(context).textTheme.bodySmall!.copyWith(fontSize: 16),
+              style: theme.textTheme.bodySmall!.copyWith(fontSize: 16),
             ),
           );
         } else {
@@ -129,6 +129,7 @@ class BottomButtonsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -151,9 +152,9 @@ class BottomButtonsWidget extends StatelessWidget {
                     ),
                     child: Text(
                       AppLocalizations.of(context).deleteAll,
-                      style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                            color: const Color.fromRGBO(255, 101, 101, 1),
-                          ),
+                      style: theme.textTheme.titleSmall!.copyWith(
+                        color: const Color.fromRGBO(255, 101, 101, 1),
+                      ),
                     ),
                   ),
                 ),

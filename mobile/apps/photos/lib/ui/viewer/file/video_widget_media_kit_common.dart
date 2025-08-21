@@ -287,6 +287,7 @@ class SeekBarAndDuration extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: 8,
@@ -326,7 +327,7 @@ class SeekBarAndDuration extends StatelessWidget {
                         file.caption!,
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
-                        style: getEnteTextTheme(context)
+                        style: EnteTheme.getTextTheme(theme)
                             .mini
                             .copyWith(color: textBaseDark),
                       ),
@@ -341,18 +342,14 @@ class SeekBarAndDuration extends StatelessWidget {
                     if (snapshot.data == null) {
                       return Text(
                         "0:00",
-                        style: getEnteTextTheme(
-                          context,
-                        ).mini.copyWith(
+                        style: EnteTheme.getTextTheme(theme).mini.copyWith(
                               color: textBaseDark,
                             ),
                       );
                     }
                     return Text(
                       secondsToDuration(snapshot.data!.inSeconds),
-                      style: getEnteTextTheme(
-                        context,
-                      ).mini.copyWith(
+                      style: EnteTheme.getTextTheme(theme).mini.copyWith(
                             color: textBaseDark,
                           ),
                     );
@@ -368,9 +365,7 @@ class SeekBarAndDuration extends StatelessWidget {
                   _secondsToDuration(
                     controller!.player.state.duration.inSeconds,
                   ),
-                  style: getEnteTextTheme(
-                    context,
-                  ).mini.copyWith(
+                  style: EnteTheme.getTextTheme(theme).mini.copyWith(
                         color: textBaseDark,
                       ),
                 ),
@@ -444,8 +439,9 @@ class _SeekBarState extends State<SeekBar> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return SliderTheme(
-      data: SliderTheme.of(context).copyWith(
+      data: theme.sliderTheme.copyWith(
         trackHeight: 1.0,
         thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8.0),
         overlayShape: const RoundSliderOverlayShape(overlayRadius: 14.0),

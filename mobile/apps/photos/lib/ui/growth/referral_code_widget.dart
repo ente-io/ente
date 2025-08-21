@@ -25,8 +25,9 @@ class ReferralCodeWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textStyle = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
+    final textStyle = EnteTheme.getTextTheme(theme);
     return Center(
       child: Container(
         color: colorScheme.backgroundElevated2,

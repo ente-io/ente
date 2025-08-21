@@ -65,7 +65,8 @@ class DialogWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final widthOfScreen = MediaQuery.of(context).size.width;
     final isMobileSmall = widthOfScreen <= mobileSmallThreshold;
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     return Container(
       width: min(widthOfScreen, 320),
       padding: isMobileSmall
@@ -110,8 +111,9 @@ class ContentContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final textTheme = EnteTheme.getTextTheme(theme);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -243,7 +245,8 @@ class _TextInputDialogState extends State<TextInputDialog> {
   Widget build(BuildContext context) {
     final widthOfScreen = MediaQuery.sizeOf(context).width;
     final isMobileSmall = widthOfScreen <= mobileSmallThreshold;
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     return Container(
       width: min(widthOfScreen, 320),
       padding: isMobileSmall

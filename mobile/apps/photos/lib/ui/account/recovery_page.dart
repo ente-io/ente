@@ -20,6 +20,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
   @override
   Widget build(BuildContext context) {
     final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
+    final theme = Theme.of(context);
     FloatingActionButtonLocation? fabLocation() {
       if (isKeypadOpen) {
         return null;
@@ -34,7 +35,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          color: Theme.of(context).iconTheme.color,
+          color: theme.iconTheme.color,
           onPressed: () {
             Navigator.of(context).pop();
           },
@@ -99,7 +100,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
                     AppLocalizations.of(context).forgotPassword,
-                    style: Theme.of(context).textTheme.headlineMedium,
+                    style: theme.textTheme.headlineMedium,
                   ),
                 ),
                 Padding(
@@ -107,7 +108,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
                   child: TextFormField(
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: getEnteColorScheme(context).fillFaint,
+                      fillColor: EnteTheme.getColorScheme(theme).fillFaint,
                       hintText:
                           AppLocalizations.of(context).enterYourRecoveryKey,
                       contentPadding: const EdgeInsets.all(20),
@@ -134,7 +135,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
                   padding: const EdgeInsets.symmetric(vertical: 18),
                   child: Divider(
                     thickness: 1,
-                    color: getEnteColorScheme(context).strokeFaint,
+                    color: EnteTheme.getColorScheme(theme).strokeFaint,
                   ),
                 ),
                 Row(

@@ -111,7 +111,8 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
   Widget build(BuildContext context) {
     filesInDeviceCollection = _filesInDeviceCollection();
 
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
       child: Column(
@@ -247,6 +248,7 @@ class ResetIgnoredFilesWidget extends StatefulWidget {
 class _ResetIgnoredFilesWidgetState extends State<ResetIgnoredFilesWidget> {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       children: [
         const SizedBox(height: 24),
@@ -255,7 +257,7 @@ class _ResetIgnoredFilesWidgetState extends State<ResetIgnoredFilesWidget> {
             title: AppLocalizations.of(context).resetIgnoredFiles,
           ),
           singleBorderRadius: 8.0,
-          menuItemColor: getEnteColorScheme(context).fillFaint,
+          menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,
           leadingIcon: Icons.cloud_off_outlined,
           alwaysShowSuccessState: true,
           onTap: () async {

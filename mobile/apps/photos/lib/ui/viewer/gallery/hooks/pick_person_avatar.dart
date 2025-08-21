@@ -24,6 +24,7 @@ Future<dynamic> showPersonAvatarPhotoSheet(
   BuildContext context,
   PersonEntity person,
 ) async {
+  final theme = Theme.of(context);
   return await showBarModalBottomSheet(
     context: context,
     builder: (context) {
@@ -36,7 +37,7 @@ Future<dynamic> showPersonAvatarPhotoSheet(
       ),
     ),
     topControl: const SizedBox.shrink(),
-    backgroundColor: getEnteColorScheme(context).backgroundElevated,
+    backgroundColor: EnteTheme.getColorScheme(theme).backgroundElevated,
     barrierColor: backdropFaintDark,
     enableDrag: true,
   );
@@ -66,6 +67,7 @@ class PickPersonCoverPhotoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final ValueNotifier<bool> isFileSelected = ValueNotifier(false);
     final selectedFiles = SelectedFiles();
     selectedFiles.addListener(() {
@@ -136,7 +138,7 @@ class PickPersonCoverPhotoWidget extends StatelessWidget {
                       decoration: BoxDecoration(
                         border: Border(
                           top: BorderSide(
-                            color: getEnteColorScheme(context).strokeFaint,
+                            color: EnteTheme.getColorScheme(theme).strokeFaint,
                           ),
                         ),
                       ),

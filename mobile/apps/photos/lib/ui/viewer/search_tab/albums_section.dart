@@ -65,7 +65,8 @@ class _AlbumsSectionState extends State<AlbumsSection> {
   @override
   Widget build(BuildContext context) {
     if (_albumSearchResults.isEmpty) {
-      final textTheme = getEnteTextTheme(context);
+      final theme = Theme.of(context);
+      final textTheme = EnteTheme.getTextTheme(theme);
       return Padding(
         padding: const EdgeInsets.only(left: 12, right: 8),
         child: Row(
@@ -136,9 +137,10 @@ class AlbumRecommendation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final heroTag = albumSearchResult.heroTag() +
         (albumSearchResult.previewThumbnail()?.tag ?? "");
-    final enteTextTheme = getEnteTextTheme(context);
+    final enteTextTheme = EnteTheme.getTextTheme(theme);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2.5),
       child: GestureDetector(
@@ -220,7 +222,8 @@ class AlbumCTA extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enteColorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final enteColorScheme = EnteTheme.getColorScheme(theme);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2.5),
       child: GestureDetector(
@@ -231,7 +234,7 @@ class AlbumCTA extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: Container(
-                color: Theme.of(context).brightness == Brightness.light
+                color: EnteTheme.isDark(theme)
                     ? enteColorScheme.backdropBase
                     : enteColorScheme.backdropFaint,
                 height: 100,
@@ -256,7 +259,7 @@ class AlbumCTA extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               AppLocalizations.of(context).addNew,
-              style: getEnteTextTheme(context).smallFaint,
+              style: EnteTheme.getTextTheme(theme).smallFaint,
             ),
           ],
         ),

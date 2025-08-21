@@ -62,6 +62,7 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       children: [
         Stack(
@@ -83,7 +84,7 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
                     ),
                     side: widget.highlight
                         ? BorderSide(
-                            color: getEnteColorScheme(context).primary700,
+                            color: EnteTheme.getColorScheme(theme).primary700,
                             width: 1.0,
                           )
                         : BorderSide.none,
@@ -109,16 +110,16 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
                 ),
               ),
             ),
-            if (isEditMode) _buildEditIcon(context),
+            if (isEditMode) _buildEditIcon(context, theme),
           ],
         ),
         const SizedBox(height: 8),
-        ..._buildFaceInfo(),
+        ..._buildFaceInfo(theme),
       ],
     );
   }
 
-  List<Widget> _buildFaceInfo() {
+  List<Widget> _buildFaceInfo(ThemeData theme) {
     final List<Widget> faceInfo = [];
     if (widget.person != null) {
       faceInfo.add(
@@ -129,7 +130,7 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
               widget.person!.data.isIgnored
                   ? '(' + AppLocalizations.of(context).ignored + ')'
                   : widget.person!.data.name.trim(),
-              style: Theme.of(context).textTheme.bodySmall,
+              style: theme.textTheme.bodySmall,
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
             ),
@@ -141,28 +142,28 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
       faceInfo.add(
         Text(
           'S:${widget.face.score.toStringAsFixed(2)}(I)',
-          style: Theme.of(context).textTheme.bodySmall,
+          style: theme.textTheme.bodySmall,
           maxLines: 1,
         ),
       );
       faceInfo.add(
         Text(
           'B:${widget.face.blur.toStringAsFixed(0)}(I)',
-          style: Theme.of(context).textTheme.bodySmall,
+          style: theme.textTheme.bodySmall,
           maxLines: 1,
         ),
       );
       faceInfo.add(
         Text(
           'D:${widget.face.detection.getFaceDirection().toDirectionString().substring(0, 3)}(I)',
-          style: Theme.of(context).textTheme.bodySmall,
+          style: theme.textTheme.bodySmall,
           maxLines: 1,
         ),
       );
       faceInfo.add(
         Text(
           'Si:${widget.face.detection.faceIsSideways().toString()}(I)',
-          style: Theme.of(context).textTheme.bodySmall,
+          style: theme.textTheme.bodySmall,
           maxLines: 1,
         ),
       );
@@ -277,7 +278,7 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
     }
   }
 
-  Widget _buildEditIcon(BuildContext context) {
+  Widget _buildEditIcon(BuildContext context, ThemeData theme) {
     return Positioned(
       right: -5,
       top: -5,
@@ -289,18 +290,18 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
           height: 20,
           decoration: BoxDecoration(
             color: hasPerson
-                ? getEnteColorScheme(context).warning500
-                : getEnteColorScheme(context).primary500,
+                ? EnteTheme.getColorScheme(theme).warning500
+                : EnteTheme.getColorScheme(theme).primary500,
             shape: BoxShape.circle,
             border: Border.all(
-              color: getEnteColorScheme(context).backgroundBase,
+              color: EnteTheme.getColorScheme(theme).backgroundBase,
               width: 2,
             ),
           ),
           child: Icon(
             hasPerson ? Icons.remove : Icons.add,
             size: 12,
-            color: getEnteColorScheme(context).backgroundBase,
+            color: EnteTheme.getColorScheme(theme).backgroundBase,
           ),
         ),
       ),

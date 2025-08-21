@@ -201,12 +201,14 @@ class ImageEditorFilterBar extends StatefulWidget {
 class _ImageEditorFilterBarState extends State<ImageEditorFilterBar> {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return buildFilteredOptions(
       widget.editorImage,
       widget.isSelected,
       widget.filterModel.name,
       widget.onSelectFilter,
       widget.filterKey ?? ValueKey(widget.filterModel.name),
+      theme,
     );
   }
 
@@ -216,6 +218,7 @@ class _ImageEditorFilterBarState extends State<ImageEditorFilterBar> {
     String filterName,
     VoidCallback onSelectFilter,
     Key filterKey,
+    ThemeData theme,
   ) {
     return GestureDetector(
       onTap: () => onSelectFilter(),
@@ -236,7 +239,7 @@ class _ImageEditorFilterBarState extends State<ImageEditorFilterBar> {
                   ),
                   side: BorderSide(
                     color: isSelected
-                        ? Theme.of(context).colorScheme.imageEditorPrimaryColor
+                        ? theme.colorScheme.imageEditorPrimaryColor
                         : Colors.transparent,
                     width: 1.5,
                   ),
@@ -261,8 +264,8 @@ class _ImageEditorFilterBarState extends State<ImageEditorFilterBar> {
             Text(
               filterName,
               style: isSelected
-                  ? getEnteTextTheme(context).smallBold
-                  : getEnteTextTheme(context).smallMuted,
+                  ? EnteTheme.getTextTheme(Theme.of(context)).smallBold
+                  : EnteTheme.getTextTheme(Theme.of(context)).smallMuted,
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

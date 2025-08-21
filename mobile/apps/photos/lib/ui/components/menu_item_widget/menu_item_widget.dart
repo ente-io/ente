@@ -251,6 +251,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
   }
 
   void _onTapDown(details) {
+    final theme = Theme.of(context);
     if (executionStateNotifier.value == ExecutionState.inProgress ||
         executionStateNotifier.value == ExecutionState.successful) {
       return;
@@ -258,7 +259,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
     setState(() {
       if (widget.pressedColor == null) {
         hasPassedGestureCallbacks()
-            ? menuItemColor = getEnteColorScheme(context).fillFaintPressed
+            ? menuItemColor = EnteTheme.getColorScheme(theme).fillFaintPressed
             : menuItemColor = widget.menuItemColor;
       } else {
         menuItemColor = widget.pressedColor;

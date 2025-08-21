@@ -174,9 +174,10 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isLightMode = Theme.of(context).brightness == Brightness.light;
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final isLightMode = !EnteTheme.isDark(theme);
+    final colorScheme = EnteTheme.getColorScheme(theme);
+    final textTheme = EnteTheme.getTextTheme(theme);
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) {
@@ -231,8 +232,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
               ),
               cropRotateEditor: CropRotateEditorTheme(
                 background: colorScheme.backgroundBase,
-                cropCornerColor:
-                    Theme.of(context).colorScheme.imageEditorPrimaryColor,
+                cropCornerColor: theme.colorScheme.imageEditorPrimaryColor,
               ),
               tuneEditor: TuneEditorTheme(
                 background: colorScheme.backgroundBase,

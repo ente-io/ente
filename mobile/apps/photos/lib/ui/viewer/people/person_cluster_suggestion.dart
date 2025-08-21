@@ -72,6 +72,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(context.l10n.reviewSuggestions),
@@ -105,7 +106,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                 child: Text(
                   AppLocalizations.of(context)
                       .noSuggestionsForPerson(widget.person.data.name),
-                  style: getEnteTextTheme(context).largeMuted,
+                  style: EnteTheme.getTextTheme(theme).largeMuted,
                 ),
               );
             }
@@ -174,6 +175,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                           vertical: 20,
                         ),
                         child: _buildSuggestionView(
+                          theme,
                           clusterID,
                           distance,
                           usingMean,
@@ -241,11 +243,12 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                             ),
                             child: Text(
                               AppLocalizations.of(context).saveAsAnotherPerson,
-                              style: getEnteTextTheme(context).mini.copyWith(
-                                    color:
-                                        getEnteColorScheme(context).textMuted,
-                                    decoration: TextDecoration.underline,
-                                  ),
+                              style:
+                                  EnteTheme.getTextTheme(theme).mini.copyWith(
+                                        color: EnteTheme.getColorScheme(theme)
+                                            .textMuted,
+                                        decoration: TextDecoration.underline,
+                                      ),
                             ),
                           ),
                         ),
@@ -386,6 +389,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
   }
 
   Widget _buildSuggestionView(
+    ThemeData theme,
     String clusterID,
     double distance,
     bool usingMean,
@@ -399,11 +403,11 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
         if (kDebugMode)
           Text(
             "ClusterID: $clusterID, Distance: ${distance.toStringAsFixed(3)}, usingMean: $usingMean",
-            style: getEnteTextTheme(context).smallMuted,
+            style: EnteTheme.getTextTheme(theme).smallMuted,
           ),
         Text(
           "${widget.person.data.name}?",
-          style: getEnteTextTheme(context).largeMuted,
+          style: EnteTheme.getTextTheme(theme).largeMuted,
         ),
         const SizedBox(height: 24),
         _buildThumbnailWidget(

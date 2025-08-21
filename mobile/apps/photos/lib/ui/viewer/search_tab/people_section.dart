@@ -80,7 +80,8 @@ class _PeopleSectionState extends State<PeopleSection> {
   Widget build(BuildContext context) {
     debugPrint("Building section for ${widget.sectionType.name}");
     final shouldShowMore = _examples.length >= widget.limit - 1;
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final textTheme = EnteTheme.getTextTheme(theme);
     return _examples.isNotEmpty
         ? GestureDetector(
             behavior: HitTestBehavior.opaque,
@@ -110,7 +111,8 @@ class _PeopleSectionState extends State<PeopleSection> {
                             padding: const EdgeInsets.all(12),
                             child: Icon(
                               Icons.chevron_right_outlined,
-                              color: getEnteColorScheme(context).strokeMuted,
+                              color:
+                                  EnteTheme.getColorScheme(theme).strokeMuted,
                             ),
                           )
                         : const SizedBox.shrink(),
@@ -208,6 +210,7 @@ class PersonSearchExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final borderRadius = 82 * (size / 102);
+    final theme = Theme.of(context);
 
     final bool isCluster = (searchResult.type() == ResultType.faces &&
         int.tryParse(searchResult.name()) != null);
@@ -252,7 +255,7 @@ class PersonSearchExample extends StatelessWidget {
                       width: size,
                       height: size,
                       decoration: BoxDecoration(
-                        color: getEnteColorScheme(context).strokeFaint,
+                        color: EnteTheme.getColorScheme(theme).strokeFaint,
                       ),
                     ),
                   ),
@@ -351,7 +354,7 @@ class PersonSearchExample extends StatelessWidget {
                           maxLines: 1,
                           textAlign: TextAlign.center,
                           overflow: TextOverflow.ellipsis,
-                          style: getEnteTextTheme(context).small,
+                          style: EnteTheme.getTextTheme(theme).small,
                         ),
                       ),
                     )
@@ -364,7 +367,7 @@ class PersonSearchExample extends StatelessWidget {
                           maxLines: 1,
                           textAlign: TextAlign.center,
                           overflow: TextOverflow.ellipsis,
-                          style: getEnteTextTheme(context).small,
+                          style: EnteTheme.getTextTheme(theme).small,
                         ),
                       ),
                     ),

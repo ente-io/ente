@@ -8,6 +8,7 @@ import 'package:photos/events/local_import_progress.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/bottom_shadow.dart';
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/dialog_widget.dart";
@@ -110,7 +111,8 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
   Widget build(BuildContext context) {
     _loadingMessage ??= AppLocalizations.of(context).loadingYourPhotos;
     _setupLoadingMessages(context);
-    final isLightMode = Theme.of(context).brightness == Brightness.light;
+    final theme = Theme.of(context);
+    final isLightMode = !EnteTheme.isDark(theme);
     return Scaffold(
       body: SingleChildScrollView(
         child: Center(
@@ -147,7 +149,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
                 Text(
                   _loadingMessage!,
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.subTextColor,
+                    color: theme.colorScheme.subTextColor,
                   ),
                 ),
                 const SizedBox(height: 54),
@@ -158,12 +160,9 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
                       children: [
                         Text(
                           AppLocalizations.of(context).didYouKnow,
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleLarge!
-                              .copyWith(
-                                color: Theme.of(context).colorScheme.greenText,
-                              ),
+                          style: theme.textTheme.titleLarge!.copyWith(
+                            color: theme.colorScheme.greenText,
+                          ),
                         ),
                       ],
                     ),
@@ -178,7 +177,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
                             scrollDirection: Axis.vertical,
                             controller: _pageController,
                             itemBuilder: (context, index) {
-                              return _getMessage(_messages[index]);
+                              return _getMessage(_messages[index], theme);
                             },
                             itemCount: _messages.length,
                             physics: const NeverScrollableScrollPhysics(),
@@ -254,14 +253,12 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
     _messages.add(AppLocalizations.of(context).loadMessage9);
   }
 
-  Widget _getMessage(String text) {
+  Widget _getMessage(String text, ThemeData theme) {
     return Text(
       text,
       textAlign: TextAlign.start,
-      style: Theme.of(context)
-          .textTheme
-          .headlineSmall!
-          .copyWith(color: Theme.of(context).colorScheme.defaultTextColor),
+      style: theme.textTheme.headlineSmall!
+          .copyWith(color: theme.colorScheme.defaultTextColor),
     );
   }
 }

@@ -164,7 +164,8 @@ class TitleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final textTheme = EnteTheme.getTextTheme(theme);
     return Padding(
       padding: EdgeInsets.only(left: isTitleH2WithoutLeading ? 16 : 0),
       child: Column(
@@ -207,7 +208,8 @@ class FlexibleSpaceBarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final textTheme = EnteTheme.getTextTheme(theme);
     return FlexibleSpaceBar(
       background: SafeArea(
         child: Column(

@@ -7,10 +7,11 @@ class CustomPinKeypad extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return SafeArea(
       child: Container(
         padding: const EdgeInsets.all(2),
-        color: getEnteColorScheme(context).strokeFainter,
+        color: EnteTheme.getColorScheme(theme).strokeFainter,
         child: Column(
           children: [
             Row(
@@ -169,8 +170,9 @@ class _ButtonState extends State<_Button> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
+    final textTheme = EnteTheme.getTextTheme(theme);
     return Expanded(
       child: GestureDetector(
         onTapDown: _onTapDown,

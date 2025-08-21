@@ -95,6 +95,7 @@ class _BackupStatusScreenState extends State<BackupStatusScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final List<BackupItem> items = this.items.values.toList().sorted(
           (a, b) => a.status.index.compareTo(b.status.index),
         );
@@ -126,7 +127,7 @@ class _BackupStatusScreenState extends State<BackupStatusScreen> {
                 children: [
                   Icon(
                     Icons.cloud_upload_outlined,
-                    color: Theme.of(context).brightness == Brightness.light
+                    color: theme.brightness == Brightness.light
                         ? const Color.fromRGBO(0, 0, 0, 0.6)
                         : const Color.fromRGBO(255, 255, 255, 0.6),
                   ),
@@ -137,7 +138,7 @@ class _BackupStatusScreenState extends State<BackupStatusScreen> {
                     style: TextStyle(
                       fontSize: 16,
                       height: 20 / 16,
-                      color: Theme.of(context).brightness == Brightness.light
+                      color: theme.brightness == Brightness.light
                           ? const Color(0xFF000000).withValues(alpha: 0.7)
                           : const Color(0xFFFFFFFF).withValues(alpha: 0.7),
                     ),

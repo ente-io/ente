@@ -45,13 +45,14 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final isCollectEnabled =
         widget.collection!.publicURLs.firstOrNull?.enableCollect ?? false;
     final isDownloadEnabled =
         widget.collection!.publicURLs.firstOrNull?.enableDownload ?? true;
     final isPasswordEnabled =
         widget.collection!.publicURLs.firstOrNull?.passwordEnabled ?? false;
-    final enteColorScheme = getEnteColorScheme(context);
+    final enteColorScheme = EnteTheme.getColorScheme(theme);
     final PublicURL url = widget.collection!.publicURLs.firstOrNull!;
     final String urlValue =
         CollectionsService.instance.getPublicUrl(widget.collection!);
@@ -76,7 +77,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       title: AppLocalizations.of(context).allowAddingPhotos,
                     ),
                     alignCaptionedTextToLeft: true,
-                    menuItemColor: getEnteColorScheme(context).fillFaint,
+                    menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,
                     trailingWidget: ToggleSwitchWidget(
                       value: () => isCollectEnabled,
                       onChanged: () async {
@@ -155,7 +156,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   ),
                   DividerWidget(
                     dividerType: DividerType.menuNoIcon,
-                    bgColor: getEnteColorScheme(context).fillFaint,
+                    bgColor: EnteTheme.getColorScheme(theme).fillFaint,
                   ),
                   MenuItemWidget(
                     key: ValueKey("Allow downloads $isDownloadEnabled"),
@@ -165,7 +166,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     alignCaptionedTextToLeft: true,
                     isBottomBorderRadiusRemoved: true,
                     isTopBorderRadiusRemoved: true,
-                    menuItemColor: getEnteColorScheme(context).fillFaint,
+                    menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,
                     trailingWidget: ToggleSwitchWidget(
                       value: () => isDownloadEnabled,
                       onChanged: () async {
@@ -188,7 +189,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   ),
                   DividerWidget(
                     dividerType: DividerType.menuNoIcon,
-                    bgColor: getEnteColorScheme(context).fillFaint,
+                    bgColor: EnteTheme.getColorScheme(theme).fillFaint,
                   ),
                   MenuItemWidget(
                     key: ValueKey("Password lock $isPasswordEnabled"),
@@ -197,7 +198,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     ),
                     alignCaptionedTextToLeft: true,
                     isTopBorderRadiusRemoved: true,
-                    menuItemColor: getEnteColorScheme(context).fillFaint,
+                    menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,
                     trailingWidget: ToggleSwitchWidget(
                       value: () => isPasswordEnabled,
                       onChanged: () async {
@@ -242,11 +243,12 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     MenuItemWidget(
                       captionedTextWidget: CaptionedTextWidget(
                         title: AppLocalizations.of(context).linkHasExpired,
-                        textColor: getEnteColorScheme(context).warning500,
+                        textColor: EnteTheme.getColorScheme(theme).warning500,
                       ),
                       leadingIcon: Icons.error_outline,
-                      leadingIconColor: getEnteColorScheme(context).warning500,
-                      menuItemColor: getEnteColorScheme(context).fillFaint,
+                      leadingIconColor:
+                          EnteTheme.getColorScheme(theme).warning500,
+                      menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,
                       isBottomBorderRadiusRemoved: true,
                     ),
                   if (!url.isExpired)
@@ -256,7 +258,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                         makeTextBold: true,
                       ),
                       leadingIcon: Icons.copy,
-                      menuItemColor: getEnteColorScheme(context).fillFaint,
+                      menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,
                       showOnlyLoadingState: true,
                       onTap: () async {
                         await Clipboard.setData(ClipboardData(text: urlValue));
@@ -270,7 +272,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   if (!url.isExpired)
                     DividerWidget(
                       dividerType: DividerType.menu,
-                      bgColor: getEnteColorScheme(context).fillFaint,
+                      bgColor: EnteTheme.getColorScheme(theme).fillFaint,
                     ),
                   if (!url.isExpired)
                     MenuItemWidget(
@@ -280,7 +282,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                         makeTextBold: true,
                       ),
                       leadingIcon: Icons.adaptive.share,
-                      menuItemColor: getEnteColorScheme(context).fillFaint,
+                      menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,
                       onTap: () async {
                         // ignore: unawaited_futures
                         await shareAlbumLinkWithPlaceholder(
@@ -303,7 +305,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     ),
                     leadingIcon: Icons.remove_circle_outline,
                     leadingIconColor: warning500,
-                    menuItemColor: getEnteColorScheme(context).fillFaint,
+                    menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,
                     surfaceExecutionStates: false,
                     onTap: () async {
                       final bool result = await sharingActions.disableUrl(

@@ -200,6 +200,7 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onVerticalDragUpdate: _isGuestView
           ? null
@@ -247,10 +248,11 @@ class _VideoWidgetMediaKitState extends State<VideoWidgetMediaKit>
                               Center(
                                 child: Text(
                                   "${(progress * 100).toStringAsFixed(0)}%",
-                                  style:
-                                      getEnteTextTheme(context).tiny.copyWith(
-                                            color: textBaseDark,
-                                          ),
+                                  style: EnteTheme.getTextTheme(theme)
+                                      .tiny
+                                      .copyWith(
+                                        color: textBaseDark,
+                                      ),
                                 ),
                               ),
                             ],

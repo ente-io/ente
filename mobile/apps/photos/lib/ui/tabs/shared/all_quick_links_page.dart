@@ -116,7 +116,8 @@ class _AllQuickLinksPageState extends State<AllQuickLinksPage> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 48,

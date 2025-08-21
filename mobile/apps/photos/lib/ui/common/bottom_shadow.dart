@@ -7,13 +7,14 @@ class BottomShadowWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       height: 8,
       decoration: BoxDecoration(
         color: Colors.transparent,
         boxShadow: [
           BoxShadow(
-            color: shadowColor ?? Theme.of(context).colorScheme.surface,
+            color: shadowColor ?? theme.colorScheme.surface,
             spreadRadius: 42,
             blurRadius: 42,
             offset: Offset(0, offsetDy), // changes position of shadow

@@ -70,7 +70,8 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
   Widget build(BuildContext context) {
     final isOwner =
         widget.collection.owner.id == Configuration.instance.getUserID();
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     final currentUserID = Configuration.instance.getUserID()!;
     final int participants = 1 + widget.collection.getSharees().length;
     final User owner = widget.collection.owner;
@@ -167,7 +168,8 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                             type: AvatarType.mini,
                             currentUserID: currentUserID,
                           ),
-                          menuItemColor: getEnteColorScheme(context).fillFaint,
+                          menuItemColor:
+                              EnteTheme.getColorScheme(theme).fillFaint,
                           trailingIcon: isOwner ? Icons.chevron_right : null,
                           trailingIconIsMuted: true,
                           onTap: isOwner
@@ -186,7 +188,8 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                             ? const SizedBox.shrink()
                             : DividerWidget(
                                 dividerType: DividerType.menu,
-                                bgColor: getEnteColorScheme(context).fillFaint,
+                                bgColor:
+                                    EnteTheme.getColorScheme(theme).fillFaint,
                               ),
                       ],
                     );
@@ -199,7 +202,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                         makeTextBold: true,
                       ),
                       leadingIcon: Icons.add_outlined,
-                      menuItemColor: getEnteColorScheme(context).fillFaint,
+                      menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,
                       onTap: () async {
                         // ignore: unawaited_futures
                         _navigateToAddUser(false);
@@ -245,7 +248,8 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                             type: AvatarType.mini,
                             currentUserID: currentUserID,
                           ),
-                          menuItemColor: getEnteColorScheme(context).fillFaint,
+                          menuItemColor:
+                              EnteTheme.getColorScheme(theme).fillFaint,
                           trailingIcon: isOwner ? Icons.chevron_right : null,
                           trailingIconIsMuted: true,
                           onTap: isOwner
@@ -264,7 +268,8 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                             ? const SizedBox.shrink()
                             : DividerWidget(
                                 dividerType: DividerType.menu,
-                                bgColor: getEnteColorScheme(context).fillFaint,
+                                bgColor:
+                                    EnteTheme.getColorScheme(theme).fillFaint,
                               ),
                       ],
                     );
@@ -277,7 +282,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                         makeTextBold: true,
                       ),
                       leadingIcon: Icons.add_outlined,
-                      menuItemColor: getEnteColorScheme(context).fillFaint,
+                      menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,
                       onTap: () async {
                         // ignore: unawaited_futures
                         _navigateToAddUser(true);

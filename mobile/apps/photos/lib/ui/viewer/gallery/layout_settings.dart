@@ -39,8 +39,9 @@ class _GalleryLayoutSettingsState extends State<GalleryLayoutSettings> {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final textTheme = EnteTheme.getTextTheme(theme);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.symmetric(
@@ -95,7 +96,7 @@ class _GalleryLayoutSettingsState extends State<GalleryLayoutSettings> {
                     ),
                     DividerWidget(
                       dividerType: DividerType.menuNoIcon,
-                      bgColor: getEnteColorScheme(context).fillFaint,
+                      bgColor: EnteTheme.getColorScheme(theme).fillFaint,
                     ),
                     MenuItemWidget(
                       leadingIcon: Icons.grid_on_rounded,
@@ -128,7 +129,7 @@ class _GalleryLayoutSettingsState extends State<GalleryLayoutSettings> {
                     ),
                     DividerWidget(
                       dividerType: DividerType.menuNoIcon,
-                      bgColor: getEnteColorScheme(context).fillFaint,
+                      bgColor: EnteTheme.getColorScheme(theme).fillFaint,
                     ),
                     MenuItemWidget(
                       captionedTextWidget: CaptionedTextWidget(

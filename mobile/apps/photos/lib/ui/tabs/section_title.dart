@@ -20,7 +20,8 @@ class SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enteTextTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final enteTextTheme = EnteTheme.getTextTheme(theme);
     Widget child;
     if (titleWithBrand != null) {
       child = titleWithBrand!;
@@ -83,7 +84,8 @@ class SectionOptions extends StatelessWidget {
 }
 
 Widget getOnEnteSection(BuildContext context) {
-  final EnteTextTheme textTheme = getEnteTextTheme(context);
+  final theme = Theme.of(context);
+  final EnteTextTheme textTheme = EnteTheme.getTextTheme(theme);
 
   return StyledText(
     text: AppLocalizations.of(context).onEnte,

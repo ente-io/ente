@@ -27,7 +27,8 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final isLightMode = Theme.of(context).brightness == Brightness.light;
+    final theme = Theme.of(context);
+    final isLightMode = !EnteTheme.isDark(theme);
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
@@ -91,7 +92,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: getEnteColorScheme(context).backgroundBase,
+              color: EnteTheme.getColorScheme(theme).backgroundBase,
               spreadRadius: 190,
               blurRadius: 30,
               offset: const Offset(0, 170),

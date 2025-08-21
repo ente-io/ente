@@ -483,13 +483,15 @@ class _FileSelectionActionsWidgetState
   }
 
   Future<void> _editLocation() async {
+    // Added local theme retrieval for backgroundColor usage
+    final theme = Theme.of(context);
     await showBarModalBottomSheet(
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(5),
         ),
       ),
-      backgroundColor: getEnteColorScheme(context).backgroundElevated,
+      backgroundColor: EnteTheme.getColorScheme(theme).backgroundElevated,
       barrierColor: backdropFaintDark,
       topControl: Stack(
         alignment: Alignment.bottomCenter,

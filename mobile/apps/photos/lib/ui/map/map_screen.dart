@@ -214,12 +214,13 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     final bottomUnsafeArea = MediaQuery.of(context).padding.bottom;
     return Container(
       color: colorScheme.backgroundBase,
       child: Theme(
-        data: Theme.of(context).copyWith(
+        data: theme.copyWith(
           bottomSheetTheme: const BottomSheetThemeData(
             backgroundColor: Colors.transparent,
           ),
@@ -253,7 +254,7 @@ class _MapScreenState extends State<MapScreen> {
               isLoading
                   ? EnteLoadingWidget(
                       size: 28,
-                      color: getEnteColorScheme(context).primary700,
+                      color: EnteTheme.getColorScheme(theme).primary700,
                     )
                   : const SizedBox.shrink(),
             ],

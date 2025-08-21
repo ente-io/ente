@@ -17,9 +17,10 @@ class ThumbnailPlaceHolder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       alignment: Alignment.center,
-      color: Theme.of(context).colorScheme.galleryThumbBackgroundColor,
+      color: theme.colorScheme.galleryThumbBackgroundColor,
     );
   }
 }
@@ -159,7 +160,7 @@ class VideoOverlayDuration extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 1),
             child: Text(
               formattedDuration,
-              style: getEnteTextTheme(context).small.copyWith(
+              style: EnteTheme.getTextTheme(Theme.of(context)).small.copyWith(
                     color: Colors.white,
                     fontSize: size, // Default font size is 14
                   ),

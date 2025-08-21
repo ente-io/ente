@@ -185,6 +185,7 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
       //rebuild gallery only when there is change in radius or center point
       key: ValueKey("$centerPoint$selectedRadius"),
       builder: (context, snapshot) {
+        final theme = Theme.of(context);
         if (snapshot.hasData) {
           return SelectionState(
             selectedFiles: _selectedFiles,
@@ -207,7 +208,7 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
                                 loadingWidget: Column(
                                   children: [
                                     EnteLoadingWidget(
-                                      color: getEnteColorScheme(context)
+                                      color: EnteTheme.getColorScheme(theme)
                                           .strokeMuted,
                                     ),
                                   ],

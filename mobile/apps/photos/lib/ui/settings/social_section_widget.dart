@@ -97,11 +97,12 @@ class SocialsMenuItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return MenuItemWidget(
       captionedTextWidget: CaptionedTextWidget(
         title: text,
       ),
-      pressedColor: getEnteColorScheme(context).fillFaint,
+      pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
       trailingIcon: Icons.chevron_right_outlined,
       trailingIconIsMuted: true,
       onTap: () async {

@@ -25,6 +25,7 @@ class VideoCropPage extends StatefulWidget {
 class _VideoCropPageState extends State<VideoCropPage> {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -95,7 +96,7 @@ class _VideoCropPageState extends State<VideoCropPage> {
             ),
             const SizedBox(height: 40),
             VideoEditorNavigationOptions(
-              color: Theme.of(context).colorScheme.videoPlayerPrimaryColor,
+              color: theme.colorScheme.videoPlayerPrimaryColor,
               secondaryText: AppLocalizations.of(context).done,
               onSecondaryPressed: () {
                 // WAY 1: validate crop parameters set in the crop view

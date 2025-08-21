@@ -16,7 +16,8 @@ class SharedEmptyStateWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final textTheme = EnteTheme.getTextTheme(theme);
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 114),
@@ -116,6 +117,7 @@ class OutgoingAlbumEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -126,12 +128,12 @@ class OutgoingAlbumEmptyState extends StatelessWidget {
             children: [
               Icon(
                 Icons.collections_outlined,
-                color: getEnteColorScheme(context).strokeMuted,
+                color: EnteTheme.getColorScheme(theme).strokeMuted,
               ),
               const SizedBox(height: 12),
               Text(
                 AppLocalizations.of(context).noAlbumsSharedByYouYet,
-                style: getEnteTextTheme(context).bodyMuted,
+                style: EnteTheme.getTextTheme(theme).bodyMuted,
               ),
             ],
           ),
@@ -165,6 +167,7 @@ class IncomingAlbumEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -175,12 +178,12 @@ class IncomingAlbumEmptyState extends StatelessWidget {
             children: [
               Icon(
                 Icons.collections_outlined,
-                color: getEnteColorScheme(context).strokeMuted,
+                color: EnteTheme.getColorScheme(theme).strokeMuted,
               ),
               const SizedBox(height: 12),
               Text(
                 AppLocalizations.of(context).nothingSharedWithYouYet,
-                style: getEnteTextTheme(context).bodyMuted,
+                style: EnteTheme.getTextTheme(theme).bodyMuted,
               ),
             ],
           ),

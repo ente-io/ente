@@ -57,6 +57,7 @@ class _RequestPasswordVerificationPageState
   @override
   Widget build(BuildContext context) {
     final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
+    final theme = Theme.of(context);
 
     FloatingActionButtonLocation? fabLocation() {
       if (isKeypadOpen) {
@@ -72,13 +73,13 @@ class _RequestPasswordVerificationPageState
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          color: Theme.of(context).iconTheme.color,
+          color: theme.iconTheme.color,
           onPressed: () {
             Navigator.of(context).pop();
           },
         ),
       ),
-      body: _getBody(),
+      body: _getBody(theme),
       floatingActionButton: DynamicFAB(
         key: const ValueKey("verifyPasswordButton"),
         isKeypadOpen: isKeypadOpen,
@@ -127,7 +128,7 @@ class _RequestPasswordVerificationPageState
     );
   }
 
-  Widget _getBody() {
+  Widget _getBody(ThemeData theme) {
     return Column(
       children: [
         Expanded(
@@ -138,7 +139,7 @@ class _RequestPasswordVerificationPageState
                   padding: const EdgeInsets.only(top: 30, left: 20, right: 20),
                   child: Text(
                     context.l10n.enterPassword,
-                    style: Theme.of(context).textTheme.headlineMedium,
+                    style: theme.textTheme.headlineMedium,
                   ),
                 ),
                 Padding(
@@ -149,7 +150,7 @@ class _RequestPasswordVerificationPageState
                   ),
                   child: Text(
                     email ?? '',
-                    style: getEnteTextTheme(context).smallMuted,
+                    style: EnteTheme.getTextTheme(theme).smallMuted,
                   ),
                 ),
                 Visibility(
@@ -174,7 +175,7 @@ class _RequestPasswordVerificationPageState
                     decoration: InputDecoration(
                       hintText: context.l10n.enterYourPassword,
                       filled: true,
-                      fillColor: getEnteColorScheme(context).fillFaint,
+                      fillColor: EnteTheme.getColorScheme(theme).fillFaint,
                       contentPadding: const EdgeInsets.all(20),
                       border: UnderlineInputBorder(
                         borderSide: BorderSide.none,
@@ -186,7 +187,7 @@ class _RequestPasswordVerificationPageState
                                 _passwordVisible
                                     ? Icons.visibility
                                     : Icons.visibility_off,
-                                color: Theme.of(context).iconTheme.color,
+                                color: theme.iconTheme.color,
                                 size: 20,
                               ),
                               onPressed: () {
@@ -215,7 +216,7 @@ class _RequestPasswordVerificationPageState
                   padding: const EdgeInsets.symmetric(vertical: 18),
                   child: Divider(
                     thickness: 1,
-                    color: getEnteColorScheme(context).strokeFaint,
+                    color: EnteTheme.getColorScheme(theme).strokeFaint,
                   ),
                 ),
               ],

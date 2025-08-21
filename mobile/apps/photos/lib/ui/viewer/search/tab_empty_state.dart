@@ -12,7 +12,8 @@ class SearchTabEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textStyle = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final textStyle = EnteTheme.getTextTheme(theme);
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),

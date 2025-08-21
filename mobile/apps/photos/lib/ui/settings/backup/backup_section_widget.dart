@@ -29,13 +29,14 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
   }
 
   Widget _getSectionOptions(BuildContext context) {
+    final theme = Theme.of(context);
     final List<Widget> sectionOptions = [
       sectionOptionSpacing,
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
           title: AppLocalizations.of(context).backedUpFolders,
         ),
-        pressedColor: getEnteColorScheme(context).fillFaint,
+        pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
         onTap: () async {
@@ -52,7 +53,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         captionedTextWidget: CaptionedTextWidget(
           title: AppLocalizations.of(context).backupStatus,
         ),
-        pressedColor: getEnteColorScheme(context).fillFaint,
+        pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
         onTap: () async {
@@ -67,7 +68,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         captionedTextWidget: CaptionedTextWidget(
           title: AppLocalizations.of(context).backupSettings,
         ),
-        pressedColor: getEnteColorScheme(context).fillFaint,
+        pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
         onTap: () async {
@@ -86,7 +87,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           captionedTextWidget: CaptionedTextWidget(
             title: AppLocalizations.of(context).freeUpSpace,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           showOnlyLoadingState: true,

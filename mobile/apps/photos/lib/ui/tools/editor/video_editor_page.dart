@@ -106,6 +106,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     _logger.info("Building video editor page");
     return PopScope(
       canPop: false,
@@ -202,9 +203,8 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                               ),
                               const SizedBox(height: 40),
                               VideoEditorNavigationOptions(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .videoPlayerPrimaryColor,
+                                color:
+                                    theme.colorScheme.videoPlayerPrimaryColor,
                                 secondaryText:
                                     AppLocalizations.of(context).saveCopy,
                                 onSecondaryPressed: () {

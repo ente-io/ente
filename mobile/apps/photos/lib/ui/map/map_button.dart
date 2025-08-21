@@ -15,7 +15,8 @@ class MapButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     return FloatingActionButton(
       elevation: 2,
       heroTag: heroTag,

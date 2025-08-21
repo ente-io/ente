@@ -14,16 +14,16 @@ class HiddenCollectionsButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return OutlinedButton(
       style: OutlinedButton.styleFrom(
-        backgroundColor: Theme.of(context).colorScheme.surface,
+        backgroundColor: theme.colorScheme.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
         padding: const EdgeInsets.all(0),
         side: BorderSide(
-          width: 0.5,
-          color: Theme.of(context).iconTheme.color!.withValues(alpha: 0.24),
+          color: theme.iconTheme.color!.withValues(alpha: 0.24),
         ),
       ),
       child: SizedBox(
@@ -38,7 +38,7 @@ class HiddenCollectionsButtonWidget extends StatelessWidget {
                 children: [
                   Icon(
                     Icons.visibility_off,
-                    color: Theme.of(context).iconTheme.color,
+                    color: theme.iconTheme.color,
                   ),
                   const Padding(padding: EdgeInsets.all(6)),
                   RichText(
@@ -47,14 +47,14 @@ class HiddenCollectionsButtonWidget extends StatelessWidget {
                       children: [
                         TextSpan(
                           text: AppLocalizations.of(context).hidden,
-                          style: Theme.of(context).textTheme.titleMedium,
+                          style: theme.textTheme.titleMedium,
                         ),
                         const TextSpan(text: "  \u2022  "),
                         WidgetSpan(
                           child: Icon(
                             Icons.lock_outline,
                             size: 16,
-                            color: Theme.of(context).iconTheme.color,
+                            color: theme.iconTheme.color,
                           ),
                         ),
                         //need to query in db and bring this value
@@ -65,7 +65,7 @@ class HiddenCollectionsButtonWidget extends StatelessWidget {
               ),
               Icon(
                 Icons.chevron_right,
-                color: Theme.of(context).iconTheme.color,
+                color: theme.iconTheme.color,
               ),
             ],
           ),

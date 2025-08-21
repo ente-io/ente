@@ -16,6 +16,7 @@ class EnteLoadingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Align(
       alignment: alignment,
       child: Padding(
@@ -25,7 +26,7 @@ class EnteLoadingWidget extends StatelessWidget {
           child: RepaintBoundary(
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              color: color ?? getEnteColorScheme(context).strokeBase,
+              color: color ?? EnteTheme.getColorScheme(theme).strokeBase,
               strokeCap: StrokeCap.round,
             ),
           ),

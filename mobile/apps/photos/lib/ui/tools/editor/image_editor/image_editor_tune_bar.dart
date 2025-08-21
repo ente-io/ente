@@ -149,6 +149,7 @@ class TuneItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: onTap,
       child: SizedBox(
@@ -163,15 +164,15 @@ class TuneItem extends StatelessWidget {
               size: 60,
               icon: icon,
               isSelected: isSelected,
-              progressColor:
-                  Theme.of(context).colorScheme.imageEditorPrimaryColor,
+              progressColor: theme.colorScheme.imageEditorPrimaryColor,
               svgPath:
                   "assets/image-editor/image-editor-${label.toLowerCase()}.svg",
             ),
             const SizedBox(height: 8),
             Text(
               label,
-              style: getEnteTextTheme(context).small,
+              // Added local theme retrieval for text style
+              style: EnteTheme.getTextTheme(theme).small,
               textAlign: TextAlign.center,
             ),
           ],
@@ -298,8 +299,9 @@ class _CircularProgressWithValueState extends State<CircularProgressWithValue>
 
   @override
   Widget build(BuildContext context) {
-    final colorTheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final colorTheme = EnteTheme.getColorScheme(theme);
+    final textTheme = EnteTheme.getTextTheme(theme);
     final displayValue =
         _normalizeValueForDisplay(widget.value, widget.min, widget.max);
     final displayText = displayValue.toString();
@@ -321,11 +323,11 @@ class _CircularProgressWithValueState extends State<CircularProgressWithValue>
               shape: BoxShape.circle,
               color: showValue || widget.isSelected
                   ? progressColor.withOpacity(0.2)
-                  : Theme.of(context).colorScheme.editorBackgroundColor,
+                  : theme.colorScheme.editorBackgroundColor,
               border: Border.all(
                 color: widget.isSelected
                     ? progressColor.withOpacity(0.4)
-                    : Theme.of(context).colorScheme.editorBackgroundColor,
+                    : theme.colorScheme.editorBackgroundColor,
                 width: 2,
               ),
             ),
@@ -402,7 +404,8 @@ class _TuneAdjustWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     return SizedBox(
       height: 40,
       child: Stack(
@@ -413,7 +416,7 @@ class _TuneAdjustWidget extends StatelessWidget {
               margin: const EdgeInsets.symmetric(horizontal: 20),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(25),
-                color: Theme.of(context).colorScheme.editorBackgroundColor,
+                color: theme.colorScheme.editorBackgroundColor,
               ),
             ),
           ),
@@ -423,13 +426,11 @@ class _TuneAdjustWidget extends StatelessWidget {
               borderRadius: BorderRadius.circular(25),
             ),
             child: SliderTheme(
-              data: SliderTheme.of(context).copyWith(
+              data: theme.sliderTheme.copyWith(
                 thumbShape: const _ColorPickerThumbShape(),
                 overlayShape: const RoundSliderOverlayShape(overlayRadius: 0),
-                activeTrackColor:
-                    Theme.of(context).colorScheme.imageEditorPrimaryColor,
-                inactiveTrackColor:
-                    Theme.of(context).colorScheme.editorBackgroundColor,
+                activeTrackColor: theme.colorScheme.imageEditorPrimaryColor,
+                inactiveTrackColor: theme.colorScheme.editorBackgroundColor,
                 trackShape: const _CenterBasedTrackShape(),
                 trackHeight: 24,
               ),

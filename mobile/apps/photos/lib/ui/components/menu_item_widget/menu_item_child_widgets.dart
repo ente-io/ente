@@ -55,7 +55,8 @@ class _TrailingWidgetState extends State<TrailingWidget> {
   }
 
   void _executionStateListener() {
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     setState(() {
       if (widget.executionStateNotifier.value == ExecutionState.idle) {
         _setTrailingIcon();
@@ -78,6 +79,7 @@ class _TrailingWidgetState extends State<TrailingWidget> {
   }
 
   void _setTrailingIcon() {
+    final theme = Theme.of(context);
     if (widget.trailingIcon != null) {
       trailingWidget = Padding(
         padding: EdgeInsets.only(
@@ -86,7 +88,7 @@ class _TrailingWidgetState extends State<TrailingWidget> {
         child: Icon(
           widget.trailingIcon,
           color: widget.trailingIconIsMuted
-              ? getEnteColorScheme(context).strokeMuted
+              ? EnteTheme.getColorScheme(theme).strokeMuted
               : widget.trailingIconColor,
         ),
       );
@@ -147,6 +149,7 @@ class LeadingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(right: 10),
       child: SizedBox(
@@ -164,7 +167,7 @@ class LeadingWidget extends StatelessWidget {
                 child: Icon(
                   leadingIcon,
                   color: leadingIconColor ??
-                      getEnteColorScheme(context).strokeBase,
+                      EnteTheme.getColorScheme(theme).strokeBase,
                 ),
               ),
       ),

@@ -56,8 +56,9 @@ class _LinkContactToPersonSelectionPageState
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     _logger.info("Building LinkContactToPersonSelectionPage");
-    final smallFontSize = getEnteTextTheme(context).small.fontSize!;
+    final smallFontSize = EnteTheme.getTextTheme(theme).small.fontSize!;
     final textScaleFactor =
         MediaQuery.textScalerOf(context).scale(smallFontSize) / smallFontSize;
     const horizontalEdgePadding = 20.0;
@@ -230,8 +231,9 @@ class _ReassignMeSelectionPageState extends State<ReassignMeSelectionPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     _logger.info("Building ReassignMeSelectionPage");
-    final smallFontSize = getEnteTextTheme(context).small.fontSize!;
+    final smallFontSize = EnteTheme.getTextTheme(theme).small.fontSize!;
     final textScaleFactor =
         MediaQuery.textScalerOf(context).scale(smallFontSize) / smallFontSize;
     const horizontalEdgePadding = 20.0;
@@ -370,6 +372,7 @@ class _RoundedPersonFaceWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -391,7 +394,7 @@ class _RoundedPersonFaceWidget extends StatelessWidget {
                   width: itemSize,
                   height: itemSize,
                   decoration: BoxDecoration(
-                    color: getEnteColorScheme(context).strokeFaint,
+                    color: EnteTheme.getColorScheme(theme).strokeFaint,
                   ),
                 ),
               ),
@@ -425,7 +428,7 @@ class _RoundedPersonFaceWidget extends StatelessWidget {
               maxLines: 1,
               textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,
-              style: getEnteTextTheme(context).small,
+              style: EnteTheme.getTextTheme(theme).small,
             ),
           ),
         ],

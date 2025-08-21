@@ -462,6 +462,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     }
     final bool isArchived = widget.collection?.isArchived() ?? false;
     final bool isHidden = widget.collection?.isHidden() ?? false;
+    final theme = Theme.of(context);
 
     final items = [
       if (galleryType.canRename())
@@ -563,7 +564,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                 : "assets/edit-auto-add-people.png",
             width: 20,
             height: 20,
-            color: EnteTheme.isDark(context) ? Colors.white : Colors.black,
+            color: EnteTheme.isDark(theme) ? Colors.white : Colors.black,
           ),
         ),
       if (galleryType.canDelete())

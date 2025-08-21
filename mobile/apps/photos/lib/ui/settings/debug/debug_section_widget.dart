@@ -25,6 +25,7 @@ class DebugSectionWidget extends StatelessWidget {
   }
 
   Widget _getSectionOptions(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       children: [
         sectionOptionSpacing,
@@ -32,7 +33,7 @@ class DebugSectionWidget extends StatelessWidget {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Key attributes",
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -45,7 +46,7 @@ class DebugSectionWidget extends StatelessWidget {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Delete Local Import DB",
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -58,7 +59,7 @@ class DebugSectionWidget extends StatelessWidget {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Allow auto-upload for ignored files",
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {

@@ -88,6 +88,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
         _menuItemForPicker(initialDeviceLimit),
       );
     }
+    final theme = Theme.of(context);
     for (int deviceLimit in publicLinkDeviceLimits) {
       items.add(
         _menuItemForPicker(deviceLimit),
@@ -97,7 +98,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
       items,
       DividerWidget(
         dividerType: DividerType.menuNoIcon,
-        bgColor: getEnteColorScheme(context).fillFaint,
+        bgColor: EnteTheme.getColorScheme(theme).fillFaint,
       ),
     );
     return Column(
@@ -107,9 +108,10 @@ class _ItemsWidgetState extends State<ItemsWidget> {
   }
 
   Widget _menuItemForPicker(int deviceLimit) {
+    final theme = Theme.of(context);
     return MenuItemWidget(
       key: ValueKey(deviceLimit),
-      menuItemColor: getEnteColorScheme(context).fillFaint,
+      menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,
       captionedTextWidget: CaptionedTextWidget(
         title: deviceLimit == 0
             ? AppLocalizations.of(context).noDeviceLimit

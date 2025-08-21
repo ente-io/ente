@@ -107,6 +107,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
         _menuItemForPicker(locale),
       );
     }
+    final theme = Theme.of(context);
     if (!foundMatch && kDebugMode) {
       items.insert(
         0,
@@ -117,7 +118,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
       items,
       DividerWidget(
         dividerType: DividerType.menuNoIcon,
-        bgColor: getEnteColorScheme(context).fillFaint,
+        bgColor: EnteTheme.getColorScheme(theme).fillFaint,
       ),
     );
     return Column(
@@ -179,9 +180,10 @@ class _ItemsWidgetState extends State<ItemsWidget> {
   }
 
   Widget _menuItemForPicker(Locale locale) {
+    final theme = Theme.of(context);
     return MenuItemWidget(
       key: ValueKey(locale.toString()),
-      menuItemColor: getEnteColorScheme(context).fillFaint,
+      menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,
       captionedTextWidget: CaptionedTextWidget(
         title: _getLanguageName(locale) + (kDebugMode ? ' ($locale)' : ''),
       ),

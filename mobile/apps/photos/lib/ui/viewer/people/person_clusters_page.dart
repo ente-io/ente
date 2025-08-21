@@ -33,6 +33,7 @@ class _PersonClustersPageState extends State<PersonClustersPage> {
   final Logger _logger = Logger("_PersonClustersState");
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.person.data.name),
@@ -101,7 +102,7 @@ class _PersonClustersPageState extends State<PersonClustersPage> {
                                 Text(
                                   AppLocalizations.of(context)
                                       .photosCount(files.length),
-                                  style: getEnteTextTheme(context).body,
+                                  style: EnteTheme.getTextTheme(theme).body,
                                 ),
                                 (index != 0)
                                     ? GestureDetector(
@@ -245,7 +246,8 @@ class __ClusterWrapperForGirdState extends State<_ClusterWrapperForGird> {
   bool _isVisible = false;
   @override
   Widget build(BuildContext context) {
-    final loadingColor = getEnteColorScheme(context).strokeMuted;
+    final theme = Theme.of(context);
+    final loadingColor = EnteTheme.getColorScheme(theme).strokeMuted;
     return VisibilityDetector(
       key: ValueKey(widget.clusterID),
       onVisibilityChanged: (info) {
@@ -296,7 +298,7 @@ class __ClusterWrapperForGirdState extends State<_ClusterWrapperForGird> {
                       widget.files.length,
                       NumberFormat().format(widget.files.length),
                     ),
-                    style: getEnteTextTheme(context).small,
+                    style: EnteTheme.getTextTheme(theme).small,
                     textAlign: TextAlign.center,
                   ),
                 ],

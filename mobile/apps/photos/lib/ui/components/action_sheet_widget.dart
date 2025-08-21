@@ -145,7 +145,8 @@ class ContentContainerWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final textTheme = EnteTheme.getTextTheme(theme);
     final bool bodyMissing = body == null && bodyWidget == null;
     debugPrint("body missing $bodyMissing");
     return Column(
@@ -179,7 +180,7 @@ class ContentContainerWidget extends StatelessWidget {
                 Icons.check_outlined,
                 size: 48,
                 color: isCheckIconGreen
-                    ? getEnteColorScheme(context).primary700
+                    ? EnteTheme.getColorScheme(theme).primary700
                     : strokeBaseDark,
               ),
         actionSheetType == ActionSheetType.defaultActionSheet &&

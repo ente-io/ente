@@ -62,6 +62,7 @@ class _RecommendedFiltersForAppbarState
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     if (_recommendations.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -91,19 +92,19 @@ class _RecommendedFiltersForAppbarState
                         );
                       },
                       backgroundColor:
-                          getEnteColorScheme(context).backgroundElevated2,
+                          EnteTheme.getColorScheme(theme).backgroundElevated2,
                     );
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4),
                     child: Container(
                       decoration: BoxDecoration(
-                        color: getEnteColorScheme(context).fillFaint,
+                        color: EnteTheme.getColorScheme(theme).fillFaint,
                         borderRadius: const BorderRadius.all(
                           Radius.circular(kFilterChipHeight / 2),
                         ),
                         border: Border.all(
-                          color: getEnteColorScheme(context).strokeFaint,
+                          color: EnteTheme.getColorScheme(theme).strokeFaint,
                           width: 0.5,
                         ),
                       ),

@@ -17,6 +17,7 @@ class BottomOfTitleBarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Row(
       mainAxisAlignment: showCloseButton
           ? MainAxisAlignment.spaceBetween
@@ -32,8 +33,8 @@ class BottomOfTitleBarWidget extends StatelessWidget {
                 caption != null
                     ? Text(
                         caption!,
-                        style: getEnteTextTheme(context).small.copyWith(
-                              color: getEnteColorScheme(context).textMuted,
+                        style: EnteTheme.getTextTheme(theme).small.copyWith(
+                              color: EnteTheme.getColorScheme(theme).textMuted,
                             ),
                       )
                     : const SizedBox.shrink(),
@@ -45,7 +46,7 @@ class BottomOfTitleBarWidget extends StatelessWidget {
           IconButton(
             icon: Icon(
               Icons.close,
-              color: getEnteColorScheme(context).strokeFaint,
+              color: EnteTheme.getColorScheme(theme).strokeFaint,
             ),
             onPressed: () {
               Navigator.of(context).pop();

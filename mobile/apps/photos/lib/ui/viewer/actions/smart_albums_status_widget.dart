@@ -60,7 +60,8 @@ class _SmartAlbumsStatusWidgetState extends State<SmartAlbumsStatusWidget>
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final textTheme = EnteTheme.getTextTheme(theme);
 
     return AnimatedCrossFade(
       firstCurve: Curves.easeInOutExpo,

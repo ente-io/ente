@@ -78,6 +78,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
   }
 
   Widget _getBody() {
+    final theme = Theme.of(context);
     return Center(
       child: SingleChildScrollView(
         child: Column(
@@ -128,9 +129,8 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
               dotsCount: 3,
               position: _featureIndex,
               decorator: DotsDecorator(
-                activeColor:
-                    Theme.of(context).colorScheme.dotsIndicatorActiveColor,
-                color: Theme.of(context).colorScheme.dotsIndicatorInactiveColor,
+                activeColor: theme.colorScheme.dotsIndicatorActiveColor,
+                color: theme.colorScheme.dotsIndicatorInactiveColor,
                 activeShape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(3),
                 ),
@@ -153,8 +153,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
                 tag: "log_in",
                 child: ElevatedButton(
                   key: const ValueKey("signInButton"),
-                  style:
-                      Theme.of(context).colorScheme.optionalActionButtonStyle,
+                  style: theme.colorScheme.optionalActionButtonStyle,
                   onPressed: _navigateToSignInPage,
                   child: Text(
                     AppLocalizations.of(context).existingUser,
@@ -322,6 +321,7 @@ class FeatureItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -336,13 +336,13 @@ class FeatureItemWidget extends StatelessWidget {
           children: [
             Text(
               featureTitleFirstLine,
-              style: Theme.of(context).textTheme.headlineSmall,
+              style: theme.textTheme.headlineSmall,
               textAlign: TextAlign.center,
             ),
             const Padding(padding: EdgeInsets.all(2)),
             Text(
               featureTitleSecondLine,
-              style: Theme.of(context).textTheme.headlineSmall,
+              style: theme.textTheme.headlineSmall,
               textAlign: TextAlign.center,
             ),
             const Padding(padding: EdgeInsets.all(12)),
@@ -350,10 +350,7 @@ class FeatureItemWidget extends StatelessWidget {
               subText,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Theme.of(context)
-                    .colorScheme
-                    .onSurface
-                    .withValues(alpha: 0.5),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                 fontSize: 16,
               ),
             ),

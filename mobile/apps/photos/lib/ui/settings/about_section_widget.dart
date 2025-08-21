@@ -25,6 +25,7 @@ class AboutSectionWidget extends StatelessWidget {
   }
 
   Widget _getSectionOptions(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       children: [
         sectionOptionSpacing,
@@ -32,7 +33,7 @@ class AboutSectionWidget extends StatelessWidget {
           captionedTextWidget: CaptionedTextWidget(
             title: AppLocalizations.of(context).weAreOpenSource,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -58,7 +59,7 @@ class AboutSectionWidget extends StatelessWidget {
                     captionedTextWidget: CaptionedTextWidget(
                       title: AppLocalizations.of(context).checkForUpdates,
                     ),
-                    pressedColor: getEnteColorScheme(context).fillFaint,
+                    pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
                     trailingIcon: Icons.chevron_right_outlined,
                     trailingIconIsMuted: true,
                     onTap: () async {
@@ -111,11 +112,12 @@ class AboutMenuItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return MenuItemWidget(
       captionedTextWidget: CaptionedTextWidget(
         title: title,
       ),
-      pressedColor: getEnteColorScheme(context).fillFaint,
+      pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
       trailingIcon: Icons.chevron_right_outlined,
       trailingIconIsMuted: true,
       onTap: () async {

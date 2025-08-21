@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/theme/effects.dart";
 import 'package:photos/theme/ente_theme.dart';
@@ -19,8 +20,9 @@ class KeyboardTopButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enteTheme = getEnteTextTheme(context);
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final enteTheme = EnteTheme.getTextTheme(theme);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(

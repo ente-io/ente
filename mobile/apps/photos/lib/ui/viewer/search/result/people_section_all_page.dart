@@ -146,6 +146,7 @@ class SelectablePersonSearchExample extends StatelessWidget {
     final borderRadius = 82 * (size / 102);
     final bool isCluster = (searchResult.type() == ResultType.faces &&
         int.tryParse(searchResult.name()) != null);
+    final theme = Theme.of(context);
 
     return ListenableBuilder(
       listenable: selectedPeople,
@@ -180,7 +181,7 @@ class SelectablePersonSearchExample extends StatelessWidget {
                       width: size,
                       height: size,
                       decoration: BoxDecoration(
-                        color: getEnteColorScheme(context).strokeFaint,
+                        color: EnteTheme.getColorScheme(theme).strokeFaint,
                       ),
                     ),
                   ),
@@ -282,7 +283,7 @@ class SelectablePersonSearchExample extends StatelessWidget {
                           maxLines: 1,
                           textAlign: TextAlign.center,
                           overflow: TextOverflow.ellipsis,
-                          style: getEnteTextTheme(context).small,
+                          style: EnteTheme.getTextTheme(theme).small,
                         ),
                       ),
                     )
@@ -293,7 +294,7 @@ class SelectablePersonSearchExample extends StatelessWidget {
                         maxLines: 1,
                         textAlign: TextAlign.center,
                         overflow: TextOverflow.ellipsis,
-                        style: getEnteTextTheme(context).small,
+                        style: EnteTheme.getTextTheme(theme).small,
                       ),
                     ),
             ],
@@ -440,7 +441,8 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final smallFontSize = getEnteTextTheme(context).small.fontSize!;
+    final theme = Theme.of(context);
+    final smallFontSize = EnteTheme.getTextTheme(theme).small.fontSize!;
     final textScaleFactor =
         MediaQuery.textScalerOf(context).scale(smallFontSize) / smallFontSize;
     const horizontalEdgePadding = 20.0;
@@ -577,6 +579,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
   }
 
   Widget _buildShowMoreOrLessButton(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
       child: SizedBox(
@@ -613,8 +616,8 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                 _showingAllFaces
                     ? AppLocalizations.of(context).showLessFaces
                     : AppLocalizations.of(context).showMoreFaces,
-                style: getEnteTextTheme(context).small.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
+                style: EnteTheme.getTextTheme(theme).small.copyWith(
+                      color: theme.colorScheme.primary,
                     ),
               ),
               const SizedBox(width: 8),
@@ -623,7 +626,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                     ? Icons.keyboard_double_arrow_up_outlined
                     : Icons.keyboard_double_arrow_down_outlined,
                 size: 16,
-                color: Theme.of(context).colorScheme.primary,
+                color: theme.colorScheme.primary,
               ),
             ],
           ),

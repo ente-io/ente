@@ -7,14 +7,15 @@ class MenuSectionDescriptionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
       child: Text(
         content,
         textAlign: TextAlign.left,
-        style: getEnteTextTheme(context)
+        style: EnteTheme.getTextTheme(theme)
             .mini
-            .copyWith(color: getEnteColorScheme(context).textMuted),
+            .copyWith(color: EnteTheme.getColorScheme(theme).textMuted),
       ),
     );
   }

@@ -41,6 +41,7 @@ class _SubscriptionPlanWidgetState extends State<SubscriptionPlanWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final brightness = _platformDispatcher.platformBrightness;
     final numAndUnit = convertBytesToNumberAndUnit(widget.storage);
     final String storageValue = numAndUnit.$1.toString();
@@ -53,7 +54,7 @@ class _SubscriptionPlanWidgetState extends State<SubscriptionPlanWidget> {
           borderRadius: BorderRadius.circular(8),
           border: widget.isActive
               ? Border.all(
-                  color: getEnteColorScheme(context).primary700,
+                  color: EnteTheme.getColorScheme(theme).primary700,
                   width: brightness == Brightness.dark ? 1.5 : 1,
                   strokeAlign: BorderSide.strokeAlignInside,
                 )
@@ -112,7 +113,7 @@ class _SubscriptionPlanWidgetState extends State<SubscriptionPlanWidget> {
                             offset: const Offset(2, -16),
                             child: Text(
                               storageUnit,
-                              style: getEnteTextTheme(context).h3.copyWith(
+                              style: EnteTheme.getTextTheme(theme).h3.copyWith(
                                     color: textMutedLight,
                                   ),
                             ),
@@ -139,7 +140,8 @@ class _Price extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final textTheme = EnteTheme.getTextTheme(theme);
     if (price.isEmpty) {
       return Text(
         "Free",

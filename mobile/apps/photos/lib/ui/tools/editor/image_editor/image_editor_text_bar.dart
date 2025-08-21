@@ -148,7 +148,8 @@ class _FontPickerWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     if (editor.textEditorConfigs.customTextStyles == null) {
       return const SizedBox.shrink();
     }
@@ -175,7 +176,7 @@ class _FontPickerWidget extends StatelessWidget {
               decoration: BoxDecoration(
                 color: isSelected
                     ? colorScheme.fillBasePressed
-                    : Theme.of(context).colorScheme.editorBackgroundColor,
+                    : theme.colorScheme.editorBackgroundColor,
                 borderRadius: BorderRadius.circular(25),
               ),
               child: Center(
@@ -203,14 +204,15 @@ class _BackgroundPickerWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final isLightMode = Theme.of(context).brightness == Brightness.light;
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
+    final isLightMode = !EnteTheme.isDark(theme);
     final backgroundStyles = {
       LayerBackgroundMode.background: {
         'text': 'Aa',
         'selectedBackgroundColor':
             isLightMode ? colorScheme.fillFaint : Colors.white,
-        'backgroundColor': Theme.of(context).colorScheme.editorBackgroundColor,
+        'backgroundColor': theme.colorScheme.editorBackgroundColor,
         'border': null,
         'textColor': Colors.white,
         'selectedInnerBackgroundColor': Colors.black,
@@ -220,7 +222,7 @@ class _BackgroundPickerWidget extends StatelessWidget {
         'text': 'Aa',
         'selectedBackgroundColor':
             isLightMode ? colorScheme.fillFaint : Colors.white,
-        'backgroundColor': Theme.of(context).colorScheme.editorBackgroundColor,
+        'backgroundColor': theme.colorScheme.editorBackgroundColor,
         'border': null,
         'textColor': Colors.black,
         'selectedInnerBackgroundColor': Colors.transparent,
@@ -230,7 +232,7 @@ class _BackgroundPickerWidget extends StatelessWidget {
         'text': 'Aa',
         'selectedBackgroundColor':
             isLightMode ? colorScheme.fillFaint : Colors.white,
-        'backgroundColor': Theme.of(context).colorScheme.editorBackgroundColor,
+        'backgroundColor': theme.colorScheme.editorBackgroundColor,
         'border': null,
         'textColor': Colors.black,
         'selectedInnerBackgroundColor': Colors.black.withOpacity(0.11),
@@ -242,7 +244,7 @@ class _BackgroundPickerWidget extends StatelessWidget {
         'text': 'Aa',
         'selectedBackgroundColor':
             isLightMode ? colorScheme.fillFaint : Colors.black,
-        'backgroundColor': Theme.of(context).colorScheme.editorBackgroundColor,
+        'backgroundColor': theme.colorScheme.editorBackgroundColor,
         'border':
             isLightMode ? null : Border.all(color: Colors.white, width: 2),
         'textColor': Colors.black,
@@ -322,7 +324,8 @@ class _AlignPickerWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     final alignments = [
       (TextAlign.left, "assets/image-editor/image-editor-text-align-left.svg"),
       (
@@ -355,7 +358,7 @@ class _AlignPickerWidget extends StatelessWidget {
               decoration: BoxDecoration(
                 color: isSelected
                     ? colorScheme.fillBasePressed
-                    : Theme.of(context).colorScheme.editorBackgroundColor,
+                    : theme.colorScheme.editorBackgroundColor,
                 borderRadius: BorderRadius.circular(25),
                 border: isSelected
                     ? Border.all(color: Colors.black, width: 2)

@@ -52,6 +52,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final inheritedUserDetails = InheritedUserDetails.of(context);
     final userDetails = inheritedUserDetails?.userDetails;
 
@@ -76,13 +77,14 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
         onTapDown: (details) => _isStorageCardPressed.value = true,
         onTapCancel: () => _isStorageCardPressed.value = false,
         onTapUp: (details) => _isStorageCardPressed.value = false,
-        child: containerForUserDetails(userDetails),
+        child: containerForUserDetails(userDetails, theme),
       );
     }
   }
 
   Widget containerForUserDetails(
     UserDetails? userDetails,
+    ThemeData theme,
   ) {
     return Stack(
       children: [
@@ -92,7 +94,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
         ),
         Positioned.fill(
           child: userDetails is UserDetails
-              ? _userDetails(userDetails)
+              ? _userDetails(userDetails, theme)
               : const EnteLoadingWidget(
                   color: strokeBaseDark,
                 ),
@@ -118,7 +120,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
     );
   }
 
-  Widget _userDetails(UserDetails userDetails) {
+  Widget _userDetails(UserDetails userDetails, ThemeData theme) {
     const hundredMBinBytes = 107374182;
     const oneTBinBytes = 1073741824000;
     showFamilyBreakup = userDetails.isPartOfFamily();
@@ -186,7 +188,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
                   isMobileScreenSmall
                       ? AppLocalizations.of(context).usedSpace
                       : AppLocalizations.of(context).storage,
-                  style: getEnteTextTheme(context)
+                  style: EnteTheme.getTextTheme(theme)
                       .small
                       .copyWith(color: textMutedDark),
                 ),
@@ -195,7 +197,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                   text: TextSpan(
-                    style: getEnteTextTheme(context)
+                    style: EnteTheme.getTextTheme(theme)
                         .h3Bold
                         .copyWith(color: textBaseDark),
                     children: _usedStorageDetails(
@@ -232,7 +234,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
                       : const SizedBox.shrink(),
                   StorageProgressWidget(
                     color: showFamilyBreakup
-                        ? getEnteColorScheme(context).primary300
+                        ? EnteTheme.getColorScheme(theme).primary300
                         : strokeBaseDark,
                     fractionOfStorage:
                         (userDetails.usage / totalStorageInBytes),
@@ -252,13 +254,14 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
                               height: 8.99,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: getEnteColorScheme(context).primary300,
+                                color:
+                                    EnteTheme.getColorScheme(theme).primary300,
                               ),
                             ),
                             const SizedBox(width: 4),
                             Text(
                               AppLocalizations.of(context).storageBreakupYou,
-                              style: getEnteTextTheme(context)
+                              style: EnteTheme.getTextTheme(theme)
                                   .miniBold
                                   .copyWith(color: textBaseDark),
                             ),
@@ -274,7 +277,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
                             const SizedBox(width: 4),
                             Text(
                               AppLocalizations.of(context).storageBreakupFamily,
-                              style: getEnteTextTheme(context)
+                              style: EnteTheme.getTextTheme(theme)
                                   .miniBold
                                   .copyWith(color: textBaseDark),
                             ),
@@ -284,7 +287,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
                   Text(
                     AppLocalizations.of(context)
                         .availableStorageSpace(freeSpace, freeSpaceUnit),
-                    style: getEnteTextTheme(context)
+                    style: EnteTheme.getTextTheme(theme)
                         .mini
                         .copyWith(color: textFaintDark),
                   ),

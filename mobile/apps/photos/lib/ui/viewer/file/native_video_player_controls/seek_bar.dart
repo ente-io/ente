@@ -64,11 +64,12 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return AnimatedBuilder(
       animation: _animationController,
       builder: (_, __) {
         return SliderTheme(
-          data: SliderTheme.of(context).copyWith(
+          data: theme.sliderTheme.copyWith(
             trackHeight: 1.0,
             tickMarkShape: SliderTickMarkShape.noTickMark,
             thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8.0),

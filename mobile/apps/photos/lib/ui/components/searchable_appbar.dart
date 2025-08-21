@@ -56,7 +56,8 @@ class _SearchableAppBarState extends State<SearchableAppBar> {
 
   @override
   Widget build(BuildContext context) {
-    final isLightMode = Theme.of(context).brightness == Brightness.light;
+    final theme = Theme.of(context);
+    final isLightMode = !EnteTheme.isDark(theme);
     return SliverAppBar(
       floating: true,
       elevation: 0,
@@ -103,7 +104,8 @@ class _SearchableAppBarState extends State<SearchableAppBar> {
   }
 
   Widget _buildSearchField() {
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     return Container(
       key: const ValueKey('searchBar'),
       alignment: Alignment.center,

@@ -43,14 +43,15 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
     _dropdownValue ??= _defaultSelection;
     final double dropDownTextSize = MediaQuery.of(context).size.width - 120;
 
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
         title: Text(AppLocalizations.of(context).deleteAccount),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          color: Theme.of(context).iconTheme.color,
+          color: theme.iconTheme.color,
           onPressed: () {
             Navigator.of(context).pop();
           },
@@ -68,7 +69,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Text(
                   AppLocalizations.of(context).askDeleteReason,
-                  style: getEnteTextTheme(context).body,
+                  style: EnteTheme.getTextTheme(theme).body,
                 ),
               ),
               const SizedBox(height: 8),
@@ -98,7 +99,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                         width: dropDownTextSize,
                         child: Text(
                           value,
-                          style: getEnteTextTheme(context).smallMuted,
+                          style: EnteTheme.getTextTheme(theme).smallMuted,
                           overflow: TextOverflow.visible,
                         ),
                       ),
@@ -111,12 +112,12 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Text(
                   AppLocalizations.of(context).deleteAccountFeedbackPrompt,
-                  style: getEnteTextTheme(context).body,
+                  style: EnteTheme.getTextTheme(theme).body,
                 ),
               ),
               const SizedBox(height: 8),
               TextFormField(
-                style: getEnteTextTheme(context).smallMuted,
+                style: EnteTheme.getTextTheme(theme).smallMuted,
                 decoration: InputDecoration(
                   enabledBorder: OutlineInputBorder(
                     borderSide:
@@ -155,7 +156,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                         child: Text(
                           AppLocalizations.of(context)
                               .kindlyHelpUsWithThisInformation,
-                          style: getEnteTextTheme(context)
+                          style: EnteTheme.getTextTheme(theme)
                               .smallBold
                               .copyWith(color: colorScheme.warning700),
                         ),
@@ -174,7 +175,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                   children: [
                     Checkbox(
                       value: _hasConfirmedDeletion,
-                      side: CheckboxTheme.of(context).side,
+                      side: theme.checkboxTheme.side,
                       onChanged: (value) {
                         setState(() {
                           _hasConfirmedDeletion = value!;
@@ -186,7 +187,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         child: Text(
                           AppLocalizations.of(context).confirmDeletePrompt,
-                          style: getEnteTextTheme(context).bodyMuted,
+                          style: EnteTheme.getTextTheme(theme).bodyMuted,
                           textAlign: TextAlign.left,
                         ),
                       ),

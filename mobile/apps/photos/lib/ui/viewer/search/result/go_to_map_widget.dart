@@ -11,6 +11,7 @@ class GoToMap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: () async {
         final bool result = await requestForMapEnable(context);
@@ -47,7 +48,7 @@ class GoToMap extends StatelessWidget {
               maxLines: 2,
               textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,
-              style: getEnteTextTheme(context).mini,
+              style: EnteTheme.getTextTheme(theme).mini,
             ),
           ],
         ),

@@ -29,14 +29,15 @@ class SubscriptionHeaderWidget extends StatefulWidget {
 class _SubscriptionHeaderWidgetState extends State<SubscriptionHeaderWidget> {
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final textTheme = EnteTheme.getTextTheme(theme);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     if (widget.isOnboarding!) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Text(
           AppLocalizations.of(context).enteSubscriptionPitch,
-          style: getEnteTextTheme(context).smallFaint,
+          style: EnteTheme.getTextTheme(theme).smallFaint,
         ),
       );
     } else {
@@ -72,6 +73,7 @@ class ValidityWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final List<Bonus> addOnBonus = bonusData?.getAddOnBonuses() ?? <Bonus>[];
     if (currentSubscription == null ||
         (currentSubscription!.isFreePlan() && addOnBonus.isEmpty)) {
@@ -109,7 +111,7 @@ class ValidityWidget extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 4),
               child: Text(
                 message,
-                style: getEnteTextTheme(context).body.copyWith(
+                style: EnteTheme.getTextTheme(theme).body.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                 textAlign: TextAlign.center,
@@ -131,6 +133,7 @@ class AddOnBonusValidity extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final endDate =
         DateFormat.yMMMd(Localizations.localeOf(context).languageCode).format(
       DateTime.fromMicrosecondsSinceEpoch(bonus.validTill),
@@ -140,7 +143,7 @@ class AddOnBonusValidity extends StatelessWidget {
       padding: const EdgeInsets.only(top: 4, bottom: 4),
       child: Text(
         AppLocalizations.of(context).addOnValidTill(storage, endDate),
-        style: getEnteTextTheme(context).smallFaint,
+        style: EnteTheme.getTextTheme(theme).smallFaint,
         textAlign: TextAlign.center,
       ),
     );
@@ -154,7 +157,8 @@ class SubFaqWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorScheme = EnteTheme.getColorScheme(theme);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 2, 16, 2),
       child: MenuItemWidget(
@@ -171,7 +175,7 @@ class SubFaqWidget extends StatelessWidget {
         onTap: () async {
           // ignore: unawaited_futures
           showModalBottomSheet<void>(
-            backgroundColor: Theme.of(context).colorScheme.bgColorForQuestions,
+            backgroundColor: theme.colorScheme.bgColorForQuestions,
             barrierColor: Colors.black87,
             context: context,
             builder: (context) {
@@ -200,7 +204,8 @@ class _SubscriptionToggleState extends State<SubscriptionToggle> {
   Widget build(BuildContext context) {
     const borderPadding = 2.5;
     const spaceBetweenButtons = 4.0;
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final textTheme = EnteTheme.getTextTheme(theme);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
       child: LayoutBuilder(
@@ -211,7 +216,7 @@ class _SubscriptionToggleState extends State<SubscriptionToggle> {
               2;
           return Container(
             decoration: BoxDecoration(
-              color: getEnteColorScheme(context).fillBaseGrey,
+              color: EnteTheme.getColorScheme(theme).fillBaseGrey,
               borderRadius: BorderRadius.circular(50),
             ),
             padding: const EdgeInsets.symmetric(
@@ -272,7 +277,7 @@ class _SubscriptionToggleState extends State<SubscriptionToggle> {
                     ),
                     width: widthOfButton,
                     decoration: BoxDecoration(
-                      color: getEnteColorScheme(context).backgroundBase,
+                      color: EnteTheme.getColorScheme(theme).backgroundBase,
                       borderRadius: BorderRadius.circular(50),
                     ),
                     child: AnimatedSwitcher(

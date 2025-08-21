@@ -61,6 +61,7 @@ class _LoginPasswordVerificationPageState
   @override
   Widget build(BuildContext context) {
     final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
+    late final theme = Theme.of(context);
 
     FloatingActionButtonLocation? fabLocation() {
       if (isKeypadOpen) {
@@ -76,13 +77,13 @@ class _LoginPasswordVerificationPageState
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          color: Theme.of(context).iconTheme.color,
+          color: theme.iconTheme.color,
           onPressed: () {
             Navigator.of(context).pop();
           },
         ),
       ),
-      body: _getBody(),
+      body: _getBody(theme),
       floatingActionButton: DynamicFAB(
         key: const ValueKey("verifyPasswordButton"),
         isKeypadOpen: isKeypadOpen,
@@ -201,7 +202,7 @@ class _LoginPasswordVerificationPageState
     }
   }
 
-  Widget _getBody() {
+  Widget _getBody(ThemeData theme) {
     return Column(
       children: [
         Expanded(
@@ -212,7 +213,7 @@ class _LoginPasswordVerificationPageState
                   padding: const EdgeInsets.only(top: 30, left: 20, right: 20),
                   child: Text(
                     AppLocalizations.of(context).enterPassword,
-                    style: Theme.of(context).textTheme.headlineMedium,
+                    style: theme.textTheme.headlineMedium,
                   ),
                 ),
                 Padding(
@@ -223,7 +224,7 @@ class _LoginPasswordVerificationPageState
                   ),
                   child: Text(
                     email ?? '',
-                    style: getEnteTextTheme(context).smallMuted,
+                    style: EnteTheme.getTextTheme(theme).smallMuted,
                   ),
                 ),
                 Visibility(
@@ -253,14 +254,14 @@ class _LoginPasswordVerificationPageState
                         borderSide: BorderSide.none,
                         borderRadius: BorderRadius.circular(6),
                       ),
-                      fillColor: getEnteColorScheme(context).fillFaint,
+                      fillColor: EnteTheme.getColorScheme(theme).fillFaint,
                       suffixIcon: _passwordInFocus
                           ? IconButton(
                               icon: Icon(
                                 _passwordVisible
                                     ? Icons.visibility
                                     : Icons.visibility_off,
-                                color: Theme.of(context).iconTheme.color,
+                                color: theme.iconTheme.color,
                                 size: 20,
                               ),
                               onPressed: () {
@@ -289,7 +290,7 @@ class _LoginPasswordVerificationPageState
                   padding: const EdgeInsets.symmetric(vertical: 18),
                   child: Divider(
                     thickness: 1,
-                    color: getEnteColorScheme(context).strokeFaint,
+                    color: EnteTheme.getColorScheme(theme).strokeFaint,
                   ),
                 ),
                 Padding(
@@ -309,13 +310,10 @@ class _LoginPasswordVerificationPageState
                         child: Center(
                           child: Text(
                             AppLocalizations.of(context).forgotPassword,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium!
-                                .copyWith(
-                                  fontSize: 14,
-                                  decoration: TextDecoration.underline,
-                                ),
+                            style: theme.textTheme.titleMedium!.copyWith(
+                              fontSize: 14,
+                              decoration: TextDecoration.underline,
+                            ),
                           ),
                         ),
                       ),
@@ -335,13 +333,10 @@ class _LoginPasswordVerificationPageState
                         child: Center(
                           child: Text(
                             AppLocalizations.of(context).changeEmail,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium!
-                                .copyWith(
-                                  fontSize: 14,
-                                  decoration: TextDecoration.underline,
-                                ),
+                            style: theme.textTheme.titleMedium!.copyWith(
+                              fontSize: 14,
+                              decoration: TextDecoration.underline,
+                            ),
                           ),
                         ),
                       ),

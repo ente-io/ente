@@ -256,6 +256,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Hero(
       tag: widget.tagPrefix! + widget.file.tag,
       child: VisibilityDetector(
@@ -287,7 +288,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
             //Loading two high-res potrait videos together causes one to
             //go blank. So only loading video when it is completely visible.
             child: !_isCompletelyVisible || _filePath == null
-                ? _getLoadingWidget()
+                ? _getLoadingWidget(theme)
                 : Stack(
                     key: const ValueKey("video_ready"),
                     children: [
@@ -629,7 +630,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     }
   }
 
-  Widget _getLoadingWidget() {
+  Widget _getLoadingWidget(ThemeData theme) {
     return Stack(
       key: const ValueKey("video_loading"),
       children: [
@@ -674,9 +675,10 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                           Center(
                             child: Text(
                               "${(progress * 100).toStringAsFixed(0)}%",
-                              style: getEnteTextTheme(context).tiny.copyWith(
-                                    color: textBaseDark,
-                                  ),
+                              style:
+                                  EnteTheme.getTextTheme(theme).tiny.copyWith(
+                                        color: textBaseDark,
+                                      ),
                             ),
                           ),
                         ],
@@ -773,6 +775,7 @@ class _SeekBarAndDuration extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return ValueListenableBuilder(
       valueListenable: showControls,
       builder: (BuildContext context, bool value, _) {
@@ -823,7 +826,7 @@ class _SeekBarAndDuration extends StatelessWidget {
                                 file.caption!,
                                 maxLines: 3,
                                 overflow: TextOverflow.ellipsis,
-                                style: getEnteTextTheme(context)
+                                style: EnteTheme.getTextTheme(theme)
                                     .mini
                                     .copyWith(color: textBaseDark),
                               ),
@@ -839,9 +842,7 @@ class _SeekBarAndDuration extends StatelessWidget {
                           curve: Curves.easeInOut,
                           child: Text(
                             secondsToDuration(position ~/ 1000),
-                            style: getEnteTextTheme(
-                              context,
-                            ).mini.copyWith(
+                            style: EnteTheme.getTextTheme(theme).mini.copyWith(
                                   color: textBaseDark,
                                 ),
                           ),
@@ -855,7 +856,7 @@ class _SeekBarAndDuration extends StatelessWidget {
                         ),
                         Text(
                           duration ?? "0:00",
-                          style: getEnteTextTheme(context).mini.copyWith(
+                          style: EnteTheme.getTextTheme(theme).mini.copyWith(
                                 color: textBaseDark,
                               ),
                         ),

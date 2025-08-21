@@ -63,7 +63,8 @@ class _MagicSectionState extends State<MagicSection> {
   @override
   Widget build(BuildContext context) {
     if (_magicSearchResults.isEmpty) {
-      // final textTheme = getEnteTextTheme(context);
+      // final theme = Theme.of(context);
+      // final textTheme = EnteTheme.getTextTheme(theme);
       // return Padding(
       //   padding: const EdgeInsets.only(left: 12, right: 8),
       //   child: Row(
@@ -141,7 +142,8 @@ class MagicRecommendation extends StatelessWidget {
   Widget build(BuildContext context) {
     final heroTag = magicSearchResult.heroTag() +
         (magicSearchResult.previewThumbnail()?.tag ?? "");
-    final enteTextTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final enteTextTheme = EnteTheme.getTextTheme(theme);
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: max(2.5 - _borderWidth, 0)),
       child: GestureDetector(
@@ -163,7 +165,7 @@ class MagicRecommendation extends StatelessWidget {
                   cornerSmoothing: _cornerSmoothing,
                 ),
                 child: Container(
-                  color: getEnteColorScheme(context).strokeFaint,
+                  color: EnteTheme.getColorScheme(theme).strokeFaint,
                   width: _width + _borderWidth * 2,
                   height: _height + _borderWidth * 2,
                 ),

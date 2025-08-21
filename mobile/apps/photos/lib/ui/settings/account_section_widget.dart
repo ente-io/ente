@@ -26,14 +26,15 @@ class AccountSectionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return ExpandableMenuItemWidget(
       title: AppLocalizations.of(context).account,
-      selectionOptionsWidget: _getSectionOptions(context),
+      selectionOptionsWidget: _getSectionOptions(context, theme),
       leadingIcon: Icons.account_circle_outlined,
     );
   }
 
-  Column _getSectionOptions(BuildContext context) {
+  Column _getSectionOptions(BuildContext context, ThemeData theme) {
     return Column(
       children: [
         sectionOptionSpacing,
@@ -41,7 +42,7 @@ class AccountSectionWidget extends StatelessWidget {
           captionedTextWidget: CaptionedTextWidget(
             title: AppLocalizations.of(context).manageSubscription,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -53,7 +54,7 @@ class AccountSectionWidget extends StatelessWidget {
           captionedTextWidget: CaptionedTextWidget(
             title: AppLocalizations.of(context).changeEmail,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           showOnlyLoadingState: true,
@@ -82,7 +83,7 @@ class AccountSectionWidget extends StatelessWidget {
           captionedTextWidget: CaptionedTextWidget(
             title: AppLocalizations.of(context).changePassword,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           showOnlyLoadingState: true,
@@ -111,7 +112,7 @@ class AccountSectionWidget extends StatelessWidget {
           captionedTextWidget: CaptionedTextWidget(
             title: AppLocalizations.of(context).recoveryKey,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           showOnlyLoadingState: true,
@@ -148,7 +149,7 @@ class AccountSectionWidget extends StatelessWidget {
           captionedTextWidget: CaptionedTextWidget(
             title: AppLocalizations.of(context).legacy,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           showOnlyLoadingState: true,
@@ -175,7 +176,7 @@ class AccountSectionWidget extends StatelessWidget {
           captionedTextWidget: CaptionedTextWidget(
             title: AppLocalizations.of(context).exportYourData,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -188,7 +189,7 @@ class AccountSectionWidget extends StatelessWidget {
           captionedTextWidget: CaptionedTextWidget(
             title: AppLocalizations.of(context).logout,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -200,7 +201,7 @@ class AccountSectionWidget extends StatelessWidget {
           captionedTextWidget: CaptionedTextWidget(
             title: AppLocalizations.of(context).deleteAccount,
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {

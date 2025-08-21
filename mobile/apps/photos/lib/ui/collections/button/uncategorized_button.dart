@@ -17,6 +17,7 @@ class UnCategorizedCollections extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final Collection? collection = CollectionsService.instance
         .getActiveCollections()
         .firstWhereOrNull((e) => e.type == CollectionType.uncategorized);
@@ -26,14 +27,14 @@ class UnCategorizedCollections extends StatelessWidget {
     }
     return OutlinedButton(
       style: OutlinedButton.styleFrom(
-        backgroundColor: Theme.of(context).colorScheme.surface,
+        backgroundColor: theme.colorScheme.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
         padding: const EdgeInsets.all(0),
         side: BorderSide(
           width: 0.5,
-          color: Theme.of(context).iconTheme.color!.withValues(alpha: 0.24),
+          color: theme.iconTheme.color!.withValues(alpha: 0.24),
         ),
       ),
       child: SizedBox(
@@ -48,7 +49,7 @@ class UnCategorizedCollections extends StatelessWidget {
                 children: [
                   Icon(
                     Icons.category_outlined,
-                    color: Theme.of(context).iconTheme.color,
+                    color: theme.iconTheme.color,
                   ),
                   const Padding(padding: EdgeInsets.all(6)),
                   FutureBuilder<int>(
@@ -64,7 +65,7 @@ class UnCategorizedCollections extends StatelessWidget {
                               TextSpan(
                                 text:
                                     AppLocalizations.of(context).uncategorized,
-                                style: Theme.of(context).textTheme.titleMedium,
+                                style: theme.textTheme.titleMedium,
                               ),
                               const TextSpan(text: "  \u2022  "),
                               TextSpan(
@@ -82,7 +83,7 @@ class UnCategorizedCollections extends StatelessWidget {
                               TextSpan(
                                 text:
                                     AppLocalizations.of(context).uncategorized,
-                                style: Theme.of(context).textTheme.titleMedium,
+                                style: theme.textTheme.titleMedium,
                               ),
                               //need to query in db and bring this value
                             ],
@@ -95,7 +96,7 @@ class UnCategorizedCollections extends StatelessWidget {
               ),
               Icon(
                 Icons.chevron_right,
-                color: Theme.of(context).iconTheme.color,
+                color: theme.iconTheme.color,
               ),
             ],
           ),

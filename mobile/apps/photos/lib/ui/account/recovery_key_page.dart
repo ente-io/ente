@@ -51,6 +51,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
   @override
   Widget build(BuildContext context) {
     final String recoveryKey = bip39.entropyToMnemonic(widget.recoveryKey);
+    final theme = Theme.of(context);
     if (recoveryKey.split(' ').length != mnemonicKeyWordCount) {
       throw AssertionError(
         'recovery code should have $mnemonicKeyWordCount words',
@@ -72,10 +73,10 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                 child: StepProgressIndicator(
                   totalSteps: 4,
                   currentStep: 3,
-                  selectedColor: Theme.of(context).colorScheme.greenAlternative,
+                  selectedColor: theme.colorScheme.greenAlternative,
                   roundedEdges: const Radius.circular(10),
                   unselectedColor:
-                      Theme.of(context).colorScheme.stepProgressUnselectedColor,
+                      theme.colorScheme.stepProgressUnselectedColor,
                 ),
               ),
             )
@@ -107,7 +108,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                           : Text(
                               widget.title ??
                                   AppLocalizations.of(context).recoveryKey,
-                              style: Theme.of(context).textTheme.headlineMedium,
+                              style: theme.textTheme.headlineMedium,
                             ),
                       Padding(
                         padding: EdgeInsets.all(widget.showAppBar! ? 0 : 12),
@@ -116,7 +117,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                         widget.text ??
                             AppLocalizations.of(context)
                                 .recoveryKeyOnForgotPassword,
-                        style: Theme.of(context).textTheme.titleMedium,
+                        style: theme.textTheme.titleMedium,
                       ),
                       const Padding(padding: EdgeInsets.only(top: 24)),
                       DottedBorder(
@@ -162,16 +163,14 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                                     borderRadius: const BorderRadius.all(
                                       Radius.circular(2),
                                     ),
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .recoveryKeyBoxColor,
+                                    color:
+                                        theme.colorScheme.recoveryKeyBoxColor,
                                   ),
                                   padding: const EdgeInsets.all(20),
                                   width: double.infinity,
                                   child: Text(
                                     recoveryKey,
-                                    style:
-                                        Theme.of(context).textTheme.bodyLarge,
+                                    style: theme.textTheme.bodyLarge,
                                   ),
                                 ),
                               ),
@@ -185,7 +184,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                           widget.subText ??
                               AppLocalizations.of(context)
                                   .recoveryKeySaveDescription,
-                          style: Theme.of(context).textTheme.bodyLarge,
+                          style: theme.textTheme.bodyLarge,
                         ),
                       ),
                       Expanded(
@@ -196,7 +195,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.end,
                             crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: _saveOptions(context, recoveryKey),
+                            children: _saveOptions(context, recoveryKey, theme),
                           ),
                         ),
                       ),
@@ -211,12 +210,16 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
     );
   }
 
-  List<Widget> _saveOptions(BuildContext context, String recoveryKey) {
+  List<Widget> _saveOptions(
+    BuildContext context,
+    String recoveryKey,
+    ThemeData theme,
+  ) {
     final List<Widget> childrens = [];
     if (!_hasTriedToSave) {
       childrens.add(
         ElevatedButton(
-          style: Theme.of(context).colorScheme.optionalActionButtonStyle,
+          style: theme.colorScheme.optionalActionButtonStyle,
           onPressed: () async {
             await _saveKeys();
           },

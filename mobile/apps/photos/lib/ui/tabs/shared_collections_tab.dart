@@ -154,7 +154,8 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
         SectionTitle(title: AppLocalizations.of(context).sharedWithYou);
     final SectionTitle sharedByYou =
         SectionTitle(title: AppLocalizations.of(context).sharedByYou);
-    final colorTheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
+    final colorTheme = EnteTheme.getColorScheme(theme);
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       child: Container(

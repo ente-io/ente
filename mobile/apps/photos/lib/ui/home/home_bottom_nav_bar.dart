@@ -88,9 +88,10 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final bool filesAreSelected = widget.selectedFiles.files.isNotEmpty;
     final bool albumsAreSelected = widget.selectedAlbums.albums.isNotEmpty;
-    final enteColorScheme = getEnteColorScheme(context);
+    final enteColorScheme = EnteTheme.getColorScheme(theme);
 
     return SafeArea(
       child: RepaintBoundary(
@@ -109,17 +110,16 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                     GNav(
                       curve: Curves.easeOutExpo,
                       backgroundColor:
-                          getEnteColorScheme(context).backgroundElevated2,
+                          EnteTheme.getColorScheme(theme).backgroundElevated2,
                       mainAxisAlignment: MainAxisAlignment.center,
                       iconSize: 24,
                       padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
                       duration: const Duration(milliseconds: 200),
                       gap: 0,
                       tabBorderRadius: 32,
-                      tabBackgroundColor:
-                          Theme.of(context).brightness == Brightness.light
-                              ? strokeFainterLight
-                              : strokeSolidFaintLight,
+                      tabBackgroundColor: theme.brightness == Brightness.light
+                          ? strokeFainterLight
+                          : strokeSolidFaintLight,
                       haptic: false,
                       tabs: [
                         GButton(

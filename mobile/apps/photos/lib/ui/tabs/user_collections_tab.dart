@@ -101,13 +101,14 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     super.build(context);
     _logger.info("Building, trigger: $_loadReason");
     return FutureBuilder<List<Collection>>(
       future: CollectionsService.instance.getCollectionForOnEnteSection(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          return _getCollectionsGalleryWidget(snapshot.data!);
+          return _getCollectionsGalleryWidget(theme, snapshot.data!);
         } else if (snapshot.hasError) {
           return Text(snapshot.error.toString());
         } else {
@@ -117,15 +118,14 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
     );
   }
 
-  Widget _getCollectionsGalleryWidget(List<Collection> collections) {
+  Widget _getCollectionsGalleryWidget(
+    ThemeData theme,
+    List<Collection> collections,
+  ) {
     final TextStyle trashAndHiddenTextStyle =
-        Theme.of(context).textTheme.titleMedium!.copyWith(
-              color: Theme.of(context)
-                  .textTheme
-                  .titleMedium!
-                  .color!
-                  .withValues(alpha: 0.5),
-            );
+        theme.textTheme.titleMedium!.copyWith(
+      color: theme.textTheme.titleMedium!.color!.withValues(alpha: 0.5),
+    );
 
     return Stack(
       alignment: Alignment.bottomCenter,
@@ -158,7 +158,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                 trailingWidget: IconButtonWidget(
                   icon: Icons.chevron_right,
                   iconButtonType: IconButtonType.secondary,
-                  iconColor: getEnteColorScheme(context).blurStrokePressed,
+                  iconColor: EnteTheme.getColorScheme(theme).blurStrokePressed,
                 ),
               ),
             ),
@@ -183,7 +183,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                 trailingWidget: IconButtonWidget(
                   icon: Icons.chevron_right,
                   iconButtonType: IconButtonType.secondary,
-                  iconColor: getEnteColorScheme(context).blurStrokePressed,
+                  iconColor: EnteTheme.getColorScheme(theme).blurStrokePressed,
                 ),
               ),
             ),
@@ -200,7 +200,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                 : const SliverToBoxAdapter(child: EmptyState()),
             SliverToBoxAdapter(
               child: Divider(
-                color: getEnteColorScheme(context).strokeFaint,
+                color: EnteTheme.getColorScheme(theme).strokeFaint,
               ),
             ),
             const SliverToBoxAdapter(child: SizedBox(height: 12)),

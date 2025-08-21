@@ -8,6 +8,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import "package:flutter/material.dart";
+import "package:photos/theme/ente_theme.dart";
 
 const double _kScrollbarThickness = 8.0;
 const double _kScrollbarThicknessWithTrack = 12.0;
@@ -159,9 +160,10 @@ class ScrollbarWithUseNotifer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return ScrollbarTheme(
-      data: ScrollbarTheme.of(context).copyWith(
-        thumbColor: Theme.of(context).brightness == Brightness.dark
+      data: theme.scrollbarTheme.copyWith(
+        thumbColor: EnteTheme.isDark(theme)
             ? const WidgetStatePropertyAll(Color.fromARGB(244, 215, 215, 215))
             : WidgetStateProperty.resolveWith((Set<WidgetState> states) {
                 if (states.contains(WidgetState.dragged)) {
@@ -260,18 +262,19 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
     late Color dragColor;
     late Color hoverColor;
     late Color idleColor;
+    final ThemeData theme = Theme.of(context);
     switch (brightness) {
       case Brightness.light:
         dragColor = onSurface.withOpacity(0.6);
         hoverColor = onSurface.withOpacity(0.5);
         idleColor = _useAndroidScrollbar
-            ? Theme.of(context).highlightColor.withOpacity(1.0)
+            ? theme.highlightColor.withOpacity(1.0)
             : onSurface.withOpacity(0.1);
       case Brightness.dark:
         dragColor = onSurface.withOpacity(0.75);
         hoverColor = onSurface.withOpacity(0.65);
         idleColor = _useAndroidScrollbar
-            ? Theme.of(context).highlightColor.withOpacity(1.0)
+            ? theme.highlightColor.withOpacity(1.0)
             : onSurface.withOpacity(0.3);
     }
 
@@ -361,7 +364,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
   void didChangeDependencies() {
     final ThemeData theme = Theme.of(context);
     _colorScheme = theme.colorScheme;
-    _scrollbarTheme = ScrollbarTheme.of(context);
+    _scrollbarTheme = theme.scrollbarTheme;
     switch (theme.platform) {
       case TargetPlatform.android:
         _useAndroidScrollbar = true;

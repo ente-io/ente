@@ -68,6 +68,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
   }
 
   Widget _getSectionOptions(BuildContext context) {
+    final theme = Theme.of(context);
     final Completer completer = Completer();
     final List<Widget> children = [];
     if (_config.hasConfiguredAccount()) {
@@ -92,7 +93,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                     UserService.instance.hasEnabledTwoFactor();
                 if (hasAuthenticated) {
                   if (isTwoFactorEnabled) {
-                    await _disableTwoFactor();
+                    await _disableTwoFactor(theme);
                     completer.isCompleted ? null : completer.complete();
                   } else {
                     await UserService.instance
@@ -131,7 +132,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
             captionedTextWidget: CaptionedTextWidget(
               title: context.l10n.passkey,
             ),
-            pressedColor: getEnteColorScheme(context).fillFaint,
+            pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
             trailingIcon: Icons.chevron_right_outlined,
             trailingIconIsMuted: true,
             onTap: () async {
@@ -187,7 +188,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         captionedTextWidget: CaptionedTextWidget(
           title: AppLocalizations.of(context).viewActiveSessions,
         ),
-        pressedColor: getEnteColorScheme(context).fillFaint,
+        pressedColor: EnteTheme.getColorScheme(theme).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
         showOnlyLoadingState: true,
@@ -217,7 +218,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     );
   }
 
-  Future<void> _disableTwoFactor() async {
+  Future<void> _disableTwoFactor(ThemeData theme) async {
     final AlertDialog alert = AlertDialog(
       title: Text(AppLocalizations.of(context).disableTwofactor),
       content: Text(
@@ -228,7 +229,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           child: Text(
             AppLocalizations.of(context).no,
             style: TextStyle(
-              color: Theme.of(context).colorScheme.greenAlternative,
+              color: theme.colorScheme.greenAlternative,
             ),
           ),
           onPressed: () {

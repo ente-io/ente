@@ -89,7 +89,7 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
         //             ),
         //           ),
         //           backgroundColor:
-        //               getEnteColorScheme(context).backgroundElevated,
+        //               EnteTheme.getColorScheme(theme).backgroundElevated,
         //           barrierColor: backdropFaintDark,
         //           context: context,
         //           builder: (context) {
@@ -103,6 +103,7 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
   }
 
   Future<List<Widget>> _getLocationTags() async {
+    final theme = Theme.of(context);
     // await Future.delayed(const Duration(seconds: 1));
     final locationTags =
         await locationService.enclosingLocationTags(widget.file.location!);
@@ -121,7 +122,7 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
       return [
         Text(
           AppLocalizations.of(context).groupNearbyPhotos,
-          style: getEnteTextTheme(context).miniBoldMuted,
+          style: EnteTheme.getTextTheme(theme).miniBoldMuted,
         ),
       ];
     } else {
@@ -200,6 +201,7 @@ class _InfoMapState extends State<InfoMap> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(top: 8),
       child: ClipRRect(
@@ -245,7 +247,7 @@ class _InfoMapState extends State<InfoMap> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: getEnteColorScheme(context).strokeFaint,
+                            color: EnteTheme.getColorScheme(theme).strokeFaint,
                           ),
                         ),
                       ),
@@ -285,7 +287,7 @@ class _InfoMapState extends State<InfoMap> {
                                   sigmaY: 2.8,
                                 ),
                                 child: Container(
-                                  color: getEnteColorScheme(context)
+                                  color: EnteTheme.getColorScheme(theme)
                                       .backgroundElevated
                                       .withValues(alpha: 0.5),
                                 ),
@@ -294,8 +296,8 @@ class _InfoMapState extends State<InfoMap> {
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(
-                                    color:
-                                        getEnteColorScheme(context).strokeFaint,
+                                    color: EnteTheme.getColorScheme(theme)
+                                        .strokeFaint,
                                   ),
                                 ),
                               ),
@@ -315,7 +317,7 @@ class _InfoMapState extends State<InfoMap> {
                                 child: Center(
                                   child: Text(
                                     AppLocalizations.of(context).enableMaps,
-                                    style: getEnteTextTheme(context).small,
+                                    style: EnteTheme.getTextTheme(theme).small,
                                   ),
                                 ),
                               ),

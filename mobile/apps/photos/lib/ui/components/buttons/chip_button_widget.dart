@@ -17,12 +17,13 @@ class ChipButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: onTap?.call,
       child: Container(
         width: noChips ? double.infinity : null,
         decoration: BoxDecoration(
-          color: getEnteColorScheme(context).fillFaint,
+          color: EnteTheme.getColorScheme(theme).fillFaint,
           borderRadius: const BorderRadius.all(Radius.circular(4)),
         ),
         child: Padding(
@@ -44,7 +45,7 @@ class ChipButtonWidget extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: Text(
                     label!,
-                    style: getEnteTextTheme(context).miniBold,
+                    style: EnteTheme.getTextTheme(theme).miniBold,
                   ),
                 ),
             ],

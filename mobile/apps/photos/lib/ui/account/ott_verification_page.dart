@@ -31,6 +31,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
   @override
   Widget build(BuildContext context) {
     final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
+    final theme = Theme.of(context);
 
     FloatingActionButtonLocation? fabLocation() {
       if (isKeypadOpen) {
@@ -46,7 +47,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          color: Theme.of(context).iconTheme.color,
+          color: theme.iconTheme.color,
           onPressed: () {
             Navigator.of(context).pop();
           },
@@ -57,15 +58,15 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                 child: StepProgressIndicator(
                   totalSteps: 4,
                   currentStep: 2,
-                  selectedColor: Theme.of(context).colorScheme.greenAlternative,
+                  selectedColor: theme.colorScheme.greenAlternative,
                   roundedEdges: const Radius.circular(10),
                   unselectedColor:
-                      Theme.of(context).colorScheme.stepProgressUnselectedColor,
+                      theme.colorScheme.stepProgressUnselectedColor,
                 ),
               )
             : null,
       ),
-      body: _getBody(),
+      body: _getBody(theme),
       floatingActionButton: DynamicFAB(
         key: const ValueKey("verifyOttButton"),
         isKeypadOpen: isKeypadOpen,
@@ -93,7 +94,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
     );
   }
 
-  Widget _getBody() {
+  Widget _getBody(ThemeData theme) {
     return ListView(
       children: [
         Column(
@@ -103,7 +104,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
               padding: const EdgeInsets.fromLTRB(20, 30, 20, 15),
               child: Text(
                 AppLocalizations.of(context).verifyEmail,
-                style: Theme.of(context).textTheme.headlineMedium,
+                style: theme.textTheme.headlineMedium,
               ),
             ),
             Padding(
@@ -119,16 +120,12 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                           child: StyledText(
                             text: AppLocalizations.of(context)
                                 .weHaveSendEmailTo(widget.email),
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium!
+                            style: theme.textTheme.titleMedium!
                                 .copyWith(fontSize: 14),
                             tags: {
                               'green': StyledTextTag(
                                 style: TextStyle(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .greenAlternative,
+                                  color: theme.colorScheme.greenAlternative,
                                 ),
                               ),
                             },
@@ -137,17 +134,13 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                         widget.isResetPasswordScreen
                             ? Text(
                                 AppLocalizations.of(context).toResetVerifyEmail,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium!
+                                style: theme.textTheme.titleMedium!
                                     .copyWith(fontSize: 14),
                               )
                             : Text(
                                 AppLocalizations.of(context)
                                     .checkInboxAndSpamFolder,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium!
+                                style: theme.textTheme.titleMedium!
                                     .copyWith(fontSize: 14),
                               ),
                       ],
@@ -164,7 +157,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
               child: TextFormField(
                 key: const ValueKey("ottVerificationInputField"),
-                style: Theme.of(context).textTheme.titleMedium,
+                style: theme.textTheme.titleMedium,
                 decoration: InputDecoration(
                   filled: true,
                   hintText: AppLocalizations.of(context).tapToEnterCode,
@@ -173,7 +166,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                     borderSide: BorderSide.none,
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  fillColor: getEnteColorScheme(context).fillFaint,
+                  fillColor: EnteTheme.getColorScheme(theme).fillFaint,
                 ),
                 controller: _verificationCodeController,
                 autofocus: false,
@@ -186,7 +179,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
             ),
             Divider(
               thickness: 1,
-              color: getEnteColorScheme(context).strokeFaint,
+              color: EnteTheme.getColorScheme(theme).strokeFaint,
             ),
             Padding(
               padding: const EdgeInsets.all(20),
@@ -205,10 +198,10 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                     },
                     child: Text(
                       AppLocalizations.of(context).resendEmail,
-                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                            fontSize: 14,
-                            decoration: TextDecoration.underline,
-                          ),
+                      style: theme.textTheme.titleMedium!.copyWith(
+                        fontSize: 14,
+                        decoration: TextDecoration.underline,
+                      ),
                     ),
                   ),
                 ],

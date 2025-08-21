@@ -23,7 +23,9 @@ class EmptyAlbumState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isLightMode = Theme.of(context).brightness == Brightness.light;
+    final theme = Theme.of(context);
+    final isLightMode = !EnteTheme.isDark(theme);
+
     return isFromCollectPhotos
         ? Stack(
             children: [
@@ -57,7 +59,7 @@ class EmptyAlbumState extends StatelessWidget {
                             text:
                                 AppLocalizations.of(context).addSomePhotosDesc2,
                             style: TextStyle(
-                              color: getEnteColorScheme(context).primary500,
+                              color: EnteTheme.getColorScheme(theme).primary500,
                             ),
                           ),
                           TextSpan(
@@ -66,7 +68,7 @@ class EmptyAlbumState extends StatelessWidget {
                           ),
                         ],
                       ),
-                      style: getEnteTextTheme(context).smallMuted,
+                      style: EnteTheme.getTextTheme(theme).smallMuted,
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 140),

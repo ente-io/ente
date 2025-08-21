@@ -829,6 +829,7 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return currentGroupId != null
         ? ValueListenableBuilder(
             valueListenable: _enlargeHeader,
@@ -861,7 +862,7 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
                     );
                   },
                   child: ColoredBox(
-                    color: getEnteColorScheme(context).backgroundBase,
+                    color: EnteTheme.getColorScheme(theme).backgroundBase,
                     child: GroupHeaderWidget(
                       title: widget.galleryGroups
                           .groupIdToGroupDataMap[currentGroupId!]!.groupType

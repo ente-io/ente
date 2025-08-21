@@ -22,6 +22,7 @@ class _CreationTimeItemState extends State<CreationTimeItem> {
       widget.file.creationTime!,
       isUtc: true,
     ).toLocal();
+    final theme = Theme.of(context);
     return InfoItemWidget(
       key: const ValueKey("Creation time"),
       leadingIcon: Icons.calendar_today_outlined,
@@ -30,7 +31,7 @@ class _CreationTimeItemState extends State<CreationTimeItem> {
       subtitleSection: Future.value([
         Text(
           getTimeIn12hrFormat(dateTime) + "  " + dateTime.timeZoneName,
-          style: getEnteTextTheme(context).miniMuted,
+          style: EnteTheme.getTextTheme(theme).miniMuted,
         ),
       ]),
       editOnTap: ((widget.file.ownerID == null ||

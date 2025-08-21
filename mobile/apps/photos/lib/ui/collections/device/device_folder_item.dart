@@ -25,6 +25,7 @@ class DeviceFolderItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final isBackedUp = deviceCollection.shouldBackup;
     return GestureDetector(
       child: Column(
@@ -43,7 +44,7 @@ class DeviceFolderItem extends StatelessWidget {
                     cornerSmoothing: _cornerSmoothing,
                   ),
                   child: Container(
-                    color: getEnteColorScheme(context).strokeFaint,
+                    color: EnteTheme.getColorScheme(theme).strokeFaint,
                     width: sideOfThumbnail,
                     height: sideOfThumbnail,
                   ),
@@ -89,7 +90,7 @@ class DeviceFolderItem extends StatelessWidget {
             child: Text(
               deviceCollection.name,
               textAlign: TextAlign.left,
-              style: Theme.of(context).colorScheme.enteTheme.textTheme.small,
+              style: theme.colorScheme.enteTheme.textTheme.small,
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -99,8 +100,7 @@ class DeviceFolderItem extends StatelessWidget {
             child: Text(
               deviceCollection.count.toString(),
               textAlign: TextAlign.left,
-              style:
-                  Theme.of(context).colorScheme.enteTheme.textTheme.miniMuted,
+              style: theme.colorScheme.enteTheme.textTheme.miniMuted,
               overflow: TextOverflow.ellipsis,
             ),
           ),

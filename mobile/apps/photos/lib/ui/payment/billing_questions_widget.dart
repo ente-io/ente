@@ -70,13 +70,14 @@ class FaqWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.all(2),
       child: ExpansionTileCard(
         elevation: 0,
         title: Text(faq!.q!),
-        expandedTextColor: Theme.of(context).colorScheme.greenAlternative,
-        baseColor: Theme.of(context).cardColor,
+        expandedTextColor: theme.colorScheme.greenAlternative,
+        baseColor: theme.cardColor,
         children: [
           Padding(
             padding: const EdgeInsets.only(

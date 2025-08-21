@@ -59,14 +59,15 @@ class _LockScreenState extends State<LockScreen>
 
   @override
   Widget build(BuildContext context) {
-    final colorTheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final colorTheme = EnteTheme.getColorScheme(theme);
+    final textTheme = EnteTheme.getTextTheme(theme);
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.logout_outlined),
-          color: Theme.of(context).iconTheme.color,
+          color: theme.iconTheme.color,
           onPressed: () {
             _onLogoutTapped(context);
           },

@@ -71,6 +71,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     _sortDuplicates();
     return Scaffold(
       appBar: AppBar(
@@ -78,7 +79,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
         title: Text(AppLocalizations.of(context).deduplicateFiles),
         actions: _duplicates.isNotEmpty ? [_getSortMenu()] : null,
       ),
-      body: _getBody(),
+      body: _getBody(theme),
     );
   }
 
@@ -95,7 +96,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     });
   }
 
-  Widget _getBody() {
+  Widget _getBody(ThemeData theme) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -118,6 +119,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                         child: _getGridView(
                           _duplicates[index],
                           index,
+                          theme,
                         ),
                       );
                     },
@@ -144,13 +146,13 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                           padding: const EdgeInsets.all(4),
                           child: Text(
                             value, // Show the value
-                            style: getEnteTextTheme(context).bodyMuted,
+                            style: EnteTheme.getTextTheme(theme).bodyMuted,
                           ),
                         );
                       }
                     },
                   ),
-                  _getDeleteButton(),
+                  _getDeleteButton(theme),
                   const SizedBox(height: crossAxisSpacing / 2),
                 ],
               ),
@@ -159,7 +161,8 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
   }
 
   Widget _getSortMenu() {
-    final textTheme = getEnteTextTheme(context);
+    final theme = Theme.of(context);
+    final textTheme = EnteTheme.getTextTheme(theme);
     Text sortOptionText(SortKey key) {
       String text = key.toString();
       switch (key) {
@@ -182,7 +185,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
         padding: const EdgeInsets.fromLTRB(24, 6, 24, 6),
         child: Icon(
           Icons.sort,
-          color: getEnteColorScheme(context).strokeBase,
+          color: EnteTheme.getColorScheme(theme).strokeBase,
           size: 20,
         ),
       ),
@@ -213,7 +216,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     );
   }
 
-  Widget _getDeleteButton() {
+  Widget _getDeleteButton(ThemeData theme) {
     int fileCount = 0;
     int totalSize = 0;
     for (int index = 0; index < _duplicates.length; index++) {
@@ -238,7 +241,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: getEnteColorScheme(context).backgroundBase,
+                  color: EnteTheme.getColorScheme(theme).backgroundBase,
                 ),
                 child: Column(
                   children: [
@@ -326,7 +329,11 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     }
   }
 
-  Widget _getGridView(DuplicateFiles duplicates, int itemIndex) {
+  Widget _getGridView(
+    DuplicateFiles duplicates,
+    int itemIndex,
+    ThemeData theme,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -354,12 +361,12 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                     duplicates.files.length,
                     formatBytes(duplicates.size),
                   ),
-                  style: Theme.of(context).textTheme.titleSmall,
+                  style: theme.textTheme.titleSmall,
                 ),
                 !selectedGrids.contains(itemIndex)
                     ? Icon(
                         Icons.check_circle_outlined,
-                        color: getEnteColorScheme(context).strokeMuted,
+                        color: EnteTheme.getColorScheme(theme).strokeMuted,
                         size: 24,
                       )
                     : const Icon(
@@ -377,7 +384,12 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
             physics: const NeverScrollableScrollPhysics(),
             // to disable GridView's scrolling
             itemBuilder: (context, index) {
-              return _buildFile(context, duplicates.files[index], itemIndex);
+              return _buildFile(
+                context,
+                duplicates.files[index],
+                itemIndex,
+                theme,
+              );
             },
             itemCount: duplicates.files.length,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -392,7 +404,12 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     );
   }
 
-  Widget _buildFile(BuildContext context, EnteFile file, int index) {
+  Widget _buildFile(
+    BuildContext context,
+    EnteFile file,
+    int index,
+    ThemeData theme,
+  ) {
     return GestureDetector(
       onTap: () {
         final files = _duplicates[index].files;
@@ -455,8 +472,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
               CollectionsService.instance
                   .getCollectionByID(file.collectionID!)!
                   .displayName,
-              style:
-                  Theme.of(context).textTheme.bodySmall!.copyWith(fontSize: 12),
+              style: theme.textTheme.bodySmall!.copyWith(fontSize: 12),
               overflow: TextOverflow.ellipsis,
             ),
           ),

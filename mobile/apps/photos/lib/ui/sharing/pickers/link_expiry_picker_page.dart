@@ -102,11 +102,12 @@ class _ItemsWidgetState extends State<ItemsWidget> {
         _menuItemForPicker(context, expiryOpiton),
       );
     }
+    final theme = Theme.of(context);
     items = addSeparators(
       items,
       DividerWidget(
         dividerType: DividerType.menuNoIcon,
-        bgColor: getEnteColorScheme(context).fillFaint,
+        bgColor: EnteTheme.getColorScheme(theme).fillFaint,
       ),
     );
     return Column(
@@ -119,8 +120,9 @@ class _ItemsWidgetState extends State<ItemsWidget> {
     BuildContext context,
     Tuple2<String, int> expiryOpiton,
   ) {
+    final theme = Theme.of(context);
     return MenuItemWidget(
-      menuItemColor: getEnteColorScheme(context).fillFaint,
+      menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,
       captionedTextWidget: CaptionedTextWidget(
         title: expiryOpiton.item1,
       ),

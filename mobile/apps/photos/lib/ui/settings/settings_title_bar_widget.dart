@@ -11,6 +11,7 @@ class SettingsTitleBarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final inheritedDetails = InheritedUserDetails.of(context);
     final userDetails = inheritedDetails?.userDetails;
     bool isCached = false;
@@ -38,7 +39,7 @@ class SettingsTitleBarWidget extends StatelessWidget {
                       NumberFormat().format(userDetails.fileCount),
                     ),
                     // "${NumberFormat().format(userDetails.fileCount)} memories",
-                    style: getEnteTextTheme(context).largeBold,
+                    style: EnteTheme.getTextTheme(theme).largeBold,
                   )
                 : const EnteLoadingWidget(),
           ],

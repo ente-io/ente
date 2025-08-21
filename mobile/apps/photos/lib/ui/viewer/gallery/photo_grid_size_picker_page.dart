@@ -91,6 +91,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     items.clear();
     for (int girdSize in gridSizes) {
       items.add(
@@ -101,7 +102,7 @@ class _ItemsWidgetState extends State<ItemsWidget> {
       items,
       DividerWidget(
         dividerType: DividerType.menuNoIcon,
-        bgColor: getEnteColorScheme(context).fillFaint,
+        bgColor: EnteTheme.getColorScheme(theme).fillFaint,
       ),
     );
     return Column(
@@ -111,9 +112,10 @@ class _ItemsWidgetState extends State<ItemsWidget> {
   }
 
   Widget _menuItemForPicker(int gridSize) {
+    final theme = Theme.of(context);
     return MenuItemWidget(
       key: ValueKey(gridSize),
-      menuItemColor: getEnteColorScheme(context).fillFaint,
+      menuItemColor: EnteTheme.getColorScheme(theme).fillFaint,
       captionedTextWidget: CaptionedTextWidget(
         title: "$gridSize",
       ),

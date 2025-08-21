@@ -95,6 +95,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return PopScope(
       canPop: !(changed && _inputName.isNotEmpty),
       onPopInvokedWithResult: (bool didPop, Object? result) async {
@@ -186,7 +187,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                                           .colorScheme
                                           .enteTheme
                                           .shadowMenu,
-                                      color: getEnteColorScheme(context)
+                                      color: EnteTheme.getColorScheme(theme)
                                           .backgroundElevated2,
                                     ),
                                     child: IconButton(
@@ -265,13 +266,15 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                               borderRadius:
                                   const BorderRadius.all(Radius.circular(8.0)),
                               borderSide: BorderSide(
-                                color: getEnteColorScheme(context).strokeMuted,
+                                color:
+                                    EnteTheme.getColorScheme(theme).strokeMuted,
                               ),
                             ),
-                            fillColor: getEnteColorScheme(context).fillFaint,
+                            fillColor:
+                                EnteTheme.getColorScheme(theme).fillFaint,
                             filled: true,
                             hintText: context.l10n.enterName,
-                            hintStyle: getEnteTextTheme(context).bodyFaint,
+                            hintStyle: EnteTheme.getTextTheme(theme).bodyFaint,
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 16,
                               vertical: 14,
@@ -333,13 +336,13 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                           },
                         ),
                         const SizedBox(height: 32),
-                        if (!widget.isEditing) _getPersonItems(),
+                        if (!widget.isEditing) _getPersonItems(theme),
                         if (widget.isEditing)
                           Align(
                             alignment: Alignment.centerLeft,
                             child: Text(
                               context.l10n.mergedPhotos,
-                              style: getEnteTextTheme(context).body,
+                              style: EnteTheme.getTextTheme(theme).body,
                             ),
                           ),
                         if (widget.isEditing)
@@ -419,7 +422,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
     });
   }
 
-  Widget _getPersonItems() {
+  Widget _getPersonItems(ThemeData theme) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 12, 4, 0),
       child: StreamBuilder<List<(PersonEntity, EnteFile)>>(
@@ -467,7 +470,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                   padding: const EdgeInsets.only(top: 12, bottom: 12),
                   child: Text(
                     context.l10n.orMergeWithExistingPerson,
-                    style: getEnteTextTheme(context).largeBold,
+                    style: EnteTheme.getTextTheme(theme).largeBold,
                   ),
                 ),
 
@@ -748,6 +751,7 @@ class _EmailSectionState extends State<_EmailSection> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     const limitCountTo = 5;
     final avatarSize = getAvatarSize(AvatarType.small);
     final overlapPadding = getOverlapPadding(AvatarType.small);
@@ -760,7 +764,7 @@ class _EmailSectionState extends State<_EmailSection> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 16),
             decoration: BoxDecoration(
-              color: getEnteColorScheme(context).fillFaint,
+              color: EnteTheme.getColorScheme(theme).fillFaint,
               borderRadius: BorderRadius.circular(12.0),
             ),
             child: Column(
@@ -879,13 +883,13 @@ class _EmailSectionState extends State<_EmailSection> {
             },
             child: Icon(
               Icons.close_outlined,
-              color: getEnteColorScheme(context).strokeMuted,
+              color: EnteTheme.getColorScheme(theme).strokeMuted,
             ),
           ),
-          fillColor: getEnteColorScheme(context).fillFaint,
+          fillColor: EnteTheme.getColorScheme(theme).fillFaint,
           filled: true,
           hintText: _email,
-          hintStyle: getEnteTextTheme(context).bodyFaint,
+          hintStyle: EnteTheme.getTextTheme(theme).bodyFaint,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
             vertical: 14,

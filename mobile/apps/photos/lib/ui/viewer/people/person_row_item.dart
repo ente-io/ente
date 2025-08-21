@@ -17,6 +17,7 @@ class PersonGridItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: onTap,
       child: Padding(
@@ -42,7 +43,7 @@ class PersonGridItem extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               person.data.name,
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: theme.textTheme.bodyMedium,
               overflow: TextOverflow.ellipsis,
             ),
           ],
