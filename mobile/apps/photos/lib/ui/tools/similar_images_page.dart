@@ -60,6 +60,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   List<SimilarFiles> _similarFilesList = [];
   SortKey _sortKey = SortKey.distanceAsc;
   bool _exactSearch = false;
+  bool _fullRefresh = false;
 
   late SelectedFiles _selectedFiles;
   late ScrollController _scrollController;
@@ -185,7 +186,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Exact search", // TODO: lau: extract string
+                "Exact search",
                 style: textTheme.bodyBold,
               ),
               ToggleSwitchWidget(
@@ -194,6 +195,25 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                   if (_isDisposed) return;
                   setState(() {
                     _exactSearch = !_exactSearch;
+                  });
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Full refresh",
+                style: textTheme.bodyBold,
+              ),
+              ToggleSwitchWidget(
+                value: () => _fullRefresh,
+                onChanged: () async {
+                  if (_isDisposed) return;
+                  setState(() {
+                    _fullRefresh = !_fullRefresh;
                   });
                 },
               ),
@@ -389,8 +409,11 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       // You can use _toggleValue here for advanced mode features
       _logger.info("exact mode: $_exactSearch");
 
-      final similarFiles = await SimilarImagesService.instance
-          .getSimilarFiles(_distanceThreshold, exact: _exactSearch);
+      final similarFiles = await SimilarImagesService.instance.getSimilarFiles(
+        _distanceThreshold,
+        exact: _exactSearch,
+        forceRefresh: _fullRefresh,
+      );
       _logger.info(
         "Found ${similarFiles.length} groups of similar images",
       );

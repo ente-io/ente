@@ -27,11 +27,12 @@ class SimilarImagesService {
   Future<List<SimilarFiles>> getSimilarFiles(
     double distanceThreshold, {
     bool exact = false,
+    bool forceRefresh = false,
   }) async {
     try {
       final now = DateTime.now();
       final List<SimilarFiles> result =
-          await _getSimilarFiles(distanceThreshold, exact);
+          await _getSimilarFiles(distanceThreshold, exact, forceRefresh);
       final duration = DateTime.now().difference(now);
       _logger.info(
         "Found ${result.length} similar files in ${duration.inSeconds} seconds for threshold $distanceThreshold and exact $exact",
@@ -46,6 +47,7 @@ class SimilarImagesService {
   Future<List<SimilarFiles>> _getSimilarFiles(
     double distanceThreshold,
     bool exact,
+    bool forceRefresh,
   ) async {
     final w = (kDebugMode ? EnteWatch('getSimilarFiles') : null)?..start();
     final mlDataDB = MLDataDB.instance;
@@ -85,6 +87,24 @@ class SimilarImagesService {
       }
     }
     w?.log("getFileIDToPersonIDs");
+
+    if (forceRefresh) {
+      final result = await _performFullSearch(
+        potentialKeys,
+        allFileIdsToFile,
+        fileIDToPersonIDs,
+        distanceThreshold,
+        exact,
+      );
+      await _cacheSimilarFiles(
+        result,
+        fileIDs.toSet(),
+        distanceThreshold,
+        exact,
+        DateTime.now().millisecondsSinceEpoch,
+      );
+      return result;
+    }
 
     // Load cached data
     final SimilarFilesCache? cachedData = await _readCachedSimilarFiles();
