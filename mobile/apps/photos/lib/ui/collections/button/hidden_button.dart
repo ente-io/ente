@@ -46,7 +46,7 @@ class HiddenCollectionsButtonWidget extends StatelessWidget {
                       style: textStyle,
                       children: [
                         TextSpan(
-                          text: S.of(context).hidden,
+                          text: AppLocalizations.of(context).hidden,
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                         const TextSpan(text: "  \u2022  "),
@@ -75,7 +75,7 @@ class HiddenCollectionsButtonWidget extends StatelessWidget {
         final hasAuthenticated = await LocalAuthenticationService.instance
             .requestLocalAuthentication(
           context,
-          S.of(context).authToViewYourHiddenFiles,
+          AppLocalizations.of(context).authToViewYourHiddenFiles,
         );
         if (hasAuthenticated) {
           // ignore: unawaited_futures

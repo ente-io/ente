@@ -129,7 +129,8 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
                 child: NotificationWidget(
                   startIcon: Icons.offline_bolt,
                   actionIcon: Icons.arrow_forward,
-                  text: S.of(context).enableMachineLearningBanner,
+                  text:
+                      AppLocalizations.of(context).enableMachineLearningBanner,
                   type: NotificationType.greenBanner,
                   mainTextStyle: darkTextTheme.smallMuted,
                   onTap: () async => {
@@ -149,7 +150,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
                 child: NotificationWidget(
                   startIcon: Icons.error_outline,
                   actionIcon: Icons.arrow_forward,
-                  text: S.of(context).confirmYourRecoveryKey,
+                  text: AppLocalizations.of(context).confirmYourRecoveryKey,
                   type: NotificationType.banner,
                   onTap: () async => {
                     await routeToPage(
@@ -228,32 +229,31 @@ class _SyncStatusWidgetState extends State<SyncStatusWidget> {
 
   String _getRefreshingText(BuildContext context) {
     if (_event == null) {
-      return S.of(context).loadingGallery;
+      return AppLocalizations.of(context).loadingGallery;
     }
     if (_event!.status == SyncStatus.startedFirstGalleryImport ||
         _event!.status == SyncStatus.completedFirstGalleryImport) {
-      return S.of(context).loadingGallery;
+      return AppLocalizations.of(context).loadingGallery;
     }
     if (_event!.status == SyncStatus.applyingRemoteDiff) {
-      return S.of(context).syncing;
+      return AppLocalizations.of(context).syncing;
     }
     if (_event!.status == SyncStatus.preparingForUpload) {
       if (_event!.total == null || _event!.total! <= 0) {
-        return S.of(context).encryptingBackup;
+        return AppLocalizations.of(context).encryptingBackup;
       } else if (_event!.total == 1) {
-        return S.of(context).uploadingSingleMemory;
+        return AppLocalizations.of(context).uploadingSingleMemory;
       } else {
-        return S
-            .of(context)
+        return AppLocalizations.of(context)
             .uploadingMultipleMemories(NumberFormat().format(_event!.total!));
       }
     }
     if (_event!.status == SyncStatus.inProgress) {
       final format = NumberFormat();
-      return S.of(context).syncProgress(
-            format.format(_event!.completed!),
-            format.format(_event!.total!),
-          );
+      return AppLocalizations.of(context).syncProgress(
+        format.format(_event!.completed!),
+        format.format(_event!.total!),
+      );
     }
     if (_event!.status == SyncStatus.paused) {
       return _event!.reason;
@@ -263,10 +263,10 @@ class _SyncStatusWidgetState extends State<SyncStatusWidget> {
     }
     if (_event!.status == SyncStatus.completedBackup) {
       if (_event!.wasStopped) {
-        return S.of(context).syncStopped;
+        return AppLocalizations.of(context).syncStopped;
       }
     }
-    return S.of(context).allMemoriesPreserved;
+    return AppLocalizations.of(context).allMemoriesPreserved;
   }
 }
 
@@ -339,7 +339,8 @@ class SyncStatusCompletedWidget extends StatelessWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.only(left: 12),
-                  child: Text(S.of(context).allMemoriesPreserved),
+                  child:
+                      Text(AppLocalizations.of(context).allMemoriesPreserved),
                 ),
               ],
             ),

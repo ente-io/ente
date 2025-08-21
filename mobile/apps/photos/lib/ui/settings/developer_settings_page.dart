@@ -31,7 +31,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
     );
     return Scaffold(
       appBar: AppBar(
-        title: Text(S.of(context).developerSettings),
+        title: Text(AppLocalizations.of(context).developerSettings),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -40,7 +40,7 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
             TextField(
               controller: _urlController,
               decoration: InputDecoration(
-                labelText: S.of(context).serverEndpoint,
+                labelText: AppLocalizations.of(context).serverEndpoint,
                 hintText: Configuration.instance.getHttpEndpoint(),
               ),
               autofocus: true,
@@ -55,7 +55,10 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
                   if ((uri.scheme == "http" || uri.scheme == "https")) {
                     await _ping(url);
                     await Configuration.instance.setHttpEndpoint(url);
-                    showToast(context, S.of(context).endpointUpdatedMessage);
+                    showToast(
+                      context,
+                      AppLocalizations.of(context).endpointUpdatedMessage,
+                    );
                     Navigator.of(context).pop();
                   } else {
                     throw const FormatException();
@@ -64,12 +67,14 @@ class _DeveloperSettingsPageState extends State<DeveloperSettingsPage> {
                   // ignore: unawaited_futures
                   showErrorDialog(
                     context,
-                    S.of(context).invalidEndpoint,
-                    S.of(context).invalidEndpointMessage + "\n" + e.toString(),
+                    AppLocalizations.of(context).invalidEndpoint,
+                    AppLocalizations.of(context).invalidEndpointMessage +
+                        "\n" +
+                        e.toString(),
                   );
                 }
               },
-              text: S.of(context).save,
+              text: AppLocalizations.of(context).save,
             ),
           ],
         ),

@@ -30,7 +30,7 @@ class _AutoCastDialogState extends State<AutoCastDialog> {
     final textStyle = getEnteTextTheme(context);
     final AlertDialog alert = AlertDialog(
       title: Text(
-        S.of(context).connectToDevice,
+        AppLocalizations.of(context).connectToDevice,
         style: textStyle.largeBold,
       ),
       content: Column(
@@ -38,12 +38,12 @@ class _AutoCastDialogState extends State<AutoCastDialog> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            S.of(context).autoCastDialogBody,
+            AppLocalizations.of(context).autoCastDialogBody,
             style: textStyle.bodyMuted,
           ),
           if (Platform.isIOS)
             Text(
-              S.of(context).autoCastiOSPermission,
+              AppLocalizations.of(context).autoCastiOSPermission,
               style: textStyle.bodyMuted,
             ),
           const SizedBox(height: 16),
@@ -61,7 +61,9 @@ class _AutoCastDialogState extends State<AutoCastDialog> {
               }
 
               if (snapshot.data!.isEmpty) {
-                return Center(child: Text(S.of(context).noDeviceFound));
+                return Center(
+                  child: Text(AppLocalizations.of(context).noDeviceFound),
+                );
               }
 
               return Column(

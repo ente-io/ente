@@ -121,8 +121,9 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
             mainAxisSize: MainAxisSize.min,
             children: [
               MenuItemWidget(
-                captionedTextWidget:
-                    CaptionedTextWidget(title: S.of(context).backup),
+                captionedTextWidget: CaptionedTextWidget(
+                  title: AppLocalizations.of(context).backup,
+                ),
                 singleBorderRadius: 8.0,
                 menuItemColor: colorScheme.fillFaint,
                 alignCaptionedTextToLeft: true,
@@ -157,8 +158,9 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
                 builder: (BuildContext context, bool value, _) {
                   return MenuSectionDescriptionWidget(
                     content: value
-                        ? S.of(context).deviceFilesAutoUploading
-                        : S.of(context).turnOnBackupForAutoUpload,
+                        ? AppLocalizations.of(context).deviceFilesAutoUploading
+                        : AppLocalizations.of(context)
+                            .turnOnBackupForAutoUpload,
                   );
                 },
               ),
@@ -250,7 +252,7 @@ class _ResetIgnoredFilesWidgetState extends State<ResetIgnoredFilesWidget> {
         const SizedBox(height: 24),
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: S.of(context).resetIgnoredFiles,
+            title: AppLocalizations.of(context).resetIgnoredFiles,
           ),
           singleBorderRadius: 8.0,
           menuItemColor: getEnteColorScheme(context).fillFaint,
@@ -269,7 +271,7 @@ class _ResetIgnoredFilesWidgetState extends State<ResetIgnoredFilesWidget> {
           },
         ),
         MenuSectionDescriptionWidget(
-          content: S.of(context).ignoredFolderUploadReason,
+          content: AppLocalizations.of(context).ignoredFolderUploadReason,
         ),
       ],
     );

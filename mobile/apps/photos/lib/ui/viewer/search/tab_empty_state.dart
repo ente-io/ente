@@ -20,19 +20,22 @@ class SearchTabEmptyState extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(S.of(context).searchHint1, style: textStyle.h3Bold),
+            Text(
+              AppLocalizations.of(context).searchHint1,
+              style: textStyle.h3Bold,
+            ),
             const SizedBox(height: 24),
-            EmptyStateItemWidget(S.of(context).searchHint2),
+            EmptyStateItemWidget(AppLocalizations.of(context).searchHint2),
             const SizedBox(height: 12),
-            EmptyStateItemWidget(S.of(context).searchHint3),
+            EmptyStateItemWidget(AppLocalizations.of(context).searchHint3),
             const SizedBox(height: 12),
-            EmptyStateItemWidget(S.of(context).searchHint4),
+            EmptyStateItemWidget(AppLocalizations.of(context).searchHint4),
             const SizedBox(height: 12),
-            EmptyStateItemWidget(S.of(context).searchHint5),
+            EmptyStateItemWidget(AppLocalizations.of(context).searchHint5),
             const SizedBox(height: 32),
             ButtonWidget(
               buttonType: ButtonType.trailingIconPrimary,
-              labelText: S.of(context).addYourPhotosNow,
+              labelText: AppLocalizations.of(context).addYourPhotosNow,
               icon: Icons.arrow_forward_outlined,
               onTap: () async {
                 // ignore: unawaited_futures

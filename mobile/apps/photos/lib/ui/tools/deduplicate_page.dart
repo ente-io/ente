@@ -67,7 +67,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: Text(S.of(context).deduplicateFiles),
+        title: Text(AppLocalizations.of(context).deduplicateFiles),
         actions: <Widget>[
           PopupMenuButton(
             constraints: const BoxConstraints(minWidth: 180),
@@ -96,7 +96,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                     Padding(
                       padding: const EdgeInsets.only(bottom: 1),
                       child: Text(
-                        S.of(context).deselectAll,
+                        AppLocalizations.of(context).deselectAll,
                         style: Theme.of(context)
                             .textTheme
                             .titleMedium!
@@ -194,10 +194,10 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       String text = key.toString();
       switch (key) {
         case SortKey.count:
-          text = S.of(context).count;
+          text = AppLocalizations.of(context).count;
           break;
         case SortKey.size:
-          text = S.of(context).totalSize;
+          text = AppLocalizations.of(context).totalSize;
           break;
       }
       return Text(
@@ -272,7 +272,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
         totalSize += toDeleteCount * _duplicates[index].size;
       }
     }
-    final String text = S.of(context).deleteItemCount(fileCount);
+    final String text = AppLocalizations.of(context).deleteItemCount(fileCount);
     return SizedBox(
       width: double.infinity,
       child: SafeArea(
@@ -376,7 +376,11 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(
-              crossAxisSpacing, 4, crossAxisSpacing, 12,),
+            crossAxisSpacing,
+            4,
+            crossAxisSpacing,
+            12,
+          ),
           child: GestureDetector(
             onTap: () {
               if (selectedGrids.contains(itemIndex)) {
@@ -390,10 +394,10 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  S.of(context).duplicateItemsGroup(
-                        duplicates.files.length,
-                        formatBytes(duplicates.size),
-                      ),
+                  AppLocalizations.of(context).duplicateItemsGroup(
+                    duplicates.files.length,
+                    formatBytes(duplicates.size),
+                  ),
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
                 !selectedGrids.contains(itemIndex)

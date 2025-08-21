@@ -27,27 +27,27 @@ class TimeMemory extends SmartMemory {
         );
 
   @override
-  String createTitle(S s, String languageCode) {
+  String createTitle(AppLocalizations locals, String languageCode) {
     if (day != null) {
       final dayFormat = DateFormat.MMMd(languageCode).format(day!);
       if (yearsAgo != null) {
-        return "$dayFormat, " + s.yearsAgo(yearsAgo!);
+        return "$dayFormat, " + locals.yearsAgo(yearsAgo!);
       } else {
-        return s.throughTheYears(dayFormat);
+        return locals.throughTheYears(dayFormat);
       }
     }
     if (month != null) {
       final monthFormat = DateFormat.MMMM(languageCode).format(month!);
       if (yearsAgo != null) {
-        return "$monthFormat, " + s.yearsAgo(yearsAgo!);
+        return "$monthFormat, " + locals.yearsAgo(yearsAgo!);
       } else {
-        return s.throughTheYears(monthFormat);
+        return locals.throughTheYears(monthFormat);
       }
     }
     if (yearsAgo != null) {
-      return s.thisWeekXYearsAgo(yearsAgo!);
+      return locals.thisWeekXYearsAgo(yearsAgo!);
     } else {
-      return s.thisWeekThroughTheYears;
+      return locals.thisWeekThroughTheYears;
     }
   }
 }

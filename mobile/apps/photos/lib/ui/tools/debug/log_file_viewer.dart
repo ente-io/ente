@@ -29,7 +29,7 @@ class _LogFileViewerState extends State<LogFileViewer> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: Text(S.of(context).todaysLogs),
+        title: Text(AppLocalizations.of(context).todaysLogs),
       ),
       body: _getBody(),
     );

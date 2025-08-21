@@ -53,7 +53,7 @@ class OnlyThemFilterChip extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 child: Text(
-                  S.of(context).onlyThem,
+                  AppLocalizations.of(context).onlyThem,
                   style: getEnteTextTheme(context).miniBold,
                 ),
               ),
