@@ -1,5 +1,7 @@
-use crate::{Error, Result};
-use reqwest::{Client, Response};
+#![allow(dead_code)]
+
+use crate::Result;
+use reqwest::Client;
 use std::time::Duration;
 
 const ENTE_API_ENDPOINT: &str = "https://api.ente.io";
@@ -13,15 +15,13 @@ pub struct ApiClient {
 
 impl ApiClient {
     pub fn new(base_url: Option<String>) -> Result<Self> {
-        let client = Client::builder()
-            .timeout(Duration::from_secs(30))
-            .build()?;
-            
+        let client = Client::builder().timeout(Duration::from_secs(30)).build()?;
+
         Ok(Self {
             client,
             base_url: base_url.unwrap_or_else(|| ENTE_API_ENDPOINT.to_string()),
         })
     }
-    
+
     // TODO: Implement API methods
 }

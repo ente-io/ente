@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use crate::Result;
 use sled::Db;
 use std::path::Path;
@@ -11,6 +13,6 @@ impl Storage {
         let db = sled::open(path)?;
         Ok(Self { db })
     }
-    
+
     // TODO: Implement storage methods
 }

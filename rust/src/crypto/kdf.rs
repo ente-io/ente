@@ -14,7 +14,7 @@ pub fn derive_login_key(key_enc_key: &[u8]) -> Result<Vec<u8>> {
         LOGIN_SUB_KEY_ID,
         LOGIN_SUB_KEY_LEN,
     )?;
-    
+
     // Return the first 16 bytes of the derived key
     Ok(sub_key[..16].to_vec())
 }
@@ -28,8 +28,8 @@ fn derive_sub_key(
 ) -> Result<Vec<u8>> {
     const CRYPTO_KDF_BLAKE2B_BYTES_MIN: usize = 16;
     const CRYPTO_KDF_BLAKE2B_BYTES_MAX: usize = 64;
-    
-    if sub_key_length < CRYPTO_KDF_BLAKE2B_BYTES_MIN || sub_key_length > CRYPTO_KDF_BLAKE2B_BYTES_MAX {
+
+    if !(CRYPTO_KDF_BLAKE2B_BYTES_MIN..=CRYPTO_KDF_BLAKE2B_BYTES_MAX).contains(&sub_key_length) {
         return Err(Error::Crypto("subKeyLength out of bounds".into()));
     }
 
@@ -45,14 +45,11 @@ fn derive_sub_key(
     // Create output buffer
     let mut out = vec![0u8; sub_key_length];
 
-    // Initialize Blake2b state with salt and personalization
-    let mut state = std::mem::MaybeUninit::<sodium::crypto_generichash_blake2b_state>::uninit();
-    
     let result = unsafe {
         sodium::crypto_generichash_blake2b_salt_personal(
             out.as_mut_ptr(),
             sub_key_length,
-            std::ptr::null(),  // No input data, just using key, salt, and personalization
+            std::ptr::null(), // No input data, just using key, salt, and personalization
             0,
             master_key.as_ptr(),
             master_key.len(),

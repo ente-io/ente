@@ -1,8 +1,7 @@
 use crate::Result;
-use base64::{engine::general_purpose::STANDARD as BASE64, Engine};
+use base64::{Engine, engine::general_purpose::STANDARD as BASE64};
 use libsodium_sys as sodium;
 use std::sync::Once;
-use zeroize::Zeroize;
 
 mod argon;
 mod chacha;
@@ -16,11 +15,9 @@ static INIT: Once = Once::new();
 
 /// Initialize libsodium. Must be called before any crypto operations.
 pub fn init() -> Result<()> {
-    INIT.call_once(|| {
-        unsafe {
-            if sodium::sodium_init() < 0 {
-                panic!("Failed to initialize libsodium");
-            }
+    INIT.call_once(|| unsafe {
+        if sodium::sodium_init() < 0 {
+            panic!("Failed to initialize libsodium");
         }
     });
     Ok(())

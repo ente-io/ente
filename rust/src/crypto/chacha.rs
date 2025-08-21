@@ -19,7 +19,8 @@ pub fn decrypt_chacha(ciphertext: &[u8], nonce: &[u8], key: &[u8]) -> Result<Vec
         )));
     }
 
-    let mut plaintext = vec![0u8; ciphertext.len() - sodium::crypto_aead_xchacha20poly1305_ietf_ABYTES as usize];
+    let mut plaintext =
+        vec![0u8; ciphertext.len() - sodium::crypto_aead_xchacha20poly1305_ietf_ABYTES as usize];
     let mut plaintext_len: u64 = 0;
 
     let result = unsafe {
@@ -37,7 +38,9 @@ pub fn decrypt_chacha(ciphertext: &[u8], nonce: &[u8], key: &[u8]) -> Result<Vec
     };
 
     if result != 0 {
-        return Err(Error::Crypto("Failed to decrypt with ChaCha20-Poly1305".into()));
+        return Err(Error::Crypto(
+            "Failed to decrypt with ChaCha20-Poly1305".into(),
+        ));
     }
 
     plaintext.truncate(plaintext_len as usize);
@@ -62,7 +65,8 @@ pub fn encrypt_chacha(plaintext: &[u8], nonce: &[u8], key: &[u8]) -> Result<Vec<
         )));
     }
 
-    let mut ciphertext = vec![0u8; plaintext.len() + sodium::crypto_aead_xchacha20poly1305_ietf_ABYTES as usize];
+    let mut ciphertext =
+        vec![0u8; plaintext.len() + sodium::crypto_aead_xchacha20poly1305_ietf_ABYTES as usize];
     let mut ciphertext_len: u64 = 0;
 
     let result = unsafe {
@@ -80,7 +84,9 @@ pub fn encrypt_chacha(plaintext: &[u8], nonce: &[u8], key: &[u8]) -> Result<Vec<
     };
 
     if result != 0 {
-        return Err(Error::Crypto("Failed to encrypt with ChaCha20-Poly1305".into()));
+        return Err(Error::Crypto(
+            "Failed to encrypt with ChaCha20-Poly1305".into(),
+        ));
     }
 
     ciphertext.truncate(ciphertext_len as usize);
