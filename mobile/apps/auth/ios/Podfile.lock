@@ -39,6 +39,8 @@ PODS:
   - DKPhotoGallery/Resource (0.0.19):
     - SDWebImage
     - SwiftyGif
+  - ente_qr (0.0.1):
+    - Flutter
   - file_picker (0.0.1):
     - DKImagePickerController/PhotoGallery
     - Flutter
@@ -136,6 +138,7 @@ DEPENDENCIES:
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
   - cupertino_http (from `.symlinks/plugins/cupertino_http/darwin`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
+  - ente_qr (from `.symlinks/plugins/ente_qr/ios`)
   - file_picker (from `.symlinks/plugins/file_picker/ios`)
   - file_saver (from `.symlinks/plugins/file_saver/ios`)
   - fk_user_agent (from `.symlinks/plugins/fk_user_agent/ios`)
@@ -183,6 +186,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/cupertino_http/darwin"
   device_info_plus:
     :path: ".symlinks/plugins/device_info_plus/ios"
+  ente_qr:
+    :path: ".symlinks/plugins/ente_qr/ios"
   file_picker:
     :path: ".symlinks/plugins/file_picker/ios"
   file_saver:
@@ -243,6 +248,7 @@ SPEC CHECKSUMS:
   device_info_plus: c6fb39579d0f423935b0c9ce7ee2f44b71b9fce6
   DKImagePickerController: 946cec48c7873164274ecc4624d19e3da4c1ef3c
   DKPhotoGallery: b3834fecb755ee09a593d7c9e389d8b5d6deed60
+  ente_qr: f39434aa69ea0e71047b49316365b2737f8a20aa
   file_picker: b159e0c068aef54932bb15dc9fd1571818edaf49
   file_saver: 503e386464dbe118f630e17b4c2e1190fa0cf808
   fk_user_agent: 1f47ec39291e8372b1d692b50084b0d54103c545
