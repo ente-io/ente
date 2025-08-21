@@ -3,11 +3,13 @@ package io.ente.auth.ente_qr
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.annotation.NonNull
+import com.google.zxing.BarcodeFormat
 import com.google.zxing.BinaryBitmap
 import com.google.zxing.DecodeHintType
 import com.google.zxing.MultiFormatReader
+import com.google.zxing.NotFoundException
 import com.google.zxing.RGBLuminanceSource
-import com.google.zxing.Result
+import com.google.zxing.Result as ZXingResult
 import com.google.zxing.common.HybridBinarizer
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
@@ -71,7 +73,7 @@ class EnteQrPlugin: FlutterPlugin, MethodCallHandler {
         )
       }
 
-      val bitmap = BitmapFactory.decodeFile(imagePath)
+      var bitmap = BitmapFactory.decodeFile(imagePath)
       if (bitmap == null) {
         return mapOf(
           "success" to false,
@@ -79,30 +81,53 @@ class EnteQrPlugin: FlutterPlugin, MethodCallHandler {
         )
       }
 
-      val width = bitmap.width
-      val height = bitmap.height
-      val pixels = IntArray(width * height)
-      bitmap.getPixels(pixels, 0, width, 0, 0, width, height)
+      // Try multiple times with different image sizes like Aegis does
+      for (i in 0..2) {
+        if (i != 0) {
+          // Resize bitmap for subsequent attempts
+          val newWidth = bitmap.width / (i * 2)
+          val newHeight = bitmap.height / (i * 2)
+          if (newWidth > 0 && newHeight > 0) {
+            bitmap = Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
+          }
+        }
 
-      val source = RGBLuminanceSource(width, height, pixels)
-      val binaryBitmap = BinaryBitmap(HybridBinarizer(source))
+        try {
+          val width = bitmap.width
+          val height = bitmap.height
+          val pixels = IntArray(width * height)
+          bitmap.getPixels(pixels, 0, width, 0, 0, width, height)
 
-      val reader = MultiFormatReader()
-      val hints = EnumMap<DecodeHintType, Any>(DecodeHintType::class.java)
-      hints[DecodeHintType.TRY_HARDER] = true
-      hints[DecodeHintType.PURE_BARCODE] = false
-      reader.setHints(hints)
+          val source = RGBLuminanceSource(width, height, pixels)
+          val binaryBitmap = BinaryBitmap(HybridBinarizer(source))
 
-      val qrResult: Result = reader.decode(binaryBitmap)
-      
+          val reader = MultiFormatReader()
+          val hints = HashMap<DecodeHintType, Any>()
+          hints[DecodeHintType.POSSIBLE_FORMATS] = listOf(BarcodeFormat.QR_CODE)
+          hints[DecodeHintType.TRY_HARDER] = true
+          hints[DecodeHintType.ALSO_INVERTED] = true
+          reader.setHints(hints)
+
+          val qrResult: ZXingResult = reader.decode(binaryBitmap)
+          
+          return mapOf(
+            "success" to true,
+            "content" to qrResult.text
+          )
+        } catch (e: NotFoundException) {
+          // Continue to next iteration
+          continue
+        }
+      }
+
       return mapOf(
-        "success" to true,
-        "content" to qrResult.text
+        "success" to false,
+        "error" to "No QR code found in image"
       )
     } catch (e: Exception) {
       return mapOf(
         "success" to false,
-        "error" to "No QR code found in image or unable to read: ${e.message}"
+        "error" to "Error scanning QR code: ${e.message}"
       )
     }
   }
