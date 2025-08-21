@@ -35,7 +35,7 @@ class CircularIconButton extends StatelessWidget {
               height: size,
               width: size,
               decoration: BoxDecoration(
-                color: isSelected 
+                color: isSelected
                     ? Theme.of(context)
                         .colorScheme
                         .imageEditorPrimaryColor

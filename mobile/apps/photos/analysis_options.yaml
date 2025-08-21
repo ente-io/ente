@@ -3,7 +3,6 @@
 # use "flutter analyze ." or "dart  analyze ." for running lint checks
 
 include: package:flutter_lints/flutter.yaml
-
 linter:
   rules:
     # Ref https://github.com/flutter/packages/blob/master/packages/flutter_lints/lib/flutter.yaml
