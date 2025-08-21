@@ -1,2 +1,2 @@
-- For commits:
-- Keep the co-author line, remove the promotional link
+- Must pass ../.github/workflows/rust-lint.yml
+- Commits: Keep the co-author line, remove the promotional link
