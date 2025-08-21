@@ -1786,6 +1786,11 @@
       ]
     },
     {
+  "title": "VHV",
+  "slug": "vhv", 
+  "altNames": ["VHV", "VHV Versicherung"]
+    },
+    {
       "title": "Vikunja"
     },
     {
