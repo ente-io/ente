@@ -1,6 +1,6 @@
 name: ente_auth
 description: ente two-factor authenticator
-version: 4.4.6+446
+version: 4.4.7+447
 publish_to: none
 
 environment:
@@ -41,6 +41,8 @@ dependencies:
     path: ../../packages/logging
   ente_network:
     path: ../../packages/network
+  ente_qr:
+    path: plugins/qr
   ente_strings:
     path: ../../packages/strings
   ente_ui:
@@ -131,7 +133,6 @@ dependencies:
   win32: ^5.1.1
   window_manager: ^0.5.0
   xdg_directories: ^1.0.4
-  zxing2: ^0.2.4
 
 dev_dependencies:
   build_runner: ^2.1.11
