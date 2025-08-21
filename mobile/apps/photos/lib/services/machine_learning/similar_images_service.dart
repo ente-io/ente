@@ -88,6 +88,13 @@ class SimilarImagesService {
 
     // Load cached data
     final SimilarFilesCache? cachedData = await _readCachedSimilarFiles();
+    if (cachedData == null) {
+      _logger.warning("No cached similar files found");
+    } else {
+      _logger.info(
+        "Cached similar files found with ${cachedData.similarFilesJsonStringList.length} groups",
+      );
+    }
 
     // Determine if we need full refresh
     bool needsFullRefresh = false;
@@ -164,6 +171,7 @@ class SimilarImagesService {
     double distanceThreshold,
     bool exact,
   ) async {
+    _logger.info("Performing incremental update for similar files");
     final existingGroups = await cachedData.similarFilesList();
     final cachedFileIDs = cachedData.allCheckedFileIDs;
     final currentFileIDsSet = currentFileIDs.map((id) => id.toInt()).toSet();
@@ -300,6 +308,7 @@ class SimilarImagesService {
     double distanceThreshold,
     bool exact,
   ) async {
+    _logger.info("Performing full search for similar files");
     final w = (kDebugMode ? EnteWatch('getSimilarFiles') : null)?..start();
     // Run bulk vector search
     final (keys, vectorKeys, distances) =
