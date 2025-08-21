@@ -1,0 +1,2 @@
+- For commits:
+- Keep the co-author line, remove the promotional link
