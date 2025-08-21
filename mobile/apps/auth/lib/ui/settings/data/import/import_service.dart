@@ -4,6 +4,7 @@ import 'package:ente_auth/ui/settings/data/import/encrypted_ente_import.dart';
 import 'package:ente_auth/ui/settings/data/import/google_auth_import.dart';
 import 'package:ente_auth/ui/settings/data/import/lastpass_import.dart';
 import 'package:ente_auth/ui/settings/data/import/plain_text_import.dart';
+import 'package:ente_auth/ui/settings/data/import/proton_import.dart';
 import 'package:ente_auth/ui/settings/data/import/raivo_plain_text_import.dart';
 import 'package:ente_auth/ui/settings/data/import/two_fas_import.dart';
 import 'package:ente_auth/ui/settings/data/import_page.dart';
@@ -42,6 +43,9 @@ class ImportService {
         break;
       case ImportType.lastpass:
         await showLastpassImportInstruction(context);
+        break;
+      case ImportType.proton:
+        await showProtonImportInstruction(context);
         break;
     }
   }

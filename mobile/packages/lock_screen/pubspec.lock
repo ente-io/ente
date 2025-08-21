@@ -201,7 +201,7 @@ packages:
     source: path
     version: "1.0.0"
   ente_base:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       path: "../base"
       relative: true
@@ -231,14 +231,14 @@ packages:
     source: path
     version: "1.0.0"
   ente_logging:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       path: "../logging"
       relative: true
     source: path
     version: "1.0.0"
   ente_network:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       path: "../network"
       relative: true
