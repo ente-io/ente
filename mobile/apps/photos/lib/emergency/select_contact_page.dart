@@ -66,7 +66,7 @@ class _AddContactPage extends State<AddContactPage> {
       resizeToAvoidBottomInset: isKeypadOpen,
       appBar: AppBar(
         title: Text(
-          S.of(context).addTrustedContact,
+          AppLocalizations.of(context).addTrustedContact,
         ),
       ),
       body: Column(
@@ -77,7 +77,7 @@ class _AddContactPage extends State<AddContactPage> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
-              S.of(context).addANewEmail,
+              AppLocalizations.of(context).addANewEmail,
               style: enteTextTheme.small
                   .copyWith(color: enteColorScheme.textMuted),
             ),
@@ -97,7 +97,8 @@ class _AddContactPage extends State<AddContactPage> {
                   children: [
                     !isEmailListEmpty
                         ? MenuSectionTitle(
-                            title: S.of(context).orPickAnExistingOne,
+                            title: AppLocalizations.of(context)
+                                .orPickAnExistingOne,
                           )
                         : const SizedBox.shrink(),
                     Expanded(
@@ -109,7 +110,8 @@ class _AddContactPage extends State<AddContactPage> {
                                 vertical: 8.0,
                               ),
                               child: MenuSectionDescriptionWidget(
-                                content: S.of(context).whyAddTrustContact,
+                                content: AppLocalizations.of(context)
+                                    .whyAddTrustContact,
                               ),
                             );
                           }
@@ -188,12 +190,14 @@ class _AddContactPage extends State<AddContactPage> {
                                 selectedEmail == '' ? _email : selectedEmail;
                             final choiceResult = await showChoiceActionSheet(
                               context,
-                              title: S.of(context).warning,
-                              body: S.of(context).confirmAddingTrustedContact(
-                                    emailToAdd,
-                                    30,
-                                  ),
-                              firstButtonLabel: S.of(context).proceed,
+                              title: AppLocalizations.of(context).warning,
+                              body: AppLocalizations.of(context)
+                                  .confirmAddingTrustedContact(
+                                emailToAdd,
+                                30,
+                              ),
+                              firstButtonLabel:
+                                  AppLocalizations.of(context).proceed,
                               isCritical: true,
                             );
                             if (choiceResult != null &&
@@ -208,8 +212,9 @@ class _AddContactPage extends State<AddContactPage> {
                                 _logger.severe('Failed to add contact', e);
                                 await showErrorDialog(
                                   context,
-                                  S.of(context).error,
-                                  S.of(context).somethingWentWrong,
+                                  AppLocalizations.of(context).error,
+                                  AppLocalizations.of(context)
+                                      .somethingWentWrong,
                                 );
                               }
                             }
@@ -221,8 +226,8 @@ class _AddContactPage extends State<AddContactPage> {
                       if ((selectedEmail == '' && !_emailIsValid)) {
                         await showErrorDialog(
                           context,
-                          S.of(context).invalidEmailAddress,
-                          S.of(context).enterValidEmail,
+                          AppLocalizations.of(context).invalidEmailAddress,
+                          AppLocalizations.of(context).enterValidEmail,
                         );
                         return;
                       }
@@ -239,7 +244,7 @@ class _AddContactPage extends State<AddContactPage> {
                       );
                     },
                     child: Text(
-                      S.of(context).verifyIDLabel,
+                      AppLocalizations.of(context).verifyIDLabel,
                       textAlign: TextAlign.center,
                       style: enteTextTheme.smallMuted.copyWith(
                         decoration: TextDecoration.underline,
@@ -278,7 +283,7 @@ class _AddContactPage extends State<AddContactPage> {
         ),
         fillColor: getEnteColorScheme(context).fillFaint,
         filled: true,
-        hintText: S.of(context).enterEmail,
+        hintText: AppLocalizations.of(context).enterEmail,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 14,

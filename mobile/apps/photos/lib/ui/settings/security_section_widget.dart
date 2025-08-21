@@ -61,7 +61,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(
-      title: S.of(context).security,
+      title: AppLocalizations.of(context).security,
       selectionOptionsWidget: _getSectionOptions(context),
       leadingIcon: Icons.local_police_outlined,
     );
@@ -76,7 +76,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           sectionOptionSpacing,
           MenuItemWidget(
             captionedTextWidget: CaptionedTextWidget(
-              title: S.of(context).twofactor,
+              title: AppLocalizations.of(context).twofactor,
             ),
             trailingWidget: ToggleSwitchWidget(
               value: () => UserService.instance.hasEnabledTwoFactor(),
@@ -85,7 +85,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                     .instance
                     .requestLocalAuthentication(
                   context,
-                  S.of(context).authToConfigureTwofactorAuthentication,
+                  AppLocalizations.of(context)
+                      .authToConfigureTwofactorAuthentication,
                 );
                 final isTwoFactorEnabled =
                     UserService.instance.hasEnabledTwoFactor();
@@ -105,7 +106,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           sectionOptionSpacing,
           MenuItemWidget(
             captionedTextWidget: CaptionedTextWidget(
-              title: S.of(context).emailVerificationToggle,
+              title: AppLocalizations.of(context).emailVerificationToggle,
             ),
             trailingWidget: ToggleSwitchWidget(
               value: () => UserService.instance.hasEmailMFAEnabled(),
@@ -114,7 +115,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                     .instance
                     .requestLocalAuthentication(
                   context,
-                  S.of(context).authToChangeEmailVerificationSetting,
+                  AppLocalizations.of(context)
+                      .authToChangeEmailVerificationSetting,
                 );
                 final isEmailMFAEnabled =
                     UserService.instance.hasEmailMFAEnabled();
@@ -136,7 +138,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               final hasAuthenticated = await LocalAuthenticationService.instance
                   .requestLocalAuthentication(
                 context,
-                S.of(context).authToViewPasskey,
+                AppLocalizations.of(context).authToViewPasskey,
               );
               if (hasAuthenticated) {
                 await onPasskeyClick(context);
@@ -150,7 +152,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     children.addAll([
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
-          title: S.of(context).appLock,
+          title: AppLocalizations.of(context).appLock,
         ),
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
@@ -159,7 +161,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           if (await LocalAuthentication().isDeviceSupported()) {
             final bool result = await requestAuthentication(
               context,
-              S.of(context).authToChangeLockscreenSetting,
+              AppLocalizations.of(context).authToChangeLockscreenSetting,
             );
             if (result) {
               await Navigator.of(context).push(
@@ -173,8 +175,9 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           } else {
             await showErrorDialog(
               context,
-              S.of(context).noSystemLockFound,
-              S.of(context).toEnableAppLockPleaseSetupDevicePasscodeOrScreen,
+              AppLocalizations.of(context).noSystemLockFound,
+              AppLocalizations.of(context)
+                  .toEnableAppLockPleaseSetupDevicePasscodeOrScreen,
             );
           }
         },
@@ -182,7 +185,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
       sectionOptionSpacing,
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
-          title: S.of(context).viewActiveSessions,
+          title: AppLocalizations.of(context).viewActiveSessions,
         ),
         pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
@@ -192,7 +195,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           final hasAuthenticated = await LocalAuthenticationService.instance
               .requestLocalAuthentication(
             context,
-            S.of(context).authToViewYourActiveSessions,
+            AppLocalizations.of(context).authToViewYourActiveSessions,
           );
           if (hasAuthenticated) {
             unawaited(
@@ -216,14 +219,14 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
 
   Future<void> _disableTwoFactor() async {
     final AlertDialog alert = AlertDialog(
-      title: Text(S.of(context).disableTwofactor),
+      title: Text(AppLocalizations.of(context).disableTwofactor),
       content: Text(
-        S.of(context).confirm2FADisable,
+        AppLocalizations.of(context).confirm2FADisable,
       ),
       actions: [
         TextButton(
           child: Text(
-            S.of(context).no,
+            AppLocalizations.of(context).no,
             style: TextStyle(
               color: Theme.of(context).colorScheme.greenAlternative,
             ),
@@ -234,7 +237,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         ),
         TextButton(
           child: Text(
-            S.of(context).yes,
+            AppLocalizations.of(context).yes,
             style: const TextStyle(
               color: Colors.red,
             ),
@@ -300,7 +303,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
       }
       await UserService.instance.updateEmailMFA(isEnabled);
     } catch (e) {
-      showToast(context, S.of(context).somethingWentWrong);
+      showToast(context, AppLocalizations.of(context).somethingWentWrong);
     }
   }
 }

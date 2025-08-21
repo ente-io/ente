@@ -75,7 +75,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: Text(S.of(context).deduplicateFiles),
+        title: Text(AppLocalizations.of(context).deduplicateFiles),
         actions: _duplicates.isNotEmpty ? [_getSortMenu()] : null,
       ),
       body: _getBody(),
@@ -164,10 +164,10 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       String text = key.toString();
       switch (key) {
         case SortKey.count:
-          text = S.of(context).count;
+          text = AppLocalizations.of(context).count;
           break;
         case SortKey.size:
-          text = S.of(context).totalSize;
+          text = AppLocalizations.of(context).totalSize;
           break;
       }
       return Text(
@@ -246,7 +246,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                       width: double.infinity,
                       child: ButtonWidget(
                         labelText:
-                            "${S.of(context).deleteItemCount(fileCount)} (${formatBytes(totalSize)})",
+                            "${AppLocalizations.of(context).deleteItemCount(fileCount)} (${formatBytes(totalSize)})",
                         buttonType: ButtonType.critical,
                         onTap: () async {
                           try {
@@ -350,10 +350,10 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  S.of(context).duplicateItemsGroup(
-                        duplicates.files.length,
-                        formatBytes(duplicates.size),
-                      ),
+                  AppLocalizations.of(context).duplicateItemsGroup(
+                    duplicates.files.length,
+                    formatBytes(duplicates.size),
+                  ),
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
                 !selectedGrids.contains(itemIndex)

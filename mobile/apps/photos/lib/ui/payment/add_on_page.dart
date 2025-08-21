@@ -21,9 +21,10 @@ class AddOnPage extends StatelessWidget {
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: S.of(context).addOns,
+              title: AppLocalizations.of(context).addOns,
             ),
-            flexibleSpaceCaption: S.of(context).addOnPageSubtitle,
+            flexibleSpaceCaption:
+                AppLocalizations.of(context).addOnPageSubtitle,
             actionIcons: [
               IconButtonWidget(
                 icon: Icons.close_outlined,
@@ -88,17 +89,17 @@ class AddOnViewSection extends StatelessWidget {
             ),
             if (bonus.validTill != 0)
               Text(
-                S.of(context).validTill(
-                      DateFormat.yMMMd(
-                        Localizations.localeOf(context).languageCode,
+                AppLocalizations.of(context).validTill(
+                  DateFormat.yMMMd(
+                    Localizations.localeOf(context).languageCode,
+                  )
+                      .format(
+                        DateTime.fromMicrosecondsSinceEpoch(
+                          bonus.validTill,
+                        ),
                       )
-                          .format(
-                            DateTime.fromMicrosecondsSinceEpoch(
-                              bonus.validTill,
-                            ),
-                          )
-                          .toString(),
-                    ),
+                      .toString(),
+                ),
                 style: textStyle.body.copyWith(
                   color: colorScheme.textMuted,
                 ),

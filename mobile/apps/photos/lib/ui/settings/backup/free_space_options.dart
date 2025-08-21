@@ -52,7 +52,7 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: S.of(context).freeUpSpace,
+              title: AppLocalizations.of(context).freeUpSpace,
             ),
             actionIcons: [
               IconButtonWidget(
@@ -82,7 +82,8 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                               children: [
                                 MenuItemWidget(
                                   captionedTextWidget: CaptionedTextWidget(
-                                    title: S.of(context).freeUpDeviceSpace,
+                                    title: AppLocalizations.of(context)
+                                        .freeUpDeviceSpace,
                                   ),
                                   menuItemColor: colorScheme.fillFaint,
                                   trailingWidget: Icon(
@@ -109,8 +110,9 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                                       // ignore: unawaited_futures
                                       showErrorDialog(
                                         context,
-                                        S.of(context).allClear,
-                                        S.of(context).noDeviceThatCanBeDeleted,
+                                        AppLocalizations.of(context).allClear,
+                                        AppLocalizations.of(context)
+                                            .noDeviceThatCanBeDeleted,
                                       );
                                     } else {
                                       final bool? result = await routeToPage(
@@ -124,14 +126,16 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                                   },
                                 ),
                                 MenuSectionDescriptionWidget(
-                                  content: S.of(context).freeUpDeviceSpaceDesc,
+                                  content: AppLocalizations.of(context)
+                                      .freeUpDeviceSpaceDesc,
                                 ),
                                 const SizedBox(
                                   height: 24,
                                 ),
                                 MenuItemWidget(
                                   captionedTextWidget: CaptionedTextWidget(
-                                    title: S.of(context).removeDuplicates,
+                                    title: AppLocalizations.of(context)
+                                        .removeDuplicates,
                                   ),
                                   menuItemColor: colorScheme.fillFaint,
                                   trailingWidget: Icon(
@@ -160,9 +164,9 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                                       unawaited(
                                         showErrorDialog(
                                           context,
-                                          S.of(context).noDuplicates,
-                                          S
-                                              .of(context)
+                                          AppLocalizations.of(context)
+                                              .noDuplicates,
+                                          AppLocalizations.of(context)
                                               .youveNoDuplicateFilesThatCanBeCleared,
                                         ),
                                       );
@@ -183,7 +187,8 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                                 Align(
                                   alignment: Alignment.centerLeft,
                                   child: MenuSectionDescriptionWidget(
-                                    content: S.of(context).removeDuplicatesDesc,
+                                    content: AppLocalizations.of(context)
+                                        .removeDuplicatesDesc,
                                   ),
                                 ),
                                 const SizedBox(
@@ -226,7 +231,8 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                                   ),
                                 MenuItemWidget(
                                   captionedTextWidget: CaptionedTextWidget(
-                                    title: S.of(context).viewLargeFiles,
+                                    title: AppLocalizations.of(context)
+                                        .viewLargeFiles,
                                   ),
                                   menuItemColor: colorScheme.fillFaint,
                                   trailingWidget: Icon(
@@ -245,14 +251,16 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                                   },
                                 ),
                                 MenuSectionDescriptionWidget(
-                                  content: S.of(context).viewLargeFilesDesc,
+                                  content: AppLocalizations.of(context)
+                                      .viewLargeFilesDesc,
                                 ),
                                 const SizedBox(
                                   height: 24,
                                 ),
                                 MenuItemWidget(
                                   captionedTextWidget: CaptionedTextWidget(
-                                    title: S.of(context).manageDeviceStorage,
+                                    title: AppLocalizations.of(context)
+                                        .manageDeviceStorage,
                                   ),
                                   menuItemColor: colorScheme.fillFaint,
                                   trailingWidget: Icon(
@@ -272,8 +280,8 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                                 Align(
                                   alignment: Alignment.centerLeft,
                                   child: MenuSectionDescriptionWidget(
-                                    content:
-                                        S.of(context).manageDeviceStorageDesc,
+                                    content: AppLocalizations.of(context)
+                                        .manageDeviceStorageDesc,
                                   ),
                                 ),
                               ],
@@ -300,37 +308,43 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
       );
       showChoiceDialog(
         context,
-        title: S.of(context).success,
-        body:
-            S.of(context).youHaveSuccessfullyFreedUp(formatBytes(status.size)),
-        firstButtonLabel: S.of(context).rateUs,
+        title: AppLocalizations.of(context).success,
+        body: AppLocalizations.of(context)
+            .youHaveSuccessfullyFreedUp(formatBytes(status.size)),
+        firstButtonLabel: AppLocalizations.of(context).rateUs,
         firstButtonOnTap: () async {
           await updateService.launchReviewUrl();
         },
         firstButtonType: ButtonType.primary,
-        secondButtonLabel: S.of(context).ok,
+        secondButtonLabel: AppLocalizations.of(context).ok,
         secondButtonOnTap: () async {
           if (Platform.isIOS) {
-            showToast(context, S.of(context).remindToEmptyDeviceTrash);
+            showToast(
+              context,
+              AppLocalizations.of(context).remindToEmptyDeviceTrash,
+            );
           }
         },
       );
     } else {
       showDialogWidget(
         context: context,
-        title: S.of(context).success,
-        body:
-            S.of(context).youHaveSuccessfullyFreedUp(formatBytes(status.size)),
+        title: AppLocalizations.of(context).success,
+        body: AppLocalizations.of(context)
+            .youHaveSuccessfullyFreedUp(formatBytes(status.size)),
         icon: Icons.download_done_rounded,
         isDismissible: true,
         buttons: [
           ButtonWidget(
             buttonType: ButtonType.neutral,
-            labelText: S.of(context).ok,
+            labelText: AppLocalizations.of(context).ok,
             isInAlert: true,
             onTap: () async {
               if (Platform.isIOS) {
-                showToast(context, S.of(context).remindToEmptyDeviceTrash);
+                showToast(
+                  context,
+                  AppLocalizations.of(context).remindToEmptyDeviceTrash,
+                );
               }
             },
           ),
@@ -342,21 +356,21 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
   void _showDuplicateFilesDeletedDialog(DeduplicationResult result) {
     showChoiceDialog(
       context,
-      title: S.of(context).sparkleSuccess,
-      body: S.of(context).duplicateFileCountWithStorageSaved(
-            result.count,
-            formatBytes(result.size),
-          ),
-      firstButtonLabel: S.of(context).rateUs,
+      title: AppLocalizations.of(context).sparkleSuccess,
+      body: AppLocalizations.of(context).duplicateFileCountWithStorageSaved(
+        result.count,
+        formatBytes(result.size),
+      ),
+      firstButtonLabel: AppLocalizations.of(context).rateUs,
       firstButtonOnTap: () async {
         await updateService.launchReviewUrl();
       },
       firstButtonType: ButtonType.primary,
-      secondButtonLabel: S.of(context).ok,
+      secondButtonLabel: AppLocalizations.of(context).ok,
       secondButtonOnTap: () async {
         showShortToast(
           context,
-          S.of(context).remindToEmptyEnteTrash,
+          AppLocalizations.of(context).remindToEmptyEnteTrash,
         );
       },
     );

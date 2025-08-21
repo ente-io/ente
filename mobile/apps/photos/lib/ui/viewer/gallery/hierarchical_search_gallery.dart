@@ -175,8 +175,8 @@ class _HierarchicalSearchGalleryState extends State<HierarchicalSearchGallery> {
                                 _firstUnnamedAppliedFaceFilter!.clusterId,
                           ),
                           actionIcon: Icons.add_outlined,
-                          text: S.of(context).savePerson,
-                          subText: S.of(context).findThemQuickly,
+                          text: AppLocalizations.of(context).savePerson,
+                          subText: AppLocalizations.of(context).findThemQuickly,
                           onTap: () async {
                             final result = await showAssignPersonAction(
                               context,

@@ -19,8 +19,8 @@ class HeaderErrorWidget extends StatelessWidget {
         child: NotificationWidget(
           startIcon: Icons.info_rounded,
           actionIcon: Icons.arrow_forward,
-          text: S.of(context).subscribe,
-          subText: S.of(context).yourSubscriptionHasExpired,
+          text: AppLocalizations.of(context).subscribe,
+          subText: AppLocalizations.of(context).yourSubscriptionHasExpired,
           onTap: () async => {
             await routeToPage(
               context,
@@ -36,8 +36,8 @@ class HeaderErrorWidget extends StatelessWidget {
         child: NotificationWidget(
           startIcon: Icons.disc_full_rounded,
           actionIcon: Icons.arrow_forward,
-          text: S.of(context).upgrade,
-          subText: S.of(context).storageLimitExceeded,
+          text: AppLocalizations.of(context).upgrade,
+          subText: AppLocalizations.of(context).storageLimitExceeded,
           onTap: () async => {
             await routeToPage(
               context,
@@ -53,14 +53,14 @@ class HeaderErrorWidget extends StatelessWidget {
         child: NotificationWidget(
           startIcon: Icons.error_outline_rounded,
           actionIcon: Icons.arrow_forward,
-          text: S.of(context).backupFailed,
-          subText: S.of(context).couldNotBackUpTryLater,
+          text: AppLocalizations.of(context).backupFailed,
+          subText: AppLocalizations.of(context).couldNotBackUpTryLater,
           onTap: () async => {
             sendLogs(
               context,
-              S.of(context).raiseTicket,
+              AppLocalizations.of(context).raiseTicket,
               "support@ente.io",
-              subject: S.of(context).backupFailed,
+              subject: AppLocalizations.of(context).backupFailed,
             ),
           },
         ),

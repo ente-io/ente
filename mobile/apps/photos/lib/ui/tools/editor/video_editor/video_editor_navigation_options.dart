@@ -28,7 +28,7 @@ class VideoEditorNavigationOptions extends StatelessWidget {
             const SizedBox(width: 28),
             TextButton(
               onPressed: onPrimaryPressed?.call ?? Navigator.of(context).pop,
-              child: Text(primaryText ?? S.of(context).cancel),
+              child: Text(primaryText ?? AppLocalizations.of(context).cancel),
             ),
             const Spacer(),
             TextButton(

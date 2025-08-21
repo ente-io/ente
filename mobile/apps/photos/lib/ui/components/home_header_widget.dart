@@ -64,15 +64,15 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
                 // ignore: unawaited_futures
                 showChoiceActionSheet(
                   context,
-                  title: S.of(context).preserveMore,
-                  body: S.of(context).grantFullAccessPrompt,
-                  firstButtonLabel: S.of(context).openSettings,
+                  title: AppLocalizations.of(context).preserveMore,
+                  body: AppLocalizations.of(context).grantFullAccessPrompt,
+                  firstButtonLabel: AppLocalizations.of(context).openSettings,
                   firstButtonOnTap: () async {
                     await PhotoManager.openSetting();
                   },
                   secondButtonLabel: hasGrantedLimit
-                      ? S.of(context).selectMorePhotos
-                      : S.of(context).cancel,
+                      ? AppLocalizations.of(context).selectMorePhotos
+                      : AppLocalizations.of(context).cancel,
                   secondButtonOnTap: () async {
                     if (hasGrantedLimit) {
                       await PhotoManager.presentLimited();

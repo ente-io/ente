@@ -254,9 +254,6 @@ dependency_overrides:
   watcher: ^1.1.0
   win32: "5.10.1"
 
-flutter_intl:
-  enabled: true
-
 dev_dependencies:
   build_runner: ^2.4.7
   flutter_driver:

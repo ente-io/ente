@@ -97,8 +97,8 @@ class _SmartAlbumsStatusWidgetState extends State<SmartAlbumsStatusWidget>
                 const SizedBox(width: 8),
                 Text(
                   (_syncingCollection?.$2 ?? true)
-                      ? S.of(context).addingPhotos
-                      : S.of(context).gettingReady,
+                      ? AppLocalizations.of(context).addingPhotos
+                      : AppLocalizations.of(context).gettingReady,
                   style: textTheme.small.copyWith(color: Colors.white),
                 ),
               ],

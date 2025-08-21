@@ -87,7 +87,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
             child: Container(
               padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
               child: Text(
-                S.of(context).selectFoldersForBackup,
+                AppLocalizations.of(context).selectFoldersForBackup,
                 textAlign: TextAlign.left,
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurface,
@@ -101,7 +101,8 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
           Padding(
             padding: const EdgeInsets.only(left: 24, right: 48),
             child: Text(
-              S.of(context).selectedFoldersWillBeEncryptedAndBackedUp,
+              AppLocalizations.of(context)
+                  .selectedFoldersWillBeEncryptedAndBackedUp,
               style:
                   Theme.of(context).textTheme.bodySmall!.copyWith(height: 1.3),
             ),
@@ -120,8 +121,8 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                       child: Text(
                         _selectedDevicePathIDs.length ==
                                 _allDevicePathIDs.length
-                            ? S.of(context).unselectAll
-                            : S.of(context).selectAll,
+                            ? AppLocalizations.of(context).unselectAll
+                            : AppLocalizations.of(context).selectAll,
                         textAlign: TextAlign.right,
                         style: const TextStyle(
                           decoration: TextDecoration.underline,
@@ -175,8 +176,8 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                                 },
                       child: Text(
                         widget.isFirstBackup
-                            ? S.of(context).startBackup
-                            : S.of(context).backup,
+                            ? AppLocalizations.of(context).startBackup
+                            : AppLocalizations.of(context).backup,
                       ),
                     ),
                   ),
@@ -193,7 +194,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                           child: Padding(
                             padding: const EdgeInsets.only(bottom: 8),
                             child: Text(
-                              S.of(context).skip,
+                              AppLocalizations.of(context).skip,
                               style: Theme.of(context)
                                   .textTheme
                                   .bodySmall!
@@ -216,7 +217,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
   Future<void> updateFolderSettings() async {
     final dialog = createProgressDialog(
       context,
-      S.of(context).updatingFolderSelection,
+      AppLocalizations.of(context).updatingFolderSelection,
     );
     await dialog.show();
     try {
@@ -371,7 +372,8 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                       const Padding(padding: EdgeInsets.only(top: 2)),
                       Text(
                         (kDebugMode ? 'inApp: $importedCount : device ' : '') +
-                            S.of(context).itemCount(deviceCollection.count),
+                            AppLocalizations.of(context)
+                                .itemCount(deviceCollection.count),
                         textAlign: TextAlign.left,
                         style: TextStyle(
                           fontSize: 12,

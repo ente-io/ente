@@ -232,8 +232,8 @@ class _LockScreenPinState extends State<LockScreenPin> {
           ),
           Text(
             widget.isChangingLockScreenSettings
-                ? S.of(context).enterPin
-                : S.of(context).setNewPin,
+                ? AppLocalizations.of(context).enterPin
+                : AppLocalizations.of(context).setNewPin,
             style: textTheme.bodyBold,
           ),
           const Padding(padding: EdgeInsets.all(12)),

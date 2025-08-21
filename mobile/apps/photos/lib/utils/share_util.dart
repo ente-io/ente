@@ -269,7 +269,7 @@ Future<void> shareAlbumLinkWithPlaceholder(
 
   final dialog = createProgressDialog(
     context,
-    S.of(context).creatingLink,
+    AppLocalizations.of(context).creatingLink,
     isDismissible: true,
   );
   await dialog.show();

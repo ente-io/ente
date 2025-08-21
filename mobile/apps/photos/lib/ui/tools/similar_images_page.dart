@@ -856,7 +856,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         title: "Delete files", // TODO: lau: extract string
         body:
             "Are you sure you want to delete these files?", // TODO: lau: extract string
-        firstButtonLabel: S.of(context).delete,
+        firstButtonLabel: AppLocalizations.of(context).delete,
         isCritical: true,
         firstButtonOnTap: () async {
           try {

@@ -89,9 +89,10 @@ class AddPhotosPhotoWidget extends StatelessWidget {
                       children: [
                         BottomOfTitleBarWidget(
                           title: TitleBarTitleWidget(
-                            title: S.of(context).addMore,
+                            title: AppLocalizations.of(context).addMore,
                           ),
-                          caption: S.of(context).selectItemsToAdd,
+                          caption:
+                              AppLocalizations.of(context).selectItemsToAdd,
                           showCloseButton: true,
                         ),
                         Expanded(
@@ -127,7 +128,8 @@ class AddPhotosPhotoWidget extends StatelessWidget {
                                   key: ValueKey(value),
                                   // isDisabled: !value,
                                   buttonType: ButtonType.primary,
-                                  labelText: S.of(context).addSelected,
+                                  labelText:
+                                      AppLocalizations.of(context).addSelected,
                                   onTap: () async {
                                     final selectedFile = selectedFiles.files;
                                     final ca = CollectionActions(
@@ -149,7 +151,8 @@ class AddPhotosPhotoWidget extends StatelessWidget {
                           ButtonWidget(
                             buttonType: ButtonType.secondary,
                             buttonAction: ButtonAction.second,
-                            labelText: S.of(context).addFromDevice,
+                            labelText:
+                                AppLocalizations.of(context).addFromDevice,
                             onTap: () async {
                               await _onPickFromDeviceClicked(context);
                             },

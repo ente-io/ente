@@ -77,7 +77,7 @@ class UnCategorizedPage extends StatelessWidget {
       selectedFiles: _selectedFiles,
       sortAsyncFn: () => collection.pubMagicMetadata.asc ?? false,
       initialFiles: null,
-      albumName: S.of(context).uncategorized,
+      albumName: AppLocalizations.of(context).uncategorized,
     );
     return GalleryFilesState(
       child: InheritedSearchFilterDataWrapper(
@@ -93,7 +93,7 @@ class UnCategorizedPage extends StatelessWidget {
             preferredSize: const Size.fromHeight(90.0),
             child: GalleryAppBarWidget(
               appBarType,
-              S.of(context).uncategorized,
+              AppLocalizations.of(context).uncategorized,
               _selectedFiles,
               collection: collection,
             ),
