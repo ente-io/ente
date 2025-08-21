@@ -81,16 +81,14 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
     try {
       final fileName =
           path.basenameWithoutExtension(widget.originalFile.title!) +
-          "_edited_" +
-          DateTime.now().microsecondsSinceEpoch.toString() +
-          ".JPEG";
+              "_edited_" +
+              DateTime.now().microsecondsSinceEpoch.toString() +
+              ".JPEG";
       //Disabling notifications for assets changing to insert the file into
       //files db before triggering a sync.
       await PhotoManager.stopChangeNotify();
-      final AssetEntity newAsset = await (PhotoManager.editor.saveImage(
-        result,
-        filename: fileName,
-      ));
+      final AssetEntity newAsset =
+          await (PhotoManager.editor.saveImage(result, filename: fileName));
       final newFile = await ente.EnteFile.fromAsset(
         widget.originalFile.deviceFolder ?? '',
         newAsset,
@@ -119,9 +117,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
 
       // the index could be -1 if the files fetched doesn't contain the newly
       // edited files
-      int selectionIndex = files.indexWhere(
-        (file) => file.generatedID == newFile.generatedID,
-      );
+      int selectionIndex =
+          files.indexWhere((file) => file.generatedID == newFile.generatedID);
       if (selectionIndex == -1) {
         files.add(newFile);
         selectionIndex = files.length - 1;
@@ -182,7 +179,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
     final textTheme = getEnteTextTheme(context);
     return PopScope(
       canPop: false,
-      onPopInvokedWithResult: (didPop, _) {
+      onPopInvoked: (didPop) {
         if (didPop) return;
         editorKey.currentState?.disablePopScope = true;
         _showExitConfirmationDialog(context);
@@ -213,12 +210,10 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
               uiOverlayStyle: SystemUiOverlayStyle(
                 systemNavigationBarContrastEnforced: true,
                 systemNavigationBarColor: Colors.transparent,
-                statusBarBrightness: isLightMode
-                    ? Brightness.dark
-                    : Brightness.light,
-                statusBarIconBrightness: isLightMode
-                    ? Brightness.dark
-                    : Brightness.light,
+                statusBarBrightness:
+                    isLightMode ? Brightness.dark : Brightness.light,
+                statusBarIconBrightness:
+                    isLightMode ? Brightness.dark : Brightness.light,
               ),
               appBarBackgroundColor: colorScheme.backgroundBase,
               background: colorScheme.backgroundBase,
@@ -236,9 +231,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
               ),
               cropRotateEditor: CropRotateEditorTheme(
                 background: colorScheme.backgroundBase,
-                cropCornerColor: Theme.of(
-                  context,
-                ).colorScheme.imageEditorPrimaryColor,
+                cropCornerColor:
+                    Theme.of(context).colorScheme.imageEditorPrimaryColor,
               ),
               tuneEditor: TuneEditorTheme(
                 background: colorScheme.backgroundBase,
@@ -274,39 +268,38 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
             ),
             customWidgets: ImageEditorCustomWidgets(
               filterEditor: CustomWidgetsFilterEditor(
-                slider:
-                    (
-                      editorState,
-                      rebuildStream,
-                      value,
-                      onChanged,
-                      onChangeEnd,
-                    ) => ReactiveCustomWidget(
-                      builder: (context) {
-                        return const SizedBox.shrink();
-                      },
-                      stream: rebuildStream,
-                    ),
-                filterButton:
-                    (
-                      filter,
-                      isSelected,
-                      scaleFactor,
-                      onSelectFilter,
-                      editorImage,
-                      filterKey,
-                    ) {
-                      return ImageEditorFilterBar(
-                        filterModel: filter,
-                        isSelected: isSelected,
-                        onSelectFilter: () {
-                          onSelectFilter.call();
-                          editorKey.currentState?.setState(() {});
-                        },
-                        editorImage: editorImage,
-                        filterKey: filterKey,
-                      );
+                slider: (
+                  editorState,
+                  rebuildStream,
+                  value,
+                  onChanged,
+                  onChangeEnd,
+                ) =>
+                    ReactiveCustomWidget(
+                  builder: (context) {
+                    return const SizedBox.shrink();
+                  },
+                  stream: rebuildStream,
+                ),
+                filterButton: (
+                  filter,
+                  isSelected,
+                  scaleFactor,
+                  onSelectFilter,
+                  editorImage,
+                  filterKey,
+                ) {
+                  return ImageEditorFilterBar(
+                    filterModel: filter,
+                    isSelected: isSelected,
+                    onSelectFilter: () {
+                      onSelectFilter.call();
+                      editorKey.currentState?.setState(() {});
                     },
+                    editorImage: editorImage,
+                    filterKey: filterKey,
+                  );
+                },
                 appBar: (editor, rebuildStream) {
                   return ReactiveCustomAppbar(
                     builder: (context) {
@@ -362,10 +355,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                         child: StreamBuilder(
                           stream: rebuildStream,
                           builder: (context, snapshot) {
-                            final isHovered = editorKey
-                                .currentState!
-                                .layerInteractionManager
-                                .hoverRemoveBtn;
+                            final isHovered = editorKey.currentState!
+                                .layerInteractionManager.hoverRemoveBtn;
 
                             return AnimatedContainer(
                               key: key,
@@ -375,9 +366,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                               margin: const EdgeInsets.only(bottom: 24),
                               decoration: BoxDecoration(
                                 color: isHovered
-                                    ? colorScheme.warning400.withValues(
-                                        alpha: 0.8,
-                                      )
+                                    ? colorScheme.warning400.withOpacity(0.8)
                                     : Colors.white,
                                 shape: BoxShape.circle,
                               ),
@@ -388,9 +377,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                                   colorFilter: ColorFilter.mode(
                                     isHovered
                                         ? Colors.white
-                                        : colorScheme.warning400.withValues(
-                                            alpha: 0.8,
-                                          ),
+                                        : colorScheme.warning400
+                                            .withOpacity(0.8),
                                     BlendMode.srcIn,
                                   ),
                                 ),
@@ -539,13 +527,13 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                 },
                 bottomBar: (cropRotateEditor, rebuildStream) =>
                     ReactiveCustomWidget(
-                      stream: rebuildStream,
-                      builder: (_) => ImageEditorCropRotateBar(
-                        configs: cropRotateEditor.configs,
-                        callbacks: cropRotateEditor.callbacks,
-                        editor: cropRotateEditor,
-                      ),
-                    ),
+                  stream: rebuildStream,
+                  builder: (_) => ImageEditorCropRotateBar(
+                    configs: cropRotateEditor.configs,
+                    callbacks: cropRotateEditor.callbacks,
+                    editor: cropRotateEditor,
+                  ),
+                ),
               ),
             ),
             mainEditorConfigs: const MainEditorConfigs(enableZoom: true),

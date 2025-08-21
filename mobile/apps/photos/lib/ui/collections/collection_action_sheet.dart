@@ -38,7 +38,7 @@ enum CollectionActionType {
   shareCollection,
   addToHiddenAlbum,
   moveToHiddenCollection,
-  autoAddPeople,
+  autoAddPeople;
 }
 
 extension CollectionActionTypeExtension on CollectionActionType {
@@ -147,20 +147,19 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
   void initState() {
     super.initState();
     _showOnlyHiddenCollections = widget.actionType.isHiddenAction;
-    _enableSelection =
-        (widget.actionType == CollectionActionType.autoAddPeople &&
+    _enableSelection = (widget.actionType ==
+                CollectionActionType.autoAddPeople &&
             widget.selectedPeople != null) ||
         ((widget.actionType == CollectionActionType.addFiles ||
                 widget.actionType == CollectionActionType.addToHiddenAlbum) &&
             (widget.sharedFiles == null || widget.sharedFiles!.isEmpty));
-    _createNewAlbumSubscription = Bus.instance.on<CreateNewAlbumEvent>().listen(
-      (event) {
-        setState(() {
-          _recentlyCreatedCollections.insert(0, event.collection);
-          _selectedCollections.add(event.collection);
-        });
-      },
-    );
+    _createNewAlbumSubscription =
+        Bus.instance.on<CreateNewAlbumEvent>().listen((event) {
+      setState(() {
+        _recentlyCreatedCollections.insert(0, event.collection);
+        _selectedCollections.add(event.collection);
+      });
+    });
   }
 
   @override
@@ -174,14 +173,12 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
     final filesCount = widget.sharedFiles != null
         ? widget.sharedFiles!.length
         : widget.selectedPeople != null
-        ? widget.selectedPeople!.length
-        : widget.selectedFiles?.files.length ?? 0;
+            ? widget.selectedPeople!.length
+            : widget.selectedFiles?.files.length ?? 0;
     final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
     final isKeyboardUp = bottomInset > 100;
-    final double bottomPadding = max(
-      0,
-      bottomInset - (_enableSelection ? okButtonSize : 0),
-    );
+    final double bottomPadding =
+        max(0, bottomInset - (_enableSelection ? okButtonSize : 0));
     return Padding(
       padding: EdgeInsets.only(
         bottom: isKeyboardUp ? bottomPadding : 0,
@@ -279,12 +276,12 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
           isDisabled: _selectedCollections.isEmpty,
           onTap: () async {
             if (widget.selectedPeople != null) {
-              final ProgressDialog dialog = createProgressDialog(
+              final ProgressDialog? dialog = createProgressDialog(
                 context,
                 AppLocalizations.of(context).uploadingFilesToAlbum,
                 isDismissible: true,
               );
-              await dialog.show();
+              await dialog?.show();
               for (final collection in _selectedCollections) {
                 try {
                   await smartAlbumsService.addPeopleToSmartAlbum(
@@ -300,12 +297,11 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                 }
               }
               unawaited(smartAlbumsService.syncSmartAlbums());
-              await dialog.hide();
+              await dialog?.hide();
               return;
             }
-            final CollectionActions collectionActions = CollectionActions(
-              CollectionsService.instance,
-            );
+            final CollectionActions collectionActions =
+                CollectionActions(CollectionsService.instance);
             final result = await collectionActions.addToMultipleCollections(
               context,
               _selectedCollections,
@@ -348,12 +344,12 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                   widget.showOptionToCreateNewAlbum && _searchQuery.isEmpty;
               final searchResults = _searchQuery.isNotEmpty
                   ? collections
-                        .where(
-                          (element) => element.displayName
-                              .toLowerCase()
-                              .contains(_searchQuery),
-                        )
-                        .toList()
+                      .where(
+                        (element) => element.displayName
+                            .toLowerCase()
+                            .contains(_searchQuery),
+                      )
+                      .toList()
                   : collections;
               return Scrollbar(
                 thumbVisibility: true,
@@ -408,8 +404,8 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
       });
       return recentlyCreated + hidden;
     } else {
-      final List<Collection>
-      collections = CollectionsService.instance.getCollectionsForUI(
+      final List<Collection> collections =
+          CollectionsService.instance.getCollectionsForUI(
         // in collections where user is a collaborator, only addTo and remove
         // action can to be performed
         includeCollab: widget.actionType == CollectionActionType.addFiles,
