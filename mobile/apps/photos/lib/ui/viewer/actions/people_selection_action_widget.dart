@@ -81,6 +81,7 @@ class _PeopleSelectionActionWidgetState
         selectedPersonIds.length == 1 && selectedClusterIds.isNotEmpty;
     final anythingSelected =
         selectedPersonIds.isNotEmpty || selectedClusterIds.isNotEmpty;
+    final theme = Theme.of(context);
 
     items.add(
       SelectionActionButton(
@@ -129,7 +130,7 @@ class _PeopleSelectionActionWidgetState
           "assets/auto-add-people.png",
           width: 24,
           height: 24,
-          color: EnteTheme.isDark(context) ? Colors.white : Colors.black,
+          color: EnteTheme.isDark(theme) ? Colors.white : Colors.black,
         ),
         onTap: _autoAddToAlbum,
         shouldShow: onlyPersonSelected,

@@ -125,6 +125,7 @@ class SearchWidgetState extends State<SearchWidget> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
     return RepaintBoundary(
       key: widgetKey,
       child: Padding(
@@ -142,7 +143,7 @@ class SearchWidgetState extends State<SearchWidget> {
                   child: TextField(
                     controller: textController,
                     focusNode: focusNode,
-                    style: Theme.of(context).textTheme.titleMedium,
+                    style: theme.textTheme.titleMedium,
                     textAlignVertical: const TextAlignVertical(y: 0),
                     // Below parameters are to disable auto-suggestion
                     // Above parameters are to disable auto-suggestion

@@ -325,10 +325,11 @@ ProgressDialog createProgressDialog(
     type: ProgressDialogType.normal,
     isDismissible: isDismissible,
   );
+  final theme = Theme.of(context);
   dialog.style(
     message: message,
-    messageTextStyle: Theme.of(context).textTheme.bodySmall,
-    backgroundColor: Theme.of(context).dialogTheme.backgroundColor,
+    messageTextStyle: theme.textTheme.bodySmall,
+    backgroundColor: theme.dialogTheme.backgroundColor,
     progressWidget: const EnteLoadingWidget(),
     borderRadius: 10,
     elevation: 10.0,

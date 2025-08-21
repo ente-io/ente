@@ -56,7 +56,7 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
 
     final memory = widget.memories[index];
     final isSeen = memory.isSeen();
-    final brightness = Theme.of(context).brightness;
+    final ThemeData theme = Theme.of(context);
 
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -79,7 +79,7 @@ class _MemoryCoverWidgetState extends State<MemoryCoverWidget> {
           height: widget.height,
           width: widget.width,
           decoration: BoxDecoration(
-            boxShadow: brightness == Brightness.dark
+            boxShadow: EnteTheme.isDark(theme)
                 ? [
                     const BoxShadow(
                       color: strokeFainterDark,

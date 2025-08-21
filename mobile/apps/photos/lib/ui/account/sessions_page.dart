@@ -32,23 +32,24 @@ class _SessionsPageState extends State<SessionsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
         title: Text(S.of(context).activeSessions),
       ),
-      body: _getBody(),
+      body: _getBody(theme),
     );
   }
 
-  Widget _getBody() {
+  Widget _getBody(ThemeData theme) {
     if (_sessions == null) {
       return const Center(child: EnteLoadingWidget());
     }
     final List<Widget> rows = [];
     rows.add(const Padding(padding: EdgeInsets.all(4)));
     for (final session in _sessions!.sessions) {
-      rows.add(_getSessionWidget(session));
+      rows.add(_getSessionWidget(session, theme));
     }
     return SingleChildScrollView(
       child: Column(
@@ -57,14 +58,14 @@ class _SessionsPageState extends State<SessionsPage> {
     );
   }
 
-  Widget _getSessionWidget(Session session) {
+  Widget _getSessionWidget(Session session, ThemeData theme) {
     final lastUsedTime =
         DateTime.fromMicrosecondsSinceEpoch(session.lastUsedTime);
     return Column(
       children: [
         InkWell(
           onTap: () async {
-            _showSessionTerminationDialog(session);
+            _showSessionTerminationDialog(session, theme);
           },
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -148,7 +149,7 @@ class _SessionsPageState extends State<SessionsPage> {
     }
   }
 
-  void _showSessionTerminationDialog(Session session) {
+  void _showSessionTerminationDialog(Session session, ThemeData theme) {
     final isLoggingOutFromThisDevice =
         session.token == Configuration.instance.getToken();
     Widget text;

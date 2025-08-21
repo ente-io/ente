@@ -221,6 +221,7 @@ class AlbumCTA extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final enteColorScheme = getEnteColorScheme(context);
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2.5),
       child: GestureDetector(
@@ -231,7 +232,7 @@ class AlbumCTA extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: Container(
-                color: Theme.of(context).brightness == Brightness.light
+                color: EnteTheme.isDark(theme)
                     ? enteColorScheme.backdropBase
                     : enteColorScheme.backdropFaint,
                 height: 100,

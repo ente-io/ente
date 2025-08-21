@@ -203,8 +203,9 @@ class _BackgroundPickerWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final colorScheme = getEnteColorScheme(context);
-    final isLightMode = Theme.of(context).brightness == Brightness.light;
+    final isLightMode = !EnteTheme.isDark(theme);
     final backgroundStyles = {
       LayerBackgroundMode.background: {
         'text': 'Aa',

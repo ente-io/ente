@@ -88,6 +88,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
   @override
   Widget build(BuildContext context) {
     final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
+    final theme = Theme.of(context);
 
     FloatingActionButtonLocation? fabLocation() {
       if (isKeypadOpen) {
@@ -112,14 +113,14 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
             ? const SizedBox.shrink()
             : IconButton(
                 icon: const Icon(Icons.arrow_back),
-                color: Theme.of(context).iconTheme.color,
+                color: theme.iconTheme.color,
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
               ),
         elevation: 0,
       ),
-      body: _getBody(title),
+      body: _getBody(title, theme),
       floatingActionButton: DynamicFAB(
         isKeypadOpen: isKeypadOpen,
         isFormValid: _passwordsMatch && _isPasswordValid,
@@ -138,7 +139,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
     );
   }
 
-  Widget _getBody(String buttonTextAndHeading) {
+  Widget _getBody(String buttonTextAndHeading, ThemeData theme) {
     final email = Configuration.instance.getEmail();
     var passwordStrengthText = S.of(context).weakStrength;
     var passwordStrengthColor = Colors.redAccent;
@@ -163,7 +164,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
                     buttonTextAndHeading,
-                    style: Theme.of(context).textTheme.headlineMedium,
+                    style: theme.textTheme.headlineMedium,
                   ),
                 ),
                 Padding(
@@ -173,10 +174,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                         ? S.of(context).enterPasswordToEncrypt
                         : S.of(context).enterNewPasswordToEncrypt,
                     textAlign: TextAlign.start,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium!
-                        .copyWith(fontSize: 14),
+                    style: theme.textTheme.titleMedium!.copyWith(fontSize: 14),
                   ),
                 ),
                 const Padding(padding: EdgeInsets.all(8)),
@@ -184,17 +182,13 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: StyledText(
                     text: S.of(context).passwordWarning,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium!
-                        .copyWith(fontSize: 14),
+                    style: theme.textTheme.titleMedium!.copyWith(fontSize: 14),
                     tags: {
                       'underline': StyledTextTag(
-                        style:
-                            Theme.of(context).textTheme.titleMedium!.copyWith(
-                                  fontSize: 14,
-                                  decoration: TextDecoration.underline,
-                                ),
+                        style: theme.textTheme.titleMedium!.copyWith(
+                          fontSize: 14,
+                          decoration: TextDecoration.underline,
+                        ),
                       ),
                     },
                   ),
@@ -235,7 +229,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                                 _password1Visible
                                     ? Icons.visibility
                                     : Icons.visibility_off,
-                                color: Theme.of(context).iconTheme.color,
+                                color: theme.iconTheme.color,
                                 size: 20,
                               ),
                               onPressed: () {
@@ -247,11 +241,8 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                           : _isPasswordValid
                               ? Icon(
                                   Icons.check,
-                                  color: Theme.of(context)
-                                      .inputDecorationTheme
-                                      .focusedBorder!
-                                      .borderSide
-                                      .color,
+                                  color: theme.inputDecorationTheme
+                                      .focusedBorder!.borderSide.color,
                                 )
                               : null,
                     ),
@@ -299,7 +290,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                                 _password2Visible
                                     ? Icons.visibility
                                     : Icons.visibility_off,
-                                color: Theme.of(context).iconTheme.color,
+                                color: theme.iconTheme.color,
                                 size: 20,
                               ),
                               onPressed: () {
@@ -311,11 +302,8 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                           : _passwordsMatch
                               ? Icon(
                                   Icons.check,
-                                  color: Theme.of(context)
-                                      .inputDecorationTheme
-                                      .focusedBorder!
-                                      .borderSide
-                                      .color,
+                                  color: theme.inputDecorationTheme
+                                      .focusedBorder!.borderSide.color,
                                 )
                               : null,
                       border: UnderlineInputBorder(
@@ -369,11 +357,10 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     child: RichText(
                       text: TextSpan(
                         text: S.of(context).howItWorks,
-                        style:
-                            Theme.of(context).textTheme.titleMedium!.copyWith(
-                                  fontSize: 14,
-                                  decoration: TextDecoration.underline,
-                                ),
+                        style: theme.textTheme.titleMedium!.copyWith(
+                          fontSize: 14,
+                          decoration: TextDecoration.underline,
+                        ),
                       ),
                     ),
                   ),

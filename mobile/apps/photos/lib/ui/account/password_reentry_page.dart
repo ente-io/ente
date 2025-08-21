@@ -63,6 +63,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
   @override
   Widget build(BuildContext context) {
     final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
+    final theme = Theme.of(context);
 
     FloatingActionButtonLocation? fabLocation() {
       if (isKeypadOpen) {
@@ -78,13 +79,13 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          color: Theme.of(context).iconTheme.color,
+          color: theme.iconTheme.color,
           onPressed: () {
             Navigator.of(context).pop();
           },
         ),
       ),
-      body: _getBody(),
+      body: _getBody(theme),
       floatingActionButton: DynamicFAB(
         key: const ValueKey("verifyPasswordButton"),
         isKeypadOpen: isKeypadOpen,
@@ -185,7 +186,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
     }
   }
 
-  Widget _getBody() {
+  Widget _getBody(ThemeData theme) {
     return Column(
       children: [
         Expanded(
@@ -197,7 +198,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
                     S.of(context).welcomeBack,
-                    style: Theme.of(context).textTheme.headlineMedium,
+                    style: theme.textTheme.headlineMedium,
                   ),
                 ),
                 Visibility(
@@ -234,7 +235,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                                 _passwordVisible
                                     ? Icons.visibility
                                     : Icons.visibility_off,
-                                color: Theme.of(context).iconTheme.color,
+                                color: theme.iconTheme.color,
                                 size: 20,
                               ),
                               onPressed: () {
@@ -284,11 +285,10 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                         },
                         child: Text(
                           S.of(context).forgotPassword,
-                          style:
-                              Theme.of(context).textTheme.titleMedium!.copyWith(
-                                    fontSize: 14,
-                                    decoration: TextDecoration.underline,
-                                  ),
+                          style: theme.textTheme.titleMedium!.copyWith(
+                            fontSize: 14,
+                            decoration: TextDecoration.underline,
+                          ),
                         ),
                       ),
                       GestureDetector(
@@ -306,11 +306,10 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                         },
                         child: Text(
                           S.of(context).changeEmail,
-                          style:
-                              Theme.of(context).textTheme.titleMedium!.copyWith(
-                                    fontSize: 14,
-                                    decoration: TextDecoration.underline,
-                                  ),
+                          style: theme.textTheme.titleMedium!.copyWith(
+                            fontSize: 14,
+                            decoration: TextDecoration.underline,
+                          ),
                         ),
                       ),
                     ],

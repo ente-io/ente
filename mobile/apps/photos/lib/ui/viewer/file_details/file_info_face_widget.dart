@@ -62,6 +62,7 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       children: [
         Stack(
@@ -113,12 +114,12 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
           ],
         ),
         const SizedBox(height: 8),
-        ..._buildFaceInfo(),
+        ..._buildFaceInfo(theme),
       ],
     );
   }
 
-  List<Widget> _buildFaceInfo() {
+  List<Widget> _buildFaceInfo(ThemeData theme) {
     final List<Widget> faceInfo = [];
     if (widget.person != null) {
       faceInfo.add(
@@ -129,7 +130,7 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
               widget.person!.data.isIgnored
                   ? '(' + S.of(context).ignored + ')'
                   : widget.person!.data.name.trim(),
-              style: Theme.of(context).textTheme.bodySmall,
+              style: theme.textTheme.bodySmall,
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
             ),
@@ -141,28 +142,28 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
       faceInfo.add(
         Text(
           'S:${widget.face.score.toStringAsFixed(2)}(I)',
-          style: Theme.of(context).textTheme.bodySmall,
+          style: theme.textTheme.bodySmall,
           maxLines: 1,
         ),
       );
       faceInfo.add(
         Text(
           'B:${widget.face.blur.toStringAsFixed(0)}(I)',
-          style: Theme.of(context).textTheme.bodySmall,
+          style: theme.textTheme.bodySmall,
           maxLines: 1,
         ),
       );
       faceInfo.add(
         Text(
           'D:${widget.face.detection.getFaceDirection().toDirectionString().substring(0, 3)}(I)',
-          style: Theme.of(context).textTheme.bodySmall,
+          style: theme.textTheme.bodySmall,
           maxLines: 1,
         ),
       );
       faceInfo.add(
         Text(
           'Si:${widget.face.detection.faceIsSideways().toString()}(I)',
-          style: Theme.of(context).textTheme.bodySmall,
+          style: theme.textTheme.bodySmall,
           maxLines: 1,
         ),
       );

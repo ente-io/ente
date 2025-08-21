@@ -19,8 +19,26 @@ class EnteTheme {
     required this.shadowButton,
   });
 
-  static bool isDark(BuildContext context) {
-    return Theme.of(context).brightness == Brightness.dark;
+  static bool isDark(ThemeData theme) {
+    return theme.brightness == Brightness.dark;
+  }
+
+  static EnteColorScheme getColorScheme(
+    ThemeData theme, {
+    bool inverse = false,
+  }) {
+    return inverse
+        ? theme.colorScheme.inverseEnteTheme.colorScheme
+        : theme.colorScheme.enteTheme.colorScheme;
+  }
+
+  static EnteTextTheme getTextTheme(
+    ThemeData theme, {
+    bool inverse = false,
+  }) {
+    return inverse
+        ? theme.colorScheme.inverseEnteTheme.textTheme
+        : theme.colorScheme.enteTheme.textTheme;
   }
 }
 

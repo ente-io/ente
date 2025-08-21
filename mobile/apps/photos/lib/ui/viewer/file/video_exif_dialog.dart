@@ -27,8 +27,9 @@ class VideoExifDialog extends StatelessWidget {
   }
 
   Widget _buildSection(BuildContext context, String title, Widget content) {
+    final theme = Theme.of(context);
     return Theme(
-      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      data: theme.copyWith(dividerColor: Colors.transparent),
       child: ExpansionTile(
         initiallyExpanded: false,
         title: Text(title, style: getEnteTextTheme(context).body),

@@ -20,6 +20,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
   @override
   Widget build(BuildContext context) {
     final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
+    final theme = Theme.of(context);
     FloatingActionButtonLocation? fabLocation() {
       if (isKeypadOpen) {
         return null;
@@ -34,7 +35,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          color: Theme.of(context).iconTheme.color,
+          color: theme.iconTheme.color,
           onPressed: () {
             Navigator.of(context).pop();
           },
@@ -93,7 +94,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
                     S.of(context).forgotPassword,
-                    style: Theme.of(context).textTheme.headlineMedium,
+                    style: theme.textTheme.headlineMedium,
                   ),
                 ),
                 Padding(

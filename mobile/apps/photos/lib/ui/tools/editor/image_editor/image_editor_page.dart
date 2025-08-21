@@ -173,7 +173,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
 
   @override
   Widget build(BuildContext context) {
-    final isLightMode = Theme.of(context).brightness == Brightness.light;
+    final theme = Theme.of(context);
+    final isLightMode = !EnteTheme.isDark(theme);
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     return PopScope(

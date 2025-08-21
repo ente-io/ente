@@ -74,6 +74,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   @override
   Widget build(BuildContext context) {
     final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
+    final theme = Theme.of(context);
 
     FloatingActionButtonLocation? fabLocation() {
       if (isKeypadOpen) {
@@ -87,7 +88,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
       elevation: 0,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
-        color: Theme.of(context).iconTheme.color,
+        color: theme.iconTheme.color,
         onPressed: () {
           Navigator.of(context).pop();
         },
@@ -97,17 +98,16 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         child: StepProgressIndicator(
           totalSteps: 4,
           currentStep: 1,
-          selectedColor: Theme.of(context).colorScheme.greenAlternative,
+          selectedColor: theme.colorScheme.greenAlternative,
           roundedEdges: const Radius.circular(10),
-          unselectedColor:
-              Theme.of(context).colorScheme.stepProgressUnselectedColor,
+          unselectedColor: theme.colorScheme.stepProgressUnselectedColor,
         ),
       ),
     );
     return Scaffold(
       resizeToAvoidBottomInset: isKeypadOpen,
       appBar: appBar,
-      body: _getBody(),
+      body: _getBody(theme),
       floatingActionButton: DynamicFAB(
         isKeypadOpen: isKeypadOpen,
         isFormValid: _isFormValid(),
@@ -130,7 +130,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
     );
   }
 
-  Widget _getBody() {
+  Widget _getBody(ThemeData theme) {
     var passwordStrengthText = S.of(context).weakStrength;
     var passwordStrengthColor = Colors.redAccent;
     if (_passwordStrength > kStrongPasswordStrengthThreshold) {
@@ -151,13 +151,13 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
                     S.of(context).createNewAccount,
-                    style: Theme.of(context).textTheme.headlineMedium,
+                    style: theme.textTheme.headlineMedium,
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
                   child: TextFormField(
-                    style: Theme.of(context).textTheme.titleMedium,
+                    style: theme.textTheme.titleMedium,
                     autofillHints: const [AutofillHints.email],
                     decoration: InputDecoration(
                       fillColor: _emailIsValid
@@ -176,11 +176,8 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       suffixIcon: _emailIsValid
                           ? Icon(
                               Icons.check,
-                              color: Theme.of(context)
-                                  .inputDecorationTheme
-                                  .focusedBorder!
-                                  .borderSide
-                                  .color,
+                              color: theme.inputDecorationTheme.focusedBorder!
+                                  .borderSide.color,
                             )
                           : null,
                     ),
@@ -223,7 +220,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                                 _password1Visible
                                     ? Icons.visibility
                                     : Icons.visibility_off,
-                                color: Theme.of(context).iconTheme.color,
+                                color: theme.iconTheme.color,
                                 size: 20,
                               ),
                               onPressed: () {
@@ -235,11 +232,8 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                           : _passwordIsValid
                               ? Icon(
                                   Icons.check,
-                                  color: Theme.of(context)
-                                      .inputDecorationTheme
-                                      .focusedBorder!
-                                      .borderSide
-                                      .color,
+                                  color: theme.inputDecorationTheme
+                                      .focusedBorder!.borderSide.color,
                                 )
                               : null,
                       border: UnderlineInputBorder(
@@ -292,7 +286,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                                 _password2Visible
                                     ? Icons.visibility
                                     : Icons.visibility_off,
-                                color: Theme.of(context).iconTheme.color,
+                                color: theme.iconTheme.color,
                                 size: 20,
                               ),
                               onPressed: () {
@@ -304,11 +298,8 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                           : _passwordsMatch
                               ? Icon(
                                   Icons.check,
-                                  color: Theme.of(context)
-                                      .inputDecorationTheme
-                                      .focusedBorder!
-                                      .borderSide
-                                      .color,
+                                  color: theme.inputDecorationTheme
+                                      .focusedBorder!.borderSide.color,
                                 )
                               : null,
                       border: UnderlineInputBorder(
@@ -377,7 +368,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
                   child: TextFormField(
-                    style: Theme.of(context).textTheme.titleMedium,
+                    style: theme.textTheme.titleMedium,
                     decoration: InputDecoration(
                       fillColor: getEnteColorScheme(context).fillFaint,
                       filled: true,
@@ -416,7 +407,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   color: getEnteColorScheme(context).strokeFaint,
                 ),
                 const SizedBox(height: 12),
-                _getAgreement(),
+                _getAgreement(theme),
                 const SizedBox(height: 40),
               ],
             ),
@@ -426,19 +417,19 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
     );
   }
 
-  Container _getAgreement() {
+  Container _getAgreement(ThemeData theme) {
     return Container(
       padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
       child: Column(
         children: [
-          _getTOSAgreement(),
-          _getPasswordAgreement(),
+          _getTOSAgreement(theme),
+          _getPasswordAgreement(theme),
         ],
       ),
     );
   }
 
-  Widget _getTOSAgreement() {
+  Widget _getTOSAgreement(ThemeData theme) {
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -450,7 +441,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         children: [
           Checkbox(
             value: _hasAgreedToTOS,
-            side: CheckboxTheme.of(context).side,
+            side: theme.checkboxTheme.side,
             onChanged: (value) {
               setState(() {
                 _hasAgreedToTOS = value!;
@@ -460,10 +451,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
           Expanded(
             child: StyledText(
               text: S.of(context).signUpTerms,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium!
-                  .copyWith(fontSize: 12),
+              style: theme.textTheme.titleMedium!.copyWith(fontSize: 12),
               tags: {
                 'u-terms': StyledTextActionTag(
                   (String? text, Map<String?, String?> attrs) =>
@@ -505,7 +493,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
     );
   }
 
-  Widget _getPasswordAgreement() {
+  Widget _getPasswordAgreement(ThemeData theme) {
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -517,7 +505,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         children: [
           Checkbox(
             value: _hasAgreedToE2E,
-            side: CheckboxTheme.of(context).side,
+            side: theme.checkboxTheme.side,
             onChanged: (value) {
               setState(() {
                 _hasAgreedToE2E = value!;
@@ -527,10 +515,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
           Expanded(
             child: StyledText(
               text: S.of(context).ackPasswordLostWarning,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium!
-                  .copyWith(fontSize: 12),
+              style: theme.textTheme.titleMedium!.copyWith(fontSize: 12),
               tags: {
                 'underline': StyledTextActionTag(
                   (String? text, Map<String?, String?> attrs) =>

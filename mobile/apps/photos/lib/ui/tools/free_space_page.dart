@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/backup_status.dart';
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/gradient_button.dart';
 import "package:photos/ui/notification/toast.dart";
 import 'package:photos/utils/delete_file_util.dart';
@@ -27,27 +28,28 @@ class FreeSpacePage extends StatefulWidget {
 class _FreeSpacePageState extends State<FreeSpacePage> {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
         title: Text(S.of(context).freeUpSpace),
       ),
-      body: _getBody(),
+      body: _getBody(theme),
     );
   }
 
-  Widget _getBody() {
+  Widget _getBody(ThemeData theme) {
     Logger("FreeSpacePage").info(
       "Number of uploaded files: " + widget.status.localIDs.length.toString(),
     );
     Logger("FreeSpacePage")
         .info("Space consumed: " + widget.status.size.toString());
     return SingleChildScrollView(
-      child: _getWidget(widget.status),
+      child: _getWidget(widget.status, theme),
     );
   }
 
-  Widget _getWidget(BackupStatus status) {
+  Widget _getWidget(BackupStatus status, ThemeData theme) {
     final count = status.localIDs.length;
     final formattedCount = NumberFormat().format(count);
     final String textMessage = widget.clearSpaceForFolder
@@ -59,7 +61,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
       color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
       fontWeight: FontWeight.w500,
     );
-    final isLightMode = Theme.of(context).brightness == Brightness.light;
+    final isLightMode = !EnteTheme.isDark(theme);
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,

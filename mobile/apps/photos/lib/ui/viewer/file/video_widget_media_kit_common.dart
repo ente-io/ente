@@ -444,8 +444,9 @@ class _SeekBarState extends State<SeekBar> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return SliderTheme(
-      data: SliderTheme.of(context).copyWith(
+      data: theme.sliderTheme.copyWith(
         trackHeight: 1.0,
         thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8.0),
         overlayShape: const RoundSliderOverlayShape(overlayRadius: 14.0),

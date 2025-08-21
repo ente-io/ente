@@ -87,13 +87,13 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return AppBar(
       elevation: 0,
       centerTitle: false,
       title: Text(
         _appBarTitle!,
-        style:
-            Theme.of(context).textTheme.headlineSmall!.copyWith(fontSize: 16),
+        style: theme.textTheme.headlineSmall!.copyWith(fontSize: 16),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       ),

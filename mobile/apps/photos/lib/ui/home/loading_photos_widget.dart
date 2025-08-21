@@ -8,6 +8,7 @@ import 'package:photos/events/local_import_progress.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/common/bottom_shadow.dart';
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/dialog_widget.dart";
@@ -109,7 +110,8 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
   Widget build(BuildContext context) {
     _loadingMessage ??= S.of(context).loadingYourPhotos;
     _setupLoadingMessages(context);
-    final isLightMode = Theme.of(context).brightness == Brightness.light;
+    final theme = Theme.of(context);
+    final isLightMode = !EnteTheme.isDark(theme);
     return Scaffold(
       body: SingleChildScrollView(
         child: Center(

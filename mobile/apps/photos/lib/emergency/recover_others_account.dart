@@ -80,12 +80,13 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
 
     String title = S.of(context).setPasswordTitle;
     title = S.of(context).resetPasswordTitle;
+    final theme = Theme.of(context);
     return Scaffold(
       resizeToAvoidBottomInset: isKeypadOpen,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          color: Theme.of(context).iconTheme.color,
+          color: theme.iconTheme.color,
           onPressed: () {
             Navigator.of(context).pop();
           },
@@ -118,6 +119,7 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
       passwordStrengthText = S.of(context).moderateStrength;
       passwordStrengthColor = Colors.orangeAccent;
     }
+    final theme = Theme.of(context);
     return Column(
       children: [
         Expanded(
@@ -129,7 +131,7 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
                     buttonTextAndHeading,
-                    style: Theme.of(context).textTheme.headlineMedium,
+                    style: theme.textTheme.headlineMedium,
                   ),
                 ),
                 Padding(
@@ -138,10 +140,7 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
                     "Enter new password for $email account. You will be able "
                     "to use this password to login into $email account.",
                     textAlign: TextAlign.start,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium!
-                        .copyWith(fontSize: 14),
+                    style: theme.textTheme.titleMedium!.copyWith(fontSize: 14),
                   ),
                 ),
                 const Padding(padding: EdgeInsets.all(12)),
@@ -179,7 +178,7 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
                                 _password1Visible
                                     ? Icons.visibility
                                     : Icons.visibility_off,
-                                color: Theme.of(context).iconTheme.color,
+                                color: theme.iconTheme.color,
                                 size: 20,
                               ),
                               onPressed: () {
@@ -191,11 +190,8 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
                           : _isPasswordValid
                               ? Icon(
                                   Icons.check,
-                                  color: Theme.of(context)
-                                      .inputDecorationTheme
-                                      .focusedBorder!
-                                      .borderSide
-                                      .color,
+                                  color: theme.inputDecorationTheme
+                                      .focusedBorder!.borderSide.color,
                                 )
                               : null,
                     ),
@@ -241,7 +237,7 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
                                 _password2Visible
                                     ? Icons.visibility
                                     : Icons.visibility_off,
-                                color: Theme.of(context).iconTheme.color,
+                                color: theme.iconTheme.color,
                                 size: 20,
                               ),
                               onPressed: () {
@@ -253,11 +249,8 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
                           : _passwordsMatch
                               ? Icon(
                                   Icons.check,
-                                  color: Theme.of(context)
-                                      .inputDecorationTheme
-                                      .focusedBorder!
-                                      .borderSide
-                                      .color,
+                                  color: theme.inputDecorationTheme
+                                      .focusedBorder!.borderSide.color,
                                 )
                               : null,
                       border: UnderlineInputBorder(

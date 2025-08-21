@@ -17,9 +17,10 @@ class ThumbnailPlaceHolder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       alignment: Alignment.center,
-      color: Theme.of(context).colorScheme.galleryThumbBackgroundColor,
+      color: theme.colorScheme.galleryThumbBackgroundColor,
     );
   }
 }

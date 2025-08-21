@@ -61,7 +61,8 @@ class FileAppBarState extends State<FileAppBar> {
   void didUpdateWidget(FileAppBar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.file.generatedID != widget.file.generatedID) {
-      _getActions();
+      final theme = Theme.of(context);
+      _getActions(theme);
     }
   }
 
@@ -88,8 +89,9 @@ class FileAppBarState extends State<FileAppBar> {
 
     //When the widget is initialized, the actions are not available.
     //Cannot call _getActions() in initState.
+    final theme = Theme.of(context);
     if (_actions.isEmpty || _reloadActions) {
-      _getActions();
+      _getActions(theme);
       _reloadActions = false;
     }
 
@@ -152,7 +154,7 @@ class FileAppBarState extends State<FileAppBar> {
     );
   }
 
-  List<Widget> _getActions() {
+  List<Widget> _getActions(ThemeData theme) {
     _actions.clear();
     final bool isOwnedByUser = widget.file.isOwner;
     final bool isFileUploaded = widget.file.isUploaded;
@@ -201,7 +203,7 @@ class FileAppBarState extends State<FileAppBar> {
                 Platform.isAndroid
                     ? Icons.download
                     : Icons.cloud_download_outlined,
-                color: Theme.of(context).iconTheme.color,
+                color: theme.iconTheme.color,
               ),
               const Padding(
                 padding: EdgeInsets.all(8),
@@ -223,7 +225,7 @@ class FileAppBarState extends State<FileAppBar> {
             children: [
               Icon(
                 isArchived ? Icons.unarchive : Icons.archive_outlined,
-                color: Theme.of(context).iconTheme.color,
+                color: theme.iconTheme.color,
               ),
               const Padding(
                 padding: EdgeInsets.all(8),
@@ -246,7 +248,7 @@ class FileAppBarState extends State<FileAppBar> {
             children: [
               Icon(
                 Icons.wallpaper_outlined,
-                color: Theme.of(context).iconTheme.color,
+                color: theme.iconTheme.color,
               ),
               const Padding(
                 padding: EdgeInsets.all(8),
@@ -266,7 +268,7 @@ class FileAppBarState extends State<FileAppBar> {
               children: [
                 Icon(
                   Icons.visibility_off,
-                  color: Theme.of(context).iconTheme.color,
+                  color: theme.iconTheme.color,
                 ),
                 const Padding(
                   padding: EdgeInsets.all(8),
@@ -284,7 +286,7 @@ class FileAppBarState extends State<FileAppBar> {
               children: [
                 Icon(
                   Icons.visibility,
-                  color: Theme.of(context).iconTheme.color,
+                  color: theme.iconTheme.color,
                 ),
                 const Padding(
                   padding: EdgeInsets.all(8),
@@ -329,7 +331,7 @@ class FileAppBarState extends State<FileAppBar> {
                 children: [
                   Icon(
                     Icons.loop_rounded,
-                    color: Theme.of(context).iconTheme.color,
+                    color: theme.iconTheme.color,
                   ),
                   shouldLoopVideo
                       ? const SizedBox.shrink()
@@ -339,7 +341,7 @@ class FileAppBarState extends State<FileAppBar> {
                             width: 2,
                             height: 24,
                             decoration: BoxDecoration(
-                              color: Theme.of(context).iconTheme.color,
+                              color: theme.iconTheme.color,
                               borderRadius: BorderRadius.circular(1),
                             ),
                           ),

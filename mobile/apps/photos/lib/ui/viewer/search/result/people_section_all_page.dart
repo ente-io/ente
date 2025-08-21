@@ -575,6 +575,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
   }
 
   Widget _buildShowMoreOrLessButton(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
       child: SizedBox(
@@ -612,7 +613,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                     ? S.of(context).showLessFaces
                     : S.of(context).showMoreFaces,
                 style: getEnteTextTheme(context).small.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
+                      color: theme.colorScheme.primary,
                     ),
               ),
               const SizedBox(width: 8),
@@ -621,7 +622,7 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
                     ? Icons.keyboard_double_arrow_up_outlined
                     : Icons.keyboard_double_arrow_down_outlined,
                 size: 16,
-                color: Theme.of(context).colorScheme.primary,
+                color: theme.colorScheme.primary,
               ),
             ],
           ),

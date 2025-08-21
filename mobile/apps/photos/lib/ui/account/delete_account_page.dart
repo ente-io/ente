@@ -43,6 +43,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
     _dropdownValue ??= _defaultSelection;
     final double dropDownTextSize = MediaQuery.of(context).size.width - 120;
 
+    final theme = Theme.of(context);
     final colorScheme = getEnteColorScheme(context);
     return Scaffold(
       appBar: AppBar(
@@ -50,7 +51,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
         title: Text(S.of(context).deleteAccount),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          color: Theme.of(context).iconTheme.color,
+          color: theme.iconTheme.color,
           onPressed: () {
             Navigator.of(context).pop();
           },
@@ -173,7 +174,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                   children: [
                     Checkbox(
                       value: _hasConfirmedDeletion,
-                      side: CheckboxTheme.of(context).side,
+                      side: theme.checkboxTheme.side,
                       onChanged: (value) {
                         setState(() {
                           _hasConfirmedDeletion = value!;
