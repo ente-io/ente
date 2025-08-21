@@ -33,7 +33,7 @@ pub fn derive_argon_key(
         sodium::crypto_pwhash(
             key.as_mut_ptr(),
             key.len() as u64,
-            password.as_ptr(),
+            password.as_ptr() as *const std::ffi::c_char,
             password.len() as u64,
             salt_bytes.as_ptr(),
             ops_limit as u64,
