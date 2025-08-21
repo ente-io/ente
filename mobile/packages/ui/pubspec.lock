@@ -161,7 +161,7 @@ packages:
     source: git
     version: "1.0.0"
   ente_events:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       path: "../events"
       relative: true

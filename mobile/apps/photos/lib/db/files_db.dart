@@ -994,17 +994,30 @@ class FilesDB with SqlDbBase {
 
       final batch = localIDsList.sublist(i, endIndex);
       final placeholders = List.filled(batch.length, '?').join(',');
+      final List<String> alreadyUploaded = [];
+      // find localIDs that are already uploaded
+      final result = await db.execute('''
+      SELECT DISTINCT $columnLocalID
+      FROM $filesTable
+      WHERE $columnLocalID IN ($placeholders)
+      AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID != -1)
+''');
 
-      final r = await db.execute('''
+      for (final row in result) {
+        alreadyUploaded.add(row[columnLocalID] as String);
+      }
+      final uploadedPlaceholders =
+          alreadyUploaded.map((id) => "'$id'").join(',');
+      final r = await db.execute(
+        '''
       DELETE FROM $filesTable
-      WHERE $columnLocalID IN ($placeholders) 
-      AND ($columnCollectionID IS NULL OR $columnCollectionID = -1)
+      WHERE $columnLocalID IN ($uploadedPlaceholders) 
       AND ($columnUploadedFileID IS NULL OR $columnUploadedFileID = -1)
       ''', batch);
 
       if (r.isNotEmpty) {
-        _logger.fine(
-          "Batch ${(i ~/ batchSize) + 1}: Removed ${r.length} files",
+        _logger.warning(
+          "Batch ${(i ~/ batchSize) + 1}: Removed duplicate ${r.length} files",
         );
         totalRemoved += r.length;
       }

@@ -17,6 +17,7 @@ enum ImportType {
   twoFas,
   bitwarden,
   lastpass,
+  proton,
 }
 
 class ImportCodePage extends StatelessWidget {
@@ -29,6 +30,7 @@ class ImportCodePage extends StatelessWidget {
     ImportType.aegis,
     ImportType.bitwarden,
     ImportType.googleAuthenticator,
+    ImportType.proton,
     ImportType.ravio,
     ImportType.lastpass,
   ];
@@ -51,6 +53,8 @@ class ImportCodePage extends StatelessWidget {
         return 'Bitwarden';
       case ImportType.lastpass:
         return 'LastPass Authenticator';
+      case ImportType.proton:
+        return 'Proton Authenticator';
     }
   }
 
