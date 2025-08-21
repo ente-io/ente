@@ -35,6 +35,8 @@ class MenuItemWidget extends StatefulWidget {
   final Color? menuItemColor;
   final bool alignCaptionedTextToLeft;
 
+  final EdgeInsets? padding;
+
   // singleBorderRadius is applied to the border when it's a standalone menu item.
   // Widget will apply singleBorderRadius if value of both isTopBorderRadiusRemoved
   // and isBottomBorderRadiusRemoved is false. Otherwise, multipleBorderRadius will
@@ -88,6 +90,7 @@ class MenuItemWidget extends StatefulWidget {
     this.showOnlyLoadingState = false,
     this.surfaceExecutionStates = true,
     this.alwaysShowSuccessState = false,
+    this.padding,
     super.key,
   });
 
@@ -97,8 +100,9 @@ class MenuItemWidget extends StatefulWidget {
 
 class _MenuItemWidgetState extends State<MenuItemWidget> {
   final _debouncer = Debouncer(const Duration(milliseconds: 300));
-  ValueNotifier<ExecutionState> executionStateNotifier =
-      ValueNotifier(ExecutionState.idle);
+  ValueNotifier<ExecutionState> executionStateNotifier = ValueNotifier(
+    ExecutionState.idle,
+  );
 
   Color? menuItemColor;
   late double borderRadius;
@@ -108,8 +112,8 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
     menuItemColor = widget.menuItemColor;
     borderRadius =
         (widget.isBottomBorderRadiusRemoved || widget.isTopBorderRadiusRemoved)
-            ? widget.multipleBorderRadius
-            : widget.singleBorderRadius;
+        ? widget.multipleBorderRadius
+        : widget.singleBorderRadius;
     if (widget.expandableController != null) {
       widget.expandableController!.addListener(() {
         setState(() {});
@@ -159,15 +163,15 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
     final isExpanded = widget.expandableController?.value;
     final bottomBorderRadius =
         (isExpanded != null && isExpanded) || widget.isBottomBorderRadiusRemoved
-            ? const Radius.circular(0)
-            : circularRadius;
+        ? const Radius.circular(0)
+        : circularRadius;
     final topBorderRadius = widget.isTopBorderRadiusRemoved
         ? const Radius.circular(0)
         : circularRadius;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 20),
       width: double.infinity,
-      padding: const EdgeInsets.only(left: 16, right: 12),
+      padding: widget.padding ?? const EdgeInsets.only(left: 16, right: 12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.only(
           topLeft: topBorderRadius,
@@ -180,14 +184,13 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          widget.alignCaptionedTextToLeft && widget.leadingIcon == null
-              ? const SizedBox.shrink()
-              : LeadingWidget(
-                  leadingIconSize: widget.leadingIconSize,
-                  leadingIcon: widget.leadingIcon,
-                  leadingIconColor: widget.leadingIconColor,
-                  leadingIconWidget: widget.leadingIconWidget,
-                ),
+          if (!widget.alignCaptionedTextToLeft || widget.leadingIcon != null)
+            LeadingWidget(
+              leadingIconSize: widget.leadingIconSize,
+              leadingIcon: widget.leadingIcon,
+              leadingIconColor: widget.leadingIconColor,
+              leadingIconWidget: widget.leadingIconWidget,
+            ),
           widget.captionedTextWidget,
           if (widget.expandableController != null)
             ExpansionTrailingIcon(
@@ -217,20 +220,15 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
       return;
     }
     _debouncer.run(
-      () => Future(
-        () {
-          executionStateNotifier.value = ExecutionState.inProgress;
-        },
-      ),
+      () => Future(() {
+        executionStateNotifier.value = ExecutionState.inProgress;
+      }),
     );
-    await widget.onTap?.call().then(
-      (value) {
-        widget.alwaysShowSuccessState
-            ? executionStateNotifier.value = ExecutionState.successful
-            : null;
-      },
-      onError: (error, stackTrace) => _debouncer.cancelDebounceTimer(),
-    );
+    await widget.onTap?.call().then((value) {
+      widget.alwaysShowSuccessState
+          ? executionStateNotifier.value = ExecutionState.successful
+          : null;
+    }, onError: (error, stackTrace) => _debouncer.cancelDebounceTimer());
     _debouncer.cancelDebounceTimer();
     if (widget.alwaysShowSuccessState) {
       Future.delayed(const Duration(seconds: 2), () {

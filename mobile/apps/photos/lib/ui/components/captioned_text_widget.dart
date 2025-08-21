@@ -21,8 +21,9 @@ class CaptionedTextWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enteColorScheme = Theme.of(context).colorScheme.enteTheme.colorScheme;
-    final enteTextTheme = Theme.of(context).colorScheme.enteTheme.textTheme;
+    final enteTheme = Theme.of(context).colorScheme.enteTheme;
+    final enteColorScheme = enteTheme.colorScheme;
+    final enteTextTheme = enteTheme.textTheme;
 
     final capitalized = title.capitalizeFirst();
 
@@ -30,7 +31,8 @@ class CaptionedTextWidget extends StatelessWidget {
       Flexible(
         child: Text(
           capitalized,
-          style: textStyle ??
+          style:
+              textStyle ??
               (makeTextBold
                   ? enteTextTheme.bodyBold.copyWith(color: textColor)
                   : enteTextTheme.body.copyWith(color: textColor)),
@@ -59,10 +61,8 @@ class CaptionedTextWidget extends StatelessWidget {
     }
     return Flexible(
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 2),
-        child: Row(
-          children: children,
-        ),
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        child: Row(children: children),
       ),
     );
   }

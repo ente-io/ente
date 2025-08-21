@@ -9707,12 +9707,7 @@ class S {
 
   /// `Link person`
   String get linkPerson {
-    return Intl.message(
-      'Link person',
-      name: 'linkPerson',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Link person', name: 'linkPerson', desc: '', args: []);
   }
 
   /// `for better sharing experience`
@@ -10993,11 +10988,41 @@ class S {
     );
   }
 
-  /// `Video streaming allows you to play videos without downloading them first. This is useful for large videos that you don't want to store on your device.`
+  /// `Skipped videos`
+  String get skippedVideos {
+    return Intl.message(
+      'Skipped videos',
+      name: 'skippedVideos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Video streaming lets you play videos on any device without waiting. Enabling this toggle will process and generate video streams on this device.`
   String get videoStreamingDescription {
     return Intl.message(
-      'Video streaming allows you to play videos without downloading them first. This is useful for large videos that you don\'t want to store on your device.',
+      'Video streaming lets you play videos on any device without waiting. Enabling this toggle will process and generate video streams on this device.',
       name: 'videoStreamingDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `More information here.`
+  String get videoStreamingDescriptionClickable {
+    return Intl.message(
+      'More information here.',
+      name: 'videoStreamingDescriptionClickable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Only videos created in the last 60 days and shorter than 1 minute will be processed on this device. For the rest of the library, you will have to enable streamable videos in the desktop app.`
+  String get videoStreamingNote {
+    return Intl.message(
+      'Only videos created in the last 60 days and shorter than 1 minute will be processed on this device. For the rest of the library, you will have to enable streamable videos in the desktop app.',
+      name: 'videoStreamingNote',
       desc: '',
       args: [],
     );
@@ -11038,6 +11063,7 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
       Locale.fromSubtags(languageCode: 'ml'),
       Locale.fromSubtags(languageCode: 'ms'),
       Locale.fromSubtags(languageCode: 'nl'),
+      Locale.fromSubtags(languageCode: 'nn'),
       Locale.fromSubtags(languageCode: 'no'),
       Locale.fromSubtags(languageCode: 'or'),
       Locale.fromSubtags(languageCode: 'pl'),

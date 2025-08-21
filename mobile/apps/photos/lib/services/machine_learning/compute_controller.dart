@@ -10,11 +10,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/compute_control_event.dart";
 import "package:thermal/thermal.dart";
 
-enum _ComputeRunState {
-  idle,
-  runningML,
-  generatingStream,
-}
+enum _ComputeRunState { idle, runningML, generatingStream }
 
 class ComputeController {
   final _logger = Logger("ComputeController");
@@ -51,16 +47,16 @@ class ComputeController {
         // if you need to test on physical device, uncomment this check
         return;
       }
-      BatteryInfoPlugin()
-          .iosBatteryInfoStream
-          .listen((IosBatteryInfo? batteryInfo) {
+      BatteryInfoPlugin().iosBatteryInfoStream.listen((
+        IosBatteryInfo? batteryInfo,
+      ) {
         _oniOSBatteryStateUpdate(batteryInfo);
       });
     }
     if (Platform.isAndroid) {
-      BatteryInfoPlugin()
-          .androidBatteryInfoStream
-          .listen((AndroidBatteryInfo? batteryInfo) {
+      BatteryInfoPlugin().androidBatteryInfoStream.listen((
+        AndroidBatteryInfo? batteryInfo,
+      ) {
         _onAndroidBatteryStateUpdate(batteryInfo);
       });
     }
@@ -76,13 +72,16 @@ class ComputeController {
       _logger.info("Device not healthy or user interacting, denying request.");
       return false;
     }
-    if (ml) {
-      return _requestML();
-    } else if (stream) {
-      return _requestStream();
+    final result = ml
+        ? _requestML()
+        : stream
+        ? _requestStream()
+        : null;
+    if (result == null) {
+      _logger.severe("No compute request specified, denying request.");
+      return false;
     }
-    _logger.severe("No compute request specified, denying request.");
-    return false;
+    return result;
   }
 
   bool _requestML() {

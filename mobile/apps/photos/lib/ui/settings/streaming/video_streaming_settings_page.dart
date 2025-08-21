@@ -1,9 +1,9 @@
 import "dart:async";
 
+import "package:flutter/gestures.dart";
 import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
-import "package:photos/service_locator.dart";
 import "package:photos/services/video_preview_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
@@ -12,11 +12,12 @@ import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/components/captioned_text_widget.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
-import "package:photos/ui/components/menu_section_title.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
+
+const helpUrl = "https://help.ente.io/photos/faq/video-streaming";
 
 class VideoStreamingSettingsPage extends StatefulWidget {
   const VideoStreamingSettingsPage({super.key});
@@ -40,7 +41,7 @@ class _VideoStreamingSettingsPageState
 
   @override
   Widget build(BuildContext context) {
-    final hasEnabled = flagService.hasGrantedMLConsent;
+    final hasEnabled = VideoPreviewService.instance.isVideoStreamingEnabled;
     return Scaffold(
       body: CustomScrollView(
         primary: false,
@@ -66,12 +67,26 @@ class _VideoStreamingSettingsPageState
               padding: const EdgeInsets.only(left: 16, right: 16),
               child: Column(
                 children: [
-                  Text(
-                    S.of(context).videoStreamingDescription,
-                    textAlign: TextAlign.left,
-                    style: getEnteTextTheme(context).mini.copyWith(
-                          color: getEnteColorScheme(context).textMuted,
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(text: S.of(context).videoStreamingDescription),
+                        const TextSpan(text: " "),
+                        TextSpan(
+                          text: S
+                              .of(context)
+                              .videoStreamingDescriptionClickable,
+                          style: const TextStyle(
+                            decoration: TextDecoration.underline,
+                          ),
+                          recognizer: TapGestureRecognizer()..onTap = openHelp,
                         ),
+                      ],
+                    ),
+                    textAlign: TextAlign.justify,
+                    style: getEnteTextTheme(context).mini.copyWith(
+                      color: getEnteColorScheme(context).textMuted,
+                    ),
                   ),
                 ],
               ),
@@ -80,9 +95,10 @@ class _VideoStreamingSettingsPageState
           if (hasEnabled)
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16)
-                    .copyWith(top: 20),
-                child: _getMlSettings(context),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                ).copyWith(top: 20),
+                child: _getStreamingSettings(context),
               ),
             )
           else
@@ -91,6 +107,7 @@ class _VideoStreamingSettingsPageState
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
                   children: [
+                    const SizedBox(height: 12),
                     ButtonWidget(
                       buttonType: ButtonType.primary,
                       labelText: context.l10n.enable,
@@ -102,18 +119,7 @@ class _VideoStreamingSettingsPageState
                     ButtonWidget(
                       buttonType: ButtonType.secondary,
                       labelText: context.l10n.moreDetails,
-                      onTap: () async {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (BuildContext context) {
-                              return WebPage(
-                                S.of(context).help,
-                                "https://help.ente.io/photos/faq/video-streaming",
-                              );
-                            },
-                          ),
-                        ).ignore();
-                      },
+                      onTap: openHelp,
                     ),
                   ],
                 ),
@@ -124,20 +130,32 @@ class _VideoStreamingSettingsPageState
     );
   }
 
+  Future<void> openHelp() async {
+    Navigator.of(context)
+        .push(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return WebPage(S.of(context).help, helpUrl);
+            },
+          ),
+        )
+        .ignore();
+  }
+
   Future<void> toggleVideoStreaming() async {
     final isEnabled = VideoPreviewService.instance.isVideoStreamingEnabled;
 
     await VideoPreviewService.instance.setIsVideoStreamingEnabled(!isEnabled);
+    setState(() {});
   }
 
-  Widget _getMlSettings(BuildContext context) {
-    final hasEnabled = flagService.hasGrantedMLConsent;
-    if (!hasEnabled) {
-      return const SizedBox.shrink();
-    }
+  Widget _getStreamingSettings(BuildContext context) {
+    final hasEnabled = VideoPreviewService.instance.isVideoStreamingEnabled;
+
     return Column(
       children: [
         MenuItemWidget(
+          padding: const EdgeInsets.only(left: 8, right: 4),
           captionedTextWidget: CaptionedTextWidget(
             title: S.of(context).enabled,
           ),
@@ -148,9 +166,8 @@ class _VideoStreamingSettingsPageState
             },
           ),
           singleBorderRadius: 8,
-          isGestureDetectorDisabled: true,
+          alignCaptionedTextToLeft: true,
         ),
-        const SizedBox(height: 12),
         const VideoStreamingStatusWidget(),
       ],
     );
@@ -158,9 +175,7 @@ class _VideoStreamingSettingsPageState
 }
 
 class VideoStreamingStatusWidget extends StatefulWidget {
-  const VideoStreamingStatusWidget({
-    super.key,
-  });
+  const VideoStreamingStatusWidget({super.key});
 
   @override
   State<VideoStreamingStatusWidget> createState() =>
@@ -183,23 +198,18 @@ class VideoStreamingStatusWidgetState
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Row(
-          children: [
-            MenuSectionTitle(title: S.of(context).status),
-            Expanded(child: Container()),
-          ],
-        ),
         FutureBuilder(
           future: VideoPreviewService.instance.getStatus(),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               final double netProcessed = snapshot.data!.netProcessedItems;
-              final int processed = snapshot.data!.processed;
               final int total = snapshot.data!.total;
 
               return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   MenuItemWidget(
+                    padding: const EdgeInsets.only(left: 8, right: 6),
                     captionedTextWidget: CaptionedTextWidget(
                       title: S.of(context).processed,
                     ),
@@ -207,42 +217,24 @@ class VideoStreamingStatusWidgetState
                       total < 1
                           ? 'NA'
                           : netProcessed == 0
-                              ? '0%'
-                              : '${(netProcessed * 100.0).toStringAsFixed(2)}%',
+                          ? '0%'
+                          : '${(netProcessed * 100.0).toStringAsFixed(2)}%',
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                     singleBorderRadius: 8,
                     alignCaptionedTextToLeft: true,
                     isGestureDetectorDisabled: true,
-                    key: ValueKey("pending_items_" + netProcessed.toString()),
+                    key: ValueKey("processed_items_" + netProcessed.toString()),
                   ),
-                  MenuItemWidget(
-                    captionedTextWidget: CaptionedTextWidget(
-                      title: S.of(context).videosProcessed,
+                  const SizedBox(height: 4),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text(
+                      S.of(context).videoStreamingNote,
+                      style: getEnteTextTheme(context).mini.copyWith(
+                        color: getEnteColorScheme(context).textMuted,
+                      ),
                     ),
-                    trailingWidget: Text(
-                      '$processed',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    singleBorderRadius: 8,
-                    alignCaptionedTextToLeft: true,
-                    isGestureDetectorDisabled: true,
-                    key: ValueKey(
-                      "videos_processed_item_" + processed.toString(),
-                    ),
-                  ),
-                  MenuItemWidget(
-                    captionedTextWidget: CaptionedTextWidget(
-                      title: S.of(context).totalVideos,
-                    ),
-                    trailingWidget: Text(
-                      '$processed',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    singleBorderRadius: 8,
-                    alignCaptionedTextToLeft: true,
-                    isGestureDetectorDisabled: true,
-                    key: ValueKey("total_videos_item_" + total.toString()),
                   ),
                 ],
               );

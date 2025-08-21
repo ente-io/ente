@@ -2296,6 +2296,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "singleFileInBothLocalAndRemote": m90,
     "singleFileInRemoteOnly": m91,
     "skip": MessageLookupByLibrary.simpleMessage("Skip"),
+    "skippedVideos": MessageLookupByLibrary.simpleMessage("Skipped videos"),
     "smartMemories": MessageLookupByLibrary.simpleMessage("Smart memories"),
     "social": MessageLookupByLibrary.simpleMessage("Social"),
     "someItemsAreInBothEnteAndYourDevice": MessageLookupByLibrary.simpleMessage(
@@ -2591,7 +2592,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "videoSmallCase": MessageLookupByLibrary.simpleMessage("video"),
     "videoStreaming": MessageLookupByLibrary.simpleMessage("Streamable videos"),
     "videoStreamingDescription": MessageLookupByLibrary.simpleMessage(
-      "Video streaming allows you to play videos without downloading them first. This is useful for large videos that you don\'t want to store on your device.",
+      "Video streaming lets you play videos on any device without waiting. Enabling this toggle will process and generate video streams on this device.",
+    ),
+    "videoStreamingDescriptionClickable": MessageLookupByLibrary.simpleMessage(
+      "More information here.",
+    ),
+    "videoStreamingNote": MessageLookupByLibrary.simpleMessage(
+      "Only videos created in the last 60 days and shorter than 1 minute will be processed on this device. For the rest of the library, you will have to enable streamable videos in the desktop app.",
     ),
     "videos": MessageLookupByLibrary.simpleMessage("Videos"),
     "videosProcessed": MessageLookupByLibrary.simpleMessage("Videos processed"),

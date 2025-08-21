@@ -73,9 +73,7 @@ class _OtherContactPageState extends State<OtherContactPage> {
     _logger.info('session ${widget.emergencyInfo}');
     if (recoverySession != null) {
       final dateTime = DateTime.now().add(
-        Duration(
-          microseconds: recoverySession!.waitTill,
-        ),
+        Duration(microseconds: recoverySession!.waitTill),
       );
       waitTill = getFormattedTime(context, dateTime);
     }
@@ -93,17 +91,14 @@ class _OtherContactPageState extends State<OtherContactPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(
-                    height: 12,
-                  ),
-                  TitleBarTitleWidget(
-                    title: context.l10n.recoverAccount,
-                  ),
+                  const SizedBox(height: 12),
+                  TitleBarTitleWidget(title: context.l10n.recoverAccount),
                   Text(
                     accountEmail,
                     textAlign: TextAlign.left,
-                    style:
-                        textTheme.small.copyWith(color: colorScheme.textMuted),
+                    style: textTheme.small.copyWith(
+                      color: colorScheme.textMuted,
+                    ),
                   ),
                 ],
               ),
@@ -116,15 +111,15 @@ class _OtherContactPageState extends State<OtherContactPage> {
                     style: textTheme.body,
                   )
                 : (recoverySession!.status == "READY"
-                    ? Text(
-                        context.l10n.recoveryReady(accountEmail),
-                        style: textTheme.body,
-                      )
-                    : Text(
-                        "You can recover $accountEmail's"
-                        " account after $waitTill.",
-                        style: textTheme.bodyBold,
-                      )),
+                      ? Text(
+                          context.l10n.recoveryReady(accountEmail),
+                          style: textTheme.body,
+                        )
+                      : Text(
+                          "You can recover $accountEmail's"
+                          " account after $waitTill.",
+                          style: textTheme.bodyBold,
+                        )),
             const SizedBox(height: 24),
             if (recoverySession == null)
               ButtonWidget(
@@ -159,8 +154,10 @@ class _OtherContactPageState extends State<OtherContactPage> {
                                 );
                               }
                             } catch (e) {
-                              showGenericErrorDialog(context: context, error: e)
-                                  .ignore();
+                              showGenericErrorDialog(
+                                context: context,
+                                error: e,
+                              ).ignore();
                             }
                           }
                         }
@@ -175,16 +172,20 @@ class _OtherContactPageState extends State<OtherContactPage> {
                   labelText: context.l10n.recoverAccount,
                   onTap: () async {
                     try {
-                      final (String key, KeyAttributes attributes) =
-                          await EmergencyContactService.instance
-                              .getRecoveryInfo(recoverySession!);
+                      final (
+                        String key,
+                        KeyAttributes attributes,
+                      ) = await EmergencyContactService.instance
+                          .getRecoveryInfo(recoverySession!);
                       routeToPage(
                         context,
                         RecoverOthersAccount(key, attributes, recoverySession!),
                       ).ignore();
                     } catch (e) {
-                      showGenericErrorDialog(context: context, error: e)
-                          .ignore();
+                      showGenericErrorDialog(
+                        context: context,
+                        error: e,
+                      ).ignore();
                     }
                   },
                 ),
@@ -204,8 +205,9 @@ class _OtherContactPageState extends State<OtherContactPage> {
                     body: S.of(context).cancelAccountRecoveryBody,
                     isCritical: true,
                     firstButtonOnTap: () async {
-                      await EmergencyContactService.instance
-                          .stopRecovery(recoverySession!);
+                      await EmergencyContactService.instance.stopRecovery(
+                        recoverySession!,
+                      );
                     },
                   );
                   if (actionResult?.action == ButtonAction.first) {
@@ -269,7 +271,8 @@ class _OtherContactPageState extends State<OtherContactPage> {
           isInAlert: true,
         ),
       ],
-      body: "Are you sure your want to stop being a trusted "
+      body:
+          "Are you sure your want to stop being a trusted "
           "contact for $accountEmail?",
       title: context.l10n.remove,
       actionSheetType: ActionSheetType.defaultActionSheet,
