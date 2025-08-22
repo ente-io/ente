@@ -21,7 +21,7 @@ pub fn derive_login_key(key_enc_key: &[u8]) -> Result<Vec<u8>> {
             sub_key.as_mut_ptr(),
             LOGIN_SUB_KEY_LEN,
             LOGIN_SUB_KEY_ID,
-            context.as_ptr(),
+            context.as_ptr() as *const std::ffi::c_char,
             key_enc_key.as_ptr(),
         )
     };

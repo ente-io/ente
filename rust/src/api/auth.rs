@@ -57,7 +57,7 @@ impl<'a> AuthClient<'a> {
             srp_m1: STANDARD.encode(client_proof),
         };
 
-        log::debug!("Sending verify-session request: {:?}", request);
+        log::debug!("Sending verify-session request: {request:?}");
 
         self.api
             .post("/users/srp/verify-session", &request, None)
@@ -124,8 +124,7 @@ impl<'a> AuthClient<'a> {
             .process_reply(&a, &identity, &login_key, &srp_salt, &server_public)
             .map_err(|e| {
                 crate::models::error::Error::AuthenticationFailed(format!(
-                    "SRP client process failed: {:?}",
-                    e
+                    "SRP client process failed: {e:?}"
                 ))
             })?;
 
@@ -133,7 +132,7 @@ impl<'a> AuthClient<'a> {
         let proof = verifier.proof();
 
         let auth_response = self
-            .verify_srp_session(&srp_attrs.srp_user_id, &session.session_id, &proof)
+            .verify_srp_session(&srp_attrs.srp_user_id, &session.session_id, proof)
             .await?;
 
         // TODO: Verify server proof if provided
@@ -184,10 +183,7 @@ impl<'a> AuthClient<'a> {
 
     /// Check passkey verification status
     pub async fn check_passkey_status(&self, session_id: &str) -> Result<AuthResponse> {
-        let url = format!(
-            "/users/two-factor/passkeys/get-token?sessionID={}",
-            session_id
-        );
+        let url = format!("/users/two-factor/passkeys/get-token?sessionID={session_id}");
         self.api.get(&url, None).await
     }
 }

@@ -26,6 +26,8 @@ The codebase must pass the GitHub Actions workflow at `../.github/workflows/rust
 2. `cargo clippy --all-targets --all-features` - Linting with all warnings as errors (RUSTFLAGS: -D warnings)
 3. `cargo build` - Build verification
 
+**Important FFI Note**: When working with libsodium FFI bindings, always use `std::ffi::c_char` for C char pointer casts (e.g., `as *const std::ffi::c_char`), NOT raw `i8` casts. The CI environment may have different type expectations than local development.
+
 ## Architecture Overview
 
 This is a Rust CLI for ente.io, providing encrypted photo backup and export functionality. The project is migrating from a Go implementation and follows a modular architecture:

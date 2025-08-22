@@ -34,14 +34,14 @@ impl<'a> ApiMethods<'a> {
         account_id: &str,
         since_time: i64,
     ) -> Result<Vec<Collection>> {
-        let url = format!("/collections/v2?sinceTime={}", since_time);
+        let url = format!("/collections/v2?sinceTime={since_time}");
         let response: GetCollectionsResponse = self.api.get(&url, Some(account_id)).await?;
         Ok(response.collections)
     }
 
     /// Get a specific collection by ID
     pub async fn get_collection(&self, account_id: &str, collection_id: i64) -> Result<Collection> {
-        let url = format!("/collections/{}", collection_id);
+        let url = format!("/collections/{collection_id}");
         self.api.get(&url, Some(account_id)).await
     }
 
@@ -62,10 +62,8 @@ impl<'a> ApiMethods<'a> {
         collection_id: i64,
         since_time: i64,
     ) -> Result<(Vec<File>, bool)> {
-        let url = format!(
-            "/collections/v2/diff?collectionID={}&sinceTime={}",
-            collection_id, since_time
-        );
+        let url =
+            format!("/collections/v2/diff?collectionID={collection_id}&sinceTime={since_time}");
         let response: GetFilesResponse = self.api.get(&url, Some(account_id)).await?;
         Ok((response.diff, response.has_more))
     }
@@ -77,10 +75,7 @@ impl<'a> ApiMethods<'a> {
         collection_id: i64,
         file_id: i64,
     ) -> Result<File> {
-        let url = format!(
-            "/collections/file?collectionID={}&fileID={}",
-            collection_id, file_id
-        );
+        let url = format!("/collections/file?collectionID={collection_id}&fileID={file_id}");
         let response: GetFileResponse = self.api.get(&url, Some(account_id)).await?;
         Ok(response.file)
     }
@@ -100,7 +95,7 @@ impl<'a> ApiMethods<'a> {
         since_time: i64,
         limit: i32,
     ) -> Result<(Vec<File>, bool)> {
-        let url = format!("/diff?sinceTime={}&limit={}", since_time, limit);
+        let url = format!("/diff?sinceTime={since_time}&limit={limit}");
         let response: GetDiffResponse = self.api.get(&url, Some(account_id)).await?;
         Ok((response.diff, response.has_more))
     }
@@ -111,10 +106,10 @@ impl<'a> ApiMethods<'a> {
         let base_url = &self.api.base_url;
         if base_url == "https://api.ente.io" {
             // Use the CDN URL for production
-            Ok(format!("https://files.ente.io/?fileID={}", file_id))
+            Ok(format!("https://files.ente.io/?fileID={file_id}"))
         } else {
             // Use the API endpoint for custom/dev environments
-            let url = format!("/files/download/{}", file_id);
+            let url = format!("/files/download/{file_id}");
             let response: GetFileUrlResponse = self.api.get(&url, Some(account_id)).await?;
             Ok(response.url)
         }
@@ -122,7 +117,7 @@ impl<'a> ApiMethods<'a> {
 
     /// Get thumbnail URL for a file
     pub async fn get_thumbnail_url(&self, account_id: &str, file_id: i64) -> Result<String> {
-        let url = format!("/files/preview/{}", file_id);
+        let url = format!("/files/preview/{file_id}");
         let response: GetThumbnailUrlResponse = self.api.get(&url, Some(account_id)).await?;
         Ok(response.url)
     }
@@ -143,7 +138,7 @@ impl<'a> ApiMethods<'a> {
 
     /// Get deleted files
     pub async fn get_trash(&self, account_id: &str, since_time: i64) -> Result<(Vec<File>, bool)> {
-        let url = format!("/trash/v2?sinceTime={}", since_time);
+        let url = format!("/trash/v2?sinceTime={since_time}");
         let response: GetDiffResponse = self.api.get(&url, Some(account_id)).await?;
         Ok((response.diff, response.has_more))
     }

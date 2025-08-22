@@ -103,23 +103,22 @@ impl ApiClient {
             match req.send().await {
                 Ok(response) => {
                     // Check if we should retry based on status code
-                    if response.status() == StatusCode::TOO_MANY_REQUESTS
-                        || response.status().is_server_error()
+                    if (response.status() == StatusCode::TOO_MANY_REQUESTS
+                        || response.status().is_server_error())
+                        && retry_count < MAX_RETRIES
                     {
-                        if retry_count < MAX_RETRIES {
-                            retry_count += 1;
-                            log::warn!(
-                                "Request failed with status {}, retry attempt {}/{}",
-                                response.status(),
-                                retry_count,
-                                MAX_RETRIES
-                            );
+                        retry_count += 1;
+                        log::warn!(
+                            "Request failed with status {}, retry attempt {}/{}",
+                            response.status(),
+                            retry_count,
+                            MAX_RETRIES
+                        );
 
-                            // Exponential backoff with jitter
-                            sleep(Duration::from_millis(delay_ms)).await;
-                            delay_ms = (delay_ms * 2).min(MAX_RETRY_DELAY_MS);
-                            continue;
-                        }
+                        // Exponential backoff with jitter
+                        sleep(Duration::from_millis(delay_ms)).await;
+                        delay_ms = (delay_ms * 2).min(MAX_RETRY_DELAY_MS);
+                        continue;
                     }
 
                     return Ok(response);
@@ -128,10 +127,7 @@ impl ApiClient {
                     if retry_count < MAX_RETRIES {
                         retry_count += 1;
                         log::warn!(
-                            "Request failed with error: {}, retry attempt {}/{}",
-                            e,
-                            retry_count,
-                            MAX_RETRIES
+                            "Request failed with error: {e}, retry attempt {retry_count}/{MAX_RETRIES}"
                         );
 
                         sleep(Duration::from_millis(delay_ms)).await;
@@ -170,12 +166,11 @@ impl ApiClient {
                     serde_json::to_string_pretty(&error_json).unwrap_or(error_text.clone())
                 );
             } else {
-                log::error!("API error: status={}, body={}", status, error_text);
+                log::error!("API error: status={status}, body={error_text}");
             }
 
             return Err(Error::Generic(format!(
-                "API error ({}): {}",
-                status, error_text
+                "API error ({status}): {error_text}"
             )));
         }
 
@@ -219,12 +214,11 @@ impl ApiClient {
                     serde_json::to_string_pretty(&error_json).unwrap_or(error_text.clone())
                 );
             } else {
-                log::error!("API error: status={}, body={}", status, error_text);
+                log::error!("API error: status={status}, body={error_text}");
             }
 
             return Err(Error::Generic(format!(
-                "API error ({}): {}",
-                status, error_text
+                "API error ({status}): {error_text}"
             )));
         }
 
@@ -258,12 +252,11 @@ impl ApiClient {
                     serde_json::to_string_pretty(&error_json).unwrap_or(error_text.clone())
                 );
             } else {
-                log::error!("API error: status={}, body={}", status, error_text);
+                log::error!("API error: status={status}, body={error_text}");
             }
 
             return Err(Error::Generic(format!(
-                "API error ({}): {}",
-                status, error_text
+                "API error ({status}): {error_text}"
             )));
         }
 
@@ -293,12 +286,11 @@ impl ApiClient {
                     serde_json::to_string_pretty(&error_json).unwrap_or(error_text.clone())
                 );
             } else {
-                log::error!("API error: status={}, body={}", status, error_text);
+                log::error!("API error: status={status}, body={error_text}");
             }
 
             return Err(Error::Generic(format!(
-                "API error ({}): {}",
-                status, error_text
+                "API error ({status}): {error_text}"
             )));
         }
 
@@ -317,7 +309,7 @@ impl ApiClient {
                 .text()
                 .await
                 .unwrap_or_else(|_| "Unknown error".to_string());
-            return Err(Error::Generic(format!("Download error: {}", error_text)));
+            return Err(Error::Generic(format!("Download error: {error_text}")));
         }
 
         Ok(response.bytes().await?.to_vec())

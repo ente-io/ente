@@ -79,8 +79,7 @@ async fn add_account(
             // If invalid app provided via CLI, use interactive selection
             if password_arg.is_some() {
                 return Err(crate::models::error::Error::InvalidInput(format!(
-                    "Invalid app: {}. Must be one of: photos, locker, auth",
-                    app_arg
+                    "Invalid app: {app_arg}. Must be one of: photos, locker, auth"
                 )));
             }
             let apps = vec!["photos", "locker", "auth"];
@@ -101,10 +100,7 @@ async fn add_account(
 
     // Check if account already exists
     if let Ok(Some(_existing)) = storage.accounts().get(&email, app) {
-        println!(
-            "\n❌ Account already exists for {} with app {:?}",
-            email, app
-        );
+        println!("\n❌ Account already exists for {email} with app {app:?}");
         return Ok(());
     }
 
@@ -124,7 +120,7 @@ async fn add_account(
     } else {
         Input::new()
             .with_prompt("Enter export directory path")
-            .default(format!("./exports/{}", email))
+            .default(format!("./exports/{email}"))
             .interact_text()
             .map_err(|e| crate::models::error::Error::InvalidInput(e.to_string()))?
     };
@@ -132,14 +128,14 @@ async fn add_account(
     // Validate export directory
     let export_path = PathBuf::from(&export_dir);
     if !export_path.exists() {
-        println!("Creating export directory: {}", export_dir);
-        std::fs::create_dir_all(&export_path).map_err(|e| crate::models::error::Error::Io(e))?;
+        println!("Creating export directory: {export_dir}");
+        std::fs::create_dir_all(&export_path).map_err(crate::models::error::Error::Io)?;
     }
 
     // Initialize API client (use ENTE_ENDPOINT env var if set, otherwise default to production)
     let api_endpoint = std::env::var("ENTE_ENDPOINT").ok();
     if let Some(ref endpoint) = api_endpoint {
-        log::debug!("Using custom API endpoint: {}", endpoint);
+        log::debug!("Using custom API endpoint: {endpoint}");
     }
     let api_client = ApiClient::new(api_endpoint)?;
     let auth_client = AuthClient::new(&api_client);
@@ -150,7 +146,7 @@ async fn add_account(
     let (auth_response, key_enc_key) = match auth_client.login_with_srp(&email, &password).await {
         Ok(result) => result,
         Err(e) => {
-            println!("\n❌ Authentication failed: {}", e);
+            println!("\n❌ Authentication failed: {e}");
             return Err(e);
         }
     };
@@ -251,9 +247,9 @@ async fn add_account(
     storage.accounts().store_secrets(account_id, &secrets)?;
 
     println!("\n✅ Account added successfully!");
-    println!("   Email: {}", email);
-    println!("   App: {:?}", app);
-    println!("   Export directory: {}", export_dir);
+    println!("   Email: {email}");
+    println!("   App: {app:?}");
+    println!("   Export directory: {export_dir}");
 
     Ok(())
 }
@@ -265,8 +261,7 @@ async fn update_account(storage: &Storage, email: &str, dir: &str, app_str: &str
         "auth" => App::Auth,
         _ => {
             return Err(crate::models::error::Error::InvalidInput(format!(
-                "Invalid app: {}. Must be one of: photos, locker, auth",
-                app_str
+                "Invalid app: {app_str}. Must be one of: photos, locker, auth"
             )));
         }
     };
@@ -274,17 +269,17 @@ async fn update_account(storage: &Storage, email: &str, dir: &str, app_str: &str
     // Validate export directory
     let export_path = PathBuf::from(dir);
     if !export_path.exists() {
-        println!("Creating export directory: {}", dir);
-        std::fs::create_dir_all(&export_path).map_err(|e| crate::models::error::Error::Io(e))?;
+        println!("Creating export directory: {dir}");
+        std::fs::create_dir_all(&export_path).map_err(crate::models::error::Error::Io)?;
     }
 
     // Update account
     storage.accounts().update_export_dir(email, app, dir)?;
 
     println!("\n✅ Account updated successfully!");
-    println!("   Email: {}", email);
-    println!("   App: {:?}", app);
-    println!("   New export directory: {}", dir);
+    println!("   Email: {email}");
+    println!("   App: {app:?}");
+    println!("   New export directory: {dir}");
 
     Ok(())
 }
@@ -296,20 +291,19 @@ async fn get_token(storage: &Storage, email: &str, app_str: &str) -> Result<()> 
         "auth" => App::Auth,
         _ => {
             return Err(crate::models::error::Error::InvalidInput(format!(
-                "Invalid app: {}. Must be one of: photos, locker, auth",
-                app_str
+                "Invalid app: {app_str}. Must be one of: photos, locker, auth"
             )));
         }
     };
 
     // Get account
     let account = storage.accounts().get(email, app)?.ok_or_else(|| {
-        crate::models::error::Error::NotFound(format!("Account not found: {}", email))
+        crate::models::error::Error::NotFound(format!("Account not found: {email}"))
     })?;
 
     // Get account secrets
     let secrets = storage.accounts().get_secrets(account.id)?.ok_or_else(|| {
-        crate::models::error::Error::NotFound(format!("Secrets not found for account {}", email))
+        crate::models::error::Error::NotFound(format!("Secrets not found for account {email}"))
     })?;
 
     // Convert token to string (assuming it's UTF-8)
@@ -317,7 +311,7 @@ async fn get_token(storage: &Storage, email: &str, app_str: &str) -> Result<()> 
         crate::models::error::Error::Generic("Token is not valid UTF-8".to_string())
     })?;
 
-    println!("{}", token_str);
+    println!("{token_str}");
 
     Ok(())
 }

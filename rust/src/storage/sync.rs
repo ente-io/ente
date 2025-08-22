@@ -135,9 +135,8 @@ impl<'a> SyncStore<'a> {
         };
 
         let query = format!(
-            "INSERT OR REPLACE INTO sync_state (account_id, {}) VALUES (?1, ?2)
-             ON CONFLICT(account_id) DO UPDATE SET {} = ?2",
-            column, column
+            "INSERT OR REPLACE INTO sync_state (account_id, {column}) VALUES (?1, ?2)
+             ON CONFLICT(account_id) DO UPDATE SET {column} = ?2"
         );
 
         self.conn.execute(&query, params![account_id, timestamp])?;
@@ -154,7 +153,7 @@ impl<'a> SyncStore<'a> {
             _ => return Err(crate::Error::InvalidInput("Invalid sync type".into())),
         };
 
-        let query = format!("SELECT {} FROM sync_state WHERE account_id = ?1", column);
+        let query = format!("SELECT {column} FROM sync_state WHERE account_id = ?1");
         let mut stmt = self.conn.prepare(&query)?;
 
         let timestamp = stmt

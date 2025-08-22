@@ -44,7 +44,7 @@ impl<'a> AccountStore<'a> {
         )?;
 
         let account = stmt
-            .query_row(params![email, format!("{:?}", app).to_lowercase()], |row| {
+            .query_row(params![email, format!("{app:?}").to_lowercase()], |row| {
                 row_to_account(row)
             })
             .optional()?;
@@ -60,7 +60,7 @@ impl<'a> AccountStore<'a> {
         )?;
 
         let accounts = stmt
-            .query_map([], |row| row_to_account(row))?
+            .query_map([], row_to_account)?
             .collect::<std::result::Result<Vec<_>, _>>()?;
 
         Ok(accounts)
@@ -73,7 +73,7 @@ impl<'a> AccountStore<'a> {
         self.conn.execute(
             "UPDATE accounts SET export_dir = ?1, updated_at = ?2 
              WHERE email = ?3 AND app = ?4",
-            params![export_dir, now, email, format!("{:?}", app).to_lowercase()],
+            params![export_dir, now, email, format!("{app:?}").to_lowercase()],
         )?;
 
         Ok(())
