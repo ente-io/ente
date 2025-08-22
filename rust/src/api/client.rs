@@ -156,11 +156,27 @@ impl ApiClient {
         let response = self.execute_with_retry(request).await?;
 
         if !response.status().is_success() {
+            let status = response.status();
             let error_text = response
                 .text()
                 .await
                 .unwrap_or_else(|_| "Unknown error".to_string());
-            return Err(Error::Generic(format!("API error: {}", error_text)));
+
+            // Try to parse as JSON to get error details
+            if let Ok(error_json) = serde_json::from_str::<serde_json::Value>(&error_text) {
+                log::error!(
+                    "API error: status={}, body={}",
+                    status,
+                    serde_json::to_string_pretty(&error_json).unwrap_or(error_text.clone())
+                );
+            } else {
+                log::error!("API error: status={}, body={}", status, error_text);
+            }
+
+            return Err(Error::Generic(format!(
+                "API error ({}): {}",
+                status, error_text
+            )));
         }
 
         Ok(response.json().await?)
@@ -173,17 +189,43 @@ impl ApiClient {
         B: Serialize,
     {
         let url = format!("{}{}", self.base_url, path);
+
+        // Debug log the JSON being sent
+        if path.contains("verify-session") {
+            log::debug!(
+                "POST {} with JSON: {}",
+                url,
+                serde_json::to_string_pretty(body)?
+            );
+        }
+
         let request = self.client.post(&url).json(body);
         let request = self.build_request(request, account_id);
 
         let response = self.execute_with_retry(request).await?;
 
         if !response.status().is_success() {
+            let status = response.status();
             let error_text = response
                 .text()
                 .await
                 .unwrap_or_else(|_| "Unknown error".to_string());
-            return Err(Error::Generic(format!("API error: {}", error_text)));
+
+            // Try to parse as JSON to get error details
+            if let Ok(error_json) = serde_json::from_str::<serde_json::Value>(&error_text) {
+                log::error!(
+                    "API error: status={}, body={}",
+                    status,
+                    serde_json::to_string_pretty(&error_json).unwrap_or(error_text.clone())
+                );
+            } else {
+                log::error!("API error: status={}, body={}", status, error_text);
+            }
+
+            return Err(Error::Generic(format!(
+                "API error ({}): {}",
+                status, error_text
+            )));
         }
 
         Ok(response.json().await?)
@@ -202,11 +244,27 @@ impl ApiClient {
         let response = self.execute_with_retry(request).await?;
 
         if !response.status().is_success() {
+            let status = response.status();
             let error_text = response
                 .text()
                 .await
                 .unwrap_or_else(|_| "Unknown error".to_string());
-            return Err(Error::Generic(format!("API error: {}", error_text)));
+
+            // Try to parse as JSON to get error details
+            if let Ok(error_json) = serde_json::from_str::<serde_json::Value>(&error_text) {
+                log::error!(
+                    "API error: status={}, body={}",
+                    status,
+                    serde_json::to_string_pretty(&error_json).unwrap_or(error_text.clone())
+                );
+            } else {
+                log::error!("API error: status={}, body={}", status, error_text);
+            }
+
+            return Err(Error::Generic(format!(
+                "API error ({}): {}",
+                status, error_text
+            )));
         }
 
         Ok(response.json().await?)
@@ -221,11 +279,27 @@ impl ApiClient {
         let response = self.execute_with_retry(request).await?;
 
         if !response.status().is_success() {
+            let status = response.status();
             let error_text = response
                 .text()
                 .await
                 .unwrap_or_else(|_| "Unknown error".to_string());
-            return Err(Error::Generic(format!("API error: {}", error_text)));
+
+            // Try to parse as JSON to get error details
+            if let Ok(error_json) = serde_json::from_str::<serde_json::Value>(&error_text) {
+                log::error!(
+                    "API error: status={}, body={}",
+                    status,
+                    serde_json::to_string_pretty(&error_json).unwrap_or(error_text.clone())
+                );
+            } else {
+                log::error!("API error: status={}, body={}", status, error_text);
+            }
+
+            return Err(Error::Generic(format!(
+                "API error ({}): {}",
+                status, error_text
+            )));
         }
 
         Ok(())

@@ -29,6 +29,7 @@ zeroize = { version = "1.8", features = ["derive"] }
 
 # SRP authentication
 srp = "0.6"
+srp6 = "1.0.0-beta.1"
 num-bigint = { version = "0.4", features = ["rand"] }
 sha2 = "0.10"
 urlencoding = "2.1"

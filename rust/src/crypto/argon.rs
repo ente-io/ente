@@ -27,17 +27,20 @@ pub fn derive_argon_key(
         )));
     }
 
-    let mut key = vec![0u8; 32]; // 32 bytes output
+    let mut key = vec![0u8; sodium::crypto_secretbox_KEYBYTES as usize]; // 32 bytes output
+
+    // Convert password to bytes (matching JS sodium.from_string)
+    let password_bytes = password.as_bytes();
 
     let result = unsafe {
         sodium::crypto_pwhash(
             key.as_mut_ptr(),
             key.len() as u64,
-            password.as_ptr() as *const std::ffi::c_char,
-            password.len() as u64,
+            password_bytes.as_ptr() as *const std::ffi::c_char,
+            password_bytes.len() as u64,
             salt_bytes.as_ptr(),
             ops_limit as u64,
-            mem_limit as usize * 1024, // Convert from KB to bytes
+            mem_limit as usize, // API sends bytes, libsodium-sys expects bytes
             sodium::crypto_pwhash_ALG_ARGON2ID13 as i32,
         )
     };

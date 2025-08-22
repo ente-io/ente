@@ -712,6 +712,7 @@ dependencies = [
  "sha2",
  "sqlx",
  "srp",
+ "srp6",
  "tempdir",
  "tempfile",
  "thiserror 2.0.16",
@@ -1097,6 +1098,12 @@ name = "hex"
 version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
+
+[[package]]
+name = "hex-literal"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bcaaec4551594c969335c98c903c1397853d4198408ea609190f420500f6be71"
 
 [[package]]
 name = "hkdf"
@@ -1756,6 +1763,7 @@ dependencies = [
  "num-integer",
  "num-traits",
  "rand 0.8.5",
+ "serde",
 ]
 
 [[package]]
@@ -2884,6 +2892,21 @@ dependencies = [
  "lazy_static",
  "num-bigint",
  "subtle",
+]
+
+[[package]]
+name = "srp6"
+version = "1.0.0-beta.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "279b6afb40ed1f544789f35d689a0b5fadb2f404de70102cdd8918fdce25e47f"
+dependencies = [
+ "hex-literal",
+ "num-bigint",
+ "num-traits",
+ "rand 0.9.2",
+ "serde",
+ "sha2",
+ "thiserror 2.0.16",
 ]
 
 [[package]]

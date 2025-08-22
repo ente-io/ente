@@ -14,7 +14,12 @@ use std::path::PathBuf;
 pub async fn handle_account_command(cmd: AccountCommand, storage: &Storage) -> Result<()> {
     match cmd.command {
         AccountSubcommands::List => list_accounts(storage).await,
-        AccountSubcommands::Add => add_account(storage).await,
+        AccountSubcommands::Add {
+            email,
+            password,
+            app,
+            export_dir,
+        } => add_account(storage, email, password, app, export_dir).await,
         AccountSubcommands::Update { email, dir, app } => {
             update_account(storage, &email, &dir, &app).await
         }
@@ -46,29 +51,52 @@ async fn list_accounts(storage: &Storage) -> Result<()> {
     Ok(())
 }
 
-async fn add_account(storage: &Storage) -> Result<()> {
+async fn add_account(
+    storage: &Storage,
+    email_arg: Option<String>,
+    password_arg: Option<String>,
+    app_arg: String,
+    export_dir_arg: Option<String>,
+) -> Result<()> {
     println!("\n=== Add Ente Account ===\n");
 
-    // Get email
-    let email: String = Input::new()
-        .with_prompt("Enter your email address")
-        .interact_text()
-        .map_err(|e| crate::models::error::Error::InvalidInput(e.to_string()))?;
+    // Get email (from arg or prompt)
+    let email = if let Some(email) = email_arg {
+        email
+    } else {
+        Input::new()
+            .with_prompt("Enter your email address")
+            .interact_text()
+            .map_err(|e| crate::models::error::Error::InvalidInput(e.to_string()))?
+    };
 
-    // Get app type
-    let apps = vec!["photos", "locker", "auth"];
-    let app_index = Select::new()
-        .with_prompt("Select the Ente app")
-        .items(&apps)
-        .default(0)
-        .interact()
-        .map_err(|e| crate::models::error::Error::InvalidInput(e.to_string()))?;
-
-    let app = match apps[app_index] {
+    // Parse app type
+    let app = match app_arg.to_lowercase().as_str() {
         "photos" => App::Photos,
         "locker" => App::Locker,
         "auth" => App::Auth,
-        _ => unreachable!(),
+        _ => {
+            // If invalid app provided via CLI, use interactive selection
+            if password_arg.is_some() {
+                return Err(crate::models::error::Error::InvalidInput(format!(
+                    "Invalid app: {}. Must be one of: photos, locker, auth",
+                    app_arg
+                )));
+            }
+            let apps = vec!["photos", "locker", "auth"];
+            let app_index = Select::new()
+                .with_prompt("Select the Ente app")
+                .items(&apps)
+                .default(0)
+                .interact()
+                .map_err(|e| crate::models::error::Error::InvalidInput(e.to_string()))?;
+            match apps[app_index] {
+                "photos" => App::Photos,
+                "locker" => App::Locker,
+                "auth" => App::Auth,
+                _ => unreachable!(),
+            }
+        }
     };
 
     // Check if account already exists
@@ -80,18 +108,26 @@ async fn add_account(storage: &Storage) -> Result<()> {
         return Ok(());
     }
 
-    // Get password
-    let password = Password::new()
-        .with_prompt("Enter your password")
-        .interact()
-        .map_err(|e| crate::models::error::Error::InvalidInput(e.to_string()))?;
+    // Get password (from arg or prompt)
+    let password = if let Some(password) = password_arg {
+        password
+    } else {
+        Password::new()
+            .with_prompt("Enter your password")
+            .interact()
+            .map_err(|e| crate::models::error::Error::InvalidInput(e.to_string()))?
+    };
 
-    // Get export directory
-    let export_dir: String = Input::new()
-        .with_prompt("Enter export directory path")
-        .default(format!("./exports/{}", email))
-        .interact_text()
-        .map_err(|e| crate::models::error::Error::InvalidInput(e.to_string()))?;
+    // Get export directory (from arg or prompt)
+    let export_dir = if let Some(dir) = export_dir_arg {
+        dir
+    } else {
+        Input::new()
+            .with_prompt("Enter export directory path")
+            .default(format!("./exports/{}", email))
+            .interact_text()
+            .map_err(|e| crate::models::error::Error::InvalidInput(e.to_string()))?
+    };
 
     // Validate export directory
     let export_path = PathBuf::from(&export_dir);
@@ -100,8 +136,12 @@ async fn add_account(storage: &Storage) -> Result<()> {
         std::fs::create_dir_all(&export_path).map_err(|e| crate::models::error::Error::Io(e))?;
     }
 
-    // Initialize API client
-    let api_client = ApiClient::new(None)?;
+    // Initialize API client (use ENTE_ENDPOINT env var if set, otherwise default to production)
+    let api_endpoint = std::env::var("ENTE_ENDPOINT").ok();
+    if let Some(ref endpoint) = api_endpoint {
+        log::debug!("Using custom API endpoint: {}", endpoint);
+    }
+    let api_client = ApiClient::new(api_endpoint)?;
     let auth_client = AuthClient::new(&api_client);
 
     println!("\nAuthenticating with Ente servers...");

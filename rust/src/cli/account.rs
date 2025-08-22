@@ -12,7 +12,23 @@ pub enum AccountSubcommands {
     List,
 
     /// Login into existing account
-    Add,
+    Add {
+        /// Email address (optional - will prompt if not provided)
+        #[arg(long)]
+        email: Option<String>,
+
+        /// Password (optional - will prompt if not provided)
+        #[arg(long)]
+        password: Option<String>,
+
+        /// Specify the app (photos, locker, auth)
+        #[arg(long, default_value = "photos")]
+        app: String,
+
+        /// Export directory path
+        #[arg(long)]
+        export_dir: Option<String>,
+    },
 
     /// Update an existing account's export directory
     Update {

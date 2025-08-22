@@ -4,13 +4,18 @@ use uuid::Uuid;
 // ========== Authentication Models ==========
 
 #[derive(Debug, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase")]
 pub struct SrpAttributes {
+    #[serde(rename = "srpUserID")]
     pub srp_user_id: Uuid,
+    #[serde(rename = "srpSalt")]
     pub srp_salt: String,
+    #[serde(rename = "memLimit")]
     pub mem_limit: i32,
+    #[serde(rename = "opsLimit")]
     pub ops_limit: i32,
+    #[serde(rename = "kekSalt")]
     pub kek_salt: String,
+    #[serde(rename = "isEmailMFAEnabled")]
     pub is_email_mfa_enabled: bool,
 }
 
@@ -21,24 +26,28 @@ pub struct GetSrpAttributesResponse {
 }
 
 #[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
 pub struct CreateSrpSessionRequest {
+    #[serde(rename = "srpUserID")]
     pub srp_user_id: String,
+    #[serde(rename = "srpA")]
     pub srp_a: String,
 }
 
 #[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub struct CreateSrpSessionResponse {
+    #[serde(rename = "sessionID")]
     pub session_id: Uuid,
+    #[serde(rename = "srpB")]
     pub srp_b: String,
 }
 
 #[derive(Debug, Serialize)]
-#[serde(rename_all = "camelCase")]
 pub struct VerifySrpSessionRequest {
+    #[serde(rename = "srpUserID")]
     pub srp_user_id: String,
+    #[serde(rename = "sessionID")]
     pub session_id: String,
+    #[serde(rename = "srpM1")]
     pub srp_m1: String,
 }
 
