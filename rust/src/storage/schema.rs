@@ -17,7 +17,7 @@ pub fn create_tables(conn: &Connection) -> Result<()> {
         )",
         [],
     )?;
-    
+
     // Secrets table (encrypted credentials)
     conn.execute(
         "CREATE TABLE IF NOT EXISTS secrets (
@@ -31,7 +31,7 @@ pub fn create_tables(conn: &Connection) -> Result<()> {
         )",
         [],
     )?;
-    
+
     // Configuration table
     conn.execute(
         "CREATE TABLE IF NOT EXISTS config (
@@ -41,7 +41,7 @@ pub fn create_tables(conn: &Connection) -> Result<()> {
         )",
         [],
     )?;
-    
+
     // Collections/Albums table
     conn.execute(
         "CREATE TABLE IF NOT EXISTS collections (
@@ -59,7 +59,7 @@ pub fn create_tables(conn: &Connection) -> Result<()> {
         )",
         [],
     )?;
-    
+
     // Files table (for caching remote file metadata)
     conn.execute(
         "CREATE TABLE IF NOT EXISTS files (
@@ -79,7 +79,7 @@ pub fn create_tables(conn: &Connection) -> Result<()> {
         )",
         [],
     )?;
-    
+
     // Album files mapping
     conn.execute(
         "CREATE TABLE IF NOT EXISTS album_files (
@@ -94,7 +94,7 @@ pub fn create_tables(conn: &Connection) -> Result<()> {
         )",
         [],
     )?;
-    
+
     // Sync state table
     conn.execute(
         "CREATE TABLE IF NOT EXISTS sync_state (
@@ -107,25 +107,25 @@ pub fn create_tables(conn: &Connection) -> Result<()> {
         )",
         [],
     )?;
-    
+
     // Create indices for better performance
     conn.execute(
         "CREATE INDEX IF NOT EXISTS idx_files_collection 
          ON files(account_id, collection_id)",
         [],
     )?;
-    
+
     conn.execute(
         "CREATE INDEX IF NOT EXISTS idx_album_files_album 
          ON album_files(account_id, album_id)",
         [],
     )?;
-    
+
     conn.execute(
         "CREATE INDEX IF NOT EXISTS idx_collections_account 
          ON collections(account_id)",
         [],
     )?;
-    
+
     Ok(())
 }

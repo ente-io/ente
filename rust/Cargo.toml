@@ -29,7 +29,10 @@ zeroize = { version = "1.8", features = ["derive"] }
 
 # SRP authentication
 srp = "0.6"
-num-bigint = "0.4"
+num-bigint = { version = "0.4", features = ["rand"] }
+sha2 = "0.10"
+urlencoding = "2.1"
+rand = "0.8"
 
 # Storage
 rusqlite = { version = "0.32", features = ["bundled", "serde_json"] }

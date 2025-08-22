@@ -12,7 +12,7 @@ pub enum Error {
     Serialization(#[from] serde_json::Error),
 
     #[error("Database error: {0}")]
-    Database(String),
+    Database(#[from] rusqlite::Error),
 
     #[error("Crypto error: {0}")]
     Crypto(String),

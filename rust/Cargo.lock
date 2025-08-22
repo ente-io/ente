@@ -688,12 +688,14 @@ dependencies = [
  "log",
  "mockito",
  "num-bigint",
+ "rand 0.8.5",
  "reqwest",
  "rpassword",
  "rusqlite",
  "serde",
  "serde_json",
  "serde_yaml",
+ "sha2",
  "sqlx",
  "srp",
  "tempdir",
@@ -701,6 +703,7 @@ dependencies = [
  "thiserror 2.0.16",
  "tokio",
  "toml",
+ "urlencoding",
  "uuid",
  "walkdir",
  "zeroize",
@@ -1738,6 +1741,7 @@ checksum = "a5e44f723f1133c9deac646763579fdb3ac745e418f2a7af9cd0c431da1f20b9"
 dependencies = [
  "num-integer",
  "num-traits",
+ "rand 0.8.5",
 ]
 
 [[package]]
@@ -3354,6 +3358,12 @@ dependencies = [
  "idna",
  "percent-encoding",
 ]
+
+[[package]]
+name = "urlencoding"
+version = "2.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "daf8dba3b7eb870caf1ddeed7bc9d2a049f3cfdfae7cb521b087cc33ae4c49da"
 
 [[package]]
 name = "utf8_iter"

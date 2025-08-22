@@ -12,7 +12,7 @@ async fn main() -> Result<()> {
 
     // Initialize libsodium
     ente_rs::crypto::init()?;
-    
+
     // Initialize storage
     let config_dir = ente_rs::utils::get_cli_config_dir()?;
     let db_path = config_dir.join("ente.db");

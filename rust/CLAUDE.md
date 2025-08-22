@@ -80,7 +80,7 @@ The project has completed foundational components (crypto, storage, models) and 
 
 ## Commit Guidelines
 
-- Keep the co-author line, remove promotional links
+- No promotional text like "Generated with [tool name]" - only keep the co-author line
 - Check `git status` before committing to avoid adding temporary/binary files
 - Never commit to main branch
 - Ensure code passes `cargo fmt` and `cargo clippy` before committing
