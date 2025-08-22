@@ -10,6 +10,7 @@ pub struct Account {
     pub email: String,
     pub user_id: i64,
     pub app: App,
+    pub endpoint: String,
     pub export_dir: Option<String>,
 }
 

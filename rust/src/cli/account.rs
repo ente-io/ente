@@ -25,6 +25,10 @@ pub enum AccountSubcommands {
         #[arg(long, default_value = "photos")]
         app: String,
 
+        /// API endpoint (defaults to https://api.ente.io)
+        #[arg(long, default_value = "https://api.ente.io")]
+        endpoint: String,
+
         /// Export directory path
         #[arg(long)]
         export_dir: Option<String>,

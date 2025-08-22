@@ -21,12 +21,13 @@ impl<'a> AccountStore<'a> {
         let now = current_timestamp();
 
         self.conn.execute(
-            "INSERT INTO accounts (email, user_id, app, export_dir, created_at, updated_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+            "INSERT INTO accounts (email, user_id, app, endpoint, export_dir, created_at, updated_at)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
             params![
                 account.email,
                 account.user_id,
                 format!("{:?}", account.app).to_lowercase(),
+                account.endpoint,
                 account.export_dir,
                 now,
                 now
@@ -39,7 +40,7 @@ impl<'a> AccountStore<'a> {
     /// Get an account by email and app
     pub fn get(&self, email: &str, app: App) -> Result<Option<Account>> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, email, user_id, app, export_dir FROM accounts 
+            "SELECT id, email, user_id, app, endpoint, export_dir FROM accounts 
              WHERE email = ?1 AND app = ?2",
         )?;
 
@@ -55,7 +56,7 @@ impl<'a> AccountStore<'a> {
     /// List all accounts
     pub fn list(&self) -> Result<Vec<Account>> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, email, user_id, app, export_dir FROM accounts 
+            "SELECT id, email, user_id, app, endpoint, export_dir FROM accounts 
              ORDER BY email, app",
         )?;
 
@@ -143,7 +144,8 @@ fn row_to_account(row: &Row) -> rusqlite::Result<Account> {
         email: row.get(1)?,
         user_id: row.get(2)?,
         app,
-        export_dir: row.get(4)?,
+        endpoint: row.get(4)?,
+        export_dir: row.get(5)?,
     })
 }
 

@@ -18,8 +18,9 @@ pub async fn handle_account_command(cmd: AccountCommand, storage: &Storage) -> R
             email,
             password,
             app,
+            endpoint,
             export_dir,
-        } => add_account(storage, email, password, app, export_dir).await,
+        } => add_account(storage, email, password, app, endpoint, export_dir).await,
         AccountSubcommands::Update { email, dir, app } => {
             update_account(storage, &email, &dir, &app).await
         }
@@ -36,14 +37,24 @@ async fn list_accounts(storage: &Storage) -> Result<()> {
     }
 
     println!("\nConfigured accounts:\n");
-    println!("{:<30} {:<10} {:<40}", "Email", "App", "Export Directory");
-    println!("{}", "-".repeat(80));
+    println!("{:<30} {:<10} {:<30} {:<40}", "Email", "App", "Endpoint", "Export Directory");
+    println!("{}", "-".repeat(110));
 
     for account in accounts {
+        // Shorten endpoint display for better readability
+        let endpoint_display = if account.endpoint == "https://api.ente.io" {
+            "api.ente.io (prod)".to_string()
+        } else if account.endpoint.starts_with("http://localhost") {
+            format!("localhost:{}", account.endpoint.split(':').last().unwrap_or(""))
+        } else {
+            account.endpoint.clone()
+        };
+        
         println!(
-            "{:<30} {:<10} {:<40}",
+            "{:<30} {:<10} {:<30} {:<40}",
             account.email,
             format!("{:?}", account.app).to_lowercase(),
+            endpoint_display,
             account.export_dir.as_deref().unwrap_or("Not configured")
         );
     }
@@ -56,6 +67,7 @@ async fn add_account(
     email_arg: Option<String>,
     password_arg: Option<String>,
     app_arg: String,
+    endpoint: String,
     export_dir_arg: Option<String>,
 ) -> Result<()> {
     println!("\n=== Add Ente Account ===\n");
@@ -132,12 +144,9 @@ async fn add_account(
         std::fs::create_dir_all(&export_path).map_err(crate::models::error::Error::Io)?;
     }
 
-    // Initialize API client (use ENTE_ENDPOINT env var if set, otherwise default to production)
-    let api_endpoint = std::env::var("ENTE_ENDPOINT").ok();
-    if let Some(ref endpoint) = api_endpoint {
-        log::debug!("Using custom API endpoint: {endpoint}");
-    }
-    let api_client = ApiClient::new(api_endpoint)?;
+    // Initialize API client with the specified endpoint
+    log::info!("Using API endpoint: {}", endpoint);
+    let api_client = ApiClient::new(Some(endpoint.clone()))?;
     let auth_client = AuthClient::new(&api_client);
 
     println!("\nAuthenticating with Ente servers...");
@@ -231,6 +240,7 @@ async fn add_account(
         email: email.clone(),
         user_id: auth_response.id,
         app,
+        endpoint: endpoint.clone(),
         export_dir: Some(export_dir.clone()),
     };
 
@@ -249,6 +259,7 @@ async fn add_account(
     println!("\n✅ Account added successfully!");
     println!("   Email: {email}");
     println!("   App: {app:?}");
+    println!("   Endpoint: {endpoint}");
     println!("   Export directory: {export_dir}");
 
     Ok(())
