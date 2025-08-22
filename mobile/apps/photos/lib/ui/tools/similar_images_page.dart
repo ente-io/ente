@@ -20,7 +20,7 @@ import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
-import "package:photos/ui/viewer/gallery/scrollbar/scroll_bar_with_use_notifier.dart";
+
 import "package:photos/utils/delete_file_util.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -64,15 +64,11 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   bool _isSelectionSheetOpen = false;
 
   late SelectedFiles _selectedFiles;
-  late ScrollController _scrollController;
-  late ValueNotifier<bool> _scrollbarInUseNotifier;
 
   @override
   void initState() {
     super.initState();
     _selectedFiles = SelectedFiles();
-    _scrollController = ScrollController();
-    _scrollbarInUseNotifier = ValueNotifier<bool>(false);
 
     if (!widget.debugScreen) {
       _findSimilarImages();
@@ -83,8 +79,6 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   void dispose() {
     _isDisposed = true;
     _selectedFiles.dispose();
-    _scrollController.dispose();
-    _scrollbarInUseNotifier.dispose();
     super.dispose();
   }
 
@@ -288,25 +282,18 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     return Column(
       children: [
         Expanded(
-          child: ScrollbarWithUseNotifer(
-            controller: _scrollController,
-            inUseNotifier: _scrollbarInUseNotifier,
-            minScrollbarLength: 36.0,
-            interactive: true,
-            thickness: 8,
-            radius: const Radius.circular(4),
-            child: ListView.builder(
-              controller: _scrollController,
-              cacheExtent: 400,
-              itemCount: _similarFilesList.length + 1, // +1 for header
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  return Container(
+          child: ListView.builder(
+            cacheExtent: 400,
+            itemCount: _similarFilesList.length + 1, // +1 for header
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                return RepaintBoundary(
+                  child: Container(
                     margin: const EdgeInsets.symmetric(
-                      horizontal: 16,
+                      horizontal: crossAxisSpacing,
                       vertical: 12,
                     ),
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(crossAxisSpacing),
                     decoration: BoxDecoration(
                       color: colorScheme.fillFaint,
                       borderRadius: BorderRadius.circular(8),
@@ -337,14 +324,16 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                         ),
                       ],
                     ),
-                  );
-                }
+                  ),
+                );
+              }
 
-                // Similar files groups (index - 1 because first item is header)
-                final similarFiles = _similarFilesList[index - 1];
-                return _buildSimilarFilesGroup(similarFiles);
-              },
-            ),
+              // Similar files groups (index - 1 because first item is header)
+              final similarFiles = _similarFilesList[index - 1];
+              return RepaintBoundary(
+                child: _buildSimilarFilesGroup(similarFiles),
+              );
+            },
           ),
         ),
         _getBottomActionButtons(),
@@ -653,24 +642,32 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             ],
           ),
           const SizedBox(height: 16),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemBuilder: (context, index) {
-              return _buildFile(
-                context,
-                similarFiles.files[index],
-                similarFiles.files,
-                index,
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final itemWidth = (constraints.maxWidth -
+                      (crossAxisSpacing * (crossAxisCount - 1))) /
+                  crossAxisCount;
+              final itemHeight =
+                  itemWidth / 0.70; // Maintain aspect ratio from GridView
+
+              return Wrap(
+                spacing: crossAxisSpacing,
+                runSpacing:
+                    0, // No additional vertical spacing - items have internal bottom padding
+                children: similarFiles.files.asMap().entries.map((entry) {
+                  return SizedBox(
+                    width: itemWidth,
+                    height: itemHeight,
+                    child: _buildFile(
+                      context,
+                      entry.value,
+                      similarFiles.files,
+                      entry.key,
+                    ),
+                  );
+                }).toList(),
               );
             },
-            itemCount: similarFiles.files.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: crossAxisCount,
-              crossAxisSpacing: crossAxisSpacing,
-              childAspectRatio: 0.70,
-            ),
-            padding: const EdgeInsets.all(0),
           ),
           const SizedBox(height: 16), // Add spacing between groups
         ],
