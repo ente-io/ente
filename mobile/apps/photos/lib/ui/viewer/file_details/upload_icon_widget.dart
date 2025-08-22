@@ -108,13 +108,13 @@ class _UpdateIconWidgetState extends State<UploadIconWidget> {
             showToast(
               context,
               AppLocalizations.of(context)
-                  .uploadIsIgnoredDueToIgnorereason(ignoreReason),
+                  .uploadIsIgnoredDueToIgnorereason(ignoreReason: ignoreReason),
             );
           }
           return Tooltip(
             message: isIgnored
                 ? AppLocalizations.of(context)
-                    .tapToUploadIsIgnoredDue(ignoreReason)
+                    .tapToUploadIsIgnoredDue(ignoreReason: ignoreReason)
                 : AppLocalizations.of(context).tapToUpload,
             child: IconButton(
               icon: const Icon(

@@ -102,8 +102,8 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                     padding: const EdgeInsets.only(bottom: 72),
                     child: Text(
                       AppLocalizations.of(context).searchSectionsLengthMismatch(
-                        snapshot.data!.length,
-                        searchTypes.length,
+                        snapshotLength: snapshot.data!.length,
+                        searchLength: searchTypes.length,
                       ),
                     ),
                   );

@@ -93,7 +93,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
               title: widget.collection.displayName,
             ),
             flexibleSpaceCaption: AppLocalizations.of(context)
-                .albumParticipantsCount(participants),
+                .albumParticipantsCount(count: participants),
           ),
           SliverList(
             delegate: SliverChildBuilderDelegate(

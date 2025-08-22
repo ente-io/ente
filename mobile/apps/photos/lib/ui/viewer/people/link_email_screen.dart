@@ -283,7 +283,7 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
       await showDialogWidget(
         context: context,
         title: AppLocalizations.of(context).noEnteAccountExclamation,
-        body: context.l10n.emailDoesNotHaveEnteAccount(email),
+        body: context.l10n.emailDoesNotHaveEnteAccount(email: email),
         icon: Icons.info_outline,
         isDismissible: true,
         buttons: [
@@ -339,7 +339,7 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
         context: context,
         title: AppLocalizations.of(context).noEnteAccountExclamation,
         icon: Icons.info_outline,
-        body: AppLocalizations.of(context).emailNoEnteAccount(email),
+        body: AppLocalizations.of(context).emailNoEnteAccount(email: email),
         isDismissible: true,
         buttons: [
           ButtonWidget(

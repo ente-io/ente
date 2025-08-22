@@ -373,7 +373,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                       Text(
                         (kDebugMode ? 'inApp: $importedCount : device ' : '') +
                             AppLocalizations.of(context)
-                                .itemCount(deviceCollection.count),
+                                .itemCount(count: deviceCollection.count),
                         textAlign: TextAlign.left,
                         style: TextStyle(
                           fontSize: 12,

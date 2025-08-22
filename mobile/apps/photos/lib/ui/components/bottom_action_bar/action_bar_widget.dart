@@ -57,11 +57,11 @@ class _ActionBarWidgetState extends State<ActionBarWidget> {
                     _selectedOwnedFilesNotifier.value !=
                             _selectedFilesNotifier.value
                         ? AppLocalizations.of(context).selectedPhotosWithYours(
-                            _selectedFilesNotifier.value,
-                            _selectedOwnedFilesNotifier.value,
+                            count: _selectedFilesNotifier.value,
+                            yourCount: _selectedOwnedFilesNotifier.value,
                           )
                         : AppLocalizations.of(context).selectedPhotos(
-                            _selectedFilesNotifier.value,
+                            count: _selectedFilesNotifier.value,
                           ),
                     style: textTheme.miniMuted,
                   );

@@ -527,7 +527,7 @@ class UserService {
       if (response.statusCode == 200) {
         showShortToast(
           context,
-          AppLocalizations.of(context).emailChangedTo(email),
+          AppLocalizations.of(context).emailChangedTo(newEmail: email),
         );
         await setEmail(email);
         Navigator.of(context).popUntil((route) => route.isFirst);

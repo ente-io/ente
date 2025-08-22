@@ -198,8 +198,9 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
                               children: [
                                 Text(
                                   AppLocalizations.of(context).memoryCount(
-                                    value,
-                                    NumberFormat().format(value),
+                                    count: value,
+                                    formattedCount:
+                                        NumberFormat().format(value),
                                   ),
                                   style: textTheme.body,
                                 ),

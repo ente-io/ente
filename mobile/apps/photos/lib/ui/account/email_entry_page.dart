@@ -345,8 +345,9 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       child: Row(
                         children: [
                           Text(
-                            AppLocalizations.of(context)
-                                .passwordStrength(passwordStrengthText),
+                            AppLocalizations.of(context).passwordStrength(
+                              passwordStrengthValue: passwordStrengthText,
+                            ),
                             style: TextStyle(
                               color: passwordStrengthColor,
                               fontWeight: FontWeight.w500,

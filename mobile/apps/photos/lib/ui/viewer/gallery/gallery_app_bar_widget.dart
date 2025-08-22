@@ -223,7 +223,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       showToast(
         context,
         AppLocalizations.of(context)
-            .typeOfGallerGallerytypeIsNotSupportedForRename("$galleryType"),
+            .typeOfGallerGallerytypeIsNotSupportedForRename(
+                galleryType: "$galleryType",),
       );
 
       return;
@@ -348,7 +349,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       context,
       title: AppLocalizations.of(context).success,
       body: AppLocalizations.of(context)
-          .youHaveSuccessfullyFreedUp(formatBytes(status.size)),
+          .youHaveSuccessfullyFreedUp(storageSaved: formatBytes(status.size)),
       firstButtonLabel: AppLocalizations.of(context).rateUs,
       firstButtonOnTap: () async {
         await updateService.launchReviewUrl();

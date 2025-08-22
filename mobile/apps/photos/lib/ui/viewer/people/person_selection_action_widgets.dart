@@ -153,9 +153,10 @@ class _LinkContactToPersonSelectionPageState
     PersonEntity? updatedPerson;
     final result = await showDialogWidget(
       context: context,
-      title: context.l10n.linkPersonToEmail(emailToLink),
+      title: context.l10n.linkPersonToEmail(email: emailToLink),
       icon: Icons.info_outline,
-      body: context.l10n.linkPersonToEmailConfirmation(personName, emailToLink),
+      body: context.l10n.linkPersonToEmailConfirmation(
+          personName: personName, email: emailToLink,),
       isDismissible: true,
       buttons: [
         ButtonWidget(
@@ -299,7 +300,8 @@ class _ReassignMeSelectionPageState extends State<ReassignMeSelectionPage> {
                       );
                       showToast(
                         context,
-                        context.l10n.reassignedToName(results[index].data.name),
+                        context.l10n
+                            .reassignedToName(name: results[index].data.name),
                       );
                       await Future.delayed(const Duration(milliseconds: 1250));
                       unawaited(dialog.hide());

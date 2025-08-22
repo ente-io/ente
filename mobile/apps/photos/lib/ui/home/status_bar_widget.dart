@@ -244,15 +244,16 @@ class _SyncStatusWidgetState extends State<SyncStatusWidget> {
       } else if (_event!.total == 1) {
         return AppLocalizations.of(context).uploadingSingleMemory;
       } else {
-        return AppLocalizations.of(context)
-            .uploadingMultipleMemories(NumberFormat().format(_event!.total!));
+        return AppLocalizations.of(context).uploadingMultipleMemories(
+          count: NumberFormat().format(_event!.total!),
+        );
       }
     }
     if (_event!.status == SyncStatus.inProgress) {
       final format = NumberFormat();
       return AppLocalizations.of(context).syncProgress(
-        format.format(_event!.completed!),
-        format.format(_event!.total!),
+        completed: format.format(_event!.completed!),
+        total: format.format(_event!.total!),
       );
     }
     if (_event!.status == SyncStatus.paused) {

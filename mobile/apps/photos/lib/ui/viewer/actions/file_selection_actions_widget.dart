@@ -177,7 +177,7 @@ class _FileSelectionActionsWidgetState
         SelectionActionButton(
           icon: Icons.remove_circle_outline,
           labelText: AppLocalizations.of(context)
-              .notPersonLabel(widget.person!.data.name),
+              .notPersonLabel(name: widget.person!.data.name),
           onTap: _onNotpersonClicked,
         ),
       );

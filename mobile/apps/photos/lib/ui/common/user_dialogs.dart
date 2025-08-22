@@ -12,7 +12,7 @@ Future<void> showInviteDialog(BuildContext context, String email) async {
     context: context,
     title: AppLocalizations.of(context).inviteToEnte,
     icon: Icons.info_outline,
-    body: AppLocalizations.of(context).emailNoEnteAccount(email),
+    body: AppLocalizations.of(context).emailNoEnteAccount(email: email),
     isDismissible: true,
     buttons: [
       ButtonWidget(

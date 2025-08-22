@@ -103,8 +103,8 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
             if (snapshot.data!.isEmpty) {
               return Center(
                 child: Text(
-                  AppLocalizations.of(context)
-                      .noSuggestionsForPerson(widget.person.data.name),
+                  AppLocalizations.of(context).noSuggestionsForPerson(
+                      personName: widget.person.data.name,),
                   style: getEnteTextTheme(context).largeMuted,
                 ),
               );

@@ -75,25 +75,25 @@ String activityTitle(
 ) {
   switch (activity) {
     case PeopleActivity.admiring:
-      return locals.admiringThem(personName);
+      return locals.admiringThem(name: personName);
     case PeopleActivity.embracing:
-      return locals.embracingThem(personName);
+      return locals.embracingThem(name: personName);
     case PeopleActivity.party:
-      return locals.partyWithThem(personName);
+      return locals.partyWithThem(name: personName);
     case PeopleActivity.hiking:
-      return locals.hikingWithThem(personName);
+      return locals.hikingWithThem(name: personName);
     case PeopleActivity.feast:
-      return locals.feastingWithThem(personName);
+      return locals.feastingWithThem(name: personName);
     case PeopleActivity.selfies:
-      return locals.selfiesWithThem(personName);
+      return locals.selfiesWithThem(name: personName);
     case PeopleActivity.posing:
-      return locals.posingWithThem(personName);
+      return locals.posingWithThem(name: personName);
     case PeopleActivity.background:
-      return locals.backgroundWithThem(personName);
+      return locals.backgroundWithThem(name: personName);
     case PeopleActivity.sports:
-      return locals.sportsWithThem(personName);
+      return locals.sportsWithThem(name: personName);
     case PeopleActivity.roadtrip:
-      return locals.roadtripWithThem(personName);
+      return locals.roadtripWithThem(name: personName);
   }
 }
 
@@ -154,7 +154,7 @@ class PeopleMemory extends SmartMemory {
     switch (peopleMemoryType) {
       case PeopleMemoryType.youAndThem:
         assert(personName != null);
-        return locals.youAndThem(personName!);
+        return locals.youAndThem(name: personName!);
       case PeopleMemoryType.doingSomethingTogether:
         assert(activity != null);
         assert(personName != null);
@@ -163,16 +163,16 @@ class PeopleMemory extends SmartMemory {
         if (personName == null) {
           return locals.spotlightOnYourself;
         } else if (newAge == null) {
-          return locals.spotlightOnThem(personName!);
+          return locals.spotlightOnThem(name: personName!);
         } else {
           if (isBirthday!) {
-            return locals.personIsAge(personName!, newAge!);
+            return locals.personIsAge(name: personName!, age: newAge!);
           } else {
-            return locals.personTurningAge(personName!, newAge!);
+            return locals.personTurningAge(name: personName!, age: newAge!);
           }
         }
       case PeopleMemoryType.lastTimeYouSawThem:
-        return locals.lastTimeWithThem(personName!);
+        return locals.lastTimeWithThem(name: personName!);
     }
   }
 }

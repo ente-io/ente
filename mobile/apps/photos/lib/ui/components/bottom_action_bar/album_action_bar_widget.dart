@@ -48,7 +48,7 @@ class _AlbumActionBarWidgetState extends State<AlbumActionBarWidget> {
                 builder: (context, value, child) {
                   return Text(
                     AppLocalizations.of(context).selectedAlbums(
-                      widget.selectedAlbums?.albums.length ?? 0,
+                      count: widget.selectedAlbums?.albums.length ?? 0,
                     ),
                     style: textTheme.miniMuted,
                   );

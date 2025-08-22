@@ -35,12 +35,14 @@ Future<void> showSingleFileDeleteSheet(
       AppLocalizations.of(context).singleFileDeleteHighlight;
   String body = "";
   if (isBothLocalAndRemote) {
-    body =
-        AppLocalizations.of(context).singleFileInBothLocalAndRemote(fileType);
+    body = AppLocalizations.of(context)
+        .singleFileInBothLocalAndRemote(fileType: fileType);
   } else if (isRemoteOnly) {
-    body = AppLocalizations.of(context).singleFileInRemoteOnly(fileType);
+    body =
+        AppLocalizations.of(context).singleFileInRemoteOnly(fileType: fileType);
   } else if (isLocalOnly) {
-    body = AppLocalizations.of(context).singleFileDeleteFromDevice(fileType);
+    body = AppLocalizations.of(context)
+        .singleFileDeleteFromDevice(fileType: fileType);
   } else {
     throw AssertionError("Unexpected state");
   }
