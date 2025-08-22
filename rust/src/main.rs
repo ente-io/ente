@@ -30,9 +30,8 @@ async fn main() -> Result<()> {
         Commands::Account(account_cmd) => {
             commands::account::handle_account_command(account_cmd, &storage).await?;
         }
-        Commands::Export(_export_cmd) => {
-            // TODO: Implement export command
-            println!("Export command not yet implemented");
+        Commands::Export(export_cmd) => {
+            commands::export::run_export(export_cmd.account).await?;
         }
     }
 

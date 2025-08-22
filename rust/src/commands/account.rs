@@ -8,6 +8,7 @@ use crate::{
     },
     storage::Storage,
 };
+use base64::Engine;
 use dialoguer::{Input, Password, Select};
 use std::path::PathBuf;
 
@@ -212,6 +213,7 @@ async fn add_account(
         &decode_base64(&key_attributes.key_decryption_nonce)?,
         &key_enc_key,
     )?;
+    log::info!("Master key decrypted, length: {}", master_key.len());
 
     // Decrypt secret key
     let secret_key = secret_box_open(
@@ -219,13 +221,38 @@ async fn add_account(
         &decode_base64(&key_attributes.secret_key_decryption_nonce)?,
         &master_key,
     )?;
+    log::info!("Secret key decrypted, length: {}", secret_key.len());
+    log::info!("Secret key hex (first 16 bytes): {}", hex::encode(&secret_key[..16.min(secret_key.len())]));
 
     // Get public key
     let public_key = decode_base64(&key_attributes.public_key)?;
 
     // Decrypt token if encrypted
     let token = if let Some(encrypted_token) = &auth_response.encrypted_token {
-        sealed_box_open(&decode_base64(encrypted_token)?, &public_key, &secret_key)?
+        log::info!("Encrypted token from server (base64): {}", encrypted_token);
+        log::info!("Public key (base64): {}", key_attributes.public_key);
+        
+        let encrypted_bytes = decode_base64(encrypted_token)?;
+        log::info!("Encrypted token bytes length: {}", encrypted_bytes.len());
+        
+        let decrypted = sealed_box_open(&encrypted_bytes, &public_key, &secret_key)?;
+        log::info!("Decrypted token bytes length: {}", decrypted.len());
+        log::info!("Decrypted token hex: {}", hex::encode(&decrypted));
+        
+        // Try to interpret as UTF-8 string first
+        match String::from_utf8(decrypted.clone()) {
+            Ok(token_str) => {
+                log::info!("Decrypted token is UTF-8 string: {}", token_str);
+                // If it's a string, use it as bytes
+                token_str.into_bytes()
+            }
+            Err(_) => {
+                log::info!("Token is not UTF-8, using raw bytes");
+                log::info!("Token as base64 URL: {}", base64::engine::general_purpose::URL_SAFE.encode(&decrypted));
+                // If not UTF-8, use raw bytes
+                decrypted
+            }
+        }
     } else if let Some(plain_token) = &auth_response.token {
         plain_token.as_bytes().to_vec()
     } else {
@@ -317,10 +344,9 @@ async fn get_token(storage: &Storage, email: &str, app_str: &str) -> Result<()> 
         crate::models::error::Error::NotFound(format!("Secrets not found for account {email}"))
     })?;
 
-    // Convert token to string (assuming it's UTF-8)
-    let token_str = String::from_utf8(secrets.token.clone()).map_err(|_| {
-        crate::models::error::Error::Generic("Token is not valid UTF-8".to_string())
-    })?;
+    // Token is stored as raw bytes from sealed_box_open
+    // The Go CLI returns it as base64 URL-encoded string WITH padding (matching TokenStr() in Go)
+    let token_str = base64::engine::general_purpose::URL_SAFE.encode(&secrets.token);
 
     println!("{token_str}");
 

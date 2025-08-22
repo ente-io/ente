@@ -176,17 +176,40 @@ pub struct Collection {
     pub name_decryption_nonce: Option<String>,
     #[serde(rename = "type")]
     pub collection_type: String,
+    pub attributes: Option<CollectionAttributes>,
     pub sharees: Option<Vec<CollectionUser>>,
+    #[serde(rename = "publicURLs")]
+    pub public_urls: Option<Vec<PublicUrl>>,
     pub updation_time: i64,
+    #[serde(default)]
     pub is_deleted: bool,
     pub magic_metadata: Option<MagicMetadata>,
     pub pub_magic_metadata: Option<MagicMetadata>,
     pub shared_magic_metadata: Option<MagicMetadata>,
+    pub app: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct CollectionAttributes {
+    pub version: i32,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct PublicUrl {
+    pub url: String,
+    pub device_limit: i32,
+    pub valid_till: i64,
+    pub enable_download: bool,
+    pub enable_collect: bool,
+    pub password_enabled: bool,
+    pub enable_join: bool,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct CollectionUser {
     pub id: i64,
+    #[serde(default)]
     pub email: String,
     pub name: Option<String>,
     pub role: Option<String>,
@@ -211,8 +234,11 @@ pub struct GetCollectionsResponse {
 #[serde(rename_all = "camelCase")]
 pub struct File {
     pub id: i64,
+    #[serde(rename = "ownerID")]
     pub owner_id: i64,
+    #[serde(rename = "collectionID")]
     pub collection_id: i64,
+    #[serde(rename = "collectionOwnerID")]
     pub collection_owner_id: Option<i64>,
     pub encrypted_key: String,
     pub key_decryption_nonce: String,
@@ -222,7 +248,8 @@ pub struct File {
     pub is_deleted: bool,
     pub updation_time: i64,
     pub magic_metadata: Option<MagicMetadata>,
-    pub pubic_magic_metadata: Option<MagicMetadata>,
+    #[serde(rename = "pubMagicMetadata")]
+    pub pub_magic_metadata: Option<MagicMetadata>,
     pub info: Option<FileInfo>,
 }
 
@@ -237,6 +264,7 @@ impl File {
 pub struct FileAttributes {
     pub encrypted_data: Option<String>,
     pub decryption_header: String,
+    pub size: Option<i64>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]

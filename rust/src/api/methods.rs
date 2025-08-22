@@ -1,6 +1,6 @@
 use crate::api::client::ApiClient;
 use crate::api::models::{
-    Collection, File, GetCollectionsResponse, GetDiffResponse, GetFileResponse, GetFileUrlResponse,
+    Collection, File, GetCollectionsResponse, GetDiffResponse, GetFileResponse,
     GetFilesResponse, GetThumbnailUrlResponse, UserDetails,
 };
 use crate::models::error::Result;
@@ -101,17 +101,16 @@ impl<'a> ApiMethods<'a> {
     }
 
     /// Get download URL for a file
-    pub async fn get_file_url(&self, account_id: &str, file_id: i64) -> Result<String> {
+    pub async fn get_file_url(&self, _account_id: &str, file_id: i64) -> Result<String> {
         // Check if we're using the default API endpoint
         let base_url = &self.api.base_url;
         if base_url == "https://api.ente.io" {
             // Use the CDN URL for production
             Ok(format!("https://files.ente.io/?fileID={file_id}"))
         } else {
-            // Use the API endpoint for custom/dev environments
-            let url = format!("/files/download/{file_id}");
-            let response: GetFileUrlResponse = self.api.get(&url, Some(account_id)).await?;
-            Ok(response.url)
+            // For custom/dev environments, use direct download URL
+            // The Go implementation shows this is the pattern
+            Ok(format!("{}/files/download/{}", base_url, file_id))
         }
     }
 
