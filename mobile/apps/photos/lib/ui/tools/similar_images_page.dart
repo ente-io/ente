@@ -64,11 +64,13 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   bool _isSelectionSheetOpen = false;
 
   late SelectedFiles _selectedFiles;
+  late ValueNotifier<String> _deleteProgress;
 
   @override
   void initState() {
     super.initState();
     _selectedFiles = SelectedFiles();
+    _deleteProgress = ValueNotifier("");
 
     if (!widget.debugScreen) {
       _findSimilarImages();
@@ -79,6 +81,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   void dispose() {
     _isDisposed = true;
     _selectedFiles.dispose();
+    _deleteProgress.dispose();
     super.dispose();
   }
 
@@ -97,14 +100,69 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   }
 
   Widget _getBody() {
-    switch (_pageState) {
-      case SimilarImagesPageState.setup:
-        return _getSetupView();
-      case SimilarImagesPageState.loading:
-        return _getLoadingView();
-      case SimilarImagesPageState.results:
-        return _getResultsView();
-    }
+    final content = switch (_pageState) {
+      SimilarImagesPageState.setup => _getSetupView(),
+      SimilarImagesPageState.loading => _getLoadingView(),
+      SimilarImagesPageState.results => _getResultsView(),
+    };
+
+    return Stack(
+      children: [
+        content,
+        // Progress overlay
+        ValueListenableBuilder(
+          valueListenable: _deleteProgress,
+          builder: (context, value, child) {
+            if (value.isEmpty) {
+              return const SizedBox.shrink();
+            }
+
+            final colorScheme = getEnteColorScheme(context);
+            final textTheme = getEnteTextTheme(context);
+
+            return Container(
+              color: colorScheme.backgroundBase.withOpacity(0.8),
+              child: Center(
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  decoration: BoxDecoration(
+                    color: colorScheme.backgroundElevated,
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: [
+                      BoxShadow(
+                        color: colorScheme.strokeFaint,
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation(colorScheme.primary500),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        "Deleting... $value", // TODO: lau: extract string
+                        style: textTheme.body,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
   }
 
   Widget _getSetupView() {
@@ -909,17 +967,85 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     }
 
     if (createSymlink) {
+      final int collectionCnt = collectionToFilesToAddMap.keys.length;
+      int progress = 0;
       for (final collectionID in collectionToFilesToAddMap.keys) {
+        if (!mounted) {
+          return;
+        }
+        if (collectionCnt > 0) {
+          progress++;
+          // calculate progress percentage upto 2 decimal places
+          final double percentage = (progress / collectionCnt) * 100;
+          _deleteProgress.value = '${percentage.toStringAsFixed(1)}%';
+        }
         await CollectionsService.instance.addSilentlyToCollection(
           collectionID,
           collectionToFilesToAddMap[collectionID]!,
         );
       }
     }
+    _deleteProgress.value = "";
 
     _selectedFiles.unSelectAll(allDeleteFiles);
     setState(() {});
     await deleteFilesFromRemoteOnly(context, allDeleteFiles.toList());
+
+    // Show congratulations popup
+    if (allDeleteFiles.isNotEmpty && mounted) {
+      final int totalSize = allDeleteFiles.fold<int>(
+        0,
+        (sum, file) => sum + (file.fileSize ?? 0),
+      );
+      _showCongratulationsDialog(allDeleteFiles.length, totalSize);
+    }
+  }
+
+  void _showCongratulationsDialog(int deletedCount, int totalSize) {
+    final textTheme = getEnteTextTheme(context);
+    final colorScheme = getEnteColorScheme(context);
+
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => AlertDialog(
+        backgroundColor: colorScheme.backgroundElevated,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.celebration_outlined,
+              size: 48,
+              color: colorScheme.primary500,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              "Great job!", // TODO: lau: extract string
+              style: textTheme.h3Bold,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "You cleaned up $deletedCount similar ${deletedCount == 1 ? 'image' : 'images'} and freed up ${formatBytes(totalSize)}", // TODO: lau: extract string
+              style: textTheme.body,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ButtonWidget(
+                labelText: "Done", // TODO: lau: extract string
+                buttonType: ButtonType.primary,
+                onTap: () async => Navigator.of(context).pop(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _getSortMenu() {
