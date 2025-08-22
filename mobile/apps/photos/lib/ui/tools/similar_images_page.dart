@@ -255,24 +255,13 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             ),
             const SizedBox(height: 16),
             Text(
-              "No Similar Images Found", // TODO: lau: extract string
+              "No similar images found", // TODO: lau: extract string
               style: textTheme.h3Bold,
             ),
             const SizedBox(height: 8),
             Text(
-              "Try adjusting the similarity threshold", // TODO: lau: extract string
-              style: textTheme.body,
-            ),
-            const SizedBox(height: 32),
-            ButtonWidget(
-              labelText: "Try Again", // TODO: lau: extract string
-              buttonType: ButtonType.secondary,
-              onTap: () async {
-                if (_isDisposed) return;
-                setState(() {
-                  _pageState = SimilarImagesPageState.setup;
-                });
-              },
+              "Your photos look unique", // TODO: lau: extract string
+              style: textTheme.bodyMuted,
             ),
           ],
         ),
