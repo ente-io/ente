@@ -13,14 +13,13 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/machine_learning/similar_images_service.dart";
 import 'package:photos/theme/ente_theme.dart';
-import "package:photos/ui/common/loading_widget.dart";
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
-import "package:photos/ui/viewer/gallery/scrollbar/scroll_bar_with_use_notifier.dart";
+
 import "package:photos/utils/delete_file_util.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -64,15 +63,13 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   bool _isSelectionSheetOpen = false;
 
   late SelectedFiles _selectedFiles;
-  late ScrollController _scrollController;
-  late ValueNotifier<bool> _scrollbarInUseNotifier;
+  late ValueNotifier<String> _deleteProgress;
 
   @override
   void initState() {
     super.initState();
     _selectedFiles = SelectedFiles();
-    _scrollController = ScrollController();
-    _scrollbarInUseNotifier = ValueNotifier<bool>(false);
+    _deleteProgress = ValueNotifier("");
 
     if (!widget.debugScreen) {
       _findSimilarImages();
@@ -83,8 +80,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   void dispose() {
     _isDisposed = true;
     _selectedFiles.dispose();
-    _scrollController.dispose();
-    _scrollbarInUseNotifier.dispose();
+    _deleteProgress.dispose();
     super.dispose();
   }
 
@@ -103,14 +99,69 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   }
 
   Widget _getBody() {
-    switch (_pageState) {
-      case SimilarImagesPageState.setup:
-        return _getSetupView();
-      case SimilarImagesPageState.loading:
-        return _getLoadingView();
-      case SimilarImagesPageState.results:
-        return _getResultsView();
-    }
+    final content = switch (_pageState) {
+      SimilarImagesPageState.setup => _getSetupView(),
+      SimilarImagesPageState.loading => _getLoadingView(),
+      SimilarImagesPageState.results => _getResultsView(),
+    };
+
+    return Stack(
+      children: [
+        content,
+        // Progress overlay
+        ValueListenableBuilder(
+          valueListenable: _deleteProgress,
+          builder: (context, value, child) {
+            if (value.isEmpty) {
+              return const SizedBox.shrink();
+            }
+
+            final colorScheme = getEnteColorScheme(context);
+            final textTheme = getEnteTextTheme(context);
+
+            return Container(
+              color: colorScheme.backgroundBase.withOpacity(0.8),
+              child: Center(
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  decoration: BoxDecoration(
+                    color: colorScheme.backgroundElevated,
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: [
+                      BoxShadow(
+                        color: colorScheme.strokeFaint,
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation(colorScheme.primary500),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        "Deleting... $value", // TODO: lau: extract string
+                        style: textTheme.body,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
   }
 
   Widget _getSetupView() {
@@ -234,16 +285,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   }
 
   Widget _getLoadingView() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          EnteLoadingWidget(),
-          SizedBox(height: 16),
-          Text("Analyzing images..."), // TODO: lau: extract string
-        ],
-      ),
-    );
+    return const SimilarImagesLoadingWidget();
   }
 
   Widget _getResultsView() {
@@ -261,24 +303,13 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             ),
             const SizedBox(height: 16),
             Text(
-              "No Similar Images Found", // TODO: lau: extract string
+              "No similar images found", // TODO: lau: extract string
               style: textTheme.h3Bold,
             ),
             const SizedBox(height: 8),
             Text(
-              "Try adjusting the similarity threshold", // TODO: lau: extract string
-              style: textTheme.body,
-            ),
-            const SizedBox(height: 32),
-            ButtonWidget(
-              labelText: "Try Again", // TODO: lau: extract string
-              buttonType: ButtonType.secondary,
-              onTap: () async {
-                if (_isDisposed) return;
-                setState(() {
-                  _pageState = SimilarImagesPageState.setup;
-                });
-              },
+              "Your photos look unique", // TODO: lau: extract string
+              style: textTheme.bodyMuted,
             ),
           ],
         ),
@@ -288,25 +319,18 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     return Column(
       children: [
         Expanded(
-          child: ScrollbarWithUseNotifer(
-            controller: _scrollController,
-            inUseNotifier: _scrollbarInUseNotifier,
-            minScrollbarLength: 36.0,
-            interactive: true,
-            thickness: 8,
-            radius: const Radius.circular(4),
-            child: ListView.builder(
-              controller: _scrollController,
-              cacheExtent: 400,
-              itemCount: _similarFilesList.length + 1, // +1 for header
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  return Container(
+          child: ListView.builder(
+            cacheExtent: 400,
+            itemCount: _similarFilesList.length + 1, // +1 for header
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                return RepaintBoundary(
+                  child: Container(
                     margin: const EdgeInsets.symmetric(
-                      horizontal: 16,
+                      horizontal: crossAxisSpacing,
                       vertical: 12,
                     ),
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(crossAxisSpacing),
                     decoration: BoxDecoration(
                       color: colorScheme.fillFaint,
                       borderRadius: BorderRadius.circular(8),
@@ -337,14 +361,16 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                         ),
                       ],
                     ),
-                  );
-                }
+                  ),
+                );
+              }
 
-                // Similar files groups (index - 1 because first item is header)
-                final similarFiles = _similarFilesList[index - 1];
-                return _buildSimilarFilesGroup(similarFiles);
-              },
-            ),
+              // Similar files groups (index - 1 because first item is header)
+              final similarFiles = _similarFilesList[index - 1];
+              return RepaintBoundary(
+                child: _buildSimilarFilesGroup(similarFiles),
+              );
+            },
           ),
         ),
         _getBottomActionButtons(),
@@ -373,54 +399,76 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             decoration: BoxDecoration(
               color: getEnteColorScheme(context).backgroundBase,
             ),
-            child: AnimatedSwitcher(
-              duration: Duration.zero,
-              child: Column(
-                key: ValueKey(hasSelectedFiles),
-                children: [
-                  if (hasSelectedFiles && !_isSelectionSheetOpen) ...[
-                    SizedBox(
-                      width: double.infinity,
-                      child: ButtonWidget(
-                        labelText:
-                            "Delete $selectedCount photos (${formatBytes(totalSize)})", // TODO: lau: extract string
-                        buttonType: ButtonType.critical,
-                        shouldSurfaceExecutionStates: false,
-                        shouldShowSuccessConfirmation: false,
-                        onTap: () async {
-                          await _deleteFiles(
-                            _selectedFiles.files,
-                            showDialog: true,
-                          );
-                        },
+            child: Column(
+              children: [
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  transitionBuilder:
+                      (Widget child, Animation<double> animation) {
+                    return SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(0, 0.1),
+                        end: Offset.zero,
+                      ).animate(
+                        CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.easeOutCubic,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                  ],
-                  if (!_isSelectionSheetOpen)
-                    SizedBox(
-                      width: double.infinity,
-                      child: ButtonWidget(
-                        labelText:
-                            "Selection options", // TODO: lau: extract string
-                        buttonType: ButtonType.secondary,
-                        shouldSurfaceExecutionStates: false,
-                        shouldShowSuccessConfirmation: false,
-                        onTap: () async {
+                      child: FadeTransition(
+                        opacity: animation,
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: hasSelectedFiles && !_isSelectionSheetOpen
+                      ? Column(
+                          key: const ValueKey('delete_section'),
+                          children: [
+                            SizedBox(
+                              width: double.infinity,
+                              child: ButtonWidget(
+                                labelText:
+                                    "Delete $selectedCount photos (${formatBytes(totalSize)})", // TODO: lau: extract string
+                                buttonType: ButtonType.critical,
+                                shouldSurfaceExecutionStates: false,
+                                shouldShowSuccessConfirmation: false,
+                                onTap: () async {
+                                  await _deleteFiles(
+                                    _selectedFiles.files,
+                                    showDialog: true,
+                                  );
+                                },
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                          ],
+                        )
+                      : const SizedBox.shrink(key: ValueKey('no_delete')),
+                ),
+                if (!_isSelectionSheetOpen)
+                  SizedBox(
+                    width: double.infinity,
+                    child: ButtonWidget(
+                      labelText:
+                          "Selection options", // TODO: lau: extract string
+                      buttonType: ButtonType.secondary,
+                      shouldSurfaceExecutionStates: false,
+                      shouldShowSuccessConfirmation: false,
+                      onTap: () async {
+                        setState(() {
+                          _isSelectionSheetOpen = true;
+                        });
+                        await _showSelectionOptionsSheet();
+                        if (mounted) {
                           setState(() {
-                            _isSelectionSheetOpen = true;
+                            _isSelectionSheetOpen = false;
                           });
-                          await _showSelectionOptionsSheet();
-                          if (mounted) {
-                            setState(() {
-                              _isSelectionSheetOpen = false;
-                            });
-                          }
-                        },
-                      ),
+                        }
+                      },
                     ),
-                ],
-              ),
+                  ),
+              ],
             ),
           ),
         );
@@ -653,24 +701,32 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             ],
           ),
           const SizedBox(height: 16),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemBuilder: (context, index) {
-              return _buildFile(
-                context,
-                similarFiles.files[index],
-                similarFiles.files,
-                index,
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final itemWidth = (constraints.maxWidth -
+                      (crossAxisSpacing * (crossAxisCount - 1))) /
+                  crossAxisCount;
+              final itemHeight =
+                  itemWidth / 0.70; // Maintain aspect ratio from GridView
+
+              return Wrap(
+                spacing: crossAxisSpacing,
+                runSpacing:
+                    0, // No additional vertical spacing - items have internal bottom padding
+                children: similarFiles.files.asMap().entries.map((entry) {
+                  return SizedBox(
+                    width: itemWidth,
+                    height: itemHeight,
+                    child: _buildFile(
+                      context,
+                      entry.value,
+                      similarFiles.files,
+                      entry.key,
+                    ),
+                  );
+                }).toList(),
               );
             },
-            itemCount: similarFiles.files.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: crossAxisCount,
-              crossAxisSpacing: crossAxisSpacing,
-              childAspectRatio: 0.70,
-            ),
-            padding: const EdgeInsets.all(0),
           ),
           const SizedBox(height: 16), // Add spacing between groups
         ],
@@ -923,41 +979,140 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     }
 
     if (createSymlink) {
+      final int collectionCnt = collectionToFilesToAddMap.keys.length;
+      int progress = 0;
       for (final collectionID in collectionToFilesToAddMap.keys) {
+        if (!mounted) {
+          return;
+        }
+        if (collectionCnt > 0) {
+          progress++;
+          // calculate progress percentage upto 2 decimal places
+          final double percentage = (progress / collectionCnt) * 100;
+          _deleteProgress.value = '${percentage.toStringAsFixed(1)}%';
+        }
         await CollectionsService.instance.addSilentlyToCollection(
           collectionID,
           collectionToFilesToAddMap[collectionID]!,
         );
       }
     }
+    _deleteProgress.value = "";
 
     _selectedFiles.unSelectAll(allDeleteFiles);
     setState(() {});
     await deleteFilesFromRemoteOnly(context, allDeleteFiles.toList());
+
+    // Show congratulations popup
+    if (allDeleteFiles.isNotEmpty && mounted) {
+      final int totalSize = allDeleteFiles.fold<int>(
+        0,
+        (sum, file) => sum + (file.fileSize ?? 0),
+      );
+      _showCongratulationsDialog(allDeleteFiles.length, totalSize);
+    }
+  }
+
+  void _showCongratulationsDialog(int deletedCount, int totalSize) {
+    final textTheme = getEnteTextTheme(context);
+    final colorScheme = getEnteColorScheme(context);
+
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => AlertDialog(
+        backgroundColor: colorScheme.backgroundElevated,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.celebration_outlined,
+              size: 48,
+              color: colorScheme.primary500,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              "Great job!", // TODO: lau: extract string
+              style: textTheme.h3Bold,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "You cleaned up $deletedCount similar ${deletedCount == 1 ? 'image' : 'images'} and freed up ${formatBytes(totalSize)}", // TODO: lau: extract string
+              style: textTheme.body,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ButtonWidget(
+                labelText: "Done", // TODO: lau: extract string
+                buttonType: ButtonType.primary,
+                onTap: () async => Navigator.of(context).pop(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _getSortMenu() {
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
-    Text sortOptionText(SortKey key) {
-      String text = key.toString();
+
+    Widget sortOptionContent(SortKey key) {
+      String text;
+      Widget trailing;
+
       switch (key) {
         case SortKey.size:
           text = "Size"; // TODO: lau: extract string
+          trailing = Icon(
+            Icons.arrow_downward,
+            size: 16,
+            color: colorScheme.textMuted,
+          );
           break;
         case SortKey.distanceAsc:
-          text = "Similarity (Desc.)"; // TODO: lau: extract string
+          text = "Similarity"; // TODO: lau: extract string
+          trailing = Icon(
+            Icons.arrow_downward,
+            size: 16,
+            color: colorScheme.textMuted,
+          );
           break;
         case SortKey.distanceDesc:
-          text = "Similarity (Asc.)"; // TODO: lau: extract string
+          text = "Similarity"; // TODO: lau: extract string
+          trailing = Icon(
+            Icons.arrow_upward,
+            size: 16,
+            color: colorScheme.textMuted,
+          );
           break;
         case SortKey.count:
           text = "Count"; // TODO: lau: extract string
+          trailing = Icon(
+            Icons.arrow_downward,
+            size: 16,
+            color: colorScheme.textMuted,
+          );
           break;
       }
-      return Text(
-        text,
-        style: textTheme.miniBold,
+
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            text,
+            style: textTheme.miniBold,
+          ),
+          const SizedBox(width: 8),
+          trailing,
+        ],
       );
     }
 
@@ -982,13 +1137,252 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         return List.generate(SortKey.values.length, (index) {
           return PopupMenuItem(
             value: index,
-            child: Text(
-              sortOptionText(SortKey.values[index]).data!,
-              style: textTheme.miniBold,
-            ),
+            child: sortOptionContent(SortKey.values[index]),
           );
         });
       },
+    );
+  }
+}
+
+class SimilarImagesLoadingWidget extends StatefulWidget {
+  const SimilarImagesLoadingWidget({super.key});
+
+  @override
+  State<SimilarImagesLoadingWidget> createState() =>
+      _SimilarImagesLoadingWidgetState();
+}
+
+class _SimilarImagesLoadingWidgetState extends State<SimilarImagesLoadingWidget>
+    with TickerProviderStateMixin {
+  late AnimationController _loadingAnimationController;
+  late AnimationController _pulseAnimationController;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _pulseAnimation;
+  int _loadingMessageIndex = 0;
+  final List<String> _loadingMessages = [
+    "Analyzing your photos locally", // TODO: lau: extract string
+    "Finding similar images", // TODO: lau: extract string
+    "Processing visual patterns", // TODO: lau: extract string
+    "Comparing image features", // TODO: lau: extract string
+    "Almost done", // TODO: lau: extract string
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Initialize loading animations
+    _loadingAnimationController = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    )..repeat();
+
+    _pulseAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    _scaleAnimation = Tween<double>(
+      begin: 0.8,
+      end: 1.0,
+    ).animate(
+      CurvedAnimation(
+        parent: _pulseAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    _pulseAnimation = Tween<double>(
+      begin: 0.4,
+      end: 1.0,
+    ).animate(
+      CurvedAnimation(
+        parent: _pulseAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    // Cycle through loading messages
+    _startMessageCycling();
+  }
+
+  void _startMessageCycling() {
+    Future.doWhile(() async {
+      if (!mounted) return false;
+      await Future.delayed(const Duration(seconds: 7));
+      if (mounted) {
+        setState(() {
+          _loadingMessageIndex++;
+        });
+        // Stop cycling after reaching the last message
+        return _loadingMessageIndex < _loadingMessages.length - 1;
+      }
+      return false;
+    });
+  }
+
+  @override
+  void dispose() {
+    _loadingAnimationController.dispose();
+    _pulseAnimationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = getEnteTextTheme(context);
+    final colorScheme = getEnteColorScheme(context);
+
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Animated scanning effect
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              // Pulsing background circle
+              AnimatedBuilder(
+                animation: _pulseAnimation,
+                builder: (context, child) {
+                  return Container(
+                    width: 160,
+                    height: 160,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: colorScheme.primary500.withOpacity(
+                        _pulseAnimation.value * 0.1,
+                      ),
+                    ),
+                  );
+                },
+              ),
+              // Rotating scanner ring
+              AnimatedBuilder(
+                animation: _loadingAnimationController,
+                builder: (context, child) {
+                  return Transform.rotate(
+                    angle: _loadingAnimationController.value * 2 * 3.14159,
+                    child: Container(
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: colorScheme.primary500,
+                          width: 2,
+                        ),
+                        gradient: SweepGradient(
+                          colors: [
+                            colorScheme.primary500.withOpacity(0),
+                            colorScheme.primary500.withOpacity(0.3),
+                            colorScheme.primary500.withOpacity(0.6),
+                            colorScheme.primary500,
+                            colorScheme.primary500.withOpacity(0),
+                          ],
+                          stops: const [0.0, 0.25, 0.5, 0.75, 1.0],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+              // Center icon with scale animation
+              AnimatedBuilder(
+                animation: _scaleAnimation,
+                builder: (context, child) {
+                  return Transform.scale(
+                    scale: _scaleAnimation.value,
+                    child: Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: colorScheme.backgroundElevated,
+                        boxShadow: [
+                          BoxShadow(
+                            color: colorScheme.strokeFaint,
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        Icons.photo_library_outlined,
+                        size: 40,
+                        color: colorScheme.primary500,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 48),
+          // Privacy badge
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: colorScheme.fillFaint,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.lock_outline,
+                  size: 14,
+                  color: colorScheme.textMuted,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  "Processing locally", // TODO: lau: extract string
+                  style: textTheme.miniFaint,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Animated loading message
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 500),
+            child: Text(
+              _loadingMessages[_loadingMessageIndex],
+              key: ValueKey(_loadingMessageIndex),
+              style: textTheme.body,
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const SizedBox(height: 8),
+          // Progress dots
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: List.generate(
+              3,
+              (index) => AnimatedBuilder(
+                animation: _loadingAnimationController,
+                builder: (context, child) {
+                  final delay = index * 0.2;
+                  final value =
+                      (_loadingAnimationController.value + delay) % 1.0;
+                  return Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: colorScheme.primary500.withOpacity(
+                        value < 0.5 ? value * 2 : 2 - value * 2,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
