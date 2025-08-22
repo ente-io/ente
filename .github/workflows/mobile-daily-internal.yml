@@ -47,6 +47,9 @@ jobs:
             - name: Install Flutter Rust Bridge
               run: cargo install flutter_rust_bridge_codegen
 
+            - name: Generate Rust bindings
+              run: flutter_rust_bridge_codegen generate
+
             - name: Increment version code for build
               run: |
                   CURRENT_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
