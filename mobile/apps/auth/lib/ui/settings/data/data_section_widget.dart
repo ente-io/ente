@@ -92,8 +92,8 @@ class DataSectionWidget extends StatelessWidget {
         },
       ),
       MenuItemWidget(
-        captionedTextWidget: const CaptionedTextWidget(
-          title: "Local Backup",
+        captionedTextWidget: CaptionedTextWidget(
+          title: l10n.localBackupSidebarTitle,
         ),
         pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
