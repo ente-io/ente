@@ -73,7 +73,7 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
       resizeToAvoidBottomInset: isKeypadOpen,
       appBar: AppBar(
         title: Text(
-          S.of(context).linkEmail,
+          AppLocalizations.of(context).linkEmail,
         ),
       ),
       body: Column(
@@ -84,13 +84,13 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: MenuSectionTitle(
-              title: S.of(context).addANewEmail,
+              title: AppLocalizations.of(context).addANewEmail,
             ),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: TextInputWidget(
-              hintText: S.of(context).email,
+              hintText: AppLocalizations.of(context).email,
               textEditingController: _textController,
               shouldSurfaceExecutionStates: false,
               onChange: (value) {
@@ -126,7 +126,8 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
                 children: [
                   _filteredUsers.isNotEmpty
                       ? MenuSectionTitle(
-                          title: S.of(context).orPickFromYourContacts,
+                          title: AppLocalizations.of(context)
+                              .orPickFromYourContacts,
                         )
                       : const SizedBox.shrink(),
                   Expanded(
@@ -199,7 +200,7 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
                   ButtonWidget(
                     buttonType: ButtonType.primary,
                     buttonSize: ButtonSize.large,
-                    labelText: S.of(context).link,
+                    labelText: AppLocalizations.of(context).link,
                     isDisabled:
                         !_emailIsValid && (_selectedEmail?.isEmpty ?? true),
                     onTap: _onLinkButtonTap,
@@ -281,7 +282,7 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
     if (publicKey == null || publicKey == '') {
       await showDialogWidget(
         context: context,
-        title: S.of(context).noEnteAccountExclamation,
+        title: AppLocalizations.of(context).noEnteAccountExclamation,
         body: context.l10n.emailDoesNotHaveEnteAccount(email),
         icon: Icons.info_outline,
         isDismissible: true,
@@ -289,19 +290,19 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
           ButtonWidget(
             buttonType: ButtonType.neutral,
             icon: Icons.adaptive.share,
-            labelText: S.of(context).invite,
+            labelText: AppLocalizations.of(context).invite,
             isInAlert: true,
             onTap: () async {
               unawaited(
                 shareText(
-                  S.of(context).shareTextRecommendUsingEnte,
+                  AppLocalizations.of(context).shareTextRecommendUsingEnte,
                 ),
               );
             },
           ),
           ButtonWidget(
             buttonType: ButtonType.secondary,
-            labelText: S.of(context).cancel,
+            labelText: AppLocalizations.of(context).cancel,
             isInAlert: true,
           ),
         ],
@@ -336,20 +337,20 @@ class _LinkEmailScreen extends State<LinkEmailScreen> {
     if (publicKey == null || publicKey == '') {
       await showDialogWidget(
         context: context,
-        title: S.of(context).noEnteAccountExclamation,
+        title: AppLocalizations.of(context).noEnteAccountExclamation,
         icon: Icons.info_outline,
-        body: S.of(context).emailNoEnteAccount(email),
+        body: AppLocalizations.of(context).emailNoEnteAccount(email),
         isDismissible: true,
         buttons: [
           ButtonWidget(
             buttonType: ButtonType.neutral,
             icon: Icons.adaptive.share,
-            labelText: S.of(context).invite,
+            labelText: AppLocalizations.of(context).invite,
             isInAlert: true,
             onTap: () async {
               unawaited(
                 shareText(
-                  S.of(context).shareTextRecommendUsingEnte,
+                  AppLocalizations.of(context).shareTextRecommendUsingEnte,
                 ),
               );
             },

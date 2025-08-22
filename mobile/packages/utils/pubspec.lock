@@ -138,7 +138,7 @@ packages:
     source: hosted
     version: "3.0.0"
   ente_base:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       path: "../base"
       relative: true
@@ -161,7 +161,7 @@ packages:
     source: git
     version: "1.0.0"
   ente_events:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       path: "../events"
       relative: true

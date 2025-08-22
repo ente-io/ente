@@ -28,17 +28,17 @@ import "package:receive_sharing_intent/receive_sharing_intent.dart";
 
 extension CollectionFileActions on CollectionActions {
   Future<void> showRemoveFromCollectionSheetV2(
-    BuildContext bContext,
+    BuildContext context,
     Collection collection,
     SelectedFiles selectedFiles,
     bool removingOthersFile, {
     bool isHidden = false,
   }) async {
     final actionResult = await showActionSheet(
-      context: bContext,
+      context: context,
       buttons: [
         ButtonWidget(
-          labelText: S.of(bContext).remove,
+          labelText: AppLocalizations.of(context).remove,
           buttonType:
               removingOthersFile ? ButtonType.critical : ButtonType.neutral,
           buttonSize: ButtonSize.large,
@@ -47,7 +47,7 @@ extension CollectionFileActions on CollectionActions {
           onTap: () async {
             try {
               await moveFilesFromCurrentCollection(
-                bContext,
+                context,
                 collection,
                 selectedFiles.files,
                 isHidden: isHidden,
@@ -59,7 +59,7 @@ extension CollectionFileActions on CollectionActions {
           },
         ),
         ButtonWidget(
-          labelText: S.of(bContext).cancel,
+          labelText: AppLocalizations.of(context).cancel,
           buttonType: ButtonType.secondary,
           buttonSize: ButtonSize.large,
           buttonAction: ButtonAction.second,
@@ -67,16 +67,18 @@ extension CollectionFileActions on CollectionActions {
           isInAlert: true,
         ),
       ],
-      title: removingOthersFile ? S.of(bContext).removeFromAlbumTitle : null,
+      title: removingOthersFile
+          ? AppLocalizations.of(context).removeFromAlbumTitle
+          : null,
       body: removingOthersFile
-          ? S.of(bContext).removeShareItemsWarning
-          : S.of(bContext).itemsWillBeRemovedFromAlbum,
+          ? AppLocalizations.of(context).removeShareItemsWarning
+          : AppLocalizations.of(context).itemsWillBeRemovedFromAlbum,
       actionSheetType: ActionSheetType.defaultActionSheet,
     );
     if (actionResult?.action != null &&
         actionResult!.action == ButtonAction.error) {
       await showGenericErrorDialog(
-        context: bContext,
+        context: context,
         error: actionResult.exception,
       );
     } else {
@@ -93,7 +95,7 @@ extension CollectionFileActions on CollectionActions {
     final ProgressDialog? dialog = showProgressDialog
         ? createProgressDialog(
             context,
-            S.of(context).uploadingFilesToAlbum,
+            AppLocalizations.of(context).uploadingFilesToAlbum,
             isDismissible: true,
           )
         : null;
@@ -193,7 +195,7 @@ extension CollectionFileActions on CollectionActions {
     ProgressDialog? dialog = showProgressDialog
         ? createProgressDialog(
             context,
-            S.of(context).uploadingFilesToAlbum,
+            AppLocalizations.of(context).uploadingFilesToAlbum,
             isDismissible: true,
           )
         : null;
@@ -249,7 +251,7 @@ extension CollectionFileActions on CollectionActions {
           if (!showProgressDialog) {
             dialog = createProgressDialog(
               context,
-              S.of(context).uploadingFilesToAlbum,
+              AppLocalizations.of(context).uploadingFilesToAlbum,
               isDismissible: true,
             );
             await dialog.show();
@@ -304,8 +306,8 @@ extension CollectionFileActions on CollectionActions {
     final ProgressDialog dialog = createProgressDialog(
       context,
       markAsFavorite
-          ? S.of(context).addingToFavorites
-          : S.of(context).removingFromFavorites,
+          ? AppLocalizations.of(context).addingToFavorites
+          : AppLocalizations.of(context).removingFromFavorites,
     );
     await dialog.show();
 
@@ -318,8 +320,8 @@ extension CollectionFileActions on CollectionActions {
       showShortToast(
         context,
         markAsFavorite
-            ? S.of(context).sorryCouldNotAddToFavorites
-            : S.of(context).sorryCouldNotRemoveFromFavorites,
+            ? AppLocalizations.of(context).sorryCouldNotAddToFavorites
+            : AppLocalizations.of(context).sorryCouldNotRemoveFromFavorites,
       );
     } finally {
       await dialog.hide();

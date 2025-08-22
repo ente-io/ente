@@ -39,7 +39,9 @@ import 'package:ente_auth/utils/totp_util.dart';
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_lock_screen/lock_screen_settings.dart';
 import 'package:ente_lock_screen/ui/app_lock.dart';
+import 'package:ente_qr/ente_qr.dart';
 import 'package:ente_ui/pages/base_home_page.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -48,7 +50,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:logging/logging.dart';
 import 'package:move_to_background/move_to_background.dart';
 
-class HomePage extends BaseHomePage  {
+class HomePage extends BaseHomePage {
   const HomePage({super.key});
 
   @override
@@ -62,6 +64,7 @@ class _HomePageState extends State<HomePage> {
   );
   bool _hasLoaded = false;
   bool _isSettingsOpen = false;
+  bool _isImportingFromGallery = false;
   final Logger _logger = Logger("HomePage");
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -287,6 +290,63 @@ class _HomePageState extends State<HomePage> {
           insertIndex++;
         }
       }
+    }
+  }
+
+  Future<void> _importFromGalleryNative() async {
+    final l10n = AppLocalizations.of(context);
+
+    if (_isImportingFromGallery) {
+      return;
+    }
+
+    _isImportingFromGallery = true;
+
+    try {
+      final FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.image,
+      );
+
+      if (result == null || result.files.single.path == null) {
+        return;
+      }
+
+      final String imagePath = result.files.single.path!;
+      final enteQr = EnteQr();
+      final QrScanResult qrResult = await enteQr.scanQrFromImage(imagePath);
+
+      if (qrResult.success && qrResult.content != null) {
+        try {
+          final newCode = Code.fromOTPAuthUrl(qrResult.content!);
+          await CodeStore.instance.addCode(newCode, shouldSync: false);
+          // Focus the new code by searching
+          if ((_allCodes?.where((e) => !e.hasError).length ?? 0) > 2) {
+            _focusNewCode(newCode);
+          }
+        } catch (e) {
+          _logger.severe('Error adding code from QR scan', e);
+          await showErrorDialog(
+            context,
+            l10n.errorInvalidQRCode,
+            l10n.errorInvalidQRCodeBody,
+          );
+        }
+      } else {
+        _logger.warning('QR scan failed: ${qrResult.error}');
+        await showErrorDialog(
+          context,
+          l10n.errorNoQRCode,
+          qrResult.error ?? l10n.errorNoQRCode,
+        );
+      }
+    } catch (e) {
+      await showErrorDialog(
+        context,
+        l10n.errorGenericTitle,
+        l10n.errorGenericBody,
+      );
+    } finally {
+      _isImportingFromGallery = false;
     }
   }
 
@@ -747,6 +807,14 @@ class _HomePageState extends State<HomePage> {
           labelWidget: SpeedDialLabelWidget(context.l10n.enterDetailsManually),
           onTap: _redirectToManualEntryPage,
         ),
+        if (PlatformUtil.isMobile())
+          SpeedDialChild(
+            child: const Icon(Icons.image),
+            backgroundColor: Theme.of(context).colorScheme.fabBackgroundColor,
+            foregroundColor: Theme.of(context).colorScheme.fabForegroundColor,
+            labelWidget: SpeedDialLabelWidget(context.l10n.importFromGallery),
+            onTap: _importFromGalleryNative,
+          ),
       ],
     );
   }

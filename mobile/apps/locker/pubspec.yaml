@@ -64,6 +64,7 @@ dependencies:
   window_manager: ^0.5.0
 
 dev_dependencies:
+  flutter_launcher_icons: ^0.14.3
   flutter_lints: ^4.0.0
   flutter_test:
     sdk: flutter
@@ -86,3 +87,10 @@ flutter:
     - family: Montserrat
       fonts:
         - asset: assets/fonts/Montserrat-Bold.ttf
+
+flutter_icons:
+  adaptive_icon_foreground: "assets/launcher-icons/icon-foreground.png"
+  adaptive_icon_background: "#1071ff"
+  android: "icon_blue"
+  ios: "IconBlue"
+  image_path: "assets/launcher-icons/icon-blue.png"

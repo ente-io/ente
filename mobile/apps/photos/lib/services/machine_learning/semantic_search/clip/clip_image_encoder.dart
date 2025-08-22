@@ -1,9 +1,9 @@
 import "dart:typed_data" show Uint8List, Float32List;
-import "dart:ui" show Image;
 
 import "package:logging/logging.dart";
 import "package:onnx_dart/onnx_dart.dart";
 import "package:onnxruntime/onnxruntime.dart";
+import "package:photos/models/ml/face/dimension.dart";
 import "package:photos/services/machine_learning/ml_model.dart";
 import "package:photos/utils/image_ml_util.dart";
 import "package:photos/utils/ml_util.dart";
@@ -28,13 +28,13 @@ class ClipImageEncoder extends MlModel {
   factory ClipImageEncoder() => instance;
 
   static Future<List<double>> predict(
-    Image image,
+    Dimensions dim,
     Uint8List rawRgbaBytes,
     int sessionAddress, [
     int? enteFileID,
   ]) async {
     final startTime = DateTime.now();
-    final inputList = await preprocessImageClip(image, rawRgbaBytes);
+    final inputList = await preprocessImageClip(dim, rawRgbaBytes);
     final preprocessingTime = DateTime.now();
     final preprocessingMs =
         preprocessingTime.difference(startTime).inMilliseconds;

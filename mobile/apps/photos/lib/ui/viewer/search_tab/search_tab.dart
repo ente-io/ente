@@ -101,10 +101,10 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 72),
                     child: Text(
-                      S.of(context).searchSectionsLengthMismatch(
-                            snapshot.data!.length,
-                            searchTypes.length,
-                          ),
+                      AppLocalizations.of(context).searchSectionsLengthMismatch(
+                        snapshot.data!.length,
+                        searchTypes.length,
+                      ),
                     ),
                   );
                 }
@@ -170,7 +170,10 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                 if (kDebugMode) {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 72),
-                    child: Text(S.of(context).error + ': ${snapshot.error}'),
+                    child: Text(
+                      AppLocalizations.of(context).error +
+                          ': ${snapshot.error}',
+                    ),
                   );
                 }
                 //Errors are handled and this else if condition will be false always

@@ -377,10 +377,9 @@ class RemoteSyncService {
         localIDsToSync.removeAll(alreadyClaimedLocalIDs);
         if (alreadyClaimedLocalIDs.isNotEmpty && !_hasCleanupStaleEntry) {
           try {
-          await _db.removeQueuedLocalFiles(alreadyClaimedLocalIDs);
-          } catch(e, s) {
-            _logger.severe("removeQueuedLocalFiles failed",e,s);
-            
+            await _db.removeQueuedLocalFiles(alreadyClaimedLocalIDs);
+          } catch (e, s) {
+            _logger.severe("removeQueuedLocalFiles failed", e, s);
           }
         }
       }
@@ -1015,7 +1014,7 @@ class RemoteSyncService {
           'creating notification for ${collection?.displayName} '
           'shared: $sharedFilesIDs, collected: $collectedFilesIDs files',
         );
-        final s = await LanguageService.s;
+        final s = await LanguageService.locals;
         // ignore: unawaited_futures
         NotificationService.instance.showNotification(
           collection!.displayName,

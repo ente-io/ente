@@ -44,15 +44,15 @@ class EmergencyContactService {
     if (!isValidEmail(email)) {
       await showErrorDialog(
         context,
-        S.of(context).invalidEmailAddress,
-        S.of(context).enterValidEmail,
+        AppLocalizations.of(context).invalidEmailAddress,
+        AppLocalizations.of(context).enterValidEmail,
       );
       return false;
     } else if (email.trim() == Configuration.instance.getEmail()) {
       await showErrorDialog(
         context,
-        S.of(context).oops,
-        S.of(context).youCannotShareWithYourself,
+        AppLocalizations.of(context).oops,
+        AppLocalizations.of(context).youCannotShareWithYourself,
       );
       return false;
     }

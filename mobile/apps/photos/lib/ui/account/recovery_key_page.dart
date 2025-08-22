@@ -82,7 +82,9 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
           : widget.showAppBar!
               ? AppBar(
                   elevation: 0,
-                  title: Text(widget.title ?? S.of(context).recoveryKey),
+                  title: Text(
+                    widget.title ?? AppLocalizations.of(context).recoveryKey,
+                  ),
                 )
               : null,
       body: Padding(
@@ -103,7 +105,8 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                       widget.showAppBar!
                           ? const SizedBox.shrink()
                           : Text(
-                              widget.title ?? S.of(context).recoveryKey,
+                              widget.title ??
+                                  AppLocalizations.of(context).recoveryKey,
                               style: Theme.of(context).textTheme.headlineMedium,
                             ),
                       Padding(
@@ -111,7 +114,8 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                       ),
                       Text(
                         widget.text ??
-                            S.of(context).recoveryKeyOnForgotPassword,
+                            AppLocalizations.of(context)
+                                .recoveryKeyOnForgotPassword,
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       const Padding(padding: EdgeInsets.only(top: 24)),
@@ -138,7 +142,8 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                                   );
                                   showShortToast(
                                     context,
-                                    S.of(context).recoveryKeyCopiedToClipboard,
+                                    AppLocalizations.of(context)
+                                        .recoveryKeyCopiedToClipboard,
                                   );
                                   setState(() {
                                     _hasTriedToSave = true;
@@ -178,7 +183,8 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                         padding: const EdgeInsets.symmetric(vertical: 20),
                         child: Text(
                           widget.subText ??
-                              S.of(context).recoveryKeySaveDescription,
+                              AppLocalizations.of(context)
+                                  .recoveryKeySaveDescription,
                           style: Theme.of(context).textTheme.bodyLarge,
                         ),
                       ),
@@ -214,7 +220,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
           onPressed: () async {
             await _saveKeys();
           },
-          child: Text(S.of(context).doThisLater),
+          child: Text(AppLocalizations.of(context).doThisLater),
         ),
       );
       childrens.add(const SizedBox(height: 10));
@@ -225,7 +231,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
         onTap: () async {
           await _shareRecoveryKey(recoveryKey);
         },
-        text: S.of(context).saveKey,
+        text: AppLocalizations.of(context).saveKey,
       ),
     );
     if (_hasTriedToSave) {

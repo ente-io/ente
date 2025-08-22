@@ -151,7 +151,7 @@ class _Price extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(
-            price + ' / ' + S.of(context).month,
+            price + ' / ' + AppLocalizations.of(context).month,
             style: textTheme.largeBold.copyWith(color: textBaseLight),
           )
               .animate(delay: const Duration(milliseconds: 100))
@@ -179,12 +179,12 @@ class _Price extends StatelessWidget {
               currencySymbol +
                   pricePerMonthString +
                   ' / ' +
-                  S.of(context).month,
+                  AppLocalizations.of(context).month,
               style: textTheme.largeBold.copyWith(color: textBaseLight),
             ),
           if (isPlayStore)
             Text(
-              price + " / " + S.of(context).yearShort,
+              price + " / " + AppLocalizations.of(context).yearShort,
               style: textTheme.small.copyWith(color: textFaintLight),
             ),
           if (!isPlayStore)
@@ -192,12 +192,12 @@ class _Price extends StatelessWidget {
               currencySymbol +
                   pricePerMonthString +
                   ' / ' +
-                  S.of(context).month,
+                  AppLocalizations.of(context).month,
               style: textTheme.largeBold.copyWith(color: textBaseLight),
             ),
           if (!isPlayStore)
             Text(
-              price + " / " + S.of(context).yearShort,
+              price + " / " + AppLocalizations.of(context).yearShort,
               style: textTheme.small.copyWith(color: textFaintLight),
             ),
         ],

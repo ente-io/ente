@@ -1,6 +1,6 @@
 name: ente_auth
 description: ente two-factor authenticator
-version: 4.4.6+446
+version: 4.4.7+447
 publish_to: none
 
 environment:
@@ -41,6 +41,8 @@ dependencies:
     path: ../../packages/logging
   ente_network:
     path: ../../packages/network
+  ente_qr:
+    path: plugins/qr
   ente_strings:
     path: ../../packages/strings
   ente_ui:
@@ -50,7 +52,7 @@ dependencies:
   expansion_tile_card: ^3.0.0
   ffi: ^2.1.0
   figma_squircle: ^0.6.3
-  file_picker: ^10.2.0
+  file_picker: ^10.3.2
   file_saver: ^0.3.1
   fixnum: ^1.1.0
   fk_user_agent: # no package updates on pub.dev
@@ -84,6 +86,7 @@ dependencies:
   google_nav_bar: ^5.0.5 #supported
   gradient_borders: ^1.0.0
   http: ^1.1.0
+  image: ^4.5.4
   intl: ^0.20.2
   io: ^1.0.4
   json_annotation: ^4.5.0

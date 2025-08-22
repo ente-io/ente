@@ -30,7 +30,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: Text(S.of(context).freeUpSpace),
+        title: Text(AppLocalizations.of(context).freeUpSpace),
       ),
       body: _getBody(),
     );
@@ -51,8 +51,10 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
     final count = status.localIDs.length;
     final formattedCount = NumberFormat().format(count);
     final String textMessage = widget.clearSpaceForFolder
-        ? S.of(context).filesBackedUpInAlbum(count, formattedCount)
-        : S.of(context).filesBackedUpFromDevice(count, formattedCount);
+        ? AppLocalizations.of(context)
+            .filesBackedUpInAlbum(count, formattedCount)
+        : AppLocalizations.of(context)
+            .filesBackedUpFromDevice(count, formattedCount);
     final informationTextStyle = TextStyle(
       fontSize: 14,
       height: 1.3,
@@ -118,8 +120,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
               const Padding(padding: EdgeInsets.all(10)),
               Expanded(
                 child: Text(
-                  S
-                      .of(context)
+                  AppLocalizations.of(context)
                       .freeUpSpaceSaving(count, formatBytes(status.size)),
                   style: informationTextStyle,
                 ),
@@ -139,7 +140,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
               const Padding(padding: EdgeInsets.all(10)),
               Expanded(
                 child: Text(
-                  S.of(context).freeUpAccessPostDelete(count),
+                  AppLocalizations.of(context).freeUpAccessPostDelete(count),
                   style: informationTextStyle,
                 ),
               ),
@@ -157,7 +158,8 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
             onTap: () async {
               await _freeStorage(status);
             },
-            text: S.of(context).freeUpAmount(formatBytes(status.size)),
+            text: AppLocalizations.of(context)
+                .freeUpAmount(formatBytes(status.size)),
           ),
         ),
         const Padding(padding: EdgeInsets.all(24)),
@@ -183,7 +185,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
     if (isSuccess) {
       Navigator.of(context).pop(true);
     } else {
-      showToast(context, S.of(context).couldNotFreeUpSpace);
+      showToast(context, AppLocalizations.of(context).couldNotFreeUpSpace);
     }
   }
 }
