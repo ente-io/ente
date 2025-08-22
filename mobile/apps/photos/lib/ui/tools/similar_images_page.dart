@@ -399,54 +399,76 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             decoration: BoxDecoration(
               color: getEnteColorScheme(context).backgroundBase,
             ),
-            child: AnimatedSwitcher(
-              duration: Duration.zero,
-              child: Column(
-                key: ValueKey(hasSelectedFiles),
-                children: [
-                  if (hasSelectedFiles && !_isSelectionSheetOpen) ...[
-                    SizedBox(
-                      width: double.infinity,
-                      child: ButtonWidget(
-                        labelText:
-                            "Delete $selectedCount photos (${formatBytes(totalSize)})", // TODO: lau: extract string
-                        buttonType: ButtonType.critical,
-                        shouldSurfaceExecutionStates: false,
-                        shouldShowSuccessConfirmation: false,
-                        onTap: () async {
-                          await _deleteFiles(
-                            _selectedFiles.files,
-                            showDialog: true,
-                          );
-                        },
+            child: Column(
+              children: [
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  transitionBuilder:
+                      (Widget child, Animation<double> animation) {
+                    return SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(0, 0.1),
+                        end: Offset.zero,
+                      ).animate(
+                        CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.easeOutCubic,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                  ],
-                  if (!_isSelectionSheetOpen)
-                    SizedBox(
-                      width: double.infinity,
-                      child: ButtonWidget(
-                        labelText:
-                            "Selection options", // TODO: lau: extract string
-                        buttonType: ButtonType.secondary,
-                        shouldSurfaceExecutionStates: false,
-                        shouldShowSuccessConfirmation: false,
-                        onTap: () async {
+                      child: FadeTransition(
+                        opacity: animation,
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: hasSelectedFiles && !_isSelectionSheetOpen
+                      ? Column(
+                          key: const ValueKey('delete_section'),
+                          children: [
+                            SizedBox(
+                              width: double.infinity,
+                              child: ButtonWidget(
+                                labelText:
+                                    "Delete $selectedCount photos (${formatBytes(totalSize)})", // TODO: lau: extract string
+                                buttonType: ButtonType.critical,
+                                shouldSurfaceExecutionStates: false,
+                                shouldShowSuccessConfirmation: false,
+                                onTap: () async {
+                                  await _deleteFiles(
+                                    _selectedFiles.files,
+                                    showDialog: true,
+                                  );
+                                },
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                          ],
+                        )
+                      : const SizedBox.shrink(key: ValueKey('no_delete')),
+                ),
+                if (!_isSelectionSheetOpen)
+                  SizedBox(
+                    width: double.infinity,
+                    child: ButtonWidget(
+                      labelText:
+                          "Selection options", // TODO: lau: extract string
+                      buttonType: ButtonType.secondary,
+                      shouldSurfaceExecutionStates: false,
+                      shouldShowSuccessConfirmation: false,
+                      onTap: () async {
+                        setState(() {
+                          _isSelectionSheetOpen = true;
+                        });
+                        await _showSelectionOptionsSheet();
+                        if (mounted) {
                           setState(() {
-                            _isSelectionSheetOpen = true;
+                            _isSelectionSheetOpen = false;
                           });
-                          await _showSelectionOptionsSheet();
-                          if (mounted) {
-                            setState(() {
-                              _isSelectionSheetOpen = false;
-                            });
-                          }
-                        },
-                      ),
+                        }
+                      },
                     ),
-                ],
-              ),
+                  ),
+              ],
             ),
           ),
         );
@@ -1041,25 +1063,56 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   Widget _getSortMenu() {
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
-    Text sortOptionText(SortKey key) {
-      String text = key.toString();
+
+    Widget sortOptionContent(SortKey key) {
+      String text;
+      Widget trailing;
+
       switch (key) {
         case SortKey.size:
           text = "Size"; // TODO: lau: extract string
+          trailing = Icon(
+            Icons.arrow_downward,
+            size: 16,
+            color: colorScheme.textMuted,
+          );
           break;
         case SortKey.distanceAsc:
-          text = "Similarity (Desc.)"; // TODO: lau: extract string
+          text = "Similarity"; // TODO: lau: extract string
+          trailing = Icon(
+            Icons.arrow_downward,
+            size: 16,
+            color: colorScheme.textMuted,
+          );
           break;
         case SortKey.distanceDesc:
-          text = "Similarity (Asc.)"; // TODO: lau: extract string
+          text = "Similarity"; // TODO: lau: extract string
+          trailing = Icon(
+            Icons.arrow_upward,
+            size: 16,
+            color: colorScheme.textMuted,
+          );
           break;
         case SortKey.count:
           text = "Count"; // TODO: lau: extract string
+          trailing = Icon(
+            Icons.arrow_downward,
+            size: 16,
+            color: colorScheme.textMuted,
+          );
           break;
       }
-      return Text(
-        text,
-        style: textTheme.miniBold,
+
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            text,
+            style: textTheme.miniBold,
+          ),
+          const SizedBox(width: 8),
+          trailing,
+        ],
       );
     }
 
@@ -1084,10 +1137,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         return List.generate(SortKey.values.length, (index) {
           return PopupMenuItem(
             value: index,
-            child: Text(
-              sortOptionText(SortKey.values[index]).data!,
-              style: textTheme.miniBold,
-            ),
+            child: sortOptionContent(SortKey.values[index]),
           );
         });
       },
