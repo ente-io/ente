@@ -1831,7 +1831,7 @@
   "videosProcessed": "Videos processed",
   "totalVideos": "Total videos",
   "skippedVideos": "Skipped videos",
-  "videoStreamingDescription": "Video streaming lets you play videos on any device without waiting. Enabling this toggle will process and generate video streams on this device.",
+  "videoStreamingDescription": "Play videos instantly on any device. Enable to process video streams on this device.",
   "videoStreamingDescriptionClickable": "More information here.",
-  "videoStreamingNote": "Only videos created in the last 60 days and shorter than 1 minute will be processed on this device. For the rest of the library, you will have to enable streamable videos in the desktop app."
+  "videoStreamingNote": "Only videos from last 60 days and under 1 minute are processed on this device. For older/longer videos, enable streaming in the desktop app."
 }

@@ -43,10 +43,31 @@ class _VideoStreamingSettingsPageState
   Widget build(BuildContext context) {
     final hasEnabled = VideoPreviewService.instance.isVideoStreamingEnabled;
     return Scaffold(
+      bottomNavigationBar: !hasEnabled
+          ? SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(height: 12),
+                    ButtonWidget(
+                      buttonType: ButtonType.primary,
+                      labelText: context.l10n.enable,
+                      onTap: () async {
+                        await toggleVideoStreaming();
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : null,
       body: CustomScrollView(
         primary: false,
         slivers: <Widget>[
           TitleBarWidget(
+            reducedExpandedHeight: 16,
             flexibleSpaceTitle: TitleBarTitleWidget(
               title: AppLocalizations.of(context).videoStreaming,
             ),
@@ -62,71 +83,89 @@ class _VideoStreamingSettingsPageState
               ),
             ],
           ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 16, right: 16),
-              child: Column(
-                children: [
-                  Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                          text: AppLocalizations.of(context)
-                              .videoStreamingDescription,
-                        ),
-                        const TextSpan(text: " "),
-                        TextSpan(
-                          text: AppLocalizations.of(context)
-                              .videoStreamingDescriptionClickable,
-                          style: const TextStyle(
-                            decoration: TextDecoration.underline,
-                          ),
-                          recognizer: TapGestureRecognizer()..onTap = openHelp,
-                        ),
-                      ],
-                    ),
-                    textAlign: TextAlign.justify,
-                    style: getEnteTextTheme(context).mini.copyWith(
-                          color: getEnteColorScheme(context).textMuted,
-                        ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          if (hasEnabled)
+          if (hasEnabled) ...[
             SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                ).copyWith(top: 20),
-                child: _getStreamingSettings(context),
-              ),
-            )
-          else
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Container(
+                height: MediaQuery.sizeOf(context).height * 0.88,
+                padding: const EdgeInsets.only(left: 16, right: 16),
                 child: Column(
                   children: [
-                    const SizedBox(height: 12),
-                    ButtonWidget(
-                      buttonType: ButtonType.primary,
-                      labelText: context.l10n.enable,
-                      onTap: () async {
-                        await toggleVideoStreaming();
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    ButtonWidget(
-                      buttonType: ButtonType.secondary,
-                      labelText: context.l10n.moreDetails,
-                      onTap: openHelp,
+                    Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                            text: AppLocalizations.of(context)
+                                .videoStreamingDescription,
+                          ),
+                          if (hasEnabled) ...[
+                            const TextSpan(text: " "),
+                            TextSpan(
+                              text: AppLocalizations.of(context)
+                                  .videoStreamingDescriptionClickable,
+                              style: const TextStyle(
+                                decoration: TextDecoration.underline,
+                              ),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = openHelp,
+                            ),
+                          ],
+                        ],
+                      ),
+                      textAlign: TextAlign.justify,
+                      style: getEnteTextTheme(context).mini.copyWith(
+                            color: getEnteColorScheme(context).textMuted,
+                          ),
                     ),
                   ],
                 ),
               ),
             ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                ).copyWith(top: 30),
+                child: _getStreamingSettings(context),
+              ),
+            ),
+          ] else ...[
+            SliverToBoxAdapter(
+              child: SizedBox(
+                width: double.infinity,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      "assets/albums-widget-static.png",
+                      height: 160,
+                    ),
+                    const SizedBox(height: 16),
+                    Text.rich(
+                      TextSpan(
+                        text: AppLocalizations.of(context).addSomePhotosDesc1,
+                        children: [
+                          TextSpan(
+                            text:
+                                AppLocalizations.of(context).addSomePhotosDesc2,
+                            style: TextStyle(
+                              color: getEnteColorScheme(context).primary500,
+                            ),
+                          ),
+                          TextSpan(
+                            text:
+                                AppLocalizations.of(context).addSomePhotosDesc3,
+                          ),
+                        ],
+                      ),
+                      style: getEnteTextTheme(context).smallMuted,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 140),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -151,11 +190,11 @@ class _VideoStreamingSettingsPageState
 
   Widget _getStreamingSettings(BuildContext context) {
     final hasEnabled = VideoPreviewService.instance.isVideoStreamingEnabled;
+    final colorScheme = getEnteColorScheme(context);
 
     return Column(
       children: [
         MenuItemWidget(
-          padding: const EdgeInsets.only(left: 8, right: 4),
           captionedTextWidget: CaptionedTextWidget(
             title: AppLocalizations.of(context).enabled,
           ),
@@ -167,7 +206,9 @@ class _VideoStreamingSettingsPageState
           ),
           singleBorderRadius: 8,
           alignCaptionedTextToLeft: true,
+          menuItemColor: colorScheme.fillFaint,
         ),
+        const SizedBox(height: 8),
         const VideoStreamingStatusWidget(),
       ],
     );
@@ -196,6 +237,7 @@ class VideoStreamingStatusWidgetState
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     return Column(
       children: [
         FutureBuilder(
@@ -209,7 +251,6 @@ class VideoStreamingStatusWidgetState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   MenuItemWidget(
-                    padding: const EdgeInsets.only(left: 8, right: 6),
                     captionedTextWidget: CaptionedTextWidget(
                       title: AppLocalizations.of(context).processed,
                     ),
@@ -225,8 +266,9 @@ class VideoStreamingStatusWidgetState
                     alignCaptionedTextToLeft: true,
                     isGestureDetectorDisabled: true,
                     key: ValueKey("processed_items_" + netProcessed.toString()),
+                    menuItemColor: colorScheme.fillFaint,
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 12),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Text(
