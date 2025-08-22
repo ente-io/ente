@@ -209,8 +209,9 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
                               children: [
                                 Text(
                                   AppLocalizations.of(context).memoryCount(
-                                    value,
-                                    NumberFormat().format(value),
+                                    count: value,
+                                    formattedCount:
+                                        NumberFormat().format(value),
                                   ),
                                   style: textTheme.body,
                                 ),

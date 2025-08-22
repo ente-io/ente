@@ -38,8 +38,8 @@ class ChildSubscriptionWidget extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: StyledText(
-              text:
-                  AppLocalizations.of(context).contactFamilyAdmin(familyAdmin),
+              text: AppLocalizations.of(context)
+                  .contactFamilyAdmin(familyAdminEmail: familyAdmin),
               style: Theme.of(context).textTheme.bodyLarge,
               tags: {
                 'green': StyledTextTag(

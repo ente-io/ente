@@ -31,21 +31,21 @@ class TimeMemory extends SmartMemory {
     if (day != null) {
       final dayFormat = DateFormat.MMMd(languageCode).format(day!);
       if (yearsAgo != null) {
-        return "$dayFormat, " + locals.yearsAgo(yearsAgo!);
+        return "$dayFormat, " + locals.yearsAgo(count: yearsAgo!);
       } else {
-        return locals.throughTheYears(dayFormat);
+        return locals.throughTheYears(dateFormat: dayFormat);
       }
     }
     if (month != null) {
       final monthFormat = DateFormat.MMMM(languageCode).format(month!);
       if (yearsAgo != null) {
-        return "$monthFormat, " + locals.yearsAgo(yearsAgo!);
+        return "$monthFormat, " + locals.yearsAgo(count: yearsAgo!);
       } else {
-        return locals.throughTheYears(monthFormat);
+        return locals.throughTheYears(dateFormat: monthFormat);
       }
     }
     if (yearsAgo != null) {
-      return locals.thisWeekXYearsAgo(yearsAgo!);
+      return locals.thisWeekXYearsAgo(count: yearsAgo!);
     } else {
       return locals.thisWeekThroughTheYears;
     }

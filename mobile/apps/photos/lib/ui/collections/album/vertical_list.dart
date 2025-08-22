@@ -243,24 +243,24 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
       bool hasVerifiedLock = false;
 
       if (widget.actionType == CollectionActionType.addFiles) {
-        toastMessage =
-            AppLocalizations.of(context).addedSuccessfullyTo(item.displayName);
+        toastMessage = AppLocalizations.of(context)
+            .addedSuccessfullyTo(albumName: item.displayName);
         shouldNavigateToCollection = true;
       } else if (widget.actionType == CollectionActionType.moveFiles ||
           widget.actionType == CollectionActionType.restoreFiles ||
           widget.actionType == CollectionActionType.unHide) {
-        toastMessage =
-            AppLocalizations.of(context).movedSuccessfullyTo(item.displayName);
+        toastMessage = AppLocalizations.of(context)
+            .movedSuccessfullyTo(albumName: item.displayName);
         shouldNavigateToCollection = true;
       } else if (widget.actionType ==
           CollectionActionType.moveToHiddenCollection) {
-        toastMessage =
-            AppLocalizations.of(context).movedSuccessfullyTo(item.displayName);
+        toastMessage = AppLocalizations.of(context)
+            .movedSuccessfullyTo(albumName: item.displayName);
         shouldNavigateToCollection = true;
         hasVerifiedLock = true;
       } else if (widget.actionType == CollectionActionType.addToHiddenAlbum) {
-        toastMessage =
-            AppLocalizations.of(context).addedSuccessfullyTo(item.displayName);
+        toastMessage = AppLocalizations.of(context)
+            .addedSuccessfullyTo(albumName: item.displayName);
         shouldNavigateToCollection = true;
         hasVerifiedLock = true;
       } else {

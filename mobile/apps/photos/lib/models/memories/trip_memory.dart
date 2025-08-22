@@ -51,13 +51,13 @@ class TripMemory extends SmartMemory {
     assert(locationName != null || tripYear != null);
     if (locationName != null) {
       if (locationName!.toLowerCase().contains("base")) return locationName!;
-      return locals.tripToLocation(locationName!);
+      return locals.tripToLocation(location: locationName!);
     }
     if (tripYear != null) {
       if (tripYear == DateTime.now().year - 1) {
         return locals.lastYearsTrip;
       } else {
-        return locals.tripInYear(tripYear!);
+        return locals.tripInYear(year: tripYear!);
       }
     }
     throw ArgumentError("TripMemory must have a location name or trip year");

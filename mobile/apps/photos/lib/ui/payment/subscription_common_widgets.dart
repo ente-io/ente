@@ -92,9 +92,10 @@ class ValidityWidget extends StatelessWidget {
       DateTime.fromMicrosecondsSinceEpoch(currentSubscription!.expiryTime),
     );
 
-    var message = AppLocalizations.of(context).renewsOn(endDate);
+    var message = AppLocalizations.of(context).renewsOn(endDate: endDate);
     if (currentSubscription!.attributes?.isCancelled ?? false) {
-      message = AppLocalizations.of(context).subWillBeCancelledOn(endDate);
+      message =
+          AppLocalizations.of(context).subWillBeCancelledOn(endDate: endDate);
       if (addOnBonus.isNotEmpty) {
         hideSubValidityView = true;
       }
@@ -139,7 +140,8 @@ class AddOnBonusValidity extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 4, bottom: 4),
       child: Text(
-        AppLocalizations.of(context).addOnValidTill(storage, endDate),
+        AppLocalizations.of(context)
+            .addOnValidTill(storageAmount: storage, endDate: endDate),
         style: getEnteTextTheme(context).smallFaint,
         textAlign: TextAlign.center,
       ),

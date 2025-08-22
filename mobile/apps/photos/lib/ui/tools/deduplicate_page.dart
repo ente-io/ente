@@ -246,7 +246,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                       width: double.infinity,
                       child: ButtonWidget(
                         labelText:
-                            "${AppLocalizations.of(context).deleteItemCount(fileCount)} (${formatBytes(totalSize)})",
+                            "${AppLocalizations.of(context).deleteItemCount(count: fileCount)} (${formatBytes(totalSize)})",
                         buttonType: ButtonType.critical,
                         onTap: () async {
                           try {
@@ -351,8 +351,8 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
               children: [
                 Text(
                   AppLocalizations.of(context).duplicateItemsGroup(
-                    duplicates.files.length,
-                    formatBytes(duplicates.size),
+                    count: duplicates.files.length,
+                    formattedSize: formatBytes(duplicates.size),
                   ),
                   style: Theme.of(context).textTheme.titleSmall,
                 ),

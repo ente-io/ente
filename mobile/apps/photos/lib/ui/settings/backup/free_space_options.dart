@@ -213,7 +213,9 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                                     onTap: () async {
                                       await routeToPage(
                                         context,
-                                        const SimilarImagesPage(debugScreen: kDebugMode,),
+                                        const SimilarImagesPage(
+                                          debugScreen: kDebugMode,
+                                        ),
                                       );
                                     },
                                   ),
@@ -310,7 +312,7 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
         context,
         title: AppLocalizations.of(context).success,
         body: AppLocalizations.of(context)
-            .youHaveSuccessfullyFreedUp(formatBytes(status.size)),
+            .youHaveSuccessfullyFreedUp(storageSaved: formatBytes(status.size)),
         firstButtonLabel: AppLocalizations.of(context).rateUs,
         firstButtonOnTap: () async {
           await updateService.launchReviewUrl();
@@ -331,7 +333,7 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
         context: context,
         title: AppLocalizations.of(context).success,
         body: AppLocalizations.of(context)
-            .youHaveSuccessfullyFreedUp(formatBytes(status.size)),
+            .youHaveSuccessfullyFreedUp(storageSaved: formatBytes(status.size)),
         icon: Icons.download_done_rounded,
         isDismissible: true,
         buttons: [
@@ -358,8 +360,8 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
       context,
       title: AppLocalizations.of(context).sparkleSuccess,
       body: AppLocalizations.of(context).duplicateFileCountWithStorageSaved(
-        result.count,
-        formatBytes(result.size),
+        count: result.count,
+        storageSaved: formatBytes(result.size),
       ),
       firstButtonLabel: AppLocalizations.of(context).rateUs,
       firstButtonOnTap: () async {

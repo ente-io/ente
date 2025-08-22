@@ -226,7 +226,7 @@ class TrashedFileOverlayText extends StatelessWidget {
         ((file.deleteBy - DateTime.now().microsecondsSinceEpoch) /
                 Duration.microsecondsPerDay)
             .ceil();
-    final text = AppLocalizations.of(context).trashDaysLeft(daysLeft);
+    final text = AppLocalizations.of(context).trashDaysLeft(count: daysLeft);
     return FileOverlayText(text);
   }
 }

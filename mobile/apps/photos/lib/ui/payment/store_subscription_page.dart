@@ -122,7 +122,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
                 ? AppLocalizations.of(context).googlePlayId
                 : AppLocalizations.of(context).appleId;
             final String message =
-                AppLocalizations.of(context).subAlreadyLinkedErrMessage(id);
+                AppLocalizations.of(context).subAlreadyLinkedErrMessage(id: id);
             // ignore: unawaited_futures
             showErrorDialog(context, title, message);
             return;
@@ -134,7 +134,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
               context,
               AppLocalizations.of(context).paymentFailed,
               AppLocalizations.of(context).paymentFailedTalkToProvider(
-                Platform.isAndroid ? "PlayStore" : "AppStore",
+                providerName: Platform.isAndroid ? "PlayStore" : "AppStore",
               ),
             );
             return;
@@ -409,7 +409,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
         context,
         AppLocalizations.of(context).sorry,
         AppLocalizations.of(context)
-            .contactToManageSubscription(capitalizedWord),
+            .contactToManageSubscription(provider: capitalizedWord),
       );
     }
   }

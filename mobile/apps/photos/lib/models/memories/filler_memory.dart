@@ -22,6 +22,6 @@ class FillerMemory extends SmartMemory {
 
   @override
   String createTitle(AppLocalizations locals, String languageCode) {
-    return locals.yearsAgo(yearsAgo);
+    return locals.yearsAgo(count: yearsAgo);
   }
 }

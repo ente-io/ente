@@ -570,7 +570,8 @@ class PhotoDateHeaderWidget extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        AppLocalizations.of(context).photosCount(photoCount),
+                        AppLocalizations.of(context)
+                            .photosCount(count: photoCount),
                         style: TextStyle(
                           color: colorScheme.textBase,
                           fontSize: 18,

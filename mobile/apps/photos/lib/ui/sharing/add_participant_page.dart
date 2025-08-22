@@ -247,8 +247,8 @@ class _AddParticipantPage extends State<AddParticipantPage> {
         ButtonWidget(
           buttonType: ButtonType.primary,
           buttonSize: ButtonSize.large,
-          labelText:
-              AppLocalizations.of(context).addViewers(_selectedEmails.length),
+          labelText: AppLocalizations.of(context)
+              .addViewers(count: _selectedEmails.length),
           isDisabled: _selectedEmails.isEmpty,
           onTap: () async {
             final results = <bool>[];
@@ -271,7 +271,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
             showToast(
               context,
               AppLocalizations.of(context)
-                  .viewersSuccessfullyAdded(noOfSuccessfullAdds),
+                  .viewersSuccessfullyAdded(count: noOfSuccessfullAdds),
             );
 
             if (!results.any((e) => e == false) && mounted) {
@@ -292,7 +292,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                   : ButtonType.primary,
           buttonSize: ButtonSize.large,
           labelText: AppLocalizations.of(context)
-              .addCollaborators(_selectedEmails.length),
+              .addCollaborators(count: _selectedEmails.length),
           isDisabled: _selectedEmails.isEmpty,
           onTap: () async {
             // TODO: This is not currently designed for best UX for action on
@@ -319,7 +319,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
             showToast(
               context,
               AppLocalizations.of(context)
-                  .collaboratorsSuccessfullyAdded(noOfSuccessfullAdds),
+                  .collaboratorsSuccessfullyAdded(count: noOfSuccessfullAdds),
             );
 
             if (!results.any((e) => e == false) && mounted) {

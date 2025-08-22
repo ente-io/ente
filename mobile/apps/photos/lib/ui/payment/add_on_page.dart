@@ -90,7 +90,7 @@ class AddOnViewSection extends StatelessWidget {
             if (bonus.validTill != 0)
               Text(
                 AppLocalizations.of(context).validTill(
-                  DateFormat.yMMMd(
+                  endDate: DateFormat.yMMMd(
                     Localizations.localeOf(context).languageCode,
                   )
                       .format(

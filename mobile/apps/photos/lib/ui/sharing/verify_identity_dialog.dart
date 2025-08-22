@@ -45,7 +45,8 @@ class _VerifyIdentifyDialogState extends State<VerifyIdentifyDialog> {
     final textStyle = getEnteTextTheme(context);
     final String subTitle = widget.self
         ? AppLocalizations.of(context).thisIsYourVerificationId
-        : AppLocalizations.of(context).thisIsPersonVerificationId(widget.email);
+        : AppLocalizations.of(context)
+            .thisIsPersonVerificationId(email: widget.email);
     final String bottomText = widget.self
         ? AppLocalizations.of(context)
             .someoneSharingAlbumsWithYouShouldSeeTheSameId
@@ -55,7 +56,7 @@ class _VerifyIdentifyDialogState extends State<VerifyIdentifyDialog> {
       title: Text(
         widget.self
             ? AppLocalizations.of(context).verificationId
-            : AppLocalizations.of(context).verifyEmailID(widget.email),
+            : AppLocalizations.of(context).verifyEmailID(email: widget.email),
       ),
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -72,7 +73,7 @@ class _VerifyIdentifyDialogState extends State<VerifyIdentifyDialog> {
                     children: [
                       Text(
                         AppLocalizations.of(context)
-                            .emailNoEnteAccount(widget.email),
+                            .emailNoEnteAccount(email: widget.email),
                       ),
                       const SizedBox(height: 24),
                       ButtonWidget(
@@ -176,9 +177,10 @@ class _VerifyIdentifyDialogState extends State<VerifyIdentifyDialog> {
               shareText(
                 widget.self
                     ? AppLocalizations.of(context)
-                        .shareMyVerificationID(verificationID)
+                        .shareMyVerificationID(verificationID: verificationID)
                     : AppLocalizations.of(context)
-                        .shareTextConfirmOthersVerificationID(verificationID),
+                        .shareTextConfirmOthersVerificationID(
+                            verificationID: verificationID,),
               );
             },
             child: Container(

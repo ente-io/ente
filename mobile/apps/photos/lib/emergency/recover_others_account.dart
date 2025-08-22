@@ -284,8 +284,9 @@ class _RecoverOthersAccountState extends State<RecoverOthersAccount> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                     child: Text(
-                      AppLocalizations.of(context)
-                          .passwordStrength(passwordStrengthText),
+                      AppLocalizations.of(context).passwordStrength(
+                        passwordStrengthValue: passwordStrengthText,
+                      ),
                       style: TextStyle(
                         color: passwordStrengthColor,
                       ),
