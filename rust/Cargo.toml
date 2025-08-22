@@ -48,6 +48,7 @@ chrono = "0.4"
 uuid = { version = "1.11", features = ["serde", "v4"] }
 rpassword = "7.3"
 indicatif = "0.17"
+dialoguer = "0.11"
 
 # File operations
 walkdir = "2.5"

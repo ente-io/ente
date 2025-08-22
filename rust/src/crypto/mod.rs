@@ -8,7 +8,9 @@ mod chacha;
 mod kdf;
 
 pub use argon::derive_argon_key;
-pub use chacha::{decrypt_chacha, encrypt_chacha, secret_box_open, secret_box_seal};
+pub use chacha::{
+    decrypt_chacha, encrypt_chacha, sealed_box_open, secret_box_open, secret_box_seal,
+};
 pub use kdf::derive_login_key;
 
 static INIT: Once = Once::new();

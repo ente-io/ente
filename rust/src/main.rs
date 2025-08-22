@@ -2,6 +2,7 @@ use clap::Parser;
 use ente_rs::{
     Result,
     cli::{Cli, Commands},
+    commands,
     storage::Storage,
 };
 
@@ -16,7 +17,7 @@ async fn main() -> Result<()> {
     // Initialize storage
     let config_dir = ente_rs::utils::get_cli_config_dir()?;
     let db_path = config_dir.join("ente.db");
-    let _storage = Storage::new(&db_path)?;
+    let storage = Storage::new(&db_path)?;
 
     // Parse CLI arguments
     let cli = Cli::parse();
@@ -26,9 +27,8 @@ async fn main() -> Result<()> {
         Commands::Version => {
             println!("ente-rs version {}", ente_rs::cli::version::VERSION);
         }
-        Commands::Account(_account_cmd) => {
-            // TODO: Implement account commands
-            println!("Account command not yet implemented");
+        Commands::Account(account_cmd) => {
+            commands::account::handle_account_command(account_cmd, &storage).await?;
         }
         Commands::Export(_export_cmd) => {
             // TODO: Implement export command

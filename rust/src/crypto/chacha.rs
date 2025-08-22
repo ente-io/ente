@@ -93,6 +93,47 @@ pub fn encrypt_chacha(plaintext: &[u8], nonce: &[u8], key: &[u8]) -> Result<Vec<
     Ok(ciphertext)
 }
 
+/// Open a sealed box (decrypt with public key crypto)
+pub fn sealed_box_open(ciphertext: &[u8], public_key: &[u8], secret_key: &[u8]) -> Result<Vec<u8>> {
+    if public_key.len() != sodium::crypto_box_PUBLICKEYBYTES as usize {
+        return Err(Error::Crypto(format!(
+            "Invalid public key length: expected {}, got {}",
+            sodium::crypto_box_PUBLICKEYBYTES,
+            public_key.len()
+        )));
+    }
+
+    if secret_key.len() != sodium::crypto_box_SECRETKEYBYTES as usize {
+        return Err(Error::Crypto(format!(
+            "Invalid secret key length: expected {}, got {}",
+            sodium::crypto_box_SECRETKEYBYTES,
+            secret_key.len()
+        )));
+    }
+
+    if ciphertext.len() < sodium::crypto_box_SEALBYTES as usize {
+        return Err(Error::Crypto("Ciphertext too short".into()));
+    }
+
+    let mut plaintext = vec![0u8; ciphertext.len() - sodium::crypto_box_SEALBYTES as usize];
+
+    let result = unsafe {
+        sodium::crypto_box_seal_open(
+            plaintext.as_mut_ptr(),
+            ciphertext.as_ptr(),
+            ciphertext.len() as u64,
+            public_key.as_ptr(),
+            secret_key.as_ptr(),
+        )
+    };
+
+    if result != 0 {
+        return Err(Error::Crypto("Failed to open sealed box".into()));
+    }
+
+    Ok(plaintext)
+}
+
 /// Open a secret box (decrypt with XSalsa20-Poly1305)
 pub fn secret_box_open(ciphertext: &[u8], nonce: &[u8], key: &[u8]) -> Result<Vec<u8>> {
     if nonce.len() != sodium::crypto_secretbox_NONCEBYTES as usize {

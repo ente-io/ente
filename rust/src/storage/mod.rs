@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use crate::{Error, Result};
+use crate::Result;
 use rusqlite::Connection;
 use serde::{Deserialize, Serialize};
 use std::path::Path;
