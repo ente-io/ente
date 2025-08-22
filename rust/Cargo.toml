@@ -32,8 +32,8 @@ srp = "0.6"
 num-bigint = "0.4"
 
 # Storage
-sled = "0.34"
-bincode = "1.3"
+rusqlite = { version = "0.32", features = ["bundled", "serde_json"] }
+sqlx = { version = "0.8", features = ["runtime-tokio", "sqlite", "migrate"], optional = true }
 
 # Utilities
 thiserror = "2.0"
