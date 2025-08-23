@@ -43,10 +43,8 @@ class AdvancedSettingsScreen extends StatelessWidget {
             delegate: SliverChildBuilderDelegate(
               (delegateBuildContext, index) {
                 return Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 20,
-                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
