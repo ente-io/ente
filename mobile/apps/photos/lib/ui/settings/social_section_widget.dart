@@ -31,7 +31,7 @@ class SocialSectionWidget extends StatelessWidget {
       [
         sectionOptionSpacing,
         SocialsMenuItemWidget(
-          AppLocalizations.of(context).rateUsOnStore(ratePlace),
+          AppLocalizations.of(context).rateUsOnStore(storeName: ratePlace),
           rateUrl,
         ),
         sectionOptionSpacing,

@@ -497,7 +497,8 @@ class _EmergencyPageState extends State<EmergencyPage> {
           isInAlert: true,
         ),
       ],
-      body: AppLocalizations.of(context).legacyInvite(contact.user.email),
+      body:
+          AppLocalizations.of(context).legacyInvite(email: contact.user.email),
       actionSheetType: ActionSheetType.defaultActionSheet,
     );
     return;
@@ -550,7 +551,7 @@ class _EmergencyPageState extends State<EmergencyPage> {
           isInAlert: true,
         ),
       ],
-      body: context.l10n.recoveryWarningBody(emergencyContactEmail),
+      body: context.l10n.recoveryWarningBody(email: emergencyContactEmail),
       actionSheetType: ActionSheetType.defaultActionSheet,
     );
     return;

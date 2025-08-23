@@ -121,7 +121,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                           content: url.isExpired
                               ? AppLocalizations.of(context).expiredLinkInfo
                               : AppLocalizations.of(context).linkExpiresOn(
-                                  getFormattedTime(
+                                  expiryTime: getFormattedTime(
                                     context,
                                     DateTime.fromMicrosecondsSinceEpoch(
                                       url.validTill,

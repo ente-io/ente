@@ -350,7 +350,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
           context,
           AppLocalizations.of(context).sorry,
           AppLocalizations.of(context)
-              .contactToManageSubscription(capitalizedWord),
+              .contactToManageSubscription(provider: capitalizedWord),
         );
     }
   }
@@ -511,7 +511,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                   context,
                   AppLocalizations.of(context).sorry,
                   AppLocalizations.of(context).cancelOtherSubscription(
-                    _currentSubscription!.paymentProvider,
+                    paymentProvider: _currentSubscription!.paymentProvider,
                   ),
                 );
                 return;

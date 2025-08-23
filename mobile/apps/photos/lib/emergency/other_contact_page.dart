@@ -117,7 +117,7 @@ class _OtherContactPageState extends State<OtherContactPage> {
                   )
                 : (recoverySession!.status == "READY"
                     ? Text(
-                        context.l10n.recoveryReady(accountEmail),
+                        context.l10n.recoveryReady(email: accountEmail),
                         style: textTheme.body,
                       )
                     : Text(
@@ -155,8 +155,8 @@ class _OtherContactPageState extends State<OtherContactPage> {
                                   context,
                                   context.l10n.recoveryInitiated,
                                   context.l10n.recoveryInitiatedDesc(
-                                    widget.contact.recoveryNoticeInDays,
-                                    Configuration.instance.getEmail()!,
+                                    days: widget.contact.recoveryNoticeInDays,
+                                    email: Configuration.instance.getEmail()!,
                                   ),
                                 );
                               }

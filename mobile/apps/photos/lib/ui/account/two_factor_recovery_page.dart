@@ -91,7 +91,7 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
                 context,
                 AppLocalizations.of(context).contactSupport,
                 AppLocalizations.of(context)
-                    .dropSupportEmail("support@ente.io"),
+                    .dropSupportEmail(supportEmail: "support@ente.io"),
               );
             },
             child: Container(

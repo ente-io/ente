@@ -175,7 +175,7 @@ Future<void> shareLogs(
   final result = await showDialogWidget(
     context: context,
     title: AppLocalizations.of(context).emailYourLogs,
-    body: AppLocalizations.of(context).pleaseSendTheLogsTo(toEmail),
+    body: AppLocalizations.of(context).pleaseSendTheLogsTo(toEmail: toEmail),
     buttons: [
       ButtonWidget(
         buttonType: ButtonType.neutral,
@@ -318,7 +318,7 @@ void _showNoMailAppsDialog(BuildContext context, String toEmail) {
   showChoiceDialog(
     context,
     icon: Icons.email_outlined,
-    title: AppLocalizations.of(context).pleaseEmailUsAt(toEmail),
+    title: AppLocalizations.of(context).pleaseEmailUsAt(toEmail: toEmail),
     firstButtonLabel: AppLocalizations.of(context).copyEmailAddress,
     secondButtonLabel: AppLocalizations.of(context).dismiss,
     firstButtonOnTap: () async {

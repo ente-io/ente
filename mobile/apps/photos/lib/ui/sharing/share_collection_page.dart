@@ -66,7 +66,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
     children.add(
       MenuSectionTitle(
         title: AppLocalizations.of(context)
-            .shareWithPeopleSectionTitle(_sharees.length),
+            .shareWithPeopleSectionTitle(numberOfPeople: _sharees.length),
         iconData: Icons.workspaces,
       ),
     );

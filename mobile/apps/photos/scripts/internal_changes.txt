@@ -1,3 +1,4 @@
+- Similar images UI changes
 - Neeraj: Fix for double enteries for local file
 - (prtk) Fix widget initial launch on iOS
 - Similar images debug screen (Settings > Backup > Free up space > Similar images)

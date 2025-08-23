@@ -100,7 +100,7 @@ class _PersonClustersPageState extends State<PersonClustersPage> {
                               children: <Widget>[
                                 Text(
                                   AppLocalizations.of(context)
-                                      .photosCount(files.length),
+                                      .photosCount(count: files.length),
                                   style: getEnteTextTheme(context).body,
                                 ),
                                 (index != 0)
@@ -293,8 +293,9 @@ class __ClusterWrapperForGirdState extends State<_ClusterWrapperForGird> {
                   const SizedBox(height: 8),
                   Text(
                     context.l10n.memoryCount(
-                      widget.files.length,
-                      NumberFormat().format(widget.files.length),
+                      count: widget.files.length,
+                      formattedCount:
+                          NumberFormat().format(widget.files.length),
                     ),
                     style: getEnteTextTheme(context).small,
                     textAlign: TextAlign.center,

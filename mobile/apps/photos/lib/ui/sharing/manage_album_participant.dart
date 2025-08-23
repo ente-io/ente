@@ -118,7 +118,7 @@ class _ManageIndividualParticipantState
                             AppLocalizations.of(context).yesConvertToViewer,
                         body: AppLocalizations.of(context)
                             .cannotAddMorePhotosAfterBecomingViewer(
-                          widget.user.displayName ?? widget.user.email,
+                          user: widget.user.displayName ?? widget.user.email,
                         ),
                         isCritical: true,
                       );

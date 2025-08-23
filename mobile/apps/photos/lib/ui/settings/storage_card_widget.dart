@@ -282,8 +282,8 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
                         )
                       : const SizedBox.shrink(),
                   Text(
-                    AppLocalizations.of(context)
-                        .availableStorageSpace(freeSpace, freeSpaceUnit),
+                    AppLocalizations.of(context).availableStorageSpace(
+                        freeAmount: freeSpace, storageUnit: freeSpaceUnit,),
                     style: getEnteTextTheme(context)
                         .mini
                         .copyWith(color: textFaintDark),
@@ -361,10 +361,10 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
     return [
       TextSpan(
         text: AppLocalizations.of(context).storageUsageInfo(
-          currentUsage,
-          currentUsageUnit,
-          totalStorage,
-          totalStorageUnit,
+          usedAmount: currentUsage,
+          usedStorageUnit: currentUsageUnit,
+          totalAmount: totalStorage,
+          totalStorageUnit: totalStorageUnit,
         ),
       ),
     ];
