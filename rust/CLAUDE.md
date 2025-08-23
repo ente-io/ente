@@ -82,17 +82,17 @@ The project has completed foundational components (crypto, storage, models) and 
 
 ## Commit Guidelines
 
-### Pre-commit Checklist (MANDATORY)
-Before EVERY commit, run these commands in order:
+### Pre-commit Checklist
+Before committing, run these commands in order:
 ```bash
 # 1. Format code
 cargo fmt
 
-# 2. Auto-fix clippy warnings
-cargo clippy --fix --allow-dirty --allow-staged
+# 2. Auto-fix clippy warnings (match CI configuration)
+cargo clippy --all-targets --all-features --fix --allow-dirty --allow-staged
 
 # 3. Verify no remaining warnings
-cargo clippy -- -D warnings
+cargo clippy --all-targets --all-features -- -D warnings
 
 # 4. Build with warnings as errors
 RUSTFLAGS="-D warnings" cargo build
