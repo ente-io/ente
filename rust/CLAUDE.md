@@ -107,6 +107,15 @@ cargo fmt --check
 - Never commit to main branch
 - All CI checks must pass - the above commands simulate CI locally
 
+### Security Guidelines
+**NEVER commit sensitive information:**
+- No real email addresses, usernames, or account IDs in code or documentation
+- No authentication tokens, API keys, or passwords (even for test accounts)
+- No debug logs that output credentials, keys, or personal information
+- Use generic examples like "user@example.com" in documentation
+- Remove all `log::debug!` statements that print sensitive data before committing
+- Avoid logging encrypted keys, nonces, or tokens even in encrypted form
+
 ## Environment Variables
 
 - `ENTE_CLI_CONFIG_DIR`: Override default config directory

@@ -111,7 +111,7 @@ The Rust CLI now has a **fully functional export capability** with proper file d
 ## Testing Status 🧪
 
 ### Successfully Tested ✅
-- ✅ Export with real account (m@ente.io)
+- ✅ Export with real account
 - ✅ Small file decryption (JPEG images)
 - ✅ Large file decryption (33MB RAW file)
 - ✅ Metadata extraction for filenames

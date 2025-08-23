@@ -82,12 +82,9 @@ impl<'a> AuthClient<'a> {
             srp_attrs.mem_limit as u32,
             srp_attrs.ops_limit as u32,
         )?;
-        log::debug!("KEK (hex): {}", hex::encode(&key_enc_key));
 
         // Step 3: Derive login key
         let login_key = derive_login_key(&key_enc_key)?;
-        log::debug!("loginSubKey (base64): {}", STANDARD.encode(&login_key));
-        log::debug!("loginSubKey (hex): {}", hex::encode(&login_key));
 
         // Step 4: Initialize SRP client
         let srp_salt = STANDARD.decode(&srp_attrs.srp_salt)?;

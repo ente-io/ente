@@ -83,7 +83,7 @@ impl ApiClient {
         // Add auth token if account_id is provided
         if let Some(id) = account_id {
             if let Some(token) = self.get_token(id) {
-                log::debug!("Adding auth token for account {id}: {token}");
+                log::debug!("Adding auth token for account {id}");
                 req = req.header(TOKEN_HEADER, token);
             } else {
                 log::warn!("No token found for account {id}");

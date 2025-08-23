@@ -238,29 +238,21 @@ async fn add_account(
 
     // Decrypt token if encrypted
     let token = if let Some(encrypted_token) = &auth_response.encrypted_token {
-        log::info!("Encrypted token from server (base64): {encrypted_token}");
-        log::info!("Public key (base64): {}", key_attributes.public_key);
-
         let encrypted_bytes = decode_base64(encrypted_token)?;
-        log::info!("Encrypted token bytes length: {}", encrypted_bytes.len());
+        log::debug!("Encrypted token bytes length: {}", encrypted_bytes.len());
 
         let decrypted = sealed_box_open(&encrypted_bytes, &public_key, &secret_key)?;
-        log::info!("Decrypted token bytes length: {}", decrypted.len());
-        log::info!("Decrypted token hex: {}", hex::encode(&decrypted));
+        log::debug!("Decrypted token bytes length: {}", decrypted.len());
 
         // Try to interpret as UTF-8 string first
         match String::from_utf8(decrypted.clone()) {
             Ok(token_str) => {
-                log::info!("Decrypted token is UTF-8 string: {token_str}");
+                log::debug!("Decrypted token is valid UTF-8");
                 // If it's a string, use it as bytes
                 token_str.into_bytes()
             }
             Err(_) => {
-                log::info!("Token is not UTF-8, using raw bytes");
-                log::info!(
-                    "Token as base64 URL: {}",
-                    base64::engine::general_purpose::URL_SAFE.encode(&decrypted)
-                );
+                log::debug!("Token is not UTF-8, using raw bytes");
                 // If not UTF-8, use raw bytes
                 decrypted
             }

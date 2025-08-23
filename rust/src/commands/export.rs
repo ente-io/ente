@@ -23,16 +23,9 @@ pub async fn run_export(account_email: Option<String>) -> Result<()> {
         // Export specific account - try to find it with any app
         let all_accounts = storage.accounts().list()?;
         log::debug!("Found {} total accounts", all_accounts.len());
-        for acc in &all_accounts {
-            log::debug!("Account: email='{}', id={}", acc.email, acc.id);
-        }
         let matching: Vec<Account> = all_accounts
             .into_iter()
-            .filter(|a| {
-                let matches = a.email == email;
-                log::debug!("Comparing '{}' == '{}': {}", a.email, email, matches);
-                matches
-            })
+            .filter(|a| a.email == email)
             .collect();
 
         if matching.is_empty() {
@@ -169,8 +162,6 @@ async fn export_account(storage: &Storage, account: &Account) -> Result<()> {
                     Ok(key) => key,
                     Err(e) => {
                         log::error!("Failed to decrypt key for file {}: {}", file.id, e);
-                        log::debug!("encrypted_key: {}", &file.encrypted_key);
-                        log::debug!("key_decryption_nonce: {}", &file.key_decryption_nonce);
                         continue;
                     }
                 };
