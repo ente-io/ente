@@ -1,199 +1,198 @@
 # Ente CLI Rust Conversion Plan
 
 ## Current Status
-The foundation is complete with crypto, storage, and CLI framework. The next critical step is implementing the API client to enable authentication and data sync.
+The Rust CLI now has a **fully functional export capability** with proper file decryption! The API client, authentication flow (using stored credentials), and streaming decryption are all working. Files can be successfully exported from Ente with their original names.
 
-## Completed Components
+## Completed Components ✅
+
+### Core Infrastructure
 - ✅ Project structure and dependencies (libsodium-sys-stable for crypto)
-- ✅ Cryptography module (Argon2, ChaCha20-Poly1305, Blake2b KDF)
 - ✅ SQLite storage layer with schema for accounts, files, collections
 - ✅ Data models (Account, File, Collection, Error types)
 - ✅ CLI command structure (account, export, version commands)
 
-## Immediate Next Step: API Client Implementation
+### Cryptography Module (`/rust/src/crypto/`)
+- ✅ Argon2 key derivation (`argon.rs`)
+- ✅ Blake2b login key derivation (`kdf.rs`)
+- ✅ XSalsa20-Poly1305 (secret_box) for key decryption (`chacha.rs`)
+- ✅ **Streaming XChaCha20-Poly1305** for file decryption (`stream.rs`)
+- ✅ Chunked decryption for large files (4MB chunks)
+- ✅ libsodium initialization and helpers
 
-### 1. API Client Base Structure (`/rust/src/api/client.rs`)
-**Current State**: Stub with basic struct definition
-**To Do**:
-- Add token storage HashMap for multi-account support
-- Implement request builder with common headers (X-Auth-Token, X-Client-Package)
-- Add retry logic with exponential backoff for failed requests
-- Implement debug/trace logging for requests/responses
-- Add rate limiting handling (429 status codes)
+### API Client (`/rust/src/api/`)
+- ✅ **Base HTTP client with token management** (`client.rs`)
+- ✅ **Request/Response models** (`models.rs`)
+  - ✅ Collection models
+  - ✅ File models with metadata
+  - ✅ User and auth response models
+- ✅ **Core API methods** (`methods.rs`)
+  - ✅ `get_collections()` - Fetch collections
+  - ✅ `get_collection_files()` - Fetch files with pagination
+  - ✅ `download_file()` - Download encrypted files
 
-### 2. Request/Response Models (`/rust/src/api/models.rs`)
-Create structs matching the Go implementation:
-- `SrpAttributes` - For SRP auth setup (srpUserID, srpSalt, memLimit, opsLimit, kekSalt)
-- `CreateSrpSessionRequest/Response` - SRP session creation
-- `VerifySrpSessionRequest/Response` - SRP verification
-- `AuthResponse` - Final auth response with token and key attributes
-- `GetFilesRequest/Response` - File listing with pagination
-- `GetCollectionsResponse` - Collections/albums listing
-- `GetDiffResponse` - For incremental sync
+### Export Command (`/rust/src/commands/export.rs`)
+- ✅ **Full export workflow implemented**
+- ✅ Load stored credentials from SQLite
+- ✅ Decrypt collection keys using master key
+- ✅ Decrypt file keys using collection keys
+- ✅ Decrypt file data using streaming XChaCha20-Poly1305
+- ✅ Decrypt and parse metadata for original filenames
+- ✅ Create date-based directory structure (YYYY/MM-Month/)
+- ✅ Skip already exported files (deduplication)
+- ✅ Progress indicators with file counts
+- ✅ Beautiful export summary with emojis
 
-### 3. Authentication Module (`/rust/src/api/auth.rs`)
-Implement the complete SRP authentication flow:
-- `get_srp_attributes(email)` - Get SRP params for user
-- `create_srp_session(srp_user_id, client_pub)` - Start SRP
-- `verify_srp_session(srp_user_id, session_id, client_proof)` - Complete SRP
-- Key derivation from password using stored Argon2 params
-- Login key derivation using Blake2b KDF
-- Token extraction and storage
+### Account Management (`/rust/src/commands/account.rs`)
+- ✅ **Account list** - Display all configured accounts
+- ✅ **Account add** (partial) - Add account with stored credentials
+- ✅ Store encrypted credentials in SQLite
 
-### 4. API Methods (`/rust/src/api/methods.rs`)
-Core API endpoints to implement:
-- `get_user_details()` - Fetch user info
-- `get_collections(since_time)` - Fetch collections with changes
-- `get_files(limit, since_time)` - Fetch file metadata
-- `get_diff(since_time, limit)` - Get incremental changes
-- `get_file_url(file_id)` - Get download URL for file
-- `get_thumbnail_url(file_id)` - Get thumbnail URL
+### Metadata Handling (`/rust/src/models/metadata.rs`)
+- ✅ **Metadata decryption and parsing**
+- ✅ Extract original filenames
+- ✅ File type detection (Image, Video, LivePhoto)
+- ✅ Public metadata support
 
-## Remaining Major Components
+## In Progress 🚧
 
-### 5. Account Management Commands (`/rust/src/commands/account.rs`)
-**account add**:
-- Prompt for email and password
-- Perform SRP authentication
-- Decrypt and store master key, secret key, token
-- Prompt for export directory
-- Save account to SQLite
+### Authentication Module (`/rust/src/api/auth.rs`)
+- ⚠️ Currently using stored tokens (not implementing full SRP flow yet)
+- Need to implement:
+  - Full SRP authentication flow
+  - Password-based key derivation
+  - Token refresh logic
 
-**account list**:
-- Query all accounts from SQLite
-- Display email, app type, export directory
+## Remaining Components 📝
 
-**account update**:
-- Update export directory for existing account
-- Validate directory exists and is writable
+### Account Management Enhancements
+- [ ] **Account add with authentication**
+  - Prompt for password
+  - Perform SRP authentication
+  - Derive and store keys
+- [ ] **Account update** - Change export directory
+- [ ] **Account remove** - Delete account and credentials
 
-### 6. Sync Engine (`/rust/src/sync/engine.rs`)
-Core sync logic:
-- Fetch remote collections and store in SQLite
-- Fetch remote files with pagination (500 per batch)
-- Track sync state with timestamps
-- Handle deleted files/collections
-- Implement incremental sync using diff API
+### Sync Engine (`/rust/src/sync/`)
+- [ ] Fix model mismatches in sync modules
+- [ ] Implement incremental sync with timestamps
+- [ ] Store sync state in SQLite
+- [ ] Handle deleted files/collections
+- [ ] Track download progress
 
-### 7. File Processing (`/rust/src/sync/files.rs`)
-- Decrypt file metadata using collection keys
-- Extract file creation time, location, type
-- Build local file path based on date/album structure
-- Check if file already exists locally (deduplication)
-- Queue files for download
+### Advanced Export Features
+- [ ] Export filters (by album, date range)
+- [ ] Shared album support
+- [ ] Hidden album handling
+- [ ] Live photos (ZIP file extraction)
+- [ ] Thumbnail generation
+- [ ] Export to different formats
 
-### 8. Download Manager (`/rust/src/sync/download.rs`)
-- Fetch file download URL from API
-- Download encrypted file to temp location
-- Decrypt file using file key (decrypt with ChaCha20-Poly1305)
-- Move to final location with proper filename
-- Handle resume for partial downloads
-- Parallel downloads with configurable concurrency
+### API Client Enhancements
+- [ ] Retry logic with exponential backoff
+- [ ] Rate limiting (429 status codes)
+- [ ] Request/response logging
+- [ ] Error recovery
+- [ ] Connection pooling
 
-### 9. Export Command (`/rust/src/commands/export.rs`)
-Main export workflow:
-- Load all configured accounts
-- For each account:
-  - Load stored credentials
-  - Initialize API client with token
-  - Run sync engine
-  - Download new/modified files
-  - Create album folders and symlinks
-  - Update sync timestamps
+### File Processing
+- [ ] EXIF data extraction
+- [ ] Location data handling
+- [ ] Creation/modification time preservation
+- [ ] Symlink creation for albums
+- [ ] Duplicate detection by hash
 
-### 10. Metadata Handling (`/rust/src/models/metadata.rs`)
-- Parse encrypted metadata JSON
-- Extract EXIF data (camera, location, timestamp)
-- Handle live photos (pair image + video)
-- Extract and apply file creation/modification times
+### Download Manager
+- [ ] Parallel downloads
+- [ ] Resume interrupted downloads
+- [ ] Bandwidth throttling
+- [ ] Progress tracking per file
+- [ ] Temp file management
 
-## Testing Strategy
+## Testing Status 🧪
 
-### Unit Tests
-- Crypto operations (compare outputs with Go implementation)
-- Storage layer CRUD operations
-- API request/response serialization
-
-### Integration Tests
-- Full authentication flow with test account
-- File download and decryption
-- Sync state management
+### Successfully Tested ✅
+- ✅ Export with real account (m@ente.io)
+- ✅ Small file decryption (JPEG images)
+- ✅ Large file decryption (33MB RAW file)
+- ✅ Metadata extraction for filenames
+- ✅ Date-based directory creation
+- ✅ File deduplication
 
 ### Manual Testing Checklist
-- [ ] Can authenticate with existing Ente account
-- [ ] Lists all albums/collections correctly
-- [ ] Downloads files to correct folder structure (YYYY/MM-Month/)
+- [x] Can export from existing Ente account
+- [x] Lists all albums/collections correctly
+- [x] Downloads files to correct folder structure (YYYY/MM-Month/)
+- [x] Correctly decrypts files
+- [x] Extracts original filenames from metadata
 - [ ] Handles incremental sync (only new files)
 - [ ] Resumes interrupted downloads
-- [ ] Multi-account support works
+- [ ] Multi-account export works
 - [ ] Export filters (by album, date range) work
 
 ## Migration from Go CLI
 
-### Data Migration
-- BoltDB to SQLite migration tool (optional, for existing users)
-- Preserve sync state to avoid re-downloading everything
-- Migrate account credentials (re-encrypt with user confirmation)
-
-### Feature Parity Checklist
-- [ ] SRP authentication
-- [ ] Multi-account support  
-- [ ] Photos export
+### Feature Parity Progress
+- [x] Multi-account support (storage)
+- [x] Photos export (basic)
+- [ ] SRP authentication (using stored tokens currently)
 - [ ] Locker export
 - [ ] Auth (2FA) export
-- [ ] Album organization
-- [ ] Deduplicated storage
+- [x] Album organization
+- [x] Deduplicated storage
 - [ ] Incremental sync
 - [ ] Export filters (albums, shared, hidden)
 
-## File Structure Reference
+### Data Migration
+- [ ] BoltDB to SQLite migration tool
+- [ ] Preserve sync state
+- [ ] Migrate account credentials
 
-```
-/home/m/p/ente/rust/src/
-├── api/
-│   ├── mod.rs
-│   ├── client.rs      # HTTP client with retry/auth
-│   ├── models.rs      # Request/response structs
-│   ├── auth.rs        # SRP authentication
-│   └── methods.rs     # API endpoint implementations
-├── commands/
-│   ├── mod.rs
-│   ├── account.rs     # Account management
-│   └── export.rs      # Export orchestration
-├── sync/
-│   ├── mod.rs
-│   ├── engine.rs      # Sync orchestration
-│   ├── files.rs       # File processing
-│   └── download.rs    # Download management
-└── models/
-    └── metadata.rs    # Metadata parsing
+## Recent Achievements 🎉
 
-```
+1. **Streaming XChaCha20-Poly1305 Implementation**
+   - Correctly implemented libsodium's secretstream API
+   - Matches Go implementation exactly
+   - Handles both small and large files
 
-## Key Implementation Notes
+2. **Chunked Decryption for Large Files**
+   - 4MB chunk size matching Go implementation
+   - Successfully tested with 33MB RAW files
+   - Memory efficient processing
 
-1. **Crypto**: All crypto operations MUST use libsodium-sys-stable
-2. **Errors**: Use proper error propagation with `?` operator
-3. **Async**: Use tokio for all async operations
-4. **Storage**: All persistent data goes through SQLite
-5. **Memory**: Use `zeroize` for sensitive data cleanup
-6. **Compatibility**: Ensure file paths work on Windows/Mac/Linux
+3. **Complete Export Flow**
+   - Collection key decryption (XSalsa20-Poly1305)
+   - File key decryption (XSalsa20-Poly1305)
+   - File data decryption (Streaming XChaCha20-Poly1305)
+   - Metadata decryption and parsing
+
+## Next Actions 🚀
+
+1. **Fix sync module compilation issues**
+   - Resolve model mismatches between API and storage types
+   - Implement proper sync state tracking
+
+2. **Implement full SRP authentication**
+   - Add password prompt to account add
+   - Implement SRP protocol
+   - Store derived keys securely
+
+3. **Add export filters**
+   - Filter by album name
+   - Filter by date range
+   - Handle shared/hidden albums
+
+4. **Improve error handling**
+   - Better error messages for users
+   - Retry failed downloads
+   - Handle network interruptions
 
 ## Environment Variables
 - `ENTE_CLI_CONFIG_DIR` - Override config directory location
-- `ENTE_LOG` - Set log level (debug, info, warn, error)
+- `ENTE_LOG` / `RUST_LOG` - Set log level (debug, info, warn, error)
 
-## Dependencies to Watch
-- `libsodium-sys-stable` - Must match crypto operations with Go version
-- `rusqlite` - Bundled SQLite for portability
-- `reqwest` - Configure with proper timeouts and retry
-- `tokio` - Use current_thread runtime for CLI app
-
-## Next Action
-Start with implementing the API client base structure in `/rust/src/api/client.rs`, focusing on:
-1. Token management for multi-account
-2. Request builder with proper headers
-3. Error handling for API responses
-4. Retry logic for network failures
-
-This will unblock the authentication flow and allow testing with real Ente servers.
+## Key Implementation Notes
+1. **Crypto**: Successfully using libsodium-sys-stable for all operations
+2. **Streaming**: Proper streaming XChaCha20-Poly1305 implementation
+3. **Storage**: SQLite working well for account and credential storage
+4. **Async**: Tokio runtime properly configured
+5. **Memory**: Chunked processing prevents memory issues with large files
