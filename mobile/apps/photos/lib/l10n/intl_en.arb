@@ -1832,6 +1832,5 @@
   "totalVideos": "Total videos",
   "skippedVideos": "Skipped videos",
   "videoStreamingDescription": "Play videos instantly on any device. Enable to process video streams on this device.",
-  "videoStreamingDescriptionClickable": "More information here.",
   "videoStreamingNote": "Only videos from last 60 days and under 1 minute are processed on this device. For older/longer videos, enable streaming in the desktop app."
 }

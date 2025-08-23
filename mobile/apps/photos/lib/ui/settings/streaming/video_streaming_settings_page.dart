@@ -63,97 +63,114 @@ class _VideoStreamingSettingsPageState
               ),
             )
           : null,
-      body: CustomScrollView(
-        primary: false,
-        slivers: <Widget>[
-          TitleBarWidget(
-            reducedExpandedHeight: 16,
-            flexibleSpaceTitle: TitleBarTitleWidget(
-              title: AppLocalizations.of(context).videoStreaming,
-            ),
-            actionIcons: [
-              IconButtonWidget(
-                icon: Icons.close_outlined,
-                iconButtonType: IconButtonType.secondary,
-                onTap: () {
-                  Navigator.pop(context);
-                  if (Navigator.canPop(context)) Navigator.pop(context);
-                  if (Navigator.canPop(context)) Navigator.pop(context);
-                },
+      appBar: hasEnabled
+          ? null
+          : PreferredSize(
+              preferredSize: const Size.fromHeight(154),
+              child: TitleBarWidget(
+                reducedExpandedHeight: 16,
+                flexibleSpaceTitle: TitleBarTitleWidget(
+                  title: AppLocalizations.of(context).videoStreaming,
+                ),
+                actionIcons: [
+                  IconButtonWidget(
+                    icon: Icons.close_outlined,
+                    iconButtonType: IconButtonType.secondary,
+                    onTap: () {
+                      Navigator.pop(context);
+                      if (Navigator.canPop(context)) Navigator.pop(context);
+                      if (Navigator.canPop(context)) Navigator.pop(context);
+                    },
+                  ),
+                ],
+                isSliver: false,
               ),
-            ],
-          ),
-          if (hasEnabled) ...[
-            SliverToBoxAdapter(
-              child: Container(
-                height: MediaQuery.sizeOf(context).height * 0.88,
-                padding: const EdgeInsets.only(left: 16, right: 16),
-                child: Column(
-                  children: [
-                    Text.rich(
-                      TextSpan(
-                        children: [
-                          TextSpan(
-                            text: AppLocalizations.of(context)
-                                .videoStreamingDescription,
-                          ),
-                          if (hasEnabled) ...[
-                            const TextSpan(text: " "),
-                            TextSpan(
-                              text: AppLocalizations.of(context)
-                                  .videoStreamingDescriptionClickable,
-                              style: const TextStyle(
-                                decoration: TextDecoration.underline,
-                              ),
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = openHelp,
-                            ),
-                          ],
-                        ],
-                      ),
-                      textAlign: TextAlign.justify,
-                      style: getEnteTextTheme(context).mini.copyWith(
-                            color: getEnteColorScheme(context).textMuted,
-                          ),
+            ),
+      body: hasEnabled
+          ? CustomScrollView(
+              primary: false,
+              slivers: <Widget>[
+                TitleBarWidget(
+                  reducedExpandedHeight: 16,
+                  flexibleSpaceTitle: TitleBarTitleWidget(
+                    title: AppLocalizations.of(context).videoStreaming,
+                  ),
+                  actionIcons: [
+                    IconButtonWidget(
+                      icon: Icons.close_outlined,
+                      iconButtonType: IconButtonType.secondary,
+                      onTap: () {
+                        Navigator.pop(context);
+                        if (Navigator.canPop(context)) Navigator.pop(context);
+                        if (Navigator.canPop(context)) Navigator.pop(context);
+                      },
                     ),
                   ],
                 ),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                ).copyWith(top: 30),
-                child: _getStreamingSettings(context),
-              ),
-            ),
-          ] else ...[
-            SliverToBoxAdapter(
-              child: SizedBox(
-                width: double.infinity,
+                SliverToBoxAdapter(
+                  child: Container(
+                    padding: const EdgeInsets.only(left: 16, right: 16),
+                    child: Column(
+                      children: [
+                        Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                text: AppLocalizations.of(context)
+                                    .videoStreamingDescription,
+                              ),
+                              const TextSpan(text: " "),
+                              TextSpan(
+                                text: AppLocalizations.of(context).moreDetails,
+                                style: TextStyle(
+                                  color: getEnteColorScheme(context).primary500,
+                                ),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = openHelp,
+                              ),
+                            ],
+                          ),
+                          textAlign: TextAlign.justify,
+                          style: getEnteTextTheme(context).mini.copyWith(
+                                color: getEnteColorScheme(context).textMuted,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                    ).copyWith(top: 30),
+                    child: _getStreamingSettings(context),
+                  ),
+                ),
+              ],
+            )
+          : Center(
+              child: SingleChildScrollView(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Image.asset(
-                      "assets/albums-widget-static.png",
+                      "assets/enable-streaming-static.png",
                       height: 160,
                     ),
                     const SizedBox(height: 16),
                     Text.rich(
                       TextSpan(
-                        text: AppLocalizations.of(context).addSomePhotosDesc1,
+                        text: AppLocalizations.of(context)
+                                .videoStreamingDescription +
+                            " ",
                         children: [
                           TextSpan(
-                            text:
-                                AppLocalizations.of(context).addSomePhotosDesc2,
+                            text: AppLocalizations.of(context).moreDetails,
                             style: TextStyle(
                               color: getEnteColorScheme(context).primary500,
                             ),
-                          ),
-                          TextSpan(
-                            text:
-                                AppLocalizations.of(context).addSomePhotosDesc3,
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = openHelp,
                           ),
                         ],
                       ),
@@ -165,9 +182,6 @@ class _VideoStreamingSettingsPageState
                 ),
               ),
             ),
-          ],
-        ],
-      ),
     );
   }
 
@@ -185,6 +199,7 @@ class _VideoStreamingSettingsPageState
     final isEnabled = VideoPreviewService.instance.isVideoStreamingEnabled;
 
     await VideoPreviewService.instance.setIsVideoStreamingEnabled(!isEnabled);
+    if (!mounted) return;
     setState(() {});
   }
 
