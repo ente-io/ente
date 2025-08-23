@@ -1,7 +1,7 @@
 use crate::Result;
 use crate::api::client::ApiClient;
 use crate::api::methods::ApiMethods;
-use crate::crypto::init as crypto_init;
+use crate::crypto::{decrypt_chacha, init as crypto_init};
 use crate::models::account::Account;
 use crate::storage::Storage;
 use base64::Engine;
@@ -102,7 +102,7 @@ async fn export_account(storage: &Storage, account: &Account) -> Result<()> {
     println!("Found {} collections", collections.len());
 
     // Master key is already raw bytes, no need to decode
-    let _master_key = &secrets.master_key;
+    let master_key = &secrets.master_key;
 
     // Fetch and export files for each collection
     println!("\nFetching files...");
@@ -163,10 +163,24 @@ async fn export_account(storage: &Storage, account: &Account) -> Result<()> {
                 // Download encrypted file
                 let encrypted_data = api.download_file(&account.email, file.id).await?;
 
-                // Decrypt file (simplified - would need proper key management)
-                // For now, just save the encrypted file
+                // Decrypt the file key
+                let file_key =
+                    decrypt_file_key(&file.encrypted_key, &file.key_decryption_nonce, master_key)?;
+
+                // Extract file decryption header (first 24 bytes are the nonce)
+                if encrypted_data.len() < 24 {
+                    log::error!("File {} has invalid encrypted data", file.id);
+                    continue;
+                }
+                let file_nonce = &encrypted_data[0..24];
+                let ciphertext = &encrypted_data[24..];
+
+                // Decrypt the file
+                let decrypted = decrypt_chacha(ciphertext, file_nonce, &file_key)?;
+
+                // Write decrypted file
                 let mut file_handle = fs::File::create(&file_path).await?;
-                file_handle.write_all(&encrypted_data).await?;
+                file_handle.write_all(&decrypted).await?;
                 file_handle.sync_all().await?;
 
                 exported_files += 1;
@@ -233,9 +247,41 @@ fn generate_export_path(
         path.push(safe_name);
     }
 
-    // Generate filename - just use ID with a generic extension for now
-    let filename = format!("file_{}.dat", file.id);
+    // Try to extract filename from metadata if available
+    // For now, use ID with appropriate extension based on file type
+    let filename = generate_filename(file, collection);
     path.push(filename);
 
     Ok(path)
+}
+
+/// Decrypt a file key using the master key
+fn decrypt_file_key(encrypted_key: &str, nonce: &str, master_key: &[u8]) -> Result<Vec<u8>> {
+    use base64::engine::general_purpose::STANDARD as BASE64;
+
+    let encrypted_bytes = BASE64.decode(encrypted_key)?;
+    let nonce_bytes = BASE64.decode(nonce)?;
+
+    decrypt_chacha(&encrypted_bytes, &nonce_bytes, master_key)
+}
+
+/// Generate a filename for the file
+fn generate_filename(
+    file: &crate::api::models::File,
+    _collection: Option<&crate::api::models::Collection>,
+) -> String {
+    // For now, determine extension based on MIME type hints or default
+    // In a real implementation, we'd decrypt metadata to get the original filename
+    let extension = if file.file.size.unwrap_or(0) > 0 {
+        // Check if it's likely an image or video based on size patterns
+        if file.thumbnail.size.unwrap_or(0) > 0 {
+            ".jpg" // Has thumbnail, likely an image
+        } else {
+            ".bin" // Unknown binary file
+        }
+    } else {
+        ".dat"
+    };
+
+    format!("file_{}{}", file.id, extension)
 }
