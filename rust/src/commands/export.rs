@@ -214,23 +214,23 @@ fn generate_export_path(
     path.push(month);
 
     // Add collection name if available
-    if let Some(col) = collection {
-        if let Some(ref name) = col.name {
-            if !name.is_empty() && name != "Uncategorized" {
-                // Sanitize collection name for filesystem
-                let safe_name: String = name
-                    .chars()
-                    .map(|c| match c {
-                        '/' | '\\' | ':' | '*' | '?' | '"' | '<' | '>' | '|' => '_',
-                        c if c.is_control() => '_',
-                        c => c,
-                    })
-                    .collect::<String>()
-                    .trim()
-                    .to_string();
-                path.push(safe_name);
-            }
-        }
+    if let Some(col) = collection
+        && let Some(ref name) = col.name
+        && !name.is_empty()
+        && name != "Uncategorized"
+    {
+        // Sanitize collection name for filesystem
+        let safe_name: String = name
+            .chars()
+            .map(|c| match c {
+                '/' | '\\' | ':' | '*' | '?' | '"' | '<' | '>' | '|' => '_',
+                c if c.is_control() => '_',
+                c => c,
+            })
+            .collect::<String>()
+            .trim()
+            .to_string();
+        path.push(safe_name);
     }
 
     // Generate filename - just use ID with a generic extension for now

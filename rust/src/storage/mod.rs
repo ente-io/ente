@@ -58,17 +58,17 @@ impl Storage {
     }
 
     /// Get account store
-    pub fn accounts(&self) -> AccountStore {
+    pub fn accounts(&self) -> AccountStore<'_> {
         AccountStore::new(&self.conn)
     }
 
     /// Get config store
-    pub fn config(&self) -> ConfigStore {
+    pub fn config(&self) -> ConfigStore<'_> {
         ConfigStore::new(&self.conn)
     }
 
     /// Get sync store
-    pub fn sync(&self) -> SyncStore {
+    pub fn sync(&self) -> SyncStore<'_> {
         SyncStore::new(&self.conn)
     }
 }
