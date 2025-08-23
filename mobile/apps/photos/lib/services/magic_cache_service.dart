@@ -2,7 +2,6 @@ import "dart:async";
 import "dart:convert";
 import "dart:io";
 
-import "package:computer/computer.dart";
 import "package:flutter/foundation.dart";
 import "package:flutter/widgets.dart";
 import "package:logging/logging.dart";
@@ -21,12 +20,12 @@ import "package:photos/models/search/hierarchical/magic_filter.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
-import "package:photos/services/remote_assets_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/ui/viewer/search/result/magic_result_screen.dart";
 import "package:photos/utils/cache_util.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/navigation_util.dart";
+import "package:photos/utils/text_embeddings_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class MagicCache {
@@ -119,8 +118,13 @@ GenericSearchResult? toGenericSearchResult(
   }
   if (!prompt.recentFirst) {
     enteFilesInMagicCache.sort((a, b) {
-      return fileIdToPositionMap[a.uploadedFileID!]!
-          .compareTo(fileIdToPositionMap[b.uploadedFileID!]!);
+      final aID = a.uploadedFileID;
+      final bID = b.uploadedFileID;
+      if (aID == null || bID == null) return 0;
+      final aPos = fileIdToPositionMap[aID];
+      final bPos = fileIdToPositionMap[bID];
+      if (aPos == null || bPos == null) return 0;
+      return aPos.compareTo(bPos);
     });
   }
   final String title = getLocalizedTitle(context, prompt.title);
@@ -168,7 +172,6 @@ GenericSearchResult? toGenericSearchResult(
 
 class MagicCacheService {
   static const _lastMagicCacheUpdateTime = "last_magic_cache_update_time";
-  static const _kMagicPromptsDataUrl = "https://discover.ente.io/v2.json";
 
   /// Delay is for cache update to be done not during app init, during which a
   /// lot of other things are happening.
@@ -178,7 +181,6 @@ class MagicCacheService {
   late final Logger _logger = Logger((MagicCacheService).toString());
 
   Future<List<MagicCache>>? _magicCacheFuture;
-  Future<List<Prompt>>? _promptFuture;
   final Set<String> _pendingUpdateReason = {};
   bool _isUpdateInProgress = false;
 
@@ -213,11 +215,7 @@ class MagicCacheService {
     if (!enableDiscover) {
       return;
     }
-    final updatedJSONFile = await RemoteAssetsService.instance
-        .getAssetIfUpdated(_kMagicPromptsDataUrl);
-    if (updatedJSONFile != null) {
-      queueUpdate("Prompts data updated");
-    } else if (lastMagicCacheUpdateTime <
+    if (lastMagicCacheUpdateTime <
         DateTime.now()
             .subtract(const Duration(hours: 12))
             .millisecondsSinceEpoch) {
@@ -247,10 +245,7 @@ class MagicCacheService {
       _isUpdateInProgress = true;
       final EnteWatch? w = kDebugMode ? EnteWatch("magicCacheWatch") : null;
       w?.start();
-      final magicPromptsData = await getPrompts();
-      w?.log("loadedPrompts");
-      final List<MagicCache> magicCaches =
-          await _nonEmptyMagicResults(magicPromptsData);
+      final List<MagicCache> magicCaches = await _nonEmptyMagicResults();
       w?.log("resultComputed");
       _magicCacheFuture = Future.value(magicCaches);
       await writeToJsonFile<List<MagicCache>>(
@@ -262,7 +257,6 @@ class MagicCacheService {
       await _resetLastMagicCacheUpdateTime();
       w?.logAndReset('done');
       _pendingUpdateReason.clear();
-      Bus.instance.fire(MagicCacheUpdatedEvent());
     } catch (e, s) {
       _logger.info("Error updating magic cache", e, s);
     } finally {
@@ -271,31 +265,12 @@ class MagicCacheService {
     }
   }
 
-  Future<List<Prompt>> getPrompts() async {
-    if (_promptFuture != null) {
-      return _promptFuture!;
-    }
-    _promptFuture = _readPromptFromDiskOrNetwork();
-    return _promptFuture!;
-  }
-
   Future<List<MagicCache>> getMagicCache() async {
     if (_magicCacheFuture != null) {
       return _magicCacheFuture!;
     }
     _magicCacheFuture = _readResultFromDisk();
     return _magicCacheFuture!;
-  }
-
-  Future<List<Prompt>> _readPromptFromDiskOrNetwork() async {
-    final String path =
-        await RemoteAssetsService.instance.getAssetPath(_kMagicPromptsDataUrl);
-    return Computer.shared().compute(
-      _loadMagicPrompts,
-      param: <String, dynamic>{
-        "path": path,
-      },
-    );
   }
 
   Future<List<MagicCache>> _readResultFromDisk() async {
@@ -312,6 +287,7 @@ class MagicCacheService {
     if (file.existsSync()) {
       await file.delete();
     }
+    _magicCacheFuture = null;
   }
 
   Future<List<GenericSearchResult>> getMagicGenericSearchResult(
@@ -322,7 +298,30 @@ class MagicCacheService {
           kDebugMode ? EnteWatch("magicGenericSearchResult") : null;
       w?.start();
       final magicCaches = await getMagicCache();
-      final List<Prompt> prompts = await getPrompts();
+
+      // Load discover embeddings to get prompts
+      final discoverEmbeddings = await loadDiscoverEmbeddings();
+      if (discoverEmbeddings == null) {
+        _logger.severe("No discover embeddings available in assets");
+        throw Exception("No discover embeddings available in assets");
+      }
+
+      final prompts = <Prompt>[];
+      for (final entry in discoverEmbeddings.queryToPromptData.entries) {
+        final query = entry.key;
+        final promptData = entry.value;
+        prompts.add(
+          Prompt(
+            query: query,
+            title: promptData.title,
+            minScore: promptData.minScore,
+            minSize: promptData.minSize,
+            showVideo: promptData.showVideo ?? true,
+            recentFirst: promptData.recentFirst ?? false,
+          ),
+        );
+      }
+
       if (magicCaches.isEmpty) {
         w?.log("No magic cache found");
         return [];
@@ -375,35 +374,53 @@ class MagicCacheService {
     }
   }
 
-  static Future<List<Prompt>> _loadMagicPrompts(
-    Map<String, dynamic> args,
-  ) async {
-    final String path = args["path"] as String;
-    final File file = File(path);
-    final String contents = await file.readAsString();
-    final Map<String, dynamic> promptsJson = jsonDecode(contents);
-    final List<dynamic> promptData = promptsJson['prompts'];
-    return promptData
-        .map<Prompt>((jsonItem) => Prompt.fromJson(jsonItem))
-        .toList();
-  }
-
-  ///Returns non-empty magic results from magicPromptsData
-  ///Length is number of prompts, can be less if there are not enough non-empty
-  ///results
-  Future<List<MagicCache>> _nonEmptyMagicResults(
-    List<Prompt> magicPromptsData,
-  ) async {
+  Future<List<MagicCache>> _nonEmptyMagicResults() async {
     final TimeLogger t = TimeLogger();
     final results = <MagicCache>[];
     final List<int> matchCount = [];
-    final Map<String, double> queryToScore = {};
-    for (Prompt prompt in magicPromptsData) {
-      queryToScore[prompt.query] = prompt.minScore;
+
+    // Uncomment this code to generate embeddings and save them to a JSON file
+    // await generateAndSaveDiscoverEmbeddings();
+    // (from package:photos/utils/text_embeddings_util.dart)
+
+    // Load pre-computed discover embeddings from assets
+    final discoverEmbeddings = await loadDiscoverEmbeddings();
+    if (discoverEmbeddings == null) {
+      _logger.severe('Failed to load discover embeddings');
+      throw Exception('Failed to load discover embeddings');
     }
-    final clipResults =
-        await SemanticSearchService.instance.getMatchingFileIDs(queryToScore);
-    for (Prompt prompt in magicPromptsData) {
+
+    // Build the embeddings and score maps
+    final Map<String, List<double>> queryToEmbedding = {};
+    final Map<String, double> queryToScore = {};
+    final List<Prompt> prompts = [];
+
+    for (final entry in discoverEmbeddings.queryToPromptData.entries) {
+      final query = entry.key;
+      final promptData = entry.value;
+      final vector = discoverEmbeddings.queryToVector[query];
+
+      if (vector != null) {
+        queryToEmbedding[query] = vector.toList();
+        queryToScore[query] = promptData.minScore;
+        prompts.add(
+          Prompt(
+            query: query,
+            title: promptData.title,
+            minScore: promptData.minScore,
+            minSize: promptData.minSize,
+            showVideo: promptData.showVideo ?? true,
+            recentFirst: promptData.recentFirst ?? false,
+          ),
+        );
+      }
+    }
+
+    _logger.info('Using pre-computed discover embeddings from assets');
+    final clipResults = await SemanticSearchService.instance
+        .getMatchingFileIDsWithEmbeddings(queryToEmbedding, queryToScore);
+
+    for (final prompt in prompts) {
       final List<int> fileUploadedIDs = clipResults[prompt.query] ?? [];
       if (fileUploadedIDs.isNotEmpty) {
         results.add(

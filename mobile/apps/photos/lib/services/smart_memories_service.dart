@@ -104,7 +104,7 @@ class SmartMemoriesService {
       );
 
       // Load pre-computed text embeddings from assets
-      final textEmbeddings = await loadTextEmbeddingsFromAssets();
+      final textEmbeddings = await loadMemoriesEmbeddings();
       if (textEmbeddings == null) {
         _logger.severe('Failed to load pre-computed text embeddings');
         throw Exception(
