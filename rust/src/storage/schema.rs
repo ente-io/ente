@@ -56,7 +56,8 @@ pub fn create_tables(conn: &Connection) -> Result<()> {
             metadata TEXT,
             updated_at INTEGER NOT NULL,
             FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
-            UNIQUE(account_id, collection_id)
+            UNIQUE(account_id, collection_id),
+            UNIQUE(collection_id)
         )",
         [],
     )?;

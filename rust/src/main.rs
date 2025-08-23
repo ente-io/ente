@@ -33,6 +33,10 @@ async fn main() -> Result<()> {
         Commands::Export(export_cmd) => {
             commands::export::run_export(export_cmd.account).await?;
         }
+        Commands::Sync(sync_cmd) => {
+            commands::sync::run_sync(sync_cmd.account, sync_cmd.metadata_only, sync_cmd.full)
+                .await?;
+        }
     }
 
     Ok(())

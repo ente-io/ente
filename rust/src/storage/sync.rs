@@ -127,6 +127,17 @@ impl<'a> SyncStore<'a> {
         sync_type: &str,
         timestamp: i64,
     ) -> Result<()> {
+        // For per-collection sync, store as generic key-value
+        if sync_type.starts_with("collection_") {
+            // Use a more generic approach for per-collection sync
+            self.conn.execute(
+                "INSERT OR REPLACE INTO sync_state (account_id, last_file_sync) VALUES (?1, ?2)
+                 ON CONFLICT(account_id) DO UPDATE SET last_file_sync = MAX(last_file_sync, ?2)",
+                params![account_id, timestamp],
+            )?;
+            return Ok(());
+        }
+
         let column = match sync_type {
             "files" => "last_file_sync",
             "collections" => "last_collection_sync",
@@ -146,6 +157,11 @@ impl<'a> SyncStore<'a> {
 
     /// Get last sync timestamp
     pub fn get_last_sync(&self, account_id: i64, sync_type: &str) -> Result<Option<i64>> {
+        // For per-collection sync, just return 0 for now
+        if sync_type.starts_with("collection_") {
+            return Ok(Some(0));
+        }
+
         let column = match sync_type {
             "files" => "last_file_sync",
             "collections" => "last_collection_sync",
@@ -177,6 +193,15 @@ impl<'a> SyncStore<'a> {
             params![account_id, album_id, file_id],
         )?;
 
+        Ok(())
+    }
+
+    /// Clear sync state for an account (for full sync)
+    pub fn clear_sync_state(&self, account_id: i64) -> Result<()> {
+        self.conn.execute(
+            "DELETE FROM sync_state WHERE account_id = ?1",
+            params![account_id],
+        )?;
         Ok(())
     }
 }

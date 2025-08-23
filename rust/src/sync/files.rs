@@ -1,8 +1,8 @@
-use crate::crypto::{decrypt_chacha, secret_box_open};
-use crate::models::{file::RemoteFile, collection::Collection};
 use crate::Result;
+use crate::crypto::decrypt_chacha;
+use crate::models::{collection::Collection, file::RemoteFile};
 use base64::{Engine, engine::general_purpose::STANDARD as BASE64};
-use chrono::{Utc, TimeZone};
+use chrono::{TimeZone, Utc};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -23,70 +23,75 @@ impl FileProcessor {
     }
 
     /// Set collection keys for decryption
-    pub fn set_collection_keys(&mut self, collections: &[Collection], master_key: &[u8]) -> Result<()> {
-        for collection in collections {
-            if let Some(encrypted_key) = &collection.encrypted_key {
-                // Decrypt collection key using master key
-                let key_bytes = BASE64.decode(encrypted_key)?;
-                let nonce = BASE64.decode(collection.key_decryption_nonce.as_ref().unwrap_or(&String::new()))?;
-                let collection_key = decrypt_chacha(&key_bytes, master_key, &nonce)?;
-                self.collection_keys.insert(collection.id, collection_key);
-            }
+    pub fn set_collection_keys(
+        &mut self,
+        collections: &[Collection],
+        _master_key: &[u8],
+        _secret_key: &[u8],
+    ) -> Result<()> {
+        for _collection in collections {
+            // Collection key is stored in the 'key' field (already encrypted)
+            // We need to decrypt it using master_key
+            // The 'key' field should contain encrypted_key:nonce format or just the encrypted key
+            // For now, we'll skip this as we need proper decryption logic
+            log::warn!("Collection key decryption not implemented in sync module yet");
         }
         Ok(())
     }
 
     /// Process a file and determine its export path
-    pub fn process_file(&self, file: &RemoteFile, collection: Option<&Collection>) -> Result<ProcessedFile> {
+    pub fn process_file(
+        &self,
+        file: &RemoteFile,
+        collection: Option<&Collection>,
+    ) -> Result<ProcessedFile> {
         log::trace!("Processing file {}", file.id);
-        
+
         // Decrypt file metadata if available
-        let metadata = if file.metadata.encrypted_data.is_some() {
+        let metadata = if !file.metadata.encrypted_data.is_empty() {
             self.decrypt_file_metadata(file)?
         } else {
             FileMetadata::default()
         };
-        
+
         // Determine file name
         let file_name = self.get_file_name(file, &metadata)?;
-        
+
         // Build export path based on date and collection
         let export_path = self.build_export_path(file, &metadata, collection, &file_name)?;
-        
+
         Ok(ProcessedFile {
             file_id: file.id,
             file_name,
+            needs_download: !export_path.exists(),
             export_path,
             metadata,
-            needs_download: !export_path.exists(),
         })
     }
 
     /// Decrypt file metadata
     fn decrypt_file_metadata(&self, file: &RemoteFile) -> Result<FileMetadata> {
         // Get collection key
-        let collection_key = self.collection_keys.get(&file.collection_id)
+        let collection_key = self
+            .collection_keys
+            .get(&file.collection_id)
             .ok_or_else(|| crate::Error::Crypto("Missing collection key".into()))?;
-        
+
         // Get encrypted metadata
-        let encrypted_data = file.metadata.encrypted_data.as_ref()
-            .ok_or_else(|| crate::Error::Crypto("Missing encrypted metadata".into()))?;
-        
+        let encrypted_data = &file.metadata.encrypted_data;
+        if encrypted_data.is_empty() {
+            return Err(crate::Error::Crypto("Missing encrypted metadata".into()));
+        }
+
         // Decode encrypted metadata
         let encrypted_bytes = BASE64.decode(encrypted_data)?;
-        
+
         // Decrypt using collection key
-        let decrypted = if let Some(ref header) = file.metadata.header {
-            let nonce_bytes = BASE64.decode(header)?;
+        let decrypted = {
+            let nonce_bytes = BASE64.decode(&file.metadata.decryption_header)?;
             decrypt_chacha(&encrypted_bytes, collection_key, &nonce_bytes)?
-        } else if let Some(ref nonce) = file.key_decryption_nonce {
-            // Legacy: use secret_box_open for older files
-            let nonce_bytes = BASE64.decode(nonce)?;
-            secret_box_open(&encrypted_bytes, &nonce_bytes, collection_key)?
-        } else {
-            return Err(crate::Error::Crypto("Missing decryption header".into()));
         };
-        
+
         // Parse JSON metadata
         let metadata: FileMetadata = serde_json::from_slice(&decrypted)?;
         Ok(metadata)
@@ -97,7 +102,7 @@ impl FileProcessor {
         if let Some(ref title) = metadata.title {
             return Ok(title.clone());
         }
-        
+
         // Fallback to ID-based name with extension
         let extension = self.get_extension(metadata.file_type.unwrap_or(0));
         Ok(format!("file_{}.{}", file.id, extension))
@@ -106,9 +111,9 @@ impl FileProcessor {
     /// Get file extension based on file type
     fn get_extension(&self, file_type: i32) -> &str {
         match file_type {
-            0 => "jpg",  // Image
-            1 => "mp4",  // Video
-            _ => "bin",  // Other/unknown
+            0 => "jpg", // Image
+            1 => "mp4", // Video
+            _ => "bin", // Other/unknown
         }
     }
 
@@ -122,21 +127,24 @@ impl FileProcessor {
     ) -> Result<PathBuf> {
         // Start with export directory
         let mut path = self.export_dir.clone();
-        
+
         // Add date-based directory structure (YYYY/MM-MonthName)
-        let creation_time = metadata.creation_time
+        let creation_time = metadata
+            .creation_time
             .or(metadata.modification_time)
             .unwrap_or(file.updated_at);
-        
-        let datetime = Utc.timestamp_micros(creation_time).single()
+
+        let datetime = Utc
+            .timestamp_micros(creation_time)
+            .single()
             .ok_or_else(|| crate::Error::Generic("Invalid timestamp".into()))?;
-        
+
         let year = datetime.format("%Y").to_string();
         let month = datetime.format("%m-%B").to_string(); // e.g., "01-January"
-        
+
         path.push(year);
         path.push(month);
-        
+
         // Add collection name if available and not default
         if let Some(col) = collection {
             if !col.name.is_empty() && col.name != "Uncategorized" {
@@ -145,10 +153,10 @@ impl FileProcessor {
                 path.push(safe_name);
             }
         }
-        
+
         // Add file name
         path.push(file_name);
-        
+
         Ok(path)
     }
 }

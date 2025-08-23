@@ -3,7 +3,7 @@
 use crate::Result;
 use rusqlite::Connection;
 use serde::{Deserialize, Serialize};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 pub mod account;
 pub mod config;
@@ -17,12 +17,14 @@ pub use sync::SyncStore;
 /// Main storage handler that manages the SQLite database
 pub struct Storage {
     conn: Connection,
+    path: Option<PathBuf>,
 }
 
 impl Storage {
     /// Create a new storage instance with the given database path
     pub fn new<P: AsRef<Path>>(path: P) -> Result<Self> {
-        let conn = Connection::open(path)?;
+        let path_buf = path.as_ref().to_path_buf();
+        let conn = Connection::open(&path_buf)?;
 
         // Enable foreign keys
         conn.execute("PRAGMA foreign_keys = ON", [])?;
@@ -30,7 +32,10 @@ impl Storage {
         // Create tables
         schema::create_tables(&conn)?;
 
-        Ok(Self { conn })
+        Ok(Self {
+            conn,
+            path: Some(path_buf),
+        })
     }
 
     /// Create an in-memory database (useful for testing)
@@ -38,7 +43,7 @@ impl Storage {
         let conn = Connection::open_in_memory()?;
         conn.execute("PRAGMA foreign_keys = ON", [])?;
         schema::create_tables(&conn)?;
-        Ok(Self { conn })
+        Ok(Self { conn, path: None })
     }
 
     /// Get a reference to the connection
@@ -70,6 +75,11 @@ impl Storage {
     /// Get sync store
     pub fn sync(&self) -> SyncStore<'_> {
         SyncStore::new(&self.conn)
+    }
+
+    /// Get the database path
+    pub fn db_path(&self) -> Option<&Path> {
+        self.path.as_deref()
     }
 }
 

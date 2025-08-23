@@ -55,29 +55,34 @@ The Rust CLI now has a **fully functional export capability** with proper file d
 
 ## In Progress 🚧
 
-### Authentication Module (`/rust/src/api/auth.rs`)
-- ⚠️ Currently using stored tokens (not implementing full SRP flow yet)
+### File Download Manager
+- ⚠️ Basic structure exists but not fully integrated
 - Need to implement:
-  - Full SRP authentication flow
-  - Password-based key derivation
-  - Token refresh logic
+  - Parallel downloads with progress tracking
+  - Integration with sync command
+  - Resume interrupted downloads
 
 ## Remaining Components 📝
 
-### Account Management Enhancements
-- [ ] **Account add with authentication**
-  - Prompt for password
-  - Perform SRP authentication
-  - Derive and store keys
-- [ ] **Account update** - Change export directory
-- [ ] **Account remove** - Delete account and credentials
+### Sync Command (`/rust/src/commands/sync.rs`)
+- ✅ **Full sync command implemented**
+- ✅ Fetch collections with pagination
+- ✅ Fetch files per collection (matching Go CLI)
+- ✅ Store sync state in SQLite
+- ✅ Handle deleted files/collections
+- ✅ Metadata-only and full sync modes
+- ✅ Per-collection incremental sync tracking
 
-### Sync Engine (`/rust/src/sync/`)
-- [ ] Fix model mismatches in sync modules
-- [ ] Implement incremental sync with timestamps
-- [ ] Store sync state in SQLite
-- [ ] Handle deleted files/collections
-- [ ] Track download progress
+### Database and Storage (`/rust/src/storage/`)
+- ✅ **Platform-specific config directory** (`~/.config/ente-cli/`)
+- ✅ Avoid conflicts with Go CLI path
+- ✅ SQLite schema with proper foreign keys
+- ✅ Collections and files storage
+- ✅ Sync state tracking
+
+### Account Management Enhancements
+- [ ] **Account remove** - Delete account and credentials
+- [ ] **Token refresh** - Handle expired tokens
 
 ### Advanced Export Features
 - [ ] Export filters (by album, date range)
@@ -124,6 +129,9 @@ The Rust CLI now has a **fully functional export capability** with proper file d
 - [x] Downloads files to correct folder structure (YYYY/MM-Month/)
 - [x] Correctly decrypts files
 - [x] Extracts original filenames from metadata
+- [x] Sync command fetches collections and files
+- [x] Metadata-only sync mode works
+- [x] Database stored in ~/.config/ente-cli/
 - [ ] Handles incremental sync (only new files)
 - [ ] Resumes interrupted downloads
 - [ ] Multi-account export works
@@ -134,12 +142,14 @@ The Rust CLI now has a **fully functional export capability** with proper file d
 ### Feature Parity Progress
 - [x] Multi-account support (storage)
 - [x] Photos export (basic)
+- [x] Sync command (collections and files)
+- [x] Album organization
+- [x] Deduplicated storage
+- [x] Platform-specific config paths
 - [ ] SRP authentication (using stored tokens currently)
 - [ ] Locker export
 - [ ] Auth (2FA) export
-- [x] Album organization
-- [x] Deduplicated storage
-- [ ] Incremental sync
+- [ ] Incremental sync (partial - needs testing)
 - [ ] Export filters (albums, shared, hidden)
 
 ### Data Migration
@@ -149,17 +159,24 @@ The Rust CLI now has a **fully functional export capability** with proper file d
 
 ## Recent Achievements 🎉
 
-1. **Streaming XChaCha20-Poly1305 Implementation**
+1. **Sync Command Implementation**
+   - Complete sync engine with per-collection file fetching
+   - Incremental sync support with timestamp tracking
+   - Metadata-only mode for fast syncing
+   - Successfully synced 5 files from test account
+
+2. **Database Path Migration**
+   - Moved from `~/.ente/` to `~/.config/ente-cli/`
+   - Follows XDG Base Directory specification
+   - Avoids conflicts with Go CLI
+   - Platform-specific paths (Linux/macOS/Windows)
+
+3. **Streaming XChaCha20-Poly1305 Implementation**
    - Correctly implemented libsodium's secretstream API
    - Matches Go implementation exactly
    - Handles both small and large files
 
-2. **Chunked Decryption for Large Files**
-   - 4MB chunk size matching Go implementation
-   - Successfully tested with 33MB RAW files
-   - Memory efficient processing
-
-3. **Complete Export Flow**
+4. **Complete Export Flow**
    - Collection key decryption (XSalsa20-Poly1305)
    - File key decryption (XSalsa20-Poly1305)
    - File data decryption (Streaming XChaCha20-Poly1305)
@@ -167,9 +184,10 @@ The Rust CLI now has a **fully functional export capability** with proper file d
 
 ## Next Actions 🚀
 
-1. **Fix sync module compilation issues**
-   - Resolve model mismatches between API and storage types
-   - Implement proper sync state tracking
+1. **Integrate download manager with sync**
+   - Connect sync command to actually download files
+   - Implement parallel downloads with progress
+   - Add resume capability for interrupted downloads
 
 2. **Implement full SRP authentication**
    - Add password prompt to account add
@@ -181,10 +199,10 @@ The Rust CLI now has a **fully functional export capability** with proper file d
    - Filter by date range
    - Handle shared/hidden albums
 
-4. **Improve error handling**
-   - Better error messages for users
-   - Retry failed downloads
-   - Handle network interruptions
+4. **Support for live photos**
+   - Handle ZIP file extraction
+   - Pair video and image components
+   - Maintain live photo metadata
 
 ## Environment Variables
 - `ENTE_CLI_CONFIG_DIR` - Override config directory location

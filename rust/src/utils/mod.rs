@@ -13,11 +13,14 @@ pub fn get_cli_config_dir() -> crate::Result<PathBuf> {
         return Ok(PathBuf::from(config_dir));
     }
 
-    // Default to ~/.ente
-    let home_dir = dirs::home_dir()
-        .ok_or_else(|| crate::Error::Generic("Could not determine home directory".into()))?;
+    // Use platform-specific config directory
+    // On Linux: ~/.config/ente-cli
+    // On macOS: ~/Library/Application Support/ente-cli
+    // On Windows: %APPDATA%/ente-cli
+    let config_dir = dirs::config_dir()
+        .ok_or_else(|| crate::Error::Generic("Could not determine config directory".into()))?;
 
-    let cli_path = home_dir.join(".ente");
+    let cli_path = config_dir.join("ente-cli");
 
     // Create directory if it doesn't exist
     if !cli_path.exists() {
