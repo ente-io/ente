@@ -1129,7 +1129,12 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       onSelected: (int index) {
         if (_isDisposed) return;
         setState(() {
-          _sortKey = SortKey.values[index];
+          final newKey = SortKey.values[index];
+          if (newKey == _sortKey) {
+            return;
+          } else {
+            _sortKey = newKey;
+          }
         });
         _sortSimilarFiles();
       },
