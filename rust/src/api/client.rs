@@ -83,10 +83,10 @@ impl ApiClient {
         // Add auth token if account_id is provided
         if let Some(id) = account_id {
             if let Some(token) = self.get_token(id) {
-                log::debug!("Adding auth token for account {}: {}", id, token);
+                log::debug!("Adding auth token for account {id}: {token}");
                 req = req.header(TOKEN_HEADER, token);
             } else {
-                log::warn!("No token found for account {}", id);
+                log::warn!("No token found for account {id}");
             }
         }
 
@@ -179,9 +179,12 @@ impl ApiClient {
 
         let text = response.text().await?;
         serde_json::from_str(&text).map_err(|e| {
-            log::error!("Failed to deserialize response: {}", e);
-            log::error!("Response text (first 1000 chars): {}", &text[..1000.min(text.len())]);
-            Error::Generic(format!("Deserialization failed: {}", e))
+            log::error!("Failed to deserialize response: {e}");
+            log::error!(
+                "Response text (first 1000 chars): {}",
+                &text[..1000.min(text.len())]
+            );
+            Error::Generic(format!("Deserialization failed: {e}"))
         })
     }
 
@@ -232,9 +235,12 @@ impl ApiClient {
 
         let text = response.text().await?;
         serde_json::from_str(&text).map_err(|e| {
-            log::error!("Failed to deserialize response: {}", e);
-            log::error!("Response text (first 1000 chars): {}", &text[..1000.min(text.len())]);
-            Error::Generic(format!("Deserialization failed: {}", e))
+            log::error!("Failed to deserialize response: {e}");
+            log::error!(
+                "Response text (first 1000 chars): {}",
+                &text[..1000.min(text.len())]
+            );
+            Error::Generic(format!("Deserialization failed: {e}"))
         })
     }
 
@@ -275,9 +281,12 @@ impl ApiClient {
 
         let text = response.text().await?;
         serde_json::from_str(&text).map_err(|e| {
-            log::error!("Failed to deserialize response: {}", e);
-            log::error!("Response text (first 1000 chars): {}", &text[..1000.min(text.len())]);
-            Error::Generic(format!("Deserialization failed: {}", e))
+            log::error!("Failed to deserialize response: {e}");
+            log::error!(
+                "Response text (first 1000 chars): {}",
+                &text[..1000.min(text.len())]
+            );
+            Error::Generic(format!("Deserialization failed: {e}"))
         })
     }
 

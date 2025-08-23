@@ -5,7 +5,7 @@ pub struct ExportCommand {
     /// Email of specific account to export (exports all if not specified)
     #[arg(long)]
     pub account: Option<String>,
-    
+
     /// Include shared albums (pass --shared=false to exclude)
     #[arg(long, default_value = "true")]
     pub shared: bool,

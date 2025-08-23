@@ -38,7 +38,10 @@ async fn list_accounts(storage: &Storage) -> Result<()> {
     }
 
     println!("\nConfigured accounts:\n");
-    println!("{:<30} {:<10} {:<30} {:<40}", "Email", "App", "Endpoint", "Export Directory");
+    println!(
+        "{:<30} {:<10} {:<30} {:<40}",
+        "Email", "App", "Endpoint", "Export Directory"
+    );
     println!("{}", "-".repeat(110));
 
     for account in accounts {
@@ -46,11 +49,14 @@ async fn list_accounts(storage: &Storage) -> Result<()> {
         let endpoint_display = if account.endpoint == "https://api.ente.io" {
             "api.ente.io (prod)".to_string()
         } else if account.endpoint.starts_with("http://localhost") {
-            format!("localhost:{}", account.endpoint.split(':').last().unwrap_or(""))
+            format!(
+                "localhost:{}",
+                account.endpoint.split(':').next_back().unwrap_or("")
+            )
         } else {
             account.endpoint.clone()
         };
-        
+
         println!(
             "{:<30} {:<10} {:<30} {:<40}",
             account.email,
@@ -146,7 +152,7 @@ async fn add_account(
     }
 
     // Initialize API client with the specified endpoint
-    log::info!("Using API endpoint: {}", endpoint);
+    log::info!("Using API endpoint: {endpoint}");
     let api_client = ApiClient::new(Some(endpoint.clone()))?;
     let auth_client = AuthClient::new(&api_client);
 
@@ -222,33 +228,39 @@ async fn add_account(
         &master_key,
     )?;
     log::info!("Secret key decrypted, length: {}", secret_key.len());
-    log::info!("Secret key hex (first 16 bytes): {}", hex::encode(&secret_key[..16.min(secret_key.len())]));
+    log::info!(
+        "Secret key hex (first 16 bytes): {}",
+        hex::encode(&secret_key[..16.min(secret_key.len())])
+    );
 
     // Get public key
     let public_key = decode_base64(&key_attributes.public_key)?;
 
     // Decrypt token if encrypted
     let token = if let Some(encrypted_token) = &auth_response.encrypted_token {
-        log::info!("Encrypted token from server (base64): {}", encrypted_token);
+        log::info!("Encrypted token from server (base64): {encrypted_token}");
         log::info!("Public key (base64): {}", key_attributes.public_key);
-        
+
         let encrypted_bytes = decode_base64(encrypted_token)?;
         log::info!("Encrypted token bytes length: {}", encrypted_bytes.len());
-        
+
         let decrypted = sealed_box_open(&encrypted_bytes, &public_key, &secret_key)?;
         log::info!("Decrypted token bytes length: {}", decrypted.len());
         log::info!("Decrypted token hex: {}", hex::encode(&decrypted));
-        
+
         // Try to interpret as UTF-8 string first
         match String::from_utf8(decrypted.clone()) {
             Ok(token_str) => {
-                log::info!("Decrypted token is UTF-8 string: {}", token_str);
+                log::info!("Decrypted token is UTF-8 string: {token_str}");
                 // If it's a string, use it as bytes
                 token_str.into_bytes()
             }
             Err(_) => {
                 log::info!("Token is not UTF-8, using raw bytes");
-                log::info!("Token as base64 URL: {}", base64::engine::general_purpose::URL_SAFE.encode(&decrypted));
+                log::info!(
+                    "Token as base64 URL: {}",
+                    base64::engine::general_purpose::URL_SAFE.encode(&decrypted)
+                );
                 // If not UTF-8, use raw bytes
                 decrypted
             }

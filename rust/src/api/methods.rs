@@ -1,7 +1,7 @@
 use crate::api::client::ApiClient;
 use crate::api::models::{
-    Collection, File, GetCollectionsResponse, GetDiffResponse, GetFileResponse,
-    GetFilesResponse, GetThumbnailUrlResponse, UserDetails,
+    Collection, File, GetCollectionsResponse, GetDiffResponse, GetFileResponse, GetFilesResponse,
+    GetThumbnailUrlResponse, UserDetails,
 };
 use crate::models::error::Result;
 
@@ -110,7 +110,7 @@ impl<'a> ApiMethods<'a> {
         } else {
             // For custom/dev environments, use direct download URL
             // The Go implementation shows this is the pattern
-            Ok(format!("{}/files/download/{}", base_url, file_id))
+            Ok(format!("{base_url}/files/download/{file_id}"))
         }
     }
 
