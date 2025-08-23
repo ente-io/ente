@@ -1,7 +1,7 @@
 use crate::Result;
 use crate::api::client::ApiClient;
 use crate::api::methods::ApiMethods;
-use crate::crypto::{decrypt_stream, init as crypto_init, secret_box_open};
+use crate::crypto::{decrypt_file_data, decrypt_stream, init as crypto_init, secret_box_open};
 use crate::models::{account::Account, metadata::FileMetadata};
 use crate::storage::Storage;
 use base64::Engine;
@@ -217,7 +217,8 @@ async fn export_account(storage: &Storage, account: &Account) -> Result<()> {
                 };
 
                 // Decrypt the file data using streaming XChaCha20-Poly1305
-                let decrypted = match decrypt_stream(&encrypted_data, &file_nonce, &file_key) {
+                // Use chunked decryption for large files
+                let decrypted = match decrypt_file_data(&encrypted_data, &file_nonce, &file_key) {
                     Ok(data) => data,
                     Err(e) => {
                         log::error!("Failed to decrypt file {}: {}", file.id, e);

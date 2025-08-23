@@ -104,9 +104,30 @@ pub fn decrypt_stream(ciphertext: &[u8], header: &[u8], key: &[u8]) -> Result<Ve
     StreamDecryptor::decrypt_all(key, header, ciphertext)
 }
 
-/// Decrypt file data from memory using streaming cipher
+/// Decrypt file data from memory using streaming cipher with chunking for large files
 pub fn decrypt_file_data(encrypted_data: &[u8], header: &[u8], key: &[u8]) -> Result<Vec<u8>> {
-    // For large files, the Go implementation uses streaming with chunks
-    // For now, we'll decrypt the whole file at once which works for most files
-    decrypt_stream(encrypted_data, header, key)
+    // Buffer size matching Go implementation: 4MB + overhead
+    const CHUNK_SIZE: usize =
+        4 * 1024 * 1024 + sodium::crypto_secretstream_xchacha20poly1305_ABYTES as usize;
+
+    let mut decryptor = StreamDecryptor::new(key, header)?;
+    let mut result = Vec::with_capacity(encrypted_data.len());
+
+    let mut offset = 0;
+    while offset < encrypted_data.len() {
+        let chunk_end = std::cmp::min(offset + CHUNK_SIZE, encrypted_data.len());
+        let chunk = &encrypted_data[offset..chunk_end];
+
+        let (plaintext, tag) = decryptor.pull(chunk)?;
+        result.extend_from_slice(&plaintext);
+
+        offset = chunk_end;
+
+        // Check if this was the final chunk
+        if tag == TAG_FINAL {
+            break;
+        }
+    }
+
+    Ok(result)
 }
