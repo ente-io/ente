@@ -82,10 +82,30 @@ The project has completed foundational components (crypto, storage, models) and 
 
 ## Commit Guidelines
 
+### Pre-commit Checklist (MANDATORY)
+Before EVERY commit, run these commands in order:
+```bash
+# 1. Format code
+cargo fmt
+
+# 2. Auto-fix clippy warnings
+cargo clippy --fix --allow-dirty --allow-staged
+
+# 3. Verify no remaining warnings
+cargo clippy -- -D warnings
+
+# 4. Build with warnings as errors
+RUSTFLAGS="-D warnings" cargo build
+
+# 5. Check formatting one final time
+cargo fmt --check
+```
+
+### Additional Guidelines
 - No promotional text like "Generated with [tool name]" - only keep the co-author line
 - Check `git status` before committing to avoid adding temporary/binary files
 - Never commit to main branch
-- Ensure code passes `cargo fmt` and `cargo clippy` before committing
+- All CI checks must pass - the above commands simulate CI locally
 
 ## Environment Variables
 
