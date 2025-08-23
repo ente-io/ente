@@ -2,7 +2,7 @@ use crate::Result;
 use crate::api::client::ApiClient;
 use crate::api::methods::ApiMethods;
 use crate::crypto::{decrypt_chacha, init as crypto_init};
-use crate::models::account::Account;
+use crate::models::{account::Account, metadata::FileMetadata};
 use crate::storage::Storage;
 use base64::Engine;
 use std::path::{Path, PathBuf};
@@ -143,8 +143,16 @@ async fn export_account(storage: &Storage, account: &Account) -> Result<()> {
                     since_time = file.updation_time;
                 }
 
-                // Generate export path
-                let file_path = generate_export_path(export_path, &file, Some(collection))?;
+                // Decrypt the file key first to get metadata
+                let file_key =
+                    decrypt_file_key(&file.encrypted_key, &file.key_decryption_nonce, master_key)?;
+
+                // Decrypt metadata to get original filename
+                let metadata = decrypt_file_metadata(&file, &file_key)?;
+
+                // Generate export path with original filename from metadata
+                let file_path =
+                    generate_export_path(export_path, &file, Some(collection), metadata.as_ref())?;
 
                 // Skip if file already exists
                 if file_path.exists() {
@@ -162,10 +170,6 @@ async fn export_account(storage: &Storage, account: &Account) -> Result<()> {
 
                 // Download encrypted file
                 let encrypted_data = api.download_file(&account.email, file.id).await?;
-
-                // Decrypt the file key
-                let file_key =
-                    decrypt_file_key(&file.encrypted_key, &file.key_decryption_nonce, master_key)?;
 
                 // Extract file decryption header (first 24 bytes are the nonce)
                 if encrypted_data.len() < 24 {
@@ -208,6 +212,7 @@ fn generate_export_path(
     export_dir: &Path,
     file: &crate::api::models::File,
     collection: Option<&crate::api::models::Collection>,
+    metadata: Option<&FileMetadata>,
 ) -> Result<PathBuf> {
     use chrono::{TimeZone, Utc};
 
@@ -247,9 +252,17 @@ fn generate_export_path(
         path.push(safe_name);
     }
 
-    // Try to extract filename from metadata if available
-    // For now, use ID with appropriate extension based on file type
-    let filename = generate_filename(file, collection);
+    // Use original filename from metadata if available
+    let filename = if let Some(meta) = metadata {
+        if let Some(title) = meta.get_title() {
+            // Sanitize filename for filesystem
+            sanitize_filename(title)
+        } else {
+            generate_fallback_filename(file, metadata)
+        }
+    } else {
+        generate_fallback_filename(file, None)
+    };
     path.push(filename);
 
     Ok(path)
@@ -265,23 +278,61 @@ fn decrypt_file_key(encrypted_key: &str, nonce: &str, master_key: &[u8]) -> Resu
     decrypt_chacha(&encrypted_bytes, &nonce_bytes, master_key)
 }
 
-/// Generate a filename for the file
-fn generate_filename(
+/// Generate a fallback filename when metadata is not available
+fn generate_fallback_filename(
     file: &crate::api::models::File,
-    _collection: Option<&crate::api::models::Collection>,
+    metadata: Option<&FileMetadata>,
 ) -> String {
-    // For now, determine extension based on MIME type hints or default
-    // In a real implementation, we'd decrypt metadata to get the original filename
-    let extension = if file.file.size.unwrap_or(0) > 0 {
-        // Check if it's likely an image or video based on size patterns
-        if file.thumbnail.size.unwrap_or(0) > 0 {
-            ".jpg" // Has thumbnail, likely an image
-        } else {
-            ".bin" // Unknown binary file
+    let extension = if let Some(meta) = metadata {
+        match meta.get_file_type() {
+            crate::models::metadata::FileType::Image => ".jpg",
+            crate::models::metadata::FileType::Video => ".mp4",
+            crate::models::metadata::FileType::LivePhoto => ".zip",
+            crate::models::metadata::FileType::Unknown => ".bin",
         }
+    } else if file.thumbnail.size.unwrap_or(0) > 0 {
+        ".jpg" // Has thumbnail, likely an image
     } else {
-        ".dat"
+        ".bin"
     };
 
     format!("file_{}{}", file.id, extension)
+}
+
+/// Sanitize a filename for the filesystem
+fn sanitize_filename(name: &str) -> String {
+    name.chars()
+        .map(|c| match c {
+            '/' | '\\' | ':' | '*' | '?' | '"' | '<' | '>' | '|' => '_',
+            '\0' => '_',
+            c if c.is_control() => '_',
+            c => c,
+        })
+        .collect::<String>()
+        .trim()
+        .to_string()
+}
+
+/// Decrypt file metadata
+fn decrypt_file_metadata(
+    file: &crate::api::models::File,
+    file_key: &[u8],
+) -> Result<Option<FileMetadata>> {
+    use base64::engine::general_purpose::STANDARD as BASE64;
+
+    // Check if metadata exists
+    if file.metadata.encrypted_data.is_none() || file.metadata.decryption_header.is_empty() {
+        return Ok(None);
+    }
+
+    let encrypted_data = file.metadata.encrypted_data.as_ref().unwrap();
+    let encrypted_bytes = BASE64.decode(encrypted_data)?;
+    let header_bytes = BASE64.decode(&file.metadata.decryption_header)?;
+
+    // Decrypt the metadata
+    let decrypted = decrypt_chacha(&encrypted_bytes, &header_bytes, file_key)?;
+
+    // Parse JSON metadata
+    let metadata: FileMetadata = serde_json::from_slice(&decrypted)?;
+    Ok(Some(metadata))
 }
