@@ -238,21 +238,33 @@ async fn export_account(storage: &Storage, account: &Account) -> Result<()> {
 
                 exported_files += 1;
 
-                // Progress indicator
-                if exported_files % 10 == 0 {
-                    println!("Exported {exported_files} files...");
-                }
+                // Progress indicator - show every file for now since we have few files
+                println!(
+                    "  [{}/{}] Exported: {}",
+                    exported_files,
+                    total_files,
+                    file_path.file_name().unwrap_or_default().to_string_lossy()
+                );
             }
         }
     }
 
-    println!("\nExport summary:");
-    println!("  Total files: {total_files}");
-    println!("  Exported: {exported_files}");
-    println!(
-        "  Skipped (already exists or deleted): {}",
-        total_files - exported_files
-    );
+    println!("\n{}", "=".repeat(50));
+    println!("Export Summary:");
+    println!("{}", "=".repeat(50));
+    println!("  📁 Total files found: {total_files}");
+    println!("  ✅ Successfully exported: {exported_files}");
+
+    let skipped = total_files - exported_files;
+    if skipped > 0 {
+        println!("  ⏭️  Skipped (already exists): {skipped}");
+    }
+
+    if exported_files == total_files {
+        println!("\n🎉 All files exported successfully!");
+    } else if exported_files > 0 {
+        println!("\n✨ Export completed with {exported_files} new files!");
+    }
 
     Ok(())
 }
