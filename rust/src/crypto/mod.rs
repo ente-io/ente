@@ -6,12 +6,14 @@ use std::sync::Once;
 mod argon;
 mod chacha;
 mod kdf;
+mod stream;
 
 pub use argon::derive_argon_key;
 pub use chacha::{
     decrypt_chacha, encrypt_chacha, sealed_box_open, secret_box_open, secret_box_seal,
 };
 pub use kdf::derive_login_key;
+pub use stream::{StreamDecryptor, decrypt_file_data, decrypt_stream};
 
 static INIT: Once = Once::new();
 

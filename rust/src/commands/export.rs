@@ -1,7 +1,7 @@
 use crate::Result;
 use crate::api::client::ApiClient;
 use crate::api::methods::ApiMethods;
-use crate::crypto::{decrypt_chacha, init as crypto_init};
+use crate::crypto::{decrypt_stream, init as crypto_init, secret_box_open};
 use crate::models::{account::Account, metadata::FileMetadata};
 use crate::storage::Storage;
 use base64::Engine;
@@ -104,6 +104,9 @@ async fn export_account(storage: &Storage, account: &Account) -> Result<()> {
     // Master key is already raw bytes, no need to decode
     let master_key = &secrets.master_key;
 
+    // We'll also need the secret key for decrypting collection keys
+    let secret_key = &secrets.secret_key;
+
     // Fetch and export files for each collection
     println!("\nFetching files...");
     let mut total_files = 0;
@@ -116,6 +119,20 @@ async fn export_account(storage: &Storage, account: &Account) -> Result<()> {
         }
 
         println!("Processing collection: {}", collection.id);
+
+        // Decrypt collection key
+        let collection_key = match decrypt_collection_key(
+            &collection.encrypted_key,
+            &collection.key_decryption_nonce,
+            master_key,
+            secret_key,
+        ) {
+            Ok(key) => key,
+            Err(e) => {
+                log::error!("Failed to decrypt collection key: {e}");
+                continue;
+            }
+        };
 
         let mut has_more = true;
         let mut since_time = 0i64;
@@ -143,12 +160,29 @@ async fn export_account(storage: &Storage, account: &Account) -> Result<()> {
                     since_time = file.updation_time;
                 }
 
-                // Decrypt the file key first to get metadata
-                let file_key =
-                    decrypt_file_key(&file.encrypted_key, &file.key_decryption_nonce, master_key)?;
+                // Decrypt the file key using the collection key
+                let file_key = match decrypt_file_key(
+                    &file.encrypted_key,
+                    &file.key_decryption_nonce,
+                    &collection_key,
+                ) {
+                    Ok(key) => key,
+                    Err(e) => {
+                        log::error!("Failed to decrypt key for file {}: {}", file.id, e);
+                        log::debug!("encrypted_key: {}", &file.encrypted_key);
+                        log::debug!("key_decryption_nonce: {}", &file.key_decryption_nonce);
+                        continue;
+                    }
+                };
 
                 // Decrypt metadata to get original filename
-                let metadata = decrypt_file_metadata(&file, &file_key)?;
+                let metadata = match decrypt_file_metadata(&file, &file_key) {
+                    Ok(meta) => meta,
+                    Err(e) => {
+                        log::warn!("Failed to decrypt metadata for file {}: {}", file.id, e);
+                        None
+                    }
+                };
 
                 // Generate export path with original filename from metadata
                 let file_path =
@@ -171,16 +205,30 @@ async fn export_account(storage: &Storage, account: &Account) -> Result<()> {
                 // Download encrypted file
                 let encrypted_data = api.download_file(&account.email, file.id).await?;
 
-                // Extract file decryption header (first 24 bytes are the nonce)
-                if encrypted_data.len() < 24 {
-                    log::error!("File {} has invalid encrypted data", file.id);
-                    continue;
-                }
-                let file_nonce = &encrypted_data[0..24];
-                let ciphertext = &encrypted_data[24..];
+                // The file nonce/header is stored separately in the API response
+                let file_nonce = match base64::engine::general_purpose::STANDARD
+                    .decode(&file.file.decryption_header)
+                {
+                    Ok(nonce) => nonce,
+                    Err(e) => {
+                        log::error!("Failed to decode file nonce for file {}: {}", file.id, e);
+                        continue;
+                    }
+                };
 
-                // Decrypt the file
-                let decrypted = decrypt_chacha(ciphertext, file_nonce, &file_key)?;
+                // Decrypt the file data using streaming XChaCha20-Poly1305
+                let decrypted = match decrypt_stream(&encrypted_data, &file_nonce, &file_key) {
+                    Ok(data) => data,
+                    Err(e) => {
+                        log::error!("Failed to decrypt file {}: {}", file.id, e);
+                        log::debug!(
+                            "File size: {}, header length: {}",
+                            encrypted_data.len(),
+                            file_nonce.len()
+                        );
+                        continue;
+                    }
+                };
 
                 // Write decrypted file
                 let mut file_handle = fs::File::create(&file_path).await?;
@@ -268,14 +316,31 @@ fn generate_export_path(
     Ok(path)
 }
 
-/// Decrypt a file key using the master key
-fn decrypt_file_key(encrypted_key: &str, nonce: &str, master_key: &[u8]) -> Result<Vec<u8>> {
+/// Decrypt a collection key using the master key
+fn decrypt_collection_key(
+    encrypted_key: &str,
+    nonce: &str,
+    master_key: &[u8],
+    _secret_key: &[u8],
+) -> Result<Vec<u8>> {
     use base64::engine::general_purpose::STANDARD as BASE64;
 
     let encrypted_bytes = BASE64.decode(encrypted_key)?;
     let nonce_bytes = BASE64.decode(nonce)?;
 
-    decrypt_chacha(&encrypted_bytes, &nonce_bytes, master_key)
+    // Collection keys are encrypted with secret_box (XSalsa20-Poly1305) using master key
+    secret_box_open(&encrypted_bytes, &nonce_bytes, master_key)
+}
+
+/// Decrypt a file key using the collection key
+fn decrypt_file_key(encrypted_key: &str, nonce: &str, collection_key: &[u8]) -> Result<Vec<u8>> {
+    use base64::engine::general_purpose::STANDARD as BASE64;
+
+    let encrypted_bytes = BASE64.decode(encrypted_key)?;
+    let nonce_bytes = BASE64.decode(nonce)?;
+
+    // File keys are encrypted with secret_box (XSalsa20-Poly1305) using collection key
+    secret_box_open(&encrypted_bytes, &nonce_bytes, collection_key)
 }
 
 /// Generate a fallback filename when metadata is not available
@@ -329,8 +394,8 @@ fn decrypt_file_metadata(
     let encrypted_bytes = BASE64.decode(encrypted_data)?;
     let header_bytes = BASE64.decode(&file.metadata.decryption_header)?;
 
-    // Decrypt the metadata
-    let decrypted = decrypt_chacha(&encrypted_bytes, &header_bytes, file_key)?;
+    // Decrypt the metadata using streaming XChaCha20-Poly1305
+    let decrypted = decrypt_stream(&encrypted_bytes, &header_bytes, file_key)?;
 
     // Parse JSON metadata
     let metadata: FileMetadata = serde_json::from_slice(&decrypted)?;
