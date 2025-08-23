@@ -745,46 +745,23 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       listenable: _selectedFiles,
       builder: (context, _) {
         final bool isSelected = _selectedFiles.isFileSelected(file);
-        final bool hasAnySelection = _selectedFiles.files.isNotEmpty;
 
         return GestureDetector(
           onTap: () {
-            if (hasAnySelection) {
-              // If files are selected, tap should toggle selection
-              _selectedFiles.toggleSelection(file);
-            } else {
-              // If no files selected, tap opens detail page
-              routeToPage(
-                context,
-                DetailPage(
-                  DetailPageConfiguration(
-                    allFiles,
-                    index,
-                    "similar_images_",
-                    mode: DetailPageMode.minimalistic,
-                  ),
-                ),
-              );
-            }
+            _selectedFiles.toggleSelection(file);
           },
           onLongPress: () {
-            if (hasAnySelection) {
-              // If files are selected, long press opens detail page
-              routeToPage(
-                context,
-                DetailPage(
-                  DetailPageConfiguration(
-                    allFiles,
-                    index,
-                    "similar_images_",
-                    mode: DetailPageMode.minimalistic,
-                  ),
+            routeToPage(
+              context,
+              DetailPage(
+                DetailPageConfiguration(
+                  allFiles,
+                  index,
+                  "similar_images_",
+                  mode: DetailPageMode.minimalistic,
                 ),
-              );
-            } else {
-              // If no files selected, long press starts selection
-              _selectedFiles.toggleSelection(file);
-            }
+              ),
+            );
           },
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
