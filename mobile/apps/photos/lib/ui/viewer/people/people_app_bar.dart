@@ -93,8 +93,8 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
           if (widget.title == null) {
             _appBarTitle = "Me";
           } else {
-            _appBarTitle =
-                context.l10n.accountOwnerPersonAppbarTitle(widget.title!);
+            _appBarTitle = context.l10n
+                .accountOwnerPersonAppbarTitle(title: widget.title!);
           }
         } else {
           _appBarTitle = widget.title;
@@ -112,7 +112,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
 
               if (person.data.email == Configuration.instance.getEmail()) {
                 _appBarTitle = context.l10n.accountOwnerPersonAppbarTitle(
-                  person.data.name,
+                  title: person.data.name,
                 );
               } else {
                 _appBarTitle = person.data.name;

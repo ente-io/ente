@@ -55,10 +55,10 @@ String _actionName(
   String text = "";
   switch (type) {
     case CollectionActionType.addFiles:
-      text = AppLocalizations.of(context).addItem(fileCount);
+      text = AppLocalizations.of(context).addItem(count: fileCount);
       break;
     case CollectionActionType.moveFiles:
-      text = AppLocalizations.of(context).moveItem(fileCount);
+      text = AppLocalizations.of(context).moveItem(count: fileCount);
       break;
     case CollectionActionType.restoreFiles:
       text = AppLocalizations.of(context).restoreToAlbum;
@@ -312,7 +312,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
               showShortToast(
                 context,
                 AppLocalizations.of(context)
-                    .addedToAlbums(_selectedCollections.length),
+                    .addedToAlbums(count: _selectedCollections.length),
               );
               widget.selectedFiles?.clearAll();
             }

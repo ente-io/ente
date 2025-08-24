@@ -141,8 +141,8 @@ class ReferralWidget extends StatelessWidget {
                 onTap: () {
                   shareText(
                     AppLocalizations.of(context).shareTextReferralCode(
-                      referralView.code,
-                      referralView.planInfo.storageInGB,
+                      referralCode: referralView.code,
+                      referralStorageInGB: referralView.planInfo.storageInGB,
                     ),
                   );
                 },
@@ -182,7 +182,7 @@ class ReferralWidget extends StatelessWidget {
                             const SizedBox(height: 12),
                             Text(
                               AppLocalizations.of(context).referralStep3(
-                                referralView.planInfo.storageInGB,
+                                storageInGB: referralView.planInfo.storageInGB,
                               ),
                             ),
                           ],
@@ -291,8 +291,10 @@ class ReferralWidget extends StatelessWidget {
           ),
           child: Text(
             AppLocalizations.of(context).claimedStorageSoFar(
-              referralView.isFamilyMember.toString().toLowerCase(),
-              convertBytesToAbsoluteGBs(referralView.claimedStorage),
+              isFamilyMember:
+                  referralView.isFamilyMember.toString().toLowerCase(),
+              storageAmountInGb:
+                  convertBytesToAbsoluteGBs(referralView.claimedStorage),
             ),
             style: textStyle.small.copyWith(
               color: colorScheme.textMuted,

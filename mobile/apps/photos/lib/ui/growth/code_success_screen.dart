@@ -74,7 +74,8 @@ class CodeSuccessScreen extends StatelessWidget {
                             ),
                         Text(
                           AppLocalizations.of(context).storageInGB(
-                            referralView.planInfo.storageInGB,
+                            storageAmountInGB:
+                                referralView.planInfo.storageInGB,
                           ),
                           style: textStyle.h2Bold,
                         ),
@@ -108,8 +109,9 @@ class CodeSuccessScreen extends StatelessWidget {
                             shareText(
                               AppLocalizations.of(context)
                                   .shareTextReferralCode(
-                                referralView.code,
-                                referralView.planInfo.storageInGB,
+                                referralCode: referralView.code,
+                                referralStorageInGB:
+                                    referralView.planInfo.storageInGB,
                               ),
                             );
                           },
@@ -138,7 +140,8 @@ class CodeSuccessScreen extends StatelessWidget {
                                   Text(
                                     AppLocalizations.of(context)
                                         .freeStorageOnReferralSuccess(
-                                      referralView.planInfo.storageInGB,
+                                      storageAmountInGB:
+                                          referralView.planInfo.storageInGB,
                                     ),
                                     style: textStyle.smallMuted,
                                     textAlign: TextAlign.center,
@@ -148,7 +151,8 @@ class CodeSuccessScreen extends StatelessWidget {
                                   const SizedBox(height: 16),
                                   Text(
                                     AppLocalizations.of(context).theyAlsoGetXGb(
-                                      referralView.planInfo.storageInGB,
+                                      storageAmountInGB:
+                                          referralView.planInfo.storageInGB,
                                     ),
                                     style: textStyle.smallMuted,
                                     textAlign: TextAlign.center,

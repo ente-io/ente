@@ -65,7 +65,9 @@ class ReferralCodeWidget extends StatelessWidget {
                               context,
                               title: AppLocalizations.of(context).error,
                               body: AppLocalizations.of(context)
-                                  .onlyFamilyAdminCanChangeCode(familyAdmin),
+                                  .onlyFamilyAdminCanChangeCode(
+                                familyAdminEmail: familyAdmin,
+                              ),
                               icon: Icons.error,
                             );
                           } else {

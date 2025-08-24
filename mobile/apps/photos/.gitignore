@@ -48,3 +48,7 @@ android/app/build/
 .fvm/
 
 lib/generated/intl/app_localizations*.dart
+
+# Generated rust bindings
+lib/src/rust/*
+rust/src/frb_generated*

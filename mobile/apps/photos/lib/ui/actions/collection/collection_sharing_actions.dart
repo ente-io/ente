@@ -93,7 +93,7 @@ class CollectionActions {
       body:
           //'This will remove the public link for accessing "${collection.name}".',
           AppLocalizations.of(context)
-              .disableLinkMessage(collection.displayName),
+              .disableLinkMessage(albumName: collection.displayName),
     );
     if (actionResult?.action != null) {
       if (actionResult!.action == ButtonAction.error) {
@@ -195,7 +195,7 @@ class CollectionActions {
       ],
       title: AppLocalizations.of(context).removeWithQuestionMark,
       body: AppLocalizations.of(context)
-          .removeParticipantBody(user.displayName ?? user.email),
+          .removeParticipantBody(userEmail: user.displayName ?? user.email),
     );
     if (actionResult?.action != null) {
       if (actionResult!.action == ButtonAction.error) {
@@ -296,7 +296,7 @@ class CollectionActions {
         context: context,
         title: AppLocalizations.of(context).inviteToEnte,
         icon: Icons.info_outline,
-        body: AppLocalizations.of(context).emailNoEnteAccount(email),
+        body: AppLocalizations.of(context).emailNoEnteAccount(email: email),
         isDismissible: true,
         buttons: [
           ButtonWidget(
@@ -394,7 +394,7 @@ class CollectionActions {
       ],
       bodyWidget: StyledText(
         text: AppLocalizations.of(context)
-            .deleteMultipleAlbumDialog(collections.length),
+            .deleteMultipleAlbumDialog(count: collections.length),
         style: textTheme.body.copyWith(color: textMutedDark),
         tags: {
           'bold': StyledTextTag(

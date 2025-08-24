@@ -16,7 +16,7 @@ import "package:photos/ui/components/models/button_type.dart";
 import 'package:photos/ui/viewer/file/detail_page.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
-import "package:photos/ui/viewer/gallery/scrollbar/scroll_bar_with_use_notifier.dart";
+
 import 'package:photos/utils/delete_file_util.dart';
 import "package:photos/utils/dialog_util.dart";
 import 'package:photos/utils/navigation_util.dart';
@@ -41,15 +41,12 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
 
   SortKey sortKey = SortKey.size;
   late ValueNotifier<String> _deleteProgress;
-  late ScrollController _scrollController;
-  late ValueNotifier<bool> _scrollbarInUseNotifier;
 
   @override
   void initState() {
     _duplicates = widget.duplicates;
     _deleteProgress = ValueNotifier("");
-    _scrollController = ScrollController();
-    _scrollbarInUseNotifier = ValueNotifier<bool>(false);
+
     _selectAllGrids();
     super.initState();
   }
@@ -57,8 +54,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
   @override
   void dispose() {
     _deleteProgress.dispose();
-    _scrollController.dispose();
-    _scrollbarInUseNotifier.dispose();
+
     super.dispose();
   }
 
@@ -102,28 +98,19 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       children: [
         Expanded(
           child: _duplicates.isNotEmpty
-              ? ScrollbarWithUseNotifer(
-                  controller: _scrollController,
-                  inUseNotifier: _scrollbarInUseNotifier,
-                  minScrollbarLength: 36.0,
-                  interactive: true,
-                  thickness: 8,
-                  radius: const Radius.circular(4),
-                  child: ListView.builder(
-                    controller: _scrollController,
-                    cacheExtent: 400,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: _getGridView(
-                          _duplicates[index],
-                          index,
-                        ),
-                      );
-                    },
-                    itemCount: _duplicates.length,
-                    shrinkWrap: true,
-                  ),
+              ? ListView.builder(
+                  cacheExtent: 400,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: _getGridView(
+                        _duplicates[index],
+                        index,
+                      ),
+                    );
+                  },
+                  itemCount: _duplicates.length,
+                  shrinkWrap: true,
                 )
               : const Padding(
                   padding: EdgeInsets.only(top: 32),
@@ -246,7 +233,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                       width: double.infinity,
                       child: ButtonWidget(
                         labelText:
-                            "${AppLocalizations.of(context).deleteItemCount(fileCount)} (${formatBytes(totalSize)})",
+                            "${AppLocalizations.of(context).deleteItemCount(count: fileCount)} (${formatBytes(totalSize)})",
                         buttonType: ButtonType.critical,
                         onTap: () async {
                           try {
@@ -351,8 +338,8 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
               children: [
                 Text(
                   AppLocalizations.of(context).duplicateItemsGroup(
-                    duplicates.files.length,
-                    formatBytes(duplicates.size),
+                    count: duplicates.files.length,
+                    formattedSize: formatBytes(duplicates.size),
                   ),
                   style: Theme.of(context).textTheme.titleSmall,
                 ),

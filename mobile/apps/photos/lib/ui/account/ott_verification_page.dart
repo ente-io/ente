@@ -118,7 +118,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                           padding: const EdgeInsets.fromLTRB(0, 0, 0, 12),
                           child: StyledText(
                             text: AppLocalizations.of(context)
-                                .weHaveSendEmailTo(widget.email),
+                                .weHaveSendEmailTo(email: widget.email),
                             style: Theme.of(context)
                                 .textTheme
                                 .titleMedium!

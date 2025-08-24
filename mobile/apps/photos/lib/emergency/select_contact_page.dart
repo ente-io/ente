@@ -193,8 +193,8 @@ class _AddContactPage extends State<AddContactPage> {
                               title: AppLocalizations.of(context).warning,
                               body: AppLocalizations.of(context)
                                   .confirmAddingTrustedContact(
-                                emailToAdd,
-                                30,
+                                email: emailToAdd,
+                                numOfDays: 30,
                               ),
                               firstButtonLabel:
                                   AppLocalizations.of(context).proceed,

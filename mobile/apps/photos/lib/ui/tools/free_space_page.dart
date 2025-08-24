@@ -52,9 +52,9 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
     final formattedCount = NumberFormat().format(count);
     final String textMessage = widget.clearSpaceForFolder
         ? AppLocalizations.of(context)
-            .filesBackedUpInAlbum(count, formattedCount)
-        : AppLocalizations.of(context)
-            .filesBackedUpFromDevice(count, formattedCount);
+            .filesBackedUpInAlbum(count: count, formattedNumber: formattedCount)
+        : AppLocalizations.of(context).filesBackedUpFromDevice(
+            count: count, formattedNumber: formattedCount,);
     final informationTextStyle = TextStyle(
       fontSize: 14,
       height: 1.3,
@@ -120,8 +120,8 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
               const Padding(padding: EdgeInsets.all(10)),
               Expanded(
                 child: Text(
-                  AppLocalizations.of(context)
-                      .freeUpSpaceSaving(count, formatBytes(status.size)),
+                  AppLocalizations.of(context).freeUpSpaceSaving(
+                      count: count, formattedSize: formatBytes(status.size),),
                   style: informationTextStyle,
                 ),
               ),
@@ -140,7 +140,8 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
               const Padding(padding: EdgeInsets.all(10)),
               Expanded(
                 child: Text(
-                  AppLocalizations.of(context).freeUpAccessPostDelete(count),
+                  AppLocalizations.of(context)
+                      .freeUpAccessPostDelete(count: count),
                   style: informationTextStyle,
                 ),
               ),
@@ -159,7 +160,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
               await _freeStorage(status);
             },
             text: AppLocalizations.of(context)
-                .freeUpAmount(formatBytes(status.size)),
+                .freeUpAmount(sizeInMBorGB: formatBytes(status.size)),
           ),
         ),
         const Padding(padding: EdgeInsets.all(24)),
