@@ -6,6 +6,7 @@ import 'package:ente_auth/services/local_backup_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/dialog_widget.dart';
+import 'package:ente_auth/ui/components/models/button_result.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -54,13 +55,14 @@ class _LocalBackupSettingsPageState extends State<LocalBackupSettingsPage> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: Text(l10n.setPasswordTitle),
+              title: Text(l10n.setPasswordTitle, style: getEnteTextTheme(context).largeBold),
               content: TextField(
                 controller: textController,
                 autofocus: true,
                 obscureText: isPasswordHidden,
                 decoration: InputDecoration(
                   hintText: l10n.enterPassword,
+                  hintStyle: getEnteTextTheme(context).mini,
                   suffixIcon: IconButton(
                     icon: Icon(
                       isPasswordHidden ? Icons.visibility_off : Icons.visibility,
@@ -75,15 +77,28 @@ class _LocalBackupSettingsPageState extends State<LocalBackupSettingsPage> {
                 onChanged: (text) => setState(() {}),
               ),
               actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(null),
-                  child: Text(l10n.cancel),
-                ),
-                ElevatedButton(
-                  onPressed: textController.text.isNotEmpty
-                      ? () => Navigator.of(context).pop(textController.text)
-                      : null,
-                  child: Text(l10n.saveAction),
+                Row(
+                  children: [
+
+                    Expanded(
+                      child: ButtonWidget(
+                        buttonType: ButtonType.secondary,
+                        labelText: l10n.cancel,
+                        onTap: () async => Navigator.of(context).pop(null),
+                      ),
+                    ),
+
+                    const SizedBox(width: 8), 
+
+                    Expanded(
+                      child: ButtonWidget(
+                        buttonType: ButtonType.primary,
+                        labelText: l10n.saveAction,
+                        isDisabled: textController.text.isEmpty,
+                        onTap: () async => Navigator.of(context).pop(textController.text),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             );
@@ -93,31 +108,33 @@ class _LocalBackupSettingsPageState extends State<LocalBackupSettingsPage> {
     );
   }
 
-  Future<bool> _showLocationChoiceDialog() async {
+  Future<ButtonResult?> _showLocationChoiceDialog({required String displayPath}) async {
     final l10n = context.l10n;
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+    final dialogBody =
+        '${l10n.backupLocationChoiceDescription}\n\nSelected: ${_simplifyPath(displayPath)}';
 
     final result = await showDialogWidget(
       title: l10n.chooseBackupLocation,
       context: context,
-      body: l10n.backupLocationChoiceDescription,
+      body: dialogBody, 
       buttons: [
         ButtonWidget(
           buttonType: ButtonType.primary,
-          labelText: l10n.chooseBackupLocation,
+          labelText: l10n.saveBackup,
           isInAlert: true,
           buttonSize: ButtonSize.large,
           buttonAction: ButtonAction.first,
         ),
         ButtonWidget(
           buttonType: ButtonType.secondary,
-          labelText: l10n.defaultLocation,
+          labelText: l10n.changeLocation, 
           isInAlert: true,
           buttonSize: ButtonSize.large,
           buttonAction: ButtonAction.second,
         ),
         ButtonWidget(
-          buttonType: ButtonType.secondary, 
+          buttonType: ButtonType.secondary,
           labelText: l10n.cancel,
           isInAlert: true,
           buttonSize: ButtonSize.large,
@@ -126,36 +143,48 @@ class _LocalBackupSettingsPageState extends State<LocalBackupSettingsPage> {
       ],
     );
 
-    // if user cancels or dismisses the dialog
-    if (result?.action == null || result?.action == ButtonAction.cancel) {
-      return false; 
-    }
+    return result;
+  }
 
-    if (result!.action == ButtonAction.first) {
-      return await _pickAndSaveBackupLocation(successMessage: l10n.initialBackupCreated);
-    } else if (result.action == ButtonAction.second) {
-      // if user selects "Default location"
-      final prefs = await SharedPreferences.getInstance();
-      try {
-        final String path = await _getDefaultBackupPath();
-        await Directory(path).create(recursive: true);
-        await prefs.setString('autoBackupPath', path);
-        setState(() {
-          _backupPath = path;
-        });
-        await LocalBackupService.instance.triggerAutomaticBackup();
-        scaffoldMessenger.showSnackBar(
-          SnackBar(content: Text(l10n.initialBackupCreated)),
-        );
-        return true; 
-      } catch (e) {
-        scaffoldMessenger.showSnackBar(
-          SnackBar(content: Text(l10n.noDefaultBackupFolder)),
-        );
-        return false; 
+  Future<bool> _handleLocationSetup() async {
+
+    String currentPath = _backupPath ?? await _getDefaultBackupPath();
+
+    while (true) {
+      final result = await _showLocationChoiceDialog(displayPath: currentPath);
+
+      if (result?.action == ButtonAction.first) {
+        final prefs = await SharedPreferences.getInstance();
+        try {
+          await Directory(currentPath).create(recursive: true);
+          await prefs.setString('autoBackupPath', currentPath);
+          setState(() {
+            _backupPath = currentPath;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.l10n.initialBackupCreated)),
+          );
+          return true; 
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.l10n.noDefaultBackupFolder)),
+          );
+          return false; 
+        }
+      }
+
+      else if (result?.action == ButtonAction.second) {
+        final newPath = await FilePicker.platform.getDirectoryPath();
+        if (newPath != null) {
+          currentPath = newPath;
+        }
+        
+      }
+      
+      else {
+        return false;
       }
     }
-    return false;
   }
 
   Future<String> _getDefaultBackupPath() async {
@@ -170,6 +199,14 @@ class _LocalBackupSettingsPageState extends State<LocalBackupSettingsPage> {
     Directory? dir = await getDownloadsDirectory();
     dir ??= await getApplicationDocumentsDirectory();
     return '${dir.path}/EnteAuthBackups';
+  }
+
+  String _simplifyPath(String fullPath) {   //takes a file path string and shortens it if it matches the common Android root path.
+    const rootToRemove = '/storage/emulated/0/';
+    if (fullPath.startsWith(rootToRemove)) {
+      return fullPath.substring(rootToRemove.length);
+    }
+    return fullPath;
   }
 
   // opens directory picker
@@ -191,12 +228,12 @@ class _LocalBackupSettingsPageState extends State<LocalBackupSettingsPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(successMessage ?? l10n.locationUpdatedAndBackupCreated),
+          content: Text(successMessage ?? l10n.locationUpdatedAndBackupCreated),  
         ),
       );
-      return true; // Report success
+      return true; 
     }
-    return false; // User cancelled the file picker
+    return false; //user cancelled the file picker
   }
 
    Future<void> _showSetPasswordDialog() async {
@@ -224,7 +261,7 @@ class _LocalBackupSettingsPageState extends State<LocalBackupSettingsPage> {
     await storage.write(key: 'autoBackupPassword', value: password);
 
     SchedulerBinding.instance.addPostFrameCallback((_) async {
-      final bool setupCompleted = await _showLocationChoiceDialog();
+      final bool setupCompleted = await _handleLocationSetup();
       if (!mounted) return;
 
       if (setupCompleted) {
@@ -247,7 +284,7 @@ class _LocalBackupSettingsPageState extends State<LocalBackupSettingsPage> {
     final l10n = context.l10n;
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.localBackupSettingsTitle),
+        title: Text(l10n.localBackupSettingsTitle), //text shown on appbar
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -261,7 +298,7 @@ class _LocalBackupSettingsPageState extends State<LocalBackupSettingsPage> {
                 children: [
                   Expanded(
                     child: Text(
-                      l10n.enableAutomaticBackups,
+                      l10n.enableAutomaticBackups,  //toggle text
                       style: getEnteTextTheme(context).largeBold,
                     ),
                   ),
@@ -300,10 +337,10 @@ class _LocalBackupSettingsPageState extends State<LocalBackupSettingsPage> {
                 ],
               ),
               Padding(
-                padding: const EdgeInsets.only(right: 50.0, top: 10.0),
+                padding: const EdgeInsets.only(top: 10.0),
                 child: Text(
-                  l10n.backupLocationDescription,
-                  style: getEnteTextTheme(context).small,
+                  l10n.backupDescription, //text below toggle
+                  style: getEnteTextTheme(context).mini,
                 ),
               ),
               const SizedBox(height: 20),
@@ -318,7 +355,7 @@ class _LocalBackupSettingsPageState extends State<LocalBackupSettingsPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            l10n.currentLocation,
+                            l10n.currentLocation, //shows current backup location
                             style: getEnteTextTheme(context).body,
                           ),
                           const SizedBox(height: 4),
@@ -334,14 +371,14 @@ class _LocalBackupSettingsPageState extends State<LocalBackupSettingsPage> {
                                 if (snapshot.connectionState ==
                                     ConnectionState.waiting) {
                                   return Text(
-                                     l10n.loadDefaultLocation,
+                                     l10n.loadDefaultLocation, 
                                     style: getEnteTextTheme(context)
                                         .small
                                         .copyWith(color: Colors.grey),
                                   );
                                 } else if (snapshot.hasError) {
                                   return Text(
-                                    l10n.couldNotDetermineLocation,
+                                    l10n.couldNotDetermineLocation, 
                                     style: getEnteTextTheme(context)
                                         .small
                                         .copyWith(color: Colors.red),
@@ -361,7 +398,7 @@ class _LocalBackupSettingsPageState extends State<LocalBackupSettingsPage> {
                             width: double.infinity,
                             child: ElevatedButton(
                               onPressed: () => _pickAndSaveBackupLocation(),
-                              child: Text(l10n.changeLocation),
+                              child: Text(l10n.changeCurrentLocation),
                             ),
                           ),
                         ],
@@ -389,7 +426,7 @@ class _LocalBackupSettingsPageState extends State<LocalBackupSettingsPage> {
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
-                                  l10n.securityNotice,
+                                  l10n.securityNotice,  //security notice title
                                   style: getEnteTextTheme(context)
                                       .smallBold
                                       .copyWith(
@@ -400,7 +437,7 @@ class _LocalBackupSettingsPageState extends State<LocalBackupSettingsPage> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              l10n.backupSecurityNotice,
+                              l10n.backupSecurityNotice,  //security notice description
                               style: getEnteTextTheme(context).mini.copyWith(
                                     color: Colors.orange.shade700,
                                   ),
