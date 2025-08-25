@@ -481,17 +481,21 @@ class FileAppBarState extends State<FileAppBar> {
 
   bool _shouldShowCreateStreamOption() {
     // Show "Create Stream" option for uploaded video files without streams
+    // Skip if sv=1 (server indicates streaming not needed)
     return widget.file.fileType == FileType.video &&
         widget.file.isUploaded &&
         widget.file.uploadedFileID != null &&
+        (widget.file.pubMagicMetadata?.sv ?? 0) != 1 &&
         !fileDataService.previewIds.containsKey(widget.file.uploadedFileID!);
   }
 
   bool _shouldShowRecreateStreamOption() {
     // Show "Recreate Stream" option for uploaded video files with existing streams
+    // Skip if sv=1 (server indicates streaming not needed)
     return widget.file.fileType == FileType.video &&
         widget.file.isUploaded &&
         widget.file.uploadedFileID != null &&
+        (widget.file.pubMagicMetadata?.sv ?? 0) != 1 &&
         fileDataService.previewIds.containsKey(widget.file.uploadedFileID!);
   }
 

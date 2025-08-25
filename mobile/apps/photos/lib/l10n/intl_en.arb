@@ -1839,5 +1839,6 @@
   "addedToStreamRecreationQueue": "Added to stream recreation queue",
   "videoPreviewAlreadyExists": "Video preview already exists",
   "videoAlreadyInQueue": "Video file already present in the queue",
-  "addedToQueue": "Added to queue"
+  "addedToQueue": "Added to queue",
+  "creatingStream": "Creating stream"
 }

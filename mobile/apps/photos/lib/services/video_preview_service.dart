@@ -158,6 +158,11 @@ class VideoPreviewService {
     }
   }
 
+  bool isCurrentlyProcessing(int? uploadedFileID) {
+    if (uploadedFileID == null) return false;
+    return uploadingFileId == uploadedFileID;
+  }
+
   Future<bool> _isRecreateOperation(EnteFile file) async {
     if (file.uploadedFileID == null) return false;
 
@@ -192,11 +197,14 @@ class VideoPreviewService {
     }
   }
 
-  Future<List<EnteFile>> _getFiles() async {
-    return await FilesDB.instance.getAllFilesAfterDate(
-      fileType: FileType.video,
-      beginDate: DateTime.now().subtract(const Duration(days: 60)),
+  Future<List<EnteFile>> _getFiles({
+    DateTime? beginDate,
+    bool onlyFilesWithLocalId = true,
+  }) async {
+    return await FilesDB.instance.getStreamingEligibleVideoFiles(
+      beginDate: beginDate,
       userID: Configuration.instance.getUserID()!,
+      onlyFilesWithLocalId: onlyFilesWithLocalId,
     );
   }
 
@@ -204,7 +212,10 @@ class VideoPreviewService {
     try {
       // TODO: Should we consider all days we could have processed or last 60 days
       await _ensurePreviewIdsInitialized();
-      final files = await _getFiles();
+      final files = await _getFiles(
+        beginDate: null,
+        onlyFilesWithLocalId: false,
+      );
       final Set<int> totalProcessed = fileDataService.previewIds.keys.toSet();
       final Set<int> total = {};
       final Set<int> processed = {};
@@ -213,9 +224,7 @@ class VideoPreviewService {
       for (final file in files) {
         if (totalProcessed.contains(file.uploadedFileID)) {
           processed.add(file.uploadedFileID!);
-          continue;
-        }
-        if (file.pubMagicMetadata?.sv == 1) {
+        } else if (file.pubMagicMetadata?.sv == 1) {
           skipped++;
           continue;
         }
@@ -958,7 +967,10 @@ class VideoPreviewService {
       manualQueueFiles = await UploadLocksDB.instance.getStreamQueue();
     } catch (_) {}
 
-    final files = await _getFiles();
+    final files = await _getFiles(
+      beginDate: DateTime.now().subtract(const Duration(days: 60)),
+      onlyFilesWithLocalId: true,
+    );
     final previewIds = fileDataService.previewIds;
 
     _logger.info(
