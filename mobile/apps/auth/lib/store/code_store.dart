@@ -7,6 +7,7 @@ import 'package:ente_auth/events/codes_updated_event.dart';
 import 'package:ente_auth/models/authenticator/entity_result.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
+import 'package:ente_auth/services/local_backup_service.dart';
 import 'package:ente_auth/store/offline_authenticator_db.dart';
 import 'package:ente_events/event_bus.dart';
 import 'package:logging/logging.dart';
@@ -64,6 +65,27 @@ class CodeStore {
     return true;
   }
 
+  Future<void> updateCode(Code originalCode, Code updatedCode, {bool shouldSync = true}) async {
+    if (updatedCode.generatedID == null) return; 
+
+    await _authenticatorService.updateEntry(
+      updatedCode.generatedID!,
+      updatedCode.toOTPAuthUrlFormat(),
+      shouldSync, 
+      _authenticatorService.getAccountMode(),
+    );
+    Bus.instance.fire(CodesUpdatedEvent());
+
+    final bool isMajorChange = originalCode.issuer != updatedCode.issuer ||
+        originalCode.account != updatedCode.account ||
+        originalCode.secret != updatedCode.secret ||
+        originalCode.display.note != updatedCode.display.note;
+        
+    if (isMajorChange) {
+      LocalBackupService.instance.triggerAutomaticBackup().ignore();
+    }
+  }
+
   Future<List<Code>> getAllCodes({
     AccountMode? accountMode,
     bool sortCodes = true,
@@ -95,7 +117,6 @@ class CodeStore {
     }
 
     if (sortCodes) {
-      // sort codes by issuer,account
       codes.sort((firstCode, secondCode) {
         if (secondCode.isPinned && !firstCode.isPinned) return 1;
         if (!secondCode.isPinned && firstCode.isPinned) return -1;
@@ -121,12 +142,15 @@ class CodeStore {
     AccountMode? accountMode,
     List<Code>? existingAllCodes,
   }) async {
+
     final mode = accountMode ?? _authenticatorService.getAccountMode();
     final allCodes = existingAllCodes ?? (await getAllCodes(accountMode: mode));
     bool isExistingCode = false;
     bool hasSameCode = false;
+
     for (final existingCode in allCodes) {
       if (existingCode.hasError) continue;
+
       if (code.generatedID != null &&
           existingCode.generatedID == code.generatedID) {
         isExistingCode = true;
@@ -155,6 +179,7 @@ class CodeStore {
         shouldSync,
         mode,
       );
+      LocalBackupService.instance.triggerAutomaticBackup().ignore();
     }
     Bus.instance.fire(CodesUpdatedEvent());
     return result;
@@ -164,6 +189,7 @@ class CodeStore {
     final mode = accountMode ?? _authenticatorService.getAccountMode();
     await _authenticatorService.deleteEntry(code.generatedID!, mode);
     Bus.instance.fire(CodesUpdatedEvent());
+    LocalBackupService.instance.triggerAutomaticBackup().ignore();
   }
 
   bool _isOfflineImportRunning = false;
@@ -214,7 +240,6 @@ class CodeStore {
           'importingCode: genID ${eachCode.generatedID} & isAlreadyPresent $alreadyPresent',
         );
         if (!alreadyPresent) {
-          // Avoid conflict with generatedID of online codes
           eachCode.generatedID = null;
           final AddResult result = await CodeStore.instance.addCode(
             eachCode,
@@ -236,6 +261,17 @@ class CodeStore {
       _isOfflineImportRunning = false;
     }
   }
+
+  Future<String> getCodesForExport() async {
+  final allCodes = await getAllCodes(sortCodes: false);
+  String data = "";
+  for (final code in allCodes) {
+    if (code.hasError) continue;
+    data += "${code.toOTPAuthUrlFormat()}\n";
+  }
+  return data;
+}
+
 }
 
 enum AddResult {
