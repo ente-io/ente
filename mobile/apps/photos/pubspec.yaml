@@ -269,6 +269,7 @@ dev_dependencies:
   intl_utils: ^2.8.7
   json_annotation: ^4.8.0
   json_serializable: ^6.6.1
+  mockito: ^5.5.0
   test: ^1.22.0
 
 # ------------------------------

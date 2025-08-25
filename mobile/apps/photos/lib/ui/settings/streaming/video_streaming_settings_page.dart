@@ -2,8 +2,11 @@ import "dart:async";
 
 import "package:flutter/gestures.dart";
 import "package:flutter/material.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/video_preview_state_change.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
+import "package:photos/models/preview/preview_item_status.dart";
 import "package:photos/services/video_preview_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
@@ -240,13 +243,35 @@ class VideoStreamingStatusWidget extends StatefulWidget {
 
 class VideoStreamingStatusWidgetState
     extends State<VideoStreamingStatusWidget> {
+  double? _netProcessed;
+  StreamSubscription? _subscription;
+
   @override
   void initState() {
     super.initState();
+    init();
+    _subscription =
+        Bus.instance.on<VideoPreviewStateChangedEvent>().listen((event) {
+      final status = event.status;
+
+      // Handle different states
+      switch (status) {
+        case PreviewItemStatus.uploaded:
+          init();
+          break;
+        default:
+      }
+    });
+  }
+
+  Future<void> init() async {
+    _netProcessed = await VideoPreviewService.instance.getStatus();
+    setState(() {});
   }
 
   @override
   void dispose() {
+    _subscription?.cancel();
     super.dispose();
   }
 
@@ -255,47 +280,40 @@ class VideoStreamingStatusWidgetState
     final colorScheme = getEnteColorScheme(context);
     return Column(
       children: [
-        FutureBuilder(
-          future: VideoPreviewService.instance.getStatus(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              final double netProcessed = snapshot.data!;
-
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  MenuItemWidget(
-                    captionedTextWidget: CaptionedTextWidget(
-                      title: AppLocalizations.of(context).processed,
-                    ),
-                    trailingWidget: Text(
-                      netProcessed == 0
-                          ? '0%'
-                          : '${(netProcessed * 100.0).toStringAsFixed(2)}%',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    singleBorderRadius: 8,
-                    alignCaptionedTextToLeft: true,
-                    isGestureDetectorDisabled: true,
-                    key: ValueKey("processed_items_" + netProcessed.toString()),
-                    menuItemColor: colorScheme.fillFaint,
-                  ),
-                  const SizedBox(height: 12),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text(
-                      AppLocalizations.of(context).videoStreamingNote,
-                      style: getEnteTextTheme(context).mini.copyWith(
-                            color: getEnteColorScheme(context).textMuted,
-                          ),
-                    ),
-                  ),
-                ],
-              );
-            }
-            return const EnteLoadingWidget();
-          },
-        ),
+        if (_netProcessed != null)
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              MenuItemWidget(
+                captionedTextWidget: CaptionedTextWidget(
+                  title: AppLocalizations.of(context).processed,
+                ),
+                trailingWidget: Text(
+                  _netProcessed == 0
+                      ? '0%'
+                      : '${(_netProcessed! * 100.0).toStringAsFixed(2)}%',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                singleBorderRadius: 8,
+                alignCaptionedTextToLeft: true,
+                isGestureDetectorDisabled: true,
+                key: ValueKey("processed_items_" + _netProcessed.toString()),
+                menuItemColor: colorScheme.fillFaint,
+              ),
+              const SizedBox(height: 12),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Text(
+                  AppLocalizations.of(context).videoStreamingNote,
+                  style: getEnteTextTheme(context).mini.copyWith(
+                        color: getEnteColorScheme(context).textMuted,
+                      ),
+                ),
+              ),
+            ],
+          )
+        else
+          const EnteLoadingWidget(),
       ],
     );
   }
