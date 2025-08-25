@@ -1,8 +1,11 @@
+import "package:ente_ui/components/action_sheet_widget.dart";
 import 'package:ente_ui/components/buttons/button_widget.dart';
 import 'package:ente_ui/components/buttons/models/button_type.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:flutter/material.dart';
+import "package:locker/core/errors.dart";
 import 'package:locker/l10n/l10n.dart';
+import "package:locker/services/collections/collections_api_client.dart";
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/utils/snack_bar_utils.dart';
@@ -156,5 +159,119 @@ class CollectionActions {
         context.l10n.failedToDeleteCollection(error.toString()),
       );
     }
+  }
+
+  static Future<bool> enableUrl(
+    BuildContext context,
+    Collection collection, {
+    bool enableCollect = false,
+  }) async {
+    try {
+      await CollectionApiClient.instance.createShareUrl(
+        collection,
+        enableCollect: enableCollect,
+      );
+      return true;
+    } catch (e) {
+      if (e is SharingNotPermittedForFreeAccountsError) {
+        await _showUnSupportedAlert(context);
+      } else {
+        _logger.severe("Failed to update shareUrl collection", e);
+        await showGenericErrorDialog(context: context, error: e);
+      }
+      return false;
+    }
+  }
+
+  static Future<bool> disableUrl(
+    BuildContext context,
+    Collection collection,
+  ) async {
+    final actionResult = await showActionSheet(
+      context: context,
+      buttons: [
+        ButtonWidget(
+          buttonType: ButtonType.critical,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.first,
+          shouldSurfaceExecutionStates: true,
+          labelText: "Yes, remove",
+          onTap: () async {
+            await CollectionApiClient.instance.disableShareUrl(collection);
+          },
+        ),
+        ButtonWidget(
+          buttonType: ButtonType.secondary,
+          buttonAction: ButtonAction.cancel,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          labelText: context.l10n.cancel,
+        ),
+      ],
+      title: "Remove public link",
+      body:
+          "This will remove the public link for accessing \"${collection.name}\".",
+    );
+    if (actionResult?.action != null) {
+      if (actionResult!.action == ButtonAction.error) {
+        await showGenericErrorDialog(
+          context: context,
+          error: actionResult.exception,
+        );
+      }
+      return actionResult.action == ButtonAction.first;
+    } else {
+      return false;
+    }
+  }
+
+  static Future<void> _showUnSupportedAlert(BuildContext context) async {
+    final AlertDialog alert = AlertDialog(
+      title: const Text("Sorry"),
+      content: const Text(
+        "You need an active paid subscription to enable sharing.",
+      ),
+      actions: [
+        ButtonWidget(
+          buttonType: ButtonType.primary,
+          isInAlert: true,
+          shouldStickToDarkTheme: false,
+          buttonAction: ButtonAction.first,
+          shouldSurfaceExecutionStates: true,
+          labelText: "Subscribe",
+          onTap: () async {
+            // TODO: If we are having subscriptions for locker
+            // Navigator.of(context).push(
+            //   MaterialPageRoute(
+            //     builder: (BuildContext context) {
+            //       return getSubscriptionPage();
+            //     },
+            //   ),
+            // ).ignore();
+            Navigator.of(context).pop();
+          },
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: ButtonWidget(
+            buttonType: ButtonType.secondary,
+            buttonAction: ButtonAction.cancel,
+            isInAlert: true,
+            shouldStickToDarkTheme: false,
+            labelText: context.l10n.ok,
+          ),
+        ),
+      ],
+    );
+
+    return showDialog(
+      useRootNavigator: false,
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+      barrierDismissible: true,
+    );
   }
 }

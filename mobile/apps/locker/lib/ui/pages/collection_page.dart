@@ -1,16 +1,22 @@
+import "dart:async";
+
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
+import "package:ente_utils/navigation_util.dart";
 import 'package:flutter/material.dart';
 import 'package:locker/events/collections_updated_event.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
+import "package:locker/services/configuration.dart";
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/ui/components/item_list_view.dart';
 import 'package:locker/ui/components/search_result_view.dart';
 import 'package:locker/ui/mixins/search_mixin.dart';
 import 'package:locker/ui/pages/home_page.dart';
 import 'package:locker/ui/pages/uploader_page.dart';
+import "package:locker/ui/sharing/manage_links_widget.dart";
+import "package:locker/ui/sharing/share_collection_page.dart";
 import 'package:locker/utils/collection_actions.dart';
 
 class CollectionPage extends UploaderPage {
@@ -30,6 +36,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
   late Collection _collection;
   List<EnteFile> _files = [];
   List<EnteFile> _filteredFiles = [];
+  bool isQuickLink = false;
 
   @override
   void onFileUploadComplete() {
@@ -51,7 +58,9 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
 
   @override
   void onSearchResultsChanged(
-      List<Collection> collections, List<EnteFile> files,) {
+    List<Collection> collections,
+    List<EnteFile> files,
+  ) {
     setState(() {
       _filteredFiles = files;
     });
@@ -112,6 +121,19 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
     );
   }
 
+  Future<void> _shareCollection() async {
+    if (Configuration.instance.getUserID() == widget.collection.owner.id) {
+      unawaited(
+        routeToPage(
+          context,
+          (isQuickLink && (widget.collection.hasLink))
+              ? ManageSharedLinkWidget(collection: widget.collection)
+              : ShareCollectionPage(collection: widget.collection),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return KeyboardListener(
@@ -139,6 +161,14 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
       actions: [
         buildSearchAction(),
         ...buildSearchActions(),
+        IconButton(
+          icon: Icon(
+            Icons.adaptive.share,
+          ),
+          onPressed: () async {
+            await _shareCollection();
+          },
+        ),
         _buildMenuButton(),
       ],
     );
