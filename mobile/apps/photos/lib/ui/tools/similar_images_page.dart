@@ -920,7 +920,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     if (filesToDelete.isEmpty) {
       return;
     }
-    final Map<int, List<EnteFile>> collectionToFilesToAddMap = {};
+    final Map<int, Set<EnteFile>> collectionToFilesToAddMap = {};
     final allDeleteFiles = <EnteFile>{};
     final groupsToRemove = <SimilarFiles>{};
     for (final similarGroup in _similarFilesList) {
@@ -935,7 +935,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
           }
         }
       }
-      if (similarGroup.files.length <= 1) {
+      if (similarGroup.length <= 1) {
         groupsToRemove.add(similarGroup);
       }
       if (groupDeleteFiles.isNotEmpty) {
@@ -951,7 +951,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             continue;
           }
           if (!collectionToFilesToAddMap.containsKey(collectionID)) {
-            collectionToFilesToAddMap[collectionID] = [];
+            collectionToFilesToAddMap[collectionID] = {};
           }
           collectionToFilesToAddMap[collectionID]!.addAll(filesToKeep);
         }
@@ -976,7 +976,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         }
         await CollectionsService.instance.addSilentlyToCollection(
           collectionID,
-          collectionToFilesToAddMap[collectionID]!,
+          collectionToFilesToAddMap[collectionID]!.toList(),
         );
       }
     }
