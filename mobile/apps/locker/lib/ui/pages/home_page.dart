@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 
 import "package:ente_accounts/services/user_service.dart";
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_ui/components/buttons/gradient_button.dart';
+import "package:ente_ui/components/buttons/icon_button_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:ente_utils/email_util.dart';
@@ -15,6 +15,8 @@ import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/models/file.dart';
+import "package:locker/ui/collections/collection_flex_grid_view.dart";
+import "package:locker/ui/collections/section_title.dart";
 import 'package:locker/ui/components/recents_section_widget.dart';
 import 'package:locker/ui/components/search_result_view.dart';
 import 'package:locker/ui/mixins/search_mixin.dart';
@@ -24,7 +26,6 @@ import "package:locker/ui/pages/settings_page.dart";
 import 'package:locker/ui/pages/uploader_page.dart';
 import 'package:locker/utils/collection_actions.dart';
 import 'package:locker/utils/collection_sort_util.dart';
-import "package:locker/utils/snack_bar_utils.dart";
 import 'package:logging/logging.dart';
 
 class HomePage extends UploaderPage {
@@ -51,6 +52,10 @@ class _HomePageState extends UploaderPageState<HomePage>
   List<EnteFile> _recentFiles = [];
   List<EnteFile> _filteredFiles = [];
   Map<int, int> _collectionFileCounts = {};
+  List<Collection> outgoingCollections = [];
+  List<Collection> incomingCollections = [];
+  List<Collection> quickLinks = [];
+
   String? _error;
   final _logger = Logger('HomePage');
   StreamSubscription? _mediaStreamSubscription;
@@ -268,10 +273,16 @@ class _HomePageState extends UploaderPageState<HomePage>
       final sortedCollections =
           CollectionSortUtil.getSortedCollections(collections);
 
+      final sharedCollections =
+          await CollectionService.instance.getSharedCollections();
+
       setState(() {
         _collections = sortedCollections;
         _filteredCollections = _filterOutUncategorized(sortedCollections);
         _filteredFiles = _recentFiles;
+        incomingCollections = sharedCollections.incoming;
+        outgoingCollections = sharedCollections.outgoing;
+        quickLinks = sharedCollections.quickLinks;
         _isLoading = false;
       });
 
@@ -491,10 +502,27 @@ class _HomePageState extends UploaderPageState<HomePage>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildCollectionsHeader(),
-                const SizedBox(height: 24),
-                _buildCollectionsGrid(),
-                const SizedBox(height: 24),
+                ..._buildCollectionSection(
+                  title: context.l10n.collections,
+                  collections: _displayedCollections,
+                  viewType: CollectionViewType.homeCollections,
+                  addSeparator: outgoingCollections.isNotEmpty ||
+                      incomingCollections.isNotEmpty,
+                ),
+                if (outgoingCollections.isNotEmpty)
+                  ..._buildCollectionSection(
+                    title: "Shared By You",
+                    collections: outgoingCollections,
+                    viewType: CollectionViewType.outgoingCollections,
+                    addSeparator: incomingCollections.isNotEmpty,
+                  ),
+                if (incomingCollections.isNotEmpty)
+                  ..._buildCollectionSection(
+                    title: "Shared With You",
+                    collections: incomingCollections,
+                    viewType: CollectionViewType.incomingCollections,
+                    addSeparator: true,
+                  ),
                 _buildRecentsSection(),
               ],
             ),
@@ -555,105 +583,6 @@ class _HomePageState extends UploaderPageState<HomePage>
       await _loadCollections();
       _navigateToCollection(createdCollection);
     }
-  }
-
-  Widget _buildCollectionsHeader() {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () {
-        SnackBarUtils.showWarningSnackBar(context, "Hello");
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const AllCollectionsPage(),
-          ),
-        );
-      },
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            context.l10n.collections,
-            style: getEnteTextTheme(context).h3Bold,
-          ),
-          const Icon(
-            Icons.chevron_right,
-            color: Colors.grey,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCollectionsGrid() {
-    return MediaQuery.removePadding(
-      context: context,
-      removeBottom: true,
-      removeTop: true,
-      child: GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          childAspectRatio: 2.2,
-        ),
-        itemCount: min(_displayedCollections.length, 4),
-        itemBuilder: (context, index) {
-          final collection = _displayedCollections[index];
-          final collectionName = collection.name ?? 'Unnamed Collection';
-
-          return GestureDetector(
-            onTap: () => _navigateToCollection(collection),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                color: getEnteColorScheme(context).fillFaint,
-              ),
-              padding: const EdgeInsets.all(12),
-              child: Stack(
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        collectionName,
-                        style: getEnteTextTheme(context).body.copyWith(
-                              fontWeight: FontWeight.w500,
-                            ),
-                        textAlign: TextAlign.left,
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        context.l10n
-                            .items(_collectionFileCounts[collection.id] ?? 0),
-                        style: getEnteTextTheme(context).small.copyWith(
-                              color: Colors.grey[600],
-                            ),
-                        textAlign: TextAlign.left,
-                      ),
-                    ],
-                  ),
-                  if (collection.type == CollectionType.favorites)
-                    Positioned(
-                      top: 0,
-                      right: 0,
-                      child: Icon(
-                        Icons.star,
-                        color: getEnteColorScheme(context).primary500,
-                        size: 18,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
   }
 
   Widget _buildMultiOptionFab() {
@@ -807,5 +736,38 @@ class _HomePageState extends UploaderPageState<HomePage>
         _collectionFileCounts = counts;
       });
     }
+  }
+
+  List<Widget> _buildCollectionSection({
+    required String title,
+    required List<Collection> collections,
+    required CollectionViewType viewType,
+    bool addSeparator = true,
+  }) {
+    return [
+      SectionOptions(
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => AllCollectionsPage(
+                viewType: viewType,
+              ),
+            ),
+          );
+        },
+        SectionTitle(title: title),
+        trailingWidget: IconButtonWidget(
+          icon: Icons.chevron_right,
+          iconButtonType: IconButtonType.secondary,
+          iconColor: getEnteColorScheme(context).blurStrokePressed,
+        ),
+      ),
+      const SizedBox(height: 24),
+      CollectionFlexGridViewWidget(
+        collections: collections,
+        collectionFileCounts: _collectionFileCounts,
+      ),
+      if (addSeparator) const SizedBox(height: 24),
+    ];
   }
 }
