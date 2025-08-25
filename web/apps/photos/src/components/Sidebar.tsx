@@ -976,6 +976,8 @@ const localeName = (locale: SupportedLocale) => {
             return "اَلْعَرَبِيَّةُ";
         case "tr-TR":
             return "Türkçe";
+        case "cs-CZ":
+            return "čeština";
     }
 };
 
