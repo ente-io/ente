@@ -955,54 +955,31 @@ class VideoPreviewService {
       final queueType = manualQueueFiles[queueFileId] ?? 'create';
       final hasPreview = previewIds[queueFileId] != null;
 
-      _logger.info(
-        "[manual-queue] Processing file $queueFileId: type=$queueType, hasPreview=$hasPreview",
-      );
-
-      // For recreate, always add to queue regardless of existing preview
       // For create, only add if no preview exists
-      if (queueType == 'recreate' || !hasPreview) {
-        // First try to find the file in the 60-day list
-        var queueFile =
-            files.firstWhereOrNull((f) => f.uploadedFileID == queueFileId);
-
-        // If not found in 60-day list, fetch it individually
-        if (queueFile == null) {
-          _logger.info(
-            "[manual-queue] File $queueFileId not found in 60-day list, fetching individually",
-          );
-          try {
-            queueFile = await FilesDB.instance.getAnyUploadedFile(queueFileId);
-            _logger.info(
-              "[manual-queue] Successfully fetched file $queueFileId individually",
-            );
-          } catch (e) {
-            _logger.warning(
-              "Failed to fetch manual queue file $queueFileId",
-              e,
-            );
-            continue;
-          }
-        } else {
-          _logger.info("[manual-queue] File $queueFileId found in 60-day list");
-        }
-
-        if (queueFile != null) {
-          _items[queueFile.uploadedFileID!] = PreviewItem(
-            status: PreviewItemStatus.inQueue,
-            file: queueFile,
-            collectionID: queueFile.collectionID ?? 0,
-          );
-          fileQueue[queueFile.uploadedFileID!] = queueFile;
-          _logger.info(
-            "[manual-queue] Added file $queueFileId to processing queue",
-          );
-        }
-      } else {
+      if (queueType == 'create' && hasPreview) {
         _logger.info(
           "[manual-queue] Skipping file $queueFileId (type=$queueType, hasPreview=$hasPreview)",
         );
+        continue;
       }
+
+      // First try to find the file in the 60-day list
+      var queueFile =
+          files.firstWhereOrNull((f) => f.uploadedFileID == queueFileId);
+
+      // If not found in 60-day list, fetch it individually
+      queueFile ??= await FilesDB.instance
+          .getAnyUploadedFile(queueFileId)
+          .catchError((e) => null);
+
+      if (queueFile == null) continue;
+
+      _items[queueFile.uploadedFileID!] = PreviewItem(
+        status: PreviewItemStatus.inQueue,
+        file: queueFile,
+        collectionID: queueFile.collectionID ?? 0,
+      );
+      fileQueue[queueFile.uploadedFileID!] = queueFile;
     }
 
     // Then add regular files that need processing
