@@ -193,22 +193,13 @@ class SemanticSearchService {
     return results;
   }
 
-  Future<Map<String, List<int>>> getMatchingFileIDs(
+  Future<Map<String, List<int>>> getMatchingFileIDsWithEmbeddings(
+    Map<String, List<double>> queryToEmbedding,
     Map<String, double> queryToScore,
   ) async {
-    final textEmbeddings = <String, List<double>>{};
-    final minimumSimilarityMap = <String, double>{};
-    for (final entry in queryToScore.entries) {
-      final query = entry.key;
-      final score = entry.value;
-      final textEmbedding = await _getTextEmbedding(query);
-      textEmbeddings[query] = textEmbedding;
-      minimumSimilarityMap[query] = score;
-    }
-
     final queryResults = await _getSimilarities(
-      textEmbeddings,
-      minimumSimilarityMap: minimumSimilarityMap,
+      queryToEmbedding,
+      minimumSimilarityMap: queryToScore,
     );
     final result = <String, List<int>>{};
     for (final entry in queryResults.entries) {
