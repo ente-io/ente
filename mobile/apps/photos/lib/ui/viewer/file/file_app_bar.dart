@@ -482,26 +482,23 @@ class FileAppBarState extends State<FileAppBar> {
 
   bool _shouldShowCreateStreamOption() {
     // Show "Create Stream" option for uploaded video files without streams
-    // Skip if sv=1 (server indicates streaming not needed)
-    final userId = Configuration.instance.getUserID();
-    return widget.file.fileType == FileType.video &&
-        widget.file.isUploaded &&
-        widget.file.uploadedFileID != null &&
-        (widget.file.pubMagicMetadata?.sv ?? 0) != 1 &&
-        widget.file.ownerID == userId &&
+    return _ensureBasicRequirements() &&
         !fileDataService.previewIds.containsKey(widget.file.uploadedFileID!);
   }
 
   bool _shouldShowRecreateStreamOption() {
     // Show "Recreate Stream" option for uploaded video files with existing streams
+    return _ensureBasicRequirements() &&
+        fileDataService.previewIds.containsKey(widget.file.uploadedFileID!);
+  }
+
+  bool _ensureBasicRequirements() {
     // Skip if sv=1 (server indicates streaming not needed)
     final userId = Configuration.instance.getUserID();
     return widget.file.fileType == FileType.video &&
         widget.file.isUploaded &&
-        widget.file.uploadedFileID != null &&
         (widget.file.pubMagicMetadata?.sv ?? 0) != 1 &&
-        widget.file.ownerID == userId &&
-        fileDataService.previewIds.containsKey(widget.file.uploadedFileID!);
+        widget.file.ownerID == userId;
   }
 
   Future<void> _handleVideoStream(String streamType) async {
