@@ -48,7 +48,7 @@ to album", and the actual files are not re-uploaded.
 
 ## Manual deduplication
 
-Ente also provides a tool for manual de-duplication in _Settings → Backup →
+Ente provides a tool for manual de-duplication in _Settings → Backup → Free up space →
 Remove duplicates_. This is useful if you have an existing library with
 duplicates across different albums, but wish to keep only one copy.
 
