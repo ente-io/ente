@@ -245,12 +245,12 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       final cachedSmallThumbnail =
           ThumbnailInMemoryLruCache.get(widget.file, thumbnailSmallSize);
       if (cachedSmallThumbnail != null) {
-        _imageProvider = Image.memory(
+        final imageProvider = Image.memory(
           cachedSmallThumbnail,
           cacheHeight: optimizedImageHeight,
           cacheWidth: optimizedImageWidth,
         ).image;
-        _hasLoadedThumbnail = true;
+        _cacheAndRender(imageProvider);
       } else {
         if (widget.diskLoadDeferDuration != null) {
           Future.delayed(widget.diskLoadDeferDuration!, () {
@@ -383,12 +383,12 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       _isLoadingRemoteThumbnail = true;
       final cachedThumbnail = ThumbnailInMemoryLruCache.get(widget.file);
       if (cachedThumbnail != null) {
-        _imageProvider = Image.memory(
+        final imageProvider = Image.memory(
           cachedThumbnail,
           cacheHeight: optimizedImageHeight,
           cacheWidth: optimizedImageWidth,
         ).image;
-        _hasLoadedThumbnail = true;
+        _cacheAndRender(imageProvider);
         return;
       }
 
