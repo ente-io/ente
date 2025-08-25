@@ -44,17 +44,19 @@ class _VerifyIdentifyDialogState extends State<VerifyIdentifyDialog> {
   Widget build(BuildContext context) {
     final textStyle = getEnteTextTheme(context);
     final String subTitle = widget.self
-        ? S.of(context).thisIsYourVerificationId
-        : S.of(context).thisIsPersonVerificationId(widget.email);
+        ? AppLocalizations.of(context).thisIsYourVerificationId
+        : AppLocalizations.of(context)
+            .thisIsPersonVerificationId(email: widget.email);
     final String bottomText = widget.self
-        ? S.of(context).someoneSharingAlbumsWithYouShouldSeeTheSameId
-        : S.of(context).howToViewShareeVerificationID;
+        ? AppLocalizations.of(context)
+            .someoneSharingAlbumsWithYouShouldSeeTheSameId
+        : AppLocalizations.of(context).howToViewShareeVerificationID;
 
     final AlertDialog alert = AlertDialog(
       title: Text(
         widget.self
-            ? S.of(context).verificationId
-            : S.of(context).verifyEmailID(widget.email),
+            ? AppLocalizations.of(context).verificationId
+            : AppLocalizations.of(context).verifyEmailID(email: widget.email),
       ),
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,18 +72,20 @@ class _VerifyIdentifyDialogState extends State<VerifyIdentifyDialog> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        S.of(context).emailNoEnteAccount(widget.email),
+                        AppLocalizations.of(context)
+                            .emailNoEnteAccount(email: widget.email),
                       ),
                       const SizedBox(height: 24),
                       ButtonWidget(
                         buttonType: ButtonType.neutral,
                         icon: Icons.adaptive.share,
-                        labelText: S.of(context).sendInvite,
+                        labelText: AppLocalizations.of(context).sendInvite,
                         isInAlert: true,
                         onTap: () async {
                           // ignore: unawaited_futures
                           shareText(
-                            S.of(context).shareTextRecommendUsingEnte,
+                            AppLocalizations.of(context)
+                                .shareTextRecommendUsingEnte,
                           );
                         },
                       ),
@@ -106,8 +110,9 @@ class _VerifyIdentifyDialogState extends State<VerifyIdentifyDialog> {
                       ButtonWidget(
                         buttonType: ButtonType.neutral,
                         isInAlert: true,
-                        labelText:
-                            widget.self ? S.of(context).ok : S.of(context).done,
+                        labelText: widget.self
+                            ? AppLocalizations.of(context).ok
+                            : AppLocalizations.of(context).done,
                       ),
                     ],
                   );
@@ -116,7 +121,7 @@ class _VerifyIdentifyDialogState extends State<VerifyIdentifyDialog> {
                 Logger("VerificationID")
                     .severe("failed to end userID", snapshot.error);
                 return Text(
-                  S.of(context).somethingWentWrong,
+                  AppLocalizations.of(context).somethingWentWrong,
                   style: textStyle.bodyMuted,
                 );
               } else {
@@ -171,10 +176,11 @@ class _VerifyIdentifyDialogState extends State<VerifyIdentifyDialog> {
               // ignore: unawaited_futures
               shareText(
                 widget.self
-                    ? S.of(context).shareMyVerificationID(verificationID)
-                    : S
-                        .of(context)
-                        .shareTextConfirmOthersVerificationID(verificationID),
+                    ? AppLocalizations.of(context)
+                        .shareMyVerificationID(verificationID: verificationID)
+                    : AppLocalizations.of(context)
+                        .shareTextConfirmOthersVerificationID(
+                            verificationID: verificationID,),
               );
             },
             child: Container(

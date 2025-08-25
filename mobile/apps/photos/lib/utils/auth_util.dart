@@ -32,26 +32,30 @@ Future<bool> requestAuthentication(
       localizedReason: reason,
       authMessages: [
         AndroidAuthMessages(
-          biometricHint: S.of(context).androidBiometricHint,
-          biometricNotRecognized: S.of(context).androidBiometricNotRecognized,
-          biometricRequiredTitle: S.of(context).androidBiometricRequiredTitle,
-          biometricSuccess: S.of(context).androidBiometricSuccess,
-          cancelButton: S.of(context).androidCancelButton,
-          deviceCredentialsRequiredTitle:
-              S.of(context).androidDeviceCredentialsRequiredTitle,
-          deviceCredentialsSetupDescription:
-              S.of(context).androidDeviceCredentialsSetupDescription,
-          goToSettingsButton: S.of(context).goToSettings,
-          goToSettingsDescription: S.of(context).androidGoToSettingsDescription,
-          signInTitle: S.of(context).androidSignInTitle,
+          biometricHint: AppLocalizations.of(context).androidBiometricHint,
+          biometricNotRecognized:
+              AppLocalizations.of(context).androidBiometricNotRecognized,
+          biometricRequiredTitle:
+              AppLocalizations.of(context).androidBiometricRequiredTitle,
+          biometricSuccess:
+              AppLocalizations.of(context).androidBiometricSuccess,
+          cancelButton: AppLocalizations.of(context).androidCancelButton,
+          deviceCredentialsRequiredTitle: AppLocalizations.of(context)
+              .androidDeviceCredentialsRequiredTitle,
+          deviceCredentialsSetupDescription: AppLocalizations.of(context)
+              .androidDeviceCredentialsSetupDescription,
+          goToSettingsButton: AppLocalizations.of(context).goToSettings,
+          goToSettingsDescription:
+              AppLocalizations.of(context).androidGoToSettingsDescription,
+          signInTitle: AppLocalizations.of(context).androidSignInTitle,
         ),
         IOSAuthMessages(
-          localizedFallbackTitle: S.of(context).enterPassword,
-          goToSettingsButton: S.of(context).goToSettings,
-          goToSettingsDescription: S.of(context).goToSettings,
-          lockOut: S.of(context).iOSLockOut,
+          localizedFallbackTitle: AppLocalizations.of(context).enterPassword,
+          goToSettingsButton: AppLocalizations.of(context).goToSettings,
+          goToSettingsDescription: AppLocalizations.of(context).goToSettings,
+          lockOut: AppLocalizations.of(context).iOSLockOut,
           // cancelButton default value is "Ok"
-          cancelButton: S.of(context).iOSOkButton,
+          cancelButton: AppLocalizations.of(context).iOSOkButton,
         ),
       ],
     );

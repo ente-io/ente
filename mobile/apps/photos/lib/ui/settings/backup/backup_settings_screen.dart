@@ -27,7 +27,7 @@ class BackupSettingsScreen extends StatelessWidget {
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: S.of(context).backupSettings,
+              title: AppLocalizations.of(context).backupSettings,
             ),
             actionIcons: [
               IconButtonWidget(
@@ -54,7 +54,8 @@ class BackupSettingsScreen extends StatelessWidget {
                           children: [
                             MenuItemWidget(
                               captionedTextWidget: CaptionedTextWidget(
-                                title: S.of(context).backupOverMobileData,
+                                title: AppLocalizations.of(context)
+                                    .backupOverMobileData,
                               ),
                               menuItemColor: colorScheme.fillFaint,
                               trailingWidget: ToggleSwitchWidget(
@@ -79,7 +80,8 @@ class BackupSettingsScreen extends StatelessWidget {
                             ),
                             MenuItemWidget(
                               captionedTextWidget: CaptionedTextWidget(
-                                title: S.of(context).backupVideos,
+                                title:
+                                    AppLocalizations.of(context).backupVideos,
                               ),
                               menuItemColor: colorScheme.fillFaint,
                               trailingWidget: ToggleSwitchWidget(
@@ -105,7 +107,8 @@ class BackupSettingsScreen extends StatelessWidget {
                             if (flagService.enableMobMultiPart)
                               MenuItemWidget(
                                 captionedTextWidget: CaptionedTextWidget(
-                                  title: S.of(context).resumableUploads,
+                                  title: AppLocalizations.of(context)
+                                      .resumableUploads,
                                 ),
                                 menuItemColor: colorScheme.fillFaint,
                                 singleBorderRadius: 8,
@@ -131,7 +134,8 @@ class BackupSettingsScreen extends StatelessWidget {
                                 children: [
                                   MenuItemWidget(
                                     captionedTextWidget: CaptionedTextWidget(
-                                      title: S.of(context).disableAutoLock,
+                                      title: AppLocalizations.of(context)
+                                          .disableAutoLock,
                                     ),
                                     menuItemColor: colorScheme.fillFaint,
                                     trailingWidget: ToggleSwitchWidget(
@@ -152,8 +156,8 @@ class BackupSettingsScreen extends StatelessWidget {
                                     isGestureDetectorDisabled: true,
                                   ),
                                   MenuSectionDescriptionWidget(
-                                    content:
-                                        S.of(context).deviceLockExplanation,
+                                    content: AppLocalizations.of(context)
+                                        .deviceLockExplanation,
                                   ),
                                 ],
                               )

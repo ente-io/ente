@@ -42,7 +42,7 @@ class _EnableMachineLearningConsentState
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: S.of(context).mlConsentTitle,
+              title: AppLocalizations.of(context).mlConsentTitle,
             ),
           ),
           SliverList(
@@ -52,7 +52,7 @@ class _EnableMachineLearningConsentState
                 child: Column(
                   children: [
                     Text(
-                      S.of(context).mlConsentDescription,
+                      AppLocalizations.of(context).mlConsentDescription,
                       textAlign: TextAlign.left,
                       style: getEnteTextTheme(context).body.copyWith(
                             color: getEnteColorScheme(context).textMuted,
@@ -65,7 +65,7 @@ class _EnableMachineLearningConsentState
                           MaterialPageRoute(
                             builder: (BuildContext context) {
                               return WebPage(
-                                S.of(context).privacyPolicyTitle,
+                                AppLocalizations.of(context).privacyPolicyTitle,
                                 "https://ente.io/privacy",
                               );
                             },
@@ -73,7 +73,7 @@ class _EnableMachineLearningConsentState
                         );
                       },
                       child: Text(
-                        S.of(context).mlConsentPrivacy,
+                        AppLocalizations.of(context).mlConsentPrivacy,
                         textAlign: TextAlign.left,
                         style: getEnteTextTheme(context).body.copyWith(
                               color: getEnteColorScheme(context).textMuted,
@@ -105,7 +105,8 @@ class _EnableMachineLearningConsentState
                                 });
                               },
                               child: Text(
-                                S.of(context).mlConsentConfirmation,
+                                AppLocalizations.of(context)
+                                    .mlConsentConfirmation,
                                 style: getEnteTextTheme(context).bodyMuted,
                                 textAlign: TextAlign.left,
                               ),
@@ -117,7 +118,7 @@ class _EnableMachineLearningConsentState
                     const SizedBox(height: 48),
                     ButtonWidget(
                       buttonType: ButtonType.primary,
-                      labelText: S.of(context).mlConsent,
+                      labelText: AppLocalizations.of(context).mlConsent,
                       isDisabled: _hasAckedPrivacyPolicy.value == false,
                       onTap: () async {
                         await enableMlConsent(context);
@@ -127,7 +128,7 @@ class _EnableMachineLearningConsentState
                     const SizedBox(height: 12),
                     ButtonWidget(
                       buttonType: ButtonType.secondary,
-                      labelText: S.of(context).cancel,
+                      labelText: AppLocalizations.of(context).cancel,
                       onTap: () async {
                         await localSettings.setHasSeenMLEnablingBanner();
                         Bus.instance.fire(NotificationEvent());

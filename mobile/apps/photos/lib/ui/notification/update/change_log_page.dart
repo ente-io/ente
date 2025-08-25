@@ -37,7 +37,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: TitleBarTitleWidget(
-                  title: S.of(context).whatsNew,
+                  title: AppLocalizations.of(context).whatsNew,
                 ),
               ),
             ),
@@ -62,7 +62,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                     ButtonWidget(
                       buttonType: ButtonType.trailingIconPrimary,
                       buttonSize: ButtonSize.large,
-                      labelText: S.of(context).continueLabel,
+                      labelText: AppLocalizations.of(context).continueLabel,
                       icon: Icons.arrow_forward_outlined,
                       onTap: () async {
                         await updateService.hideChangeLog();
@@ -77,7 +77,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                     ButtonWidget(
                       buttonType: ButtonType.trailingIconSecondary,
                       buttonSize: ButtonSize.large,
-                      labelText: S.of(context).rateTheApp,
+                      labelText: AppLocalizations.of(context).rateTheApp,
                       icon: Icons.favorite_rounded,
                       iconColor: enteColorScheme.primary500,
                       onTap: () async {

@@ -34,8 +34,8 @@ Future<void> showAlreadyLinkedEmailDialog(
   await showChoiceActionSheet(
     context,
     title: context.l10n.error,
-    body: context.l10n.editEmailAlreadyLinked(person.data.name),
-    firstButtonLabel: context.l10n.viewPersonToUnlink(person.data.name),
+    body: context.l10n.editEmailAlreadyLinked(name: person.data.name),
+    firstButtonLabel: context.l10n.viewPersonToUnlink(name: person.data.name),
     firstButtonOnTap: () async {
       await routeToPage(
         context,

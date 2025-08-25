@@ -92,7 +92,7 @@ class _PreviewPropertiesItemWidgetState
     child = InfoItemWidget(
       key: const ValueKey("Stream properties"),
       leadingIcon: Icons.play_circle_outline,
-      title: S.of(context).streamDetails,
+      title: AppLocalizations.of(context).streamDetails,
       subtitleSection: Future.value(subSectionWidgets),
     );
     if (mounted) {

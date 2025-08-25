@@ -8,7 +8,7 @@ on:
 
 env:
     FLUTTER_VERSION: "3.32.8"
-    RUST_VERSION: "1.85.1"
+    RUST_VERSION: "1.86.0"
 
 permissions:
     contents: read
@@ -46,6 +46,9 @@ jobs:
 
             - name: Install Flutter Rust Bridge
               run: cargo install flutter_rust_bridge_codegen
+
+            - name: Generate Rust bindings
+              run: flutter_rust_bridge_codegen generate
 
             - name: Increment version code for build
               run: |

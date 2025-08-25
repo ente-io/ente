@@ -110,7 +110,7 @@ class _BackupStatusScreenState extends State<BackupStatusScreen> {
       appBar: AppBar(
         leadingWidth: 32,
         title: TitleWidget(
-          title: S.of(context).backupStatus,
+          title: AppLocalizations.of(context).backupStatus,
           caption: null,
           isTitleH2WithoutLeading: false,
         ),
@@ -132,7 +132,7 @@ class _BackupStatusScreenState extends State<BackupStatusScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    S.of(context).backupStatusDescription,
+                    AppLocalizations.of(context).backupStatusDescription,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 16,

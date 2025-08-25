@@ -93,8 +93,8 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
           if (widget.title == null) {
             _appBarTitle = "Me";
           } else {
-            _appBarTitle =
-                context.l10n.accountOwnerPersonAppbarTitle(widget.title!);
+            _appBarTitle = context.l10n
+                .accountOwnerPersonAppbarTitle(title: widget.title!);
           }
         } else {
           _appBarTitle = widget.title;
@@ -112,7 +112,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
 
               if (person.data.email == Configuration.instance.getEmail()) {
                 _appBarTitle = context.l10n.accountOwnerPersonAppbarTitle(
-                  person.data.name,
+                  title: person.data.name,
                 );
               } else {
                 _appBarTitle = person.data.name;
@@ -227,7 +227,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
                   padding: EdgeInsets.all(8),
                 ),
                 Text(
-                  S.of(context).edit,
+                  AppLocalizations.of(context).edit,
                   style: textTheme.bodyBold,
                 ),
               ],
@@ -242,7 +242,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
                   padding: EdgeInsets.all(8),
                 ),
                 Text(
-                  S.of(context).review,
+                  AppLocalizations.of(context).review,
                   style: textTheme.bodyBold,
                 ),
               ],
@@ -257,7 +257,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
                   padding: EdgeInsets.all(8),
                 ),
                 Text(
-                  S.of(context).setCover,
+                  AppLocalizations.of(context).setCover,
                   style: textTheme.bodyBold,
                 ),
               ],
@@ -289,7 +289,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
                   padding: EdgeInsets.all(8),
                 ),
                 Text(
-                  S.of(context).remove,
+                  AppLocalizations.of(context).remove,
                   style: textTheme.bodyBold,
                 ),
               ],
@@ -308,7 +308,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
                 const Padding(
                   padding: EdgeInsets.all(8),
                 ),
-                Text(S.of(context).showPerson),
+                Text(AppLocalizations.of(context).showPerson),
               ],
             ),
           ),
@@ -354,9 +354,9 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
   Future<void> _resetPerson(BuildContext context) async {
     await showChoiceDialog(
       context,
-      title: S.of(context).areYouSureYouWantToResetThisPerson,
-      body: S.of(context).allPersonGroupingWillReset,
-      firstButtonLabel: S.of(context).yesResetPerson,
+      title: AppLocalizations.of(context).areYouSureYouWantToResetThisPerson,
+      body: AppLocalizations.of(context).allPersonGroupingWillReset,
+      firstButtonLabel: AppLocalizations.of(context).yesResetPerson,
       firstButtonOnTap: () async {
         try {
           await PersonService.instance.deletePerson(person.remoteID);

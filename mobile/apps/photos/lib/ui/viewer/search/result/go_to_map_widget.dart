@@ -43,7 +43,7 @@ class GoToMap extends StatelessWidget {
               height: 11.5,
             ),
             Text(
-              S.of(context).yourMap,
+              AppLocalizations.of(context).yourMap,
               maxLines: 2,
               textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,

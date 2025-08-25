@@ -16,7 +16,7 @@ class SocialSectionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(
-      title: S.of(context).social,
+      title: AppLocalizations.of(context).social,
       selectionOptionsWidget: _getSectionOptions(context),
       leadingIcon: Icons.interests_outlined,
     );
@@ -30,43 +30,49 @@ class SocialSectionWidget extends StatelessWidget {
     options.addAll(
       [
         sectionOptionSpacing,
-        SocialsMenuItemWidget(S.of(context).rateUsOnStore(ratePlace), rateUrl),
+        SocialsMenuItemWidget(
+          AppLocalizations.of(context).rateUsOnStore(storeName: ratePlace),
+          rateUrl,
+        ),
         sectionOptionSpacing,
       ],
     );
     options.addAll(
       [
         SocialsMenuItemWidget(
-          S.of(context).blog,
+          AppLocalizations.of(context).blog,
           "https://ente.io/blog",
           launchInExternalApp: !Platform.isAndroid,
         ),
         sectionOptionSpacing,
         SocialsMenuItemWidget(
-          S.of(context).merchandise,
+          AppLocalizations.of(context).merchandise,
           "https://shop.ente.io",
           launchInExternalApp: !Platform.isAndroid,
         ),
         sectionOptionSpacing,
         SocialsMenuItemWidget(
-          S.of(context).twitter,
+          AppLocalizations.of(context).twitter,
           "https://twitter.com/enteio",
         ),
         sectionOptionSpacing,
         SocialsMenuItemWidget(
-          S.of(context).mastodon,
+          AppLocalizations.of(context).mastodon,
           "https://fosstodon.org/@ente",
         ),
         sectionOptionSpacing,
         SocialsMenuItemWidget(
-          S.of(context).matrix,
+          AppLocalizations.of(context).matrix,
           "https://ente.io/matrix/",
         ),
         sectionOptionSpacing,
-        SocialsMenuItemWidget(S.of(context).discord, "https://ente.io/discord"),
+        SocialsMenuItemWidget(
+          AppLocalizations.of(context).discord,
+          "https://ente.io/discord",
+        ),
         sectionOptionSpacing,
         SocialsMenuItemWidget(
-          S.of(context).reddit,
+          AppLocalizations.of(context).reddit,
           "https://reddit.com/r/enteio",
         ),
         sectionOptionSpacing,

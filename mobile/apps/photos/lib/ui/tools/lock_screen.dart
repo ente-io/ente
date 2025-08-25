@@ -157,7 +157,8 @@ class _LockScreenState extends State<LockScreen>
                         alignment: Alignment.center,
                         children: [
                           Text(
-                            S.of(context).tooManyIncorrectAttempts,
+                            AppLocalizations.of(context)
+                                .tooManyIncorrectAttempts,
                             style: textTheme.small,
                           )
                               .animate(
@@ -183,7 +184,7 @@ class _LockScreenState extends State<LockScreen>
                     : GestureDetector(
                         onTap: () => _showLockScreen(source: "tap"),
                         child: Text(
-                          S.of(context).tapToUnlock,
+                          AppLocalizations.of(context).tapToUnlock,
                           style: textTheme.small,
                         ),
                       ),
@@ -209,8 +210,8 @@ class _LockScreenState extends State<LockScreen>
   void _onLogoutTapped(BuildContext context) {
     showChoiceActionSheet(
       context,
-      title: S.of(context).areYouSureYouWantToLogout,
-      firstButtonLabel: S.of(context).yesLogout,
+      title: AppLocalizations.of(context).areYouSureYouWantToLogout,
+      firstButtonLabel: AppLocalizations.of(context).yesLogout,
       isCritical: true,
       firstButtonOnTap: () async {
         await UserService.instance.logout(context);
@@ -222,7 +223,8 @@ class _LockScreenState extends State<LockScreen>
   Future<void> _autoLogoutOnMaxInvalidAttempts() async {
     _logger.info("Auto logout on max invalid attempts");
     Navigator.of(context).popUntil((route) => route.isFirst);
-    final dialog = createProgressDialog(context, S.of(context).loggingOut);
+    final dialog =
+        createProgressDialog(context, AppLocalizations.of(context).loggingOut);
     await dialog.show();
     await Configuration.instance.logout();
     await dialog.hide();

@@ -91,7 +91,7 @@ class UpdateService {
 
   Future<void> showUpdateNotification() async {
     if (await shouldShowUpdateNotification()) {
-      final s = await LanguageService.s;
+      final s = await LanguageService.locals;
       // ignore: unawaited_futures
       NotificationService.instance.showNotification(
         s.updateAvailable,

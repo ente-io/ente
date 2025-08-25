@@ -24,7 +24,7 @@ class GalleryGroupTypePickerPage extends StatelessWidget {
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: S.of(context).groupBy,
+              title: AppLocalizations.of(context).groupBy,
             ),
             actionIcons: [
               IconButtonWidget(

@@ -1177,8 +1177,9 @@ class CollectionsService {
       if (e is DioException && e.response?.statusCode == 410) {
         await showInfoDialog(
           context,
-          title: S.of(context).linkExpired,
-          body: S.of(context).theLinkYouAreTryingToAccessHasExpired,
+          title: AppLocalizations.of(context).linkExpired,
+          body: AppLocalizations.of(context)
+              .theLinkYouAreTryingToAccessHasExpired,
         );
         throw UnauthorizedError();
       }
@@ -1216,8 +1217,8 @@ class CollectionsService {
       _logger.warning("Failed to verify public collection password $e");
       await showErrorDialog(
         context,
-        S.of(context).incorrectPasswordTitle,
-        S.of(context).pleaseTryAgain,
+        AppLocalizations.of(context).incorrectPasswordTitle,
+        AppLocalizations.of(context).pleaseTryAgain,
       );
       return false;
     }

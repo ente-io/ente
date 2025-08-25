@@ -32,8 +32,8 @@ Future<void> changeVisibility(
   final dialog = createProgressDialog(
     context,
     newVisibility == archiveVisibility
-        ? S.of(context).archiving
-        : S.of(context).unarchiving,
+        ? AppLocalizations.of(context).archiving
+        : AppLocalizations.of(context).unarchiving,
   );
   await dialog.show();
   try {
@@ -41,8 +41,8 @@ Future<void> changeVisibility(
     showShortToast(
       context,
       newVisibility == archiveVisibility
-          ? S.of(context).successfullyArchived
-          : S.of(context).successfullyUnarchived,
+          ? AppLocalizations.of(context).successfullyArchived
+          : AppLocalizations.of(context).successfullyUnarchived,
     );
 
     await dialog.hide();
@@ -116,7 +116,7 @@ Future<void> changeSortOrder(
     );
   } catch (e, s) {
     _logger.severe("failed to update collection visibility", e, s);
-    showShortToast(context, S.of(context).somethingWentWrong);
+    showShortToast(context, AppLocalizations.of(context).somethingWentWrong);
     rethrow;
   }
 }
@@ -136,7 +136,7 @@ Future<void> updateOrder(
     );
   } catch (e, s) {
     _logger.severe("failed to update order", e, s);
-    showShortToast(context, S.of(context).somethingWentWrong);
+    showShortToast(context, AppLocalizations.of(context).somethingWentWrong);
     rethrow;
   }
 }
@@ -162,7 +162,7 @@ Future<void> changeCoverPhoto(
     );
   } catch (e, s) {
     _logger.severe("failed to update cover", e, s);
-    showShortToast(context, S.of(context).somethingWentWrong);
+    showShortToast(context, AppLocalizations.of(context).somethingWentWrong);
     rethrow;
   }
 }
@@ -187,7 +187,8 @@ Future<bool> editTime(
       fileIdToTimeUpdate[file.uploadedFileID!] = {editTimeKey: editedTime};
     }
 
-    final dialog = createProgressDialog(context, S.of(context).pleaseWait);
+    final dialog =
+        createProgressDialog(context, AppLocalizations.of(context).pleaseWait);
     await dialog.show();
     try {
       await FileMagicService.instance.updatePublicMagicMetadata(
@@ -200,7 +201,7 @@ Future<bool> editTime(
           ForceReloadHomeGalleryEvent("FileMetadataChange-$editTimeKey"),
         );
       }
-      showShortToast(context, S.of(context).done);
+      showShortToast(context, AppLocalizations.of(context).done);
       await dialog.hide();
     } catch (e, s) {
       _logger.severe("failed to update times $fileIdToTimeUpdate", e, s);
@@ -209,7 +210,7 @@ Future<bool> editTime(
     }
     return true;
   } catch (e) {
-    showShortToast(context, S.of(context).somethingWentWrong);
+    showShortToast(context, AppLocalizations.of(context).somethingWentWrong);
     return false;
   }
 }
@@ -223,12 +224,12 @@ Future<void> editFilename(
   final extName = extension(fileName);
   final result = await showTextInputDialog(
     context,
-    title: S.of(context).renameFile,
-    submitButtonLabel: S.of(context).rename,
+    title: AppLocalizations.of(context).renameFile,
+    submitButtonLabel: AppLocalizations.of(context).rename,
     initialValue: nameWithoutExt,
     message: extName.toUpperCase(),
     alignMessage: Alignment.centerRight,
-    hintText: S.of(context).enterFileName,
+    hintText: AppLocalizations.of(context).enterFileName,
     maxLength: 50,
     alwaysShowSuccessState: true,
     onSubmit: (String text) async {
@@ -285,7 +286,8 @@ Future<void> _updatePublicMetadata(
   }
   ProgressDialog? dialog;
   if (context != null && showProgressDialogs) {
-    dialog = createProgressDialog(context, S.of(context).pleaseWait);
+    dialog =
+        createProgressDialog(context, AppLocalizations.of(context).pleaseWait);
     await dialog.show();
   }
   try {
@@ -293,7 +295,7 @@ Future<void> _updatePublicMetadata(
     await FileMagicService.instance.updatePublicMagicMetadata(files, update);
     if (context != null) {
       if (showDoneToast) {
-        showShortToast(context, S.of(context).done);
+        showShortToast(context, AppLocalizations.of(context).done);
       }
       await dialog?.hide();
     }
@@ -317,26 +319,26 @@ bool _shouldReloadGallery(String key) {
 _visActionProgressDialogText(BuildContext context, _VisibilityAction action) {
   switch (action) {
     case _VisibilityAction.archive:
-      return S.of(context).archiving;
+      return AppLocalizations.of(context).archiving;
     case _VisibilityAction.hide:
-      return S.of(context).hiding;
+      return AppLocalizations.of(context).hiding;
     case _VisibilityAction.unarchive:
-      return S.of(context).unarchiving;
+      return AppLocalizations.of(context).unarchiving;
     case _VisibilityAction.unHide:
-      return S.of(context).unhiding;
+      return AppLocalizations.of(context).unhiding;
   }
 }
 
 _visActionSuccessfulText(BuildContext context, _VisibilityAction action) {
   switch (action) {
     case _VisibilityAction.archive:
-      return S.of(context).successfullyArchived;
+      return AppLocalizations.of(context).successfullyArchived;
     case _VisibilityAction.hide:
-      return S.of(context).successfullyHid;
+      return AppLocalizations.of(context).successfullyHid;
     case _VisibilityAction.unarchive:
-      return S.of(context).successfullyUnarchived;
+      return AppLocalizations.of(context).successfullyUnarchived;
     case _VisibilityAction.unHide:
-      return S.of(context).successfullyUnhid;
+      return AppLocalizations.of(context).successfullyUnhid;
   }
 }
 
