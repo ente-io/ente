@@ -251,16 +251,16 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
           cacheWidth: optimizedImageWidth,
         ).image;
         _cacheAndRender(imageProvider);
+        return;
+      }
+      if (widget.diskLoadDeferDuration != null) {
+        Future.delayed(widget.diskLoadDeferDuration!, () {
+          if (mounted) {
+            _getThumbnailFromDisk();
+          }
+        });
       } else {
-        if (widget.diskLoadDeferDuration != null) {
-          Future.delayed(widget.diskLoadDeferDuration!, () {
-            if (mounted) {
-              _getThumbnailFromDisk();
-            }
-          });
-        } else {
-          _getThumbnailFromDisk();
-        }
+        _getThumbnailFromDisk();
       }
     }
   }
