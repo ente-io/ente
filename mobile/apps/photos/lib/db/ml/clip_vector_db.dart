@@ -1,4 +1,3 @@
-import "dart:io" show File;
 import "dart:typed_data" show Float32List;
 
 import "package:flutter_rust_bridge/flutter_rust_bridge.dart" show Uint64List;
@@ -8,11 +7,13 @@ import "package:path_provider/path_provider.dart";
 import "package:photos/models/ml/vector.dart";
 import "package:photos/services/machine_learning/semantic_search/query_result.dart";
 import "package:photos/src/rust/api/usearch_api.dart";
+import "package:shared_preferences/shared_preferences.dart";
 
 class ClipVectorDB {
   static final Logger _logger = Logger("ClipVectorDB");
 
   static const _databaseName = "ente.ml.vectordb.clip";
+  static const _kMigrationKey = "clip_vector_migration";
 
   static final BigInt _embeddingDimension = BigInt.from(512);
 
@@ -51,10 +52,9 @@ class ClipVectorDB {
   Future<bool> checkIfMigrationDone() async {
     if (_migrationDone != null) return _migrationDone!;
     _logger.info("Checking if ClipVectorDB migration has run");
-    final documentsDirectory = await getApplicationDocumentsDirectory();
-    final migrationFlagFile =
-        File(join(documentsDirectory.path, 'clip_vector_migration_done'));
-    if (await migrationFlagFile.exists()) {
+    final prefs = await SharedPreferences.getInstance();
+    final migrationDone = prefs.getBool(_kMigrationKey) ?? false;
+    if (migrationDone) {
       _logger.info("ClipVectorDB migration already done");
       _migrationDone = true;
       return _migrationDone!;
@@ -67,10 +67,8 @@ class ClipVectorDB {
 
   Future<void> setMigrationDone() async {
     _logger.info("Setting ClipVectorDB migration done");
-    final documentsDirectory = await getApplicationDocumentsDirectory();
-    final migrationFlagFile =
-        File(join(documentsDirectory.path, 'clip_vector_migration_done'));
-    await migrationFlagFile.create(recursive: true);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_kMigrationKey, true);
     _migrationDone = true;
   }
 

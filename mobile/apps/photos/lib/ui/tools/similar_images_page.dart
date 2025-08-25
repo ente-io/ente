@@ -89,7 +89,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: const Text("Similar images"), // TODO: lau: extract string
+        title: Text(AppLocalizations.of(context).similarImages),
         actions: _pageState == SimilarImagesPageState.results
             ? [_getSortMenu()]
             : null,
@@ -120,7 +120,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             final textTheme = getEnteTextTheme(context);
 
             return Container(
-              color: colorScheme.backgroundBase.withOpacity(0.8),
+              color: colorScheme.backgroundBase.withValues(alpha: 0.8),
               child: Center(
                 child: Container(
                   padding:
@@ -150,7 +150,8 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        "Deleting... $value", // TODO: lau: extract string
+                        AppLocalizations.of(context)
+                            .deletingProgress(progress: value),
                         style: textTheme.body,
                       ),
                     ],
@@ -181,24 +182,24 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
           ),
           const SizedBox(height: 32),
           Text(
-            "Find similar images", // TODO: lau: extract string
+            AppLocalizations.of(context).findSimilarImages,
             style: textTheme.h3Bold,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
           Text(
-            "Use AI to find images that look similar to each other. Adjust the distance threshold below.", // TODO: lau: extract string
+            "Use AI to find images that look similar to each other. Adjust the distance threshold below.",
             style: textTheme.body,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 48),
           Text(
-            "Similarity threshold", // TODO: lau: extract string
+            "Similarity threshold",
             style: textTheme.bodyBold,
           ),
           const SizedBox(height: 8),
           Text(
-            "Lower values mean a closer match.", // TODO: lau: extract string
+            "Lower values mean a closer match.",
             style: textTheme.miniMuted,
           ),
           const SizedBox(height: 16),
@@ -229,7 +230,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             ],
           ),
           Text(
-            "Current: ${_distanceThreshold.toStringAsFixed(2)}", // TODO: lau: extract string
+            "Current: ${_distanceThreshold.toStringAsFixed(2)}",
             style: textTheme.body,
             textAlign: TextAlign.center,
           ),
@@ -273,7 +274,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
           ),
           const SizedBox(height: 32),
           ButtonWidget(
-            labelText: "Find similar images", // TODO: lau: extract string
+            labelText: AppLocalizations.of(context).findSimilarImages,
             buttonType: ButtonType.primary,
             onTap: () async {
               await _findSimilarImages();
@@ -303,12 +304,12 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             ),
             const SizedBox(height: 16),
             Text(
-              "No similar images found", // TODO: lau: extract string
+              AppLocalizations.of(context).noSimilarImagesFound,
               style: textTheme.h3Bold,
             ),
             const SizedBox(height: 8),
             Text(
-              "Your photos look unique", // TODO: lau: extract string
+              AppLocalizations.of(context).yourPhotosLookUnique,
               style: textTheme.bodyMuted,
             ),
           ],
@@ -348,12 +349,15 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "${_similarFilesList.length} ${_similarFilesList.length == 1 ? 'group' : 'groups'} found", // TODO: lau: extract string
+                                AppLocalizations.of(context).similarGroupsFound(
+                                  count: _similarFilesList.length,
+                                ),
                                 style: textTheme.bodyBold,
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                "Review and remove similar images", // TODO: lau: extract string
+                                AppLocalizations.of(context)
+                                    .reviewAndRemoveSimilarImages,
                                 style: textTheme.miniMuted,
                               ),
                             ],
@@ -428,8 +432,11 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                             SizedBox(
                               width: double.infinity,
                               child: ButtonWidget(
-                                labelText:
-                                    "Delete $selectedCount photos (${formatBytes(totalSize)})", // TODO: lau: extract string
+                                labelText: AppLocalizations.of(context)
+                                    .deletePhotosWithSize(
+                                  count: selectedCount,
+                                  size: formatBytes(totalSize),
+                                ),
                                 buttonType: ButtonType.critical,
                                 shouldSurfaceExecutionStates: false,
                                 shouldShowSuccessConfirmation: false,
@@ -450,8 +457,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                   SizedBox(
                     width: double.infinity,
                     child: ButtonWidget(
-                      labelText:
-                          "Selection options", // TODO: lau: extract string
+                      labelText: AppLocalizations.of(context).selectionOptions,
                       buttonType: ButtonType.secondary,
                       shouldSurfaceExecutionStates: false,
                       shouldShowSuccessConfirmation: false,
@@ -588,23 +594,20 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       }
     }
 
-    final String exactLabel = exactFiles > 0
-        ? "Select exact ($exactFiles)" // TODO: lau: extract string
-        : "Select exact"; // TODO: lau: extract string
+    // Always show counts, even when 0
+    final String exactLabel =
+        AppLocalizations.of(context).selectExactWithCount(count: exactFiles);
 
-    final String similarLabel = similarFiles > 0
-        ? "Select similar ($similarFiles)" // TODO: lau: extract string
-        : "Select similar"; // TODO: lau: extract string
+    final String similarLabel = AppLocalizations.of(context)
+        .selectSimilarWithCount(count: similarFiles);
 
-    final String allLabel = allFiles > 0
-        ? "Select all ($allFiles)" // TODO: lau: extract string
-        : "Select all"; // TODO: lau: extract string
+    final String allLabel =
+        AppLocalizations.of(context).selectAllWithCount(count: allFiles);
 
     await showActionSheet(
       context: context,
-      title: "Select similar images", // TODO: lau: extract string
-      body:
-          "Choose which similar images to select for deletion", // TODO: lau: extract string
+      title: AppLocalizations.of(context).selectSimilarImagesTitle,
+      body: AppLocalizations.of(context).chooseSimilarImagesToSelect,
       buttons: [
         ButtonWidget(
           labelText: exactLabel,
@@ -614,6 +617,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
           isInAlert: true,
           buttonAction: ButtonAction.first,
           shouldSurfaceExecutionStates: false,
+          isDisabled: exactFiles == 0,
           onTap: () async {
             _selectFilesByThreshold(0.0);
           },
@@ -626,6 +630,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
           isInAlert: true,
           buttonAction: ButtonAction.second,
           shouldSurfaceExecutionStates: false,
+          isDisabled: similarFiles == 0,
           onTap: () async {
             _selectFilesByThreshold(0.02);
           },
@@ -638,12 +643,13 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
           isInAlert: true,
           buttonAction: ButtonAction.third,
           shouldSurfaceExecutionStates: false,
+          isDisabled: allFiles == 0,
           onTap: () async {
             _selectFilesByThreshold(0.05);
           },
         ),
         ButtonWidget(
-          labelText: "Clear selection", // TODO: lau: extract string
+          labelText: AppLocalizations.of(context).clearSelection,
           buttonType: ButtonType.secondary,
           buttonSize: ButtonSize.large,
           shouldStickToDarkTheme: true,
@@ -670,10 +676,11 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "${similarFiles.files.length} similar images" +
+                AppLocalizations.of(context)
+                        .similarImagesCount(count: similarFiles.files.length) +
                     (kDebugMode
                         ? " (I: d: ${similarFiles.furthestDistance.toStringAsFixed(3)})"
-                        : ""), // TODO: lau: extract string
+                        : ""),
                 style: textTheme.smallMuted.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
@@ -745,46 +752,23 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       listenable: _selectedFiles,
       builder: (context, _) {
         final bool isSelected = _selectedFiles.isFileSelected(file);
-        final bool hasAnySelection = _selectedFiles.files.isNotEmpty;
 
         return GestureDetector(
           onTap: () {
-            if (hasAnySelection) {
-              // If files are selected, tap should toggle selection
-              _selectedFiles.toggleSelection(file);
-            } else {
-              // If no files selected, tap opens detail page
-              routeToPage(
-                context,
-                DetailPage(
-                  DetailPageConfiguration(
-                    allFiles,
-                    index,
-                    "similar_images_",
-                    mode: DetailPageMode.minimalistic,
-                  ),
-                ),
-              );
-            }
+            _selectedFiles.toggleSelection(file);
           },
           onLongPress: () {
-            if (hasAnySelection) {
-              // If files are selected, long press opens detail page
-              routeToPage(
-                context,
-                DetailPage(
-                  DetailPageConfiguration(
-                    allFiles,
-                    index,
-                    "similar_images_",
-                    mode: DetailPageMode.minimalistic,
-                  ),
+            routeToPage(
+              context,
+              DetailPage(
+                DetailPageConfiguration(
+                  allFiles,
+                  index,
+                  "similar_images_",
+                  mode: DetailPageMode.minimalistic,
                 ),
-              );
-            } else {
-              // If no files selected, long press starts selection
-              _selectedFiles.toggleSelection(file);
-            }
+              ),
+            );
           },
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -890,7 +874,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             ),
             const SizedBox(width: 4),
             Text(
-              "Delete (${files.length})", // TODO: lau: extract string
+              AppLocalizations.of(context).deleteWithCount(count: files.length),
               style: textTheme.smallBold.copyWith(
                 color: colorScheme.warning500,
               ),
@@ -909,9 +893,8 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     if (showDialog) {
       final _ = await showChoiceActionSheet(
         context,
-        title: "Delete files", // TODO: lau: extract string
-        body:
-            "Are you sure you want to delete these files?", // TODO: lau: extract string
+        title: AppLocalizations.of(context).deleteFiles,
+        body: AppLocalizations.of(context).areYouSureDeleteFiles,
         firstButtonLabel: AppLocalizations.of(context).delete,
         isCritical: true,
         firstButtonOnTap: () async {
@@ -937,7 +920,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     if (filesToDelete.isEmpty) {
       return;
     }
-    final Map<int, List<EnteFile>> collectionToFilesToAddMap = {};
+    final Map<int, Set<EnteFile>> collectionToFilesToAddMap = {};
     final allDeleteFiles = <EnteFile>{};
     final groupsToRemove = <SimilarFiles>{};
     for (final similarGroup in _similarFilesList) {
@@ -952,7 +935,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
           }
         }
       }
-      if (similarGroup.files.length <= 1) {
+      if (similarGroup.length <= 1) {
         groupsToRemove.add(similarGroup);
       }
       if (groupDeleteFiles.isNotEmpty) {
@@ -968,7 +951,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             continue;
           }
           if (!collectionToFilesToAddMap.containsKey(collectionID)) {
-            collectionToFilesToAddMap[collectionID] = [];
+            collectionToFilesToAddMap[collectionID] = {};
           }
           collectionToFilesToAddMap[collectionID]!.addAll(filesToKeep);
         }
@@ -993,7 +976,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         }
         await CollectionsService.instance.addSilentlyToCollection(
           collectionID,
-          collectionToFilesToAddMap[collectionID]!,
+          collectionToFilesToAddMap[collectionID]!.toList(),
         );
       }
     }
@@ -1035,13 +1018,16 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             ),
             const SizedBox(height: 16),
             Text(
-              "Great job!", // TODO: lau: extract string
+              AppLocalizations.of(context).greatJob,
               style: textTheme.h3Bold,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
-              "You cleaned up $deletedCount similar ${deletedCount == 1 ? 'image' : 'images'} and freed up ${formatBytes(totalSize)}", // TODO: lau: extract string
+              AppLocalizations.of(context).cleanedUpSimilarImages(
+                count: deletedCount,
+                size: formatBytes(totalSize),
+              ),
               style: textTheme.body,
               textAlign: TextAlign.center,
             ),
@@ -1049,7 +1035,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             SizedBox(
               width: double.infinity,
               child: ButtonWidget(
-                labelText: "Done", // TODO: lau: extract string
+                labelText: AppLocalizations.of(context).done,
                 buttonType: ButtonType.primary,
                 onTap: () async => Navigator.of(context).pop(),
               ),
@@ -1064,55 +1050,25 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
 
-    Widget sortOptionContent(SortKey key) {
+    Text sortOptionText(SortKey key) {
       String text;
-      Widget trailing;
-
       switch (key) {
         case SortKey.size:
-          text = "Size"; // TODO: lau: extract string
-          trailing = Icon(
-            Icons.arrow_downward,
-            size: 16,
-            color: colorScheme.textMuted,
-          );
+          text = AppLocalizations.of(context).size;
           break;
         case SortKey.distanceAsc:
-          text = "Similarity"; // TODO: lau: extract string
-          trailing = Icon(
-            Icons.arrow_downward,
-            size: 16,
-            color: colorScheme.textMuted,
-          );
+          text = AppLocalizations.of(context).similarity;
           break;
         case SortKey.distanceDesc:
-          text = "Similarity"; // TODO: lau: extract string
-          trailing = Icon(
-            Icons.arrow_upward,
-            size: 16,
-            color: colorScheme.textMuted,
-          );
+          text = "(I) Similarity ↑";
           break;
         case SortKey.count:
-          text = "Count"; // TODO: lau: extract string
-          trailing = Icon(
-            Icons.arrow_downward,
-            size: 16,
-            color: colorScheme.textMuted,
-          );
+          text = AppLocalizations.of(context).count;
           break;
       }
-
-      return Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            text,
-            style: textTheme.miniBold,
-          ),
-          const SizedBox(width: 8),
-          trailing,
-        ],
+      return Text(
+        text,
+        style: textTheme.miniBold,
       );
     }
 
@@ -1129,15 +1085,29 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       onSelected: (int index) {
         if (_isDisposed) return;
         setState(() {
-          _sortKey = SortKey.values[index];
+          final newKey = SortKey.values[index];
+          if (newKey == _sortKey) {
+            return;
+          } else {
+            _sortKey = newKey;
+          }
         });
         _sortSimilarFiles();
       },
       itemBuilder: (context) {
-        return List.generate(SortKey.values.length, (index) {
+        final sortKeys = kDebugMode
+            ? SortKey.values
+            : SortKey.values
+                .where((key) => key != SortKey.distanceDesc)
+                .toList();
+        return List.generate(sortKeys.length, (index) {
+          final sortKey = sortKeys[index];
           return PopupMenuItem(
-            value: index,
-            child: sortOptionContent(SortKey.values[index]),
+            value: SortKey.values.indexOf(sortKey),
+            child: Text(
+              sortOptionText(sortKey).data!,
+              style: textTheme.miniBold,
+            ),
           );
         });
       },
@@ -1160,13 +1130,14 @@ class _SimilarImagesLoadingWidgetState extends State<SimilarImagesLoadingWidget>
   late Animation<double> _scaleAnimation;
   late Animation<double> _pulseAnimation;
   int _loadingMessageIndex = 0;
-  final List<String> _loadingMessages = [
-    "Analyzing your photos locally", // TODO: lau: extract string
-    "Finding similar images", // TODO: lau: extract string
-    "Processing visual patterns", // TODO: lau: extract string
-    "Comparing image features", // TODO: lau: extract string
-    "Almost done", // TODO: lau: extract string
-  ];
+
+  List<String> get _loadingMessages => [
+        AppLocalizations.of(context).analyzingPhotosLocally,
+        AppLocalizations.of(context).findingSimilarImages,
+        AppLocalizations.of(context).processingVisualPatterns,
+        AppLocalizations.of(context).comparingImageFeatures,
+        AppLocalizations.of(context).almostDone,
+      ];
 
   @override
   void initState() {
@@ -1203,7 +1174,6 @@ class _SimilarImagesLoadingWidgetState extends State<SimilarImagesLoadingWidget>
       ),
     );
 
-    // Cycle through loading messages
     _startMessageCycling();
   }
 
@@ -1251,8 +1221,8 @@ class _SimilarImagesLoadingWidgetState extends State<SimilarImagesLoadingWidget>
                     height: 160,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: colorScheme.primary500.withOpacity(
-                        _pulseAnimation.value * 0.1,
+                      color: colorScheme.primary500.withValues(
+                        alpha: _pulseAnimation.value * 0.1,
                       ),
                     ),
                   );
@@ -1275,11 +1245,11 @@ class _SimilarImagesLoadingWidgetState extends State<SimilarImagesLoadingWidget>
                         ),
                         gradient: SweepGradient(
                           colors: [
-                            colorScheme.primary500.withOpacity(0),
-                            colorScheme.primary500.withOpacity(0.3),
-                            colorScheme.primary500.withOpacity(0.6),
+                            colorScheme.primary500.withValues(alpha: 0),
+                            colorScheme.primary500.withValues(alpha: 0.3),
+                            colorScheme.primary500.withValues(alpha: 0.6),
                             colorScheme.primary500,
-                            colorScheme.primary500.withOpacity(0),
+                            colorScheme.primary500.withValues(alpha: 0),
                           ],
                           stops: const [0.0, 0.25, 0.5, 0.75, 1.0],
                         ),
@@ -1337,7 +1307,7 @@ class _SimilarImagesLoadingWidgetState extends State<SimilarImagesLoadingWidget>
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  "Processing locally", // TODO: lau: extract string
+                  AppLocalizations.of(context).processingLocally,
                   style: textTheme.miniFaint,
                 ),
               ],
@@ -1372,8 +1342,8 @@ class _SimilarImagesLoadingWidgetState extends State<SimilarImagesLoadingWidget>
                     height: 8,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: colorScheme.primary500.withOpacity(
-                        value < 0.5 ? value * 2 : 2 - value * 2,
+                      color: colorScheme.primary500.withValues(
+                        alpha: value < 0.5 ? value * 2 : 2 - value * 2,
                       ),
                     ),
                   );

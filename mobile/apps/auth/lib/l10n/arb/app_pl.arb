@@ -111,6 +111,7 @@
   "importAegisGuide": "Użyj opcji \"Eksportuj sejf\" w ustawieniach Aegis.\n\nJeśli twój sejf jest zaszyfrowany, musisz wprowadzić hasło sejfu, aby odszyfrować sejf.",
   "import2FasGuide": "Użyj opcji \"Ustawienia->Kopia Zapasowa-Eksport\" w 2FAS.\n\nJeśli twoja kopia zapasowa jest zaszyfrowana, musisz wprowadzić hasło, aby odszyfrować kopię zapasową",
   "importLastpassGuide": "Użyj opcji \"Przenieś konta\" w Ustawieniach Lastpass Authenticator i naciśnij \"Eksportuj konta do pliku\". Zaimportuj pobrany plik JSON.",
+  "importProtonAuthGuide": "Użyj opcji „Eksportuj” w ustawieniach Proton Authenticator, aby wyeksportować kody.",
   "exportCodes": "Eksportuj kody",
   "importLabel": "Importuj",
   "importInstruction": "Wybierz plik, który zawiera listę twoich kodów w następującym formacie",
@@ -519,5 +520,12 @@
   "algorithm": "Algorytm",
   "type": "Rodzaj",
   "period": "Okres",
-  "digits": "Cyfry"
+  "digits": "Cyfry",
+  "importFromGallery": "Importuj z galerii",
+  "errorCouldNotReadImage": "Nie można odczytać wybranego pliku obrazu.",
+  "errorInvalidQRCode": "Nieprawidłowy kod QR",
+  "errorInvalidQRCodeBody": "Zeskanowany kod QR nie wskazuje na prawidłowe konto 2FA.",
+  "errorNoQRCode": "Nie znaleziono kodu QR",
+  "errorGenericTitle": "Wystąpił błąd",
+  "errorGenericBody": "Podczas importowania wystąpił nieoczekiwany błąd."
 }
