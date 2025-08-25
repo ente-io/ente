@@ -1128,8 +1128,8 @@ class VideoPreviewService {
     Future.delayed(duration, () async {
       if (_hasQueuedFile) return;
 
-      final allowedStream = _allowStream();
-      if (!allowedStream) return;
+      final isStreamAllowed = _allowStream();
+      if (!isStreamAllowed) return;
 
       await _ensurePreviewIdsInitialized();
       await _putFilesForPreviewCreation();

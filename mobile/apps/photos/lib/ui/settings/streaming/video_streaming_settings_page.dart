@@ -80,9 +80,7 @@ class _VideoStreamingSettingsPageState
                     icon: Icons.close_outlined,
                     iconButtonType: IconButtonType.secondary,
                     onTap: () {
-                      Navigator.pop(context);
-                      if (Navigator.canPop(context)) Navigator.pop(context);
-                      if (Navigator.canPop(context)) Navigator.pop(context);
+                      Navigator.popUntil(context, (route) => route.isFirst);
                     },
                   ),
                 ],
