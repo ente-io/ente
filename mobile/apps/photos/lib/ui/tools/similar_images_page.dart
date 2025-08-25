@@ -120,7 +120,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             final textTheme = getEnteTextTheme(context);
 
             return Container(
-              color: colorScheme.backgroundBase.withOpacity(0.8),
+              color: colorScheme.backgroundBase.withValues(alpha: 0.8),
               child: Center(
                 child: Container(
                   padding:
@@ -350,7 +350,8 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                             children: [
                               Text(
                                 AppLocalizations.of(context).similarGroupsFound(
-                                    count: _similarFilesList.length,),
+                                  count: _similarFilesList.length,
+                                ),
                                 style: textTheme.bodyBold,
                               ),
                               const SizedBox(height: 4),
@@ -433,8 +434,9 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                               child: ButtonWidget(
                                 labelText: AppLocalizations.of(context)
                                     .deletePhotosWithSize(
-                                        count: selectedCount,
-                                        size: formatBytes(totalSize),),
+                                  count: selectedCount,
+                                  size: formatBytes(totalSize),
+                                ),
                                 buttonType: ButtonType.critical,
                                 shouldSurfaceExecutionStates: false,
                                 shouldShowSuccessConfirmation: false,
@@ -1023,7 +1025,9 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             const SizedBox(height: 8),
             Text(
               AppLocalizations.of(context).cleanedUpSimilarImages(
-                  count: deletedCount, size: formatBytes(totalSize),),
+                count: deletedCount,
+                size: formatBytes(totalSize),
+              ),
               style: textTheme.body,
               textAlign: TextAlign.center,
             ),
@@ -1218,8 +1222,8 @@ class _SimilarImagesLoadingWidgetState extends State<SimilarImagesLoadingWidget>
                     height: 160,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: colorScheme.primary500.withOpacity(
-                        _pulseAnimation.value * 0.1,
+                      color: colorScheme.primary500.withValues(
+                        alpha: _pulseAnimation.value * 0.1,
                       ),
                     ),
                   );
@@ -1242,11 +1246,11 @@ class _SimilarImagesLoadingWidgetState extends State<SimilarImagesLoadingWidget>
                         ),
                         gradient: SweepGradient(
                           colors: [
-                            colorScheme.primary500.withOpacity(0),
-                            colorScheme.primary500.withOpacity(0.3),
-                            colorScheme.primary500.withOpacity(0.6),
+                            colorScheme.primary500.withValues(alpha: 0),
+                            colorScheme.primary500.withValues(alpha: 0.3),
+                            colorScheme.primary500.withValues(alpha: 0.6),
                             colorScheme.primary500,
-                            colorScheme.primary500.withOpacity(0),
+                            colorScheme.primary500.withValues(alpha: 0),
                           ],
                           stops: const [0.0, 0.25, 0.5, 0.75, 1.0],
                         ),
@@ -1339,8 +1343,8 @@ class _SimilarImagesLoadingWidgetState extends State<SimilarImagesLoadingWidget>
                     height: 8,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: colorScheme.primary500.withOpacity(
-                        value < 0.5 ? value * 2 : 2 - value * 2,
+                      color: colorScheme.primary500.withValues(
+                        alpha: value < 0.5 ? value * 2 : 2 - value * 2,
                       ),
                     ),
                   );
