@@ -112,6 +112,7 @@ class VideoPreviewService {
     _items.clear();
   }
 
+  // Return value indicates file was successfully added to queue or not
   Future<bool> addToManualQueue(EnteFile file, String queueType) async {
     if (file.uploadedFileID == null) return false;
 
@@ -139,23 +140,7 @@ class VideoPreviewService {
       queueFiles(duration: Duration.zero);
     }
 
-    return true; // Indicates file was successfully added to queue
-  }
-
-  Future<void> removeFromManualQueue(int uploadedFileID) async {
-    await UploadLocksDB.instance.removeFromStreamQueue(uploadedFileID);
-  }
-
-  Future<bool> isInManualQueue(int? uploadedFileID) async {
-    if (uploadedFileID == null) return false;
-
-    try {
-      // Check database directly instead of relying on in-memory _manualQueueFiles
-      // which might not be populated yet
-      return await UploadLocksDB.instance.isInStreamQueue(uploadedFileID);
-    } catch (_) {
-      return false;
-    }
+    return true;
   }
 
   bool isCurrentlyProcessing(int? uploadedFileID) {
@@ -565,7 +550,8 @@ class VideoPreviewService {
     }
 
     if (isInManualQueue) {
-      await removeFromManualQueue(enteFile.uploadedFileID!);
+      await UploadLocksDB.instance
+          .removeFromStreamQueue(enteFile.uploadedFileID!);
     }
   }
 

@@ -6,6 +6,7 @@ import "package:flutter_svg/flutter_svg.dart";
 import "package:local_auth/local_auth.dart";
 import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension.dart';
+import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/generated/l10n.dart";
@@ -482,20 +483,24 @@ class FileAppBarState extends State<FileAppBar> {
   bool _shouldShowCreateStreamOption() {
     // Show "Create Stream" option for uploaded video files without streams
     // Skip if sv=1 (server indicates streaming not needed)
+    final userId = Configuration.instance.getUserID();
     return widget.file.fileType == FileType.video &&
         widget.file.isUploaded &&
         widget.file.uploadedFileID != null &&
         (widget.file.pubMagicMetadata?.sv ?? 0) != 1 &&
+        widget.file.ownerID == userId &&
         !fileDataService.previewIds.containsKey(widget.file.uploadedFileID!);
   }
 
   bool _shouldShowRecreateStreamOption() {
     // Show "Recreate Stream" option for uploaded video files with existing streams
     // Skip if sv=1 (server indicates streaming not needed)
+    final userId = Configuration.instance.getUserID();
     return widget.file.fileType == FileType.video &&
         widget.file.isUploaded &&
         widget.file.uploadedFileID != null &&
         (widget.file.pubMagicMetadata?.sv ?? 0) != 1 &&
+        widget.file.ownerID == userId &&
         fileDataService.previewIds.containsKey(widget.file.uploadedFileID!);
   }
 
