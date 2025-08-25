@@ -96,20 +96,16 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
     try {
       List<Collection> collections = [];
 
-      switch (widget.viewType) {
-        case CollectionViewType.homeCollections:
-          collections = await CollectionService.instance.getCollections();
-          break;
-        case CollectionViewType.outgoingCollections:
-          final sharedCollections =
-              await CollectionService.instance.getSharedCollections();
+      if (widget.viewType == CollectionViewType.homeCollections) {
+        collections = await CollectionService.instance.getCollections();
+      } else {
+        final sharedCollections =
+            await CollectionService.instance.getSharedCollections();
+        if (widget.viewType == CollectionViewType.outgoingCollections) {
           collections = sharedCollections.outgoing;
-          break;
-        case CollectionViewType.incomingCollections:
-          final sharedCollections =
-              await CollectionService.instance.getSharedCollections();
+        } else if (widget.viewType == CollectionViewType.incomingCollections) {
           collections = sharedCollections.incoming;
-          break;
+        }
       }
 
       final regularCollections = <Collection>[];
