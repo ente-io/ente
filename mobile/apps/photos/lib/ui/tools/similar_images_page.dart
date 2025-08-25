@@ -594,18 +594,15 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       }
     }
 
-    final String exactLabel = exactFiles > 0
-        ? AppLocalizations.of(context).selectExactWithCount(count: exactFiles)
-        : AppLocalizations.of(context).selectExact;
+    // Always show counts, even when 0
+    final String exactLabel =
+        AppLocalizations.of(context).selectExactWithCount(count: exactFiles);
 
-    final String similarLabel = similarFiles > 0
-        ? AppLocalizations.of(context)
-            .selectSimilarWithCount(count: similarFiles)
-        : AppLocalizations.of(context).selectSimilar;
+    final String similarLabel = AppLocalizations.of(context)
+        .selectSimilarWithCount(count: similarFiles);
 
-    final String allLabel = allFiles > 0
-        ? AppLocalizations.of(context).selectAllWithCount(count: allFiles)
-        : AppLocalizations.of(context).selectAll;
+    final String allLabel =
+        AppLocalizations.of(context).selectAllWithCount(count: allFiles);
 
     await showActionSheet(
       context: context,
@@ -620,6 +617,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
           isInAlert: true,
           buttonAction: ButtonAction.first,
           shouldSurfaceExecutionStates: false,
+          isDisabled: exactFiles == 0,
           onTap: () async {
             _selectFilesByThreshold(0.0);
           },
@@ -632,6 +630,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
           isInAlert: true,
           buttonAction: ButtonAction.second,
           shouldSurfaceExecutionStates: false,
+          isDisabled: similarFiles == 0,
           onTap: () async {
             _selectFilesByThreshold(0.02);
           },
@@ -644,6 +643,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
           isInAlert: true,
           buttonAction: ButtonAction.third,
           shouldSurfaceExecutionStates: false,
+          isDisabled: allFiles == 0,
           onTap: () async {
             _selectFilesByThreshold(0.05);
           },
