@@ -181,7 +181,7 @@ func (c *CollectionController) UpdateShareeMagicMetadata(ctx *gin.Context, req e
 }
 
 // ShareURL generates a public auth-token for the given collectionID
-func (c *CollectionController) ShareURL(ctx context.Context, userID int64, req ente.CreatePublicAccessTokenRequest) (
+func (c *CollectionController) ShareURL(ctx *gin.Context, userID int64, req ente.CreatePublicAccessTokenRequest) (
 	ente.PublicURL, error) {
 	collection, err := c.CollectionRepo.Get(req.CollectionID)
 	if err != nil {
@@ -206,7 +206,7 @@ func (c *CollectionController) ShareURL(ctx context.Context, userID int64, req e
 
 // UpdateShareURL updates the shared url configuration
 func (c *CollectionController) UpdateShareURL(
-	ctx context.Context,
+	ctx *gin.Context,
 	userID int64,
 	req ente.UpdatePublicAccessTokenRequest,
 ) (*ente.PublicURL, error) {
