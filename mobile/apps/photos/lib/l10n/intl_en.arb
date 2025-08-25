@@ -1832,5 +1832,12 @@
   "totalVideos": "Total videos",
   "skippedVideos": "Skipped videos",
   "videoStreamingDescription": "Play videos instantly on any device. Enable to process video streams on this device.",
-  "videoStreamingNote": "Only videos from last 60 days and under 1 minute are processed on this device. For older/longer videos, enable streaming in the desktop app."
+  "videoStreamingNote": "Only videos from last 60 days and under 1 minute are processed on this device. For older/longer videos, enable streaming in the desktop app.",
+  "createStream": "Create stream",
+  "recreateStream": "Recreate stream",
+  "addedToStreamCreationQueue": "Added to stream creation queue",
+  "addedToStreamRecreationQueue": "Added to stream recreation queue",
+  "videoPreviewAlreadyExists": "Video preview already exists",
+  "videoAlreadyInQueue": "Video file already present in the queue",
+  "addedToQueue": "Added to queue"
 }

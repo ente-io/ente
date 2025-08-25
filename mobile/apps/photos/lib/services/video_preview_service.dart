@@ -19,6 +19,7 @@ import "package:photos/core/network/network.dart";
 import 'package:photos/db/files_db.dart';
 import "package:photos/db/upload_locks_db.dart";
 import "package:photos/events/video_streaming_changed.dart";
+import 'package:photos/generated/intl/app_localizations.dart';
 import "package:photos/models/base/id.dart";
 import "package:photos/models/ffmpeg/ffprobe_props.dart";
 import "package:photos/models/file/file.dart";
@@ -111,8 +112,76 @@ class VideoPreviewService {
     _items.clear();
   }
 
+  Future<bool> addToManualQueue(EnteFile file, String queueType) async {
+    if (file.uploadedFileID == null) return false;
+
+    // Check if already in queue
+    final bool alreadyInQueue =
+        await UploadLocksDB.instance.isInStreamQueue(file.uploadedFileID!);
+    if (alreadyInQueue) {
+      return false; // Indicates file was already in queue
+    }
+
+    // Add to persistent database queue
+    await UploadLocksDB.instance
+        .addToStreamQueue(file.uploadedFileID!, queueType);
+
+    _items[file.uploadedFileID!] = PreviewItem(
+      status: PreviewItemStatus.inQueue,
+      file: file,
+      retryCount: 0,
+      collectionID: file.collectionID ?? 0,
+    );
+    fileQueue[file.uploadedFileID!] = file;
+
+    // Start processing if not already processing
+    if (uploadingFileId < 0) {
+      queueFiles(duration: Duration.zero);
+    }
+
+    return true; // Indicates file was successfully added to queue
+  }
+
+  Future<void> removeFromManualQueue(int uploadedFileID) async {
+    await UploadLocksDB.instance.removeFromStreamQueue(uploadedFileID);
+  }
+
+  Future<bool> isInManualQueue(int? uploadedFileID) async {
+    if (uploadedFileID == null) return false;
+
+    try {
+      // Check database directly instead of relying on in-memory _manualQueueFiles
+      // which might not be populated yet
+      return await UploadLocksDB.instance.isInStreamQueue(uploadedFileID);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<bool> _isRecreateOperation(EnteFile file) async {
+    if (file.uploadedFileID == null) return false;
+
+    try {
+      // Check database directly instead of relying on in-memory _manualQueueFiles
+      // which might not be populated yet
+      final manualQueueFiles = await UploadLocksDB.instance.getStreamQueue();
+      final queueType = manualQueueFiles[file.uploadedFileID!];
+      return queueType == 'recreate';
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> _ensurePreviewIdsInitialized() async {
+    // Ensure fileDataService previewIds is initialized before using it
+    if (fileDataService.previewIds.isEmpty) {
+      await fileDataService.syncFDStatus();
+    }
+  }
+
   Future<bool> isSharedFileStreamble(EnteFile file) async {
     try {
+      await _ensurePreviewIdsInitialized();
       if (fileDataService.previewIds.containsKey(file.uploadedFileID)) {
         return true;
       }
@@ -134,6 +203,7 @@ class VideoPreviewService {
   Future<StreamingStatus> getStatus() async {
     try {
       // TODO: Should we consider all days we could have processed or last 60 days
+      await _ensurePreviewIdsInitialized();
       final files = await _getFiles();
       final Set<int> totalProcessed = fileDataService.previewIds.keys.toSet();
       final Set<int> total = {};
@@ -190,10 +260,14 @@ class VideoPreviewService {
         return;
       }
       try {
-        // check if playlist already exist
-        if (await getPlaylist(enteFile) != null) {
+        // check if playlist already exist, but skip this check for 'recreate' operations
+        final isRecreateOperation = await _isRecreateOperation(enteFile);
+        if (!isRecreateOperation && await getPlaylist(enteFile) != null) {
           if (ctx != null && ctx.mounted) {
-            showShortToast(ctx, 'Video preview already exists');
+            showShortToast(
+              ctx,
+              AppLocalizations.of(ctx).videoPreviewAlreadyExists,
+            );
           }
           removeFile = true;
           return;
@@ -471,12 +545,18 @@ class VideoPreviewService {
   Future<void> _removeFromLocks(EnteFile enteFile) async {
     final bool isFailurePresent =
         _failureFiles?.contains(enteFile.uploadedFileID!) ?? false;
+    final bool isInManualQueue =
+        await UploadLocksDB.instance.isInStreamQueue(enteFile.uploadedFileID!);
 
     if (isFailurePresent) {
       await UploadLocksDB.instance.deleteStreamUploadErrorEntry(
         enteFile.uploadedFileID!,
       );
       _failureFiles?.remove(enteFile.uploadedFileID!);
+    }
+
+    if (isInManualQueue) {
+      await removeFromManualQueue(enteFile.uploadedFileID!);
     }
   }
 
@@ -684,12 +764,13 @@ class VideoPreviewService {
       final tempDir = await getTemporaryDirectory();
       final playlistFile = File("${tempDir.path}/${file.uploadedFileID}.m3u8");
       await playlistFile.writeAsString(finalPlaylist);
-      final String log = (StringBuffer()
-            ..write("[CACHE-STATUS] ")
-            ..write("Video: ${videoFile != null ? '✓' : '✗'} | ")
-            ..write("Details: ${detailsCache != null ? '✓' : '✗'} | ")
-            ..write("Playlist: ${playlistCache != null ? '✓' : '✗'}"))
-          .toString();
+      final String log = (
+        StringBuffer()
+          ..write("[CACHE-STATUS] ")
+          ..write("Video: ${videoFile != null ? '✓' : '✗'} | ")
+          ..write("Details: ${detailsCache != null ? '✓' : '✗'} | ")
+          ..write("Playlist: ${playlistCache != null ? '✓' : '✗'}"),
+      ).toString();
       _logger.info("Mapped playlist to ${playlistFile.path}, $log");
       final data = PlaylistData(
         preview: playlistFile,
@@ -849,9 +930,12 @@ class VideoPreviewService {
     if (!isVideoStreamingEnabled || !await canUseHighBandwidth()) return;
 
     Map<int, String> failureFiles = {};
+    Map<int, String> manualQueueFiles = {};
     try {
       failureFiles = await UploadLocksDB.instance.getStreamUploadError();
       _failureFiles = {...failureFiles.keys};
+
+      manualQueueFiles = await UploadLocksDB.instance.getStreamQueue();
 
       // handle case when failures are already previewed
       for (final failure in _failureFiles!) {
@@ -859,13 +943,91 @@ class VideoPreviewService {
           UploadLocksDB.instance.deleteStreamUploadErrorEntry(failure).ignore();
         }
       }
+
+      // handle case when manual queue items are already previewed (for 'create' type only)
+      for (final queueItem in manualQueueFiles.keys) {
+        final queueType = manualQueueFiles[queueItem];
+        final hasPreview = fileDataService.previewIds[queueItem] != null;
+        if (hasPreview && queueType == 'create') {
+          // Remove from queue only if it's a 'create' type and preview exists
+          await UploadLocksDB.instance.removeFromStreamQueue(queueItem);
+        }
+      }
+
+      // Refresh manual queue after cleanup
+      manualQueueFiles = await UploadLocksDB.instance.getStreamQueue();
     } catch (_) {}
 
     final files = await _getFiles();
-
     final previewIds = fileDataService.previewIds;
-    final allFiles =
-        files.where((file) => previewIds[file.uploadedFileID] == null).toList();
+
+    _logger.info(
+      "[init] Found ${files.length} files in last 60 days, ${manualQueueFiles.length} manual queue files: ${manualQueueFiles.keys.toList()}",
+    );
+
+    // Add manual queue files first (they have priority)
+    for (final queueFileId in manualQueueFiles.keys) {
+      final queueType = manualQueueFiles[queueFileId] ?? 'create';
+      final hasPreview = previewIds[queueFileId] != null;
+
+      _logger.info(
+        "[manual-queue] Processing file $queueFileId: type=$queueType, hasPreview=$hasPreview",
+      );
+
+      // For recreate, always add to queue regardless of existing preview
+      // For create, only add if no preview exists
+      if (queueType == 'recreate' || !hasPreview) {
+        // First try to find the file in the 60-day list
+        var queueFile =
+            files.firstWhereOrNull((f) => f.uploadedFileID == queueFileId);
+
+        // If not found in 60-day list, fetch it individually
+        if (queueFile == null) {
+          _logger.info(
+            "[manual-queue] File $queueFileId not found in 60-day list, fetching individually",
+          );
+          try {
+            queueFile = await FilesDB.instance.getAnyUploadedFile(queueFileId);
+            _logger.info(
+              "[manual-queue] Successfully fetched file $queueFileId individually",
+            );
+          } catch (e) {
+            _logger.warning(
+              "Failed to fetch manual queue file $queueFileId",
+              e,
+            );
+            continue;
+          }
+        } else {
+          _logger.info("[manual-queue] File $queueFileId found in 60-day list");
+        }
+
+        if (queueFile != null) {
+          _items[queueFile.uploadedFileID!] = PreviewItem(
+            status: PreviewItemStatus.inQueue,
+            file: queueFile,
+            collectionID: queueFile.collectionID ?? 0,
+          );
+          fileQueue[queueFile.uploadedFileID!] = queueFile;
+          _logger.info(
+            "[manual-queue] Added file $queueFileId to processing queue",
+          );
+        }
+      } else {
+        _logger.info(
+          "[manual-queue] Skipping file $queueFileId (type=$queueType, hasPreview=$hasPreview)",
+        );
+      }
+    }
+
+    // Then add regular files that need processing
+    final allFiles = files
+        .where(
+          (file) =>
+              previewIds[file.uploadedFileID] == null &&
+              !manualQueueFiles.containsKey(file.uploadedFileID),
+        )
+        .toList();
 
     // set all video status to in queue
     var n = allFiles.length, i = 0;
@@ -901,12 +1063,15 @@ class VideoPreviewService {
       i++;
     }
 
-    if (allFiles.isEmpty) {
+    final totalFiles = fileQueue.length;
+    if (totalFiles == 0) {
       _logger.info("[init] No preview to cache");
       return;
     }
 
-    _logger.info("[init] Processing ${allFiles.length} items for streaming");
+    _logger.info(
+      "[init] Processing $totalFiles items for streaming (${manualQueueFiles.length} manual requested, ${fileQueue.length} queued, ${allFiles.length} regular)",
+    );
 
     // take first file and put it for stream generation
     final entry = fileQueue.entries.first;
