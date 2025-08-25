@@ -46,19 +46,17 @@ const _maxRetryCount = 3;
 class StreamingStatus {
   final double netProcessedItems;
   final int processed;
-  final int skipped;
   final int total;
 
   StreamingStatus(
     this.netProcessedItems,
     this.processed,
-    this.skipped,
     this.total,
   );
 
   @override
   String toString() {
-    return 'StreamingStatus{netProcessedItems: $netProcessedItems, processed: $processed, skipped: $skipped, total: $total}';
+    return 'StreamingStatus{netProcessedItems: $netProcessedItems, processed: $processed, total: $total}';
   }
 }
 
@@ -209,7 +207,6 @@ class VideoPreviewService {
       final Set<int> total = {};
       // Processed: All the video files that are processed within the total
       final Set<int> processed = {};
-      int skipped = 0;
 
       for (final file in files) {
         // If file is processed, then add it to specific set
@@ -218,7 +215,6 @@ class VideoPreviewService {
         }
         // Don't include files which are to be skipped anyways
         else if (file.pubMagicMetadata?.sv == 1) {
-          skipped++;
           continue;
         }
         // Include the file to total set
@@ -235,10 +231,8 @@ class VideoPreviewService {
       final status = StreamingStatus(
         netProcessedItems,
         totalProcessed.length,
-        skipped,
         files.length,
       );
-      _logger.info("$status");
       return status;
     } catch (e, s) {
       _logger.severe('Error getting Streaming status', e, s);
