@@ -1887,7 +1887,6 @@
       }
     }
   },
-  "selectAll": "Select all",
   "selectSimilarImagesTitle": "Select similar images",
   "chooseSimilarImagesToSelect": "Choose which similar images to select for deletion",
   "clearSelection": "Clear selection",
