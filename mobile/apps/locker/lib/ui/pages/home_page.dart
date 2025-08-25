@@ -506,19 +506,18 @@ class _HomePageState extends UploaderPageState<HomePage>
                   title: context.l10n.collections,
                   collections: _displayedCollections,
                   viewType: CollectionViewType.homeCollections,
-                  addSeparator: outgoingCollections.isNotEmpty ||
-                      incomingCollections.isNotEmpty,
+                  addSeparator: true,
                 ),
                 if (outgoingCollections.isNotEmpty)
                   ..._buildCollectionSection(
-                    title: "Shared By You",
+                    title: context.l10n.sharedByYou,
                     collections: outgoingCollections,
                     viewType: CollectionViewType.outgoingCollections,
                     addSeparator: incomingCollections.isNotEmpty,
                   ),
                 if (incomingCollections.isNotEmpty)
                   ..._buildCollectionSection(
-                    title: "Shared With You",
+                    title: context.l10n.sharedWithYou,
                     collections: incomingCollections,
                     viewType: CollectionViewType.incomingCollections,
                     addSeparator: true,

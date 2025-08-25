@@ -534,4 +534,59 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reddit => 'Reddit';
+
+  @override
+  String get allowDownloads => 'Allow downloads';
+
+  @override
+  String get sharedByYou => 'Shared by you';
+
+  @override
+  String get sharedWithYou => 'Shared with you';
+
+  @override
+  String get manageLink => 'Manage link';
+
+  @override
+  String get linkExpiry => 'Link expiry';
+
+  @override
+  String get linkNeverExpires => 'Never';
+
+  @override
+  String get linkExpired => 'Expired';
+
+  @override
+  String get linkEnabled => 'Enabled';
+
+  @override
+  String get setAPassword => 'Set a password';
+
+  @override
+  String get lockButtonLabel => 'Lock';
+
+  @override
+  String get enterPassword => 'Enter password';
+
+  @override
+  String get removeLink => 'Remove link';
+
+  @override
+  String get sendLink => 'Send link';
+
+  @override
+  String get setPasswordTitle => 'Set password';
+
+  @override
+  String get resetPasswordTitle => 'Reset password';
+
+  @override
+  String get allowAddingFiles => 'Allow adding files';
+
+  @override
+  String get disableDownloadWarningTitle => 'Please note';
+
+  @override
+  String get disableDownloadWarningBody =>
+      'Viewers can still take screenshots or save a copy of your files using external tools.';
 }

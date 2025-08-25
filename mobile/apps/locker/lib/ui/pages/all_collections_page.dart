@@ -440,9 +440,9 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
       case CollectionViewType.homeCollections:
         return context.l10n.collections;
       case CollectionViewType.outgoingCollections:
-        return "Shared by you";
+        return context.l10n.sharedByYou;
       case CollectionViewType.incomingCollections:
-        return "Shared with you";
+        return context.l10n.sharedWithYou;
     }
   }
 }

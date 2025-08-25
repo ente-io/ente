@@ -1017,6 +1017,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reddit'**
   String get reddit;
+
+  /// No description provided for @allowDownloads.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow downloads'**
+  String get allowDownloads;
+
+  /// No description provided for @sharedByYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared by you'**
+  String get sharedByYou;
+
+  /// No description provided for @sharedWithYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared with you'**
+  String get sharedWithYou;
+
+  /// No description provided for @manageLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage link'**
+  String get manageLink;
+
+  /// No description provided for @linkExpiry.
+  ///
+  /// In en, this message translates to:
+  /// **'Link expiry'**
+  String get linkExpiry;
+
+  /// No description provided for @linkNeverExpires.
+  ///
+  /// In en, this message translates to:
+  /// **'Never'**
+  String get linkNeverExpires;
+
+  /// No description provided for @linkExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get linkExpired;
+
+  /// No description provided for @linkEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled'**
+  String get linkEnabled;
+
+  /// No description provided for @setAPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a password'**
+  String get setAPassword;
+
+  /// No description provided for @lockButtonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock'**
+  String get lockButtonLabel;
+
+  /// No description provided for @enterPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter password'**
+  String get enterPassword;
+
+  /// No description provided for @removeLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove link'**
+  String get removeLink;
+
+  /// No description provided for @sendLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Send link'**
+  String get sendLink;
+
+  /// No description provided for @setPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set password'**
+  String get setPasswordTitle;
+
+  /// No description provided for @resetPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset password'**
+  String get resetPasswordTitle;
+
+  /// No description provided for @allowAddingFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow adding files'**
+  String get allowAddingFiles;
+
+  /// No description provided for @disableDownloadWarningTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Please note'**
+  String get disableDownloadWarningTitle;
+
+  /// No description provided for @disableDownloadWarningBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Viewers can still take screenshots or save a copy of your files using external tools.'**
+  String get disableDownloadWarningBody;
 }
 
 class _AppLocalizationsDelegate

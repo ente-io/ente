@@ -51,7 +51,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: const Text("Manage Link"),
+        title: Text(context.l10n.manageLink),
       ),
       body: SingleChildScrollView(
         child: ListBody(
@@ -63,8 +63,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                 children: [
                   MenuItemWidget(
                     key: ValueKey("Allow collect $isCollectEnabled"),
-                    captionedTextWidget: const CaptionedTextWidget(
-                      title: "Allow adding files",
+                    captionedTextWidget: CaptionedTextWidget(
+                      title: context.l10n.allowAddingFiles,
                     ),
                     alignCaptionedTextToLeft: true,
                     menuItemColor: getEnteColorScheme(context).fillFaint,
@@ -85,10 +85,12 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   MenuItemWidget(
                     alignCaptionedTextToLeft: true,
                     captionedTextWidget: CaptionedTextWidget(
-                      title: "Link Expiry",
+                      title: context.l10n.linkExpiry,
                       subTitle: (url.hasExpiry
-                          ? (url.isExpired ? "Link Expired" : "Link Enabled")
-                          : "Link Never Expires"),
+                          ? (url.isExpired
+                              ? context.l10n.linkExpired
+                              : context.l10n.linkEnabled)
+                          : context.l10n.linkNeverExpires),
                       subTitleColor: url.isExpired ? warning500 : null,
                     ),
                     trailingIcon: Icons.chevron_right,
@@ -147,8 +149,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   ),
                   MenuItemWidget(
                     key: ValueKey("Allow downloads $isDownloadEnabled"),
-                    captionedTextWidget: const CaptionedTextWidget(
-                      title: "Allow downloads",
+                    captionedTextWidget: CaptionedTextWidget(
+                      title: context.l10n.allowDownloads,
                     ),
                     alignCaptionedTextToLeft: true,
                     isBottomBorderRadiusRemoved: true,
@@ -165,8 +167,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                           // ignore: unawaited_futures
                           showErrorDialog(
                             context,
-                            "Disabling downloads will prevent users from saving files.",
-                            "Are you sure you want to disable downloads for this link?",
+                            context.l10n.disableDownloadWarningTitle,
+                            context.l10n.disableDownloadWarningBody,
                           );
                         }
                       },
@@ -191,9 +193,9 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                           // ignore: unawaited_futures
                           showTextInputDialog(
                             context,
-                            title: "Set a password",
-                            submitButtonLabel: "Lock",
-                            hintText: "Enter password",
+                            title: context.l10n.setPasswordTitle,
+                            submitButtonLabel: context.l10n.lockButtonLabel,
+                            hintText: context.l10n.enterPassword,
                             isPasswordInput: true,
                             alwaysShowSuccessState: true,
                             onSubmit: (String password) async {
@@ -225,7 +227,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   if (url.isExpired)
                     MenuItemWidget(
                       captionedTextWidget: CaptionedTextWidget(
-                        title: "Link has expired",
+                        title: context.l10n.linkExpired,
                         textColor: getEnteColorScheme(context).warning500,
                       ),
                       leadingIcon: Icons.error_outline,
@@ -235,8 +237,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     ),
                   if (!url.isExpired)
                     MenuItemWidget(
-                      captionedTextWidget: const CaptionedTextWidget(
-                        title: "Copy link",
+                      captionedTextWidget: CaptionedTextWidget(
+                        title: context.l10n.copyLink,
                         makeTextBold: true,
                       ),
                       leadingIcon: Icons.copy,
@@ -246,7 +248,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                         await Clipboard.setData(ClipboardData(text: urlValue));
                         showShortToast(
                           context,
-                          "Link copied to clipboard",
+                          context.l10n.linkCopiedToClipboard,
                         );
                       },
                       isBottomBorderRadiusRemoved: true,
@@ -259,8 +261,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   if (!url.isExpired)
                     MenuItemWidget(
                       key: sendLinkButtonKey,
-                      captionedTextWidget: const CaptionedTextWidget(
-                        title: "Send Link",
+                      captionedTextWidget: CaptionedTextWidget(
+                        title: context.l10n.sendLink,
                         makeTextBold: true,
                       ),
                       leadingIcon: Icons.adaptive.share,
@@ -276,8 +278,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     ),
                   const SizedBox(height: 24),
                   MenuItemWidget(
-                    captionedTextWidget: const CaptionedTextWidget(
-                      title: "Remove Link",
+                    captionedTextWidget: CaptionedTextWidget(
+                      title: context.l10n.removeLink,
                       textColor: warning500,
                       makeTextBold: true,
                     ),
