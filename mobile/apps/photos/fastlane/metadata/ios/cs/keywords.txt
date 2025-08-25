@@ -1,1 +1,1 @@
-photos,photography,family,privacy,cloud,backup,videos,photo,encryption,storage,album,alternative
+fotky,fotografie,rodina,soukromí,cloud,zálohování,videa,fotka,šifrování,úložiště,album,alternativa
