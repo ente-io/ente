@@ -1080,16 +1080,18 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
           break;
       }
 
-      return Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            text,
-            style: textTheme.miniBold,
-          ),
-          const SizedBox(width: 8),
-          trailing,
-        ],
+      return SizedBox(
+        width: 120,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              text,
+              style: textTheme.miniBold,
+            ),
+            trailing,
+          ],
+        ),
       );
     }
 
