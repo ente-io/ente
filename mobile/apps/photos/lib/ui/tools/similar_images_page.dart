@@ -1130,19 +1130,18 @@ class _SimilarImagesLoadingWidgetState extends State<SimilarImagesLoadingWidget>
   late Animation<double> _scaleAnimation;
   late Animation<double> _pulseAnimation;
   int _loadingMessageIndex = 0;
-  late final List<String> _loadingMessages;
+
+  List<String> get _loadingMessages => [
+        AppLocalizations.of(context).analyzingPhotosLocally,
+        AppLocalizations.of(context).findingSimilarImages,
+        AppLocalizations.of(context).processingVisualPatterns,
+        AppLocalizations.of(context).comparingImageFeatures,
+        AppLocalizations.of(context).almostDone,
+      ];
 
   @override
   void initState() {
     super.initState();
-
-    _loadingMessages = [
-      AppLocalizations.of(context).analyzingPhotosLocally,
-      AppLocalizations.of(context).findingSimilarImages,
-      AppLocalizations.of(context).processingVisualPatterns,
-      AppLocalizations.of(context).comparingImageFeatures,
-      AppLocalizations.of(context).almostDone,
-    ];
 
     // Initialize loading animations
     _loadingAnimationController = AnimationController(
