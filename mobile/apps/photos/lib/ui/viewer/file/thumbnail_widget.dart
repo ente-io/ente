@@ -432,14 +432,14 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   }
 
   void _cacheAndRender(ImageProvider<Object> imageProvider) {
-    precacheImage(imageProvider, context).then((value) {
-      if (mounted) {
-        setState(() {
-          _imageProvider = imageProvider;
-          _hasLoadedThumbnail = true;
-        });
-      }
-    });
+    if (mounted) {
+      setState(() {
+        _imageProvider = imageProvider;
+        _hasLoadedThumbnail = true;
+      });
+    }
+
+    precacheImage(imageProvider, context);
   }
 
   void _reset() {
