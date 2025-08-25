@@ -43,23 +43,6 @@ import "package:shared_preferences/shared_preferences.dart";
 
 const _maxRetryCount = 3;
 
-class StreamingStatus {
-  final double netProcessedItems;
-  final int processed;
-  final int total;
-
-  StreamingStatus(
-    this.netProcessedItems,
-    this.processed,
-    this.total,
-  );
-
-  @override
-  String toString() {
-    return 'StreamingStatus{netProcessedItems: $netProcessedItems, processed: $processed, total: $total}';
-  }
-}
-
 class VideoPreviewService {
   final _logger = Logger("VideoPreviewService");
   final LinkedHashMap<int, PreviewItem> _items = LinkedHashMap();
@@ -191,7 +174,7 @@ class VideoPreviewService {
     );
   }
 
-  Future<StreamingStatus> getStatus() async {
+  Future<double> getStatus() async {
     try {
       await _ensurePreviewIdsInitialized();
       // This will get us all the video files that are present on remote
@@ -228,11 +211,7 @@ class VideoPreviewService {
           total.isEmpty ? 1 : (processed.length / total.length).clamp(0, 1);
 
       // Store the data and return it
-      final status = StreamingStatus(
-        netProcessedItems,
-        totalProcessed.length,
-        files.length,
-      );
+      final status = netProcessedItems;
       return status;
     } catch (e, s) {
       _logger.severe('Error getting Streaming status', e, s);

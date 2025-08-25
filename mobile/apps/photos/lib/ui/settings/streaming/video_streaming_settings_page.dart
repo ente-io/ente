@@ -259,7 +259,7 @@ class VideoStreamingStatusWidgetState
           future: VideoPreviewService.instance.getStatus(),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              final double netProcessed = snapshot.data!.netProcessedItems;
+              final double netProcessed = snapshot.data!;
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
