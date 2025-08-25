@@ -972,7 +972,12 @@ class VideoPreviewService {
           .getAnyUploadedFile(queueFileId)
           .catchError((e) => null);
 
-      if (queueFile == null) continue;
+      if (queueFile == null) {
+        await UploadLocksDB.instance
+            .removeFromStreamQueue(queueFileId)
+            .catchError((e) {});
+        continue;
+      }
 
       _items[queueFile.uploadedFileID!] = PreviewItem(
         status: PreviewItemStatus.inQueue,
