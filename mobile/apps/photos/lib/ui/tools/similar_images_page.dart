@@ -89,7 +89,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: const Text("Similar images"), // TODO: lau: extract string
+        title: Text(AppLocalizations.of(context).similarImages),
         actions: _pageState == SimilarImagesPageState.results
             ? [_getSortMenu()]
             : null,
@@ -150,7 +150,8 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                       ),
                       const SizedBox(width: 12),
                       Text(
-                        "Deleting... $value", // TODO: lau: extract string
+                        AppLocalizations.of(context)
+                            .deletingProgress(progress: value),
                         style: textTheme.body,
                       ),
                     ],
@@ -181,24 +182,24 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
           ),
           const SizedBox(height: 32),
           Text(
-            "Find similar images", // TODO: lau: extract string
+            AppLocalizations.of(context).findSimilarImages,
             style: textTheme.h3Bold,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
           Text(
-            "Use AI to find images that look similar to each other. Adjust the distance threshold below.", // TODO: lau: extract string
+            "Use AI to find images that look similar to each other. Adjust the distance threshold below.",
             style: textTheme.body,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 48),
           Text(
-            "Similarity threshold", // TODO: lau: extract string
+            "Similarity threshold",
             style: textTheme.bodyBold,
           ),
           const SizedBox(height: 8),
           Text(
-            "Lower values mean a closer match.", // TODO: lau: extract string
+            "Lower values mean a closer match.",
             style: textTheme.miniMuted,
           ),
           const SizedBox(height: 16),
@@ -229,7 +230,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             ],
           ),
           Text(
-            "Current: ${_distanceThreshold.toStringAsFixed(2)}", // TODO: lau: extract string
+            "Current: ${_distanceThreshold.toStringAsFixed(2)}",
             style: textTheme.body,
             textAlign: TextAlign.center,
           ),
@@ -273,7 +274,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
           ),
           const SizedBox(height: 32),
           ButtonWidget(
-            labelText: "Find similar images", // TODO: lau: extract string
+            labelText: AppLocalizations.of(context).findSimilarImages,
             buttonType: ButtonType.primary,
             onTap: () async {
               await _findSimilarImages();
@@ -303,12 +304,12 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             ),
             const SizedBox(height: 16),
             Text(
-              "No similar images found", // TODO: lau: extract string
+              AppLocalizations.of(context).noSimilarImagesFound,
               style: textTheme.h3Bold,
             ),
             const SizedBox(height: 8),
             Text(
-              "Your photos look unique", // TODO: lau: extract string
+              AppLocalizations.of(context).yourPhotosLookUnique,
               style: textTheme.bodyMuted,
             ),
           ],
@@ -348,12 +349,14 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "${_similarFilesList.length} ${_similarFilesList.length == 1 ? 'group' : 'groups'} found", // TODO: lau: extract string
+                                AppLocalizations.of(context).similarGroupsFound(
+                                    count: _similarFilesList.length,),
                                 style: textTheme.bodyBold,
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                "Review and remove similar images", // TODO: lau: extract string
+                                AppLocalizations.of(context)
+                                    .reviewAndRemoveSimilarImages,
                                 style: textTheme.miniMuted,
                               ),
                             ],
@@ -428,8 +431,10 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                             SizedBox(
                               width: double.infinity,
                               child: ButtonWidget(
-                                labelText:
-                                    "Delete $selectedCount photos (${formatBytes(totalSize)})", // TODO: lau: extract string
+                                labelText: AppLocalizations.of(context)
+                                    .deletePhotosWithSize(
+                                        count: selectedCount,
+                                        size: formatBytes(totalSize),),
                                 buttonType: ButtonType.critical,
                                 shouldSurfaceExecutionStates: false,
                                 shouldShowSuccessConfirmation: false,
@@ -450,8 +455,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                   SizedBox(
                     width: double.infinity,
                     child: ButtonWidget(
-                      labelText:
-                          "Selection options", // TODO: lau: extract string
+                      labelText: AppLocalizations.of(context).selectionOptions,
                       buttonType: ButtonType.secondary,
                       shouldSurfaceExecutionStates: false,
                       shouldShowSuccessConfirmation: false,
@@ -589,22 +593,22 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     }
 
     final String exactLabel = exactFiles > 0
-        ? "Select exact ($exactFiles)" // TODO: lau: extract string
-        : "Select exact"; // TODO: lau: extract string
+        ? AppLocalizations.of(context).selectExactWithCount(count: exactFiles)
+        : AppLocalizations.of(context).selectExact;
 
     final String similarLabel = similarFiles > 0
-        ? "Select similar ($similarFiles)" // TODO: lau: extract string
-        : "Select similar"; // TODO: lau: extract string
+        ? AppLocalizations.of(context)
+            .selectSimilarWithCount(count: similarFiles)
+        : AppLocalizations.of(context).selectSimilar;
 
     final String allLabel = allFiles > 0
-        ? "Select all ($allFiles)" // TODO: lau: extract string
-        : "Select all"; // TODO: lau: extract string
+        ? AppLocalizations.of(context).selectAllWithCount(count: allFiles)
+        : AppLocalizations.of(context).selectAll;
 
     await showActionSheet(
       context: context,
-      title: "Select similar images", // TODO: lau: extract string
-      body:
-          "Choose which similar images to select for deletion", // TODO: lau: extract string
+      title: AppLocalizations.of(context).selectSimilarImagesTitle,
+      body: AppLocalizations.of(context).chooseSimilarImagesToSelect,
       buttons: [
         ButtonWidget(
           labelText: exactLabel,
@@ -643,7 +647,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
           },
         ),
         ButtonWidget(
-          labelText: "Clear selection", // TODO: lau: extract string
+          labelText: AppLocalizations.of(context).clearSelection,
           buttonType: ButtonType.secondary,
           buttonSize: ButtonSize.large,
           shouldStickToDarkTheme: true,
@@ -670,10 +674,11 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "${similarFiles.files.length} similar images" +
+                AppLocalizations.of(context)
+                        .similarImagesCount(count: similarFiles.files.length) +
                     (kDebugMode
                         ? " (I: d: ${similarFiles.furthestDistance.toStringAsFixed(3)})"
-                        : ""), // TODO: lau: extract string
+                        : ""),
                 style: textTheme.smallMuted.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
@@ -867,7 +872,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             ),
             const SizedBox(width: 4),
             Text(
-              "Delete (${files.length})", // TODO: lau: extract string
+              AppLocalizations.of(context).deleteWithCount(count: files.length),
               style: textTheme.smallBold.copyWith(
                 color: colorScheme.warning500,
               ),
@@ -886,9 +891,8 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     if (showDialog) {
       final _ = await showChoiceActionSheet(
         context,
-        title: "Delete files", // TODO: lau: extract string
-        body:
-            "Are you sure you want to delete these files?", // TODO: lau: extract string
+        title: AppLocalizations.of(context).deleteFiles,
+        body: AppLocalizations.of(context).areYouSureDeleteFiles,
         firstButtonLabel: AppLocalizations.of(context).delete,
         isCritical: true,
         firstButtonOnTap: () async {
@@ -1012,13 +1016,14 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             ),
             const SizedBox(height: 16),
             Text(
-              "Great job!", // TODO: lau: extract string
+              AppLocalizations.of(context).greatJob,
               style: textTheme.h3Bold,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
-              "You cleaned up $deletedCount similar ${deletedCount == 1 ? 'image' : 'images'} and freed up ${formatBytes(totalSize)}", // TODO: lau: extract string
+              AppLocalizations.of(context).cleanedUpSimilarImages(
+                  count: deletedCount, size: formatBytes(totalSize),),
               style: textTheme.body,
               textAlign: TextAlign.center,
             ),
@@ -1026,7 +1031,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             SizedBox(
               width: double.infinity,
               child: ButtonWidget(
-                labelText: "Done", // TODO: lau: extract string
+                labelText: AppLocalizations.of(context).done,
                 buttonType: ButtonType.primary,
                 onTap: () async => Navigator.of(context).pop(),
               ),
@@ -1045,16 +1050,16 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       String text;
       switch (key) {
         case SortKey.size:
-          text = "Size"; // TODO: lau: extract string
+          text = AppLocalizations.of(context).size;
           break;
         case SortKey.distanceAsc:
-          text = "Similarity"; // TODO: lau: extract string
+          text = AppLocalizations.of(context).similarity;
           break;
         case SortKey.distanceDesc:
-          text = "(I) Similarity ↑"; // TODO: lau: extract string
+          text = "(I) Similarity ↑";
           break;
         case SortKey.count:
-          text = "Count"; // TODO: lau: extract string
+          text = AppLocalizations.of(context).count;
           break;
       }
       return Text(
@@ -1121,17 +1126,19 @@ class _SimilarImagesLoadingWidgetState extends State<SimilarImagesLoadingWidget>
   late Animation<double> _scaleAnimation;
   late Animation<double> _pulseAnimation;
   int _loadingMessageIndex = 0;
-  final List<String> _loadingMessages = [
-    "Analyzing your photos locally", // TODO: lau: extract string
-    "Finding similar images", // TODO: lau: extract string
-    "Processing visual patterns", // TODO: lau: extract string
-    "Comparing image features", // TODO: lau: extract string
-    "Almost done", // TODO: lau: extract string
-  ];
+  late final List<String> _loadingMessages;
 
   @override
   void initState() {
     super.initState();
+
+    _loadingMessages = [
+      AppLocalizations.of(context).analyzingPhotosLocally,
+      AppLocalizations.of(context).findingSimilarImages,
+      AppLocalizations.of(context).processingVisualPatterns,
+      AppLocalizations.of(context).comparingImageFeatures,
+      AppLocalizations.of(context).almostDone,
+    ];
 
     // Initialize loading animations
     _loadingAnimationController = AnimationController(
@@ -1164,7 +1171,6 @@ class _SimilarImagesLoadingWidgetState extends State<SimilarImagesLoadingWidget>
       ),
     );
 
-    // Cycle through loading messages
     _startMessageCycling();
   }
 
@@ -1298,7 +1304,7 @@ class _SimilarImagesLoadingWidgetState extends State<SimilarImagesLoadingWidget>
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  "Processing locally", // TODO: lau: extract string
+                  AppLocalizations.of(context).processingLocally,
                   style: textTheme.miniFaint,
                 ),
               ],

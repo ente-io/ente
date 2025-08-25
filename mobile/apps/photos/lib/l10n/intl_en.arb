@@ -1827,5 +1827,106 @@
         "type": "int"
       }
     }
-  }
+  },
+  "similarImages": "Similar images",
+  "deletingProgress": "Deleting... {progress}",
+  "@deletingProgress": {
+    "placeholders": {
+      "progress": {
+        "type": "String"
+      }
+    }
+  },
+  "findSimilarImages": "Find similar images",
+  "noSimilarImagesFound": "No similar images found",
+  "yourPhotosLookUnique": "Your photos look unique",
+  "similarGroupsFound": "{count, plural, =1{{count} group found} other{{count} groups found}}",
+  "@similarGroupsFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewAndRemoveSimilarImages": "Review and remove similar images",
+  "deletePhotosWithSize": "Delete {count} photos ({size})",
+  "@deletePhotosWithSize": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "selectionOptions": "Selection options",
+  "selectExactWithCount": "Select exact ({count})",
+  "@selectExactWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectExact": "Select exact",
+  "selectSimilarWithCount": "Select similar ({count})",
+  "@selectSimilarWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectSimilar": "Select similar",
+  "selectAllWithCount": "Select all ({count})",
+  "@selectAllWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectAll": "Select all",
+  "selectSimilarImagesTitle": "Select similar images",
+  "chooseSimilarImagesToSelect": "Choose which similar images to select for deletion",
+  "clearSelection": "Clear selection",
+  "similarImagesCount": "{count} similar images",
+  "@similarImagesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteWithCount": "Delete ({count})",
+  "@deleteWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteFiles": "Delete files",
+  "areYouSureDeleteFiles": "Are you sure you want to delete these files?",
+  "greatJob": "Great job!",
+  "cleanedUpSimilarImages": "You cleaned up {count, plural, =1{{count} similar image} other{{count} similar images}} and freed up {size}",
+  "@cleanedUpSimilarImages": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "size": "Size",
+  "similarity": "Similarity",
+  "analyzingPhotosLocally": "Analyzing your photos locally",
+  "findingSimilarImages": "Finding similar images",
+  "processingVisualPatterns": "Processing visual patterns",
+  "comparingImageFeatures": "Comparing image features",
+  "almostDone": "Almost done",
+  "processingLocally": "Processing locally"
 }
