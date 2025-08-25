@@ -6,7 +6,7 @@ description: Removing duplicates photos using Ente Photos
 # Deduplicate
 
 Ente performs two different duplicate detections: one during uploads, and one
-that can be manually run afterwards to remove duplicates across albums.
+that can be manually run afterwards to remove duplicates and very similar files across albums.
 
 ## During uploads
 
@@ -56,6 +56,13 @@ During this operation, Ente will discard duplicates across all albums, retain a
 single copy, and add symlinks to this copy within all existing albums. So your
 existing album structure remains unchanged, while the space consumed by the
 duplicate data is freed up.
+
+## Filtering similar images
+
+Ente also provides a tool for manual removal of images that are similar, but not the exact same, using our private ML. This feature can be found in _Settings → Backup → Free up space →
+Similar images_. This is useful if you've taken a lot of similar photos, potentiall even in different albums, and want to keep only the best ones.
+
+During this filtering process you can choose which photos to keep and which to delete for each set of similar images. Ente will then automatically add symlinks for the kept photos to any albums that only had the deleted images. This way you can easily prune similar images, without worrying about accidentally removing the best ones from a certain album.
 
 ## Adding to Ente album creates symlinks
 
