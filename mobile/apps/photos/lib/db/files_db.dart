@@ -1,5 +1,4 @@
 import "dart:async";
-import "dart:convert" show jsonDecode;
 import "dart:io";
 
 import "package:computer/computer.dart";
@@ -1699,7 +1698,7 @@ class FilesDB with SqlDbBase {
       SELECT * FROM $filesTable
       WHERE $columnFileType = ?
       AND $columnCreationTime > ?
-      AND $columnUploadedFileID  != -1
+      AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID != -1)
       AND $columnOwnerID = $userID
       AND $columnLocalID IS NOT NULL
       AND ($columnFileSize IS NOT NULL AND $columnFileSize <= 524288000)
@@ -1781,65 +1780,6 @@ class FilesDB with SqlDbBase {
       ids.add(result[columnUploadedFileID] as int);
     }
     return ids.length;
-  }
-
-  Future<Set<int>> remoteVideosCount() async {
-    final db = await instance.sqliteAsyncDB;
-    final results = await db.getAll(
-      '''
-      SELECT DISTINCT $columnUploadedFileID FROM $filesTable
-      WHERE  $columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1
-      AND $columnFileType = ?
-    ''',
-      [getInt(FileType.video)],
-    );
-    final ids = <int>{};
-    for (final result in results) {
-      ids.add(result[columnUploadedFileID] as int);
-    }
-    return ids;
-  }
-
-  Future<Set<int>> skippedVideosCount() async {
-    // skipped because video size > 500 MB || duration > 60
-    final db = await instance.sqliteAsyncDB;
-    final results = await db.getAll(
-      '''
-      SELECT DISTINCT $columnUploadedFileID FROM $filesTable
-      WHERE  $columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1
-      AND (($columnFileSize IS NOT NULL AND $columnFileSize > 524288000)
-      OR ($columnDuration IS NOT NULL AND $columnDuration > 60))
-      AND $columnFileType = ?
-    ''',
-      [getInt(FileType.video)],
-    );
-
-    final ids = <int>{};
-    for (final result in results) {
-      ids.add(result[columnUploadedFileID] as int);
-    }
-
-    // get video files <= 10 MB
-    final results2 = await db.getAll(
-      '''
-      SELECT DISTINCT $columnUploadedFileID, $columnPubMMdEncodedJson FROM $filesTable
-      WHERE  $columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1
-      AND ($columnFileSize IS NOT NULL AND $columnFileSize <= 10485760)
-      AND $columnFileType = ?
-    ''',
-      [getInt(FileType.video)],
-    );
-    for (final result in results2) {
-      // decode pub magic metadata and check sv == 1
-      final pubMagicEncodedJson = result[columnPubMMdEncodedJson];
-      if (pubMagicEncodedJson == null) continue;
-      final pubMagicMetadata = jsonDecode(pubMagicEncodedJson);
-      if (pubMagicMetadata['sv'] == 1) {
-        ids.add(result[columnUploadedFileID] as int);
-      }
-    }
-
-    return ids;
   }
 
   ///Returns "columnName1 = ?, columnName2 = ?, ..."

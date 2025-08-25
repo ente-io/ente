@@ -123,25 +123,42 @@ class VideoPreviewService {
     }
   }
 
+  Future<List<EnteFile>> _getFiles() async {
+    return await FilesDB.instance.getAllFilesAfterDate(
+      fileType: FileType.video,
+      beginDate: DateTime.now().subtract(const Duration(days: 60)),
+      userID: Configuration.instance.getUserID()!,
+    );
+  }
+
   Future<StreamingStatus> getStatus() async {
     try {
-      final filesDB = FilesDB.instance;
-      final totalRemoteVideos = await filesDB.remoteVideosCount();
-      final processed = fileDataService.previewIds.keys.toSet();
-      final skippedVideos = (await filesDB.skippedVideosCount()).difference(
-        processed,
-      );
+      // TODO: Should we consider all days we could have processed or last 60 days
+      final files = await _getFiles();
+      final Set<int> totalProcessed = fileDataService.previewIds.keys.toSet();
+      final Set<int> total = {};
+      final Set<int> processed = {};
+      int skipped = 0;
 
-      final netTotal = totalRemoteVideos.difference(skippedVideos);
+      for (final file in files) {
+        if (totalProcessed.contains(file.uploadedFileID)) {
+          processed.add(file.uploadedFileID!);
+          continue;
+        }
+        if (file.pubMagicMetadata?.sv == 1) {
+          skipped++;
+          continue;
+        }
+        total.add(file.uploadedFileID!);
+      }
 
-      final double netProcessedItems = netTotal.isEmpty
-          ? 0
-          : (processed.length / netTotal.length).clamp(0, 1);
+      final double netProcessedItems =
+          total.isEmpty ? 0 : (processed.length / total.length).clamp(0, 1);
       final status = StreamingStatus(
         netProcessedItems,
-        processed.length,
-        skippedVideos.length,
-        totalRemoteVideos.length,
+        totalProcessed.length,
+        skipped,
+        files.length,
       );
       _logger.info("$status");
       return status;
@@ -844,11 +861,7 @@ class VideoPreviewService {
       }
     } catch (_) {}
 
-    final files = await FilesDB.instance.getAllFilesAfterDate(
-      fileType: FileType.video,
-      beginDate: DateTime.now().subtract(const Duration(days: 2000)),
-      userID: Configuration.instance.getUserID()!,
-    );
+    final files = await _getFiles();
 
     final previewIds = fileDataService.previewIds;
     final allFiles =

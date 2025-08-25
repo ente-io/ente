@@ -260,7 +260,6 @@ class VideoStreamingStatusWidgetState
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               final double netProcessed = snapshot.data!.netProcessedItems;
-              final int total = snapshot.data!.total;
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -270,11 +269,9 @@ class VideoStreamingStatusWidgetState
                       title: AppLocalizations.of(context).processed,
                     ),
                     trailingWidget: Text(
-                      total < 1
-                          ? 'NA'
-                          : netProcessed == 0
-                              ? '0%'
-                              : '${(netProcessed * 100.0).toStringAsFixed(2)}%',
+                      netProcessed == 0
+                          ? '0%'
+                          : '${(netProcessed * 100.0).toStringAsFixed(2)}%',
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
                     singleBorderRadius: 8,
