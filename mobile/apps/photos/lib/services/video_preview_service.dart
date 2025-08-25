@@ -1058,7 +1058,8 @@ class VideoPreviewService {
 
       final allowedStream = _allowStream();
       if (!allowedStream) return;
-      await fileDataService.syncFDStatus();
+
+      await _ensurePreviewIdsInitialized();
       await _putFilesForPreviewCreation();
     });
   }
