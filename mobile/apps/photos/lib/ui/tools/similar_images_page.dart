@@ -1041,57 +1041,25 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
 
-    Widget sortOptionContent(SortKey key) {
+    Text sortOptionText(SortKey key) {
       String text;
-      Widget trailing;
-
       switch (key) {
         case SortKey.size:
           text = "Size"; // TODO: lau: extract string
-          trailing = Icon(
-            Icons.arrow_downward,
-            size: 16,
-            color: colorScheme.textMuted,
-          );
           break;
         case SortKey.distanceAsc:
           text = "Similarity"; // TODO: lau: extract string
-          trailing = Icon(
-            Icons.arrow_downward,
-            size: 16,
-            color: colorScheme.textMuted,
-          );
           break;
         case SortKey.distanceDesc:
-          text = "Similarity"; // TODO: lau: extract string
-          trailing = Icon(
-            Icons.arrow_upward,
-            size: 16,
-            color: colorScheme.textMuted,
-          );
+          text = "(I) Similarity ↑"; // TODO: lau: extract string
           break;
         case SortKey.count:
           text = "Count"; // TODO: lau: extract string
-          trailing = Icon(
-            Icons.arrow_downward,
-            size: 16,
-            color: colorScheme.textMuted,
-          );
           break;
       }
-
-      return SizedBox(
-        width: 120,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              text,
-              style: textTheme.miniBold,
-            ),
-            trailing,
-          ],
-        ),
+      return Text(
+        text,
+        style: textTheme.miniBold,
       );
     }
 
@@ -1118,10 +1086,19 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         _sortSimilarFiles();
       },
       itemBuilder: (context) {
-        return List.generate(SortKey.values.length, (index) {
+        final sortKeys = kDebugMode
+            ? SortKey.values
+            : SortKey.values
+                .where((key) => key != SortKey.distanceDesc)
+                .toList();
+        return List.generate(sortKeys.length, (index) {
+          final sortKey = sortKeys[index];
           return PopupMenuItem(
-            value: index,
-            child: sortOptionContent(SortKey.values[index]),
+            value: SortKey.values.indexOf(sortKey),
+            child: Text(
+              sortOptionText(sortKey).data!,
+              style: textTheme.miniBold,
+            ),
           );
         });
       },
