@@ -408,6 +408,8 @@ class CollectionApiClient {
         '/collections/share-url',
         data: {
           'collectionID': collection.id,
+          "enableCollect": enableCollect,
+          "enableJoin": true,
           'app': 'locker',
         },
       );
