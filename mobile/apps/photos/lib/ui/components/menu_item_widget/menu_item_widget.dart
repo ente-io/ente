@@ -35,6 +35,8 @@ class MenuItemWidget extends StatefulWidget {
   final Color? menuItemColor;
   final bool alignCaptionedTextToLeft;
 
+  final EdgeInsets? padding;
+
   // singleBorderRadius is applied to the border when it's a standalone menu item.
   // Widget will apply singleBorderRadius if value of both isTopBorderRadiusRemoved
   // and isBottomBorderRadiusRemoved is false. Otherwise, multipleBorderRadius will
@@ -88,6 +90,7 @@ class MenuItemWidget extends StatefulWidget {
     this.showOnlyLoadingState = false,
     this.surfaceExecutionStates = true,
     this.alwaysShowSuccessState = false,
+    this.padding,
     super.key,
   });
 
@@ -97,8 +100,9 @@ class MenuItemWidget extends StatefulWidget {
 
 class _MenuItemWidgetState extends State<MenuItemWidget> {
   final _debouncer = Debouncer(const Duration(milliseconds: 300));
-  ValueNotifier<ExecutionState> executionStateNotifier =
-      ValueNotifier(ExecutionState.idle);
+  ValueNotifier<ExecutionState> executionStateNotifier = ValueNotifier(
+    ExecutionState.idle,
+  );
 
   Color? menuItemColor;
   late double borderRadius;
@@ -167,7 +171,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 20),
       width: double.infinity,
-      padding: const EdgeInsets.only(left: 16, right: 12),
+      padding: widget.padding ?? const EdgeInsets.only(left: 16, right: 12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.only(
           topLeft: topBorderRadius,
@@ -180,14 +184,13 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          widget.alignCaptionedTextToLeft && widget.leadingIcon == null
-              ? const SizedBox.shrink()
-              : LeadingWidget(
-                  leadingIconSize: widget.leadingIconSize,
-                  leadingIcon: widget.leadingIcon,
-                  leadingIconColor: widget.leadingIconColor,
-                  leadingIconWidget: widget.leadingIconWidget,
-                ),
+          if (!widget.alignCaptionedTextToLeft || widget.leadingIcon != null)
+            LeadingWidget(
+              leadingIconSize: widget.leadingIconSize,
+              leadingIcon: widget.leadingIcon,
+              leadingIconColor: widget.leadingIconColor,
+              leadingIconWidget: widget.leadingIconWidget,
+            ),
           widget.captionedTextWidget,
           if (widget.expandableController != null)
             ExpansionTrailingIcon(
@@ -217,11 +220,9 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
       return;
     }
     _debouncer.run(
-      () => Future(
-        () {
-          executionStateNotifier.value = ExecutionState.inProgress;
-        },
-      ),
+      () => Future(() {
+        executionStateNotifier.value = ExecutionState.inProgress;
+      }),
     );
     await widget.onTap?.call().then(
       (value) {

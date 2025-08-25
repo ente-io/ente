@@ -71,6 +71,9 @@ class MLService {
     // Listen on ComputeController
     Bus.instance.on<ComputeControlEvent>().listen((event) {
       if (!flagService.hasGrantedMLConsent) {
+        if (event.shouldRun) {
+          VideoPreviewService.instance.queueFiles(duration: Duration.zero);
+        }
         return;
       }
 

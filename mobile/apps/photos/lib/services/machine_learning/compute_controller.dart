@@ -76,13 +76,15 @@ class ComputeController {
       _logger.info("Device not healthy or user interacting, denying request.");
       return false;
     }
+    bool result = false;
     if (ml) {
-      return _requestML();
+      result = _requestML();
     } else if (stream) {
-      return _requestStream();
+      result = _requestStream();
+    } else {
+      _logger.severe("No compute request specified, denying request.");
     }
-    _logger.severe("No compute request specified, denying request.");
-    return false;
+    return result;
   }
 
   bool _requestML() {

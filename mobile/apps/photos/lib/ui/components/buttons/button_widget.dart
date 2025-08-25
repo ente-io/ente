@@ -412,6 +412,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
     if (widget.onTap != null) {
       _debouncer.run(
         () => Future(() {
+          if (!mounted) return;
           setState(() {
             executionState = ExecutionState.inProgress;
           });
@@ -432,6 +433,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
           : null;
       _debouncer.cancelDebounceTimer();
       if (executionState == ExecutionState.successful) {
+        if (!mounted) return;
         setState(() {});
       }
 
@@ -470,6 +472,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
         }
       }
       if (executionState == ExecutionState.error) {
+        if (!mounted) return;
         setState(() {
           executionState = ExecutionState.idle;
           widget.isInAlert
@@ -512,6 +515,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
   }
 
   void _onTapDown(details) {
+    if (!mounted) return;
     setState(() {
       buttonColor = widget.buttonStyle.pressedButtonColor ??
           widget.buttonStyle.defaultButtonColor;
@@ -527,13 +531,17 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
   void _onTapUp(details) {
     Future.delayed(
       const Duration(milliseconds: 84),
-      () => setState(() {
-        setAllStylesToDefault();
-      }),
+      () {
+        if (!mounted) return;
+        setState(() {
+          setAllStylesToDefault();
+        });
+      },
     );
   }
 
   void _onTapCancel() {
+    if (!mounted) return;
     setState(() {
       setAllStylesToDefault();
     });

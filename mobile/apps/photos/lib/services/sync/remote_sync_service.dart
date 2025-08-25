@@ -17,6 +17,7 @@ import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
+import "package:photos/main.dart" show isProcessBg;
 import 'package:photos/models/device_collection.dart';
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
@@ -31,7 +32,6 @@ import 'package:photos/services/local_file_update_service.dart';
 import "package:photos/services/notification_service.dart";
 import 'package:photos/services/sync/diff_fetcher.dart';
 import 'package:photos/services/sync/sync_service.dart';
-import "package:photos/services/video_preview_service.dart";
 import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -132,13 +132,9 @@ class RemoteSyncService {
       }
 
       if (
-          // Only Uploading Previews in fg to prevent heating issues
-          AppLifecycleService.instance.isForeground &&
-              // if ML is enabled the MLService will queue when ML is done
-              !flagService.hasGrantedMLConsent) {
-        fileDataService.syncFDStatus().then((_) {
-          VideoPreviewService.instance.queueFiles();
-        }).ignore();
+          // We don't need syncFDStatus here if in background
+          !isProcessBg) {
+        fileDataService.syncFDStatus().ignore();
       }
 
       final filesToBeUploaded = await _getFilesToBeUploaded();
