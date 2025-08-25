@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/spf13/viper"
 
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/stacktrace"
@@ -14,8 +15,9 @@ import (
 // CollectionLinkRepo defines the methods for inserting, updating and
 // retrieving entities related to public collections
 type CollectionLinkRepo struct {
-	DB        *sql.DB
-	albumHost string
+	DB         *sql.DB
+	albumHost  string
+	lockerHost string
 }
 
 // NewCollectionLinkRepository ..
@@ -23,13 +25,21 @@ func NewCollectionLinkRepository(db *sql.DB, albumHost string) *CollectionLinkRe
 	if albumHost == "" {
 		albumHost = "https://albums.ente.io"
 	}
+	lockerHost := viper.GetString("apps.public-locker")
+	if lockerHost == "" {
+		lockerHost = "https://locker.ente.io"
+	}
 	return &CollectionLinkRepo{
-		DB:        db,
-		albumHost: albumHost,
+		DB:         db,
+		albumHost:  albumHost,
+		lockerHost: lockerHost,
 	}
 }
 
-func (pcr *CollectionLinkRepo) GetAlbumUrl(token string) string {
+func (pcr *CollectionLinkRepo) GetAlbumUrl(app ente.App, token string) string {
+	if app == ente.Locker {
+		return fmt.Sprintf("%s/?t=%s", pcr.lockerHost, token)
+	}
 	return fmt.Sprintf("%s/?t=%s", pcr.albumHost, token)
 }
 
@@ -57,7 +67,7 @@ func (pcr *CollectionLinkRepo) DisableSharing(ctx context.Context, cID int64) er
 
 // GetCollectionToActivePublicURLMap will return map of collectionID to PublicURLs which are not disabled yet.
 // Note: The url could be expired or deviceLimit is already reached
-func (pcr *CollectionLinkRepo) GetCollectionToActivePublicURLMap(ctx context.Context, collectionIDs []int64) (map[int64][]ente.PublicURL, error) {
+func (pcr *CollectionLinkRepo) GetCollectionToActivePublicURLMap(ctx context.Context, collectionIDs []int64, app ente.App) (map[int64][]ente.PublicURL, error) {
 	rows, err := pcr.DB.QueryContext(ctx, `SELECT collection_id, access_token, valid_till, device_limit, enable_download, enable_collect, enable_join, pw_nonce, mem_limit, ops_limit FROM 
                                                    public_collection_tokens WHERE collection_id = ANY($1) and is_disabled = FALSE`,
 		pq.Array(collectionIDs))
@@ -78,7 +88,7 @@ func (pcr *CollectionLinkRepo) GetCollectionToActivePublicURLMap(ctx context.Con
 		if err = rows.Scan(&collectionID, &accessToken, &publicUrl.ValidTill, &publicUrl.DeviceLimit, &publicUrl.EnableDownload, &publicUrl.EnableCollect, &publicUrl.EnableJoin, &nonce, &memLimit, &opsLimit); err != nil {
 			return nil, stacktrace.Propagate(err, "")
 		}
-		publicUrl.URL = pcr.GetAlbumUrl(accessToken)
+		publicUrl.URL = pcr.GetAlbumUrl(app, accessToken)
 		if nonce != nil {
 			publicUrl.Nonce = nonce
 			publicUrl.MemLimit = memLimit
