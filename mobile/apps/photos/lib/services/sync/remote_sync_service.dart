@@ -377,10 +377,9 @@ class RemoteSyncService {
         localIDsToSync.removeAll(alreadyClaimedLocalIDs);
         if (alreadyClaimedLocalIDs.isNotEmpty && !_hasCleanupStaleEntry) {
           try {
-          await _db.removeQueuedLocalFiles(alreadyClaimedLocalIDs);
-          } catch(e, s) {
-            _logger.severe("removeQueuedLocalFiles failed",e,s);
-            
+            await _db.removeQueuedLocalFiles(alreadyClaimedLocalIDs, ownerID);
+          } catch (e, s) {
+            _logger.severe("removeQueuedLocalFiles failed", e, s);
           }
         }
       }
