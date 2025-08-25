@@ -195,29 +195,43 @@ class VideoPreviewService {
 
   Future<StreamingStatus> getStatus() async {
     try {
-      // TODO: Should we consider all days we could have processed or last 60 days
       await _ensurePreviewIdsInitialized();
+      // This will get us all the video files that are present on remote
+      // and also that could be / have been skipped due to device
+      // limitations
       final files = await _getFiles(
         beginDate: null,
         onlyFilesWithLocalId: false,
       );
+      // This is the total video files that have streams
       final Set<int> totalProcessed = fileDataService.previewIds.keys.toSet();
+      // Total: Total Remote video files owned - skipped video files
       final Set<int> total = {};
+      // Processed: All the video files that are processed within the total
       final Set<int> processed = {};
       int skipped = 0;
 
       for (final file in files) {
+        // If file is processed, then add it to specific set
         if (totalProcessed.contains(file.uploadedFileID)) {
           processed.add(file.uploadedFileID!);
-        } else if (file.pubMagicMetadata?.sv == 1) {
+        }
+        // Don't include files which are to be skipped anyways
+        else if (file.pubMagicMetadata?.sv == 1) {
           skipped++;
           continue;
         }
+        // Include the file to total set
         total.add(file.uploadedFileID!);
       }
 
+      // If total is empty then mark all as processed else compute the ratio
+      // of processed files and total remote video files
+      // netProcessedItems = processed / total
       final double netProcessedItems =
-          total.isEmpty ? 0 : (processed.length / total.length).clamp(0, 1);
+          total.isEmpty ? 1 : (processed.length / total.length).clamp(0, 1);
+
+      // Store the data and return it
       final status = StreamingStatus(
         netProcessedItems,
         totalProcessed.length,
