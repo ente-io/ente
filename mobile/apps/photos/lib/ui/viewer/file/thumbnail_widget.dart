@@ -432,11 +432,6 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   }
 
   void _cacheAndRender(ImageProvider<Object> imageProvider) {
-    if (imageCache.currentSizeBytes > 256 * 1024 * 1024) {
-      _logger.info("Clearing image cache");
-      imageCache.clear();
-      imageCache.clearLiveImages();
-    }
     precacheImage(imageProvider, context).then((value) {
       if (mounted) {
         setState(() {
