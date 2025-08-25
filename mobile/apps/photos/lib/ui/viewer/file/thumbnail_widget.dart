@@ -245,22 +245,22 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       final cachedSmallThumbnail =
           ThumbnailInMemoryLruCache.get(widget.file, thumbnailSmallSize);
       if (cachedSmallThumbnail != null) {
-        _imageProvider = Image.memory(
+        final imageProvider = Image.memory(
           cachedSmallThumbnail,
           cacheHeight: optimizedImageHeight,
           cacheWidth: optimizedImageWidth,
         ).image;
-        _hasLoadedThumbnail = true;
+        _cacheAndRender(imageProvider);
+        return;
+      }
+      if (widget.diskLoadDeferDuration != null) {
+        Future.delayed(widget.diskLoadDeferDuration!, () {
+          if (mounted) {
+            _getThumbnailFromDisk();
+          }
+        });
       } else {
-        if (widget.diskLoadDeferDuration != null) {
-          Future.delayed(widget.diskLoadDeferDuration!, () {
-            if (mounted) {
-              _getThumbnailFromDisk();
-            }
-          });
-        } else {
-          _getThumbnailFromDisk();
-        }
+        _getThumbnailFromDisk();
       }
     }
   }
@@ -383,12 +383,12 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       _isLoadingRemoteThumbnail = true;
       final cachedThumbnail = ThumbnailInMemoryLruCache.get(widget.file);
       if (cachedThumbnail != null) {
-        _imageProvider = Image.memory(
+        final imageProvider = Image.memory(
           cachedThumbnail,
           cacheHeight: optimizedImageHeight,
           cacheWidth: optimizedImageWidth,
         ).image;
-        _hasLoadedThumbnail = true;
+        _cacheAndRender(imageProvider);
         return;
       }
 
@@ -432,19 +432,14 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   }
 
   void _cacheAndRender(ImageProvider<Object> imageProvider) {
-    if (imageCache.currentSizeBytes > 256 * 1024 * 1024) {
-      _logger.info("Clearing image cache");
-      imageCache.clear();
-      imageCache.clearLiveImages();
+    if (mounted) {
+      setState(() {
+        _imageProvider = imageProvider;
+        _hasLoadedThumbnail = true;
+      });
     }
-    precacheImage(imageProvider, context).then((value) {
-      if (mounted) {
-        setState(() {
-          _imageProvider = imageProvider;
-          _hasLoadedThumbnail = true;
-        });
-      }
-    });
+
+    precacheImage(imageProvider, context);
   }
 
   void _reset() {
