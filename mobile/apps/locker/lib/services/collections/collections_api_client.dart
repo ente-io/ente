@@ -4,13 +4,17 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import "package:ente_events/event_bus.dart";
 import 'package:ente_network/network.dart';
 import 'package:locker/core/errors.dart';
+import "package:locker/events/collections_updated_event.dart";
+import "package:locker/services/collections/collections_db.dart";
 import "package:locker/services/collections/collections_service.dart";
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/collections/models/collection_file_item.dart';
 import 'package:locker/services/collections/models/collection_magic.dart';
 import 'package:locker/services/collections/models/diff.dart';
+import "package:locker/services/collections/models/public_url.dart";
 import 'package:locker/services/configuration.dart';
 import "package:locker/services/files/sync/metadata_updater_service.dart";
 import 'package:locker/services/files/sync/models/file.dart';
@@ -393,6 +397,70 @@ class CollectionApiClient {
       final collection = await _fromRemoteCollection(collectionData);
       return collection;
     });
+  }
+
+  Future<void> createShareUrl(
+    Collection collection, {
+    bool enableCollect = false,
+  }) async {
+    try {
+      final response = await _enteDio.post(
+        '/collections/share-url',
+        data: {
+          'collectionID': collection.id,
+          'app': 'locker',
+        },
+      );
+      collection.publicURLs.add(PublicURL.fromMap(response.data["result"]));
+      await CollectionDB.instance.updateCollections([collection]);
+      CollectionService.instance.updateCollectionCache(collection);
+      Bus.instance.fire(CollectionsUpdatedEvent());
+    } catch (e, s) {
+      _logger.severe('Failed to create share URL for collection', e, s);
+      rethrow;
+    }
+  }
+
+  Future<void> disableShareUrl(Collection collection) async {
+    try {
+      await _enteDio.delete(
+        "/collections/share-url/" + collection.id.toString(),
+      );
+      collection.publicURLs.clear();
+      await CollectionDB.instance.updateCollections(List.from([collection]));
+      CollectionService.instance.updateCollectionCache(collection);
+      Bus.instance.fire(CollectionsUpdatedEvent());
+    } on DioException catch (e) {
+      _logger.info(e);
+      rethrow;
+    }
+  }
+
+  Future<void> updateShareUrl(
+    Collection collection,
+    Map<String, dynamic> prop,
+  ) async {
+    prop.putIfAbsent('collectionID', () => collection.id);
+    try {
+      final response = await _enteDio.put(
+        "/collections/share-url",
+        data: json.encode(prop),
+      );
+      // remove existing url information
+      collection.publicURLs.clear();
+      collection.publicURLs.add(PublicURL.fromMap(response.data["result"]));
+      await CollectionDB.instance.updateCollections(List.from([collection]));
+      CollectionService.instance.updateCollectionCache(collection);
+      Bus.instance.fire(CollectionsUpdatedEvent());
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 402) {
+        throw SharingNotPermittedForFreeAccountsError();
+      }
+      rethrow;
+    } catch (e, s) {
+      _logger.severe("failed to update ShareUrl", e, s);
+      rethrow;
+    }
   }
 }
 
