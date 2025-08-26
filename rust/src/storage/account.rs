@@ -17,16 +17,16 @@ impl<'a> AccountStore<'a> {
     }
 
     /// Add a new account
-    pub fn add(&self, account: &Account) -> Result<i64> {
+    pub fn add(&self, account: &Account) -> Result<()> {
         let now = current_timestamp();
 
         self.conn.execute(
-            "INSERT INTO accounts (email, user_id, app, endpoint, export_dir, created_at, updated_at)
+            "INSERT INTO accounts (user_id, app, email, endpoint, export_dir, created_at, updated_at)
              VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
             params![
-                account.email,
                 account.user_id,
                 format!("{:?}", account.app).to_lowercase(),
+                account.email,
                 account.endpoint,
                 account.export_dir,
                 now,
@@ -34,13 +34,13 @@ impl<'a> AccountStore<'a> {
             ],
         )?;
 
-        Ok(self.conn.last_insert_rowid())
+        Ok(())
     }
 
     /// Get an account by email and app
     pub fn get(&self, email: &str, app: App) -> Result<Option<Account>> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, email, user_id, app, endpoint, export_dir FROM accounts 
+            "SELECT user_id, app, email, endpoint, export_dir FROM accounts 
              WHERE email = ?1 AND app = ?2",
         )?;
 
@@ -56,7 +56,7 @@ impl<'a> AccountStore<'a> {
     /// List all accounts
     pub fn list(&self) -> Result<Vec<Account>> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, email, user_id, app, endpoint, export_dir FROM accounts 
+            "SELECT user_id, app, email, endpoint, export_dir FROM accounts 
              ORDER BY email, app",
         )?;
 
@@ -81,22 +81,25 @@ impl<'a> AccountStore<'a> {
     }
 
     /// Delete an account
-    pub fn delete(&self, account_id: i64) -> Result<()> {
-        self.conn
-            .execute("DELETE FROM accounts WHERE id = ?1", params![account_id])?;
+    pub fn delete(&self, user_id: i64, app: App) -> Result<()> {
+        self.conn.execute(
+            "DELETE FROM accounts WHERE user_id = ?1 AND app = ?2",
+            params![user_id, format!("{app:?}").to_lowercase()],
+        )?;
         Ok(())
     }
 
     /// Store account secrets (encrypted)
-    pub fn store_secrets(&self, account_id: i64, secrets: &AccountSecrets) -> Result<()> {
+    pub fn store_secrets(&self, user_id: i64, app: App, secrets: &AccountSecrets) -> Result<()> {
         let now = current_timestamp();
 
         self.conn.execute(
             "INSERT OR REPLACE INTO secrets 
-             (account_id, token, master_key, secret_key, public_key, updated_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+             (user_id, app, token, master_key, secret_key, public_key, updated_at)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
             params![
-                account_id,
+                user_id,
+                format!("{app:?}").to_lowercase(),
                 &secrets.token,
                 &secrets.master_key,
                 &secrets.secret_key,
@@ -109,14 +112,14 @@ impl<'a> AccountStore<'a> {
     }
 
     /// Get account secrets
-    pub fn get_secrets(&self, account_id: i64) -> Result<Option<AccountSecrets>> {
+    pub fn get_secrets(&self, user_id: i64, app: App) -> Result<Option<AccountSecrets>> {
         let mut stmt = self.conn.prepare(
             "SELECT token, master_key, secret_key, public_key FROM secrets 
-             WHERE account_id = ?1",
+             WHERE user_id = ?1 AND app = ?2",
         )?;
 
         let secrets = stmt
-            .query_row(params![account_id], |row| {
+            .query_row(params![user_id, format!("{app:?}").to_lowercase()], |row| {
                 Ok(AccountSecrets {
                     token: row.get(0)?,
                     master_key: row.get(1)?,
@@ -131,7 +134,7 @@ impl<'a> AccountStore<'a> {
 }
 
 fn row_to_account(row: &Row) -> rusqlite::Result<Account> {
-    let app_str: String = row.get(3)?;
+    let app_str: String = row.get(1)?;
     let app = match app_str.as_str() {
         "photos" => App::Photos,
         "locker" => App::Locker,
@@ -140,12 +143,12 @@ fn row_to_account(row: &Row) -> rusqlite::Result<Account> {
     };
 
     Ok(Account {
-        id: row.get(0)?,
-        email: row.get(1)?,
-        user_id: row.get(2)?,
+        id: 0, // Not used anymore, but kept for compatibility
+        user_id: row.get(0)?,
         app,
-        endpoint: row.get(4)?,
-        export_dir: row.get(5)?,
+        email: row.get(2)?,
+        endpoint: row.get(3)?,
+        export_dir: row.get(4)?,
     })
 }
 

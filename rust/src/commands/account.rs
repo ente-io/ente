@@ -284,8 +284,10 @@ async fn add_account(
     };
 
     // Store account in database
-    let account_id = storage.accounts().add(&account)?;
-    storage.accounts().store_secrets(account_id, &secrets)?;
+    storage.accounts().add(&account)?;
+    storage
+        .accounts()
+        .store_secrets(account.user_id, account.app, &secrets)?;
 
     println!("\n✅ Account added successfully!");
     println!("   Email: {email}");
@@ -344,9 +346,12 @@ async fn get_token(storage: &Storage, email: &str, app_str: &str) -> Result<()> 
     })?;
 
     // Get account secrets
-    let secrets = storage.accounts().get_secrets(account.id)?.ok_or_else(|| {
-        crate::models::error::Error::NotFound(format!("Secrets not found for account {email}"))
-    })?;
+    let secrets = storage
+        .accounts()
+        .get_secrets(account.user_id, account.app)?
+        .ok_or_else(|| {
+            crate::models::error::Error::NotFound(format!("Secrets not found for account {email}"))
+        })?;
 
     // Token is stored as raw bytes from sealed_box_open
     // The Go CLI returns it as base64 URL-encoded string WITH padding (matching TokenStr() in Go)

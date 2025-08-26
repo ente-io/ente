@@ -71,7 +71,7 @@ async fn sync_account(
     // Get stored secrets
     let secrets = storage
         .accounts()
-        .get_secrets(account.id)?
+        .get_secrets(account.user_id, account.app)?
         .ok_or_else(|| crate::Error::NotFound("Account secrets not found".into()))?;
 
     // Create API client with account's endpoint
@@ -157,11 +157,9 @@ async fn sync_account(
             for (file, path) in download_tasks {
                 if path.exists() {
                     // File already exists, mark it as synced in database
-                    storage.sync().update_file_local_path(
-                        account.id,
-                        file.id,
-                        path.to_str().unwrap_or(""),
-                    )?;
+                    storage
+                        .sync()
+                        .update_file_local_path(file.id, path.to_str().unwrap_or(""))?;
                     already_synced += 1;
                 } else {
                     to_download.push((file, path));
@@ -182,11 +180,9 @@ async fn sync_account(
 
                 // Update local paths in database for newly downloaded files
                 for (file, path) in &download_stats.successful_downloads {
-                    storage.sync().update_file_local_path(
-                        account.id,
-                        file.id,
-                        path.to_str().unwrap_or(""),
-                    )?;
+                    storage
+                        .sync()
+                        .update_file_local_path(file.id, path.to_str().unwrap_or(""))?;
                 }
 
                 println!(

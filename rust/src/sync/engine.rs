@@ -88,7 +88,7 @@ impl SyncEngine {
             };
 
             // Upsert collection (insert or update)
-            sync_store.upsert_collection(self.account.id, &storage_collection)?;
+            sync_store.upsert_collection(&storage_collection)?;
 
             // Count as new or updated based on updation time
             if collection.updation_time > last_sync {
@@ -103,7 +103,7 @@ impl SyncEngine {
 
         // Update sync timestamp
         let now = chrono::Utc::now().timestamp_micros();
-        sync_store.update_sync_state(self.account.id, "collections", now)?;
+        sync_store.update_sync_state(self.account.user_id, "collections", now)?;
 
         log::info!(
             "Collections synced: {} new, {} updated",
@@ -199,7 +199,7 @@ impl SyncEngine {
                     };
 
                     // Upsert file (insert or update)
-                    sync_store.upsert_file(self.account.id, &remote_file)?;
+                    sync_store.upsert_file(&remote_file)?;
 
                     // Count as new or updated
                     if file.updation_time > last_sync {

@@ -75,7 +75,7 @@ async fn export_account(storage: &Storage, account: &Account) -> Result<()> {
     // Get stored secrets
     let secrets = storage
         .accounts()
-        .get_secrets(account.id)?
+        .get_secrets(account.user_id, account.app)?
         .ok_or_else(|| crate::Error::NotFound("Account secrets not found".into()))?;
 
     // Create API client with account's endpoint

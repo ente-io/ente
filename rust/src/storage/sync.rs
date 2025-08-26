@@ -17,19 +17,18 @@ impl<'a> SyncStore<'a> {
     }
 
     /// Store a collection
-    pub fn upsert_collection(&self, account_id: i64, collection: &Collection) -> Result<()> {
+    pub fn upsert_collection(&self, collection: &Collection) -> Result<()> {
         let metadata = serde_json::to_string(&collection)?;
 
         self.conn.execute(
             "INSERT OR REPLACE INTO collections 
-             (collection_id, account_id, name, type, owner, is_deleted, metadata, updated_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
+             (collection_id, owner, name, type, is_deleted, metadata, updated_at)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
             params![
                 collection.id,
-                account_id,
+                collection.owner,
                 collection.name,
                 format!("{:?}", collection.collection_type).to_lowercase(),
-                collection.owner,
                 collection.is_deleted as i32,
                 metadata,
                 collection.updated_at
@@ -39,16 +38,16 @@ impl<'a> SyncStore<'a> {
         Ok(())
     }
 
-    /// Get all collections for an account
-    pub fn get_collections(&self, account_id: i64) -> Result<Vec<Collection>> {
+    /// Get all collections for a user
+    pub fn get_collections(&self, user_id: i64) -> Result<Vec<Collection>> {
         let mut stmt = self.conn.prepare(
             "SELECT metadata FROM collections 
-             WHERE account_id = ?1 AND is_deleted = 0
+             WHERE owner = ?1 AND is_deleted = 0
              ORDER BY collection_id",
         )?;
 
         let collections = stmt
-            .query_map(params![account_id], |row| {
+            .query_map(params![user_id], |row| {
                 let metadata: String = row.get(0)?;
                 Ok(serde_json::from_str::<Collection>(&metadata).unwrap())
             })?
@@ -58,7 +57,7 @@ impl<'a> SyncStore<'a> {
     }
 
     /// Store a file
-    pub fn upsert_file(&self, account_id: i64, file: &RemoteFile) -> Result<()> {
+    pub fn upsert_file(&self, file: &RemoteFile) -> Result<()> {
         let file_info = serde_json::to_string(&file.file)?;
         let metadata = serde_json::to_string(&file.metadata)?;
 
@@ -76,12 +75,12 @@ impl<'a> SyncStore<'a> {
 
         self.conn.execute(
             "INSERT OR REPLACE INTO files 
-             (file_id, account_id, collection_id, encrypted_key, key_decryption_nonce, 
+             (file_id, owner_id, collection_id, encrypted_key, key_decryption_nonce, 
               file_info, metadata, is_deleted, is_synced_locally, updated_at)
              VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
             params![
                 file.id,
-                account_id,
+                file.owner_id,
                 file.collection_id,
                 file.encrypted_key,
                 file.key_decryption_nonce,
@@ -99,19 +98,19 @@ impl<'a> SyncStore<'a> {
     /// Get files for a collection
     pub fn get_files_by_collection(
         &self,
-        account_id: i64,
+        user_id: i64,
         collection_id: i64,
     ) -> Result<Vec<RemoteFile>> {
         let mut stmt = self.conn.prepare(
             "SELECT file_id, collection_id, encrypted_key, key_decryption_nonce, 
-                    file_info, metadata, is_deleted, updated_at
+                    file_info, metadata, is_deleted, updated_at, owner_id
              FROM files 
-             WHERE account_id = ?1 AND collection_id = ?2 AND is_deleted = 0
+             WHERE owner_id = ?1 AND collection_id = ?2 AND is_deleted = 0
              ORDER BY file_id",
         )?;
 
         let files = stmt
-            .query_map(params![account_id, collection_id], |row| {
+            .query_map(params![user_id, collection_id], |row| {
                 let file_info: String = row.get(4)?;
                 let metadata: String = row.get(5)?;
 
@@ -134,7 +133,7 @@ impl<'a> SyncStore<'a> {
                 Ok(RemoteFile {
                     id: row.get(0)?,
                     collection_id: row.get(1)?,
-                    owner_id: 0, // Will need to fetch from account
+                    owner_id: row.get(8)?,
                     encrypted_key: row.get(2)?,
                     key_decryption_nonce: row.get(3)?,
                     file: file_obj,
@@ -150,19 +149,15 @@ impl<'a> SyncStore<'a> {
     }
 
     /// Update sync state
-    pub fn update_sync_state(
-        &self,
-        account_id: i64,
-        sync_type: &str,
-        timestamp: i64,
-    ) -> Result<()> {
+    pub fn update_sync_state(&self, user_id: i64, sync_type: &str, timestamp: i64) -> Result<()> {
         // For per-collection sync, store as generic key-value
         if sync_type.starts_with("collection_") {
             // Use a more generic approach for per-collection sync
+            // Note: We're assuming photos app for now - might need app parameter in future
             self.conn.execute(
-                "INSERT OR REPLACE INTO sync_state (account_id, last_file_sync) VALUES (?1, ?2)
-                 ON CONFLICT(account_id) DO UPDATE SET last_file_sync = MAX(last_file_sync, ?2)",
-                params![account_id, timestamp],
+                "INSERT OR REPLACE INTO sync_state (user_id, app, last_file_sync) VALUES (?1, 'photos', ?2)
+                 ON CONFLICT(user_id, app) DO UPDATE SET last_file_sync = MAX(last_file_sync, ?2)",
+                params![user_id, timestamp],
             )?;
             return Ok(());
         }
@@ -175,17 +170,17 @@ impl<'a> SyncStore<'a> {
         };
 
         let query = format!(
-            "INSERT OR REPLACE INTO sync_state (account_id, {column}) VALUES (?1, ?2)
-             ON CONFLICT(account_id) DO UPDATE SET {column} = ?2"
+            "INSERT OR REPLACE INTO sync_state (user_id, app, {column}) VALUES (?1, 'photos', ?2)
+             ON CONFLICT(user_id, app) DO UPDATE SET {column} = ?2"
         );
 
-        self.conn.execute(&query, params![account_id, timestamp])?;
+        self.conn.execute(&query, params![user_id, timestamp])?;
 
         Ok(())
     }
 
     /// Get last sync timestamp
-    pub fn get_last_sync(&self, account_id: i64, sync_type: &str) -> Result<Option<i64>> {
+    pub fn get_last_sync(&self, user_id: i64, sync_type: &str) -> Result<Option<i64>> {
         // For per-collection sync, just return 0 for now
         if sync_type.starts_with("collection_") {
             return Ok(Some(0));
@@ -198,11 +193,12 @@ impl<'a> SyncStore<'a> {
             _ => return Err(crate::Error::InvalidInput("Invalid sync type".into())),
         };
 
-        let query = format!("SELECT {column} FROM sync_state WHERE account_id = ?1");
+        let query =
+            format!("SELECT {column} FROM sync_state WHERE user_id = ?1 AND app = 'photos'");
         let mut stmt = self.conn.prepare(&query)?;
 
         let timestamp = stmt
-            .query_row(params![account_id], |row| row.get::<_, Option<i64>>(0))
+            .query_row(params![user_id], |row| row.get::<_, Option<i64>>(0))
             .optional()?
             .flatten();
 
@@ -210,50 +206,45 @@ impl<'a> SyncStore<'a> {
     }
 
     /// Mark album file as synced
-    pub fn mark_album_file_synced(
-        &self,
-        account_id: i64,
-        album_id: i64,
-        file_id: i64,
-    ) -> Result<()> {
+    pub fn mark_album_file_synced(&self, album_id: i64, file_id: i64) -> Result<()> {
         self.conn.execute(
             "UPDATE album_files SET synced_locally = 1 
-             WHERE account_id = ?1 AND album_id = ?2 AND file_id = ?3",
-            params![account_id, album_id, file_id],
+             WHERE album_id = ?1 AND file_id = ?2",
+            params![album_id, file_id],
         )?;
 
         Ok(())
     }
 
     /// Clear sync state for an account (for full sync)
-    pub fn clear_sync_state(&self, account_id: i64) -> Result<()> {
+    pub fn clear_sync_state(&self, user_id: i64) -> Result<()> {
         self.conn.execute(
-            "DELETE FROM sync_state WHERE account_id = ?1",
-            params![account_id],
+            "DELETE FROM sync_state WHERE user_id = ?1 AND app = 'photos'",
+            params![user_id],
         )?;
         Ok(())
     }
 
     /// Get files that need downloading (not synced locally)
-    pub fn get_pending_downloads(&self, account_id: i64) -> Result<Vec<RemoteFile>> {
+    pub fn get_pending_downloads(&self, user_id: i64) -> Result<Vec<RemoteFile>> {
         // First check how many files are already synced
         let synced_count: i64 = self.conn.query_row(
-            "SELECT COUNT(*) FROM files WHERE account_id = ?1 AND is_synced_locally = 1",
-            params![account_id],
+            "SELECT COUNT(*) FROM files WHERE owner_id = ?1 AND is_synced_locally = 1",
+            params![user_id],
             |row| row.get(0),
         )?;
         log::debug!("Files already synced locally: {synced_count}");
 
         let mut stmt = self.conn.prepare(
             "SELECT file_id, collection_id, encrypted_key, key_decryption_nonce, 
-                    file_info, metadata, is_deleted, updated_at
+                    file_info, metadata, is_deleted, updated_at, owner_id
              FROM files 
-             WHERE account_id = ?1 AND is_deleted = 0 AND is_synced_locally = 0
+             WHERE owner_id = ?1 AND is_deleted = 0 AND is_synced_locally = 0
              ORDER BY file_id",
         )?;
 
         let files = stmt
-            .query_map(params![account_id], |row| {
+            .query_map(params![user_id], |row| {
                 let file_info: String = row.get(4)?;
                 let metadata: String = row.get(5)?;
 
@@ -276,7 +267,7 @@ impl<'a> SyncStore<'a> {
                 Ok(RemoteFile {
                     id: row.get(0)?,
                     collection_id: row.get(1)?,
-                    owner_id: 0, // Will need to fetch from account
+                    owner_id: row.get(8)?,
                     encrypted_key: row.get(2)?,
                     key_decryption_nonce: row.get(3)?,
                     file: file_obj,
@@ -292,12 +283,7 @@ impl<'a> SyncStore<'a> {
     }
 
     /// Mark file as synced locally after successful download
-    pub fn mark_file_synced(
-        &self,
-        account_id: i64,
-        file_id: i64,
-        local_path: Option<&str>,
-    ) -> Result<()> {
+    pub fn mark_file_synced(&self, file_id: i64, local_path: Option<&str>) -> Result<()> {
         let rows_updated = if let Some(path) = local_path {
             self.conn.execute(
                 "UPDATE files SET is_synced_locally = 1, local_path = ?2 
@@ -312,20 +298,13 @@ impl<'a> SyncStore<'a> {
             )?
         };
 
-        log::debug!(
-            "Marked file {file_id} (account {account_id}) as synced locally, rows affected: {rows_updated}"
-        );
+        log::debug!("Marked file {file_id} as synced locally, rows affected: {rows_updated}");
 
         Ok(())
     }
 
     /// Update file local path (legacy method - consider using mark_file_synced instead)
-    pub fn update_file_local_path(
-        &self,
-        account_id: i64,
-        file_id: i64,
-        local_path: &str,
-    ) -> Result<()> {
-        self.mark_file_synced(account_id, file_id, Some(local_path))
+    pub fn update_file_local_path(&self, file_id: i64, local_path: &str) -> Result<()> {
+        self.mark_file_synced(file_id, Some(local_path))
     }
 }
