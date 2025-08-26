@@ -379,14 +379,14 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
             colorScheme,
             textTheme,
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: crossAxisSpacing),
           _buildTabButton(
             TabFilter.similar,
             AppLocalizations.of(context).similar,
             colorScheme,
             textTheme,
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: crossAxisSpacing),
           _buildTabButton(
             TabFilter.identical,
             AppLocalizations.of(context).identical,
@@ -409,14 +409,16 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     return GestureDetector(
       onTap: () => _onTabChanged(tab),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         decoration: BoxDecoration(
           color: isSelected ? colorScheme.primary700 : colorScheme.fillFaint,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
           label,
-          style: isSelected ? textTheme.bodyMuted : textTheme.bodyBold,
+          style: isSelected
+              ? textTheme.smallBold.copyWith(color: Colors.white)
+              : textTheme.smallBold,
         ),
       ),
     );
