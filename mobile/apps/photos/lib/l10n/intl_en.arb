@@ -1866,7 +1866,7 @@
   "@deletePhotosWithSize": {
     "placeholders": {
       "count": {
-        "type": "int"
+        "type": "String"
       },
       "size": {
         "type": "String"

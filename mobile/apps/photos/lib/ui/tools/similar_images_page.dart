@@ -2,6 +2,7 @@ import "dart:async";
 
 import "package:flutter/foundation.dart" show kDebugMode;
 import 'package:flutter/material.dart';
+import "package:intl/intl.dart";
 import 'package:logging/logging.dart';
 import "package:photos/core/configuration.dart";
 import 'package:photos/core/constants.dart';
@@ -502,7 +503,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                               child: ButtonWidget(
                                 labelText: AppLocalizations.of(context)
                                     .deletePhotosWithSize(
-                                  count: selectedFilteredFiles.length,
+                                  count: NumberFormat().format(selectedFilteredFiles.length),
                                   size: formatBytes(totalSize),
                                 ),
                                 buttonType: ButtonType.critical,
