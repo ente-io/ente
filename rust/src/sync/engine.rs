@@ -196,6 +196,14 @@ impl SyncEngine {
                         },
                         is_deleted: file.is_deleted,
                         updated_at: file.updation_time,
+                        pub_magic_metadata: file.pub_magic_metadata.as_ref().map(|m| {
+                            crate::models::file::MagicMetadata {
+                                version: m.version,
+                                count: m.count,
+                                data: m.data.clone(),
+                                header: m.header.clone(),
+                            }
+                        }),
                     };
 
                     // Upsert file (insert or update)

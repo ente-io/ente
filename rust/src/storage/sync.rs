@@ -141,6 +141,7 @@ impl<'a> SyncStore<'a> {
                     metadata: metadata_obj,
                     is_deleted: row.get::<_, i32>(6)? != 0,
                     updated_at: row.get(7)?,
+                    pub_magic_metadata: None, // TODO: Store and retrieve from database if needed
                 })
             })?
             .collect::<std::result::Result<Vec<_>, _>>()?;
@@ -275,6 +276,7 @@ impl<'a> SyncStore<'a> {
                     metadata: metadata_obj,
                     is_deleted: row.get::<_, i32>(6)? != 0,
                     updated_at: row.get(7)?,
+                    pub_magic_metadata: None, // TODO: Store and retrieve from database if needed
                 })
             })?
             .collect::<std::result::Result<Vec<_>, _>>()?;

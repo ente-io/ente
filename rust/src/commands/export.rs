@@ -195,9 +195,34 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
                     }
                 };
 
+                // Decrypt public magic metadata to check for edited name
+                let pub_magic_metadata = if file.pub_magic_metadata.is_some() {
+                    match decrypt_magic_metadata(
+                        file.pub_magic_metadata.as_ref().unwrap(),
+                        &file_key,
+                    ) {
+                        Ok(meta) => meta,
+                        Err(e) => {
+                            log::debug!(
+                                "Failed to decrypt public magic metadata for file {}: {}",
+                                file.id,
+                                e
+                            );
+                            None
+                        }
+                    }
+                } else {
+                    None
+                };
+
                 // Generate export path with original filename from metadata
-                let file_path =
-                    generate_export_path(export_path, &file, Some(collection), metadata.as_ref())?;
+                let file_path = generate_export_path(
+                    export_path,
+                    &file,
+                    Some(collection),
+                    metadata.as_ref(),
+                    pub_magic_metadata.as_ref(),
+                )?;
 
                 // Skip if file already exists
                 if file_path.exists() {
@@ -285,6 +310,7 @@ fn generate_export_path(
     file: &crate::api::models::File,
     collection: Option<&crate::api::models::Collection>,
     metadata: Option<&FileMetadata>,
+    pub_magic_metadata: Option<&serde_json::Value>,
 ) -> Result<PathBuf> {
     use chrono::{TimeZone, Utc};
 
@@ -324,16 +350,25 @@ fn generate_export_path(
         path.push(safe_name);
     }
 
-    // Use original filename from metadata if available
-    let filename = if let Some(meta) = metadata {
-        if let Some(title) = meta.get_title() {
-            // Sanitize filename for filesystem
-            sanitize_filename(title)
+    // Use filename from public magic metadata (edited name) or regular metadata
+    let filename = {
+        // First check for edited name in public magic metadata
+        if let Some(pub_meta) = pub_magic_metadata
+            && let Some(edited_name) = pub_meta.get("editedName")
+            && let Some(name_str) = edited_name.as_str()
+            && !name_str.is_empty()
+        {
+            sanitize_filename(name_str)
+        } else if let Some(meta) = metadata {
+            // Fall back to original title from metadata
+            if let Some(title) = meta.get_title() {
+                sanitize_filename(title)
+            } else {
+                generate_fallback_filename(file, metadata)
+            }
         } else {
-            generate_fallback_filename(file, metadata)
+            generate_fallback_filename(file, None)
         }
-    } else {
-        generate_fallback_filename(file, None)
     };
     path.push(filename);
 
@@ -423,5 +458,28 @@ fn decrypt_file_metadata(
 
     // Parse JSON metadata
     let metadata: FileMetadata = serde_json::from_slice(&decrypted)?;
+    Ok(Some(metadata))
+}
+
+/// Decrypt magic metadata (public or private)
+fn decrypt_magic_metadata(
+    magic_metadata: &crate::api::models::MagicMetadata,
+    file_key: &[u8],
+) -> Result<Option<serde_json::Value>> {
+    use base64::engine::general_purpose::STANDARD as BASE64;
+
+    // Check if data exists
+    if magic_metadata.data.is_empty() || magic_metadata.header.is_empty() {
+        return Ok(None);
+    }
+
+    let encrypted_bytes = BASE64.decode(&magic_metadata.data)?;
+    let header_bytes = BASE64.decode(&magic_metadata.header)?;
+
+    // Decrypt the metadata using streaming XChaCha20-Poly1305
+    let decrypted = decrypt_stream(&encrypted_bytes, &header_bytes, file_key)?;
+
+    // Parse as generic JSON since magic metadata structure can vary
+    let metadata: serde_json::Value = serde_json::from_slice(&decrypted)?;
     Ok(Some(metadata))
 }

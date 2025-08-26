@@ -20,6 +20,16 @@ pub struct RemoteFile {
     pub is_deleted: bool,
     #[serde(rename = "updatedAt")]
     pub updated_at: i64,
+    #[serde(rename = "pubMagicMetadata")]
+    pub pub_magic_metadata: Option<MagicMetadata>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MagicMetadata {
+    pub version: i32,
+    pub count: i32,
+    pub data: String,
+    pub header: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

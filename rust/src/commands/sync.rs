@@ -268,6 +268,20 @@ fn decrypt_collection_keys(
     Ok(keys)
 }
 
+/// Sanitize a filename for the filesystem
+fn sanitize_filename(name: &str) -> String {
+    name.chars()
+        .map(|c| match c {
+            '/' | '\\' | ':' | '*' | '?' | '"' | '<' | '>' | '|' => '_',
+            '\0' => '_',
+            c if c.is_control() => '_',
+            c => c,
+        })
+        .collect::<String>()
+        .trim()
+        .to_string()
+}
+
 /// Prepare download tasks with proper file paths
 async fn prepare_download_tasks(
     files: &[crate::models::file::RemoteFile],
@@ -290,7 +304,7 @@ async fn prepare_download_tasks(
         let collection = collection_map.get(&file.collection_id);
 
         // Try to decrypt metadata to get original filename
-        let metadata = if let Some(col_key) =
+        let (metadata, pub_magic_metadata) = if let Some(col_key) =
             download_manager.collection_keys.get(&file.collection_id)
         {
             // Decrypt file key first
@@ -300,9 +314,8 @@ async fn prepare_download_tasks(
                 secret_box_open(&key_bytes, &nonce, col_key)?
             };
 
-            // Then decrypt metadata if available
-            // Note: file.metadata is a crate::models::file::MetadataInfo, not FileAttributes
-            if !file.metadata.encrypted_data.is_empty() {
+            // Decrypt regular metadata
+            let regular_meta = if !file.metadata.encrypted_data.is_empty() {
                 if !file.metadata.decryption_header.is_empty() {
                     let encrypted_bytes = BASE64.decode(&file.metadata.encrypted_data)?;
                     let header_bytes = BASE64.decode(&file.metadata.decryption_header)?;
@@ -319,9 +332,37 @@ async fn prepare_download_tasks(
                 }
             } else {
                 None
-            }
+            };
+
+            // Decrypt public magic metadata if available
+            let pub_meta = if let Some(ref magic) = file.pub_magic_metadata {
+                if !magic.data.is_empty() && !magic.header.is_empty() {
+                    let encrypted_bytes = BASE64.decode(&magic.data)?;
+                    let header_bytes = BASE64.decode(&magic.header)?;
+
+                    match decrypt_stream(&encrypted_bytes, &header_bytes, &file_key) {
+                        Ok(decrypted) => {
+                            serde_json::from_slice::<serde_json::Value>(&decrypted).ok()
+                        }
+                        Err(e) => {
+                            log::debug!(
+                                "Failed to decrypt public magic metadata for file {}: {}",
+                                file.id,
+                                e
+                            );
+                            None
+                        }
+                    }
+                } else {
+                    None
+                }
+            } else {
+                None
+            };
+
+            (regular_meta, pub_meta)
         } else {
-            None
+            (None, None)
         };
 
         // Generate export path
@@ -356,15 +397,25 @@ async fn prepare_download_tasks(
             path.push(safe_name.trim());
         }
 
-        // Use original filename from metadata or generate fallback
-        let filename = if let Some(ref meta) = metadata {
-            if let Some(title) = meta.get_title() {
-                title.to_string()
+        // Use filename from public magic metadata (edited name) or regular metadata
+        let filename = {
+            // First check for edited name in public magic metadata
+            if let Some(ref pub_meta) = pub_magic_metadata
+                && let Some(edited_name) = pub_meta.get("editedName")
+                && let Some(name_str) = edited_name.as_str()
+                && !name_str.is_empty()
+            {
+                sanitize_filename(name_str)
+            } else if let Some(ref meta) = metadata {
+                // Fall back to original title from metadata
+                if let Some(title) = meta.get_title() {
+                    sanitize_filename(title)
+                } else {
+                    format!("file_{}.jpg", file.id)
+                }
             } else {
                 format!("file_{}.jpg", file.id)
             }
-        } else {
-            format!("file_{}.jpg", file.id)
         };
 
         path.push(filename);
