@@ -321,55 +321,9 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         Expanded(
           child: ListView.builder(
             cacheExtent: 400,
-            itemCount: _similarFilesList.length + 1, // +1 for header
+            itemCount: _similarFilesList.length,
             itemBuilder: (context, index) {
-              if (index == 0) {
-                return RepaintBoundary(
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: crossAxisSpacing,
-                      vertical: 12,
-                    ),
-                    padding: const EdgeInsets.all(crossAxisSpacing),
-                    decoration: BoxDecoration(
-                      color: colorScheme.fillFaint,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.photo_library_outlined,
-                          size: 20,
-                          color: colorScheme.textMuted,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                AppLocalizations.of(context).similarGroupsFound(
-                                  count: _similarFilesList.length,
-                                ),
-                                style: textTheme.bodyBold,
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                AppLocalizations.of(context)
-                                    .reviewAndRemoveSimilarImages,
-                                style: textTheme.miniMuted,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }
-
-              // Similar files groups (index - 1 because first item is header)
-              final similarFiles = _similarFilesList[index - 1];
+              final similarFiles = _similarFilesList[index];
               return RepaintBoundary(
                 child: _buildSimilarFilesGroup(similarFiles),
               );
