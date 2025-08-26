@@ -423,21 +423,17 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   }
 
   void _onTabChanged(TabFilter newTab) {
-    final hadSelections = _selectedFiles.files.isNotEmpty;
-
     setState(() {
       _selectedTab = newTab;
 
-      if (hadSelections) {
-        final newSelection = <EnteFile>{};
-        for (final group in _filteredGroups) {
-          for (int i = 1; i < group.files.length; i++) {
-            newSelection.add(group.files[i]);
-          }
+      final newSelection = <EnteFile>{};
+      for (final group in _filteredGroups) {
+        for (int i = 1; i < group.files.length; i++) {
+          newSelection.add(group.files[i]);
         }
-        _selectedFiles.clearAll();
-        _selectedFiles.selectAll(newSelection);
       }
+      _selectedFiles.clearAll();
+      _selectedFiles.selectAll(newSelection);
     });
   }
 
