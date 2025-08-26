@@ -55,7 +55,7 @@ class BaseConfiguration {
 
   // Keys that should not be deleted during logout
   // These keys are necessary for functionality that needs to work even when users
-  // aren't signed in, such as using Auth without backup 
+  // aren't signed in, such as using Auth without backup
   List<String> preservedKeys = [offlineAuthSecretKey];
 
   Future<void> init(List<EnteBaseDatabase> dbs) async {
@@ -74,14 +74,7 @@ class BaseConfiguration {
 
   Future<void> logout({bool autoLogout = false}) async {
     await _preferences.clear();
-
-    // Delete all keys except preserved ones
-    final allKeys = await _secureStorage.readAll();
-    for (final key in allKeys.keys) {
-      if (!preservedKeys.contains(key)) {
-        await _secureStorage.delete(key: key);
-      }
-    }
+    await resetSecureStorage();
     for (final db in _databases) {
       await db.clearTable();
     }
@@ -89,6 +82,16 @@ class BaseConfiguration {
     _cachedToken = null;
     _secretKey = null;
     Bus.instance.fire(SignedOutEvent());
+  }
+
+  Future<void> resetSecureStorage() async {
+    // Delete all keys except preserved ones
+    final allKeys = await _secureStorage.readAll();
+    for (final key in allKeys.keys) {
+      if (!preservedKeys.contains(key)) {
+        await _secureStorage.delete(key: key);
+      }
+    }
   }
 
   Future<KeyGenResult> generateKey(String password) async {
@@ -395,15 +398,7 @@ class BaseConfiguration {
   Future<void> _setupKeys() async {
     try {
       if (!_preferences.containsKey(tokenKey)) {
-
-        // Delete all keys except preserved ones
-        final allKeys = await _secureStorage.readAll();
-        for (final key in allKeys.keys) {
-          if (!preservedKeys.contains(key)) {
-            await _secureStorage.delete(key: key);
-          }
-        }
-
+        await resetSecureStorage();
         return;
       }
       _key = await _secureStorage.read(key: keyKey);
