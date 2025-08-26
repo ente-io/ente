@@ -506,21 +506,18 @@ class _HomePageState extends UploaderPageState<HomePage>
                   title: context.l10n.collections,
                   collections: _displayedCollections,
                   viewType: CollectionViewType.homeCollections,
-                  addSeparator: true,
                 ),
                 if (outgoingCollections.isNotEmpty)
                   ..._buildCollectionSection(
                     title: context.l10n.sharedByYou,
                     collections: outgoingCollections,
                     viewType: CollectionViewType.outgoingCollections,
-                    addSeparator: incomingCollections.isNotEmpty,
                   ),
                 if (incomingCollections.isNotEmpty)
                   ..._buildCollectionSection(
                     title: context.l10n.sharedWithYou,
                     collections: incomingCollections,
                     viewType: CollectionViewType.incomingCollections,
-                    addSeparator: true,
                   ),
                 _buildRecentsSection(),
               ],
@@ -741,7 +738,6 @@ class _HomePageState extends UploaderPageState<HomePage>
     required String title,
     required List<Collection> collections,
     required CollectionViewType viewType,
-    bool addSeparator = true,
   }) {
     return [
       SectionOptions(
@@ -766,7 +762,7 @@ class _HomePageState extends UploaderPageState<HomePage>
         collections: collections,
         collectionFileCounts: _collectionFileCounts,
       ),
-      if (addSeparator) const SizedBox(height: 24),
+      const SizedBox(height: 24),
     ];
   }
 }
