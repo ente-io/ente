@@ -1874,7 +1874,7 @@
     }
   },
   "selectionOptions": "Selection options",
-  "selectExactWithCount": "Select exact ({count})",
+  "selectExactWithCount": "Exactly similar ({count})",
   "@selectExactWithCount": {
     "placeholders": {
       "count": {
@@ -1883,7 +1883,7 @@
     }
   },
   "selectExact": "Select exact",
-  "selectSimilarWithCount": "Select similar ({count})",
+  "selectSimilarWithCount": "Mostly similar ({count})",
   "@selectSimilarWithCount": {
     "placeholders": {
       "count": {
@@ -1892,7 +1892,7 @@
     }
   },
   "selectSimilar": "Select similar",
-  "selectAllWithCount": "Select all ({count})",
+  "selectAllWithCount": "All similarities ({count})",
   "@selectAllWithCount": {
     "placeholders": {
       "count": {
@@ -1901,7 +1901,7 @@
     }
   },
   "selectSimilarImagesTitle": "Select similar images",
-  "chooseSimilarImagesToSelect": "Choose which similar images to select for deletion",
+  "chooseSimilarImagesToSelect": "Select images based on their visual similarity",
   "clearSelection": "Clear selection",
   "similarImagesCount": "{count} similar images",
   "@similarImagesCount": {
@@ -1936,9 +1936,10 @@
   "size": "Size",
   "similarity": "Similarity",
   "analyzingPhotosLocally": "Analyzing your photos locally",
+  "lookingForVisualSimilarities": "Looking for visual similarities",
+  "comparingImageDetails": "Comparing image details",
   "findingSimilarImages": "Finding similar images",
-  "processingVisualPatterns": "Processing visual patterns",
-  "comparingImageFeatures": "Comparing image features",
   "almostDone": "Almost done",
-  "processingLocally": "Processing locally"
+  "processingLocally": "Processing locally",
+  "useMLToFindSimilarImages": "Use ML to find images that look similar to each other."
 }

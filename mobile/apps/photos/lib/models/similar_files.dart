@@ -15,7 +15,6 @@ class SimilarFiles {
 
   int get totalSize => files.fold(0, (sum, file) => sum + (file.fileSize ?? 0));
 
-  // TODO: lau: check if we're not using this wrong
   bool get isEmpty => files.isEmpty;
 
   int get length => files.length;

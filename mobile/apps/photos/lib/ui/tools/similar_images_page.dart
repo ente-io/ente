@@ -3,9 +3,9 @@ import "dart:async";
 import "package:flutter/foundation.dart" show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import "package:photos/core/configuration.dart";
 import 'package:photos/core/constants.dart';
 import "package:photos/generated/l10n.dart";
-
 import "package:photos/models/file/file.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/models/similar_files.dart";
@@ -19,7 +19,6 @@ import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
-
 import "package:photos/utils/delete_file_util.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -444,6 +443,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                                   await _deleteFiles(
                                     _selectedFiles.files,
                                     showDialog: true,
+                                    showUIFeedback: true,
                                   );
                                 },
                               ),
@@ -856,7 +856,11 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
 
     return GestureDetector(
       onTap: () async {
-        await _deleteFiles(files, showDialog: showDialog);
+        await _deleteFiles(
+          files,
+          showDialog: showDialog,
+          showUIFeedback: false,
+        );
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -888,6 +892,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   Future<void> _deleteFiles(
     Set<EnteFile> filesToDelete, {
     bool showDialog = true,
+    bool showUIFeedback = true,
   }) async {
     if (filesToDelete.isEmpty) return;
     if (showDialog) {
@@ -899,7 +904,11 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         isCritical: true,
         firstButtonOnTap: () async {
           try {
-            await _deleteFilesLogic(filesToDelete, true);
+            await _deleteFilesLogic(
+              filesToDelete,
+              true,
+              showUIFeedback: showUIFeedback,
+            );
           } catch (e, s) {
             _logger.severe("Failed to delete files", e, s);
             if (flagService.internalUser) {
@@ -909,14 +918,19 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         },
       );
     } else {
-      await _deleteFilesLogic(filesToDelete, true);
+      await _deleteFilesLogic(
+        filesToDelete,
+        true,
+        showUIFeedback: showUIFeedback,
+      );
     }
   }
 
   Future<void> _deleteFilesLogic(
     Set<EnteFile> filesToDelete,
-    bool createSymlink,
-  ) async {
+    bool createSymlink, {
+    bool showUIFeedback = true,
+  }) async {
     if (filesToDelete.isEmpty) {
       return;
     }
@@ -962,32 +976,44 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     }
 
     if (createSymlink) {
+      final userID = Configuration.instance.getUserID();
       final int collectionCnt = collectionToFilesToAddMap.keys.length;
       int progress = 0;
       for (final collectionID in collectionToFilesToAddMap.keys) {
         if (!mounted) {
           return;
         }
-        if (collectionCnt > 0) {
+        if (collectionCnt > 0 && showUIFeedback) {
           progress++;
           // calculate progress percentage upto 2 decimal places
           final double percentage = (progress / collectionCnt) * 100;
           _deleteProgress.value = '${percentage.toStringAsFixed(1)}%';
         }
-        await CollectionsService.instance.addSilentlyToCollection(
-          collectionID,
-          collectionToFilesToAddMap[collectionID]!.toList(),
-        );
+        // Check permission before attempting to add symlinks
+        final collection =
+            CollectionsService.instance.getCollectionByID(collectionID);
+        if (collection != null && collection.canAutoAdd(userID!)) {
+          await CollectionsService.instance.addSilentlyToCollection(
+            collectionID,
+            collectionToFilesToAddMap[collectionID]!.toList(),
+          );
+        } else {
+          _logger.warning(
+            "Skipping adding symlinks to collection $collectionID due to missing permissions (${collection?.canAutoAdd(userID!) ?? false}) or collection not found. (${collection == null})",
+          );
+        }
       }
     }
-    _deleteProgress.value = "";
+    if (showUIFeedback) {
+      _deleteProgress.value = "";
+    }
 
     _selectedFiles.unSelectAll(allDeleteFiles);
     setState(() {});
     await deleteFilesFromRemoteOnly(context, allDeleteFiles.toList());
 
     // Show congratulations popup
-    if (allDeleteFiles.isNotEmpty && mounted) {
+    if (allDeleteFiles.isNotEmpty && mounted && showUIFeedback) {
       final int totalSize = allDeleteFiles.fold<int>(
         0,
         (sum, file) => sum + (file.fileSize ?? 0),
@@ -1133,9 +1159,9 @@ class _SimilarImagesLoadingWidgetState extends State<SimilarImagesLoadingWidget>
 
   List<String> get _loadingMessages => [
         AppLocalizations.of(context).analyzingPhotosLocally,
+        AppLocalizations.of(context).lookingForVisualSimilarities,
+        AppLocalizations.of(context).comparingImageDetails,
         AppLocalizations.of(context).findingSimilarImages,
-        AppLocalizations.of(context).processingVisualPatterns,
-        AppLocalizations.of(context).comparingImageFeatures,
         AppLocalizations.of(context).almostDone,
       ];
 
