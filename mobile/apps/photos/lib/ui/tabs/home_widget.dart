@@ -64,7 +64,7 @@ import 'package:photos/ui/home/start_backup_hook_widget.dart';
 import 'package:photos/ui/notification/update/change_log_page.dart';
 import "package:photos/ui/settings/app_update_dialog.dart";
 import "package:photos/ui/settings_page.dart";
-import "package:photos/ui/tabs/shared_collections_tab.dart";
+import "package:photos/ui/tabs/feed_tab.dart";
 import "package:photos/ui/tabs/user_collections_tab.dart";
 import "package:photos/ui/viewer/actions/file_viewer.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
@@ -87,7 +87,7 @@ class HomeWidget extends StatefulWidget {
 }
 
 class _HomeWidgetState extends State<HomeWidget> {
-  static const _sharedCollectionTab = SharedCollectionsTab();
+  static const _feedTab = FeedTab();
   static const _searchTab = SearchTab();
   static final _settingsPage = SettingsPage(
     emailNotifier: UserService.instance.emailValueNotifier,
@@ -761,7 +761,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                         selectedFiles: _selectedFiles,
                       ),
                 UserCollectionsTab(selectedAlbums: _selectedAlbums),
-                _sharedCollectionTab,
+                _feedTab,
                 _searchTab,
               ],
             );

@@ -151,7 +151,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                         ),
                         GButton(
                           margin: const EdgeInsets.fromLTRB(10, 6, 8, 6),
-                          icon: Icons.people_outlined,
+                          icon: Icons.rss_feed_outlined,
                           iconColor: enteColorScheme.tabIcon,
                           iconActiveColor: strokeBaseLight,
                           text: '',
