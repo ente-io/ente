@@ -44,8 +44,10 @@ The Rust CLI now has a **fully functional export capability** with proper file d
 
 ### Account Management (`/rust/src/commands/account.rs`)
 - ✅ **Account list** - Display all configured accounts
-- ✅ **Account add** (partial) - Add account with stored credentials
+- ✅ **Account add** - Full SRP authentication implemented
 - ✅ Store encrypted credentials in SQLite
+- ✅ 2FA/OTP support
+- ✅ Proper key derivation with Argon2
 
 ### Metadata Handling (`/rust/src/models/metadata.rs`)
 - ✅ **Metadata decryption and parsing**
@@ -55,23 +57,27 @@ The Rust CLI now has a **fully functional export capability** with proper file d
 
 ## In Progress 🚧
 
+### Sync Command (`/rust/src/commands/sync.rs`)
+- ✅ **Metadata sync implemented**
+- ✅ Fetch collections with pagination
+- ✅ Fetch files metadata per collection (matching Go CLI)
+- ✅ Store sync state in SQLite
+- ✅ Handle deleted files/collections
+- ✅ Per-collection incremental sync tracking for metadata
+- ⚠️ **File downloads NOT integrated** - only syncs metadata currently
+- 📝 TODO: Integrate DownloadManager for actual file downloads
+
 ### File Download Manager
-- ⚠️ Basic structure exists but not fully integrated
+- ✅ Basic structure implemented (`/rust/src/sync/download.rs`)
+- ✅ Download individual files with decryption
+- ✅ Parallel download infrastructure
+- ⚠️ **NOT integrated with sync command**
 - Need to implement:
-  - Parallel downloads with progress tracking
-  - Integration with sync command
+  - Integration with sync command for full sync mode
+  - Progress tracking UI
   - Resume interrupted downloads
 
 ## Remaining Components 📝
-
-### Sync Command (`/rust/src/commands/sync.rs`)
-- ✅ **Full sync command implemented**
-- ✅ Fetch collections with pagination
-- ✅ Fetch files per collection (matching Go CLI)
-- ✅ Store sync state in SQLite
-- ✅ Handle deleted files/collections
-- ✅ Metadata-only and full sync modes
-- ✅ Per-collection incremental sync tracking
 
 ### Database and Storage (`/rust/src/storage/`)
 - ✅ **Platform-specific config directory** (`~/.config/ente-cli/`)
@@ -142,14 +148,15 @@ The Rust CLI now has a **fully functional export capability** with proper file d
 ### Feature Parity Progress
 - [x] Multi-account support (storage)
 - [x] Photos export (basic)
-- [x] Sync command (collections and files)
+- [x] Sync command (metadata only currently)
 - [x] Album organization
 - [x] Deduplicated storage
 - [x] Platform-specific config paths
-- [ ] SRP authentication (using stored tokens currently)
+- [x] SRP authentication (fully implemented)
+- [ ] Full sync with file downloads
 - [ ] Locker export
 - [ ] Auth (2FA) export
-- [ ] Incremental sync (partial - needs testing)
+- [x] Incremental sync (metadata only)
 - [ ] Export filters (albums, shared, hidden)
 
 ### Data Migration

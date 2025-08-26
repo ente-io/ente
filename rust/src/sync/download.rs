@@ -16,7 +16,7 @@ pub struct DownloadManager {
     #[allow(dead_code)]
     storage: Storage,
     temp_dir: PathBuf,
-    collection_keys: HashMap<i64, Vec<u8>>,
+    pub collection_keys: HashMap<i64, Vec<u8>>,
     concurrent_downloads: usize,
 }
 
@@ -111,9 +111,11 @@ impl DownloadManager {
         let results: Vec<_> = stream::iter(files)
             .map(|(file, path)| {
                 let account_id = account_id.to_string();
+                let file_clone = file.clone();
+                let path_clone = path.clone();
                 async move {
                     let result = self.download_file(&account_id, &file, &path).await;
-                    (file.id, result)
+                    (file_clone, path_clone, result)
                 }
             })
             .buffer_unordered(self.concurrent_downloads)
@@ -121,11 +123,14 @@ impl DownloadManager {
             .await;
 
         // Count results
-        for (_file_id, result) in results {
+        for (file, path, result) in results {
             match result {
-                Ok(_) => stats.successful += 1,
+                Ok(_) => {
+                    stats.successful += 1;
+                    stats.successful_downloads.push((file, path));
+                }
                 Err(e) => {
-                    log::error!("Download failed: {e}");
+                    log::error!("Download failed for file {}: {}", file.id, e);
                     stats.failed += 1;
                 }
             }
@@ -238,6 +243,7 @@ pub struct DownloadStats {
     pub successful: usize,
     pub failed: usize,
     pub skipped: usize,
+    pub successful_downloads: Vec<(RemoteFile, PathBuf)>,
 }
 
 impl DownloadStats {

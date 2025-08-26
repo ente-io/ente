@@ -1,4 +1,4 @@
-mod download;
+pub mod download;
 mod engine;
 mod files;
 

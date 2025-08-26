@@ -204,4 +204,53 @@ impl<'a> SyncStore<'a> {
         )?;
         Ok(())
     }
+
+    /// Get files that need downloading (no local_path)
+    pub fn get_pending_downloads(&self, account_id: i64) -> Result<Vec<RemoteFile>> {
+        let mut stmt = self.conn.prepare(
+            "SELECT file_id, collection_id, encrypted_key, key_decryption_nonce, 
+                    file_info, metadata, is_deleted, updated_at
+             FROM files 
+             WHERE account_id = ?1 AND is_deleted = 0 AND local_path IS NULL
+             ORDER BY file_id",
+        )?;
+
+        let files = stmt
+            .query_map(params![account_id], |row| {
+                let file_info: String = row.get(4)?;
+                let metadata: String = row.get(5)?;
+
+                Ok(RemoteFile {
+                    id: row.get(0)?,
+                    collection_id: row.get(1)?,
+                    owner_id: 0, // Will need to fetch from account
+                    encrypted_key: row.get(2)?,
+                    key_decryption_nonce: row.get(3)?,
+                    file: serde_json::from_str(&file_info).unwrap(),
+                    thumbnail: serde_json::from_str("{}").unwrap(), // Placeholder
+                    metadata: serde_json::from_str(&metadata).unwrap(),
+                    is_deleted: row.get::<_, i32>(6)? != 0,
+                    updated_at: row.get(7)?,
+                })
+            })?
+            .collect::<std::result::Result<Vec<_>, _>>()?;
+
+        Ok(files)
+    }
+
+    /// Update file local path after successful download
+    pub fn update_file_local_path(
+        &self,
+        account_id: i64,
+        file_id: i64,
+        local_path: &str,
+    ) -> Result<()> {
+        self.conn.execute(
+            "UPDATE files SET local_path = ?3 
+             WHERE account_id = ?1 AND file_id = ?2",
+            params![account_id, file_id, local_path],
+        )?;
+
+        Ok(())
+    }
 }

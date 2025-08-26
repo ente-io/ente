@@ -1,9 +1,13 @@
 use crate::Result;
 use crate::api::client::ApiClient;
-use crate::models::account::Account;
+use crate::api::methods::ApiMethods;
+use crate::crypto::secret_box_open;
+use crate::models::{account::Account, metadata::FileMetadata};
 use crate::storage::Storage;
-use crate::sync::{SyncEngine, SyncStats};
+use crate::sync::{SyncEngine, SyncStats, download::DownloadManager};
 use base64::Engine;
+use std::collections::HashMap;
+use std::path::{Path, PathBuf};
 
 pub async fn run_sync(
     account_email: Option<String>,
@@ -83,12 +87,17 @@ async fn sync_account(
         storage.sync().clear_sync_state(account.id)?;
     }
 
-    // Create sync engine (need to create new storage instance for ownership)
+    // Create sync engine (need to create new instances for ownership)
     let db_path = storage
         .db_path()
         .ok_or_else(|| crate::Error::Generic("Database path not available".into()))?;
+
+    // Create API client for sync engine
+    let sync_api_client = ApiClient::new(Some(account.endpoint.clone()))?;
+    sync_api_client.add_token(&account.email, &token);
+
     let sync_storage = Storage::new(db_path)?;
-    let sync_engine = SyncEngine::new(api_client, sync_storage, account.clone());
+    let sync_engine = SyncEngine::new(sync_api_client, sync_storage, account.clone());
 
     // Run sync
     println!("Fetching collections and files...");
@@ -99,15 +108,74 @@ async fn sync_account(
 
     // Download files if not metadata-only
     if !metadata_only {
-        println!("\n📥 Downloading files would happen here (not yet implemented)");
-        // TODO: Implement file download using DownloadManager
-        // let pending_files = sync_engine.get_pending_downloads().await?;
-        // if !pending_files.is_empty() {
-        //     println!("Found {} files to download", pending_files.len());
-        //     let download_manager = DownloadManager::new(api_client, storage.clone())?;
-        //     // Set collection keys...
-        //     // Download files...
-        // }
+        // Get pending downloads
+        let pending_files = storage.sync().get_pending_downloads(account.id)?;
+
+        if !pending_files.is_empty() {
+            println!("\n📥 Found {} files to download", pending_files.len());
+
+            // Get collections to decrypt collection keys
+            // Need to fetch from API to get the api::models::Collection type with encrypted_key
+            let api = ApiMethods::new(&api_client);
+            let api_collections = api.get_collections(&account.email, 0).await?;
+
+            // Decrypt collection keys
+            let collection_keys = decrypt_collection_keys(
+                &api_collections,
+                &secrets.master_key,
+                &secrets.secret_key,
+            )?;
+
+            // Create download manager
+            // Create a new API client for the download manager
+            let download_api_client = ApiClient::new(Some(account.endpoint.clone()))?;
+            download_api_client.add_token(&account.email, &token);
+
+            // Create another storage instance for download manager
+            let download_storage = Storage::new(db_path)?;
+            let mut download_manager = DownloadManager::new(download_api_client, download_storage)?;
+            download_manager.set_collection_keys(collection_keys);
+
+            // Determine export directory
+            let export_dir = if let Some(ref dir) = account.export_dir {
+                PathBuf::from(dir)
+            } else {
+                std::env::current_dir()?.join("ente-export")
+            };
+
+            // Prepare download tasks with proper paths
+            let download_tasks = prepare_download_tasks(
+                &pending_files,
+                &export_dir,
+                &api_collections,
+                &download_manager,
+            )
+            .await?;
+
+            // Download files
+            let download_stats = download_manager
+                .download_files(&account.email, download_tasks)
+                .await?;
+
+            // Update local paths in database
+            for (file, path) in &download_stats.successful_downloads {
+                storage.sync().update_file_local_path(
+                    account.id,
+                    file.id,
+                    path.to_str().unwrap_or(""),
+                )?;
+            }
+
+            println!(
+                "\n✅ Downloaded {} files successfully",
+                download_stats.successful
+            );
+            if download_stats.failed > 0 {
+                println!("❌ Failed to download {} files", download_stats.failed);
+            }
+        } else {
+            println!("\n✨ All files are already downloaded");
+        }
     } else {
         println!("\n📋 Metadata-only sync completed (skipping file downloads)");
     }
@@ -140,4 +208,147 @@ fn display_sync_stats(stats: &SyncStats) {
         stats.files.updated
     );
     println!("└─────────────────────────────────────┘");
+}
+
+/// Decrypt collection keys for file decryption
+fn decrypt_collection_keys(
+    collections: &[crate::api::models::Collection],
+    master_key: &[u8],
+    _secret_key: &[u8],
+) -> Result<HashMap<i64, Vec<u8>>> {
+    use base64::engine::general_purpose::STANDARD as BASE64;
+
+    let mut keys = HashMap::new();
+
+    for collection in collections {
+        if collection.is_deleted {
+            continue;
+        }
+
+        // Decrypt collection key
+        let encrypted_bytes = BASE64.decode(&collection.encrypted_key)?;
+        let nonce_bytes = BASE64.decode(&collection.key_decryption_nonce)?;
+
+        match secret_box_open(&encrypted_bytes, &nonce_bytes, master_key) {
+            Ok(key) => {
+                keys.insert(collection.id, key);
+            }
+            Err(e) => {
+                log::warn!(
+                    "Failed to decrypt key for collection {}: {}",
+                    collection.id,
+                    e
+                );
+            }
+        }
+    }
+
+    Ok(keys)
+}
+
+/// Prepare download tasks with proper file paths
+async fn prepare_download_tasks(
+    files: &[crate::models::file::RemoteFile],
+    export_dir: &Path,
+    collections: &[crate::api::models::Collection],
+    download_manager: &DownloadManager,
+) -> Result<Vec<(crate::models::file::RemoteFile, PathBuf)>> {
+    use crate::crypto::decrypt_stream;
+    use base64::engine::general_purpose::STANDARD as BASE64;
+    use chrono::{TimeZone, Utc};
+
+    let mut tasks = Vec::new();
+
+    // Create collection lookup map
+    let collection_map: HashMap<i64, &crate::api::models::Collection> =
+        collections.iter().map(|c| (c.id, c)).collect();
+
+    for file in files {
+        // Get collection for this file
+        let collection = collection_map.get(&file.collection_id);
+
+        // Try to decrypt metadata to get original filename
+        let metadata = if let Some(col_key) =
+            download_manager.collection_keys.get(&file.collection_id)
+        {
+            // Decrypt file key first
+            let file_key = {
+                let key_bytes = BASE64.decode(&file.encrypted_key)?;
+                let nonce = BASE64.decode(&file.key_decryption_nonce)?;
+                secret_box_open(&key_bytes, &nonce, col_key)?
+            };
+
+            // Then decrypt metadata if available
+            // Note: file.metadata is a crate::models::file::MetadataInfo, not FileAttributes
+            if !file.metadata.encrypted_data.is_empty() {
+                if !file.metadata.decryption_header.is_empty() {
+                    let encrypted_bytes = BASE64.decode(&file.metadata.encrypted_data)?;
+                    let header_bytes = BASE64.decode(&file.metadata.decryption_header)?;
+
+                    match decrypt_stream(&encrypted_bytes, &header_bytes, &file_key) {
+                        Ok(decrypted) => serde_json::from_slice::<FileMetadata>(&decrypted).ok(),
+                        Err(e) => {
+                            log::warn!("Failed to decrypt metadata for file {}: {}", file.id, e);
+                            None
+                        }
+                    }
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        } else {
+            None
+        };
+
+        // Generate export path
+        let mut path = export_dir.to_path_buf();
+
+        // Add date-based directory structure
+        let datetime = Utc
+            .timestamp_micros(file.updated_at)
+            .single()
+            .ok_or_else(|| crate::Error::Generic("Invalid timestamp".into()))?;
+
+        let year = datetime.format("%Y").to_string();
+        let month = datetime.format("%m-%B").to_string();
+
+        path.push(year);
+        path.push(month);
+
+        // Add collection name if available
+        if let Some(col) = collection {
+            if let Some(ref name) = col.name {
+                if !name.is_empty() && name != "Uncategorized" {
+                    let safe_name: String = name
+                        .chars()
+                        .map(|c| match c {
+                            '/' | '\\' | ':' | '*' | '?' | '"' | '<' | '>' | '|' => '_',
+                            c if c.is_control() => '_',
+                            c => c,
+                        })
+                        .collect();
+                    path.push(safe_name.trim());
+                }
+            }
+        }
+
+        // Use original filename from metadata or generate fallback
+        let filename = if let Some(ref meta) = metadata {
+            if let Some(title) = meta.get_title() {
+                title.to_string()
+            } else {
+                format!("file_{}.jpg", file.id)
+            }
+        } else {
+            format!("file_{}.jpg", file.id)
+        };
+
+        path.push(filename);
+
+        tasks.push((file.clone(), path));
+    }
+
+    Ok(tasks)
 }
