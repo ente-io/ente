@@ -429,10 +429,8 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       _selectedTab = newTab;
 
       if (hadSelections) {
-        // Select all files in the newly filtered groups
         final newSelection = <EnteFile>{};
         for (final group in _filteredGroups) {
-          // Skip the first file in each group (the reference file)
           for (int i = 1; i < group.files.length; i++) {
             newSelection.add(group.files[i]);
           }
@@ -440,7 +438,6 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         _selectedFiles.clearAll();
         _selectedFiles.selectAll(newSelection);
       }
-      // If no selections before, keep everything unselected
     });
   }
 
@@ -448,24 +445,24 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     return ListenableBuilder(
       listenable: _selectedFiles,
       builder: (context, _) {
-        final selectedCount = _selectedFiles.files.length;
+        final selectedFiles = _selectedFiles.files;
+        final selectedCount = selectedFiles.length;
         final hasSelectedFiles = selectedCount > 0;
 
-        int totalFilteredFiles = 0;
-        int selectedFilteredFiles = 0;
+        final eligibleFilteredFiles = <EnteFile>{};
         for (final group in _filteredGroups) {
           for (int i = 1; i < group.files.length; i++) {
-            totalFilteredFiles++;
-            if (_selectedFiles.isFileSelected(group.files[i])) {
-              selectedFilteredFiles++;
-            }
+            eligibleFilteredFiles.add(group.files[i]);
           }
         }
-        final allFilteredSelected = totalFilteredFiles > 0 &&
-            selectedFilteredFiles == totalFilteredFiles;
+
+        final selectedFilteredFiles =
+            selectedFiles.intersection(eligibleFilteredFiles);
+        final allFilteredSelected = eligibleFilteredFiles.isNotEmpty &&
+            selectedFilteredFiles.length == eligibleFilteredFiles.length;
 
         int totalSize = 0;
-        for (final file in _selectedFiles.files) {
+        for (final file in selectedFilteredFiles) {
           totalSize += file.fileSize ?? 0;
         }
 
@@ -509,7 +506,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                               child: ButtonWidget(
                                 labelText: AppLocalizations.of(context)
                                     .deletePhotosWithSize(
-                                  count: selectedCount,
+                                  count: selectedFilteredFiles.length,
                                   size: formatBytes(totalSize),
                                 ),
                                 buttonType: ButtonType.critical,
@@ -517,7 +514,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                                 shouldShowSuccessConfirmation: false,
                                 onTap: () async {
                                   await _deleteFiles(
-                                    _selectedFiles.files,
+                                    selectedFilteredFiles,
                                     showDialog: true,
                                     showUIFeedback: true,
                                   );
@@ -552,25 +549,21 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   }
 
   void _toggleSelectAll() {
-    final filesToToggle = <EnteFile>{};
+    final eligibleFiles = <EnteFile>{};
     for (final group in _filteredGroups) {
       for (int i = 1; i < group.files.length; i++) {
-        filesToToggle.add(group.files[i]);
+        eligibleFiles.add(group.files[i]);
       }
     }
 
-    bool allSelected = true;
-    for (final file in filesToToggle) {
-      if (!_selectedFiles.isFileSelected(file)) {
-        allSelected = false;
-        break;
-      }
-    }
+    final currentSelected = _selectedFiles.files.intersection(eligibleFiles);
+    final allSelected = eligibleFiles.isNotEmpty &&
+        currentSelected.length == eligibleFiles.length;
 
     if (allSelected) {
-      _selectedFiles.unSelectAll(filesToToggle);
+      _selectedFiles.unSelectAll(eligibleFiles);
     } else {
-      _selectedFiles.selectAll(filesToToggle);
+      _selectedFiles.selectAll(eligibleFiles);
     }
   }
 
@@ -581,7 +574,6 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     });
 
     try {
-      // You can use _toggleValue here for advanced mode features
       _logger.info("exact mode: $_exactSearch");
 
       final similarFiles = await SimilarImagesService.instance.getSimilarFiles(
