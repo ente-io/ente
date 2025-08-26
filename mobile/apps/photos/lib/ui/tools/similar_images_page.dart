@@ -1150,9 +1150,9 @@ class _SimilarImagesLoadingWidgetState extends State<SimilarImagesLoadingWidget>
 
   List<String> get _loadingMessages => [
         AppLocalizations.of(context).analyzingPhotosLocally,
+        AppLocalizations.of(context).lookingForVisualSimilarities,
+        AppLocalizations.of(context).comparingImageDetails,
         AppLocalizations.of(context).findingSimilarImages,
-        AppLocalizations.of(context).processingVisualPatterns,
-        AppLocalizations.of(context).comparingImageFeatures,
         AppLocalizations.of(context).almostDone,
       ];
 

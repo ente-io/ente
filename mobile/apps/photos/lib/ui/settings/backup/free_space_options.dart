@@ -196,10 +196,9 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                                 ),
                                 if (flagService.enableVectorDb)
                                   MenuItemWidget(
-                                    captionedTextWidget:
-                                        const CaptionedTextWidget(
-                                      title:
-                                          "Similar images", // TODO: lau: extract string
+                                    captionedTextWidget: CaptionedTextWidget(
+                                      title: AppLocalizations.of(context)
+                                          .similarImages,
                                     ),
                                     menuItemColor: colorScheme.fillFaint,
                                     trailingWidget: Icon(
@@ -220,11 +219,11 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                                     },
                                   ),
                                 if (flagService.enableVectorDb)
-                                  const Align(
+                                  Align(
                                     alignment: Alignment.centerLeft,
                                     child: MenuSectionDescriptionWidget(
-                                      content:
-                                          "Use AI to find images that look similar to each other.", // TODO: lau: extract string
+                                      content: AppLocalizations.of(context)
+                                          .useMLToFindSimilarImages,
                                     ),
                                   ),
                                 if (flagService.enableVectorDb)
