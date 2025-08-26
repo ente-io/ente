@@ -20,6 +20,7 @@ import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
+import "package:photos/ui/viewer/gallery/empty_state.dart";
 import "package:photos/utils/delete_file_util.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -344,23 +345,20 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       children: [
         _buildTabBar(),
         Expanded(
-          child: ListView.builder(
-            cacheExtent: 400,
-            itemCount: _filteredGroups.length,
-            itemBuilder: (context, index) {
-              final similarFiles = _filteredGroups[index];
-              return RepaintBoundary(
-                child: Column(
-                  children: [
-                    SizedBox(height: index == 0 ? 0 : 16),
-                    _buildSimilarFilesGroup(similarFiles),
-                  ],
+          child: _filteredGroups.isEmpty
+              ? const EmptyState()
+              : ListView.builder(
+                  cacheExtent: 400,
+                  itemCount: _filteredGroups.length,
+                  itemBuilder: (context, index) {
+                    final similarFiles = _filteredGroups[index];
+                    return RepaintBoundary(
+                      child: _buildSimilarFilesGroup(similarFiles),
+                    );
+                  },
                 ),
-              );
-            },
-          ),
         ),
-        _getBottomActionButtons(),
+        if (_filteredGroups.isNotEmpty) _getBottomActionButtons(),
       ],
     );
   }
@@ -961,9 +959,9 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       _similarFilesList.remove(group);
     }
 
+    final int collectionCnt = collectionToFilesToAddMap.keys.length;
     if (createSymlink) {
       final userID = Configuration.instance.getUserID();
-      final int collectionCnt = collectionToFilesToAddMap.keys.length;
       int progress = 0;
       for (final collectionID in collectionToFilesToAddMap.keys) {
         if (!mounted) {
