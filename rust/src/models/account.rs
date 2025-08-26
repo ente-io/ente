@@ -6,9 +6,8 @@ use zeroize::Zeroize;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Account {
-    pub id: i64,
-    pub email: String,
     pub user_id: i64,
+    pub email: String,
     pub app: App,
     pub endpoint: String,
     pub export_dir: Option<String>,

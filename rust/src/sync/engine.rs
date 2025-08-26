@@ -48,7 +48,7 @@ impl SyncEngine {
 
         // Get last sync time for collections
         let last_sync = sync_store
-            .get_last_sync(self.account.id, "collections")?
+            .get_last_sync(self.account.user_id, "collections")?
             .unwrap_or(0);
 
         let api = ApiMethods::new(&self.api_client);
@@ -122,7 +122,7 @@ impl SyncEngine {
         let mut result = SyncResult::default();
 
         // Get all collections for this account
-        let collections = sync_store.get_collections(self.account.id)?;
+        let collections = sync_store.get_collections(self.account.user_id)?;
 
         // Sync files for each collection
         for collection in collections {
@@ -139,7 +139,7 @@ impl SyncEngine {
             // Get last sync time for this collection's files
             let mut last_sync = sync_store
                 .get_last_sync(
-                    self.account.id,
+                    self.account.user_id,
                     &format!("collection_{}_files", collection.id),
                 )?
                 .unwrap_or(0);
@@ -215,7 +215,7 @@ impl SyncEngine {
 
                 // Update sync state after each batch for this collection
                 sync_store.update_sync_state(
-                    self.account.id,
+                    self.account.user_id,
                     &format!("collection_{}_files", collection.id),
                     last_sync,
                 )?;
@@ -236,11 +236,11 @@ impl SyncEngine {
 
         // Get all non-deleted files for this account
         // Note: We'll need to check all collections for this account
-        let collections = sync_store.get_collections(self.account.id)?;
+        let collections = sync_store.get_collections(self.account.user_id)?;
 
         let mut all_files = Vec::new();
         for collection in collections {
-            let files = sync_store.get_files_by_collection(self.account.id, collection.id)?;
+            let files = sync_store.get_files_by_collection(self.account.user_id, collection.id)?;
             all_files.extend(files);
         }
 
@@ -254,7 +254,7 @@ impl SyncEngine {
     /// Get collections for decryption keys
     pub async fn get_collections(&self) -> Result<Vec<crate::models::collection::Collection>> {
         let sync_store = self.storage.sync();
-        sync_store.get_collections(self.account.id)
+        sync_store.get_collections(self.account.user_id)
     }
 }
 

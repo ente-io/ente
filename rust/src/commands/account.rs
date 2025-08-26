@@ -267,9 +267,8 @@ async fn add_account(
 
     // Create account
     let account = Account {
-        id: 0, // Will be set by database
-        email: email.clone(),
         user_id: auth_response.id,
+        email: email.clone(),
         app,
         endpoint: endpoint.clone(),
         export_dir: Some(export_dir.clone()),

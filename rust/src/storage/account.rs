@@ -143,7 +143,6 @@ fn row_to_account(row: &Row) -> rusqlite::Result<Account> {
     };
 
     Ok(Account {
-        id: 0, // Not used anymore, but kept for compatibility
         user_id: row.get(0)?,
         app,
         email: row.get(2)?,

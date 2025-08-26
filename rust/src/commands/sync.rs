@@ -84,7 +84,7 @@ async fn sync_account(
     // Clear sync state if full sync requested
     if full_sync {
         println!("Performing full sync (clearing existing sync state)...");
-        storage.sync().clear_sync_state(account.id)?;
+        storage.sync().clear_sync_state(account.user_id)?;
     }
 
     // Create sync engine (need to create new instances for ownership)
@@ -109,7 +109,7 @@ async fn sync_account(
     // Download files if not metadata-only
     if !metadata_only {
         // Get pending downloads
-        let pending_files = storage.sync().get_pending_downloads(account.id)?;
+        let pending_files = storage.sync().get_pending_downloads(account.user_id)?;
 
         if !pending_files.is_empty() {
             println!("\n📥 Found {} files to download", pending_files.len());
@@ -159,7 +159,7 @@ async fn sync_account(
                     // File already exists, mark it as synced in database
                     storage
                         .sync()
-                        .update_file_local_path(file.id, path.to_str().unwrap_or(""))?;
+                        .mark_file_synced(file.id, Some(path.to_str().unwrap_or("")))?;
                     already_synced += 1;
                 } else {
                     to_download.push((file, path));
@@ -182,7 +182,7 @@ async fn sync_account(
                 for (file, path) in &download_stats.successful_downloads {
                     storage
                         .sync()
-                        .update_file_local_path(file.id, path.to_str().unwrap_or(""))?;
+                        .mark_file_synced(file.id, Some(path.to_str().unwrap_or("")))?;
                 }
 
                 println!(

@@ -302,9 +302,4 @@ impl<'a> SyncStore<'a> {
 
         Ok(())
     }
-
-    /// Update file local path (legacy method - consider using mark_file_synced instead)
-    pub fn update_file_local_path(&self, file_id: i64, local_path: &str) -> Result<()> {
-        self.mark_file_synced(file_id, Some(local_path))
-    }
 }
