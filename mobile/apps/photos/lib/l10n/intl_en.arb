@@ -1831,7 +1831,7 @@
   "videosProcessed": "Videos processed",
   "totalVideos": "Total videos",
   "skippedVideos": "Skipped videos",
-  "videoStreamingDescription": "Play videos instantly on any device. Enable to process video streams on this device.",
+  "videoStreamingDescription": "Play videos instantly on any device.\nEnable to process video streams on this device.",
   "videoStreamingNote": "Only videos from last 60 days and under 1 minute are processed on this device. For older/longer videos, enable streaming in the desktop app.",
   "createStream": "Create stream",
   "recreateStream": "Recreate stream",

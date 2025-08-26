@@ -12,7 +12,6 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/common/web_page.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
-import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/components/captioned_text_widget.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
@@ -49,7 +48,8 @@ class _VideoStreamingSettingsPageState
       bottomNavigationBar: !hasEnabled
           ? SafeArea(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16)
+                    .copyWith(bottom: 20),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -75,15 +75,7 @@ class _VideoStreamingSettingsPageState
                 flexibleSpaceTitle: TitleBarTitleWidget(
                   title: AppLocalizations.of(context).videoStreaming,
                 ),
-                actionIcons: [
-                  IconButtonWidget(
-                    icon: Icons.close_outlined,
-                    iconButtonType: IconButtonType.secondary,
-                    onTap: () {
-                      Navigator.popUntil(context, (route) => route.isFirst);
-                    },
-                  ),
-                ],
+                actionIcons: const [],
                 isSliver: false,
               ),
             ),
@@ -96,17 +88,7 @@ class _VideoStreamingSettingsPageState
                   flexibleSpaceTitle: TitleBarTitleWidget(
                     title: AppLocalizations.of(context).videoStreaming,
                   ),
-                  actionIcons: [
-                    IconButtonWidget(
-                      icon: Icons.close_outlined,
-                      iconButtonType: IconButtonType.secondary,
-                      onTap: () {
-                        Navigator.pop(context);
-                        if (Navigator.canPop(context)) Navigator.pop(context);
-                        if (Navigator.canPop(context)) Navigator.pop(context);
-                      },
-                    ),
-                  ],
+                  actionIcons: const [],
                 ),
                 SliverToBoxAdapter(
                   child: Container(
@@ -159,24 +141,27 @@ class _VideoStreamingSettingsPageState
                       height: 160,
                     ),
                     const SizedBox(height: 16),
-                    Text.rich(
-                      TextSpan(
-                        text: AppLocalizations.of(context)
-                                .videoStreamingDescription +
-                            " ",
-                        children: [
-                          TextSpan(
-                            text: AppLocalizations.of(context).moreDetails,
-                            style: TextStyle(
-                              color: getEnteColorScheme(context).primary500,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text.rich(
+                        TextSpan(
+                          text: AppLocalizations.of(context)
+                                  .videoStreamingDescription +
+                              "\n",
+                          children: [
+                            TextSpan(
+                              text: AppLocalizations.of(context).moreDetails,
+                              style: TextStyle(
+                                color: getEnteColorScheme(context).primary500,
+                              ),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = openHelp,
                             ),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = openHelp,
-                          ),
-                        ],
+                          ],
+                        ),
+                        style: getEnteTextTheme(context).smallMuted,
+                        textAlign: TextAlign.center,
                       ),
-                      style: getEnteTextTheme(context).smallMuted,
-                      textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 140),
                   ],
