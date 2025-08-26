@@ -131,9 +131,7 @@ async fn sync_account(
             let download_api_client = ApiClient::new(Some(account.endpoint.clone()))?;
             download_api_client.add_token(&account.email, &token);
 
-            // Create another storage instance for download manager
-            let download_storage = Storage::new(db_path)?;
-            let mut download_manager = DownloadManager::new(download_api_client, download_storage)?;
+            let mut download_manager = DownloadManager::new(download_api_client)?;
             download_manager.set_collection_keys(collection_keys);
 
             // Determine export directory
@@ -152,26 +150,54 @@ async fn sync_account(
             )
             .await?;
 
-            // Download files
-            let download_stats = download_manager
-                .download_files(&account.email, download_tasks)
-                .await?;
+            // First, mark files that already exist as synced
+            let mut already_synced = 0;
+            let mut to_download = Vec::new();
 
-            // Update local paths in database
-            for (file, path) in &download_stats.successful_downloads {
-                storage.sync().update_file_local_path(
-                    account.id,
-                    file.id,
-                    path.to_str().unwrap_or(""),
-                )?;
+            for (file, path) in download_tasks {
+                if path.exists() {
+                    // File already exists, mark it as synced in database
+                    storage.sync().update_file_local_path(
+                        account.id,
+                        file.id,
+                        path.to_str().unwrap_or(""),
+                    )?;
+                    already_synced += 1;
+                } else {
+                    to_download.push((file, path));
+                }
             }
 
-            println!(
-                "\n✅ Downloaded {} files successfully",
-                download_stats.successful
-            );
-            if download_stats.failed > 0 {
-                println!("❌ Failed to download {} files", download_stats.failed);
+            if already_synced > 0 {
+                log::info!("Marked {already_synced} already existing files as synced");
+            }
+
+            if !to_download.is_empty() {
+                println!("📥 Downloading {} new files", to_download.len());
+
+                // Download files
+                let download_stats = download_manager
+                    .download_files(&account.email, to_download)
+                    .await?;
+
+                // Update local paths in database for newly downloaded files
+                for (file, path) in &download_stats.successful_downloads {
+                    storage.sync().update_file_local_path(
+                        account.id,
+                        file.id,
+                        path.to_str().unwrap_or(""),
+                    )?;
+                }
+
+                println!(
+                    "\n✅ Downloaded {} files successfully",
+                    download_stats.successful
+                );
+                if download_stats.failed > 0 {
+                    println!("❌ Failed to download {} files", download_stats.failed);
+                }
+            } else {
+                println!("\n✨ All files are already downloaded");
             }
         } else {
             println!("\n✨ All files are already downloaded");

@@ -74,6 +74,7 @@ pub fn create_tables(conn: &Connection) -> Result<()> {
             file_info TEXT NOT NULL,
             metadata TEXT NOT NULL,
             is_deleted INTEGER NOT NULL DEFAULT 0,
+            is_synced_locally INTEGER NOT NULL DEFAULT 0,
             local_path TEXT,
             updated_at INTEGER NOT NULL,
             FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
@@ -129,19 +130,6 @@ pub fn create_tables(conn: &Connection) -> Result<()> {
          ON collections(account_id)",
         [],
     )?;
-
-    // Add migration for local_path column if it doesn't exist
-    let has_column = conn
-        .query_row(
-            "SELECT COUNT(*) FROM pragma_table_info('files') WHERE name='local_path'",
-            [],
-            |row| row.get::<_, i32>(0),
-        )
-        .unwrap_or(0);
-
-    if has_column == 0 {
-        conn.execute("ALTER TABLE files ADD COLUMN local_path TEXT", [])?;
-    }
 
     Ok(())
 }

@@ -1,9 +1,8 @@
 use crate::Result;
 use crate::api::client::ApiClient;
 use crate::api::methods::ApiMethods;
-use crate::crypto::decrypt_chacha;
+use crate::crypto::{decrypt_file_data, secret_box_open};
 use crate::models::file::RemoteFile;
-use crate::storage::Storage;
 use base64::{Engine, engine::general_purpose::STANDARD as BASE64};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -13,8 +12,6 @@ use tokio::io::AsyncWriteExt;
 /// Manages file downloads with parallel processing and error recovery
 pub struct DownloadManager {
     api_client: ApiClient,
-    #[allow(dead_code)]
-    storage: Storage,
     temp_dir: PathBuf,
     pub collection_keys: HashMap<i64, Vec<u8>>,
     concurrent_downloads: usize,
@@ -22,13 +19,12 @@ pub struct DownloadManager {
 
 impl DownloadManager {
     /// Create a new download manager
-    pub fn new(api_client: ApiClient, storage: Storage) -> Result<Self> {
+    pub fn new(api_client: ApiClient) -> Result<Self> {
         let temp_dir = std::env::temp_dir().join("ente-downloads");
         std::fs::create_dir_all(&temp_dir)?;
 
         Ok(Self {
             api_client,
-            storage,
             temp_dir,
             collection_keys: HashMap::new(),
             concurrent_downloads: 4, // Default concurrent downloads
@@ -61,7 +57,11 @@ impl DownloadManager {
 
         // Check if file already exists
         if destination.exists() {
-            log::debug!("File already exists at {destination:?}, skipping");
+            log::debug!(
+                "File already exists at {destination:?}, skipping download but marking as successful"
+            );
+            // Even though we skip downloading, we should still update the database
+            // This is handled by returning Ok(()) which will mark it as successful
             return Ok(());
         }
 
@@ -188,16 +188,16 @@ impl DownloadManager {
                 crate::Error::Crypto("Missing collection key for file decryption".into())
             })?;
 
-        // Decrypt file key using collection key
+        // Decrypt file key using collection key (XSalsa20-Poly1305)
         let file_key = {
             let key_bytes = BASE64.decode(&file.encrypted_key)?;
             let nonce = BASE64.decode(&file.key_decryption_nonce)?;
-            decrypt_chacha(&key_bytes, collection_key, &nonce)?
+            secret_box_open(&key_bytes, &nonce, collection_key)?
         };
 
-        // Decrypt file data using file key
+        // Decrypt file data using file key (Streaming XChaCha20-Poly1305)
         let file_nonce = BASE64.decode(&file.file.decryption_header)?;
-        let decrypted = decrypt_chacha(encrypted_data, &file_key, &file_nonce)?;
+        let decrypted = decrypt_file_data(encrypted_data, &file_nonce, &file_key)?;
 
         Ok(decrypted)
     }

@@ -62,11 +62,23 @@ impl<'a> SyncStore<'a> {
         let file_info = serde_json::to_string(&file.file)?;
         let metadata = serde_json::to_string(&file.metadata)?;
 
+        // First check if file exists and preserve is_synced_locally flag
+        let existing_sync_status: Option<i32> = self
+            .conn
+            .query_row(
+                "SELECT is_synced_locally FROM files WHERE account_id = ?1 AND file_id = ?2",
+                params![account_id, file.id],
+                |row| row.get(0),
+            )
+            .optional()?;
+
+        let is_synced = existing_sync_status.unwrap_or(0);
+
         self.conn.execute(
             "INSERT OR REPLACE INTO files 
              (account_id, file_id, collection_id, encrypted_key, key_decryption_nonce, 
-              file_info, metadata, is_deleted, updated_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
+              file_info, metadata, is_deleted, is_synced_locally, updated_at)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
             params![
                 account_id,
                 file.id,
@@ -76,6 +88,7 @@ impl<'a> SyncStore<'a> {
                 file_info,
                 metadata,
                 file.is_deleted as i32,
+                is_synced,
                 file.updated_at
             ],
         )?;
@@ -102,15 +115,31 @@ impl<'a> SyncStore<'a> {
                 let file_info: String = row.get(4)?;
                 let metadata: String = row.get(5)?;
 
+                // Deserialize stored data - thumbnail might not be stored properly
+                let file_obj: crate::models::file::FileInfo = serde_json::from_str(&file_info)
+                    .map_err(|e| rusqlite::Error::ToSqlConversionFailure(Box::new(e)))?;
+
+                let metadata_obj: crate::models::file::MetadataInfo =
+                    serde_json::from_str(&metadata)
+                        .map_err(|e| rusqlite::Error::ToSqlConversionFailure(Box::new(e)))?;
+
+                // Create a default thumbnail info if not available
+                let thumbnail = crate::models::file::FileInfo {
+                    encrypted_data: None,
+                    decryption_header: String::new(),
+                    object_key: None,
+                    size: None,
+                };
+
                 Ok(RemoteFile {
                     id: row.get(0)?,
                     collection_id: row.get(1)?,
                     owner_id: 0, // Will need to fetch from account
                     encrypted_key: row.get(2)?,
                     key_decryption_nonce: row.get(3)?,
-                    file: serde_json::from_str(&file_info).unwrap(),
-                    thumbnail: serde_json::from_str("{}").unwrap(), // Placeholder
-                    metadata: serde_json::from_str(&metadata).unwrap(),
+                    file: file_obj,
+                    thumbnail,
+                    metadata: metadata_obj,
                     is_deleted: row.get::<_, i32>(6)? != 0,
                     updated_at: row.get(7)?,
                 })
@@ -205,13 +234,21 @@ impl<'a> SyncStore<'a> {
         Ok(())
     }
 
-    /// Get files that need downloading (no local_path)
+    /// Get files that need downloading (not synced locally)
     pub fn get_pending_downloads(&self, account_id: i64) -> Result<Vec<RemoteFile>> {
+        // First check how many files are already synced
+        let synced_count: i64 = self.conn.query_row(
+            "SELECT COUNT(*) FROM files WHERE account_id = ?1 AND is_synced_locally = 1",
+            params![account_id],
+            |row| row.get(0),
+        )?;
+        log::debug!("Files already synced locally: {synced_count}");
+
         let mut stmt = self.conn.prepare(
             "SELECT file_id, collection_id, encrypted_key, key_decryption_nonce, 
                     file_info, metadata, is_deleted, updated_at
              FROM files 
-             WHERE account_id = ?1 AND is_deleted = 0 AND local_path IS NULL
+             WHERE account_id = ?1 AND is_deleted = 0 AND is_synced_locally = 0
              ORDER BY file_id",
         )?;
 
@@ -220,15 +257,31 @@ impl<'a> SyncStore<'a> {
                 let file_info: String = row.get(4)?;
                 let metadata: String = row.get(5)?;
 
+                // Deserialize stored data - thumbnail might not be stored properly
+                let file_obj: crate::models::file::FileInfo = serde_json::from_str(&file_info)
+                    .map_err(|e| rusqlite::Error::ToSqlConversionFailure(Box::new(e)))?;
+
+                let metadata_obj: crate::models::file::MetadataInfo =
+                    serde_json::from_str(&metadata)
+                        .map_err(|e| rusqlite::Error::ToSqlConversionFailure(Box::new(e)))?;
+
+                // Create a default thumbnail info if not available
+                let thumbnail = crate::models::file::FileInfo {
+                    encrypted_data: None,
+                    decryption_header: String::new(),
+                    object_key: None,
+                    size: None,
+                };
+
                 Ok(RemoteFile {
                     id: row.get(0)?,
                     collection_id: row.get(1)?,
                     owner_id: 0, // Will need to fetch from account
                     encrypted_key: row.get(2)?,
                     key_decryption_nonce: row.get(3)?,
-                    file: serde_json::from_str(&file_info).unwrap(),
-                    thumbnail: serde_json::from_str("{}").unwrap(), // Placeholder
-                    metadata: serde_json::from_str(&metadata).unwrap(),
+                    file: file_obj,
+                    thumbnail,
+                    metadata: metadata_obj,
                     is_deleted: row.get::<_, i32>(6)? != 0,
                     updated_at: row.get(7)?,
                 })
@@ -238,19 +291,41 @@ impl<'a> SyncStore<'a> {
         Ok(files)
     }
 
-    /// Update file local path after successful download
+    /// Mark file as synced locally after successful download
+    pub fn mark_file_synced(
+        &self,
+        account_id: i64,
+        file_id: i64,
+        local_path: Option<&str>,
+    ) -> Result<()> {
+        let rows_updated = if let Some(path) = local_path {
+            self.conn.execute(
+                "UPDATE files SET is_synced_locally = 1, local_path = ?3 
+                 WHERE account_id = ?1 AND file_id = ?2",
+                params![account_id, file_id, path],
+            )?
+        } else {
+            self.conn.execute(
+                "UPDATE files SET is_synced_locally = 1 
+                 WHERE account_id = ?1 AND file_id = ?2",
+                params![account_id, file_id],
+            )?
+        };
+
+        log::debug!(
+            "Marked file {file_id} (account {account_id}) as synced locally, rows affected: {rows_updated}"
+        );
+
+        Ok(())
+    }
+
+    /// Update file local path (legacy method - consider using mark_file_synced instead)
     pub fn update_file_local_path(
         &self,
         account_id: i64,
         file_id: i64,
         local_path: &str,
     ) -> Result<()> {
-        self.conn.execute(
-            "UPDATE files SET local_path = ?3 
-             WHERE account_id = ?1 AND file_id = ?2",
-            params![account_id, file_id, local_path],
-        )?;
-
-        Ok(())
+        self.mark_file_synced(account_id, file_id, Some(local_path))
     }
 }
