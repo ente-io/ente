@@ -99,7 +99,7 @@ Future<void> _runInForeground() async {
   return await _runWithLogs(() async {
     _logger.info("Starting app in foreground");
     try {
-      await _init(false, via: 'mainMethod');
+      await init(false, via: 'mainMethod');
     } catch (e, s) {
       _logger.severe("Failed to init", e, s);
       rethrow;
@@ -160,7 +160,7 @@ void _registerWindowsProtocol() {
   }
 }
 
-Future<void> _init(bool bool, {String? via}) async {
+Future<void> init(bool bool, {String? via}) async {
   _registerWindowsProtocol();
   await CryptoUtil.init();
 

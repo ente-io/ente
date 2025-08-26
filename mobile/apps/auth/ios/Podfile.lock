@@ -68,6 +68,8 @@ PODS:
     - Flutter
   - fluttertoast (0.0.2):
     - Flutter
+  - integration_test (0.0.1):
+    - Flutter
   - local_auth_darwin (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -150,6 +152,7 @@ DEPENDENCIES:
   - flutter_native_splash (from `.symlinks/plugins/flutter_native_splash/ios`)
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
+  - integration_test (from `.symlinks/plugins/integration_test/ios`)
   - local_auth_darwin (from `.symlinks/plugins/local_auth_darwin/darwin`)
   - move_to_background (from `.symlinks/plugins/move_to_background/ios`)
   - objective_c (from `.symlinks/plugins/objective_c/ios`)
@@ -210,6 +213,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_secure_storage/ios"
   fluttertoast:
     :path: ".symlinks/plugins/fluttertoast/ios"
+  integration_test:
+    :path: ".symlinks/plugins/integration_test/ios"
   local_auth_darwin:
     :path: ".symlinks/plugins/local_auth_darwin/darwin"
   move_to_background:
@@ -260,6 +265,7 @@ SPEC CHECKSUMS:
   flutter_native_splash: df59bb2e1421aa0282cb2e95618af4dcb0c56c29
   flutter_secure_storage: d33dac7ae2ea08509be337e775f6b59f1ff45f12
   fluttertoast: 21eecd6935e7064cc1fcb733a4c5a428f3f24f0f
+  integration_test: 252f60fa39af5e17c3aa9899d35d908a0721b573
   local_auth_darwin: fa4b06454df7df8e97c18d7ee55151c57e7af0de
   move_to_background: 39a5b79b26d577b0372cbe8a8c55e7aa9fcd3a2d
   MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb

@@ -33,6 +33,8 @@
 .pub/
 /build/
 macos/build/
+.gradle/
+settings.local.json
 
 # Web related
 lib/generated_plugin_registrant.dart
