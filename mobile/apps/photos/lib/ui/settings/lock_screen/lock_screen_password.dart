@@ -99,7 +99,7 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
         builder: (context, isFormValid, child) {
           return DynamicFAB(
             isKeypadOpen: isKeypadOpen,
-            buttonText: S.of(context).next,
+            buttonText: AppLocalizations.of(context).next,
             isFormValid: isFormValid,
             onPressedFunction: () async {
               _submitNotifier.value = !_submitNotifier.value;
@@ -127,10 +127,10 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
                         shape: BoxShape.circle,
                         gradient: LinearGradient(
                           colors: [
-                            Colors.grey.shade500.withOpacity(0.2),
-                            Colors.grey.shade50.withOpacity(0.1),
-                            Colors.grey.shade400.withOpacity(0.2),
-                            Colors.grey.shade300.withOpacity(0.4),
+                            Colors.grey.shade500.withValues(alpha: 0.2),
+                            Colors.grey.shade50.withValues(alpha: 0.1),
+                            Colors.grey.shade400.withValues(alpha: 0.2),
+                            Colors.grey.shade300.withValues(alpha: 0.4),
                           ],
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
@@ -166,8 +166,8 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
               ),
               Text(
                 widget.isChangingLockScreenSettings
-                    ? S.of(context).enterPassword
-                    : S.of(context).setNewPassword,
+                    ? AppLocalizations.of(context).enterPassword
+                    : AppLocalizations.of(context).setNewPassword,
                 textAlign: TextAlign.center,
                 style: textTheme.bodyBold,
               ),
@@ -175,7 +175,7 @@ class _LockScreenPasswordState extends State<LockScreenPassword> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: TextInputWidget(
-                  hintText: S.of(context).password,
+                  hintText: AppLocalizations.of(context).password,
                   focusNode: _focusNode,
                   enableFillColor: false,
                   textCapitalization: TextCapitalization.none,

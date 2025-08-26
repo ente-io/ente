@@ -1776,13 +1776,5 @@
   "same": "Aynı",
   "different": "Farklı",
   "sameperson": "Aynı kişi mi?",
-  "cLTitle1": "Gelişmiş Görüntü Düzenleyici",
-  "cLDesc1": "Daha fazla kırpma çerçevesi, hızlı düzenlemeler için filtre ön ayarları, doygunluk, kontrast, parlaklık, sıcaklık ve çok daha fazlası dahil olmak üzere ince ayar seçenekleri ekleyen yeni ve gelişmiş bir görüntü düzenleyici yayınlıyoruz. Yeni düzenleyici ayrıca fotoğraflarınızın üzerine çizim yapabilme ve çıkartma olarak emoji ekleme özelliğini de içeriyor.",
-  "cLTitle2": "Akıllı Albümler",
-  "cLDesc2": "Artık seçili kişilerin fotoğraflarını herhangi bir albüme otomatik olarak ekleyebilirsiniz. Sadece albüme gidin ve taşma menüsünden \"otomatik kişi ekleme\"yi seçin. Paylaşılan albümle birlikte kullanılırsa, fotoğrafları sıfır tıklamayla paylaşabilirsiniz.",
-  "cLTitle3": "Geliştirilmiş Galeri",
-  "cLDesc3": "Galerinizi haftalara, aylara ve yıllara göre gruplandırma özelliği ekledik. Artık bu yeni gruplandırma seçenekleri ve özel ızgaralarla galerinizi tam istediğiniz gibi görünecek şekilde özelleştirebilirsiniz.",
-  "cLTitle4": "Daha Hızlı Kaydırma",
-  "cLDesc4": "Galeri kaydırma deneyimini iyileştirmek için perde arkasındaki bir dizi iyileştirmenin yanı sıra, zaman çizelgesinde hızlıca atlayabilmenizi sağlayan işaretçiler göstermek için kaydırma çubuğunu da yeniden tasarladık.",
   "indexingPausedStatusDescription": "Dizin oluşturma duraklatıldı. Cihaz hazır olduğunda otomatik olarak devam edecektir. Cihaz, pil seviyesi, pil sağlığı ve termal durumu sağlıklı bir aralıkta olduğunda hazır kabul edilir."
 }

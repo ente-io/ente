@@ -1,0 +1,33 @@
+name: ente_configuration
+description: A Flutter package for shared configuration across ente apps
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  bip39: ^1.0.6
+  ente_base:
+    path: ../../packages/base
+  ente_crypto_dart:
+    git:
+      url: https://github.com/ente-io/ente_crypto_dart.git
+  ente_events:
+    path: ../../packages/events
+  ente_logging:
+    path: ../../packages/logging
+  flutter_secure_storage: ^9.0.0
+  path_provider: ^2.1.5
+  shared_preferences: ^2.5.3
+  tuple: ^2.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:

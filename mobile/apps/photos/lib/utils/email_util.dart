@@ -45,14 +45,14 @@ Future<void> sendLogs(
   // ignore: unawaited_futures
   showDialogWidget(
     context: context,
-    title: S.of(context).reportABug,
+    title: AppLocalizations.of(context).reportABug,
     icon: Icons.bug_report_outlined,
-    body: S.of(context).logsDialogBody,
+    body: AppLocalizations.of(context).logsDialogBody,
     buttons: [
       ButtonWidget(
         isInAlert: true,
         buttonType: ButtonType.neutral,
-        labelText: S.of(context).reportABug,
+        labelText: AppLocalizations.of(context).reportABug,
         buttonAction: ButtonAction.first,
         shouldSurfaceExecutionStates: false,
         onTap: () async {
@@ -66,7 +66,7 @@ Future<void> sendLogs(
       //on pressing this button
       ButtonWidget(
         buttonType: ButtonType.secondary,
-        labelText: S.of(context).viewLogs,
+        labelText: AppLocalizations.of(context).viewLogs,
         buttonAction: ButtonAction.second,
         onTap: () async {
           // ignore: unawaited_futures
@@ -83,7 +83,7 @@ Future<void> sendLogs(
       ),
       ButtonWidget(
         buttonType: ButtonType.secondary,
-        labelText: S.of(context).exportLogs,
+        labelText: AppLocalizations.of(context).exportLogs,
         buttonAction: ButtonAction.third,
         onTap: () async {
           final zipFilePath = await getZippedLogsFile(context);
@@ -93,7 +93,7 @@ Future<void> sendLogs(
       ButtonWidget(
         isInAlert: true,
         buttonType: ButtonType.secondary,
-        labelText: S.of(context).cancel,
+        labelText: AppLocalizations.of(context).cancel,
         buttonAction: ButtonAction.cancel,
       ),
     ],
@@ -146,7 +146,10 @@ Future<void> triggerSendLogs(
 Future<String> getZippedLogsFile(BuildContext? context) async {
   late final ProgressDialog dialog;
   if (context != null) {
-    dialog = createProgressDialog(context, S.of(context).preparingLogs);
+    dialog = createProgressDialog(
+      context,
+      AppLocalizations.of(context).preparingLogs,
+    );
     await dialog.show();
   }
   final logsPath = (await getApplicationSupportDirectory()).path;
@@ -171,12 +174,12 @@ Future<void> shareLogs(
 ) async {
   final result = await showDialogWidget(
     context: context,
-    title: S.of(context).emailYourLogs,
-    body: S.of(context).pleaseSendTheLogsTo(toEmail),
+    title: AppLocalizations.of(context).emailYourLogs,
+    body: AppLocalizations.of(context).pleaseSendTheLogsTo(toEmail: toEmail),
     buttons: [
       ButtonWidget(
         buttonType: ButtonType.neutral,
-        labelText: S.of(context).copyEmailAddress,
+        labelText: AppLocalizations.of(context).copyEmailAddress,
         isInAlert: true,
         buttonAction: ButtonAction.first,
         onTap: () async {
@@ -186,13 +189,13 @@ Future<void> shareLogs(
       ),
       ButtonWidget(
         buttonType: ButtonType.neutral,
-        labelText: S.of(context).exportLogs,
+        labelText: AppLocalizations.of(context).exportLogs,
         isInAlert: true,
         buttonAction: ButtonAction.second,
       ),
       ButtonWidget(
         buttonType: ButtonType.secondary,
-        labelText: S.of(context).cancel,
+        labelText: AppLocalizations.of(context).cancel,
         isInAlert: true,
         buttonAction: ButtonAction.cancel,
       ),
@@ -217,9 +220,11 @@ Future<void> exportLogs(BuildContext context, String zipFilePath) async {
       ext: 'zip',
     );
   } else {
-    await Share.shareXFiles(
-      [XFile(zipFilePath, mimeType: 'application/zip')],
-      sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile(zipFilePath, mimeType: 'application/zip')],
+        sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
+      ),
     );
   }
 }
@@ -265,7 +270,7 @@ Future<void> sendEmail(
         await showCupertinoModalPopup(
           context: context,
           builder: (_) => CupertinoActionSheet(
-            title: Text(S.of(context).selectMailApp + " \n $to"),
+            title: Text(AppLocalizations.of(context).selectMailApp + " \n $to"),
             actions: [
               for (var app in result.options)
                 CupertinoActionSheetAction(
@@ -283,7 +288,7 @@ Future<void> sendEmail(
                 ),
             ],
             cancelButton: CupertinoActionSheetAction(
-              child: Text(S.of(context).cancel),
+              child: Text(AppLocalizations.of(context).cancel),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -313,9 +318,9 @@ void _showNoMailAppsDialog(BuildContext context, String toEmail) {
   showChoiceDialog(
     context,
     icon: Icons.email_outlined,
-    title: S.of(context).pleaseEmailUsAt(toEmail),
-    firstButtonLabel: S.of(context).copyEmailAddress,
-    secondButtonLabel: S.of(context).dismiss,
+    title: AppLocalizations.of(context).pleaseEmailUsAt(toEmail: toEmail),
+    firstButtonLabel: AppLocalizations.of(context).copyEmailAddress,
+    secondButtonLabel: AppLocalizations.of(context).dismiss,
     firstButtonOnTap: () async {
       await Clipboard.setData(ClipboardData(text: toEmail));
       showShortToast(context, 'Copied');

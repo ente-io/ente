@@ -3,10 +3,11 @@ package middleware
 import (
 	"context"
 	"fmt"
+	"net/http"
+
 	publicCtrl "github.com/ente-io/museum/pkg/controller/public"
 	"github.com/ente-io/museum/pkg/repo/public"
 	"github.com/ente-io/museum/pkg/utils/array"
-	"net/http"
 
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/controller"
@@ -38,7 +39,7 @@ func (m *FileLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context) stri
 	return func(c *gin.Context) {
 		accessToken := auth.GetAccessToken(c)
 		if accessToken == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing accessToken"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing accessToken", "context": "file_link"})
 			return
 		}
 		clientIP := network.GetClientIP(c)

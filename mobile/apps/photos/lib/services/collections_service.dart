@@ -753,6 +753,21 @@ class CollectionsService {
     return _cachedKeys[collectionID]!;
   }
 
+  String getPublicUrl(Collection c) {
+    final PublicURL url = c.publicURLs.firstOrNull!;
+    Uri publicUrl = Uri.parse(url.url);
+    final String customDomain = flagService.customDomain;
+    if (customDomain.isNotEmpty) {
+      publicUrl =
+          publicUrl.replace(host: customDomain, scheme: "https", port: 443);
+    }
+    final String collectionKey = Base58Encode(
+      CollectionsService.instance.getCollectionKey(c.id),
+    );
+    final String urlValue = "${publicUrl.toString()}#$collectionKey";
+    return urlValue;
+  }
+
   Uint8List _getAndCacheDecryptedKey(
     Collection collection, {
     String source = "",
@@ -1162,8 +1177,9 @@ class CollectionsService {
       if (e is DioException && e.response?.statusCode == 410) {
         await showInfoDialog(
           context,
-          title: S.of(context).linkExpired,
-          body: S.of(context).theLinkYouAreTryingToAccessHasExpired,
+          title: AppLocalizations.of(context).linkExpired,
+          body: AppLocalizations.of(context)
+              .theLinkYouAreTryingToAccessHasExpired,
         );
         throw UnauthorizedError();
       }
@@ -1201,8 +1217,8 @@ class CollectionsService {
       _logger.warning("Failed to verify public collection password $e");
       await showErrorDialog(
         context,
-        S.of(context).incorrectPasswordTitle,
-        S.of(context).pleaseTryAgain,
+        AppLocalizations.of(context).incorrectPasswordTitle,
+        AppLocalizations.of(context).pleaseTryAgain,
       );
       return false;
     }

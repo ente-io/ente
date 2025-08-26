@@ -74,13 +74,13 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         trimStyle: TrimSliderStyle(
           onTrimmedColor: const ColorScheme.dark().videoPlayerPrimaryColor,
           onTrimmingColor: const ColorScheme.dark().videoPlayerPrimaryColor,
-          background: Theme.of(context).colorScheme.videoPlayerBackgroundColor,
+          background: Theme.of(context).colorScheme.editorBackgroundColor,
           positionLineColor:
               Theme.of(context).colorScheme.videoPlayerBorderColor,
           lineColor: Theme.of(context)
               .colorScheme
               .videoPlayerBorderColor
-              .withOpacity(0.6),
+              .withValues(alpha: 0.6),
         ),
       );
 
@@ -152,7 +152,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                               VideoEditorMainActions(
                                 children: [
                                   VideoEditorBottomAction(
-                                    label: S.of(context).trim,
+                                    label: AppLocalizations.of(context).trim,
                                     svgPath:
                                         "assets/video-editor/video-editor-trim-action.svg",
                                     onPressed: () => Navigator.push(
@@ -168,7 +168,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                                   ),
                                   const SizedBox(width: 40),
                                   VideoEditorBottomAction(
-                                    label: S.of(context).crop,
+                                    label: AppLocalizations.of(context).crop,
                                     svgPath:
                                         "assets/video-editor/video-editor-crop-action.svg",
                                     onPressed: () => Navigator.push(
@@ -184,7 +184,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                                   ),
                                   const SizedBox(width: 40),
                                   VideoEditorBottomAction(
-                                    label: S.of(context).rotate,
+                                    label: AppLocalizations.of(context).rotate,
                                     svgPath:
                                         "assets/video-editor/video-editor-rotate-action.svg",
                                     onPressed: () => Navigator.push(
@@ -205,7 +205,8 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                                 color: Theme.of(context)
                                     .colorScheme
                                     .videoPlayerPrimaryColor,
-                                secondaryText: S.of(context).saveCopy,
+                                secondaryText:
+                                    AppLocalizations.of(context).saveCopy,
                                 onSecondaryPressed: () {
                                   exportVideo();
                                 },
@@ -228,7 +229,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
 
     final dialogKey = GlobalKey<LinearProgressDialogState>();
     final dialog = LinearProgressDialog(
-      S.of(context).savingEdits,
+      AppLocalizations.of(context).savingEdits,
       key: dialogKey,
     );
 
@@ -304,7 +305,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
             Bus.instance
                 .fire(LocalPhotosUpdatedEvent([newFile], source: "editSave"));
             SyncService.instance.sync().ignore();
-            showShortToast(context, S.of(context).editsSaved);
+            showShortToast(context, AppLocalizations.of(context).editsSaved);
             _logger.info("Original file " + widget.file.toString());
             _logger.info("Saved edits to file " + newFile.toString());
             final files = widget.detailPageConfig.files;

@@ -167,7 +167,7 @@ class DownloadManager {
         final existingSize = await baseFile.length();
         if (existingSize == task.totalBytes) {
           _logger.info(
-            'Download already exists for ${task.filename} (${existingSize}/${task.totalBytes} bytes)',
+            'Download already exists for ${task.filename} ($existingSize/${task.totalBytes} bytes)',
           );
           task = task.copyWith(
             status: DownloadStatus.completed,

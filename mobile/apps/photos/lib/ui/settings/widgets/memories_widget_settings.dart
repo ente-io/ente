@@ -102,11 +102,11 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: S.of(context).memories,
+              title: AppLocalizations.of(context).memories,
             ),
             expandedHeight: MediaQuery.textScalerOf(context).scale(120),
             flexibleSpaceCaption: hasInstalledAny
-                ? S.of(context).memoriesWidgetDesc
+                ? AppLocalizations.of(context).memoriesWidgetDesc
                 : context.l10n.addMemoriesWidgetPrompt,
             actionIcons: [
               IconButtonWidget(
@@ -152,11 +152,15 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
                         const SizedBox(height: 18),
                         MenuItemWidget(
                           captionedTextWidget: CaptionedTextWidget(
-                            title: S.of(context).pastYearsMemories,
+                            title:
+                                AppLocalizations.of(context).pastYearsMemories,
                           ),
                           leadingIconWidget: SvgPicture.asset(
                             "assets/icons/past-year-memory-icon.svg",
-                            color: colorScheme.textBase,
+                            colorFilter: ColorFilter.mode(
+                              colorScheme.textBase,
+                              BlendMode.srcIn,
+                            ),
                           ),
                           menuItemColor: colorScheme.fillFaint,
                           trailingWidget: ToggleSwitchWidget(
@@ -175,11 +179,15 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
                         const SizedBox(height: 4),
                         MenuItemWidget(
                           captionedTextWidget: CaptionedTextWidget(
-                            title: S.of(context).onThisDayMemories,
+                            title:
+                                AppLocalizations.of(context).onThisDayMemories,
                           ),
                           leadingIconWidget: SvgPicture.asset(
                             "assets/icons/memories-widget-icon.svg",
-                            color: colorScheme.textBase,
+                            colorFilter: ColorFilter.mode(
+                              colorScheme.textBase,
+                              BlendMode.srcIn,
+                            ),
                           ),
                           menuItemColor: colorScheme.fillFaint,
                           trailingWidget: ToggleSwitchWidget(
@@ -199,11 +207,14 @@ class _MemoriesWidgetSettingsState extends State<MemoriesWidgetSettings> {
                           const SizedBox(height: 4),
                           MenuItemWidget(
                             captionedTextWidget: CaptionedTextWidget(
-                              title: S.of(context).smartMemories,
+                              title: AppLocalizations.of(context).smartMemories,
                             ),
                             leadingIconWidget: SvgPicture.asset(
                               "assets/icons/smart-memory-icon.svg",
-                              color: colorScheme.textBase,
+                              colorFilter: ColorFilter.mode(
+                                colorScheme.textBase,
+                                BlendMode.srcIn,
+                              ),
                             ),
                             menuItemColor: colorScheme.fillFaint,
                             trailingWidget: ToggleSwitchWidget(

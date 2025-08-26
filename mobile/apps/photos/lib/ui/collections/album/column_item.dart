@@ -64,7 +64,7 @@ class AlbumColumnItemWidget extends StatelessWidget {
                           );
                         } else {
                           return const NoThumbnailWidget(
-                            addBorder: false, 
+                            addBorder: false,
                           );
                         }
                       },
@@ -88,10 +88,11 @@ class AlbumColumnItemWidget extends StatelessWidget {
                           builder: (context, snapshot) {
                             if (snapshot.hasData) {
                               return Text(
-                                S.of(context).memoryCount(
-                                      snapshot.data!,
+                                AppLocalizations.of(context).memoryCount(
+                                  count: snapshot.data!,
+                                  formattedCount:
                                       NumberFormat().format(snapshot.data!),
-                                    ),
+                                ),
                                 style: textTheme.miniMuted,
                               );
                             } else {

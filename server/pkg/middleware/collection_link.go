@@ -5,9 +5,16 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
+	"net/http"
+	"net/url"
+	"strings"
+
+	"github.com/ente-io/museum/pkg/repo/remotestore"
+	"github.com/gin-contrib/requestid"
+	"github.com/spf13/viper"
+
 	public2 "github.com/ente-io/museum/pkg/controller/public"
 	"github.com/ente-io/museum/pkg/repo/public"
-	"net/http"
 
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/controller"
@@ -34,6 +41,7 @@ type CollectionLinkMiddleware struct {
 	Cache                *cache.Cache
 	BillingCtrl          *controller.BillingController
 	DiscordController    *discord.DiscordController
+	RemoteStoreRepo      *remotestore.Repository
 }
 
 // Authenticate returns a middle ware that extracts the `X-Auth-Access-Token`
@@ -43,7 +51,7 @@ func (m *CollectionLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context
 	return func(c *gin.Context) {
 		accessToken := auth.GetAccessToken(c)
 		if accessToken == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing accessToken"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing accessToken", "context": "album_link"})
 			return
 		}
 		clientIP := network.GetClientIP(c)
@@ -64,7 +72,7 @@ func (m *CollectionLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context
 				return
 			}
 			// validate if user still has active paid subscription
-			if err = m.validateOwnersSubscription(publicCollectionSummary.CollectionID); err != nil {
+			if err = m.validateOwnersSubscription(c, publicCollectionSummary.CollectionID); err != nil {
 				logrus.WithError(err).Warn("failed to verify active paid subscription")
 				c.AbortWithStatusJSON(http.StatusGone, gin.H{"error": "no active subscription"})
 				return
@@ -114,12 +122,16 @@ func (m *CollectionLinkMiddleware) Authenticate(urlSanitizer func(_ *gin.Context
 		c.Next()
 	}
 }
-func (m *CollectionLinkMiddleware) validateOwnersSubscription(cID int64) error {
+func (m *CollectionLinkMiddleware) validateOwnersSubscription(c *gin.Context, cID int64) error {
 	userID, err := m.CollectionRepo.GetOwnerID(cID)
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
-	return m.BillingCtrl.HasActiveSelfOrFamilySubscription(userID, false)
+	err = m.BillingCtrl.HasActiveSelfOrFamilySubscription(userID, false)
+	if err != nil {
+		return stacktrace.Propagate(err, "failed to validate owners subscription")
+	}
+	return m.validateOrigin(c, userID)
 }
 
 func (m *CollectionLinkMiddleware) isDeviceLimitReached(ctx context.Context,
@@ -174,6 +186,44 @@ func (m *CollectionLinkMiddleware) validatePassword(c *gin.Context, reqPath stri
 		return ente.ErrAuthenticationRequired
 	}
 	return m.PublicCollectionCtrl.ValidateJWTToken(c, accessTokenJWT, *collectionSummary.PassHash)
+}
+
+func (m *CollectionLinkMiddleware) validateOrigin(c *gin.Context, ownerID int64) error {
+	origin := c.Request.Header.Get("Origin")
+
+	if origin == "" || origin == viper.GetString("apps.public-albums") {
+		return nil
+	}
+	reqId := requestid.Get(c)
+	logger := logrus.WithFields(logrus.Fields{
+		"ownerID": ownerID,
+		"req_id":  reqId,
+		"origin":  origin,
+	})
+	alertMessage := fmt.Sprintf("custom domain %s", reqId)
+	domain, err := m.RemoteStoreRepo.GetDomain(c, ownerID)
+	if err != nil {
+		logger.WithError(err).Error("domainFetchFailed")
+		m.DiscordController.NotifyPotentialAbuse(alertMessage + " - domainFetchFailed")
+		return nil
+	}
+	if domain == nil || *domain == "" {
+		logger.Warn("domainNotConfigured")
+		m.DiscordController.NotifyPotentialAbuse(alertMessage + " - domainNotConfigured")
+		return ente.NewPermissionDeniedError("no custom domain configured")
+	}
+	parse, err := url.Parse(origin)
+	if err != nil {
+		logger.WithError(err).Error("originParseFailedL")
+		m.DiscordController.NotifyPotentialAbuse(alertMessage + " - originParseFailed")
+		return nil
+	}
+	if !strings.Contains(strings.ToLower(parse.Host), strings.ToLower(*domain)) {
+		logger.Warnf("domainMismatch for owner %d, origin %s, domain %s host %s", ownerID, origin, *domain, parse.Host)
+		m.DiscordController.NotifyPotentialAbuse(alertMessage + " - domainMismatch")
+		return ente.NewPermissionDeniedError("unknown custom domain")
+	}
+	return nil
 }
 
 func computeHashKeyForList(list []string, delim string) string {

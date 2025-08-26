@@ -35,7 +35,7 @@ class SortCodeMenuWidget extends StatelessWidget {
         text,
         style: Theme.of(context).textTheme.titleMedium!.copyWith(
               fontSize: 14,
-              color: Theme.of(context).iconTheme.color!.withOpacity(0.7),
+              color: Theme.of(context).iconTheme.color!.withValues(alpha: 0.7),
             ),
       );
     }

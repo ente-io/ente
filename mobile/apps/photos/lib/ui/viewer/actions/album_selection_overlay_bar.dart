@@ -142,7 +142,7 @@ class _SelectAllAlbumsButtonState extends State<SelectAllAlbumsButton> {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 4,
                 offset: const Offset(0, -1),
               ),
@@ -153,7 +153,7 @@ class _SelectAllAlbumsButtonState extends State<SelectAllAlbumsButton> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                S.of(context).selectAllShort,
+                AppLocalizations.of(context).selectAllShort,
                 style: getEnteTextTheme(context).miniMuted,
               ),
               const SizedBox(width: 4),

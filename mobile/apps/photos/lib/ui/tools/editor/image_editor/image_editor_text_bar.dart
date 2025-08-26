@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import "package:flutter_svg/svg.dart";
+import "package:photos/ente_theme_data.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/tools/editor/image_editor/circular_icon_button.dart";
@@ -76,7 +77,7 @@ class _ImageEditorTextBarState extends State<ImageEditorTextBar>
       children: [
         CircularIconButton(
           svgPath: "assets/image-editor/image-editor-text-color.svg",
-          label: S.of(context).color,
+          label: AppLocalizations.of(context).color,
           isSelected: selectedActionIndex == 0,
           onTap: () {
             _selectAction(0);
@@ -84,7 +85,7 @@ class _ImageEditorTextBarState extends State<ImageEditorTextBar>
         ),
         CircularIconButton(
           svgPath: "assets/image-editor/image-editor-text-font.svg",
-          label: S.of(context).font,
+          label: AppLocalizations.of(context).font,
           isSelected: selectedActionIndex == 1,
           onTap: () {
             _selectAction(1);
@@ -92,7 +93,7 @@ class _ImageEditorTextBarState extends State<ImageEditorTextBar>
         ),
         CircularIconButton(
           svgPath: "assets/image-editor/image-editor-text-background.svg",
-          label: S.of(context).background,
+          label: AppLocalizations.of(context).background,
           isSelected: selectedActionIndex == 2,
           onTap: () {
             setState(() {
@@ -102,7 +103,7 @@ class _ImageEditorTextBarState extends State<ImageEditorTextBar>
         ),
         CircularIconButton(
           svgPath: "assets/image-editor/image-editor-text-align-left.svg",
-          label: S.of(context).align,
+          label: AppLocalizations.of(context).align,
           isSelected: selectedActionIndex == 3,
           onTap: () {
             setState(() {
@@ -174,7 +175,7 @@ class _FontPickerWidget extends StatelessWidget {
               decoration: BoxDecoration(
                 color: isSelected
                     ? colorScheme.fillBasePressed
-                    : colorScheme.backgroundElevated2,
+                    : Theme.of(context).colorScheme.editorBackgroundColor,
                 borderRadius: BorderRadius.circular(25),
               ),
               child: Center(
@@ -209,7 +210,7 @@ class _BackgroundPickerWidget extends StatelessWidget {
         'text': 'Aa',
         'selectedBackgroundColor':
             isLightMode ? colorScheme.fillFaint : Colors.white,
-        'backgroundColor': colorScheme.backgroundElevated2,
+        'backgroundColor': Theme.of(context).colorScheme.editorBackgroundColor,
         'border': null,
         'textColor': Colors.white,
         'selectedInnerBackgroundColor': Colors.black,
@@ -219,7 +220,7 @@ class _BackgroundPickerWidget extends StatelessWidget {
         'text': 'Aa',
         'selectedBackgroundColor':
             isLightMode ? colorScheme.fillFaint : Colors.white,
-        'backgroundColor': colorScheme.backgroundElevated2,
+        'backgroundColor': Theme.of(context).colorScheme.editorBackgroundColor,
         'border': null,
         'textColor': Colors.black,
         'selectedInnerBackgroundColor': Colors.transparent,
@@ -229,7 +230,7 @@ class _BackgroundPickerWidget extends StatelessWidget {
         'text': 'Aa',
         'selectedBackgroundColor':
             isLightMode ? colorScheme.fillFaint : Colors.white,
-        'backgroundColor': colorScheme.backgroundElevated2,
+        'backgroundColor': Theme.of(context).colorScheme.editorBackgroundColor,
         'border': null,
         'textColor': Colors.black,
         'selectedInnerBackgroundColor': Colors.black.withOpacity(0.11),
@@ -241,7 +242,7 @@ class _BackgroundPickerWidget extends StatelessWidget {
         'text': 'Aa',
         'selectedBackgroundColor':
             isLightMode ? colorScheme.fillFaint : Colors.black,
-        'backgroundColor': colorScheme.backgroundElevated2,
+        'backgroundColor': Theme.of(context).colorScheme.editorBackgroundColor,
         'border':
             isLightMode ? null : Border.all(color: Colors.white, width: 2),
         'textColor': Colors.black,
@@ -354,7 +355,7 @@ class _AlignPickerWidget extends StatelessWidget {
               decoration: BoxDecoration(
                 color: isSelected
                     ? colorScheme.fillBasePressed
-                    : colorScheme.backgroundElevated2,
+                    : Theme.of(context).colorScheme.editorBackgroundColor,
                 borderRadius: BorderRadius.circular(25),
                 border: isSelected
                     ? Border.all(color: Colors.black, width: 2)

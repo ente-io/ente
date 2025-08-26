@@ -374,7 +374,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                                           )
                                         : const SizedBox();
                                   },
-                                  valueListenable: _isPlaybackReady, 
+                                  valueListenable: _isPlaybackReady,
                                 ),
                               ),
                             ),
@@ -581,7 +581,10 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
         _progressNotifier.value = count / (widget.file.fileSize ?? total);
         if (_progressNotifier.value == 1) {
           if (mounted) {
-            showShortToast(context, S.of(context).decryptingVideo);
+            showShortToast(
+              context,
+              AppLocalizations.of(context).decryptingVideo,
+            );
           }
         }
       },
@@ -592,8 +595,8 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     }).onError((error, stackTrace) {
       showErrorDialog(
         context,
-        S.of(context).error,
-        S.of(context).failedToDownloadVideo,
+        AppLocalizations.of(context).error,
+        AppLocalizations.of(context).failedToDownloadVideo,
       );
     });
   }
@@ -642,7 +645,7 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(24),
-              color: Colors.black.withOpacity(0.3),
+              color: Colors.black.withValues(alpha: 0.3),
               border: Border.all(
                 color: strokeFaintDark,
                 width: 1,
@@ -793,7 +796,7 @@ class _SeekBarAndDuration extends StatelessWidget {
                   4,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.3),
+                  color: Colors.black.withValues(alpha: 0.3),
                   borderRadius: const BorderRadius.all(
                     Radius.circular(8),
                   ),
@@ -910,7 +913,9 @@ class _VideoDescriptionAndSwitchToMediaKitButton extends StatelessWidget {
                           HapticFeedback.vibrate();
                           elTooltipController.hide();
                         },
-                        child: Text(S.of(context).useDifferentPlayerInfo),
+                        child: Text(
+                          AppLocalizations.of(context).useDifferentPlayerInfo,
+                        ),
                       ),
                       position: ElTooltipPosition.topEnd,
                       color: backgroundElevatedDark,
@@ -947,12 +952,12 @@ class _VideoDescriptionAndSwitchToMediaKitButton extends StatelessWidget {
                                 Icon(
                                   Icons.play_arrow_outlined,
                                   size: 24,
-                                  color: Colors.white.withOpacity(0.2),
+                                  color: Colors.white.withValues(alpha: 0.2),
                                 ),
                                 Icon(
                                   Icons.question_mark_rounded,
                                   size: 10,
-                                  color: Colors.white.withOpacity(0.2),
+                                  color: Colors.white.withValues(alpha: 0.2),
                                 ),
                               ],
                             ),

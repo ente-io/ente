@@ -8,7 +8,8 @@ on:
             - ".github/workflows/mobile-lint.yml"
 
 env:
-    FLUTTER_VERSION: "3.24.3"
+    FLUTTER_VERSION: "3.32.8"
+    RUST_VERSION: "1.86.0"
 
 permissions:
     contents: read
@@ -31,7 +32,18 @@ jobs:
                   channel: "stable"
                   flutter-version: ${{ env.FLUTTER_VERSION  }}
                   cache: true
-
+                  
             - run: flutter pub get
+                  
+            - name: Install Rust ${{ env.RUST_VERSION }}
+              uses: dtolnay/rust-toolchain@master
+              with:
+                  toolchain: ${{ env.RUST_VERSION }}
+                  
+            - name: Install Flutter Rust Bridge
+              run: cargo install flutter_rust_bridge_codegen
+              
+            - name: Generate Rust bindings
+              run: flutter_rust_bridge_codegen generate
 
             - run: flutter analyze --no-fatal-infos

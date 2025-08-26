@@ -1,0 +1,152 @@
+name: "Internal release (photos)"
+
+on:
+    schedule:
+        # Runs daily at 12:30 UTC (6:00 PM IST)
+        - cron: "30 12 * * *"
+    workflow_dispatch: # Allow manual trigger
+
+env:
+    FLUTTER_VERSION: "3.32.8"
+    RUST_VERSION: "1.86.0"
+
+permissions:
+    contents: read
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        defaults:
+            run:
+                working-directory: mobile/apps/photos
+
+        steps:
+            - name: Checkout code and submodules
+              uses: actions/checkout@v4
+              with:
+                  submodules: recursive
+
+            - name: Setup JDK 17
+              uses: actions/setup-java@v1
+              with:
+                  java-version: 17
+
+            - name: Install Flutter ${{ env.FLUTTER_VERSION }}
+              uses: subosito/flutter-action@v2
+              with:
+                  channel: "stable"
+                  flutter-version: ${{ env.FLUTTER_VERSION }}
+                  cache: true
+
+            - name: Install Rust ${{ env.RUST_VERSION }}
+              uses: dtolnay/rust-toolchain@master
+              with:
+                  toolchain: ${{ env.RUST_VERSION }}
+
+            - name: Install Flutter Rust Bridge
+              run: cargo install flutter_rust_bridge_codegen
+
+            - name: Generate Rust bindings
+              run: flutter_rust_bridge_codegen generate
+
+            - name: Increment version code for build
+              run: |
+                  CURRENT_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
+                  VERSION_NAME=$(echo $CURRENT_VERSION | cut -d'+' -f1)
+                  CURRENT_BUILD=$(echo $CURRENT_VERSION | cut -d'+' -f2)
+                  NEW_BUILD=$((CURRENT_BUILD + ${{ github.run_number }}))
+                  NEW_VERSION="${VERSION_NAME}+${NEW_BUILD}"
+
+                  sed -i "s/^version: .*/version: $NEW_VERSION/" pubspec.yaml
+                  echo "Building with version ${NEW_VERSION}"
+                  
+                  # Store version for later use
+                  echo "NEW_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
+
+            - name: Prepare and validate changelog for Play Store
+              run: |
+                  mkdir -p whatsnew
+                  CHANGELOG_FILE="scripts/store_changes.txt"
+                  DISCORD_FILE="scripts/internal_changes.txt"
+                  OUTPUT_FILE="whatsnew/whatsnew-en-US"
+
+                  # Use provided changelog or fallback
+                  if [ -f "$CHANGELOG_FILE" ]; then
+                          head -c 500 "$CHANGELOG_FILE" > "$OUTPUT_FILE"
+                  else
+                          echo "Bug fixes and improvements" > "$OUTPUT_FILE"
+                  fi
+
+                  # Validate: file exists
+                  if [ ! -s "$OUTPUT_FILE" ]; then
+                          echo "❌ Changelog is empty."
+                          exit 1
+                  fi
+
+                  # Validate: <= 500 chars
+                  LENGTH=$(wc -m < "$OUTPUT_FILE")
+                  if [ "$LENGTH" -gt 500 ]; then
+                          echo "❌ Changelog exceeds 500 characters ($LENGTH)."
+                          exit 1
+                  fi
+
+                  # Validate: no markdown or HTML
+                  if grep -Eq '[\*\_\<\>\[\]\(\)]' "$OUTPUT_FILE"; then
+                          echo "❌ Changelog contains markdown/HTML formatting."
+                          exit 1
+                  fi
+
+                  echo "✅ Changelog valid:"
+                  cat "$OUTPUT_FILE"
+                  
+                  # Store changelog for Play Store (with escaped newlines)
+                  CHANGELOG_PLAYSTORE=$(cat "$OUTPUT_FILE" | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/"/\\"/g')
+                  echo "CHANGELOG=${CHANGELOG_PLAYSTORE}" >> $GITHUB_ENV
+                  
+                  # Store changelog for Discord (with proper newlines)
+                  CHANGELOG_DISCORD=$(cat "$DISCORD_FILE" | sed 's/"/\\"/g')
+                  echo "CHANGELOG_DISCORD<<EOF" >> $GITHUB_ENV
+                  echo "$CHANGELOG_DISCORD" >> $GITHUB_ENV
+                  echo "EOF" >> $GITHUB_ENV
+
+            - name: Setup keys
+              uses: timheuer/base64-to-file@v1
+              with:
+                  fileName: "keystore/ente_photos_key.jks"
+                  encodedString: ${{ secrets.SIGNING_KEY_PHOTOS }}
+
+            - name: Build PlayStore AAB
+              run: |
+                  flutter build appbundle --dart-define=cronetHttpNoPlay=true --release --flavor playstore
+              env:
+                  SIGNING_KEY_PATH: "/home/runner/work/_temp/keystore/ente_photos_key.jks"
+                  SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS_PHOTOS }}
+                  SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD_PHOTOS }}
+                  SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD_PHOTOS }}
+
+            - name: Upload AAB to PlayStore
+              uses: r0adkll/upload-google-play@v1
+              with:
+                  serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+                  packageName: io.ente.photos
+                  releaseFiles: mobile/apps/photos/build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
+                  track: internal
+                  whatsNewDirectory: mobile/apps/photos/whatsnew
+                  mappingFile: mobile/apps/photos/build/app/outputs/mapping/playstoreRelease/mapping.txt
+
+            - name: Notify Discord
+              uses: sarisia/actions-status-discord@v1
+              with:
+                  webhook: ${{ secrets.DISCORD_INTERNAL_RELEASE_WEBHOOK }}
+                  nodetail: true
+                  title: "🏆 Daily release Photos v${{ env.NEW_VERSION }} (Branch: ${{ github.ref_name }})"
+                  description: |
+                      **Version:** ${{ env.NEW_VERSION }}
+                      **Flutter:** ${{ env.FLUTTER_VERSION }}
+                      **Commit:** [${{ github.sha }}](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})
+                      **Download:** [Play Store](https://play.google.com/store/apps/details?id=io.ente.photos)
+
+                      **Changes:**
+                      ${{ env.CHANGELOG_DISCORD }}
+                  color: 0x00ff00

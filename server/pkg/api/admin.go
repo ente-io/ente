@@ -3,12 +3,13 @@ package api
 import (
 	"errors"
 	"fmt"
-	"github.com/ente-io/museum/pkg/controller/emergency"
-	"github.com/ente-io/museum/pkg/controller/remotestore"
-	"github.com/ente-io/museum/pkg/repo/authenticator"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/ente-io/museum/pkg/controller/emergency"
+	"github.com/ente-io/museum/pkg/controller/remotestore"
+	"github.com/ente-io/museum/pkg/repo/authenticator"
 
 	"github.com/ente-io/museum/pkg/controller/family"
 
@@ -377,7 +378,7 @@ func (h *AdminHandler) UpdateFeatureFlag(c *gin.Context) {
 		return
 	}
 	go h.DiscordController.NotifyAdminAction(
-		fmt.Sprintf("Admin (%d) updating flag:%s to val:%s for %d", auth.GetUserID(c.Request.Header), request.Key, request.Value, request.UserID))
+		fmt.Sprintf("Admin (%d) updating flag:%s to val:%v for %d", auth.GetUserID(c.Request.Header), request.Key, request.Value, request.UserID))
 
 	logger := logrus.WithFields(logrus.Fields{
 		"user_id":  request.UserID,

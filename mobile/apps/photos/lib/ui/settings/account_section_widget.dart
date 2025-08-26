@@ -27,7 +27,7 @@ class AccountSectionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(
-      title: S.of(context).account,
+      title: AppLocalizations.of(context).account,
       selectionOptionsWidget: _getSectionOptions(context),
       leadingIcon: Icons.account_circle_outlined,
     );
@@ -39,7 +39,7 @@ class AccountSectionWidget extends StatelessWidget {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: S.of(context).manageSubscription,
+            title: AppLocalizations.of(context).manageSubscription,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -51,7 +51,7 @@ class AccountSectionWidget extends StatelessWidget {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: S.of(context).changeEmail,
+            title: AppLocalizations.of(context).changeEmail,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -61,7 +61,7 @@ class AccountSectionWidget extends StatelessWidget {
             final hasAuthenticated = await LocalAuthenticationService.instance
                 .requestLocalAuthentication(
               context,
-              S.of(context).authToChangeYourEmail,
+              AppLocalizations.of(context).authToChangeYourEmail,
             );
             if (hasAuthenticated) {
               // ignore: unawaited_futures
@@ -71,7 +71,7 @@ class AccountSectionWidget extends StatelessWidget {
                 builder: (BuildContext context) {
                   return const ChangeEmailDialog();
                 },
-                barrierColor: Colors.black.withOpacity(0.85),
+                barrierColor: Colors.black.withValues(alpha: 0.85),
                 barrierDismissible: false,
               );
             }
@@ -80,7 +80,7 @@ class AccountSectionWidget extends StatelessWidget {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: S.of(context).changePassword,
+            title: AppLocalizations.of(context).changePassword,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -90,7 +90,7 @@ class AccountSectionWidget extends StatelessWidget {
             final hasAuthenticated = await LocalAuthenticationService.instance
                 .requestLocalAuthentication(
               context,
-              S.of(context).authToChangeYourPassword,
+              AppLocalizations.of(context).authToChangeYourPassword,
             );
             if (hasAuthenticated) {
               // ignore: unawaited_futures
@@ -109,7 +109,7 @@ class AccountSectionWidget extends StatelessWidget {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: S.of(context).recoveryKey,
+            title: AppLocalizations.of(context).recoveryKey,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -119,7 +119,7 @@ class AccountSectionWidget extends StatelessWidget {
             final hasAuthenticated = await LocalAuthenticationService.instance
                 .requestLocalAuthentication(
               context,
-              S.of(context).authToViewYourRecoveryKey,
+              AppLocalizations.of(context).authToViewYourRecoveryKey,
             );
             if (hasAuthenticated) {
               String recoveryKey;
@@ -134,7 +134,7 @@ class AccountSectionWidget extends StatelessWidget {
                   context,
                   RecoveryKeyPage(
                     recoveryKey,
-                    S.of(context).ok,
+                    AppLocalizations.of(context).ok,
                     showAppBar: true,
                     onDone: () {},
                   ),
@@ -146,7 +146,7 @@ class AccountSectionWidget extends StatelessWidget {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: S.of(context).legacy,
+            title: AppLocalizations.of(context).legacy,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -157,7 +157,7 @@ class AccountSectionWidget extends StatelessWidget {
                 await LocalAuthenticationService.instance
                     .requestLocalAuthentication(
                   context,
-                  S.of(context).authToManageLegacy,
+                  AppLocalizations.of(context).authToManageLegacy,
                 );
             if (hasAuthenticated) {
               Navigator.of(context).push(
@@ -173,7 +173,7 @@ class AccountSectionWidget extends StatelessWidget {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: S.of(context).exportYourData,
+            title: AppLocalizations.of(context).exportYourData,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -186,7 +186,7 @@ class AccountSectionWidget extends StatelessWidget {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: S.of(context).logout,
+            title: AppLocalizations.of(context).logout,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -198,7 +198,7 @@ class AccountSectionWidget extends StatelessWidget {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: S.of(context).deleteAccount,
+            title: AppLocalizations.of(context).deleteAccount,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -207,7 +207,7 @@ class AccountSectionWidget extends StatelessWidget {
             final hasAuthenticated = await LocalAuthenticationService.instance
                 .requestLocalAuthentication(
               context,
-              S.of(context).authToInitiateAccountDeletion,
+              AppLocalizations.of(context).authToInitiateAccountDeletion,
             );
             if (hasAuthenticated) {
               unawaited(
@@ -236,8 +236,8 @@ class AccountSectionWidget extends StatelessWidget {
   void _onLogoutTapped(BuildContext context) {
     showChoiceActionSheet(
       context,
-      title: S.of(context).areYouSureYouWantToLogout,
-      firstButtonLabel: S.of(context).yesLogout,
+      title: AppLocalizations.of(context).areYouSureYouWantToLogout,
+      firstButtonLabel: AppLocalizations.of(context).yesLogout,
       isCritical: true,
       firstButtonOnTap: () async {
         await UserService.instance.logout(context);

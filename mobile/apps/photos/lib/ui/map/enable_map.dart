@@ -14,14 +14,14 @@ Future<bool> requestForMapEnable(BuildContext context) async {
 
   final ButtonResult? result = await showDialogWidget(
     context: context,
-    title: S.of(context).enableMaps,
-    body: S.of(context).enableMapsDesc,
+    title: AppLocalizations.of(context).enableMaps,
+    body: AppLocalizations.of(context).enableMapsDesc,
     isDismissible: true,
     buttons: [
       ButtonWidget(
         buttonType: ButtonType.primary,
         buttonAction: ButtonAction.first,
-        labelText: S.of(context).enableMaps,
+        labelText: AppLocalizations.of(context).enableMaps,
         isInAlert: true,
         onTap: () async {
           await flagService.setMapEnabled(true);
@@ -30,7 +30,7 @@ Future<bool> requestForMapEnable(BuildContext context) async {
       ButtonWidget(
         buttonType: ButtonType.secondary,
         buttonAction: ButtonAction.second,
-        labelText: S.of(context).cancel,
+        labelText: AppLocalizations.of(context).cancel,
         isInAlert: true,
       ),
     ],
@@ -39,7 +39,7 @@ Future<bool> requestForMapEnable(BuildContext context) async {
     return true;
   }
   if (result?.action == ButtonAction.error) {
-    showShortToast(context, S.of(context).somethingWentWrong);
+    showShortToast(context, AppLocalizations.of(context).somethingWentWrong);
     return false;
   }
   return false;

@@ -4,7 +4,7 @@ on:
   workflow_dispatch: # Manual trigger only
 
 env:
-  FLUTTER_VERSION: "3.24.3"
+  FLUTTER_VERSION: "3.32.8"
   ANDROID_KEYSTORE_PATH: "keystore/ente_photos_key.jks"
 
 jobs:

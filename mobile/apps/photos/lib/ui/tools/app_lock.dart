@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/utils/lock_screen_settings.dart";
@@ -115,15 +114,16 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
       darkTheme: widget.darkTheme,
       locale: widget.locale,
       debugShowCheckedModeBanner: false,
-      supportedLocales: appSupportedLocales,
+      supportedLocales: AppLocalizations.supportedLocales,
       localeListResolutionCallback: localResolutionCallBack,
       localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        S.delegate,
+        ...AppLocalizations.localizationsDelegates,
       ],
       onGenerateRoute: (settings) {
+        // On Android disabling deep links doesn't work, so this function
+        // also gets triggered like /?generatedId=xyz&mainKey=abcd
+        // Related: https://github.com/flutter/flutter/issues/119938
+
         switch (settings.name) {
           case '/lock-screen':
             return PageRouteBuilder(
@@ -135,7 +135,7 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
                   this.widget.builder(settings.arguments),
             );
         }
-        return PageRouteBuilder(pageBuilder: (_, __, ___) => this._lockScreen);
+        return null;
       },
     );
   }

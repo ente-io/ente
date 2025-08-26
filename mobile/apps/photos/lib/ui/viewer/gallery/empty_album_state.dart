@@ -51,16 +51,18 @@ class EmptyAlbumState extends StatelessWidget {
                     const SizedBox(height: 16),
                     Text.rich(
                       TextSpan(
-                        text: S.of(context).addSomePhotosDesc1,
+                        text: AppLocalizations.of(context).addSomePhotosDesc1,
                         children: [
                           TextSpan(
-                            text: S.of(context).addSomePhotosDesc2,
+                            text:
+                                AppLocalizations.of(context).addSomePhotosDesc2,
                             style: TextStyle(
                               color: getEnteColorScheme(context).primary500,
                             ),
                           ),
                           TextSpan(
-                            text: S.of(context).addSomePhotosDesc3,
+                            text:
+                                AppLocalizations.of(context).addSomePhotosDesc3,
                           ),
                         ],
                       ),
@@ -79,7 +81,7 @@ class EmptyAlbumState extends StatelessWidget {
                     ButtonWidget(
                       buttonType: ButtonType.primary,
                       buttonSize: ButtonSize.large,
-                      labelText: S.of(context).addPhotos,
+                      labelText: AppLocalizations.of(context).addPhotos,
                       icon: Icons.add_photo_alternate_outlined,
                       shouldSurfaceExecutionStates: false,
                       onTap: () async {
@@ -103,7 +105,7 @@ class EmptyAlbumState extends StatelessWidget {
                         height: 24,
                         color: isLightMode ? Colors.white : Colors.black,
                       ),
-                      labelText: S.of(context).autoAddPeople,
+                      labelText: AppLocalizations.of(context).autoAddPeople,
                       shouldSurfaceExecutionStates: false,
                       onTap: () async {
                         await routeToPage(

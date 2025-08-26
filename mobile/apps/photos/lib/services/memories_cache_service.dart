@@ -3,7 +3,6 @@ import "dart:io" show File;
 
 import "package:flutter/cupertino.dart";
 import "package:flutter/foundation.dart" show kDebugMode;
-import "package:flutter/material.dart" show BuildContext;
 import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/core/event_bus.dart";
@@ -690,7 +689,7 @@ class MemoriesCacheService {
         );
         continue;
       }
-      final s = await LanguageService.s;
+      final s = await LanguageService.locals;
       await NotificationService.instance.scheduleNotification(
         s.onThisDay,
         message: s.lookBackOnYourMemories,
@@ -762,10 +761,10 @@ class MemoriesCacheService {
         );
         continue;
       }
-      final s = await LanguageService.s;
+      final s = await LanguageService.locals;
       await NotificationService.instance.scheduleNotification(
         memory.personName != null
-            ? s.wishThemAHappyBirthday(memory.personName!)
+            ? s.wishThemAHappyBirthday(name: memory.personName!)
             : s.happyBirthday,
         id: memory.id.hashCode,
         channelID: "birthday",
