@@ -112,3 +112,26 @@ disclose it by emailing security@ente.io or [using this
 link](https://github.com/ente-io/ente/security/advisories/new) instead of
 opening a public issue. We will investigate all legitimate reports. To know
 more, please see our [security policy](SECURITY.md).
+
+
+<!-- GitHub Frontend Bot Testing Improvement Contribution -->
+
+This comment was added by GitHub Frontend Bot as part of a testing infrastructure improvement initiative.
+
+**Suggested Testing Improvements:**
+
+**Recommended Testing Stack:**
+- **Built-in test package** - Dart's native testing
+- **mockito** - Mocking framework
+- **flutter_test** - Flutter-specific testing (if applicable)
+- **integration_test** - Integration testing
+
+**Example setup:**
+```yaml
+dev_dependencies:
+  test: ^1.21.0
+  mockito: ^5.3.0
+```
+
+---
+*Generated on 2025-08-26T19:56:30.842Z*
