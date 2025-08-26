@@ -117,13 +117,20 @@ cargo fmt --check
 - Not fixing warnings that clippy reports
 - Making changes after running the checks
 
+### Commit and PR Message Format
+
+Use a concise commit message with:
+
+- **No emojis**
+- Short subject line (under 72 chars)
+- Brief bullet points for context only if necessary
+- Only the Co-Authored-By line at the end, no promotional text or links
+
 ### Additional Guidelines
 
-- No promotional text like "Generated with [tool name]" - only keep the co-author line
 - Check `git status` before committing to avoid adding temporary/binary files
 - Never commit to main branch
-- Keep commit messages and pull requests short and concise. No emojis.
-- All CI checks must pass - the above commands simulate CI locally
+- All CI checks must pass - run the checklist commands above before committing
 
 ### Security Guidelines
 
