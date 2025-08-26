@@ -12,7 +12,9 @@ import "package:photos/models/similar_files.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/machine_learning/similar_images_service.dart";
+import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
+import "package:photos/theme/text_style.dart";
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import "package:photos/ui/components/models/button_type.dart";
@@ -37,6 +39,12 @@ enum SortKey {
   count,
 }
 
+enum TabFilter {
+  all,
+  similar,
+  identical,
+}
+
 class SimilarImagesPage extends StatefulWidget {
   final bool debugScreen;
 
@@ -49,6 +57,8 @@ class SimilarImagesPage extends StatefulWidget {
 class _SimilarImagesPageState extends State<SimilarImagesPage> {
   static const crossAxisCount = 3;
   static const crossAxisSpacing = 12.0;
+  static const double _similarThreshold = 0.02;
+  static const double _identicalThreshold = 0.0;
 
   final _logger = Logger("SimilarImagesPage");
   bool _isDisposed = false;
@@ -56,13 +66,29 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   SimilarImagesPageState _pageState = SimilarImagesPageState.setup;
   double _distanceThreshold = 0.04; // Default value
   List<SimilarFiles> _similarFilesList = [];
+
   SortKey _sortKey = SortKey.distanceAsc;
   bool _exactSearch = false;
   bool _fullRefresh = false;
   bool _isSelectionSheetOpen = false;
+  TabFilter _selectedTab = TabFilter.all;
 
   late SelectedFiles _selectedFiles;
   late ValueNotifier<String> _deleteProgress;
+
+  List<SimilarFiles> get _filteredGroups {
+    if (_selectedTab == TabFilter.all) {
+      return _similarFilesList;
+    }
+
+    final threshold = _selectedTab == TabFilter.similar
+        ? _similarThreshold
+        : _identicalThreshold;
+
+    return _similarFilesList.where((group) {
+      return group.furthestDistance <= threshold;
+    }).toList();
+  }
 
   @override
   void initState() {
@@ -318,14 +344,20 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
 
     return Column(
       children: [
+        _buildTabBar(),
         Expanded(
           child: ListView.builder(
             cacheExtent: 400,
-            itemCount: _similarFilesList.length,
+            itemCount: _filteredGroups.length,
             itemBuilder: (context, index) {
-              final similarFiles = _similarFilesList[index];
+              final similarFiles = _filteredGroups[index];
               return RepaintBoundary(
-                child: _buildSimilarFilesGroup(similarFiles),
+                child: Column(
+                  children: [
+                    SizedBox(height: index == 0 ? 0 : 16),
+                    _buildSimilarFilesGroup(similarFiles),
+                  ],
+                ),
               );
             },
           ),
@@ -333,6 +365,85 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         _getBottomActionButtons(),
       ],
     );
+  }
+
+  Widget _buildTabBar() {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: Row(
+        children: [
+          _buildTabButton(
+            TabFilter.all,
+            'All', // TODO: lau: extract string
+            colorScheme,
+            textTheme,
+          ),
+          const SizedBox(width: 8),
+          _buildTabButton(
+            TabFilter.similar,
+            'Similar', // TODO: lau: extract string
+            colorScheme,
+            textTheme,
+          ),
+          const SizedBox(width: 8),
+          _buildTabButton(
+            TabFilter.identical,
+            'Identical', // TODO: lau: extract string
+            colorScheme,
+            textTheme,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabButton(
+    TabFilter tab,
+    String label,
+    EnteColorScheme colorScheme,
+    EnteTextTheme textTheme,
+  ) {
+    final isSelected = _selectedTab == tab;
+
+    return GestureDetector(
+      onTap: () => _onTabChanged(tab),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? colorScheme.primary700 : colorScheme.fillFaint,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          label,
+          style: isSelected ? textTheme.bodyMuted : textTheme.bodyBold,
+        ),
+      ),
+    );
+  }
+
+  void _onTabChanged(TabFilter newTab) {
+    final hadSelections = _selectedFiles.files.isNotEmpty;
+
+    setState(() {
+      _selectedTab = newTab;
+
+      if (hadSelections) {
+        // Select all files in the newly filtered groups
+        final newSelection = <EnteFile>{};
+        for (final group in _filteredGroups) {
+          // Skip the first file in each group (the reference file)
+          for (int i = 1; i < group.files.length; i++) {
+            newSelection.add(group.files[i]);
+          }
+        }
+        _selectedFiles.clearAll();
+        _selectedFiles.selectAll(newSelection);
+      }
+      // If no selections before, keep everything unselected
+    });
   }
 
   Widget _getBottomActionButtons() {
