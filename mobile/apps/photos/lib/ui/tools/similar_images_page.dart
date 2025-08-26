@@ -967,7 +967,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         if (!mounted) {
           return;
         }
-        if (collectionCnt > 0 && showUIFeedback) {
+        if (collectionCnt > 2 && showUIFeedback) {
           progress++;
           // calculate progress percentage upto 2 decimal places
           final double percentage = (progress / collectionCnt) * 100;
@@ -988,7 +988,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         }
       }
     }
-    if (showUIFeedback) {
+    if (collectionCnt > 2 && showUIFeedback) {
       _deleteProgress.value = "";
     }
 
