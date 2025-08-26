@@ -4,11 +4,11 @@ import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:bip39/bip39.dart' as bip39;
-import 'package:ente_configuration/constants.dart';
 import 'package:ente_base/models/database.dart';
 import 'package:ente_base/models/key_attributes.dart';
 import 'package:ente_base/models/key_gen_result.dart';
 import 'package:ente_base/models/private_key_attributes.dart';
+import 'package:ente_configuration/constants.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_events/models/endpoint_updated_event.dart';
