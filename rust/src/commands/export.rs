@@ -104,6 +104,8 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
     println!("\nFetching files...");
     let mut total_files = 0;
     let mut exported_files = 0;
+    let mut skipped_files = 0;
+    let mut deleted_files = 0;
 
     for collection in &collections {
         // Skip deleted collections
@@ -160,13 +162,15 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
                 break;
             }
 
-            total_files += files.len();
-
             for file in files {
                 // Skip deleted files
                 if file.is_deleted {
+                    deleted_files += 1;
                     continue;
                 }
+
+                // Count non-deleted files
+                total_files += 1;
 
                 // Update since_time for next batch
                 if file.updation_time > since_time {
@@ -227,6 +231,7 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
                 // Skip if file already exists
                 if file_path.exists() {
                     log::debug!("File already exists: {file_path:?}");
+                    skipped_files += 1;
                     continue;
                 }
 
@@ -276,9 +281,8 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
 
                 // Progress indicator - show every file for now since we have few files
                 println!(
-                    "  [{}/{}] Exported: {}",
+                    "  [{}] Exported: {}",
                     exported_files,
-                    total_files,
                     file_path.file_name().unwrap_or_default().to_string_lossy()
                 );
             }
@@ -288,18 +292,28 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
     println!("\n{}", "=".repeat(50));
     println!("Export Summary:");
     println!("{}", "=".repeat(50));
-    println!("  📁 Total files found: {total_files}");
+    println!("  📁 Total files (non-deleted): {total_files}");
     println!("  ✅ Successfully exported: {exported_files}");
 
-    let skipped = total_files - exported_files;
-    if skipped > 0 {
-        println!("  ⏭️  Skipped (already exists): {skipped}");
+    if skipped_files > 0 {
+        println!("  ⏭️  Skipped (already exists): {skipped_files}");
+    }
+
+    if deleted_files > 0 {
+        println!("  🗑️  Deleted files (skipped): {deleted_files}");
+    }
+
+    let failed = total_files - exported_files - skipped_files;
+    if failed > 0 {
+        println!("  ❌ Failed to export: {failed}");
     }
 
     if exported_files == total_files {
         println!("\n🎉 All files exported successfully!");
     } else if exported_files > 0 {
         println!("\n✨ Export completed with {exported_files} new files!");
+    } else if skipped_files == total_files {
+        println!("\n✨ All files already exported!");
     }
 
     Ok(())

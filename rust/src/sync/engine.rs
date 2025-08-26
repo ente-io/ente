@@ -250,8 +250,8 @@ impl SyncEngine {
                     // Count as new, updated or deleted
                     if file.is_deleted {
                         result.deleted += 1;
-                    } else if file.updation_time > last_sync {
-                        if last_sync == 0 {
+                    } else if file.updation_time > initial_sync {
+                        if initial_sync == 0 {
                             // First sync - count as new
                             result.new += 1;
                         } else {
