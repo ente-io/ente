@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import "package:photos/module/upload/model/multipart.dart";
 import 'package:sqflite/sqflite.dart';
 import "package:sqflite_migration/sqflite_migration.dart";
+import 'package:synchronized/synchronized.dart';
 
 class UploadLocksDB {
   static const _databaseName = "ente.upload_locks.db";
@@ -77,17 +78,23 @@ class UploadLocksDB {
   UploadLocksDB._privateConstructor();
   static final UploadLocksDB instance = UploadLocksDB._privateConstructor();
 
+  // only have a single app-wide reference to the database
   static Future<Database>? _dbFuture;
+  static final Lock _lock = Lock();
+
   Future<Database> get database async {
-    _dbFuture ??= _initDatabase();
-    return _dbFuture!;
+    // Use synchronized access to prevent concurrent initialization
+    return _lock.synchronized(() async {
+      _dbFuture ??= _initDatabase();
+      return _dbFuture!;
+    });
   }
 
+  // this opens the database (and creates it if it doesn't exist)
   Future<Database> _initDatabase() async {
     final Directory documentsDirectory =
         await getApplicationDocumentsDirectory();
     final String path = join(documentsDirectory.path, _databaseName);
-
     return await openDatabaseWithMigration(path, dbConfig);
   }
 
@@ -208,7 +215,7 @@ class UploadLocksDB {
 
   Future<int> releaseLock(String id, String owner) async {
     final db = await instance.database;
-    return db.delete(
+    return await db.delete(
       _uploadLocksTable.table,
       where:
           '${_uploadLocksTable.columnID} = ? AND ${_uploadLocksTable.columnOwner} = ?',
@@ -218,7 +225,7 @@ class UploadLocksDB {
 
   Future<int> releaseLocksAcquiredByOwnerBefore(String owner, int time) async {
     final db = await instance.database;
-    return db.delete(
+    return await db.delete(
       _uploadLocksTable.table,
       where:
           '${_uploadLocksTable.columnOwner} = ? AND ${_uploadLocksTable.columnTime} < ?',
@@ -228,7 +235,7 @@ class UploadLocksDB {
 
   Future<int> releaseAllLocksAcquiredBefore(int time) async {
     final db = await instance.database;
-    return db.delete(
+    return await db.delete(
       _uploadLocksTable.table,
       where: '${_uploadLocksTable.columnTime} < ?',
       whereArgs: [time],
