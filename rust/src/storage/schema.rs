@@ -44,30 +44,28 @@ pub fn create_tables(conn: &Connection) -> Result<()> {
     )?;
 
     // Collections/Albums table
+    // Note: collection_id is globally unique across all users, so we use it as the primary key
     conn.execute(
         "CREATE TABLE IF NOT EXISTS collections (
-            id INTEGER PRIMARY KEY,
+            collection_id INTEGER PRIMARY KEY,
             account_id INTEGER NOT NULL,
-            collection_id INTEGER NOT NULL,
             name TEXT NOT NULL,
             type TEXT NOT NULL,
             owner INTEGER NOT NULL,
             is_deleted INTEGER NOT NULL DEFAULT 0,
             metadata TEXT,
             updated_at INTEGER NOT NULL,
-            FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
-            UNIQUE(account_id, collection_id),
-            UNIQUE(collection_id)
+            FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE
         )",
         [],
     )?;
 
     // Files table (for caching remote file metadata)
+    // Note: file_id is globally unique across all users, so we use it as the primary key
     conn.execute(
         "CREATE TABLE IF NOT EXISTS files (
-            id INTEGER PRIMARY KEY,
+            file_id INTEGER PRIMARY KEY,
             account_id INTEGER NOT NULL,
-            file_id INTEGER NOT NULL,
             collection_id INTEGER NOT NULL,
             encrypted_key TEXT NOT NULL,
             key_decryption_nonce TEXT NOT NULL,
@@ -78,8 +76,7 @@ pub fn create_tables(conn: &Connection) -> Result<()> {
             local_path TEXT,
             updated_at INTEGER NOT NULL,
             FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
-            FOREIGN KEY (collection_id) REFERENCES collections(collection_id),
-            UNIQUE(account_id, file_id)
+            FOREIGN KEY (collection_id) REFERENCES collections(collection_id)
         )",
         [],
     )?;
@@ -87,14 +84,15 @@ pub fn create_tables(conn: &Connection) -> Result<()> {
     // Album files mapping
     conn.execute(
         "CREATE TABLE IF NOT EXISTS album_files (
-            id INTEGER PRIMARY KEY,
-            account_id INTEGER NOT NULL,
             album_id INTEGER NOT NULL,
             file_id INTEGER NOT NULL,
+            account_id INTEGER NOT NULL,
             synced_locally INTEGER NOT NULL DEFAULT 0,
             created_at INTEGER NOT NULL,
+            PRIMARY KEY (album_id, file_id),
             FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE CASCADE,
-            UNIQUE(account_id, album_id, file_id)
+            FOREIGN KEY (album_id) REFERENCES collections(collection_id),
+            FOREIGN KEY (file_id) REFERENCES files(file_id)
         )",
         [],
     )?;
@@ -115,13 +113,25 @@ pub fn create_tables(conn: &Connection) -> Result<()> {
     // Create indices for better performance
     conn.execute(
         "CREATE INDEX IF NOT EXISTS idx_files_collection 
-         ON files(account_id, collection_id)",
+         ON files(collection_id)",
+        [],
+    )?;
+
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_files_account 
+         ON files(account_id)",
         [],
     )?;
 
     conn.execute(
         "CREATE INDEX IF NOT EXISTS idx_album_files_album 
-         ON album_files(account_id, album_id)",
+         ON album_files(album_id)",
+        [],
+    )?;
+
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_album_files_account 
+         ON album_files(account_id)",
         [],
     )?;
 

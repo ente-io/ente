@@ -22,11 +22,11 @@ impl<'a> SyncStore<'a> {
 
         self.conn.execute(
             "INSERT OR REPLACE INTO collections 
-             (account_id, collection_id, name, type, owner, is_deleted, metadata, updated_at)
+             (collection_id, account_id, name, type, owner, is_deleted, metadata, updated_at)
              VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
             params![
-                account_id,
                 collection.id,
+                account_id,
                 collection.name,
                 format!("{:?}", collection.collection_type).to_lowercase(),
                 collection.owner,
@@ -66,8 +66,8 @@ impl<'a> SyncStore<'a> {
         let existing_sync_status: Option<i32> = self
             .conn
             .query_row(
-                "SELECT is_synced_locally FROM files WHERE account_id = ?1 AND file_id = ?2",
-                params![account_id, file.id],
+                "SELECT is_synced_locally FROM files WHERE file_id = ?1",
+                params![file.id],
                 |row| row.get(0),
             )
             .optional()?;
@@ -76,12 +76,12 @@ impl<'a> SyncStore<'a> {
 
         self.conn.execute(
             "INSERT OR REPLACE INTO files 
-             (account_id, file_id, collection_id, encrypted_key, key_decryption_nonce, 
+             (file_id, account_id, collection_id, encrypted_key, key_decryption_nonce, 
               file_info, metadata, is_deleted, is_synced_locally, updated_at)
              VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
             params![
-                account_id,
                 file.id,
+                account_id,
                 file.collection_id,
                 file.encrypted_key,
                 file.key_decryption_nonce,
@@ -300,15 +300,15 @@ impl<'a> SyncStore<'a> {
     ) -> Result<()> {
         let rows_updated = if let Some(path) = local_path {
             self.conn.execute(
-                "UPDATE files SET is_synced_locally = 1, local_path = ?3 
-                 WHERE account_id = ?1 AND file_id = ?2",
-                params![account_id, file_id, path],
+                "UPDATE files SET is_synced_locally = 1, local_path = ?2 
+                 WHERE file_id = ?1",
+                params![file_id, path],
             )?
         } else {
             self.conn.execute(
                 "UPDATE files SET is_synced_locally = 1 
-                 WHERE account_id = ?1 AND file_id = ?2",
-                params![account_id, file_id],
+                 WHERE file_id = ?1",
+                params![file_id],
             )?
         };
 
