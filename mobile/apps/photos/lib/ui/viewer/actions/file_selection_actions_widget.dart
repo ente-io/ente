@@ -50,6 +50,7 @@ import 'package:photos/utils/navigation_util.dart';
 import "package:photos/utils/share_util.dart";
 import "package:photos/utils/standalone/simple_task_queue.dart";
 import "package:screenshot/screenshot.dart";
+import "package:smooth_page_indicator/smooth_page_indicator.dart";
 
 class FileSelectionActionsWidget extends StatefulWidget {
   final GalleryType type;
@@ -89,6 +90,7 @@ class _FileSelectionActionsWidgetState
   Collection? _cachedCollectionForSharedLink;
   final GlobalKey shareButtonKey = GlobalKey();
   final GlobalKey sendLinkButtonKey = GlobalKey();
+  final PageController _pageController = PageController();
   final StreamController<double> _progressController =
       StreamController<double>();
 
@@ -153,6 +155,31 @@ class _FileSelectionActionsWidgetState
     //for items that should be shown.
     final List<SelectionActionButton> items = [];
 
+    final showUploadIcon = widget.type == GalleryType.localFolder &&
+        split.ownedByCurrentUser.isEmpty;
+
+    //add to album
+    if (widget.type.showAddToAlbum()) {
+      if (showUploadIcon) {
+        items.add(
+          SelectionActionButton(
+            icon: Icons.cloud_upload_outlined,
+            labelText: S.of(context).addToEnte,
+            onTap: _addToAlbum,
+          ),
+        );
+      } else {
+        items.add(
+          SelectionActionButton(
+            icon: Icons.add_outlined,
+            labelText: S.of(context).addToAlbum,
+            onTap: _addToAlbum,
+          ),
+        );
+      }
+    }
+
+    //share link
     if (widget.type.showCreateLink()) {
       if (_cachedCollectionForSharedLink != null && anyUploadedFiles) {
         items.add(
@@ -166,7 +193,7 @@ class _FileSelectionActionsWidgetState
         items.add(
           SelectionActionButton(
             icon: Icons.navigation_rounded,
-            labelText: S.of(context).sendLink,
+            labelText: S.of(context).share,
             onTap: anyUploadedFiles ? _onSendLinkTapped : null,
             shouldShow: ownedFilesCount > 0,
             key: sendLinkButtonKey,
@@ -174,6 +201,150 @@ class _FileSelectionActionsWidgetState
         );
       }
     }
+
+    //Favorite
+    if (widget.type.showFavoriteOption()) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.favorite_border_rounded,
+          labelText: S.of(context).favorite,
+          onTap: anyUploadedFiles ? _onFavoriteClick : null,
+          shouldShow: ownedFilesCount > 0,
+        ),
+      );
+    } else if (widget.type.showUnFavoriteOption()) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.favorite,
+          labelText: S.of(context).removeFromFavorite,
+          onTap: _onUnFavoriteClick,
+          shouldShow: ownedFilesCount > 0,
+        ),
+      );
+    }
+
+    //Download
+    if (showDownloadOption) {
+      items.add(
+        SelectionActionButton(
+          labelText: S.of(context).download,
+          icon: Icons.cloud_download_outlined,
+          onTap: () => _download(widget.selectedFiles.files.toList()),
+        ),
+      );
+    }
+
+    //Delete (for owned photos only)
+    if (widget.type.showDeleteOption()) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.delete_outline,
+          labelText: S.of(context).delete,
+          onTap: anyOwnedFiles ? _onDeleteClick : null,
+          shouldShow: allOwnedFiles,
+        ),
+      );
+    }
+
+    //Hide (for owned photos only)
+    if (widget.type.showHideOption()) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.visibility_off_outlined,
+          labelText: S.of(context).hide,
+          onTap: anyUploadedFiles ? _onHideClick : null,
+          shouldShow: ownedFilesCount > 0,
+        ),
+      );
+    } else if (widget.type.showUnHideOption()) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.visibility_outlined,
+          labelText: S.of(context).unhide,
+          onTap: _onUnhideClick,
+          shouldShow: ownedFilesCount > 0,
+        ),
+      );
+    }
+
+    //Archive (for owned photos only)
+    if (widget.type.showArchiveOption()) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.archive_outlined,
+          labelText: S.of(context).archive,
+          onTap: anyUploadedFiles ? _onArchiveClick : null,
+          shouldShow: ownedFilesCount > 0,
+        ),
+      );
+    } else if (widget.type.showUnArchiveOption()) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.unarchive,
+          labelText: S.of(context).unarchive,
+          onTap: _onUnArchiveClick,
+          shouldShow: ownedFilesCount > 0,
+        ),
+      );
+    }
+
+    //Guest view
+    items.add(
+      SelectionActionButton(
+        svgAssetPath: "assets/icons/guest_view_icon.svg",
+        labelText: S.of(context).guestView,
+        onTap: _onGuestViewClick,
+      ),
+    );
+
+    //Create collage
+    if (widget.type != GalleryType.sharedPublicCollection) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.grid_view_outlined,
+          labelText: S.of(context).createCollage,
+          onTap: _onCreateCollageClicked,
+          shouldShow: showCollageOption,
+        ),
+      );
+    }
+
+    //Edit (only if single photo is selected)
+    if (widget.type.showBulkEditTime()) {
+      items.add(
+        SelectionActionButton(
+          shouldShow: widget.selectedFiles.files.every(
+            (element) => (element.ownerID == currentUserID),
+          ),
+          labelText: S.of(context).editTime,
+          icon: Icons.edit_calendar_outlined,
+          onTap: () async {
+            final newDate = await showEditDateSheet(
+              context,
+              widget.selectedFiles.files,
+            );
+            if (newDate != null) {
+              widget.selectedFiles.clearAll();
+            }
+          },
+        ),
+      );
+    }
+
+    //Edit location (for owned photos only)
+    if (widget.type.showEditLocation()) {
+      items.add(
+        SelectionActionButton(
+          shouldShow: widget.selectedFiles.files.any(
+            (element) => (element.ownerID == currentUserID),
+          ),
+          labelText: S.of(context).editLocation,
+          icon: Icons.edit_location_alt_outlined,
+          onTap: _editLocation,
+        ),
+      );
+    }
+
     if (widget.type == GalleryType.peopleTag && widget.person != null) {
       items.add(
         SelectionActionButton(
@@ -201,28 +372,6 @@ class _FileSelectionActionsWidgetState
           onTap: _onRemoveFromClusterClicked,
         ),
       );
-    }
-
-    final showUploadIcon = widget.type == GalleryType.localFolder &&
-        split.ownedByCurrentUser.isEmpty;
-    if (widget.type.showAddToAlbum()) {
-      if (showUploadIcon) {
-        items.add(
-          SelectionActionButton(
-            icon: Icons.cloud_upload_outlined,
-            labelText: S.of(context).addToEnte,
-            onTap: _addToAlbum,
-          ),
-        );
-      } else {
-        items.add(
-          SelectionActionButton(
-            icon: Icons.add_outlined,
-            labelText: S.of(context).addToAlbum,
-            onTap: _addToAlbum,
-          ),
-        );
-      }
     }
 
     if (widget.type.showAddtoHiddenAlbum()) {
@@ -256,17 +405,6 @@ class _FileSelectionActionsWidgetState
       );
     }
 
-    if (widget.type.showDeleteOption()) {
-      items.add(
-        SelectionActionButton(
-          icon: Icons.delete_outline,
-          labelText: S.of(context).delete,
-          onTap: anyOwnedFiles ? _onDeleteClick : null,
-          shouldShow: allOwnedFiles,
-        ),
-      );
-    }
-
     if (widget.type.showRemoveFromAlbum()) {
       items.add(
         SelectionActionButton(
@@ -288,42 +426,6 @@ class _FileSelectionActionsWidgetState
       );
     }
 
-    if (widget.type.showFavoriteOption()) {
-      items.add(
-        SelectionActionButton(
-          icon: Icons.favorite_border_rounded,
-          labelText: S.of(context).favorite,
-          onTap: anyUploadedFiles ? _onFavoriteClick : null,
-          shouldShow: ownedFilesCount > 0,
-        ),
-      );
-    } else if (widget.type.showUnFavoriteOption()) {
-      items.add(
-        SelectionActionButton(
-          icon: Icons.favorite,
-          labelText: S.of(context).removeFromFavorite,
-          onTap: _onUnFavoriteClick,
-          shouldShow: ownedFilesCount > 0,
-        ),
-      );
-    }
-    items.add(
-      SelectionActionButton(
-        svgAssetPath: "assets/icons/guest_view_icon.svg",
-        labelText: S.of(context).guestView,
-        onTap: _onGuestViewClick,
-      ),
-    );
-    if (widget.type != GalleryType.sharedPublicCollection) {
-      items.add(
-        SelectionActionButton(
-          icon: Icons.grid_view_outlined,
-          labelText: S.of(context).createCollage,
-          onTap: _onCreateCollageClicked,
-          shouldShow: showCollageOption,
-        ),
-      );
-    }
     if (flagService.internalUser &&
         widget.type != GalleryType.sharedPublicCollection) {
       items.add(
@@ -331,45 +433,6 @@ class _FileSelectionActionsWidgetState
           icon: Icons.movie_creation_sharp,
           labelText: "(i) Video Memory",
           onTap: _onCreateVideoMemoryClicked,
-        ),
-      );
-    }
-
-    if (widget.type.showHideOption()) {
-      items.add(
-        SelectionActionButton(
-          icon: Icons.visibility_off_outlined,
-          labelText: S.of(context).hide,
-          onTap: anyUploadedFiles ? _onHideClick : null,
-          shouldShow: ownedFilesCount > 0,
-        ),
-      );
-    } else if (widget.type.showUnHideOption()) {
-      items.add(
-        SelectionActionButton(
-          icon: Icons.visibility_outlined,
-          labelText: S.of(context).unhide,
-          onTap: _onUnhideClick,
-          shouldShow: ownedFilesCount > 0,
-        ),
-      );
-    }
-    if (widget.type.showArchiveOption()) {
-      items.add(
-        SelectionActionButton(
-          icon: Icons.archive_outlined,
-          labelText: S.of(context).archive,
-          onTap: anyUploadedFiles ? _onArchiveClick : null,
-          shouldShow: ownedFilesCount > 0,
-        ),
-      );
-    } else if (widget.type.showUnArchiveOption()) {
-      items.add(
-        SelectionActionButton(
-          icon: Icons.unarchive,
-          labelText: S.of(context).unarchive,
-          onTap: _onUnArchiveClick,
-          shouldShow: ownedFilesCount > 0,
         ),
       );
     }
@@ -394,49 +457,6 @@ class _FileSelectionActionsWidgetState
       );
     }
 
-    if (widget.type.showBulkEditTime()) {
-      items.add(
-        SelectionActionButton(
-          shouldShow: widget.selectedFiles.files.every(
-            (element) => (element.ownerID == currentUserID),
-          ),
-          labelText: S.of(context).editTime,
-          icon: Icons.edit_calendar_outlined,
-          onTap: () async {
-            final newDate = await showEditDateSheet(
-              context,
-              widget.selectedFiles.files,
-            );
-            if (newDate != null) {
-              widget.selectedFiles.clearAll();
-            }
-          },
-        ),
-      );
-    }
-
-    if (widget.type.showEditLocation()) {
-      items.add(
-        SelectionActionButton(
-          shouldShow: widget.selectedFiles.files.any(
-            (element) => (element.ownerID == currentUserID),
-          ),
-          labelText: S.of(context).editLocation,
-          icon: Icons.edit_location_alt_outlined,
-          onTap: _editLocation,
-        ),
-      );
-    }
-
-    if (showDownloadOption) {
-      items.add(
-        SelectionActionButton(
-          labelText: S.of(context).download,
-          icon: Icons.cloud_download_outlined,
-          onTap: () => _download(widget.selectedFiles.files.toList()),
-        ),
-      );
-    }
     if (widget.type != GalleryType.sharedPublicCollection) {
       items.add(
         SelectionActionButton(
@@ -448,38 +468,147 @@ class _FileSelectionActionsWidgetState
       );
     }
 
-    if (items.isNotEmpty) {
-      final scrollController = ScrollController();
-      // h4ck: https://github.com/flutter/flutter/issues/57920#issuecomment-893970066
+    // Filter items that should be shown first
+    final List<SelectionActionButton> visibleItems = items
+        .where((item) => item.shouldShow == null || item.shouldShow == true)
+        .toList();
+
+    final List<SelectionActionButton> firstThreeItems =
+        visibleItems.length > 3 ? visibleItems.take(3).toList() : visibleItems;
+
+    final List<SelectionActionButton> otherItems =
+        visibleItems.length > 3 ? visibleItems.sublist(3) : [];
+
+    final List<List<SelectionActionButton>> groupedOtherItems = [];
+    for (int i = 0; i < otherItems.length; i += 4) {
+      int end = (i + 4 < otherItems.length) ? i + 4 : otherItems.length;
+      groupedOtherItems.add(otherItems.sublist(i, end));
+    }
+
+    if (visibleItems.isNotEmpty) {
       return MediaQuery(
         data: MediaQuery.of(context).removePadding(removeBottom: true),
         child: SafeArea(
-          child: Scrollbar(
-            radius: const Radius.circular(1),
-            thickness: 2,
-            controller: scrollController,
-            thumbVisibility: true,
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(
-                decelerationRate: ScrollDecelerationRate.fast,
-              ),
-              scrollDirection: Axis.horizontal,
-              child: Container(
-                padding: const EdgeInsets.only(bottom: 24),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(width: 4),
-                    ...items,
-                    const SizedBox(width: 4),
-                  ],
+          child: Container(
+            padding: const EdgeInsets.only(bottom: 20),
+            child: Column(
+              children: [
+                // First Row
+                const SizedBox(
+                  height: 4,
                 ),
-              ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                  ),
+                  child: Row(
+                    children: firstThreeItems
+                        .map(
+                          (item) => Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                              ),
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  Container(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.10,
+                                    decoration: BoxDecoration(
+                                      color: getEnteColorScheme(context)
+                                          .backgroundElevated2,
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                  ),
+                                  item,
+                                ],
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                ),
+
+                // Second Row
+                if (groupedOtherItems.isNotEmpty) ...[
+                  const SizedBox(height: 24),
+                  Container(
+                    width: double.infinity,
+                    height: 74,
+                    decoration: BoxDecoration(
+                      color: getEnteColorScheme(context).backgroundElevated2,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    margin: const EdgeInsets.symmetric(horizontal: 12),
+                    child: PageView.builder(
+                      controller: _pageController,
+                      itemCount: groupedOtherItems.length,
+                      onPageChanged: (index) {
+                        if (index >= groupedOtherItems.length &&
+                            groupedOtherItems.isNotEmpty) {
+                          _pageController.animateToPage(
+                            groupedOtherItems.length - 1,
+                            duration: const Duration(seconds: 5),
+                            curve: Curves.easeInOut,
+                          );
+                        }
+                      },
+                      itemBuilder: (context, pageIndex) {
+                        if (pageIndex >= groupedOtherItems.length) {
+                          return const SizedBox();
+                        }
+
+                        final currentGroup = groupedOtherItems[pageIndex];
+
+                        return Row(
+                          children: currentGroup.map((item) {
+                            return Expanded(
+                              child: AnimatedSwitcher(
+                                duration: const Duration(seconds: 5),
+                                transitionBuilder: (
+                                  Widget child,
+                                  Animation<double> animation,
+                                ) {
+                                  return FadeTransition(
+                                    opacity: animation,
+                                    child: child,
+                                  );
+                                },
+                                child: item is Widget
+                                    ? KeyedSubtree(
+                                        key: ValueKey(item.hashCode),
+                                        child: item,
+                                      )
+                                    : const SizedBox(),
+                              ),
+                            );
+                          }).toList(),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  if (groupedOtherItems.length > 1)
+                    SmoothPageIndicator(
+                      controller: _pageController,
+                      count: groupedOtherItems.length,
+                      effect: const WormEffect(
+                        dotHeight: 6,
+                        dotWidth: 6,
+                        spacing: 6,
+                        activeDotColor: Colors.white,
+                      ),
+                    ),
+                ],
+              ],
             ),
           ),
         ),
       );
     }
+
     return const SizedBox();
   }
 
@@ -495,7 +624,6 @@ class _FileSelectionActionsWidgetState
       topControl: Stack(
         alignment: Alignment.bottomCenter,
         children: [
-          // This container is for increasing the tap area
           Container(
             width: double.infinity,
             height: 36,

@@ -11,6 +11,7 @@ import "package:photos/models/search/hierarchical/only_them_filter.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/theme/effects.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/components/bottom_action_bar/action_bar_widget.dart";
 import 'package:photos/ui/components/bottom_action_bar/bottom_action_bar_widget.dart';
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
@@ -25,6 +26,7 @@ class FileSelectionOverlayBar extends StatefulWidget {
   final Color? backgroundColor;
   final PersonEntity? person;
   final String? clusterID;
+  final VoidCallback? onCancel;
 
   const FileSelectionOverlayBar(
     this.galleryType,
@@ -33,6 +35,7 @@ class FileSelectionOverlayBar extends StatefulWidget {
     this.backgroundColor,
     this.person,
     this.clusterID,
+    this.onCancel,
     super.key,
   });
 
@@ -127,13 +130,30 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
           duration: const Duration(milliseconds: 400),
           firstChild: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.only(right: 4),
-                child: SelectAllButton(
-                  backgroundColor: widget.backgroundColor,
-                ),
+              Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 12),
+                    child: SelectAllButton(
+                      backgroundColor: widget.backgroundColor,
+                    ),
+                  ),
+                  const Spacer(),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: ActionBarWidget(
+                      selectedFiles: widget.selectedFiles,
+                      onCancel: () {
+                        if (widget.selectedFiles.files.isNotEmpty) {
+                          widget.selectedFiles.clearAll();
+                        }
+                      },
+                      backgroundColor: widget.backgroundColor,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 8),
               Container(
@@ -151,7 +171,6 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                       widget.selectedFiles.clearAll();
                     }
                   },
-                  backgroundColor: widget.backgroundColor,
                 ),
               ),
             ],
@@ -247,50 +266,47 @@ class _SelectAllButtonState extends State<SelectAllButton> {
           _allSelected = !_allSelected;
         });
       },
-      child: Padding(
-        padding: const EdgeInsets.only(top: 8),
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: widget.backgroundColor ?? colorScheme.backgroundElevated2,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 4,
-                offset: const Offset(0, -1),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                S.of(context).selectAllShort,
-                style: getEnteTextTheme(context).miniMuted,
-              ),
-              const SizedBox(width: 4),
-              ListenableBuilder(
-                listenable: selectionState!.selectedFiles,
-                builder: (context, _) {
-                  if (selectionState.selectedFiles.files.length ==
-                      allGalleryFiles.length) {
-                    _allSelected = true;
-                  } else {
-                    _allSelected = false;
-                  }
-                  return Icon(
-                    _allSelected
-                        ? Icons.check_circle
-                        : Icons.check_circle_outline,
-                    color: _allSelected ? null : colorScheme.strokeMuted,
-                    size: 18,
-                  );
-                },
-              ),
-            ],
-          ),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+        decoration: BoxDecoration(
+          color: widget.backgroundColor ?? colorScheme.backgroundElevated2,
+          borderRadius: BorderRadius.circular(100),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 4,
+              offset: const Offset(0, -1),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              S.of(context).selectAll,
+              style: getEnteTextTheme(context).mini,
+            ),
+            const SizedBox(width: 4),
+            ListenableBuilder(
+              listenable: selectionState!.selectedFiles,
+              builder: (context, _) {
+                if (selectionState.selectedFiles.files.length ==
+                    allGalleryFiles.length) {
+                  _allSelected = true;
+                } else {
+                  _allSelected = false;
+                }
+                return Icon(
+                  _allSelected
+                      ? Icons.check_circle
+                      : Icons.check_circle_outline,
+                  color: _allSelected ? null : colorScheme.strokeBase,
+                  size: 16,
+                );
+              },
+            ),
+          ],
         ),
       ),
     );

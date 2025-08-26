@@ -5,6 +5,7 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/theme/ente_theme.dart';
 
 class ActionBarWidget extends StatefulWidget {
+  final Color? backgroundColor;
   final SelectedFiles? selectedFiles;
   final VoidCallback? onCancel;
 
@@ -12,6 +13,7 @@ class ActionBarWidget extends StatefulWidget {
     required this.onCancel,
     this.selectedFiles,
     super.key,
+    required this.backgroundColor,
   });
 
   @override
@@ -42,53 +44,57 @@ class _ActionBarWidgetState extends State<ActionBarWidget> {
   @override
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
-    return SizedBox(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Flexible(
-              flex: 1,
-              child: ValueListenableBuilder(
-                valueListenable: _selectedFilesNotifier,
-                builder: (context, value, child) {
-                  return Text(
-                    _selectedOwnedFilesNotifier.value !=
-                            _selectedFilesNotifier.value
-                        ? S.of(context).selectedPhotosWithYours(
-                              _selectedFilesNotifier.value,
-                              _selectedOwnedFilesNotifier.value,
-                            )
-                        : S.of(context).selectedPhotos(
-                              _selectedFilesNotifier.value,
-                            ),
-                    style: textTheme.miniMuted,
-                  );
-                },
+    final colorScheme = getEnteColorScheme(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+      decoration: BoxDecoration(
+        color: widget.backgroundColor ?? colorScheme.backgroundElevated2,
+        borderRadius: BorderRadius.circular(100),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, -1),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ValueListenableBuilder(
+            valueListenable: _selectedFilesNotifier,
+            builder: (context, value, child) {
+              return Text(
+                _selectedOwnedFilesNotifier.value !=
+                        _selectedFilesNotifier.value
+                    ? S.of(context).selectedPhotosWithYours(
+                          _selectedFilesNotifier.value,
+                          _selectedOwnedFilesNotifier.value,
+                        )
+                    : S.of(context).selectedPhotos(
+                          _selectedFilesNotifier.value,
+                        ),
+                style: textTheme.mini,
+              );
+            },
+          ),
+          const SizedBox(width: 4),
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              widget.onCancel?.call();
+            },
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: Icon(
+                Icons.close,
+                size: 16,
+                color: textTheme.mini.color,
               ),
             ),
-            Flexible(
-              flex: 1,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () {
-                    widget.onCancel?.call();
-                  },
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      S.of(context).cancel,
-                      style: textTheme.mini,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
