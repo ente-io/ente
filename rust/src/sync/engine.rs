@@ -92,12 +92,18 @@ impl SyncEngine {
 
             // Count as new or updated based on updation time
             if collection.updation_time > last_sync {
-                // We don't have creation_time in API response, so count as updated
-                if collection.updation_time > last_sync {
+                if last_sync == 0 {
+                    // First sync - count as new
                     result.new += 1;
                 } else {
+                    // Incremental sync - count as updated
                     result.updated += 1;
                 }
+            }
+
+            // Track deleted collections
+            if collection.is_deleted {
+                result.deleted += 1;
             }
         }
 
@@ -137,17 +143,41 @@ impl SyncEngine {
             );
 
             // Get last sync time for this collection's files
-            let mut last_sync = sync_store
+            let initial_sync = sync_store
                 .get_last_sync(
                     self.account.user_id,
                     &format!("collection_{}_files", collection.id),
                 )?
                 .unwrap_or(0);
 
+            let mut last_sync = initial_sync;
+            let is_first_sync = initial_sync == 0;
+
+            // Log sync status
+            if is_first_sync {
+                log::info!(
+                    "Initial sync for collection: {} ({})",
+                    collection.name,
+                    collection.id
+                );
+            } else {
+                let last_sync_time = chrono::DateTime::from_timestamp_micros(initial_sync)
+                    .map(|dt| dt.format("%Y-%m-%d %H:%M:%S").to_string())
+                    .unwrap_or_else(|| "unknown".to_string());
+                log::info!(
+                    "Incremental sync for collection: {} ({}) since {}",
+                    collection.name,
+                    collection.id,
+                    last_sync_time
+                );
+            }
+
             let mut has_more = true;
+            let mut batch_count = 0;
             while has_more {
                 log::debug!(
-                    "Fetching files for collection {}, since_time: {}",
+                    "Fetching batch {} for collection {}, since_time: {}",
+                    batch_count + 1,
                     collection.id,
                     last_sync
                 );
@@ -156,8 +186,10 @@ impl SyncEngine {
                     .get_collection_files(account_id, collection.id, last_sync)
                     .await?;
                 has_more = more;
+                batch_count += 1;
 
                 if files.is_empty() {
+                    log::debug!("No more files to sync for collection {}", collection.id);
                     break;
                 }
 
@@ -206,13 +238,26 @@ impl SyncEngine {
                         }),
                     };
 
+                    // Skip deleted files on first sync
+                    if is_first_sync && file.is_deleted {
+                        log::trace!("Skipping deleted file {} on initial sync", file.id);
+                        continue;
+                    }
+
                     // Upsert file (insert or update)
                     sync_store.upsert_file(&remote_file)?;
 
-                    // Count as new or updated
-                    if file.updation_time > last_sync {
-                        // We don't have creation_time in API response, count as updated
-                        result.updated += 1;
+                    // Count as new, updated or deleted
+                    if file.is_deleted {
+                        result.deleted += 1;
+                    } else if file.updation_time > last_sync {
+                        if last_sync == 0 {
+                            // First sync - count as new
+                            result.new += 1;
+                        } else {
+                            // Incremental sync - count as updated
+                            result.updated += 1;
+                        }
                     }
 
                     // Track the latest updation time for next sync
@@ -231,9 +276,10 @@ impl SyncEngine {
         }
 
         log::info!(
-            "Files synced: {} new, {} updated",
+            "Files synced: {} new, {} updated, {} deleted",
             result.new,
-            result.updated
+            result.updated,
+            result.deleted
         );
         Ok(result)
     }

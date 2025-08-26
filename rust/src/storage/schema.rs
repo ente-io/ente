@@ -113,6 +113,19 @@ pub fn create_tables(conn: &Connection) -> Result<()> {
         [],
     )?;
 
+    // Collection sync state table - stores per-collection sync timestamps
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS collection_sync_state (
+            user_id INTEGER NOT NULL,
+            collection_id INTEGER NOT NULL,
+            last_sync_time INTEGER NOT NULL,
+            updated_at INTEGER NOT NULL,
+            PRIMARY KEY (user_id, collection_id),
+            FOREIGN KEY (collection_id) REFERENCES collections(collection_id) ON DELETE CASCADE
+        )",
+        [],
+    )?;
+
     // Create indices for better performance
     conn.execute(
         "CREATE INDEX IF NOT EXISTS idx_files_collection 
@@ -141,6 +154,12 @@ pub fn create_tables(conn: &Connection) -> Result<()> {
     conn.execute(
         "CREATE INDEX IF NOT EXISTS idx_accounts_email 
          ON accounts(email)",
+        [],
+    )?;
+
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_collection_sync_state 
+         ON collection_sync_state(user_id, collection_id)",
         [],
     )?;
 

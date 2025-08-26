@@ -151,14 +151,23 @@ impl<'a> SyncStore<'a> {
 
     /// Update sync state
     pub fn update_sync_state(&self, user_id: i64, sync_type: &str, timestamp: i64) -> Result<()> {
-        // For per-collection sync, store as generic key-value
+        // For per-collection sync, store in collection_sync_state table
         if sync_type.starts_with("collection_") {
-            // Use a more generic approach for per-collection sync
-            // Note: We're assuming photos app for now - might need app parameter in future
+            // Extract collection_id from sync_type (format: "collection_{id}_files")
+            let collection_id = sync_type
+                .strip_prefix("collection_")
+                .and_then(|s| s.strip_suffix("_files"))
+                .and_then(|s| s.parse::<i64>().ok())
+                .ok_or_else(|| {
+                    crate::Error::InvalidInput(format!("Invalid sync type: {}", sync_type))
+                })?;
+
+            let now = chrono::Utc::now().timestamp_micros();
             self.conn.execute(
-                "INSERT OR REPLACE INTO sync_state (user_id, app, last_file_sync) VALUES (?1, 'photos', ?2)
-                 ON CONFLICT(user_id, app) DO UPDATE SET last_file_sync = MAX(last_file_sync, ?2)",
-                params![user_id, timestamp],
+                "INSERT OR REPLACE INTO collection_sync_state 
+                 (user_id, collection_id, last_sync_time, updated_at)
+                 VALUES (?1, ?2, ?3, ?4)",
+                params![user_id, collection_id, timestamp, now],
             )?;
             return Ok(());
         }
@@ -182,9 +191,28 @@ impl<'a> SyncStore<'a> {
 
     /// Get last sync timestamp
     pub fn get_last_sync(&self, user_id: i64, sync_type: &str) -> Result<Option<i64>> {
-        // For per-collection sync, just return 0 for now
+        // For per-collection sync, retrieve from collection_sync_state table
         if sync_type.starts_with("collection_") {
-            return Ok(Some(0));
+            // Extract collection_id from sync_type (format: "collection_{id}_files")
+            let collection_id = sync_type
+                .strip_prefix("collection_")
+                .and_then(|s| s.strip_suffix("_files"))
+                .and_then(|s| s.parse::<i64>().ok())
+                .ok_or_else(|| {
+                    crate::Error::InvalidInput(format!("Invalid sync type: {}", sync_type))
+                })?;
+
+            let timestamp = self
+                .conn
+                .query_row(
+                    "SELECT last_sync_time FROM collection_sync_state 
+                     WHERE user_id = ?1 AND collection_id = ?2",
+                    params![user_id, collection_id],
+                    |row| row.get::<_, i64>(0),
+                )
+                .optional()?;
+
+            return Ok(timestamp);
         }
 
         let column = match sync_type {
@@ -219,10 +247,17 @@ impl<'a> SyncStore<'a> {
 
     /// Clear sync state for an account (for full sync)
     pub fn clear_sync_state(&self, user_id: i64) -> Result<()> {
+        // Clear both sync_state and collection_sync_state
         self.conn.execute(
             "DELETE FROM sync_state WHERE user_id = ?1 AND app = 'photos'",
             params![user_id],
         )?;
+
+        self.conn.execute(
+            "DELETE FROM collection_sync_state WHERE user_id = ?1",
+            params![user_id],
+        )?;
+
         Ok(())
     }
 
