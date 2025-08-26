@@ -344,21 +344,20 @@ async fn prepare_download_tasks(
         path.push(month);
 
         // Add collection name if available
-        if let Some(col) = collection {
-            if let Some(ref name) = col.name
-                && !name.is_empty()
-                && name != "Uncategorized"
-            {
-                let safe_name: String = name
-                    .chars()
-                    .map(|c| match c {
-                        '/' | '\\' | ':' | '*' | '?' | '"' | '<' | '>' | '|' => '_',
-                        c if c.is_control() => '_',
-                        c => c,
-                    })
-                    .collect();
-                path.push(safe_name.trim());
-            }
+        if let Some(col) = collection
+            && let Some(ref name) = col.name
+            && !name.is_empty()
+            && name != "Uncategorized"
+        {
+            let safe_name: String = name
+                .chars()
+                .map(|c| match c {
+                    '/' | '\\' | ':' | '*' | '?' | '"' | '<' | '>' | '|' => '_',
+                    c if c.is_control() => '_',
+                    c => c,
+                })
+                .collect();
+            path.push(safe_name.trim());
         }
 
         // Use original filename from metadata or generate fallback
