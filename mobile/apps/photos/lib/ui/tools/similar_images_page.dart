@@ -997,7 +997,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     await deleteFilesFromRemoteOnly(context, allDeleteFiles.toList());
 
     // Show congratulations popup
-    if (allDeleteFiles.isNotEmpty && mounted && showUIFeedback) {
+    if (allDeleteFiles.length > 100 && mounted && showUIFeedback) {
       final int totalSize = allDeleteFiles.fold<int>(
         0,
         (sum, file) => sum + (file.fileSize ?? 0),
