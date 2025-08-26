@@ -66,7 +66,6 @@ class UploadLocksDB {
 
   static final migrationScripts = [
     ..._createTrackUploadsTable(),
-    ..._createStreamQueueTable(),
   ];
 
   final dbConfig = MigrationConfig(
@@ -142,11 +141,6 @@ class UploadLocksDB {
                   ${_streamUploadErrorTable.columnCreatedAt} INTEGER DEFAULT CURRENT_TIMESTAMP NOT NULL
                 )
                 ''',
-    ];
-  }
-
-  static List<String> _createStreamQueueTable() {
-    return [
       '''
                 CREATE TABLE IF NOT EXISTS ${_streamQueueTable.table} (
                   ${_streamQueueTable.columnUploadedFileID} INTEGER PRIMARY KEY,
