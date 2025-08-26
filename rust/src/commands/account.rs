@@ -123,6 +123,9 @@ async fn add_account(
         return Ok(());
     }
 
+    // Check if we're in non-interactive mode (password provided via CLI)
+    let is_non_interactive = password_arg.is_some();
+    
     // Get password (from arg or prompt)
     let password = if let Some(password) = password_arg {
         password
@@ -133,9 +136,12 @@ async fn add_account(
             .map_err(|e| crate::models::error::Error::InvalidInput(e.to_string()))?
     };
 
-    // Get export directory (from arg or prompt)
+    // Get export directory (from arg or use default)
     let export_dir = if let Some(dir) = export_dir_arg {
         dir
+    } else if is_non_interactive {
+        // If password was provided via CLI (non-interactive mode), use default path
+        format!("./exports/{email}")
     } else {
         Input::new()
             .with_prompt("Enter export directory path")

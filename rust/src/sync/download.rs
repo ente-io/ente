@@ -81,8 +81,9 @@ impl DownloadManager {
         temp_file.sync_all().await?;
         drop(temp_file);
 
-        // Move to final destination
-        fs::rename(&temp_path, destination).await?;
+        // Move to final destination (use copy + delete to work across filesystems)
+        fs::copy(&temp_path, destination).await?;
+        fs::remove_file(&temp_path).await?;
 
         // TODO: Update storage with local path
         // self.storage.sync().update_file_local_path(file.id, destination.to_str().unwrap())?;
