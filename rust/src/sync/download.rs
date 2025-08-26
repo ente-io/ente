@@ -4,8 +4,10 @@ use crate::api::methods::ApiMethods;
 use crate::crypto::{decrypt_file_data, secret_box_open};
 use crate::models::file::RemoteFile;
 use base64::{Engine, engine::general_purpose::STANDARD as BASE64};
+use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 use tokio::fs;
 use tokio::io::AsyncWriteExt;
 
@@ -15,6 +17,7 @@ pub struct DownloadManager {
     temp_dir: PathBuf,
     pub collection_keys: HashMap<i64, Vec<u8>>,
     concurrent_downloads: usize,
+    show_progress: bool,
 }
 
 impl DownloadManager {
@@ -28,6 +31,7 @@ impl DownloadManager {
             temp_dir,
             collection_keys: HashMap::new(),
             concurrent_downloads: 4, // Default concurrent downloads
+            show_progress: true,
         })
     }
 
@@ -41,12 +45,29 @@ impl DownloadManager {
         self.concurrent_downloads = count.clamp(1, 10); // Limit between 1-10
     }
 
+    /// Set whether to show progress indicators
+    pub fn set_show_progress(&mut self, show: bool) {
+        self.show_progress = show;
+    }
+
     /// Download a single file
     pub async fn download_file(
         &self,
         account_id: &str,
         file: &RemoteFile,
         destination: &Path,
+    ) -> Result<()> {
+        self.download_file_with_progress(account_id, file, destination, None)
+            .await
+    }
+
+    /// Download a single file with optional progress bar
+    async fn download_file_with_progress(
+        &self,
+        account_id: &str,
+        file: &RemoteFile,
+        destination: &Path,
+        progress: Option<Arc<ProgressBar>>,
     ) -> Result<()> {
         log::debug!("Downloading file {} to {:?}", file.id, destination);
 
@@ -88,6 +109,11 @@ impl DownloadManager {
         // TODO: Update storage with local path
         // self.storage.sync().update_file_local_path(file.id, destination.to_str().unwrap())?;
 
+        // Update progress if available
+        if let Some(pb) = progress {
+            pb.inc(1);
+        }
+
         log::info!("Downloaded file {} to {:?}", file.id, destination);
         Ok(())
     }
@@ -108,14 +134,34 @@ impl DownloadManager {
             ..Default::default()
         };
 
+        // Create progress bars if enabled
+        let (_multi_progress, progress_bar) = if self.show_progress && total > 0 {
+            let mp = MultiProgress::new();
+            let pb = mp.add(ProgressBar::new(total as u64));
+            pb.set_style(
+                ProgressStyle::default_bar()
+                    .template("{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {pos}/{len} ({percent}%) {msg}")
+                    .unwrap()
+                    .progress_chars("#>-"),
+            );
+            pb.set_message("Downloading files...");
+            (Some(Arc::new(mp)), Some(Arc::new(pb)))
+        } else {
+            (None, None)
+        };
+
         // Process files in parallel with concurrency limit
+        let pb_clone = progress_bar.clone();
         let results: Vec<_> = stream::iter(files)
             .map(|(file, path)| {
                 let account_id = account_id.to_string();
                 let file_clone = file.clone();
                 let path_clone = path.clone();
+                let pb = pb_clone.clone();
                 async move {
-                    let result = self.download_file(&account_id, &file, &path).await;
+                    let result = self
+                        .download_file_with_progress(&account_id, &file, &path, pb)
+                        .await;
                     (file_clone, path_clone, result)
                 }
             })
@@ -135,6 +181,11 @@ impl DownloadManager {
                     stats.failed += 1;
                 }
             }
+        }
+
+        // Finish progress bar
+        if let Some(pb) = progress_bar {
+            pb.finish_with_message(format!("Downloaded {} files", stats.successful));
         }
 
         log::info!(

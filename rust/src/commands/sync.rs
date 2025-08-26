@@ -173,7 +173,7 @@ async fn sync_account(
             if !to_download.is_empty() {
                 println!("📥 Downloading {} new files", to_download.len());
 
-                // Download files
+                // Download files with progress bar
                 let download_stats = download_manager
                     .download_files(&account.email, to_download)
                     .await?;
