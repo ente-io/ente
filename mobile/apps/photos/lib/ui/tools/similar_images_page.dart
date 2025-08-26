@@ -3,9 +3,9 @@ import "dart:async";
 import "package:flutter/foundation.dart" show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import "package:photos/core/configuration.dart";
 import 'package:photos/core/constants.dart';
 import "package:photos/generated/l10n.dart";
-
 import "package:photos/models/file/file.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/models/similar_files.dart";
@@ -19,7 +19,6 @@ import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
-
 import "package:photos/utils/delete_file_util.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -977,6 +976,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     }
 
     if (createSymlink) {
+      final userID = Configuration.instance.getUserID();
       final int collectionCnt = collectionToFilesToAddMap.keys.length;
       int progress = 0;
       for (final collectionID in collectionToFilesToAddMap.keys) {
@@ -989,10 +989,19 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
           final double percentage = (progress / collectionCnt) * 100;
           _deleteProgress.value = '${percentage.toStringAsFixed(1)}%';
         }
-        await CollectionsService.instance.addSilentlyToCollection(
-          collectionID,
-          collectionToFilesToAddMap[collectionID]!.toList(),
-        );
+        // Check permission before attempting to add symlinks
+        final collection =
+            CollectionsService.instance.getCollectionByID(collectionID);
+        if (collection != null && collection.canAutoAdd(userID!)) {
+          await CollectionsService.instance.addSilentlyToCollection(
+            collectionID,
+            collectionToFilesToAddMap[collectionID]!.toList(),
+          );
+        } else {
+          _logger.warning(
+            "Skipping adding symlinks to collection $collectionID due to missing permissions (${collection?.canAutoAdd(userID!) ?? false}) or collection not found. (${collection == null})",
+          );
+        }
       }
     }
     if (showUIFeedback) {
