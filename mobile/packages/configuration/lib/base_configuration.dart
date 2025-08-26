@@ -4,11 +4,11 @@ import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:bip39/bip39.dart' as bip39;
+import 'package:ente_configuration/constants.dart';
 import 'package:ente_base/models/database.dart';
 import 'package:ente_base/models/key_attributes.dart';
 import 'package:ente_base/models/key_gen_result.dart';
 import 'package:ente_base/models/private_key_attributes.dart';
-import 'package:ente_configuration/constants.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_events/models/endpoint_updated_event.dart';
@@ -35,18 +35,10 @@ class BaseConfiguration {
   static const userIDKey = "user_id";
   static const endPointKey = "endpoint";
   static const lastTempFolderClearTimeKey = "last_temp_folder_clear_time";
-  static const offlineAuthSecretKey = "offline_auth_secret_key";
 
   final kTempFolderDeletionTimeBuffer = const Duration(days: 1).inMicroseconds;
 
   static final _logger = Logger("Configuration");
-
-  // Keys that should not be deleted during logout
-  // These keys are necessary for functionality that needs to work even when users
-  // aren't signed in. E.g offline auth
-  List<String> preservedKeys = [
-    offlineAuthSecretKey,
-  ];
 
   String? _cachedToken;
   late SharedPreferences _preferences;
@@ -70,19 +62,13 @@ class BaseConfiguration {
         accessibility: KeychainAccessibility.first_unlock_this_device,
       ),
     );
-    await _setupKeys();
-    await _setupFolders();
+    _setupKeys();
+    _setupFolders();
   }
 
   Future<void> logout({bool autoLogout = false}) async {
     await _preferences.clear();
-    // Delete all keys except preserved ones 
-    final allKeys = await _secureStorage.readAll();
-    for (final key in allKeys.keys) {
-      if (!preservedKeys.contains(key)) {
-        await _secureStorage.delete(key: key);
-      }
-    }
+    _secureStorage.deleteAll();
     for (final db in _databases) {
       await db.clearTable();
     }
@@ -231,7 +217,7 @@ class BaseConfiguration {
       if (split.length != mnemonicKeyWordCount) {
         String wordThatIsFollowedByEmptySpaceInSplit = '';
         for (int i = 0; i < split.length; i++) {
-          final String word = split[i];
+          String word = split[i];
           if (word.isEmpty) {
             wordThatIsFollowedByEmptySpaceInSplit =
                 '\n\nExtra space after word at position $i';
@@ -393,17 +379,10 @@ class BaseConfiguration {
     return _volatilePassword;
   }
 
-  Future<void> _setupKeys() async { 
+  Future<void> _setupKeys() async {
     try {
       if (!_preferences.containsKey(tokenKey)) {
-        _logger.info("No token found, clearing secure storage");
-        // Delete all keys except preserved ones
-        final allKeys = await _secureStorage.readAll();
-        for (final key in allKeys.keys) {
-          if (!preservedKeys.contains(key)) {
-            await _secureStorage.delete(key: key);
-          }
-        }
+        await _secureStorage.deleteAll();
         return;
       }
       _key = await _secureStorage.read(key: keyKey);
