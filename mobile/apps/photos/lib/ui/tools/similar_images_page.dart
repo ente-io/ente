@@ -375,21 +375,21 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         children: [
           _buildTabButton(
             TabFilter.all,
-            'All', // TODO: lau: extract string
+            AppLocalizations.of(context).all,
             colorScheme,
             textTheme,
           ),
           const SizedBox(width: 8),
           _buildTabButton(
             TabFilter.similar,
-            'Similar', // TODO: lau: extract string
+            AppLocalizations.of(context).similar,
             colorScheme,
             textTheme,
           ),
           const SizedBox(width: 8),
           _buildTabButton(
             TabFilter.identical,
-            'Identical', // TODO: lau: extract string
+            AppLocalizations.of(context).identical,
             colorScheme,
             textTheme,
           ),
