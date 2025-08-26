@@ -2,14 +2,14 @@ use crate::Result;
 use crate::api::client::ApiClient;
 use crate::api::methods::ApiMethods;
 use crate::crypto::{decrypt_file_data, decrypt_stream, init as crypto_init, secret_box_open};
-use crate::models::{account::Account, metadata::FileMetadata};
+use crate::models::{account::Account, filter::ExportFilter, metadata::FileMetadata};
 use crate::storage::Storage;
 use base64::Engine;
 use std::path::{Path, PathBuf};
 use tokio::fs;
 use tokio::io::AsyncWriteExt;
 
-pub async fn run_export(account_email: Option<String>) -> Result<()> {
+pub async fn run_export(account_email: Option<String>, filter: ExportFilter) -> Result<()> {
     // Initialize crypto
     crypto_init()?;
 
@@ -48,7 +48,7 @@ pub async fn run_export(account_email: Option<String>) -> Result<()> {
     for account in accounts {
         println!("\n=== Exporting account: {} ===", account.email);
 
-        if let Err(e) = export_account(&storage, &account).await {
+        if let Err(e) = export_account(&storage, &account, &filter).await {
             log::error!("Failed to export account {}: {}", account.email, e);
             println!("❌ Export failed: {e}");
         } else {
@@ -59,7 +59,7 @@ pub async fn run_export(account_email: Option<String>) -> Result<()> {
     Ok(())
 }
 
-async fn export_account(storage: &Storage, account: &Account) -> Result<()> {
+async fn export_account(storage: &Storage, account: &Account, filter: &ExportFilter) -> Result<()> {
     // Get export directory
     let export_dir = account
         .export_dir
@@ -111,7 +111,27 @@ async fn export_account(storage: &Storage, account: &Account) -> Result<()> {
             continue;
         }
 
-        println!("Processing collection: {}", collection.id);
+        // Decrypt collection name to check filters
+        let collection_name = if let Some(ref _encrypted_name) = collection.encrypted_name {
+            // Decrypt collection name if needed for filtering
+            // For now, we'll use the collection ID as a fallback
+            // TODO: Implement proper name decryption
+            format!("Collection {}", collection.id)
+        } else {
+            format!("Collection {}", collection.id)
+        };
+
+        // Apply collection filters
+        // TODO: Determine if collection is shared or hidden from metadata
+        let is_shared = false; // Need to check collection metadata
+        let is_hidden = false; // Need to check collection metadata
+
+        if !filter.should_include_collection(&collection_name, is_shared, is_hidden) {
+            log::debug!("Skipping filtered collection: {}", collection_name);
+            continue;
+        }
+
+        println!("Processing collection: {}", collection_name);
 
         // Decrypt collection key
         let collection_key = match decrypt_collection_key(

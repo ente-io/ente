@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+use crate::api::retry::RetryConfig;
 use crate::models::error::{Error, Result};
 use reqwest::{Client, RequestBuilder, Response, StatusCode};
 use serde::{Deserialize, Serialize};
@@ -32,6 +33,8 @@ pub struct ApiClient {
     pub(crate) base_url: String,
     /// Token storage for multi-account support: account_id -> token
     tokens: Arc<RwLock<HashMap<String, String>>>,
+    /// Retry configuration
+    retry_config: RetryConfig,
 }
 
 impl ApiClient {
@@ -55,6 +58,7 @@ impl ApiClient {
             download_client,
             base_url: base_url.unwrap_or_else(|| ENTE_API_ENDPOINT.to_string()),
             tokens: Arc::new(RwLock::new(HashMap::new())),
+            retry_config: RetryConfig::default(),
         })
     }
 
@@ -74,6 +78,11 @@ impl ApiClient {
     pub fn get_token(&self, account_id: &str) -> Option<String> {
         let tokens = self.tokens.read().unwrap();
         tokens.get(account_id).cloned()
+    }
+
+    /// Set retry configuration
+    pub fn set_retry_config(&mut self, config: RetryConfig) {
+        self.retry_config = config;
     }
 
     /// Build a request with common headers

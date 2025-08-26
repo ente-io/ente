@@ -31,7 +31,16 @@ async fn main() -> Result<()> {
             commands::account::handle_account_command(account_cmd, &storage).await?;
         }
         Commands::Export(export_cmd) => {
-            commands::export::run_export(export_cmd.account).await?;
+            use ente_rs::models::filter::ExportFilter;
+
+            let filter = ExportFilter {
+                include_shared: export_cmd.shared,
+                include_hidden: export_cmd.hidden,
+                albums: export_cmd.albums,
+                emails: export_cmd.emails,
+            };
+
+            commands::export::run_export(export_cmd.account, filter).await?;
         }
         Commands::Sync(sync_cmd) => {
             commands::sync::run_sync(sync_cmd.account, sync_cmd.metadata_only, sync_cmd.full)

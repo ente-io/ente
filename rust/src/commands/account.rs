@@ -125,7 +125,7 @@ async fn add_account(
 
     // Check if we're in non-interactive mode (password provided via CLI)
     let is_non_interactive = password_arg.is_some();
-    
+
     // Get password (from arg or prompt)
     let password = if let Some(password) = password_arg {
         password
