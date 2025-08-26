@@ -1941,5 +1941,5 @@
   "findingSimilarImages": "Finding similar images",
   "almostDone": "Almost done",
   "processingLocally": "Processing locally",
-  "useMLToFindSimilarImages": "Find and remove images that look similar to each other."
+  "useMLToFindSimilarImages": "Review and remove images that look similar to each other."
 }
