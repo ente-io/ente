@@ -83,23 +83,28 @@ The project has completed foundational components (crypto, storage, models) and 
 ## Commit Guidelines
 
 ### Pre-commit Checklist
-Before committing, run these commands in order:
+**CRITICAL: CI will fail if ANY of these checks fail. Run ALL commands and ensure they ALL pass.**
+
 ```bash
 # 1. Format code
 cargo fmt
 
-# 2. Auto-fix clippy warnings (match CI configuration)
-cargo clippy --all-targets --all-features --fix --allow-dirty --allow-staged
-
-# 3. Verify no remaining warnings
+# 2. Check for clippy warnings (THIS MUST PASS - CI fails on any warning)
 cargo clippy --all-targets --all-features -- -D warnings
+# If this fails, fix the warnings manually (not all can be auto-fixed)
 
-# 4. Build with warnings as errors
+# 3. Build with warnings as errors (THIS MUST PASS - matches CI environment)
 RUSTFLAGS="-D warnings" cargo build
 
-# 5. Check formatting one final time
+# 4. Verify formatting is correct (THIS MUST PASS - CI checks this)
 cargo fmt --check
 ```
+
+**Why CI might fail even after running these:**
+- Skipping any command above
+- Assuming auto-fix tools handle everything (they don't)
+- Not fixing warnings that clippy reports
+- Making changes after running the checks
 
 ### Additional Guidelines
 - No promotional text like "Generated with [tool name]" - only keep the co-author line

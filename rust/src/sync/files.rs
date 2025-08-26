@@ -146,12 +146,13 @@ impl FileProcessor {
         path.push(month);
 
         // Add collection name if available and not default
-        if let Some(col) = collection {
-            if !col.name.is_empty() && col.name != "Uncategorized" {
-                // Sanitize collection name for filesystem
-                let safe_name = sanitize_filename(&col.name);
-                path.push(safe_name);
-            }
+        if let Some(col) = collection
+            && !col.name.is_empty()
+            && col.name != "Uncategorized"
+        {
+            // Sanitize collection name for filesystem
+            let safe_name = sanitize_filename(&col.name);
+            path.push(safe_name);
         }
 
         // Add file name
