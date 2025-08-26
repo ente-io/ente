@@ -505,6 +505,14 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       _pageState = SimilarImagesPageState.results;
       _sortSimilarFiles();
 
+      for (final group in _similarFilesList) {
+        if (group.files.length > 1) {
+          for (int i = 1; i < group.files.length; i++) {
+            _selectedFiles.toggleSelection(group.files[i]);
+          }
+        }
+      }
+
       if (_isDisposed) return;
       setState(() {});
 
