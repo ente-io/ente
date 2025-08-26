@@ -13,6 +13,7 @@ use tokio::io::AsyncWriteExt;
 /// Manages file downloads with parallel processing and error recovery
 pub struct DownloadManager {
     api_client: ApiClient,
+    #[allow(dead_code)]
     storage: Storage,
     temp_dir: PathBuf,
     collection_keys: HashMap<i64, Vec<u8>>,
@@ -41,7 +42,7 @@ impl DownloadManager {
 
     /// Set number of concurrent downloads
     pub fn set_concurrent_downloads(&mut self, count: usize) {
-        self.concurrent_downloads = count.max(1).min(10); // Limit between 1-10
+        self.concurrent_downloads = count.clamp(1, 10); // Limit between 1-10
     }
 
     /// Download a single file
@@ -60,7 +61,7 @@ impl DownloadManager {
 
         // Check if file already exists
         if destination.exists() {
-            log::debug!("File already exists at {:?}, skipping", destination);
+            log::debug!("File already exists at {destination:?}, skipping");
             return Ok(());
         }
 
@@ -99,7 +100,7 @@ impl DownloadManager {
         use futures::stream::{self, StreamExt};
 
         let total = files.len();
-        log::info!("Starting download of {} files", total);
+        log::info!("Starting download of {total} files");
 
         let mut stats = DownloadStats {
             total,
@@ -124,7 +125,7 @@ impl DownloadManager {
             match result {
                 Ok(_) => stats.successful += 1,
                 Err(e) => {
-                    log::error!("Download failed: {}", e);
+                    log::error!("Download failed: {e}");
                     stats.failed += 1;
                 }
             }
@@ -225,7 +226,7 @@ impl DownloadManager {
             }
         }
 
-        log::debug!("Cleaned up {} temporary files", count);
+        log::debug!("Cleaned up {count} temporary files");
         Ok(())
     }
 }

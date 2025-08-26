@@ -36,7 +36,7 @@ impl SyncEngine {
         // Then sync files
         stats.files = self.sync_files(account_id).await?;
 
-        log::info!("Sync completed: {:?}", stats);
+        log::info!("Sync completed: {stats:?}");
         Ok(stats)
     }
 
@@ -130,25 +130,36 @@ impl SyncEngine {
                 continue;
             }
 
-            log::debug!("Syncing files for collection: {} ({})", collection.name, collection.id);
+            log::debug!(
+                "Syncing files for collection: {} ({})",
+                collection.name,
+                collection.id
+            );
 
             // Get last sync time for this collection's files
             let mut last_sync = sync_store
-                .get_last_sync(self.account.id, &format!("collection_{}_files", collection.id))?
+                .get_last_sync(
+                    self.account.id,
+                    &format!("collection_{}_files", collection.id),
+                )?
                 .unwrap_or(0);
 
             let mut has_more = true;
             while has_more {
-                log::debug!("Fetching files for collection {}, since_time: {}", collection.id, last_sync);
+                log::debug!(
+                    "Fetching files for collection {}, since_time: {}",
+                    collection.id,
+                    last_sync
+                );
 
                 let (files, more) = api
                     .get_collection_files(account_id, collection.id, last_sync)
                     .await?;
                 has_more = more;
 
-            if files.is_empty() {
-                break;
-            }
+                if files.is_empty() {
+                    break;
+                }
 
                 result.total += files.len();
 
@@ -176,7 +187,11 @@ impl SyncEngine {
                             size: file.thumbnail.size,
                         },
                         metadata: crate::models::file::MetadataInfo {
-                            encrypted_data: file.metadata.encrypted_data.clone().unwrap_or_default(),
+                            encrypted_data: file
+                                .metadata
+                                .encrypted_data
+                                .clone()
+                                .unwrap_or_default(),
                             decryption_header: file.metadata.decryption_header.clone(),
                         },
                         is_deleted: file.is_deleted,
