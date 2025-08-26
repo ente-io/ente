@@ -3,6 +3,7 @@
 ## Development Commands
 
 ### Build and Test
+
 ```bash
 # Format code (required before commits)
 cargo fmt
@@ -21,7 +22,9 @@ cargo build --release
 ```
 
 ### CI Requirements
+
 The codebase must pass the GitHub Actions workflow at `../.github/workflows/rust-lint.yml` which runs:
+
 1. `cargo fmt --check` - Code formatting check
 2. `cargo clippy --all-targets --all-features` - Linting with all warnings as errors (RUSTFLAGS: -D warnings)
 3. `cargo build` - Build verification
@@ -35,34 +38,40 @@ This is a Rust CLI for ente.io, providing encrypted photo backup and export func
 ### Core Modules
 
 **`api/`** - HTTP client for ente.io API
+
 - `client.rs`: Base HTTP client with auth token management
 - Authentication uses SRP (Secure Remote Password) protocol
 - Handles retry logic and rate limiting
 
 **`crypto/`** - Cryptographic operations using libsodium
+
 - `argon.rs`: Argon2id key derivation
 - `chacha.rs`: ChaCha20-Poly1305 encryption/decryption
 - `kdf.rs`: Blake2b key derivation
 - All crypto MUST use `libsodium-sys-stable` (statically linked)
 
 **`storage/`** - SQLite persistence layer
+
 - `schema.rs`: Database schema for accounts, files, collections
 - `account.rs`: Account CRUD operations
 - `sync.rs`: Sync state management
 - Uses `rusqlite` with bundled SQLite for portability
 
 **`cli/`** - Command-line interface
+
 - `account.rs`: Account management (add, list, update)
 - `export.rs`: Photo export orchestration
 - Uses `clap` for argument parsing
 
 **`models/`** - Data structures
+
 - `account.rs`: Account model with encrypted credentials
 - `file.rs`: File metadata and encryption info
 - `collection.rs`: Albums/collections
 - `error.rs`: Error types using `thiserror`
 
 **`sync/`** - Synchronization engine
+
 - Handles incremental sync with ente servers
 - File download and decryption
 - Collection management
@@ -83,6 +92,7 @@ The project has completed foundational components (crypto, storage, models) and 
 ## Commit Guidelines
 
 ### Pre-commit Checklist
+
 **CRITICAL: CI will fail if ANY of these checks fail. Run ALL commands and ensure they ALL pass.**
 
 ```bash
@@ -101,19 +111,24 @@ cargo fmt --check
 ```
 
 **Why CI might fail even after running these:**
+
 - Skipping any command above
 - Assuming auto-fix tools handle everything (they don't)
 - Not fixing warnings that clippy reports
 - Making changes after running the checks
 
 ### Additional Guidelines
+
 - No promotional text like "Generated with [tool name]" - only keep the co-author line
 - Check `git status` before committing to avoid adding temporary/binary files
 - Never commit to main branch
+- Keep commit messages and pull requests short and concise. No emojis.
 - All CI checks must pass - the above commands simulate CI locally
 
 ### Security Guidelines
+
 **NEVER commit sensitive information:**
+
 - No real email addresses, usernames, or account IDs in code or documentation
 - No authentication tokens, API keys, or passwords (even for test accounts)
 - No debug logs that output credentials, keys, or personal information
