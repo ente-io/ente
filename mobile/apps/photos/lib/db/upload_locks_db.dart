@@ -53,12 +53,20 @@ class UploadLocksDB {
     columnCreatedAt: "created_at",
   );
 
+  static const _streamQueueTable = (
+    table: "stream_queue",
+    columnUploadedFileID: "uploaded_file_id",
+    columnQueueType: "queue_type", // 'create' or 'recreate'
+    columnCreatedAt: "created_at",
+  );
+
   static final initializationScript = [
     ..._createUploadLocksTable(),
   ];
 
   static final migrationScripts = [
     ..._createTrackUploadsTable(),
+    ..._createStreamQueueTable(),
   ];
 
   final dbConfig = MigrationConfig(
@@ -137,11 +145,24 @@ class UploadLocksDB {
     ];
   }
 
+  static List<String> _createStreamQueueTable() {
+    return [
+      '''
+                CREATE TABLE IF NOT EXISTS ${_streamQueueTable.table} (
+                  ${_streamQueueTable.columnUploadedFileID} INTEGER PRIMARY KEY,
+                  ${_streamQueueTable.columnQueueType} TEXT NOT NULL,
+                  ${_streamQueueTable.columnCreatedAt} INTEGER DEFAULT CURRENT_TIMESTAMP NOT NULL
+                )
+                ''',
+    ];
+  }
+
   Future<void> clearTable() async {
     final db = await instance.database;
     await db.delete(_uploadLocksTable.table);
     await db.delete(_trackUploadTable.table);
     await db.delete(_partsTable.table);
+    await db.delete(_streamQueueTable.table);
   }
 
   Future<void> acquireLock(String id, String owner, int time) async {
@@ -518,5 +539,57 @@ class UploadLocksDB {
       final row = rows.first;
       return row[_trackUploadTable.columnEncryptedFileName] as String;
     });
+  }
+
+  // Stream Queue Management Methods
+  Future<void> addToStreamQueue(
+    int uploadedFileID,
+    String queueType, // 'create' or 'recreate'
+  ) async {
+    final db = await instance.database;
+    await db.insert(
+      _streamQueueTable.table,
+      {
+        _streamQueueTable.columnUploadedFileID: uploadedFileID,
+        _streamQueueTable.columnQueueType: queueType,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<void> removeFromStreamQueue(int uploadedFileID) async {
+    final db = await instance.database;
+    await db.delete(
+      _streamQueueTable.table,
+      where: '${_streamQueueTable.columnUploadedFileID} = ?',
+      whereArgs: [uploadedFileID],
+    );
+  }
+
+  Future<Map<int, String>> getStreamQueue() async {
+    final db = await instance.database;
+    final rows = await db.query(
+      _streamQueueTable.table,
+      columns: [
+        _streamQueueTable.columnUploadedFileID,
+        _streamQueueTable.columnQueueType,
+      ],
+    );
+    final map = <int, String>{};
+    for (final row in rows) {
+      map[row[_streamQueueTable.columnUploadedFileID] as int] =
+          row[_streamQueueTable.columnQueueType] as String;
+    }
+    return map;
+  }
+
+  Future<bool> isInStreamQueue(int uploadedFileID) async {
+    final db = await instance.database;
+    final rows = await db.query(
+      _streamQueueTable.table,
+      where: '${_streamQueueTable.columnUploadedFileID} = ?',
+      whereArgs: [uploadedFileID],
+    );
+    return rows.isNotEmpty;
   }
 }

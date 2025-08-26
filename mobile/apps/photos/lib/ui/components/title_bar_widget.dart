@@ -15,6 +15,7 @@ class TitleBarWidget extends StatelessWidget {
   final Color? backgroundColor;
   final bool isSliver;
   final double? expandedHeight;
+  final double reducedExpandedHeight;
 
   const TitleBarWidget({
     this.leading,
@@ -29,6 +30,7 @@ class TitleBarWidget extends StatelessWidget {
     this.backgroundColor,
     this.isSliver = true,
     this.expandedHeight,
+    this.reducedExpandedHeight = 0,
     super.key,
   });
 
@@ -43,8 +45,9 @@ class TitleBarWidget extends StatelessWidget {
         leadingWidth: 48,
         automaticallyImplyLeading: false,
         pinned: true,
-        expandedHeight:
-            expandedHeight ?? (isFlexibleSpaceDisabled ? toolbarHeight : 102),
+        expandedHeight: expandedHeight ??
+            (isFlexibleSpaceDisabled ? toolbarHeight : 102) -
+                reducedExpandedHeight,
         centerTitle: false,
         titleSpacing: 4,
         title: TitleWidget(
