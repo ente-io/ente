@@ -1687,26 +1687,36 @@ class FilesDB with SqlDbBase {
     );
   }
 
-  Future<List<EnteFile>> getAllFilesAfterDate({
-    required FileType fileType,
-    required DateTime beginDate,
+  Future<List<EnteFile>> getStreamingEligibleVideoFiles({
+    DateTime? beginDate,
     required int userID,
+    bool onlyFilesWithLocalId = false,
   }) async {
     final db = await instance.sqliteAsyncDB;
-    final results = await db.getAll(
-      '''
+
+    String query = '''
       SELECT * FROM $filesTable
       WHERE $columnFileType = ?
-      AND $columnCreationTime > ?
-      AND $columnUploadedFileID  != -1
-      AND $columnOwnerID = $userID
-      AND $columnLocalID IS NOT NULL
+      AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID != -1)
+      AND $columnOwnerID = ?
       AND ($columnFileSize IS NOT NULL AND $columnFileSize <= 524288000)
       AND ($columnDuration IS NOT NULL AND ($columnDuration <= 60 AND $columnDuration > 0))
-      ORDER BY $columnCreationTime DESC
-    ''',
-      [getInt(fileType), beginDate.microsecondsSinceEpoch],
-    );
+    ''';
+
+    final List<Object> queryArgs = [getInt(FileType.video), userID];
+
+    if (beginDate != null) {
+      query += ' AND $columnCreationTime > ?';
+      queryArgs.add(beginDate.microsecondsSinceEpoch);
+    }
+
+    if (onlyFilesWithLocalId) {
+      query += ' AND $columnLocalID IS NOT NULL';
+    }
+
+    query += ' ORDER BY $columnCreationTime DESC';
+
+    final results = await db.getAll(query, queryArgs);
     return convertToFiles(results);
   }
 
