@@ -57,7 +57,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   static const crossAxisCount = 3;
   static const crossAxisSpacing = 12.0;
   static const double _similarThreshold = 0.02;
-  static const double _identicalThreshold = 0.0;
+  static const double _identicalThreshold = 0.0001;
 
   final _logger = Logger("SimilarImagesPage");
   bool _isDisposed = false;
