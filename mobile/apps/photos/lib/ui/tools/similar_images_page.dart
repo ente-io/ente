@@ -444,6 +444,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                                   await _deleteFiles(
                                     _selectedFiles.files,
                                     showDialog: true,
+                                    showUIFeedback: true,
                                   );
                                 },
                               ),
@@ -856,7 +857,11 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
 
     return GestureDetector(
       onTap: () async {
-        await _deleteFiles(files, showDialog: showDialog);
+        await _deleteFiles(
+          files,
+          showDialog: showDialog,
+          showUIFeedback: false,
+        );
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -888,6 +893,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   Future<void> _deleteFiles(
     Set<EnteFile> filesToDelete, {
     bool showDialog = true,
+    bool showUIFeedback = true,
   }) async {
     if (filesToDelete.isEmpty) return;
     if (showDialog) {
@@ -899,7 +905,11 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         isCritical: true,
         firstButtonOnTap: () async {
           try {
-            await _deleteFilesLogic(filesToDelete, true);
+            await _deleteFilesLogic(
+              filesToDelete,
+              true,
+              showUIFeedback: showUIFeedback,
+            );
           } catch (e, s) {
             _logger.severe("Failed to delete files", e, s);
             if (flagService.internalUser) {
@@ -909,14 +919,19 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         },
       );
     } else {
-      await _deleteFilesLogic(filesToDelete, true);
+      await _deleteFilesLogic(
+        filesToDelete,
+        true,
+        showUIFeedback: showUIFeedback,
+      );
     }
   }
 
   Future<void> _deleteFilesLogic(
     Set<EnteFile> filesToDelete,
-    bool createSymlink,
-  ) async {
+    bool createSymlink, {
+    bool showUIFeedback = true,
+  }) async {
     if (filesToDelete.isEmpty) {
       return;
     }
@@ -968,7 +983,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         if (!mounted) {
           return;
         }
-        if (collectionCnt > 0) {
+        if (collectionCnt > 0 && showUIFeedback) {
           progress++;
           // calculate progress percentage upto 2 decimal places
           final double percentage = (progress / collectionCnt) * 100;
@@ -980,14 +995,16 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         );
       }
     }
-    _deleteProgress.value = "";
+    if (showUIFeedback) {
+      _deleteProgress.value = "";
+    }
 
     _selectedFiles.unSelectAll(allDeleteFiles);
     setState(() {});
     await deleteFilesFromRemoteOnly(context, allDeleteFiles.toList());
 
     // Show congratulations popup
-    if (allDeleteFiles.isNotEmpty && mounted) {
+    if (allDeleteFiles.isNotEmpty && mounted && showUIFeedback) {
       final int totalSize = allDeleteFiles.fold<int>(
         0,
         (sum, file) => sum + (file.fileSize ?? 0),
