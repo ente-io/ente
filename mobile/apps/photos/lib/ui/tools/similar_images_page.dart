@@ -68,7 +68,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   double _distanceThreshold = 0.04; // Default value
   List<SimilarFiles> _similarFilesList = [];
 
-  SortKey _sortKey = SortKey.distanceAsc;
+  SortKey _sortKey = SortKey.size;
   bool _exactSearch = false;
   bool _fullRefresh = false;
   TabFilter _selectedTab = TabFilter.identical;
@@ -1073,7 +1073,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       String text;
       switch (key) {
         case SortKey.size:
-          text = AppLocalizations.of(context).size;
+          text = AppLocalizations.of(context).totalSize;
           break;
         case SortKey.distanceAsc:
           text = AppLocalizations.of(context).similarity;
