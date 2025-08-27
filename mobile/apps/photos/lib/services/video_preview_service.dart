@@ -260,7 +260,7 @@ class VideoPreviewService {
         "Pause preview due to disabledSteaming($isVideoStreamingEnabled) or computeController permission) - isManual: $isManual",
       );
       if (isVideoStreamingEnabled) _logger.info("No permission to run compute");
-      if (!isManual) clearQueue(); // Only clear queue for automatic processing
+      clearQueue();
       return;
     }
 
