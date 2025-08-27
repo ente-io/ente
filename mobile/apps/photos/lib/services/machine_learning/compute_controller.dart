@@ -112,9 +112,6 @@ class ComputeController {
       _logger.info("Stream request granted");
       _currentRunState = _ComputeRunState.generatingStream;
       return true;
-    } else if (_currentRunState == _ComputeRunState.generatingStream &&
-        !_waitingToRunML) {
-      return true;
     }
     _logger.info(
       "Stream request denied, current state: $_currentRunState, wants to run ML: $_waitingToRunML",
