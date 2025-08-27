@@ -68,26 +68,37 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   double _distanceThreshold = 0.04; // Default value
   List<SimilarFiles> _similarFilesList = [];
 
-  SortKey _sortKey = SortKey.distanceAsc;
+  SortKey _sortKey = SortKey.size;
   bool _exactSearch = false;
   bool _fullRefresh = false;
-  TabFilter _selectedTab = TabFilter.all;
+  TabFilter _selectedTab = TabFilter.identical;
 
   late SelectedFiles _selectedFiles;
   late ValueNotifier<String> _deleteProgress;
 
   List<SimilarFiles> get _filteredGroups {
-    if (_selectedTab == TabFilter.all) {
-      return _similarFilesList;
+    switch (_selectedTab) {
+      case TabFilter.all:
+        return _similarFilesList;
+      case TabFilter.similar:
+        final filteredGroups = <SimilarFiles>[];
+        for (final group in _similarFilesList) {
+          final distance = group.furthestDistance;
+          if (distance > _identicalThreshold && distance <= _similarThreshold) {
+            filteredGroups.add(group);
+          }
+        }
+        return filteredGroups;
+      case TabFilter.identical:
+        final filteredGroups = <SimilarFiles>[];
+        for (final group in _similarFilesList) {
+          final distance = group.furthestDistance;
+          if (distance <= _identicalThreshold) {
+            filteredGroups.add(group);
+          }
+        }
+        return filteredGroups;
     }
-
-    final threshold = _selectedTab == TabFilter.similar
-        ? _similarThreshold
-        : _identicalThreshold;
-
-    return _similarFilesList.where((group) {
-      return group.furthestDistance <= threshold;
-    }).toList();
   }
 
   @override
@@ -347,7 +358,10 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         _buildTabBar(),
         Expanded(
           child: _filteredGroups.isEmpty
-              ? const EmptyState()
+              ? EmptyState(
+                  text:
+                      AppLocalizations.of(context).nothingHereTryAnotherFilter,
+                )
               : ListView.builder(
                   cacheExtent: 400,
                   itemCount: _filteredGroups.length,
@@ -373,8 +387,8 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       child: Row(
         children: [
           _buildTabButton(
-            TabFilter.all,
-            AppLocalizations.of(context).all,
+            TabFilter.identical,
+            AppLocalizations.of(context).identical,
             colorScheme,
             textTheme,
           ),
@@ -387,8 +401,8 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
           ),
           const SizedBox(width: crossAxisSpacing),
           _buildTabButton(
-            TabFilter.identical,
-            AppLocalizations.of(context).identical,
+            TabFilter.all,
+            AppLocalizations.of(context).all,
             colorScheme,
             textTheme,
           ),
@@ -503,7 +517,8 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                               child: ButtonWidget(
                                 labelText: AppLocalizations.of(context)
                                     .deletePhotosWithSize(
-                                  count: NumberFormat().format(selectedFilteredFiles.length),
+                                  count: NumberFormat()
+                                      .format(selectedFilteredFiles.length),
                                   size: formatBytes(totalSize),
                                 ),
                                 buttonType: ButtonType.critical,
@@ -1061,7 +1076,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       String text;
       switch (key) {
         case SortKey.size:
-          text = AppLocalizations.of(context).size;
+          text = AppLocalizations.of(context).totalSize;
           break;
         case SortKey.distanceAsc:
           text = AppLocalizations.of(context).similarity;
