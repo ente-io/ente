@@ -9,6 +9,7 @@ import "package:ente_ui/theme/colors.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_ui/utils/toast_util.dart";
+import "package:ente_utils/navigation_util.dart";
 import "package:ente_utils/share_utils.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
@@ -17,7 +18,11 @@ import "package:locker/services/collections/collections_api_client.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/collections/models/public_url.dart";
+import "package:locker/ui/components/menu_section_description_widget.dart";
+import "package:locker/ui/sharing/pickers/device_limit_picker_page.dart";
+import "package:locker/ui/sharing/pickers/link_expiry_picker_page.dart";
 import "package:locker/utils/collection_actions.dart";
+import "package:locker/utils/date_time_util.dart";
 
 class ManageSharedLinkWidget extends StatefulWidget {
   final Collection? collection;
@@ -78,9 +83,9 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       },
                     ),
                   ),
-                  // MenuSectionDescriptionWidget(
-                  //   content: S.of(context).allowAddPhotosDescription,
-                  // ),
+                  MenuSectionDescriptionWidget(
+                    content: context.l10n.allowAddFilesDescription,
+                  ),
                   const SizedBox(height: 24),
                   MenuItemWidget(
                     alignCaptionedTextToLeft: true,
@@ -98,51 +103,50 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     surfaceExecutionStates: false,
                     onTap: () async {
                       // ignore: unawaited_futures
-                      // routeToPage(
-                      //   context,
-                      //   LinkExpiryPickerPage(widget.collection!),
-                      // ).then((value) {
-                      //   setState(() {});
-                      // });
+                      routeToPage(
+                        context,
+                        LinkExpiryPickerPage(widget.collection!),
+                      ).then((value) {
+                        setState(() {});
+                      });
                     },
                   ),
-                  // url.hasExpiry
-                  //     ? MenuSectionDescriptionWidget(
-                  //         content: url.isExpired
-                  //             ? S.of(context).expiredLinkInfo
-                  //             : S.of(context).linkExpiresOn(
-                  //                   getFormattedTime(
-                  //                     context,
-                  //                     DateTime.fromMicrosecondsSinceEpoch(
-                  //                       url.validTill,
-                  //                     ),
-                  //                   ),
-                  //                 ),
-                  //       )
-                  //     : const SizedBox.shrink(),
+                  url.hasExpiry
+                      ? MenuSectionDescriptionWidget(
+                          content: url.isExpired
+                              ? context.l10n.expiredLinkInfo
+                              : context.l10n.linkExpiresOn(
+                                  getFormattedTime(
+                                    DateTime.fromMicrosecondsSinceEpoch(
+                                      url.validTill,
+                                    ),
+                                  ),
+                                ),
+                        )
+                      : const SizedBox.shrink(),
                   const Padding(padding: EdgeInsets.only(top: 24)),
-                  // MenuItemWidget(
-                  //   captionedTextWidget: CaptionedTextWidget(
-                  //     title: S.of(context).linkDeviceLimit,
-                  //     subTitle: url.deviceLimit == 0
-                  //         ? S.of(context).noDeviceLimit
-                  //         : "${url.deviceLimit}",
-                  //   ),
-                  //   trailingIcon: Icons.chevron_right,
-                  //   menuItemColor: enteColorScheme.fillFaint,
-                  //   alignCaptionedTextToLeft: true,
-                  //   isBottomBorderRadiusRemoved: true,
-                  //   onTap: () async {
-                  //     // ignore: unawaited_futures
-                  //     routeToPage(
-                  //       context,
-                  //       DeviceLimitPickerPage(widget.collection!),
-                  //     ).then((value) {
-                  //       setState(() {});
-                  //     });
-                  //   },
-                  //   surfaceExecutionStates: false,
-                  // ),
+                  MenuItemWidget(
+                    captionedTextWidget: CaptionedTextWidget(
+                      title: context.l10n.linkDeviceLimit,
+                      subTitle: url.deviceLimit == 0
+                          ? context.l10n.noDeviceLimit
+                          : "${url.deviceLimit}",
+                    ),
+                    trailingIcon: Icons.chevron_right,
+                    menuItemColor: enteColorScheme.fillFaint,
+                    alignCaptionedTextToLeft: true,
+                    isBottomBorderRadiusRemoved: true,
+                    onTap: () async {
+                      // ignore: unawaited_futures
+                      routeToPage(
+                        context,
+                        DeviceLimitPickerPage(widget.collection!),
+                      ).then((value) {
+                        setState(() {});
+                      });
+                    },
+                    surfaceExecutionStates: false,
+                  ),
                   DividerWidget(
                     dividerType: DividerType.menuNoIcon,
                     bgColor: getEnteColorScheme(context).fillFaint,
