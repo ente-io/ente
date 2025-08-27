@@ -184,8 +184,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   ),
                   MenuItemWidget(
                     key: ValueKey("Password lock $isPasswordEnabled"),
-                    captionedTextWidget: const CaptionedTextWidget(
-                      title: "",
+                    captionedTextWidget:   CaptionedTextWidget(
+                      title: context.l10n.passwordLock,
                     ),
                     alignCaptionedTextToLeft: true,
                     isTopBorderRadiusRemoved: true,

@@ -2,12 +2,14 @@ import "dart:async";
 
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
+import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_utils/navigation_util.dart";
 import 'package:flutter/material.dart';
 import 'package:locker/events/collections_updated_event.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
+import "package:locker/services/collections/models/collection_view_type.dart";
 import "package:locker/services/configuration.dart";
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/ui/components/item_list_view.dart';
@@ -18,6 +20,7 @@ import 'package:locker/ui/pages/uploader_page.dart';
 import "package:locker/ui/sharing/manage_links_widget.dart";
 import "package:locker/ui/sharing/share_collection_page.dart";
 import 'package:locker/utils/collection_actions.dart';
+import "package:logging/logging.dart";
 
 class CollectionPage extends UploaderPage {
   final Collection collection;
@@ -33,9 +36,12 @@ class CollectionPage extends UploaderPage {
 
 class _CollectionPageState extends UploaderPageState<CollectionPage>
     with SearchMixin {
+  final _logger = Logger("CollectionPage");
+
   late Collection _collection;
   List<EnteFile> _files = [];
   List<EnteFile> _filteredFiles = [];
+  late CollectionViewType collectionViewType;
   bool isQuickLink = false;
 
   @override
@@ -90,6 +96,10 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
           .first;
       await _initializeData(collection);
     });
+    collectionViewType = getCollectionViewType(
+      _collection,
+      Configuration.instance.getUserID()!,
+    );
   }
 
   Future<void> _initializeData(Collection collection) async {
@@ -122,15 +132,29 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
   }
 
   Future<void> _shareCollection() async {
-    if (Configuration.instance.getUserID() == widget.collection.owner.id) {
-      unawaited(
-        routeToPage(
-          context,
-          (isQuickLink && (widget.collection.hasLink))
-              ? ManageSharedLinkWidget(collection: widget.collection)
-              : ShareCollectionPage(collection: widget.collection),
-        ),
-      );
+    try {
+      if ((collectionViewType != CollectionViewType.ownedCollection &&
+          collectionViewType != CollectionViewType.sharedCollection &&
+          collectionViewType != CollectionViewType.hiddenOwnedCollection &&
+          collectionViewType != CollectionViewType.favorite &&
+          !isQuickLink)) {
+        throw Exception(
+          "Cannot share collection of type $collectionViewType",
+        );
+      }
+      if (Configuration.instance.getUserID() == widget.collection.owner.id) {
+        unawaited(
+          routeToPage(
+            context,
+            (isQuickLink && (widget.collection.hasLink))
+                ? ManageSharedLinkWidget(collection: widget.collection)
+                : ShareCollectionPage(collection: widget.collection),
+          ),
+        );
+      }
+    } catch (e, s) {
+      _logger.severe(e, s);
+      await showGenericErrorDialog(context: context, error: e);
     }
   }
 
