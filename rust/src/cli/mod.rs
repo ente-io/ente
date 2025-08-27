@@ -2,7 +2,6 @@ use clap::{Parser, Subcommand};
 
 pub mod account;
 pub mod export;
-pub mod sync;
 pub mod version;
 
 #[derive(Parser)]
@@ -20,9 +19,6 @@ pub enum Commands {
 
     /// Export photos and files
     Export(export::ExportCommand),
-
-    /// Sync collections and file metadata
-    Sync(sync::SyncCommand),
 
     /// Print version information
     Version,

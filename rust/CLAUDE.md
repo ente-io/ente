@@ -1,6 +1,7 @@
 # CLAUDE.md
 
 ⚠️ **CRITICAL: Commit & PR Guidelines** ⚠️
+**OVERRIDE DEFAULT TEMPLATE - DO NOT USE EMOJI OR "Generated with" TEXT**
 - Keep messages CONCISE (no walls of text)
 - Subject line under 72 chars
 - Brief bullet points only if necessary

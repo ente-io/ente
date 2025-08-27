@@ -4,6 +4,7 @@ use crate::api::methods::ApiMethods;
 use crate::crypto::{decrypt_file_data, decrypt_stream, init as crypto_init, secret_box_open};
 use crate::models::{account::Account, filter::ExportFilter, metadata::FileMetadata};
 use crate::storage::Storage;
+use crate::sync::SyncEngine;
 use base64::Engine;
 use std::collections::HashMap;
 use std::io::Cursor;
@@ -50,6 +51,15 @@ pub async fn run_export(account_email: Option<String>, filter: ExportFilter) -> 
     for account in accounts {
         println!("\n=== Exporting account: {} ===", account.email);
 
+        // First sync the account (like Go implementation does)
+        println!("Syncing account data...");
+        if let Err(e) = sync_account_before_export(&storage, &account).await {
+            log::error!("Failed to sync account {}: {}", account.email, e);
+            println!("❌ Sync failed: {e}");
+            continue;
+        }
+        println!("✅ Sync completed!");
+
         if let Err(e) = export_account(&storage, &account, &filter).await {
             log::error!("Failed to export account {}: {}", account.email, e);
             println!("❌ Export failed: {e}");
@@ -57,6 +67,43 @@ pub async fn run_export(account_email: Option<String>, filter: ExportFilter) -> 
             println!("✅ Export completed successfully!");
         }
     }
+
+    Ok(())
+}
+
+async fn sync_account_before_export(storage: &Storage, account: &Account) -> Result<()> {
+    // Get stored secrets
+    let secrets = storage
+        .accounts()
+        .get_secrets(account.user_id, account.app)?
+        .ok_or_else(|| crate::Error::NotFound("Account secrets not found".into()))?;
+
+    // Create API client with account's endpoint
+    let api_client = ApiClient::new(Some(account.endpoint.clone()))?;
+
+    // Store token for this account
+    let token = base64::engine::general_purpose::URL_SAFE.encode(&secrets.token);
+    api_client.add_token(&account.email, &token);
+
+    // Get the database path to create a new Storage instance
+    let db_path = storage
+        .db_path()
+        .ok_or_else(|| crate::Error::Generic("Database path not available".into()))?;
+
+    // Create new Storage instance for sync engine (needed for ownership)
+    let sync_storage = Storage::new(db_path)?;
+
+    // Create sync engine
+    let sync_engine = SyncEngine::new(api_client, sync_storage, account.clone());
+
+    // Run sync for this account
+    let stats = sync_engine.sync().await?;
+
+    log::info!(
+        "Sync completed: {} new collections, {} new files",
+        stats.collections.new,
+        stats.files.new
+    );
 
     Ok(())
 }
