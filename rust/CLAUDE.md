@@ -1,5 +1,12 @@
 # CLAUDE.md
 
+⚠️ **CRITICAL: Commit & PR Guidelines** ⚠️
+- Keep messages CONCISE (no walls of text)
+- Subject line under 72 chars
+- Brief bullet points only if necessary
+- NO emojis
+- NO promotional text or links (except Co-Authored-By line)
+
 ## Development Commands
 
 ### Build and Test
@@ -116,15 +123,6 @@ cargo fmt --check
 - Assuming auto-fix tools handle everything (they don't)
 - Not fixing warnings that clippy reports
 - Making changes after running the checks
-
-### Commit and PR Message Format
-
-Use a concise commit message with:
-
-- **No emojis**
-- Short subject line (under 72 chars)
-- Brief bullet points for context only if necessary
-- Only the Co-Authored-By line at the end, no promotional text or links
 
 ### Additional Guidelines
 

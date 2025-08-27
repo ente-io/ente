@@ -35,6 +35,9 @@ pub enum Error {
     #[error("Base64 decode error: {0}")]
     Base64Decode(#[from] base64::DecodeError),
 
+    #[error("ZIP error: {0}")]
+    Zip(#[from] zip::result::ZipError),
+
     #[error("{0}")]
     Generic(String),
 }

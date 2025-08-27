@@ -5,6 +5,8 @@ use crate::crypto::{decrypt_file_data, decrypt_stream, init as crypto_init, secr
 use crate::models::{account::Account, filter::ExportFilter, metadata::FileMetadata};
 use crate::storage::Storage;
 use base64::Engine;
+use std::collections::HashMap;
+use std::io::Cursor;
 use std::path::{Path, PathBuf};
 use tokio::fs;
 use tokio::io::AsyncWriteExt;
@@ -71,6 +73,9 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
 
     // Create export directory if needed
     fs::create_dir_all(export_path).await?;
+
+    // Track exported hashes for deduplication within this export session
+    let mut exported_hashes: HashMap<String, PathBuf> = HashMap::new();
 
     // Get stored secrets
     let secrets = storage
@@ -190,7 +195,7 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
                     }
                 };
 
-                // Decrypt metadata to get original filename
+                // Decrypt metadata to get original filename and hash
                 let metadata = match decrypt_file_metadata(&file, &file_key) {
                     Ok(meta) => meta,
                     Err(e) => {
@@ -219,6 +224,41 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
                     None
                 };
 
+                // Check for deduplication by hash
+                let content_hash = if let Some(ref meta) = metadata {
+                    let hash = match meta.get_file_type() {
+                        crate::models::metadata::FileType::Image => {
+                            meta.image_hash.as_ref().or(meta.hash.as_ref())
+                        }
+                        crate::models::metadata::FileType::Video => {
+                            meta.video_hash.as_ref().or(meta.hash.as_ref())
+                        }
+                        _ => meta.hash.as_ref(),
+                    };
+                    if let Some(h) = hash {
+                        log::debug!("File {} has hash: {}", file.id, h);
+                    } else {
+                        log::debug!("File {} has no hash in metadata", file.id);
+                    }
+                    hash
+                } else {
+                    log::debug!("File {} has no metadata", file.id);
+                    None
+                };
+
+                // Check if we've already exported a file with this hash
+                if let Some(hash) = content_hash
+                    && let Some(existing_path) = exported_hashes.get(hash)
+                {
+                    log::info!(
+                        "Skipping duplicate file {} (same hash as {})",
+                        file.id,
+                        existing_path.display()
+                    );
+                    skipped_files += 1;
+                    continue;
+                }
+
                 // Generate export path with original filename from metadata
                 let file_path = generate_export_path(
                     export_path,
@@ -228,10 +268,15 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
                     pub_magic_metadata.as_ref(),
                 )?;
 
-                // Skip if file already exists
+                // Skip if file already exists on disk
                 if file_path.exists() {
                     log::debug!("File already exists: {file_path:?}");
                     skipped_files += 1;
+
+                    // Add to hash map even for existing files to prevent duplicates
+                    if let Some(hash) = content_hash {
+                        exported_hashes.insert(hash.clone(), file_path.clone());
+                    }
                     continue;
                 }
 
@@ -272,12 +317,34 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
                     }
                 };
 
-                // Write decrypted file
-                let mut file_handle = fs::File::create(&file_path).await?;
-                file_handle.write_all(&decrypted).await?;
-                file_handle.sync_all().await?;
+                // Check if this is a live photo that needs extraction
+                let is_live_photo = metadata
+                    .as_ref()
+                    .map(|m| m.is_live_photo())
+                    .unwrap_or(false);
+
+                if is_live_photo {
+                    // Extract live photo components from ZIP
+                    if let Err(e) = extract_live_photo(&decrypted, &file_path).await {
+                        log::error!("Failed to extract live photo {}: {}", file.id, e);
+                        // Fall back to saving as ZIP
+                        let mut file_handle = fs::File::create(&file_path).await?;
+                        file_handle.write_all(&decrypted).await?;
+                        file_handle.sync_all().await?;
+                    }
+                } else {
+                    // Write regular file
+                    let mut file_handle = fs::File::create(&file_path).await?;
+                    file_handle.write_all(&decrypted).await?;
+                    file_handle.sync_all().await?;
+                }
 
                 exported_files += 1;
+
+                // Add hash to deduplication map
+                if let Some(hash) = content_hash {
+                    exported_hashes.insert(hash.clone(), file_path.clone());
+                }
 
                 // Progress indicator - show every file for now since we have few files
                 println!(
@@ -496,4 +563,64 @@ fn decrypt_magic_metadata(
     // Parse as generic JSON since magic metadata structure can vary
     let metadata: serde_json::Value = serde_json::from_slice(&decrypted)?;
     Ok(Some(metadata))
+}
+
+/// Extract live photo components from a ZIP file
+async fn extract_live_photo(zip_data: &[u8], output_path: &Path) -> Result<()> {
+    use zip::ZipArchive;
+
+    // Parse the ZIP archive
+    let cursor = Cursor::new(zip_data);
+    let mut archive = ZipArchive::new(cursor)?;
+
+    // Get the parent directory and base name
+    let parent_dir = output_path
+        .parent()
+        .ok_or_else(|| crate::Error::Generic("Invalid output path".into()))?;
+
+    let base_name = output_path
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .ok_or_else(|| crate::Error::Generic("Invalid filename".into()))?;
+
+    // Extract each file from the ZIP
+    for i in 0..archive.len() {
+        let mut file = archive.by_index(i)?;
+        let file_name = file.name().to_string();
+
+        // Determine the output filename based on the content
+        let output_file_path = if file_name.to_lowercase().ends_with(".heic")
+            || file_name.to_lowercase().ends_with(".jpg")
+            || file_name.to_lowercase().ends_with(".jpeg")
+        {
+            // Image component
+            parent_dir.join(format!("{}.jpg", base_name))
+        } else if file_name.to_lowercase().ends_with(".mov")
+            || file_name.to_lowercase().ends_with(".mp4")
+        {
+            // Video component
+            parent_dir.join(format!("{}.mov", base_name))
+        } else {
+            // Unknown component - use original extension
+            let ext = std::path::Path::new(&file_name)
+                .extension()
+                .and_then(|e| e.to_str())
+                .unwrap_or("bin");
+            parent_dir.join(format!("{}.{}", base_name, ext))
+        };
+
+        // Read the file contents
+        let mut contents = Vec::new();
+        use std::io::Read;
+        file.read_to_end(&mut contents)?;
+
+        // Write to disk
+        let mut output_file = fs::File::create(&output_file_path).await?;
+        output_file.write_all(&contents).await?;
+        output_file.sync_all().await?;
+
+        log::debug!("Extracted live photo component: {:?}", output_file_path);
+    }
+
+    Ok(())
 }

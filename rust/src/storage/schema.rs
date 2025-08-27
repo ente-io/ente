@@ -75,6 +75,7 @@ pub fn create_tables(conn: &Connection) -> Result<()> {
             key_decryption_nonce TEXT NOT NULL,
             file_info TEXT NOT NULL,
             metadata TEXT NOT NULL,
+            content_hash TEXT,
             is_deleted INTEGER NOT NULL DEFAULT 0,
             is_synced_locally INTEGER NOT NULL DEFAULT 0,
             local_path TEXT,
@@ -160,6 +161,14 @@ pub fn create_tables(conn: &Connection) -> Result<()> {
     conn.execute(
         "CREATE INDEX IF NOT EXISTS idx_collection_sync_state 
          ON collection_sync_state(user_id, collection_id)",
+        [],
+    )?;
+
+    // Create index for file deduplication
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_files_hash 
+         ON files(owner_id, content_hash) 
+         WHERE content_hash IS NOT NULL AND is_deleted = 0",
         [],
     )?;
 

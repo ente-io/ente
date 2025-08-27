@@ -294,6 +294,7 @@ async fn prepare_download_tasks(
     use chrono::{TimeZone, Utc};
 
     let mut tasks = Vec::new();
+    let mut seen_hashes: HashMap<String, PathBuf> = HashMap::new();
 
     // Create collection lookup map
     let collection_map: HashMap<i64, &crate::api::models::Collection> =
@@ -400,7 +401,7 @@ async fn prepare_download_tasks(
         // Use filename from public magic metadata (edited name) or regular metadata
         let filename = {
             // First check for edited name in public magic metadata
-            if let Some(ref pub_meta) = pub_magic_metadata
+            let base_name = if let Some(ref pub_meta) = pub_magic_metadata
                 && let Some(edited_name) = pub_meta.get("editedName")
                 && let Some(name_str) = edited_name.as_str()
                 && !name_str.is_empty()
@@ -411,14 +412,65 @@ async fn prepare_download_tasks(
                 if let Some(title) = meta.get_title() {
                     sanitize_filename(title)
                 } else {
-                    format!("file_{}.jpg", file.id)
+                    // Generate fallback name based on file type
+                    let ext = match meta.get_file_type() {
+                        crate::models::metadata::FileType::Image => "jpg",
+                        crate::models::metadata::FileType::Video => "mp4",
+                        crate::models::metadata::FileType::LivePhoto => "zip",
+                        crate::models::metadata::FileType::Unknown => "bin",
+                    };
+                    format!("file_{}.{}", file.id, ext)
                 }
             } else {
                 format!("file_{}.jpg", file.id)
+            };
+
+            // For live photos, ensure .zip extension if not already present
+            if let Some(ref meta) = metadata {
+                if meta.is_live_photo() && !base_name.to_lowercase().ends_with(".zip") {
+                    // Remove any existing extension and add .zip
+                    if let Some(pos) = base_name.rfind('.') {
+                        format!("{}.zip", &base_name[..pos])
+                    } else {
+                        format!("{}.zip", base_name)
+                    }
+                } else {
+                    base_name
+                }
+            } else {
+                base_name
             }
         };
 
         path.push(filename);
+
+        // Check for deduplication by hash
+        let content_hash = if let Some(ref meta) = metadata {
+            match meta.get_file_type() {
+                crate::models::metadata::FileType::Image => {
+                    meta.image_hash.as_ref().or(meta.hash.as_ref())
+                }
+                crate::models::metadata::FileType::Video => {
+                    meta.video_hash.as_ref().or(meta.hash.as_ref())
+                }
+                _ => meta.hash.as_ref(),
+            }
+        } else {
+            None
+        };
+
+        // Skip if we've already seen this hash (duplicate)
+        if let Some(hash) = content_hash {
+            if let Some(existing_path) = seen_hashes.get(hash) {
+                log::info!(
+                    "Skipping duplicate file {} (same hash as {})",
+                    file.id,
+                    existing_path.display()
+                );
+                continue;
+            }
+            seen_hashes.insert(hash.clone(), path.clone());
+        }
 
         tasks.push((file.clone(), path));
     }

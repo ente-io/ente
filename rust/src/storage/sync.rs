@@ -58,6 +58,15 @@ impl<'a> SyncStore<'a> {
 
     /// Store a file
     pub fn upsert_file(&self, file: &RemoteFile) -> Result<()> {
+        self.upsert_file_with_hash(file, None)
+    }
+
+    /// Store a file with optional content hash
+    pub fn upsert_file_with_hash(
+        &self,
+        file: &RemoteFile,
+        content_hash: Option<&str>,
+    ) -> Result<()> {
         let file_info = serde_json::to_string(&file.file)?;
         let metadata = serde_json::to_string(&file.metadata)?;
 
@@ -76,8 +85,8 @@ impl<'a> SyncStore<'a> {
         self.conn.execute(
             "INSERT OR REPLACE INTO files 
              (file_id, owner_id, collection_id, encrypted_key, key_decryption_nonce, 
-              file_info, metadata, is_deleted, is_synced_locally, updated_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
+              file_info, metadata, content_hash, is_deleted, is_synced_locally, updated_at)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
             params![
                 file.id,
                 file.owner_id,
@@ -86,6 +95,7 @@ impl<'a> SyncStore<'a> {
                 file.key_decryption_nonce,
                 file_info,
                 metadata,
+                content_hash,
                 file.is_deleted as i32,
                 is_synced,
                 file.updated_at
@@ -338,5 +348,36 @@ impl<'a> SyncStore<'a> {
         log::debug!("Marked file {file_id} as synced locally, rows affected: {rows_updated}");
 
         Ok(())
+    }
+
+    /// Check if a file with the same hash already exists for this user
+    pub fn find_duplicate_by_hash(&self, owner_id: i64, content_hash: &str) -> Result<Option<i64>> {
+        let file_id: Option<i64> = self
+            .conn
+            .query_row(
+                "SELECT file_id FROM files 
+                 WHERE owner_id = ?1 AND content_hash = ?2 AND is_deleted = 0 
+                 AND is_synced_locally = 1
+                 LIMIT 1",
+                params![owner_id, content_hash],
+                |row| row.get(0),
+            )
+            .optional()?;
+
+        Ok(file_id)
+    }
+
+    /// Get local path of a file
+    pub fn get_file_local_path(&self, file_id: i64) -> Result<Option<String>> {
+        let path: Option<String> = self
+            .conn
+            .query_row(
+                "SELECT local_path FROM files WHERE file_id = ?1",
+                params![file_id],
+                |row| row.get(0),
+            )
+            .optional()?;
+
+        Ok(path)
     }
 }

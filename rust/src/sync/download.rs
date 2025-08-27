@@ -6,6 +6,7 @@ use crate::models::file::RemoteFile;
 use base64::{Engine, engine::general_purpose::STANDARD as BASE64};
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use std::collections::HashMap;
+use std::io::Cursor;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use tokio::fs;
@@ -96,15 +97,40 @@ impl DownloadManager {
         // Decrypt file
         let decrypted_data = self.decrypt_file_data(file, &encrypted_data)?;
 
-        // Write to temp file
-        let mut temp_file = fs::File::create(&temp_path).await?;
-        temp_file.write_all(&decrypted_data).await?;
-        temp_file.sync_all().await?;
-        drop(temp_file);
+        // Check if this is a live photo (based on .zip extension in destination)
+        let is_live_photo = destination
+            .extension()
+            .and_then(|ext| ext.to_str())
+            .map(|ext| ext.to_lowercase() == "zip")
+            .unwrap_or(false);
 
-        // Move to final destination (use copy + delete to work across filesystems)
-        fs::copy(&temp_path, destination).await?;
-        fs::remove_file(&temp_path).await?;
+        if is_live_photo {
+            // Extract live photo components
+            if let Err(e) = self.extract_live_photo(&decrypted_data, destination).await {
+                log::warn!(
+                    "Failed to extract live photo components for file {}, saving as ZIP: {}",
+                    file.id,
+                    e
+                );
+                // Fall back to saving as ZIP
+                let mut temp_file = fs::File::create(&temp_path).await?;
+                temp_file.write_all(&decrypted_data).await?;
+                temp_file.sync_all().await?;
+                drop(temp_file);
+                fs::copy(&temp_path, destination).await?;
+                fs::remove_file(&temp_path).await?;
+            }
+        } else {
+            // Write regular file
+            let mut temp_file = fs::File::create(&temp_path).await?;
+            temp_file.write_all(&decrypted_data).await?;
+            temp_file.sync_all().await?;
+            drop(temp_file);
+
+            // Move to final destination (use copy + delete to work across filesystems)
+            fs::copy(&temp_path, destination).await?;
+            fs::remove_file(&temp_path).await?;
+        }
 
         // TODO: Update storage with local path
         // self.storage.sync().update_file_local_path(file.id, destination.to_str().unwrap())?;
@@ -311,5 +337,67 @@ impl DownloadStats {
         } else {
             (self.successful as f64 / self.total as f64) * 100.0
         }
+    }
+}
+
+impl DownloadManager {
+    /// Extract live photo components from a ZIP file
+    async fn extract_live_photo(&self, zip_data: &[u8], output_path: &Path) -> Result<()> {
+        use std::io::Read;
+        use zip::ZipArchive;
+
+        // Parse the ZIP archive
+        let cursor = Cursor::new(zip_data);
+        let mut archive = ZipArchive::new(cursor)?;
+
+        // Get the parent directory and base name
+        let parent_dir = output_path
+            .parent()
+            .ok_or_else(|| crate::Error::Generic("Invalid output path".into()))?;
+
+        let base_name = output_path
+            .file_stem()
+            .and_then(|s| s.to_str())
+            .ok_or_else(|| crate::Error::Generic("Invalid filename".into()))?;
+
+        // Extract each file from the ZIP
+        for i in 0..archive.len() {
+            let mut file = archive.by_index(i)?;
+            let file_name = file.name().to_string();
+
+            // Determine the output filename based on the content
+            let output_file_path = if file_name.to_lowercase().ends_with(".heic")
+                || file_name.to_lowercase().ends_with(".jpg")
+                || file_name.to_lowercase().ends_with(".jpeg")
+            {
+                // Image component
+                parent_dir.join(format!("{}.jpg", base_name))
+            } else if file_name.to_lowercase().ends_with(".mov")
+                || file_name.to_lowercase().ends_with(".mp4")
+            {
+                // Video component
+                parent_dir.join(format!("{}.mov", base_name))
+            } else {
+                // Unknown component - use original extension
+                let ext = std::path::Path::new(&file_name)
+                    .extension()
+                    .and_then(|e| e.to_str())
+                    .unwrap_or("bin");
+                parent_dir.join(format!("{}.{}", base_name, ext))
+            };
+
+            // Read the file contents
+            let mut contents = Vec::new();
+            file.read_to_end(&mut contents)?;
+
+            // Write to disk
+            let mut output_file = fs::File::create(&output_file_path).await?;
+            output_file.write_all(&contents).await?;
+            output_file.sync_all().await?;
+
+            log::info!("Extracted live photo component: {:?}", output_file_path);
+        }
+
+        Ok(())
     }
 }
