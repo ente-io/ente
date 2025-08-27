@@ -32,6 +32,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/file_magic_service.dart";
 import "package:photos/services/filedata/model/file_data.dart";
 import "package:photos/services/isolated_ffmpeg_service.dart";
+import "package:photos/services/machine_learning/compute_controller.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_key.dart";
@@ -120,8 +121,9 @@ class VideoPreviewService {
     if (file.uploadedFileID == null) return false;
 
     // Check if already in queue
-    final bool alreadyInQueue =
-        await uploadLocksDB.isInStreamQueue(file.uploadedFileID!);
+    final bool alreadyInQueue = await uploadLocksDB.isInStreamQueue(
+      file.uploadedFileID!,
+    );
     if (alreadyInQueue) {
       return false; // Indicates file was already in queue
     }
@@ -131,7 +133,7 @@ class VideoPreviewService {
 
     // Start processing if not already processing
     if (uploadingFileId < 0) {
-      queueFiles(duration: Duration.zero);
+      queueFiles(duration: Duration.zero, isManual: true);
     } else {
       _items[file.uploadedFileID!] = PreviewItem(
         status: PreviewItemStatus.inQueue,
@@ -252,10 +254,12 @@ class VideoPreviewService {
     BuildContext? ctx,
     EnteFile enteFile, [
     bool forceUpload = false,
+    bool isManual = false,
   ]) async {
-    if (!_allowStream()) {
+    final canStream = _isPermissionGranted();
+    if (!canStream) {
       _logger.info(
-        "Pause preview due to disabledSteaming($isVideoStreamingEnabled) or computeController permission)",
+        "Pause preview due to disabledSteaming($isVideoStreamingEnabled) or computeController permission) - isManual: $isManual",
       );
       if (isVideoStreamingEnabled) _logger.info("No permission to run compute");
       clearQueue();
@@ -575,8 +579,9 @@ class VideoPreviewService {
   Future<void> _removeFromLocks(EnteFile enteFile) async {
     final bool isFailurePresent =
         _failureFiles?.contains(enteFile.uploadedFileID!) ?? false;
-    final bool isInManualQueue =
-        await uploadLocksDB.isInStreamQueue(enteFile.uploadedFileID!);
+    final bool isInManualQueue = await uploadLocksDB.isInStreamQueue(
+      enteFile.uploadedFileID!,
+    );
 
     if (isFailurePresent) {
       await uploadLocksDB.deleteStreamUploadErrorEntry(
@@ -1025,8 +1030,9 @@ class VideoPreviewService {
       }
 
       // First try to find the file in the 60-day list
-      var queueFile =
-          files.firstWhereOrNull((f) => f.uploadedFileID == queueFileId);
+      var queueFile = files.firstWhereOrNull(
+        (f) => f.uploadedFileID == queueFileId,
+      );
 
       // If not found in 60-day list, fetch it individually
       queueFile ??=
@@ -1124,11 +1130,27 @@ class VideoPreviewService {
         computeController.requestCompute(stream: true);
   }
 
-  void queueFiles({Duration duration = const Duration(seconds: 5)}) {
+  bool _allowManualStream() {
+    return isVideoStreamingEnabled &&
+        computeController.requestCompute(
+          stream: true,
+          bypassInteractionCheck: true,
+        );
+  }
+
+  bool _isPermissionGranted() {
+    return isVideoStreamingEnabled &&
+        computeController.computeState == ComputeRunState.generatingStream;
+  }
+
+  void queueFiles({
+    Duration duration = const Duration(seconds: 5),
+    bool isManual = false,
+  }) {
     Future.delayed(duration, () async {
       if (_hasQueuedFile) return;
 
-      final isStreamAllowed = _allowStream();
+      final isStreamAllowed = isManual ? _allowManualStream() : _allowStream();
       if (!isStreamAllowed) return;
 
       await _ensurePreviewIdsInitialized();
