@@ -71,7 +71,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   SortKey _sortKey = SortKey.distanceAsc;
   bool _exactSearch = false;
   bool _fullRefresh = false;
-  TabFilter _selectedTab = TabFilter.all;
+  TabFilter _selectedTab = TabFilter.identical;
 
   late SelectedFiles _selectedFiles;
   late ValueNotifier<String> _deleteProgress;
@@ -373,8 +373,8 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       child: Row(
         children: [
           _buildTabButton(
-            TabFilter.all,
-            AppLocalizations.of(context).all,
+            TabFilter.identical,
+            AppLocalizations.of(context).identical,
             colorScheme,
             textTheme,
           ),
@@ -387,8 +387,8 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
           ),
           const SizedBox(width: crossAxisSpacing),
           _buildTabButton(
-            TabFilter.identical,
-            AppLocalizations.of(context).identical,
+            TabFilter.all,
+            AppLocalizations.of(context).all,
             colorScheme,
             textTheme,
           ),
@@ -503,7 +503,8 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                               child: ButtonWidget(
                                 labelText: AppLocalizations.of(context)
                                     .deletePhotosWithSize(
-                                  count: NumberFormat().format(selectedFilteredFiles.length),
+                                  count: NumberFormat()
+                                      .format(selectedFilteredFiles.length),
                                   size: formatBytes(totalSize),
                                 ),
                                 buttonType: ButtonType.critical,
