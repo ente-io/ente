@@ -13,7 +13,8 @@ enum AppIcon {
   iconGreen("Default", "IconGreen", "assets/launcher_icon/icon-green.png"),
   iconLight("Light", "IconLight", "assets/launcher_icon/icon-light.png"),
   iconDark("Dark", "IconDark", "assets/launcher_icon/icon-dark.png"),
-  iconOG("OG", "IconOG", "assets/launcher_icon/icon-og.png");
+  iconOG("OG", "IconOG", "assets/launcher_icon/icon-og.png"),
+  iconDuckyHuggingE("Ducky", "IconDuckyHuggingE", "assets/launcher_icon/icon-ducky-hugging-e-foreground.png");
 
   final String name;
   final String id;
@@ -175,13 +176,26 @@ class _AppIconTile extends StatelessWidget {
                         cornerRadius: 12,
                         cornerSmoothing: 1,
                       ),
-                      child: Image(
-                        width: 60,
-                        height: 60,
-                        image: AssetImage(
-                          appIcon.path,
-                        ),
-                      ),
+                      child: appIcon == AppIcon.iconDuckyHuggingE
+                          ? Container(
+                              width: 60,
+                              height: 60,
+                              color: const Color(0xFF08C225),
+                              child: Image(
+                                width: 60,
+                                height: 60,
+                                image: AssetImage(
+                                  appIcon.path,
+                                ),
+                              ),
+                            )
+                          : Image(
+                              width: 60,
+                              height: 60,
+                              image: AssetImage(
+                                appIcon.path,
+                              ),
+                            ),
                     ),
                     const SizedBox(width: 12),
                     AnimatedSwitcher(
