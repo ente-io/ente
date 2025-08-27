@@ -10,7 +10,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/compute_control_event.dart";
 import "package:thermal/thermal.dart";
 
-enum _ComputeRunState {
+enum ComputeRunState {
   idle,
   runningML,
   generatingStream,
@@ -35,7 +35,7 @@ class ComputeController {
   bool interactionOverride = false;
   late Timer _userInteractionTimer;
 
-  _ComputeRunState _currentRunState = _ComputeRunState.idle;
+  ComputeRunState _currentRunState = ComputeRunState.idle;
   bool _waitingToRunML = false;
 
   bool get isDeviceHealthy => _isDeviceHealthy;
@@ -70,8 +70,12 @@ class ComputeController {
     _logger.info('init done ');
   }
 
-  bool requestCompute({bool ml = false, bool stream = false, bool bypassInteractionCheck = false}) {
-    _logger.info("Requesting compute: ml: $ml, stream: $stream, bypassInteraction: $bypassInteractionCheck");
+  bool requestCompute(
+      {bool ml = false,
+      bool stream = false,
+      bool bypassInteractionCheck = false}) {
+    _logger.info(
+        "Requesting compute: ml: $ml, stream: $stream, bypassInteraction: $bypassInteractionCheck");
     if (!_isDeviceHealthy) {
       _logger.info("Device not healthy, denying request.");
       return false;
@@ -91,13 +95,17 @@ class ComputeController {
     return result;
   }
 
+  ComputeRunState get computeState {
+    return _currentRunState;
+  }
+
   bool _requestML() {
-    if (_currentRunState == _ComputeRunState.idle) {
-      _currentRunState = _ComputeRunState.runningML;
+    if (_currentRunState == ComputeRunState.idle) {
+      _currentRunState = ComputeRunState.runningML;
       _waitingToRunML = false;
       _logger.info("ML request granted");
       return true;
-    } else if (_currentRunState == _ComputeRunState.runningML) {
+    } else if (_currentRunState == ComputeRunState.runningML) {
       return true;
     }
     _logger.info(
@@ -108,9 +116,9 @@ class ComputeController {
   }
 
   bool _requestStream() {
-    if (_currentRunState == _ComputeRunState.idle && !_waitingToRunML) {
+    if (_currentRunState == ComputeRunState.idle && !_waitingToRunML) {
       _logger.info("Stream request granted");
-      _currentRunState = _ComputeRunState.generatingStream;
+      _currentRunState = ComputeRunState.generatingStream;
       return true;
     }
     _logger.info(
@@ -125,13 +133,13 @@ class ComputeController {
     );
 
     if (ml) {
-      if (_currentRunState == _ComputeRunState.runningML) {
-        _currentRunState = _ComputeRunState.idle;
+      if (_currentRunState == ComputeRunState.runningML) {
+        _currentRunState = ComputeRunState.idle;
       }
       _waitingToRunML = false;
     } else if (stream) {
-      if (_currentRunState == _ComputeRunState.generatingStream) {
-        _currentRunState = _ComputeRunState.idle;
+      if (_currentRunState == ComputeRunState.generatingStream) {
+        _currentRunState = ComputeRunState.idle;
       }
     }
   }
