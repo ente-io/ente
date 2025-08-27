@@ -440,43 +440,23 @@ fn generate_export_path(
     metadata: Option<&FileMetadata>,
     pub_magic_metadata: Option<&serde_json::Value>,
 ) -> Result<PathBuf> {
-    use chrono::{TimeZone, Utc};
-
     // Start with export directory
     let mut path = export_dir.to_path_buf();
 
-    // Add date-based directory structure (YYYY/MM-MonthName)
-    // Use updation_time as creation time proxy
-    let datetime = Utc
-        .timestamp_micros(file.updation_time)
-        .single()
-        .ok_or_else(|| crate::Error::Generic("Invalid timestamp".into()))?;
-
-    let year = datetime.format("%Y").to_string();
-    let month = datetime.format("%m-%B").to_string(); // e.g., "01-January"
-
-    path.push(year);
-    path.push(month);
-
-    // Add collection name if available
-    if let Some(col) = collection
+    // Match Go CLI structure: export_dir/AlbumName/filename
+    // Use collection/album name as folder, or "Uncategorized" if none
+    let album_folder = if let Some(col) = collection
         && let Some(ref name) = col.name
         && !name.is_empty()
-        && name != "Uncategorized"
     {
-        // Sanitize collection name for filesystem
-        let safe_name: String = name
-            .chars()
-            .map(|c| match c {
-                '/' | '\\' | ':' | '*' | '?' | '"' | '<' | '>' | '|' => '_',
-                c if c.is_control() => '_',
-                c => c,
-            })
-            .collect::<String>()
-            .trim()
-            .to_string();
-        path.push(safe_name);
-    }
+        // Sanitize collection name for filesystem (matching Go's approach)
+        sanitize_album_name(name)
+    } else {
+        // Files without a collection go to "Uncategorized" (matching Go CLI)
+        "Uncategorized".to_string()
+    };
+
+    path.push(album_folder);
 
     // Use filename from public magic metadata (edited name) or regular metadata
     let filename = {
@@ -558,6 +538,19 @@ fn sanitize_filename(name: &str) -> String {
             '/' | '\\' | ':' | '*' | '?' | '"' | '<' | '>' | '|' => '_',
             '\0' => '_',
             c if c.is_control() => '_',
+            c => c,
+        })
+        .collect::<String>()
+        .trim()
+        .to_string()
+}
+
+/// Sanitize an album/collection name for filesystem (matching Go CLI's logic)
+fn sanitize_album_name(name: &str) -> String {
+    // Go CLI replaces : and / with _ in album names
+    name.chars()
+        .map(|c| match c {
+            ':' | '/' => '_',
             c => c,
         })
         .collect::<String>()
