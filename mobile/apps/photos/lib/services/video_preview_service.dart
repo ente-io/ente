@@ -131,7 +131,7 @@ class VideoPreviewService {
 
     // Start processing if not already processing
     if (uploadingFileId < 0) {
-      queueFiles(duration: Duration.zero);
+      queueFiles(duration: Duration.zero, isManual: true);
     } else {
       _items[file.uploadedFileID!] = PreviewItem(
         status: PreviewItemStatus.inQueue,
@@ -252,13 +252,15 @@ class VideoPreviewService {
     BuildContext? ctx,
     EnteFile enteFile, [
     bool forceUpload = false,
+    bool isManual = false,
   ]) async {
-    if (!_allowStream()) {
+    final canStream = isManual ? _allowManualStream() : _allowStream();
+    if (!canStream) {
       _logger.info(
-        "Pause preview due to disabledSteaming($isVideoStreamingEnabled) or computeController permission)",
+        "Pause preview due to disabledSteaming($isVideoStreamingEnabled) or computeController permission) - isManual: $isManual",
       );
       if (isVideoStreamingEnabled) _logger.info("No permission to run compute");
-      clearQueue();
+      if (!isManual) clearQueue(); // Only clear queue for automatic processing
       return;
     }
 
@@ -1124,11 +1126,16 @@ class VideoPreviewService {
         computeController.requestCompute(stream: true);
   }
 
-  void queueFiles({Duration duration = const Duration(seconds: 5)}) {
+  bool _allowManualStream() {
+    return isVideoStreamingEnabled &&
+        computeController.requestCompute(stream: true, bypassInteractionCheck: true);
+  }
+
+  void queueFiles({Duration duration = const Duration(seconds: 5), bool isManual = false}) {
     Future.delayed(duration, () async {
       if (_hasQueuedFile) return;
 
-      final isStreamAllowed = _allowStream();
+      final isStreamAllowed = isManual ? _allowManualStream() : _allowStream();
       if (!isStreamAllowed) return;
 
       await _ensurePreviewIdsInitialized();
