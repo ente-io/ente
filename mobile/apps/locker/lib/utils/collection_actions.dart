@@ -1,13 +1,22 @@
+import "dart:async";
+
+import "package:ente_accounts/services/user_service.dart";
 import "package:ente_ui/components/action_sheet_widget.dart";
 import 'package:ente_ui/components/buttons/button_widget.dart';
 import 'package:ente_ui/components/buttons/models/button_type.dart';
+import "package:ente_ui/components/dialog_widget.dart";
+import "package:ente_ui/components/progress_dialog.dart";
 import 'package:ente_ui/utils/dialog_util.dart';
+import "package:ente_utils/email_util.dart";
+import "package:ente_utils/share_utils.dart";
 import 'package:flutter/material.dart';
 import "package:locker/core/errors.dart";
 import 'package:locker/l10n/l10n.dart';
 import "package:locker/services/collections/collections_api_client.dart";
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
+import "package:locker/services/configuration.dart";
+import "package:locker/ui/components/user_dialogs.dart";
 import 'package:locker/utils/snack_bar_utils.dart';
 import 'package:logging/logging.dart';
 
@@ -273,5 +282,131 @@ class CollectionActions {
       },
       barrierDismissible: true,
     );
+  }
+
+  Future<bool> doesEmailHaveAccount(
+    BuildContext context,
+    String email, {
+    bool showProgress = false,
+  }) async {
+    ProgressDialog? dialog;
+    String? publicKey;
+    if (showProgress) {
+      dialog = createProgressDialog(
+        context,
+        context.l10n.sharing,
+        isDismissible: true,
+      );
+      await dialog.show();
+    }
+    try {
+      publicKey = await UserService.instance.getPublicKey(email);
+    } catch (e) {
+      await dialog?.hide();
+      _logger.severe("Failed to get public key", e);
+      await showGenericErrorDialog(context: context, error: e);
+      return false;
+    }
+    // getPublicKey can return null when no user is associated with given
+    // email id
+    if (publicKey == null || publicKey == '') {
+      // todo: neeraj replace this as per the design where a new screen
+      // is used for error. Do this change along with handling of network errors
+      await showInviteDialog(context, email);
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  // addEmailToCollection returns true if add operation was successful
+  Future<bool> addEmailToCollection(
+    BuildContext context,
+    Collection collection,
+    String email,
+    CollectionParticipantRole role, {
+    bool showProgress = false,
+  }) async {
+    if (!isValidEmail(email)) {
+      await showErrorDialog(
+        context,
+        context.l10n.invalidEmailAddress,
+        context.l10n.enterValidEmail,
+      );
+      return false;
+    } else if (email.trim() == Configuration.instance.getEmail()) {
+      await showErrorDialog(
+        context,
+        context.l10n.oops,
+        context.l10n.youCannotShareWithYourself,
+      );
+      return false;
+    }
+
+    ProgressDialog? dialog;
+    String? publicKey;
+    if (showProgress) {
+      dialog = createProgressDialog(
+        context,
+        context.l10n.sharing,
+        isDismissible: true,
+      );
+      await dialog.show();
+    }
+
+    try {
+      publicKey = await UserService.instance.getPublicKey(email);
+    } catch (e) {
+      await dialog?.hide();
+      _logger.severe("Failed to get public key", e);
+      await showGenericErrorDialog(context: context, error: e);
+      return false;
+    }
+    // getPublicKey can return null when no user is associated with given
+    // email id
+    if (publicKey == null || publicKey == '') {
+      // todo: neeraj replace this as per the design where a new screen
+      // is used for error. Do this change along with handling of network errors
+      await showDialogWidget(
+        context: context,
+        title: context.l10n.inviteToEnte,
+        icon: Icons.info_outline,
+        body: context.l10n.emailNoEnteAccount(email),
+        isDismissible: true,
+        buttons: [
+          ButtonWidget(
+            buttonType: ButtonType.neutral,
+            icon: Icons.adaptive.share,
+            labelText: context.l10n.sendInvite,
+            isInAlert: true,
+            onTap: () async {
+              unawaited(
+                shareText(
+                  context.l10n.shareTextRecommendUsingEnte,
+                ),
+              );
+            },
+          ),
+        ],
+      );
+      return false;
+    } else {
+      try {
+        final newSharees = await CollectionApiClient.instance
+            .share(collection.id, email, publicKey, role);
+        await dialog?.hide();
+        collection.updateSharees(newSharees);
+        return true;
+      } catch (e) {
+        await dialog?.hide();
+        if (e is SharingNotPermittedForFreeAccountsError) {
+          await _showUnSupportedAlert(context);
+        } else {
+          _logger.severe("failed to share collection", e);
+          await showGenericErrorDialog(context: context, error: e);
+        }
+        return false;
+      }
+    }
   }
 }

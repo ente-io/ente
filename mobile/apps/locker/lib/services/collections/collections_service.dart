@@ -12,6 +12,7 @@ import "package:locker/services/collections/collections_db.dart";
 import 'package:locker/services/collections/models/collection.dart';
 import "package:locker/services/collections/models/collection_items.dart";
 import "package:locker/services/collections/models/public_url.dart";
+import "package:locker/services/collections/models/user.dart";
 import 'package:locker/services/configuration.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/services/trash/models/trash_item_request.dart';
@@ -383,6 +384,71 @@ class CollectionService {
       _logger.severe("Failed to get file key: $e");
       rethrow;
     }
+  }
+
+  // getActiveCollections returns list of collections which are not deleted yet
+  List<Collection> getActiveCollections() {
+    return _collectionIDToCollections.values
+        .toList()
+        .where((element) => !element.isDeleted)
+        .toList();
+  }
+
+  /// Returns Contacts(Users) that are relevant to the account owner.
+  /// Note: "User" refers to the account owner in the points below.
+  /// This includes:
+  /// 	- Collaborators and viewers of collections owned by user
+  ///   - Owners of collections shared to user.
+  ///   - All collaborators of collections in which user is a collaborator or
+  ///     a viewer.
+  ///   - All family members of user.
+  ///   - All contacts linked to a person.
+  List<User> getRelevantContacts() {
+    final List<User> relevantUsers = [];
+    final existingEmails = <String>{};
+    final int ownerID = Configuration.instance.getUserID()!;
+    final String ownerEmail = Configuration.instance.getEmail()!;
+    existingEmails.add(ownerEmail);
+
+    for (final c in getActiveCollections()) {
+      // Add collaborators and viewers of collections owned by user
+      if (c.owner.id == ownerID) {
+        for (final User u in c.sharees) {
+          if (u.id != null && u.email.isNotEmpty) {
+            if (!existingEmails.contains(u.email)) {
+              relevantUsers.add(u);
+              existingEmails.add(u.email);
+            }
+          }
+        }
+      } else if (c.owner.id != null && c.owner.email.isNotEmpty) {
+        // Add owners of collections shared with user
+        if (!existingEmails.contains(c.owner.email)) {
+          relevantUsers.add(c.owner);
+          existingEmails.add(c.owner.email);
+        }
+        // Add collaborators of collections shared with user where user is a
+        // viewer or a collaborator
+        for (final User u in c.sharees) {
+          if (u.id != null &&
+              u.email.isNotEmpty &&
+              u.email == ownerEmail &&
+              (u.isCollaborator || u.isViewer)) {
+            for (final User u in c.sharees) {
+              if (u.id != null && u.email.isNotEmpty && u.isCollaborator) {
+                if (!existingEmails.contains(u.email)) {
+                  relevantUsers.add(u);
+                  existingEmails.add(u.email);
+                }
+              }
+            }
+            break;
+          }
+        }
+      }
+    }
+
+    return relevantUsers;
   }
 
   String getPublicUrl(Collection c) {

@@ -1,3 +1,4 @@
+import "dart:async";
 import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
@@ -15,6 +16,7 @@ import 'package:locker/services/collections/models/collection_file_item.dart';
 import 'package:locker/services/collections/models/collection_magic.dart';
 import 'package:locker/services/collections/models/diff.dart';
 import "package:locker/services/collections/models/public_url.dart";
+import "package:locker/services/collections/models/user.dart";
 import 'package:locker/services/configuration.dart';
 import "package:locker/services/files/sync/metadata_updater_service.dart";
 import 'package:locker/services/files/sync/models/file.dart';
@@ -33,7 +35,11 @@ class CollectionApiClient {
   final _enteDio = Network.instance.enteDio;
   final _config = Configuration.instance;
 
-  Future<void> init() async {}
+  late CollectionDB _db;
+
+  Future<void> init() async {
+    _db = CollectionDB.instance;
+  }
 
   Future<List<Collection>> getCollections(int sinceTime) async {
     try {
@@ -414,7 +420,7 @@ class CollectionApiClient {
         },
       );
       collection.publicURLs.add(PublicURL.fromMap(response.data["result"]));
-      await CollectionDB.instance.updateCollections([collection]);
+      await _db.updateCollections([collection]);
       CollectionService.instance.updateCollectionCache(collection);
       Bus.instance.fire(CollectionsUpdatedEvent());
     } catch (e, s) {
@@ -429,7 +435,7 @@ class CollectionApiClient {
         "/collections/share-url/" + collection.id.toString(),
       );
       collection.publicURLs.clear();
-      await CollectionDB.instance.updateCollections(List.from([collection]));
+      await _db.updateCollections(List.from([collection]));
       CollectionService.instance.updateCollectionCache(collection);
       Bus.instance.fire(CollectionsUpdatedEvent());
     } on DioException catch (e) {
@@ -451,7 +457,7 @@ class CollectionApiClient {
       // remove existing url information
       collection.publicURLs.clear();
       collection.publicURLs.add(PublicURL.fromMap(response.data["result"]));
-      await CollectionDB.instance.updateCollections(List.from([collection]));
+      await _db.updateCollections(List.from([collection]));
       CollectionService.instance.updateCollectionCache(collection);
       Bus.instance.fire(CollectionsUpdatedEvent());
     } on DioException catch (e) {
@@ -461,6 +467,45 @@ class CollectionApiClient {
       rethrow;
     } catch (e, s) {
       _logger.severe("failed to update ShareUrl", e, s);
+      rethrow;
+    }
+  }
+
+  Future<List<User>> share(
+    int collectionID,
+    String email,
+    String publicKey,
+    CollectionParticipantRole role,
+  ) async {
+    final collectionKey =
+        CollectionService.instance.getCollectionKey(collectionID);
+    final encryptedKey = CryptoUtil.sealSync(
+      collectionKey,
+      CryptoUtil.base642bin(publicKey),
+    );
+    try {
+      final response = await _enteDio.post(
+        "/collections/share",
+        data: {
+          "collectionID": collectionID,
+          "email": email,
+          "encryptedKey": CryptoUtil.bin2base64(encryptedKey),
+          "role": role.toStringVal(),
+        },
+      );
+      final sharees = <User>[];
+      for (final user in response.data["sharees"]) {
+        sharees.add(User.fromMap(user));
+      }
+      final collection = CollectionService.instance.getFromCache(collectionID);
+      final updatedCollection = collection!.copyWith(sharees: sharees);
+      CollectionService.instance.updateCollectionCache(updatedCollection);
+      unawaited(_db.updateCollections([updatedCollection]));
+      return sharees;
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 402) {
+        throw SharingNotPermittedForFreeAccountsError();
+      }
       rethrow;
     }
   }
