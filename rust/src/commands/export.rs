@@ -2,7 +2,12 @@ use crate::Result;
 use crate::api::client::ApiClient;
 use crate::api::methods::ApiMethods;
 use crate::crypto::{decrypt_file_data, decrypt_stream, init as crypto_init, secret_box_open};
-use crate::models::{account::Account, filter::ExportFilter, metadata::FileMetadata};
+use crate::models::{
+    account::Account,
+    export_metadata::{AlbumMetadata, DiskFileMetadata},
+    filter::ExportFilter,
+    metadata::FileMetadata,
+};
 use crate::storage::Storage;
 use crate::sync::SyncEngine;
 use base64::Engine;
@@ -123,6 +128,12 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
 
     // Track exported hashes for deduplication within this export session
     let mut exported_hashes: HashMap<String, PathBuf> = HashMap::new();
+
+    // Track albums that have metadata written
+    let mut albums_with_metadata: HashMap<String, bool> = HashMap::new();
+
+    // Track file indices per album for unique metadata filenames
+    let mut album_file_indices: HashMap<String, usize> = HashMap::new();
 
     // Get stored secrets
     let secrets = storage
@@ -393,6 +404,42 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
                     exported_hashes.insert(hash.clone(), file_path.clone());
                 }
 
+                // Determine album folder for metadata
+                let album_folder = if let Some(ref name) = collection.name
+                    && !name.is_empty()
+                {
+                    sanitize_album_name(name)
+                } else {
+                    "Uncategorized".to_string()
+                };
+
+                // Write album metadata if not already written for this album
+                if !albums_with_metadata.contains_key(&album_folder) {
+                    write_album_metadata(export_path, &album_folder, collection, account.user_id)
+                        .await?;
+                    albums_with_metadata.insert(album_folder.clone(), true);
+                }
+
+                // Get and increment file index for this album
+                let file_index = album_file_indices.entry(album_folder.clone()).or_insert(0);
+
+                // Write file metadata
+                let filename = file_path
+                    .file_name()
+                    .and_then(|n| n.to_str())
+                    .unwrap_or("file");
+                write_file_metadata(
+                    export_path,
+                    &album_folder,
+                    &file,
+                    metadata.as_ref(),
+                    filename,
+                    *file_index,
+                )
+                .await?;
+
+                *file_index += 1;
+
                 // Progress indicator - show every file for now since we have few files
                 println!(
                     "  [{}] Exported: {}",
@@ -661,6 +708,68 @@ async fn extract_live_photo(zip_data: &[u8], output_path: &Path) -> Result<()> {
 
         log::debug!("Extracted live photo component: {:?}", output_file_path);
     }
+
+    Ok(())
+}
+
+/// Write album metadata to .meta/album_meta.json
+async fn write_album_metadata(
+    export_path: &Path,
+    album_folder: &str,
+    collection: &crate::api::models::Collection,
+    account_id: i64,
+) -> Result<()> {
+    let meta_dir = export_path.join(album_folder).join(".meta");
+    fs::create_dir_all(&meta_dir).await?;
+
+    let album_meta = AlbumMetadata::new(
+        collection.id,
+        collection.owner.id,
+        collection
+            .name
+            .clone()
+            .unwrap_or_else(|| "Unnamed".to_string()),
+        account_id,
+    );
+
+    let meta_path = meta_dir.join("album_meta.json");
+    let json = serde_json::to_string_pretty(&album_meta)?;
+    fs::write(meta_path, json).await?;
+
+    Ok(())
+}
+
+/// Write file metadata to .meta folder
+async fn write_file_metadata(
+    export_path: &Path,
+    album_folder: &str,
+    file: &crate::api::models::File,
+    metadata: Option<&FileMetadata>,
+    filename: &str,
+    file_index: usize,
+) -> Result<()> {
+    let meta_dir = export_path.join(album_folder).join(".meta");
+    fs::create_dir_all(&meta_dir).await?;
+
+    // Generate unique metadata filename
+    let base_name = Path::new(filename)
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .unwrap_or("file");
+    let extension = Path::new(filename)
+        .extension()
+        .and_then(|s| s.to_str())
+        .unwrap_or("bin");
+
+    // Create metadata filename like "IMG_1234.jpg_0.json"
+    let meta_filename = format!("{}_{}.{}.json", base_name, file_index, extension);
+
+    let mut disk_metadata = DiskFileMetadata::from_file(file, metadata, filename.to_string());
+    disk_metadata.meta_file_name = meta_filename.clone();
+
+    let meta_path = meta_dir.join(meta_filename);
+    let json = serde_json::to_string_pretty(&disk_metadata)?;
+    fs::write(meta_path, json).await?;
 
     Ok(())
 }
