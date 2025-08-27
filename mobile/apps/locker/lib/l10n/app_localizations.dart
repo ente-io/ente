@@ -1443,6 +1443,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hey, can you confirm that this is your ente.io verification ID: {verificationID}'**
   String shareTextConfirmOthersVerificationID(Object verificationID);
+
+  /// No description provided for @passwordLock.
+  ///
+  /// In en, this message translates to:
+  /// **'Password lock'**
+  String get passwordLock;
 }
 
 class _AppLocalizationsDelegate

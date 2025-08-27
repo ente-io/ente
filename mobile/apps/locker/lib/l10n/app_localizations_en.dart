@@ -813,4 +813,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String shareTextConfirmOthersVerificationID(Object verificationID) {
     return 'Hey, can you confirm that this is your ente.io verification ID: $verificationID';
   }
+
+  @override
+  String get passwordLock => 'Password lock';
 }

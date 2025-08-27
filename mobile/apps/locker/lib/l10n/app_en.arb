@@ -454,5 +454,6 @@
   "verifyEmailID": "Verify {email}",
   "emailNoEnteAccount": "{email} does not have an Ente account.\n\nSend them an invite to share files.",
   "shareMyVerificationID": "Here's my verification ID: {verificationID} for ente.io.",
-  "shareTextConfirmOthersVerificationID": "Hey, can you confirm that this is your ente.io verification ID: {verificationID}"
+  "shareTextConfirmOthersVerificationID": "Hey, can you confirm that this is your ente.io verification ID: {verificationID}",
+  "passwordLock": "Password lock"
 }
