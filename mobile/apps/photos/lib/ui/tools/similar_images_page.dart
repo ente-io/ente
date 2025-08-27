@@ -77,17 +77,28 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   late ValueNotifier<String> _deleteProgress;
 
   List<SimilarFiles> get _filteredGroups {
-    if (_selectedTab == TabFilter.all) {
-      return _similarFilesList;
+    switch (_selectedTab) {
+      case TabFilter.all:
+        return _similarFilesList;
+      case TabFilter.similar:
+        final filteredGroups = <SimilarFiles>[];
+        for (final group in _similarFilesList) {
+          final distance = group.furthestDistance;
+          if (distance > _identicalThreshold && distance <= _similarThreshold) {
+            filteredGroups.add(group);
+          }
+        }
+        return filteredGroups;
+      case TabFilter.identical:
+        final filteredGroups = <SimilarFiles>[];
+        for (final group in _similarFilesList) {
+          final distance = group.furthestDistance;
+          if (distance <= _identicalThreshold) {
+            filteredGroups.add(group);
+          }
+        }
+        return filteredGroups;
     }
-
-    final threshold = _selectedTab == TabFilter.similar
-        ? _similarThreshold
-        : _identicalThreshold;
-
-    return _similarFilesList.where((group) {
-      return group.furthestDistance <= threshold;
-    }).toList();
   }
 
   @override
