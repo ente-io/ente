@@ -70,12 +70,14 @@ class ComputeController {
     _logger.info('init done ');
   }
 
-  bool requestCompute(
-      {bool ml = false,
-      bool stream = false,
-      bool bypassInteractionCheck = false}) {
+  bool requestCompute({
+    bool ml = false,
+    bool stream = false,
+    bool bypassInteractionCheck = false,
+  }) {
     _logger.info(
-        "Requesting compute: ml: $ml, stream: $stream, bypassInteraction: $bypassInteractionCheck");
+      "Requesting compute: ml: $ml, stream: $stream, bypassInteraction: $bypassInteractionCheck",
+    );
     if (!_isDeviceHealthy) {
       _logger.info("Device not healthy, denying request.");
       return false;
