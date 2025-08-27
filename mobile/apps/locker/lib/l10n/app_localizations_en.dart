@@ -589,4 +589,228 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get disableDownloadWarningBody =>
       'Viewers can still take screenshots or save a copy of your files using external tools.';
+
+  @override
+  String get allowAddFilesDescription =>
+      'Allow people with the link to also add files to the shared album.';
+
+  @override
+  String get after1Hour => 'After 1 hour';
+
+  @override
+  String get after1Day => 'After 1 day';
+
+  @override
+  String get after1Week => 'After 1 week';
+
+  @override
+  String get after1Month => 'After 1 month';
+
+  @override
+  String get after1Year => 'After 1 year';
+
+  @override
+  String get never => 'Never';
+
+  @override
+  String get custom => 'Custom';
+
+  @override
+  String get selectTime => 'Select time';
+
+  @override
+  String get selectDate => 'Select date';
+
+  @override
+  String get previous => 'Previous';
+
+  @override
+  String get done => 'Done';
+
+  @override
+  String get next => 'Next';
+
+  @override
+  String get noDeviceLimit => 'None';
+
+  @override
+  String get linkDeviceLimit => 'Device limit';
+
+  @override
+  String get expiredLinkInfo =>
+      'This link has expired. Please select a new expiry time or disable link expiry.';
+
+  @override
+  String linkExpiresOn(Object expiryTime) {
+    return 'Link will expire on $expiryTime';
+  }
+
+  @override
+  String shareWithPeopleSectionTitle(int numberOfPeople) {
+    String _temp0 = intl.Intl.pluralLogic(
+      numberOfPeople,
+      locale: localeName,
+      other: 'Shared with $numberOfPeople people',
+      one: 'Shared with 1 person',
+      zero: 'Share with specific people',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get linkHasExpired => 'Link has expired';
+
+  @override
+  String get publicLinkEnabled => 'Public link enabled';
+
+  @override
+  String get shareALink => 'Share a link';
+
+  @override
+  String get addViewer => 'Add viewer';
+
+  @override
+  String get addCollaborator => 'Add collaborator';
+
+  @override
+  String get addANewEmail => 'Add a new email';
+
+  @override
+  String get orPickAnExistingOne => 'Or pick an existing one';
+
+  @override
+  String get sharedCollectionSectionDescription =>
+      'Create shared and collaborative collections with other Ente users, including users on free plans.';
+
+  @override
+  String get createPublicLink => 'Create public link';
+
+  @override
+  String get addParticipants => 'Add participants';
+
+  @override
+  String get add => 'Add';
+
+  @override
+  String get collaboratorsCanAddFilesToTheSharedCollection =>
+      'Collaborators can add files to the shared collection.';
+
+  @override
+  String get enterEmail => 'Enter email';
+
+  @override
+  String viewersSuccessfullyAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Added $count viewers',
+      one: 'Added 1 viewer',
+      zero: 'Added 0 viewers',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String collaboratorsSuccessfullyAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Added $count collaborators',
+      one: 'Added 1 collaborator',
+      zero: 'Added 0 collaborator',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String addViewers(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Add viewers',
+      one: 'Add viewer',
+      zero: 'Add viewer',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String addCollaborators(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Add collaborators',
+      one: 'Add collaborator',
+      zero: 'Add collaborator',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get longPressAnEmailToVerifyEndToEndEncryption =>
+      'Long press an email to verify end to end encryption.';
+
+  @override
+  String get sharing => 'Sharing...';
+
+  @override
+  String get invalidEmailAddress => 'Invalid email address';
+
+  @override
+  String get enterValidEmail => 'Please enter a valid email address.';
+
+  @override
+  String get oops => 'Oops';
+
+  @override
+  String get youCannotShareWithYourself => 'You cannot share with yourself';
+
+  @override
+  String get inviteToEnte => 'Invite to Ente';
+
+  @override
+  String get sendInvite => 'Send invite';
+
+  @override
+  String get shareTextRecommendUsingEnte =>
+      'Download Ente so we can easily share original quality files\n\nhttps://ente.io';
+
+  @override
+  String get thisIsYourVerificationId => 'This is your Verification ID';
+
+  @override
+  String get someoneSharingAlbumsWithYouShouldSeeTheSameId =>
+      'Someone sharing albums with you should see the same ID on their device.';
+
+  @override
+  String get howToViewShareeVerificationID =>
+      'Please ask them to long-press their email address on the settings screen, and verify that the IDs on both devices match.';
+
+  @override
+  String thisIsPersonVerificationId(String email) {
+    return 'This is $email\'s Verification ID';
+  }
+
+  @override
+  String get verificationId => 'Verification ID';
+
+  @override
+  String verifyEmailID(Object email) {
+    return 'Verify $email';
+  }
+
+  @override
+  String emailNoEnteAccount(Object email) {
+    return '$email does not have an Ente account.\n\nSend them an invite to share files.';
+  }
+
+  @override
+  String shareMyVerificationID(Object verificationID) {
+    return 'Here\'s my verification ID: $verificationID for ente.io.';
+  }
+
+  @override
+  String shareTextConfirmOthersVerificationID(Object verificationID) {
+    return 'Hey, can you confirm that this is your ente.io verification ID: $verificationID';
+  }
 }

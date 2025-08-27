@@ -1125,6 +1125,324 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Viewers can still take screenshots or save a copy of your files using external tools.'**
   String get disableDownloadWarningBody;
+
+  /// No description provided for @allowAddFilesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow people with the link to also add files to the shared album.'**
+  String get allowAddFilesDescription;
+
+  /// No description provided for @after1Hour.
+  ///
+  /// In en, this message translates to:
+  /// **'After 1 hour'**
+  String get after1Hour;
+
+  /// No description provided for @after1Day.
+  ///
+  /// In en, this message translates to:
+  /// **'After 1 day'**
+  String get after1Day;
+
+  /// No description provided for @after1Week.
+  ///
+  /// In en, this message translates to:
+  /// **'After 1 week'**
+  String get after1Week;
+
+  /// No description provided for @after1Month.
+  ///
+  /// In en, this message translates to:
+  /// **'After 1 month'**
+  String get after1Month;
+
+  /// No description provided for @after1Year.
+  ///
+  /// In en, this message translates to:
+  /// **'After 1 year'**
+  String get after1Year;
+
+  /// No description provided for @never.
+  ///
+  /// In en, this message translates to:
+  /// **'Never'**
+  String get never;
+
+  /// No description provided for @custom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get custom;
+
+  /// No description provided for @selectTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Select time'**
+  String get selectTime;
+
+  /// No description provided for @selectDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Select date'**
+  String get selectDate;
+
+  /// No description provided for @previous.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get previous;
+
+  /// No description provided for @done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get done;
+
+  /// No description provided for @next.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get next;
+
+  /// No description provided for @noDeviceLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get noDeviceLimit;
+
+  /// No description provided for @linkDeviceLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Device limit'**
+  String get linkDeviceLimit;
+
+  /// No description provided for @expiredLinkInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'This link has expired. Please select a new expiry time or disable link expiry.'**
+  String get expiredLinkInfo;
+
+  /// No description provided for @linkExpiresOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Link will expire on {expiryTime}'**
+  String linkExpiresOn(Object expiryTime);
+
+  /// No description provided for @shareWithPeopleSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{numberOfPeople, plural, =0 {Share with specific people} =1 {Shared with 1 person} other {Shared with {numberOfPeople} people}}'**
+  String shareWithPeopleSectionTitle(int numberOfPeople);
+
+  /// No description provided for @linkHasExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Link has expired'**
+  String get linkHasExpired;
+
+  /// No description provided for @publicLinkEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Public link enabled'**
+  String get publicLinkEnabled;
+
+  /// No description provided for @shareALink.
+  ///
+  /// In en, this message translates to:
+  /// **'Share a link'**
+  String get shareALink;
+
+  /// No description provided for @addViewer.
+  ///
+  /// In en, this message translates to:
+  /// **'Add viewer'**
+  String get addViewer;
+
+  /// No description provided for @addCollaborator.
+  ///
+  /// In en, this message translates to:
+  /// **'Add collaborator'**
+  String get addCollaborator;
+
+  /// No description provided for @addANewEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a new email'**
+  String get addANewEmail;
+
+  /// No description provided for @orPickAnExistingOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Or pick an existing one'**
+  String get orPickAnExistingOne;
+
+  /// No description provided for @sharedCollectionSectionDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Create shared and collaborative collections with other Ente users, including users on free plans.'**
+  String get sharedCollectionSectionDescription;
+
+  /// No description provided for @createPublicLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Create public link'**
+  String get createPublicLink;
+
+  /// No description provided for @addParticipants.
+  ///
+  /// In en, this message translates to:
+  /// **'Add participants'**
+  String get addParticipants;
+
+  /// No description provided for @add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get add;
+
+  /// No description provided for @collaboratorsCanAddFilesToTheSharedCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Collaborators can add files to the shared collection.'**
+  String get collaboratorsCanAddFilesToTheSharedCollection;
+
+  /// No description provided for @enterEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter email'**
+  String get enterEmail;
+
+  /// Number of viewers that were successfully added to an album.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0 {Added 0 viewers} =1 {Added 1 viewer} other {Added {count} viewers}}'**
+  String viewersSuccessfullyAdded(int count);
+
+  /// Number of collaborators that were successfully added to an album.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0 {Added 0 collaborator} =1 {Added 1 collaborator} other {Added {count} collaborators}}'**
+  String collaboratorsSuccessfullyAdded(int count);
+
+  /// No description provided for @addViewers.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0 {Add viewer} =1 {Add viewer} other {Add viewers}}'**
+  String addViewers(num count);
+
+  /// No description provided for @addCollaborators.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0 {Add collaborator} =1 {Add collaborator} other {Add collaborators}}'**
+  String addCollaborators(num count);
+
+  /// No description provided for @longPressAnEmailToVerifyEndToEndEncryption.
+  ///
+  /// In en, this message translates to:
+  /// **'Long press an email to verify end to end encryption.'**
+  String get longPressAnEmailToVerifyEndToEndEncryption;
+
+  /// No description provided for @sharing.
+  ///
+  /// In en, this message translates to:
+  /// **'Sharing...'**
+  String get sharing;
+
+  /// No description provided for @invalidEmailAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email address'**
+  String get invalidEmailAddress;
+
+  /// No description provided for @enterValidEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid email address.'**
+  String get enterValidEmail;
+
+  /// No description provided for @oops.
+  ///
+  /// In en, this message translates to:
+  /// **'Oops'**
+  String get oops;
+
+  /// No description provided for @youCannotShareWithYourself.
+  ///
+  /// In en, this message translates to:
+  /// **'You cannot share with yourself'**
+  String get youCannotShareWithYourself;
+
+  /// No description provided for @inviteToEnte.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite to Ente'**
+  String get inviteToEnte;
+
+  /// No description provided for @sendInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Send invite'**
+  String get sendInvite;
+
+  /// No description provided for @shareTextRecommendUsingEnte.
+  ///
+  /// In en, this message translates to:
+  /// **'Download Ente so we can easily share original quality files\n\nhttps://ente.io'**
+  String get shareTextRecommendUsingEnte;
+
+  /// No description provided for @thisIsYourVerificationId.
+  ///
+  /// In en, this message translates to:
+  /// **'This is your Verification ID'**
+  String get thisIsYourVerificationId;
+
+  /// No description provided for @someoneSharingAlbumsWithYouShouldSeeTheSameId.
+  ///
+  /// In en, this message translates to:
+  /// **'Someone sharing albums with you should see the same ID on their device.'**
+  String get someoneSharingAlbumsWithYouShouldSeeTheSameId;
+
+  /// No description provided for @howToViewShareeVerificationID.
+  ///
+  /// In en, this message translates to:
+  /// **'Please ask them to long-press their email address on the settings screen, and verify that the IDs on both devices match.'**
+  String get howToViewShareeVerificationID;
+
+  /// No description provided for @thisIsPersonVerificationId.
+  ///
+  /// In en, this message translates to:
+  /// **'This is {email}\'s Verification ID'**
+  String thisIsPersonVerificationId(String email);
+
+  /// No description provided for @verificationId.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification ID'**
+  String get verificationId;
+
+  /// No description provided for @verifyEmailID.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify {email}'**
+  String verifyEmailID(Object email);
+
+  /// No description provided for @emailNoEnteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'{email} does not have an Ente account.\n\nSend them an invite to share files.'**
+  String emailNoEnteAccount(Object email);
+
+  /// No description provided for @shareMyVerificationID.
+  ///
+  /// In en, this message translates to:
+  /// **'Here\'s my verification ID: {verificationID} for ente.io.'**
+  String shareMyVerificationID(Object verificationID);
+
+  /// No description provided for @shareTextConfirmOthersVerificationID.
+  ///
+  /// In en, this message translates to:
+  /// **'Hey, can you confirm that this is your ente.io verification ID: {verificationID}'**
+  String shareTextConfirmOthersVerificationID(Object verificationID);
 }
 
 class _AppLocalizationsDelegate
