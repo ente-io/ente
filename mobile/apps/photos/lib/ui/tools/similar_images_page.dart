@@ -358,7 +358,10 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         _buildTabBar(),
         Expanded(
           child: _filteredGroups.isEmpty
-              ? const EmptyState()
+              ? EmptyState(
+                  text:
+                      AppLocalizations.of(context).nothingHereTryAnotherFilter,
+                )
               : ListView.builder(
                   cacheExtent: 400,
                   itemCount: _filteredGroups.length,
