@@ -1,4 +1,7 @@
 - Similar images design changes. Also changed the vectorDB index file name, so internal users will have another migration (long loading time). 
+- Prateek: Enable immediate manual video stream processing by bypassing user interaction timer
+- Prateek: Fix multiple concurrent streaming processes bug in ComputeController
+- Prateek: Fix video streaming description text display spacing in advanced settings
 - Ashil: Render cached thumbnails faster (noticeable in gallery scrolling)
 - Similar images UI changes
 - Neeraj: Fix for double enteries for local file
