@@ -13,7 +13,7 @@ import "package:shared_preferences/shared_preferences.dart";
 class ClipVectorDB {
   static final Logger _logger = Logger("ClipVectorDB");
 
-  static const _databaseName = "ente.ml.vectordb.clip";
+  static const _databaseName = "ente.ml.vectordb.clip.usearch";
   static const _kMigrationKey = "clip_vector_migration";
 
   static final BigInt _embeddingDimension = BigInt.from(512);
@@ -37,11 +37,10 @@ class ClipVectorDB {
 
   Future<VectorDb> _initVectorDB() async {
     final documentsDirectory = await getApplicationDocumentsDirectory();
-    final String databaseDirectory =
-        join(documentsDirectory.path, _databaseName);
-    _logger.info("Opening vectorDB access: DB path " + databaseDirectory);
+    final String dbPath = join(documentsDirectory.path, _databaseName);
+    _logger.info("Opening vectorDB access: DB path " + dbPath);
     final vectorDB = VectorDb(
-      filePath: databaseDirectory,
+      filePath: dbPath,
       dimensions: _embeddingDimension,
     );
     final stats = await getIndexStats(vectorDB);
@@ -283,10 +282,10 @@ class ClipVectorDB {
   Future<void> deleteIndexFile() async {
     try {
       final documentsDirectory = await getApplicationDocumentsDirectory();
-      final String databaseDirectory =
+      final String dbPath =
           join(documentsDirectory.path, _databaseName);
-      _logger.info("Delete index file: DB path " + databaseDirectory);
-      final file = File(databaseDirectory);
+      _logger.info("Delete index file: DB path " + dbPath);
+      final file = File(dbPath);
       if (await file.exists()) {
         await file.delete();
       }
