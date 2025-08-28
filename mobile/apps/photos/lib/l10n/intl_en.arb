@@ -1922,12 +1922,9 @@
   "deleteFiles": "Delete files",
   "areYouSureDeleteFiles": "Are you sure you want to delete these files?",
   "greatJob": "Great job!",
-  "cleanedUpSimilarImages": "You cleaned up {count, plural, =1{{count} similar image} other{{count} similar images}} and freed up {size}",
+  "cleanedUpSimilarImages": "You freed up {size} of space",
   "@cleanedUpSimilarImages": {
     "placeholders": {
-      "count": {
-        "type": "int"
-      },
       "size": {
         "type": "String"
       }
@@ -1946,5 +1943,6 @@
   "similar": "Similar",
   "identical": "Identical",
   "nothingHereTryAnotherFilter": "Nothing here, try another filter! 👀",
-  "related": "Related"
+  "related": "Related",
+  "hoorayyyy": "Hoorayyyy!"
 }
