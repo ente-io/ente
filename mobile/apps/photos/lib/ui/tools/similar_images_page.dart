@@ -2,6 +2,7 @@ import "dart:async";
 
 import "package:flutter/foundation.dart" show kDebugMode;
 import 'package:flutter/material.dart';
+import "package:flutter_svg/svg.dart";
 import "package:intl/intl.dart";
 import 'package:logging/logging.dart';
 import "package:photos/core/configuration.dart";
@@ -21,7 +22,6 @@ import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
-import "package:photos/ui/viewer/gallery/empty_state.dart";
 import "package:photos/utils/delete_file_util.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -361,9 +361,26 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         _buildTabBar(),
         Expanded(
           child: _filteredGroups.isEmpty
-              ? EmptyState(
-                  text:
-                      AppLocalizations.of(context).nothingHereTryAnotherFilter,
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SvgPicture.asset(
+                          "assets/ducky_cleaning_static.svg",
+                          height: 160,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          AppLocalizations.of(context).nothingToTidyUpHere,
+                          textAlign: TextAlign.center,
+                          style: textTheme.bodyMuted,
+                        ),
+                        const SizedBox(height: 48),
+                      ],
+                    ),
+                  ),
                 )
               : ListView.builder(
                   cacheExtent: 400,
@@ -1017,7 +1034,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         0,
         (sum, file) => sum + (file.fileSize ?? 0),
       );
-      _showCongratulationsDialog(allDeleteFiles.length, totalSize);
+      _showCongratulationsDialog(totalSize);
     }
   }
 
