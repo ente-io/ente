@@ -1,3 +1,4 @@
+import "dart:io" show File;
 import "dart:typed_data" show Float32List;
 
 import "package:flutter_rust_bridge/flutter_rust_bridge.dart" show Uint64List;
@@ -141,17 +142,6 @@ class ClipVectorDB {
     }
   }
 
-  Future<void> deleteIndex() async {
-    final db = await _vectorDB;
-    try {
-      await db.deleteIndex();
-      _vectorDbFuture = null;
-    } catch (e, s) {
-      _logger.severe("Error deleting index", e, s);
-      rethrow;
-    }
-  }
-
   Future<VectorDbStats> getIndexStats([VectorDb? db]) async {
     db ??= await _vectorDB;
     try {
@@ -275,6 +265,34 @@ class ClipVectorDB {
         e,
         s,
       );
+      rethrow;
+    }
+  }
+
+  Future<void> deleteIndex() async {
+    final db = await _vectorDB;
+    try {
+      await db.deleteIndex();
+      _vectorDbFuture = null;
+    } catch (e, s) {
+      _logger.severe("Error deleting index", e, s);
+      rethrow;
+    }
+  }
+
+  Future<void> deleteIndexFile() async {
+    try {
+      final documentsDirectory = await getApplicationDocumentsDirectory();
+      final String databaseDirectory =
+          join(documentsDirectory.path, _databaseName);
+      _logger.info("Delete index file: DB path " + databaseDirectory);
+      final file = File(databaseDirectory);
+      if (await file.exists()) {
+        await file.delete();
+      }
+      _logger.info("Deleted index file on disk");
+    } catch (e, s) {
+      _logger.severe("Error deleting index file on disk", e, s);
       rethrow;
     }
   }
