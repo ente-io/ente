@@ -1,3 +1,4 @@
+- Ashil: New ducky icon in icon switcher
 - Ashil: Render cached thumbnails faster (noticeable in gallery scrolling)
 - Similar images UI changes
 - Neeraj: Fix for double enteries for local file
