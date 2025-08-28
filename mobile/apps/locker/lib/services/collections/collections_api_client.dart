@@ -509,6 +509,30 @@ class CollectionApiClient {
       rethrow;
     }
   }
+
+  Future<List<User>> unshare(int collectionID, String email) async {
+    try {
+      final response = await _enteDio.post(
+        "/collections/unshare",
+        data: {
+          "collectionID": collectionID,
+          "email": email,
+        },
+      );
+      final sharees = <User>[];
+      for (final user in response.data["sharees"]) {
+        sharees.add(User.fromMap(user));
+      }
+      final collection = CollectionService.instance.getFromCache(collectionID);
+      final updatedCollection = collection!.copyWith(sharees: sharees);
+      CollectionService.instance.updateCollectionCache(updatedCollection);
+      unawaited(_db.updateCollections([updatedCollection]));
+      return sharees;
+    } catch (e) {
+      _logger.severe(e);
+      rethrow;
+    }
+  }
 }
 
 class CreateRequest {
