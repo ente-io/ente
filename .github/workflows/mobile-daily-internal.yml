@@ -50,6 +50,15 @@ jobs:
             - name: Generate Rust bindings
               run: flutter_rust_bridge_codegen generate
 
+            - name: Remove unused folders (docs, auth, locker)
+              working-directory: ${{ github.workspace }}
+              run: |
+                echo "Before cleanup:"
+                du -sh . || true
+                rm -rf docs mobile/apps/auth mobile/apps/locker web server
+                echo "After cleanup:"
+                du -sh . || true
+
             - name: Increment version code for build
               run: |
                   CURRENT_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
