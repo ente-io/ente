@@ -179,6 +179,7 @@ dependencies:
     git:
       url: https://github.com/KasemJaffer/receive_sharing_intent.git
       ref: 2cea396
+  rive: ^0.13.20
   rust_lib_photos:
     path: rust_builder
   screenshot: ^3.0.0
