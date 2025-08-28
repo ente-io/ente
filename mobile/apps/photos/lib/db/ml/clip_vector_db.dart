@@ -14,7 +14,7 @@ class ClipVectorDB {
   static final Logger _logger = Logger("ClipVectorDB");
 
   static const _databaseName = "ente.ml.vectordb.clip.usearch";
-  static const _kMigrationKey = "clip_vector_migration";
+  static const _kMigrationKey = "clip_vectordb_migration";
 
   static final BigInt _embeddingDimension = BigInt.from(512);
 
