@@ -26,6 +26,7 @@ import "package:photos/utils/delete_file_util.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/standalone/data.dart";
+import "package:rive/rive.dart" show RiveAnimation;
 
 enum SimilarImagesPageState {
   setup,
@@ -325,7 +326,28 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   }
 
   Widget _getLoadingView() {
-    return const SimilarImagesLoadingWidget();
+    final textTheme = getEnteTextTheme(context);
+
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SizedBox(
+            height: 160,
+            child: RiveAnimation.asset(
+              'assets/ducky_analyze_files.riv',
+              fit: BoxFit.contain,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            AppLocalizations.of(context).analyzingPhotosLocally,
+            style: textTheme.bodyMuted,
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _getResultsView() {
@@ -1158,248 +1180,6 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
           );
         });
       },
-    );
-  }
-}
-
-class SimilarImagesLoadingWidget extends StatefulWidget {
-  const SimilarImagesLoadingWidget({super.key});
-
-  @override
-  State<SimilarImagesLoadingWidget> createState() =>
-      _SimilarImagesLoadingWidgetState();
-}
-
-class _SimilarImagesLoadingWidgetState extends State<SimilarImagesLoadingWidget>
-    with TickerProviderStateMixin {
-  late AnimationController _loadingAnimationController;
-  late AnimationController _pulseAnimationController;
-  late Animation<double> _scaleAnimation;
-  late Animation<double> _pulseAnimation;
-  int _loadingMessageIndex = 0;
-
-  List<String> get _loadingMessages => [
-        AppLocalizations.of(context).analyzingPhotosLocally,
-        AppLocalizations.of(context).lookingForVisualSimilarities,
-        AppLocalizations.of(context).comparingImageDetails,
-        AppLocalizations.of(context).findingSimilarImages,
-        AppLocalizations.of(context).almostDone,
-      ];
-
-  @override
-  void initState() {
-    super.initState();
-
-    // Initialize loading animations
-    _loadingAnimationController = AnimationController(
-      duration: const Duration(seconds: 2),
-      vsync: this,
-    )..repeat();
-
-    _pulseAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
-      vsync: this,
-    )..repeat(reverse: true);
-
-    _scaleAnimation = Tween<double>(
-      begin: 0.8,
-      end: 1.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _pulseAnimationController,
-        curve: Curves.easeInOut,
-      ),
-    );
-
-    _pulseAnimation = Tween<double>(
-      begin: 0.4,
-      end: 1.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _pulseAnimationController,
-        curve: Curves.easeInOut,
-      ),
-    );
-
-    _startMessageCycling();
-  }
-
-  void _startMessageCycling() {
-    Future.doWhile(() async {
-      if (!mounted) return false;
-      await Future.delayed(const Duration(seconds: 7));
-      if (mounted) {
-        setState(() {
-          _loadingMessageIndex++;
-        });
-        // Stop cycling after reaching the last message
-        return _loadingMessageIndex < _loadingMessages.length - 1;
-      }
-      return false;
-    });
-  }
-
-  @override
-  void dispose() {
-    _loadingAnimationController.dispose();
-    _pulseAnimationController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
-    final colorScheme = getEnteColorScheme(context);
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Animated scanning effect
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              // Pulsing background circle
-              AnimatedBuilder(
-                animation: _pulseAnimation,
-                builder: (context, child) {
-                  return Container(
-                    width: 160,
-                    height: 160,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: colorScheme.primary500.withValues(
-                        alpha: _pulseAnimation.value * 0.1,
-                      ),
-                    ),
-                  );
-                },
-              ),
-              // Rotating scanner ring
-              AnimatedBuilder(
-                animation: _loadingAnimationController,
-                builder: (context, child) {
-                  return Transform.rotate(
-                    angle: _loadingAnimationController.value * 2 * 3.14159,
-                    child: Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: colorScheme.primary500,
-                          width: 2,
-                        ),
-                        gradient: SweepGradient(
-                          colors: [
-                            colorScheme.primary500.withValues(alpha: 0),
-                            colorScheme.primary500.withValues(alpha: 0.3),
-                            colorScheme.primary500.withValues(alpha: 0.6),
-                            colorScheme.primary500,
-                            colorScheme.primary500.withValues(alpha: 0),
-                          ],
-                          stops: const [0.0, 0.25, 0.5, 0.75, 1.0],
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-              // Center icon with scale animation
-              AnimatedBuilder(
-                animation: _scaleAnimation,
-                builder: (context, child) {
-                  return Transform.scale(
-                    scale: _scaleAnimation.value,
-                    child: Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: colorScheme.backgroundElevated,
-                        boxShadow: [
-                          BoxShadow(
-                            color: colorScheme.strokeFaint,
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        Icons.photo_library_outlined,
-                        size: 40,
-                        color: colorScheme.primary500,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-          const SizedBox(height: 48),
-          // Privacy badge
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: colorScheme.fillFaint,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.lock_outline,
-                  size: 14,
-                  color: colorScheme.textMuted,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  AppLocalizations.of(context).processingLocally,
-                  style: textTheme.miniFaint,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          // Animated loading message
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 500),
-            child: Text(
-              _loadingMessages[_loadingMessageIndex],
-              key: ValueKey(_loadingMessageIndex),
-              style: textTheme.body,
-              textAlign: TextAlign.center,
-            ),
-          ),
-          const SizedBox(height: 8),
-          // Progress dots
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: List.generate(
-              3,
-              (index) => AnimatedBuilder(
-                animation: _loadingAnimationController,
-                builder: (context, child) {
-                  final delay = index * 0.2;
-                  final value =
-                      (_loadingAnimationController.value + delay) % 1.0;
-                  return Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: colorScheme.primary500.withValues(
-                        alpha: value < 0.5 ? value * 2 : 2 - value * 2,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
