@@ -54,6 +54,7 @@ import 'package:photos/ui/collections/collection_action_sheet.dart';
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import 'package:photos/ui/extents_page_view.dart';
+import "package:photos/ui/feed/feed_tab.dart";
 import 'package:photos/ui/home/grant_permissions_widget.dart';
 import 'package:photos/ui/home/header_widget.dart';
 import 'package:photos/ui/home/home_bottom_nav_bar.dart';
@@ -64,7 +65,6 @@ import 'package:photos/ui/home/start_backup_hook_widget.dart';
 import 'package:photos/ui/notification/update/change_log_page.dart';
 import "package:photos/ui/settings/app_update_dialog.dart";
 import "package:photos/ui/settings_page.dart";
-import "package:photos/ui/tabs/shared_collections_tab.dart";
 import "package:photos/ui/tabs/user_collections_tab.dart";
 import "package:photos/ui/viewer/actions/file_viewer.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
@@ -87,7 +87,6 @@ class HomeWidget extends StatefulWidget {
 }
 
 class _HomeWidgetState extends State<HomeWidget> {
-  static const _sharedCollectionTab = SharedCollectionsTab();
   static const _searchTab = SearchTab();
   static final _settingsPage = SettingsPage(
     emailNotifier: UserService.instance.emailValueNotifier,
@@ -761,7 +760,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                         selectedFiles: _selectedFiles,
                       ),
                 UserCollectionsTab(selectedAlbums: _selectedAlbums),
-                _sharedCollectionTab,
+                const FeedTab(),
                 _searchTab,
               ],
             );
