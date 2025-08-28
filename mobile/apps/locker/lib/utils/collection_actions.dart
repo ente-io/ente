@@ -15,6 +15,7 @@ import 'package:locker/l10n/l10n.dart';
 import "package:locker/services/collections/collections_api_client.dart";
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
+import "package:locker/services/collections/models/user.dart";
 import "package:locker/services/configuration.dart";
 import "package:locker/ui/components/user_dialogs.dart";
 import 'package:locker/utils/snack_bar_utils.dart';
@@ -409,4 +410,50 @@ class CollectionActions {
       }
     }
   }
+
+    // removeParticipant remove the user from a share album
+  Future<bool> removeParticipant(
+    BuildContext context,
+    Collection collection,
+    User user,
+  ) async {
+    final actionResult = await showActionSheet(
+      context: context,
+      buttons: [
+        ButtonWidget(
+          buttonType: ButtonType.critical,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.first,
+          shouldSurfaceExecutionStates: true,
+          labelText: context.l10n.yesRemove,
+          onTap: () async {
+            final newSharees = await CollectionApiClient.instance
+                .unshare(collection.id, user.email);
+            collection.updateSharees(newSharees);
+          },
+        ),
+        ButtonWidget(
+          buttonType: ButtonType.secondary,
+          buttonAction: ButtonAction.cancel,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          labelText: context.l10n.cancel,
+        ),
+      ],
+      title: context.l10n.removeWithQuestionMark,
+      body: context.l10n.removeParticipantBody(user.name ?? user.email),
+    );
+    if (actionResult?.action != null) {
+      if (actionResult!.action == ButtonAction.error) {
+        await showGenericErrorDialog(
+          context: context,
+          error: actionResult.exception,
+        );
+      }
+      return actionResult.action == ButtonAction.first;
+    }
+    return false;
+  }
+
 }
