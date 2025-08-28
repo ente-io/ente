@@ -1021,9 +1021,10 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     }
   }
 
-  void _showCongratulationsDialog(int deletedCount, int totalSize) {
+  void _showCongratulationsDialog(int totalSize) {
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
+    final screenWidth = MediaQuery.of(context).size.width;
 
     showDialog(
       context: context,
@@ -1033,39 +1034,43 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.celebration_outlined,
-              size: 48,
-              color: colorScheme.primary500,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              AppLocalizations.of(context).greatJob,
-              style: textTheme.h3Bold,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              AppLocalizations.of(context).cleanedUpSimilarImages(
-                count: deletedCount,
-                size: formatBytes(totalSize),
+        contentPadding: const EdgeInsets.all(24),
+        content: SizedBox(
+          width: screenWidth - (crossAxisSpacing),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SvgPicture.asset(
+                "assets/ducky_cleaning_static.svg",
+                height: 160,
               ),
-              style: textTheme.body,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ButtonWidget(
-                labelText: AppLocalizations.of(context).done,
-                buttonType: ButtonType.primary,
-                onTap: () async => Navigator.of(context).pop(),
+              const SizedBox(height: 16),
+              Text(
+                AppLocalizations.of(context).hoorayyyy,
+                style: textTheme.h2Bold.copyWith(
+                  color: colorScheme.primary500,
+                ),
+                textAlign: TextAlign.center,
               ),
-            ),
-          ],
+              const SizedBox(height: 8),
+              Text(
+                AppLocalizations.of(context).cleanedUpSimilarImages(
+                  size: formatBytes(totalSize),
+                ),
+                style: textTheme.body,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 36),
+              SizedBox(
+                width: double.infinity,
+                child: ButtonWidget(
+                  labelText: AppLocalizations.of(context).done,
+                  buttonType: ButtonType.primary,
+                  onTap: () async => Navigator.of(context).pop(),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
