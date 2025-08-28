@@ -1129,7 +1129,7 @@ abstract class AppLocalizations {
   /// No description provided for @allowAddFilesDescription.
   ///
   /// In en, this message translates to:
-  /// **'Allow people with the link to also add files to the shared album.'**
+  /// **'Allow people with the link to also add files to the shared collection.'**
   String get allowAddFilesDescription;
 
   /// No description provided for @after1Hour.
@@ -1312,13 +1312,13 @@ abstract class AppLocalizations {
   /// **'Enter email'**
   String get enterEmail;
 
-  /// Number of viewers that were successfully added to an album.
+  /// Number of viewers that were successfully added to a collection.
   ///
   /// In en, this message translates to:
   /// **'{count, plural, =0 {Added 0 viewers} =1 {Added 1 viewer} other {Added {count} viewers}}'**
   String viewersSuccessfullyAdded(int count);
 
-  /// Number of collaborators that were successfully added to an album.
+  /// Number of collaborators that were successfully added to a collection.
   ///
   /// In en, this message translates to:
   /// **'{count, plural, =0 {Added 0 collaborator} =1 {Added 1 collaborator} other {Added {count} collaborators}}'**
@@ -1449,6 +1449,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Password lock'**
   String get passwordLock;
+
+  /// No description provided for @manage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage'**
+  String get manage;
+
+  /// No description provided for @addedAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Added as'**
+  String get addedAs;
+
+  /// No description provided for @removeParticipant.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove participant'**
+  String get removeParticipant;
+
+  /// No description provided for @yesConvertToViewer.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, convert to viewer'**
+  String get yesConvertToViewer;
+
+  /// No description provided for @changePermissions.
+  ///
+  /// In en, this message translates to:
+  /// **'Change permissions'**
+  String get changePermissions;
+
+  /// Warning message when changing a collaborator to viewer
+  ///
+  /// In en, this message translates to:
+  /// **'{name} will no longer be able to add files to the collection after becoming a viewer.'**
+  String cannotAddMoreFilesAfterBecomingViewer(String name);
+
+  /// No description provided for @removeWithQuestionMark.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove?'**
+  String get removeWithQuestionMark;
+
+  /// No description provided for @removeParticipantBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{userEmail} will be removed from this shared collection\n\nAny files added by them will also be removed from the collection'**
+  String removeParticipantBody(Object userEmail);
+
+  /// No description provided for @yesRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, remove'**
+  String get yesRemove;
+
+  /// No description provided for @remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get remove;
+
+  /// No description provided for @viewer.
+  ///
+  /// In en, this message translates to:
+  /// **'Viewer'**
+  String get viewer;
+
+  /// No description provided for @collaborator.
+  ///
+  /// In en, this message translates to:
+  /// **'Collaborator'**
+  String get collaborator;
+
+  /// No description provided for @collaboratorsCanAddFilesToTheSharedAlbum.
+  ///
+  /// In en, this message translates to:
+  /// **'Collaborators can add files to the shared collection.'**
+  String get collaboratorsCanAddFilesToTheSharedAlbum;
+
+  /// The count of participants in an album
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0 {No Participants} =1 {1 Participant} other {{count} Participants}}'**
+  String albumParticipantsCount(int count);
+
+  /// No description provided for @addMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Add more'**
+  String get addMore;
+
+  /// No description provided for @you.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get you;
+
+  /// No description provided for @albumOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get albumOwner;
 }
 
 class _AppLocalizationsDelegate

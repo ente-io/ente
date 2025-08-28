@@ -592,7 +592,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get allowAddFilesDescription =>
-      'Allow people with the link to also add files to the shared album.';
+      'Allow people with the link to also add files to the shared collection.';
 
   @override
   String get after1Hour => 'After 1 hour';
@@ -816,4 +816,69 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get passwordLock => 'Password lock';
+
+  @override
+  String get manage => 'Manage';
+
+  @override
+  String get addedAs => 'Added as';
+
+  @override
+  String get removeParticipant => 'Remove participant';
+
+  @override
+  String get yesConvertToViewer => 'Yes, convert to viewer';
+
+  @override
+  String get changePermissions => 'Change permissions';
+
+  @override
+  String cannotAddMoreFilesAfterBecomingViewer(String name) {
+    return '$name will no longer be able to add files to the collection after becoming a viewer.';
+  }
+
+  @override
+  String get removeWithQuestionMark => 'Remove?';
+
+  @override
+  String removeParticipantBody(Object userEmail) {
+    return '$userEmail will be removed from this shared collection\n\nAny files added by them will also be removed from the collection';
+  }
+
+  @override
+  String get yesRemove => 'Yes, remove';
+
+  @override
+  String get remove => 'Remove';
+
+  @override
+  String get viewer => 'Viewer';
+
+  @override
+  String get collaborator => 'Collaborator';
+
+  @override
+  String get collaboratorsCanAddFilesToTheSharedAlbum =>
+      'Collaborators can add files to the shared collection.';
+
+  @override
+  String albumParticipantsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Participants',
+      one: '1 Participant',
+      zero: 'No Participants',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get addMore => 'Add more';
+
+  @override
+  String get you => 'You';
+
+  @override
+  String get albumOwner => 'Owner';
 }

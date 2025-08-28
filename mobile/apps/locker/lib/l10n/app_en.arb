@@ -368,7 +368,7 @@
   "allowAddingFiles": "Allow adding files",
   "disableDownloadWarningTitle": "Please note",
   "disableDownloadWarningBody": "Viewers can still take screenshots or save a copy of your files using external tools.",
-  "allowAddFilesDescription": "Allow people with the link to also add files to the shared album.",
+  "allowAddFilesDescription": "Allow people with the link to also add files to the shared collection.",
   "after1Hour": "After 1 hour",
   "after1Day": "After 1 day",
   "after1Week": "After 1 week",
@@ -415,7 +415,7 @@
         "example": "2"
       }
     },
-    "description": "Number of viewers that were successfully added to an album."
+    "description": "Number of viewers that were successfully added to a collection."
   },
   "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Added 0 collaborator} =1 {Added 1 collaborator} other {Added {count} collaborators}}",
   "@collaboratorsSuccessfullyAdded": {
@@ -425,7 +425,7 @@
         "example": "2"
       }
     },
-    "description": "Number of collaborators that were successfully added to an album."
+    "description": "Number of collaborators that were successfully added to a collection."
   },
   "addViewers": "{count, plural, =0 {Add viewer} =1 {Add viewer} other {Add viewers}}",
   "addCollaborators": "{count, plural, =0 {Add collaborator} =1 {Add collaborator} other {Add collaborators}}",
@@ -455,5 +455,40 @@
   "emailNoEnteAccount": "{email} does not have an Ente account.\n\nSend them an invite to share files.",
   "shareMyVerificationID": "Here's my verification ID: {verificationID} for ente.io.",
   "shareTextConfirmOthersVerificationID": "Hey, can you confirm that this is your ente.io verification ID: {verificationID}",
-  "passwordLock": "Password lock"
+  "passwordLock": "Password lock",
+  "manage": "Manage",
+  "addedAs": "Added as",
+  "removeParticipant": "Remove participant",
+  "yesConvertToViewer": "Yes, convert to viewer",
+  "changePermissions": "Change permissions",
+  "cannotAddMoreFilesAfterBecomingViewer": "{name} will no longer be able to add files to the collection after becoming a viewer.",
+  "@cannotAddMoreFilesAfterBecomingViewer": {
+    "description": "Warning message when changing a collaborator to viewer",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "John"
+      }
+    }
+  },
+  "removeWithQuestionMark": "Remove?",
+  "removeParticipantBody": "{userEmail} will be removed from this shared collection\n\nAny files added by them will also be removed from the collection",
+  "yesRemove": "Yes, remove",
+  "remove": "Remove",
+  "viewer": "Viewer",
+  "collaborator": "Collaborator",
+  "collaboratorsCanAddFilesToTheSharedAlbum": "Collaborators can add files to the shared collection.",
+  "albumParticipantsCount": "{count, plural, =0 {No Participants} =1 {1 Participant} other {{count} Participants}}",
+  "@albumParticipantsCount": {
+    "description": "The count of participants in an album",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "addMore": "Add more",
+  "you": "You",
+  "albumOwner": "Owner"
 }
