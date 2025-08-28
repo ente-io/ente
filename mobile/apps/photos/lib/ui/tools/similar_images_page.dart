@@ -41,9 +41,9 @@ enum SortKey {
 }
 
 enum TabFilter {
-  all,
-  similar,
-  identical,
+  same,
+  close,
+  related,
 }
 
 class SimilarImagesPage extends StatefulWidget {
@@ -58,8 +58,8 @@ class SimilarImagesPage extends StatefulWidget {
 class _SimilarImagesPageState extends State<SimilarImagesPage> {
   static const crossAxisCount = 3;
   static const crossAxisSpacing = 12.0;
-  static const double _similarThreshold = 0.02;
-  static const double _identicalThreshold = 0.001;
+  static const double _closeThreshold = 0.02;
+  static const double _sameThreshold = 0.001;
 
   final _logger = Logger("SimilarImagesPage");
   bool _isDisposed = false;
@@ -71,34 +71,37 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   SortKey _sortKey = SortKey.size;
   bool _exactSearch = false;
   bool _fullRefresh = false;
-  TabFilter _selectedTab = TabFilter.identical;
+  TabFilter _selectedTab = TabFilter.same;
 
   late SelectedFiles _selectedFiles;
   late ValueNotifier<String> _deleteProgress;
 
   List<SimilarFiles> get _filteredGroups {
+    final filteredGroups = <SimilarFiles>[];
     switch (_selectedTab) {
-      case TabFilter.all:
-        return _similarFilesList;
-      case TabFilter.similar:
-        final filteredGroups = <SimilarFiles>[];
+      case TabFilter.same:
         for (final group in _similarFilesList) {
           final distance = group.furthestDistance;
-          if (distance > _identicalThreshold && distance <= _similarThreshold) {
+          if (distance <= _sameThreshold) {
             filteredGroups.add(group);
           }
         }
-        return filteredGroups;
-      case TabFilter.identical:
-        final filteredGroups = <SimilarFiles>[];
+      case TabFilter.close:
         for (final group in _similarFilesList) {
           final distance = group.furthestDistance;
-          if (distance <= _identicalThreshold) {
+          if (distance > _sameThreshold && distance <= _closeThreshold) {
             filteredGroups.add(group);
           }
         }
-        return filteredGroups;
+      case TabFilter.related:
+        for (final group in _similarFilesList) {
+          final distance = group.furthestDistance;
+          if (distance > _closeThreshold) {
+            filteredGroups.add(group);
+          }
+        }
     }
+    return filteredGroups;
   }
 
   @override
@@ -387,22 +390,22 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       child: Row(
         children: [
           _buildTabButton(
-            TabFilter.identical,
-            AppLocalizations.of(context).identical,
+            TabFilter.same,
+            AppLocalizations.of(context).same,
             colorScheme,
             textTheme,
           ),
           const SizedBox(width: crossAxisSpacing),
           _buildTabButton(
-            TabFilter.similar,
-            AppLocalizations.of(context).similar,
+            TabFilter.close,
+            AppLocalizations.of(context).close,
             colorScheme,
             textTheme,
           ),
           const SizedBox(width: crossAxisSpacing),
           _buildTabButton(
-            TabFilter.all,
-            AppLocalizations.of(context).all,
+            TabFilter.related,
+            AppLocalizations.of(context).related,
             colorScheme,
             textTheme,
           ),

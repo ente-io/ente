@@ -1945,5 +1945,6 @@
   "all": "All",
   "similar": "Similar",
   "identical": "Identical",
-  "nothingHereTryAnotherFilter": "Nothing here, try another filter! 👀"
+  "nothingHereTryAnotherFilter": "Nothing here, try another filter! 👀",
+  "related": "Related"
 }
