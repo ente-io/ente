@@ -1,3 +1,4 @@
+import "dart:io" show File;
 import "dart:math" show max;
 
 import "package:flutter/foundation.dart" show kDebugMode;
@@ -449,6 +450,20 @@ class SimilarImagesService {
       SimilarFilesCache.decodeFromJsonString,
     );
     return cache;
+  }
+
+  Future<void> clearCache() async {
+    try {
+      final cachePath = await _getCachePath();
+      final file = File(cachePath);
+      if (await file.exists()) {
+        await file.delete();
+        _logger.info("Cleared similar files cache at $cachePath");
+      }
+    } catch (e, s) {
+      _logger.severe("Error clearing similar files cache", e, s);
+      rethrow;
+    }
   }
 }
 
