@@ -1,3 +1,4 @@
+- Ashil: Revert increase in cache extent for gallery - to check if thumbnail not loading regression resolves
 - Prateek: Enable immediate manual video stream processing by bypassing user interaction timer
 - Prateek: Fix multiple concurrent streaming processes bug in ComputeController
 - Prateek: Fix video streaming description text display spacing in advanced settings
