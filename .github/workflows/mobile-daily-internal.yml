@@ -43,24 +43,6 @@ jobs:
                   FREED=$(( (AFTER - BEFORE) / 1048576 ))  # Convert KB to GB
                   echo "Time: $((END-START))s | Freed: ${FREED}GB"
                   
-                  echo -e "\n=== Removing Haskell (~5-8GB) ==="
-                  BEFORE=$(df / | awk 'NR==2 {print $4}')
-                  START=$(date +%s)
-                  sudo rm -rf /opt/ghc
-                  END=$(date +%s)
-                  AFTER=$(df / | awk 'NR==2 {print $4}')
-                  FREED=$(( (AFTER - BEFORE) / 1048576 ))
-                  echo "Time: $((END-START))s | Freed: ${FREED}GB"
-                  
-                  echo -e "\n=== Removing Boost (~1-2GB) ==="
-                  BEFORE=$(df / | awk 'NR==2 {print $4}')
-                  START=$(date +%s)
-                  sudo rm -rf "/usr/local/share/boost"
-                  END=$(date +%s)
-                  AFTER=$(df / | awk 'NR==2 {print $4}')
-                  FREED=$(( (AFTER - BEFORE) / 1048576 ))
-                  echo "Time: $((END-START))s | Freed: ${FREED}GB"
-                  
                   echo -e "\n=== Removing cached tools (~5-10GB) ==="
                   BEFORE=$(df / | awk 'NR==2 {print $4}')
                   START=$(date +%s)
