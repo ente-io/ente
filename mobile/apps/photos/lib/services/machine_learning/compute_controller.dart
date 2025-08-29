@@ -74,9 +74,10 @@ class ComputeController {
     bool ml = false,
     bool stream = false,
     bool bypassInteractionCheck = false,
+    bool bypassMLWaiting = false,
   }) {
     _logger.info(
-      "Requesting compute: ml: $ml, stream: $stream, bypassInteraction: $bypassInteractionCheck",
+      "Requesting compute: ml: $ml, stream: $stream, bypassInteraction: $bypassInteractionCheck, bypassMLWaiting: $bypassMLWaiting",
     );
     if (!_isDeviceHealthy) {
       _logger.info("Device not healthy, denying request.");
@@ -90,7 +91,7 @@ class ComputeController {
     if (ml) {
       result = _requestML();
     } else if (stream) {
-      result = _requestStream();
+      result = _requestStream(bypassMLWaiting);
     } else {
       _logger.severe("No compute request specified, denying request.");
     }
@@ -117,14 +118,14 @@ class ComputeController {
     return false;
   }
 
-  bool _requestStream() {
-    if (_currentRunState == ComputeRunState.idle && !_waitingToRunML) {
+  bool _requestStream([bool bypassMLWaiting = false]) {
+    if (_currentRunState == ComputeRunState.idle && (bypassMLWaiting || !_waitingToRunML)) {
       _logger.info("Stream request granted");
       _currentRunState = ComputeRunState.generatingStream;
       return true;
     }
     _logger.info(
-      "Stream request denied, current state: $_currentRunState, wants to run ML: $_waitingToRunML",
+      "Stream request denied, current state: $_currentRunState, wants to run ML: $_waitingToRunML, bypassMLWaiting: $bypassMLWaiting",
     );
     return false;
   }

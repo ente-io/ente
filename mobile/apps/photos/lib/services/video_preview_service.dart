@@ -1135,6 +1135,7 @@ class VideoPreviewService {
         computeController.requestCompute(
           stream: true,
           bypassInteractionCheck: true,
+          bypassMLWaiting: true,
         );
   }
 
