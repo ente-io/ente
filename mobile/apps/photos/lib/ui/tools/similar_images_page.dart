@@ -503,21 +503,19 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     return ListenableBuilder(
       listenable: _selectedFiles,
       builder: (context, _) {
-        final selectedFiles = _selectedFiles.files;
-        final selectedCount = selectedFiles.length;
-        final hasSelectedFiles = selectedCount > 0;
-
         final eligibleFilteredFiles = <EnteFile>{};
         for (final group in _filteredGroups) {
           for (int i = 1; i < group.files.length; i++) {
             eligibleFilteredFiles.add(group.files[i]);
           }
         }
+        final selectedFiles = _selectedFiles.files;
 
         final selectedFilteredFiles =
             selectedFiles.intersection(eligibleFilteredFiles);
         final allFilteredSelected = eligibleFilteredFiles.isNotEmpty &&
             selectedFilteredFiles.length == eligibleFilteredFiles.length;
+        final hasSelectedFiles = selectedFilteredFiles.isNotEmpty;
 
         int totalSize = 0;
         for (final file in selectedFilteredFiles) {
