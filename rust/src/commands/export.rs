@@ -198,22 +198,17 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
         };
 
         // Decrypt collection name if it's encrypted
-        if collection.name.as_ref().map_or(true, |n| n.is_empty()) {
-            if let Some(ref encrypted_name) = collection.encrypted_name {
-                if let Some(ref nonce) = collection.name_decryption_nonce {
-                    match decrypt_collection_name(encrypted_name, nonce, &collection_key) {
-                        Ok(name) => {
-                            log::debug!("Decrypted collection {} name: {}", collection.id, name);
-                            collection.name = Some(name);
-                        }
-                        Err(e) => {
-                            log::warn!(
-                                "Failed to decrypt collection {} name: {}",
-                                collection.id,
-                                e
-                            );
-                        }
-                    }
+        if collection.name.as_ref().is_none_or(|n| n.is_empty())
+            && let Some(ref encrypted_name) = collection.encrypted_name
+            && let Some(ref nonce) = collection.name_decryption_nonce
+        {
+            match decrypt_collection_name(encrypted_name, nonce, &collection_key) {
+                Ok(name) => {
+                    log::debug!("Decrypted collection {} name: {}", collection.id, name);
+                    collection.name = Some(name);
+                }
+                Err(e) => {
+                    log::warn!("Failed to decrypt collection {} name: {}", collection.id, e);
                 }
             }
         }
@@ -226,7 +221,7 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
     let mut all_files = Vec::new();
 
     // Iterate through each collection and fetch its files
-    for (collection_id, _) in &collection_map {
+    for collection_id in collection_map.keys() {
         let mut has_more = true;
         let mut since_time = 0i64;
 

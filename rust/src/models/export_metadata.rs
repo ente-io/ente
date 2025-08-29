@@ -1,4 +1,27 @@
-use serde::{Deserialize, Serialize};
+use chrono::{Local, TimeZone};
+use serde::{Deserialize, Serialize, Serializer};
+
+/// Custom serializer for timestamp fields to match Go CLI's ISO 8601 format
+fn serialize_timestamp_as_iso8601<S>(
+    timestamp_micros: &i64,
+    serializer: S,
+) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    let timestamp_secs = timestamp_micros / 1_000_000;
+    let timestamp_nanos = ((timestamp_micros % 1_000_000) * 1000) as u32;
+
+    let datetime = Local
+        .timestamp_opt(timestamp_secs, timestamp_nanos)
+        .single()
+        .ok_or_else(|| serde::ser::Error::custom("Invalid timestamp"))?;
+
+    // Format with milliseconds and timezone offset (matching Go CLI format)
+    let iso_string = datetime.to_rfc3339_opts(chrono::SecondsFormat::Millis, true);
+
+    serializer.serialize_str(&iso_string)
+}
 
 /// Album metadata matching Go's export.AlbumMetadata structure
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -37,8 +60,10 @@ pub struct DiskFileMetadata {
     pub description: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub location: Option<Location>,
-    pub creation_time: i64,     // Unix timestamp in microseconds
-    pub modification_time: i64, // Unix timestamp in microseconds
+    #[serde(serialize_with = "serialize_timestamp_as_iso8601")]
+    pub creation_time: i64, // Unix timestamp in microseconds (serialized as ISO 8601)
+    #[serde(serialize_with = "serialize_timestamp_as_iso8601")]
+    pub modification_time: i64, // Unix timestamp in microseconds (serialized as ISO 8601)
     pub info: FileInfo,
     /// Meta filename on disk (excluded from JSON)
     #[serde(skip)]
