@@ -28,10 +28,12 @@ where
 #[serde(rename_all = "camelCase")]
 pub struct AlbumMetadata {
     pub id: i64,
+    #[serde(rename = "ownerID")]
     pub owner_id: i64,
     pub album_name: String,
     pub is_deleted: bool,
     /// Account IDs that own this album (for shared export directories)
+    #[serde(rename = "accountOwnerIDs")]
     pub account_owner_ids: Vec<i64>,
     /// Folder name on disk (excluded from JSON)
     #[serde(skip)]
@@ -77,6 +79,7 @@ pub struct FileInfo {
     pub id: i64,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub hash: Option<String>,
+    #[serde(rename = "ownerID")]
     pub owner_id: i64,
     /// Multiple filenames for live photos or burst photos
     pub file_names: Vec<String>,
