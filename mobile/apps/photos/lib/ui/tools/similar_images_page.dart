@@ -409,8 +409,13 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                   itemCount: _filteredGroups.length,
                   itemBuilder: (context, index) {
                     final similarFiles = _filteredGroups[index];
-                    return RepaintBoundary(
-                      child: _buildSimilarFilesGroup(similarFiles),
+                    return Column(
+                      children: [
+                        if (index == 0) const SizedBox(height: 16),
+                        RepaintBoundary(
+                          child: _buildSimilarFilesGroup(similarFiles),
+                        ),
+                      ],
                     );
                   },
                 ),
