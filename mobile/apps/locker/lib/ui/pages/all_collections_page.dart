@@ -18,18 +18,18 @@ import 'package:locker/ui/pages/trash_page.dart';
 import 'package:locker/utils/collection_sort_util.dart';
 import 'package:logging/logging.dart';
 
-enum CollectionViewType {
-  homeCollections,
-  outgoingCollections,
+enum UISectionType {
   incomingCollections,
+  outgoingCollections,
+  homeCollections,
 }
 
 class AllCollectionsPage extends StatefulWidget {
-  final CollectionViewType viewType;
+  final UISectionType viewType;
 
   const AllCollectionsPage({
     super.key,
-    this.viewType = CollectionViewType.homeCollections,
+    this.viewType = UISectionType.homeCollections,
   });
 
   @override
@@ -81,7 +81,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
     Bus.instance.on<CollectionsUpdatedEvent>().listen((event) async {
       await _loadCollections();
     });
-    if (widget.viewType == CollectionViewType.homeCollections) {
+    if (widget.viewType == UISectionType.homeCollections) {
       showTrash = true;
       showUncategorized = true;
     }
@@ -96,14 +96,14 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
     try {
       List<Collection> collections = [];
 
-      if (widget.viewType == CollectionViewType.homeCollections) {
+      if (widget.viewType == UISectionType.homeCollections) {
         collections = await CollectionService.instance.getCollections();
       } else {
         final sharedCollections =
             await CollectionService.instance.getSharedCollections();
-        if (widget.viewType == CollectionViewType.outgoingCollections) {
+        if (widget.viewType == UISectionType.outgoingCollections) {
           collections = sharedCollections.outgoing;
-        } else if (widget.viewType == CollectionViewType.incomingCollections) {
+        } else if (widget.viewType == UISectionType.incomingCollections) {
           collections = sharedCollections.incoming;
         }
       }
@@ -124,11 +124,11 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
       _allCollections = List.from(collections);
       _sortedCollections = List.from(regularCollections);
       _uncategorizedCollection =
-          widget.viewType == CollectionViewType.homeCollections
+          widget.viewType == UISectionType.homeCollections
               ? uncategorized
               : null;
       _uncategorizedFileCount = uncategorized != null &&
-              widget.viewType == CollectionViewType.homeCollections
+              widget.viewType == UISectionType.homeCollections
           ? (await CollectionService.instance
                   .getFilesInCollection(uncategorized))
               .length
@@ -437,11 +437,11 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
 
   String _getTitle(BuildContext context) {
     switch (widget.viewType) {
-      case CollectionViewType.homeCollections:
+      case UISectionType.homeCollections:
         return context.l10n.collections;
-      case CollectionViewType.outgoingCollections:
+      case UISectionType.outgoingCollections:
         return context.l10n.sharedByYou;
-      case CollectionViewType.incomingCollections:
+      case UISectionType.incomingCollections:
         return context.l10n.sharedWithYou;
     }
   }

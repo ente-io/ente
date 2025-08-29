@@ -505,19 +505,19 @@ class _HomePageState extends UploaderPageState<HomePage>
                 ..._buildCollectionSection(
                   title: context.l10n.collections,
                   collections: _displayedCollections,
-                  viewType: CollectionViewType.homeCollections,
+                  viewType: UISectionType.homeCollections,
                 ),
                 if (outgoingCollections.isNotEmpty)
                   ..._buildCollectionSection(
                     title: context.l10n.sharedByYou,
                     collections: outgoingCollections,
-                    viewType: CollectionViewType.outgoingCollections,
+                    viewType: UISectionType.outgoingCollections,
                   ),
                 if (incomingCollections.isNotEmpty)
                   ..._buildCollectionSection(
                     title: context.l10n.sharedWithYou,
                     collections: incomingCollections,
-                    viewType: CollectionViewType.incomingCollections,
+                    viewType: UISectionType.incomingCollections,
                   ),
                 _buildRecentsSection(),
               ],
@@ -737,7 +737,7 @@ class _HomePageState extends UploaderPageState<HomePage>
   List<Widget> _buildCollectionSection({
     required String title,
     required List<Collection> collections,
-    required CollectionViewType viewType,
+    required UISectionType viewType,
   }) {
     return [
       SectionOptions(
