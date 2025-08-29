@@ -327,28 +327,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   }
 
   Widget _getLoadingView() {
-    final textTheme = getEnteTextTheme(context);
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const SizedBox(
-            height: 160,
-            child: RiveAnimation.asset(
-              'assets/ducky_analyze_files.riv',
-              fit: BoxFit.contain,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            AppLocalizations.of(context).analyzingPhotosLocally,
-            style: textTheme.bodyMuted,
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
+    return const _LoadingScreen();
   }
 
   Widget _getResultsView() {
@@ -1192,6 +1171,86 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
           );
         });
       },
+    );
+  }
+}
+
+class _LoadingScreen extends StatefulWidget {
+  const _LoadingScreen();
+
+  @override
+  State<_LoadingScreen> createState() => _LoadingScreenState();
+}
+
+class _LoadingScreenState extends State<_LoadingScreen> {
+  Timer? _timer;
+  int _currentTextIndex = 0;
+
+  late List<String> _loadingTexts;
+
+  @override
+  void initState() {
+    super.initState();
+    _startTextCycling();
+  }
+
+  void _startTextCycling() {
+    _timer = Timer.periodic(const Duration(seconds: 7), (timer) {
+      if (_currentTextIndex < _loadingTexts.length - 1) {
+        if (mounted) {
+          setState(() {
+            _currentTextIndex++;
+          });
+        }
+        // Stop the timer when we reach the last text
+        if (_currentTextIndex >= _loadingTexts.length - 1) {
+          timer.cancel();
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = getEnteTextTheme(context);
+
+    _loadingTexts = [
+      AppLocalizations.of(context).analyzingPhotosLocally,
+      AppLocalizations.of(context).lookingForVisualSimilarities,
+      AppLocalizations.of(context).comparingImageDetails,
+      AppLocalizations.of(context).findingSimilarImages,
+      AppLocalizations.of(context).almostDone,
+    ];
+
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SizedBox(
+            height: 160,
+            child: RiveAnimation.asset(
+              'assets/ducky_analyze_files.riv',
+              fit: BoxFit.contain,
+            ),
+          ),
+          const SizedBox(height: 16),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 500),
+            child: Text(
+              _loadingTexts[_currentTextIndex],
+              key: ValueKey<int>(_currentTextIndex),
+              style: textTheme.bodyMuted,
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
