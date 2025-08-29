@@ -490,11 +490,14 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       listenable: _selectedFiles,
       builder: (context, _) {
         final eligibleFilteredFiles = <EnteFile>{};
+        int autoSelectCount = 0;
         for (final group in _filteredGroups) {
-          for (int i = 1; i < group.files.length; i++) {
+          for (int i = 0; i < group.files.length; i++) {
             final file = group.files[i];
-            if (FavoritesService.instance.isFavoriteCache(file)) continue;
             eligibleFilteredFiles.add(file);
+            if (i != 0 && !FavoritesService.instance.isFavoriteCache(file)) {
+              autoSelectCount++;
+            }
           }
         }
         final selectedFiles = _selectedFiles.files;
@@ -502,7 +505,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         final selectedFilteredFiles =
             selectedFiles.intersection(eligibleFilteredFiles);
         final allFilteredSelected = eligibleFilteredFiles.isNotEmpty &&
-            selectedFilteredFiles.length == eligibleFilteredFiles.length;
+            selectedFilteredFiles.length >= autoSelectCount;
         final hasSelectedFiles = selectedFilteredFiles.isNotEmpty;
 
         int totalSize = 0;
@@ -582,7 +585,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                     shouldSurfaceExecutionStates: false,
                     shouldShowSuccessConfirmation: false,
                     onTap: () async {
-                      _toggleSelectAll();
+                      _toggleSelectAll(allFilteredSelected);
                     },
                   ),
                 ),
@@ -594,24 +597,20 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     );
   }
 
-  void _toggleSelectAll() {
-    final eligibleFiles = <EnteFile>{};
+  void _toggleSelectAll(bool allSelected) {
+    final autoSelectFiles = <EnteFile>{};
     for (final group in _filteredGroups) {
       for (int i = 1; i < group.files.length; i++) {
         final file = group.files[i];
         if (FavoritesService.instance.isFavoriteCache(file)) continue;
-        eligibleFiles.add(file);
+        autoSelectFiles.add(file);
       }
     }
 
-    final currentSelected = _selectedFiles.files.intersection(eligibleFiles);
-    final allSelected = eligibleFiles.isNotEmpty &&
-        currentSelected.length == eligibleFiles.length;
-
     if (allSelected) {
-      _selectedFiles.unSelectAll(eligibleFiles);
+      _selectedFiles.clearAll();
     } else {
-      _selectedFiles.selectAll(eligibleFiles);
+      _selectedFiles.selectAll(autoSelectFiles);
     }
   }
 
