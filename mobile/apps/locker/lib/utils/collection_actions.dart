@@ -11,6 +11,7 @@ import "package:ente_utils/email_util.dart";
 import "package:ente_utils/share_utils.dart";
 import 'package:flutter/material.dart';
 import "package:locker/core/errors.dart";
+import "package:locker/extensions/user_extension.dart";
 import 'package:locker/l10n/l10n.dart';
 import "package:locker/services/collections/collections_api_client.dart";
 import 'package:locker/services/collections/collections_service.dart';
@@ -489,7 +490,7 @@ class CollectionActions {
         ),
       ],
       title: context.l10n.removeWithQuestionMark,
-      body: context.l10n.removeParticipantBody(user.name ?? user.email),
+      body: context.l10n.removeParticipantBody(user.displayName ?? user.email),
     );
     if (actionResult?.action != null) {
       if (actionResult!.action == ButtonAction.error) {

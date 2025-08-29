@@ -881,4 +881,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get albumOwner => 'Owner';
+
+  @override
+  String typeOfCollectionTypeIsNotSupportedForRename(String collectionType) {
+    return 'Type of collection $collectionType is not supported for rename';
+  }
+
+  @override
+  String get leaveCollection => 'Leave collection';
+
+  @override
+  String get filesAddedByYouWillBeRemovedFromTheCollection =>
+      'Files added by you will be removed from the collection';
+
+  @override
+  String get leaveSharedCollection => 'Leave shared collection?';
 }

@@ -490,5 +490,17 @@
   },
   "addMore": "Add more",
   "you": "You",
-  "albumOwner": "Owner"
+  "albumOwner": "Owner",
+  "typeOfCollectionTypeIsNotSupportedForRename": "Type of collection {collectionType} is not supported for rename",
+  "@typeOfCollectionTypeIsNotSupportedForRename": {
+    "placeholders": {
+      "collectionType": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "leaveCollection": "Leave collection",
+  "filesAddedByYouWillBeRemovedFromTheCollection": "Files added by you will be removed from the collection",
+  "leaveSharedCollection": "Leave shared collection?"
 }

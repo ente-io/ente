@@ -1551,6 +1551,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Owner'**
   String get albumOwner;
+
+  /// No description provided for @typeOfCollectionTypeIsNotSupportedForRename.
+  ///
+  /// In en, this message translates to:
+  /// **'Type of collection {collectionType} is not supported for rename'**
+  String typeOfCollectionTypeIsNotSupportedForRename(String collectionType);
+
+  /// No description provided for @leaveCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave collection'**
+  String get leaveCollection;
+
+  /// No description provided for @filesAddedByYouWillBeRemovedFromTheCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Files added by you will be removed from the collection'**
+  String get filesAddedByYouWillBeRemovedFromTheCollection;
+
+  /// No description provided for @leaveSharedCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave shared collection?'**
+  String get leaveSharedCollection;
 }
 
 class _AppLocalizationsDelegate
