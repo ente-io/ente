@@ -72,6 +72,12 @@ jobs:
                   flutter-version: ${{ env.FLUTTER_VERSION  }}
                   cache: true
 
+            - name: Install Flutter Rust Bridge
+              run: cargo install flutter_rust_bridge_codegen
+
+            - name: Generate Rust bindings
+              run: flutter_rust_bridge_codegen generate
+
             - name: Setup keys
               uses: timheuer/base64-to-file@v1
               with:
