@@ -51,10 +51,12 @@ class _HomePageState extends UploaderPageState<HomePage>
   List<Collection> _filteredCollections = [];
   List<EnteFile> _recentFiles = [];
   List<EnteFile> _filteredFiles = [];
-  Map<int, int> _collectionFileCounts = {};
   List<Collection> outgoingCollections = [];
   List<Collection> incomingCollections = [];
   List<Collection> quickLinks = [];
+  Map<int, int> _outgoingCollectionFileCounts = {};
+  Map<int, int> _incomingCollectionFileCounts = {};
+  Map<int, int> _homeCollectionFileCounts = {};
 
   String? _error;
   final _logger = Logger('HomePage');
@@ -93,7 +95,17 @@ class _HomePageState extends UploaderPageState<HomePage>
   }
 
   List<Collection> get _displayedCollections {
-    final collections = isSearchActive ? _filteredCollections : _collections;
+    final List<Collection> collections;
+    if (isSearchActive) {
+      collections = _filteredCollections;
+    } else {
+      final excludeIds = {
+        ...incomingCollections.map((c) => c.id),
+        ...quickLinks.map((c) => c.id),
+      };
+      collections =
+          _collections.where((c) => !excludeIds.contains(c.id)).toList();
+    }
     return _filterOutUncategorized(collections);
   }
 
@@ -506,18 +518,21 @@ class _HomePageState extends UploaderPageState<HomePage>
                   title: context.l10n.collections,
                   collections: _displayedCollections,
                   viewType: UISectionType.homeCollections,
+                  fileCounts: _homeCollectionFileCounts,
                 ),
                 if (outgoingCollections.isNotEmpty)
                   ..._buildCollectionSection(
                     title: context.l10n.sharedByYou,
                     collections: outgoingCollections,
                     viewType: UISectionType.outgoingCollections,
+                    fileCounts: _outgoingCollectionFileCounts,
                   ),
                 if (incomingCollections.isNotEmpty)
                   ..._buildCollectionSection(
                     title: context.l10n.sharedWithYou,
                     collections: incomingCollections,
                     viewType: UISectionType.incomingCollections,
+                    fileCounts: _incomingCollectionFileCounts,
                   ),
                 _buildRecentsSection(),
               ],
@@ -715,21 +730,45 @@ class _HomePageState extends UploaderPageState<HomePage>
   }
 
   Future<void> _loadCollectionFileCounts() async {
-    final counts = <int, int>{};
+    final mainCounts = <int, int>{};
+    final outgoingCounts = <int, int>{};
+    final incomingCounts = <int, int>{};
 
-    for (final collection in _displayedCollections.take(4)) {
-      try {
-        final files =
-            await CollectionService.instance.getFilesInCollection(collection);
-        counts[collection.id] = files.length;
-      } catch (e) {
-        counts[collection.id] = 0;
-      }
-    }
+    await Future.wait([
+      ..._displayedCollections.take(4).map((collection) async {
+        try {
+          final files =
+              await CollectionService.instance.getFilesInCollection(collection);
+          mainCounts[collection.id] = files.length;
+        } catch (e) {
+          mainCounts[collection.id] = 0;
+        }
+      }),
+      ...outgoingCollections.take(4).map((collection) async {
+        try {
+          final files =
+              await CollectionService.instance.getFilesInCollection(collection);
+          outgoingCounts[collection.id] = files.length;
+        } catch (e) {
+          outgoingCounts[collection.id] = 0;
+        }
+      }),
+      ...incomingCollections.take(4).map((collection) async {
+        try {
+          final files =
+              await CollectionService.instance.getFilesInCollection(collection);
+          incomingCounts[collection.id] = files.length;
+        } catch (e) {
+          incomingCounts[collection.id] = 0;
+        }
+      }),
+    ]);
 
     if (mounted) {
       setState(() {
-        _collectionFileCounts = counts;
+        _homeCollectionFileCounts = mainCounts;
+        _outgoingCollectionFileCounts = outgoingCounts;
+        _incomingCollectionFileCounts = incomingCounts;
       });
     }
   }
@@ -738,6 +777,7 @@ class _HomePageState extends UploaderPageState<HomePage>
     required String title,
     required List<Collection> collections,
     required UISectionType viewType,
+    required Map<int, int> fileCounts,
   }) {
     return [
       SectionOptions(
@@ -760,7 +800,7 @@ class _HomePageState extends UploaderPageState<HomePage>
       const SizedBox(height: 24),
       CollectionFlexGridViewWidget(
         collections: collections,
-        collectionFileCounts: _collectionFileCounts,
+        collectionFileCounts: fileCounts,
       ),
       const SizedBox(height: 24),
     ];
