@@ -59,6 +59,9 @@ class CollectionService {
         _init();
       });
     }
+    Bus.instance.on<CollectionsUpdatedEvent>().listen((event) {
+      _init();
+    });
   }
 
   Future<void> sync() async {
@@ -401,8 +404,6 @@ class CollectionService {
   ///   - Owners of collections shared to user.
   ///   - All collaborators of collections in which user is a collaborator or
   ///     a viewer.
-  ///   - All family members of user.
-  ///   - All contacts linked to a person.
   List<User> getRelevantContacts() {
     final List<User> relevantUsers = [];
     final existingEmails = <String>{};

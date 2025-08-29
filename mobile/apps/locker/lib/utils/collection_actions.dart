@@ -171,6 +171,53 @@ class CollectionActions {
     }
   }
 
+  static Future<void> leaveCollection(
+    BuildContext context,
+    Collection collection, {
+    VoidCallback? onSuccess,
+  }) async {
+    final actionResult = await showActionSheet(
+      context: context,
+      buttons: [
+        ButtonWidget(
+          buttonType: ButtonType.critical,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.first,
+          shouldSurfaceExecutionStates: true,
+          labelText: context.l10n.leaveCollection,
+          onTap: () async {
+            await CollectionApiClient.instance.leaveCollection(collection);
+          },
+        ),
+        ButtonWidget(
+          buttonType: ButtonType.secondary,
+          buttonAction: ButtonAction.cancel,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          labelText: context.l10n.cancel,
+        ),
+      ],
+      title: context.l10n.leaveCollection,
+      body: context.l10n.filesAddedByYouWillBeRemovedFromTheCollection,
+    );
+    if (actionResult?.action != null && context.mounted) {
+      if (actionResult!.action == ButtonAction.error) {
+        await showGenericErrorDialog(
+          context: context,
+          error: actionResult.exception,
+        );
+      } else if (actionResult.action == ButtonAction.first) {
+        onSuccess?.call();
+        Navigator.of(context).pop();
+        SnackBarUtils.showInfoSnackBar(
+          context,
+          "Leave collection successfully",
+        );
+      }
+    }
+  }
+
   static Future<bool> enableUrl(
     BuildContext context,
     Collection collection, {
@@ -411,7 +458,7 @@ class CollectionActions {
     }
   }
 
-    // removeParticipant remove the user from a share album
+  // removeParticipant remove the user from a share album
   Future<bool> removeParticipant(
     BuildContext context,
     Collection collection,
@@ -455,5 +502,4 @@ class CollectionActions {
     }
     return false;
   }
-
 }

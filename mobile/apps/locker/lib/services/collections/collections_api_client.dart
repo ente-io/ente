@@ -171,6 +171,26 @@ class CollectionApiClient {
     }
   }
 
+  Future<void> leaveCollection(Collection collection) async {
+    try {
+      await _enteDio.post(
+        "/collections/leave/${collection.id}",
+      );
+      await _handleCollectionDeletion(collection);
+      Bus.instance.fire(CollectionsUpdatedEvent());
+    } catch (e, s) {
+      _logger.severe("failed to leave collection", e, s);
+      rethrow;
+    }
+  }
+
+  Future<void> _handleCollectionDeletion(Collection collection) async {
+    await _db.deleteCollection(collection);
+    final deletedCollection = collection.copyWith(isDeleted: true);
+    unawaited(_db.updateCollections([deletedCollection]));
+    CollectionService.instance.updateCollectionCache(deletedCollection);
+  }
+
   Future<void> move(
     EnteFile file,
     Collection fromCollection,
@@ -423,8 +443,13 @@ class CollectionApiClient {
       await _db.updateCollections([collection]);
       CollectionService.instance.updateCollectionCache(collection);
       Bus.instance.fire(CollectionsUpdatedEvent());
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 402) {
+        throw SharingNotPermittedForFreeAccountsError();
+      }
+      rethrow;
     } catch (e, s) {
-      _logger.severe('Failed to create share URL for collection', e, s);
+      _logger.severe("failed to rename collection", e, s);
       rethrow;
     }
   }
