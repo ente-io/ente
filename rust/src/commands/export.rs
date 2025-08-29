@@ -152,51 +152,33 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
 
     let api = ApiMethods::new(&api_client);
 
-    // Fetch collections
-    println!("\nFetching collections...");
-    let collections = api.get_collections(&account.email, 0).await?;
-    println!("Found {} collections", collections.len());
-
     // Master key is already raw bytes, no need to decode
     let master_key = &secrets.master_key;
 
     // We'll also need the secret key for decrypting collection keys
     let secret_key = &secrets.secret_key;
 
-    // Fetch and export files for each collection
-    println!("\nFetching files...");
-    let mut total_files = 0;
-    let mut exported_files = 0;
-    let mut skipped_files = 0;
-    let mut deleted_files = 0;
+    // Step 1: Fetch all collections and create a map of collection IDs to collections
+    println!("\nFetching collections...");
+    let collections = api.get_collections(&account.email, 0).await?;
+    println!("Found {} collections", collections.len());
 
-    for collection in &collections {
+    // Create collection ID to collection map and decrypt collection keys
+    let mut collection_map: HashMap<i64, (crate::api::models::Collection, Vec<u8>)> =
+        HashMap::new();
+
+    for mut collection in collections {
         // Skip deleted collections
         if collection.is_deleted {
             continue;
         }
 
-        // Decrypt collection name to check filters
-        let collection_name = if let Some(ref _encrypted_name) = collection.encrypted_name {
-            // Decrypt collection name if needed for filtering
-            // For now, we'll use the collection ID as a fallback
-            // TODO: Implement proper name decryption
-            format!("Collection {}", collection.id)
-        } else {
-            format!("Collection {}", collection.id)
-        };
-
-        // Apply collection filters
-        // TODO: Determine if collection is shared or hidden from metadata
-        let is_shared = false; // Need to check collection metadata
-        let is_hidden = false; // Need to check collection metadata
-
-        if !filter.should_include_collection(&collection_name, is_shared, is_hidden) {
-            log::debug!("Skipping filtered collection: {}", collection_name);
-            continue;
-        }
-
-        println!("Processing collection: {}", collection_name);
+        log::debug!(
+            "Processing collection {}: name={:?}, encrypted_name={:?}",
+            collection.id,
+            collection.name,
+            collection.encrypted_name
+        );
 
         // Decrypt collection key
         let collection_key = match decrypt_collection_key(
@@ -207,17 +189,50 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
         ) {
             Ok(key) => key,
             Err(e) => {
-                log::error!("Failed to decrypt collection key: {e}");
+                log::error!(
+                    "Failed to decrypt collection key for {}: {e}",
+                    collection.id
+                );
                 continue;
             }
         };
 
+        // Decrypt collection name if it's encrypted
+        if collection.name.as_ref().map_or(true, |n| n.is_empty()) {
+            if let Some(ref encrypted_name) = collection.encrypted_name {
+                if let Some(ref nonce) = collection.name_decryption_nonce {
+                    match decrypt_collection_name(encrypted_name, nonce, &collection_key) {
+                        Ok(name) => {
+                            log::debug!("Decrypted collection {} name: {}", collection.id, name);
+                            collection.name = Some(name);
+                        }
+                        Err(e) => {
+                            log::warn!(
+                                "Failed to decrypt collection {} name: {}",
+                                collection.id,
+                                e
+                            );
+                        }
+                    }
+                }
+            }
+        }
+
+        collection_map.insert(collection.id, (collection, collection_key));
+    }
+
+    // Step 2: Fetch all files from all collections (like Go CLI does)
+    println!("\nFetching all files...");
+    let mut all_files = Vec::new();
+
+    // Iterate through each collection and fetch its files
+    for (collection_id, _) in &collection_map {
         let mut has_more = true;
         let mut since_time = 0i64;
 
         while has_more {
             let (files, more) = api
-                .get_collection_files(&account.email, collection.id, since_time)
+                .get_collection_files(&account.email, *collection_id, since_time)
                 .await?;
             has_more = more;
 
@@ -225,228 +240,260 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
                 break;
             }
 
-            for file in files {
-                // Skip deleted files
-                if file.is_deleted {
-                    deleted_files += 1;
-                    continue;
-                }
-
-                // Count non-deleted files
-                total_files += 1;
-
-                // Update since_time for next batch
+            // Update since_time for next batch
+            for file in &files {
                 if file.updation_time > since_time {
                     since_time = file.updation_time;
                 }
-
-                // Decrypt the file key using the collection key
-                let file_key = match decrypt_file_key(
-                    &file.encrypted_key,
-                    &file.key_decryption_nonce,
-                    &collection_key,
-                ) {
-                    Ok(key) => key,
-                    Err(e) => {
-                        log::error!("Failed to decrypt key for file {}: {}", file.id, e);
-                        continue;
-                    }
-                };
-
-                // Decrypt metadata to get original filename and hash
-                let metadata = match decrypt_file_metadata(&file, &file_key) {
-                    Ok(meta) => meta,
-                    Err(e) => {
-                        log::warn!("Failed to decrypt metadata for file {}: {}", file.id, e);
-                        None
-                    }
-                };
-
-                // Decrypt public magic metadata to check for edited name
-                let pub_magic_metadata = if file.pub_magic_metadata.is_some() {
-                    match decrypt_magic_metadata(
-                        file.pub_magic_metadata.as_ref().unwrap(),
-                        &file_key,
-                    ) {
-                        Ok(meta) => meta,
-                        Err(e) => {
-                            log::debug!(
-                                "Failed to decrypt public magic metadata for file {}: {}",
-                                file.id,
-                                e
-                            );
-                            None
-                        }
-                    }
-                } else {
-                    None
-                };
-
-                // Check for deduplication by hash
-                let content_hash = if let Some(ref meta) = metadata {
-                    let hash = match meta.get_file_type() {
-                        crate::models::metadata::FileType::Image => {
-                            meta.image_hash.as_ref().or(meta.hash.as_ref())
-                        }
-                        crate::models::metadata::FileType::Video => {
-                            meta.video_hash.as_ref().or(meta.hash.as_ref())
-                        }
-                        _ => meta.hash.as_ref(),
-                    };
-                    if let Some(h) = hash {
-                        log::debug!("File {} has hash: {}", file.id, h);
-                    } else {
-                        log::debug!("File {} has no hash in metadata", file.id);
-                    }
-                    hash
-                } else {
-                    log::debug!("File {} has no metadata", file.id);
-                    None
-                };
-
-                // Check if we've already exported a file with this hash
-                if let Some(hash) = content_hash
-                    && let Some(existing_path) = exported_hashes.get(hash)
-                {
-                    log::info!(
-                        "Skipping duplicate file {} (same hash as {})",
-                        file.id,
-                        existing_path.display()
-                    );
-                    skipped_files += 1;
-                    continue;
-                }
-
-                // Generate export path with original filename from metadata
-                let file_path = generate_export_path(
-                    export_path,
-                    &file,
-                    Some(collection),
-                    metadata.as_ref(),
-                    pub_magic_metadata.as_ref(),
-                )?;
-
-                // Skip if file already exists on disk
-                if file_path.exists() {
-                    log::debug!("File already exists: {file_path:?}");
-                    skipped_files += 1;
-
-                    // Add to hash map even for existing files to prevent duplicates
-                    if let Some(hash) = content_hash {
-                        exported_hashes.insert(hash.clone(), file_path.clone());
-                    }
-                    continue;
-                }
-
-                // Download and save file
-                log::debug!("Downloading file {} to {:?}", file.id, file_path);
-
-                // Ensure directory exists
-                if let Some(parent) = file_path.parent() {
-                    fs::create_dir_all(parent).await?;
-                }
-
-                // Download encrypted file
-                let encrypted_data = api.download_file(&account.email, file.id).await?;
-
-                // The file nonce/header is stored separately in the API response
-                let file_nonce = match base64::engine::general_purpose::STANDARD
-                    .decode(&file.file.decryption_header)
-                {
-                    Ok(nonce) => nonce,
-                    Err(e) => {
-                        log::error!("Failed to decode file nonce for file {}: {}", file.id, e);
-                        continue;
-                    }
-                };
-
-                // Decrypt the file data using streaming XChaCha20-Poly1305
-                // Use chunked decryption for large files
-                let decrypted = match decrypt_file_data(&encrypted_data, &file_nonce, &file_key) {
-                    Ok(data) => data,
-                    Err(e) => {
-                        log::error!("Failed to decrypt file {}: {}", file.id, e);
-                        log::debug!(
-                            "File size: {}, header length: {}",
-                            encrypted_data.len(),
-                            file_nonce.len()
-                        );
-                        continue;
-                    }
-                };
-
-                // Check if this is a live photo that needs extraction
-                let is_live_photo = metadata
-                    .as_ref()
-                    .map(|m| m.is_live_photo())
-                    .unwrap_or(false);
-
-                if is_live_photo {
-                    // Extract live photo components from ZIP
-                    if let Err(e) = extract_live_photo(&decrypted, &file_path).await {
-                        log::error!("Failed to extract live photo {}: {}", file.id, e);
-                        // Fall back to saving as ZIP
-                        let mut file_handle = fs::File::create(&file_path).await?;
-                        file_handle.write_all(&decrypted).await?;
-                        file_handle.sync_all().await?;
-                    }
-                } else {
-                    // Write regular file
-                    let mut file_handle = fs::File::create(&file_path).await?;
-                    file_handle.write_all(&decrypted).await?;
-                    file_handle.sync_all().await?;
-                }
-
-                exported_files += 1;
-
-                // Add hash to deduplication map
-                if let Some(hash) = content_hash {
-                    exported_hashes.insert(hash.clone(), file_path.clone());
-                }
-
-                // Determine album folder for metadata
-                let album_folder = if let Some(ref name) = collection.name
-                    && !name.is_empty()
-                {
-                    sanitize_album_name(name)
-                } else {
-                    "Uncategorized".to_string()
-                };
-
-                // Write album metadata if not already written for this album
-                if !albums_with_metadata.contains_key(&album_folder) {
-                    write_album_metadata(export_path, &album_folder, collection, account.user_id)
-                        .await?;
-                    albums_with_metadata.insert(album_folder.clone(), true);
-                }
-
-                // Get and increment file index for this album
-                let file_index = album_file_indices.entry(album_folder.clone()).or_insert(0);
-
-                // Write file metadata
-                let filename = file_path
-                    .file_name()
-                    .and_then(|n| n.to_str())
-                    .unwrap_or("file");
-                write_file_metadata(
-                    export_path,
-                    &album_folder,
-                    &file,
-                    metadata.as_ref(),
-                    filename,
-                    *file_index,
-                )
-                .await?;
-
-                *file_index += 1;
-
-                // Progress indicator - show every file for now since we have few files
-                println!(
-                    "  [{}] Exported: {}",
-                    exported_files,
-                    file_path.file_name().unwrap_or_default().to_string_lossy()
-                );
             }
+
+            all_files.extend(files);
+        }
+    }
+
+    println!("Found {} total files", all_files.len());
+
+    // Step 3: Process each file and export to the correct album folder
+    let mut total_files = 0;
+    let mut exported_files = 0;
+    let mut skipped_files = 0;
+    let mut deleted_files = 0;
+
+    for file in all_files {
+        // Skip deleted files
+        if file.is_deleted {
+            deleted_files += 1;
+            continue;
+        }
+
+        // Count non-deleted files
+        total_files += 1;
+
+        // Find the collection this file belongs to
+        // Files have a collection_id field that indicates which album they belong to
+        let collection_info = match collection_map.get(&file.collection_id) {
+            Some(info) => info,
+            None => {
+                log::debug!(
+                    "File {} belongs to unknown/deleted collection {}",
+                    file.id,
+                    file.collection_id
+                );
+                continue;
+            }
+        };
+
+        let (collection, collection_key) = collection_info;
+
+        // Apply collection filters
+        let collection_name = collection.name.as_deref().unwrap_or("Unnamed");
+        // TODO: Determine if collection is shared or hidden from metadata
+        let is_shared = false; // Need to check collection metadata
+        let is_hidden = false; // Need to check collection metadata
+
+        if !filter.should_include_collection(collection_name, is_shared, is_hidden) {
+            log::debug!("Skipping file in filtered collection: {}", collection_name);
+            continue;
+        }
+
+        // Decrypt the file key using the collection key
+        let file_key = match decrypt_file_key(
+            &file.encrypted_key,
+            &file.key_decryption_nonce,
+            collection_key,
+        ) {
+            Ok(key) => key,
+            Err(e) => {
+                log::error!("Failed to decrypt key for file {}: {}", file.id, e);
+                continue;
+            }
+        };
+
+        // Decrypt metadata to get original filename and hash
+        let metadata = match decrypt_file_metadata(&file, &file_key) {
+            Ok(meta) => meta,
+            Err(e) => {
+                log::warn!("Failed to decrypt metadata for file {}: {}", file.id, e);
+                None
+            }
+        };
+
+        // Decrypt public magic metadata to check for edited name
+        let pub_magic_metadata = if file.pub_magic_metadata.is_some() {
+            match decrypt_magic_metadata(file.pub_magic_metadata.as_ref().unwrap(), &file_key) {
+                Ok(meta) => meta,
+                Err(e) => {
+                    log::debug!(
+                        "Failed to decrypt public magic metadata for file {}: {}",
+                        file.id,
+                        e
+                    );
+                    None
+                }
+            }
+        } else {
+            None
+        };
+
+        // Check for deduplication by hash
+        let content_hash = if let Some(ref meta) = metadata {
+            let hash = match meta.get_file_type() {
+                crate::models::metadata::FileType::Image => {
+                    meta.image_hash.as_ref().or(meta.hash.as_ref())
+                }
+                crate::models::metadata::FileType::Video => {
+                    meta.video_hash.as_ref().or(meta.hash.as_ref())
+                }
+                _ => meta.hash.as_ref(),
+            };
+            if let Some(h) = hash {
+                log::debug!("File {} has hash: {}", file.id, h);
+            } else {
+                log::debug!("File {} has no hash in metadata", file.id);
+            }
+            hash
+        } else {
+            log::debug!("File {} has no metadata", file.id);
+            None
+        };
+
+        // Check if we've already exported a file with this hash
+        if let Some(hash) = content_hash
+            && let Some(existing_path) = exported_hashes.get(hash)
+        {
+            log::info!(
+                "Skipping duplicate file {} (same hash as {})",
+                file.id,
+                existing_path.display()
+            );
+            skipped_files += 1;
+            continue;
+        }
+
+        // Generate export path with original filename from metadata
+        let file_path = generate_export_path(
+            export_path,
+            &file,
+            Some(collection),
+            metadata.as_ref(),
+            pub_magic_metadata.as_ref(),
+        )?;
+
+        // Skip if file already exists on disk
+        if file_path.exists() {
+            log::debug!("File already exists: {file_path:?}");
+            skipped_files += 1;
+
+            // Add to hash map even for existing files to prevent duplicates
+            if let Some(hash) = content_hash {
+                exported_hashes.insert(hash.clone(), file_path.clone());
+            }
+            continue;
+        }
+
+        // Download and save file
+        log::debug!("Downloading file {} to {:?}", file.id, file_path);
+
+        // Ensure directory exists
+        if let Some(parent) = file_path.parent() {
+            fs::create_dir_all(parent).await?;
+        }
+
+        // Download encrypted file
+        let encrypted_data = api.download_file(&account.email, file.id).await?;
+
+        // The file nonce/header is stored separately in the API response
+        let file_nonce =
+            match base64::engine::general_purpose::STANDARD.decode(&file.file.decryption_header) {
+                Ok(nonce) => nonce,
+                Err(e) => {
+                    log::error!("Failed to decode file nonce for file {}: {}", file.id, e);
+                    continue;
+                }
+            };
+
+        // Decrypt the file data using streaming XChaCha20-Poly1305
+        // Use chunked decryption for large files
+        let decrypted = match decrypt_file_data(&encrypted_data, &file_nonce, &file_key) {
+            Ok(data) => data,
+            Err(e) => {
+                log::error!("Failed to decrypt file {}: {}", file.id, e);
+                log::debug!(
+                    "File size: {}, header length: {}",
+                    encrypted_data.len(),
+                    file_nonce.len()
+                );
+                continue;
+            }
+        };
+
+        // Check if this is a live photo that needs extraction
+        let is_live_photo = metadata
+            .as_ref()
+            .map(|m| m.is_live_photo())
+            .unwrap_or(false);
+
+        if is_live_photo {
+            // Extract live photo components from ZIP
+            if let Err(e) = extract_live_photo(&decrypted, &file_path).await {
+                log::error!("Failed to extract live photo {}: {}", file.id, e);
+                // Fall back to saving as ZIP
+                let mut file_handle = fs::File::create(&file_path).await?;
+                file_handle.write_all(&decrypted).await?;
+                file_handle.sync_all().await?;
+            }
+        } else {
+            // Write regular file
+            let mut file_handle = fs::File::create(&file_path).await?;
+            file_handle.write_all(&decrypted).await?;
+            file_handle.sync_all().await?;
+        }
+
+        exported_files += 1;
+
+        // Add hash to deduplication map
+        if let Some(hash) = content_hash {
+            exported_hashes.insert(hash.clone(), file_path.clone());
+        }
+
+        // Determine album folder for metadata
+        let album_folder = if let Some(ref name) = collection.name
+            && !name.is_empty()
+        {
+            sanitize_album_name(name)
+        } else {
+            "Uncategorized".to_string()
+        };
+
+        // Write album metadata if not already written for this album
+        if !albums_with_metadata.contains_key(&album_folder) {
+            write_album_metadata(export_path, &album_folder, collection, account.user_id).await?;
+            albums_with_metadata.insert(album_folder.clone(), true);
+        }
+
+        // Get and increment file index for this album
+        let file_index = album_file_indices.entry(album_folder.clone()).or_insert(0);
+
+        // Write file metadata
+        let filename = file_path
+            .file_name()
+            .and_then(|n| n.to_str())
+            .unwrap_or("file");
+        write_file_metadata(
+            export_path,
+            &album_folder,
+            &file,
+            metadata.as_ref(),
+            filename,
+            *file_index,
+        )
+        .await?;
+
+        *file_index += 1;
+
+        // Progress indicator - show every 10 files for better UX
+        if exported_files % 10 == 0 || exported_files == 1 {
+            println!("  [{}/{}] Exported files...", exported_files, total_files);
         }
     }
 
@@ -544,6 +591,25 @@ fn decrypt_collection_key(
 
     // Collection keys are encrypted with secret_box (XSalsa20-Poly1305) using master key
     secret_box_open(&encrypted_bytes, &nonce_bytes, master_key)
+}
+
+/// Decrypt a collection name using the collection key
+fn decrypt_collection_name(
+    encrypted_name: &str,
+    nonce: &str,
+    collection_key: &[u8],
+) -> Result<String> {
+    use base64::engine::general_purpose::STANDARD as BASE64;
+
+    let encrypted_bytes = BASE64.decode(encrypted_name)?;
+    let nonce_bytes = BASE64.decode(nonce)?;
+
+    // Collection names are encrypted with secret_box using the collection key
+    let decrypted = secret_box_open(&encrypted_bytes, &nonce_bytes, collection_key)?;
+
+    // Convert to string
+    String::from_utf8(decrypted)
+        .map_err(|e| crate::Error::Generic(format!("Invalid UTF-8 in collection name: {}", e)))
 }
 
 /// Decrypt a file key using the collection key
