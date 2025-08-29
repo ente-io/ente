@@ -17,6 +17,7 @@ import 'package:locker/ui/components/search_result_view.dart';
 import 'package:locker/ui/mixins/search_mixin.dart';
 import 'package:locker/ui/pages/home_page.dart';
 import 'package:locker/ui/pages/uploader_page.dart';
+import "package:locker/ui/sharing/album_participants_page.dart";
 import "package:locker/ui/sharing/manage_links_widget.dart";
 import "package:locker/ui/sharing/share_collection_page.dart";
 import 'package:locker/utils/collection_actions.dart';
@@ -132,6 +133,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
   }
 
   Future<void> _shareCollection() async {
+    final collection = widget.collection;
     try {
       if ((collectionViewType != CollectionViewType.ownedCollection &&
           collectionViewType != CollectionViewType.sharedCollection &&
@@ -142,13 +144,20 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
           "Cannot share collection of type $collectionViewType",
         );
       }
-      if (Configuration.instance.getUserID() == widget.collection.owner.id) {
+      if (Configuration.instance.getUserID() == collection.owner.id) {
         unawaited(
           routeToPage(
             context,
-            (isQuickLink && (widget.collection.hasLink))
-                ? ManageSharedLinkWidget(collection: widget.collection)
-                : ShareCollectionPage(collection: widget.collection),
+            (isQuickLink && (collection.hasLink))
+                ? ManageSharedLinkWidget(collection: collection)
+                : ShareCollectionPage(collection: collection),
+          ),
+        );
+      } else {
+        unawaited(
+          routeToPage(
+            context,
+            AlbumParticipantsPage(collection),
           ),
         );
       }
