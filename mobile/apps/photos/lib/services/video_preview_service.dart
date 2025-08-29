@@ -125,6 +125,10 @@ class VideoPreviewService {
       file.uploadedFileID!,
     );
     if (alreadyInQueue) {
+      // File is already queued, but trigger processing in case it was stalled
+      if (uploadingFileId < 0) {
+        queueFiles(duration: Duration.zero, isManual: true, forceProcess: true);
+      }
       return false; // Indicates file was already in queue
     }
 
@@ -1144,6 +1148,7 @@ class VideoPreviewService {
         computeController.requestCompute(
           stream: true,
           bypassInteractionCheck: true,
+          bypassMLWaiting: true,
         );
   }
 
@@ -1155,9 +1160,10 @@ class VideoPreviewService {
   void queueFiles({
     Duration duration = const Duration(seconds: 5),
     bool isManual = false,
+    bool forceProcess = false,
   }) {
     Future.delayed(duration, () async {
-      if (_hasQueuedFile) return;
+      if (_hasQueuedFile && !forceProcess) return;
 
       final isStreamAllowed = isManual ? _allowManualStream() : _allowStream();
       if (!isStreamAllowed) return;
