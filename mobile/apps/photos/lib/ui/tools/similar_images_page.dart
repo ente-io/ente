@@ -13,6 +13,7 @@ import "package:photos/models/selected_files.dart";
 import "package:photos/models/similar_files.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
+import "package:photos/services/favorites_service.dart";
 import "package:photos/services/machine_learning/similar_images_service.dart";
 import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
@@ -491,7 +492,9 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       final newSelection = <EnteFile>{};
       for (final group in _filteredGroups) {
         for (int i = 1; i < group.files.length; i++) {
-          newSelection.add(group.files[i]);
+          final file = group.files[i];
+          if (FavoritesService.instance.isFavoriteCache(file)) continue;
+          newSelection.add(file);
         }
       }
       _selectedFiles.clearAll();
@@ -506,7 +509,9 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         final eligibleFilteredFiles = <EnteFile>{};
         for (final group in _filteredGroups) {
           for (int i = 1; i < group.files.length; i++) {
-            eligibleFilteredFiles.add(group.files[i]);
+            final file = group.files[i];
+            if (FavoritesService.instance.isFavoriteCache(file)) continue;
+            eligibleFilteredFiles.add(file);
           }
         }
         final selectedFiles = _selectedFiles.files;
@@ -609,7 +614,9 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     final eligibleFiles = <EnteFile>{};
     for (final group in _filteredGroups) {
       for (int i = 1; i < group.files.length; i++) {
-        eligibleFiles.add(group.files[i]);
+        final file = group.files[i];
+        if (FavoritesService.instance.isFavoriteCache(file)) continue;
+        eligibleFiles.add(file);
       }
     }
 
@@ -649,7 +656,9 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       for (final group in _similarFilesList) {
         if (group.files.length > 1) {
           for (int i = 1; i < group.files.length; i++) {
-            _selectedFiles.toggleSelection(group.files[i]);
+            final file = group.files[i];
+            if (FavoritesService.instance.isFavoriteCache(file)) continue;
+            _selectedFiles.toggleSelection(file);
           }
         }
       }

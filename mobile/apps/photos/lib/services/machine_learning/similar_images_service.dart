@@ -10,6 +10,7 @@ import "package:photos/extensions/stop_watch.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/similar_files.dart";
+import "package:photos/services/favorites_service.dart";
 import "package:photos/services/machine_learning/ml_computer.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/search_service.dart";
@@ -257,6 +258,11 @@ class SimilarImagesService {
               group.addFile(newFile);
               group.furthestDistance = max(group.furthestDistance, distance);
               group.files.sort((a, b) {
+                if (FavoritesService.instance.isFavoriteCache(a)) {
+                  return -1;
+                } else if (FavoritesService.instance.isFavoriteCache(b)) {
+                  return 1;
+                }
                 final sizeComparison =
                     (b.fileSize ?? 0).compareTo(a.fileSize ?? 0);
                 if (sizeComparison != 0) return sizeComparison;
@@ -307,6 +313,11 @@ class SimilarImagesService {
           similarNewFiles.add(newFile);
           alreadyUsedNewFiles.add(newFileID);
           similarNewFiles.sort((a, b) {
+            if (FavoritesService.instance.isFavoriteCache(a)) {
+              return -1;
+            } else if (FavoritesService.instance.isFavoriteCache(b)) {
+              return 1;
+            }
             final sizeComparison = (b.fileSize ?? 0).compareTo(a.fileSize ?? 0);
             if (sizeComparison != 0) return sizeComparison;
             return a.displayName.compareTo(b.displayName);
@@ -381,6 +392,11 @@ class SimilarImagesService {
         }
         // show highest quality files first
         similarFilesList.sort((a, b) {
+          if (FavoritesService.instance.isFavoriteCache(a)) {
+            return -1;
+          } else if (FavoritesService.instance.isFavoriteCache(b)) {
+            return 1;
+          }
           final sizeComparison = (b.fileSize ?? 0).compareTo(a.fileSize ?? 0);
           if (sizeComparison != 0) return sizeComparison;
           return a.displayName.compareTo(b.displayName);
