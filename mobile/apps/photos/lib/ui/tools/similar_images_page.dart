@@ -2,6 +2,7 @@ import "dart:async";
 
 import "package:flutter/foundation.dart" show kDebugMode;
 import 'package:flutter/material.dart';
+import "package:flutter_svg/svg.dart";
 import "package:intl/intl.dart";
 import 'package:logging/logging.dart';
 import "package:photos/core/configuration.dart";
@@ -21,11 +22,11 @@ import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
-import "package:photos/ui/viewer/gallery/empty_state.dart";
 import "package:photos/utils/delete_file_util.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/standalone/data.dart";
+import "package:rive/rive.dart" show RiveAnimation;
 
 enum SimilarImagesPageState {
   setup,
@@ -41,9 +42,9 @@ enum SortKey {
 }
 
 enum TabFilter {
-  all,
-  similar,
-  identical,
+  same,
+  close,
+  related,
 }
 
 class SimilarImagesPage extends StatefulWidget {
@@ -58,8 +59,8 @@ class SimilarImagesPage extends StatefulWidget {
 class _SimilarImagesPageState extends State<SimilarImagesPage> {
   static const crossAxisCount = 3;
   static const crossAxisSpacing = 12.0;
-  static const double _similarThreshold = 0.02;
-  static const double _identicalThreshold = 0.0001;
+  static const double _closeThreshold = 0.02;
+  static const double _sameThreshold = 0.001;
 
   final _logger = Logger("SimilarImagesPage");
   bool _isDisposed = false;
@@ -71,34 +72,37 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   SortKey _sortKey = SortKey.size;
   bool _exactSearch = false;
   bool _fullRefresh = false;
-  TabFilter _selectedTab = TabFilter.identical;
+  TabFilter _selectedTab = TabFilter.same;
 
   late SelectedFiles _selectedFiles;
   late ValueNotifier<String> _deleteProgress;
 
   List<SimilarFiles> get _filteredGroups {
+    final filteredGroups = <SimilarFiles>[];
     switch (_selectedTab) {
-      case TabFilter.all:
-        return _similarFilesList;
-      case TabFilter.similar:
-        final filteredGroups = <SimilarFiles>[];
+      case TabFilter.same:
         for (final group in _similarFilesList) {
           final distance = group.furthestDistance;
-          if (distance > _identicalThreshold && distance <= _similarThreshold) {
+          if (distance <= _sameThreshold) {
             filteredGroups.add(group);
           }
         }
-        return filteredGroups;
-      case TabFilter.identical:
-        final filteredGroups = <SimilarFiles>[];
+      case TabFilter.close:
         for (final group in _similarFilesList) {
           final distance = group.furthestDistance;
-          if (distance <= _identicalThreshold) {
+          if (distance > _sameThreshold && distance <= _closeThreshold) {
             filteredGroups.add(group);
           }
         }
-        return filteredGroups;
+      case TabFilter.related:
+        for (final group in _similarFilesList) {
+          final distance = group.furthestDistance;
+          if (distance > _closeThreshold) {
+            filteredGroups.add(group);
+          }
+        }
     }
+    return filteredGroups;
   }
 
   @override
@@ -322,7 +326,28 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   }
 
   Widget _getLoadingView() {
-    return const SimilarImagesLoadingWidget();
+    final textTheme = getEnteTextTheme(context);
+
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SizedBox(
+            height: 160,
+            child: RiveAnimation.asset(
+              'assets/ducky_analyze_files.riv',
+              fit: BoxFit.contain,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            AppLocalizations.of(context).analyzingPhotosLocally,
+            style: textTheme.bodyMuted,
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _getResultsView() {
@@ -358,17 +383,39 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         _buildTabBar(),
         Expanded(
           child: _filteredGroups.isEmpty
-              ? EmptyState(
-                  text:
-                      AppLocalizations.of(context).nothingHereTryAnotherFilter,
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SvgPicture.asset(
+                          "assets/ducky_cleaning_static.svg",
+                          height: 160,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          AppLocalizations.of(context).nothingToTidyUpHere,
+                          textAlign: TextAlign.center,
+                          style: textTheme.bodyMuted,
+                        ),
+                        const SizedBox(height: 48),
+                      ],
+                    ),
+                  ),
                 )
               : ListView.builder(
                   cacheExtent: 400,
                   itemCount: _filteredGroups.length,
                   itemBuilder: (context, index) {
                     final similarFiles = _filteredGroups[index];
-                    return RepaintBoundary(
-                      child: _buildSimilarFilesGroup(similarFiles),
+                    return Column(
+                      children: [
+                        if (index == 0) const SizedBox(height: 16),
+                        RepaintBoundary(
+                          child: _buildSimilarFilesGroup(similarFiles),
+                        ),
+                      ],
                     );
                   },
                 ),
@@ -387,22 +434,22 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       child: Row(
         children: [
           _buildTabButton(
-            TabFilter.identical,
-            AppLocalizations.of(context).identical,
+            TabFilter.same,
+            AppLocalizations.of(context).same,
             colorScheme,
             textTheme,
           ),
           const SizedBox(width: crossAxisSpacing),
           _buildTabButton(
-            TabFilter.similar,
-            AppLocalizations.of(context).similar,
+            TabFilter.close,
+            AppLocalizations.of(context).close,
             colorScheme,
             textTheme,
           ),
           const SizedBox(width: crossAxisSpacing),
           _buildTabButton(
-            TabFilter.all,
-            AppLocalizations.of(context).all,
+            TabFilter.related,
+            AppLocalizations.of(context).related,
             colorScheme,
             textTheme,
           ),
@@ -1014,13 +1061,14 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         0,
         (sum, file) => sum + (file.fileSize ?? 0),
       );
-      _showCongratulationsDialog(allDeleteFiles.length, totalSize);
+      _showCongratulationsDialog(totalSize);
     }
   }
 
-  void _showCongratulationsDialog(int deletedCount, int totalSize) {
+  void _showCongratulationsDialog(int totalSize) {
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
+    final screenWidth = MediaQuery.of(context).size.width;
 
     showDialog(
       context: context,
@@ -1030,39 +1078,43 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.celebration_outlined,
-              size: 48,
-              color: colorScheme.primary500,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              AppLocalizations.of(context).greatJob,
-              style: textTheme.h3Bold,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              AppLocalizations.of(context).cleanedUpSimilarImages(
-                count: deletedCount,
-                size: formatBytes(totalSize),
+        contentPadding: const EdgeInsets.all(24),
+        content: SizedBox(
+          width: screenWidth - (crossAxisSpacing),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SvgPicture.asset(
+                "assets/ducky_cleaning_static.svg",
+                height: 160,
               ),
-              style: textTheme.body,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ButtonWidget(
-                labelText: AppLocalizations.of(context).done,
-                buttonType: ButtonType.primary,
-                onTap: () async => Navigator.of(context).pop(),
+              const SizedBox(height: 16),
+              Text(
+                AppLocalizations.of(context).hoorayyyy,
+                style: textTheme.h2Bold.copyWith(
+                  color: colorScheme.primary500,
+                ),
+                textAlign: TextAlign.center,
               ),
-            ),
-          ],
+              const SizedBox(height: 8),
+              Text(
+                AppLocalizations.of(context).cleanedUpSimilarImages(
+                  size: formatBytes(totalSize),
+                ),
+                style: textTheme.body,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 36),
+              SizedBox(
+                width: double.infinity,
+                child: ButtonWidget(
+                  labelText: AppLocalizations.of(context).done,
+                  buttonType: ButtonType.primary,
+                  onTap: () async => Navigator.of(context).pop(),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1133,248 +1185,6 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
           );
         });
       },
-    );
-  }
-}
-
-class SimilarImagesLoadingWidget extends StatefulWidget {
-  const SimilarImagesLoadingWidget({super.key});
-
-  @override
-  State<SimilarImagesLoadingWidget> createState() =>
-      _SimilarImagesLoadingWidgetState();
-}
-
-class _SimilarImagesLoadingWidgetState extends State<SimilarImagesLoadingWidget>
-    with TickerProviderStateMixin {
-  late AnimationController _loadingAnimationController;
-  late AnimationController _pulseAnimationController;
-  late Animation<double> _scaleAnimation;
-  late Animation<double> _pulseAnimation;
-  int _loadingMessageIndex = 0;
-
-  List<String> get _loadingMessages => [
-        AppLocalizations.of(context).analyzingPhotosLocally,
-        AppLocalizations.of(context).lookingForVisualSimilarities,
-        AppLocalizations.of(context).comparingImageDetails,
-        AppLocalizations.of(context).findingSimilarImages,
-        AppLocalizations.of(context).almostDone,
-      ];
-
-  @override
-  void initState() {
-    super.initState();
-
-    // Initialize loading animations
-    _loadingAnimationController = AnimationController(
-      duration: const Duration(seconds: 2),
-      vsync: this,
-    )..repeat();
-
-    _pulseAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
-      vsync: this,
-    )..repeat(reverse: true);
-
-    _scaleAnimation = Tween<double>(
-      begin: 0.8,
-      end: 1.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _pulseAnimationController,
-        curve: Curves.easeInOut,
-      ),
-    );
-
-    _pulseAnimation = Tween<double>(
-      begin: 0.4,
-      end: 1.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _pulseAnimationController,
-        curve: Curves.easeInOut,
-      ),
-    );
-
-    _startMessageCycling();
-  }
-
-  void _startMessageCycling() {
-    Future.doWhile(() async {
-      if (!mounted) return false;
-      await Future.delayed(const Duration(seconds: 7));
-      if (mounted) {
-        setState(() {
-          _loadingMessageIndex++;
-        });
-        // Stop cycling after reaching the last message
-        return _loadingMessageIndex < _loadingMessages.length - 1;
-      }
-      return false;
-    });
-  }
-
-  @override
-  void dispose() {
-    _loadingAnimationController.dispose();
-    _pulseAnimationController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
-    final colorScheme = getEnteColorScheme(context);
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Animated scanning effect
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              // Pulsing background circle
-              AnimatedBuilder(
-                animation: _pulseAnimation,
-                builder: (context, child) {
-                  return Container(
-                    width: 160,
-                    height: 160,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: colorScheme.primary500.withValues(
-                        alpha: _pulseAnimation.value * 0.1,
-                      ),
-                    ),
-                  );
-                },
-              ),
-              // Rotating scanner ring
-              AnimatedBuilder(
-                animation: _loadingAnimationController,
-                builder: (context, child) {
-                  return Transform.rotate(
-                    angle: _loadingAnimationController.value * 2 * 3.14159,
-                    child: Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: colorScheme.primary500,
-                          width: 2,
-                        ),
-                        gradient: SweepGradient(
-                          colors: [
-                            colorScheme.primary500.withValues(alpha: 0),
-                            colorScheme.primary500.withValues(alpha: 0.3),
-                            colorScheme.primary500.withValues(alpha: 0.6),
-                            colorScheme.primary500,
-                            colorScheme.primary500.withValues(alpha: 0),
-                          ],
-                          stops: const [0.0, 0.25, 0.5, 0.75, 1.0],
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-              // Center icon with scale animation
-              AnimatedBuilder(
-                animation: _scaleAnimation,
-                builder: (context, child) {
-                  return Transform.scale(
-                    scale: _scaleAnimation.value,
-                    child: Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: colorScheme.backgroundElevated,
-                        boxShadow: [
-                          BoxShadow(
-                            color: colorScheme.strokeFaint,
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        Icons.photo_library_outlined,
-                        size: 40,
-                        color: colorScheme.primary500,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-          const SizedBox(height: 48),
-          // Privacy badge
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: colorScheme.fillFaint,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.lock_outline,
-                  size: 14,
-                  color: colorScheme.textMuted,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  AppLocalizations.of(context).processingLocally,
-                  style: textTheme.miniFaint,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          // Animated loading message
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 500),
-            child: Text(
-              _loadingMessages[_loadingMessageIndex],
-              key: ValueKey(_loadingMessageIndex),
-              style: textTheme.body,
-              textAlign: TextAlign.center,
-            ),
-          ),
-          const SizedBox(height: 8),
-          // Progress dots
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: List.generate(
-              3,
-              (index) => AnimatedBuilder(
-                animation: _loadingAnimationController,
-                builder: (context, child) {
-                  final delay = index * 0.2;
-                  final value =
-                      (_loadingAnimationController.value + delay) % 1.0;
-                  return Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: colorScheme.primary500.withValues(
-                        alpha: value < 0.5 ? value * 2 : 2 - value * 2,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
