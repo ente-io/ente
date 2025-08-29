@@ -1,3 +1,4 @@
+- Ashil: Revert increase in cache extent for gallery - to check if thumbnail not loading regression resolves
 - Similar images design changes. Also changed the vectorDB index file name, so internal users will have another migration (long loading time). 
 - Ashil: New ducky icon in icon switcher
 - Prateek: Enable immediate manual video stream processing by bypassing user interaction timer
