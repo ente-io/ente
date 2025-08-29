@@ -279,17 +279,23 @@ class ClipVectorDB {
     }
   }
 
-  Future<void> deleteIndexFile() async {
+  Future<void> deleteIndexFile({bool undoMigration = false}) async {
     try {
       final documentsDirectory = await getApplicationDocumentsDirectory();
-      final String dbPath =
-          join(documentsDirectory.path, _databaseName);
+      final String dbPath = join(documentsDirectory.path, _databaseName);
       _logger.info("Delete index file: DB path " + dbPath);
       final file = File(dbPath);
       if (await file.exists()) {
         await file.delete();
       }
       _logger.info("Deleted index file on disk");
+      _vectorDbFuture = null;
+      if (undoMigration) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool(_kMigrationKey, false);
+        _migrationDone = false;
+        _logger.info("Undid migration flag");
+      }
     } catch (e, s) {
       _logger.severe("Error deleting index file on disk", e, s);
       rethrow;

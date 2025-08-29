@@ -86,6 +86,24 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
+            title: "Clear vectorDB index",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              await ClipVectorDB.instance.deleteIndexFile(undoMigration: true);
+              showShortToast(context, 'Deleted vectorDB index');
+            } catch (e, s) {
+              logger.severe('vectorDB index delete failed ', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
             title: "Show pending notifications",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
