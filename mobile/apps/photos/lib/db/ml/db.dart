@@ -1323,6 +1323,9 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
             embeddings.add(Float32List.view(result[embeddingColumn].buffer));
           } else {
             weirdCount++;
+            _logger.warning(
+              "Weird clip embedding length ${embedding.length} for fileID ${result[fileIDColumn]}, skipping",
+            );
           }
         }
         _logger.info(
