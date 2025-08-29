@@ -2,6 +2,7 @@ import "dart:async";
 
 import "package:flutter/foundation.dart" show kDebugMode;
 import 'package:flutter/material.dart';
+import "package:flutter_spinkit/flutter_spinkit.dart" show SpinKitFadingCircle;
 import "package:flutter_svg/svg.dart";
 import "package:intl/intl.dart";
 import 'package:logging/logging.dart';
@@ -57,7 +58,8 @@ class SimilarImagesPage extends StatefulWidget {
   State<SimilarImagesPage> createState() => _SimilarImagesPageState();
 }
 
-class _SimilarImagesPageState extends State<SimilarImagesPage> {
+class _SimilarImagesPageState extends State<SimilarImagesPage>
+    with SingleTickerProviderStateMixin {
   static const crossAxisCount = 3;
   static const crossAxisSpacing = 12.0;
   static const double _closeThreshold = 0.02;
@@ -78,6 +80,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   late SelectedFiles _selectedFiles;
   late ValueNotifier<String> _deleteProgress;
   late ScrollController _scrollController;
+  late AnimationController deleteAnimationController;
 
   List<SimilarFiles> get _filteredGroups {
     final filteredGroups = <SimilarFiles>[];
@@ -113,6 +116,10 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     _selectedFiles = SelectedFiles();
     _deleteProgress = ValueNotifier("");
     _scrollController = ScrollController();
+    deleteAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    );
 
     if (!widget.debugScreen) {
       _findSimilarImages();
@@ -125,6 +132,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     _selectedFiles.dispose();
     _deleteProgress.dispose();
     _scrollController.dispose();
+    deleteAnimationController.dispose();
     super.dispose();
   }
 
@@ -156,52 +164,59 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         ValueListenableBuilder(
           valueListenable: _deleteProgress,
           builder: (context, value, child) {
-            if (value.isEmpty) {
-              return const SizedBox.shrink();
-            }
-
             final colorScheme = getEnteColorScheme(context);
             final textTheme = getEnteTextTheme(context);
+            final fontFeatures = textTheme.small.fontFeatures ?? [];
 
-            return Container(
-              color: colorScheme.backgroundBase.withValues(alpha: 0.8),
-              child: Center(
+            return AnimatedCrossFade(
+              firstCurve: Curves.easeInOutExpo,
+              secondCurve: Curves.easeInOutExpo,
+              sizeCurve: Curves.easeInOutExpo,
+              crossFadeState: value.isEmpty
+                  ? CrossFadeState.showFirst
+                  : CrossFadeState.showSecond,
+              duration: const Duration(milliseconds: 400),
+              secondChild: Align(
+                alignment: Alignment.center,
                 child: Container(
+                  height: 42,
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12)
+                          .copyWith(left: 14),
                   decoration: BoxDecoration(
-                    color: colorScheme.backgroundElevated,
                     borderRadius: BorderRadius.circular(8),
-                    boxShadow: [
-                      BoxShadow(
-                        color: colorScheme.strokeFaint,
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
+                    color: Colors.black.withValues(alpha: 0.72),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor:
-                              AlwaysStoppedAnimation(colorScheme.primary500),
+                        child: SpinKitFadingCircle(
+                          size: 18,
+                          color: colorScheme.warning500,
+                          controller: deleteAnimationController,
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 8),
                       Text(
-                        AppLocalizations.of(context)
-                            .deletingProgress(progress: value),
-                        style: textTheme.body,
+                        AppLocalizations.of(context).deletingDash,
+                        style: textTheme.small.copyWith(color: Colors.white),
+                      ),
+                      Text(
+                        value,
+                        style: textTheme.small.copyWith(
+                          color: Colors.white,
+                          fontFeatures: [
+                            const FontFeature.tabularFigures(),
+                            ...fontFeatures,
+                          ],
+                        ),
                       ),
                     ],
                   ),
                 ),
               ),
+              firstChild: const SizedBox.shrink(),
             );
           },
         ),
