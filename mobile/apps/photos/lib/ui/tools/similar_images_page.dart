@@ -77,6 +77,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
 
   late SelectedFiles _selectedFiles;
   late ValueNotifier<String> _deleteProgress;
+  late ScrollController _scrollController;
 
   List<SimilarFiles> get _filteredGroups {
     final filteredGroups = <SimilarFiles>[];
@@ -111,6 +112,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     super.initState();
     _selectedFiles = SelectedFiles();
     _deleteProgress = ValueNotifier("");
+    _scrollController = ScrollController();
 
     if (!widget.debugScreen) {
       _findSimilarImages();
@@ -122,6 +124,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     _isDisposed = true;
     _selectedFiles.dispose();
     _deleteProgress.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -385,6 +388,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                   ),
                 )
               : ListView.builder(
+                  controller: _scrollController,
                   cacheExtent: 400,
                   itemCount: _filteredGroups.length,
                   itemBuilder: (context, index) {
@@ -558,6 +562,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                                     selectedFilteredFiles,
                                     showDialog: true,
                                     showUIFeedback: true,
+                                    scrollToTop: true,
                                   );
                                 },
                               ),
@@ -922,6 +927,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     Set<EnteFile> filesToDelete, {
     bool showDialog = true,
     bool showUIFeedback = true,
+    bool scrollToTop = false,
   }) async {
     if (filesToDelete.isEmpty) return;
     if (showDialog) {
@@ -937,6 +943,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
               filesToDelete,
               true,
               showUIFeedback: showUIFeedback,
+              scrollToTop: scrollToTop,
             );
           } catch (e, s) {
             _logger.severe("Failed to delete files", e, s);
@@ -951,6 +958,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         filesToDelete,
         true,
         showUIFeedback: showUIFeedback,
+        scrollToTop: scrollToTop,
       );
     }
   }
@@ -959,6 +967,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     Set<EnteFile> filesToDelete,
     bool createSymlink, {
     bool showUIFeedback = true,
+    bool scrollToTop = false,
   }) async {
     if (filesToDelete.isEmpty) {
       return;
@@ -1040,6 +1049,15 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     _selectedFiles.unSelectAll(allDeleteFiles);
     setState(() {});
     await deleteFilesFromRemoteOnly(context, allDeleteFiles.toList());
+
+    // Scroll to top if requested
+    if (scrollToTop && mounted) {
+      await _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeOutCubic,
+      );
+    }
 
     // Show congratulations popup
     if (allDeleteFiles.length > 100 && mounted && showUIFeedback) {
