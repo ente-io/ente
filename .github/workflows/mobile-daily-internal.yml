@@ -27,6 +27,50 @@ jobs:
               with:
                   submodules: recursive
 
+            - name: Free up disk space
+              run: |
+                  echo "Initial disk usage:"
+                  df -h /
+                  INITIAL=$(df / | awk 'NR==2 {print $4}' | sed 's/G//')
+                  
+                  echo -e "\n=== Removing .NET SDK (~20-25GB) ==="
+                  BEFORE=$(df / | awk 'NR==2 {print $4}' | sed 's/G//')
+                  START=$(date +%s)
+                  sudo rm -rf /usr/share/dotnet
+                  END=$(date +%s)
+                  AFTER=$(df / | awk 'NR==2 {print $4}' | sed 's/G//')
+                  echo "Time: $((END-START))s | Freed: $(echo "$AFTER - $BEFORE" | bc)GB"
+                  
+                  echo -e "\n=== Removing Haskell (~5-8GB) ==="
+                  BEFORE=$(df / | awk 'NR==2 {print $4}' | sed 's/G//')
+                  START=$(date +%s)
+                  sudo rm -rf /opt/ghc
+                  END=$(date +%s)
+                  AFTER=$(df / | awk 'NR==2 {print $4}' | sed 's/G//')
+                  echo "Time: $((END-START))s | Freed: $(echo "$AFTER - $BEFORE" | bc)GB"
+                  
+                  echo -e "\n=== Removing Boost (~1-2GB) ==="
+                  BEFORE=$(df / | awk 'NR==2 {print $4}' | sed 's/G//')
+                  START=$(date +%s)
+                  sudo rm -rf "/usr/local/share/boost"
+                  END=$(date +%s)
+                  AFTER=$(df / | awk 'NR==2 {print $4}' | sed 's/G//')
+                  echo "Time: $((END-START))s | Freed: $(echo "$AFTER - $BEFORE" | bc)GB"
+                  
+                  echo -e "\n=== Removing cached tools (~5-10GB) ==="
+                  BEFORE=$(df / | awk 'NR==2 {print $4}' | sed 's/G//')
+                  START=$(date +%s)
+                  sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+                  END=$(date +%s)
+                  AFTER=$(df / | awk 'NR==2 {print $4}' | sed 's/G//')
+                  echo "Time: $((END-START))s | Freed: $(echo "$AFTER - $BEFORE" | bc)GB"
+                  
+                  echo -e "\n=== Final Summary ==="
+                  FINAL=$(df / | awk 'NR==2 {print $4}' | sed 's/G//')
+                  echo "Total space freed: $(echo "$FINAL - $INITIAL" | bc)GB"
+                  echo "Final disk usage:"
+                  df -h /
+
             - name: Setup JDK 17
               uses: actions/setup-java@v1
               with:
