@@ -260,6 +260,9 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     await db.execute(deleteNotPersonFeedbackTable);
     await db.execute(deleteClipEmbeddingsTable);
     await db.execute(deleteFileDataTable);
+    if (await ClipVectorDB.instance.checkIfMigrationDone()) {
+      await ClipVectorDB.instance.deleteIndexFile();
+    }
   }
 
   @override
