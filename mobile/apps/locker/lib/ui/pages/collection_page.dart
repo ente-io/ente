@@ -38,12 +38,15 @@ class CollectionPage extends UploaderPage {
 class _CollectionPageState extends UploaderPageState<CollectionPage>
     with SearchMixin {
   final _logger = Logger("CollectionPage");
+  late StreamSubscription<CollectionsUpdatedEvent>
+      _collectionUpdateSubscription;
 
   late Collection _collection;
   List<EnteFile> _files = [];
   List<EnteFile> _filteredFiles = [];
   late CollectionViewType collectionViewType;
   bool isQuickLink = false;
+  bool showFAB = true;
 
   @override
   void onFileUploadComplete() {
@@ -82,6 +85,12 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
     }
   }
 
+  @override
+  void dispose() {
+    _collectionUpdateSubscription.cancel();
+    super.dispose();
+  }
+
   List<EnteFile> get _displayedFiles =>
       isSearchActive ? _filteredFiles : _files;
 
@@ -89,18 +98,40 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
   void initState() {
     super.initState();
     _initializeData(widget.collection);
-    Bus.instance.on<CollectionsUpdatedEvent>().listen((event) async {
-      final collection = (await CollectionService.instance.getCollections())
-          .where(
-            (c) => c.id == widget.collection.id,
-          )
-          .first;
-      await _initializeData(collection);
+    _collectionUpdateSubscription =
+        Bus.instance.on<CollectionsUpdatedEvent>().listen((event) async {
+      if (!mounted) return;
+
+      try {
+        final collections = await CollectionService.instance.getCollections();
+
+        final matchingCollection = collections.where(
+          (c) => c.id == widget.collection.id,
+        );
+
+        if (matchingCollection.isNotEmpty) {
+          await _initializeData(matchingCollection.first);
+        } else {
+          _logger.warning(
+            'Collection ${widget.collection.id} no longer exists, navigating back',
+          );
+          if (mounted) {
+            Navigator.of(context).pop();
+          }
+        }
+      } catch (e) {
+        _logger.severe('Error updating collection: $e');
+      }
     });
+
     collectionViewType = getCollectionViewType(
       _collection,
       Configuration.instance.getUserID()!,
     );
+
+    showFAB = collectionViewType == CollectionViewType.ownedCollection ||
+        collectionViewType == CollectionViewType.hiddenOwnedCollection ||
+        collectionViewType == CollectionViewType.quickLink;
   }
 
   Future<void> _initializeData(Collection collection) async {
@@ -167,6 +198,13 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
     }
   }
 
+  Future<void> _leaveCollection() async {
+    await CollectionActions.leaveCollection(
+      context,
+      _collection,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return KeyboardListener(
@@ -218,33 +256,53 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
           case 'delete':
             _deleteCollection();
             break;
+          case 'leave_collection':
+            _leaveCollection();
+            break;
         }
       },
       itemBuilder: (BuildContext context) {
         return [
-          PopupMenuItem<String>(
-            value: 'edit',
-            child: Row(
-              children: [
-                const Icon(Icons.edit),
-                const SizedBox(width: 12),
-                Text(context.l10n.edit),
-              ],
+          if (collectionViewType == CollectionViewType.ownedCollection ||
+              collectionViewType == CollectionViewType.hiddenOwnedCollection ||
+              collectionViewType == CollectionViewType.quickLink)
+            PopupMenuItem<String>(
+              value: 'edit',
+              child: Row(
+                children: [
+                  const Icon(Icons.edit),
+                  const SizedBox(width: 12),
+                  Text(context.l10n.edit),
+                ],
+              ),
             ),
-          ),
-          PopupMenuItem<String>(
-            value: 'delete',
-            child: Row(
-              children: [
-                const Icon(Icons.delete, color: Colors.red),
-                const SizedBox(width: 12),
-                Text(
-                  context.l10n.delete,
-                  style: const TextStyle(color: Colors.red),
-                ),
-              ],
+          if (collectionViewType == CollectionViewType.ownedCollection ||
+              collectionViewType == CollectionViewType.hiddenOwnedCollection ||
+              collectionViewType == CollectionViewType.quickLink)
+            PopupMenuItem<String>(
+              value: 'delete',
+              child: Row(
+                children: [
+                  const Icon(Icons.delete, color: Colors.red),
+                  const SizedBox(width: 12),
+                  Text(
+                    context.l10n.delete,
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                ],
+              ),
             ),
-          ),
+          if (collectionViewType == CollectionViewType.sharedCollection)
+            PopupMenuItem<String>(
+              value: 'leave_collection',
+              child: Row(
+                children: [
+                  const Icon(Icons.logout),
+                  const SizedBox(width: 12),
+                  Text(context.l10n.leaveCollection),
+                ],
+              ),
+            ),
         ];
       },
     );
@@ -329,10 +387,12 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
   }
 
   Widget _buildFAB() {
-    return FloatingActionButton(
-      onPressed: addFile,
-      tooltip: context.l10n.addFiles,
-      child: const Icon(Icons.add),
-    );
+    return showFAB
+        ? FloatingActionButton(
+            onPressed: addFile,
+            tooltip: context.l10n.addFiles,
+            child: const Icon(Icons.add),
+          )
+        : const SizedBox.shrink();
   }
 }

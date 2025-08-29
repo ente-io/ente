@@ -1,8 +1,11 @@
-
+import "package:ente_events/event_bus.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
+import "package:locker/events/collections_updated_event.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/collections/models/collection.dart";
+import "package:locker/services/collections/models/collection_view_type.dart";
+import "package:locker/services/configuration.dart";
 import "package:locker/ui/components/item_list_view.dart";
 import "package:locker/ui/pages/collection_page.dart";
 import "package:locker/utils/collection_actions.dart";
@@ -34,7 +37,7 @@ class CollectionRowWidget extends StatelessWidget {
               ? null
               : Border(
                   bottom: BorderSide(
-                    color: Theme.of(context).dividerColor.withOpacity(0.3),
+                    color: Theme.of(context).dividerColor.withAlpha(30),
                     width: 0.5,
                   ),
                 ),
@@ -87,51 +90,74 @@ class CollectionRowWidget extends StatelessWidget {
                 size: 20,
               ),
               itemBuilder: (BuildContext context) {
-                if (overflowActions != null && overflowActions!.isNotEmpty) {
-                  return overflowActions!
-                      .map(
-                        (action) => PopupMenuItem<String>(
-                          value: action.id,
-                          child: Row(
-                            children: [
-                              Icon(action.icon, size: 16),
-                              const SizedBox(width: 8),
-                              Text(action.label),
-                            ],
-                          ),
-                        ),
-                      )
-                      .toList();
-                } else {
-                  return [
-                    PopupMenuItem<String>(
-                      value: 'edit',
-                      child: Row(
-                        children: [
-                          const Icon(Icons.edit, size: 16),
-                          const SizedBox(width: 8),
-                          Text(context.l10n.edit),
-                        ],
-                      ),
-                    ),
-                    PopupMenuItem<String>(
-                      value: 'delete',
-                      child: Row(
-                        children: [
-                          const Icon(Icons.delete, size: 16),
-                          const SizedBox(width: 8),
-                          Text(context.l10n.delete),
-                        ],
-                      ),
-                    ),
-                  ];
-                }
+                return _buildPopupMenuItems(context);
               },
             ),
           ],
         ),
       ),
     );
+  }
+
+  List<PopupMenuItem<String>> _buildPopupMenuItems(BuildContext context) {
+    final collectionViewType =
+        getCollectionViewType(collection, Configuration.instance.getUserID()!);
+    if (overflowActions != null && overflowActions!.isNotEmpty) {
+      return overflowActions!
+          .map(
+            (action) => PopupMenuItem<String>(
+              value: action.id,
+              child: Row(
+                children: [
+                  Icon(action.icon, size: 16),
+                  const SizedBox(width: 8),
+                  Text(action.label),
+                ],
+              ),
+            ),
+          )
+          .toList();
+    } else {
+      return [
+        if (collectionViewType == CollectionViewType.ownedCollection ||
+            collectionViewType == CollectionViewType.hiddenOwnedCollection ||
+            collectionViewType == CollectionViewType.quickLink)
+          PopupMenuItem<String>(
+            value: 'edit',
+            child: Row(
+              children: [
+                const Icon(Icons.edit, size: 16),
+                const SizedBox(width: 8),
+                Text(context.l10n.edit),
+              ],
+            ),
+          ),
+        if (collectionViewType == CollectionViewType.ownedCollection ||
+            collectionViewType == CollectionViewType.hiddenOwnedCollection ||
+            collectionViewType == CollectionViewType.quickLink)
+          PopupMenuItem<String>(
+            value: 'delete',
+            child: Row(
+              children: [
+                const Icon(Icons.delete, size: 16),
+                const SizedBox(width: 8),
+                Text(context.l10n.delete),
+              ],
+            ),
+          ),
+        if (collectionViewType == CollectionViewType.sharedCollection)
+          PopupMenuItem<String>(
+            value: 'leave_collection',
+            child: Row(
+              children: [
+                const Icon(Icons.logout),
+                const SizedBox(width: 12),
+                Text(context.l10n.leaveCollection),
+              ],
+            ),
+          ),
+      ];
+    }
   }
 
   void _handleMenuAction(BuildContext context, String action) {
@@ -148,6 +174,9 @@ class CollectionRowWidget extends StatelessWidget {
           break;
         case 'delete':
           _deleteCollection(context);
+          break;
+        case 'leave_collection':
+          _leaveCollection(context);
           break;
       }
     }
@@ -166,6 +195,16 @@ class CollectionRowWidget extends StatelessWidget {
       MaterialPageRoute(
         builder: (context) => CollectionPage(collection: collection),
       ),
+    );
+  }
+
+  Future<void> _leaveCollection(BuildContext context) async {
+    await CollectionActions.leaveCollection(
+      context,
+      collection,
+      onSuccess: () {
+        Bus.instance.fire(CollectionsUpdatedEvent());
+      },
     );
   }
 }
