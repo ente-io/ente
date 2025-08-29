@@ -31,43 +31,49 @@ jobs:
               run: |
                   echo "Initial disk usage:"
                   df -h /
-                  INITIAL=$(df / | awk 'NR==2 {print $4}' | sed 's/G//')
+                  # Get available space in KB
+                  INITIAL=$(df / | awk 'NR==2 {print $4}')
                   
                   echo -e "\n=== Removing .NET SDK (~20-25GB) ==="
-                  BEFORE=$(df / | awk 'NR==2 {print $4}' | sed 's/G//')
+                  BEFORE=$(df / | awk 'NR==2 {print $4}')
                   START=$(date +%s)
                   sudo rm -rf /usr/share/dotnet
                   END=$(date +%s)
-                  AFTER=$(df / | awk 'NR==2 {print $4}' | sed 's/G//')
-                  echo "Time: $((END-START))s | Freed: $(echo "$AFTER - $BEFORE" | bc)GB"
+                  AFTER=$(df / | awk 'NR==2 {print $4}')
+                  FREED=$(( (AFTER - BEFORE) / 1048576 ))  # Convert KB to GB
+                  echo "Time: $((END-START))s | Freed: ${FREED}GB"
                   
                   echo -e "\n=== Removing Haskell (~5-8GB) ==="
-                  BEFORE=$(df / | awk 'NR==2 {print $4}' | sed 's/G//')
+                  BEFORE=$(df / | awk 'NR==2 {print $4}')
                   START=$(date +%s)
                   sudo rm -rf /opt/ghc
                   END=$(date +%s)
-                  AFTER=$(df / | awk 'NR==2 {print $4}' | sed 's/G//')
-                  echo "Time: $((END-START))s | Freed: $(echo "$AFTER - $BEFORE" | bc)GB"
+                  AFTER=$(df / | awk 'NR==2 {print $4}')
+                  FREED=$(( (AFTER - BEFORE) / 1048576 ))
+                  echo "Time: $((END-START))s | Freed: ${FREED}GB"
                   
                   echo -e "\n=== Removing Boost (~1-2GB) ==="
-                  BEFORE=$(df / | awk 'NR==2 {print $4}' | sed 's/G//')
+                  BEFORE=$(df / | awk 'NR==2 {print $4}')
                   START=$(date +%s)
                   sudo rm -rf "/usr/local/share/boost"
                   END=$(date +%s)
-                  AFTER=$(df / | awk 'NR==2 {print $4}' | sed 's/G//')
-                  echo "Time: $((END-START))s | Freed: $(echo "$AFTER - $BEFORE" | bc)GB"
+                  AFTER=$(df / | awk 'NR==2 {print $4}')
+                  FREED=$(( (AFTER - BEFORE) / 1048576 ))
+                  echo "Time: $((END-START))s | Freed: ${FREED}GB"
                   
                   echo -e "\n=== Removing cached tools (~5-10GB) ==="
-                  BEFORE=$(df / | awk 'NR==2 {print $4}' | sed 's/G//')
+                  BEFORE=$(df / | awk 'NR==2 {print $4}')
                   START=$(date +%s)
                   sudo rm -rf "$AGENT_TOOLSDIRECTORY"
                   END=$(date +%s)
-                  AFTER=$(df / | awk 'NR==2 {print $4}' | sed 's/G//')
-                  echo "Time: $((END-START))s | Freed: $(echo "$AFTER - $BEFORE" | bc)GB"
+                  AFTER=$(df / | awk 'NR==2 {print $4}')
+                  FREED=$(( (AFTER - BEFORE) / 1048576 ))
+                  echo "Time: $((END-START))s | Freed: ${FREED}GB"
                   
                   echo -e "\n=== Final Summary ==="
-                  FINAL=$(df / | awk 'NR==2 {print $4}' | sed 's/G//')
-                  echo "Total space freed: $(echo "$FINAL - $INITIAL" | bc)GB"
+                  FINAL=$(df / | awk 'NR==2 {print $4}')
+                  TOTAL_FREED=$(( (FINAL - INITIAL) / 1048576 ))
+                  echo "Total space freed: ${TOTAL_FREED}GB"
                   echo "Final disk usage:"
                   df -h /
 
