@@ -315,6 +315,14 @@ async fn update_account(storage: &Storage, email: &str, dir: &str, app_str: &str
         }
     };
 
+    // Check if account exists
+    if storage.accounts().get(email, app)?.is_none() {
+        return Err(crate::models::error::Error::NotFound(format!(
+            "Account not found: {} (app: {:?})",
+            email, app
+        )));
+    }
+
     // Validate export directory
     let export_path = PathBuf::from(dir);
     if !export_path.exists() {

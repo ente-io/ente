@@ -71,21 +71,36 @@ impl<'a> AccountStore<'a> {
     pub fn update_export_dir(&self, email: &str, app: App, export_dir: &str) -> Result<()> {
         let now = current_timestamp();
 
-        self.conn.execute(
+        let rows_affected = self.conn.execute(
             "UPDATE accounts SET export_dir = ?1, updated_at = ?2 
              WHERE email = ?3 AND app = ?4",
             params![export_dir, now, email, format!("{app:?}").to_lowercase()],
         )?;
+
+        if rows_affected == 0 {
+            return Err(crate::Error::NotFound(format!(
+                "Account not found: {} (app: {:?})",
+                email, app
+            )));
+        }
 
         Ok(())
     }
 
     /// Delete an account
     pub fn delete(&self, user_id: i64, app: App) -> Result<()> {
-        self.conn.execute(
+        let rows_affected = self.conn.execute(
             "DELETE FROM accounts WHERE user_id = ?1 AND app = ?2",
             params![user_id, format!("{app:?}").to_lowercase()],
         )?;
+
+        if rows_affected == 0 {
+            return Err(crate::Error::NotFound(format!(
+                "Account not found: user_id={} (app: {:?})",
+                user_id, app
+            )));
+        }
+
         Ok(())
     }
 
