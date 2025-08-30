@@ -17,6 +17,8 @@ class WiFiUnavailableError extends Error {}
 
 class SilentlyCancelUploadsError extends Error {}
 
+class SharingNotPermittedForFreeAccountsError extends Error {}
+
 class InvalidFileError extends ArgumentError {
   final InvalidReason reason;
 

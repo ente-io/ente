@@ -1,16 +1,22 @@
+import "dart:async";
 import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import "package:ente_events/event_bus.dart";
 import 'package:ente_network/network.dart';
 import 'package:locker/core/errors.dart';
+import "package:locker/events/collections_updated_event.dart";
+import "package:locker/services/collections/collections_db.dart";
 import "package:locker/services/collections/collections_service.dart";
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/collections/models/collection_file_item.dart';
 import 'package:locker/services/collections/models/collection_magic.dart';
 import 'package:locker/services/collections/models/diff.dart';
+import "package:locker/services/collections/models/public_url.dart";
+import "package:locker/services/collections/models/user.dart";
 import 'package:locker/services/configuration.dart';
 import "package:locker/services/files/sync/metadata_updater_service.dart";
 import 'package:locker/services/files/sync/models/file.dart';
@@ -29,7 +35,11 @@ class CollectionApiClient {
   final _enteDio = Network.instance.enteDio;
   final _config = Configuration.instance;
 
-  Future<void> init() async {}
+  late CollectionDB _db;
+
+  Future<void> init() async {
+    _db = CollectionDB.instance;
+  }
 
   Future<List<Collection>> getCollections(int sinceTime) async {
     try {
@@ -159,6 +169,26 @@ class CollectionApiClient {
       _logger.warning("failed to rename collection", e);
       rethrow;
     }
+  }
+
+  Future<void> leaveCollection(Collection collection) async {
+    try {
+      await _enteDio.post(
+        "/collections/leave/${collection.id}",
+      );
+      await _handleCollectionDeletion(collection);
+    } catch (e, s) {
+      _logger.severe("failed to leave collection", e, s);
+      rethrow;
+    }
+  }
+
+  Future<void> _handleCollectionDeletion(Collection collection) async {
+    await _db.deleteCollection(collection);
+    final deletedCollection = collection.copyWith(isDeleted: true);
+    unawaited(_db.updateCollections([deletedCollection]));
+    CollectionService.instance.updateCollectionCache(deletedCollection);
+    await CollectionService.instance.sync();
   }
 
   Future<void> move(
@@ -393,6 +423,140 @@ class CollectionApiClient {
       final collection = await _fromRemoteCollection(collectionData);
       return collection;
     });
+  }
+
+  Future<void> createShareUrl(
+    Collection collection, {
+    bool enableCollect = false,
+  }) async {
+    try {
+      final response = await _enteDio.post(
+        '/collections/share-url',
+        data: {
+          'collectionID': collection.id,
+          "enableCollect": enableCollect,
+          "enableJoin": true,
+          'app': 'locker',
+        },
+      );
+      collection.publicURLs.add(PublicURL.fromMap(response.data["result"]));
+      await _db.updateCollections([collection]);
+      CollectionService.instance.updateCollectionCache(collection);
+      Bus.instance.fire(CollectionsUpdatedEvent());
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 402) {
+        throw SharingNotPermittedForFreeAccountsError();
+      }
+      rethrow;
+    } catch (e, s) {
+      _logger.severe("failed to rename collection", e, s);
+      rethrow;
+    }
+  }
+
+  Future<void> disableShareUrl(Collection collection) async {
+    try {
+      await _enteDio.delete(
+        "/collections/share-url/" + collection.id.toString(),
+      );
+      collection.publicURLs.clear();
+      await _db.updateCollections(List.from([collection]));
+      CollectionService.instance.updateCollectionCache(collection);
+      Bus.instance.fire(CollectionsUpdatedEvent());
+    } on DioException catch (e) {
+      _logger.info(e);
+      rethrow;
+    }
+  }
+
+  Future<void> updateShareUrl(
+    Collection collection,
+    Map<String, dynamic> prop,
+  ) async {
+    prop.putIfAbsent('collectionID', () => collection.id);
+    try {
+      final response = await _enteDio.put(
+        "/collections/share-url",
+        data: json.encode(prop),
+      );
+      // remove existing url information
+      collection.publicURLs.clear();
+      collection.publicURLs.add(PublicURL.fromMap(response.data["result"]));
+      await _db.updateCollections(List.from([collection]));
+      CollectionService.instance.updateCollectionCache(collection);
+      Bus.instance.fire(CollectionsUpdatedEvent());
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 402) {
+        throw SharingNotPermittedForFreeAccountsError();
+      }
+      rethrow;
+    } catch (e, s) {
+      _logger.severe("failed to update ShareUrl", e, s);
+      rethrow;
+    }
+  }
+
+  Future<List<User>> share(
+    int collectionID,
+    String email,
+    String publicKey,
+    CollectionParticipantRole role,
+  ) async {
+    final collectionKey =
+        CollectionService.instance.getCollectionKey(collectionID);
+    final encryptedKey = CryptoUtil.sealSync(
+      collectionKey,
+      CryptoUtil.base642bin(publicKey),
+    );
+    try {
+      final response = await _enteDio.post(
+        "/collections/share",
+        data: {
+          "collectionID": collectionID,
+          "email": email,
+          "encryptedKey": CryptoUtil.bin2base64(encryptedKey),
+          "role": role.toStringVal(),
+        },
+      );
+      final sharees = <User>[];
+      for (final user in response.data["sharees"]) {
+        sharees.add(User.fromMap(user));
+      }
+      final collection = CollectionService.instance.getFromCache(collectionID);
+      final updatedCollection = collection!.copyWith(sharees: sharees);
+      CollectionService.instance.updateCollectionCache(updatedCollection);
+      unawaited(_db.updateCollections([updatedCollection]));
+      return sharees;
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 402) {
+        throw SharingNotPermittedForFreeAccountsError();
+      }
+      rethrow;
+    }
+  }
+
+  Future<List<User>> unshare(int collectionID, String email) async {
+    try {
+      final response = await _enteDio.post(
+        "/collections/unshare",
+        data: {
+          "collectionID": collectionID,
+          "email": email,
+        },
+      );
+      final sharees = <User>[];
+      for (final user in response.data["sharees"]) {
+        sharees.add(User.fromMap(user));
+      }
+      final collection = CollectionService.instance.getFromCache(collectionID);
+      final updatedCollection = collection!.copyWith(sharees: sharees);
+      CollectionService.instance.updateCollectionCache(updatedCollection);
+      unawaited(_db.updateCollections([updatedCollection]));
+      return sharees;
+    } catch (e) {
+      _logger.severe(e);
+      rethrow;
+    }
   }
 }
 

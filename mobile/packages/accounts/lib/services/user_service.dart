@@ -160,6 +160,24 @@ class UserService {
     );
   }
 
+  // getPublicKey returns null value if email id is not
+  // associated with another ente account
+  Future<String?> getPublicKey(String email) async {
+    try {
+      final response = await _enteDio.get(
+        "/users/public-key",
+        queryParameters: {"email": email},
+      );
+      final publicKey = response.data["publicKey"];
+      return publicKey;
+    } on DioException catch (e) {
+      if (e.response != null && e.response?.statusCode == 404) {
+        return null;
+      }
+      rethrow;
+    }
+  }
+
   Future<UserDetails> getUserDetailsV2({
     bool memoryCount = false,
     bool shouldCache = true,
