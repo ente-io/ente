@@ -181,9 +181,18 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
         );
 
         // Decrypt collection key
+        // Shared collections don't have key_decryption_nonce - they use a different mechanism
+        let Some(ref key_nonce) = collection.key_decryption_nonce else {
+            log::warn!(
+                "Collection {} appears to be shared (no key_decryption_nonce), skipping for now",
+                collection.id
+            );
+            continue;
+        };
+
         let collection_key = match decrypt_collection_key(
             &collection.encrypted_key,
-            &collection.key_decryption_nonce,
+            key_nonce,
             master_key,
             secret_key,
         ) {

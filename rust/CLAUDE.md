@@ -98,7 +98,7 @@ The project has completed foundational components (crypto, storage, models) and 
 
 ## Commit Guidelines
 
-### Pre-commit Checklist
+### Pre-commit Checklist (RUN BEFORE EVERY COMMIT!)
 
 **CRITICAL: CI will fail if ANY of these checks fail. Run ALL commands and ensure they ALL pass.**
 

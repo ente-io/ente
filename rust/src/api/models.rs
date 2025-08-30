@@ -170,7 +170,7 @@ pub struct Collection {
     pub id: i64,
     pub owner: CollectionUser,
     pub encrypted_key: String,
-    pub key_decryption_nonce: String,
+    pub key_decryption_nonce: Option<String>,
     pub name: Option<String>,
     pub encrypted_name: Option<String>,
     pub name_decryption_nonce: Option<String>,
