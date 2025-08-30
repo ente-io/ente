@@ -414,6 +414,7 @@ Future<dynamic> showTextInputDialog(
   bool alwaysShowSuccessState = false,
   bool isPasswordInput = false,
   bool useRootNavigator = false,
+  VoidCallback? onCancel,
 }) {
   return showDialog(
     barrierColor: backdropFaintDark,
