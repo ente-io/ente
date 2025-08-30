@@ -1323,6 +1323,9 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
             embeddings.add(Float32List.view(result[embeddingColumn].buffer));
           } else {
             weirdCount++;
+            _logger.warning(
+              "Weird clip embedding length ${embedding.length} for fileID ${result[fileIDColumn]}, skipping",
+            );
           }
         }
         _logger.info(
@@ -1349,7 +1352,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
         "migrated all $totalCount embeddings to ClipVectorDB in ${stopwatch.elapsed.inMilliseconds} ms, with $weirdCount weird embeddings not migrated",
       );
       await ClipVectorDB.instance.setMigrationDone();
-      _logger.info("ClipVectorDB migration done, flag file created");
+      _logger.info("ClipVectorDB migration done");
     } catch (e, s) {
       _logger.severe(
         "Error migrating ClipVectorDB after ${stopwatch.elapsed.inMilliseconds} ms, clearing out DB again",

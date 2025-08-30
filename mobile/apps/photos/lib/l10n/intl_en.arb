@@ -1843,14 +1843,6 @@
   "addedToQueue": "Added to queue",
   "creatingStream": "Creating stream",
   "similarImages": "Similar images",
-  "deletingProgress": "Deleting... {progress}",
-  "@deletingProgress": {
-    "placeholders": {
-      "progress": {
-        "type": "String"
-      }
-    }
-  },
   "findSimilarImages": "Find similar images",
   "noSimilarImagesFound": "No similar images found",
   "yourPhotosLookUnique": "Your photos look unique",
@@ -1933,11 +1925,11 @@
   },
   "size": "Size",
   "similarity": "Similarity",
-  "analyzingPhotosLocally": "Analyzing your photos locally",
-  "lookingForVisualSimilarities": "Looking for visual similarities",
-  "comparingImageDetails": "Comparing image details",
-  "findingSimilarImages": "Finding similar images",
-  "almostDone": "Almost done",
+  "analyzingPhotosLocally": "Analyzing your photos locally...",
+  "lookingForVisualSimilarities": "Looking for visual similarities...",
+  "comparingImageDetails": "Comparing image details...",
+  "findingSimilarImages": "Finding similar images...",
+  "almostDone": "Almost done...",
   "processingLocally": "Processing locally",
   "useMLToFindSimilarImages": "Review and remove images that look similar to each other.",
   "all": "All",
@@ -1946,5 +1938,6 @@
   "nothingHereTryAnotherFilter": "Nothing here, try another filter! 👀",
   "related": "Related",
   "hoorayyyy": "Hoorayyyy!",
-  "nothingToTidyUpHere": "Nothing to tidy up here"
+  "nothingToTidyUpHere": "Nothing to tidy up here",
+  "deletingDash": "Deleting - "
 }
