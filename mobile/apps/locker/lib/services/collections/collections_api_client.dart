@@ -177,7 +177,6 @@ class CollectionApiClient {
         "/collections/leave/${collection.id}",
       );
       await _handleCollectionDeletion(collection);
-      Bus.instance.fire(CollectionsUpdatedEvent());
     } catch (e, s) {
       _logger.severe("failed to leave collection", e, s);
       rethrow;
@@ -189,6 +188,7 @@ class CollectionApiClient {
     final deletedCollection = collection.copyWith(isDeleted: true);
     unawaited(_db.updateCollections([deletedCollection]));
     CollectionService.instance.updateCollectionCache(deletedCollection);
+    await CollectionService.instance.sync();
   }
 
   Future<void> move(

@@ -27,7 +27,7 @@ CollectionViewType getCollectionViewType(Collection c, int userID) {
   } else if (c.isHidden()) {
     return CollectionViewType.hiddenOwnedCollection;
   }
-  debugPrint("Unknown gallery type for collection ${c.id}, falling back to "
+  debugPrint("Unknown collection type for collection ${c.id}, falling back to "
       "default");
   return CollectionViewType.ownedCollection;
 }

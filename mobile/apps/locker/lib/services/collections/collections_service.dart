@@ -59,9 +59,6 @@ class CollectionService {
         _init();
       });
     }
-    Bus.instance.on<CollectionsUpdatedEvent>().listen((event) {
-      _init();
-    });
   }
 
   Future<void> sync() async {
