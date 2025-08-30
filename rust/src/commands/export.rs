@@ -282,9 +282,23 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
 
         // Apply collection filters
         let collection_name = collection.name.as_deref().unwrap_or("Unnamed");
-        // TODO: Determine if collection is shared or hidden from metadata
-        let is_shared = false; // Need to check collection metadata
-        let is_hidden = false; // Need to check collection metadata
+
+        // Determine if collection is shared
+        let is_shared = collection.sharees.as_ref().is_some_and(|s| !s.is_empty())
+            || collection.shared_magic_metadata.is_some()
+            || collection.owner.id != account.user_id;
+
+        // Determine if collection is hidden from metadata
+        let is_hidden = check_collection_visibility(collection, collection_key);
+
+        // Log collection visibility for debugging
+        log::debug!(
+            "Collection {}: name={:?}, is_hidden={}, is_shared={}",
+            collection.id,
+            collection.name,
+            is_hidden,
+            is_shared
+        );
 
         if !filter.should_include_collection(collection_name, is_shared, is_hidden) {
             log::debug!("Skipping file in filtered collection: {}", collection_name);
@@ -771,6 +785,32 @@ async fn extract_live_photo(zip_data: &[u8], output_path: &Path) -> Result<()> {
     }
 
     Ok(())
+}
+
+/// Check if a collection is hidden based on its metadata
+fn check_collection_visibility(
+    collection: &crate::api::models::Collection,
+    collection_key: &[u8],
+) -> bool {
+    // Try encrypted magic metadata (private metadata) - this is where visibility is stored per Go CLI
+    if let Some(ref magic_metadata) = collection.magic_metadata {
+        // Try to decrypt and parse the magic metadata
+        if let Ok(Some(decrypted_json)) = decrypt_magic_metadata(magic_metadata, collection_key) {
+            // Check for visibility field - value of 2 means hidden (matching Go CLI logic)
+            if let Some(visibility) = decrypted_json.get("visibility").and_then(|v| v.as_i64()) {
+                log::debug!(
+                    "Collection {} has visibility: {} (hidden={})",
+                    collection.id,
+                    visibility,
+                    visibility == 2
+                );
+                return visibility == 2;
+            }
+        }
+    }
+
+    // Default to not hidden if we can't determine visibility
+    false
 }
 
 /// Write album metadata to .meta/album_meta.json

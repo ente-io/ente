@@ -7,11 +7,11 @@ pub struct ExportCommand {
     pub account: Option<String>,
 
     /// Include shared albums (pass --shared=false to exclude)
-    #[arg(long, default_value = "true")]
+    #[arg(long, default_value_t = true, action = clap::ArgAction::Set)]
     pub shared: bool,
 
     /// Include hidden albums (pass --hidden=false to exclude)
-    #[arg(long, default_value = "true")]
+    #[arg(long, default_value_t = true, action = clap::ArgAction::Set)]
     pub hidden: bool,
 
     /// Comma-separated list of album names to export
