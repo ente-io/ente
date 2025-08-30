@@ -26,6 +26,20 @@ type File struct {
 	Info               *FileInfo      `json:"info,omitempty"`
 }
 
+type MetaFile struct {
+	ID                 int64          `json:"id"`
+	OwnerID            int64          `json:"ownerID"`
+	CollectionID       int64          `json:"collectionID"`
+	EncryptedKey       string         `json:"encryptedKey"`
+	KeyDecryptionNonce string         `json:"keyDecryptionNonce"`
+	Metadata           FileAttributes `json:"metadata" binding:"required"`
+	// IsDeleted is True when the file ID is removed from the  CollectionID
+	IsDeleted          bool           `json:"isDeleted"`
+	UpdationTime       int64          `json:"updationTime"`
+	MagicMetadata      *MagicMetadata `json:"magicMetadata,omitempty"`
+	PubicMagicMetadata *MagicMetadata `json:"pubMagicMetadata,omitempty"`
+}
+
 // FileInfo has information about storage used by the file & it's metadata(future)
 type FileInfo struct {
 	FileSize      int64 `json:"fileSize,omitempty"`
