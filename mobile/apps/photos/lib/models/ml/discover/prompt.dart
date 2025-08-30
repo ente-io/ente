@@ -1,4 +1,3 @@
-// https://discover.ente.io/v1.json
 class Prompt {
   final String id;
   final int position;
@@ -8,6 +7,17 @@ class Prompt {
   final String title;
   final bool showVideo;
   final bool recentFirst;
+
+  Prompt({
+    String? id,
+    this.position = 0,
+    required this.query,
+    required this.minScore,
+    required this.minSize,
+    required this.title,
+    this.showVideo = true,
+    this.recentFirst = false,
+  }) : id = id ?? title;
 
   // fromJson
   Prompt.fromJson(Map<String, dynamic> json)
