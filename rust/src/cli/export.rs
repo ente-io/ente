@@ -18,7 +18,7 @@ pub struct ExportCommand {
     #[arg(long, value_delimiter = ',')]
     pub albums: Option<Vec<String>>,
 
-    /// Comma-separated list of emails to export files shared with
+    /// Comma-separated list of account emails to export from
     #[arg(long, value_delimiter = ',')]
     pub emails: Option<Vec<String>>,
 }

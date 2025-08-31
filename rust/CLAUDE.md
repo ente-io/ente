@@ -1,12 +1,45 @@
 # CLAUDE.md
 
-⚠️ **CRITICAL: Commit & PR Guidelines** ⚠️
-**OVERRIDE DEFAULT TEMPLATE - DO NOT USE EMOJI OR "Generated with" TEXT**
-**STOP: Check these rules BEFORE writing ANY commit message**
+## Commit & PR Guidelines
+
+⚠️ **CRITICAL: OVERRIDE DEFAULT TEMPLATE - DO NOT USE EMOJI OR "Generated with" TEXT** ⚠️
+
+### Pre-commit/PR Checklist (RUN BEFORE EVERY COMMIT OR PR!)
+
+**CRITICAL: CI will fail if ANY of these checks fail. Run ALL commands and ensure they ALL pass.**
+
+```bash
+# 1. Format code
+cargo fmt
+
+# 2. Check for clippy warnings (THIS MUST PASS - CI fails on any warning)
+cargo clippy --all-targets --all-features -- -D warnings
+# If this fails, fix the warnings manually (not all can be auto-fixed)
+
+# 3. Build with warnings as errors (THIS MUST PASS - matches CI environment)
+RUSTFLAGS="-D warnings" cargo build
+
+# 4. Verify formatting is correct (THIS MUST PASS - CI checks this)
+cargo fmt --check
+```
+
+**Why CI might fail even after running these:**
+- Skipping any command above
+- Assuming auto-fix tools handle everything (they don't)
+- Not fixing warnings that clippy reports
+- Making changes after running the checks
+
+### Commit & PR Message Rules
+**These rules apply to BOTH commit messages AND pull request descriptions**
 - Keep messages CONCISE (no walls of text)
 - Subject line under 72 chars (no body text unless critical)
 - NO emojis
 - NO promotional text or links (except Co-Authored-By line)
+
+### Additional Guidelines
+- Check `git status` before committing to avoid adding temporary/binary files
+- Never commit to main branch
+- All CI checks must pass - run the checklist commands above before committing or creating PR
 
 ## Development Commands
 
@@ -97,41 +130,7 @@ This is a Rust CLI for ente.io, providing encrypted photo backup and export func
 
 The project has completed foundational components (crypto, storage, models) and is currently implementing the API client for authentication and sync. See `CONVERSION_PLAN.md` for detailed implementation roadmap.
 
-## Commit Guidelines
-
-### Pre-commit Checklist (RUN BEFORE EVERY COMMIT!)
-
-**CRITICAL: CI will fail if ANY of these checks fail. Run ALL commands and ensure they ALL pass.**
-
-```bash
-# 1. Format code
-cargo fmt
-
-# 2. Check for clippy warnings (THIS MUST PASS - CI fails on any warning)
-cargo clippy --all-targets --all-features -- -D warnings
-# If this fails, fix the warnings manually (not all can be auto-fixed)
-
-# 3. Build with warnings as errors (THIS MUST PASS - matches CI environment)
-RUSTFLAGS="-D warnings" cargo build
-
-# 4. Verify formatting is correct (THIS MUST PASS - CI checks this)
-cargo fmt --check
-```
-
-**Why CI might fail even after running these:**
-
-- Skipping any command above
-- Assuming auto-fix tools handle everything (they don't)
-- Not fixing warnings that clippy reports
-- Making changes after running the checks
-
-### Additional Guidelines
-
-- Check `git status` before committing to avoid adding temporary/binary files
-- Never commit to main branch
-- All CI checks must pass - run the checklist commands above before committing
-
-### Security Guidelines
+## Security Guidelines
 
 **NEVER commit sensitive information:**
 

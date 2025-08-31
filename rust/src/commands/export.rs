@@ -54,8 +54,35 @@ pub async fn run_export(account_email: Option<String>, filter: ExportFilter) -> 
         return Ok(());
     }
 
+    // Apply email filter at account level (matching Go CLI behavior)
+    let accounts_to_export: Vec<Account> = if let Some(ref emails) = filter.emails {
+        if emails.is_empty() {
+            accounts
+        } else {
+            accounts
+                .into_iter()
+                .filter(|a| {
+                    let should_export = emails
+                        .iter()
+                        .any(|e| e.eq_ignore_ascii_case(a.email.trim()));
+                    if !should_export {
+                        log::info!("Skip account {}: account is excluded by filter", a.email);
+                    }
+                    should_export
+                })
+                .collect()
+        }
+    } else {
+        accounts
+    };
+
+    if accounts_to_export.is_empty() {
+        println!("No accounts match the email filter.");
+        return Ok(());
+    }
+
     // Export each account
-    for account in accounts {
+    for account in accounts_to_export {
         println!("\n=== Exporting account: {} ===", account.email);
 
         // First sync the account (like Go implementation does)
@@ -176,11 +203,19 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
             continue;
         }
 
+        // Log collection processing (with better handling of empty owner email)
+        let owner_info = if collection.owner.email.is_empty() {
+            format!("owner_id={}", collection.owner.id)
+        } else {
+            format!("owner={}", collection.owner.email)
+        };
+
         log::debug!(
-            "Processing collection {}: name={:?}, encrypted_name={:?}",
+            "Processing collection {}: name={:?}, encrypted_name={:?}, {}",
             collection.id,
             collection.name,
-            collection.encrypted_name
+            collection.encrypted_name,
+            owner_info
         );
 
         // Decrypt collection key
