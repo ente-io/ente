@@ -1,5 +1,5 @@
-use chrono::{Local, TimeZone};
-use serde::{Deserialize, Serialize, Serializer};
+use chrono::{DateTime, Local, TimeZone};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 /// Custom serializer for timestamp fields to match Go CLI's ISO 8601 format
 fn serialize_timestamp_as_iso8601<S>(
@@ -21,6 +21,31 @@ where
     let iso_string = datetime.to_rfc3339_opts(chrono::SecondsFormat::Millis, true);
 
     serializer.serialize_str(&iso_string)
+}
+
+/// Custom deserializer that can handle both i64 and ISO string timestamps
+fn deserialize_timestamp_from_iso_or_i64<'de, D>(deserializer: D) -> Result<i64, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    use serde::de::Error;
+
+    #[derive(Deserialize)]
+    #[serde(untagged)]
+    enum TimestampFormat {
+        Microseconds(i64),
+        IsoString(String),
+    }
+
+    match TimestampFormat::deserialize(deserializer)? {
+        TimestampFormat::Microseconds(micros) => Ok(micros),
+        TimestampFormat::IsoString(s) => {
+            // Parse ISO string back to microseconds
+            DateTime::parse_from_rfc3339(&s)
+                .map(|dt| dt.timestamp_micros())
+                .map_err(|e| Error::custom(format!("Invalid ISO timestamp: {}", e)))
+        }
+    }
 }
 
 /// Album metadata matching Go's export.AlbumMetadata structure
@@ -62,9 +87,15 @@ pub struct DiskFileMetadata {
     pub description: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub location: Option<Location>,
-    #[serde(serialize_with = "serialize_timestamp_as_iso8601")]
+    #[serde(
+        serialize_with = "serialize_timestamp_as_iso8601",
+        deserialize_with = "deserialize_timestamp_from_iso_or_i64"
+    )]
     pub creation_time: i64, // Unix timestamp in microseconds (serialized as ISO 8601)
-    #[serde(serialize_with = "serialize_timestamp_as_iso8601")]
+    #[serde(
+        serialize_with = "serialize_timestamp_as_iso8601",
+        deserialize_with = "deserialize_timestamp_from_iso_or_i64"
+    )]
     pub modification_time: i64, // Unix timestamp in microseconds (serialized as ISO 8601)
     pub info: FileInfo,
     /// Meta filename on disk (excluded from JSON)

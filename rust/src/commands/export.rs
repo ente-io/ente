@@ -19,6 +19,86 @@ use std::path::{Path, PathBuf};
 use tokio::fs;
 use tokio::io::AsyncWriteExt;
 
+/// Information about a file already on disk, loaded from metadata
+#[derive(Debug, Clone)]
+struct ExistingFile {
+    /// Path to the actual file on disk
+    file_path: PathBuf,
+    /// Path to the metadata JSON file
+    meta_path: PathBuf,
+}
+
+/// Load existing file metadata for a specific album
+async fn load_album_metadata(
+    export_path: &Path,
+    album_name: &str,
+) -> Result<HashMap<i64, ExistingFile>> {
+    let mut existing_files = HashMap::new();
+
+    let meta_dir = export_path.join(album_name).join(".meta");
+    if !meta_dir.exists() {
+        return Ok(existing_files);
+    }
+
+    let mut entries = match fs::read_dir(&meta_dir).await {
+        Ok(entries) => entries,
+        Err(e) => {
+            log::warn!("Failed to read metadata directory {:?}: {}", meta_dir, e);
+            return Ok(existing_files);
+        }
+    };
+
+    while let Some(entry) = entries.next_entry().await? {
+        let meta_path = entry.path();
+
+        // Skip non-JSON files and album_meta.json
+        if meta_path.extension().is_none_or(|ext| ext != "json") {
+            continue;
+        }
+
+        if meta_path
+            .file_name()
+            .is_some_and(|name| name == "album_meta.json")
+        {
+            continue;
+        }
+
+        // Read and parse metadata file
+        let json_content = match fs::read_to_string(&meta_path).await {
+            Ok(content) => content,
+            Err(e) => {
+                log::warn!("Failed to read metadata file {:?}: {}", meta_path, e);
+                continue;
+            }
+        };
+
+        let disk_metadata: DiskFileMetadata = match serde_json::from_str(&json_content) {
+            Ok(metadata) => metadata,
+            Err(e) => {
+                log::warn!("Failed to parse metadata file {:?}: {}", meta_path, e);
+                continue;
+            }
+        };
+
+        // Check if the actual file exists
+        for filename in &disk_metadata.info.file_names {
+            let file_path = export_path.join(album_name).join(filename);
+            if file_path.exists() {
+                existing_files.insert(
+                    disk_metadata.info.id,
+                    ExistingFile {
+                        file_path,
+                        meta_path: meta_path.clone(),
+                    },
+                );
+                break; // Only need one existing file per ID
+            }
+        }
+    }
+
+    Ok(existing_files)
+}
+
 pub async fn run_export(account_email: Option<String>, filter: ExportFilter) -> Result<()> {
     // Initialize crypto
     crypto_init()?;
@@ -163,6 +243,9 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
 
     // Track file indices per album for unique metadata filenames
     let mut album_file_indices: HashMap<String, usize> = HashMap::new();
+
+    // Track existing files per album (loaded on demand)
+    let mut album_existing_files: HashMap<String, HashMap<i64, ExistingFile>> = HashMap::new();
 
     // Get stored secrets
     let secrets = storage
@@ -437,19 +520,6 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
             None
         };
 
-        // Check if we've already exported a file with this hash
-        if let Some(hash) = content_hash
-            && let Some(existing_path) = exported_hashes.get(hash)
-        {
-            log::info!(
-                "Skipping duplicate file {} (same hash as {})",
-                file.id,
-                existing_path.display()
-            );
-            skipped_files += 1;
-            continue;
-        }
-
         // Generate export path with original filename from metadata
         let file_path = generate_export_path(
             export_path,
@@ -459,9 +529,98 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
             pub_magic_metadata.as_ref(),
         )?;
 
-        // Skip if file already exists on disk
-        if file_path.exists() {
-            log::debug!("File already exists: {file_path:?}");
+        // Determine album folder
+        let album_folder = if let Some(ref name) = collection.name
+            && !name.is_empty()
+        {
+            sanitize_album_name(name)
+        } else {
+            "Uncategorized".to_string()
+        };
+
+        // Load existing files for this album if not already loaded
+        if !album_existing_files.contains_key(&album_folder) {
+            let existing = load_album_metadata(export_path, &album_folder).await?;
+            log::debug!(
+                "Loaded {} existing files for album {}",
+                existing.len(),
+                album_folder
+            );
+            album_existing_files.insert(album_folder.clone(), existing);
+        }
+
+        // Check if this file already exists in the album by ID (for rename detection)
+        let existing_files = album_existing_files.get_mut(&album_folder).unwrap();
+        if let Some(existing) = existing_files.get(&file.id) {
+            if existing.file_path == file_path {
+                // File exists at the same path - no rename needed
+                log::debug!(
+                    "File {} already exists at correct path: {:?}",
+                    file.id,
+                    file_path
+                );
+                skipped_files += 1;
+
+                // Add to hash map even for existing files to prevent duplicates
+                if let Some(hash) = content_hash {
+                    exported_hashes.insert(hash.clone(), file_path.clone());
+                }
+                continue;
+            } else {
+                // File exists at different path - it was renamed
+                log::info!(
+                    "File {} renamed from {:?} to {:?}",
+                    file.id,
+                    existing.file_path,
+                    file_path
+                );
+
+                // Remove old file
+                if existing.file_path.exists() {
+                    log::debug!("Removing old file: {:?}", existing.file_path);
+                    fs::remove_file(&existing.file_path).await.ok();
+                }
+
+                // For live photos, also remove the MOV component
+                let is_live_photo = metadata
+                    .as_ref()
+                    .map(|m| m.is_live_photo())
+                    .unwrap_or(false);
+
+                if is_live_photo {
+                    // Try to remove old MOV file
+                    // The MOV file has the same base name but with .MOV extension
+                    let old_mov_path = existing.file_path.with_extension("MOV");
+                    if old_mov_path.exists() {
+                        log::debug!("Removing old live photo MOV component: {:?}", old_mov_path);
+                        fs::remove_file(&old_mov_path).await.ok();
+                    }
+
+                    // Also try lowercase .mov
+                    let old_mov_path_lower = existing.file_path.with_extension("mov");
+                    if old_mov_path_lower.exists() && old_mov_path_lower != old_mov_path {
+                        log::debug!(
+                            "Removing old live photo mov component: {:?}",
+                            old_mov_path_lower
+                        );
+                        fs::remove_file(&old_mov_path_lower).await.ok();
+                    }
+                }
+
+                // Remove old metadata
+                if existing.meta_path.exists() {
+                    log::debug!("Removing old metadata: {:?}", existing.meta_path);
+                    fs::remove_file(&existing.meta_path).await.ok();
+                }
+
+                // Remove from tracking so we don't try to remove it again
+                existing_files.remove(&file.id);
+
+                // Continue to re-export with new name
+            }
+        } else if file_path.exists() {
+            // File exists but not tracked by ID (old export or hash collision)
+            log::debug!("File already exists (not tracked by ID): {file_path:?}");
             skipped_files += 1;
 
             // Add to hash map even for existing files to prevent duplicates
@@ -471,20 +630,77 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
             continue;
         }
 
-        // Download and save file
-        log::debug!("Downloading file {} to {:?}", file.id, file_path);
+        // Check if we've already downloaded this file content (by hash) in another album
+        // If so, we can copy it instead of downloading again
+        let need_download = if let Some(hash) = content_hash
+            && let Some(existing_path) = exported_hashes.get(hash)
+            && existing_path != &file_path
+        {
+            log::info!(
+                "File {} has same content as {}, copying instead of downloading",
+                file.id,
+                existing_path.display()
+            );
 
-        // Ensure directory exists
-        if let Some(parent) = file_path.parent() {
-            fs::create_dir_all(parent).await?;
-        }
+            // Copy the existing file to the new location
+            if let Some(parent) = file_path.parent() {
+                fs::create_dir_all(parent).await?;
+            }
+            fs::copy(existing_path, &file_path).await?;
 
-        // Download encrypted file
-        let encrypted_data = api.download_file(&account.email, file.id).await?;
+            // For live photos, also copy the MOV component
+            let is_live_photo = metadata
+                .as_ref()
+                .map(|m| m.is_live_photo())
+                .unwrap_or(false);
 
-        // The file nonce/header is stored separately in the API response
-        let file_nonce =
-            match base64::engine::general_purpose::STANDARD.decode(&file.file.decryption_header) {
+            if is_live_photo {
+                // Try to copy MOV file
+                let existing_mov = existing_path.with_extension("MOV");
+                let new_mov = file_path.with_extension("MOV");
+                if existing_mov.exists() {
+                    log::debug!(
+                        "Copying live photo MOV component from {:?} to {:?}",
+                        existing_mov,
+                        new_mov
+                    );
+                    fs::copy(&existing_mov, &new_mov).await.ok();
+                } else {
+                    // Try lowercase .mov
+                    let existing_mov_lower = existing_path.with_extension("mov");
+                    let new_mov_lower = file_path.with_extension("mov");
+                    if existing_mov_lower.exists() {
+                        log::debug!(
+                            "Copying live photo mov component from {:?} to {:?}",
+                            existing_mov_lower,
+                            new_mov_lower
+                        );
+                        fs::copy(&existing_mov_lower, &new_mov_lower).await.ok();
+                    }
+                }
+            }
+
+            false
+        } else {
+            true
+        };
+
+        // Download and save file only if needed
+        if need_download {
+            log::debug!("Downloading file {} to {:?}", file.id, file_path);
+
+            // Ensure directory exists
+            if let Some(parent) = file_path.parent() {
+                fs::create_dir_all(parent).await?;
+            }
+
+            // Download encrypted file
+            let encrypted_data = api.download_file(&account.email, file.id).await?;
+
+            // The file nonce/header is stored separately in the API response
+            let file_nonce = match base64::engine::general_purpose::STANDARD
+                .decode(&file.file.decryption_header)
+            {
                 Ok(nonce) => nonce,
                 Err(e) => {
                     log::error!("Failed to decode file nonce for file {}: {}", file.id, e);
@@ -492,41 +708,42 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
                 }
             };
 
-        // Decrypt the file data using streaming XChaCha20-Poly1305
-        // Use chunked decryption for large files
-        let decrypted = match decrypt_file_data(&encrypted_data, &file_nonce, &file_key) {
-            Ok(data) => data,
-            Err(e) => {
-                log::error!("Failed to decrypt file {}: {}", file.id, e);
-                log::debug!(
-                    "File size: {}, header length: {}",
-                    encrypted_data.len(),
-                    file_nonce.len()
-                );
-                continue;
-            }
-        };
+            // Decrypt the file data using streaming XChaCha20-Poly1305
+            // Use chunked decryption for large files
+            let decrypted = match decrypt_file_data(&encrypted_data, &file_nonce, &file_key) {
+                Ok(data) => data,
+                Err(e) => {
+                    log::error!("Failed to decrypt file {}: {}", file.id, e);
+                    log::debug!(
+                        "File size: {}, header length: {}",
+                        encrypted_data.len(),
+                        file_nonce.len()
+                    );
+                    continue;
+                }
+            };
 
-        // Check if this is a live photo that needs extraction
-        let is_live_photo = metadata
-            .as_ref()
-            .map(|m| m.is_live_photo())
-            .unwrap_or(false);
+            // Check if this is a live photo that needs extraction
+            let is_live_photo = metadata
+                .as_ref()
+                .map(|m| m.is_live_photo())
+                .unwrap_or(false);
 
-        if is_live_photo {
-            // Extract live photo components from ZIP
-            if let Err(e) = extract_live_photo(&decrypted, &file_path).await {
-                log::error!("Failed to extract live photo {}: {}", file.id, e);
-                // Fall back to saving as ZIP
+            if is_live_photo {
+                // Extract live photo components from ZIP
+                if let Err(e) = extract_live_photo(&decrypted, &file_path).await {
+                    log::error!("Failed to extract live photo {}: {}", file.id, e);
+                    // Fall back to saving as ZIP
+                    let mut file_handle = fs::File::create(&file_path).await?;
+                    file_handle.write_all(&decrypted).await?;
+                    file_handle.sync_all().await?;
+                }
+            } else {
+                // Write regular file
                 let mut file_handle = fs::File::create(&file_path).await?;
                 file_handle.write_all(&decrypted).await?;
                 file_handle.sync_all().await?;
             }
-        } else {
-            // Write regular file
-            let mut file_handle = fs::File::create(&file_path).await?;
-            file_handle.write_all(&decrypted).await?;
-            file_handle.sync_all().await?;
         }
 
         exported_files += 1;
@@ -535,15 +752,6 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
         if let Some(hash) = content_hash {
             exported_hashes.insert(hash.clone(), file_path.clone());
         }
-
-        // Determine album folder for metadata
-        let album_folder = if let Some(ref name) = collection.name
-            && !name.is_empty()
-        {
-            sanitize_album_name(name)
-        } else {
-            "Uncategorized".to_string()
-        };
 
         // Write album metadata if not already written for this album
         if !albums_with_metadata.contains_key(&album_folder) {
@@ -559,7 +767,7 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
             .file_name()
             .and_then(|n| n.to_str())
             .unwrap_or("file");
-        write_file_metadata(
+        let meta_path = write_file_metadata(
             export_path,
             &album_folder,
             &file,
@@ -568,6 +776,16 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
             *file_index,
         )
         .await?;
+
+        // Track the newly exported file
+        let existing_files = album_existing_files.get_mut(&album_folder).unwrap();
+        existing_files.insert(
+            file.id,
+            ExistingFile {
+                file_path: file_path.clone(),
+                meta_path,
+            },
+        );
 
         *file_index += 1;
 
@@ -938,7 +1156,7 @@ async fn write_file_metadata(
     metadata: Option<&FileMetadata>,
     filename: &str,
     file_index: usize,
-) -> Result<()> {
+) -> Result<PathBuf> {
     let meta_dir = export_path.join(album_folder).join(".meta");
     fs::create_dir_all(&meta_dir).await?;
 
@@ -960,7 +1178,7 @@ async fn write_file_metadata(
 
     let meta_path = meta_dir.join(meta_filename);
     let json = serde_json::to_string_pretty(&disk_metadata)?;
-    fs::write(meta_path, json).await?;
+    fs::write(&meta_path, json).await?;
 
-    Ok(())
+    Ok(meta_path)
 }
