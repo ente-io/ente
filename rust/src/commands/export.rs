@@ -1,7 +1,9 @@
 use crate::Result;
 use crate::api::client::ApiClient;
 use crate::api::methods::ApiMethods;
-use crate::crypto::{decrypt_file_data, decrypt_stream, init as crypto_init, secret_box_open};
+use crate::crypto::{
+    decrypt_file_data, decrypt_stream, init as crypto_init, sealed_box_open, secret_box_open,
+};
 use crate::models::{
     account::Account,
     export_metadata::{AlbumMetadata, DiskFileMetadata},
@@ -155,8 +157,9 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
     // Master key is already raw bytes, no need to decode
     let master_key = &secrets.master_key;
 
-    // We'll also need the secret key for decrypting collection keys
+    // We'll also need the secret key and public key for decrypting shared collection keys
     let secret_key = &secrets.secret_key;
+    let public_key = &secrets.public_key;
 
     // Step 1: Fetch all collections and create a map of collection IDs to collections
     println!("\nFetching collections...");
@@ -181,28 +184,52 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
         );
 
         // Decrypt collection key
-        // Shared collections don't have key_decryption_nonce - they use a different mechanism
-        let Some(ref key_nonce) = collection.key_decryption_nonce else {
-            log::warn!(
-                "Collection {} appears to be shared (no key_decryption_nonce), skipping for now",
-                collection.id
-            );
-            continue;
-        };
-
-        let collection_key = match decrypt_collection_key(
-            &collection.encrypted_key,
-            key_nonce,
-            master_key,
-            secret_key,
-        ) {
-            Ok(key) => key,
-            Err(e) => {
-                log::error!(
-                    "Failed to decrypt collection key for {}: {e}",
+        // Collections can be encrypted in two ways:
+        // 1. Owned collections: Use secret_box with master key and nonce
+        // 2. Shared collections: Use sealed_box with public key cryptography
+        let collection_key = if let Some(ref key_nonce) = collection.key_decryption_nonce {
+            // Owned collection - decrypt with master key
+            match decrypt_collection_key(
+                &collection.encrypted_key,
+                key_nonce,
+                master_key,
+                secret_key,
+            ) {
+                Ok(key) => key,
+                Err(e) => {
+                    log::error!(
+                        "Failed to decrypt owned collection key for {}: {e}",
+                        collection.id
+                    );
+                    continue;
+                }
+            }
+        } else {
+            // Shared collection - check if it's shared with us (not by us)
+            if collection.owner.id == account.user_id {
+                log::warn!(
+                    "Collection {} owned by current user but missing key_decryption_nonce, skipping",
                     collection.id
                 );
                 continue;
+            }
+
+            // This is a collection shared with us - decrypt with sealed_box
+            log::info!(
+                "Collection {} is shared from user {}, using sealed_box decryption",
+                collection.id,
+                collection.owner.id
+            );
+
+            match decrypt_shared_collection_key(&collection.encrypted_key, public_key, secret_key) {
+                Ok(key) => key,
+                Err(e) => {
+                    log::error!(
+                        "Failed to decrypt shared collection key for {}: {e}",
+                        collection.id
+                    );
+                    continue;
+                }
             }
         };
 
@@ -609,6 +636,21 @@ fn decrypt_collection_key(
 
     // Collection keys are encrypted with secret_box (XSalsa20-Poly1305) using master key
     secret_box_open(&encrypted_bytes, &nonce_bytes, master_key)
+}
+
+/// Decrypt a shared collection key using public key cryptography (sealed box)
+fn decrypt_shared_collection_key(
+    encrypted_key: &str,
+    public_key: &[u8],
+    secret_key: &[u8],
+) -> Result<Vec<u8>> {
+    use base64::engine::general_purpose::STANDARD as BASE64;
+
+    let encrypted_bytes = BASE64.decode(encrypted_key)?;
+
+    // Shared collection keys are encrypted with sealed_box (crypto_box_seal)
+    // which uses the recipient's public key and an ephemeral keypair
+    sealed_box_open(&encrypted_bytes, public_key, secret_key)
 }
 
 /// Decrypt a collection name using the collection key

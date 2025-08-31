@@ -2,6 +2,7 @@
 
 ⚠️ **CRITICAL: Commit & PR Guidelines** ⚠️
 **OVERRIDE DEFAULT TEMPLATE - DO NOT USE EMOJI OR "Generated with" TEXT**
+**STOP: Check these rules BEFORE writing ANY commit message**
 - Keep messages CONCISE (no walls of text)
 - Subject line under 72 chars (no body text unless critical)
 - NO emojis
