@@ -69,6 +69,10 @@ impl<'a> SyncStore<'a> {
     ) -> Result<()> {
         let file_info = serde_json::to_string(&file.file)?;
         let metadata = serde_json::to_string(&file.metadata)?;
+        let pub_magic_metadata = match &file.pub_magic_metadata {
+            Some(meta) => Some(serde_json::to_string(meta)?),
+            None => None,
+        };
 
         // First check if file exists and preserve is_synced_locally flag
         let existing_sync_status: Option<i32> = self
@@ -85,8 +89,8 @@ impl<'a> SyncStore<'a> {
         self.conn.execute(
             "INSERT OR REPLACE INTO files 
              (file_id, owner_id, collection_id, encrypted_key, key_decryption_nonce, 
-              file_info, metadata, content_hash, is_deleted, is_synced_locally, updated_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
+              file_info, metadata, pub_magic_metadata, content_hash, is_deleted, is_synced_locally, updated_at)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)",
             params![
                 file.id,
                 file.owner_id,
@@ -95,6 +99,7 @@ impl<'a> SyncStore<'a> {
                 file.key_decryption_nonce,
                 file_info,
                 metadata,
+                pub_magic_metadata,
                 content_hash,
                 file.is_deleted as i32,
                 is_synced,
@@ -113,7 +118,7 @@ impl<'a> SyncStore<'a> {
     ) -> Result<Vec<RemoteFile>> {
         let mut stmt = self.conn.prepare(
             "SELECT file_id, collection_id, encrypted_key, key_decryption_nonce, 
-                    file_info, metadata, is_deleted, updated_at, owner_id
+                    file_info, metadata, is_deleted, updated_at, owner_id, pub_magic_metadata
              FROM files 
              WHERE owner_id = ?1 AND collection_id = ?2 AND is_deleted = 0
              ORDER BY file_id",
@@ -123,6 +128,7 @@ impl<'a> SyncStore<'a> {
             .query_map(params![user_id, collection_id], |row| {
                 let file_info: String = row.get(4)?;
                 let metadata: String = row.get(5)?;
+                let pub_magic_metadata_json: Option<String> = row.get(9)?;
 
                 // Deserialize stored data - thumbnail might not be stored properly
                 let file_obj: crate::models::file::FileInfo = serde_json::from_str(&file_info)
@@ -131,6 +137,15 @@ impl<'a> SyncStore<'a> {
                 let metadata_obj: crate::models::file::MetadataInfo =
                     serde_json::from_str(&metadata)
                         .map_err(|e| rusqlite::Error::ToSqlConversionFailure(Box::new(e)))?;
+
+                // Deserialize pub_magic_metadata if present
+                let pub_magic_metadata = match pub_magic_metadata_json {
+                    Some(json) => Some(
+                        serde_json::from_str(&json)
+                            .map_err(|e| rusqlite::Error::ToSqlConversionFailure(Box::new(e)))?,
+                    ),
+                    None => None,
+                };
 
                 // Create a default thumbnail info if not available
                 let thumbnail = crate::models::file::FileInfo {
@@ -151,7 +166,7 @@ impl<'a> SyncStore<'a> {
                     metadata: metadata_obj,
                     is_deleted: row.get::<_, i32>(6)? != 0,
                     updated_at: row.get(7)?,
-                    pub_magic_metadata: None, // TODO: Store and retrieve from database if needed
+                    pub_magic_metadata,
                 })
             })?
             .collect::<std::result::Result<Vec<_>, _>>()?;
@@ -283,7 +298,7 @@ impl<'a> SyncStore<'a> {
 
         let mut stmt = self.conn.prepare(
             "SELECT file_id, collection_id, encrypted_key, key_decryption_nonce, 
-                    file_info, metadata, is_deleted, updated_at, owner_id
+                    file_info, metadata, is_deleted, updated_at, owner_id, pub_magic_metadata
              FROM files 
              WHERE owner_id = ?1 AND is_deleted = 0 AND is_synced_locally = 0
              ORDER BY file_id",
@@ -293,6 +308,7 @@ impl<'a> SyncStore<'a> {
             .query_map(params![user_id], |row| {
                 let file_info: String = row.get(4)?;
                 let metadata: String = row.get(5)?;
+                let pub_magic_metadata_json: Option<String> = row.get(9)?;
 
                 // Deserialize stored data - thumbnail might not be stored properly
                 let file_obj: crate::models::file::FileInfo = serde_json::from_str(&file_info)
@@ -301,6 +317,15 @@ impl<'a> SyncStore<'a> {
                 let metadata_obj: crate::models::file::MetadataInfo =
                     serde_json::from_str(&metadata)
                         .map_err(|e| rusqlite::Error::ToSqlConversionFailure(Box::new(e)))?;
+
+                // Deserialize pub_magic_metadata if present
+                let pub_magic_metadata = match pub_magic_metadata_json {
+                    Some(json) => Some(
+                        serde_json::from_str(&json)
+                            .map_err(|e| rusqlite::Error::ToSqlConversionFailure(Box::new(e)))?,
+                    ),
+                    None => None,
+                };
 
                 // Create a default thumbnail info if not available
                 let thumbnail = crate::models::file::FileInfo {
@@ -321,7 +346,7 @@ impl<'a> SyncStore<'a> {
                     metadata: metadata_obj,
                     is_deleted: row.get::<_, i32>(6)? != 0,
                     updated_at: row.get(7)?,
-                    pub_magic_metadata: None, // TODO: Store and retrieve from database if needed
+                    pub_magic_metadata,
                 })
             })?
             .collect::<std::result::Result<Vec<_>, _>>()?;

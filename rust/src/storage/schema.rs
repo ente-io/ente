@@ -75,6 +75,7 @@ pub fn create_tables(conn: &Connection) -> Result<()> {
             key_decryption_nonce TEXT NOT NULL,
             file_info TEXT NOT NULL,
             metadata TEXT NOT NULL,
+            pub_magic_metadata TEXT,
             content_hash TEXT,
             is_deleted INTEGER NOT NULL DEFAULT 0,
             is_synced_locally INTEGER NOT NULL DEFAULT 0,
