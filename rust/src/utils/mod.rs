@@ -8,11 +8,6 @@ pub fn get_cli_config_dir() -> crate::Result<PathBuf> {
         return Ok(PathBuf::from(config_dir));
     }
 
-    // For backward compatibility
-    if let Ok(config_dir) = std::env::var("ENTE_CLI_CONFIG_PATH") {
-        return Ok(PathBuf::from(config_dir));
-    }
-
     // Use platform-specific config directory
     // On Linux: ~/.config/ente-cli
     // On macOS: ~/Library/Application Support/ente-cli
