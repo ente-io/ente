@@ -490,45 +490,40 @@ class _FileSelectionActionsWidgetState
         data: MediaQuery.of(context).removePadding(removeBottom: true),
         child: SafeArea(
           child: Container(
-            padding: const EdgeInsets.only(bottom: 20),
+            padding: const EdgeInsets.only(
+              bottom: 20.0,
+              left: 20.0,
+              right: 20.0,
+            ),
             child: Column(
               children: [
                 // First Row
                 const SizedBox(
                   height: 4,
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                  ),
-                  child: Row(
-                    children: firstThreeItems
-                        .map(
-                          (item) => Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                              ),
-                              child: Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  Container(
-                                    height: MediaQuery.of(context).size.height *
-                                        0.10,
-                                    decoration: BoxDecoration(
-                                      color: getEnteColorScheme(context)
-                                          .backgroundElevated2,
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                  ),
-                                  item,
-                                ],
+                Row(
+                  children: [
+                    for (int i = 0; i < firstThreeItems.length; i++) ...[
+                      Expanded(
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Container(
+                              height: MediaQuery.of(context).size.height * 0.10,
+                              decoration: BoxDecoration(
+                                color: getEnteColorScheme(context)
+                                    .backgroundElevated2,
+                                borderRadius: BorderRadius.circular(20),
                               ),
                             ),
-                          ),
-                        )
-                        .toList(),
-                  ),
+                            firstThreeItems[i],
+                          ],
+                        ),
+                      ),
+                      if (i != firstThreeItems.length - 1)
+                        const SizedBox(width: 15),
+                    ],
+                  ],
                 ),
 
                 // Second Row
@@ -541,7 +536,6 @@ class _FileSelectionActionsWidgetState
                       color: getEnteColorScheme(context).backgroundElevated2,
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    margin: const EdgeInsets.symmetric(horizontal: 12),
                     child: PageView.builder(
                       controller: _pageController,
                       itemCount: groupedOtherItems.length,
