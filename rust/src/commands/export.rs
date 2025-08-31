@@ -836,18 +836,22 @@ async fn extract_live_photo(zip_data: &[u8], output_path: &Path) -> Result<()> {
         let mut file = archive.by_index(i)?;
         let file_name = file.name().to_string();
 
-        // Determine the output filename based on the content
-        let output_file_path = if file_name.to_lowercase().ends_with(".heic")
-            || file_name.to_lowercase().ends_with(".jpg")
-            || file_name.to_lowercase().ends_with(".jpeg")
-        {
-            // Image component
-            parent_dir.join(format!("{}.jpg", base_name))
-        } else if file_name.to_lowercase().ends_with(".mov")
-            || file_name.to_lowercase().ends_with(".mp4")
-        {
-            // Video component
-            parent_dir.join(format!("{}.mov", base_name))
+        // Determine the output filename preserving original extension
+        // Following Go CLI's approach: use the actual extension from the file in the ZIP
+        let output_file_path = if file_name.to_lowercase().contains("image") {
+            // Image component - preserve its original extension
+            let ext = std::path::Path::new(&file_name)
+                .extension()
+                .and_then(|e| e.to_str())
+                .unwrap_or("jpg");
+            parent_dir.join(format!("{}.{}", base_name, ext))
+        } else if file_name.to_lowercase().contains("video") {
+            // Video component - preserve its original extension
+            let ext = std::path::Path::new(&file_name)
+                .extension()
+                .and_then(|e| e.to_str())
+                .unwrap_or("mov");
+            parent_dir.join(format!("{}.{}", base_name, ext))
         } else {
             // Unknown component - use original extension
             let ext = std::path::Path::new(&file_name)
