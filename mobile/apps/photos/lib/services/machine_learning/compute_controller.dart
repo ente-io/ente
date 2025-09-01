@@ -32,6 +32,8 @@ class ComputeController {
   bool _isDeviceHealthy = true;
   bool _isUserInteracting = true;
   bool _canRunCompute = false;
+
+  /// If true, user interaction is ignored and compute tasks can run regardless of user activity.
   bool interactionOverride = false;
   late Timer _userInteractionTimer;
 
