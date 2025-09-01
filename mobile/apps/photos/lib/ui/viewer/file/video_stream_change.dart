@@ -63,6 +63,18 @@ class _VideoStreamChangeWidgetState extends State<VideoStreamChangeWidget> {
     super.dispose();
   }
 
+  String _getStatusText(BuildContext context, PreviewItemStatus? status) {
+    switch (status) {
+      case PreviewItemStatus.inQueue:
+      case PreviewItemStatus.retry:
+        return AppLocalizations.of(context).queued;
+      case PreviewItemStatus.compressing:
+      case PreviewItemStatus.uploading:
+      default:
+        return AppLocalizations.of(context).creatingStream;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool isPreviewAvailable = widget.file.uploadedFileID != null &&
@@ -71,6 +83,11 @@ class _VideoStreamChangeWidgetState extends State<VideoStreamChangeWidget> {
     // Check if this file is currently being processed for streaming
     final bool isCurrentlyProcessing = VideoPreviewService.instance
         .isCurrentlyProcessing(widget.file.uploadedFileID);
+    
+    // Get the current processing status for more specific messaging
+    final processingStatus = widget.file.uploadedFileID != null 
+        ? VideoPreviewService.instance.getProcessingStatus(widget.file.uploadedFileID!)
+        : null;
 
     final colorScheme = getEnteColorScheme(context);
 
@@ -125,7 +142,7 @@ class _VideoStreamChangeWidgetState extends State<VideoStreamChangeWidget> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        AppLocalizations.of(context).creatingStream,
+                        _getStatusText(context, processingStatus),
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
