@@ -32,7 +32,14 @@ class ComputeController {
   bool _isDeviceHealthy = true;
   bool _isUserInteracting = true;
   bool _canRunCompute = false;
+
+  /// If true, user interaction is ignored and compute tasks can run regardless of user activity.
   bool interactionOverride = false;
+
+  /// If true, compute tasks are paused regardless of device health or user activity.
+  bool get computeBlocked => _computeBlocks.isNotEmpty;
+  final Set<String> _computeBlocks = {};
+
   late Timer _userInteractionTimer;
 
   ComputeRunState _currentRunState = ComputeRunState.idle;
@@ -87,6 +94,10 @@ class ComputeController {
       _logger.info("User interacting, denying request.");
       return false;
     }
+    if (computeBlocked) {
+      _logger.info("Compute is blocked by: $_computeBlocks, denying request.");
+      return false;
+    }
     bool result = false;
     if (ml) {
       result = _requestML();
@@ -119,7 +130,8 @@ class ComputeController {
   }
 
   bool _requestStream([bool bypassMLWaiting = false]) {
-    if (_currentRunState == ComputeRunState.idle && (bypassMLWaiting || !_waitingToRunML)) {
+    if (_currentRunState == ComputeRunState.idle &&
+        (bypassMLWaiting || !_waitingToRunML)) {
       _logger.info("Stream request granted");
       _currentRunState = ComputeRunState.generatingStream;
       return true;
@@ -166,12 +178,25 @@ class ComputeController {
     _fireControlEvent();
   }
 
+  void blockCompute({required String blocker}) {
+    _computeBlocks.add(blocker);
+    _logger.info("Forcing to pauze compute due to: $blocker");
+    _fireControlEvent();
+  }
+
+  void unblockCompute({required String blocker}) {
+    _computeBlocks.remove(blocker);
+    _logger.info("removed blocker: $blocker, now blocked: $computeBlocked");
+    _fireControlEvent();
+  }
+
   void _fireControlEvent() {
-    final shouldRunCompute = _isDeviceHealthy && _canRunGivenUserInteraction();
+    final shouldRunCompute =
+        _isDeviceHealthy && _canRunGivenUserInteraction() && !computeBlocked;
     if (shouldRunCompute != _canRunCompute) {
       _canRunCompute = shouldRunCompute;
       _logger.info(
-        "Firing event: $shouldRunCompute      (device health: $_isDeviceHealthy, user interaction: $_isUserInteracting, mlInteractionOverride: $interactionOverride)",
+        "Firing event: $shouldRunCompute      (device health: $_isDeviceHealthy, user interaction: $_isUserInteracting, mlInteractionOverride: $interactionOverride, blockers: $_computeBlocks)",
       );
       Bus.instance.fire(ComputeControlEvent(shouldRunCompute));
     }

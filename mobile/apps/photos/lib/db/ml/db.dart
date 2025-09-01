@@ -1292,8 +1292,11 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     int processedCount = 0;
     int weirdCount = 0;
     int whileCount = 0;
+    const String migrationKey = "clip_vector_db_migration_in_progress";
     final stopwatch = Stopwatch()..start();
     try {
+      // Make sure no other heavy compute is running
+      computeController.blockCompute(blocker: migrationKey);
       while (true) {
         whileCount++;
         _logger.info("$whileCount st round of while loop");
@@ -1363,6 +1366,8 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       rethrow;
     } finally {
       stopwatch.stop();
+      // Make sure compute can run again
+      computeController.unblockCompute(blocker: migrationKey);
     }
   }
 
