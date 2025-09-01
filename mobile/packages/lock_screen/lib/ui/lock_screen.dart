@@ -38,7 +38,6 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
   int remainingTimeInSeconds = 0;
   final _lockscreenSetting = LockScreenSettings.instance;
   late Brightness _platformBrightness;
-  bool _isManualPresentation = false;
   // Suppress auto-auth only for the initial manual presentation.
   bool _suppressAutoPrompt = false;
 
@@ -51,9 +50,9 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       final Map<String, dynamic>? args =
           ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-      _isManualPresentation = args?['manual'] as bool? ?? false;
-      _suppressAutoPrompt = _isManualPresentation;
-      if (!_isManualPresentation) {
+      final bool isManualPresentation = args?['manual'] as bool? ?? false;
+      _suppressAutoPrompt = isManualPresentation;
+      if (!isManualPresentation) {
         _showLockScreen(source: "postFrameInit");
       }
     });
