@@ -7,23 +7,24 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
+import 'package:photos/core/exceptions.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/files_updated_event.dart';
-import "package:photos/events/local_photos_updated_event.dart";
-import "package:photos/models/api/collection/user.dart";
-import "package:photos/models/file/extensions/file_props.dart";
+import 'package:photos/events/local_photos_updated_event.dart';
+import 'package:photos/models/api/collection/user.dart';
+import 'package:photos/models/file/extensions/file_props.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/file/trash_file.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/ui/viewer/file/file_icons_widget.dart';
-import "package:photos/ui/viewer/gallery/component/group/type.dart";
-import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
+import 'package:photos/ui/viewer/gallery/component/group/type.dart';
+import 'package:photos/ui/viewer/gallery/state/gallery_context_state.dart';
 import 'package:photos/utils/file_util.dart';
-import "package:photos/utils/standalone/task_queue.dart";
+import 'package:photos/utils/standalone/task_queue.dart';
 import 'package:photos/utils/thumbnail_util.dart';
 
 class ThumbnailWidget extends StatefulWidget {
@@ -307,8 +308,13 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         thumbnailSmallSize,
       );
     }).catchError((e) {
-      _logger.warning("Could not load thumbnail from disk: ", e);
       _errorLoadingLocalThumbnail = true;
+      if (e is WidgetUnmountedException) {
+        // Widget was unmounted - this is expected behavior
+        _logger.fine("Thumbnail loading cancelled: widget unmounted");
+      } else {
+        _logger.warning("Could not load thumbnail from disk: ", e);
+      }
     });
   }
 
@@ -326,7 +332,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         }
         //Do not retry if the widget is not mounted
         if (!mounted) {
-          return null;
+          throw WidgetUnmountedException("Thumbnail loading cancelled: widget unmounted");
         }
 
         retryAttempts++;

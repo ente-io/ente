@@ -251,9 +251,12 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                                     );
                                   },
                                 ),
-                                MenuSectionDescriptionWidget(
-                                  content: AppLocalizations.of(context)
-                                      .viewLargeFilesDesc,
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: MenuSectionDescriptionWidget(
+                                    content: AppLocalizations.of(context)
+                                        .viewLargeFilesDesc,
+                                  ),
                                 ),
                                 const SizedBox(
                                   height: 24,

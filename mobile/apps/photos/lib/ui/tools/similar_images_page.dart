@@ -2,6 +2,9 @@ import "dart:async";
 
 import "package:flutter/foundation.dart" show kDebugMode;
 import 'package:flutter/material.dart';
+import "package:flutter_spinkit/flutter_spinkit.dart" show SpinKitFadingCircle;
+import "package:flutter_svg/svg.dart";
+import "package:intl/intl.dart";
 import 'package:logging/logging.dart';
 import "package:photos/core/configuration.dart";
 import 'package:photos/core/constants.dart';
@@ -11,9 +14,11 @@ import "package:photos/models/selected_files.dart";
 import "package:photos/models/similar_files.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
+import "package:photos/services/favorites_service.dart";
 import "package:photos/services/machine_learning/similar_images_service.dart";
+import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
-import 'package:photos/ui/components/action_sheet_widget.dart';
+import "package:photos/theme/text_style.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
@@ -23,6 +28,7 @@ import "package:photos/utils/delete_file_util.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/standalone/data.dart";
+import "package:rive/rive.dart" show RiveAnimation;
 
 enum SimilarImagesPageState {
   setup,
@@ -37,6 +43,12 @@ enum SortKey {
   count,
 }
 
+enum TabFilter {
+  same,
+  close,
+  related,
+}
+
 class SimilarImagesPage extends StatefulWidget {
   final bool debugScreen;
 
@@ -46,9 +58,12 @@ class SimilarImagesPage extends StatefulWidget {
   State<SimilarImagesPage> createState() => _SimilarImagesPageState();
 }
 
-class _SimilarImagesPageState extends State<SimilarImagesPage> {
+class _SimilarImagesPageState extends State<SimilarImagesPage>
+    with SingleTickerProviderStateMixin {
   static const crossAxisCount = 3;
   static const crossAxisSpacing = 12.0;
+  static const double _closeThreshold = 0.02;
+  static const double _sameThreshold = 0.001;
 
   final _logger = Logger("SimilarImagesPage");
   bool _isDisposed = false;
@@ -56,19 +71,55 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   SimilarImagesPageState _pageState = SimilarImagesPageState.setup;
   double _distanceThreshold = 0.04; // Default value
   List<SimilarFiles> _similarFilesList = [];
-  SortKey _sortKey = SortKey.distanceAsc;
+
+  SortKey _sortKey = SortKey.size;
   bool _exactSearch = false;
   bool _fullRefresh = false;
-  bool _isSelectionSheetOpen = false;
+  TabFilter _selectedTab = TabFilter.same;
 
   late SelectedFiles _selectedFiles;
   late ValueNotifier<String> _deleteProgress;
+  late ScrollController _scrollController;
+  late AnimationController deleteAnimationController;
+
+  List<SimilarFiles> get _filteredGroups {
+    final filteredGroups = <SimilarFiles>[];
+    switch (_selectedTab) {
+      case TabFilter.same:
+        for (final group in _similarFilesList) {
+          final distance = group.furthestDistance;
+          if (distance <= _sameThreshold) {
+            filteredGroups.add(group);
+          }
+        }
+      case TabFilter.close:
+        for (final group in _similarFilesList) {
+          final distance = group.furthestDistance;
+          if (distance > _sameThreshold && distance <= _closeThreshold) {
+            filteredGroups.add(group);
+          }
+        }
+      case TabFilter.related:
+        for (final group in _similarFilesList) {
+          final distance = group.furthestDistance;
+          if (distance > _closeThreshold) {
+            filteredGroups.add(group);
+          }
+        }
+    }
+    return filteredGroups;
+  }
 
   @override
   void initState() {
     super.initState();
     _selectedFiles = SelectedFiles();
     _deleteProgress = ValueNotifier("");
+    _scrollController = ScrollController();
+    deleteAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    );
 
     if (!widget.debugScreen) {
       _findSimilarImages();
@@ -80,6 +131,8 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     _isDisposed = true;
     _selectedFiles.dispose();
     _deleteProgress.dispose();
+    _scrollController.dispose();
+    deleteAnimationController.dispose();
     super.dispose();
   }
 
@@ -111,52 +164,59 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         ValueListenableBuilder(
           valueListenable: _deleteProgress,
           builder: (context, value, child) {
-            if (value.isEmpty) {
-              return const SizedBox.shrink();
-            }
-
             final colorScheme = getEnteColorScheme(context);
             final textTheme = getEnteTextTheme(context);
+            final fontFeatures = textTheme.small.fontFeatures ?? [];
 
-            return Container(
-              color: colorScheme.backgroundBase.withValues(alpha: 0.8),
-              child: Center(
+            return AnimatedCrossFade(
+              firstCurve: Curves.easeInOutExpo,
+              secondCurve: Curves.easeInOutExpo,
+              sizeCurve: Curves.easeInOutExpo,
+              crossFadeState: value.isEmpty
+                  ? CrossFadeState.showFirst
+                  : CrossFadeState.showSecond,
+              duration: const Duration(milliseconds: 400),
+              secondChild: Align(
+                alignment: Alignment.center,
                 child: Container(
+                  height: 42,
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12)
+                          .copyWith(left: 14),
                   decoration: BoxDecoration(
-                    color: colorScheme.backgroundElevated,
                     borderRadius: BorderRadius.circular(8),
-                    boxShadow: [
-                      BoxShadow(
-                        color: colorScheme.strokeFaint,
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
+                    color: Colors.black.withValues(alpha: 0.72),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor:
-                              AlwaysStoppedAnimation(colorScheme.primary500),
+                        child: SpinKitFadingCircle(
+                          size: 18,
+                          color: colorScheme.warning500,
+                          controller: deleteAnimationController,
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 8),
                       Text(
-                        AppLocalizations.of(context)
-                            .deletingProgress(progress: value),
-                        style: textTheme.body,
+                        AppLocalizations.of(context).deletingDash,
+                        style: textTheme.small.copyWith(color: Colors.white),
+                      ),
+                      Text(
+                        value,
+                        style: textTheme.small.copyWith(
+                          color: Colors.white,
+                          fontFeatures: [
+                            const FontFeature.tabularFigures(),
+                            ...fontFeatures,
+                          ],
+                        ),
                       ),
                     ],
                   ),
                 ),
               ),
+              firstChild: const SizedBox.shrink(),
             );
           },
         ),
@@ -285,7 +345,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   }
 
   Widget _getLoadingView() {
-    return const SimilarImagesLoadingWidget();
+    return const _LoadingScreen();
   }
 
   Widget _getResultsView() {
@@ -318,78 +378,153 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
 
     return Column(
       children: [
+        _buildTabBar(),
         Expanded(
-          child: ListView.builder(
-            cacheExtent: 400,
-            itemCount: _similarFilesList.length + 1, // +1 for header
-            itemBuilder: (context, index) {
-              if (index == 0) {
-                return RepaintBoundary(
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: crossAxisSpacing,
-                      vertical: 12,
-                    ),
-                    padding: const EdgeInsets.all(crossAxisSpacing),
-                    decoration: BoxDecoration(
-                      color: colorScheme.fillFaint,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
+          child: _filteredGroups.isEmpty
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          Icons.photo_library_outlined,
-                          size: 20,
-                          color: colorScheme.textMuted,
+                        SvgPicture.asset(
+                          "assets/ducky_cleaning_static.svg",
+                          height: 160,
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                AppLocalizations.of(context).similarGroupsFound(
-                                  count: _similarFilesList.length,
-                                ),
-                                style: textTheme.bodyBold,
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                AppLocalizations.of(context)
-                                    .reviewAndRemoveSimilarImages,
-                                style: textTheme.miniMuted,
-                              ),
-                            ],
-                          ),
+                        const SizedBox(height: 16),
+                        Text(
+                          AppLocalizations.of(context).nothingToTidyUpHere,
+                          textAlign: TextAlign.center,
+                          style: textTheme.bodyMuted,
                         ),
+                        const SizedBox(height: 48),
                       ],
                     ),
                   ),
-                );
-              }
-
-              // Similar files groups (index - 1 because first item is header)
-              final similarFiles = _similarFilesList[index - 1];
-              return RepaintBoundary(
-                child: _buildSimilarFilesGroup(similarFiles),
-              );
-            },
-          ),
+                )
+              : ListView.builder(
+                  controller: _scrollController,
+                  cacheExtent: 400,
+                  itemCount: _filteredGroups.length,
+                  itemBuilder: (context, index) {
+                    final similarFiles = _filteredGroups[index];
+                    return Column(
+                      children: [
+                        if (index == 0) const SizedBox(height: 16),
+                        RepaintBoundary(
+                          child: _buildSimilarFilesGroup(similarFiles),
+                        ),
+                      ],
+                    );
+                  },
+                ),
         ),
-        _getBottomActionButtons(),
+        if (_filteredGroups.isNotEmpty) _getBottomActionButtons(),
       ],
     );
+  }
+
+  Widget _buildTabBar() {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: Row(
+        children: [
+          _buildTabButton(
+            TabFilter.same,
+            AppLocalizations.of(context).same,
+            colorScheme,
+            textTheme,
+          ),
+          const SizedBox(width: crossAxisSpacing),
+          _buildTabButton(
+            TabFilter.close,
+            AppLocalizations.of(context).close,
+            colorScheme,
+            textTheme,
+          ),
+          const SizedBox(width: crossAxisSpacing),
+          _buildTabButton(
+            TabFilter.related,
+            AppLocalizations.of(context).related,
+            colorScheme,
+            textTheme,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabButton(
+    TabFilter tab,
+    String label,
+    EnteColorScheme colorScheme,
+    EnteTextTheme textTheme,
+  ) {
+    final isSelected = _selectedTab == tab;
+
+    return GestureDetector(
+      onTap: () => _onTabChanged(tab),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected ? colorScheme.primary700 : colorScheme.fillFaint,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+          label,
+          style: isSelected
+              ? textTheme.smallBold.copyWith(color: Colors.white)
+              : textTheme.smallBold,
+        ),
+      ),
+    );
+  }
+
+  void _onTabChanged(TabFilter newTab) {
+    setState(() {
+      _selectedTab = newTab;
+
+      final newSelection = <EnteFile>{};
+      for (final group in _filteredGroups) {
+        for (int i = 1; i < group.files.length; i++) {
+          final file = group.files[i];
+          if (FavoritesService.instance.isFavoriteCache(file)) continue;
+          newSelection.add(file);
+        }
+      }
+      _selectedFiles.clearAll();
+      _selectedFiles.selectAll(newSelection);
+    });
   }
 
   Widget _getBottomActionButtons() {
     return ListenableBuilder(
       listenable: _selectedFiles,
       builder: (context, _) {
-        final selectedCount = _selectedFiles.files.length;
-        final hasSelectedFiles = selectedCount > 0;
+        final eligibleFilteredFiles = <EnteFile>{};
+        int autoSelectCount = 0;
+        for (final group in _filteredGroups) {
+          for (int i = 0; i < group.files.length; i++) {
+            final file = group.files[i];
+            eligibleFilteredFiles.add(file);
+            if (i != 0 && !FavoritesService.instance.isFavoriteCache(file)) {
+              autoSelectCount++;
+            }
+          }
+        }
+        final selectedFiles = _selectedFiles.files;
+
+        final selectedFilteredFiles =
+            selectedFiles.intersection(eligibleFilteredFiles);
+        final allFilteredSelected = eligibleFilteredFiles.isNotEmpty &&
+            selectedFilteredFiles.length >= autoSelectCount;
+        final hasSelectedFiles = selectedFilteredFiles.isNotEmpty;
 
         int totalSize = 0;
-        for (final file in _selectedFiles.files) {
+        for (final file in selectedFilteredFiles) {
           totalSize += file.fileSize ?? 0;
         }
 
@@ -424,7 +559,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                       ),
                     );
                   },
-                  child: hasSelectedFiles && !_isSelectionSheetOpen
+                  child: hasSelectedFiles
                       ? Column(
                           key: const ValueKey('delete_section'),
                           children: [
@@ -433,7 +568,8 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                               child: ButtonWidget(
                                 labelText: AppLocalizations.of(context)
                                     .deletePhotosWithSize(
-                                  count: selectedCount,
+                                  count: NumberFormat()
+                                      .format(selectedFilteredFiles.length),
                                   size: formatBytes(totalSize),
                                 ),
                                 buttonType: ButtonType.critical,
@@ -441,9 +577,10 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                                 shouldShowSuccessConfirmation: false,
                                 onTap: () async {
                                   await _deleteFiles(
-                                    _selectedFiles.files,
+                                    selectedFilteredFiles,
                                     showDialog: true,
                                     showUIFeedback: true,
+                                    scrollToTop: true,
                                   );
                                 },
                               ),
@@ -453,33 +590,43 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                         )
                       : const SizedBox.shrink(key: ValueKey('no_delete')),
                 ),
-                if (!_isSelectionSheetOpen)
-                  SizedBox(
-                    width: double.infinity,
-                    child: ButtonWidget(
-                      labelText: AppLocalizations.of(context).selectionOptions,
-                      buttonType: ButtonType.secondary,
-                      shouldSurfaceExecutionStates: false,
-                      shouldShowSuccessConfirmation: false,
-                      onTap: () async {
-                        setState(() {
-                          _isSelectionSheetOpen = true;
-                        });
-                        await _showSelectionOptionsSheet();
-                        if (mounted) {
-                          setState(() {
-                            _isSelectionSheetOpen = false;
-                          });
-                        }
-                      },
-                    ),
+                SizedBox(
+                  width: double.infinity,
+                  child: ButtonWidget(
+                    labelText: allFilteredSelected
+                        ? AppLocalizations.of(context).unselectAll
+                        : AppLocalizations.of(context).selectAll,
+                    buttonType: ButtonType.secondary,
+                    shouldSurfaceExecutionStates: false,
+                    shouldShowSuccessConfirmation: false,
+                    onTap: () async {
+                      _toggleSelectAll(allFilteredSelected);
+                    },
                   ),
+                ),
               ],
             ),
           ),
         );
       },
     );
+  }
+
+  void _toggleSelectAll(bool allSelected) {
+    final autoSelectFiles = <EnteFile>{};
+    for (final group in _filteredGroups) {
+      for (int i = 1; i < group.files.length; i++) {
+        final file = group.files[i];
+        if (FavoritesService.instance.isFavoriteCache(file)) continue;
+        autoSelectFiles.add(file);
+      }
+    }
+
+    if (allSelected) {
+      _selectedFiles.clearAll();
+    } else {
+      _selectedFiles.selectAll(autoSelectFiles);
+    }
   }
 
   Future<void> _findSimilarImages() async {
@@ -489,7 +636,6 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     });
 
     try {
-      // You can use _toggleValue here for advanced mode features
       _logger.info("exact mode: $_exactSearch");
 
       final similarFiles = await SimilarImagesService.instance.getSimilarFiles(
@@ -504,6 +650,16 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       _similarFilesList = similarFiles;
       _pageState = SimilarImagesPageState.results;
       _sortSimilarFiles();
+
+      for (final group in _similarFilesList) {
+        if (group.files.length > 1) {
+          for (int i = 1; i < group.files.length; i++) {
+            final file = group.files[i];
+            if (FavoritesService.instance.isFavoriteCache(file)) continue;
+            _selectedFiles.toggleSelection(file);
+          }
+        }
+      }
 
       if (_isDisposed) return;
       setState(() {});
@@ -555,114 +711,6 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     }
     if (_isDisposed) return;
     setState(() {});
-  }
-
-  void _selectFilesByThreshold(double threshold) {
-    final filesToSelect = <EnteFile>{};
-
-    for (final similarFilesGroup in _similarFilesList) {
-      if (similarFilesGroup.furthestDistance <= threshold) {
-        for (int i = 1; i < similarFilesGroup.files.length; i++) {
-          filesToSelect.add(similarFilesGroup.files[i]);
-        }
-      }
-    }
-
-    if (filesToSelect.isNotEmpty) {
-      _selectedFiles.clearAll(fireEvent: false);
-      _selectedFiles.selectAll(filesToSelect);
-    } else {
-      _selectedFiles.clearAll(fireEvent: false);
-    }
-  }
-
-  Future<void> _showSelectionOptionsSheet() async {
-    // Calculate how many files fall into each category
-    int exactFiles = 0;
-    int similarFiles = 0;
-    int allFiles = 0;
-
-    for (final group in _similarFilesList) {
-      final duplicateCount = group.files.length - 1; // Exclude the first file
-      allFiles += duplicateCount;
-
-      if (group.furthestDistance <= 0.0) {
-        exactFiles += duplicateCount;
-        similarFiles += duplicateCount;
-      } else if (group.furthestDistance <= 0.02) {
-        similarFiles += duplicateCount;
-      }
-    }
-
-    // Always show counts, even when 0
-    final String exactLabel =
-        AppLocalizations.of(context).selectExactWithCount(count: exactFiles);
-
-    final String similarLabel = AppLocalizations.of(context)
-        .selectSimilarWithCount(count: similarFiles);
-
-    final String allLabel =
-        AppLocalizations.of(context).selectAllWithCount(count: allFiles);
-
-    await showActionSheet(
-      context: context,
-      title: AppLocalizations.of(context).selectSimilarImagesTitle,
-      body: AppLocalizations.of(context).chooseSimilarImagesToSelect,
-      buttons: [
-        ButtonWidget(
-          labelText: exactLabel,
-          buttonType: ButtonType.neutral,
-          buttonSize: ButtonSize.large,
-          shouldStickToDarkTheme: true,
-          isInAlert: true,
-          buttonAction: ButtonAction.first,
-          shouldSurfaceExecutionStates: false,
-          isDisabled: exactFiles == 0,
-          onTap: () async {
-            _selectFilesByThreshold(0.0);
-          },
-        ),
-        ButtonWidget(
-          labelText: similarLabel,
-          buttonType: ButtonType.neutral,
-          buttonSize: ButtonSize.large,
-          shouldStickToDarkTheme: true,
-          isInAlert: true,
-          buttonAction: ButtonAction.second,
-          shouldSurfaceExecutionStates: false,
-          isDisabled: similarFiles == 0,
-          onTap: () async {
-            _selectFilesByThreshold(0.02);
-          },
-        ),
-        ButtonWidget(
-          labelText: allLabel,
-          buttonType: ButtonType.neutral,
-          buttonSize: ButtonSize.large,
-          shouldStickToDarkTheme: true,
-          isInAlert: true,
-          buttonAction: ButtonAction.third,
-          shouldSurfaceExecutionStates: false,
-          isDisabled: allFiles == 0,
-          onTap: () async {
-            _selectFilesByThreshold(0.05);
-          },
-        ),
-        ButtonWidget(
-          labelText: AppLocalizations.of(context).clearSelection,
-          buttonType: ButtonType.secondary,
-          buttonSize: ButtonSize.large,
-          shouldStickToDarkTheme: true,
-          isInAlert: true,
-          buttonAction: ButtonAction.cancel,
-          shouldSurfaceExecutionStates: false,
-          onTap: () async {
-            _selectedFiles.clearAll(fireEvent: false);
-          },
-        ),
-      ],
-      actionSheetType: ActionSheetType.defaultActionSheet,
-    );
   }
 
   Widget _buildSimilarFilesGroup(SimilarFiles similarFiles) {
@@ -893,6 +941,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     Set<EnteFile> filesToDelete, {
     bool showDialog = true,
     bool showUIFeedback = true,
+    bool scrollToTop = false,
   }) async {
     if (filesToDelete.isEmpty) return;
     if (showDialog) {
@@ -908,6 +957,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
               filesToDelete,
               true,
               showUIFeedback: showUIFeedback,
+              scrollToTop: scrollToTop,
             );
           } catch (e, s) {
             _logger.severe("Failed to delete files", e, s);
@@ -922,6 +972,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         filesToDelete,
         true,
         showUIFeedback: showUIFeedback,
+        scrollToTop: scrollToTop,
       );
     }
   }
@@ -930,6 +981,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     Set<EnteFile> filesToDelete,
     bool createSymlink, {
     bool showUIFeedback = true,
+    bool scrollToTop = false,
   }) async {
     if (filesToDelete.isEmpty) {
       return;
@@ -975,15 +1027,15 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       _similarFilesList.remove(group);
     }
 
+    final int collectionCnt = collectionToFilesToAddMap.keys.length;
     if (createSymlink) {
       final userID = Configuration.instance.getUserID();
-      final int collectionCnt = collectionToFilesToAddMap.keys.length;
       int progress = 0;
       for (final collectionID in collectionToFilesToAddMap.keys) {
         if (!mounted) {
           return;
         }
-        if (collectionCnt > 0 && showUIFeedback) {
+        if (collectionCnt > 2 && showUIFeedback) {
           progress++;
           // calculate progress percentage upto 2 decimal places
           final double percentage = (progress / collectionCnt) * 100;
@@ -1004,7 +1056,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         }
       }
     }
-    if (showUIFeedback) {
+    if (collectionCnt > 2 && showUIFeedback) {
       _deleteProgress.value = "";
     }
 
@@ -1012,19 +1064,29 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
     setState(() {});
     await deleteFilesFromRemoteOnly(context, allDeleteFiles.toList());
 
+    // Scroll to top if requested
+    if (scrollToTop && mounted) {
+      await _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeOutCubic,
+      );
+    }
+
     // Show congratulations popup
-    if (allDeleteFiles.isNotEmpty && mounted && showUIFeedback) {
+    if (allDeleteFiles.length > 100 && mounted && showUIFeedback) {
       final int totalSize = allDeleteFiles.fold<int>(
         0,
         (sum, file) => sum + (file.fileSize ?? 0),
       );
-      _showCongratulationsDialog(allDeleteFiles.length, totalSize);
+      _showCongratulationsDialog(totalSize);
     }
   }
 
-  void _showCongratulationsDialog(int deletedCount, int totalSize) {
+  void _showCongratulationsDialog(int totalSize) {
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
+    final screenWidth = MediaQuery.of(context).size.width;
 
     showDialog(
       context: context,
@@ -1034,39 +1096,43 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.celebration_outlined,
-              size: 48,
-              color: colorScheme.primary500,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              AppLocalizations.of(context).greatJob,
-              style: textTheme.h3Bold,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              AppLocalizations.of(context).cleanedUpSimilarImages(
-                count: deletedCount,
-                size: formatBytes(totalSize),
+        contentPadding: const EdgeInsets.all(24),
+        content: SizedBox(
+          width: screenWidth - (crossAxisSpacing),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SvgPicture.asset(
+                "assets/ducky_cleaning_static.svg",
+                height: 160,
               ),
-              style: textTheme.body,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ButtonWidget(
-                labelText: AppLocalizations.of(context).done,
-                buttonType: ButtonType.primary,
-                onTap: () async => Navigator.of(context).pop(),
+              const SizedBox(height: 16),
+              Text(
+                AppLocalizations.of(context).hoorayyyy,
+                style: textTheme.h2Bold.copyWith(
+                  color: colorScheme.primary500,
+                ),
+                textAlign: TextAlign.center,
               ),
-            ),
-          ],
+              const SizedBox(height: 8),
+              Text(
+                AppLocalizations.of(context).cleanedUpSimilarImages(
+                  size: formatBytes(totalSize),
+                ),
+                style: textTheme.body,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 36),
+              SizedBox(
+                width: double.infinity,
+                child: ButtonWidget(
+                  labelText: AppLocalizations.of(context).done,
+                  buttonType: ButtonType.primary,
+                  onTap: () async => Navigator.of(context).pop(),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1080,7 +1146,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
       String text;
       switch (key) {
         case SortKey.size:
-          text = AppLocalizations.of(context).size;
+          text = AppLocalizations.of(context).totalSize;
           break;
         case SortKey.distanceAsc:
           text = AppLocalizations.of(context).similarity;
@@ -1141,240 +1207,78 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
   }
 }
 
-class SimilarImagesLoadingWidget extends StatefulWidget {
-  const SimilarImagesLoadingWidget({super.key});
+class _LoadingScreen extends StatefulWidget {
+  const _LoadingScreen();
 
   @override
-  State<SimilarImagesLoadingWidget> createState() =>
-      _SimilarImagesLoadingWidgetState();
+  State<_LoadingScreen> createState() => _LoadingScreenState();
 }
 
-class _SimilarImagesLoadingWidgetState extends State<SimilarImagesLoadingWidget>
-    with TickerProviderStateMixin {
-  late AnimationController _loadingAnimationController;
-  late AnimationController _pulseAnimationController;
-  late Animation<double> _scaleAnimation;
-  late Animation<double> _pulseAnimation;
-  int _loadingMessageIndex = 0;
+class _LoadingScreenState extends State<_LoadingScreen> {
+  Timer? _timer;
+  int _currentTextIndex = 0;
 
-  List<String> get _loadingMessages => [
-        AppLocalizations.of(context).analyzingPhotosLocally,
-        AppLocalizations.of(context).lookingForVisualSimilarities,
-        AppLocalizations.of(context).comparingImageDetails,
-        AppLocalizations.of(context).findingSimilarImages,
-        AppLocalizations.of(context).almostDone,
-      ];
+  late List<String> _loadingTexts;
 
   @override
   void initState() {
     super.initState();
-
-    // Initialize loading animations
-    _loadingAnimationController = AnimationController(
-      duration: const Duration(seconds: 2),
-      vsync: this,
-    )..repeat();
-
-    _pulseAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
-      vsync: this,
-    )..repeat(reverse: true);
-
-    _scaleAnimation = Tween<double>(
-      begin: 0.8,
-      end: 1.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _pulseAnimationController,
-        curve: Curves.easeInOut,
-      ),
-    );
-
-    _pulseAnimation = Tween<double>(
-      begin: 0.4,
-      end: 1.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _pulseAnimationController,
-        curve: Curves.easeInOut,
-      ),
-    );
-
-    _startMessageCycling();
+    _startTextCycling();
   }
 
-  void _startMessageCycling() {
-    Future.doWhile(() async {
-      if (!mounted) return false;
-      await Future.delayed(const Duration(seconds: 7));
-      if (mounted) {
-        setState(() {
-          _loadingMessageIndex++;
-        });
-        // Stop cycling after reaching the last message
-        return _loadingMessageIndex < _loadingMessages.length - 1;
+  void _startTextCycling() {
+    _timer = Timer.periodic(const Duration(seconds: 7), (timer) {
+      if (_currentTextIndex < _loadingTexts.length - 1) {
+        if (mounted) {
+          setState(() {
+            _currentTextIndex++;
+          });
+        }
+        // Stop the timer when we reach the last text
+        if (_currentTextIndex >= _loadingTexts.length - 1) {
+          timer.cancel();
+        }
       }
-      return false;
     });
   }
 
   @override
   void dispose() {
-    _loadingAnimationController.dispose();
-    _pulseAnimationController.dispose();
+    _timer?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
-    final colorScheme = getEnteColorScheme(context);
+
+    _loadingTexts = [
+      AppLocalizations.of(context).analyzingPhotosLocally,
+      AppLocalizations.of(context).lookingForVisualSimilarities,
+      AppLocalizations.of(context).comparingImageDetails,
+      AppLocalizations.of(context).findingSimilarImages,
+      AppLocalizations.of(context).almostDone,
+    ];
 
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Animated scanning effect
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              // Pulsing background circle
-              AnimatedBuilder(
-                animation: _pulseAnimation,
-                builder: (context, child) {
-                  return Container(
-                    width: 160,
-                    height: 160,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: colorScheme.primary500.withValues(
-                        alpha: _pulseAnimation.value * 0.1,
-                      ),
-                    ),
-                  );
-                },
-              ),
-              // Rotating scanner ring
-              AnimatedBuilder(
-                animation: _loadingAnimationController,
-                builder: (context, child) {
-                  return Transform.rotate(
-                    angle: _loadingAnimationController.value * 2 * 3.14159,
-                    child: Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: colorScheme.primary500,
-                          width: 2,
-                        ),
-                        gradient: SweepGradient(
-                          colors: [
-                            colorScheme.primary500.withValues(alpha: 0),
-                            colorScheme.primary500.withValues(alpha: 0.3),
-                            colorScheme.primary500.withValues(alpha: 0.6),
-                            colorScheme.primary500,
-                            colorScheme.primary500.withValues(alpha: 0),
-                          ],
-                          stops: const [0.0, 0.25, 0.5, 0.75, 1.0],
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-              // Center icon with scale animation
-              AnimatedBuilder(
-                animation: _scaleAnimation,
-                builder: (context, child) {
-                  return Transform.scale(
-                    scale: _scaleAnimation.value,
-                    child: Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: colorScheme.backgroundElevated,
-                        boxShadow: [
-                          BoxShadow(
-                            color: colorScheme.strokeFaint,
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        Icons.photo_library_outlined,
-                        size: 40,
-                        color: colorScheme.primary500,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-          const SizedBox(height: 48),
-          // Privacy badge
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: colorScheme.fillFaint,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.lock_outline,
-                  size: 14,
-                  color: colorScheme.textMuted,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  AppLocalizations.of(context).processingLocally,
-                  style: textTheme.miniFaint,
-                ),
-              ],
+          const SizedBox(
+            height: 160,
+            child: RiveAnimation.asset(
+              'assets/ducky_analyze_files.riv',
+              fit: BoxFit.contain,
             ),
           ),
           const SizedBox(height: 16),
-          // Animated loading message
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 500),
             child: Text(
-              _loadingMessages[_loadingMessageIndex],
-              key: ValueKey(_loadingMessageIndex),
-              style: textTheme.body,
+              _loadingTexts[_currentTextIndex],
+              key: ValueKey<int>(_currentTextIndex),
+              style: textTheme.bodyMuted,
               textAlign: TextAlign.center,
-            ),
-          ),
-          const SizedBox(height: 8),
-          // Progress dots
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: List.generate(
-              3,
-              (index) => AnimatedBuilder(
-                animation: _loadingAnimationController,
-                builder: (context, child) {
-                  final delay = index * 0.2;
-                  final value =
-                      (_loadingAnimationController.value + delay) % 1.0;
-                  return Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: colorScheme.primary500.withValues(
-                        alpha: value < 0.5 ? value * 2 : 2 - value * 2,
-                      ),
-                    ),
-                  );
-                },
-              ),
             ),
           ),
         ],
