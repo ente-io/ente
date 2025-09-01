@@ -1,6 +1,7 @@
 import "dart:async";
 
 import 'package:flutter/material.dart';
+import "package:flutter/rendering.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
@@ -44,6 +45,7 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
   late final StreamSubscription<HideSharedItemsFromHomeGalleryEvent>
       _hideSharedFilesFromHomeSubscription;
   bool _shouldHideSharedItems = localSettings.hideSharedItemsFromHomeGallery;
+  final ValueNotifier<bool> _isScrolling = ValueNotifier(false);
 
   /// This deboucner is to delay the UI update of the shared items toggle
   /// since it's expensive (a new differnt key is used for the gallery
@@ -76,64 +78,77 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final gallery = Gallery(
-      key: ValueKey(_shouldHideSharedItems),
-      asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
-        final ownerID = Configuration.instance.getUserID();
-        final hasSelectedAllForBackup =
-            Configuration.instance.hasSelectedAllFoldersForBackup();
-        final collectionsToHide =
-            CollectionsService.instance.archivedOrHiddenCollectionIds();
-        FileLoadResult result;
-        final DBFilterOptions filterOptions = DBFilterOptions(
-          hideIgnoredForUpload: true,
-          dedupeUploadID: true,
-          ignoredCollectionIDs: collectionsToHide,
-          ignoreSavedFiles: true,
-          ignoreSharedItems: _shouldHideSharedItems,
-        );
-        if (hasSelectedAllForBackup) {
-          result = await FilesDB.instance.getAllLocalAndUploadedFiles(
-            creationStartTime,
-            creationEndTime,
-            ownerID!,
-            limit: limit,
-            asc: asc,
-            filterOptions: filterOptions,
-          );
-        } else {
-          result = await FilesDB.instance.getAllPendingOrUploadedFiles(
-            creationStartTime,
-            creationEndTime,
-            ownerID!,
-            limit: limit,
-            asc: asc,
-            filterOptions: filterOptions,
-          );
+    final gallery = NotificationListener<ScrollNotification>(
+      onNotification: (scrollInfo) {
+        if (scrollInfo is UserScrollNotification) {
+          if (scrollInfo.direction == ScrollDirection.forward ||
+              scrollInfo.direction == ScrollDirection.reverse) {
+            _isScrolling.value = true;
+          } else if (scrollInfo.direction == ScrollDirection.idle) {
+            _isScrolling.value = false;
+          }
         }
+        return false;
+      },
+      child: Gallery(
+        key: ValueKey(_shouldHideSharedItems),
+        asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
+          final ownerID = Configuration.instance.getUserID();
+          final hasSelectedAllForBackup =
+              Configuration.instance.hasSelectedAllFoldersForBackup();
+          final collectionsToHide =
+              CollectionsService.instance.archivedOrHiddenCollectionIds();
+          FileLoadResult result;
+          final DBFilterOptions filterOptions = DBFilterOptions(
+            hideIgnoredForUpload: true,
+            dedupeUploadID: true,
+            ignoredCollectionIDs: collectionsToHide,
+            ignoreSavedFiles: true,
+            ignoreSharedItems: _shouldHideSharedItems,
+          );
+          if (hasSelectedAllForBackup) {
+            result = await FilesDB.instance.getAllLocalAndUploadedFiles(
+              creationStartTime,
+              creationEndTime,
+              ownerID!,
+              limit: limit,
+              asc: asc,
+              filterOptions: filterOptions,
+            );
+          } else {
+            result = await FilesDB.instance.getAllPendingOrUploadedFiles(
+              creationStartTime,
+              creationEndTime,
+              ownerID!,
+              limit: limit,
+              asc: asc,
+              filterOptions: filterOptions,
+            );
+          }
 
-        return result;
-      },
-      reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
-      removalEventTypes: const {
-        EventType.deletedFromRemote,
-        EventType.deletedFromEverywhere,
-        EventType.archived,
-        EventType.hide,
-      },
-      forceReloadEvents: [
-        Bus.instance.on<BackupFoldersUpdatedEvent>(),
-        Bus.instance.on<ForceReloadHomeGalleryEvent>(),
-      ],
-      tagPrefix: "home_gallery",
-      selectedFiles: widget.selectedFiles,
-      header: widget.header,
-      footer: widget.footer,
-      reloadDebounceTime: const Duration(seconds: 2),
-      reloadDebounceExecutionInterval: const Duration(seconds: 5),
-      galleryType: GalleryType.homepage,
-      groupType: widget.groupType,
-      showGallerySettingsCTA: true,
+          return result;
+        },
+        reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
+        removalEventTypes: const {
+          EventType.deletedFromRemote,
+          EventType.deletedFromEverywhere,
+          EventType.archived,
+          EventType.hide,
+        },
+        forceReloadEvents: [
+          Bus.instance.on<BackupFoldersUpdatedEvent>(),
+          Bus.instance.on<ForceReloadHomeGalleryEvent>(),
+        ],
+        tagPrefix: "home_gallery",
+        selectedFiles: widget.selectedFiles,
+        header: widget.header,
+        footer: widget.footer,
+        reloadDebounceTime: const Duration(seconds: 2),
+        reloadDebounceExecutionInterval: const Duration(seconds: 5),
+        galleryType: GalleryType.homepage,
+        groupType: widget.groupType,
+        showGallerySettingsCTA: true,
+      ),
     );
     return GalleryFilesState(
       child: SelectionState(
@@ -142,7 +157,16 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
           alignment: Alignment.bottomCenter,
           children: [
             gallery,
-            FileSelectionOverlayBar(GalleryType.homepage, widget.selectedFiles),
+            ValueListenableBuilder<bool>(
+              valueListenable: _isScrolling,
+              builder: (context, isScrolling, _) {
+                return FileSelectionOverlayBar(
+                  GalleryType.homepage,
+                  widget.selectedFiles,
+                  isCollapsed: isScrolling,
+                );
+              },
+            ),
           ],
         ),
       ),

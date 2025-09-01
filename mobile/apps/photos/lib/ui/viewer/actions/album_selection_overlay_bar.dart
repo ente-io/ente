@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/selected_albums.dart";
-import "package:photos/theme/effects.dart";
+// import "package:photos/theme/effects.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/collection_list_page.dart";
-import "package:photos/ui/components/bottom_action_bar/album_bottom_action_bar_widget.dart";
+// import "package:photos/ui/components/bottom_action_bar/album_bottom_action_bar_widget.dart";
 
 class AlbumSelectionOverlayBar extends StatefulWidget {
   final VoidCallback? onClose;
@@ -62,29 +62,29 @@ class _AlbumSelectionOverlayBarState extends State<AlbumSelectionOverlayBar> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              if (widget.showSelectAllButton)
-                Padding(
-                  padding: const EdgeInsets.only(right: 4),
-                  child: SelectAllAlbumsButton(
-                    widget.selectedAlbums,
-                    widget.collections,
-                    backgroundColor: widget.backgroundColor,
-                  ),
-                ),
-              const SizedBox(height: 8),
-              Container(
-                decoration: BoxDecoration(boxShadow: shadowFloatFaintLight),
-                child: AlbumBottomActionBarWidget(
-                  widget.selectedAlbums,
-                  widget.sectionType,
-                  onCancel: () {
-                    if (widget.selectedAlbums.albums.isNotEmpty) {
-                      widget.selectedAlbums.clearAll();
-                    }
-                  },
-                  backgroundColor: widget.backgroundColor,
-                ),
-              ),
+              // if (widget.showSelectAllButton)
+              //   Padding(
+              //     padding: const EdgeInsets.only(right: 4),
+              //     child: SelectAllAlbumsButton(
+              //       widget.selectedAlbums,
+              //       widget.collections,
+              //       backgroundColor: widget.backgroundColor,
+              //     ),
+              //   ),
+              // const SizedBox(height: 8),
+              // Container(
+              //   decoration: BoxDecoration(boxShadow: shadowFloatFaintLight),
+              //   child: AlbumBottomActionBarWidget(
+              //     widget.selectedAlbums,
+              //     widget.sectionType,
+              //     onCancel: () {
+              //       if (widget.selectedAlbums.albums.isNotEmpty) {
+              //         widget.selectedAlbums.clearAll();
+              //       }
+              //     },
+              //     backgroundColor: widget.backgroundColor,
+              //   ),
+              // ),
             ],
           ),
           secondChild: const SizedBox(width: double.infinity),
