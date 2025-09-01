@@ -314,7 +314,7 @@
       }
     }
   },
-  "faq": "Často kladené dotazy",
+  "faq": "Často kladené dotazy (FAQ)",
   "help": "Nápověda",
   "oopsSomethingWentWrong": "Jejda, něco se pokazilo",
   "peopleUsingYourCode": "Lidé, kteří používají váš kód",
@@ -498,7 +498,7 @@
   "authToChangeYourEmail": "Pro změnu e-mailové adresy se prosím ověřte",
   "changePassword": "Změnit heslo",
   "authToChangeYourPassword": "Pro změnu hesla se prosím ověřte",
-  "emailVerificationToggle": "Ověření emailem",
+  "emailVerificationToggle": "Ověření pomocí e-mailu",
   "authToChangeEmailVerificationSetting": "Pro změnu ověření pomocí emailu se musíte ověřit",
   "exportYourData": "Exportujte svá data",
   "logout": "Odhlásit se",
@@ -594,7 +594,7 @@
   "theme": "Motiv",
   "lightTheme": "Světlý",
   "darkTheme": "Tmavý",
-  "systemTheme": "Podle systému",
+  "systemTheme": "Systém",
   "freeTrial": "Bezplatná zkušební verze",
   "selectYourPlan": "Vyberte svůj tarif",
   "enteSubscriptionPitch": "Ente uchovává vaše vzpomínky, takže jsou vám vždy k dispozici, i když ztratíte své zařízení.",
@@ -1827,5 +1827,98 @@
         "type": "int"
       }
     }
-  }
+  },
+  "videosProcessed": "Zpracovaná videa",
+  "totalVideos": "Celkový počet videí",
+  "skippedVideos": "Přeskočená videa",
+  "videoStreamingNote": "Na tomto zařízení se zpracovávají pouze videa z posledních 60 dnů, která jsou kratší než 1 minuta. U starších/delších videí povolte streamování v desktopové aplikaci.",
+  "createStream": "Vytvořit stream",
+  "recreateStream": "Obnovit stream",
+  "addedToStreamCreationQueue": "Přidáno do fronty pro vytvoření streamu",
+  "addedToStreamRecreationQueue": "Přidáno do fronty pro obnovení streamu",
+  "videoPreviewAlreadyExists": "Náhled videa již existuje",
+  "videoAlreadyInQueue": "Video soubor již je ve frontě",
+  "addedToQueue": "Přidáno do fronty",
+  "creatingStream": "Vytváření streamu",
+  "similarImages": "Podobné obrázky",
+  "findSimilarImages": "Najít podobné obrázky",
+  "noSimilarImagesFound": "Nebyly nalezeny žádné podobné obrázky",
+  "yourPhotosLookUnique": "Vaše fotografie vypadají jedinečně",
+  "similarGroupsFound": "{count, plural, =1{{count} skupina nalezena} few{{count} skupiny nalezeny} other{{count} skupin nalezeno}}",
+  "@similarGroupsFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewAndRemoveSimilarImages": "Zkontrolujte a odstraňte podobné obrázky",
+  "deletePhotosWithSize": "Smazat {count} fotek ({size})",
+  "@deletePhotosWithSize": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "selectionOptions": "Možnosti výběru",
+  "selectExactWithCount": "Úplně stejné ({count})",
+  "@selectExactWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectExact": "Vybrat shodné",
+  "selectSimilarWithCount": "Hodně podobné ({count})",
+  "@selectSimilarWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectSimilar": "Vyberte podobné",
+  "selectAllWithCount": "Všechny podobnosti ({count})",
+  "@selectAllWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectSimilarImagesTitle": "Vyberte podobné obrázky",
+  "chooseSimilarImagesToSelect": "Vyberte obrázky na základě jejich vizuální podobnosti",
+  "clearSelection": "Vymazat výběr",
+  "similarImagesCount": "{count} podobných obrázků",
+  "@similarImagesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteWithCount": "Smazat ({count})",
+  "@deleteWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteFiles": "Smazat soubory",
+  "areYouSureDeleteFiles": "Opravdu chcete tyto soubory smazat?",
+  "greatJob": "Dobrá práce!",
+  "size": "Velikost",
+  "similarity": "Podobnost",
+  "processingLocally": "Místní zpracování",
+  "useMLToFindSimilarImages": "Zkontrolujte a odstraňte obrázky, které se navzájem podobají.",
+  "all": "Vše",
+  "similar": "Podobné",
+  "identical": "Identické",
+  "nothingHereTryAnotherFilter": "Tady nic není, zkuste jiný filtr! 👀"
 }

@@ -1827,5 +1827,111 @@
         "type": "int"
       }
     }
-  }
+  },
+  "videosProcessed": "视频已处理",
+  "totalVideos": "视频总数",
+  "skippedVideos": "已跳过的视频",
+  "videoStreamingDescriptionLine1": "在任何设备上立即播放视频。",
+  "videoStreamingDescriptionLine2": "启用以处理此设备上的视频流。",
+  "videoStreamingNote": "此设备仅处理过去 60 天内时长不超过 1 分钟的视频。对于更早/更长的视频，请在桌面应用中启用流式传输。",
+  "createStream": "创建流",
+  "recreateStream": "重建流",
+  "addedToStreamCreationQueue": "已添加到流创建队列",
+  "addedToStreamRecreationQueue": "已添加到流重建队列",
+  "videoPreviewAlreadyExists": "视频预览已存在",
+  "videoAlreadyInQueue": "视频文件已存在于队列中",
+  "addedToQueue": "已添加至队列",
+  "creatingStream": "正在创建流",
+  "similarImages": "相似图片",
+  "findSimilarImages": "查找相似图片",
+  "noSimilarImagesFound": "未找到相似图片",
+  "yourPhotosLookUnique": "您的照片看起来很独特",
+  "similarGroupsFound": "{count, plural, =1{{count} 组已找到} other{{count} 组已找到}}",
+  "@similarGroupsFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewAndRemoveSimilarImages": "查看并删除相似图片",
+  "deletePhotosWithSize": "删除 {count} 张照片 ({size})",
+  "@deletePhotosWithSize": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "selectionOptions": "选择选项",
+  "selectExactWithCount": "完全相似 ({count})",
+  "@selectExactWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectExact": "精确选择",
+  "selectSimilarWithCount": "部分相似 ({count})",
+  "@selectSimilarWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectSimilar": "选择相似项",
+  "selectAllWithCount": "所有相似项 ({count})",
+  "@selectAllWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectSimilarImagesTitle": "选择所有相似图片",
+  "chooseSimilarImagesToSelect": "根据视觉相似性选择图像",
+  "clearSelection": "清除选择",
+  "similarImagesCount": "{count} 张相似图片",
+  "@similarImagesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteWithCount": "删除 ({count}) 项",
+  "@deleteWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteFiles": "删除文件",
+  "areYouSureDeleteFiles": "您确定要删除这些文件吗？",
+  "greatJob": "做得好！",
+  "cleanedUpSimilarImages": "您已释放了 {size} 的空间",
+  "@cleanedUpSimilarImages": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "size": "大小",
+  "similarity": "相似度",
+  "processingLocally": "正在本地处理",
+  "useMLToFindSimilarImages": "审查并删除看起来彼此相似的图像。",
+  "all": "全部",
+  "similar": "相似的",
+  "identical": "完全相同",
+  "nothingHereTryAnotherFilter": "此处无内容，请尝试其他过滤器！👀",
+  "related": "相关",
+  "hoorayyyy": "耶～～！",
+  "nothingToTidyUpHere": "这里没什么可清理的"
 }

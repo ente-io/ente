@@ -159,7 +159,7 @@
   "addCollaborator": "Agregar colaborador",
   "addANewEmail": "Agregar nuevo correo electrónico",
   "orPickAnExistingOne": "O elige uno existente",
-  "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum": "Colaboradores pueden añadir fotos y videos al álbum compartido.",
+  "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum": "Colaboradores pueden añadir fotos y vídeos al álbum compartido.",
   "enterEmail": "Ingresar correo electrónico ",
   "albumOwner": "Propietario",
   "@albumOwner": {
@@ -270,7 +270,7 @@
   "shareTextConfirmOthersVerificationID": "Hola, ¿puedes confirmar que esta es tu ID de verificación ente.io: {verificationID}?",
   "somethingWentWrong": "Algo salió mal",
   "sendInvite": "Enviar invitación",
-  "shareTextRecommendUsingEnte": "Descarga Ente para que podamos compartir fácilmente fotos y videos en calidad original.\n\nhttps://ente.io",
+  "shareTextRecommendUsingEnte": "Descarga Ente para que podamos compartir fácilmente fotos y vídeos en calidad original.\n\nhttps://ente.io",
   "done": "Hecho",
   "applyCodeTitle": "Usar código",
   "enterCodeDescription": "Introduce el código proporcionado por tu amigo para reclamar almacenamiento gratuito para ambos",
@@ -857,7 +857,7 @@
   "deviceFilesAutoUploading": "Los archivos añadidos a este álbum de dispositivo se subirán automáticamente a Ente.",
   "turnOnBackupForAutoUpload": "Activar la copia de seguridad para subir automáticamente archivos añadidos a la carpeta de este dispositivo a Ente.",
   "noHiddenPhotosOrVideos": "No hay fotos ni vídeos ocultos",
-  "toHideAPhotoOrVideo": "Para ocultar una foto o video",
+  "toHideAPhotoOrVideo": "Para ocultar una foto o vídeo",
   "openTheItem": "• Abrir el elemento",
   "clickOnTheOverflowMenu": "• Haga clic en el menú desbordante",
   "click": "• Clic",
@@ -866,7 +866,7 @@
   "archiveAlbum": "Archivar álbum",
   "calculating": "Calculando...",
   "pleaseWaitDeletingAlbum": "Por favor espera. Borrando el álbum",
-  "searchByExamples": "• Nombres de álbumes (por ejemplo, \"Cámara\")\n• Tipos de archivos (por ejemplo, \"Videos\", \".gif\")\n• Años y meses (por ejemplo, \"2022\", \"Enero\")\n• Vacaciones (por ejemplo, \"Navidad\")\n• Descripciones fotográficas (por ejemplo, \"#diversión\")",
+  "searchByExamples": "• Nombres de álbumes (por ejemplo, \"Cámara\")\n• Tipos de archivos (por ejemplo, \"Vídeos\", \".gif\")\n• Años y meses (por ejemplo, \"2022\", \"Enero\")\n• Vacaciones (por ejemplo, \"Navidad\")\n• Descripciones fotográficas (por ejemplo, \"#diversión\")",
   "youCanTrySearchingForADifferentQuery": "Puedes intentar buscar una consulta diferente.",
   "noResultsFound": "No se han encontrado resultados",
   "addedBy": "Añadido por {emailOrName}",
@@ -884,8 +884,8 @@
   "filesSavedToGallery": "Archivo guardado en la galería",
   "fileFailedToSaveToGallery": "No se pudo guardar el archivo en la galería",
   "download": "Descargar",
-  "pressAndHoldToPlayVideo": "Presiona y mantén presionado para reproducir el video",
-  "pressAndHoldToPlayVideoDetailed": "Mantén pulsada la imagen para reproducir el video",
+  "pressAndHoldToPlayVideo": "Presiona y mantén presionado para reproducir el vídeo",
+  "pressAndHoldToPlayVideoDetailed": "Mantén pulsada la imagen para reproducir el vídeo",
   "downloadFailed": "Descarga fallida",
   "deduplicateFiles": "Deduplicar archivos",
   "deselectAll": "Deseleccionar todo",
@@ -895,7 +895,7 @@
   "count": "Cuenta",
   "totalSize": "Tamaño total",
   "longpressOnAnItemToViewInFullscreen": "Manten presionado un elemento para ver en pantalla completa",
-  "decryptingVideo": "Descifrando video...",
+  "decryptingVideo": "Descifrando vídeo...",
   "authToViewYourMemories": "Por favor, autentícate para ver tus recuerdos",
   "unlock": "Desbloquear",
   "freeUpSpace": "Liberar espacio",
@@ -1014,7 +1014,7 @@
   "cachedData": "Datos almacenados en caché",
   "clearCaches": "Limpiar cachés",
   "remoteImages": "Imágenes remotas",
-  "remoteVideos": "Videos remotos",
+  "remoteVideos": "Vídeos remotos",
   "remoteThumbnails": "Miniaturas remotas",
   "pendingSync": "Sincronización pendiente",
   "localGallery": "Galería local",
@@ -1169,7 +1169,7 @@
     "description": "Label for the map view"
   },
   "maps": "Mapas",
-  "enableMaps": "Activar Mapas",
+  "enableMaps": "Habilitar mapas",
   "enableMapsDesc": "Esto mostrará tus fotos en el mapa mundial.\n\nEste mapa está gestionado por Open Street Map, y la ubicación exacta de tus fotos nunca se comparte.\n\nPuedes deshabilitar esta función en cualquier momento en Ajustes.",
   "quickLinks": "Acceso rápido",
   "selectItemsToAdd": "Selecciona elementos para agregar",
@@ -1346,7 +1346,7 @@
   "noSystemLockFound": "Bloqueo de sistema no encontrado",
   "tapToUnlock": "Toca para desbloquear",
   "tooManyIncorrectAttempts": "Demasiados intentos incorrectos",
-  "videoInfo": "Información de video",
+  "videoInfo": "Información de vídeo",
   "autoLock": "Bloqueo automático",
   "immediately": "Inmediatamente",
   "autoLockFeatureDescription": "Tiempo después de que la aplicación esté en segundo plano",
@@ -1433,7 +1433,7 @@
     "description": "In session page, warn user (in toast) that active sessions could not be fetched."
   },
   "failedToRefreshStripeSubscription": "Error al actualizar la suscripción",
-  "failedToPlayVideo": "Error al reproducir el video",
+  "failedToPlayVideo": "Error al reproducir el vídeo",
   "uploadIsIgnoredDueToIgnorereason": "La subida se ignoró debido a {ignoreReason}",
   "@uploadIsIgnoredDueToIgnorereason": {
     "placeholders": {
@@ -1588,7 +1588,7 @@
   },
   "legacyInvite": "{email} te ha invitado a ser un contacto de confianza",
   "authToManageLegacy": "Por favor, autentícate para administrar tus contactos de confianza",
-  "useDifferentPlayerInfo": "¿Tienes problemas para reproducir este video? Mantén pulsado aquí para probar un reproductor diferente.",
+  "useDifferentPlayerInfo": "¿Tienes problemas para reproducir este vídeo? Mantén pulsado aquí para probar un reproductor diferente.",
   "hideSharedItemsFromHomeGallery": "Ocultar elementos compartidos de la galería de inicio",
   "gallery": "Galería",
   "joinAlbum": "Unir álbum",
@@ -1662,7 +1662,7 @@
   "@linkPersonCaption": {
     "description": "Caption for the 'Link person' title. It should be a continuation of the 'Link person' title. Just like how 'Link person' + 'for better sharing experience' forms a proper sentence in English, the combination of these two strings should also be a proper sentence in other languages."
   },
-  "videoStreaming": "Vídeos en streaming",
+  "videoStreaming": "Vídeos en transmisión",
   "processingVideos": "Procesando vídeos",
   "streamDetails": "Detalles de la transmisión",
   "processing": "Procesando",
@@ -1827,5 +1827,111 @@
         "type": "int"
       }
     }
-  }
+  },
+  "videosProcessed": "Vídeos procesados",
+  "totalVideos": "Vídeos totales",
+  "skippedVideos": "Vídeos omitidos",
+  "videoStreamingDescriptionLine1": "Reproduce vídeos al instante en cualquier dispositivo.",
+  "videoStreamingDescriptionLine2": "Habilitar para procesar transmisiones de vídeo en este dispositivo.",
+  "videoStreamingNote": "Solo los vídeos de los últimos 60 días y menos de 1 minuto se procesan en este dispositivo. Para vídeos más viejos/más largos, habilita la transmisión en la aplicación de escritorio.",
+  "createStream": "Crear transmisión",
+  "recreateStream": "Recrear transmisión",
+  "addedToStreamCreationQueue": "Añadido a la cola de creación de transmisiones",
+  "addedToStreamRecreationQueue": "Añadido a la cola de grabación de transmisiones",
+  "videoPreviewAlreadyExists": "La vista previa de vídeo ya existe",
+  "videoAlreadyInQueue": "El archivo de vídeo ya está en la cola",
+  "addedToQueue": "Añadido a la cola",
+  "creatingStream": "Creando transmisión",
+  "similarImages": "Imágenes similares",
+  "findSimilarImages": "Buscar imágenes similares",
+  "noSimilarImagesFound": "No se encontraron imágenes similares",
+  "yourPhotosLookUnique": "Tus fotos se ven únicas",
+  "similarGroupsFound": "{count, plural, one {}=1{{count} grupo encontrado} other{{count} grupos encontrados}}",
+  "@similarGroupsFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewAndRemoveSimilarImages": "Revisar y eliminar imágenes similares",
+  "deletePhotosWithSize": "Eliminar {count} fotos ({size})",
+  "@deletePhotosWithSize": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "selectionOptions": "Opciones de selección",
+  "selectExactWithCount": "Exactamente similar ({count})",
+  "@selectExactWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectExact": "Seleccionar exactos",
+  "selectSimilarWithCount": "Mayormente, similar ({count})",
+  "@selectSimilarWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectSimilar": "Seleccionar similares",
+  "selectAllWithCount": "Todas las similitudes ({count})",
+  "@selectAllWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectSimilarImagesTitle": "Seleccionar imágenes similares",
+  "chooseSimilarImagesToSelect": "Seleccionar imágenes basándose en su similitud visual",
+  "clearSelection": "Borrar selección",
+  "similarImagesCount": "{count} imágenes similares",
+  "@similarImagesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteWithCount": "Eliminar ({count})",
+  "@deleteWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteFiles": "Eliminar archivos",
+  "areYouSureDeleteFiles": "¿Estás seguro que quieres eliminar estos archivos?",
+  "greatJob": "¡Bien hecho!",
+  "cleanedUpSimilarImages": "Has liberado {size} de espacio",
+  "@cleanedUpSimilarImages": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "size": "Tamaño",
+  "similarity": "Similitud",
+  "processingLocally": "Procesando localmente",
+  "useMLToFindSimilarImages": "Revisar y eliminar imágenes que se parecen entre sí.",
+  "all": "Todas",
+  "similar": "Similares",
+  "identical": "Idénticas",
+  "nothingHereTryAnotherFilter": "Nada aquí, ¡prueba con otro filtro! 👀",
+  "related": "Relacionado",
+  "hoorayyyy": "¡Hurraaaa!",
+  "nothingToTidyUpHere": "Nada que limpiar aquí"
 }
