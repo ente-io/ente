@@ -585,16 +585,19 @@ class VideoPreviewService {
       if (uploadingFileId == enteFile.uploadedFileID!) {
         uploadingFileId = -1;
       }
-      _logger.info(
-        "[chunk] Processing ${_items.length} items for streaming, $error",
-      );
-      // process next file
       if (fileQueue.isNotEmpty) {
+        // process next file
+        _logger.info(
+          "[chunk] Processing ${_items.length} items for streaming, $error",
+        );
         final entry = fileQueue.entries.first;
         final file = entry.value;
         fileQueue.remove(entry.key);
         await chunkAndUploadVideo(ctx, file);
       } else {
+        _logger.info(
+          "[chunk] Nothing to process releasing compute, $error",
+        );
         computeController.releaseCompute(stream: true);
       }
     }
