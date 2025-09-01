@@ -157,8 +157,6 @@ class VideoPreviewService {
 
   bool isCurrentlyProcessing(int? uploadedFileID) {
     if (uploadedFileID == null) return false;
-    // Check if file is actively being processed
-    if (uploadingFileId == uploadedFileID) return true;
 
     // Also check if file is in queue or other processing states
     final item = _items[uploadedFileID];
