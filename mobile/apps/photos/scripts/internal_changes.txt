@@ -1,4 +1,5 @@
-- Ashil: Revert diskLoadDeferDuration to 500ms
+- Ashil: Revert diskLoadDeferDuration to 80ms (Fixes local thumbnails taking ~1 sec to load on scrolling gallery)
+- Ashil: Revert diskLoadDeferDuration to 500ms (Was 80ms before but fixes local thumbnail taking very long to load or never loading)
 - Ashil: Revert increase in cache extent for gallery - to check if thumbnail not loading regression resolves
 - Similar images design changes. Also changed the vectorDB index file name, so internal users will have another migration (long loading time). 
 - Ashil: New ducky icon in icon switcher
