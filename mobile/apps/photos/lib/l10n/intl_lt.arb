@@ -1818,5 +1818,16 @@
   "brushColor": "Teptuko spalva",
   "font": "Šriftas",
   "background": "Fonas",
-  "align": "Lygiuoti"
+  "align": "Lygiuoti",
+  "similarImages": "Panašūs vaizdai",
+  "findSimilarImages": "Rasti panašų vaizdų",
+  "noSimilarImagesFound": "Panašių vaizdų nerasta",
+  "yourPhotosLookUnique": "Jūsų nuotraukos atrodo ypatingos",
+  "selectionOptions": "Pasirinkimo parinktys",
+  "deleteFiles": "Ištrinti failus",
+  "areYouSureDeleteFiles": "Ar tikrai norite ištrinti šiuos failus?",
+  "greatJob": "Puiku!",
+  "size": "Dydis",
+  "similarity": "Panašumas",
+  "processingLocally": "Apdorojama vietoje"
 }

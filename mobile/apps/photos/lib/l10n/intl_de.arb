@@ -1827,5 +1827,111 @@
         "type": "int"
       }
     }
-  }
+  },
+  "videosProcessed": "Videos verarbeitet",
+  "totalVideos": "Videos insgesamt",
+  "skippedVideos": "Übersprungene Videos",
+  "videoStreamingDescriptionLine1": "Videos sofort auf jedem Gerät abspielen.",
+  "videoStreamingDescriptionLine2": "Aktivieren, um Video-Streams auf diesem Gerät zu verarbeiten.",
+  "videoStreamingNote": "Nur Videos der letzten 60 Tage und unter einer Minute werden auf diesem Gerät verarbeitet. Für ältere/längere Videos aktiviere das Streaming in der Desktop-App.",
+  "createStream": "Stream erzeugen",
+  "recreateStream": "Stream neu erzeugen",
+  "addedToStreamCreationQueue": "Zur Warteschlange für Streamerstellung hinzugefügt",
+  "addedToStreamRecreationQueue": "Zur Warteschlange für Neuerstellung der Streams hinzugefügt",
+  "videoPreviewAlreadyExists": "Videovorschau existiert bereits",
+  "videoAlreadyInQueue": "Videodatei existiert bereits in der Warteschlange",
+  "addedToQueue": "Zur Warteschlange hinzugefügt",
+  "creatingStream": "Stream wird erzeugt",
+  "similarImages": "Ähnliche Bilder",
+  "findSimilarImages": "Ähnliche Bilder finden",
+  "noSimilarImagesFound": "Keine ähnlichen Bilder gefunden",
+  "yourPhotosLookUnique": "Deine Fotos sehen einzigartig aus",
+  "similarGroupsFound": "{count, plural, =1{Eine Gruppe gefunden} other{{count} Gruppen gefunden}}",
+  "@similarGroupsFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewAndRemoveSimilarImages": "Überprüfe und lösche ähnliche Bilder",
+  "deletePhotosWithSize": "Lösche {count} Fotos ({size})",
+  "@deletePhotosWithSize": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "selectionOptions": "Auswahloptionen",
+  "selectExactWithCount": "Exakt gleich ({count})",
+  "@selectExactWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectExact": "Exakte auswählen",
+  "selectSimilarWithCount": "Nahezu gleich ({count})",
+  "@selectSimilarWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectSimilar": "Ähnliche auswählen",
+  "selectAllWithCount": "Alle Ähnlichkeiten ({count})",
+  "@selectAllWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectSimilarImagesTitle": "Ähnliche Bilder auswählen",
+  "chooseSimilarImagesToSelect": "Wähle Bilder anhand ihrer visuellen Ähnlichkeit",
+  "clearSelection": "Auswahl aufheben",
+  "similarImagesCount": "{count} ähnliche Bilder",
+  "@similarImagesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteWithCount": "Löschen ({count})",
+  "@deleteWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteFiles": "Dateien löschen",
+  "areYouSureDeleteFiles": "Bist du sicher, dass du diese Dateien löschen willst?",
+  "greatJob": "Gut gemacht!",
+  "cleanedUpSimilarImages": "Du hast {size} an Speicherplatz freigegeben",
+  "@cleanedUpSimilarImages": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "size": "Größe",
+  "similarity": "Ähnlichkeit",
+  "processingLocally": "Lokale Verarbeitung",
+  "useMLToFindSimilarImages": "Überprüfe und entferne Bilder, die sich ähnlich sehen.",
+  "all": "Alle",
+  "similar": "Ähnlich",
+  "identical": "Identisch",
+  "nothingHereTryAnotherFilter": "Nichts zu sehen, probier einen anderen Filter! 👀",
+  "related": "Verwandt",
+  "hoorayyyy": "Hurraaaa!",
+  "nothingToTidyUpHere": "Hier gibt es nichts zu bereinigen"
 }
