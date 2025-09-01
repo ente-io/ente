@@ -157,7 +157,27 @@ class VideoPreviewService {
 
   bool isCurrentlyProcessing(int? uploadedFileID) {
     if (uploadedFileID == null) return false;
-    return uploadingFileId == uploadedFileID;
+    // Check if file is actively being processed
+    if (uploadingFileId == uploadedFileID) return true;
+
+    // Also check if file is in queue or other processing states
+    final item = _items[uploadedFileID];
+    if (item != null) {
+      switch (item.status) {
+        case PreviewItemStatus.inQueue:
+        case PreviewItemStatus.compressing:
+        case PreviewItemStatus.uploading:
+          return true;
+        default:
+          return false;
+      }
+    }
+
+    return false;
+  }
+
+  PreviewItemStatus? getProcessingStatus(int uploadedFileID) {
+    return _items[uploadedFileID]?.status;
   }
 
   Future<bool> _isRecreateOperation(EnteFile file) async {
@@ -258,8 +278,9 @@ class VideoPreviewService {
     BuildContext? ctx,
     EnteFile enteFile, [
     bool forceUpload = false,
-    bool isManual = false,
   ]) async {
+    final bool isManual =
+        await uploadLocksDB.isInStreamQueue(enteFile.uploadedFileID!);
     final canStream = _isPermissionGranted();
     if (!canStream) {
       _logger.info(
