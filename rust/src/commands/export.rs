@@ -551,7 +551,7 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
 
         // Check if this file already exists in the album by ID (for rename detection)
         let existing_files = album_existing_files.get_mut(&album_folder).unwrap();
-        if let Some(existing) = existing_files.get(&file.id) {
+        if let Some(existing) = existing_files.remove(&file.id) {
             if existing.file_path == file_path {
                 // File exists at the same path - no rename needed
                 log::debug!(
@@ -612,9 +612,6 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
                     log::debug!("Removing old metadata: {:?}", existing.meta_path);
                     fs::remove_file(&existing.meta_path).await.ok();
                 }
-
-                // Remove from tracking so we don't try to remove it again
-                existing_files.remove(&file.id);
 
                 // Continue to re-export with new name
             }
@@ -767,7 +764,7 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
             .file_name()
             .and_then(|n| n.to_str())
             .ok_or_else(|| crate::Error::Generic(format!("Invalid file path: {:?}", file_path)))?;
-        let meta_path = write_file_metadata(
+        write_file_metadata(
             export_path,
             &album_folder,
             &file,
@@ -777,15 +774,9 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
         )
         .await?;
 
-        // Track the newly exported file
-        let existing_files = album_existing_files.get_mut(&album_folder).unwrap();
-        existing_files.insert(
-            file.id,
-            ExistingFile {
-                file_path: file_path.clone(),
-                meta_path,
-            },
-        );
+        // Note: We don't add newly exported files to album_existing_files
+        // That map is only for tracking files that existed before this export
+        // and need to be checked for deletion
 
         *file_index += 1;
 
@@ -793,6 +784,66 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
         if exported_files % 10 == 0 || exported_files == 1 {
             println!("  [{}/{}] Exported files...", exported_files, total_files);
         }
+    }
+
+    // Clean up deleted files that are still on disk
+    // Any files remaining in album_existing_files were not seen during export (deleted)
+    let mut removed_files = 0;
+    for (album_name, remaining_files) in album_existing_files {
+        for (file_id, existing_file) in remaining_files {
+            log::info!(
+                "Removing deleted file {} from album {}: {:?}",
+                file_id,
+                album_name,
+                existing_file.file_path
+            );
+
+            // Remove the actual file
+            if existing_file.file_path.exists() {
+                if let Err(e) = fs::remove_file(&existing_file.file_path).await {
+                    log::warn!(
+                        "Failed to remove deleted file {:?}: {}",
+                        existing_file.file_path,
+                        e
+                    );
+                } else {
+                    removed_files += 1;
+                }
+            }
+
+            // For live photos, also remove the MOV component
+            let mov_path = existing_file.file_path.with_extension("MOV");
+            if mov_path.exists() {
+                log::debug!("Removing live photo MOV component: {:?}", mov_path);
+                fs::remove_file(&mov_path).await.ok();
+            }
+
+            // Also try lowercase .mov
+            let mov_path_lower = existing_file.file_path.with_extension("mov");
+            if mov_path_lower.exists() && mov_path_lower != mov_path {
+                log::debug!("Removing live photo mov component: {:?}", mov_path_lower);
+                fs::remove_file(&mov_path_lower).await.ok();
+            }
+
+            // Remove the metadata file
+            if existing_file.meta_path.exists() {
+                log::debug!(
+                    "Removing metadata for deleted file: {:?}",
+                    existing_file.meta_path
+                );
+                if let Err(e) = fs::remove_file(&existing_file.meta_path).await {
+                    log::warn!(
+                        "Failed to remove metadata {:?}: {}",
+                        existing_file.meta_path,
+                        e
+                    );
+                }
+            }
+        }
+    }
+
+    if removed_files > 0 {
+        log::info!("Removed {} deleted files from disk", removed_files);
     }
 
     println!("\n{}", "=".repeat(50));
@@ -807,6 +858,10 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
 
     if deleted_files > 0 {
         println!("  🗑️  Deleted files (skipped): {deleted_files}");
+    }
+
+    if removed_files > 0 {
+        println!("  🧹 Removed from disk: {removed_files}");
     }
 
     let failed = total_files - exported_files - skipped_files;
