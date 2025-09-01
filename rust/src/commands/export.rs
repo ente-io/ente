@@ -766,7 +766,7 @@ async fn export_account(storage: &Storage, account: &Account, filter: &ExportFil
         let filename = file_path
             .file_name()
             .and_then(|n| n.to_str())
-            .unwrap_or("file");
+            .ok_or_else(|| crate::Error::Generic(format!("Invalid file path: {:?}", file_path)))?;
         let meta_path = write_file_metadata(
             export_path,
             &album_folder,
@@ -864,10 +864,18 @@ fn generate_export_path(
             if let Some(title) = meta.get_title() {
                 sanitize_filename(title)
             } else {
-                generate_fallback_filename(file, metadata)
+                // Match Go CLI behavior: error if no title found
+                return Err(crate::Error::Generic(format!(
+                    "File {} has no title in metadata",
+                    file.id
+                )));
             }
         } else {
-            generate_fallback_filename(file, None)
+            // Match Go CLI behavior: error if no metadata
+            return Err(crate::Error::Generic(format!(
+                "File {} has no metadata",
+                file.id
+            )));
         }
     };
     path.push(filename);
@@ -936,26 +944,7 @@ fn decrypt_file_key(encrypted_key: &str, nonce: &str, collection_key: &[u8]) -> 
     secret_box_open(&encrypted_bytes, &nonce_bytes, collection_key)
 }
 
-/// Generate a fallback filename when metadata is not available
-fn generate_fallback_filename(
-    file: &crate::api::models::File,
-    metadata: Option<&FileMetadata>,
-) -> String {
-    let extension = if let Some(meta) = metadata {
-        match meta.get_file_type() {
-            crate::models::metadata::FileType::Image => ".jpg",
-            crate::models::metadata::FileType::Video => ".mp4",
-            crate::models::metadata::FileType::LivePhoto => ".zip",
-            crate::models::metadata::FileType::Unknown => ".bin",
-        }
-    } else if file.thumbnail.size.unwrap_or(0) > 0 {
-        ".jpg" // Has thumbnail, likely an image
-    } else {
-        ".bin"
-    };
-
-    format!("file_{}{}", file.id, extension)
-}
+// Removed generate_fallback_filename - Go CLI panics if no title, we return error instead
 
 /// Sanitize a filename for the filesystem
 fn sanitize_filename(name: &str) -> String {
@@ -1061,22 +1050,31 @@ async fn extract_live_photo(zip_data: &[u8], output_path: &Path) -> Result<()> {
             let ext = std::path::Path::new(&file_name)
                 .extension()
                 .and_then(|e| e.to_str())
-                .unwrap_or("jpg");
+                .ok_or_else(|| {
+                    crate::Error::Generic(format!(
+                        "Live photo image component has no extension: {}",
+                        file_name
+                    ))
+                })?;
             parent_dir.join(format!("{}.{}", base_name, ext))
         } else if file_name.to_lowercase().contains("video") {
             // Video component - preserve its original extension
             let ext = std::path::Path::new(&file_name)
                 .extension()
                 .and_then(|e| e.to_str())
-                .unwrap_or("mov");
+                .ok_or_else(|| {
+                    crate::Error::Generic(format!(
+                        "Live photo video component has no extension: {}",
+                        file_name
+                    ))
+                })?;
             parent_dir.join(format!("{}.{}", base_name, ext))
         } else {
-            // Unknown component - use original extension
-            let ext = std::path::Path::new(&file_name)
-                .extension()
-                .and_then(|e| e.to_str())
-                .unwrap_or("bin");
-            parent_dir.join(format!("{}.{}", base_name, ext))
+            // Go CLI returns error for unexpected files in live photo ZIP
+            return Err(crate::Error::Generic(format!(
+                "Unexpected file in live photo ZIP: {}",
+                file_name
+            )));
         };
 
         // Read the file contents
@@ -1161,14 +1159,15 @@ async fn write_file_metadata(
     fs::create_dir_all(&meta_dir).await?;
 
     // Generate unique metadata filename
+    // At this point, filename should always be valid since we error out earlier if not
     let base_name = Path::new(filename)
         .file_stem()
         .and_then(|s| s.to_str())
-        .unwrap_or("file");
+        .ok_or_else(|| crate::Error::Generic("Invalid filename for metadata".to_string()))?;
     let extension = Path::new(filename)
         .extension()
         .and_then(|s| s.to_str())
-        .unwrap_or("bin");
+        .unwrap_or(""); // Extension might be legitimately missing for some files
 
     // Create metadata filename like "IMG_1234.jpg_0.json"
     let meta_filename = format!("{}_{}.{}.json", base_name, file_index, extension);

@@ -412,17 +412,14 @@ async fn prepare_download_tasks(
                 if let Some(title) = meta.get_title() {
                     sanitize_filename(title)
                 } else {
-                    // Generate fallback name based on file type
-                    let ext = match meta.get_file_type() {
-                        crate::models::metadata::FileType::Image => "jpg",
-                        crate::models::metadata::FileType::Video => "mp4",
-                        crate::models::metadata::FileType::LivePhoto => "zip",
-                        crate::models::metadata::FileType::Unknown => "bin",
-                    };
-                    format!("file_{}.{}", file.id, ext)
+                    // Match Go CLI behavior: error if no title found
+                    log::error!("File {} has no title in metadata", file.id);
+                    continue; // Skip this file
                 }
             } else {
-                format!("file_{}.jpg", file.id)
+                // Match Go CLI behavior: error if no metadata
+                log::error!("File {} has no metadata", file.id);
+                continue; // Skip this file
             };
 
             // For live photos, ensure .zip extension if not already present

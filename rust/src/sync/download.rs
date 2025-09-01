@@ -366,24 +366,37 @@ impl DownloadManager {
             let file_name = file.name().to_string();
 
             // Determine the output filename based on the content
-            let output_file_path = if file_name.to_lowercase().ends_with(".heic")
-                || file_name.to_lowercase().ends_with(".jpg")
-                || file_name.to_lowercase().ends_with(".jpeg")
-            {
-                // Image component
-                parent_dir.join(format!("{}.jpg", base_name))
-            } else if file_name.to_lowercase().ends_with(".mov")
-                || file_name.to_lowercase().ends_with(".mp4")
-            {
-                // Video component
-                parent_dir.join(format!("{}.mov", base_name))
-            } else {
-                // Unknown component - use original extension
+            // Match Go CLI behavior: check for "image" or "video" in filename
+            let output_file_path = if file_name.to_lowercase().contains("image") {
+                // Image component - preserve original extension
                 let ext = std::path::Path::new(&file_name)
                     .extension()
                     .and_then(|e| e.to_str())
-                    .unwrap_or("bin");
+                    .ok_or_else(|| {
+                        crate::Error::Generic(format!(
+                            "Live photo image component has no extension: {}",
+                            file_name
+                        ))
+                    })?;
                 parent_dir.join(format!("{}.{}", base_name, ext))
+            } else if file_name.to_lowercase().contains("video") {
+                // Video component - preserve original extension
+                let ext = std::path::Path::new(&file_name)
+                    .extension()
+                    .and_then(|e| e.to_str())
+                    .ok_or_else(|| {
+                        crate::Error::Generic(format!(
+                            "Live photo video component has no extension: {}",
+                            file_name
+                        ))
+                    })?;
+                parent_dir.join(format!("{}.{}", base_name, ext))
+            } else {
+                // Go CLI returns error for unexpected files in live photo ZIP
+                return Err(crate::Error::Generic(format!(
+                    "Unexpected file in live photo ZIP: {}",
+                    file_name
+                )));
             };
 
             // Read the file contents

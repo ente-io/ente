@@ -57,7 +57,10 @@ impl<'a> AuthClient<'a> {
             srp_m1: STANDARD.encode(client_proof),
         };
 
-        log::debug!("Sending verify-session request: {request:?}");
+        log::debug!(
+            "Sending verify-session request for session_id: {}",
+            request.session_id
+        );
 
         self.api
             .post("/users/srp/verify-session", &request, None)

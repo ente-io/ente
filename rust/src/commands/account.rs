@@ -234,10 +234,6 @@ async fn add_account(
         &master_key,
     )?;
     log::info!("Secret key decrypted, length: {}", secret_key.len());
-    log::info!(
-        "Secret key hex (first 16 bytes): {}",
-        hex::encode(&secret_key[..16.min(secret_key.len())])
-    );
 
     // Get public key
     let public_key = decode_base64(&key_attributes.public_key)?;

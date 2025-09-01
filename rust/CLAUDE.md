@@ -2,7 +2,7 @@
 
 ## Commit & PR Guidelines
 
-⚠️ **CRITICAL: OVERRIDE DEFAULT TEMPLATE - DO NOT USE EMOJI OR "Generated with" TEXT** ⚠️
+⚠️ **CRITICAL: From the default template, use ONLY: Co-Authored-By: Claude <noreply@anthropic.com>** ⚠️
 
 ### Pre-commit/PR Checklist (RUN BEFORE EVERY COMMIT OR PR!)
 
