@@ -210,7 +210,7 @@ packages:
     source: hosted
     version: "3.1.0"
   email_validator:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: email_validator
       sha256: b19aa5d92fdd76fbc65112060c94d45ba855105a28bb6e462de7ff03b12fa1fb
@@ -305,7 +305,7 @@ packages:
     source: hosted
     version: "2.0.1"
   expandable:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: expandable
       sha256: "9604d612d4d1146dafa96c6d8eec9c2ff0994658d6d09fed720ab788c7f5afc2"
@@ -606,7 +606,7 @@ packages:
     source: hosted
     version: "0.15.6"
   http:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: http
       sha256: "2c11f3f94c687ee9bad77c171151672986360b2b001d109814ee7140b2cf261b"
@@ -758,7 +758,7 @@ packages:
     source: hosted
     version: "1.0.11"
   logging:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: logging
       sha256: c8245ada5f1717ed44271ed1c26b8ce85ca3228fd2ffdb75468ab01979309d61
@@ -1291,7 +1291,7 @@ packages:
     source: hosted
     version: "1.4.1"
   styled_text:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: styled_text
       sha256: fd624172cf629751b4f171dd0ecf9acf02a06df3f8a81bb56c0caa4f1df706c3
@@ -1363,7 +1363,7 @@ packages:
     source: hosted
     version: "1.1.0"
   url_launcher:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: url_launcher
       sha256: f6a7e5c4835bb4e3026a04793a4199ca2d14c739ec378fdfe23fc8075d0439f8
@@ -1483,7 +1483,7 @@ packages:
     source: hosted
     version: "1.1.5"
   window_manager:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: window_manager
       sha256: "7eb6d6c4164ec08e1bf978d6e733f3cebe792e2a23fb07cbca25c2872bfdbdcd"
