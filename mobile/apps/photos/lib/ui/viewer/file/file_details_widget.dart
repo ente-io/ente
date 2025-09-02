@@ -325,7 +325,7 @@ class _FileDetailsWidgetState extends State<FileDetailsWidget> {
             slivers: <Widget>[
               TitleBarWidget(
                 isFlexibleSpaceDisabled: true,
-                title: S.of(context).details,
+                title: AppLocalizations.of(context).details,
                 isOnTopOfScreen: false,
                 backgroundColor: getEnteColorScheme(context).backgroundElevated,
                 leading: IconButtonWidget(

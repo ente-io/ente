@@ -111,6 +111,7 @@
   "importAegisGuide": "Naudokite „Aegis“ nustatymuose esančią parinktį Eksportuoti slėptuvę.\n\nJei jūsų saugykla užšifruota, turėsite įvesti saugyklos slaptažodį, kad iššifruotumėte saugyklą.",
   "import2FasGuide": "Naudokite programoje 2FAS esančią parinktį „Settings->2FAS Backup->Export to file“.\n\nJei atsarginė kopija užšifruota, turėsite įvesti slaptažodį, kad iššifruotumėte atsarginę kopiją.",
   "importLastpassGuide": "Naudokite „Lastpass Authenticator“ nustatymuose esančią parinktį „Transfer accounts“ (perkelti paskyras) ir paspauskite „Export accounts to file“ (eksportuoti paskyras į failą). Importuokite atsisiųstą JSON failą.",
+  "importProtonAuthGuide": "Naudokite „Proton Authenticator“ nustatymuose esančią parinktį „Export“ (eksportuoti), kad eksportuotumėte savo kodus.",
   "exportCodes": "Eksportuoti kodus",
   "importLabel": "Importuoti",
   "importInstruction": "Pasirinkite failą, kuriame yra tokio formato jūsų kodų sąrašas",
@@ -519,5 +520,12 @@
   "algorithm": "Algoritmas",
   "type": "Tipas",
   "period": "Laikotarpis",
-  "digits": "Skaitmenys"
+  "digits": "Skaitmenys",
+  "importFromGallery": "Importuoti iš galerijos",
+  "errorCouldNotReadImage": "Nepavyko perskaityti pasirinkto vaizdo failo.",
+  "errorInvalidQRCode": "Netinkamas QR kodas",
+  "errorInvalidQRCodeBody": "Nuskenuotas QR kodas nėra tinkama 2FA paskyra.",
+  "errorNoQRCode": "QR kodas nerastas.",
+  "errorGenericTitle": "Įvyko klaida",
+  "errorGenericBody": "Importuojant įvyko netikėta klaida."
 }

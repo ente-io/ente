@@ -53,7 +53,7 @@ Future<List<EnteFile>> getPublicFiles(
     Logger("getPublicFiles").severe("Failed to decrypt collection ", e, s);
     await showErrorDialog(
       context,
-      S.of(context).somethingWentWrong,
+      AppLocalizations.of(context).somethingWentWrong,
       e.toString(),
     );
     rethrow;

@@ -135,7 +135,7 @@ class _PendingSyncInfoScreenState extends State<PendingSyncInfoScreen> {
                       Column(
                         children: [
                           MenuSectionTitle(
-                            title: S.of(context).cachedData,
+                            title: AppLocalizations.of(context).cachedData,
                           ),
                           ListView.builder(
                             shrinkWrap: true,

@@ -521,6 +521,357 @@ class FilesDB with SqlDbBase {
   }
 
   // todo:rewrite (upload related)
+  List<EnteFile> deduplicateByLocalID(List<EnteFile> files) {
+    final localIDs = <String>{};
+    final List<EnteFile> deduplicatedFiles = [];
+    for (final file in files) {
+      final id = file.localID;
+      if (id == null) {
+        continue;
+      }
+      if (localIDs.contains(id)) {
+        continue;
+      }
+      localIDs.add(id);
+      deduplicatedFiles.add(file);
+    }
+    return deduplicatedFiles;
+  }
+
+  Future<FileLoadResult> getFilesInCollection(
+    int collectionID,
+    int startTime,
+    int endTime, {
+    int? limit,
+    bool? asc,
+    int visibility = visibleVisibility,
+  }) async {
+    final db = await instance.sqliteAsyncDB;
+    final order = (asc ?? false ? 'ASC' : 'DESC');
+    String query =
+        'SELECT * FROM $filesTable WHERE $columnCollectionID = ? AND $columnCreationTime >= ? AND $columnCreationTime <= ? ORDER BY $columnCreationTime $order, $columnModificationTime $order';
+    final List<Object> args = [collectionID, startTime, endTime];
+    if (limit != null) {
+      query += ' LIMIT ?';
+      args.add(limit);
+    }
+    final results = await db.getAll(
+      query,
+      args,
+    );
+    final files = convertToFiles(results);
+    return FileLoadResult(files, files.length == limit);
+  }
+
+  Future<List<EnteFile>> getAllFilesCollection(int collectionID) async {
+    final db = await instance.sqliteAsyncDB;
+    const String whereClause = '$columnCollectionID = ?';
+    final List<Object> whereArgs = [collectionID];
+    final results = await db.getAll(
+      'SELECT * FROM $filesTable WHERE $whereClause',
+      whereArgs,
+    );
+    final files = convertToFiles(results);
+    return files;
+  }
+
+  Future<List<EnteFile>> getAllFilesFromCollections(
+    Iterable<int> collectionID,
+  ) async {
+    final db = await instance.sqliteAsyncDB;
+    final String sql =
+        'SELECT * FROM $filesTable WHERE $columnCollectionID IN (${collectionID.join(',')})';
+    final results = await db.getAll(sql);
+    final files = convertToFiles(results);
+    return files;
+  }
+
+  Future<List<EnteFile>> getNewFilesInCollection(
+    int collectionID,
+    int addedTime,
+  ) async {
+    final db = await instance.sqliteAsyncDB;
+    const String whereClause =
+        '$columnCollectionID = ? AND $columnAddedTime > ?';
+    final List<Object> whereArgs = [collectionID, addedTime];
+    final results = await db.getAll(
+      'SELECT * FROM $filesTable WHERE $whereClause',
+      whereArgs,
+    );
+    final files = convertToFiles(results);
+    return files;
+  }
+
+  Future<FileLoadResult> getFilesInCollections(
+    List<int> collectionIDs,
+    int startTime,
+    int endTime,
+    int userID, {
+    int? limit,
+    bool? asc,
+  }) async {
+    if (collectionIDs.isEmpty) {
+      return FileLoadResult(<EnteFile>[], false);
+    }
+    final inParam = collectionIDs.map((id) => "'$id'").join(',');
+
+    final db = await instance.sqliteAsyncDB;
+    final order = (asc ?? false ? 'ASC' : 'DESC');
+    final String whereClause =
+        '$columnCollectionID  IN ($inParam) AND $columnCreationTime >= ? AND '
+        '$columnCreationTime <= ? AND $columnOwnerID = ?';
+    final List<Object> whereArgs = [startTime, endTime, userID];
+
+    String query = 'SELECT * FROM $filesTable WHERE $whereClause ORDER BY '
+        '$columnCreationTime $order, $columnModificationTime $order';
+    if (limit != null) {
+      query += ' LIMIT ?';
+      whereArgs.add(limit);
+    }
+    final results = await db.getAll(
+      query,
+      whereArgs,
+    );
+    final files = convertToFiles(results);
+    final dedupeResult =
+        await applyDBFilters(files, DBFilterOptions.dedupeOption);
+    _logger.info("Fetched " + dedupeResult.length.toString() + " files");
+    return FileLoadResult(files, files.length == limit);
+  }
+
+  Future<List<EnteFile>> getFilesCreatedWithinDurations(
+    List<List<int>> durations,
+    Set<int> ignoredCollectionIDs, {
+    int? visibility,
+    String order = 'ASC',
+  }) async {
+    if (durations.isEmpty) {
+      return <EnteFile>[];
+    }
+    final db = await instance.sqliteAsyncDB;
+    String whereClause = durations
+        .map(
+          (duration) =>
+              "($columnCreationTime >= ${duration[0]} AND $columnCreationTime < ${duration[1]})",
+        )
+        .join(" OR ");
+
+    whereClause = "( $whereClause )";
+    if (visibility != null) {
+      whereClause += ' AND $columnMMdVisibility = $visibility';
+    }
+    final query =
+        'SELECT * FROM $filesTable WHERE $whereClause ORDER BY $columnCreationTime $order';
+    final results = await db.getAll(
+      query,
+    );
+    final files = convertToFiles(results);
+    return applyDBFilters(
+      files,
+      DBFilterOptions(ignoredCollectionIDs: ignoredCollectionIDs),
+    );
+  }
+
+  // Files which user added to a collection manually but they are not
+  // uploaded yet or files belonging to a collection which is marked for backup
+  Future<List<EnteFile>> getFilesPendingForUpload() async {
+    final db = await instance.sqliteAsyncDB;
+    final results = await db.getAll(
+      'SELECT * FROM $filesTable WHERE ($columnUploadedFileID IS NULL OR '
+      '$columnUploadedFileID IS -1) AND $columnCollectionID IS NOT NULL AND '
+      '$columnCollectionID IS NOT -1 AND $columnLocalID IS NOT NULL AND '
+      '$columnLocalID IS NOT -1 GROUP BY $columnLocalID '
+      'ORDER BY $columnCreationTime DESC',
+    );
+    final files = convertToFiles(results);
+    // future-safe filter just to ensure that the query doesn't end up  returning files
+    // which should not be backed up
+    files.removeWhere(
+      (e) =>
+          e.collectionID == null ||
+          e.localID == null ||
+          e.uploadedFileID != null,
+    );
+    return files;
+  }
+
+  Future<List<EnteFile>> getUnUploadedLocalFiles() async {
+    final db = await instance.sqliteAsyncDB;
+    final results = await db.getAll(
+      'SELECT * FROM $filesTable WHERE ($columnUploadedFileID IS NULL OR '
+      '$columnUploadedFileID IS -1) AND $columnLocalID IS NOT NULL '
+      'GROUP BY $columnLocalID ORDER BY $columnCreationTime DESC',
+    );
+    return convertToFiles(results);
+  }
+
+  Future<List<int>> getUploadedFileIDsToBeUpdated(int ownerID) async {
+    final db = await instance.sqliteAsyncDB;
+    final rows = await db.getAll(
+      'SELECT DISTINCT $columnUploadedFileID FROM $filesTable WHERE '
+      '($columnLocalID IS NOT NULL AND $columnOwnerID = ? AND '
+      '($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1) '
+      'AND $columnUpdationTime IS NULL) ORDER BY $columnCreationTime DESC ',
+      [ownerID],
+    );
+    final uploadedFileIDs = <int>[];
+    for (final row in rows) {
+      uploadedFileIDs.add(row[columnUploadedFileID] as int);
+    }
+    return uploadedFileIDs;
+  }
+
+  Future<List<EnteFile>> getFilesInAllCollection(
+    int uploadedFileID,
+    int userID,
+  ) async {
+    final db = await instance.sqliteAsyncDB;
+    final results = await db.getAll(
+      'SELECT * FROM $filesTable WHERE $columnLocalID IS NOT NULL AND '
+      '$columnOwnerID = ? AND $columnUploadedFileID = ?',
+      [userID, uploadedFileID],
+    );
+    if (results.isEmpty) {
+      return <EnteFile>[];
+    }
+    return convertToFiles(results);
+  }
+
+  Future<Set<String>> getExistingLocalFileIDs(int ownerID) async {
+    final db = await instance.sqliteAsyncDB;
+    final rows = await db.getAll(
+      'SELECT DISTINCT $columnLocalID FROM $filesTable '
+      'WHERE $columnLocalID IS NOT NULL AND ($columnOwnerID IS NULL OR '
+      '$columnOwnerID = ?)',
+      [ownerID],
+    );
+    final result = <String>{};
+    for (final row in rows) {
+      result.add(row[columnLocalID] as String);
+    }
+    return result;
+  }
+
+  Future<Set<String>> getLocalIDsMarkedForOrAlreadyUploaded(int ownerID) async {
+    final db = await instance.sqliteAsyncDB;
+    final rows = await db.getAll(
+      'SELECT DISTINCT $columnLocalID FROM $filesTable '
+      'WHERE $columnLocalID IS NOT NULL AND ($columnCollectionID IS NOT NULL '
+      'AND $columnCollectionID != -1) AND ($columnOwnerID = ? OR '
+      '$columnOwnerID IS NULL)',
+      [ownerID],
+    );
+    final result = <String>{};
+    for (final row in rows) {
+      result.add(row[columnLocalID] as String);
+    }
+    return result;
+  }
+
+  // remove references for local files which are either already uploaded
+  // or queued for upload but not yet uploaded
+// Remove queued local files that have duplicate uploaded entries with same localID
+  Future<int> removeQueuedLocalFiles(Set<String> localIDs, int ownerID) async {
+    if (localIDs.isEmpty) {
+      _logger.finest("No local IDs provided for removal");
+      return 0;
+    }
+
+    final db = await instance.sqliteAsyncDB;
+    const batchSize = 10000;
+    int totalRemoved = 0;
+    final localIDsList = localIDs.toList();
+
+    for (int i = 0; i < localIDsList.length; i += batchSize) {
+      final endIndex = (i + batchSize > localIDsList.length)
+          ? localIDsList.length
+          : i + batchSize;
+      final batch = localIDsList.sublist(i, endIndex);
+      final placeholders = List.filled(batch.length, '?').join(',');
+
+      // Find localIDs that already have uploaded entries
+      final result = await db.execute(
+        '''
+      SELECT DISTINCT $columnLocalID
+      FROM $filesTable
+      WHERE 
+      $columnOwnerID = $ownerID
+      AND $columnLocalID IN ($placeholders)
+      AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID != -1)
+    ''',
+        batch,
+      );
+
+      if (result.isNotEmpty) {
+        final alreadyUploadedLocalIDs =
+            result.map((row) => row[columnLocalID] as String).toList();
+        final localIdPlaceholder =
+            List.filled(alreadyUploadedLocalIDs.length, '?').join(',');
+
+        // Delete queued entries for localIDs that already have uploaded versions
+        final deleteResult = await db.execute(
+          '''
+        DELETE FROM $filesTable
+        WHERE $columnLocalID IN ($localIdPlaceholder)
+        AND ($columnUploadedFileID IS NULL OR $columnUploadedFileID = -1)
+      ''',
+          alreadyUploadedLocalIDs,
+        );
+
+        final removedCount =
+            deleteResult.length; // or however your DB returns affected rows
+        if (removedCount > 0) {
+          _logger.warning(
+            "Batch ${(i ~/ batchSize) + 1}: Removed $removedCount queued duplicates",
+          );
+          totalRemoved += removedCount;
+        }
+      }
+    }
+
+    if (totalRemoved > 0) {
+      _logger.warning(
+        "Removed $totalRemoved queued files that had uploaded duplicates",
+      );
+    } else {
+      _logger.finest("No queued duplicates found for uploaded files");
+    }
+
+    return totalRemoved;
+  }
+
+  Future<Set<String>> getLocalFileIDsForCollection(int collectionID) async {
+    final db = await instance.sqliteAsyncDB;
+    final rows = await db.getAll(
+      'SELECT $columnLocalID FROM $filesTable '
+      'WHERE $columnLocalID IS NOT NULL AND $columnCollectionID = ?',
+      [collectionID],
+    );
+    final result = <String>{};
+    for (final row in rows) {
+      result.add(row[columnLocalID] as String);
+    }
+    return result;
+  }
+
+  // Sets the collectionID for the files with given LocalIDs if the
+  // corresponding file entries are not already mapped to some other collection
+  Future<void> setCollectionIDForUnMappedLocalFiles(
+    int collectionID,
+    Set<String> localIDs,
+  ) async {
+    final db = await instance.sqliteAsyncDB;
+    final inParam = localIDs.map((id) => "'$id'").join(',');
+    await db.execute(
+      '''
+      UPDATE $filesTable
+      SET $columnCollectionID = $collectionID
+      WHERE $columnLocalID IN ($inParam) AND ($columnCollectionID IS NULL OR 
+      $columnCollectionID = -1);
+    ''',
+    );
+  }
+
   Future<void> markFilesForReUpload(
     int ownerID,
     String localID,

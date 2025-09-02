@@ -12,6 +12,7 @@ import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
+import "package:photos/main.dart" show isProcessBg;
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/local/asset_upload_queue.dart";
 import "package:photos/models/metadata/file_magic.dart";
@@ -26,7 +27,6 @@ import "package:photos/services/notification_service.dart";
 import "package:photos/services/remote/fetch/files_diff.dart";
 import "package:photos/services/remote/fetch/remote_diff.dart";
 import "package:photos/services/sync/upload_candidate.dart";
-import "package:photos/services/video_preview_service.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 
 class RemoteSyncService {
@@ -129,13 +129,9 @@ class RemoteSyncService {
       }
 
       if (
-          // Only Uploading Previews in fg to prevent heating issues
-          AppLifecycleService.instance.isForeground &&
-              // if ML is enabled the MLService will queue when ML is done
-              !flagService.hasGrantedMLConsent) {
-        fileDataService.syncFDStatus().then((_) {
-          VideoPreviewService.instance.queueFiles();
-        }).ignore();
+          // We don't need syncFDStatus here if in background
+          !isProcessBg) {
+        fileDataService.syncFDStatus().ignore();
       }
 
       final hasUploadedFiles = await _uploadFiles();
@@ -409,7 +405,7 @@ class RemoteSyncService {
             'creating notification for ${collection?.displayName} '
             'shared: $sharedFileCount, collected: $collectedFileCount files',
           );
-          final s = await LanguageService.s;
+          final s = await LanguageService.locals;
           // ignore: unawaited_futures
           NotificationService.instance.showNotification(
             collection!.displayName,

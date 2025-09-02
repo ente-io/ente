@@ -246,12 +246,12 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       final cachedThumbnail =
           enteImageCache.getThumb(widget.file, thumbnailLarge512);
       if (cachedThumbnail != null) {
-        _imageProvider = Image.memory(
+        final imageProvider = Image.memory(
           cachedThumbnail,
           cacheHeight: optimizedImageHeight,
           cacheWidth: optimizedImageWidth,
         ).image;
-        _hasLoadedThumbnail = true;
+        _cacheAndRender(imageProvider);
         return;
       }
 
@@ -295,19 +295,14 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   }
 
   void _cacheAndRender(ImageProvider<Object> imageProvider) {
-    if (imageCache.currentSizeBytes > 256 * 1024 * 1024) {
-      _logger.info("Clearing image cache");
-      imageCache.clear();
-      imageCache.clearLiveImages();
+    if (mounted) {
+      setState(() {
+        _imageProvider = imageProvider;
+        _hasLoadedThumbnail = true;
+      });
     }
-    precacheImage(imageProvider, context).then((value) {
-      if (mounted) {
-        setState(() {
-          _imageProvider = imageProvider;
-          _hasLoadedThumbnail = true;
-        });
-      }
-    });
+
+    precacheImage(imageProvider, context);
   }
 
   void _reset() {

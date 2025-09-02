@@ -80,7 +80,7 @@ class _TrashSectionButtonState extends State<TrashSectionButton> {
                             style: widget.textStyle,
                             children: [
                               TextSpan(
-                                text: S.of(context).trash,
+                                text: AppLocalizations.of(context).trash,
                                 style: Theme.of(context).textTheme.titleMedium,
                               ),
                               const TextSpan(text: "  \u2022  "),
@@ -97,7 +97,7 @@ class _TrashSectionButtonState extends State<TrashSectionButton> {
                             style: widget.textStyle,
                             children: [
                               TextSpan(
-                                text: S.of(context).trash,
+                                text: AppLocalizations.of(context).trash,
                                 style: Theme.of(context).textTheme.titleMedium,
                               ),
                               //need to query in db and bring this value
@@ -121,7 +121,7 @@ class _TrashSectionButtonState extends State<TrashSectionButton> {
         final hasAuthenticated = await LocalAuthenticationService.instance
             .requestLocalAuthentication(
           context,
-          S.of(context).authToViewTrashedFiles,
+          AppLocalizations.of(context).authToViewTrashedFiles,
         );
         if (hasAuthenticated) {
           // ignore: unawaited_futures

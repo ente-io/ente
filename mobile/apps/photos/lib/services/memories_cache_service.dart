@@ -681,7 +681,7 @@ class MemoriesCacheService {
         );
         continue;
       }
-      final s = await LanguageService.s;
+      final s = await LanguageService.locals;
       await NotificationService.instance.scheduleNotification(
         s.onThisDay,
         message: s.lookBackOnYourMemories,
@@ -753,10 +753,10 @@ class MemoriesCacheService {
         );
         continue;
       }
-      final s = await LanguageService.s;
+      final s = await LanguageService.locals;
       await NotificationService.instance.scheduleNotification(
         memory.personName != null
-            ? s.wishThemAHappyBirthday(memory.personName!)
+            ? s.wishThemAHappyBirthday(name: memory.personName!)
             : s.happyBirthday,
         id: memory.id.hashCode,
         channelID: "birthday",

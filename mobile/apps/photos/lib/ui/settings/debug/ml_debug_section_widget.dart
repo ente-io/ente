@@ -22,6 +22,7 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import 'package:photos/services/machine_learning/ml_service.dart';
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
+import "package:photos/services/machine_learning/similar_images_service.dart";
 import "package:photos/services/notification_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/src/rust/api/simple.dart";
@@ -83,6 +84,25 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
     logger.info("Building ML Debug section options");
     return Column(
       children: [
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Clear vectorDB index",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              await ClipVectorDB.instance.deleteIndexFile(undoMigration: true);
+              await SimilarImagesService.instance.clearCache();
+              showShortToast(context, 'Deleted vectorDB index');
+            } catch (e, s) {
+              logger.severe('vectorDB index delete failed ', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(

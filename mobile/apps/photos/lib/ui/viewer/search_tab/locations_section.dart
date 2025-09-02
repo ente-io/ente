@@ -461,7 +461,7 @@ class GoToMapWithBG extends StatelessWidget {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      S.of(context).yourMap,
+                                      AppLocalizations.of(context).yourMap,
                                       style: enteTextTheme.mini.copyWith(
                                         color: Colors.white,
                                       ),
@@ -581,7 +581,7 @@ class LocationCTA extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  S.of(context).addNew,
+                                  AppLocalizations.of(context).addNew,
                                   style: enteTextTheme.miniFaint,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,

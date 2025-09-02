@@ -132,10 +132,10 @@ class FilesService {
     final Map<int, Map<String, dynamic>> fileIDToUpdateMetadata = {};
     await showActionSheet(
       context: context,
-      body: S.of(context).changeLocationOfSelectedItems,
+      body: AppLocalizations.of(context).changeLocationOfSelectedItems,
       buttons: [
         ButtonWidget(
-          labelText: S.of(context).yes,
+          labelText: AppLocalizations.of(context).yes,
           buttonType: ButtonType.neutral,
           buttonSize: ButtonSize.large,
           shouldStickToDarkTheme: true,
@@ -152,7 +152,7 @@ class FilesService {
           },
         ),
         ButtonWidget(
-          labelText: S.of(context).cancel,
+          labelText: AppLocalizations.of(context).cancel,
           buttonType: ButtonType.secondary,
           buttonSize: ButtonSize.large,
           shouldStickToDarkTheme: true,

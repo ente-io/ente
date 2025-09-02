@@ -73,3 +73,6 @@ analyzer:
     - thirdparty/**
     - lib/generated/**
     - rust_builder/**
+    - lib/src/rust/**
+    - rust/src/**
+    - test/**

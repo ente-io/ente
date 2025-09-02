@@ -179,6 +179,7 @@ dependencies:
     git:
       url: https://github.com/KasemJaffer/receive_sharing_intent.git
       ref: 2cea396
+  rive: ^0.13.20
   rust_lib_photos:
     path: rust_builder
   screenshot: ^3.0.0
@@ -254,9 +255,6 @@ dependency_overrides:
   watcher: ^1.1.0
   win32: "5.10.1"
 
-flutter_intl:
-  enabled: true
-
 dev_dependencies:
   build_runner: ^2.4.7
   flutter_driver:
@@ -272,6 +270,7 @@ dev_dependencies:
   intl_utils: ^2.8.7
   json_annotation: ^4.8.0
   json_serializable: ^6.6.1
+  mockito: ^5.5.0
   test: ^1.22.0
 
 # ------------------------------

@@ -171,7 +171,7 @@
   "deleteFromBoth": "Slett frå begge",
   "newAlbum": "Nytt album",
   "albums": "Albums",
-  "memoryCount": "{count, plural, =0{ingen minne} one{{formattedCount} minne} other{{formattedCount} minne}}",
+  "memoryCount": "{count, plural, =0{ingen minne} other{{formattedCount} minne}}",
   "@memoryCount": {
     "description": "The text to display the number of memories",
     "type": "text",

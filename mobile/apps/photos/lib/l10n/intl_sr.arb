@@ -445,7 +445,7 @@
     }
   },
   "showMemories": "Прикажи успомене",
-  "yearsAgo": "{count, plural, one{{count} година уназад} few {{count} године уназад} other{{count} година уназад}}",
+  "yearsAgo": "{count, plural, other{{count} година уназад}}",
   "backupStatus": "Статус резервних копија",
   "backupOverMobileData": "Копирај користећи мобилни интернет",
   "backupVideos": "Копирај видео снимке",
@@ -496,7 +496,7 @@
       }
     }
   },
-  "duplicateFileCountWithStorageSaved": "Обрисали сте {count, plural, one{{count} дупликат} few {{count} дупликата} other{{count} дупликата}}, ослобађам ({storageSaved}!)",
+  "duplicateFileCountWithStorageSaved": "Обрисали сте {count, plural, one{{count} дупликат} other{{count} дупликата}}, ослобађам ({storageSaved}!)",
   "@duplicateFileCountWithStorageSaved": {
     "description": "The text to display when the user has successfully cleaned up duplicate files",
     "type": "text",

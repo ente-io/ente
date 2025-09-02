@@ -54,9 +54,9 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
             _developerModeTapCount = 0;
             final result = await showChoiceDialog(
               context,
-              title: S.of(context).developerSettings,
-              firstButtonLabel: S.of(context).yes,
-              body: S.of(context).developerSettingsWarning,
+              title: AppLocalizations.of(context).developerSettings,
+              firstButtonLabel: AppLocalizations.of(context).yes,
+              body: AppLocalizations.of(context).developerSettingsWarning,
               isDismissible: false,
             );
             if (result?.action == ButtonAction.first) {
@@ -98,7 +98,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
                           (locale) async {
                             await setLocale(locale);
                             EnteApp.setLocale(context, locale);
-                            unawaited(S.delegate.load(locale));
+                            unawaited(AppLocalizations.delegate.load(locale));
                           },
                           locale,
                         ),
@@ -157,7 +157,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
                       Theme.of(context).colorScheme.optionalActionButtonStyle,
                   onPressed: _navigateToSignInPage,
                   child: Text(
-                    S.of(context).existingUser,
+                    AppLocalizations.of(context).existingUser,
                     style: const TextStyle(
                       color: Colors.black, // same for both themes
                     ),
@@ -183,7 +183,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: GradientButton(
         onTap: _navigateToSignUpPage,
-        text: S.of(context).newToEnte,
+        text: AppLocalizations.of(context).newToEnte,
       ),
     );
   }
@@ -195,23 +195,23 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
         children: [
           FeatureItemWidget(
             "assets/onboarding_lock.png",
-            S.of(context).privateBackups,
-            S.of(context).forYourMemories,
-            S.of(context).endtoendEncryptedByDefault,
+            AppLocalizations.of(context).privateBackups,
+            AppLocalizations.of(context).forYourMemories,
+            AppLocalizations.of(context).endtoendEncryptedByDefault,
           ),
           FeatureItemWidget(
             "assets/onboarding_safe.png",
-            S.of(context).safelyStored,
-            S.of(context).atAFalloutShelter,
-            S.of(context).designedToOutlive,
+            AppLocalizations.of(context).safelyStored,
+            AppLocalizations.of(context).atAFalloutShelter,
+            AppLocalizations.of(context).designedToOutlive,
           ),
           FeatureItemWidget(
             "assets/onboarding_sync.png",
-            S.of(context).available,
-            S.of(context).everywhere,
+            AppLocalizations.of(context).available,
+            AppLocalizations.of(context).everywhere,
             Platform.isAndroid
-                ? S.of(context).androidIosWebDesktop
-                : S.of(context).mobileWebDesktop,
+                ? AppLocalizations.of(context).androidIosWebDesktop
+                : AppLocalizations.of(context).mobileWebDesktop,
           ),
         ],
         onPageChanged: (index) {
@@ -287,13 +287,13 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
     if (autoLogout) {
       final result = await showDialogWidget(
         context: context,
-        title: S.of(context).pleaseLoginAgain,
-        body: S.of(context).autoLogoutMessage,
+        title: AppLocalizations.of(context).pleaseLoginAgain,
+        body: AppLocalizations.of(context).autoLogoutMessage,
         buttons: [
           ButtonWidget(
             buttonType: ButtonType.neutral,
             buttonAction: ButtonAction.first,
-            labelText: S.of(context).ok,
+            labelText: AppLocalizations.of(context).ok,
             isInAlert: true,
           ),
         ],

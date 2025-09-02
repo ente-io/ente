@@ -17,18 +17,22 @@ class Network {
   late Dio _enteDio;
 
   Future<void> init(BaseConfiguration configuration) async {
-    final String ua = await userAgent();
+    final bool isMobile = Platform.isAndroid || Platform.isIOS;
+    String? ua;
+    if (isMobile) {
+      ua = await userAgent();
+    }
     final packageInfo = await PackageInfo.fromPlatform();
     final version = packageInfo.version;
     final packageName = packageInfo.packageName;
     final endpoint = configuration.getHttpEndpoint();
-    final isMobile = Platform.isAndroid || Platform.isIOS;
 
     _dio = Dio(
       BaseOptions(
         connectTimeout: Duration(milliseconds: kConnectTimeout),
         headers: {
-          HttpHeaders.userAgentHeader: isMobile ? ua : Platform.operatingSystem,
+          HttpHeaders.userAgentHeader:
+              isMobile ? ua! : Platform.operatingSystem,
           'X-Client-Version': version,
           'X-Client-Package': packageName,
         },
@@ -41,7 +45,7 @@ class Network {
         connectTimeout: Duration(milliseconds: kConnectTimeout),
         headers: {
           if (isMobile)
-            HttpHeaders.userAgentHeader: ua
+            HttpHeaders.userAgentHeader: ua!
           else
             HttpHeaders.userAgentHeader: Platform.operatingSystem,
           'X-Client-Version': version,

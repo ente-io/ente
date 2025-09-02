@@ -88,7 +88,7 @@ class FileBottomBarState extends State<FileBottomBar> {
         widget.file.ownerID == null || widget.file.ownerID == widget.userID;
     children.add(
       Tooltip(
-        message: S.of(context).info,
+        message: AppLocalizations.of(context).info,
         child: Padding(
           padding: const EdgeInsets.only(top: 12),
           child: IconButton(
@@ -113,7 +113,7 @@ class FileBottomBarState extends State<FileBottomBar> {
           (widget.file.fileType == FileType.video)) {
         children.add(
           Tooltip(
-            message: S.of(context).edit,
+            message: AppLocalizations.of(context).edit,
             child: Padding(
               padding: const EdgeInsets.only(top: 12),
               child: IconButton(
@@ -132,7 +132,7 @@ class FileBottomBarState extends State<FileBottomBar> {
       if (isOwnedByUser) {
         children.add(
           Tooltip(
-            message: S.of(context).delete,
+            message: AppLocalizations.of(context).delete,
             child: Padding(
               padding: const EdgeInsets.only(top: 12),
               child: IconButton(
@@ -153,7 +153,7 @@ class FileBottomBarState extends State<FileBottomBar> {
 
       children.add(
         Tooltip(
-          message: S.of(context).share,
+          message: AppLocalizations.of(context).share,
           child: Padding(
             padding: const EdgeInsets.only(top: 12),
             child: IconButton(
@@ -224,7 +224,7 @@ class FileBottomBarState extends State<FileBottomBar> {
   void _addTrashOptions(List<Widget> children) {
     children.add(
       Tooltip(
-        message: S.of(context).restore,
+        message: AppLocalizations.of(context).restore,
         child: Padding(
           padding: const EdgeInsets.only(top: 12),
           child: IconButton(
@@ -248,7 +248,7 @@ class FileBottomBarState extends State<FileBottomBar> {
 
     children.add(
       Tooltip(
-        message: S.of(context).delete,
+        message: AppLocalizations.of(context).delete,
         child: Padding(
           padding: const EdgeInsets.only(top: 12),
           child: IconButton(

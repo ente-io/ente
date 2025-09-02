@@ -113,7 +113,7 @@ class _DeviceFoldersGridViewState extends State<DeviceFoldersGridView> {
                 snapshot.error,
                 snapshot.stackTrace,
               );
-              return Text(S.of(context).failedToLoadAlbums);
+              return Text(AppLocalizations.of(context).failedToLoadAlbums);
             } else {
               return const EnteLoadingWidget();
             }

@@ -117,7 +117,7 @@ class SmartMemoriesService {
 
       final local = await getLocale();
       final languageCode = local?.languageCode ?? "en";
-      final s = await LanguageService.s;
+      final s = await LanguageService.locals;
 
       _logger.info('get locale and S $t');
 
@@ -355,7 +355,7 @@ class SmartMemoriesService {
 
     final local = await getLocale();
     final languageCode = local?.languageCode ?? "en";
-    final s = await LanguageService.s;
+    final s = await LanguageService.locals;
 
     _logger.info('get locale and S');
     for (final memory in memories) {

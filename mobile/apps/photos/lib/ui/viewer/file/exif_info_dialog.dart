@@ -17,7 +17,7 @@ class ExifInfoDialog extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            S.of(context).exif,
+            AppLocalizations.of(context).exif,
             style: textTheme.h3Bold,
           ),
           Text(
@@ -35,7 +35,7 @@ class ExifInfoDialog extends StatelessWidget {
       actions: [
         TextButton(
           child: Text(
-            S.of(context).close,
+            AppLocalizations.of(context).close,
             style: textTheme.body,
           ),
           onPressed: () {

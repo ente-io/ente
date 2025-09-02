@@ -261,7 +261,11 @@ class GalleryState extends State<Gallery> {
       });
     } else {
       groupHeaderExtent = GalleryGroups.spacing;
-      _updateGalleryGroups();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _updateGalleryGroups();
+        }
+      });
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -600,7 +604,6 @@ class GalleryState extends State<Gallery> {
                           ? const NeverScrollableScrollPhysics()
                           : const ExponentialBouncingScrollPhysics(),
                       controller: _scrollController,
-                      cacheExtent: galleryCacheExtent,
                       slivers: [
                         SliverToBoxAdapter(
                           child: SizeChangedLayoutNotifier(
@@ -637,25 +640,6 @@ class GalleryState extends State<Gallery> {
               ),
             ),
     );
-  }
-
-  double get galleryCacheExtent {
-    final int photoGridSize = localSettings.getPhotoGridSize();
-    switch (photoGridSize) {
-      case 2:
-      case 3:
-        return 1000;
-      case 4:
-        return 850;
-      case 5:
-        return 600;
-      case 6:
-        return 300;
-      default:
-        throw StateError(
-          'Invalid photo grid size configuration: $photoGridSize',
-        );
-    }
   }
 }
 

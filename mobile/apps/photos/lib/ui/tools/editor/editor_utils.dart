@@ -60,7 +60,7 @@ Future<void> saveAsset({
     }
 
     Bus.instance.fire(LocalPhotosUpdatedEvent([newFile], source: "editSave"));
-    showShortToast(context, S.of(context).editsSaved);
+    showShortToast(context, AppLocalizations.of(context).editsSaved);
     logger.info("Original file " + originalFile.toString());
     logger.info("Saved edits to file " + newFile.toString());
     final files = detailPageConfig.files;
@@ -85,7 +85,7 @@ Future<void> saveAsset({
     );
   } catch (e, s) {
     onSaveFinished();
-    showToast(context, S.of(context).oopsCouldNotSaveEdits);
+    showToast(context, AppLocalizations.of(context).oopsCouldNotSaveEdits);
     logger.severe(e, s);
   } finally {
     await PhotoManager.startChangeNotify();

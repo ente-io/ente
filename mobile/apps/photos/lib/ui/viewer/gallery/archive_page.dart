@@ -73,7 +73,7 @@ class ArchivePage extends StatelessWidget {
       selectedFiles: _selectedFiles,
       initialFiles: null,
       emptyState: EmptyState(
-        text: S.of(context).youDontHaveAnyArchivedItems,
+        text: AppLocalizations.of(context).youDontHaveAnyArchivedItems,
       ),
       header: AlbumHorizontalList(
         CollectionsService.instance.getArchivedCollection,
@@ -85,7 +85,7 @@ class ArchivePage extends StatelessWidget {
           preferredSize: const Size.fromHeight(50.0),
           child: GalleryAppBarWidget(
             appBarType,
-            S.of(context).archive,
+            AppLocalizations.of(context).archive,
             _selectedFiles,
           ),
         ),

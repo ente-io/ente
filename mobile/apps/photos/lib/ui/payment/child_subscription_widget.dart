@@ -28,7 +28,7 @@ class ChildSubscriptionWidget extends StatelessWidget {
         children: [
           Center(
             child: Text(
-              S.of(context).youAreOnAFamilyPlan,
+              AppLocalizations.of(context).youAreOnAFamilyPlan,
               style: Theme.of(context).textTheme.bodyLarge,
             ),
           ),
@@ -38,7 +38,8 @@ class ChildSubscriptionWidget extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: StyledText(
-              text: S.of(context).contactFamilyAdmin(familyAdmin),
+              text: AppLocalizations.of(context)
+                  .contactFamilyAdmin(familyAdminEmail: familyAdmin),
               style: Theme.of(context).textTheme.bodyLarge,
               tags: {
                 'green': StyledTextTag(
@@ -70,7 +71,7 @@ class ChildSubscriptionWidget extends StatelessWidget {
                 backgroundColor: Colors.red[500],
               ),
               child: Text(
-                S.of(context).leaveFamily,
+                AppLocalizations.of(context).leaveFamily,
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
@@ -91,8 +92,7 @@ class ChildSubscriptionWidget extends StatelessWidget {
                   text: TextSpan(
                     children: [
                       TextSpan(
-                        text: S
-                            .of(context)
+                        text: AppLocalizations.of(context)
                             .pleaseContactSupportAndWeWillBeHappyToHelp,
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
@@ -110,9 +110,9 @@ class ChildSubscriptionWidget extends StatelessWidget {
   Future<void> _leaveFamilyPlan(BuildContext context) async {
     final choice = await showChoiceDialog(
       context,
-      title: S.of(context).leaveFamily,
-      body: S.of(context).areYouSureThatYouWantToLeaveTheFamily,
-      firstButtonLabel: S.of(context).leave,
+      title: AppLocalizations.of(context).leaveFamily,
+      body: AppLocalizations.of(context).areYouSureThatYouWantToLeaveTheFamily,
+      firstButtonLabel: AppLocalizations.of(context).leave,
       firstButtonOnTap: () async {
         try {
           await UserService.instance.leaveFamilyPlan();

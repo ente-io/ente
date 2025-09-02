@@ -107,7 +107,10 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     try {
       await _fetchSub();
     } catch (e) {
-      showToast(context, S.of(context).failedToRefreshStripeSubscription);
+      showToast(
+        context,
+        AppLocalizations.of(context).failedToRefreshStripeSubscription,
+      );
     }
     await _dialog.hide();
 
@@ -165,8 +168,8 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               children: [
                 TitleBarTitleWidget(
                   title: widget.isOnboarding
-                      ? S.of(context).selectYourPlan
-                      : S.of(context).subscription,
+                      ? AppLocalizations.of(context).selectYourPlan
+                      : AppLocalizations.of(context).subscription,
                 ),
                 _isFreePlanUser() || !_hasLoadedData
                     ? const SizedBox.shrink()
@@ -188,7 +191,10 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   Widget _getBody() {
     if (!_isLoading) {
       _isLoading = true;
-      _dialog = createProgressDialog(context, S.of(context).pleaseWait);
+      _dialog = createProgressDialog(
+        context,
+        AppLocalizations.of(context).pleaseWait,
+      );
       _fetchSub();
     }
     if (_hasLoadedData) {
@@ -254,7 +260,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
           padding: const EdgeInsets.fromLTRB(16, 2, 16, 2),
           child: MenuItemWidget(
             captionedTextWidget: CaptionedTextWidget(
-              title: S.of(context).manageFamily,
+              title: AppLocalizations.of(context).manageFamily,
             ),
             menuItemColor: colorScheme.fillFaint,
             trailingWidget: Icon(
@@ -342,8 +348,9 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
             : '';
         await showErrorDialog(
           context,
-          S.of(context).sorry,
-          S.of(context).contactToManageSubscription(capitalizedWord),
+          AppLocalizations.of(context).sorry,
+          AppLocalizations.of(context)
+              .contactToManageSubscription(provider: capitalizedWord),
         );
     }
   }
@@ -356,7 +363,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       await Navigator.of(context).push(
         MaterialPageRoute(
           builder: (BuildContext context) {
-            return WebPage(S.of(context).paymentDetails, url);
+            return WebPage(AppLocalizations.of(context).paymentDetails, url);
           },
         ),
       ).then((value) => onWebPaymentGoBack);
@@ -373,8 +380,8 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       return const SizedBox.shrink();
     }
     final String title = isRenewCancelled
-        ? S.of(context).renewSubscription
-        : S.of(context).cancelSubscription;
+        ? AppLocalizations.of(context).renewSubscription
+        : AppLocalizations.of(context).cancelSubscription;
     return MenuItemWidget(
       captionedTextWidget: CaptionedTextWidget(
         title: title,
@@ -394,17 +401,17 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
           final choice = await showChoiceDialog(
             context,
             title: title,
-            body: S.of(context).areYouSureYouWantToRenew,
-            firstButtonLabel: S.of(context).yesRenew,
+            body: AppLocalizations.of(context).areYouSureYouWantToRenew,
+            firstButtonLabel: AppLocalizations.of(context).yesRenew,
           );
           confirmAction = choice!.action == ButtonAction.first;
         } else {
           final choice = await showChoiceDialog(
             context,
             title: title,
-            body: S.of(context).areYouSureYouWantToCancel,
-            firstButtonLabel: S.of(context).yesCancel,
-            secondButtonLabel: S.of(context).no,
+            body: AppLocalizations.of(context).areYouSureYouWantToCancel,
+            firstButtonLabel: AppLocalizations.of(context).yesCancel,
+            secondButtonLabel: AppLocalizations.of(context).no,
             isCritical: true,
           );
           confirmAction = choice!.action == ButtonAction.first;
@@ -429,17 +436,17 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       showShortToast(
         context,
         isAutoRenewDisabled
-            ? S.of(context).failedToRenew
-            : S.of(context).failedToCancel,
+            ? AppLocalizations.of(context).failedToRenew
+            : AppLocalizations.of(context).failedToCancel,
       );
     }
     await _dialog.hide();
     if (!isAutoRenewDisabled && mounted) {
       await showTextInputDialog(
         context,
-        title: S.of(context).askCancelReason,
-        submitButtonLabel: S.of(context).send,
-        hintText: S.of(context).optionalAsShortAsYouLike,
+        title: AppLocalizations.of(context).askCancelReason,
+        submitButtonLabel: AppLocalizations.of(context).send,
+        hintText: AppLocalizations.of(context).optionalAsShortAsYouLike,
         alwaysShowSuccessState: true,
         textCapitalization: TextCapitalization.words,
         onSubmit: (String text) async {
@@ -502,10 +509,10 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                   _currentSubscription!.productID != freeProductID) {
                 await showErrorDialog(
                   context,
-                  S.of(context).sorry,
-                  S.of(context).cancelOtherSubscription(
-                        _currentSubscription!.paymentProvider,
-                      ),
+                  AppLocalizations.of(context).sorry,
+                  AppLocalizations.of(context).cancelOtherSubscription(
+                    paymentProvider: _currentSubscription!.paymentProvider,
+                  ),
                 );
                 return;
               }
@@ -521,8 +528,8 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                 );
                 await showErrorDialog(
                   context,
-                  S.of(context).sorry,
-                  S.of(context).youCannotDowngradeToThisPlan,
+                  AppLocalizations.of(context).sorry,
+                  AppLocalizations.of(context).youCannotDowngradeToThisPlan,
                 );
                 return;
               }
@@ -531,9 +538,10 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                 // confirm if user wants to change plan or not
                 final result = await showChoiceDialog(
                   context,
-                  title: S.of(context).confirmPlanChange,
-                  body: S.of(context).areYouSureYouWantToChangeYourPlan,
-                  firstButtonLabel: S.of(context).yes,
+                  title: AppLocalizations.of(context).confirmPlanChange,
+                  body: AppLocalizations.of(context)
+                      .areYouSureYouWantToChangeYourPlan,
+                  firstButtonLabel: AppLocalizations.of(context).yes,
                 );
                 if (result!.action == ButtonAction.first) {
                   stripPurChaseAction = 'update';

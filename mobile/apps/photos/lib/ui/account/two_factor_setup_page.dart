@@ -80,7 +80,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
       appBar: AppBar(
         elevation: 0,
         title: Text(
-          S.of(context).twofactorSetup,
+          AppLocalizations.of(context).twofactorSetup,
         ),
       ),
       body: _getBody(),
@@ -103,10 +103,10 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
                     unselectedLabelColor: Colors.grey,
                     tabs: [
                       Tab(
-                        text: S.of(context).enterCode,
+                        text: AppLocalizations.of(context).enterCode,
                       ),
                       Tab(
-                        text: S.of(context).scanCode,
+                        text: AppLocalizations.of(context).scanCode,
                       ),
                     ],
                     controller: _tabController,
@@ -141,14 +141,18 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
     return GestureDetector(
       onTap: () async {
         await Clipboard.setData(ClipboardData(text: widget.secretCode));
-        showShortToast(context, S.of(context).codeCopiedToClipboard);
+        showShortToast(
+          context,
+          AppLocalizations.of(context).codeCopiedToClipboard,
+        );
       },
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Padding(padding: EdgeInsets.all(12)),
           Text(
-            S.of(context).copypasteThisCodentoYourAuthenticatorApp,
+            AppLocalizations.of(context)
+                .copypasteThisCodentoYourAuthenticatorApp,
             style: const TextStyle(
               height: 1.4,
               fontSize: 16,
@@ -175,7 +179,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
           ),
           const Padding(padding: EdgeInsets.all(6)),
           Text(
-            S.of(context).tapToCopy,
+            AppLocalizations.of(context).tapToCopy,
             style: TextStyle(color: textColor.withValues(alpha: 0.5)),
           ),
         ],
@@ -189,7 +193,8 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
         children: [
           const Padding(padding: EdgeInsets.all(12)),
           Text(
-            S.of(context).scanThisBarcodeWithnyourAuthenticatorApp,
+            AppLocalizations.of(context)
+                .scanThisBarcodeWithnyourAuthenticatorApp,
             style: const TextStyle(
               height: 1.4,
               fontSize: 16,
@@ -212,7 +217,8 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
       children: [
         const Padding(padding: EdgeInsets.all(12)),
         Text(
-          S.of(context).enterThe6digitCodeFromnyourAuthenticatorApp,
+          AppLocalizations.of(context)
+              .enterThe6digitCodeFromnyourAuthenticatorApp,
           style: const TextStyle(
             height: 1.4,
             fontSize: 16,
@@ -259,7 +265,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
                   await _enableTwoFactor(_code);
                 }
               : null,
-          child: Text(S.of(context).confirm),
+          child: Text(AppLocalizations.of(context).confirm),
         ),
         const Padding(padding: EdgeInsets.only(bottom: 24)),
       ],
@@ -281,12 +287,14 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
       context,
       RecoveryKeyPage(
         recoveryKey,
-        S.of(context).ok,
+        AppLocalizations.of(context).ok,
         showAppBar: true,
         onDone: () {},
-        title: S.of(context).setupComplete,
-        text: S.of(context).saveYourRecoveryKeyIfYouHaventAlready,
-        subText: S.of(context).thisCanBeUsedToRecoverYourAccountIfYou,
+        title: AppLocalizations.of(context).setupComplete,
+        text:
+            AppLocalizations.of(context).saveYourRecoveryKeyIfYouHaventAlready,
+        subText:
+            AppLocalizations.of(context).thisCanBeUsedToRecoverYourAccountIfYou,
       ),
     );
   }

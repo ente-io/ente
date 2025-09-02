@@ -150,7 +150,7 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
     if (videoFile != null && videoFile.existsSync()) {
       _setVideoController(videoFile.path);
     } else if (_enteFile.isLivePhoto) {
-      showShortToast(context, S.of(context).downloadFailed);
+      showShortToast(context, AppLocalizations.of(context).downloadFailed);
     }
     _isLoadingVideoPlayer = false;
   }
@@ -158,7 +158,7 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
   Future<File?> _getLivePhotoVideo() async {
     if (_enteFile.isRemoteFile &&
         !(await isFileCached(_enteFile, liveVideo: true))) {
-      showShortToast(context, S.of(context).downloading);
+      showShortToast(context, AppLocalizations.of(context).downloading);
     }
 
     File? videoFile = await getFile(widget.enteFile, liveVideo: true)
@@ -185,7 +185,7 @@ class _ZoomableLiveImageNewState extends State<ZoomableLiveImageNew>
 
   Future<File?> _getMotionPhotoVideo() async {
     if (_enteFile.isRemoteFile && !(await isFileCached(_enteFile))) {
-      showShortToast(context, S.of(context).downloading);
+      showShortToast(context, AppLocalizations.of(context).downloading);
     }
 
     final File? imageFile = await getFile(

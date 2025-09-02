@@ -38,7 +38,7 @@ class AlbumsItemWidget extends StatelessWidget {
     return InfoItemWidget(
       key: const ValueKey("Albums"),
       leadingIcon: Icons.folder_outlined,
-      title: S.of(context).albums,
+      title: AppLocalizations.of(context).albums,
       subtitleSection: fileIsBackedup
           ? _collectionsListOfFile(
               context,
@@ -85,7 +85,7 @@ class AlbumsItemWidget extends StatelessWidget {
         collections.add(c!);
         chipButtons.add(
           ChipButtonWidget(
-            c.isHidden() ? S.of(context).hidden : c.displayName,
+            c.isHidden() ? AppLocalizations.of(context).hidden : c.displayName,
             onTap: () {
               if (c.isHidden()) {
                 return;

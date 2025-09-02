@@ -93,7 +93,7 @@ class _AlbumsWidgetSettingsState extends State<AlbumsWidgetSettings> {
                   return ButtonWidget(
                     buttonType: ButtonType.primary,
                     buttonSize: ButtonSize.large,
-                    labelText: S.of(context).save,
+                    labelText: AppLocalizations.of(context).save,
                     shouldSurfaceExecutionStates: false,
                     onTap: _selectedAlbums.albums.isNotEmpty
                         ? () async {
@@ -120,11 +120,11 @@ class _AlbumsWidgetSettingsState extends State<AlbumsWidgetSettings> {
           slivers: <Widget>[
             TitleBarWidget(
               flexibleSpaceTitle: TitleBarTitleWidget(
-                title: S.of(context).albums,
+                title: AppLocalizations.of(context).albums,
               ),
               expandedHeight: MediaQuery.textScalerOf(context).scale(120),
               flexibleSpaceCaption: hasInstalledAny
-                  ? S.of(context).albumsWidgetDesc
+                  ? AppLocalizations.of(context).albumsWidgetDesc
                   : context.l10n.addAlbumWidgetPrompt,
               actionIcons: [
                 IconButtonWidget(

@@ -139,7 +139,9 @@ class _DeviceFolderVerticalGridViewBodyState
         } else if (snapshot.hasError) {
           logger.severe("failed to load device gallery", snapshot.error);
           return SliverFillRemaining(
-            child: Center(child: Text(S.of(context).failedToLoadAlbums)),
+            child: Center(
+              child: Text(AppLocalizations.of(context).failedToLoadAlbums),
+            ),
           );
         } else {
           return const SliverFillRemaining(child: EnteLoadingWidget());

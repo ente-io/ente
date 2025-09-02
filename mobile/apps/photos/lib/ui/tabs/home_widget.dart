@@ -328,8 +328,8 @@ class _HomeWidgetState extends State<HomeWidget> {
       if (publicUrl.passwordEnabled) {
         await showTextInputDialog(
           context,
-          title: S.of(context).enterPassword,
-          submitButtonLabel: S.of(context).ok,
+          title: AppLocalizations.of(context).enterPassword,
+          submitButtonLabel: AppLocalizations.of(context).ok,
           alwaysShowSuccessState: false,
           popnavAfterSubmission: false,
           onSubmit: (String text) async {
@@ -424,12 +424,12 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   Future<void> _autoLogoutAlert() async {
     final AlertDialog alert = AlertDialog(
-      title: Text(S.of(context).sessionExpired),
-      content: Text(S.of(context).pleaseLoginAgain),
+      title: Text(AppLocalizations.of(context).sessionExpired),
+      content: Text(AppLocalizations.of(context).pleaseLoginAgain),
       actions: [
         TextButton(
           child: Text(
-            S.of(context).ok,
+            AppLocalizations.of(context).ok,
             style: TextStyle(
               color: Theme.of(context).colorScheme.greenAlternative,
             ),
@@ -437,8 +437,10 @@ class _HomeWidgetState extends State<HomeWidget> {
           onPressed: () async {
             Navigator.of(context).pop('dialog');
             Navigator.of(context).popUntil((route) => route.isFirst);
-            final dialog =
-                createProgressDialog(context, S.of(context).loggingOut);
+            final dialog = createProgressDialog(
+              context,
+              AppLocalizations.of(context).loggingOut,
+            );
             await dialog.show();
             await Configuration.instance.logout();
             await dialog.hide();
@@ -500,7 +502,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                 actions: [
                   const SizedBox(height: 24),
                   ButtonWidget(
-                    labelText: S.of(context).openFile,
+                    labelText: AppLocalizations.of(context).openFile,
                     buttonType: ButtonType.primary,
                     onTap: () async {
                       Navigator.of(context).pop(true);
@@ -511,7 +513,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                   ),
                   ButtonWidget(
                     buttonType: ButtonType.secondary,
-                    labelText: S.of(context).backupFile,
+                    labelText: AppLocalizations.of(context).backupFile,
                     onTap: () async {
                       Navigator.of(context).pop(false);
                     },

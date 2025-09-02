@@ -260,6 +260,9 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     await db.execute(deleteNotPersonFeedbackTable);
     await db.execute(deleteClipEmbeddingsTable);
     await db.execute(deleteFileDataTable);
+    if (await ClipVectorDB.instance.checkIfMigrationDone()) {
+      await ClipVectorDB.instance.deleteIndexFile();
+    }
   }
 
   @override
@@ -1290,8 +1293,11 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     int processedCount = 0;
     int weirdCount = 0;
     int whileCount = 0;
+    const String migrationKey = "clip_vector_db_migration_in_progress";
     final stopwatch = Stopwatch()..start();
     try {
+      // Make sure no other heavy compute is running
+      computeController.blockCompute(blocker: migrationKey);
       while (true) {
         whileCount++;
         _logger.info("$whileCount st round of while loop");
@@ -1321,6 +1327,9 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
             embeddings.add(Float32List.view(result[embeddingColumn].buffer));
           } else {
             weirdCount++;
+            _logger.warning(
+              "Weird clip embedding length ${embedding.length} for fileID ${result[fileIDColumn]}, skipping",
+            );
           }
         }
         _logger.info(
@@ -1347,7 +1356,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
         "migrated all $totalCount embeddings to ClipVectorDB in ${stopwatch.elapsed.inMilliseconds} ms, with $weirdCount weird embeddings not migrated",
       );
       await ClipVectorDB.instance.setMigrationDone();
-      _logger.info("ClipVectorDB migration done, flag file created");
+      _logger.info("ClipVectorDB migration done");
     } catch (e, s) {
       _logger.severe(
         "Error migrating ClipVectorDB after ${stopwatch.elapsed.inMilliseconds} ms, clearing out DB again",
@@ -1358,6 +1367,8 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       rethrow;
     } finally {
       stopwatch.stop();
+      // Make sure compute can run again
+      computeController.unblockCompute(blocker: migrationKey);
     }
   }
 

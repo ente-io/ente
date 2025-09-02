@@ -372,7 +372,7 @@
   "deleteFromBoth": "Usuń z obu",
   "newAlbum": "Nowy album",
   "albums": "Albumy",
-  "memoryCount": "{count, plural, =0{brak wspomnień} one{{formattedCount} wspomnienie} few{{formattedCount} wspomnienia} many{{formattedCount} wspomnień} other{{formattedCount} wspomnień}}",
+  "memoryCount": "{count, plural, =0{brak wspomnień} one{{formattedCount} wspomnienie} other{{formattedCount} wspomnień}}",
   "@memoryCount": {
     "description": "The text to display the number of memories",
     "type": "text",
@@ -794,11 +794,11 @@
   "share": "Udostępnij",
   "unhideToAlbum": "Odkryj do albumu",
   "restoreToAlbum": "Przywróć do albumu",
-  "moveItem": "{count, plural, =1 {Przenieś element} few {Przenieś elementy} many {Przenieś elementów} other {Przenieś elementów}}",
+  "moveItem": "{count, plural, =1 {Przenieś element} other {Przenieś elementów}}",
   "@moveItem": {
     "description": "Page title while moving one or more items to an album"
   },
-  "addItem": "{count, plural, =1 {Dodaj element} few {Dodaj elementy} many {Dodaj elementów} other {Dodaj elementów}}",
+  "addItem": "{count, plural, =1 {Dodaj element} other {Dodaj elementów}}",
   "@addItem": {
     "description": "Page title while adding one or more items to album"
   },
@@ -899,7 +899,7 @@
   "authToViewYourMemories": "Prosimy uwierzytelnić się, aby wyświetlić swoje wspomnienia",
   "unlock": "Odblokuj",
   "freeUpSpace": "Zwolnij miejsce",
-  "freeUpSpaceSaving": "{count, plural, =1 {Może zostać usunięty z urządzenia, aby zwolnić {formattedSize}} many {Może być usuniętych z urządzenia, aby zwolnić {formattedSize}} other {Mogą być usunięte z urządzenia, aby zwolnić {formattedSize}}}",
+  "freeUpSpaceSaving": "{count, plural, =1 {Może zostać usunięty z urządzenia, aby zwolnić {formattedSize}} other {Mogą być usunięte z urządzenia, aby zwolnić {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, one {1 plikowi} other {{formattedNumber} plikom}} w tym albumie została bezpiecznie utworzona kopia zapasowa",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -1488,7 +1488,7 @@
   },
   "currentlyRunning": "aktualnie uruchomiony",
   "ignored": "ignorowane",
-  "photosCount": "{count, plural, =0 {0 zdjęć} =1 {1 zdjęcie} few {{count} zdjęcia} many {{count} zdjęć} other {{count} zdjęć}}",
+  "photosCount": "{count, plural, =0 {0 zdjęć} =1 {1 zdjęcie} other {{count} zdjęć}}",
   "@photosCount": {
     "placeholders": {
       "count": {
@@ -1686,7 +1686,7 @@
   "moveSelectedPhotosToOneDate": "Przenieś wybrane zdjęcia na jedną datę",
   "shiftDatesAndTime": "Zmień daty i czas",
   "photosKeepRelativeTimeDifference": "Zdjęcia zachowują względną różnicę czasu",
-  "photocountPhotos": "{count, plural, =0 {Brak zdjęć} =1 {1 zdjęcie} few {{count} zdjęcia} many {{count} zdjęć} other {{count} zdjęć}}",
+  "photocountPhotos": "{count, plural, =0 {Brak zdjęć} =1 {1 zdjęcie} other {{count} zdjęć}}",
   "@photocountPhotos": {
     "placeholders": {
       "count": {
@@ -1700,7 +1700,7 @@
   "selectedItemsWillBeRemovedFromThisPerson": "Wybrane elementy zostaną usunięte z tej osoby, ale nie zostaną usunięte z Twojej biblioteki.",
   "throughTheYears": "{dateFormat} przez lata",
   "thisWeekThroughTheYears": "Ten tydzień przez lata",
-  "thisWeekXYearsAgo": "{count, plural, =1 {W tym tygodniu, {count} rok temu} few {W tym tygodniu, {count} lata temu} many {W tym tygodniu, {count} lat temu} other {W tym tygodniu, {count} lat temu}}",
+  "thisWeekXYearsAgo": "{count, plural, =1 {W tym tygodniu, {count} rok temu} other {W tym tygodniu, {count} lat temu}}",
   "youAndThem": "Ty i {name}",
   "admiringThem": "Podziwianie {name}",
   "embracingThem": "Obejmowanie {name}",

@@ -7,12 +7,17 @@ import "package:flutter/services.dart";
 import "package:photos/utils/ffprobe_util.dart";
 
 class IsolatedFfmpegService {
-  static Future<Map> runFfmpeg(String command) async {
+  IsolatedFfmpegService._privateConstructor();
+
+  static final IsolatedFfmpegService instance =
+      IsolatedFfmpegService._privateConstructor();
+
+  Future<Map> runFfmpeg(String command) async {
     final rootIsolateToken = RootIsolateToken.instance!;
     return await Isolate.run<Map>(() => _ffmpegRun(command, rootIsolateToken));
   }
 
-  static Future<Map> getVideoInfo(String file) async {
+  Future<Map> getVideoInfo(String file) async {
     final rootIsolateToken = RootIsolateToken.instance!;
     return await Isolate.run<Map>(() => _getVideoProps(file, rootIsolateToken));
   }

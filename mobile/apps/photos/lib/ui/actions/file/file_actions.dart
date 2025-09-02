@@ -25,19 +25,23 @@ Future<void> showSingleFileDeleteSheet(
 }) async {
   final List<ButtonWidget> buttons = [];
   final String fileType = file.fileType == FileType.video
-      ? S.of(context).videoSmallCase
-      : S.of(context).photoSmallCase;
+      ? AppLocalizations.of(context).videoSmallCase
+      : AppLocalizations.of(context).photoSmallCase;
   final bool isBothLocalAndRemote = file.rAsset != null && file.localID != null;
   final bool isLocalOnly = file.rAsset == null && file.localID != null;
   final bool isRemoteOnly = file.rAsset != null && file.localID == null;
-  final String bodyHighlight = S.of(context).singleFileDeleteHighlight;
-  String body = "";
+  String body;
+  final String bodyHighlight =
+      AppLocalizations.of(context).singleFileDeleteHighlight;
   if (isBothLocalAndRemote) {
-    body = S.of(context).singleFileInBothLocalAndRemote(fileType);
+    body = AppLocalizations.of(context)
+        .singleFileInBothLocalAndRemote(fileType: fileType);
   } else if (isRemoteOnly) {
-    body = S.of(context).singleFileInRemoteOnly(fileType);
+    body =
+        AppLocalizations.of(context).singleFileInRemoteOnly(fileType: fileType);
   } else if (isLocalOnly) {
-    body = S.of(context).singleFileDeleteFromDevice(fileType);
+    body = AppLocalizations.of(context)
+        .singleFileDeleteFromDevice(fileType: fileType);
   } else {
     throw AssertionError("Unexpected state");
   }
@@ -46,8 +50,8 @@ Future<void> showSingleFileDeleteSheet(
     buttons.add(
       ButtonWidget(
         labelText: isBothLocalAndRemote
-            ? S.of(context).deleteFromEnte
-            : S.of(context).yesDelete,
+            ? AppLocalizations.of(context).deleteFromEnte
+            : AppLocalizations.of(context).yesDelete,
         buttonType: ButtonType.neutral,
         buttonSize: ButtonSize.large,
         shouldStickToDarkTheme: true,
@@ -56,7 +60,7 @@ Future<void> showSingleFileDeleteSheet(
         isInAlert: true,
         onTap: () async {
           await deleteFilesFromRemoteOnly(context, [file]);
-          showShortToast(context, S.of(context).movedToTrash);
+          showShortToast(context, AppLocalizations.of(context).movedToTrash);
           if (isRemoteOnly) {
             if (onFileRemoved != null) {
               onFileRemoved(file);
@@ -71,8 +75,8 @@ Future<void> showSingleFileDeleteSheet(
     buttons.add(
       ButtonWidget(
         labelText: isBothLocalAndRemote
-            ? S.of(context).deleteFromDevice
-            : S.of(context).yesDelete,
+            ? AppLocalizations.of(context).deleteFromDevice
+            : AppLocalizations.of(context).yesDelete,
         buttonType: ButtonType.neutral,
         buttonSize: ButtonSize.large,
         shouldStickToDarkTheme: true,
@@ -93,7 +97,7 @@ Future<void> showSingleFileDeleteSheet(
   if (isBothLocalAndRemote) {
     buttons.add(
       ButtonWidget(
-        labelText: S.of(context).deleteFromBoth,
+        labelText: AppLocalizations.of(context).deleteFromBoth,
         buttonType: ButtonType.neutral,
         buttonSize: ButtonSize.large,
         shouldStickToDarkTheme: true,
@@ -112,7 +116,7 @@ Future<void> showSingleFileDeleteSheet(
   }
   buttons.add(
     ButtonWidget(
-      labelText: S.of(context).cancel,
+      labelText: AppLocalizations.of(context).cancel,
       buttonType: ButtonType.secondary,
       buttonSize: ButtonSize.large,
       shouldStickToDarkTheme: true,

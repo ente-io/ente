@@ -1827,5 +1827,117 @@
         "type": "int"
       }
     }
-  }
+  },
+  "videosProcessed": "Video đã được xử lý",
+  "totalVideos": "Tổng số video",
+  "skippedVideos": "Video bị bỏ qua",
+  "videoStreamingDescriptionLine1": "Phát video trên bất kỳ thiết bị.",
+  "videoStreamingDescriptionLine2": "Bật để xử lý luồng phát video trên thiết bị này.",
+  "videoStreamingNote": "Thiết bị này chỉ xử lý các video từ 60 ngày trở xuống và có thời lượng dưới 1 phút. Đối với các video cũ hơn/dài hơn, hãy bật tính năng phát trực tuyến trong ứng dụng máy tính để bàn.",
+  "createStream": "Tạo phát trực tiếp",
+  "recreateStream": "Tạo lại phát trực tiếp",
+  "addedToStreamCreationQueue": "Đã thêm vào hàng đợi tạo luồng",
+  "addedToStreamRecreationQueue": "Đã thêm vào hàng đợi tạo lại luồng",
+  "videoPreviewAlreadyExists": "Bản xem trước video đã tồn tại",
+  "videoAlreadyInQueue": "Tệp video đã có trong hàng đợi",
+  "addedToQueue": "Đã thêm vào hàng đợi",
+  "creatingStream": "Đang tạo luồng",
+  "similarImages": "Ảnh giống nhau",
+  "findSimilarImages": "Tìm ảnh giống nhau",
+  "noSimilarImagesFound": "Không tìm thấy ảnh giống nhau",
+  "yourPhotosLookUnique": "Ảnh của bạn trông độc đáo",
+  "similarGroupsFound": "{count, plural, =1{{count} nhóm được tìm thấy} other{{count} nhóm được tìm thấy}}",
+  "@similarGroupsFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewAndRemoveSimilarImages": "Xem lại và xóa ảnh giống nhau",
+  "deletePhotosWithSize": "Xóa {count} ảnh ({size})",
+  "@deletePhotosWithSize": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "selectionOptions": "Tùy chọn lựa chọn",
+  "selectExactWithCount": "Giống nhau hoàn toàn ({count})",
+  "@selectExactWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectExact": "Chọn chính xác",
+  "selectSimilarWithCount": "Giống nhau một phần ({count})",
+  "@selectSimilarWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectSimilar": "Chọn giống nhau",
+  "selectAllWithCount": "Tất cả giống nhau ({count})",
+  "@selectAllWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectSimilarImagesTitle": "Chọn những ảnh giống nhau",
+  "chooseSimilarImagesToSelect": "Chọn ảnh dựa trên sự tương đồng thị giác",
+  "clearSelection": "Bỏ chọn",
+  "similarImagesCount": "{count} ảnh giống nhau",
+  "@similarImagesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteWithCount": "Xóa ({count})",
+  "@deleteWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteFiles": "Xóa các tệp",
+  "areYouSureDeleteFiles": "Bạn có chắc muốn xóa các tệp này?",
+  "greatJob": "Tốt lắm!",
+  "cleanedUpSimilarImages": "Bạn tiết kiệm được {size}",
+  "@cleanedUpSimilarImages": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "size": "Dung lượng",
+  "similarity": "Sự giống nhau",
+  "analyzingPhotosLocally": "Phân tích ảnh của bạn trên thiết bị...",
+  "lookingForVisualSimilarities": "Tìm theo sự tương đồng thị giác...",
+  "comparingImageDetails": "So sánh các đặc điểm ảnh...",
+  "findingSimilarImages": "Tìm các ảnh giống nhau...",
+  "almostDone": "Sắp xong...",
+  "processingLocally": "Đang xử lý cục bộ",
+  "useMLToFindSimilarImages": "Xem lại và xóa những ảnh có vẻ giống nhau.",
+  "all": "Tất cả",
+  "similar": "Giống nhau",
+  "identical": "Giống hệt nhau",
+  "nothingHereTryAnotherFilter": "Không thấy gì, hãy thử thay đổi bộ lọc! 👀",
+  "related": "Có liên quan",
+  "hoorayyyy": "Hoorayyyy!",
+  "nothingToTidyUpHere": "Ở đây đã ngon lành rồi",
+  "deletingDash": "Đang xóa - "
 }
