@@ -1494,4 +1494,52 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     final List<Object?> params = [personOrClusterID];
     await db.execute(sql, params);
   }
+
+  // Faces Through Time feature queries
+  // Note: These methods need to be used in conjunction with FilesDB
+  // to get creation_time information, as that's stored in a different database
+  Future<List<int>> getPersonFileIds(String personId) async {
+    final db = await instance.asyncDB;
+    final result = await db.getAll(
+      '''
+        SELECT DISTINCT fc.$fileIDColumn
+        FROM $facesTable fc
+        JOIN $faceClustersTable fcluster ON fc.$faceIDColumn = fcluster.$faceIDColumn
+        JOIN $clusterPersonTable cp ON fcluster.$clusterIDColumn = cp.$clusterIDColumn
+        WHERE cp.$personIdColumn = ?
+      ''',
+      [personId],
+    );
+    return result.map((row) => row[fileIDColumn] as int).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> getPersonFacesWithScores(
+    String personId,
+    double minScore,
+  ) async {
+    final db = await instance.asyncDB;
+    final results = await db.getAll(
+      '''
+        SELECT 
+          fc.$faceIDColumn as faceId,
+          fc.$fileIDColumn as fileId,
+          fc.$faceScore as score,
+          fc.$faceBlur as blur
+        FROM $facesTable fc
+        JOIN $faceClustersTable fcluster ON fc.$faceIDColumn = fcluster.$faceIDColumn
+        JOIN $clusterPersonTable cp ON fcluster.$clusterIDColumn = cp.$clusterIDColumn
+        WHERE cp.$personIdColumn = ? AND fc.$faceScore >= ?
+      ''',
+      [personId, minScore],
+    );
+    
+    return results.map((row) {
+      return {
+        'faceId': row['faceId'],
+        'fileId': row['fileId'],
+        'score': row['score'],
+        'blur': row['blur'],
+      };
+    }).toList();
+  }
 }
