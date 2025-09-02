@@ -1,5 +1,15 @@
-# melos_managed_dependency_overrides: ffi,flutter_sodium,intl,js,media_kit,media_kit_libs_ios_video,media_kit_libs_video,media_kit_video,protobuf,video_player,watcher,win32
+# melos_managed_dependency_overrides: ente_cast,ente_cast_normal,ente_crypto,ente_feature_flag,onnx_dart,ffi,flutter_sodium,intl,js,media_kit,media_kit_libs_ios_video,media_kit_libs_video,media_kit_video,protobuf,video_player,watcher,win32
 dependency_overrides:
+  ente_cast:
+    path: plugins/ente_cast
+  ente_cast_normal:
+    path: plugins/ente_cast_normal
+  ente_crypto:
+    path: plugins/ente_crypto
+  ente_feature_flag:
+    path: plugins/ente_feature_flag
+  onnx_dart:
+    path: plugins/onnx_dart
   ffi: 2.1.0
   flutter_sodium:
     git:
