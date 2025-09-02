@@ -133,6 +133,29 @@ lib/
 4. Update submodules: `git submodule update --init --recursive`
 5. Enable git hooks: `git config core.hooksPath hooks`
 
+## Critical Coding Requirements
+
+### 1. Code Quality - MANDATORY
+**Every code change MUST pass `flutter analyze` with zero issues**
+- Run `flutter analyze` after EVERY code modification
+- Resolve ALL issues (info, warning, error) - no exceptions
+- The codebase has zero issues by default, so any issue is from your changes
+- DO NOT commit or consider work complete until `flutter analyze` passes cleanly
+
+### 2. Component Reuse - MANDATORY
+**Always reuse existing components**
+- Use a subagent to search for existing components before creating new ones
+- Only create new components if none exist that meet the requirements
+- Check both UI components in `lib/ui/` and shared components in `../../packages/`
+
+### 3. Design System - MANDATORY
+**Never hardcode colors or text styles**
+- Always use the Ente design system for colors and typography
+- Use a subagent to find the appropriate design tokens
+- Access colors via theme: `Theme.of(context).colorScheme.primary`
+- Access text styles via theme: `Theme.of(context).textTheme.bodyLarge`
+- If you MUST use custom colors/styles (extremely rare), explicitly inform the user with a clear warning
+
 ## Important Notes
 
 - Large service files (some 70k+ lines) - consider file context when editing
