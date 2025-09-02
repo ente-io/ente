@@ -7,8 +7,8 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
-import 'package:photos/core/exceptions.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/core/exceptions.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/files_updated_event.dart';
@@ -332,7 +332,9 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         }
         //Do not retry if the widget is not mounted
         if (!mounted) {
-          throw WidgetUnmountedException("Thumbnail loading cancelled: widget unmounted");
+          throw WidgetUnmountedException(
+            "Thumbnail loading cancelled: widget unmounted",
+          );
         }
 
         retryAttempts++;
