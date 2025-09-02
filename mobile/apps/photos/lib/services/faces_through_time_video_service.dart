@@ -15,8 +15,10 @@ class FacesThroughTimeVideoService {
     _logger.info('Video generation will be implemented with FFmpeg');
     
     // Temporary: Share a text message instead
-    await Share.share(
-      'Check out this amazing face timeline! (Video generation coming soon)',
+    await SharePlus.instance.share(
+      ShareParams(
+        text: 'Check out this amazing face timeline! (Video generation coming soon)',
+      ),
     );
   }
 }
