@@ -1921,6 +1921,72 @@
   },
   "deleteFiles": "Delete files",
   "areYouSureDeleteFiles": "Are you sure you want to delete these files?",
+  "swipeToReview": "Swipe to Review",
+  "imageXOfY": "{current} of {total}",
+  "@imageXOfY": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "allGroupsReviewed": "All groups reviewed!",
+  "filesMarkedForDeletion": "{count} files marked for deletion",
+  "@filesMarkedForDeletion": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storageToBeFreed": "{size} will be freed",
+  "@storageToBeFreed": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "deletePhotosBody": "Delete {count} photos? This will free up {size}",
+  "@deletePhotosBody": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "deletedPhotosWithSize": "Deleted {count} photos and freed {size}",
+  "@deletedPhotosWithSize": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewAgain": "Review Again",
+  "deleteThese": "Delete These",
+  "undoAll": "Undo All",
+  "groupComplete": "Group complete",
+  "deleteAllInGroup": "Delete all images in this group?",
+  "allImagesMarkedForDeletion": "You've marked all {count} images for deletion",
+  "@allImagesMarkedForDeletion": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "congratulations": "Congratulations!",
+  "noImagesSelected": "No images selected",
   "greatJob": "Great job!",
   "cleanedUpSimilarImages": "You cleaned up {count, plural, =1{{count} similar image} other{{count} similar images}} and freed up {size}",
   "@cleanedUpSimilarImages": {

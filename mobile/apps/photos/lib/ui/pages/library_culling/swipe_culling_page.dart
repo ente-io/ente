@@ -1,4 +1,7 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
@@ -10,6 +13,7 @@ import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/pages/library_culling/models/swipe_culling_state.dart';
 import 'package:photos/ui/pages/library_culling/widgets/swipeable_photo_card.dart';
 import 'package:photos/ui/pages/library_culling/widgets/group_carousel.dart';
+import 'package:photos/ui/pages/library_culling/widgets/group_summary_popup.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/standalone/data.dart';
@@ -26,7 +30,8 @@ class SwipeCullingPage extends StatefulWidget {
   State<SwipeCullingPage> createState() => _SwipeCullingPageState();
 }
 
-class _SwipeCullingPageState extends State<SwipeCullingPage> {
+class _SwipeCullingPageState extends State<SwipeCullingPage> 
+    with TickerProviderStateMixin {
   final _logger = Logger("SwipeCullingPage");
   
   late List<SimilarFiles> groups;
@@ -38,17 +43,32 @@ class _SwipeCullingPageState extends State<SwipeCullingPage> {
   
   final CardSwiperController controller = CardSwiperController();
   late ValueNotifier<String> _deleteProgress;
+  
+  // Animation controllers for celebrations
+  late AnimationController _celebrationController;
+  late AnimationController _progressRingController;
+  bool _showingCelebration = false;
 
   @override
   void initState() {
     super.initState();
     _deleteProgress = ValueNotifier("");
+    _celebrationController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+    _progressRingController = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    );
     _initializeGroups();
   }
   
   @override
   void dispose() {
     _deleteProgress.dispose();
+    _celebrationController.dispose();
+    _progressRingController.dispose();
     controller.dispose();
     super.dispose();
   }
@@ -117,6 +137,9 @@ class _SwipeCullingPageState extends State<SwipeCullingPage> {
     final file = currentFile;
     if (file == null) return;
 
+    // Haptic feedback for swipe action
+    HapticFeedback.lightImpact();
+
     setState(() {
       decisions[file] = decision;
       
@@ -146,21 +169,90 @@ class _SwipeCullingPageState extends State<SwipeCullingPage> {
     });
   }
 
-  void _handleGroupCompletion() {
-    // TODO: Show minimal celebration animation
-    // For now, just move to next group
+  void _handleGroupCompletion() async {
+    if (_showingCelebration) return;
+    
+    // Haptic feedback
+    HapticFeedback.mediumImpact();
+    
+    setState(() {
+      _showingCelebration = true;
+    });
+    
+    // Start progress ring animation
+    _progressRingController.forward();
+    
+    // Wait for progress ring to complete or user to skip
+    await Future.delayed(const Duration(seconds: 2));
+    
+    // Quick celebration based on group size
+    final groupSize = currentGroupFiles.length;
+    if (groupSize <= 5) {
+      _celebrationController.duration = const Duration(milliseconds: 500);
+    } else if (groupSize <= 15) {
+      _celebrationController.duration = const Duration(milliseconds: 700);
+    } else {
+      _celebrationController.duration = const Duration(milliseconds: 800);
+    }
+    
+    _celebrationController.forward();
+    await Future.delayed(const Duration(milliseconds: 300));
+    
+    // Move to next group or show completion
     if (currentGroupIndex < groups.length - 1) {
       setState(() {
         currentGroupIndex++;
         currentImageIndex = 0;
+        _showingCelebration = false;
       });
+      _celebrationController.reset();
+      _progressRingController.reset();
     } else {
       _showCompletionDialog();
     }
   }
 
   void _showAllInGroupDeletionDialog() {
-    // TODO: Implement confirmation dialog for all-in-group deletion
+    final groupSize = currentGroupFiles.length;
+    
+    showDialog(
+      context: context,
+      builder: (context) {
+        final theme = getEnteColorScheme(context);
+        return AlertDialog(
+          title: Text(S.of(context).deleteAllInGroup),
+          content: Text(
+            S.of(context).allImagesMarkedForDeletion(groupSize),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Review again - reset this group's decisions
+                setState(() {
+                  for (final file in currentGroupFiles) {
+                    decisions[file] = SwipeDecision.undecided;
+                  }
+                  currentImageIndex = 0;
+                  groupHistories[currentGroupIndex]?.clear();
+                });
+              },
+              child: Text(S.of(context).reviewAgain),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _handleGroupCompletion();
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: theme.warning700,
+              ),
+              child: Text(S.of(context).delete),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _showCompletionDialog() {
@@ -247,7 +339,56 @@ class _SwipeCullingPageState extends State<SwipeCullingPage> {
   }
 
   void _showGroupSummaryPopup(int groupIndex) {
-    // TODO: Implement group summary popup
+    if (groupIndex < 0 || groupIndex >= groups.length) return;
+    
+    final group = groups[groupIndex];
+    
+    showDialog(
+      context: context,
+      builder: (context) => GroupSummaryPopup(
+        group: group,
+        decisions: decisions,
+        onUndoAll: () {
+          setState(() {
+            // Reset all decisions for this group
+            for (final file in group.files) {
+              decisions[file] = SwipeDecision.undecided;
+            }
+            // Clear group history
+            groupHistories[groupIndex]?.clear();
+            // Remove from full history
+            fullHistory.removeWhere((action) => action.groupIndex == groupIndex);
+          });
+          Navigator.of(context).pop();
+          _switchToGroup(groupIndex);
+        },
+        onDeleteThese: () async {
+          // Get files to delete from this group
+          final filesToDelete = <EnteFile>{};
+          for (final file in group.files) {
+            if (decisions[file] == SwipeDecision.delete) {
+              filesToDelete.add(file);
+            }
+          }
+          
+          if (filesToDelete.isNotEmpty) {
+            Navigator.of(context).pop();
+            await _deleteFilesLogic(filesToDelete, true);
+            
+            // Remove this group from the list if all deleted
+            if (filesToDelete.length == group.files.length) {
+              setState(() {
+                groups.removeAt(groupIndex);
+                if (currentGroupIndex >= groups.length && groups.isNotEmpty) {
+                  currentGroupIndex = groups.length - 1;
+                  currentImageIndex = 0;
+                }
+              });
+            }
+          }
+        },
+      ),
+    );
   }
 
   Future<void> _deleteFilesLogic(
@@ -371,7 +512,9 @@ class _SwipeCullingPageState extends State<SwipeCullingPage> {
       );
     }
 
-    return Scaffold(
+    return Stack(
+      children: [
+        Scaffold(
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -413,7 +556,10 @@ class _SwipeCullingPageState extends State<SwipeCullingPage> {
             ),
           Expanded(
             child: currentFile != null
-                ? CardSwiper(
+                ? Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      CardSwiper(
                     controller: controller,
                     cardsCount: currentGroupFiles.length - currentImageIndex,
                     numberOfCardsDisplayed: 1,
@@ -457,6 +603,65 @@ class _SwipeCullingPageState extends State<SwipeCullingPage> {
                     },
                     isDisabled: false,
                     threshold: 50,
+                  ),
+                      
+                      // Celebration overlay
+                      if (_showingCelebration)
+                        AnimatedBuilder(
+                          animation: _progressRingController,
+                          builder: (context, child) {
+                            return Container(
+                              color: Colors.black.withOpacity(0.3),
+                              child: Center(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Stack(
+                                      alignment: Alignment.center,
+                                      children: [
+                                        // Progress ring
+                                        SizedBox(
+                                          width: 100,
+                                          height: 100,
+                                          child: CircularProgressIndicator(
+                                            value: _progressRingController.value,
+                                            strokeWidth: 4,
+                                            valueColor: AlwaysStoppedAnimation(
+                                              theme.primary500,
+                                            ),
+                                          ),
+                                        ),
+                                        // Checkmark or celebration icon
+                                        Icon(
+                                          Icons.check_circle_outline,
+                                          size: 60,
+                                          color: theme.primary500,
+                                        )
+                                          .animate(controller: _celebrationController)
+                                          .scale(
+                                            begin: 0.8,
+                                            end: 1.2,
+                                            curve: Curves.elasticOut,
+                                          )
+                                          .fadeIn(),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      S.of(context).groupComplete,
+                                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                      .animate(controller: _celebrationController)
+                                      .fadeIn(delay: 200.ms),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                    ],
                   )
                 : Center(
                     child: Text(S.of(context).noImagesSelected),
@@ -492,6 +697,56 @@ class _SwipeCullingPageState extends State<SwipeCullingPage> {
           ),
         ],
       ),
+    ),
+        
+        // Progress overlay during deletion
+        ValueListenableBuilder(
+          valueListenable: _deleteProgress,
+          builder: (context, value, child) {
+            if (value.isEmpty) {
+              return const SizedBox.shrink();
+            }
+            
+            return Container(
+              color: theme.backgroundBase.withOpacity(0.8),
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  decoration: BoxDecoration(
+                    color: theme.backgroundElevated,
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: [
+                      BoxShadow(
+                        color: theme.strokeFaint,
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation(theme.primary500),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Deleting... $value',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 }
