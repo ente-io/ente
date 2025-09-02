@@ -530,12 +530,13 @@ class _FileSelectionActionsWidgetState
 
                 // Second Row
                 AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
+                  duration: const Duration(milliseconds: 350),
+                  curve: Curves.easeInOutCubic,
                   height: widget.isCollapsed ? 0 : null,
                   child: AnimatedOpacity(
                     opacity: widget.isCollapsed ? 0.0 : 1.0,
-                    duration: const Duration(milliseconds: 300),
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeInOut,
                     child: ClipRect(
                       child: Column(
                         children: [

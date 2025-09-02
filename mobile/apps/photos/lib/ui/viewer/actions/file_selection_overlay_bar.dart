@@ -124,25 +124,25 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   Widget _body() {
     return GestureDetector(
       onVerticalDragUpdate: (details) {
-        if (details.primaryDelta! < -5) {
+        if (details.primaryDelta! < -10) {
           widget.onExpand?.call();
         }
       },
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeInOutCubic,
         width: double.infinity,
         child: ValueListenableBuilder(
           valueListenable: _hasSelectedFilesNotifier,
           builder: (context, value, child) {
             return AnimatedCrossFade(
-              firstCurve: Curves.easeInOutExpo,
-              secondCurve: Curves.easeInOutExpo,
-              sizeCurve: Curves.easeInOutExpo,
+              firstCurve: Curves.easeInOutCubic,
+              secondCurve: Curves.easeInOutCubic,
+              sizeCurve: Curves.easeInOutCubic,
               crossFadeState: _hasSelectedFilesNotifier.value
                   ? CrossFadeState.showFirst
                   : CrossFadeState.showSecond,
-              duration: const Duration(milliseconds: 400),
+              duration: const Duration(milliseconds: 350),
               firstChild: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,

@@ -116,9 +116,13 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
               (!_hasCollapsedOnce || !_isCollapsed) &&
               (scrollInfo.direction == ScrollDirection.forward ||
                   scrollInfo.direction == ScrollDirection.reverse)) {
-            setState(() {
-              _isCollapsed = true;
-              _hasCollapsedOnce = true;
+            Future.delayed(const Duration(milliseconds: 10), () {
+              if (mounted && _hasFilesSelected) {
+                setState(() {
+                  _isCollapsed = true;
+                  _hasCollapsedOnce = true;
+                });
+              }
             });
           }
         }
