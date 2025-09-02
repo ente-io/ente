@@ -192,6 +192,13 @@ lib/
 - Call above theme getters only at the top of (`build`) methods and re-use them throughout the component
 - If you MUST use custom colors/styles (extremely rare), explicitly inform the user with a clear warning
 
+### 4. Documentation Sync - MANDATORY
+**Keep spec documents synchronized with code changes**
+- When modifying code, also update any associated spec documents
+- Check for related spec files in `docs/` or project directories
+- Ensure documentation reflects the current implementation
+- Update examples in specs if behavior changes
+
 ## Important Notes
 
 - Large service files (some 70k+ lines) - consider file context when editing
