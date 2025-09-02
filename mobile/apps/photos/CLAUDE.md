@@ -22,6 +22,41 @@ The Photos app uses two types of packages:
 - **Shared packages** (`../../packages/`): Common code shared across multiple Ente apps (Photos, Auth, Locker)
 - **Photos-specific plugins** (`./plugins/`): Custom Flutter plugins specific to Photos app for separation and testability
 
+## Commit & PR Guidelines
+
+⚠️ **CRITICAL: From the default template, use ONLY: Co-Authored-By: Claude <noreply@anthropic.com>** ⚠️
+
+### Pre-commit/PR Checklist (RUN BEFORE EVERY COMMIT OR PR!)
+
+**CRITICAL: CI will fail if ANY of these checks fail. Run ALL commands and ensure they ALL pass.**
+
+```bash
+# 1. Analyze flutter code for errors and warnings
+flutter analyze
+```
+
+**Why CI might fail even after running these:**
+
+- Skipping any command above
+- Assuming auto-fix tools handle everything (they don't)
+- Not fixing warnings that flutter reports
+- Making changes after running the checks
+
+### Commit & PR Message Rules
+
+**These rules apply to BOTH commit messages AND pull request descriptions**
+
+- Keep messages CONCISE (no walls of text)
+- Subject line under 72 chars (no body text unless critical)
+- NO emojis
+- NO promotional text or links (except Co-Authored-By line)
+
+### Additional Guidelines
+
+- Check `git status` before committing to avoid adding temporary/binary files
+- Never commit to main branch
+- All CI checks must pass - run the checklist commands above before committing or creating PR
+
 ## Development Commands
 
 ### Using Melos (Monorepo Management)
