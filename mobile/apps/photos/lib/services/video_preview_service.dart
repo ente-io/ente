@@ -32,6 +32,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/file_magic_service.dart";
 import "package:photos/services/filedata/model/file_data.dart";
 import "package:photos/services/isolated_ffmpeg_service.dart";
+import "package:photos/services/machine_learning/compute_controller.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_key.dart";
@@ -120,9 +121,14 @@ class VideoPreviewService {
     if (file.uploadedFileID == null) return false;
 
     // Check if already in queue
-    final bool alreadyInQueue =
-        await uploadLocksDB.isInStreamQueue(file.uploadedFileID!);
+    final bool alreadyInQueue = await uploadLocksDB.isInStreamQueue(
+      file.uploadedFileID!,
+    );
     if (alreadyInQueue) {
+      // File is already queued, but trigger processing in case it was stalled
+      if (uploadingFileId < 0) {
+        queueFiles(duration: Duration.zero, isManual: true, forceProcess: true);
+      }
       return false; // Indicates file was already in queue
     }
 
@@ -131,7 +137,7 @@ class VideoPreviewService {
 
     // Start processing if not already processing
     if (uploadingFileId < 0) {
-      queueFiles(duration: Duration.zero);
+      queueFiles(duration: Duration.zero, isManual: true);
     } else {
       _items[file.uploadedFileID!] = PreviewItem(
         status: PreviewItemStatus.inQueue,
@@ -151,7 +157,25 @@ class VideoPreviewService {
 
   bool isCurrentlyProcessing(int? uploadedFileID) {
     if (uploadedFileID == null) return false;
-    return uploadingFileId == uploadedFileID;
+
+    // Also check if file is in queue or other processing states
+    final item = _items[uploadedFileID];
+    if (item != null) {
+      switch (item.status) {
+        case PreviewItemStatus.inQueue:
+        case PreviewItemStatus.compressing:
+        case PreviewItemStatus.uploading:
+          return true;
+        default:
+          return false;
+      }
+    }
+
+    return false;
+  }
+
+  PreviewItemStatus? getProcessingStatus(int uploadedFileID) {
+    return _items[uploadedFileID]?.status;
   }
 
   Future<bool> _isRecreateOperation(EnteFile file) async {
@@ -250,13 +274,20 @@ class VideoPreviewService {
 
   Future<void> chunkAndUploadVideo(
     BuildContext? ctx,
-    EnteFile enteFile, [
+    EnteFile enteFile, {
+    /// Indicates this function is an continuation of a chunking thread
+    bool continuation = false,
+    // not used currently
     bool forceUpload = false,
-  ]) async {
-    if (!_allowStream()) {
+  }) async {
+    final bool isManual =
+        await uploadLocksDB.isInStreamQueue(enteFile.uploadedFileID!);
+    final canStream = _isPermissionGranted();
+    if (!canStream) {
       _logger.info(
-        "Pause preview due to disabledSteaming($isVideoStreamingEnabled) or computeController permission)",
+        "Pause preview due to disabledSteaming($isVideoStreamingEnabled) or computeController permission) - isManual: $isManual",
       );
+      computeController.releaseCompute(stream: true);
       if (isVideoStreamingEnabled) _logger.info("No permission to run compute");
       clearQueue();
       return;
@@ -295,14 +326,15 @@ class VideoPreviewService {
         "Starting video preview generation for ${enteFile.displayName}",
       );
       // elimination case for <=10 MB with H.264
-      var (props, result, file) = await _checkFileForPreviewCreation(enteFile);
+      var (props, result, file) =
+          await _checkFileForPreviewCreation(enteFile, isManual);
       if (result) {
         removeFile = true;
         return;
       }
 
       // check if there is already a preview in processing
-      if (uploadingFileId >= 0) {
+      if (!continuation && uploadingFileId >= 0) {
         if (uploadingFileId == enteFile.uploadedFileID) return;
 
         _items[enteFile.uploadedFileID!] = PreviewItem(
@@ -553,21 +585,26 @@ class VideoPreviewService {
         _removeFile(enteFile);
         _removeFromLocks(enteFile).ignore();
       }
-      // reset uploading status if this was getting processed
-      if (uploadingFileId == enteFile.uploadedFileID!) {
-        uploadingFileId = -1;
-      }
-      _logger.info(
-        "[chunk] Processing ${_items.length} items for streaming, $error",
-      );
-      // process next file
       if (fileQueue.isNotEmpty) {
+        // process next file
+        _logger.info(
+          "[chunk] Processing ${_items.length} items for streaming, $error",
+        );
         final entry = fileQueue.entries.first;
         final file = entry.value;
         fileQueue.remove(entry.key);
-        await chunkAndUploadVideo(ctx, file);
+        await chunkAndUploadVideo(
+          ctx,
+          file,
+          continuation: true,
+        );
       } else {
+        _logger.info(
+          "[chunk] Nothing to process releasing compute, $error",
+        );
         computeController.releaseCompute(stream: true);
+
+        uploadingFileId = -1;
       }
     }
   }
@@ -575,8 +612,9 @@ class VideoPreviewService {
   Future<void> _removeFromLocks(EnteFile enteFile) async {
     final bool isFailurePresent =
         _failureFiles?.contains(enteFile.uploadedFileID!) ?? false;
-    final bool isInManualQueue =
-        await uploadLocksDB.isInStreamQueue(enteFile.uploadedFileID!);
+    final bool isInManualQueue = await uploadLocksDB.isInStreamQueue(
+      enteFile.uploadedFileID!,
+    );
 
     if (isFailurePresent) {
       await uploadLocksDB.deleteStreamUploadErrorEntry(
@@ -917,27 +955,35 @@ class VideoPreviewService {
   }
 
   Future<(FFProbeProps?, bool, File?)> _checkFileForPreviewCreation(
-    EnteFile enteFile,
-  ) async {
+    EnteFile enteFile, [
+    bool isManual = false,
+  ]) async {
     if ((enteFile.pubMagicMetadata?.sv ?? 0) == 1) {
       _logger.info("Skip Preview due to sv=1 for  ${enteFile.displayName}");
       return (null, true, null);
     }
-    if (enteFile.fileSize == null || enteFile.duration == null) {
-      _logger.warning(
-        "Skip Preview due to misisng size/duration for ${enteFile.displayName}",
-      );
-      return (null, true, null);
-    }
-    final int size = enteFile.fileSize!;
-    final int duration = enteFile.duration!;
-    if (size >= 500 * 1024 * 1024 || duration > 60) {
-      _logger.info("Skip Preview due to size: $size or duration: $duration");
-      return (null, true, null);
+    if (!isManual) {
+      if (enteFile.fileSize == null || enteFile.duration == null) {
+        _logger.warning(
+          "Skip Preview due to misisng size/duration for ${enteFile.displayName}",
+        );
+        return (null, true, null);
+      }
+      final int size = enteFile.fileSize!;
+      final int duration = enteFile.duration!;
+      if (size >= 500 * 1024 * 1024 || duration > 60) {
+        _logger.info("Skip Preview due to size: $size or duration: $duration");
+        return (null, true, null);
+      }
     }
     FFProbeProps? props;
     File? file;
     bool skipFile = false;
+    if (enteFile.fileSize == null && isManual) {
+      return (props, skipFile, file);
+    }
+
+    final size = enteFile.fileSize ?? 0;
     try {
       final isFileUnder10MB = size <= 10 * 1024 * 1024;
       if (isFileUnder10MB) {
@@ -969,8 +1015,9 @@ class VideoPreviewService {
   }
 
   // generate stream for all files after cutoff date
-  Future<void> _putFilesForPreviewCreation() async {
-    if (!isVideoStreamingEnabled || !await canUseHighBandwidth()) return;
+  // returns false if it fails to launch chuncking function
+  Future<bool> _putFilesForPreviewCreation() async {
+    if (!isVideoStreamingEnabled || !await canUseHighBandwidth()) return false;
 
     Map<int, String> failureFiles = {};
     Map<int, String> manualQueueFiles = {};
@@ -1025,8 +1072,9 @@ class VideoPreviewService {
       }
 
       // First try to find the file in the 60-day list
-      var queueFile =
-          files.firstWhereOrNull((f) => f.uploadedFileID == queueFileId);
+      var queueFile = files.firstWhereOrNull(
+        (f) => f.uploadedFileID == queueFileId,
+      );
 
       // If not found in 60-day list, fetch it individually
       queueFile ??=
@@ -1105,7 +1153,7 @@ class VideoPreviewService {
     final totalFiles = fileQueue.length;
     if (totalFiles == 0) {
       _logger.info("[init] No preview to cache");
-      return;
+      return false;
     }
 
     _logger.info(
@@ -1117,6 +1165,7 @@ class VideoPreviewService {
     final file = entry.value;
     fileQueue.remove(entry.key);
     chunkAndUploadVideo(null, file).ignore();
+    return true;
   }
 
   bool _allowStream() {
@@ -1124,15 +1173,39 @@ class VideoPreviewService {
         computeController.requestCompute(stream: true);
   }
 
-  void queueFiles({Duration duration = const Duration(seconds: 5)}) {
-    Future.delayed(duration, () async {
-      if (_hasQueuedFile) return;
+  bool _allowManualStream() {
+    return isVideoStreamingEnabled &&
+        computeController.requestCompute(
+          stream: true,
+          bypassInteractionCheck: true,
+          bypassMLWaiting: true,
+        );
+  }
 
-      final isStreamAllowed = _allowStream();
+  /// To check if it's enabled, device is healthy and running streaming
+  bool _isPermissionGranted() {
+    return isVideoStreamingEnabled &&
+        computeController.computeState == ComputeRunState.generatingStream &&
+        computeController.isDeviceHealthy;
+  }
+
+  void queueFiles({
+    Duration duration = const Duration(seconds: 5),
+    bool isManual = false,
+    bool forceProcess = false,
+  }) {
+    Future.delayed(duration, () async {
+      if (_hasQueuedFile && !forceProcess) return;
+
+      final isStreamAllowed = isManual ? _allowManualStream() : _allowStream();
       if (!isStreamAllowed) return;
 
       await _ensurePreviewIdsInitialized();
-      await _putFilesForPreviewCreation();
+      final result = await _putFilesForPreviewCreation();
+      // Cannot proceed to stream generation, would have to release compute ASAP
+      if (!result) {
+        computeController.releaseCompute(stream: true);
+      }
     });
   }
 }

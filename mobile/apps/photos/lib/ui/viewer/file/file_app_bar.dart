@@ -497,8 +497,10 @@ class FileAppBarState extends State<FileAppBar> {
     final userId = Configuration.instance.getUserID();
     return widget.file.fileType == FileType.video &&
         widget.file.isUploaded &&
+        widget.file.fileSize != null &&
         (widget.file.pubMagicMetadata?.sv ?? 0) != 1 &&
-        widget.file.ownerID == userId;
+        widget.file.ownerID == userId &&
+        VideoPreviewService.instance.isVideoStreamingEnabled;
   }
 
   Future<void> _handleVideoStream(String streamType) async {

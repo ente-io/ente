@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 1.2.1+1205
+version: 1.2.2+1205
 publish_to: none
 
 environment:
@@ -180,6 +180,7 @@ dependencies:
     git:
       url: https://github.com/KasemJaffer/receive_sharing_intent.git
       ref: 2cea396
+  rive: ^0.13.20
   rust_lib_photos:
     path: rust_builder
   screenshot: ^3.0.0
