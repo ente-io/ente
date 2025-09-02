@@ -1,4 +1,4 @@
-import 'dart:async';
+import 'dart:async' show Future, unawaited;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -138,7 +138,7 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
     if (file == null) return;
 
     // Haptic feedback for swipe action
-    HapticFeedback.lightImpact();
+    unawaited(HapticFeedback.lightImpact());
 
     setState(() {
       decisions[file] = decision;
@@ -173,14 +173,14 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
     if (_showingCelebration) return;
 
     // Haptic feedback
-    HapticFeedback.mediumImpact();
+    unawaited(HapticFeedback.mediumImpact());
 
     setState(() {
       _showingCelebration = true;
     });
 
     // Start progress ring animation
-    _progressRingController.forward();
+    unawaited(_progressRingController.forward());
 
     // Wait for progress ring to complete or user to skip
     await Future.delayed(const Duration(seconds: 2));
@@ -195,7 +195,7 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
       _celebrationController.duration = const Duration(milliseconds: 800);
     }
 
-    _celebrationController.forward();
+    unawaited(_celebrationController.forward());
     await Future.delayed(const Duration(milliseconds: 300));
 
     // Move to next group or show completion

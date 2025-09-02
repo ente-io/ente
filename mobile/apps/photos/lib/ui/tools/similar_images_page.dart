@@ -1,4 +1,4 @@
-import "dart:async";
+import "dart:async" show unawaited;
 
 import "package:flutter/foundation.dart" show kDebugMode;
 import 'package:flutter/material.dart';
@@ -163,7 +163,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
                           
                           if (result != null && result > 0) {
                             // Refresh page after deletion
-                            _findSimilarImages();
+                            unawaited(_findSimilarImages());
                           }
                         },
                       );
