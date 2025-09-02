@@ -26,6 +26,7 @@ import "package:photos/utils/delete_file_util.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/standalone/data.dart";
+import 'package:photos/ui/pages/library_culling/swipe_culling_page.dart';
 
 enum SimilarImagesPageState {
   setup,
@@ -127,7 +128,51 @@ class _SimilarImagesPageState extends State<SimilarImagesPage> {
         elevation: 0,
         title: Text(AppLocalizations.of(context).similarImages),
         actions: _pageState == SimilarImagesPageState.results
-            ? [_getSortMenu()]
+            ? [
+                // Show swipe culling icon when files are selected
+                ListenableBuilder(
+                  listenable: _selectedFiles,
+                  builder: (context, _) {
+                    if (_selectedFiles.files.isNotEmpty) {
+                      return IconButton(
+                        icon: const Icon(Icons.view_carousel_rounded),
+                        onPressed: () async {
+                          // Get selected groups (groups with at least one selected file)
+                          final selectedGroups = <SimilarFiles>[];
+                          for (final group in _filteredGroups) {
+                            bool hasSelectedFile = false;
+                            for (final file in group.files) {
+                              if (_selectedFiles.files.contains(file)) {
+                                hasSelectedFile = true;
+                                break;
+                              }
+                            }
+                            if (hasSelectedFile) {
+                              selectedGroups.add(group);
+                            }
+                          }
+                          
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SwipeCullingPage(
+                                similarFiles: selectedGroups,
+                              ),
+                            ),
+                          );
+                          
+                          if (result != null && result > 0) {
+                            // Refresh page after deletion
+                            _findSimilarImages();
+                          }
+                        },
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  },
+                ),
+                _getSortMenu(),
+              ]
             : null,
       ),
       body: _getBody(),
