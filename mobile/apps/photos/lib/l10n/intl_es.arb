@@ -1776,14 +1776,6 @@
   "same": "Igual",
   "different": "Diferente",
   "sameperson": "la misma persona?",
-  "cLTitle1": "Editor avanzado de imágenes",
-  "cLDesc1": "Estamos lanzando un nuevo y avanzado editor de imágenes que añade más marcos de recorte, preajustes de filtros para edición rápida, opciones de ajuste finas incluyendo saturación, contraste, brillo, temperatura y mucho más. El nuevo editor también incluye la capacidad de dibujar en tus fotos y añadir emojis como pegatinas.",
-  "cLTitle2": "Álbumes Inteligentes",
-  "cLDesc2": "Ahora puedes añadir automáticamente fotos de personas seleccionadas a cualquier álbum. Solo tienes que ir al álbum, y seleccionar \"Agregar personas automáticamente\" del menú desbordante. Si se utiliza junto con el álbum compartido, puedes compartir fotos con cero clics.",
-  "cLTitle3": "Galería mejorada",
-  "cLDesc3": "Hemos añadido la capacidad de agrupar tu galería por semanas, meses y años. Ahora puedes personalizar tu galería exactamente como quieras con estas nuevas opciones de agrupación, junto con rejillas personalizadas",
-  "cLTitle4": "Desplazamiento más rápido",
-  "cLDesc4": "Junto con un montón de mejoras bajo el capó para mejorar la experiencia del desplazamiento de la galería también hemos rediseñado la barra de desplazamiento para mostrar los marcadores, permitiéndote saltar rápidamente a través de la línea de tiempo.",
   "indexingPausedStatusDescription": "La indexación está pausada. Se reanudará automáticamente cuando el dispositivo esté listo. El dispositivo se considera listo cuando su nivel de batería, la salud de la batería y temperatura están en un rango saludable.",
   "thisWeek": "Esta semana",
   "lastWeek": "Semana pasada",
@@ -1933,5 +1925,11 @@
   "nothingHereTryAnotherFilter": "Nada aquí, ¡prueba con otro filtro! 👀",
   "related": "Relacionado",
   "hoorayyyy": "¡Hurraaaa!",
-  "nothingToTidyUpHere": "Nada que limpiar aquí"
+  "nothingToTidyUpHere": "Nada que limpiar aquí",
+  "cLTitle1": "Imágenes Similares",
+  "cLDesc1": "Estamos introduciendo un nuevo sistema basado en ML para detectar imágenes similares, con el cual puedes limpiar tu biblioteca. Disponible en Configuración->Copia de Seguridad->Liberar Espacio",
+  "cLTitle2": "Generación manual de transmisión de video",
+  "cLDesc2": "Ahora puedes activar manualmente la generación de transmisión para videos directamente desde la aplicación. También hemos agregado una nueva pantalla de configuración de transmisión de video que te mostrará qué porcentaje de tus videos han sido procesados para transmisión",
+  "cLTitle3": "Mejoras de Rendimiento",
+  "cLDesc3": "Múltiples mejoras internas, incluyendo mejor uso de caché y una experiencia de desplazamiento más fluida"
 }

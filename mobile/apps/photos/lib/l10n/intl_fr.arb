@@ -1776,14 +1776,6 @@
   "same": "Identique",
   "different": "Différent(e)",
   "sameperson": "Même personne ?",
-  "cLTitle1": "Éditeur d'image avancé",
-  "cLDesc1": "Nous déployons un nouvel éditeur d'image avancé qui ajoute plus d'options de rognage, des filtres, des préréglages pour des modifications rapides ainsi que des options de réglage fin (la saturation, le contraste, la luminosité, la température et beaucoup plus). Le nouvel éditeur inclut également la possibilité de dessiner sur vos photos et d'ajouter des emojis en tant qu'autocollants.",
-  "cLTitle2": "Albums Intelligents",
-  "cLDesc2": "Vous pouvez maintenant ajouter automatiquement des photos de personnes sélectionnées à n'importe quel album. Allez simplement à l'album et sélectionnez \"Ajouter automatiquement des personnes\" dans le menu déroulant. Couplé avec un album partagé, vous pouvez partager des photos en zéro clic.",
-  "cLTitle3": "Galerie améliorée",
-  "cLDesc3": "Nous avons ajouté la possibilité de regrouper votre galerie par semaines, mois et années. Vous pouvez maintenant personnaliser votre galerie pour qu'elle soit exactement comme vous le souhaitez avec ces nouvelles options de regroupement, ainsi que des grilles personnalisées",
-  "cLTitle4": "Défilement plus rapide",
-  "cLDesc4": "En plus des quelques améliorations pour améliorer l'expérience de défilement de la galerie, nous avons également redessiné la barre de défilement pour afficher des marqueurs, ce qui vous permet de sauter rapidement dans la chronologie.",
   "indexingPausedStatusDescription": "L'indexation est en pause. Elle reprendra automatiquement lorsque l'appareil sera prêt. Celui-ci est considéré comme prêt lorsque le niveau de batterie, sa santé et son état thermique sont dans une plage saine.",
   "thisWeek": "Cette semaine",
   "lastWeek": "La semaine dernière",
@@ -1925,5 +1917,11 @@
   "nothingHereTryAnotherFilter": "Rien ici, essayez un autre filtre ! 👀",
   "related": "Liés",
   "hoorayyyy": "Houraaa !",
-  "nothingToTidyUpHere": "Rien à nettoyer ici"
+  "nothingToTidyUpHere": "Rien à nettoyer ici",
+  "cLTitle1": "Images Similaires",
+  "cLDesc1": "Nous introduisons un nouveau système basé sur l'IA pour détecter les images similaires, avec lequel vous pouvez nettoyer votre bibliothèque. Disponible dans Paramètres->Sauvegarde->Libérer de l'espace",
+  "cLTitle2": "Génération manuelle de flux vidéo",
+  "cLDesc2": "Vous pouvez maintenant déclencher manuellement la génération de flux pour les vidéos directement depuis l'application. Nous avons également ajouté un nouvel écran de paramètres de streaming vidéo qui vous montrera quel pourcentage de vos vidéos ont été traitées pour le streaming",
+  "cLTitle3": "Améliorations de performance",
+  "cLDesc3": "Plusieurs améliorations internes, incluant une meilleure utilisation du cache et une expérience de défilement plus fluide"
 }

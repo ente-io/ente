@@ -1776,14 +1776,6 @@
   "same": "Chính xác",
   "different": "Khác",
   "sameperson": "Cùng một người?",
-  "cLTitle1": "Trình chỉnh sửa ảnh nâng cao",
-  "cLDesc1": "Chúng tôi phát hành một trình chỉnh sửa ảnh tân tiến, bổ sung thêm cắt ảnh, bộ lọc có sẵn để chỉnh sửa nhanh, các tùy chọn tinh chỉnh bao gồm độ bão hòa, độ tương phản, độ sáng, độ ấm và nhiều hơn nữa. Trình chỉnh sửa mới cũng bao gồm khả năng vẽ lên ảnh và thêm emoji dưới dạng nhãn dán.",
-  "cLTitle2": "Album thông minh",
-  "cLDesc2": "Giờ đây, bạn có thể tự động thêm ảnh của những người đã chọn vào bất kỳ album nào. Chỉ cần mở album và chọn \"Tự động thêm người\" trong menu. Nếu sử dụng cùng với album chia sẻ, bạn có thể chia sẻ ảnh mà không cần tốn công.",
-  "cLTitle3": "Cải tiến Thư viện ảnh",
-  "cLDesc3": "Chúng tôi bổ sung tính năng phân nhóm thư viện ảnh theo tuần, tháng và năm. Giờ đây, bạn có thể tùy chỉnh thư viện ảnh theo đúng ý muốn với các tùy chọn mới này, cùng với các lưới tùy chỉnh.",
-  "cLTitle4": "Cuộn nhanh hơn",
-  "cLDesc4": "Cùng với một loạt cải tiến ngầm nhằm nâng cao trải nghiệm cuộn thư viện, chúng tôi cũng đã thiết kế lại thanh cuộn để hiển thị các điểm đánh dấu, cho phép bạn nhanh chóng nhảy cóc trên dòng thời gian.",
   "indexingPausedStatusDescription": "Lập chỉ mục bị tạm dừng. Nó sẽ tự động tiếp tục khi thiết bị đã sẵn sàng. Thiết bị được coi là sẵn sàng khi mức pin, tình trạng pin và trạng thái nhiệt độ nằm trong phạm vi tốt.",
   "thisWeek": "Tuần này",
   "lastWeek": "Tuần trước",
@@ -1939,5 +1931,11 @@
   "related": "Có liên quan",
   "hoorayyyy": "Hoorayyyy!",
   "nothingToTidyUpHere": "Ở đây đã ngon lành rồi",
-  "deletingDash": "Đang xóa - "
+  "deletingDash": "Đang xóa - ",
+  "cLTitle1": "Hình Ảnh Tương Tự",
+  "cLDesc1": "Chúng tôi đang giới thiệu một hệ thống dựa trên ML mới để phát hiện hình ảnh tương tự, bạn có thể dùng để dọn dẹp thư viện của mình. Có sẵn trong Cài đặt->Sao lưu->Giải phóng Dung lượng",
+  "cLTitle2": "Tạo luồng video thủ công",
+  "cLDesc2": "Bây giờ bạn có thể kích hoạt tạo luồng cho video trực tiếp từ ứng dụng. Chúng tôi cũng đã thêm màn hình cài đặt phát trực tuyến video mới sẽ cho bạn biết bao nhiêu phần trăm video của bạn đã được xử lý để phát trực tuyến",
+  "cLTitle3": "Cải Thiện Hiệu Suất",
+  "cLDesc3": "Nhiều cải thiện bên trong, bao gồm sử dụng bộ nhớ đệm tốt hơn và trải nghiệm cuộn mượt mà hơn"
 }
