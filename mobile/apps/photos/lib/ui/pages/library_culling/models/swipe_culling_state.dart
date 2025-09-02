@@ -1,5 +1,4 @@
 import 'package:photos/models/file/file.dart';
-import 'package:photos/models/similar_files.dart';
 
 enum SwipeDecision { keep, delete, undecided }
 

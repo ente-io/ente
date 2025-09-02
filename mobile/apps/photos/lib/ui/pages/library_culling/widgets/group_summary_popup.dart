@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:photos/generated/l10n.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/similar_files.dart';
-import 'package:photos/generated/l10n.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/pages/library_culling/models/swipe_culling_state.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
@@ -69,7 +69,7 @@ class GroupSummaryPopup extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Text(
-                  S.of(context).storageToBeFreed(formatBytes(totalSize)),
+                  AppLocalizations.of(context).storageToBeFreed(formatBytes(totalSize)),
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: theme.warning700,
                   ),
@@ -174,7 +174,7 @@ class GroupSummaryPopup extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: onUndoAll,
-                    child: Text(S.of(context).undoAll),
+                    child: Text(AppLocalizations.of(context).undoAll),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -185,7 +185,7 @@ class GroupSummaryPopup extends StatelessWidget {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: theme.warning700,
                       ),
-                      child: Text(S.of(context).deleteThese),
+                      child: Text(AppLocalizations.of(context).deleteThese),
                     ),
                   ),
               ],

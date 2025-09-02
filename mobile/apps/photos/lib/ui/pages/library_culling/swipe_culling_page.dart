@@ -5,15 +5,16 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/generated/l10n.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/similar_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/pages/library_culling/models/swipe_culling_state.dart';
-import 'package:photos/ui/pages/library_culling/widgets/swipeable_photo_card.dart';
 import 'package:photos/ui/pages/library_culling/widgets/group_carousel.dart';
 import 'package:photos/ui/pages/library_culling/widgets/group_summary_popup.dart';
+import 'package:photos/ui/pages/library_culling/widgets/swipeable_photo_card.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/standalone/data.dart';
@@ -22,28 +23,28 @@ class SwipeCullingPage extends StatefulWidget {
   final List<SimilarFiles> similarFiles;
 
   const SwipeCullingPage({
-    Key? key,
+    super.key,
     required this.similarFiles,
-  }) : super(key: key);
+  });
 
   @override
   State<SwipeCullingPage> createState() => _SwipeCullingPageState();
 }
 
-class _SwipeCullingPageState extends State<SwipeCullingPage> 
+class _SwipeCullingPageState extends State<SwipeCullingPage>
     with TickerProviderStateMixin {
   final _logger = Logger("SwipeCullingPage");
-  
+
   late List<SimilarFiles> groups;
   int currentGroupIndex = 0;
   int currentImageIndex = 0;
   Map<EnteFile, SwipeDecision> decisions = {};
   Map<int, List<SwipeAction>> groupHistories = {};
   List<SwipeAction> fullHistory = [];
-  
+
   final CardSwiperController controller = CardSwiperController();
   late ValueNotifier<String> _deleteProgress;
-  
+
   // Animation controllers for celebrations
   late AnimationController _celebrationController;
   late AnimationController _progressRingController;
@@ -63,7 +64,7 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
     );
     _initializeGroups();
   }
-  
+
   @override
   void dispose() {
     _deleteProgress.dispose();
@@ -78,7 +79,7 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
     groups = widget.similarFiles
         .where((g) => g.files.length > 1 && g.files.length < 50)
         .toList();
-    
+
     // Initialize all as undecided
     for (final group in groups) {
       for (final file in group.files) {
@@ -111,11 +112,11 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
     if (groupIndex >= groups.length) {
       return GroupProgress(totalImages: 0, reviewedImages: 0, deletionCount: 0);
     }
-    
+
     final group = groups[groupIndex];
     int reviewed = 0;
     int toDelete = 0;
-    
+
     for (final file in group.files) {
       final decision = decisions[file] ?? SwipeDecision.undecided;
       if (decision != SwipeDecision.undecided) {
@@ -125,7 +126,7 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
         }
       }
     }
-    
+
     return GroupProgress(
       totalImages: group.files.length,
       reviewedImages: reviewed,
@@ -142,14 +143,14 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
 
     setState(() {
       decisions[file] = decision;
-      
+
       final action = SwipeAction(
         file: file,
         decision: decision,
         timestamp: DateTime.now(),
         groupIndex: currentGroupIndex,
       );
-      
+
       groupHistories[currentGroupIndex]?.add(action);
       fullHistory.add(action);
 
@@ -159,7 +160,7 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
       } else {
         // Group complete - check if all images marked for deletion
         final groupProgress = getGroupProgress(currentGroupIndex);
-        if (groupProgress.deletionCount == groupProgress.totalImages && 
+        if (groupProgress.deletionCount == groupProgress.totalImages &&
             groupProgress.totalImages > 0) {
           _showAllInGroupDeletionDialog();
         } else {
@@ -171,20 +172,20 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
 
   void _handleGroupCompletion() async {
     if (_showingCelebration) return;
-    
+
     // Haptic feedback
     HapticFeedback.mediumImpact();
-    
+
     setState(() {
       _showingCelebration = true;
     });
-    
+
     // Start progress ring animation
     _progressRingController.forward();
-    
+
     // Wait for progress ring to complete or user to skip
     await Future.delayed(const Duration(seconds: 2));
-    
+
     // Quick celebration based on group size
     final groupSize = currentGroupFiles.length;
     if (groupSize <= 5) {
@@ -194,10 +195,10 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
     } else {
       _celebrationController.duration = const Duration(milliseconds: 800);
     }
-    
+
     _celebrationController.forward();
     await Future.delayed(const Duration(milliseconds: 300));
-    
+
     // Move to next group or show completion
     if (currentGroupIndex < groups.length - 1) {
       setState(() {
@@ -214,15 +215,15 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
 
   void _showAllInGroupDeletionDialog() {
     final groupSize = currentGroupFiles.length;
-    
+
     showDialog(
       context: context,
       builder: (context) {
         final theme = getEnteColorScheme(context);
         return AlertDialog(
-          title: Text(S.of(context).deleteAllInGroup),
+          title: Text(AppLocalizations.of(context).deleteAllInGroup),
           content: Text(
-            S.of(context).allImagesMarkedForDeletion(groupSize),
+            AppLocalizations.of(context).allImagesMarkedForDeletion(groupSize),
           ),
           actions: [
             TextButton(
@@ -237,7 +238,7 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
                   groupHistories[currentGroupIndex]?.clear();
                 });
               },
-              child: Text(S.of(context).reviewAgain),
+              child: Text(AppLocalizations.of(context).reviewAgain),
             ),
             TextButton(
               onPressed: () {
@@ -247,7 +248,7 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
               style: TextButton.styleFrom(
                 foregroundColor: theme.warning700,
               ),
-              child: Text(S.of(context).delete),
+              child: Text(AppLocalizations.of(context).delete),
             ),
           ],
         );
@@ -258,27 +259,27 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
   void _showCompletionDialog() {
     final filesToDelete = <EnteFile>{};
     int totalSize = 0;
-    
+
     for (final entry in decisions.entries) {
       if (entry.value == SwipeDecision.delete) {
         filesToDelete.add(entry.key);
         totalSize += entry.key.fileSize ?? 0;
       }
     }
-    
+
     if (filesToDelete.isEmpty) {
       Navigator.of(context).pop(0);
       return;
     }
-    
+
     showChoiceDialog(
       context,
-      title: S.of(context).deletePhotos,
-      body: S.of(context).deletePhotosBody(
-        filesToDelete.length.toString(),
-        formatBytes(totalSize),
-      ),
-      firstButtonLabel: S.of(context).delete,
+      title: AppLocalizations.of(context).deletePhotos,
+      body: AppLocalizations.of(context).deletePhotosBody(
+            filesToDelete.length.toString(),
+            formatBytes(totalSize),
+          ),
+      firstButtonLabel: AppLocalizations.of(context).delete,
       isCritical: true,
       firstButtonOnTap: () async {
         try {
@@ -303,7 +304,7 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
       final lastAction = groupHistories[currentGroupIndex]!.removeLast();
       fullHistory.removeLast();
       decisions[lastAction.file] = SwipeDecision.undecided;
-      
+
       // Move back to the undone image
       final fileIndex = currentGroupFiles.indexOf(lastAction.file);
       if (fileIndex != -1) {
@@ -322,11 +323,11 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
 
   void _switchToGroup(int groupIndex) {
     if (groupIndex < 0 || groupIndex >= groups.length) return;
-    
+
     setState(() {
       currentGroupIndex = groupIndex;
       currentImageIndex = 0;
-      
+
       // Find first undecided image in the group
       final files = groups[groupIndex].files;
       for (int i = 0; i < files.length; i++) {
@@ -340,9 +341,9 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
 
   void _showGroupSummaryPopup(int groupIndex) {
     if (groupIndex < 0 || groupIndex >= groups.length) return;
-    
+
     final group = groups[groupIndex];
-    
+
     showDialog(
       context: context,
       builder: (context) => GroupSummaryPopup(
@@ -357,7 +358,8 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
             // Clear group history
             groupHistories[groupIndex]?.clear();
             // Remove from full history
-            fullHistory.removeWhere((action) => action.groupIndex == groupIndex);
+            fullHistory
+                .removeWhere((action) => action.groupIndex == groupIndex);
           });
           Navigator.of(context).pop();
           _switchToGroup(groupIndex);
@@ -370,11 +372,11 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
               filesToDelete.add(file);
             }
           }
-          
+
           if (filesToDelete.isNotEmpty) {
             Navigator.of(context).pop();
             await _deleteFilesLogic(filesToDelete, true);
-            
+
             // Remove this group from the list if all deleted
             if (filesToDelete.length == group.files.length) {
               setState(() {
@@ -398,10 +400,10 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
     if (filesToDelete.isEmpty) {
       return;
     }
-    
+
     final Map<int, Set<EnteFile>> collectionToFilesToAddMap = {};
     final allDeleteFiles = <EnteFile>{};
-    
+
     for (final group in groups) {
       final groupDeleteFiles = <EnteFile>{};
       for (final file in filesToDelete) {
@@ -410,11 +412,13 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
           allDeleteFiles.add(file);
         }
       }
-      
+
       if (groupDeleteFiles.isNotEmpty && createSymlink) {
-        final filesToKeep = group.files.where((f) => !groupDeleteFiles.contains(f)).toSet();
-        final collectionIDs = filesToKeep.map((file) => file.collectionID).toSet();
-        
+        final filesToKeep =
+            group.files.where((f) => !groupDeleteFiles.contains(f)).toSet();
+        final collectionIDs =
+            filesToKeep.map((file) => file.collectionID).toSet();
+
         for (final deletedFile in groupDeleteFiles) {
           final collectionID = deletedFile.collectionID;
           if (collectionIDs.contains(collectionID) || collectionID == null) {
@@ -427,7 +431,7 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
         }
       }
     }
-    
+
     final int collectionCnt = collectionToFilesToAddMap.keys.length;
     if (createSymlink) {
       final userID = Configuration.instance.getUserID();
@@ -441,9 +445,10 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
           final double percentage = (progress / collectionCnt) * 100;
           _deleteProgress.value = '${percentage.toStringAsFixed(1)}%';
         }
-        
+
         // Check permission before attempting to add symlinks
-        final collection = CollectionsService.instance.getCollectionByID(collectionID);
+        final collection =
+            CollectionsService.instance.getCollectionByID(collectionID);
         if (collection != null && collection.canAutoAdd(userID!)) {
           await CollectionsService.instance.addSilentlyToCollection(
             collectionID,
@@ -456,13 +461,13 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
         }
       }
     }
-    
+
     if (collectionCnt > 2) {
       _deleteProgress.value = "";
     }
-    
+
     await deleteFilesFromRemoteOnly(context, allDeleteFiles.toList());
-    
+
     // Show congratulations if more than 100 files deleted
     if (allDeleteFiles.length > 100 && mounted) {
       final int totalSize = allDeleteFiles.fold<int>(
@@ -472,24 +477,23 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
       _showCongratulationsDialog(allDeleteFiles.length, totalSize);
     }
   }
-  
+
   void _showCongratulationsDialog(int deletedCount, int totalSize) {
     showDialog(
       context: context,
       builder: (context) {
-        final theme = getEnteColorScheme(context);
         return AlertDialog(
-          title: Text(S.of(context).congratulations),
+          title: Text(AppLocalizations.of(context).congratulations),
           content: Text(
-            S.of(context).deletedPhotosWithSize(
-              deletedCount.toString(),
-              formatBytes(totalSize),
-            ),
+            AppLocalizations.of(context).deletedPhotosWithSize(
+                  deletedCount.toString(),
+                  formatBytes(totalSize),
+                ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text(S.of(context).ok),
+              child: Text(AppLocalizations.of(context).ok),
             ),
           ],
         );
@@ -500,14 +504,14 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
   @override
   Widget build(BuildContext context) {
     final theme = getEnteColorScheme(context);
-    
+
     if (groups.isEmpty) {
       return Scaffold(
         appBar: AppBar(
-          title: Text(S.of(context).review),
+          title: Text(AppLocalizations.of(context).review),
         ),
         body: Center(
-          child: Text(S.of(context).noImagesSelected),
+          child: Text(AppLocalizations.of(context).noImagesSelected),
         ),
       );
     }
@@ -515,190 +519,203 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
     return Stack(
       children: [
         Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            if (totalDeletionCount > 0) {
-              // TODO: Show exit confirmation if there are pending deletions
-            }
-            Navigator.of(context).pop();
-          },
-        ),
-        title: Text(
-          "${currentImageIndex + 1} of ${currentGroupFiles.length}",
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-        actions: [
-          if (totalDeletionCount > 0)
-            TextButton(
-              onPressed: _showCompletionDialog,
-              child: Text(
-                "Delete ($totalDeletionCount)",
-                style: TextStyle(color: theme.warning700),
-              ),
+          appBar: AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () {
+                if (totalDeletionCount > 0) {
+                  // TODO: Show exit confirmation if there are pending deletions
+                }
+                Navigator.of(context).pop();
+              },
             ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // Group carousel at top
-          if (groups.length > 1)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: GroupCarousel(
-                groups: groups,
-                currentGroupIndex: currentGroupIndex,
-                onGroupSelected: _switchToGroup,
-                onGroupLongPress: _showGroupSummaryPopup,
-                progressMap: progressMap,
-              ),
+            title: Text(
+              "${currentImageIndex + 1} of ${currentGroupFiles.length}",
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
-          Expanded(
-            child: currentFile != null
-                ? Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      CardSwiper(
-                    controller: controller,
-                    cardsCount: currentGroupFiles.length - currentImageIndex,
-                    numberOfCardsDisplayed: 1,
-                    backCardOffset: const Offset(0, 0),
-                    padding: const EdgeInsets.all(24.0),
-                    cardBuilder: (context, index, percentThresholdX, percentThresholdY) {
-                      final fileIndex = currentImageIndex + index;
-                      if (fileIndex >= currentGroupFiles.length) {
-                        return const SizedBox.shrink();
-                      }
-                      
-                      final file = currentGroupFiles[fileIndex];
-                      final isFirst = fileIndex == 0;
-                      
-                      // Calculate swipe progress for overlay effects
-                      final swipeProgress = percentThresholdX / 100;
-                      final isSwipingLeft = swipeProgress < -0.1;
-                      final isSwipingRight = swipeProgress > 0.1;
-                      
-                      return SwipeablePhotoCard(
-                        file: file,
-                        showBestPictureBadge: isFirst,
-                        swipeProgress: swipeProgress,
-                        isSwipingLeft: isSwipingLeft,
-                        isSwipingRight: isSwipingRight,
-                      );
-                    },
-                    onSwipe: (previousIndex, currentIndex, direction) {
-                      final decision = direction == CardSwiperDirection.left
-                          ? SwipeDecision.delete
-                          : SwipeDecision.keep;
-                      
-                      // Handle the swipe decision
-                      _handleSwipeDecision(decision);
-                      
-                      return true;
-                    },
-                    onEnd: () {
-                      // All cards in current group have been swiped
-                      // This is handled in _handleSwipeDecision when reaching last card
-                    },
-                    isDisabled: false,
-                    threshold: 50,
+            actions: [
+              if (totalDeletionCount > 0)
+                TextButton(
+                  onPressed: _showCompletionDialog,
+                  child: Text(
+                    "Delete ($totalDeletionCount)",
+                    style: TextStyle(color: theme.warning700),
                   ),
-                      
-                      // Celebration overlay
-                      if (_showingCelebration)
-                        AnimatedBuilder(
-                          animation: _progressRingController,
-                          builder: (context, child) {
-                            return Container(
-                              color: Colors.black.withOpacity(0.3),
-                              child: Center(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Stack(
-                                      alignment: Alignment.center,
+                ),
+            ],
+          ),
+          body: Column(
+            children: [
+              // Group carousel at top
+              if (groups.length > 1)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: GroupCarousel(
+                    groups: groups,
+                    currentGroupIndex: currentGroupIndex,
+                    onGroupSelected: _switchToGroup,
+                    onGroupLongPress: _showGroupSummaryPopup,
+                    progressMap: progressMap,
+                  ),
+                ),
+              Expanded(
+                child: currentFile != null
+                    ? Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          CardSwiper(
+                            controller: controller,
+                            cardsCount:
+                                currentGroupFiles.length - currentImageIndex,
+                            numberOfCardsDisplayed: 1,
+                            backCardOffset: const Offset(0, 0),
+                            padding: const EdgeInsets.all(24.0),
+                            cardBuilder: (context, index, percentThresholdX,
+                                percentThresholdY) {
+                              final fileIndex = currentImageIndex + index;
+                              if (fileIndex >= currentGroupFiles.length) {
+                                return const SizedBox.shrink();
+                              }
+
+                              final file = currentGroupFiles[fileIndex];
+                              final isFirst = fileIndex == 0;
+
+                              // Calculate swipe progress for overlay effects
+                              final swipeProgress = percentThresholdX / 100;
+                              final isSwipingLeft = swipeProgress < -0.1;
+                              final isSwipingRight = swipeProgress > 0.1;
+
+                              return SwipeablePhotoCard(
+                                file: file,
+                                showBestPictureBadge: isFirst,
+                                swipeProgress: swipeProgress,
+                                isSwipingLeft: isSwipingLeft,
+                                isSwipingRight: isSwipingRight,
+                              );
+                            },
+                            onSwipe: (previousIndex, currentIndex, direction) {
+                              final decision =
+                                  direction == CardSwiperDirection.left
+                                      ? SwipeDecision.delete
+                                      : SwipeDecision.keep;
+
+                              // Handle the swipe decision
+                              _handleSwipeDecision(decision);
+
+                              return true;
+                            },
+                            onEnd: () {
+                              // All cards in current group have been swiped
+                              // This is handled in _handleSwipeDecision when reaching last card
+                            },
+                            isDisabled: false,
+                            threshold: 50,
+                          ),
+
+                          // Celebration overlay
+                          if (_showingCelebration)
+                            AnimatedBuilder(
+                              animation: _progressRingController,
+                              builder: (context, child) {
+                                return Container(
+                                  color: Colors.black.withValues(alpha: 0.3),
+                                  child: Center(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        // Progress ring
-                                        SizedBox(
-                                          width: 100,
-                                          height: 100,
-                                          child: CircularProgressIndicator(
-                                            value: _progressRingController.value,
-                                            strokeWidth: 4,
-                                            valueColor: AlwaysStoppedAnimation(
-                                              theme.primary500,
+                                        Stack(
+                                          alignment: Alignment.center,
+                                          children: [
+                                            // Progress ring
+                                            SizedBox(
+                                              width: 100,
+                                              height: 100,
+                                              child: CircularProgressIndicator(
+                                                value: _progressRingController
+                                                    .value,
+                                                strokeWidth: 4,
+                                                valueColor:
+                                                    AlwaysStoppedAnimation(
+                                                  theme.primary500,
+                                                ),
+                                              ),
                                             ),
-                                          ),
+                                            // Checkmark or celebration icon
+                                            Icon(
+                                              Icons.check_circle_outline,
+                                              size: 60,
+                                              color: theme.primary500,
+                                            )
+                                                .animate(
+                                                    controller:
+                                                        _celebrationController)
+                                                .scaleXY(
+                                                  begin: 0.8,
+                                                  end: 1.2,
+                                                  curve: Curves.elasticOut,
+                                                )
+                                                .fadeIn(),
+                                          ],
                                         ),
-                                        // Checkmark or celebration icon
-                                        Icon(
-                                          Icons.check_circle_outline,
-                                          size: 60,
-                                          color: theme.primary500,
+                                        const SizedBox(height: 16),
+                                        Text(
+                                          AppLocalizations.of(context).groupComplete,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .headlineSmall
+                                              ?.copyWith(
+                                                color: Colors.white,
+                                              ),
                                         )
-                                          .animate(controller: _celebrationController)
-                                          .scale(
-                                            begin: 0.8,
-                                            end: 1.2,
-                                            curve: Curves.elasticOut,
-                                          )
-                                          .fadeIn(),
+                                            .animate(
+                                                controller:
+                                                    _celebrationController)
+                                            .fadeIn(delay: 200.ms),
                                       ],
                                     ),
-                                    const SizedBox(height: 16),
-                                    Text(
-                                      S.of(context).groupComplete,
-                                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                        color: Colors.white,
-                                      ),
-                                    )
-                                      .animate(controller: _celebrationController)
-                                      .fadeIn(delay: 200.ms),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                    ],
-                  )
-                : Center(
-                    child: Text(S.of(context).noImagesSelected),
-                  ),
+                                  ),
+                                );
+                              },
+                            ),
+                        ],
+                      )
+                    : Center(
+                        child: Text(AppLocalizations.of(context).noImagesSelected),
+                      ),
+              ),
+              // Action buttons at bottom
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    IconButton(
+                      onPressed: currentFile != null
+                          ? () => controller.swipe(CardSwiperDirection.left)
+                          : null,
+                      icon: Icon(Icons.delete_outline, color: theme.warning700),
+                      iconSize: 32,
+                    ),
+                    IconButton(
+                      onPressed: _handleUndo,
+                      icon: const Icon(Icons.undo),
+                      iconSize: 32,
+                    ),
+                    IconButton(
+                      onPressed: currentFile != null
+                          ? () => controller.swipe(CardSwiperDirection.right)
+                          : null,
+                      icon: Icon(Icons.thumb_up_outlined,
+                          color: theme.primary700),
+                      iconSize: 32,
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          // Action buttons at bottom
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                IconButton(
-                  onPressed: currentFile != null 
-                      ? () => controller.swipe(CardSwiperDirection.left)
-                      : null,
-                  icon: Icon(Icons.delete_outline, color: theme.warning700),
-                  iconSize: 32,
-                ),
-                IconButton(
-                  onPressed: _handleUndo,
-                  icon: const Icon(Icons.undo),
-                  iconSize: 32,
-                ),
-                IconButton(
-                  onPressed: currentFile != null
-                      ? () => controller.swipe(CardSwiperDirection.right)
-                      : null,
-                  icon: Icon(Icons.thumb_up_outlined, color: theme.primary700),
-                  iconSize: 32,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    ),
-        
+        ),
+
         // Progress overlay during deletion
         ValueListenableBuilder(
           valueListenable: _deleteProgress,
@@ -706,12 +723,13 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
             if (value.isEmpty) {
               return const SizedBox.shrink();
             }
-            
+
             return Container(
-              color: theme.backgroundBase.withOpacity(0.8),
+              color: theme.backgroundBase.withValues(alpha: 0.8),
               child: Center(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                   decoration: BoxDecoration(
                     color: theme.backgroundElevated,
                     borderRadius: BorderRadius.circular(8),

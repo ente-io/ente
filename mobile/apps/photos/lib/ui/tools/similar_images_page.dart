@@ -25,8 +25,8 @@ import "package:photos/ui/viewer/gallery/empty_state.dart";
 import "package:photos/utils/delete_file_util.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
-import "package:photos/utils/standalone/data.dart";
 import 'package:photos/ui/pages/library_culling/swipe_culling_page.dart';
+import "package:photos/utils/standalone/data.dart";
 
 enum SimilarImagesPageState {
   setup,
