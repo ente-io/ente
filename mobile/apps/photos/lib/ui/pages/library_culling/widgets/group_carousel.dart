@@ -60,7 +60,7 @@ class GroupCarousel extends StatelessWidget {
                   boxShadow: isCurrentGroup
                       ? [
                           BoxShadow(
-                            color: theme.primary500.withOpacity(0.3),
+                            color: theme.primary500.withValues(alpha: 0.3),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),

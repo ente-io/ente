@@ -19,13 +19,13 @@ import "package:photos/theme/text_style.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
+import "package:photos/ui/pages/library_culling/swipe_culling_page.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/gallery/empty_state.dart";
 import "package:photos/utils/delete_file_util.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
-import 'package:photos/ui/pages/library_culling/swipe_culling_page.dart';
 import "package:photos/utils/standalone/data.dart";
 
 enum SimilarImagesPageState {

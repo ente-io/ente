@@ -5,7 +5,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/ente_theme_data.dart';
 import 'package:photos/generated/l10n.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/similar_files.dart';
@@ -223,7 +222,7 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
         return AlertDialog(
           title: Text(AppLocalizations.of(context).deleteAllInGroup),
           content: Text(
-            AppLocalizations.of(context).allImagesMarkedForDeletion(groupSize),
+            AppLocalizations.of(context).allImagesMarkedForDeletion(count: groupSize),
           ),
           actions: [
             TextButton(
@@ -276,8 +275,8 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
       context,
       title: AppLocalizations.of(context).deletePhotos,
       body: AppLocalizations.of(context).deletePhotosBody(
-            filesToDelete.length.toString(),
-            formatBytes(totalSize),
+            count: filesToDelete.length.toString(),
+            size: formatBytes(totalSize),
           ),
       firstButtonLabel: AppLocalizations.of(context).delete,
       isCritical: true,
@@ -486,8 +485,8 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
           title: Text(AppLocalizations.of(context).congratulations),
           content: Text(
             AppLocalizations.of(context).deletedPhotosWithSize(
-                  deletedCount.toString(),
-                  formatBytes(totalSize),
+                  count: deletedCount.toString(),
+                  size: formatBytes(totalSize),
                 ),
           ),
           actions: [
@@ -570,8 +569,12 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
                             numberOfCardsDisplayed: 1,
                             backCardOffset: const Offset(0, 0),
                             padding: const EdgeInsets.all(24.0),
-                            cardBuilder: (context, index, percentThresholdX,
-                                percentThresholdY) {
+                            cardBuilder: (
+                                context,
+                                index,
+                                percentThresholdX,
+                                percentThresholdY,
+                            ) {
                               final fileIndex = currentImageIndex + index;
                               if (fileIndex >= currentGroupFiles.length) {
                                 return const SizedBox.shrink();
@@ -648,7 +651,8 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
                                             )
                                                 .animate(
                                                     controller:
-                                                        _celebrationController)
+                                                        _celebrationController,
+                                                )
                                                 .scaleXY(
                                                   begin: 0.8,
                                                   end: 1.2,
@@ -669,7 +673,8 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
                                         )
                                             .animate(
                                                 controller:
-                                                    _celebrationController)
+                                                    _celebrationController,
+                                            )
                                             .fadeIn(delay: 200.ms),
                                       ],
                                     ),
@@ -705,8 +710,10 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
                       onPressed: currentFile != null
                           ? () => controller.swipe(CardSwiperDirection.right)
                           : null,
-                      icon: Icon(Icons.thumb_up_outlined,
-                          color: theme.primary700),
+                      icon: Icon(
+                          Icons.thumb_up_outlined,
+                          color: theme.primary700,
+                      ),
                       iconSize: 32,
                     ),
                   ],

@@ -69,7 +69,7 @@ class GroupSummaryPopup extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Text(
-                  AppLocalizations.of(context).storageToBeFreed(formatBytes(totalSize)),
+                  AppLocalizations.of(context).storageToBeFreed(size: formatBytes(totalSize)),
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: theme.warning700,
                   ),
