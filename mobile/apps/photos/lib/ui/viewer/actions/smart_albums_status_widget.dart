@@ -80,7 +80,7 @@ class _SmartAlbumsStatusWidgetState extends State<SmartAlbumsStatusWidget>
                 .copyWith(left: 14),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
-              color: Colors.black.withOpacity(0.65),
+              color: Colors.black.withValues(alpha: 0.65),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,

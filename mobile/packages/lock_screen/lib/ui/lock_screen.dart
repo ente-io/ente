@@ -38,6 +38,8 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
   int remainingTimeInSeconds = 0;
   final _lockscreenSetting = LockScreenSettings.instance;
   late Brightness _platformBrightness;
+  // Suppress auto-auth only for the initial manual presentation.
+  bool _suppressAutoPrompt = false;
 
   @override
   void initState() {
@@ -46,7 +48,13 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
     invalidAttemptCount = _lockscreenSetting.getInvalidAttemptCount();
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      _showLockScreen(source: "postFrameInit");
+      final Map<String, dynamic>? args =
+          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      final bool isManualPresentation = args?['manual'] as bool? ?? false;
+      _suppressAutoPrompt = isManualPresentation;
+      if (!isManualPresentation) {
+        _showLockScreen(source: "postFrameInit");
+      }
     });
     _platformBrightness =
         SchedulerBinding.instance.platformDispatcher.platformBrightness;
@@ -71,7 +79,8 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
       ),
       body: GestureDetector(
         onTap: () {
-          isTimerRunning ? null : _showLockScreen(source: "tap");
+          if (isTimerRunning) return;
+          _showLockScreen(source: "tap");
         },
         child: Container(
           decoration: BoxDecoration(
@@ -219,8 +228,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
           DateTime.now().millisecondsSinceEpoch - lastAuthenticatingTime! <
               5000;
       if (!_hasAuthenticationFailed && !didAuthInLast5Seconds) {
-        // Show the lock screen again only if the app is resuming from the
-        // background, and not when the lock screen was explicitly dismissed
+        // If there is a cooldown timer (after multiple failures), respect it
         if (_lockscreenSetting.getlastInvalidAttemptTime() >
                 DateTime.now().millisecondsSinceEpoch &&
             !_isShowingLockScreen) {
@@ -231,6 +239,9 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
             startLockTimer(time);
             _showLockScreen(source: "lifeCycle");
           });
+        } else if (!_suppressAutoPrompt) {
+          // No cooldown: auto-prompt when app becomes active again
+          _showLockScreen(source: "lifeCycle");
         }
       } else {
         _hasAuthenticationFailed = false; // Reset failure state
@@ -242,6 +253,9 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
       if (!_isShowingLockScreen) {
         _hasPlacedAppInBackground = true;
         _hasAuthenticationFailed = false; // reset failure state
+        // If we suppressed the initial auto-prompt due to manual lock,
+        // enable auto-prompt for the next resume after focus loss.
+        _suppressAutoPrompt = false;
       }
     }
   }

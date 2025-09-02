@@ -100,7 +100,12 @@ class _VideoStreamingSettingsPageState
                             children: [
                               TextSpan(
                                 text: AppLocalizations.of(context)
-                                    .videoStreamingDescription,
+                                    .videoStreamingDescriptionLine1,
+                              ),
+                              const TextSpan(text: " "),
+                              TextSpan(
+                                text: AppLocalizations.of(context)
+                                    .videoStreamingDescriptionLine2,
                               ),
                               const TextSpan(text: " "),
                               TextSpan(
@@ -113,7 +118,6 @@ class _VideoStreamingSettingsPageState
                               ),
                             ],
                           ),
-                          textAlign: TextAlign.justify,
                           style: getEnteTextTheme(context).mini.copyWith(
                                 color: getEnteColorScheme(context).textMuted,
                               ),
@@ -145,10 +149,17 @@ class _VideoStreamingSettingsPageState
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Text.rich(
                         TextSpan(
-                          text: AppLocalizations.of(context)
-                                  .videoStreamingDescription +
-                              "\n",
                           children: [
+                            TextSpan(
+                              text: AppLocalizations.of(context)
+                                  .videoStreamingDescriptionLine1,
+                            ),
+                            const TextSpan(text: "\n"),
+                            TextSpan(
+                              text: AppLocalizations.of(context)
+                                  .videoStreamingDescriptionLine2,
+                            ),
+                            const TextSpan(text: "\n"),
                             TextSpan(
                               text: AppLocalizations.of(context).moreDetails,
                               style: TextStyle(

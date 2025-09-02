@@ -1,4 +1,4 @@
-ente es una aplicación simple para hacer copias de seguridad y compartir tus fotos y videos.
+ente es una aplicación simple para hacer copias de seguridad y compartir tus fotos y vídeos.
 
 Si has estado buscando una alternativa a Google Photos que sea amigable con la privacidad, has llegado al lugar correcto. Con Ente, se almacenan cifradas de extremo a extremo (e2ee). Esto significa que solo tú puedes verlas.
 

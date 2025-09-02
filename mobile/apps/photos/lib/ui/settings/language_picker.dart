@@ -159,16 +159,11 @@ class _ItemsWidgetState extends State<ItemsWidget> {
         return 'Русский';
       case 'tr':
         return 'Türkçe';
-      case 'fi':
-        return 'Suomi';
       case 'zh':
+        if (locale.countryCode == 'CN') {
+          return '中文 (简体)';
+        }
         return '中文';
-      case 'zh-CN':
-        return '中文';
-      case 'ko':
-        return '한국어';
-      case 'ar':
-        return 'العربية';
       case 'uk':
         return 'Українська';
       case 'vi':

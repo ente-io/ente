@@ -41,6 +41,15 @@ class LocalSettings {
       "hide_shared_items_from_home_gallery";
   static const kCollectionViewType = "collection_view_type";
   static const kCollectionSortDirection = "collection_sort_direction";
+  static const kShowLocalIDOverThumbnails = "show_local_id_over_thumbnails";
+  
+  // Thumbnail queue configuration keys
+  static const kSmallQueueMaxConcurrent = "small_queue_max_concurrent";
+  static const kSmallQueueTimeout = "small_queue_timeout_seconds";
+  static const kSmallQueueMaxSize = "small_queue_max_size";
+  static const kLargeQueueMaxConcurrent = "large_queue_max_concurrent";
+  static const kLargeQueueTimeout = "large_queue_timeout_seconds";
+  static const kLargeQueueMaxSize = "large_queue_max_size";
 
   final SharedPreferences _prefs;
 
@@ -217,4 +226,59 @@ class LocalSettings {
 
   bool get hideSharedItemsFromHomeGallery =>
       _prefs.getBool(_hideSharedItemsFromHomeGalleryTag) ?? false;
+
+  bool get showLocalIDOverThumbnails =>
+      _prefs.getBool(kShowLocalIDOverThumbnails) ?? false;
+
+  Future<void> setShowLocalIDOverThumbnails(bool value) async {
+    await _prefs.setBool(kShowLocalIDOverThumbnails, value);
+  }
+
+  // Thumbnail queue configuration - Small queue
+  int get smallQueueMaxConcurrent => _prefs.getInt(kSmallQueueMaxConcurrent) ?? 15;
+  
+  int get smallQueueTimeoutSeconds => _prefs.getInt(kSmallQueueTimeout) ?? 60;
+  
+  int get smallQueueMaxSize => _prefs.getInt(kSmallQueueMaxSize) ?? 200;
+  
+  Future<void> setSmallQueueMaxConcurrent(int value) async {
+    await _prefs.setInt(kSmallQueueMaxConcurrent, value);
+  }
+  
+  Future<void> setSmallQueueTimeout(int seconds) async {
+    await _prefs.setInt(kSmallQueueTimeout, seconds);
+  }
+  
+  Future<void> setSmallQueueMaxSize(int value) async {
+    await _prefs.setInt(kSmallQueueMaxSize, value);
+  }
+
+  // Thumbnail queue configuration - Large queue
+  int get largeQueueMaxConcurrent => _prefs.getInt(kLargeQueueMaxConcurrent) ?? 5;
+  
+  int get largeQueueTimeoutSeconds => _prefs.getInt(kLargeQueueTimeout) ?? 60;
+  
+  int get largeQueueMaxSize => _prefs.getInt(kLargeQueueMaxSize) ?? 200;
+  
+  Future<void> setLargeQueueMaxConcurrent(int value) async {
+    await _prefs.setInt(kLargeQueueMaxConcurrent, value);
+  }
+  
+  Future<void> setLargeQueueTimeout(int seconds) async {
+    await _prefs.setInt(kLargeQueueTimeout, seconds);
+  }
+  
+  Future<void> setLargeQueueMaxSize(int value) async {
+    await _prefs.setInt(kLargeQueueMaxSize, value);
+  }
+
+  // Reset thumbnail queue settings to defaults
+  Future<void> resetThumbnailQueueSettings() async {
+    await _prefs.remove(kSmallQueueMaxConcurrent);
+    await _prefs.remove(kSmallQueueTimeout);
+    await _prefs.remove(kSmallQueueMaxSize);
+    await _prefs.remove(kLargeQueueMaxConcurrent);
+    await _prefs.remove(kLargeQueueTimeout);
+    await _prefs.remove(kLargeQueueMaxSize);
+  }
 }

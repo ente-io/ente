@@ -130,14 +130,19 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
           case '/lock-screen':
             return PageRouteBuilder(
               pageBuilder: (_, __, ___) => this._lockScreen,
+              settings: settings,
             );
           case '/unlocked':
             return PageRouteBuilder(
               pageBuilder: (_, __, ___) =>
                   this.widget.builder(settings.arguments),
+              settings: settings,
             );
         }
-        return PageRouteBuilder(pageBuilder: (_, __, ___) => this._lockScreen);
+        return PageRouteBuilder(
+          pageBuilder: (_, __, ___) => this._lockScreen,
+          settings: settings,
+        );
       },
     );
   }
@@ -193,10 +198,18 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
     });
   }
 
-  /// Manually show the [lockScreen].
+  /// Show the [lockScreen] for automatic locking (app launch, background resume).
   Future<void> showLockScreen() {
     this._isLocked = true;
-    return _navigatorKey.currentState!.pushNamed('/lock-screen');
+    return _navigatorKey.currentState!
+        .pushNamed('/lock-screen', arguments: {"manual": false});
+  }
+
+  /// Show the [lockScreen] for user-initiated manual lock (no auto-auth on first frame).
+  Future<void> showManualLockScreen() {
+    this._isLocked = true;
+    return _navigatorKey.currentState!
+        .pushNamed('/lock-screen', arguments: {"manual": true});
   }
 
   void _didUnlockOnAppLaunch(Object? args) {

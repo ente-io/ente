@@ -100,7 +100,7 @@ class GeneralSectionWidget extends StatelessWidget {
             await routeToPage(
               context,
               LanguageSelectorPage(
-                AppLocalizations.supportedLocales,
+                appSupportedLocales,
                 (locale) async {
                   await setLocale(locale);
                   EnteApp.setLocale(context, locale);

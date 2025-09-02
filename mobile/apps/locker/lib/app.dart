@@ -7,8 +7,7 @@ import 'package:ente_events/event_bus.dart';
 import 'package:ente_events/models/signed_in_event.dart';
 import 'package:ente_events/models/signed_out_event.dart';
 import 'package:ente_strings/l10n/strings_localizations.dart';
-import 'package:ente_ui/theme/colors.dart';
-import 'package:ente_ui/theme/ente_theme_data.dart';
+import "package:ente_ui/theme/ente_theme_data.dart";
 import 'package:ente_ui/utils/window_listener_service.dart';
 import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
@@ -87,37 +86,14 @@ class _AppState extends State<App>
 
   @override
   Widget build(BuildContext context) {
-    final schemes = ColorSchemeBuilder.fromCustomColors(
-      primary700: const Color(0xFF1565C0), // Dark blue
-      primary500: const Color(0xFF2196F3), // Material blue
-      primary400: const Color(0xFF42A5F5), // Light blue
-      primary300: const Color(0xFF90CAF9), // Very light blue
-      iconButtonColor: const Color(0xFF1976D2), // Custom icon color
-      gradientButtonBgColors: const [
-        Color(0xFF1565C0),
-        Color(0xFF2196F3),
-        Color(0xFF42A5F5),
-      ],
-    );
-
-    final lightTheme = createAppThemeData(
-      brightness: Brightness.light,
-      colorScheme: schemes.light,
-    );
-
-    final darkTheme = createAppThemeData(
-      brightness: Brightness.dark,
-      colorScheme: schemes.dark,
-    );
-
     Widget buildApp() {
       if (Platform.isAndroid ||
           Platform.isWindows ||
           Platform.isLinux ||
           kDebugMode) {
         return AdaptiveTheme(
-          light: lightTheme,
-          dark: darkTheme,
+          light: lightThemeData,
+          dark: darkThemeData,
           initial: AdaptiveThemeMode.system,
           builder: (lightTheme, dartTheme) => MaterialApp(
             title: "ente",
@@ -142,8 +118,8 @@ class _AppState extends State<App>
         return MaterialApp(
           title: "ente",
           themeMode: ThemeMode.system,
-          theme: lightTheme,
-          darkTheme: darkTheme,
+          theme: lightThemeData,
+          darkTheme: darkThemeData,
           debugShowCheckedModeBanner: false,
           locale: locale,
           supportedLocales: appSupportedLocales,

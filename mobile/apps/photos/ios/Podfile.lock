@@ -181,6 +181,8 @@ PODS:
   - PromisesObjC (2.4.0)
   - receive_sharing_intent (1.8.1):
     - Flutter
+  - rive_common (0.0.1):
+    - Flutter
   - rust_lib_photos (0.0.1):
     - Flutter
   - SDWebImage (5.21.1):
@@ -291,6 +293,7 @@ DEPENDENCIES:
   - photo_manager (from `.symlinks/plugins/photo_manager/ios`)
   - privacy_screen (from `.symlinks/plugins/privacy_screen/ios`)
   - receive_sharing_intent (from `.symlinks/plugins/receive_sharing_intent/ios`)
+  - rive_common (from `.symlinks/plugins/rive_common/ios`)
   - rust_lib_photos (from `.symlinks/plugins/rust_lib_photos/ios`)
   - sentry_flutter (from `.symlinks/plugins/sentry_flutter/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
@@ -418,6 +421,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/privacy_screen/ios"
   receive_sharing_intent:
     :path: ".symlinks/plugins/receive_sharing_intent/ios"
+  rive_common:
+    :path: ".symlinks/plugins/rive_common/ios"
   rust_lib_photos:
     :path: ".symlinks/plugins/rust_lib_photos/ios"
   sentry_flutter:
@@ -510,6 +515,7 @@ SPEC CHECKSUMS:
   privacy_screen: 3159a541f5d3a31bea916cfd4e58f9dc722b3fd4
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   receive_sharing_intent: 222384f00ffe7e952bbfabaa9e3967cb87e5fe00
+  rive_common: dd421daaf9ae69f0125aa761dd96abd278399952
   rust_lib_photos: 04d3901908d2972192944083310b65abf410774c
   SDWebImage: f29024626962457f3470184232766516dee8dfea
   SDWebImageWebPCoder: e38c0a70396191361d60c092933e22c20d5b1380

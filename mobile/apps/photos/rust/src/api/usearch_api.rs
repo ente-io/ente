@@ -32,8 +32,8 @@ impl VectorDB {
 
         if file_exists {
             println!("Loading index from disk.");
-            // Loads the index into memory. https://docs.rs/usearch/latest/usearch/struct.Index.html#method.load
-            db.index.load(file_path).expect("Failed to load index");
+            // Use view to not load the index into memory. https://docs.rs/usearch/latest/usearch/struct.Index.html#method.view
+            db.index.view(file_path).expect("Failed to load index");
         } else {
             println!("Creating new index.");
             db.save_index();

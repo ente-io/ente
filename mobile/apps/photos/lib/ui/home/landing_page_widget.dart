@@ -94,7 +94,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
                       routeToPage(
                         context,
                         LanguageSelectorPage(
-                          AppLocalizations.supportedLocales,
+                          appSupportedLocales,
                           (locale) async {
                             await setLocale(locale);
                             EnteApp.setLocale(context, locale);

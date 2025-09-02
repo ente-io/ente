@@ -35,9 +35,8 @@ class TextInputWidget extends StatefulWidget {
   final bool popNavAfterSubmission;
   final bool shouldSurfaceExecutionStates;
   final TextCapitalization? textCapitalization;
-  @Deprecated(
-    "Do not use this widget for password input. Create a separate PasswordInputWidget. This widget is becoming bloated and hard to maintain, so will create a PasswordInputWidget and remove this field from this widget in future",
-  )
+
+  /// WARNING: Do not use this widget for password input. Create a separate PasswordInputWidget. This widget is becoming bloated and hard to maintain, so will create a PasswordInputWidget and remove this field from this widget in future
   final bool isPasswordInput;
 
   ///Clear comes in the form of a suffix icon. It is unrelated to onCancel.

@@ -28,6 +28,38 @@ jobs:
               with:
                   submodules: recursive
 
+            - name: Free up disk space
+              run: |
+                  echo "Initial disk usage:"
+                  df -h /
+                  # Get available space in KB
+                  INITIAL=$(df / | awk 'NR==2 {print $4}')
+                  
+                  echo -e "\n=== Removing .NET SDK (~20-25GB) ==="
+                  BEFORE=$(df / | awk 'NR==2 {print $4}')
+                  START=$(date +%s)
+                  sudo rm -rf /usr/share/dotnet
+                  END=$(date +%s)
+                  AFTER=$(df / | awk 'NR==2 {print $4}')
+                  FREED=$(( (AFTER - BEFORE) / 1048576 ))  # Convert KB to GB
+                  echo "Time: $((END-START))s | Freed: ${FREED}GB"
+                  
+                  echo -e "\n=== Removing cached tools (~5-10GB) ==="
+                  BEFORE=$(df / | awk 'NR==2 {print $4}')
+                  START=$(date +%s)
+                  sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+                  END=$(date +%s)
+                  AFTER=$(df / | awk 'NR==2 {print $4}')
+                  FREED=$(( (AFTER - BEFORE) / 1048576 ))
+                  echo "Time: $((END-START))s | Freed: ${FREED}GB"
+                  
+                  echo -e "\n=== Final Summary ==="
+                  FINAL=$(df / | awk 'NR==2 {print $4}')
+                  TOTAL_FREED=$(( (FINAL - INITIAL) / 1048576 ))
+                  echo "Total space freed: ${TOTAL_FREED}GB"
+                  echo "Final disk usage:"
+                  df -h /
+
             - name: Setup JDK 17
               uses: actions/setup-java@v1
               with:
@@ -39,6 +71,12 @@ jobs:
                   channel: "stable"
                   flutter-version: ${{ env.FLUTTER_VERSION  }}
                   cache: true
+
+            - name: Install Flutter Rust Bridge
+              run: cargo install flutter_rust_bridge_codegen
+
+            - name: Generate Rust bindings
+              run: flutter_rust_bridge_codegen generate
 
             - name: Setup keys
               uses: timheuer/base64-to-file@v1

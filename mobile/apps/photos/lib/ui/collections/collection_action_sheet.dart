@@ -276,12 +276,12 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
           isDisabled: _selectedCollections.isEmpty,
           onTap: () async {
             if (widget.selectedPeople != null) {
-              final ProgressDialog? dialog = createProgressDialog(
+              final ProgressDialog dialog = createProgressDialog(
                 context,
                 AppLocalizations.of(context).uploadingFilesToAlbum,
                 isDismissible: true,
               );
-              await dialog?.show();
+              await dialog.show();
               for (final collection in _selectedCollections) {
                 try {
                   await smartAlbumsService.addPeopleToSmartAlbum(
@@ -297,7 +297,7 @@ class _CollectionActionSheetState extends State<CollectionActionSheet> {
                 }
               }
               unawaited(smartAlbumsService.syncSmartAlbums());
-              await dialog?.hide();
+              await dialog.hide();
               return;
             }
             final CollectionActions collectionActions =
