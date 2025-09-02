@@ -1748,7 +1748,7 @@
   "birthdays": "Compleanni",
   "cLTitle1": "Immagini Simili",
   "cLDesc1": "Stiamo introducendo un nuovo sistema basato su ML per rilevare immagini simili, con il quale puoi pulire la tua libreria. Disponibile in Impostazioni->Backup->Libera Spazio",
-  "cLTitle2": "Generazione manuale stream video",
+  "cLTitle2": "Miglioramenti streaming video",
   "cLDesc2": "Ora puoi attivare manualmente la generazione di stream per i video direttamente dall'app. Abbiamo anche aggiunto una nuova schermata delle impostazioni di streaming video che ti mostrerà quale percentuale dei tuoi video è stata elaborata per lo streaming",
   "cLTitle3": "Miglioramenti delle Prestazioni",
   "cLDesc3": "Multipli miglioramenti interni, incluso un miglior utilizzo della cache e un'esperienza di scorrimento più fluida"
