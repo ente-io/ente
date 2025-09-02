@@ -23,18 +23,18 @@
 - [ ] Test thumbnail generation
 
 ### Phase 4: UI Components
-- [ ] Create FacesTimelineBanner widget
-- [ ] Create FacesThroughTimePage (slideshow)
-- [ ] Implement auto-advance timer (2 seconds)
-- [ ] Add tap controls (pause/resume/navigate)
-- [ ] Add age/time display logic
+- [x] Create FacesTimelineBanner widget
+- [x] Create FacesThroughTimePage (slideshow)
+- [x] Implement auto-advance timer (2 seconds)
+- [x] Add tap controls (pause/resume/navigate)
+- [x] Add age/time display logic
 
 ### Phase 5: Integration
-- [ ] Create FacesTimelineReadyEvent
-- [ ] Integrate with PeoplePage
-- [ ] Add banner display logic
+- [x] Create FacesTimelineReadyEvent
+- [x] Integrate with PeoplePage
+- [x] Add banner display logic
 - [ ] Add menu option for viewed timelines
-- [ ] Test end-to-end flow
+- [x] Test end-to-end flow
 
 ### Phase 6: Video Generation
 - [ ] Create FacesThroughTimeVideoService

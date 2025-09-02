@@ -3,6 +3,7 @@ import "dart:async";
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import 'package:photos/core/event_bus.dart';
+import "package:photos/events/faces_timeline_ready_event.dart";
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import "package:photos/events/people_changed_event.dart";
@@ -14,6 +15,7 @@ import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/search/search_result.dart";
 import 'package:photos/models/selected_files.dart';
+import "package:photos/services/faces_through_time_service.dart";
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/ui/components/end_to_end_banner.dart";
@@ -24,8 +26,9 @@ import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.da
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
+import "package:photos/ui/viewer/people/faces_through_time_page.dart";
+import "package:photos/ui/viewer/people/faces_timeline_banner.dart";
 import "package:photos/ui/viewer/people/link_email_screen.dart";
-
 import "package:photos/ui/viewer/people/people_app_bar.dart";
 import "package:photos/ui/viewer/people/person_gallery_suggestion.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -57,6 +60,11 @@ class _PeoplePageState extends State<PeoplePage> {
   late PersonEntity _person;
 
   bool userDismissedPersonGallerySuggestion = false;
+  
+  // Faces Through Time feature state
+  bool _timelineReady = false;
+  bool _timelineViewed = false;
+  StreamSubscription<FacesTimelineReadyEvent>? _timelineReadyEvent;
 
   late final StreamSubscription<LocalPhotosUpdatedEvent> _filesUpdatedEvent;
   late final StreamSubscription<PeopleChangedEvent> _peopleChangedEvent;
@@ -67,6 +75,19 @@ class _PeoplePageState extends State<PeoplePage> {
     super.initState();
     _person = widget.person;
     ClusterFeedbackService.resetLastViewedClusterID();
+    
+    // Check for Faces Through Time feature
+    _checkFacesTimeline();
+    
+    // Listen for timeline ready events
+    _timelineReadyEvent = Bus.instance.on<FacesTimelineReadyEvent>().listen((event) {
+      if (event.personId == _person.remoteID && mounted) {
+        setState(() {
+          _timelineReady = true;
+        });
+      }
+    });
+    
     _peopleChangedEvent = Bus.instance.on<PeopleChangedEvent>().listen((event) {
       if (event.type == PeopleEventType.saveOrEditPerson) {
         if (event.person != null &&
@@ -118,11 +139,41 @@ class _PeoplePageState extends State<PeoplePage> {
     files = sortedFiles;
     return sortedFiles;
   }
+  
+  Future<void> _checkFacesTimeline() async {
+    final service = FacesThroughTimeService();
+    final isEligible = await service.isEligible(_person.remoteID);
+    
+    if (isEligible) {
+      _timelineViewed = await service.hasBeenViewed(_person.remoteID);
+      
+      if (!_timelineViewed) {
+        // Start preparing timeline in background
+        unawaited(service.checkAndPrepareTimeline(_person.remoteID));
+      } else if (mounted) {
+        setState(() {
+          _timelineReady = true;
+        });
+      }
+    }
+  }
+  
+  void _openTimeline() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => FacesThroughTimePage(
+          personId: _person.remoteID,
+          personName: _person.data.name,
+        ),
+      ),
+    );
+  }
 
   @override
   void dispose() {
     _filesUpdatedEvent.cancel();
     _peopleChangedEvent.cancel();
+    _timelineReadyEvent?.cancel();
     super.dispose();
   }
 
@@ -179,6 +230,9 @@ class _PeoplePageState extends State<PeoplePage> {
                                         personFiles: personFiles,
                                         loadPersonFiles: loadPersonFiles,
                                         personEntity: _person,
+                                        timelineReady: _timelineReady,
+                                        timelineViewed: _timelineViewed,
+                                        onOpenTimeline: _openTimeline,
                                       );
                               },
                             )
@@ -188,6 +242,9 @@ class _PeoplePageState extends State<PeoplePage> {
                               personFiles: personFiles,
                               loadPersonFiles: loadPersonFiles,
                               personEntity: _person,
+                              timelineReady: _timelineReady,
+                              timelineViewed: _timelineViewed,
+                              onOpenTimeline: _openTimeline,
                             ),
                       FileSelectionOverlayBar(
                         PeoplePage.overlayType,
@@ -221,6 +278,9 @@ class _Gallery extends StatefulWidget {
   final List<EnteFile> personFiles;
   final Future<List<EnteFile>> Function() loadPersonFiles;
   final PersonEntity personEntity;
+  final bool timelineReady;
+  final bool timelineViewed;
+  final VoidCallback onOpenTimeline;
 
   const _Gallery({
     required this.tagPrefix,
@@ -228,6 +288,9 @@ class _Gallery extends StatefulWidget {
     required this.personFiles,
     required this.loadPersonFiles,
     required this.personEntity,
+    required this.timelineReady,
+    required this.timelineViewed,
+    required this.onOpenTimeline,
   });
 
   @override
@@ -267,6 +330,13 @@ class _GalleryState extends State<_Gallery> {
           widget.personFiles.isNotEmpty ? [widget.personFiles.first] : [],
       header: Column(
         children: [
+          // Faces Through Time banner
+          widget.timelineReady && !widget.timelineViewed
+              ? FacesTimelineBanner(
+                  person: widget.personEntity,
+                  onTap: widget.onOpenTimeline,
+                )
+              : const SizedBox.shrink(),
           (widget.personEntity.data.email != null &&
                       widget.personEntity.data.email!.isNotEmpty) ||
                   widget.personEntity.data.isIgnored
