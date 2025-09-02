@@ -1,3 +1,4 @@
+- Ashil: Add new section (show local ID & config local thumb queue) in debug section in settings to help in debugging thumbnail not loading issue.
 - Ashil: Revert diskLoadDeferDuration to 80ms (Fixes local thumbnails taking ~1 sec to load on scrolling gallery)
 - Ashil: Revert diskLoadDeferDuration to 500ms (Was 80ms before but fixes local thumbnail taking very long to load or never loading)
 - Ashil: Revert increase in cache extent for gallery - to check if thumbnail not loading regression resolves
