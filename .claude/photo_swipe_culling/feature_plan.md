@@ -24,8 +24,9 @@ Transform the tedious task of removing duplicate/similar photos into an engaging
 
 ### Entry Point
 From Similar Images page → New icon in top-right corner (swipe/cards icon) → Opens swipe culling interface with selected images
-- Icon only appears when images are selected (hidden when selection is empty)
-- Carries over selected groups from Similar Images page
+- Icon only appears when filtered groups are available (not just when files are selected)
+- Filters out single-image groups and groups with 50+ images before checking
+- Carries over filtered groups from Similar Images page
 
 ### Flow
 1. User selects images on Similar Images page (auto-selected duplicates)
@@ -40,26 +41,30 @@ From Similar Images page → New icon in top-right corner (swipe/cards icon) →
 
 #### Header
 - **Left**: Back button
-- **Center**: Current position "X of Y" for current group (subtle text)
+- **Center**: Visual progress indicator (not text "X of Y")
 - **Right**: "Delete (N)" button showing total pending deletions count
 
 #### Main Content Area
 - **Swipeable Card Stack**: Current image displayed prominently
+  - Shows full image without cropping (aspect ratio preserved)
+  - Card size adapts to image dimensions
+  - Uses full resolution image (not thumbnails) after initial load
 - **Swipe Indicators**:
-  - Left swipe → Red overlay with trash icon (delete)
-  - Right swipe → Green overlay with thumbs up (keep)
-  - Visual feedback: Card border changes color based on action
+  - Left swipe → Red border that intensifies with swipe distance (no full overlay)
+  - Right swipe → Green border that intensifies with swipe distance (no full overlay)
+  - Visual feedback: Only colored border, no full image overlay
 
 #### Group Navigation (Top Carousel)
 - Horizontal scrollable list of image groups
-- Each group shows:
-  - Thumbnail grid (2x2 or similar)
-  - Badge with count of images to review
-  - **Deletion count badge** in corner showing number marked for deletion
-  - Visual indicator for current group (highlighted/selected state)
-- Groups marked as complete when all images reviewed
+- **Visual Design**:
+  - **Current group**: Two thumbnails stacked with slight rotation (like cards)
+  - **Other groups**: Single thumbnail of first image
+  - **Size difference**: Current group slightly larger than others
+  - **Selection indicator**: Non-selected groups shown with reduced opacity (not border highlight)
+  - **Completion badges**: Small badge showing deletion count when complete (if > 0)
 - **Interaction Model**:
-  - **Single tap**: Navigate to that group
+  - **Single tap on current group**: Show summary popup
+  - **Single tap on other group**: Navigate to that group
   - **Long press**: Show popup summary with:
     - Images kept vs deleted count
     - Visual preview of decisions
@@ -67,8 +72,10 @@ From Similar Images page → New icon in top-right corner (swipe/cards icon) →
     - Storage to be freed from this group
 
 #### Bottom Action Bar
+- Positioned slightly above bottom edge
+- **Container Design**: Rounded container (borderRadius: 8) with subtle background
 - **Left**: Delete button (red) - quick delete current image
-- **Center**: Undo button - revert last action
+- **Center**: Undo button with circular arrow icon - revert last action
 - **Right**: Keep button (green) - quick keep current image
 
 ### Interaction Patterns
@@ -87,15 +94,11 @@ From Similar Images page → New icon in top-right corner (swipe/cards icon) →
 - **Confirm**: Opens deletion summary dialog
 
 #### Auto-Advance Flow (Group Completion)
-**Minimal Celebration Approach**: Quick, non-intrusive transition
-1. **Progress Ring**: Subtle circular progress indicator around photo frame
-2. **Micro Celebration**:
-   - Duration: 0.5-0.8s (adaptive to group size)
-   - Small groups (2-5 images): Simple checkmark animation
-   - Medium groups (6-15 images): Quick particle burst
-   - Large groups (15+ images): Brief radial pulse
-3. **Inline Stats**: Small text overlay "✓ Group complete" that fades quickly
-4. **Smooth Transition**: Cross-fade to next group's first photo
+**Minimal Celebration Approach**: Ultra-quick, non-intrusive transition
+1. **Duration**: Maximum 0.25-0.4s (half current time)
+2. **Animation**: Light sprinkle effect or simple checkmark fade
+3. **No text**: No "Group complete" message
+4. **Smooth Transition**: Quick cross-fade to next group's first photo
 5. **Non-blocking**: Animation doesn't prevent immediate interaction
 
 **Alternative Approaches Considered**:

@@ -41,7 +41,7 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
   Map<int, List<SwipeAction>> groupHistories = {};
   List<SwipeAction> fullHistory = [];
 
-  final CardSwiperController controller = CardSwiperController();
+  late CardSwiperController controller;
   late ValueNotifier<String> _deleteProgress;
 
   // Animation controllers for celebrations
@@ -52,9 +52,10 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
   @override
   void initState() {
     super.initState();
+    controller = CardSwiperController();
     _deleteProgress = ValueNotifier("");
     _celebrationController = AnimationController(
-      duration: const Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 400),
       vsync: this,
     );
     _progressRingController = AnimationController(
@@ -179,24 +180,10 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
       _showingCelebration = true;
     });
 
-    // Start progress ring animation
-    unawaited(_progressRingController.forward());
-
-    // Wait for progress ring to complete or user to skip
-    await Future.delayed(const Duration(seconds: 2));
-
-    // Quick celebration based on group size
-    final groupSize = currentGroupFiles.length;
-    if (groupSize <= 5) {
-      _celebrationController.duration = const Duration(milliseconds: 500);
-    } else if (groupSize <= 15) {
-      _celebrationController.duration = const Duration(milliseconds: 700);
-    } else {
-      _celebrationController.duration = const Duration(milliseconds: 800);
-    }
-
+    // Ultra-quick celebration animation
+    _celebrationController.duration = const Duration(milliseconds: 250);
     unawaited(_celebrationController.forward());
-    await Future.delayed(const Duration(milliseconds: 300));
+    await Future.delayed(const Duration(milliseconds: 250));
 
     // Move to next group or show completion
     if (currentGroupIndex < groups.length - 1) {
@@ -335,6 +322,10 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
           break;
         }
       }
+      
+      // Reset the controller to ensure clean state
+      controller.dispose();
+      controller = CardSwiperController();
     });
   }
 
@@ -392,6 +383,64 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
     );
   }
 
+  Widget _buildProgressDots(theme) {
+    final totalImages = currentGroupFiles.length;
+    
+    if (totalImages == 0) return const SizedBox.shrink();
+    
+    // Limit dots to max 10 for readability
+    const maxDots = 10;
+    final showAllDots = totalImages <= maxDots;
+    
+    return SizedBox(
+      height: 8,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: List.generate(
+          showAllDots ? totalImages : maxDots,
+          (index) {
+            // For collapsed view, calculate which image this dot represents
+            final imageIndex = showAllDots 
+                ? index 
+                : (index * totalImages / maxDots).floor();
+            
+            final decision = decisions[currentGroupFiles[imageIndex]];
+            final isCurrent = showAllDots 
+                ? index == currentImageIndex
+                : imageIndex <= currentImageIndex && 
+                  (index == maxDots - 1 || 
+                   ((index + 1) * totalImages / maxDots).floor() > currentImageIndex);
+            
+            Color dotColor;
+            double dotSize = 6;
+            
+            if (decision == SwipeDecision.delete) {
+              dotColor = theme.warning700;
+            } else if (decision == SwipeDecision.keep) {
+              dotColor = theme.primary500;
+            } else if (isCurrent) {
+              dotColor = theme.textBase;
+              dotSize = 8;
+            } else {
+              dotColor = theme.strokeFaint;
+            }
+            
+            return Container(
+              margin: const EdgeInsets.symmetric(horizontal: 2),
+              width: dotSize,
+              height: dotSize,
+              decoration: BoxDecoration(
+                color: dotColor,
+                shape: BoxShape.circle,
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+  
   Future<void> _deleteFilesLogic(
     Set<EnteFile> filesToDelete,
     bool createSymlink,
@@ -528,10 +577,7 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
                 Navigator.of(context).pop();
               },
             ),
-            title: Text(
-              "${currentImageIndex + 1} of ${currentGroupFiles.length}",
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
+            title: _buildProgressDots(theme),
             actions: [
               if (totalDeletionCount > 0)
                 TextButton(
@@ -562,7 +608,9 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
                     ? Stack(
                         alignment: Alignment.center,
                         children: [
+                          // Use a unique key for each group to force rebuild
                           CardSwiper(
+                            key: ValueKey('swiper_${currentGroupIndex}_$currentImageIndex'),
                             controller: controller,
                             cardsCount:
                                 currentGroupFiles.length - currentImageIndex,
@@ -577,7 +625,13 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
                             ) {
                               final fileIndex = currentImageIndex + index;
                               if (fileIndex >= currentGroupFiles.length) {
-                                return const SizedBox.shrink();
+                                // Return a placeholder container instead of SizedBox.shrink()
+                                return Container(
+                                  decoration: BoxDecoration(
+                                    color: theme.backgroundBase,
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                );
                               }
 
                               final file = currentGroupFiles[fileIndex];
@@ -589,6 +643,7 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
                               final isSwipingRight = swipeProgress > 0.1;
 
                               return SwipeablePhotoCard(
+                                key: ValueKey(file.uploadedFileID ?? file.localID),
                                 file: file,
                                 showBestPictureBadge: isFirst,
                                 swipeProgress: swipeProgress,
@@ -615,72 +670,28 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
                             threshold: 50,
                           ),
 
-                          // Celebration overlay
+                          // Minimal celebration overlay
                           if (_showingCelebration)
-                            AnimatedBuilder(
-                              animation: _progressRingController,
-                              builder: (context, child) {
-                                return Container(
-                                  color: Colors.black.withValues(alpha: 0.3),
-                                  child: Center(
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Stack(
-                                          alignment: Alignment.center,
-                                          children: [
-                                            // Progress ring
-                                            SizedBox(
-                                              width: 100,
-                                              height: 100,
-                                              child: CircularProgressIndicator(
-                                                value: _progressRingController
-                                                    .value,
-                                                strokeWidth: 4,
-                                                valueColor:
-                                                    AlwaysStoppedAnimation(
-                                                  theme.primary500,
-                                                ),
-                                              ),
-                                            ),
-                                            // Checkmark or celebration icon
-                                            Icon(
-                                              Icons.check_circle_outline,
-                                              size: 60,
-                                              color: theme.primary500,
-                                            )
-                                                .animate(
-                                                    controller:
-                                                        _celebrationController,
-                                                )
-                                                .scaleXY(
-                                                  begin: 0.8,
-                                                  end: 1.2,
-                                                  curve: Curves.elasticOut,
-                                                )
-                                                .fadeIn(),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 16),
-                                        Text(
-                                          AppLocalizations.of(context).groupComplete,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .headlineSmall
-                                              ?.copyWith(
-                                                color: Colors.white,
-                                              ),
-                                        )
-                                            .animate(
-                                                controller:
-                                                    _celebrationController,
-                                            )
-                                            .fadeIn(delay: 200.ms),
-                                      ],
+                            Container(
+                              color: Colors.black.withValues(alpha: 0.2),
+                              child: Center(
+                                child: Icon(
+                                  Icons.check_circle,
+                                  size: 48,
+                                  color: theme.primary500,
+                                )
+                                    .animate(
+                                        controller: _celebrationController,
+                                    )
+                                    .scaleXY(
+                                      begin: 0.5,
+                                      end: 1.2,
+                                      curve: Curves.easeOut,
+                                    )
+                                    .fadeIn(
+                                      duration: 100.ms,
                                     ),
-                                  ),
-                                );
-                              },
+                              ),
                             ),
                         ],
                       )
@@ -690,33 +701,86 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
               ),
               // Action buttons at bottom
               Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    IconButton(
-                      onPressed: currentFile != null
-                          ? () => controller.swipe(CardSwiperDirection.left)
-                          : null,
-                      icon: Icon(Icons.delete_outline, color: theme.warning700),
-                      iconSize: 32,
-                    ),
-                    IconButton(
-                      onPressed: _handleUndo,
-                      icon: const Icon(Icons.undo),
-                      iconSize: 32,
-                    ),
-                    IconButton(
-                      onPressed: currentFile != null
-                          ? () => controller.swipe(CardSwiperDirection.right)
-                          : null,
-                      icon: Icon(
-                          Icons.thumb_up_outlined,
-                          color: theme.primary700,
+                padding: const EdgeInsets.only(
+                  left: 24,
+                  right: 24,
+                  bottom: 24,
+                  top: 8,
+                ),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: theme.backgroundElevated,
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
                       ),
-                      iconSize: 32,
-                    ),
-                  ],
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(24),
+                          onTap: currentFile != null
+                              ? () => controller.swipe(CardSwiperDirection.left)
+                              : null,
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Icon(
+                              Icons.close_rounded,
+                              color: currentFile != null 
+                                  ? theme.warning700 
+                                  : theme.strokeFaint,
+                              size: 28,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(24),
+                          onTap: _handleUndo,
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Icon(
+                              Icons.replay_rounded,
+                              color: theme.textBase,
+                              size: 28,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(24),
+                          onTap: currentFile != null
+                              ? () => controller.swipe(CardSwiperDirection.right)
+                              : null,
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Icon(
+                              Icons.favorite_rounded,
+                              color: currentFile != null 
+                                  ? theme.primary700 
+                                  : theme.strokeFaint,
+                              size: 28,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],

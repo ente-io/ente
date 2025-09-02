@@ -14,12 +14,12 @@ class GroupSummaryPopup extends StatelessWidget {
   final VoidCallback onDeleteThese;
 
   const GroupSummaryPopup({
-    Key? key,
+    super.key,
     required this.group,
     required this.decisions,
     required this.onUndoAll,
     required this.onDeleteThese,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -108,7 +108,7 @@ class GroupSummaryPopup extends StatelessWidget {
                       if (decision == SwipeDecision.delete)
                         Container(
                           decoration: BoxDecoration(
-                            color: theme.warning700.withOpacity(0.7),
+                            color: theme.warning700.withValues(alpha: 0.7),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Center(

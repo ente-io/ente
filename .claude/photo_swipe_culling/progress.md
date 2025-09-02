@@ -60,6 +60,27 @@
   - photosDeleted
   - noSimilarPhotosFound
 
+### Bug Fixes & UI Improvements
+- [ ] Fix carousel icon visibility - check filtered groups instead of selected files
+- [ ] Fix swipe overlay - use colored border instead of full overlay
+- [ ] Fix black screen bug after swiping (image loading issue)
+- [ ] Fix image display:
+  - [ ] Show full image without cropping (preserve aspect ratio)
+  - [ ] Use full resolution images instead of thumbnails
+  - [ ] Check zoomable_image.dart for proper image loading logic
+- [ ] Redesign group carousel:
+  - [ ] Current group: stacked thumbnails with rotation
+  - [ ] Other groups: single thumbnail
+  - [ ] Size difference between current and other groups
+  - [ ] Opacity for non-selected groups instead of border
+- [ ] Fix tap behavior: tap on current group shows summary
+- [ ] Speed up completion animation (max 0.4s, no text)
+- [ ] Replace "X of Y" with visual progress indicator
+- [ ] Improve bottom buttons:
+  - [ ] Add rounded container background
+  - [ ] Move slightly up from bottom
+  - [ ] Use circular arrow icon for undo
+
 ### Testing & Refinement
 - [ ] Test with various group sizes (2-50 images)
 - [ ] Verify deletion logic and symlink creation

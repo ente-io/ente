@@ -12,20 +12,20 @@ class GroupCarousel extends StatelessWidget {
   final Map<int, GroupProgress> progressMap;
 
   const GroupCarousel({
-    Key? key,
+    super.key,
     required this.groups,
     required this.currentGroupIndex,
     required this.onGroupSelected,
     required this.onGroupLongPress,
     required this.progressMap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = getEnteColorScheme(context);
     
-    return Container(
-      height: 80,
+    return SizedBox(
+      height: 90,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -43,94 +43,69 @@ class GroupCarousel extends StatelessWidget {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: GestureDetector(
-              onTap: () => onGroupSelected(index),
+              onTap: () => isCurrentGroup 
+                  ? onGroupLongPress(index)  // Show summary if tapping current group
+                  : onGroupSelected(index),
               onLongPress: () => onGroupLongPress(index),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                width: 64,
-                height: 64,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: isCurrentGroup 
-                        ? theme.primary500 
-                        : theme.strokeFaint,
-                    width: isCurrentGroup ? 2 : 1,
-                  ),
-                  boxShadow: isCurrentGroup
-                      ? [
-                          BoxShadow(
-                            color: theme.primary500.withValues(alpha: 0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ]
-                      : null,
-                ),
-                child: Stack(
-                  children: [
-                    // 2x2 grid of thumbnails
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(11),
-                      child: _buildThumbnailGrid(group),
-                    ),
-                    
-                    // Progress/status badges
-                    if (progress.isComplete)
-                      Positioned(
-                        top: 4,
-                        right: 4,
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: progress.deletionCount > 0
-                                ? theme.warning700
-                                : theme.primary500,
-                            shape: BoxShape.circle,
-                          ),
-                          child: progress.deletionCount > 0
-                              ? Text(
-                                  '${progress.deletionCount}',
-                                  style: TextStyle(
-                                    color: theme.backgroundBase,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                )
-                              : Icon(
-                                  Icons.check,
-                                  size: 12,
-                                  color: theme.backgroundBase,
-                                ),
-                        ),
-                      ),
-                    
-                    // Current group indicator
-                    if (isCurrentGroup && !progress.isComplete)
-                      Positioned(
-                        bottom: 4,
-                        left: 0,
-                        right: 0,
-                        child: Container(
-                          height: 3,
-                          margin: const EdgeInsets.symmetric(horizontal: 8),
-                          decoration: BoxDecoration(
-                            color: theme.primary500,
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                          child: FractionallySizedBox(
-                            alignment: Alignment.centerLeft,
-                            widthFactor: progress.progressPercentage,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: theme.primary700,
-                                borderRadius: BorderRadius.circular(2),
+                width: isCurrentGroup ? 72 : 64,
+                height: isCurrentGroup ? 72 : 64,
+                child: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 200),
+                  opacity: isCurrentGroup ? 1.0 : 0.6,
+                  child: Stack(
+                    children: [
+                      // Build stacked thumbnails for current group, single for others
+                      if (isCurrentGroup)
+                        _buildStackedThumbnails(group, theme)
+                      else
+                        _buildSingleThumbnail(group),
+                      
+                      // Progress/status badges
+                      if (progress.isComplete && progress.deletionCount > 0)
+                        Positioned(
+                          top: 4,
+                          right: 4,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: theme.warning700,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              '${progress.deletionCount}',
+                              style: TextStyle(
+                                color: theme.backgroundBase,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
                         ),
-                      ),
-                  ],
+                      
+                      if (progress.isComplete && progress.deletionCount == 0)
+                        Positioned(
+                          top: 4,
+                          right: 4,
+                          child: Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                              color: theme.primary500,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.check,
+                              size: 12,
+                              color: theme.backgroundBase,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -140,38 +115,105 @@ class GroupCarousel extends StatelessWidget {
     );
   }
 
-  Widget _buildThumbnailGrid(SimilarFiles group) {
-    final files = group.files.take(4).toList();
-    
-    if (files.isEmpty) {
+  Widget _buildStackedThumbnails(SimilarFiles group, theme) {
+    if (group.files.isEmpty) {
       return const SizedBox.shrink();
     }
     
-    if (files.length == 1) {
-      return ThumbnailWidget(
-        files[0],
-        fit: BoxFit.cover,
-        shouldShowLivePhotoOverlay: false,
-        shouldShowOwnerAvatar: false,
-      );
+    return Stack(
+      children: [
+        // Back card (rotated slightly)
+        if (group.files.length > 1)
+          Positioned(
+            top: 4,
+            left: 4,
+            right: 4,
+            bottom: 4,
+            child: Transform.rotate(
+              angle: -0.05, // Slight rotation
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 2,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: ThumbnailWidget(
+                    group.files[1],
+                    fit: BoxFit.cover,
+                    shouldShowLivePhotoOverlay: false,
+                    shouldShowOwnerAvatar: false,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        // Front card
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          child: Transform.rotate(
+            angle: 0.05, // Slight rotation opposite direction
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.15),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: ThumbnailWidget(
+                  group.files[0],
+                  fit: BoxFit.cover,
+                  shouldShowLivePhotoOverlay: false,
+                  shouldShowOwnerAvatar: false,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+  
+  Widget _buildSingleThumbnail(SimilarFiles group) {
+    if (group.files.isEmpty) {
+      return const SizedBox.shrink();
     }
     
-    return GridView.builder(
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 1,
-        mainAxisSpacing: 1,
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      itemCount: files.length.clamp(0, 4),
-      itemBuilder: (context, index) {
-        return ThumbnailWidget(
-          files[index],
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: ThumbnailWidget(
+          group.files[0],
           fit: BoxFit.cover,
           shouldShowLivePhotoOverlay: false,
           shouldShowOwnerAvatar: false,
-        );
-      },
+        ),
+      ),
     );
   }
 }

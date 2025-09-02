@@ -1,4 +1,4 @@
-import "dart:async" show unawaited;
+import "dart:async" show Timer, unawaited;
 
 import "package:flutter/foundation.dart" show kDebugMode;
 import 'package:flutter/material.dart';
@@ -145,34 +145,39 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
         title: Text(AppLocalizations.of(context).similarImages),
         actions: _pageState == SimilarImagesPageState.results
             ? [
-                // Show swipe culling icon when files are selected
+                // Show swipe culling icon when filtered groups are available
                 ListenableBuilder(
                   listenable: _selectedFiles,
                   builder: (context, _) {
-                    if (_selectedFiles.files.isNotEmpty) {
+                    // Get selected groups (groups with at least one selected file)
+                    final selectedGroups = <SimilarFiles>[];
+                    for (final group in _filteredGroups) {
+                      bool hasSelectedFile = false;
+                      for (final file in group.files) {
+                        if (_selectedFiles.files.contains(file)) {
+                          hasSelectedFile = true;
+                          break;
+                        }
+                      }
+                      if (hasSelectedFile) {
+                        selectedGroups.add(group);
+                      }
+                    }
+                    
+                    // Filter out single-image groups and groups with 50+ images
+                    final validGroups = selectedGroups
+                        .where((g) => g.files.length > 1 && g.files.length < 50)
+                        .toList();
+                    
+                    if (validGroups.isNotEmpty) {
                       return IconButton(
                         icon: const Icon(Icons.view_carousel_rounded),
                         onPressed: () async {
-                          // Get selected groups (groups with at least one selected file)
-                          final selectedGroups = <SimilarFiles>[];
-                          for (final group in _filteredGroups) {
-                            bool hasSelectedFile = false;
-                            for (final file in group.files) {
-                              if (_selectedFiles.files.contains(file)) {
-                                hasSelectedFile = true;
-                                break;
-                              }
-                            }
-                            if (hasSelectedFile) {
-                              selectedGroups.add(group);
-                            }
-                          }
-                          
                           final result = await Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => SwipeCullingPage(
-                                similarFiles: selectedGroups,
+                                similarFiles: validGroups,
                               ),
                             ),
                           );
