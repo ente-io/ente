@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:photos/models/faces_through_time/face_timeline_entry.dart';
 
 class FaceTimeline {
