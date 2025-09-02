@@ -58,6 +58,7 @@ class FileSelectionActionsWidget extends StatefulWidget {
   final DeviceCollection? deviceCollection;
   final SelectedFiles selectedFiles;
   final PersonEntity? person;
+  final bool isCollapsed;
   final String? clusterID;
 
   const FileSelectionActionsWidget(
@@ -67,6 +68,7 @@ class FileSelectionActionsWidget extends StatefulWidget {
     this.collection,
     this.person,
     this.clusterID,
+    this.isCollapsed = false,
     this.deviceCollection,
   });
 
@@ -527,75 +529,92 @@ class _FileSelectionActionsWidgetState
                 ),
 
                 // Second Row
-                if (groupedOtherItems.isNotEmpty) ...[
-                  const SizedBox(height: 24),
-                  Container(
-                    width: double.infinity,
-                    height: 74,
-                    decoration: BoxDecoration(
-                      color: getEnteColorScheme(context).backgroundElevated2,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: PageView.builder(
-                      controller: _pageController,
-                      itemCount: groupedOtherItems.length,
-                      onPageChanged: (index) {
-                        if (index >= groupedOtherItems.length &&
-                            groupedOtherItems.isNotEmpty) {
-                          _pageController.animateToPage(
-                            groupedOtherItems.length - 1,
-                            duration: const Duration(seconds: 5),
-                            curve: Curves.easeInOut,
-                          );
-                        }
-                      },
-                      itemBuilder: (context, pageIndex) {
-                        if (pageIndex >= groupedOtherItems.length) {
-                          return const SizedBox();
-                        }
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  height: widget.isCollapsed ? 0 : null,
+                  child: AnimatedOpacity(
+                    opacity: widget.isCollapsed ? 0.0 : 1.0,
+                    duration: const Duration(milliseconds: 300),
+                    child: ClipRect(
+                      child: Column(
+                        children: [
+                          if (groupedOtherItems.isNotEmpty) ...[
+                            const SizedBox(height: 24),
+                            Container(
+                              width: double.infinity,
+                              height: 74,
+                              decoration: BoxDecoration(
+                                color: getEnteColorScheme(context)
+                                    .backgroundElevated2,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: PageView.builder(
+                                controller: _pageController,
+                                itemCount: groupedOtherItems.length,
+                                onPageChanged: (index) {
+                                  if (index >= groupedOtherItems.length &&
+                                      groupedOtherItems.isNotEmpty) {
+                                    _pageController.animateToPage(
+                                      groupedOtherItems.length - 1,
+                                      duration: const Duration(seconds: 5),
+                                      curve: Curves.easeInOut,
+                                    );
+                                  }
+                                },
+                                itemBuilder: (context, pageIndex) {
+                                  if (pageIndex >= groupedOtherItems.length) {
+                                    return const SizedBox();
+                                  }
 
-                        final currentGroup = groupedOtherItems[pageIndex];
+                                  final currentGroup =
+                                      groupedOtherItems[pageIndex];
 
-                        return Row(
-                          children: currentGroup.map((item) {
-                            return Expanded(
-                              child: AnimatedSwitcher(
-                                duration: const Duration(seconds: 5),
-                                transitionBuilder: (
-                                  Widget child,
-                                  Animation<double> animation,
-                                ) {
-                                  return FadeTransition(
-                                    opacity: animation,
-                                    child: child,
+                                  return Row(
+                                    children: currentGroup.map((item) {
+                                      return Expanded(
+                                        child: AnimatedSwitcher(
+                                          duration: const Duration(seconds: 5),
+                                          transitionBuilder: (
+                                            Widget child,
+                                            Animation<double> animation,
+                                          ) {
+                                            return FadeTransition(
+                                              opacity: animation,
+                                              child: child,
+                                            );
+                                          },
+                                          child: item is Widget
+                                              ? KeyedSubtree(
+                                                  key: ValueKey(item.hashCode),
+                                                  child: item,
+                                                )
+                                              : const SizedBox(),
+                                        ),
+                                      );
+                                    }).toList(),
                                   );
                                 },
-                                child: item is Widget
-                                    ? KeyedSubtree(
-                                        key: ValueKey(item.hashCode),
-                                        child: item,
-                                      )
-                                    : const SizedBox(),
                               ),
-                            );
-                          }).toList(),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  if (groupedOtherItems.length > 1)
-                    SmoothPageIndicator(
-                      controller: _pageController,
-                      count: groupedOtherItems.length,
-                      effect: const WormEffect(
-                        dotHeight: 6,
-                        dotWidth: 6,
-                        spacing: 6,
-                        activeDotColor: Colors.white,
+                            ),
+                            const SizedBox(height: 16),
+                            if (groupedOtherItems.length > 1)
+                              SmoothPageIndicator(
+                                controller: _pageController,
+                                count: groupedOtherItems.length,
+                                effect: const WormEffect(
+                                  dotHeight: 6,
+                                  dotWidth: 6,
+                                  spacing: 6,
+                                  activeDotColor: Colors.white,
+                                ),
+                              ),
+                          ],
+                        ],
                       ),
                     ),
-                ],
+                  ),
+                ),
               ],
             ),
           ),

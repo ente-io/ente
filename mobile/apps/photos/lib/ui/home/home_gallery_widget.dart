@@ -46,8 +46,10 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
       _hideSharedFilesFromHomeSubscription;
   bool _shouldHideSharedItems = localSettings.hideSharedItemsFromHomeGallery;
   final ValueNotifier<bool> _isScrolling = ValueNotifier(false);
-  bool _isCollapsed = true;
+  bool _isCollapsed = false;
   bool _hasCollapsedOnce = false;
+  bool _hasFilesSelected = false;
+  Timer? _selectionTimer;
 
   /// This deboucner is to delay the UI update of the shared items toggle
   /// since it's expensive (a new differnt key is used for the gallery
@@ -69,6 +71,28 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
         });
       });
     });
+
+    widget.selectedFiles.addListener(_onSelectionChanged);
+  }
+
+  void _onSelectionChanged() {
+    final hasSelection = widget.selectedFiles.files.isNotEmpty;
+
+    if (hasSelection && !_hasFilesSelected) {
+      setState(() {
+        _isCollapsed = false;
+        _hasFilesSelected = true;
+      });
+
+      _selectionTimer?.cancel();
+      _selectionTimer = Timer(const Duration(milliseconds: 1000), () {});
+    } else if (!hasSelection && _hasFilesSelected) {
+      setState(() {
+        _hasFilesSelected = false;
+        _isCollapsed = false;
+      });
+      _selectionTimer?.cancel();
+    }
   }
 
   @override
@@ -76,14 +100,20 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
     super.dispose();
     _hideSharedFilesFromHomeSubscription.cancel();
     _hideSharedItemsToggleDebouncer.cancelDebounceTimer();
+    widget.selectedFiles.removeListener(_onSelectionChanged);
+    _selectionTimer?.cancel();
   }
 
   @override
   Widget build(BuildContext context) {
     final gallery = NotificationListener<ScrollNotification>(
       onNotification: (scrollInfo) {
-        if (scrollInfo is UserScrollNotification) {
-          if ((!_hasCollapsedOnce || !_isCollapsed) &&
+        if (scrollInfo is UserScrollNotification && _hasFilesSelected) {
+          final shouldAllowCollapse =
+              _selectionTimer == null || !_selectionTimer!.isActive;
+
+          if (shouldAllowCollapse &&
+              (!_hasCollapsedOnce || !_isCollapsed) &&
               (scrollInfo.direction == ScrollDirection.forward ||
                   scrollInfo.direction == ScrollDirection.reverse)) {
             setState(() {

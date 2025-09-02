@@ -14,6 +14,7 @@ class BottomActionBarWidget extends StatelessWidget {
   final String? clusterID;
   final SelectedFiles selectedFiles;
   final VoidCallback? onCancel;
+  final bool isCollapsed;
 
   const BottomActionBarWidget({
     required this.galleryType,
@@ -22,6 +23,7 @@ class BottomActionBarWidget extends StatelessWidget {
     this.person,
     this.clusterID,
     this.onCancel,
+    this.isCollapsed = false,
     super.key,
   });
 
@@ -57,6 +59,7 @@ class BottomActionBarWidget extends StatelessWidget {
             collection: collection,
             person: person,
             clusterID: clusterID,
+            isCollapsed: isCollapsed,
           ),
           const SizedBox(height: 2),
         ],

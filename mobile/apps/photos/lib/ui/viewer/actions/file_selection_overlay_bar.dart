@@ -122,8 +122,6 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   }
 
   Widget _body() {
-    final targetHeight = widget.isCollapsed ? 180.0 : 300.0;
-
     return GestureDetector(
       onVerticalDragUpdate: (details) {
         if (details.primaryDelta! < -5) {
@@ -133,7 +131,6 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
-        height: targetHeight,
         width: double.infinity,
         child: ValueListenableBuilder(
           valueListenable: _hasSelectedFilesNotifier,
@@ -184,6 +181,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                       collection: widget.collection,
                       person: widget.person,
                       clusterID: widget.clusterID,
+                      isCollapsed: widget.isCollapsed,
                       onCancel: () {
                         if (widget.selectedFiles.files.isNotEmpty) {
                           widget.selectedFiles.clearAll();
