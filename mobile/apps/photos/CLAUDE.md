@@ -143,7 +143,7 @@ lib/
 - DO NOT commit or consider work complete until `flutter analyze` passes cleanly
 
 ### 2. Component Reuse - MANDATORY
-**Always reuse existing components**
+**Always try to reuse existing components**
 - Use a subagent to search for existing components before creating new ones
 - Only create new components if none exist that meet the requirements
 - Check both UI components in `lib/ui/` and shared components in `../../packages/`
@@ -152,8 +152,9 @@ lib/
 **Never hardcode colors or text styles**
 - Always use the Ente design system for colors and typography
 - Use a subagent to find the appropriate design tokens
-- Access colors via theme: `Theme.of(context).colorScheme.primary`
-- Access text styles via theme: `Theme.of(context).textTheme.bodyLarge`
+- Access colors via theme: `getEnteColorScheme(context)`
+- Access text styles via theme: `getEnteTextTheme(context)`
+- Call above theme getters only at the top of (`build`) methods and re-use them throughout the component
 - If you MUST use custom colors/styles (extremely rare), explicitly inform the user with a clear warning
 
 ## Important Notes
