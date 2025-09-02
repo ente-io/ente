@@ -1776,14 +1776,6 @@
   "same": "Identyczne",
   "different": "Inne",
   "sameperson": "Ta sama osoba?",
-  "cLTitle1": "Zaawansowany Edytor Obrazów",
-  "cLDesc1": "Wydajemy nowy i zaawansowany edytor obrazów, który dodaje więcej klatek przycinania, filtry dla szybkich edycji, precyzyjne opcje dostrajania, w tym nasycenie, kontrast, jasność, temperatura i wiele więcej. Nowy edytor zawiera również możliwość rysowania zdjęć i dodawania emotikonów jako naklejki.",
-  "cLTitle2": "Inteligentne Albumy",
-  "cLDesc2": "Teraz możesz automatycznie dodawać zdjęcia wybranych osób do dowolnego albumu. Po prostu przejdź do albumu i wybierz \"automatycznie dodaj osoby\" z menu przepełnienia. Jeśli używane razem z udostępnionym albumem, możesz udostępniać zdjęcia bez żadnych kliknięć.",
-  "cLTitle3": "Ulepszona Galeria",
-  "cLDesc3": "Dodaliśmy możliwość grupowania Twojej galerii po tygodniach, miesiącach i latach. Możesz teraz spersonalizować swoją galerię, aby dokładnie wyglądać w ten sposób z nowymi opcjami grupowania, wraz z niestandardowymi siatkami",
-  "cLTitle4": "Szybsze Przewijanie",
-  "cLDesc4": "Wraz z kilkoma ulepszeniami w celu poprawy doświadczenia galerii, przeprojektowaliśmy również pasek przewijania, aby pokazywać znaczniki, umożliwiając szybki skok po osi czasu.",
   "indexingPausedStatusDescription": "Indeksowanie zostało wstrzymane. Zostanie automatycznie wznowione, gdy urządzenie będzie gotowe. Urządzenie uznaje się za gotowe, gdy poziom baterii, stan jej zdrowia oraz status termiczny znajdują się w bezpiecznym zakresie.",
   "thisWeek": "Ten tydzień",
   "lastWeek": "Zeszły tydzień",
@@ -1827,5 +1819,11 @@
         "type": "int"
       }
     }
-  }
+  },
+  "cLTitle1": "Podobne Obrazy",
+  "cLDesc1": "Wprowadzamy nowy system oparty na ML do wykrywania podobnych obrazów, za pomocą którego możesz posprzątać swoją bibliotekę. Dostępne w Ustawienia->Kopia zapasowa->Zwolnij miejsce",
+  "cLTitle2": "Ulepszenia streamingu wideo",
+  "cLDesc2": "Możesz teraz ręcznie wyzwolić generowanie strumienia dla filmów bezpośrednio z aplikacji. Dodaliśmy również nowy ekran ustawień streamingu wideo, który pokaże ci, jaki procent twoich filmów zostało przetworzonych do streamingu",
+  "cLTitle3": "Ulepszenia Wydajności",
+  "cLDesc3": "Liczne ulepszenia pod maską, w tym lepsze wykorzystanie pamięci podręcznej i płynniejsze przewijanie"
 }

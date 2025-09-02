@@ -49,32 +49,47 @@ class ComputeController {
 
   ComputeController() {
     _logger.info('ComputeController constructor');
+    init();
+    _logger.info('init done ');
+  }
+
+  // Directly assign the values + Attach listener for compute controller
+  Future<void> init() async {
+    // Interaction Timer
     _startInteractionTimer(kDefaultInteractionTimeout);
+
+    // Thermal related
+    _onThermalStateUpdate(await _thermal.thermalStatus);
+    _thermal.onThermalStatusChanged.listen((ThermalStatus thermalState) {
+      _onThermalStateUpdate(thermalState);
+    });
+
+    // Battery State
     if (Platform.isIOS) {
       if (kDebugMode) {
-        _logger.info(
+        _logger.fine(
           "iOS battery info stream is not available in simulator, disabling in debug mode",
         );
-        // if you need to test on physical device, uncomment this check
-        return;
+      } else {
+        // Update Battery state for iOS
+        _oniOSBatteryStateUpdate(await BatteryInfoPlugin().iosBatteryInfo);
+        BatteryInfoPlugin()
+            .iosBatteryInfoStream
+            .listen((IosBatteryInfo? batteryInfo) {
+          _oniOSBatteryStateUpdate(batteryInfo);
+        });
       }
-      BatteryInfoPlugin()
-          .iosBatteryInfoStream
-          .listen((IosBatteryInfo? batteryInfo) {
-        _oniOSBatteryStateUpdate(batteryInfo);
-      });
-    }
-    if (Platform.isAndroid) {
+    } else if (Platform.isAndroid) {
+      // Update Battery state for Android
+      _onAndroidBatteryStateUpdate(
+        await BatteryInfoPlugin().androidBatteryInfo,
+      );
       BatteryInfoPlugin()
           .androidBatteryInfoStream
           .listen((AndroidBatteryInfo? batteryInfo) {
         _onAndroidBatteryStateUpdate(batteryInfo);
       });
     }
-    _thermal.onThermalStatusChanged.listen((ThermalStatus thermalState) {
-      _onThermalStateUpdate(thermalState);
-    });
-    _logger.info('init done ');
   }
 
   bool requestCompute({

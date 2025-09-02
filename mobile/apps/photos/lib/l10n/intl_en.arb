@@ -1776,14 +1776,6 @@
   "same": "Same",
   "different": "Different",
   "sameperson": "Same person?",
-  "cLTitle1": "Advanced Image Editor",
-  "cLDesc1": "We are releasing a new and advanced image editor that add more cropping frames, filter presets for quick edits, fine tuning options including saturation, contrast, brightness, temperature and a lot more. The new editor also includes the ability to draw on your photos and add emojis as stickers.",
-  "cLTitle2": "Smart Albums",
-  "cLDesc2": "You can now automatically add photos of selected people to any album. Just go the album, and select \"auto-add people\" from the overflow menu. If used along with shared album, you can share photos with zero clicks.",
-  "cLTitle3": "Improved Gallery",
-  "cLDesc3": "We have added the ability to group your gallery by weeks, months, and years. You can now customise your gallery to look exactly the way you want with these new grouping options, along with custom grids",
-  "cLTitle4": "Faster Scroll",
-  "cLDesc4": "Along with a bunch of under the hood improvements to improve the gallery scroll experience, we have also redesigned the scroll bar to show markers, allowing you to quickly jump across the timeline.",
   "indexingPausedStatusDescription": "Indexing is paused. It will automatically resume when the device is ready. The device is considered ready when its battery level, battery health, and thermal status are within a healthy range.",
   "thisWeek": "This week",
   "lastWeek": "Last week",
@@ -1939,5 +1931,11 @@
   "related": "Related",
   "hoorayyyy": "Hoorayyyy!",
   "nothingToTidyUpHere": "Nothing to tidy up here",
-  "deletingDash": "Deleting - "
+  "deletingDash": "Deleting - ",
+  "cLTitle1": "Similar Images",
+  "cLDesc1": "We are introducing a new ML-based system to detect similar images, using which you can cleanup your library. Available in Settings -> Backup -> Free up space",
+  "cLTitle2": "Video streaming enhancements",
+  "cLDesc2": "You can now manually trigger stream generation for videos directly from the app. We have also added a new video streaming settings screen which will show you what percentage of your videos have been processed for streaming",
+  "cLTitle3": "Performance Improvements",
+  "cLDesc3": "Multiple under the hood improvements, including better cache usage and a smoother scroll experience"
 }

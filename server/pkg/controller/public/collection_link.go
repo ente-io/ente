@@ -60,13 +60,14 @@ type CollectionLinkController struct {
 	JwtSecret             []byte
 }
 
-func (c *CollectionLinkController) CreateLink(ctx context.Context, req ente.CreatePublicAccessTokenRequest) (ente.PublicURL, error) {
+func (c *CollectionLinkController) CreateLink(ctx *gin.Context, req ente.CreatePublicAccessTokenRequest) (ente.PublicURL, error) {
 	accessToken := shortuuid.New()[0:AccessTokenLength]
+	app := auth.GetApp(ctx)
 	err := c.CollectionLinkRepo.
 		Insert(ctx, req.CollectionID, accessToken, req.ValidTill, req.DeviceLimit, req.EnableCollect, req.EnableJoin)
 	if err != nil {
 		if errors.Is(err, ente.ErrActiveLinkAlreadyExists) {
-			collectionToPubUrlMap, err2 := c.CollectionLinkRepo.GetCollectionToActivePublicURLMap(ctx, []int64{req.CollectionID})
+			collectionToPubUrlMap, err2 := c.CollectionLinkRepo.GetCollectionToActivePublicURLMap(ctx, []int64{req.CollectionID}, app)
 			if err2 != nil {
 				return ente.PublicURL{}, stacktrace.Propagate(err2, "")
 			}
@@ -81,8 +82,9 @@ func (c *CollectionLinkController) CreateLink(ctx context.Context, req ente.Crea
 			return ente.PublicURL{}, stacktrace.Propagate(err, "")
 		}
 	}
+
 	response := ente.PublicURL{
-		URL:             c.CollectionLinkRepo.GetAlbumUrl(accessToken),
+		URL:             c.CollectionLinkRepo.GetAlbumUrl(app, accessToken),
 		ValidTill:       req.ValidTill,
 		DeviceLimit:     req.DeviceLimit,
 		EnableDownload:  true,
@@ -124,7 +126,7 @@ func (c *CollectionLinkController) Disable(ctx context.Context, cID int64) error
 	return stacktrace.Propagate(err, "")
 }
 
-func (c *CollectionLinkController) UpdateSharedUrl(ctx context.Context, req ente.UpdatePublicAccessTokenRequest) (ente.PublicURL, error) {
+func (c *CollectionLinkController) UpdateSharedUrl(ctx *gin.Context, req ente.UpdatePublicAccessTokenRequest) (ente.PublicURL, error) {
 	publicCollectionToken, err := c.CollectionLinkRepo.GetActiveCollectionLinkRow(ctx, req.CollectionID)
 	if err != nil {
 		return ente.PublicURL{}, err
@@ -159,8 +161,9 @@ func (c *CollectionLinkController) UpdateSharedUrl(ctx context.Context, req ente
 	if err != nil {
 		return ente.PublicURL{}, stacktrace.Propagate(err, "")
 	}
+	app := auth.GetApp(ctx)
 	return ente.PublicURL{
-		URL:             c.CollectionLinkRepo.GetAlbumUrl(publicCollectionToken.Token),
+		URL:             c.CollectionLinkRepo.GetAlbumUrl(app, publicCollectionToken.Token),
 		DeviceLimit:     publicCollectionToken.DeviceLimit,
 		ValidTill:       publicCollectionToken.ValidTill,
 		EnableDownload:  publicCollectionToken.EnableDownload,

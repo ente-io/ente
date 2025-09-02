@@ -157,7 +157,25 @@ class VideoPreviewService {
 
   bool isCurrentlyProcessing(int? uploadedFileID) {
     if (uploadedFileID == null) return false;
-    return uploadingFileId == uploadedFileID;
+
+    // Also check if file is in queue or other processing states
+    final item = _items[uploadedFileID];
+    if (item != null) {
+      switch (item.status) {
+        case PreviewItemStatus.inQueue:
+        case PreviewItemStatus.compressing:
+        case PreviewItemStatus.uploading:
+          return true;
+        default:
+          return false;
+      }
+    }
+
+    return false;
+  }
+
+  PreviewItemStatus? getProcessingStatus(int uploadedFileID) {
+    return _items[uploadedFileID]?.status;
   }
 
   Future<bool> _isRecreateOperation(EnteFile file) async {
@@ -256,15 +274,20 @@ class VideoPreviewService {
 
   Future<void> chunkAndUploadVideo(
     BuildContext? ctx,
-    EnteFile enteFile, [
+    EnteFile enteFile, {
+    /// Indicates this function is an continuation of a chunking thread
+    bool continuation = false,
+    // not used currently
     bool forceUpload = false,
-    bool isManual = false,
-  ]) async {
+  }) async {
+    final bool isManual =
+        await uploadLocksDB.isInStreamQueue(enteFile.uploadedFileID!);
     final canStream = _isPermissionGranted();
     if (!canStream) {
       _logger.info(
         "Pause preview due to disabledSteaming($isVideoStreamingEnabled) or computeController permission) - isManual: $isManual",
       );
+      computeController.releaseCompute(stream: true);
       if (isVideoStreamingEnabled) _logger.info("No permission to run compute");
       clearQueue();
       return;
@@ -311,7 +334,7 @@ class VideoPreviewService {
       }
 
       // check if there is already a preview in processing
-      if (uploadingFileId >= 0) {
+      if (!continuation && uploadingFileId >= 0) {
         if (uploadingFileId == enteFile.uploadedFileID) return;
 
         _items[enteFile.uploadedFileID!] = PreviewItem(
@@ -562,21 +585,26 @@ class VideoPreviewService {
         _removeFile(enteFile);
         _removeFromLocks(enteFile).ignore();
       }
-      // reset uploading status if this was getting processed
-      if (uploadingFileId == enteFile.uploadedFileID!) {
-        uploadingFileId = -1;
-      }
-      _logger.info(
-        "[chunk] Processing ${_items.length} items for streaming, $error",
-      );
-      // process next file
       if (fileQueue.isNotEmpty) {
+        // process next file
+        _logger.info(
+          "[chunk] Processing ${_items.length} items for streaming, $error",
+        );
         final entry = fileQueue.entries.first;
         final file = entry.value;
         fileQueue.remove(entry.key);
-        await chunkAndUploadVideo(ctx, file);
+        await chunkAndUploadVideo(
+          ctx,
+          file,
+          continuation: true,
+        );
       } else {
+        _logger.info(
+          "[chunk] Nothing to process releasing compute, $error",
+        );
         computeController.releaseCompute(stream: true);
+
+        uploadingFileId = -1;
       }
     }
   }
@@ -987,8 +1015,9 @@ class VideoPreviewService {
   }
 
   // generate stream for all files after cutoff date
-  Future<void> _putFilesForPreviewCreation() async {
-    if (!isVideoStreamingEnabled || !await canUseHighBandwidth()) return;
+  // returns false if it fails to launch chuncking function
+  Future<bool> _putFilesForPreviewCreation() async {
+    if (!isVideoStreamingEnabled || !await canUseHighBandwidth()) return false;
 
     Map<int, String> failureFiles = {};
     Map<int, String> manualQueueFiles = {};
@@ -1124,7 +1153,7 @@ class VideoPreviewService {
     final totalFiles = fileQueue.length;
     if (totalFiles == 0) {
       _logger.info("[init] No preview to cache");
-      return;
+      return false;
     }
 
     _logger.info(
@@ -1136,6 +1165,7 @@ class VideoPreviewService {
     final file = entry.value;
     fileQueue.remove(entry.key);
     chunkAndUploadVideo(null, file).ignore();
+    return true;
   }
 
   bool _allowStream() {
@@ -1152,9 +1182,11 @@ class VideoPreviewService {
         );
   }
 
+  /// To check if it's enabled, device is healthy and running streaming
   bool _isPermissionGranted() {
     return isVideoStreamingEnabled &&
-        computeController.computeState == ComputeRunState.generatingStream;
+        computeController.computeState == ComputeRunState.generatingStream &&
+        computeController.isDeviceHealthy;
   }
 
   void queueFiles({
@@ -1169,7 +1201,11 @@ class VideoPreviewService {
       if (!isStreamAllowed) return;
 
       await _ensurePreviewIdsInitialized();
-      await _putFilesForPreviewCreation();
+      final result = await _putFilesForPreviewCreation();
+      // Cannot proceed to stream generation, would have to release compute ASAP
+      if (!result) {
+        computeController.releaseCompute(stream: true);
+      }
     });
   }
 }
