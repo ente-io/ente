@@ -46,6 +46,8 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
       _hideSharedFilesFromHomeSubscription;
   bool _shouldHideSharedItems = localSettings.hideSharedItemsFromHomeGallery;
   final ValueNotifier<bool> _isScrolling = ValueNotifier(false);
+  bool _isCollapsed = true;
+  bool _hasCollapsedOnce = false;
 
   /// This deboucner is to delay the UI update of the shared items toggle
   /// since it's expensive (a new differnt key is used for the gallery
@@ -81,11 +83,13 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
     final gallery = NotificationListener<ScrollNotification>(
       onNotification: (scrollInfo) {
         if (scrollInfo is UserScrollNotification) {
-          if (scrollInfo.direction == ScrollDirection.forward ||
-              scrollInfo.direction == ScrollDirection.reverse) {
-            _isScrolling.value = true;
-          } else if (scrollInfo.direction == ScrollDirection.idle) {
-            _isScrolling.value = false;
+          if ((!_hasCollapsedOnce || !_isCollapsed) &&
+              (scrollInfo.direction == ScrollDirection.forward ||
+                  scrollInfo.direction == ScrollDirection.reverse)) {
+            setState(() {
+              _isCollapsed = true;
+              _hasCollapsedOnce = true;
+            });
           }
         }
         return false;
@@ -163,7 +167,12 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
                 return FileSelectionOverlayBar(
                   GalleryType.homepage,
                   widget.selectedFiles,
-                  isCollapsed: isScrolling,
+                  isCollapsed: _isCollapsed,
+                  onExpand: () {
+                    setState(() {
+                      _isCollapsed = false;
+                    });
+                  },
                 );
               },
             ),
