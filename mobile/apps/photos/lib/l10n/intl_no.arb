@@ -1737,10 +1737,10 @@
   "memoriesWidgetDesc": "Velg typen minner du ønsker å se på din hjemskjerm.",
   "smartMemories": "Smarte minner",
   "pastYearsMemories": "Tidligere års minner",
-  "cLTitle1": "Lignende Bilder",
-  "cLDesc1": "Vi introduserer et nytt ML-basert system for å oppdage lignende bilder, som du kan bruke til å rydde opp i biblioteket ditt. Tilgjengelig i Innstillinger->Sikkerhetskopi->Frigjør plass",
+  "cLTitle1": "Lignende bilder",
+  "cLDesc1": "Vi introduserer et nytt ML-basert system for å oppdage lignende bilder, som du kan bruke til å rydde opp i biblioteket ditt. Tilgjengelig i Innstillinger -> Sikkerhetskopi -> Frigjør plass",
   "cLTitle2": "Video streaming forbedringer",
   "cLDesc2": "Du kan nå manuelt utløse stream generering for videoer direkte fra appen. Vi har også lagt til en ny video streaming innstillinger skjerm som viser deg hvor mange prosent av videoene dine som er behandlet for streaming",
-  "cLTitle3": "Ytelsesforbedringar",
+  "cLTitle3": "Ytelsesforbedringer",
   "cLDesc3": "Flere forbedringer under panseret, inkludert bedre cache bruk og en jevnere rullingsopplevelse"
 }

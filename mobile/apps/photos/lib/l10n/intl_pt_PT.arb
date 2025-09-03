@@ -1820,10 +1820,10 @@
       }
     }
   },
-  "cLTitle1": "Imagens Similares",
-  "cLDesc1": "Estamos a introduzir um novo sistema baseado em ML para detectar imagens similares, com o qual pode limpar a sua biblioteca. Disponível em Definições->Cópia de Segurança->Libertar Espaço",
+  "cLTitle1": "Imagens similares",
+  "cLDesc1": "Estamos a introduzir um novo sistema baseado em ML para detectar imagens similares, com o qual pode limpar a sua biblioteca. Disponível em Definições -> Cópia de segurança -> Libertar espaço",
   "cLTitle2": "Melhorias do streaming de vídeo",
   "cLDesc2": "Agora pode accionar manualmente a geração de stream para vídeos directamente da aplicação. Também adicionámos um novo ecrã de definições de streaming de vídeo que mostrará que percentagem dos seus vídeos foram processados para streaming",
-  "cLTitle3": "Melhorias de Performance",
+  "cLTitle3": "Melhorias de desempenho",
   "cLDesc3": "Múltiplas melhorias internas, incluindo melhor uso de cache e uma experiência de deslocação mais suave"
 }

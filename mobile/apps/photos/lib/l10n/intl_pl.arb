@@ -1820,10 +1820,10 @@
       }
     }
   },
-  "cLTitle1": "Podobne Obrazy",
+  "cLTitle1": "Podobne obrazy",
   "cLDesc1": "Wprowadzamy nowy system oparty na ML do wykrywania podobnych obrazów, za pomocą którego możesz posprzątać swoją bibliotekę. Dostępne w Ustawienia->Kopia zapasowa->Zwolnij miejsce",
   "cLTitle2": "Ulepszenia streamingu wideo",
   "cLDesc2": "Możesz teraz ręcznie wyzwolić generowanie strumienia dla filmów bezpośrednio z aplikacji. Dodaliśmy również nowy ekran ustawień streamingu wideo, który pokaże ci, jaki procent twoich filmów zostało przetworzonych do streamingu",
-  "cLTitle3": "Ulepszenia Wydajności",
+  "cLTitle3": "Ulepszenia wydajności",
   "cLDesc3": "Liczne ulepszenia pod maską, w tym lepsze wykorzystanie pamięci podręcznej i płynniejsze przewijanie"
 }
