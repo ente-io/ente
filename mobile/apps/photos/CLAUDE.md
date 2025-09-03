@@ -206,3 +206,6 @@ lib/
 - When adding functionality, check both `../../packages/` for shared code and `./plugins/` for Photos-specific plugins
 - Performance-critical paths use Rust integration
 - Always follow existing code conventions and patterns in neighboring files
+
+# Individual Preferences
+- @~/.claude/my-project-instructions.md
