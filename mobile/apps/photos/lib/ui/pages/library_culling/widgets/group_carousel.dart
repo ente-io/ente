@@ -23,50 +23,53 @@ class GroupCarousel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = getEnteColorScheme(context);
-    
+
     return SizedBox(
-      height: 90,
+      height: 100,
       child: ListView.builder(
+        clipBehavior: Clip.none,
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
         itemCount: groups.length,
         itemBuilder: (context, index) {
           final group = groups[index];
-          final progress = progressMap[index] ?? 
+          final progress = progressMap[index] ??
               GroupProgress(
-                totalImages: group.files.length, 
-                reviewedImages: 0, 
+                totalImages: group.files.length,
+                reviewedImages: 0,
                 deletionCount: 0,
               );
           final isCurrentGroup = index == currentGroupIndex;
-          
+
           return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             child: GestureDetector(
-              onTap: () => isCurrentGroup 
-                  ? onGroupLongPress(index)  // Show summary if tapping current group
+              onTap: () => isCurrentGroup
+                  ? onGroupLongPress(
+                      index,
+                    ) // Show summary if tapping current group
                   : onGroupSelected(index),
               onLongPress: () => onGroupLongPress(index),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                width: isCurrentGroup ? 72 : 64,
-                height: isCurrentGroup ? 72 : 64,
+              child: SizedBox(
+                width: 72, // 72x90 rectangular
+                height: 90,
                 child: AnimatedOpacity(
                   duration: const Duration(milliseconds: 200),
                   opacity: isCurrentGroup ? 1.0 : 0.6,
                   child: Stack(
+                    clipBehavior: Clip.none,
                     children: [
                       // Build stacked thumbnails for current group, single for others
                       if (isCurrentGroup)
                         _buildStackedThumbnails(group, theme)
                       else
                         _buildSingleThumbnail(group),
-                      
+
                       // Progress/status badges
                       if (progress.isComplete && progress.deletionCount > 0)
                         Positioned(
-                          top: 4,
-                          right: 4,
+                          top: -8,
+                          right: -8,
                           child: Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 6,
@@ -78,29 +81,29 @@ class GroupCarousel extends StatelessWidget {
                             ),
                             child: Text(
                               '${progress.deletionCount}',
-                              style: TextStyle(
-                                color: theme.backgroundBase,
+                              style: const TextStyle(
+                                color: Colors.white,
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
                         ),
-                      
+
                       if (progress.isComplete && progress.deletionCount == 0)
                         Positioned(
-                          top: 4,
-                          right: 4,
+                          top: -8,
+                          right: -8,
                           child: Container(
                             padding: const EdgeInsets.all(2),
                             decoration: BoxDecoration(
                               color: theme.primary500,
                               shape: BoxShape.circle,
                             ),
-                            child: Icon(
+                            child: const Icon(
                               Icons.check,
                               size: 12,
-                              color: theme.backgroundBase,
+                              color: Colors.white,
                             ),
                           ),
                         ),
@@ -119,7 +122,7 @@ class GroupCarousel extends StatelessWidget {
     if (group.files.isEmpty) {
       return const SizedBox.shrink();
     }
-    
+
     return Stack(
       children: [
         // Back card (rotated slightly)
@@ -130,10 +133,14 @@ class GroupCarousel extends StatelessWidget {
             right: 4,
             bottom: 4,
             child: Transform.rotate(
-              angle: -0.05, // Slight rotation
+              angle: -0.15, // More rotation for better separation
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: theme.strokeMuted,
+                    width: 1.0,
+                  ),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.1),
@@ -145,7 +152,7 @@ class GroupCarousel extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: ThumbnailWidget(
-                    group.files[1],
+                    group.files[0],
                     fit: BoxFit.cover,
                     shouldShowLivePhotoOverlay: false,
                     shouldShowOwnerAvatar: false,
@@ -161,10 +168,14 @@ class GroupCarousel extends StatelessWidget {
           right: 0,
           bottom: 0,
           child: Transform.rotate(
-            angle: 0.05, // Slight rotation opposite direction
+            angle: 0.10, // More rotation opposite direction
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: theme.strokeMuted,
+                  width: 1.0,
+                ),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.15),
@@ -188,12 +199,12 @@ class GroupCarousel extends StatelessWidget {
       ],
     );
   }
-  
+
   Widget _buildSingleThumbnail(SimilarFiles group) {
     if (group.files.isEmpty) {
       return const SizedBox.shrink();
     }
-    
+
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),

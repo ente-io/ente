@@ -3,6 +3,7 @@
 ## Design Screenshots
 
 The following screenshots illustrate the feature design:
+
 - `swipe_left_delete.png` - Left swipe interaction showing red overlay and trash icon for deletion
 - `swipe_right_keep.png` - Right swipe interaction showing green overlay and thumbs up for keeping
 - `group_carousel_view.png` - Main interface with group carousel at top and best picture badge
@@ -11,10 +12,11 @@ The following screenshots illustrate the feature design:
 ## 1. Feature Overview
 
 ### Purpose
+
 Transform the tedious task of removing duplicate/similar photos into an engaging, gamified experience using familiar swipe gestures inspired by dating apps like Tinder.
 
-
 ### Core Value Proposition
+
 - **Efficiency**: Quick decision-making through intuitive gestures
 - **Engagement**: Gamified experience reduces decision fatigue
 - **Safety**: Batch processing with review capability before final deletion
@@ -23,12 +25,15 @@ Transform the tedious task of removing duplicate/similar photos into an engaging
 ## 2. User Journey
 
 ### Entry Point
+
 From Similar Images page → New icon in top-right corner (swipe/cards icon) → Opens swipe culling interface with selected images
+
 - Icon only appears when filtered groups are available (not just when files are selected)
 - Filters out single-image groups and groups with 50+ images before checking
 - Carries over filtered groups from Similar Images page
 
 ### Flow
+
 1. User selects images on Similar Images page (auto-selected duplicates)
 2. Taps swipe culling icon to enter new interface
 3. Reviews each image in a group via swipe gestures
@@ -40,28 +45,63 @@ From Similar Images page → New icon in top-right corner (swipe/cards icon) →
 ### Screen Layout
 
 #### Header
+
 - **Left**: Back button
-- **Center**: Visual progress indicator (not text "X of Y")
-- **Right**: "Delete (N)" button showing total pending deletions count
+- **Center**: Empty
+- **Right**: Delete button with:
+  - Red background color
+  - White text
+  - Trash icon at start
+  - Shows "Delete (N)" with pending count
+
+#### Progress Indicator
+
+- **Instagram-style dots** showing image progress within group
+- **Location**: Just above the swipeable image card
+  - Positioned between group carousel and main image
+  - 8px padding above and below
+  - Center-aligned horizontally
+  - Subtle fade-in animation when switching groups
+- **Color coding**:
+  - Red dots for deleted images
+  - Green dots for kept images
+  - Larger current dot (8px vs 6px)
+  - Gray for undecided
+- **Max dots**: 10 (collapsed view for larger groups)
 
 #### Main Content Area
+
 - **Swipeable Card Stack**: Current image displayed prominently
   - Shows full image without cropping (aspect ratio preserved)
   - Card size adapts to image dimensions
   - Uses full resolution image (not thumbnails) after initial load
+  - No "Best" badge (removed for v1)
 - **Swipe Indicators**:
-  - Left swipe → Red border that intensifies with swipe distance (no full overlay)
-  - Right swipe → Green border that intensifies with swipe distance (no full overlay)
+  - Left swipe → Thin red border that intensifies with swipe distance (4px max)
+  - Right swipe → Thin green border that intensifies with swipe distance (4px max)
   - Visual feedback: Only colored border, no full image overlay
+- **File Information**: Directly below image (minimal gap):
+  - File display name (top)
+  - File size in human-readable format (bottom)
+  - Both in muted text color
+  - Positioned immediately after the image card
 
 #### Group Navigation (Top Carousel)
+
 - Horizontal scrollable list of image groups
 - **Visual Design**:
+  - **Thumbnail shape**: Rectangular thumbnails (72x90px, portrait orientation)
+  - **Spacing**: Increased spacing between groups (8px horizontal padding)
   - **Current group**: Two thumbnails stacked with slight rotation (like cards)
+    - Visible border around each thumbnail (1px solid stroke)
+    - Clear layering effect showing two distinct images
   - **Other groups**: Single thumbnail of first image
-  - **Size difference**: Current group slightly larger than others
-  - **Selection indicator**: Non-selected groups shown with reduced opacity (not border highlight)
-  - **Completion badges**: Small badge showing deletion count when complete (if > 0)
+  - **Selection indicator**: Non-selected groups shown with reduced opacity
+  - **Completion badges**:
+    - Positioned ON the corner edge (not inside)
+    - Red badge with white text for deletion count
+    - Green circle with white checkmark for completed groups
+    - Both badges overlap the corner boundary
 - **Interaction Model**:
   - **Single tap on current group**: Show summary popup
   - **Single tap on other group**: Navigate to that group
@@ -72,21 +112,27 @@ From Similar Images page → New icon in top-right corner (swipe/cards icon) →
     - Storage to be freed from this group
 
 #### Bottom Action Bar
-- Positioned slightly above bottom edge
-- **Container Design**: Rounded container (borderRadius: 8) with subtle background
-- **Left**: Delete button (red) - quick delete current image
-- **Center**: Undo button with circular arrow icon - revert last action
-- **Right**: Keep button (green) - quick keep current image
+
+- Positioned higher up from bottom edge
+- **Design**:
+  - Large square containers for delete and keep buttons (72x72px)
+  - No container for undo button (standalone)
+  - Undo button positioned between the two containers
+- **Left**: Delete button (X icon) in square container with elevation
+- **Center**: Undo button with circular arrow icon (no container, muted color)
+- **Right**: Keep button (thumbs up icon) in square container with elevation
 
 ### Interaction Patterns
 
 #### Swipe Gestures
+
 - **Right Swipe**: Mark image as "keep" (green indicator)
 - **Left Swipe**: Mark image for deletion (red indicator)
 - **Swipe Threshold**: ~30% of screen width to trigger action
 - **Snap Back**: If swipe incomplete, card returns to center
 
 #### Button Actions
+
 - **Bottom Delete**: Alternative to left swipe
 - **Bottom Keep**: Alternative to right swipe
 - **Undo**: Reverts last swipe action within current group only
@@ -94,7 +140,9 @@ From Similar Images page → New icon in top-right corner (swipe/cards icon) →
 - **Confirm**: Opens deletion summary dialog
 
 #### Auto-Advance Flow (Group Completion)
+
 **Minimal Celebration Approach**: Ultra-quick, non-intrusive transition
+
 1. **Duration**: Maximum 0.25-0.4s (half current time)
 2. **Animation**: Light sprinkle effect or simple checkmark fade
 3. **No text**: No "Group complete" message
@@ -102,14 +150,16 @@ From Similar Images page → New icon in top-right corner (swipe/cards icon) →
 5. **Non-blocking**: Animation doesn't prevent immediate interaction
 
 **Alternative Approaches Considered**:
+
 - Streak celebration with momentum carry-forward
 - Level-up gaming style transitions
 - Stories-style progress segments
 - Swipe-through summary card
 
 #### Special Cases
-- **"Best Picture" Badge**: Currently shows first image in group (v1 implementation)
-  - Future: Algorithm based on quality metrics, resolution, and filename patterns
+
+- **"Best Picture" Badge**: Removed for v1
+  - Future v2: Algorithm based on quality metrics, resolution, and filename patterns
 - **Last Card in Group**: Auto-advances with celebration animation as described above
 
 ## 4. Feature Requirements
@@ -117,6 +167,7 @@ From Similar Images page → New icon in top-right corner (swipe/cards icon) →
 ### Functional Requirements
 
 #### Core Features
+
 - [ ] Display images from selected similar groups in swipeable card interface
 - [ ] Filter out single-image groups and groups with 50+ images
 - [ ] Support swipe left (delete) and swipe right (keep) gestures
@@ -130,6 +181,7 @@ From Similar Images page → New icon in top-right corner (swipe/cards icon) →
 - [ ] Auto-advance with minimal celebration animation between groups
 
 #### Data Management
+
 - [ ] Maintain decision state for each image
 - [ ] Keep state in memory during session (no persistence in v1)
 - [ ] Track full decision history for final deletion
@@ -138,6 +190,7 @@ From Similar Images page → New icon in top-right corner (swipe/cards icon) →
 - [ ] Calculate storage to be freed
 
 #### Navigation
+
 - [ ] Entry from Similar Images page with selected files
 - [ ] Exit handling (prompt if unsaved changes)
 - [ ] Group switching via carousel
@@ -146,6 +199,7 @@ From Similar Images page → New icon in top-right corner (swipe/cards icon) →
 ### Non-Functional Requirements
 
 #### Performance
+
 - **Critical**: Smooth 60fps swipe animations (top priority)
 - Display thumbnails first, then load full resolution images
 - Preload next 2-3 images for instant display
@@ -154,6 +208,7 @@ From Similar Images page → New icon in top-right corner (swipe/cards icon) →
 - Memory efficiency through smart image recycling
 
 #### User Experience
+
 - Haptic feedback on swipe completion (if available)
 - Clear visual states (undecided/keep/delete)
 - Responsive to quick successive swipes
@@ -162,6 +217,7 @@ From Similar Images page → New icon in top-right corner (swipe/cards icon) →
 ## 5. Technical Architecture
 
 ### State Management
+
 ```dart
 class SwipeCullingState {
   List<SimilarFiles> groups;
@@ -185,26 +241,31 @@ class SwipeAction {
 ### Key Components
 
 #### SwipeCullingPage
+
 - Main page widget managing overall state
 - Handles navigation between groups
 - Manages confirmation and deletion flow
 
 #### SwipeablePhotoCard
+
 - Individual card widget with swipe detection
 - Handles gesture recognition and animation
 - Renders image with overlay effects
 
 #### GroupCarousel
+
 - Horizontal scrollable group selector
 - Shows thumbnails and progress badges
 - Handles group switching
 
 #### SwipeActionBar
+
 - Bottom control buttons
 - Triggers same actions as swipe gestures
 - Manages undo stack
 
 ### Data Flow
+
 1. Receive selected `List<SimilarFiles>` from Similar Images page
 2. Filter out single-image groups and groups with 50+ images
 3. Initialize decision map with all images as "undecided"
@@ -218,6 +279,7 @@ class SwipeAction {
 ## 6. Implementation Phases
 
 ### Phase 1: Core Swipe Interface (MVP)
+
 - Implement flutter_card_swiper for smooth animations
 - Left/right swipe detection with visual feedback
 - Color overlays and icons during swipe
@@ -226,12 +288,14 @@ class SwipeAction {
 - Thumbnail-first image loading strategy
 
 ### Phase 2: Multi-Group Navigation
+
 - Group carousel implementation
 - Group switching logic
 - Progress tracking per group
 - Auto-advance between groups
 
 ### Phase 3: Polish & Optimization
+
 - Smooth animations and transitions
 - Haptic feedback
 - Image preloading
@@ -239,6 +303,7 @@ class SwipeAction {
 - Undo functionality
 
 ### Phase 4: Advanced Features (Future)
+
 - AI-powered "Best Picture" suggestions
 - Bulk actions (delete all in group)
 - Swipe sensitivity settings
@@ -247,6 +312,7 @@ class SwipeAction {
 ## 7. Detailed Component Specifications
 
 ### SwipeablePhotoCard Widget
+
 ```dart
 class SwipeablePhotoCard extends StatefulWidget {
   final EnteFile file;
@@ -257,6 +323,7 @@ class SwipeablePhotoCard extends StatefulWidget {
 ```
 
 **Behavior:**
+
 - Displays image with proper aspect ratio
 - Tracks finger position during drag
 - Calculates swipe velocity and direction
@@ -265,6 +332,7 @@ class SwipeablePhotoCard extends StatefulWidget {
 - Returns to center if swipe incomplete
 
 ### GroupCarousel Widget
+
 ```dart
 class GroupCarousel extends StatelessWidget {
   final List<SimilarFiles> groups;
@@ -275,6 +343,7 @@ class GroupCarousel extends StatelessWidget {
 ```
 
 **Features:**
+
 - 2x2 grid thumbnail for each group
 - Clean thumbnails for unreviewd groups (no badges)
 - **Red badge showing deletion count** for completed groups (only if > 0)
@@ -286,12 +355,16 @@ class GroupCarousel extends StatelessWidget {
 ### Confirmation Dialogs
 
 #### Contextual Confirmations
+
 1. **All-in-Group Deletion** (Shows immediately when user marks all images in a group for deletion):
-   - "Delete all images in this group?"
-   - "You've marked all X images for deletion. This will remove the entire group."
-   - Options: "Delete All" / "Review Again"
+
+   - Title: "Delete all images in this group?"
+   - Message: "You've marked all X images for deletion. This will remove the entire group."
+   - Options: "Review Again" / "Confirm"
+   - Follow Ente dialog design patterns (use context explorer for reference)
 
 2. **Final Batch Deletion** (When user taps Confirm button):
+
    - "Delete images - Are you sure you want to delete all the images you swiped left on?"
    - Shows total count and storage to be freed
    - Options: "Delete" / "Cancel"
@@ -304,6 +377,7 @@ class GroupCarousel extends StatelessWidget {
 ## 8. Edge Cases & Considerations
 
 ### Edge Cases
+
 - Single image groups: Not displayed in UI, filtered out completely
 - User exits without confirming: Changes lost (no persistence in v1)
 - Network/storage issues: Handled by existing bulk delete logic
@@ -312,11 +386,13 @@ class GroupCarousel extends StatelessWidget {
 - All images in group marked for deletion: Show immediate confirmation dialog
 
 ### Security & Privacy
+
 - Maintain E2E encryption throughout
 - No server-side processing of decisions
 - Local-only gesture data
 
 ### Accessibility
+
 - Alternative buttons for all swipe actions
 - Screen reader support with clear descriptions
 - Keyboard navigation support
@@ -325,11 +401,13 @@ class GroupCarousel extends StatelessWidget {
 ## 9. Success Metrics
 
 ### User Engagement
+
 - Time to review X images (target: <1 second per image)
 - Completion rate (% users who finish review)
 - Undo usage rate (indicates decision confidence)
 
 ### Feature Effectiveness
+
 - Storage space reclaimed
 - Number of duplicates removed
 - User retention after using feature
@@ -350,28 +428,37 @@ class GroupCarousel extends StatelessWidget {
 ## 11. Final Design Specifications
 
 ### Count Display Strategy
+
 **Main Swipe Interface:**
+
 - Header shows "X of Y" for current group only (subtle, non-intrusive)
 - Optional: Progress dots below photo showing keep/delete pattern
 
 **Carousel Groups:**
+
 - Unreviewd: Clean thumbnails, no badges
 - Current: Subtle highlight/border
 - Completed: Red badge with deletion count (only if > 0)
 - Alternative: Green checkmark if all kept
 
 ### Group Summary Popup (Long-press on carousel)
-**Design**: Grid view with overlay indicators
+
+**Design**: Clean grid view with overlay indicators
+
 - Shows all thumbnails in a grid layout
+- Uses `EnteLoadingWidget` for thumbnails still loading
+- No divider line above thumbnails
 - Deleted images have red overlay with trash icon
 - Kept images shown normally
-- Bottom actions:
-  - "Undo All" button (secondary style)
-  - "Delete These" button (critical style, for group-specific deletion)
+- **Vertical button layout** (aligned, bottom of popup):
+  - "Delete These" button (critical style, top)
+  - "Undo All" button (secondary style, bottom)
 - Shows storage to be freed at top
 
 ### Completion Flow
+
 **All Groups Reviewed Dialog:**
+
 - Appears after last group is completed
 - Content:
   - "All groups reviewed!"
@@ -385,6 +472,7 @@ class GroupCarousel extends StatelessWidget {
 ## 12. Dependencies
 
 ### Existing Components to Reuse
+
 - `SimilarFiles` data model
 - `EnteFile` model
 - Deletion utilities with symlink support
@@ -392,6 +480,7 @@ class GroupCarousel extends StatelessWidget {
 - `ThumbnailWidget` for previews
 
 ### New Package Requirements
+
 - **flutter_card_swiper** (Recommended: Best performance, active maintenance, undo support)
   - Alternative: `appinio_swiper` for maximum memory efficiency
 - Advanced animations (`flutter_animate`)
@@ -401,11 +490,13 @@ class GroupCarousel extends StatelessWidget {
 ## 13. Risk Assessment
 
 ### Technical Risks
+
 - **Performance**: Smooth animations with high-res images
 - **Memory**: Managing multiple images in memory
 - **State Complexity**: Tracking decisions across multiple groups
 
 ### Mitigation Strategies
+
 - Display thumbnails first, lazy load full resolution
 - Use `flutter_card_swiper` with proper image caching
 - Implement aggressive image recycling
@@ -416,21 +507,25 @@ class GroupCarousel extends StatelessWidget {
 ## 14. Testing Strategy
 
 ### Unit Tests
+
 - Decision state management
 - Undo/redo logic
 - Group navigation logic
 
 ### Widget Tests
+
 - Swipe gesture recognition
 - Animation states
 - Button interactions
 
 ### Integration Tests
+
 - Full flow from Similar Images to deletion
 - State persistence
 - Error handling
 
 ### User Testing
+
 - A/B test auto-advance vs manual navigation
 - Test swipe sensitivity settings
 - Gather feedback on animation speed
@@ -438,11 +533,13 @@ class GroupCarousel extends StatelessWidget {
 ## 15. Documentation Needs
 
 ### User Documentation
+
 - Tutorial on first use
 - Gesture guide
 - FAQ section
 
 ### Developer Documentation
+
 - State management architecture
 - Component interaction diagrams
 - Animation timing specifications
@@ -450,6 +547,7 @@ class GroupCarousel extends StatelessWidget {
 ## 16. Future Enhancements
 
 ### V2 Features (Next Release)
+
 - **Decision Persistence**: Save swipe decisions across sessions
 - **Smart Best Picture Algorithm**:
   - Technical quality metrics (resolution, blur, exposure)
@@ -459,6 +557,7 @@ class GroupCarousel extends StatelessWidget {
 - **Advanced Statistics**: Photos reviewed, space saved, time spent
 
 ### V3 Features (Future)
+
 - Advanced filters (by date, size, etc.)
 - ML-powered quality detection with learning
 - Face recognition priority
@@ -470,6 +569,7 @@ class GroupCarousel extends StatelessWidget {
 ## 17. Implementation Plan
 
 ### File Structure
+
 ```
 mobile/apps/photos/lib/ui/
 ├── pages/
@@ -485,29 +585,34 @@ mobile/apps/photos/lib/ui/
 ```
 
 ### State Management
+
 - Use `StatefulWidget` with `setState` for main page state
 - Keep state simple and isolated to this feature
 - No new dependencies required
 
 ### Navigation & Data Passing
+
 - Pass selected `List<SimilarFiles>` via constructor from Similar Images page
 - Return result (deleted count) via `Navigator.pop(result)`
 
 ### Key Implementation Steps
 
 #### Step 1: Create Base Structure
+
 1. Create folder structure under `lib/ui/pages/library_culling/`
 2. Create `SwipeCullingPage` StatefulWidget
 3. Define `SwipeCullingState` model class
 4. Set up basic navigation from Similar Images page
 
 #### Step 2: Add Entry Point Icon
+
 1. In `similar_images_page.dart`, add icon to AppBar actions
 2. Show icon only when `selectedFiles.isNotEmpty`
 3. Icon navigates to `SwipeCullingPage` with selected groups
 4. Use `Icons.view_carousel_rounded` icon
 
 #### Step 3: Implement Core Swipe Interface
+
 1. Add `flutter_card_swiper` to pubspec.yaml
 2. Create `SwipeablePhotoCard` widget
 3. Implement swipe detection and visual feedback
@@ -515,30 +620,35 @@ mobile/apps/photos/lib/ui/
 5. Test with single group first
 
 #### Step 4: Build UI Components
+
 1. **Header**: Back button, "X of Y" counter, Confirm button
 2. **GroupCarousel**: Horizontal list with thumbnails and badges
 3. **SwipeActionBar**: Delete/Undo/Keep buttons
 4. **Swipe overlays**: Red/green borders with icons
 
 #### Step 5: Implement Group Navigation
+
 1. Add carousel widget with tap/long-press handlers
 2. Implement group switching logic
 3. Add progress tracking per group
 4. Implement auto-advance with minimal celebration using Ente color scheme
 
 #### Step 6: Add Popup Interactions
+
 1. Create `GroupSummaryPopup` for long-press
 2. Show grid with overlay indicators
 3. Add "Undo All" and "Delete These" actions
 4. Calculate and display storage savings
 
 #### Step 7: Duplicate & Adapt Deletion Logic
+
 1. Copy `_deleteFilesLogic` from `similar_images_page.dart`
 2. Adapt for swipe culling context
 3. Maintain symlink creation logic
 4. Add progress indicators
 
 #### Step 8: Implement Completion Flow
+
 1. Detect when all groups reviewed
 2. Show "All groups reviewed!" dialog
 3. Display deletion summary (count + storage)
@@ -546,6 +656,7 @@ mobile/apps/photos/lib/ui/
 5. Navigate back to Similar Images page
 
 #### Step 9: Add Localization
+
 1. Add strings to `/mobile/apps/photos/lib/l10n/intl_en.arb`:
    ```json
    "swipeToReview": "Swipe to Review",
@@ -564,12 +675,14 @@ mobile/apps/photos/lib/ui/
 2. Use via `AppLocalizations.of(context).stringKey`
 
 #### Step 10: Handle Edge Cases
+
 1. Filter out single-image groups
 2. Filter out groups with 50+ images
 3. Implement confirmation for all-in-group deletion
 4. Handle exit without saving (show warning dialog)
 
 #### Step 11: Performance Optimization
+
 1. Use `ThumbnailWidget` for initial display
 2. Lazy load full resolution images
 3. Preload next 2-3 images
@@ -577,6 +690,7 @@ mobile/apps/photos/lib/ui/
 5. Test with large datasets
 
 #### Step 12: Testing
+
 1. Unit tests for state management logic
 2. Widget tests for swipe detection
 3. Integration test for full flow
@@ -584,6 +698,7 @@ mobile/apps/photos/lib/ui/
 5. Performance profiling
 
 ### Development Order
+
 1. **Day 1**: Steps 1-4 (Base structure + core swipe)
 2. **Day 2**: Steps 5-6 (Group navigation + popups)
 3. **Day 3**: Steps 7-8 (Deletion logic + completion)
@@ -593,6 +708,7 @@ mobile/apps/photos/lib/ui/
 ### Code Snippets
 
 #### Navigation from Similar Images
+
 ```dart
 // In similar_images_page.dart AppBar actions
 if (selectedFiles.isNotEmpty)
@@ -616,15 +732,16 @@ if (selectedFiles.isNotEmpty)
 ```
 
 #### Basic State Structure
+
 ```dart
 class SwipeCullingPage extends StatefulWidget {
   final List<SimilarFiles> similarFiles;
-  
+
   const SwipeCullingPage({
     Key? key,
     required this.similarFiles,
   }) : super(key: key);
-  
+
   @override
   State<SwipeCullingPage> createState() => _SwipeCullingPageState();
 }
@@ -635,7 +752,7 @@ class _SwipeCullingPageState extends State<SwipeCullingPage> {
   int currentImageIndex = 0;
   Map<EnteFile, SwipeDecision> decisions = {};
   Map<int, List<SwipeAction>> groupHistories = {};
-  
+
   @override
   void initState() {
     super.initState();
@@ -650,12 +767,13 @@ class _SwipeCullingPageState extends State<SwipeCullingPage> {
       }
     }
   }
-  
+
   // ... rest of implementation
 }
 ```
 
 ### Testing Checklist
+
 - [ ] Swipe gestures work smoothly
 - [ ] Visual feedback appears correctly
 - [ ] Group navigation works
@@ -669,6 +787,7 @@ class _SwipeCullingPageState extends State<SwipeCullingPage> {
 - [ ] No analytics or tracking code present
 
 ### Key Implementation Notes
+
 1. **Icon**: Use `Icons.view_carousel_rounded` for entry point
 2. **Header Button**: Shows "Delete (N)" not "Confirm (N)"
 3. **Celebration Animation**: Simple, minimal, using Ente colorScheme

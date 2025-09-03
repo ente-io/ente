@@ -76,9 +76,7 @@ class GroupSummaryPopup extends StatelessWidget {
                 ),
               ),
             
-            const Divider(),
-            
-            // Grid of images with overlay indicators
+            // Grid of images with overlay indicators (no divider)
             Expanded(
               child: GridView.builder(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -168,26 +166,27 @@ class GroupSummaryPopup extends StatelessWidget {
             
             const SizedBox(height: 16),
             
-            // Action buttons
-            Row(
+            // Action buttons (vertical layout)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: onUndoAll,
-                    child: Text(AppLocalizations.of(context).undoAll),
-                  ),
-                ),
-                const SizedBox(width: 12),
                 if (deletionCount > 0)
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: onDeleteThese,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: theme.warning700,
-                      ),
-                      child: Text(AppLocalizations.of(context).deleteThese),
+                  ElevatedButton(
+                    onPressed: onDeleteThese,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.warning700,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
+                    child: Text(AppLocalizations.of(context).deleteThese),
                   ),
+                const SizedBox(height: 8),
+                OutlinedButton(
+                  onPressed: onUndoAll,
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: Text(AppLocalizations.of(context).undoAll),
+                ),
               ],
             ),
           ],

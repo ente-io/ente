@@ -6,7 +6,6 @@ import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 
 class SwipeablePhotoCard extends StatelessWidget {
   final EnteFile file;
-  final bool showBestPictureBadge;
   final double swipeProgress;
   final bool isSwipingLeft;
   final bool isSwipingRight;
@@ -14,7 +13,6 @@ class SwipeablePhotoCard extends StatelessWidget {
   const SwipeablePhotoCard({
     super.key,
     required this.file,
-    this.showBestPictureBadge = false,
     this.swipeProgress = 0.0,
     this.isSwipingLeft = false,
     this.isSwipingRight = false,
@@ -27,7 +25,7 @@ class SwipeablePhotoCard extends StatelessWidget {
     
     // Calculate border intensity based on swipe progress
     final borderIntensity = (swipeProgress.abs() * 3).clamp(0.0, 1.0);
-    final borderWidth = (borderIntensity * 8).clamp(0.0, 8.0);
+    final borderWidth = (borderIntensity * 4).clamp(0.0, 4.0); // Thinner border
     
     // Determine border color based on swipe direction
     Color? borderColor;
@@ -81,42 +79,6 @@ class SwipeablePhotoCard extends StatelessWidget {
                       width: borderWidth,
                     ),
                     borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-              ),
-            
-            // Best picture badge
-            if (showBestPictureBadge)
-              Positioned(
-                top: 16,
-                right: 16,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: theme.primary500,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.star,
-                        size: 16,
-                        color: theme.backgroundBase,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Best',
-                        style: TextStyle(
-                          color: theme.backgroundBase,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
                   ),
                 ),
               ),
