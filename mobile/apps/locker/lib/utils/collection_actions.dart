@@ -1,6 +1,7 @@
 import "dart:async";
 
 import "package:ente_accounts/services/user_service.dart";
+import "package:ente_sharing/models/user.dart";
 import "package:ente_ui/components/action_sheet_widget.dart";
 import 'package:ente_ui/components/buttons/button_widget.dart';
 import 'package:ente_ui/components/buttons/models/button_type.dart';
@@ -15,8 +16,7 @@ import "package:locker/extensions/user_extension.dart";
 import 'package:locker/l10n/l10n.dart';
 import "package:locker/services/collections/collections_api_client.dart";
 import 'package:locker/services/collections/collections_service.dart';
-import 'package:locker/services/collections/models/collection.dart';
-import "package:locker/services/collections/models/user.dart";
+import 'package:locker/services/collections/models/collection.dart'; 
 import "package:locker/services/configuration.dart";
 import "package:locker/ui/components/user_dialogs.dart";
 import 'package:locker/utils/snack_bar_utils.dart';

@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_events/models/signed_in_event.dart';
+import "package:ente_sharing/models/user.dart";
 import "package:fast_base58/fast_base58.dart";
 import "package:flutter/foundation.dart";
 import 'package:locker/events/collections_updated_event.dart';
@@ -11,8 +12,7 @@ import "package:locker/services/collections/collections_api_client.dart";
 import "package:locker/services/collections/collections_db.dart";
 import 'package:locker/services/collections/models/collection.dart';
 import "package:locker/services/collections/models/collection_items.dart";
-import "package:locker/services/collections/models/public_url.dart";
-import "package:locker/services/collections/models/user.dart";
+import "package:locker/services/collections/models/public_url.dart"; 
 import 'package:locker/services/configuration.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/services/trash/models/trash_item_request.dart';

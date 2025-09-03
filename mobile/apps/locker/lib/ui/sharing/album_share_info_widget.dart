@@ -1,9 +1,9 @@
 import "dart:math";
 
+import "package:ente_sharing/models/user.dart";
 import "package:flutter/material.dart";
-import "package:locker/services/collections/models/user.dart";
 import "package:locker/ui/sharing/more_count_badge.dart";
-import "package:locker/ui/sharing/user_avator_widget.dart"; 
+import "package:locker/ui/sharing/user_avator_widget.dart";
 
 class AlbumSharesIcons extends StatelessWidget {
   final List<User> sharees;

@@ -1,4 +1,5 @@
 import 'package:email_validator/email_validator.dart';
+import "package:ente_sharing/models/user.dart";
 import "package:ente_ui/components/buttons/button_widget.dart";
 import "package:ente_ui/components/buttons/models/button_type.dart";
 import "package:ente_ui/components/captioned_text_widget.dart";
@@ -14,7 +15,6 @@ import "package:locker/extensions/user_extension.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
-import "package:locker/services/collections/models/user.dart"; 
 import "package:locker/ui/sharing/user_avator_widget.dart";
 import "package:locker/ui/sharing/verify_identity_dialog.dart";
 import "package:locker/utils/collection_actions.dart";
@@ -73,9 +73,10 @@ class _AddParticipantPage extends State<AddParticipantPage> {
   Widget build(BuildContext context) {
     final filterSuggestedUsers = _suggestedUsers
         .where(
-          (element) => (element.displayName ?? element.email).toLowerCase().contains(
-                _textController.text.trim().toLowerCase(),
-              ),
+          (element) =>
+              (element.displayName ?? element.email).toLowerCase().contains(
+                    _textController.text.trim().toLowerCase(),
+                  ),
         )
         .toList();
     isKeypadOpen = MediaQuery.viewInsetsOf(context).bottom > 100;
@@ -440,7 +441,8 @@ class _AddParticipantPage extends State<AddParticipantPage> {
       }
     }
 
-    final List<User> suggestedUsers = CollectionService.instance.getRelevantContacts();
+    final List<User> suggestedUsers =
+        CollectionService.instance.getRelevantContacts();
 
     if (_textController.text.trim().isNotEmpty) {
       suggestedUsers.removeWhere(

@@ -1,8 +1,8 @@
 
+import "package:ente_sharing/models/user.dart";
 import "package:ente_ui/theme/colors.dart";
 import "package:ente_ui/theme/ente_theme.dart";
-import 'package:flutter/material.dart';
-import "package:locker/services/collections/models/user.dart";
+import 'package:flutter/material.dart'; 
 import "package:locker/services/configuration.dart";
 import 'package:tuple/tuple.dart';
 

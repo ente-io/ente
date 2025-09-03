@@ -1,3 +1,4 @@
+import "package:ente_sharing/models/user.dart";
 import "package:ente_ui/components/captioned_text_widget.dart";
 import "package:ente_ui/components/divider_widget.dart";
 import "package:ente_ui/components/menu_item_widget.dart";
@@ -12,8 +13,7 @@ import "package:flutter/services.dart";
 import "package:locker/extensions/user_extension.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/collections/collections_service.dart";
-import "package:locker/services/collections/models/collection.dart";
-import "package:locker/services/collections/models/user.dart";
+import "package:locker/services/collections/models/collection.dart"; 
 import "package:locker/ui/sharing/add_participant_page.dart";
 import "package:locker/ui/sharing/album_participants_page.dart";
 import "package:locker/ui/sharing/album_share_info_widget.dart";

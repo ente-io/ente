@@ -1,3 +1,4 @@
+import "package:ente_sharing/models/user.dart";
 import "package:ente_ui/components/buttons/button_widget.dart";
 import "package:ente_ui/components/captioned_text_widget.dart";
 import "package:ente_ui/components/divider_widget.dart";
@@ -11,8 +12,7 @@ import "package:ente_ui/utils/dialog_util.dart";
 import 'package:flutter/material.dart';
 import "package:locker/extensions/user_extension.dart";
 import "package:locker/l10n/l10n.dart";
-import "package:locker/services/collections/models/collection.dart";
-import "package:locker/services/collections/models/user.dart"; 
+import "package:locker/services/collections/models/collection.dart"; 
 import "package:locker/utils/collection_actions.dart";
 
 class ManageIndividualParticipant extends StatefulWidget {
