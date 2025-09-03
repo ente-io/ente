@@ -32,8 +32,11 @@ impl VectorDB {
 
         if file_exists {
             println!("Loading index from disk.");
-            // Use view to not load the index into memory. https://docs.rs/usearch/latest/usearch/struct.Index.html#method.view
-            db.index.view(file_path).expect("Failed to load index");
+            // Must use load() instead of view() because:
+            // - view() creates a read-only memory-mapped view (immutable)
+            // - load() loads the index into RAM for read/write operations (mutable)
+            // Using view() causes "Can't add to an immutable index" error
+            db.index.load(file_path).expect("Failed to load index");
         } else {
             println!("Creating new index.");
             db.save_index();
