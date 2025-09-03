@@ -535,7 +535,6 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
   @override
   Widget build(BuildContext context) {
     final theme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
 
     if (groups.isEmpty) {
       return Scaffold(
@@ -707,34 +706,6 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
                                           ),
                                     ),
                                   ),
-                              ],
-                            ),
-                          ),
-                          // File info directly below image
-                          Padding(
-                            padding: const EdgeInsets.only(
-                              left: 24.0,
-                              right: 24.0,
-                              top: 4.0,
-                              bottom: 4.0,
-                            ),
-                            child: Column(
-                              children: [
-                                Text(
-                                  currentFile?.displayName ?? '',
-                                  style: textTheme.small.copyWith(
-                                    color: theme.textMuted,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  formatBytes(currentFile?.fileSize ?? 0),
-                                  style: textTheme.mini.copyWith(
-                                    color: theme.textFaint,
-                                  ),
-                                ),
                               ],
                             ),
                           ),
