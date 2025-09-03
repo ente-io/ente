@@ -275,6 +275,13 @@ packages:
       relative: true
     source: path
     version: "1.0.0"
+  ente_sharing:
+    dependency: "direct main"
+    description:
+      path: "../../packages/sharing"
+      relative: true
+    source: path
+    version: "1.0.0"
   ente_strings:
     dependency: "direct main"
     description:
