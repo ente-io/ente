@@ -7,6 +7,7 @@ The photo swipe culling feature has been fully implemented with all planned func
 ## Completed Implementation
 
 ### Phase 1: Core Features ✅
+
 - [x] Create directory structure: `lib/ui/pages/library_culling/`
 - [x] Install flutter_card_swiper package (^7.0.1)
 - [x] Main swipe card interface with smooth animations
@@ -19,6 +20,7 @@ The photo swipe culling feature has been fully implemented with all planned func
 - [x] Entry point from Similar Images page
 
 ### Phase 2: Initial UI Improvements ✅
+
 - [x] Fix carousel icon visibility - check filtered groups
 - [x] Fix swipe overlay - colored borders instead of full overlay
 - [x] Fix black screen bug (unique keys, controller reset)
@@ -30,6 +32,7 @@ The photo swipe culling feature has been fully implemented with all planned func
 - [x] Separate containers for action buttons
 
 ### Phase 3: Final UI Refinements ✅
+
 - [x] Square thumbnails (72x72px) with proper spacing
 - [x] Visible 1px borders on stacked thumbnails
 - [x] Remove "Best" label (postponed to v2)
@@ -48,6 +51,7 @@ The photo swipe culling feature has been fully implemented with all planned func
 ## Technical Implementation
 
 ### Architecture
+
 - **State Management**: StatefulWidget with setState
 - **Package Used**: flutter_card_swiper ^7.0.1
 - **Deletion**: Reuses existing `_deleteFilesLogic` with symlinks
@@ -55,6 +59,7 @@ The photo swipe culling feature has been fully implemented with all planned func
 - **Design System**: Follows Ente color scheme and patterns
 
 ### File Structure
+
 ```
 lib/ui/pages/library_culling/
 ├── swipe_culling_page.dart        # Main page (~850 lines)
@@ -67,6 +72,7 @@ lib/ui/pages/library_culling/
 ```
 
 ### Key Features
+
 - **Swipe Gestures**: Right = Keep, Left = Delete
 - **Visual Feedback**: Colored borders that intensify with swipe distance
 - **Group Navigation**: Tap to switch, long-press for summary
@@ -75,6 +81,7 @@ lib/ui/pages/library_culling/
 - **Safety**: Symlinks preserve album associations
 
 ## Quality Assurance
+
 - ✅ Flutter analyze: 0 issues in photos app
 - ✅ All imports properly ordered
 - ✅ No deprecated APIs used
@@ -82,13 +89,23 @@ lib/ui/pages/library_culling/
 - ✅ Consistent code style
 - ✅ Localization complete
 
+## Remaining fixes
+
+- [ ] Use the `EnteLoadingWidget` for each thumbnail that is still loading.
+- [ ] The display name and file size of the file should be directly below the image.
+- [ ] Make bottom buttons more visually pleasing. Make the side buttons container bigger (100x100) and put them a big higher up. The undo button stays in between them
+- [ ] When the user progresses through the groups, the carousel groups row should move along.
+- [ ] We're showing the thumbnail only, even in big view. We should instead use the same logic as `zoomable_image.dart`, where we show thumbnail only till the full file is downloaded, and then we show that.
+
 ## Remaining Tasks (Optional)
+
 - [ ] Production testing with various group sizes
 - [ ] Performance monitoring with large datasets
 - [ ] User feedback collection
 - [ ] A/B testing for UX improvements
 
 ## Future Enhancements (v2)
+
 - [ ] AI-powered "Best Picture" detection
 - [ ] Decision persistence across sessions
 - [ ] Batch operations ("Delete all except first")
@@ -98,6 +115,7 @@ lib/ui/pages/library_culling/
 - [ ] Machine learning for quality detection
 
 ## Notes
+
 - **Priority**: Smooth 60fps animations maintained
 - **Security**: No analytics or tracking code
 - **Privacy**: All processing done locally
@@ -105,4 +123,5 @@ lib/ui/pages/library_culling/
 - **Design**: Follows Ente design language throughout
 
 ---
-*Last Updated: Current session - All features implemented and tested*
+
+_Last Updated: Current session - All features implemented and tested_
