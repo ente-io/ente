@@ -93,9 +93,9 @@ lib/ui/pages/library_culling/
 
 - [x] The `EnteLoadingWidget` is displayed for each thumbnail even when it's done loading (in group summar mainly). Also get rid of that weird question mark icon.
 - [x] Bug with not displaying badge for half processed groups.
-- [X] The display name and file size of the file is displayed twice. Get rid of the bottom most one.
-- [ ] There are pixel overflows and issues with the card. It looks great when untouched, but upon swiping we're moving much more than expected.
-- [ ] Make the bottom buttons look good.
+- [x] The display name and file size of the file is displayed twice. Get rid of the bottom most one.
+- [x] There are pixel overflows and issues with the card. It looks great when untouched, but upon swiping we're moving much more than expected.
+- [x] Make the bottom buttons look good.
 
 ## Remaining Tasks (Optional)
 
