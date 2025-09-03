@@ -535,7 +535,6 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
   @override
   Widget build(BuildContext context) {
     final theme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
 
     if (groups.isEmpty) {
       return Scaffold(
@@ -621,21 +620,18 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
                     ? Column(
                         children: [
                           Expanded(
-                            child: Column(
+                            child: Stack(
+                              alignment: Alignment.center,
                               children: [
-                                Expanded(
-                                  child: Stack(
-                                    alignment: Alignment.center,
-                                    children: [
-                                      // Use a unique key for each group to force rebuild
-                                      CardSwiper(
+                                // Use a unique key for each group to force rebuild
+                                CardSwiper(
                             key: ValueKey('swiper_${currentGroupIndex}_$currentImageIndex'),
                             controller: controller,
                             cardsCount:
                                 currentGroupFiles.length - currentImageIndex,
                             numberOfCardsDisplayed: 1,
                             backCardOffset: const Offset(0, 0),
-                            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                            padding: const EdgeInsets.all(20.0),
                             cardBuilder: (
                                 context,
                                 index,
@@ -685,59 +681,29 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
                             },
                             isDisabled: false,
                             threshold: 50,
-                                      ),
-
-                                      // Minimal celebration overlay
-                                      if (_showingCelebration)
-                                        Container(
-                                          color: Colors.black.withValues(alpha: 0.2),
-                                          child: Center(
-                                            child: Icon(
-                                              Icons.check_circle,
-                                              size: 48,
-                                              color: theme.primary500,
-                                            )
-                                                .animate(
-                                                    controller: _celebrationController,
-                                                )
-                                                .scaleXY(
-                                                  begin: 0.5,
-                                                  end: 1.2,
-                                                  curve: Curves.easeOut,
-                                                )
-                                                .fadeIn(
-                                                  duration: 100.ms,
-                                                ),
-                                          ),
-                                        ),
-                                    ],
-                                  ),
                                 ),
-                                // File info display - outside the swipeable area
-                                if (currentFile != null)
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 24,
-                                      vertical: 12,
-                                    ),
-                                    child: Column(
-                                      children: [
-                                        Text(
-                                          currentFile!.displayName,
-                                          style: textTheme.body,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          textAlign: TextAlign.center,
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          formatBytes(currentFile!.fileSize ?? 0),
-                                          style: textTheme.small.copyWith(
-                                            color: theme.textMuted,
+
+                                // Minimal celebration overlay
+                                if (_showingCelebration)
+                                  Container(
+                                    color: Colors.black.withValues(alpha: 0.2),
+                                    child: Center(
+                                      child: Icon(
+                                        Icons.check_circle,
+                                        size: 48,
+                                        color: theme.primary500,
+                                      )
+                                          .animate(
+                                              controller: _celebrationController,
+                                          )
+                                          .scaleXY(
+                                            begin: 0.5,
+                                            end: 1.2,
+                                            curve: Curves.easeOut,
+                                          )
+                                          .fadeIn(
+                                            duration: 100.ms,
                                           ),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ],
                                     ),
                                   ),
                               ],
