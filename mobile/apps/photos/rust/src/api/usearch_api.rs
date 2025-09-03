@@ -32,8 +32,11 @@ impl VectorDB {
 
         if file_exists {
             println!("Loading index from disk.");
-            // Use view to not load the index into memory. https://docs.rs/usearch/latest/usearch/struct.Index.html#method.view
-            db.index.view(file_path).expect("Failed to load index");
+            // Must use load() instead of view() because:
+            // - view() creates a read-only memory-mapped view (immutable)
+            // - load() loads the index into RAM for read/write operations (mutable)
+            // Using view() causes "Can't add to an immutable index" error
+            db.index.load(file_path).expect("Failed to load index");
         } else {
             println!("Creating new index.");
             db.save_index();
@@ -46,9 +49,37 @@ impl VectorDB {
         if let Some(parent) = self.path.parent() {
             std::fs::create_dir_all(parent).expect("Failed to create directory");
         }
-        self.index
-            .save(self.path.to_str().expect("Invalid path"))
-            .expect("Failed to save index");
+
+        // Use atomic write: save to temp file first, then rename
+        let temp_path = self.path.with_extension("tmp");
+        let temp_path_str = temp_path.to_str().expect("Invalid temp path");
+
+        // Save to temporary file
+        match self.index.save(temp_path_str) {
+            Ok(_) => {
+                // Atomic rename - guaranteed atomic on iOS/Android
+                // This will atomically replace the existing file
+                // The rename ensures we never have a partially written file,
+                // even if the app is suspended or crashes
+                match std::fs::rename(&temp_path, &self.path) {
+                    Ok(_) => {
+                        println!("Successfully saved index atomically");
+                    }
+                    Err(e) => {
+                        println!("Failed to rename temp index file: {:?}", e);
+                        // Try to clean up temp file
+                        let _ = std::fs::remove_file(&temp_path);
+                        panic!("Failed to atomically save index: {:?}", e);
+                    }
+                }
+            }
+            Err(e) => {
+                println!("Failed to save index to temp file: {:?}", e);
+                // Try to clean up temp file if it exists
+                let _ = std::fs::remove_file(&temp_path);
+                panic!("Failed to save index: {:?}", e);
+            }
+        }
     }
 
     fn ensure_capacity(&self, margin: usize) {

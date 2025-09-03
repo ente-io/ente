@@ -39,10 +39,26 @@ class ClipVectorDB {
     final documentsDirectory = await getApplicationDocumentsDirectory();
     final String dbPath = join(documentsDirectory.path, _databaseName);
     _logger.info("Opening vectorDB access: DB path " + dbPath);
-    final vectorDB = VectorDb(
-      filePath: dbPath,
-      dimensions: _embeddingDimension,
-    );
+    late VectorDb vectorDB;
+    try {
+      vectorDB = VectorDb(
+        filePath: dbPath,
+        dimensions: _embeddingDimension,
+      );
+    } catch (e, s) {
+      _logger.severe("Could not open VectorDB at path $dbPath", e, s);
+      _logger.severe("Deleting the index file and trying again");
+      await deleteIndexFile();
+      try {
+        vectorDB = VectorDb(
+          filePath: dbPath,
+          dimensions: _embeddingDimension,
+        );
+      } catch (e, s) {
+        _logger.severe("Still can't open VectorDB at path $dbPath", e, s);
+        rethrow;
+      }
+    }
     final stats = await getIndexStats(vectorDB);
     _logger.info("VectorDB connection opened with stats: ${stats.toString()}");
 
