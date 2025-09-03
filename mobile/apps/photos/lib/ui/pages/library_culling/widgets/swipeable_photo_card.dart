@@ -7,7 +7,6 @@ import 'package:photos/models/file/file.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/utils/file_util.dart';
-import 'package:photos/utils/standalone/data.dart';
 import 'package:photos/utils/thumbnail_util.dart';
 
 class SwipeablePhotoCard extends StatefulWidget {
@@ -129,7 +128,6 @@ class _SwipeablePhotoCardState extends State<SwipeablePhotoCard> {
   @override
   Widget build(BuildContext context) {
     final theme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
     final screenSize = MediaQuery.of(context).size;
     
     // Calculate border intensity based on swipe progress
@@ -149,86 +147,52 @@ class _SwipeablePhotoCardState extends State<SwipeablePhotoCard> {
     final maxWidth = screenSize.width * 0.85;
     final maxHeight = screenSize.height * 0.65;
     
-    // Get file info
-    final fileName = widget.file.displayName;
-    final fileSize = formatBytes(widget.file.fileSize ?? 0);
-    
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            constraints: BoxConstraints(
-              maxWidth: maxWidth,
-              maxHeight: maxHeight,
-            ),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Stack(
-                children: [
-                  // Main photo - progressively load from thumbnail to full image
-                  if (_imageProvider != null)
-                    Image(
-                      image: _imageProvider!,
-                      fit: BoxFit.contain,
-                      gaplessPlayback: true,
-                    )
-                  else
-                    const Center(
-                      child: EnteLoadingWidget(),
-                    ),
-                
-                  // Border overlay for swipe feedback
-                  if (borderColor != null && borderWidth > 0)
-                    IgnorePointer(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: borderColor,
-                            width: borderWidth,
-                          ),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ),
-          // File info directly below the image
-          Container(
-            width: maxWidth,
-            padding: const EdgeInsets.only(top: 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  fileName,
-                  style: textTheme.body,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  fileSize,
-                  style: textTheme.small.copyWith(color: theme.textMuted),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
+    return Container(
+      constraints: BoxConstraints(
+        maxWidth: maxWidth,
+        maxHeight: maxHeight,
+      ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
           ),
         ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Stack(
+          children: [
+            // Main photo - progressively load from thumbnail to full image
+            if (_imageProvider != null)
+              Image(
+                image: _imageProvider!,
+                fit: BoxFit.contain,
+                gaplessPlayback: true,
+              )
+            else
+              const Center(
+                child: EnteLoadingWidget(),
+              ),
+          
+            // Border overlay for swipe feedback
+            if (borderColor != null && borderWidth > 0)
+              IgnorePointer(
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: borderColor,
+                      width: borderWidth,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
