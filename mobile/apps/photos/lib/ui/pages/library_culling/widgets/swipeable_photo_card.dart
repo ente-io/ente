@@ -157,11 +157,8 @@ class _SwipeablePhotoCardState extends State<SwipeablePhotoCard> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // Let the image size itself, then wrap with decoration
           Container(
-            constraints: BoxConstraints(
-              maxWidth: maxWidth,
-              maxHeight: maxHeight,
-            ),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
@@ -171,38 +168,35 @@ class _SwipeablePhotoCardState extends State<SwipeablePhotoCard> {
                   offset: const Offset(0, 5),
                 ),
               ],
+              // Apply border directly when swiping
+              border: borderColor != null && borderWidth > 0
+                  ? Border.all(
+                      color: borderColor,
+                      width: borderWidth,
+                    )
+                  : null,
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(16),
-              child: Stack(
-                children: [
-                  // Main photo - progressively load from thumbnail to full image
-                  if (_imageProvider != null)
-                    Image(
-                      image: _imageProvider!,
-                      fit: BoxFit.contain,
-                      gaplessPlayback: true,
+              child: _imageProvider != null
+                  ? ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: maxWidth,
+                        maxHeight: maxHeight,
+                      ),
+                      child: Image(
+                        image: _imageProvider!,
+                        fit: BoxFit.contain,
+                        gaplessPlayback: true,
+                      ),
                     )
-                  else
-                    const Center(
-                      child: EnteLoadingWidget(),
-                    ),
-                
-                  // Border overlay for swipe feedback
-                  if (borderColor != null && borderWidth > 0)
-                    IgnorePointer(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: borderColor,
-                            width: borderWidth,
-                          ),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
+                  : SizedBox(
+                      width: maxWidth * 0.8,
+                      height: maxHeight * 0.5,
+                      child: const Center(
+                        child: EnteLoadingWidget(),
                       ),
                     ),
-                ],
-              ),
             ),
           ),
           // File info directly below the image
