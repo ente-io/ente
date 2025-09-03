@@ -91,11 +91,11 @@ lib/ui/pages/library_culling/
 
 ## Remaining fixes
 
-- [ ] Use the `EnteLoadingWidget` for each thumbnail that is still loading.
-- [ ] The display name and file size of the file should be directly below the image.
-- [ ] Make bottom buttons more visually pleasing. Make the side buttons container bigger (100x100) and put them a big higher up. The undo button stays in between them
-- [ ] When the user progresses through the groups, the carousel groups row should move along.
-- [ ] We're showing the thumbnail only, even in big view. We should instead use the same logic as `zoomable_image.dart`, where we show thumbnail only till the full file is downloaded, and then we show that.
+- [ ] The `EnteLoadingWidget` is displayed for each thumbnail even when it's done loading (in group summar mainly). Also get rid of that weird question mark icon.
+- [ ] Bug with not displaying badge for half processed groups.
+- [ ] The display name and file size of the file is displayed twice. Get rid of the bottom most one.
+- [ ] There are pixel overflows and issues with the card. It looks great when untouched, but upon swiping we're moving much more than expected.
+- [ ] Make the bottom buttons look good.
 
 ## Remaining Tasks (Optional)
 
