@@ -153,12 +153,9 @@ class _SwipeablePhotoCardState extends State<SwipeablePhotoCard> {
     final fileName = widget.file.displayName;
     final fileSize = formatBytes(widget.file.fileSize ?? 0);
     
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Let the image size itself, then wrap with decoration
-          Container(
+    // Wrap content tightly - no fixed sizes
+    final Widget imageWidget = _imageProvider != null
+        ? Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
@@ -178,27 +175,44 @@ class _SwipeablePhotoCardState extends State<SwipeablePhotoCard> {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(16),
-              child: _imageProvider != null
-                  ? ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: maxWidth,
-                        maxHeight: maxHeight,
-                      ),
-                      child: Image(
-                        image: _imageProvider!,
-                        fit: BoxFit.contain,
-                        gaplessPlayback: true,
-                      ),
-                    )
-                  : SizedBox(
-                      width: maxWidth * 0.8,
-                      height: maxHeight * 0.5,
-                      child: const Center(
-                        child: EnteLoadingWidget(),
-                      ),
-                    ),
+              // Use constraints only on the Image itself
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: maxWidth,
+                  maxHeight: maxHeight,
+                ),
+                child: Image(
+                  image: _imageProvider!,
+                  fit: BoxFit.contain,
+                  gaplessPlayback: true,
+                ),
+              ),
             ),
-          ),
+          )
+        : Container(
+            width: maxWidth * 0.8,
+            height: maxHeight * 0.5,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              color: theme.backgroundElevated,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+            child: const Center(
+              child: EnteLoadingWidget(),
+            ),
+          );
+
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          imageWidget,
           // File info directly below the image
           Container(
             width: maxWidth,
