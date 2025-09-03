@@ -752,93 +752,114 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
               // Action buttons at bottom
               Padding(
                 padding: const EdgeInsets.only(
-                  left: 24,
-                  right: 24,
-                  bottom: 60, // Positioned higher up
-                  top: 12,
+                  left: 32,
+                  right: 32,
+                  bottom: 48, 
+                  top: 8,
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    // Delete button - larger square (100x100)
+                    // Delete button - 72x72
                     Container(
-                      width: 100,
-                      height: 100,
+                      width: 72,
+                      height: 72,
                       decoration: BoxDecoration(
-                        color: theme.backgroundElevated,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.1),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
+                        color: currentFile != null
+                            ? theme.backgroundElevated2
+                            : theme.backgroundBase,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: currentFile != null
+                              ? theme.strokeFaint
+                              : theme.strokeFainter,
+                          width: 1,
+                        ),
+                        boxShadow: currentFile != null
+                            ? [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.08),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ]
+                            : null,
                       ),
                       child: Material(
                         color: Colors.transparent,
                         child: InkWell(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(16),
                           onTap: currentFile != null
-                              ? () => controller.swipe(CardSwiperDirection.left)
+                              ? () {
+                                  HapticFeedback.lightImpact();
+                                  controller.swipe(CardSwiperDirection.left);
+                                }
                               : null,
                           child: Center(
                             child: Icon(
-                              Icons.close_rounded,
+                              Icons.close,
                               color: currentFile != null 
                                   ? theme.warning700 
-                                  : theme.strokeFaint,
-                              size: 40,
+                                  : theme.strokeFainter,
+                              size: 32,
                             ),
                           ),
                         ),
                       ),
                     ),
-                    // Undo button without container (stays between)
-                    Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(24),
-                        onTap: _handleUndo,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Icon(
-                            Icons.replay_rounded,
-                            color: theme.textMuted, // Muted color
-                            size: 32,
-                          ),
-                        ),
+                    // Undo button without container
+                    IconButton(
+                      onPressed: _handleUndo,
+                      icon: Icon(
+                        Icons.undo_rounded,
+                        color: theme.textMuted.withValues(alpha: 0.6),
+                        size: 28,
                       ),
+                      padding: const EdgeInsets.all(12),
+                      splashRadius: 28,
                     ),
-                    // Keep button - larger square (100x100)
+                    // Keep button - 72x72
                     Container(
-                      width: 100,
-                      height: 100,
+                      width: 72,
+                      height: 72,
                       decoration: BoxDecoration(
-                        color: theme.backgroundElevated,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.1),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
+                        color: currentFile != null
+                            ? theme.backgroundElevated2
+                            : theme.backgroundBase,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: currentFile != null
+                              ? theme.strokeFaint
+                              : theme.strokeFainter,
+                          width: 1,
+                        ),
+                        boxShadow: currentFile != null
+                            ? [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.08),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ]
+                            : null,
                       ),
                       child: Material(
                         color: Colors.transparent,
                         child: InkWell(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(16),
                           onTap: currentFile != null
-                              ? () => controller.swipe(CardSwiperDirection.right)
+                              ? () {
+                                  HapticFeedback.lightImpact();
+                                  controller.swipe(CardSwiperDirection.right);
+                                }
                               : null,
                           child: Center(
                             child: Icon(
                               Icons.thumb_up_outlined,
                               color: currentFile != null 
                                   ? theme.primary700 
-                                  : theme.strokeFaint,
-                              size: 40,
+                                  : theme.strokeFainter,
+                              size: 32,
                             ),
                           ),
                         ),
