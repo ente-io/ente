@@ -438,11 +438,16 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     }
 
     await relevantTaskQueue.addTask(_localThumbnailQueueTaskId!, () async {
-      final thumbnailBytes = await getThumbnailFromLocal(
-        widget.file,
-        size: widget.thumbnailSize,
-      );
-      completer.complete(thumbnailBytes);
+      late final Uint8List? thumbnailBytes;
+      try {
+        thumbnailBytes = await getThumbnailFromLocal(
+          widget.file,
+          size: widget.thumbnailSize,
+        );
+        completer.complete(thumbnailBytes);
+      } catch (e) {
+        completer.completeError(e);
+      }
     });
 
     return completer.future;
