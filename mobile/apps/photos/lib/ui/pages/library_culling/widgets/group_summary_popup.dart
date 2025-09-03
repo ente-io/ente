@@ -3,8 +3,12 @@ import 'package:photos/generated/l10n.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/similar_files.dart';
 import 'package:photos/theme/ente_theme.dart';
+import 'package:photos/ui/components/buttons/button_widget.dart';
+import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/pages/library_culling/models/swipe_culling_state.dart';
+import 'package:photos/ui/viewer/file/detail_page.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
+import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/standalone/data.dart';
 
 class GroupSummaryPopup extends StatelessWidget {
@@ -24,13 +28,18 @@ class GroupSummaryPopup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
     final files = group.files;
     
     // Calculate stats
     int deletionCount = 0;
+    int decisionCount = 0;
     int totalSize = 0;
     for (final file in files) {
       final decision = decisions[file] ?? SwipeDecision.undecided;
+      if (decision != SwipeDecision.undecided) {
+        decisionCount++;
+      }
       if (decision == SwipeDecision.delete) {
         deletionCount++;
         totalSize += file.fileSize ?? 0;
@@ -55,8 +64,8 @@ class GroupSummaryPopup extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Group Summary',
-                  style: Theme.of(context).textTheme.titleLarge,
+                  'Decisions',
+                  style: textTheme.largeBold,
                 ),
                 IconButton(
                   onPressed: () => Navigator.of(context).pop(),
@@ -82,82 +91,125 @@ class GroupSummaryPopup extends StatelessWidget {
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3,
                   crossAxisSpacing: 8,
-                  mainAxisSpacing: 8,
+                  mainAxisSpacing: 16, // More vertical spacing
+                  childAspectRatio: 0.75, // Adjusted for square thumbnails with text
                 ),
                 itemCount: files.length,
                 itemBuilder: (context, index) {
                   final file = files[index];
                   final decision = decisions[file] ?? SwipeDecision.undecided;
                   
-                  return Stack(
-                    fit: StackFit.expand,
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: ThumbnailWidget(
-                          file,
-                          fit: BoxFit.cover,
-                          shouldShowLivePhotoOverlay: false,
-                          shouldShowOwnerAvatar: false,
+                      Expanded(
+                        child: GestureDetector(
+                          onLongPress: () {
+                            routeToPage(
+                              context,
+                              DetailPage(
+                                DetailPageConfiguration(
+                                  files,
+                                  index,
+                                  "group_summary_",
+                                  mode: DetailPageMode.minimalistic,
+                                ),
+                              ),
+                            );
+                          },
+                          child: AspectRatio(
+                            aspectRatio: 1, // Square thumbnail
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Hero(
+                                    tag: "group_summary_${file.tag}",
+                                    child: ThumbnailWidget(
+                                      file,
+                                      fit: BoxFit.cover,
+                                      shouldShowLivePhotoOverlay: false,
+                                      shouldShowOwnerAvatar: false,
+                                    ),
+                                  ),
+                                ),
+                            
+                            // Badge for deleted items (red trash icon)
+                            if (decision == SwipeDecision.delete)
+                              Positioned(
+                                top: 4,
+                                right: 4,
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: theme.warning700,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.delete_outline,
+                                    size: 16,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            
+                            // Checkmark for kept items
+                            if (decision == SwipeDecision.keep)
+                              Positioned(
+                                top: 4,
+                                right: 4,
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: theme.primary500,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.check,
+                                    size: 16,
+                                    color: theme.backgroundBase,
+                                  ),
+                                ),
+                              ),
+                            
+                            // Badge for undecided (using icon for consistent size)
+                            if (decision == SwipeDecision.undecided)
+                              Positioned(
+                                top: 4,
+                                right: 4,
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withValues(alpha: 0.7),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.question_mark_outlined,
+                                    size: 16,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
-                      
-                      // Overlay for deleted items
-                      if (decision == SwipeDecision.delete)
-                        Container(
-                          decoration: BoxDecoration(
-                            color: theme.warning700.withValues(alpha: 0.7),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Center(
-                            child: Icon(
-                              Icons.delete_outline,
-                              color: Colors.white,
-                              size: 32,
-                            ),
-                          ),
-                        ),
-                      
-                      // Checkmark for kept items
-                      if (decision == SwipeDecision.keep)
-                        Positioned(
-                          top: 4,
-                          right: 4,
-                          child: Container(
-                            padding: const EdgeInsets.all(2),
-                            decoration: BoxDecoration(
-                              color: theme.primary500,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.check,
-                              size: 16,
-                              color: theme.backgroundBase,
-                            ),
-                          ),
-                        ),
-                      
-                      // Badge for undecided
-                      if (decision == SwipeDecision.undecided)
-                        Positioned(
-                          top: 4,
-                          right: 4,
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: theme.strokeFaint,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Text(
-                              '?',
-                              style: TextStyle(
-                                color: theme.textFaint,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
+                      const SizedBox(height: 6),
+                      Text(
+                        file.displayName,
+                        style: textTheme.small,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.left,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        formatBytes(file.fileSize!),
+                        style: textTheme.miniMuted,
+                        textAlign: TextAlign.left,
+                      ),
                     ],
                   );
                 },
@@ -166,29 +218,27 @@ class GroupSummaryPopup extends StatelessWidget {
             
             const SizedBox(height: 16),
             
-            // Action buttons (vertical layout)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (deletionCount > 0)
-                  ElevatedButton(
-                    onPressed: onDeleteThese,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: theme.warning700,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                    child: Text(AppLocalizations.of(context).deleteThese),
-                  ),
-                const SizedBox(height: 8),
-                OutlinedButton(
-                  onPressed: onUndoAll,
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                  child: Text(AppLocalizations.of(context).undoAll),
-                ),
-              ],
-            ),
+            // Action buttons using Ente button design
+            if (deletionCount > 0) ...[
+              ButtonWidget(
+                buttonType: ButtonType.critical,
+                labelText: 'Confirm',
+                onTap: () async {
+                  onDeleteThese();
+                },
+                isInAlert: true,
+              ),
+              const SizedBox(height: 8),
+            ],
+            if (decisionCount > 0)
+              ButtonWidget(
+                buttonType: ButtonType.secondary,
+                labelText: 'Undo decisions',
+                onTap: () async {
+                  onUndoAll();
+                },
+                isInAlert: true,
+              ),
           ],
         ),
       ),

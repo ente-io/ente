@@ -4,7 +4,7 @@ import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/pages/library_culling/models/swipe_culling_state.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 
-class GroupCarousel extends StatelessWidget {
+class GroupCarousel extends StatefulWidget {
   final List<SimilarFiles> groups;
   final int currentGroupIndex;
   final Function(int) onGroupSelected;
@@ -21,35 +21,90 @@ class GroupCarousel extends StatelessWidget {
   });
 
   @override
+  State<GroupCarousel> createState() => _GroupCarouselState();
+}
+
+class _GroupCarouselState extends State<GroupCarousel> {
+  late ScrollController _scrollController;
+  
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+  }
+  
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+  
+  @override
+  void didUpdateWidget(GroupCarousel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.currentGroupIndex != oldWidget.currentGroupIndex) {
+      _scrollToCurrentGroup();
+    }
+  }
+  
+  void _scrollToCurrentGroup() {
+    if (!_scrollController.hasClients) return;
+    
+    // Calculate the position to scroll to (72 width + 16 padding per item)
+    const itemWidth = 72.0 + 16.0;
+    final targetPosition = widget.currentGroupIndex * itemWidth;
+    
+    // Center the current group in the viewport if possible
+    final viewportWidth = _scrollController.position.viewportDimension;
+    final maxScrollExtent = _scrollController.position.maxScrollExtent;
+    final centeredPosition = targetPosition - (viewportWidth / 2) + (itemWidth / 2);
+    final scrollPosition = centeredPosition.clamp(0.0, maxScrollExtent);
+    
+    _scrollController.animateTo(
+      scrollPosition,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+  
+  @override
   Widget build(BuildContext context) {
     final theme = getEnteColorScheme(context);
+
+    // Scroll to current group after build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.currentGroupIndex > 0) {
+        _scrollToCurrentGroup();
+      }
+    });
 
     return SizedBox(
       height: 100,
       child: ListView.builder(
+        controller: _scrollController,
         clipBehavior: Clip.none,
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
-        itemCount: groups.length,
+        itemCount: widget.groups.length,
         itemBuilder: (context, index) {
-          final group = groups[index];
-          final progress = progressMap[index] ??
+          final group = widget.groups[index];
+          final progress = widget.progressMap[index] ??
               GroupProgress(
                 totalImages: group.files.length,
                 reviewedImages: 0,
                 deletionCount: 0,
               );
-          final isCurrentGroup = index == currentGroupIndex;
+          final isCurrentGroup = index == widget.currentGroupIndex;
 
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: GestureDetector(
               onTap: () => isCurrentGroup
-                  ? onGroupLongPress(
+                  ? widget.onGroupLongPress(
                       index,
                     ) // Show summary if tapping current group
-                  : onGroupSelected(index),
-              onLongPress: () => onGroupLongPress(index),
+                  : widget.onGroupSelected(index),
+              onLongPress: () => widget.onGroupLongPress(index),
               child: SizedBox(
                 width: 72, // 72x90 rectangular
                 height: 90,

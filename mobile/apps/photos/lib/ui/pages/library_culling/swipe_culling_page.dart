@@ -749,31 +749,31 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
                 padding: const EdgeInsets.only(
                   left: 24,
                   right: 24,
-                  bottom: 32,
+                  bottom: 60, // Positioned higher up
                   top: 12,
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    // Delete button - large square
+                    // Delete button - larger square (100x100)
                     Container(
-                      width: 72,
-                      height: 72,
+                      width: 100,
+                      height: 100,
                       decoration: BoxDecoration(
                         color: theme.backgroundElevated,
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withValues(alpha: 0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
                           ),
                         ],
                       ),
                       child: Material(
                         color: Colors.transparent,
                         child: InkWell(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(12),
                           onTap: currentFile != null
                               ? () => controller.swipe(CardSwiperDirection.left)
                               : null,
@@ -783,47 +783,47 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
                               color: currentFile != null 
                                   ? theme.warning700 
                                   : theme.strokeFaint,
-                              size: 32,
+                              size: 40,
                             ),
                           ),
                         ),
                       ),
                     ),
-                    // Undo button without container
+                    // Undo button without container (stays between)
                     Material(
                       color: Colors.transparent,
                       child: InkWell(
                         borderRadius: BorderRadius.circular(24),
                         onTap: _handleUndo,
                         child: Padding(
-                          padding: const EdgeInsets.all(12),
+                          padding: const EdgeInsets.all(16),
                           child: Icon(
                             Icons.replay_rounded,
                             color: theme.textMuted, // Muted color
-                            size: 28,
+                            size: 32,
                           ),
                         ),
                       ),
                     ),
-                    // Keep button - large square
+                    // Keep button - larger square (100x100)
                     Container(
-                      width: 72,
-                      height: 72,
+                      width: 100,
+                      height: 100,
                       decoration: BoxDecoration(
                         color: theme.backgroundElevated,
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withValues(alpha: 0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
                           ),
                         ],
                       ),
                       child: Material(
                         color: Colors.transparent,
                         child: InkWell(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(12),
                           onTap: currentFile != null
                               ? () => controller.swipe(CardSwiperDirection.right)
                               : null,
@@ -833,7 +833,7 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
                               color: currentFile != null 
                                   ? theme.primary700 
                                   : theme.strokeFaint,
-                              size: 32,
+                              size: 40,
                             ),
                           ),
                         ),
