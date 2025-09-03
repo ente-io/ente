@@ -97,13 +97,6 @@ flutter analyze .
 
 # Run tests
 flutter test
-
-# Integration tests
-flutter driver --target=test_driver/integration_test.dart
-
-# Performance tests
-./scripts/app_init_perf_test.sh
-./scripts/gallery_scroll_perf_test.sh
 ```
 
 ## Architecture Overview
