@@ -147,7 +147,8 @@ class _SwipeablePhotoCardState extends State<SwipeablePhotoCard> {
 
     // Calculate card dimensions to preserve aspect ratio
     final maxWidth = screenSize.width * 0.85;
-    final maxHeight = screenSize.height * 0.65;
+    // Reserve space for file info text (approximately 60px) + padding
+    final maxHeight = screenSize.height * 0.65 - 80;
     
     // Get file info
     final fileName = widget.file.displayName;
@@ -209,34 +210,42 @@ class _SwipeablePhotoCardState extends State<SwipeablePhotoCard> {
           );
 
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          imageWidget,
-          // File info directly below the image
-          Container(
-            width: maxWidth,
-            padding: const EdgeInsets.only(top: 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  fileName,
-                  style: textTheme.body,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  fileSize,
-                  style: textTheme.small.copyWith(color: theme.textMuted),
-                  textAlign: TextAlign.center,
-                ),
-              ],
+      child: ConstrainedBox(
+        // Ensure the entire widget fits within reasonable bounds
+        constraints: BoxConstraints(
+          maxHeight: screenSize.height * 0.75,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              child: imageWidget,
             ),
-          ),
-        ],
+            // File info directly below the image
+            Container(
+              width: maxWidth,
+              padding: const EdgeInsets.only(top: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    fileName,
+                    style: textTheme.body,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    fileSize,
+                    style: textTheme.small.copyWith(color: theme.textMuted),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
