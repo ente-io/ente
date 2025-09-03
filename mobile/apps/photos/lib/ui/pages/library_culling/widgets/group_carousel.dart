@@ -121,7 +121,8 @@ class _GroupCarouselState extends State<GroupCarousel> {
                         _buildSingleThumbnail(group),
 
                       // Progress/status badges
-                      if (progress.isComplete && progress.deletionCount > 0)
+                      // Show red badge with deletion count if any images are marked for deletion
+                      if (progress.deletionCount > 0)
                         Positioned(
                           top: -8,
                           right: -8,
@@ -145,6 +146,7 @@ class _GroupCarouselState extends State<GroupCarousel> {
                           ),
                         ),
 
+                      // Show green checkmark only if group is complete with no deletions
                       if (progress.isComplete && progress.deletionCount == 0)
                         Positioned(
                           top: -8,
