@@ -1932,10 +1932,10 @@
   "hoorayyyy": "Hoorayyyy!",
   "nothingToTidyUpHere": "Nothing to tidy up here",
   "deletingDash": "Deleting - ",
-  "cLTitle1": "Similar Images",
+  "cLTitle1": "Similar images",
   "cLDesc1": "We are introducing a new ML-based system to detect similar images, using which you can cleanup your library. Available in Settings -> Backup -> Free up space",
   "cLTitle2": "Video streaming enhancements",
   "cLDesc2": "You can now manually trigger stream generation for videos directly from the app. We have also added a new video streaming settings screen which will show you what percentage of your videos have been processed for streaming",
-  "cLTitle3": "Performance Improvements",
+  "cLTitle3": "Performance improvements",
   "cLDesc3": "Multiple under the hood improvements, including better cache usage and a smoother scroll experience"
 }

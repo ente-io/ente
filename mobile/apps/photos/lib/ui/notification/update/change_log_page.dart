@@ -27,7 +27,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
       body: Container(
         color: enteColorScheme.backgroundElevated,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             const SizedBox(
               height: 36,
@@ -41,9 +41,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                 ),
               ),
             ),
-            const SizedBox(
-              height: 24,
-            ),
+            const SizedBox(height: 24),
             Expanded(child: _getChangeLog(context)),
             const DividerWidget(
               dividerType: DividerType.solid,
@@ -77,7 +75,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                     ButtonWidget(
                       buttonType: ButtonType.trailingIconSecondary,
                       buttonSize: ButtonSize.large,
-                      labelText: AppLocalizations.of(context).rateTheApp,
+                      labelText: AppLocalizations.of(context).rateUs,
                       icon: Icons.favorite_rounded,
                       iconColor: enteColorScheme.primary500,
                       onTap: () async {
@@ -113,6 +111,20 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
         context.l10n.cLDesc3,
       ),
     ]);
+    // For a short list, avoid forcing the list to fill remaining space; show a simple column.
+    if (items.length <= 6) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final e in items) ChangeLogEntryWidget(entry: e),
+            const SizedBox(height: 16), // balanced gap before divider/buttons
+          ],
+        ),
+      );
+    }
 
     return Container(
       padding: const EdgeInsets.only(left: 16),
