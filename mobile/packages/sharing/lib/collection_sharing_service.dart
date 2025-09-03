@@ -4,8 +4,8 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
 import 'package:ente_network/network.dart';
-import 'package:ente_sharing/models/user.dart';
 import 'package:ente_sharing/errors.dart';
+import 'package:ente_sharing/models/user.dart';
 import 'package:logging/logging.dart';
 
 class CollectionSharingService {
