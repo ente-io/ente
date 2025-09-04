@@ -1575,6 +1575,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Leave shared collection?'**
   String get leaveSharedCollection;
+
+  /// No description provided for @noSystemLockFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No system lock found'**
+  String get noSystemLockFound;
+
+  /// No description provided for @toEnableAppLockPleaseSetupDevicePasscodeOrScreen.
+  ///
+  /// In en, this message translates to:
+  /// **'To enable app lock, please setup device passcode or screen lock in your system settings.'**
+  String get toEnableAppLockPleaseSetupDevicePasscodeOrScreen;
 }
 
 class _AppLocalizationsDelegate
