@@ -1773,10 +1773,10 @@
   "areYouSureYouWantToMergeThem": "Weet je zeker dat je ze wilt samenvoegen?",
   "allUnnamedGroupsWillBeMergedIntoTheSelectedPerson": "Alle naamloze groepen worden samengevoegd met de geselecteerde persoon. Dit kan nog steeds ongedaan worden gemaakt vanuit het geschiedenisoverzicht van de persoon.",
   "yesIgnore": "Ja, negeer",
-  "cLTitle1": "Vergelijkbare Afbeeldingen",
-  "cLDesc1": "We introduceren een nieuw ML-gebaseerd systeem om vergelijkbare afbeeldingen te detecteren, waarmee je je bibliotheek kunt opschonen. Beschikbaar in Instellingen->Backup->Ruimte vrijmaken",
+  "cLTitle1": "Vergelijkbare afbeeldingen",
+  "cLDesc1": "We introduceren een nieuw ML-gebaseerd systeem om vergelijkbare afbeeldingen te detecteren, waarmee je je bibliotheek kunt opschonen. Beschikbaar in Instellingen -> Backup -> Ruimte vrijmaken",
   "cLTitle2": "Video streaming verbeteringen",
   "cLDesc2": "Je kunt nu handmatig stream generatie voor video's activeren direct vanuit de app. We hebben ook een nieuw video streaming instellingenscherm toegevoegd dat toont welk percentage van je video's is verwerkt voor streaming",
-  "cLTitle3": "Prestatie Verbeteringen",
+  "cLTitle3": "Prestatieverbeteringen",
   "cLDesc3": "Meerdere verbeteringen onder de motorkap, inclusief beter cache gebruik en een vloeiendere scroll ervaring"
 }

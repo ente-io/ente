@@ -8,8 +8,11 @@ environment:
 
 dependencies:
   adaptive_theme: ^3.6.0
+  bip39: ^1.0.6
   collection: ^1.18.0
+  crypto: ^3.0.6
   dio: ^5.8.0+1
+  dotted_border: ^3.1.0
   email_validator: ^3.0.0
   ente_accounts:
     path: ../../packages/accounts
@@ -28,6 +31,8 @@ dependencies:
     path: ../../packages/logging
   ente_network:
     path: ../../packages/network
+  ente_sharing:
+    path: ../../packages/sharing
   ente_strings:
     path: ../../packages/strings
   ente_ui:
@@ -59,6 +64,7 @@ dependencies:
   sqflite: ^2.4.1
   styled_text: ^8.1.0
   tray_manager: ^0.5.0
+  tuple: ^2.0.2
   url_launcher: ^6.3.2
   uuid: ^4.5.1
   window_manager: ^0.5.0
