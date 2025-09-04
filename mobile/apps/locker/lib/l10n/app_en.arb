@@ -349,5 +349,160 @@
   "mastodon": "Mastodon",
   "matrix": "Matrix",
   "discord": "Discord",
-  "reddit": "Reddit"
+  "reddit": "Reddit",
+  "allowDownloads": "Allow downloads",
+  "sharedByYou": "Shared by you",
+  "sharedWithYou": "Shared with you",
+  "manageLink": "Manage link",
+  "linkExpiry": "Link expiry",
+  "linkNeverExpires": "Never",
+  "linkExpired": "Expired",
+  "linkEnabled": "Enabled",
+  "setAPassword": "Set a password",
+  "lockButtonLabel": "Lock",
+  "enterPassword": "Enter password",
+  "removeLink": "Remove link",
+  "sendLink": "Send link",
+  "setPasswordTitle": "Set password",
+  "resetPasswordTitle": "Reset password",
+  "allowAddingFiles": "Allow adding files",
+  "disableDownloadWarningTitle": "Please note",
+  "disableDownloadWarningBody": "Viewers can still take screenshots or save a copy of your files using external tools.",
+  "allowAddFilesDescription": "Allow people with the link to also add files to the shared collection.",
+  "after1Hour": "After 1 hour",
+  "after1Day": "After 1 day",
+  "after1Week": "After 1 week",
+  "after1Month": "After 1 month",
+  "after1Year": "After 1 year",
+  "never": "Never",
+  "custom": "Custom",
+  "selectTime": "Select time",
+  "selectDate": "Select date",
+  "previous": "Previous",
+  "done": "Done",
+  "next": "Next",
+  "noDeviceLimit": "None",
+  "linkDeviceLimit": "Device limit",
+  "expiredLinkInfo": "This link has expired. Please select a new expiry time or disable link expiry.",
+  "linkExpiresOn": "Link will expire on {expiryTime}",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Share with specific people} =1 {Shared with 1 person} other {Shared with {numberOfPeople} people}}",
+  "@shareWithPeopleSectionTitle": {
+    "placeholders": {
+      "numberOfPeople": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "linkHasExpired": "Link has expired",
+  "publicLinkEnabled": "Public link enabled",
+  "shareALink": "Share a link",
+  "addViewer": "Add viewer",
+  "addCollaborator": "Add collaborator",
+  "addANewEmail": "Add a new email",
+  "orPickAnExistingOne": "Or pick an existing one",
+  "sharedCollectionSectionDescription": "Create shared and collaborative collections with other Ente users, including users on free plans.",
+  "createPublicLink": "Create public link",
+  "addParticipants": "Add participants",
+  "add": "Add",
+  "collaboratorsCanAddFilesToTheSharedCollection": "Collaborators can add files to the shared collection.",
+  "enterEmail": "Enter email",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {Added 0 viewers} =1 {Added 1 viewer} other {Added {count} viewers}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to a collection."
+  },
+  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Added 0 collaborator} =1 {Added 1 collaborator} other {Added {count} collaborators}}",
+  "@collaboratorsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of collaborators that were successfully added to a collection."
+  },
+  "addViewers": "{count, plural, =0 {Add viewer} =1 {Add viewer} other {Add viewers}}",
+  "addCollaborators": "{count, plural, =0 {Add collaborator} =1 {Add collaborator} other {Add collaborators}}",
+  "longPressAnEmailToVerifyEndToEndEncryption": "Long press an email to verify end to end encryption.",
+  "sharing": "Sharing...",
+  "invalidEmailAddress": "Invalid email address",
+  "enterValidEmail": "Please enter a valid email address.",
+  "oops": "Oops",
+  "youCannotShareWithYourself": "You cannot share with yourself",
+  "inviteToEnte": "Invite to Ente",
+  "sendInvite": "Send invite",
+  "shareTextRecommendUsingEnte": "Download Ente so we can easily share original quality files\n\nhttps://ente.io",
+  "thisIsYourVerificationId": "This is your Verification ID",
+  "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Someone sharing albums with you should see the same ID on their device.",
+  "howToViewShareeVerificationID": "Please ask them to long-press their email address on the settings screen, and verify that the IDs on both devices match.",
+  "thisIsPersonVerificationId": "This is {email}'s Verification ID",
+  "@thisIsPersonVerificationId": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@ente.io"
+      }
+    }
+  },
+  "verificationId": "Verification ID",
+  "verifyEmailID": "Verify {email}",
+  "emailNoEnteAccount": "{email} does not have an Ente account.\n\nSend them an invite to share files.",
+  "shareMyVerificationID": "Here's my verification ID: {verificationID} for ente.io.",
+  "shareTextConfirmOthersVerificationID": "Hey, can you confirm that this is your ente.io verification ID: {verificationID}",
+  "passwordLock": "Password lock",
+  "manage": "Manage",
+  "addedAs": "Added as",
+  "removeParticipant": "Remove participant",
+  "yesConvertToViewer": "Yes, convert to viewer",
+  "changePermissions": "Change permissions",
+  "cannotAddMoreFilesAfterBecomingViewer": "{name} will no longer be able to add files to the collection after becoming a viewer.",
+  "@cannotAddMoreFilesAfterBecomingViewer": {
+    "description": "Warning message when changing a collaborator to viewer",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "John"
+      }
+    }
+  },
+  "removeWithQuestionMark": "Remove?",
+  "removeParticipantBody": "{userEmail} will be removed from this shared collection\n\nAny files added by them will also be removed from the collection",
+  "yesRemove": "Yes, remove",
+  "remove": "Remove",
+  "viewer": "Viewer",
+  "collaborator": "Collaborator",
+  "collaboratorsCanAddFilesToTheSharedAlbum": "Collaborators can add files to the shared collection.",
+  "albumParticipantsCount": "{count, plural, =0 {No Participants} =1 {1 Participant} other {{count} Participants}}",
+  "@albumParticipantsCount": {
+    "description": "The count of participants in an album",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "addMore": "Add more",
+  "you": "You",
+  "albumOwner": "Owner",
+  "typeOfCollectionTypeIsNotSupportedForRename": "Type of collection {collectionType} is not supported for rename",
+  "@typeOfCollectionTypeIsNotSupportedForRename": {
+    "placeholders": {
+      "collectionType": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "leaveCollection": "Leave collection",
+  "filesAddedByYouWillBeRemovedFromTheCollection": "Files added by you will be removed from the collection",
+  "leaveSharedCollection": "Leave shared collection?",
+  "noSystemLockFound": "No system lock found",
+  "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "To enable app lock, please setup device passcode or screen lock in your system settings."
 }

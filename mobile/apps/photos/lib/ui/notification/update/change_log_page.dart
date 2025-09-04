@@ -77,7 +77,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                     ButtonWidget(
                       buttonType: ButtonType.trailingIconSecondary,
                       buttonSize: ButtonSize.large,
-                      labelText: AppLocalizations.of(context).rateTheApp,
+                      labelText: AppLocalizations.of(context).rateUs,
                       icon: Icons.favorite_rounded,
                       iconColor: enteColorScheme.primary500,
                       onTap: () async {
@@ -113,7 +113,6 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
         context.l10n.cLDesc3,
       ),
     ]);
-
     return Container(
       padding: const EdgeInsets.only(left: 16),
       child: Scrollbar(

@@ -672,10 +672,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
         await showGenericErrorDialog(context: context, error: e);
       }
       if (_isDisposed) return;
-      setState(() {
-        _pageState = SimilarImagesPageState.setup;
-      });
-      return;
+      Navigator.of(context).pop();
     }
   }
 

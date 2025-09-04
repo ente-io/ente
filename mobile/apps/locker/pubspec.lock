@@ -66,7 +66,7 @@ packages:
     source: hosted
     version: "2.13.0"
   bip39:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: bip39
       sha256: de1ee27ebe7d96b84bb3a04a4132a0a3007dcdd5ad27dd14aa87a29d97c45edc
@@ -146,7 +146,7 @@ packages:
     source: hosted
     version: "0.3.4+2"
   crypto:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: crypto
       sha256: "1e445881f28f22d6140f181e07737b22f1e099a5e1ff94b0af2f9e4a463f4855"
@@ -202,7 +202,7 @@ packages:
     source: hosted
     version: "2.1.1"
   dotted_border:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: dotted_border
       sha256: "99b091ec6891ba0c5331fdc2b502993c7c108f898995739a73c6845d71dad70c"
@@ -272,6 +272,13 @@ packages:
     dependency: "direct main"
     description:
       path: "../../packages/network"
+      relative: true
+    source: path
+    version: "1.0.0"
+  ente_sharing:
+    dependency: "direct main"
+    description:
+      path: "../../packages/sharing"
       relative: true
     source: path
     version: "1.0.0"
@@ -1331,7 +1338,7 @@ packages:
     source: hosted
     version: "0.5.0"
   tuple:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: tuple
       sha256: a97ce2013f240b2f3807bcbaf218765b6f301c3eff91092bcfa23a039e7dd151

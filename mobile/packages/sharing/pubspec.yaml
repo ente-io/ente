@@ -1,0 +1,26 @@
+name: ente_sharing
+description: Common sharing functionality for ente apps
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.10.0"
+
+dependencies:
+  collection: ^1.17.0
+  dio: ^5.0.0
+  ente_crypto_dart:
+    git:
+      url: https://github.com/ente-io/ente_crypto_dart.git
+  ente_network:
+    path: ../network
+  fast_base58: ^0.2.1
+  flutter:
+    sdk: flutter
+  logging: ^1.0.0
+
+dev_dependencies:
+  flutter_lints: ^2.0.0
+  flutter_test:
+    sdk: flutter
