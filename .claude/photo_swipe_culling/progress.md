@@ -94,10 +94,11 @@ lib/ui/pages/library_culling/
 - [x] Use circular undo icon as specified in feature plan
 - [x] Double pressing the image in card should zoom in to image by pushing the `DetailPage` with hero animation (check `similar_images_page.dart` for example).
 - [x] Stack next image behind current image with darkening/opacity, peeking from top. Shows full image preview that animates forward when current is swiped.
+- [x] Fix issue with the carousel groups looking too dark. Even the selected group in carousel row looks darker than the current image, which is weird.
 - [ ] Make the undo button animate nicely to the previous photo, instead of this flicker. Think hard on how to do this animation.
+- [ ] Pressing the undo button when nothing is decided in current group should navigate the user to the last group with changes and undo a change there.
 - [ ] Animate going from last image in group to first image in next group
 - [ ] Bug: when only having a single group, finishing it, and then canceling the delete, the complete checkmark animation stays on screen. Which is fine, but it doesn't disappear on pressing the undo button.
-- [ ] Pressing the undo button when nothing is decided in current group should navigate the user to the last group with changes and undo a change there.
 - [ ] Better placement of the instagram-like progress dots
 
 ## Remaining Tasks (Optional)

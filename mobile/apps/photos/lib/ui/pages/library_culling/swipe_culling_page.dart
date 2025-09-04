@@ -687,16 +687,24 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
 
                                     // Apply darkening to the back card (no clipping, show full image)
                                     if (isBackCard) {
-                                      card = ColorFiltered(
-                                        colorFilter: ColorFilter.mode(
-                                          Colors.black.withValues(
-                                              alpha: 0.4,), // Darken the preview
-                                          BlendMode.darken,
-                                        ),
-                                        child: Opacity(
-                                          opacity:
-                                              0.6, // Make it more transparent
-                                          child: card,
+                                      // Use RepaintBoundary to isolate the darkening effect
+                                      card = RepaintBoundary(
+                                        child: Stack(
+                                          children: [
+                                            Opacity(
+                                              opacity: 0.5, // Make it more transparent
+                                              child: card,
+                                            ),
+                                            // Add a dark overlay instead of ColorFilter
+                                            Positioned.fill(
+                                              child: Container(
+                                                decoration: BoxDecoration(
+                                                  color: Colors.black.withValues(alpha: 0.3),
+                                                  borderRadius: BorderRadius.circular(16),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       );
                                     }
