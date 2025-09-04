@@ -7,6 +7,7 @@ import "package:photos/models/collection/collection.dart";
 import "package:photos/models/metadata/common_keys.dart";
 import "package:photos/models/selected_albums.dart";
 import "package:photos/services/collections_service.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
 import "package:photos/ui/collections/collection_list_page.dart";
 import "package:photos/ui/components/action_sheet_widget.dart";
@@ -18,6 +19,7 @@ import "package:photos/ui/sharing/add_participant_page.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/magic_util.dart";
 import "package:photos/utils/navigation_util.dart";
+import "package:smooth_page_indicator/smooth_page_indicator.dart";
 
 class AlbumSelectionActionWidget extends StatefulWidget {
   final SelectedAlbums selectedAlbums;
@@ -39,6 +41,7 @@ class _AlbumSelectionActionWidgetState
   final _logger = Logger("AlbumSelectionActionWidgetState");
   late CollectionActions collectionActions;
   bool hasFavorites = false;
+  final PageController _pageController = PageController();
 
   @override
   initState() {
@@ -125,36 +128,104 @@ class _AlbumSelectionActionWidgetState
       );
     }
 
-    final scrollController = ScrollController();
+    final List<SelectionActionButton> visibleItems = items
+        .where((item) => item.shouldShow == null || item.shouldShow == true)
+        .toList();
 
-    return MediaQuery(
-      data: MediaQuery.of(context).removePadding(removeBottom: true),
-      child: SafeArea(
-        child: Scrollbar(
-          radius: const Radius.circular(1),
-          thickness: 2,
-          controller: scrollController,
-          thumbVisibility: true,
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(
-              decelerationRate: ScrollDecelerationRate.fast,
+    final List<List<SelectionActionButton>> groupedItems = [];
+    for (int i = 0; i < visibleItems.length; i += 4) {
+      int end = (i + 4 < visibleItems.length) ? i + 4 : visibleItems.length;
+      groupedItems.add(visibleItems.sublist(i, end));
+    }
+
+    if (visibleItems.isNotEmpty) {
+      return MediaQuery(
+        data: MediaQuery.of(context).removePadding(removeBottom: true),
+        child: SafeArea(
+          child: Container(
+            padding: const EdgeInsets.only(
+              bottom: 20.0,
+              left: 20.0,
+              right: 20.0,
             ),
-            scrollDirection: Axis.horizontal,
-            child: Container(
-              padding: const EdgeInsets.only(bottom: 24),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(width: 4),
-                  ...items,
-                  const SizedBox(width: 4),
+            child: Column(
+              children: [
+                if (groupedItems.isNotEmpty) ...[
+                  const SizedBox(height: 24),
+                  Container(
+                    width: double.infinity,
+                    height: 74,
+                    decoration: BoxDecoration(
+                      color: getEnteColorScheme(context).backgroundElevated2,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: PageView.builder(
+                      controller: _pageController,
+                      itemCount: groupedItems.length,
+                      onPageChanged: (index) {
+                        if (index >= groupedItems.length &&
+                            groupedItems.isNotEmpty) {
+                          _pageController.animateToPage(
+                            groupedItems.length - 1,
+                            duration: const Duration(seconds: 5),
+                            curve: Curves.easeInOut,
+                          );
+                        }
+                      },
+                      itemBuilder: (context, pageIndex) {
+                        if (pageIndex >= groupedItems.length) {
+                          return const SizedBox();
+                        }
+
+                        final currentGroup = groupedItems[pageIndex];
+
+                        return Row(
+                          children: currentGroup.map((item) {
+                            return Expanded(
+                              child: AnimatedSwitcher(
+                                duration: const Duration(seconds: 5),
+                                transitionBuilder: (
+                                  Widget child,
+                                  Animation<double> animation,
+                                ) {
+                                  return FadeTransition(
+                                    opacity: animation,
+                                    child: child,
+                                  );
+                                },
+                                child: item is Widget
+                                    ? KeyedSubtree(
+                                        key: ValueKey(item.hashCode),
+                                        child: item,
+                                      )
+                                    : const SizedBox(),
+                              ),
+                            );
+                          }).toList(),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  if (groupedItems.length > 1)
+                    SmoothPageIndicator(
+                      controller: _pageController,
+                      count: groupedItems.length,
+                      effect: const WormEffect(
+                        dotHeight: 6,
+                        dotWidth: 6,
+                        spacing: 6,
+                        activeDotColor: Colors.white,
+                      ),
+                    ),
                 ],
-              ),
+              ],
             ),
           ),
         ),
-      ),
-    );
+      );
+    }
+    return const SizedBox.shrink();
   }
 
   Future<void> _shareCollection() async {

@@ -3,8 +3,7 @@ import "package:photos/core/constants.dart";
 import "package:photos/models/selected_albums.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/collection_list_page.dart";
-import "package:photos/ui/components/bottom_action_bar/album_action_bar_widget.dart";
-import "package:photos/ui/components/divider_widget.dart";
+// import "package:photos/ui/components/bottom_action_bar/album_action_bar_widget.dart";
 import "package:photos/ui/viewer/actions/album_selection_action_widget.dart";
 
 class AlbumBottomActionBarWidget extends StatelessWidget {
@@ -31,10 +30,10 @@ class AlbumBottomActionBarWidget extends StatelessWidget {
         : 0;
     return Container(
       decoration: BoxDecoration(
-        color: backgroundColor ?? colorScheme.backgroundElevated2,
+        color: colorScheme.backgroundElevated,
         borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(8),
-          topRight: Radius.circular(8),
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
         ),
       ),
       padding: EdgeInsets.only(
@@ -47,11 +46,10 @@ class AlbumBottomActionBarWidget extends StatelessWidget {
         children: [
           const SizedBox(height: 8),
           AlbumSelectionActionWidget(selectedAlbums, sectionType),
-          const DividerWidget(dividerType: DividerType.bottomBar),
-          AlbumActionBarWidget(
-            selectedAlbums: selectedAlbums,
-            onCancel: onCancel,
-          ),
+          // AlbumActionBarWidget(
+          //   selectedAlbums: selectedAlbums,
+          //   onCancel: onCancel,
+          // ),
         ],
       ),
     );
