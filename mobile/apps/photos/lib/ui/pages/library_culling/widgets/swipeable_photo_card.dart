@@ -17,6 +17,7 @@ class SwipeablePhotoCard extends StatefulWidget {
   final double swipeProgress;
   final bool isSwipingLeft;
   final bool isSwipingRight;
+  final bool showFileInfo;
 
   const SwipeablePhotoCard({
     super.key,
@@ -24,6 +25,7 @@ class SwipeablePhotoCard extends StatefulWidget {
     this.swipeProgress = 0.0,
     this.isSwipingLeft = false,
     this.isSwipingRight = false,
+    this.showFileInfo = true,
   });
 
   @override
@@ -239,29 +241,30 @@ class _SwipeablePhotoCardState extends State<SwipeablePhotoCard> {
                 child: imageWidget,
               ),
             ),
-            // File info directly below the image
-            Container(
-              width: maxWidth,
-              padding: const EdgeInsets.only(top: 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    fileName,
-                    style: textTheme.body,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    fileSize,
-                    style: textTheme.small.copyWith(color: theme.textMuted),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+            // File info directly below the image (only if showFileInfo is true)
+            if (widget.showFileInfo)
+              Container(
+                width: maxWidth,
+                padding: const EdgeInsets.only(top: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      fileName,
+                      style: textTheme.body,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      fileSize,
+                      style: textTheme.small.copyWith(color: theme.textMuted),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
               ),
-            ),
           ],
         ),
       ),

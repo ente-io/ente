@@ -205,7 +205,8 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
     showChoiceDialog(
       context,
       title: AppLocalizations.of(context).deleteAllInGroup,
-      body: AppLocalizations.of(context).allImagesMarkedForDeletion(count: groupSize),
+      body: AppLocalizations.of(context)
+          .allImagesMarkedForDeletion(count: groupSize),
       firstButtonLabel: AppLocalizations.of(context).confirm,
       secondButtonLabel: AppLocalizations.of(context).reviewAgain,
       isCritical: true,
@@ -245,9 +246,9 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
       context,
       title: AppLocalizations.of(context).deletePhotos,
       body: AppLocalizations.of(context).deletePhotosBody(
-            count: filesToDelete.length.toString(),
-            size: formatBytes(totalSize),
-          ),
+        count: filesToDelete.length.toString(),
+        size: formatBytes(totalSize),
+      ),
       firstButtonLabel: AppLocalizations.of(context).delete,
       isCritical: true,
       firstButtonOnTap: () async {
@@ -305,7 +306,7 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
           break;
         }
       }
-      
+
       // Reset the controller to ensure clean state
       controller.dispose();
       controller = CardSwiperController();
@@ -368,13 +369,13 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
 
   Widget _buildProgressDots(theme) {
     final totalImages = currentGroupFiles.length;
-    
+
     if (totalImages == 0) return const SizedBox.shrink();
-    
+
     // Limit dots to max 10 for readability
     const maxDots = 10;
     final showAllDots = totalImages <= maxDots;
-    
+
     return SizedBox(
       height: 8,
       child: Row(
@@ -384,20 +385,20 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
           showAllDots ? totalImages : maxDots,
           (index) {
             // For collapsed view, calculate which image this dot represents
-            final imageIndex = showAllDots 
-                ? index 
-                : (index * totalImages / maxDots).floor();
-            
+            final imageIndex =
+                showAllDots ? index : (index * totalImages / maxDots).floor();
+
             final decision = decisions[currentGroupFiles[imageIndex]];
-            final isCurrent = showAllDots 
+            final isCurrent = showAllDots
                 ? index == currentImageIndex
-                : imageIndex <= currentImageIndex && 
-                  (index == maxDots - 1 || 
-                   ((index + 1) * totalImages / maxDots).floor() > currentImageIndex);
-            
+                : imageIndex <= currentImageIndex &&
+                    (index == maxDots - 1 ||
+                        ((index + 1) * totalImages / maxDots).floor() >
+                            currentImageIndex);
+
             Color dotColor;
             double dotSize = 6;
-            
+
             if (decision == SwipeDecision.delete) {
               dotColor = theme.warning700;
             } else if (decision == SwipeDecision.keep) {
@@ -408,7 +409,7 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
             } else {
               dotColor = theme.strokeFaint;
             }
-            
+
             return Container(
               margin: const EdgeInsets.symmetric(horizontal: 2),
               width: dotSize,
@@ -423,7 +424,7 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
       ),
     );
   }
-  
+
   Future<void> _deleteFilesLogic(
     Set<EnteFile> filesToDelete,
     bool createSymlink,
@@ -517,9 +518,9 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
           title: Text(AppLocalizations.of(context).congratulations),
           content: Text(
             AppLocalizations.of(context).deletedPhotosWithSize(
-                  count: deletedCount.toString(),
-                  size: formatBytes(totalSize),
-                ),
+              count: deletedCount.toString(),
+              size: formatBytes(totalSize),
+            ),
           ),
           actions: [
             TextButton(
@@ -568,7 +569,8 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
                   child: GestureDetector(
                     onTap: _showCompletionDialog,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 8,),
                       decoration: BoxDecoration(
                         color: theme.warning500.withAlpha((0.1 * 255).toInt()),
                         borderRadius: BorderRadius.circular(8),
@@ -583,10 +585,11 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            AppLocalizations.of(context).deleteWithCount(count: totalDeletionCount),
+                            AppLocalizations.of(context)
+                                .deleteWithCount(count: totalDeletionCount),
                             style: getEnteTextTheme(context).smallBold.copyWith(
-                              color: theme.warning500,
-                            ),
+                                  color: theme.warning500,
+                                ),
                           ),
                         ],
                       ),
@@ -625,62 +628,99 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
                               children: [
                                 // Use a unique key for each group to force rebuild
                                 CardSwiper(
-                            key: ValueKey('swiper_${currentGroupIndex}_$currentImageIndex'),
-                            controller: controller,
-                            cardsCount:
-                                currentGroupFiles.length - currentImageIndex,
-                            numberOfCardsDisplayed: 1,
-                            backCardOffset: const Offset(0, 0),
-                            padding: const EdgeInsets.all(20.0),
-                            cardBuilder: (
-                                context,
-                                index,
-                                percentThresholdX,
-                                percentThresholdY,
-                            ) {
-                              final fileIndex = currentImageIndex + index;
-                              if (fileIndex >= currentGroupFiles.length) {
-                                // Return a placeholder container instead of SizedBox.shrink()
-                                return Container(
-                                  decoration: BoxDecoration(
-                                    color: theme.backgroundBase,
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                );
-                              }
+                                  key: ValueKey(
+                                      'swiper_${currentGroupIndex}_$currentImageIndex',),
+                                  controller: controller,
+                                  cardsCount: currentGroupFiles.length -
+                                      currentImageIndex,
+                                  numberOfCardsDisplayed:
+                                      (currentGroupFiles.length -
+                                                  currentImageIndex) >=
+                                              2
+                                          ? 2
+                                          : 1, // Show 2 cards only if available
+                                  backCardOffset: const Offset(
+                                      0, -50,), // Very subtle peek from top
+                                  padding: const EdgeInsets.all(20.0),
+                                  cardBuilder: (
+                                    context,
+                                    index,
+                                    percentThresholdX,
+                                    percentThresholdY,
+                                  ) {
+                                    final fileIndex = currentImageIndex + index;
+                                    if (fileIndex >= currentGroupFiles.length) {
+                                      // Return a placeholder container instead of SizedBox.shrink()
+                                      return Container(
+                                        decoration: BoxDecoration(
+                                          color: theme.backgroundBase,
+                                          borderRadius:
+                                              BorderRadius.circular(16),
+                                        ),
+                                      );
+                                    }
 
-                              final file = currentGroupFiles[fileIndex];
+                                    final file = currentGroupFiles[fileIndex];
+                                    final isBackCard = index >
+                                        0; // Check if this is the back card
 
-                              // Calculate swipe progress for overlay effects
-                              final swipeProgress = percentThresholdX / 100;
-                              final isSwipingLeft = swipeProgress < -0.1;
-                              final isSwipingRight = swipeProgress > 0.1;
+                                    // Calculate swipe progress for overlay effects
+                                    final swipeProgress =
+                                        percentThresholdX / 100;
+                                    final isSwipingLeft = swipeProgress < -0.1;
+                                    final isSwipingRight = swipeProgress > 0.1;
 
-                              return SwipeablePhotoCard(
-                                key: ValueKey(file.uploadedFileID ?? file.localID),
-                                file: file,
-                                swipeProgress: swipeProgress,
-                                isSwipingLeft: isSwipingLeft,
-                                isSwipingRight: isSwipingRight,
-                              );
-                            },
-                            onSwipe: (previousIndex, currentIndex, direction) {
-                              final decision =
-                                  direction == CardSwiperDirection.left
-                                      ? SwipeDecision.delete
-                                      : SwipeDecision.keep;
+                                    // Wrap back card with darkening/opacity effect
+                                    Widget card = SwipeablePhotoCard(
+                                      key: ValueKey(
+                                          file.uploadedFileID ?? file.localID,),
+                                      file: file,
+                                      swipeProgress:
+                                          isBackCard ? 0 : swipeProgress,
+                                      isSwipingLeft:
+                                          isBackCard ? false : isSwipingLeft,
+                                      isSwipingRight:
+                                          isBackCard ? false : isSwipingRight,
+                                      showFileInfo:
+                                          !isBackCard, // Hide file info for back card
+                                    );
 
-                              // Handle the swipe decision
-                              _handleSwipeDecision(decision);
+                                    // Apply darkening to the back card (no clipping, show full image)
+                                    if (isBackCard) {
+                                      card = ColorFiltered(
+                                        colorFilter: ColorFilter.mode(
+                                          Colors.black.withValues(
+                                              alpha: 0.4,), // Darken the preview
+                                          BlendMode.darken,
+                                        ),
+                                        child: Opacity(
+                                          opacity:
+                                              0.6, // Make it more transparent
+                                          child: card,
+                                        ),
+                                      );
+                                    }
 
-                              return true;
-                            },
-                            onEnd: () {
-                              // All cards in current group have been swiped
-                              // This is handled in _handleSwipeDecision when reaching last card
-                            },
-                            isDisabled: false,
-                            threshold: 50,
+                                    return card;
+                                  },
+                                  onSwipe:
+                                      (previousIndex, currentIndex, direction) {
+                                    final decision =
+                                        direction == CardSwiperDirection.left
+                                            ? SwipeDecision.delete
+                                            : SwipeDecision.keep;
+
+                                    // Handle the swipe decision
+                                    _handleSwipeDecision(decision);
+
+                                    return true;
+                                  },
+                                  onEnd: () {
+                                    // All cards in current group have been swiped
+                                    // This is handled in _handleSwipeDecision when reaching last card
+                                  },
+                                  isDisabled: false,
+                                  threshold: 50,
                                 ),
 
                                 // Minimal celebration overlay
@@ -694,7 +734,7 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
                                         color: theme.primary500,
                                       )
                                           .animate(
-                                              controller: _celebrationController,
+                                            controller: _celebrationController,
                                           )
                                           .scaleXY(
                                             begin: 0.5,
@@ -712,7 +752,8 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
                         ],
                       )
                     : Center(
-                        child: Text(AppLocalizations.of(context).noImagesSelected),
+                        child:
+                            Text(AppLocalizations.of(context).noImagesSelected),
                       ),
               ),
               // Action buttons at bottom
@@ -720,7 +761,7 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
                 padding: const EdgeInsets.only(
                   left: 32,
                   right: 32,
-                  bottom: 48, 
+                  bottom: 48,
                   top: 8,
                 ),
                 child: Row(
@@ -764,8 +805,8 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
                           child: Center(
                             child: Icon(
                               Icons.close,
-                              color: currentFile != null 
-                                  ? theme.warning700 
+                              color: currentFile != null
+                                  ? theme.warning700
                                   : theme.strokeFainter,
                               size: 32,
                             ),
@@ -822,8 +863,8 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
                           child: Center(
                             child: Icon(
                               Icons.thumb_up_outlined,
-                              color: currentFile != null 
-                                  ? theme.primary700 
+                              color: currentFile != null
+                                  ? theme.primary700
                                   : theme.strokeFainter,
                               size: 32,
                             ),
