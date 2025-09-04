@@ -10,7 +10,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/compute_control_event.dart";
 import "package:thermal/thermal.dart";
 
-enum _ComputeRunState {
+enum ComputeRunState {
   idle,
   runningML,
   generatingStream,
@@ -35,7 +35,7 @@ class ComputeController {
   bool interactionOverride = false;
   late Timer _userInteractionTimer;
 
-  _ComputeRunState _currentRunState = _ComputeRunState.idle;
+  ComputeRunState _currentRunState = ComputeRunState.idle;
   bool _waitingToRunML = false;
 
   bool get isDeviceHealthy => _isDeviceHealthy;
@@ -70,28 +70,45 @@ class ComputeController {
     _logger.info('init done ');
   }
 
-  bool requestCompute({bool ml = false, bool stream = false}) {
-    _logger.info("Requesting compute: ml: $ml, stream: $stream");
-    if (!_isDeviceHealthy || !_canRunGivenUserInteraction()) {
-      _logger.info("Device not healthy or user interacting, denying request.");
+  bool requestCompute({
+    bool ml = false,
+    bool stream = false,
+    bool bypassInteractionCheck = false,
+    bool bypassMLWaiting = false,
+  }) {
+    _logger.info(
+      "Requesting compute: ml: $ml, stream: $stream, bypassInteraction: $bypassInteractionCheck, bypassMLWaiting: $bypassMLWaiting",
+    );
+    if (!_isDeviceHealthy) {
+      _logger.info("Device not healthy, denying request.");
       return false;
     }
-    if (ml) {
-      return _requestML();
-    } else if (stream) {
-      return _requestStream();
+    if (!bypassInteractionCheck && !_canRunGivenUserInteraction()) {
+      _logger.info("User interacting, denying request.");
+      return false;
     }
-    _logger.severe("No compute request specified, denying request.");
-    return false;
+    bool result = false;
+    if (ml) {
+      result = _requestML();
+    } else if (stream) {
+      result = _requestStream(bypassMLWaiting);
+    } else {
+      _logger.severe("No compute request specified, denying request.");
+    }
+    return result;
+  }
+
+  ComputeRunState get computeState {
+    return _currentRunState;
   }
 
   bool _requestML() {
-    if (_currentRunState == _ComputeRunState.idle) {
-      _currentRunState = _ComputeRunState.runningML;
+    if (_currentRunState == ComputeRunState.idle) {
+      _currentRunState = ComputeRunState.runningML;
       _waitingToRunML = false;
       _logger.info("ML request granted");
       return true;
-    } else if (_currentRunState == _ComputeRunState.runningML) {
+    } else if (_currentRunState == ComputeRunState.runningML) {
       return true;
     }
     _logger.info(
@@ -101,17 +118,14 @@ class ComputeController {
     return false;
   }
 
-  bool _requestStream() {
-    if (_currentRunState == _ComputeRunState.idle && !_waitingToRunML) {
+  bool _requestStream([bool bypassMLWaiting = false]) {
+    if (_currentRunState == ComputeRunState.idle && (bypassMLWaiting || !_waitingToRunML)) {
       _logger.info("Stream request granted");
-      _currentRunState = _ComputeRunState.generatingStream;
-      return true;
-    } else if (_currentRunState == _ComputeRunState.generatingStream &&
-        !_waitingToRunML) {
+      _currentRunState = ComputeRunState.generatingStream;
       return true;
     }
     _logger.info(
-      "Stream request denied, current state: $_currentRunState, wants to run ML: $_waitingToRunML",
+      "Stream request denied, current state: $_currentRunState, wants to run ML: $_waitingToRunML, bypassMLWaiting: $bypassMLWaiting",
     );
     return false;
   }
@@ -122,13 +136,13 @@ class ComputeController {
     );
 
     if (ml) {
-      if (_currentRunState == _ComputeRunState.runningML) {
-        _currentRunState = _ComputeRunState.idle;
+      if (_currentRunState == ComputeRunState.runningML) {
+        _currentRunState = ComputeRunState.idle;
       }
       _waitingToRunML = false;
     } else if (stream) {
-      if (_currentRunState == _ComputeRunState.generatingStream) {
-        _currentRunState = _ComputeRunState.idle;
+      if (_currentRunState == ComputeRunState.generatingStream) {
+        _currentRunState = ComputeRunState.idle;
       }
     }
   }

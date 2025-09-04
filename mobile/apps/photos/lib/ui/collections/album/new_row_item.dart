@@ -28,9 +28,9 @@ class NewAlbumRowItemWidget extends StatelessWidget {
       onTap: () async {
         final result = await showTextInputDialog(
           context,
-          title: S.of(context).newAlbum,
-          submitButtonLabel: S.of(context).create,
-          hintText: S.of(context).enterAlbumName,
+          title: AppLocalizations.of(context).newAlbum,
+          submitButtonLabel: AppLocalizations.of(context).create,
+          hintText: AppLocalizations.of(context).enterAlbumName,
           alwaysShowSuccessState: false,
           initialValue: "",
           textCapitalization: TextCapitalization.words,
@@ -94,7 +94,7 @@ class NewAlbumRowItemWidget extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            S.of(context).addNew,
+            AppLocalizations.of(context).addNew,
             style: getEnteTextTheme(context).smallFaint,
           ),
         ],

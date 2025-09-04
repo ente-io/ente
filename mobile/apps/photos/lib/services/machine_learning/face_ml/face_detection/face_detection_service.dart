@@ -1,6 +1,5 @@
 import "dart:async";
 import 'dart:typed_data' show Float32List, Uint8List;
-import 'dart:ui' as ui show Image;
 
 import 'package:logging/logging.dart';
 import "package:onnx_dart/onnx_dart.dart";
@@ -44,7 +43,7 @@ class FaceDetectionService extends MlModel {
 
   /// Detects faces in the given image data.
   static Future<List<FaceDetectionRelative>> predict(
-    ui.Image image,
+    Dimensions dimensions,
     Uint8List rawRgbaBytes,
     int sessionAddress,
   ) async {
@@ -58,7 +57,7 @@ class FaceDetectionService extends MlModel {
     final startTime = DateTime.now();
 
     final (inputImageList, scaledSize) = await preprocessImageYoloFace(
-      image,
+      dimensions,
       rawRgbaBytes,
     );
     final preprocessingTime = DateTime.now();

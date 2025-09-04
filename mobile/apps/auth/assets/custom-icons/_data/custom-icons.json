@@ -383,6 +383,11 @@
       "title": "CoinDCX"
     },
     {
+  "title": "CoinTracking",
+  "slug": "cointracking", 
+  "altNames": ["cointracking.info", "Coin Tracking"]
+    },
+    {
       "title": "colorado",
       "altNames": [
         "Colorado.gov",
@@ -736,6 +741,11 @@
       "title": "Hivelocity"
     },
     {
+  "title": "HRDocumentBox",
+  "slug": "hrdocumentbox", 
+  "altNames": ["HRDocumentBox", "HR Document Box"]
+    },
+    {
       "title": "HSA Bank",
       "slug": "hsa_bank",
       "altNames": [
@@ -1038,6 +1048,13 @@
         "Le Chat",
         "Mistral AI",
         "MistralAI"
+      ]
+    },
+    {
+      "title": "Mobile01",
+      "slug": "mobile01",
+      "altNames": [
+        "M01"
       ]
     },
     {
@@ -1772,6 +1789,11 @@
         "UOLLET",
         "uollet.com.br"
       ]
+    },
+    {
+  "title": "VHV",
+  "slug": "vhv", 
+  "altNames": ["VHV", "VHV Versicherung"]
     },
     {
       "title": "Vikunja"

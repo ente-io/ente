@@ -58,7 +58,7 @@ class _TwoFactorAuthenticationPageState
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          S.of(context).twofactorAuthenticationPageTitle,
+          AppLocalizations.of(context).twofactorAuthenticationPageTitle,
         ),
       ),
       body: _getBody(),
@@ -72,7 +72,8 @@ class _TwoFactorAuthenticationPageState
       mainAxisSize: MainAxisSize.max,
       children: [
         Text(
-          S.of(context).enterThe6digitCodeFromnyourAuthenticatorApp,
+          AppLocalizations.of(context)
+              .enterThe6digitCodeFromnyourAuthenticatorApp,
           style: const TextStyle(
             height: 1.4,
             fontSize: 16,
@@ -132,7 +133,7 @@ class _TwoFactorAuthenticationPageState
                     await _verifyTwoFactorCode(_code);
                   }
                 : null,
-            child: Text(S.of(context).verify),
+            child: Text(AppLocalizations.of(context).verify),
           ),
         ),
         const Padding(padding: EdgeInsets.all(30)),
@@ -149,7 +150,7 @@ class _TwoFactorAuthenticationPageState
             padding: const EdgeInsets.all(10),
             child: Center(
               child: Text(
-                S.of(context).lostDevice,
+                AppLocalizations.of(context).lostDevice,
                 style: const TextStyle(
                   decoration: TextDecoration.underline,
                   fontSize: 12,

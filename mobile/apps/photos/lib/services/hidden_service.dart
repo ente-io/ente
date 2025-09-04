@@ -166,7 +166,11 @@ extension HiddenService on CollectionsService {
     } on AssertionError catch (e) {
       await dialog.hide();
       unawaited(
-        showErrorDialog(context, S.of(context).oops, e.message as String),
+        showErrorDialog(
+          context,
+          AppLocalizations.of(context).oops,
+          e.message as String,
+        ),
       );
       return false;
     } catch (e, s) {

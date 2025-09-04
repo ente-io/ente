@@ -84,7 +84,7 @@ class _PeopleSelectionActionWidgetState
 
     items.add(
       SelectionActionButton(
-        labelText: S.of(context).edit,
+        labelText: AppLocalizations.of(context).edit,
         icon: Icons.edit_outlined,
         onTap: _onEditPerson,
         shouldShow: onlyOnePerson,
@@ -92,7 +92,7 @@ class _PeopleSelectionActionWidgetState
     );
     items.add(
       SelectionActionButton(
-        labelText: S.of(context).review,
+        labelText: AppLocalizations.of(context).review,
         icon: Icons.search_outlined,
         onTap: _onReviewSuggestion,
         shouldShow: onlyOnePerson,
@@ -100,7 +100,7 @@ class _PeopleSelectionActionWidgetState
     );
     items.add(
       SelectionActionButton(
-        labelText: S.of(context).ignore,
+        labelText: AppLocalizations.of(context).ignore,
         icon: Icons.hide_image_outlined,
         onTap: _onIgnore,
         shouldShow: anythingSelected,
@@ -108,7 +108,7 @@ class _PeopleSelectionActionWidgetState
     );
     items.add(
       SelectionActionButton(
-        labelText: S.of(context).merge,
+        labelText: AppLocalizations.of(context).merge,
         icon: Icons.merge_outlined,
         onTap: _onMerge,
         shouldShow: onePersonAndClusters,
@@ -116,7 +116,7 @@ class _PeopleSelectionActionWidgetState
     );
     items.add(
       SelectionActionButton(
-        labelText: S.of(context).reset,
+        labelText: AppLocalizations.of(context).reset,
         icon: Icons.remove_outlined,
         onTap: _onResetPerson,
         shouldShow: onlyOnePerson,
@@ -124,7 +124,7 @@ class _PeopleSelectionActionWidgetState
     );
     items.add(
       SelectionActionButton(
-        labelText: S.of(context).autoAddToAlbum,
+        labelText: AppLocalizations.of(context).autoAddToAlbum,
         iconWidget: Image.asset(
           "assets/auto-add-people.png",
           width: 24,
@@ -220,9 +220,9 @@ class _PeopleSelectionActionWidgetState
 
     await showChoiceDialog(
       context,
-      title: S.of(context).areYouSureYouWantToResetThisPerson,
-      body: S.of(context).allPersonGroupingWillReset,
-      firstButtonLabel: S.of(context).yesResetPerson,
+      title: AppLocalizations.of(context).areYouSureYouWantToResetThisPerson,
+      body: AppLocalizations.of(context).allPersonGroupingWillReset,
+      firstButtonLabel: AppLocalizations.of(context).yesResetPerson,
       firstButtonOnTap: () async {
         try {
           await PersonService.instance.deletePerson(person.remoteID);
@@ -243,12 +243,12 @@ class _PeopleSelectionActionWidgetState
     await showChoiceDialog(
       context,
       title: multiple
-          ? S.of(context).areYouSureYouWantToIgnoreThesePersons
-          : S.of(context).areYouSureYouWantToIgnoreThisPerson,
+          ? AppLocalizations.of(context).areYouSureYouWantToIgnoreThesePersons
+          : AppLocalizations.of(context).areYouSureYouWantToIgnoreThisPerson,
       body: multiple
-          ? S.of(context).thePersonGroupsWillNotBeDisplayed
-          : S.of(context).thePersonWillNotBeDisplayed,
-      firstButtonLabel: S.of(context).yesIgnore,
+          ? AppLocalizations.of(context).thePersonGroupsWillNotBeDisplayed
+          : AppLocalizations.of(context).thePersonWillNotBeDisplayed,
+      firstButtonLabel: AppLocalizations.of(context).yesIgnore,
       firstButtonOnTap: () async {
         try {
           for (final clusterID in selectedClusterIds) {
@@ -279,9 +279,10 @@ class _PeopleSelectionActionWidgetState
 
     await showChoiceDialog(
       context,
-      title: S.of(context).areYouSureYouWantToMergeThem,
-      body: S.of(context).allUnnamedGroupsWillBeMergedIntoTheSelectedPerson,
-      firstButtonLabel: S.of(context).confirm,
+      title: AppLocalizations.of(context).areYouSureYouWantToMergeThem,
+      body: AppLocalizations.of(context)
+          .allUnnamedGroupsWillBeMergedIntoTheSelectedPerson,
+      firstButtonLabel: AppLocalizations.of(context).confirm,
       firstButtonOnTap: () async {
         try {
           final personMap = await personEntitiesMapFuture;

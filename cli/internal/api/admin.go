@@ -139,5 +139,28 @@ func (c *Client) UpdateFreePlanSub(ctx context.Context, userDetails *models.User
 		}
 	}
 	return nil
+}
 
+func (c *Client) SendTestMail(ctx context.Context, toEmail, fromEmail, fromName string) error {
+	body := map[string]interface{}{
+		"to":        []string{toEmail},
+		"fromName":  fromName,
+		"fromEmail": fromEmail,
+		"subject":   "Test mail from Ente",
+		"body":      "This is a test mail from Ente",
+	}
+	r, err := c.restClient.R().
+		SetContext(ctx).
+		SetBody(body).
+		Post("/admin/mail")
+	if err != nil {
+		return err
+	}
+	if r.IsError() {
+		return &ApiError{
+			StatusCode: r.StatusCode(),
+			Message:    r.String(),
+		}
+	}
+	return nil
 }

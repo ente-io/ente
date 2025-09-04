@@ -53,6 +53,13 @@ class UploadLocksDB {
     columnCreatedAt: "created_at",
   );
 
+  static const _streamQueueTable = (
+    table: "stream_queue",
+    columnUploadedFileID: "uploaded_file_id",
+    columnQueueType: "queue_type", // 'create' or 'recreate'
+    columnCreatedAt: "created_at",
+  );
+
   static final initializationScript = [
     ..._createUploadLocksTable(),
   ];
@@ -134,18 +141,26 @@ class UploadLocksDB {
                   ${_streamUploadErrorTable.columnCreatedAt} INTEGER DEFAULT CURRENT_TIMESTAMP NOT NULL
                 )
                 ''',
+      '''
+                CREATE TABLE IF NOT EXISTS ${_streamQueueTable.table} (
+                  ${_streamQueueTable.columnUploadedFileID} INTEGER PRIMARY KEY,
+                  ${_streamQueueTable.columnQueueType} TEXT NOT NULL,
+                  ${_streamQueueTable.columnCreatedAt} INTEGER DEFAULT CURRENT_TIMESTAMP NOT NULL
+                )
+                ''',
     ];
   }
 
   Future<void> clearTable() async {
-    final db = await instance.database;
+    final db = await database;
     await db.delete(_uploadLocksTable.table);
     await db.delete(_trackUploadTable.table);
     await db.delete(_partsTable.table);
+    await db.delete(_streamQueueTable.table);
   }
 
   Future<void> acquireLock(String id, String owner, int time) async {
-    final db = await instance.database;
+    final db = await database;
     final row = <String, dynamic>{};
     row[_uploadLocksTable.columnID] = id;
     row[_uploadLocksTable.columnOwner] = owner;
@@ -158,7 +173,7 @@ class UploadLocksDB {
   }
 
   Future<String> getLockData(String id) async {
-    final db = await instance.database;
+    final db = await database;
     final rows = await db.query(
       _uploadLocksTable.table,
       where: '${_uploadLocksTable.columnID} = ?',
@@ -175,7 +190,7 @@ class UploadLocksDB {
   }
 
   Future<bool> isLocked(String id, String owner) async {
-    final db = await instance.database;
+    final db = await database;
     final rows = await db.query(
       _uploadLocksTable.table,
       where:
@@ -186,7 +201,7 @@ class UploadLocksDB {
   }
 
   Future<int> releaseLock(String id, String owner) async {
-    final db = await instance.database;
+    final db = await database;
     return db.delete(
       _uploadLocksTable.table,
       where:
@@ -196,7 +211,7 @@ class UploadLocksDB {
   }
 
   Future<int> releaseLocksAcquiredByOwnerBefore(String owner, int time) async {
-    final db = await instance.database;
+    final db = await database;
     return db.delete(
       _uploadLocksTable.table,
       where:
@@ -206,7 +221,7 @@ class UploadLocksDB {
   }
 
   Future<int> releaseAllLocksAcquiredBefore(int time) async {
-    final db = await instance.database;
+    final db = await database;
     return db.delete(
       _uploadLocksTable.table,
       where: '${_uploadLocksTable.columnTime} < ?',
@@ -220,7 +235,7 @@ class UploadLocksDB {
     String fileHash,
     int collectionID,
   ) async {
-    final db = await instance.database;
+    final db = await database;
 
     final rows = await db.query(
       _trackUploadTable.table,
@@ -247,7 +262,7 @@ class UploadLocksDB {
     String fileHash,
     int collectionID,
   ) async {
-    final db = await instance.database;
+    final db = await database;
     await db.update(
       _trackUploadTable.table,
       {
@@ -270,7 +285,7 @@ class UploadLocksDB {
     String fileHash,
     int collectionID,
   ) async {
-    final db = await instance.database;
+    final db = await database;
     final rows = await db.query(
       _trackUploadTable.table,
       where: '${_trackUploadTable.columnLocalID} = ?'
@@ -328,7 +343,7 @@ class UploadLocksDB {
     int uploadedFileID,
     String errorMessage,
   ) async {
-    final db = await UploadLocksDB.instance.database;
+    final db = await database;
 
     await db.insert(
       _streamUploadErrorTable.table,
@@ -346,7 +361,7 @@ class UploadLocksDB {
     int uploadedFileID,
     String errorMessage,
   ) async {
-    final db = await instance.database;
+    final db = await database;
     await db.update(
       _streamUploadErrorTable.table,
       {
@@ -360,7 +375,7 @@ class UploadLocksDB {
   }
 
   Future<int> deleteStreamUploadErrorEntry(int uploadedFileID) async {
-    final db = await instance.database;
+    final db = await database;
     return await db.delete(
       _streamUploadErrorTable.table,
       where: '${_streamUploadErrorTable.columnUploadedFileID} = ?',
@@ -369,7 +384,7 @@ class UploadLocksDB {
   }
 
   Future<Map<int, String>> getStreamUploadError() {
-    return instance.database.then((db) async {
+    return database.then((db) async {
       final rows = await db.query(
         _streamUploadErrorTable.table,
         columns: [
@@ -398,7 +413,7 @@ class UploadLocksDB {
     String keyNonce, {
     required int partSize,
   }) async {
-    final db = await UploadLocksDB.instance.database;
+    final db = await database;
     final objectKey = urls.objectKey;
 
     await db.insert(
@@ -441,7 +456,7 @@ class UploadLocksDB {
     int partNumber,
     String etag,
   ) async {
-    final db = await instance.database;
+    final db = await database;
     await db.update(
       _partsTable.table,
       {
@@ -458,7 +473,7 @@ class UploadLocksDB {
     String objectKey,
     MultipartStatus status,
   ) async {
-    final db = await instance.database;
+    final db = await database;
     await db.update(
       _trackUploadTable.table,
       {
@@ -472,7 +487,7 @@ class UploadLocksDB {
   Future<int> deleteMultipartTrack(
     String localId,
   ) async {
-    final db = await instance.database;
+    final db = await database;
     return await db.delete(
       _trackUploadTable.table,
       where: '${_trackUploadTable.columnLocalID} = ?',
@@ -482,7 +497,7 @@ class UploadLocksDB {
 
   // getFileNameToLastAttemptedAtMap returns a map of encrypted file name to last attempted at time
   Future<Map<String, int>> getFileNameToLastAttemptedAtMap() {
-    return instance.database.then((db) async {
+    return database.then((db) async {
       final rows = await db.query(
         _trackUploadTable.table,
         columns: [
@@ -504,7 +519,7 @@ class UploadLocksDB {
     String fileHash,
     int collectionID,
   ) {
-    return instance.database.then((db) async {
+    return database.then((db) async {
       final rows = await db.query(
         _trackUploadTable.table,
         where: '${_trackUploadTable.columnLocalID} = ?'
@@ -518,5 +533,57 @@ class UploadLocksDB {
       final row = rows.first;
       return row[_trackUploadTable.columnEncryptedFileName] as String;
     });
+  }
+
+  // Stream Queue Management Methods
+  Future<void> addToStreamQueue(
+    int uploadedFileID,
+    String queueType, // 'create' or 'recreate'
+  ) async {
+    final db = await database;
+    await db.insert(
+      _streamQueueTable.table,
+      {
+        _streamQueueTable.columnUploadedFileID: uploadedFileID,
+        _streamQueueTable.columnQueueType: queueType,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<void> removeFromStreamQueue(int uploadedFileID) async {
+    final db = await database;
+    await db.delete(
+      _streamQueueTable.table,
+      where: '${_streamQueueTable.columnUploadedFileID} = ?',
+      whereArgs: [uploadedFileID],
+    );
+  }
+
+  Future<Map<int, String>> getStreamQueue() async {
+    final db = await database;
+    final rows = await db.query(
+      _streamQueueTable.table,
+      columns: [
+        _streamQueueTable.columnUploadedFileID,
+        _streamQueueTable.columnQueueType,
+      ],
+    );
+    final map = <int, String>{};
+    for (final row in rows) {
+      map[row[_streamQueueTable.columnUploadedFileID] as int] =
+          row[_streamQueueTable.columnQueueType] as String;
+    }
+    return map;
+  }
+
+  Future<bool> isInStreamQueue(int uploadedFileID) async {
+    final db = await database;
+    final rows = await db.query(
+      _streamQueueTable.table,
+      where: '${_streamQueueTable.columnUploadedFileID} = ?',
+      whereArgs: [uploadedFileID],
+    );
+    return rows.isNotEmpty;
   }
 }

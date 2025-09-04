@@ -156,6 +156,23 @@ func (c *ClICtrl) UpdateFreeStorage(ctx context.Context, params model.AdminActio
 	return nil
 }
 
+func (c *ClICtrl) SendTestMail(ctx context.Context, params model.AdminActionForUser, to, from, fromName string) error {
+	accountCtx, err := c.buildAdminContext(ctx, params.AdminEmail)
+	if err != nil {
+		return err
+	}
+	err = c.Client.SendTestMail(accountCtx, to, from, fromName)
+	if err != nil {
+		if apiErr, ok := err.(*api.ApiError); ok && apiErr.StatusCode == 400 && strings.Contains(apiErr.Message, "Token is too old") {
+			fmt.Printf("Error: old admin token, please re-authenticate using `ente account add` \n")
+			return nil
+		}
+		return err
+	}
+	fmt.Printf("Successfully sent test email to %s\n", to)
+	return nil
+}
+
 func (c *ClICtrl) buildAdminContext(ctx context.Context, adminEmail string) (context.Context, error) {
 	accounts, err := c.GetAccounts(ctx)
 	if err != nil {

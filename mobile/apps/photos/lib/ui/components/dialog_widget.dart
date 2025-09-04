@@ -295,7 +295,7 @@ class _TextInputDialogState extends State<TextInputDialog> {
                   child: ButtonWidget(
                     buttonType: ButtonType.secondary,
                     buttonSize: ButtonSize.small,
-                    labelText: S.of(context).cancel,
+                    labelText: AppLocalizations.of(context).cancel,
                     isInAlert: true,
                   ),
                 ),

@@ -54,34 +54,34 @@ extension SectionTypeExtensions on SectionType {
   String sectionTitle(BuildContext context) {
     switch (this) {
       case SectionType.face:
-        return S.of(context).people;
+        return AppLocalizations.of(context).people;
       case SectionType.magic:
-        return S.of(context).discover;
+        return AppLocalizations.of(context).discover;
       case SectionType.location:
-        return S.of(context).locations;
+        return AppLocalizations.of(context).locations;
       case SectionType.contacts:
-        return S.of(context).contacts;
+        return AppLocalizations.of(context).contacts;
       case SectionType.album:
-        return S.of(context).albums;
+        return AppLocalizations.of(context).albums;
       case SectionType.fileTypesAndExtension:
-        return S.of(context).fileTypes;
+        return AppLocalizations.of(context).fileTypes;
     }
   }
 
   String getEmptyStateText(BuildContext context) {
     switch (this) {
       case SectionType.face:
-        return S.of(context).searchPersonsEmptySection;
+        return AppLocalizations.of(context).searchPersonsEmptySection;
       case SectionType.magic:
-        return S.of(context).searchDiscoverEmptySection;
+        return AppLocalizations.of(context).searchDiscoverEmptySection;
       case SectionType.location:
-        return S.of(context).searchLocationEmptySection;
+        return AppLocalizations.of(context).searchLocationEmptySection;
       case SectionType.contacts:
-        return S.of(context).searchPeopleEmptySection;
+        return AppLocalizations.of(context).searchPeopleEmptySection;
       case SectionType.album:
-        return S.of(context).searchAlbumsEmptySection;
+        return AppLocalizations.of(context).searchAlbumsEmptySection;
       case SectionType.fileTypesAndExtension:
-        return S.of(context).searchFileTypesAndNamesEmptySection;
+        return AppLocalizations.of(context).searchFileTypesAndNamesEmptySection;
     }
   }
 
@@ -127,11 +127,11 @@ extension SectionTypeExtensions on SectionType {
         // todo: later
         return "temp";
       case SectionType.location:
-        return S.of(context).addNew;
+        return AppLocalizations.of(context).addNew;
       case SectionType.contacts:
-        return S.of(context).invite;
+        return AppLocalizations.of(context).invite;
       case SectionType.album:
-        return S.of(context).addNew;
+        return AppLocalizations.of(context).addNew;
       case SectionType.fileTypesAndExtension:
         return "";
     }
@@ -159,7 +159,7 @@ extension SectionTypeExtensions on SectionType {
       case SectionType.contacts:
         return () async {
           await shareText(
-            S.of(context).shareTextRecommendUsingEnte,
+            AppLocalizations.of(context).shareTextRecommendUsingEnte,
           );
         };
       case SectionType.location:
@@ -173,9 +173,9 @@ extension SectionTypeExtensions on SectionType {
         return () async {
           final result = await showTextInputDialog(
             context,
-            title: S.of(context).newAlbum,
-            submitButtonLabel: S.of(context).create,
-            hintText: S.of(context).enterAlbumName,
+            title: AppLocalizations.of(context).newAlbum,
+            submitButtonLabel: AppLocalizations.of(context).create,
+            hintText: AppLocalizations.of(context).enterAlbumName,
             alwaysShowSuccessState: false,
             initialValue: "",
             textCapitalization: TextCapitalization.words,

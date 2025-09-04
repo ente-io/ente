@@ -8,11 +8,13 @@ import "package:path_provider/path_provider.dart";
 import "package:photos/models/ml/vector.dart";
 import "package:photos/services/machine_learning/semantic_search/query_result.dart";
 import "package:photos/src/rust/api/usearch_api.dart";
+import "package:shared_preferences/shared_preferences.dart";
 
 class ClipVectorDB {
   static final Logger _logger = Logger("ClipVectorDB");
 
-  static const _databaseName = "ente.ml.vectordb.clip";
+  static const _databaseName = "ente.ml.vectordb.clip.usearch";
+  static const _kMigrationKey = "clip_vectordb_migration";
 
   static final BigInt _embeddingDimension = BigInt.from(512);
 
@@ -35,11 +37,10 @@ class ClipVectorDB {
 
   Future<VectorDb> _initVectorDB() async {
     final documentsDirectory = await getApplicationDocumentsDirectory();
-    final String databaseDirectory =
-        join(documentsDirectory.path, _databaseName);
-    _logger.info("Opening vectorDB access: DB path " + databaseDirectory);
+    final String dbPath = join(documentsDirectory.path, _databaseName);
+    _logger.info("Opening vectorDB access: DB path " + dbPath);
     final vectorDB = VectorDb(
-      filePath: databaseDirectory,
+      filePath: dbPath,
       dimensions: _embeddingDimension,
     );
     final stats = await getIndexStats(vectorDB);
@@ -51,10 +52,9 @@ class ClipVectorDB {
   Future<bool> checkIfMigrationDone() async {
     if (_migrationDone != null) return _migrationDone!;
     _logger.info("Checking if ClipVectorDB migration has run");
-    final documentsDirectory = await getApplicationDocumentsDirectory();
-    final migrationFlagFile =
-        File(join(documentsDirectory.path, 'clip_vector_migration_done'));
-    if (await migrationFlagFile.exists()) {
+    final prefs = await SharedPreferences.getInstance();
+    final migrationDone = prefs.getBool(_kMigrationKey) ?? false;
+    if (migrationDone) {
       _logger.info("ClipVectorDB migration already done");
       _migrationDone = true;
       return _migrationDone!;
@@ -67,10 +67,8 @@ class ClipVectorDB {
 
   Future<void> setMigrationDone() async {
     _logger.info("Setting ClipVectorDB migration done");
-    final documentsDirectory = await getApplicationDocumentsDirectory();
-    final migrationFlagFile =
-        File(join(documentsDirectory.path, 'clip_vector_migration_done'));
-    await migrationFlagFile.create(recursive: true);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_kMigrationKey, true);
     _migrationDone = true;
   }
 
@@ -139,17 +137,6 @@ class ClipVectorDB {
       await db.resetIndex();
     } catch (e, s) {
       _logger.severe("Error deleting all embeddings", e, s);
-      rethrow;
-    }
-  }
-
-  Future<void> deleteIndex() async {
-    final db = await _vectorDB;
-    try {
-      await db.deleteIndex();
-      _vectorDbFuture = null;
-    } catch (e, s) {
-      _logger.severe("Error deleting index", e, s);
       rethrow;
     }
   }
@@ -277,6 +264,40 @@ class ClipVectorDB {
         e,
         s,
       );
+      rethrow;
+    }
+  }
+
+  Future<void> deleteIndex() async {
+    final db = await _vectorDB;
+    try {
+      await db.deleteIndex();
+      _vectorDbFuture = null;
+    } catch (e, s) {
+      _logger.severe("Error deleting index", e, s);
+      rethrow;
+    }
+  }
+
+  Future<void> deleteIndexFile({bool undoMigration = false}) async {
+    try {
+      final documentsDirectory = await getApplicationDocumentsDirectory();
+      final String dbPath = join(documentsDirectory.path, _databaseName);
+      _logger.info("Delete index file: DB path " + dbPath);
+      final file = File(dbPath);
+      if (await file.exists()) {
+        await file.delete();
+      }
+      _logger.info("Deleted index file on disk");
+      _vectorDbFuture = null;
+      if (undoMigration) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool(_kMigrationKey, false);
+        _migrationDone = false;
+        _logger.info("Undid migration flag");
+      }
+    } catch (e, s) {
+      _logger.severe("Error deleting index file on disk", e, s);
       rethrow;
     }
   }

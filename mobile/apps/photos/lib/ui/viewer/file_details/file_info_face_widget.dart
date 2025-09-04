@@ -127,7 +127,7 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
           child: Center(
             child: Text(
               widget.person!.data.isIgnored
-                  ? '(' + S.of(context).ignored + ')'
+                  ? '(' + AppLocalizations.of(context).ignored + ')'
                   : widget.person!.data.name.trim(),
               style: Theme.of(context).textTheme.bodySmall,
               overflow: TextOverflow.ellipsis,
@@ -225,7 +225,7 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
 
     showShortToast(
       context,
-      S.of(context).faceNotClusteredYet,
+      AppLocalizations.of(context).faceNotClusteredYet,
     );
     unawaited(MLService.instance.clusterAllImages(force: true));
     return;
@@ -257,11 +257,11 @@ class _FileInfoFaceWidgetState extends State<FileInfoFaceWidget> {
     if (widget.person == null) return;
     final result = await showChoiceActionSheet(
       context,
-      title: S.of(context).removePersonLabel,
-      body: S.of(context).areYouSureRemoveThisFaceFromPerson,
-      firstButtonLabel: S.of(context).remove,
+      title: AppLocalizations.of(context).removePersonLabel,
+      body: AppLocalizations.of(context).areYouSureRemoveThisFaceFromPerson,
+      firstButtonLabel: AppLocalizations.of(context).remove,
       firstButtonType: ButtonType.critical,
-      secondButtonLabel: S.of(context).cancel,
+      secondButtonLabel: AppLocalizations.of(context).cancel,
       isCritical: true,
     );
     if (result?.action == ButtonAction.first) {

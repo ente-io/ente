@@ -2,6 +2,8 @@
 
 ## v1.7.15 (Unreleased)
 
+- Custom domains.
+- Support Czech translations.
 - .
 
 ## v1.7.14

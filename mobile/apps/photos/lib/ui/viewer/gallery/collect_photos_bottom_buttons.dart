@@ -56,7 +56,7 @@ class _EmptyAlbumStateNewState extends State<CollectPhotosBottomButtons> {
   Future<void> _generateAlbumUrl() async {
     final dialog = createProgressDialog(
       context,
-      S.of(context).creatingLink,
+      AppLocalizations.of(context).creatingLink,
       isDismissible: true,
     );
     await dialog.show();
@@ -115,7 +115,7 @@ class _EmptyAlbumStateNewState extends State<CollectPhotosBottomButtons> {
                       child: ButtonWidget(
                         buttonType: ButtonType.secondary,
                         buttonSize: ButtonSize.large,
-                        labelText: S.of(context).addPhotos,
+                        labelText: AppLocalizations.of(context).addPhotos,
                         icon: Icons.add_photo_alternate_outlined,
                         shouldSurfaceExecutionStates: false,
                         onTap: () async {
@@ -134,7 +134,7 @@ class _EmptyAlbumStateNewState extends State<CollectPhotosBottomButtons> {
                     ButtonWidget(
                       buttonType: ButtonType.primary,
                       buttonSize: ButtonSize.large,
-                      labelText: S.of(context).share,
+                      labelText: AppLocalizations.of(context).share,
                       icon: Icons.adaptive.share,
                       shouldSurfaceExecutionStates: false,
                       onTap: () async {

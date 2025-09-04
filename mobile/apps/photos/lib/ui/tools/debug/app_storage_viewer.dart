@@ -61,25 +61,28 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
     paths.addAll([
       PathStorageItem.name(
         imageCachePath,
-        S.of(context).remoteImages,
+        AppLocalizations.of(context).remoteImages,
         allowCacheClear: true,
       ),
       PathStorageItem.name(
         videoCachePath,
-        S.of(context).remoteVideos,
+        AppLocalizations.of(context).remoteVideos,
         allowCacheClear: true,
       ),
       PathStorageItem.name(
         cacheDirectory,
-        S.of(context).remoteThumbnails,
+        AppLocalizations.of(context).remoteThumbnails,
         allowCacheClear: true,
       ),
-      PathStorageItem.name(tempDownload, S.of(context).pendingSync),
+      PathStorageItem.name(
+        tempDownload,
+        AppLocalizations.of(context).pendingSync,
+      ),
       PathStorageItem.name(
         Platform.isAndroid
             ? androidGlideCacheDirectory
             : iOSPhotoManagerInAppCacheDirectory,
-        S.of(context).localGallery,
+        AppLocalizations.of(context).localGallery,
         allowCacheClear: true,
       ),
     ]);
@@ -136,7 +139,7 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: S.of(context).manageDeviceStorage,
+              title: AppLocalizations.of(context).manageDeviceStorage,
             ),
             actionIcons: [
               IconButtonWidget(
@@ -165,7 +168,7 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
                       Column(
                         children: [
                           MenuSectionTitle(
-                            title: S.of(context).cachedData,
+                            title: AppLocalizations.of(context).cachedData,
                           ),
                           ListView.builder(
                             shrinkWrap: true,
@@ -190,7 +193,7 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
                           MenuItemWidget(
                             leadingIcon: Icons.delete_sweep_outlined,
                             captionedTextWidget: CaptionedTextWidget(
-                              title: S.of(context).clearCaches,
+                              title: AppLocalizations.of(context).clearCaches,
                             ),
                             menuItemColor:
                                 getEnteColorScheme(context).fillFaint,

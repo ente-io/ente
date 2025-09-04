@@ -1,4 +1,4 @@
-- Added similar images debug screen (Settings > Backup > Free up space > Similar images)
+- Video streaming improvements
 - Added support for custom domain links
 - Image editor fixes:  
   - Fixed bottom navigation bar color in light theme  

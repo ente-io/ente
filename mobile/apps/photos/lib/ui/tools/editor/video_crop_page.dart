@@ -96,7 +96,7 @@ class _VideoCropPageState extends State<VideoCropPage> {
             const SizedBox(height: 40),
             VideoEditorNavigationOptions(
               color: Theme.of(context).colorScheme.videoPlayerPrimaryColor,
-              secondaryText: S.of(context).done,
+              secondaryText: AppLocalizations.of(context).done,
               onSecondaryPressed: () {
                 // WAY 1: validate crop parameters set in the crop view
                 widget.controller.applyCacheCrop();

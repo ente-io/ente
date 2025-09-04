@@ -88,7 +88,8 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
     } else {
       _importProgressEvent =
           Bus.instance.on<LocalImportProgressEvent>().listen((event) {
-        _loadingMessage = S.of(context).processingImport(event.folderName);
+        _loadingMessage = AppLocalizations.of(context)
+            .processingImport(folderName: event.folderName);
         if (mounted) {
           setState(() {});
         }
@@ -107,7 +108,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
 
   @override
   Widget build(BuildContext context) {
-    _loadingMessage ??= S.of(context).loadingYourPhotos;
+    _loadingMessage ??= AppLocalizations.of(context).loadingYourPhotos;
     _setupLoadingMessages(context);
     final isLightMode = Theme.of(context).brightness == Brightness.light;
     return Scaffold(
@@ -156,7 +157,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Text(
-                          S.of(context).didYouKnow,
+                          AppLocalizations.of(context).didYouKnow,
                           style: Theme.of(context)
                               .textTheme
                               .titleLarge!
@@ -209,19 +210,21 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
                       onPressed: () {
                         showDialogWidget(
                           context: context,
-                          title: S.of(context).oops,
+                          title: AppLocalizations.of(context).oops,
                           icon: Icons.error_outline_outlined,
-                          body: S.of(context).localSyncErrorMessage,
+                          body: AppLocalizations.of(context)
+                              .localSyncErrorMessage,
                           isDismissible: true,
                           buttons: [
                             ButtonWidget(
                               buttonType: ButtonType.primary,
-                              labelText: S.of(context).contactSupport,
+                              labelText:
+                                  AppLocalizations.of(context).contactSupport,
                               buttonAction: ButtonAction.second,
                               onTap: () async {
                                 await sendLogs(
                                   context,
-                                  S.of(context).contactSupport,
+                                  AppLocalizations.of(context).contactSupport,
                                   "support@ente.io",
                                   postShare: () {},
                                 );
@@ -240,15 +243,15 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
   }
 
   void _setupLoadingMessages(BuildContext context) {
-    _messages.add(S.of(context).loadMessage1);
-    _messages.add(S.of(context).loadMessage2);
-    _messages.add(S.of(context).loadMessage3);
-    _messages.add(S.of(context).loadMessage4);
-    _messages.add(S.of(context).loadMessage5);
-    _messages.add(S.of(context).loadMessage6);
-    _messages.add(S.of(context).loadMessage7);
-    _messages.add(S.of(context).loadMessage8);
-    _messages.add(S.of(context).loadMessage9);
+    _messages.add(AppLocalizations.of(context).loadMessage1);
+    _messages.add(AppLocalizations.of(context).loadMessage2);
+    _messages.add(AppLocalizations.of(context).loadMessage3);
+    _messages.add(AppLocalizations.of(context).loadMessage4);
+    _messages.add(AppLocalizations.of(context).loadMessage5);
+    _messages.add(AppLocalizations.of(context).loadMessage6);
+    _messages.add(AppLocalizations.of(context).loadMessage7);
+    _messages.add(AppLocalizations.of(context).loadMessage8);
+    _messages.add(AppLocalizations.of(context).loadMessage9);
   }
 
   Widget _getMessage(String text) {

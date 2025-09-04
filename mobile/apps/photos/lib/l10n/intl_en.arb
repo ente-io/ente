@@ -1827,5 +1827,117 @@
         "type": "int"
       }
     }
-  }
+  },
+  "videosProcessed": "Videos processed",
+  "totalVideos": "Total videos",
+  "skippedVideos": "Skipped videos",
+  "videoStreamingDescriptionLine1": "Play videos instantly on any device.",
+  "videoStreamingDescriptionLine2": "Enable to process video streams on this device.",
+  "videoStreamingNote": "Only videos from last 60 days and under 1 minute are processed on this device. For older/longer videos, enable streaming in the desktop app.",
+  "createStream": "Create stream",
+  "recreateStream": "Recreate stream",
+  "addedToStreamCreationQueue": "Added to stream creation queue",
+  "addedToStreamRecreationQueue": "Added to stream recreation queue",
+  "videoPreviewAlreadyExists": "Video preview already exists",
+  "videoAlreadyInQueue": "Video file already present in the queue",
+  "addedToQueue": "Added to queue",
+  "creatingStream": "Creating stream",
+  "similarImages": "Similar images",
+  "findSimilarImages": "Find similar images",
+  "noSimilarImagesFound": "No similar images found",
+  "yourPhotosLookUnique": "Your photos look unique",
+  "similarGroupsFound": "{count, plural, =1{{count} group found} other{{count} groups found}}",
+  "@similarGroupsFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewAndRemoveSimilarImages": "Review and remove similar images",
+  "deletePhotosWithSize": "Delete {count} photos ({size})",
+  "@deletePhotosWithSize": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "selectionOptions": "Selection options",
+  "selectExactWithCount": "Exactly similar ({count})",
+  "@selectExactWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectExact": "Select exact",
+  "selectSimilarWithCount": "Mostly similar ({count})",
+  "@selectSimilarWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectSimilar": "Select similar",
+  "selectAllWithCount": "All similarities ({count})",
+  "@selectAllWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectSimilarImagesTitle": "Select similar images",
+  "chooseSimilarImagesToSelect": "Select images based on their visual similarity",
+  "clearSelection": "Clear selection",
+  "similarImagesCount": "{count} similar images",
+  "@similarImagesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteWithCount": "Delete ({count})",
+  "@deleteWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteFiles": "Delete files",
+  "areYouSureDeleteFiles": "Are you sure you want to delete these files?",
+  "greatJob": "Great job!",
+  "cleanedUpSimilarImages": "You freed up {size} of space",
+  "@cleanedUpSimilarImages": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "size": "Size",
+  "similarity": "Similarity",
+  "analyzingPhotosLocally": "Analyzing your photos locally...",
+  "lookingForVisualSimilarities": "Looking for visual similarities...",
+  "comparingImageDetails": "Comparing image details...",
+  "findingSimilarImages": "Finding similar images...",
+  "almostDone": "Almost done...",
+  "processingLocally": "Processing locally",
+  "useMLToFindSimilarImages": "Review and remove images that look similar to each other.",
+  "all": "All",
+  "similar": "Similar",
+  "identical": "Identical",
+  "nothingHereTryAnotherFilter": "Nothing here, try another filter! 👀",
+  "related": "Related",
+  "hoorayyyy": "Hoorayyyy!",
+  "nothingToTidyUpHere": "Nothing to tidy up here",
+  "deletingDash": "Deleting - "
 }

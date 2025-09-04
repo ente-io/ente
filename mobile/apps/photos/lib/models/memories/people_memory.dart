@@ -68,28 +68,32 @@ String activityQuery(PeopleActivity activity) {
   }
 }
 
-String activityTitle(S s, PeopleActivity activity, String personName) {
+String activityTitle(
+  AppLocalizations locals,
+  PeopleActivity activity,
+  String personName,
+) {
   switch (activity) {
     case PeopleActivity.admiring:
-      return s.admiringThem(personName);
+      return locals.admiringThem(name: personName);
     case PeopleActivity.embracing:
-      return s.embracingThem(personName);
+      return locals.embracingThem(name: personName);
     case PeopleActivity.party:
-      return s.partyWithThem(personName);
+      return locals.partyWithThem(name: personName);
     case PeopleActivity.hiking:
-      return s.hikingWithThem(personName);
+      return locals.hikingWithThem(name: personName);
     case PeopleActivity.feast:
-      return s.feastingWithThem(personName);
+      return locals.feastingWithThem(name: personName);
     case PeopleActivity.selfies:
-      return s.selfiesWithThem(personName);
+      return locals.selfiesWithThem(name: personName);
     case PeopleActivity.posing:
-      return s.posingWithThem(personName);
+      return locals.posingWithThem(name: personName);
     case PeopleActivity.background:
-      return s.backgroundWithThem(personName);
+      return locals.backgroundWithThem(name: personName);
     case PeopleActivity.sports:
-      return s.sportsWithThem(personName);
+      return locals.sportsWithThem(name: personName);
     case PeopleActivity.roadtrip:
-      return s.roadtripWithThem(personName);
+      return locals.roadtripWithThem(name: personName);
   }
 }
 
@@ -146,29 +150,29 @@ class PeopleMemory extends SmartMemory {
   }
 
   @override
-  String createTitle(S s, String languageCode) {
+  String createTitle(AppLocalizations locals, String languageCode) {
     switch (peopleMemoryType) {
       case PeopleMemoryType.youAndThem:
         assert(personName != null);
-        return s.youAndThem(personName!);
+        return locals.youAndThem(name: personName!);
       case PeopleMemoryType.doingSomethingTogether:
         assert(activity != null);
         assert(personName != null);
-        return activityTitle(s, activity!, personName!);
+        return activityTitle(locals, activity!, personName!);
       case PeopleMemoryType.spotlight:
         if (personName == null) {
-          return s.spotlightOnYourself;
+          return locals.spotlightOnYourself;
         } else if (newAge == null) {
-          return s.spotlightOnThem(personName!);
+          return locals.spotlightOnThem(name: personName!);
         } else {
           if (isBirthday!) {
-            return s.personIsAge(personName!, newAge!);
+            return locals.personIsAge(name: personName!, age: newAge!);
           } else {
-            return s.personTurningAge(personName!, newAge!);
+            return locals.personTurningAge(name: personName!, age: newAge!);
           }
         }
       case PeopleMemoryType.lastTimeYouSawThem:
-        return s.lastTimeWithThem(personName!);
+        return locals.lastTimeWithThem(name: personName!);
     }
   }
 }

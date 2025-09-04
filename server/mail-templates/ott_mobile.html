@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+  <meta content="text/html; charset=utf-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, minimum-scale=1"
+  />
+  <style>
+    body {
+      background-color: #f0f1f3;
+      font-family: "Helvetica Neue", "Segoe UI", Helvetica, sans-serif;
+      font-size: 16px;
+      line-height: 27px;
+      margin: 0;
+      color: #444;
+    }
+
+    pre {
+      background: #f4f4f4f4;
+      padding: 2px;
+    }
+
+    table {
+      width: 100%;
+      border: 1px solid #ddd;
+    }
+
+    table td {
+      border-color: #ddd;
+      padding: 5px;
+    }
+
+    .wrap {
+      background-color: #fff;
+      padding: 30px;
+      max-width: auto;
+      margin: 0 auto;
+      border-radius: 5px;
+    }
+
+    .button {
+      background: #0055d4;
+      border-radius: 3px;
+      text-decoration: none !important;
+      color: #fff !important;
+      font-weight: bold;
+      padding: 10px 30px;
+      display: inline-block;
+    }
+
+    .button:hover {
+      background: #111;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: #888;
+    }
+
+    .footer a {
+      color: #888;
+      margin-right: 5px;
+    }
+
+    .gutter {
+      padding: 10px;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    a {
+      color: #0055d4;
+    }
+
+    a:hover {
+      color: #111;
+    }
+
+    .footer-icons {
+      padding: 4px !important;
+      width: 24px !important;
+    }
+  </style>
+
+  <body>
+    <div class="gutter" style="padding: 4px">&nbsp;</div>
+    <div
+      class="wrap"
+      style="
+        background-color: rgb(255, 255, 255);
+        padding: 30px;
+        max-width: 525px;
+        margin: 0 auto;
+        border-radius: 5px;
+        font-size: 16px;
+      "
+    >
+      <h2 style="text-align: center; margin-bottom: 16px">
+        Verify your email address
+      </h2>
+      <hr style="margin: 32px 0; border: none; border-top: 1px solid #ddd" />
+      <div>
+        <p style="text-align: center">
+          Click on the button to verify your email.
+        </p>
+        <center style="margin: 24px 0">
+          <a
+            href="https://verify.ente.io/?ott={{.VerificationCode}}"
+            style="
+              background-color: #00b33c;
+              border-radius: 3px;
+              text-decoration: none !important;
+              color: #fff !important;
+              font-weight: bold;
+              padding: 8px 30px;
+              display: inline-block;
+              text-align: center;
+            "
+            target="_blank"
+          >
+            Verify email
+          </a>
+        </center>
+        <div
+          style="
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin-top: 32px;
+            margin-bottom: 32px;
+          "
+        >
+          <p> or enter the code manually </p>
+          <center>
+            <div
+              style="
+                background-color: #f6f6f6;
+                border-radius: 6px;
+                color: #787878;
+                display: inline-block;
+                letter-spacing: 3px;
+                padding: 8px 14px;
+                text-align: center;
+                font-size: 16px;
+                font-weight: bold;
+              "
+              target="_blank"
+            >
+              {{.VerificationCode}}
+            </div>
+          </center>
+        </div>
+      </div>
+      <hr
+        style="
+          margin-top: 32px;
+          margin-bottom: 32px;
+          border: none;
+          border-top: 1px solid #ddd;
+        "
+      />
+      <p style="text-align: center; font-size: 14px; color: #666">
+        If you need help, just hit the reply button!
+      </p>
+    </div>
+    <br />
+    <div
+      class="footer"
+      style="text-align: center; font-size: 12px; color: rgb(136, 136, 136)"
+    >
+      <div>
+        <a href="https://ente.io" target="_blank"
+          ><img
+            src="https://email-assets.ente.io/ente-green.png"
+            style="width: 100px; padding: 24px"
+            title="Ente"
+            alt="Ente"
+        /></a>
+      </div>
+      <div>
+        <a href="https://fosstodon.org/@ente" target="_blank"
+          ><img
+            src="https://email-assets.ente.io/mastodon-icon.png"
+            class="footer-icons"
+            style="width: 24px; padding: 4px"
+            title="Mastodon"
+            alt="Mastodon"
+        /></a>
+        <a href="https://twitter.com/enteio" target="_blank"
+          ><img
+            src="https://email-assets.ente.io/twitter-icon.png"
+            class="footer-icons"
+            style="width: 24px; padding: 4px"
+            title="Twitter"
+            alt="Twitter"
+        /></a>
+        <a href="https://discord.ente.io" target="_blank"
+          ><img
+            src="https://email-assets.ente.io/discord-icon.png"
+            class="footer-icons"
+            style="width: 24px; padding: 4px"
+            title="Discord"
+            alt="Discord"
+        /></a>
+        <a href="https://github.com/ente-io" target="_blank"
+          ><img
+            src="https://email-assets.ente.io/github-icon.png"
+            class="footer-icons"
+            style="width: 24px; padding: 4px"
+            title="GitHub"
+            alt="GitHub"
+        /></a>
+      </div>
+      <p>
+        Ente Technologies, Inc.
+        <br />
+        1111B S Governors Ave 6032 Dover, DE 19904
+      </p>
+      <br />
+    </div>
+  </body>
+</html>

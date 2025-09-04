@@ -54,9 +54,10 @@ class _ReferralScreenState extends State<ReferralScreen> {
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: S.of(context).claimFreeStorage,
+              title: AppLocalizations.of(context).claimFreeStorage,
             ),
-            flexibleSpaceCaption: S.of(context).inviteYourFriends,
+            flexibleSpaceCaption:
+                AppLocalizations.of(context).inviteYourFriends,
             actionIcons: [
               IconButtonWidget(
                 icon: Icons.close_outlined,
@@ -92,7 +93,8 @@ class _ReferralScreenState extends State<ReferralScreen> {
                           child: Padding(
                             padding: const EdgeInsets.all(24.0),
                             child: Text(
-                              S.of(context).failedToFetchReferralDetails,
+                              AppLocalizations.of(context)
+                                  .failedToFetchReferralDetails,
                             ),
                           ),
                         );
@@ -138,10 +140,10 @@ class ReferralWidget extends StatelessWidget {
             ? InkWell(
                 onTap: () {
                   shareText(
-                    S.of(context).shareTextReferralCode(
-                          referralView.code,
-                          referralView.planInfo.storageInGB,
-                        ),
+                    AppLocalizations.of(context).shareTextReferralCode(
+                      referralCode: referralView.code,
+                      referralStorageInGB: referralView.planInfo.storageInGB,
+                    ),
                   );
                 },
                 child: Stack(
@@ -164,7 +166,7 @@ class ReferralWidget extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              S.of(context).referralStep1,
+                              AppLocalizations.of(context).referralStep1,
                             ),
                             const SizedBox(height: 12),
                             ReferralCodeWidget(
@@ -175,13 +177,13 @@ class ReferralWidget extends StatelessWidget {
                             ),
                             const SizedBox(height: 12),
                             Text(
-                              S.of(context).referralStep2,
+                              AppLocalizations.of(context).referralStep2,
                             ),
                             const SizedBox(height: 12),
                             Text(
-                              S.of(context).referralStep3(
-                                    referralView.planInfo.storageInGB,
-                                  ),
+                              AppLocalizations.of(context).referralStep3(
+                                storageInGB: referralView.planInfo.storageInGB,
+                              ),
                             ),
                           ],
                         ),
@@ -210,7 +212,8 @@ class ReferralWidget extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        S.of(context).referralsAreCurrentlyPaused,
+                        AppLocalizations.of(context)
+                            .referralsAreCurrentlyPaused,
                         style: textStyle.small
                             .copyWith(color: colorScheme.textFaint),
                       ),
@@ -221,7 +224,7 @@ class ReferralWidget extends StatelessWidget {
         const SizedBox(height: 4),
         isReferralEnabled
             ? Text(
-                S.of(context).youCanAtMaxDoubleYourStorage,
+                AppLocalizations.of(context).youCanAtMaxDoubleYourStorage,
                 style: textStyle.mini.copyWith(
                   color: colorScheme.textMuted,
                 ),
@@ -232,7 +235,7 @@ class ReferralWidget extends StatelessWidget {
         referralView.enableApplyCode
             ? MenuItemWidget(
                 captionedTextWidget: CaptionedTextWidget(
-                  title: S.of(context).applyCodeTitle,
+                  title: AppLocalizations.of(context).applyCodeTitle,
                 ),
                 menuItemColor: colorScheme.fillFaint,
                 trailingWidget: Icon(
@@ -259,7 +262,7 @@ class ReferralWidget extends StatelessWidget {
             : const SizedBox.shrink(),
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: S.of(context).faq,
+            title: AppLocalizations.of(context).faq,
           ),
           menuItemColor: colorScheme.fillFaint,
           trailingWidget: Icon(
@@ -274,7 +277,7 @@ class ReferralWidget extends StatelessWidget {
             routeToPage(
               context,
               WebPage(
-                S.of(context).faq,
+                AppLocalizations.of(context).faq,
                 "https://help.ente.io/photos/features/referral-program/",
               ),
             );
@@ -287,10 +290,12 @@ class ReferralWidget extends StatelessWidget {
             vertical: 6.0,
           ),
           child: Text(
-            S.of(context).claimedStorageSoFar(
+            AppLocalizations.of(context).claimedStorageSoFar(
+              isFamilyMember:
                   referralView.isFamilyMember.toString().toLowerCase(),
+              storageAmountInGb:
                   convertBytesToAbsoluteGBs(referralView.claimedStorage),
-                ),
+            ),
             style: textStyle.small.copyWith(
               color: colorScheme.textMuted,
             ),
@@ -298,7 +303,7 @@ class ReferralWidget extends StatelessWidget {
         ),
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: S.of(context).details,
+            title: AppLocalizations.of(context).details,
           ),
           menuItemColor: colorScheme.fillFaint,
           trailingWidget: Icon(
