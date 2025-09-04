@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import "package:ente_base/models/database.dart";
+import "package:ente_sharing/models/user.dart";
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/collections/models/public_url.dart';
-import 'package:locker/services/collections/models/user.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
