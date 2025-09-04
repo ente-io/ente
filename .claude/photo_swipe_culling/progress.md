@@ -96,7 +96,8 @@ lib/ui/pages/library_culling/
 - [x] Stack next image behind current image with darkening/opacity, peeking from top. Shows full image preview that animates forward when current is swiped.
 - [x] Fix issue with the carousel groups looking too dark. Even the selected group in carousel row looks darker than the current image, which is weird.
 - [x] Pressing the undo button when nothing is decided in current group should navigate the user to the last group with changes and undo a change there.
-- [ ] Make the undo button animate nicely to the previous photo, instead of this flicker. Think hard on how to do this animation.
+- [x] Make the undo button animate nicely to the previous photo, instead of this flicker. Implemented with AnimatedSwitcher for smooth fade/slide transitions.
+- [x] Show current image with ALL next ones stacked behind it, instead of only the next one stacked behind it. Make them stick out at the top. Make sure the transition after swiping is smooth, with no weird flickers.
 - [ ] Animate going from last image in group to first image in next group
 - [ ] Better placement of the instagram-like progress dots
 - [ ] Bug: when only having a single group, finishing it, and then canceling the delete, the complete checkmark animation stays on screen. Which is fine, but it doesn't disappear on pressing the undo button.

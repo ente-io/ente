@@ -275,7 +275,7 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
         final lastAction = groupHistories[currentGroupIndex]!.removeLast();
         fullHistory.removeLast();
         decisions[lastAction.file] = SwipeDecision.undecided;
-        
+
         // Move back to the undone image
         final fileIndex = currentGroupFiles.indexOf(lastAction.file);
         if (fileIndex != -1) {
@@ -286,7 +286,7 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
       // Find the last group with changes to undo
       int? targetGroupIndex;
       SwipeAction? lastAction;
-      
+
       for (int i = groups.length - 1; i >= 0; i--) {
         if (groupHistories[i]?.isNotEmpty ?? false) {
           targetGroupIndex = i;
@@ -294,19 +294,20 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
           break;
         }
       }
-      
+
       if (targetGroupIndex != null && targetGroupIndex != currentGroupIndex) {
         // Switch to the group with history and undo the last action there
         setState(() {
           currentGroupIndex = targetGroupIndex!;
-          
+
           // Remove the last action from that group
           groupHistories[targetGroupIndex]!.removeLast();
           fullHistory.removeLast();
           decisions[lastAction!.file] = SwipeDecision.undecided;
-          
+
           // Find the index of the undone file in the target group
-          final fileIndex = groups[targetGroupIndex].files.indexOf(lastAction.file);
+          final fileIndex =
+              groups[targetGroupIndex].files.indexOf(lastAction.file);
           if (fileIndex != -1) {
             currentImageIndex = fileIndex;
           } else {
@@ -340,7 +341,6 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
           break;
         }
       }
-      // Don't dispose controller - the CardSwiper key change will handle rebuild
     });
   }
 
@@ -601,7 +601,9 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
                     onTap: _showCompletionDialog,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 8,),
+                        horizontal: 8,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: theme.warning500.withAlpha((0.1 * 255).toInt()),
                         borderRadius: BorderRadius.circular(8),
@@ -657,36 +659,20 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
                             child: Stack(
                               alignment: Alignment.center,
                               children: [
-                                // Use AnimatedSwitcher for smooth transitions on undo
-                                AnimatedSwitcher(
-                                  duration: const Duration(milliseconds: 300),
-                                  switchInCurve: Curves.easeInOut,
-                                  switchOutCurve: Curves.easeInOut,
-                                  transitionBuilder: (child, animation) {
-                                    return FadeTransition(
-                                      opacity: animation,
-                                      child: SlideTransition(
-                                        position: Tween<Offset>(
-                                          begin: const Offset(0.0, 0.05),
-                                          end: Offset.zero,
-                                        ).animate(animation),
-                                        child: child,
-                                      ),
-                                    );
-                                  },
-                                  child: CardSwiper(
-                                    key: ValueKey('swiper_${currentGroupIndex}_$currentImageIndex'),
-                                    controller: controller,
+                                // CardSwiper without AnimatedSwitcher wrapper
+                                CardSwiper(
+                                  key: ValueKey('swiper_${currentGroupIndex}_$currentImageIndex'),
+                                  controller: controller,
                                   cardsCount: currentGroupFiles.length -
                                       currentImageIndex,
                                   numberOfCardsDisplayed:
-                                      (currentGroupFiles.length -
-                                                  currentImageIndex) >=
-                                              2
-                                          ? 2
-                                          : 1, // Show 2 cards only if available
+                                      // Show up to 4 cards stacked, or all remaining if less
+                                      (currentGroupFiles.length - currentImageIndex)
+                                          .clamp(1, 4),
                                   backCardOffset: const Offset(
-                                      0, -50,), // Very subtle peek from top
+                                    0,
+                                    -20,
+                                  ), // Minimal peek from top for cleaner stacking
                                   padding: const EdgeInsets.all(20.0),
                                   cardBuilder: (
                                     context,
@@ -707,55 +693,28 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
                                     }
 
                                     final file = currentGroupFiles[fileIndex];
-                                    final isBackCard = index >
-                                        0; // Check if this is the back card
 
-                                    // Calculate swipe progress for overlay effects
-                                    final swipeProgress =
-                                        percentThresholdX / 100;
-                                    final isSwipingLeft = swipeProgress < -0.1;
-                                    final isSwipingRight = swipeProgress > 0.1;
+                                    // Calculate swipe progress for overlay effects (only for front card)
+                                    final swipeProgress = index == 0
+                                        ? percentThresholdX / 100
+                                        : 0.0;
+                                    final isSwipingLeft =
+                                        index == 0 && swipeProgress < -0.1;
+                                    final isSwipingRight =
+                                        index == 0 && swipeProgress > 0.1;
 
-                                    // Wrap back card with darkening/opacity effect
-                                    Widget card = SwipeablePhotoCard(
+                                    // Simple card without any custom wrapping
+                                    return SwipeablePhotoCard(
                                       key: ValueKey(
-                                          file.uploadedFileID ?? file.localID,),
+                                        file.uploadedFileID ?? file.localID,
+                                      ),
                                       file: file,
-                                      swipeProgress:
-                                          isBackCard ? 0 : swipeProgress,
-                                      isSwipingLeft:
-                                          isBackCard ? false : isSwipingLeft,
-                                      isSwipingRight:
-                                          isBackCard ? false : isSwipingRight,
+                                      swipeProgress: swipeProgress,
+                                      isSwipingLeft: isSwipingLeft,
+                                      isSwipingRight: isSwipingRight,
                                       showFileInfo:
-                                          !isBackCard, // Hide file info for back card
+                                          false, // Never show file info in cards
                                     );
-
-                                    // Apply darkening to the back card (no clipping, show full image)
-                                    if (isBackCard) {
-                                      // Use RepaintBoundary to isolate the darkening effect
-                                      card = RepaintBoundary(
-                                        child: Stack(
-                                          children: [
-                                            Opacity(
-                                              opacity: 0.5, // Make it more transparent
-                                              child: card,
-                                            ),
-                                            // Add a dark overlay instead of ColorFilter
-                                            Positioned.fill(
-                                              child: Container(
-                                                decoration: BoxDecoration(
-                                                  color: Colors.black.withValues(alpha: 0.3),
-                                                  borderRadius: BorderRadius.circular(16),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    }
-
-                                    return card;
                                   },
                                   onSwipe:
                                       (previousIndex, currentIndex, direction) {
@@ -773,9 +732,8 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
                                     // All cards in current group have been swiped
                                     // This is handled in _handleSwipeDecision when reaching last card
                                   },
-                                    isDisabled: false,
-                                    threshold: 50,
-                                  ),
+                                  isDisabled: false,
+                                  threshold: 50,
                                 ),
 
                                 // Minimal celebration overlay
@@ -811,6 +769,31 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
                             Text(AppLocalizations.of(context).noImagesSelected),
                       ),
               ),
+              // File info display (below cards, above action buttons)
+              if (currentFile != null)
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  child: Column(
+                    children: [
+                      Text(
+                        currentFile!.displayName,
+                        style: getEnteTextTheme(context).body,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        formatBytes(currentFile!.fileSize ?? 0),
+                        style: getEnteTextTheme(context).small.copyWith(
+                              color: theme.textMuted,
+                            ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
               // Action buttons at bottom
               Padding(
                 padding: const EdgeInsets.only(
