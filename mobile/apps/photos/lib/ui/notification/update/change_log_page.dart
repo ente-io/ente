@@ -27,7 +27,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
       body: Container(
         color: enteColorScheme.backgroundElevated,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const SizedBox(
               height: 36,
@@ -41,7 +41,9 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(
+              height: 24,
+            ),
             Expanded(child: _getChangeLog(context)),
             const DividerWidget(
               dividerType: DividerType.solid,
@@ -111,21 +113,6 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
         context.l10n.cLDesc3,
       ),
     ]);
-    // For a short list, avoid forcing the list to fill remaining space; show a simple column.
-    if (items.length <= 6) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (final e in items) ChangeLogEntryWidget(entry: e),
-            const SizedBox(height: 16), // balanced gap before divider/buttons
-          ],
-        ),
-      );
-    }
-
     return Container(
       padding: const EdgeInsets.only(left: 16),
       child: Scrollbar(
