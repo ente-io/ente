@@ -268,19 +268,53 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
   }
 
   void _handleUndo() {
-    if (groupHistories[currentGroupIndex]?.isEmpty ?? true) return;
-
-    setState(() {
-      final lastAction = groupHistories[currentGroupIndex]!.removeLast();
-      fullHistory.removeLast();
-      decisions[lastAction.file] = SwipeDecision.undecided;
-
-      // Move back to the undone image
-      final fileIndex = currentGroupFiles.indexOf(lastAction.file);
-      if (fileIndex != -1) {
-        currentImageIndex = fileIndex;
+    // Check if current group has history
+    if (groupHistories[currentGroupIndex]?.isNotEmpty ?? false) {
+      // Undo in current group
+      setState(() {
+        final lastAction = groupHistories[currentGroupIndex]!.removeLast();
+        fullHistory.removeLast();
+        decisions[lastAction.file] = SwipeDecision.undecided;
+        
+        // Move back to the undone image
+        final fileIndex = currentGroupFiles.indexOf(lastAction.file);
+        if (fileIndex != -1) {
+          currentImageIndex = fileIndex;
+        }
+      });
+    } else {
+      // Find the last group with changes to undo
+      int? targetGroupIndex;
+      SwipeAction? lastAction;
+      
+      for (int i = groups.length - 1; i >= 0; i--) {
+        if (groupHistories[i]?.isNotEmpty ?? false) {
+          targetGroupIndex = i;
+          lastAction = groupHistories[i]!.last;
+          break;
+        }
       }
-    });
+      
+      if (targetGroupIndex != null && targetGroupIndex != currentGroupIndex) {
+        // Switch to the group with history and undo the last action there
+        setState(() {
+          currentGroupIndex = targetGroupIndex!;
+          
+          // Remove the last action from that group
+          groupHistories[targetGroupIndex]!.removeLast();
+          fullHistory.removeLast();
+          decisions[lastAction!.file] = SwipeDecision.undecided;
+          
+          // Find the index of the undone file in the target group
+          final fileIndex = groups[targetGroupIndex].files.indexOf(lastAction.file);
+          if (fileIndex != -1) {
+            currentImageIndex = fileIndex;
+          } else {
+            currentImageIndex = 0;
+          }
+        });
+      }
+    }
   }
 
   Map<int, GroupProgress> get progressMap {
@@ -306,10 +340,7 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
           break;
         }
       }
-
-      // Reset the controller to ensure clean state
-      controller.dispose();
-      controller = CardSwiperController();
+      // Don't dispose controller - the CardSwiper key change will handle rebuild
     });
   }
 
@@ -626,10 +657,9 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
                             child: Stack(
                               alignment: Alignment.center,
                               children: [
-                                // Use a unique key for each group to force rebuild
+                                // Use a unique key for group and index to force rebuild on undo
                                 CardSwiper(
-                                  key: ValueKey(
-                                      'swiper_${currentGroupIndex}_$currentImageIndex',),
+                                  key: ValueKey('swiper_${currentGroupIndex}_$currentImageIndex'),
                                   controller: controller,
                                   cardsCount: currentGroupFiles.length -
                                       currentImageIndex,
