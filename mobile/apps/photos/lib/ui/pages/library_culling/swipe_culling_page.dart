@@ -777,7 +777,7 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
                     IconButton(
                       onPressed: _handleUndo,
                       icon: Icon(
-                        Icons.undo_rounded,
+                        Icons.replay,
                         color: theme.textMuted.withValues(alpha: 0.6),
                         size: 28,
                       ),

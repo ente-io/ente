@@ -89,13 +89,14 @@ lib/ui/pages/library_culling/
 - ✅ Consistent code style
 - ✅ Localization complete
 
-## Remaining fixes
+## Remaining improvements/fixes
 
-- [x] The `EnteLoadingWidget` is displayed for each thumbnail even when it's done loading (in group summar mainly). Also get rid of that weird question mark icon.
-- [x] Bug with not displaying badge for half processed groups.
-- [x] The display name and file size of the file is displayed twice. Get rid of the bottom most one.
-- [x] There are pixel overflows and issues with the card. It looks great when untouched, but upon swiping we're moving much more than expected.
-- [x] Make the bottom buttons look good.
+- [x] Use circular undo icon as specified in feature plan
+- [ ] Double pressing the image in card should zoom in to image by pushing the `DetailPage` with hero animation (check `similar_images_page.dart` for example).
+- [ ] Stack other images in group behind currently swipable image
+- [ ] Animate going from last image in group to first image in next group
+- [ ] Bug: when only having a single group, finishing it, and then canceling the delete, the complete checkmark animation stays on screen. Which is fine, but it doesn't disappear on pressing the undo button.
+- [ ] Better placement of the instagram-like progress dots
 
 ## Remaining Tasks (Optional)
 
