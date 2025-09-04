@@ -6,7 +6,9 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/loading_widget.dart';
+import 'package:photos/ui/viewer/file/detail_page.dart';
 import 'package:photos/utils/file_util.dart';
+import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/standalone/data.dart';
 import 'package:photos/utils/thumbnail_util.dart';
 
@@ -219,7 +221,23 @@ class _SwipeablePhotoCardState extends State<SwipeablePhotoCard> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Flexible(
-              child: imageWidget,
+              child: GestureDetector(
+                onDoubleTap: () {
+                  // Navigate to detail page with hero animation
+                  routeToPage(
+                    context,
+                    DetailPage(
+                      DetailPageConfiguration(
+                        [widget.file],
+                        0,
+                        "swipe_culling_",
+                        mode: DetailPageMode.minimalistic,
+                      ),
+                    ),
+                  );
+                },
+                child: imageWidget,
+              ),
             ),
             // File info directly below the image
             Container(

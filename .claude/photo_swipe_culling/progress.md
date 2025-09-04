@@ -92,8 +92,8 @@ lib/ui/pages/library_culling/
 ## Remaining improvements/fixes
 
 - [x] Use circular undo icon as specified in feature plan
-- [ ] Double pressing the image in card should zoom in to image by pushing the `DetailPage` with hero animation (check `similar_images_page.dart` for example).
-- [ ] Stack other images in group behind currently swipable image
+- [x] Double pressing the image in card should zoom in to image by pushing the `DetailPage` with hero animation (check `similar_images_page.dart` for example).
+- [ ] Put the next image in the group to the right of the current image, slightly more opaque and slightly darkern/opaque and just the left most side, because I still want to use most space for the current image. After swiping the current image, the next image is animated (fast and smooth) from that position on the right to the center position as new current image. 
 - [ ] Animate going from last image in group to first image in next group
 - [ ] Bug: when only having a single group, finishing it, and then canceling the delete, the complete checkmark animation stays on screen. Which is fine, but it doesn't disappear on pressing the undo button.
 - [ ] Better placement of the instagram-like progress dots
