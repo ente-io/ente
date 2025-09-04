@@ -98,7 +98,7 @@ lib/ui/pages/library_culling/
 - [x] Pressing the undo button when nothing is decided in current group should navigate the user to the last group with changes and undo a change there.
 - [x] Make the undo button animate nicely to the previous photo, instead of this flicker. Implemented with AnimatedSwitcher for smooth fade/slide transitions.
 - [x] Show current image with ALL next ones stacked behind it, instead of only the next one stacked behind it. Make them stick out at the top. Make sure the transition after swiping is smooth, with no weird flickers.
-- [ ] Get rid of the flicker that happens after swiping at the end of the animation. 
+- [ ] Get rid of the flicker that happens after swiping at the end of the animation. (See `flicker_fix_attempts.md` for documented failed approaches) 
 - [ ] Move the file info (name, size) higher up, to be just below the image. Make sure it's not part of the swipable card though.
 - [ ] Animate going from last image in group to first image in next group
 - [ ] Better placement of the instagram-like progress dots
