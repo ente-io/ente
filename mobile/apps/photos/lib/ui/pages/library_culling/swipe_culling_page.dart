@@ -657,10 +657,26 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
                             child: Stack(
                               alignment: Alignment.center,
                               children: [
-                                // Use a unique key for group and index to force rebuild on undo
-                                CardSwiper(
-                                  key: ValueKey('swiper_${currentGroupIndex}_$currentImageIndex'),
-                                  controller: controller,
+                                // Use AnimatedSwitcher for smooth transitions on undo
+                                AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 300),
+                                  switchInCurve: Curves.easeInOut,
+                                  switchOutCurve: Curves.easeInOut,
+                                  transitionBuilder: (child, animation) {
+                                    return FadeTransition(
+                                      opacity: animation,
+                                      child: SlideTransition(
+                                        position: Tween<Offset>(
+                                          begin: const Offset(0.0, 0.05),
+                                          end: Offset.zero,
+                                        ).animate(animation),
+                                        child: child,
+                                      ),
+                                    );
+                                  },
+                                  child: CardSwiper(
+                                    key: ValueKey('swiper_${currentGroupIndex}_$currentImageIndex'),
+                                    controller: controller,
                                   cardsCount: currentGroupFiles.length -
                                       currentImageIndex,
                                   numberOfCardsDisplayed:
@@ -757,8 +773,9 @@ class _SwipeCullingPageState extends State<SwipeCullingPage>
                                     // All cards in current group have been swiped
                                     // This is handled in _handleSwipeDecision when reaching last card
                                   },
-                                  isDisabled: false,
-                                  threshold: 50,
+                                    isDisabled: false,
+                                    threshold: 50,
+                                  ),
                                 ),
 
                                 // Minimal celebration overlay
