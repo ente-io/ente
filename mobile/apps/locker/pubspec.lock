@@ -210,7 +210,7 @@ packages:
     source: hosted
     version: "3.1.0"
   email_validator:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: email_validator
       sha256: b19aa5d92fdd76fbc65112060c94d45ba855105a28bb6e462de7ff03b12fa1fb
@@ -312,7 +312,7 @@ packages:
     source: hosted
     version: "2.0.1"
   expandable:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: expandable
       sha256: "9604d612d4d1146dafa96c6d8eec9c2ff0994658d6d09fed720ab788c7f5afc2"
@@ -645,7 +645,7 @@ packages:
     source: hosted
     version: "4.5.4"
   intl:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: intl
       sha256: "3df61194eb431efc39c4ceba583b95633a403f46c9fd341e550ce0bfa50e9aa5"
@@ -1490,7 +1490,7 @@ packages:
     source: hosted
     version: "1.1.5"
   window_manager:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: window_manager
       sha256: "7eb6d6c4164ec08e1bf978d6e733f3cebe792e2a23fb07cbca25c2872bfdbdcd"
