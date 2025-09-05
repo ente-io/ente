@@ -73,6 +73,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.2"
+  cronet_http:
+    dependency: transitive
+    description:
+      name: cronet_http
+      sha256: "1b99ad5ae81aa9d2f12900e5f17d3681f3828629bb7f7fe7ad88076a34209840"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.5.0"
   cross_file:
     dependency: transitive
     description:
@@ -97,6 +105,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.2"
+  cupertino_http:
+    dependency: transitive
+    description:
+      name: cupertino_http
+      sha256: "72187f715837290a63479a5b0ae709f4fedad0ed6bd0441c275eceaa02d5abae"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.0"
   device_info_plus:
     dependency: transitive
     description:
@@ -174,6 +190,20 @@ packages:
       relative: true
     source: path
     version: "1.0.0"
+  ente_network:
+    dependency: "direct overridden"
+    description:
+      path: "../network"
+      relative: true
+    source: path
+    version: "1.0.0"
+  ente_sharing:
+    dependency: "direct overridden"
+    description:
+      path: "../sharing"
+      relative: true
+    source: path
+    version: "1.0.0"
   ente_strings:
     dependency: "direct main"
     description:
@@ -212,6 +242,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.3"
+  fast_base58:
+    dependency: transitive
+    description:
+      name: fast_base58
+      sha256: "611f65633b734f27a850b51371b3eba993a5165650e12e8e7b02959f3768ba06"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.1"
   ffi:
     dependency: transitive
     description:
@@ -249,6 +287,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_animate:
+    dependency: "direct main"
+    description:
+      name: flutter_animate
+      sha256: "7befe2d3252728afb77aecaaea1dec88a89d35b9b1d2eea6d04479e8af9117b5"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.5.2"
   flutter_email_sender:
     dependency: transitive
     description:
@@ -382,6 +428,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.2"
+  flutter_shaders:
+    dependency: transitive
+    description:
+      name: flutter_shaders
+      sha256: "34794acadd8275d971e02df03afee3dee0f98dbfb8c4837082ad0034f612a3e2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.3"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -440,6 +494,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.2"
+  http_profile:
+    dependency: transitive
+    description:
+      name: http_profile
+      sha256: "7e679e355b09aaee2ab5010915c932cce3f2d1c11c3b2dc177891687014ffa78"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
   intl:
     dependency: transitive
     description:
@@ -448,6 +510,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.20.2"
+  jni:
+    dependency: transitive
+    description:
+      name: jni
+      sha256: d2c361082d554d4593c3012e26f6b188f902acd291330f13d6427641a92b3da1
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.14.2"
   js:
     dependency: transitive
     description:
@@ -544,6 +614,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.0"
+  native_dio_adapter:
+    dependency: transitive
+    description:
+      name: native_dio_adapter
+      sha256: "1c51bd42027861d27ccad462ba0903f5e3197461cc6d59a0bb8658cb5ad7bd01"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.5.0"
+  objective_c:
+    dependency: transitive
+    description:
+      name: objective_c
+      sha256: "9f034ba1eeca53ddb339bc8f4813cb07336a849cd735559b60cdc068ecce2dc7"
+      url: "https://pub.dev"
+    source: hosted
+    version: "7.1.0"
+  package_config:
+    dependency: transitive
+    description:
+      name: package_config
+      sha256: f096c55ebb7deb7e384101542bfba8c52696c1b56fca2eb62827989ef2353bbc
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.0"
   package_info_plus:
     dependency: transitive
     description:
@@ -648,6 +742,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.3"
+  pub_semver:
+    dependency: transitive
+    description:
+      name: pub_semver
+      sha256: "5bfcf68ca79ef689f8990d1160781b4bad40a3bd5e5218ad4076ddb7f4081585"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.0"
   screen_retriever:
     dependency: transitive
     description:
@@ -877,6 +979,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
+  ua_client_hints:
+    dependency: transitive
+    description:
+      name: ua_client_hints
+      sha256: "1b8759a46bfeab355252881df27f2604c01bded86aa2b578869fb1b638b23118"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.4.1"
   url_launcher:
     dependency: transitive
     description:
@@ -973,6 +1083,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.1"
+  web_socket:
+    dependency: transitive
+    description:
+      name: web_socket
+      sha256: "34d64019aa8e36bf9842ac014bb5d2f5586ca73df5e4d9bf5c936975cae6982c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   win32:
     dependency: transitive
     description:
