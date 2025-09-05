@@ -18,7 +18,11 @@ func (h *DiscountCouponHandler) ClaimCoupon(c *gin.Context) {
 		handler.Error(c, err)
 		return
 	}
-	h.Controller.ClaimCoupon(c, req)
+	err := h.Controller.ClaimCoupon(c, req)
+	if err != nil {
+		handler.Error(c, err)
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"message": "If you are paid subscriber, you should shortly get an email."})
 }
 

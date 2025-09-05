@@ -68,7 +68,7 @@ func (r *Repository) GetUnclaimedCoupon(ctx context.Context, providerName string
 
 func (r *Repository) ClaimCoupon(ctx context.Context, providerName, code string, userID int64) error {
 	query := `UPDATE discount_coupons 
-	          SET claimed_by_user_id = $1, claimed_at = now_utc_micro_seconds() 
+	          SET claimed_by_user_id = $1, claimed_at = now_utc_micro_seconds(), sent_count = 1
 	          WHERE provider_name = $2 AND code = $3 AND claimed_by_user_id IS NULL`
 
 	result, err := r.DB.ExecContext(ctx, query, userID, providerName, code)

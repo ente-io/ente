@@ -44,42 +44,40 @@ type AddCouponsRequest struct {
 	Codes        []string `json:"codes" binding:"required"`
 }
 
-func (c *Controller) ClaimCoupon(ctx *gin.Context, req ClaimCouponRequest) {
+func (c *Controller) ClaimCoupon(ctx *gin.Context, req ClaimCouponRequest) error {
+	if !AllowedProviders[req.ProviderName] {
+		return stacktrace.Propagate(ente.NewBadRequestWithMessage("Invalid provider name"), "")
+	}
 	go c.processClaimRequest(ctx, req)
+	return nil
 }
 
 func (c *Controller) processClaimRequest(ctx *gin.Context, req ClaimCouponRequest) {
+	sanitizedEmail := strings.ToLower(strings.TrimSpace(req.Email))
 	logger :=
 		log.WithField("provider", req.ProviderName).
-			WithField("email", req.Email).
+			WithField("email", sanitizedEmail).
 			WithField("req_id", requestid.Get(ctx))
 
-	if !AllowedProviders[req.ProviderName] {
-		logger.Info("Invalid provider name for discount coupon")
-		return
-	}
-	userID, err := c.UserRepo.GetUserIDWithEmail(req.Email)
+	userID, err := c.UserRepo.GetUserIDWithEmail(sanitizedEmail)
 	if err != nil {
 		logger.WithError(err).Info("User not found for discount coupon claim")
 		return
 	}
-
-	logger = logger.WithField("userID", userID)
-
 	user, err := c.UserRepo.GetUserByIDInternal(userID)
 	if err != nil {
 		logger.WithError(err).Error("Failed to get user details")
 		return
 	}
-
-	eligible, err := c.isUserEligible(user)
-	if err != nil {
-		logger.WithError(err).Error("Failed to check user eligibility")
+	logger = logger.WithField("userID", userID)
+	if user.FamilyAdminID != nil && *user.FamilyAdminID != user.ID {
+		logger.Info("User is a family member, not eligible for discount coupon")
 		return
 	}
 
-	if !eligible {
-		logger.Info("User not eligible for discount coupon")
+	err = c.BillingController.HasActiveSelfOrFamilySubscription(user.ID, true)
+	if err != nil {
+		logger.WithError(err).Error("User does not have active paid subscription")
 		return
 	}
 
@@ -133,20 +131,6 @@ func (c *Controller) processClaimRequest(ctx *gin.Context, req ClaimCouponReques
 	}
 
 	logger.Info("Successfully claimed and sent coupon")
-}
-
-func (c *Controller) isUserEligible(user ente.User) (bool, error) {
-	userID := user.ID
-	if user.FamilyAdminID != nil && *user.FamilyAdminID != userID {
-		return false, nil
-	}
-
-	err := c.BillingController.HasActiveSelfOrFamilySubscription(userID, true)
-	if err != nil {
-		return false, stacktrace.Propagate(err, "failed to check active subscription")
-	}
-
-	return true, nil
 }
 
 func (c *Controller) sendCouponEmail(ctx context.Context, user ente.User, couponCode, providerName string) error {
