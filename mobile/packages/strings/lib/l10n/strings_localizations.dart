@@ -1294,6 +1294,156 @@ abstract class StringsLocalizations {
   /// In en, this message translates to:
   /// **'Endpoint updated successfully'**
   String get endpointUpdatedMessage;
+
+  /// No description provided for @yes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get yes;
+
+  /// No description provided for @remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get remove;
+
+  /// No description provided for @addMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Add more'**
+  String get addMore;
+
+  /// No description provided for @somethingWentWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong'**
+  String get somethingWentWrong;
+
+  /// No description provided for @legacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Legacy'**
+  String get legacy;
+
+  /// No description provided for @recoveryWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'A trusted contact is trying to access your account'**
+  String get recoveryWarning;
+
+  /// No description provided for @recoveryWarningBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{email} is trying to recover your account.'**
+  String recoveryWarningBody(Object email);
+
+  /// No description provided for @legacyPageDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Legacy allows trusted contacts to access your account in your absence.'**
+  String get legacyPageDesc;
+
+  /// No description provided for @legacyPageDesc2.
+  ///
+  /// In en, this message translates to:
+  /// **'Trusted contacts can initiate account recovery, and if not blocked within 30 days, reset your password and access your account.'**
+  String get legacyPageDesc2;
+
+  /// No description provided for @legacyAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Legacy accounts'**
+  String get legacyAccounts;
+
+  /// No description provided for @trustedContacts.
+  ///
+  /// In en, this message translates to:
+  /// **'Trusted contacts'**
+  String get trustedContacts;
+
+  /// No description provided for @addTrustedContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Trusted Contact'**
+  String get addTrustedContact;
+
+  /// No description provided for @removeInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove invite'**
+  String get removeInvite;
+
+  /// No description provided for @rejectRecovery.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject recovery'**
+  String get rejectRecovery;
+
+  /// No description provided for @recoveryInitiated.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery initiated'**
+  String get recoveryInitiated;
+
+  /// No description provided for @recoveryInitiatedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'You can access the account after {days} days. A notification will be sent to {email}.'**
+  String recoveryInitiatedDesc(int days, String email);
+
+  /// No description provided for @removeYourselfAsTrustedContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove yourself as trusted contact'**
+  String get removeYourselfAsTrustedContact;
+
+  /// No description provided for @declineTrustInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline Invite'**
+  String get declineTrustInvite;
+
+  /// No description provided for @cancelAccountRecovery.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel recovery'**
+  String get cancelAccountRecovery;
+
+  /// No description provided for @recoveryAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Recover account'**
+  String get recoveryAccount;
+
+  /// No description provided for @cancelAccountRecoveryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to cancel recovery?'**
+  String get cancelAccountRecoveryBody;
+
+  /// No description provided for @startAccountRecoveryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start recovery'**
+  String get startAccountRecoveryTitle;
+
+  /// No description provided for @whyAddTrustContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Trusted contact can help in recovering your data.'**
+  String get whyAddTrustContact;
+
+  /// No description provided for @recoveryReady.
+  ///
+  /// In en, this message translates to:
+  /// **'You can now recover {email}\'s account by setting a new password.'**
+  String recoveryReady(String email);
+
+  /// No description provided for @trustedInviteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You have been invited to be a legacy contact by {email}.'**
+  String trustedInviteBody(Object email);
 }
 
 class _StringsLocalizationsDelegate

@@ -623,4 +623,93 @@ class StringsLocalizationsEn extends StringsLocalizations {
 
   @override
   String get endpointUpdatedMessage => 'Endpoint updated successfully';
+
+  @override
+  String get yes => 'Yes';
+
+  @override
+  String get remove => 'Remove';
+
+  @override
+  String get addMore => 'Add more';
+
+  @override
+  String get somethingWentWrong => 'Something went wrong';
+
+  @override
+  String get legacy => 'Legacy';
+
+  @override
+  String get recoveryWarning =>
+      'A trusted contact is trying to access your account';
+
+  @override
+  String recoveryWarningBody(Object email) {
+    return '$email is trying to recover your account.';
+  }
+
+  @override
+  String get legacyPageDesc =>
+      'Legacy allows trusted contacts to access your account in your absence.';
+
+  @override
+  String get legacyPageDesc2 =>
+      'Trusted contacts can initiate account recovery, and if not blocked within 30 days, reset your password and access your account.';
+
+  @override
+  String get legacyAccounts => 'Legacy accounts';
+
+  @override
+  String get trustedContacts => 'Trusted contacts';
+
+  @override
+  String get addTrustedContact => 'Add Trusted Contact';
+
+  @override
+  String get removeInvite => 'Remove invite';
+
+  @override
+  String get rejectRecovery => 'Reject recovery';
+
+  @override
+  String get recoveryInitiated => 'Recovery initiated';
+
+  @override
+  String recoveryInitiatedDesc(int days, String email) {
+    return 'You can access the account after $days days. A notification will be sent to $email.';
+  }
+
+  @override
+  String get removeYourselfAsTrustedContact =>
+      'Remove yourself as trusted contact';
+
+  @override
+  String get declineTrustInvite => 'Decline Invite';
+
+  @override
+  String get cancelAccountRecovery => 'Cancel recovery';
+
+  @override
+  String get recoveryAccount => 'Recover account';
+
+  @override
+  String get cancelAccountRecoveryBody =>
+      'Are you sure you want to cancel recovery?';
+
+  @override
+  String get startAccountRecoveryTitle => 'Start recovery';
+
+  @override
+  String get whyAddTrustContact =>
+      'Trusted contact can help in recovering your data.';
+
+  @override
+  String recoveryReady(String email) {
+    return 'You can now recover $email\'s account by setting a new password.';
+  }
+
+  @override
+  String trustedInviteBody(Object email) {
+    return 'You have been invited to be a legacy contact by $email.';
+  }
 }
