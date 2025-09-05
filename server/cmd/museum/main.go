@@ -31,6 +31,7 @@ import (
 
 	cache2 "github.com/ente-io/museum/ente/cache"
 	"github.com/ente-io/museum/pkg/controller/discord"
+	discountCouponCtrl "github.com/ente-io/museum/pkg/controller/discountcoupon"
 	"github.com/ente-io/museum/pkg/controller/offer"
 	"github.com/ente-io/museum/pkg/controller/usercache"
 
@@ -56,6 +57,7 @@ import (
 	authenticatorRepo "github.com/ente-io/museum/pkg/repo/authenticator"
 	castRepo "github.com/ente-io/museum/pkg/repo/cast"
 	"github.com/ente-io/museum/pkg/repo/datacleanup"
+	discountCouponRepo "github.com/ente-io/museum/pkg/repo/discountcoupon"
 	"github.com/ente-io/museum/pkg/repo/embedding"
 	fileDataRepo "github.com/ente-io/museum/pkg/repo/filedata"
 	"github.com/ente-io/museum/pkg/repo/kex"
@@ -803,6 +805,18 @@ func main() {
 
 	offerHandler := &api.OfferHandler{Controller: offerController}
 	publicAPI.GET("/offers/black-friday", offerHandler.GetBlackFridayOffers)
+
+	discountCouponRepository := &discountCouponRepo.Repository{DB: db}
+	discountCouponController := &discountCouponCtrl.Controller{
+		Repo:                  discountCouponRepository,
+		UserRepo:              userRepo,
+		BillingController:     billingController,
+		EmailNotificationCtrl: emailNotificationCtrl,
+		DiscordController:     discordController,
+	}
+	discountCouponHandler := &api.DiscountCouponHandler{Controller: discountCouponController}
+	publicAPI.POST("/discount/claim", discountCouponHandler.ClaimCoupon)
+	adminAPI.POST("/discount/add-coupons", discountCouponHandler.AddCoupons)
 
 	setKnownAPIs(server.Routes())
 	setupAndStartBackgroundJobs(objectCleanupController, replicationController3, fileDataCtrl)
