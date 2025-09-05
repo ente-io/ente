@@ -478,7 +478,7 @@ class _CodeWidgetState extends State<CodeWidget> {
       _getCurrentOTP(),
       confirmationMessage: context.l10n.copiedToClipboard,
     );
-    _udateCodeMetadata().ignore();
+    _updateCodeMetadata().ignore();
   }
 
   void _copyNextToClipboard() {
@@ -486,10 +486,10 @@ class _CodeWidgetState extends State<CodeWidget> {
       _getNextTotp(),
       confirmationMessage: context.l10n.copiedNextToClipboard,
     );
-    _udateCodeMetadata().ignore();
+    _updateCodeMetadata().ignore();
   }
 
-  Future<void> _udateCodeMetadata() async {
+  Future<void> _updateCodeMetadata() async {
     if (widget.sortKey == null) return;
     Future.delayed(const Duration(milliseconds: 100), () {
       if (mounted) {
@@ -502,7 +502,7 @@ class _CodeWidgetState extends State<CodeWidget> {
               lastUsedAt: DateTime.now().microsecondsSinceEpoch,
             ),
           );
-          unawaited(CodeStore.instance.addCode(code));
+          unawaited(CodeStore.instance.updateCode(widget.code, code));
         }
       }
     });
@@ -568,7 +568,7 @@ class _CodeWidgetState extends State<CodeWidget> {
       ),
     );
     if (code != null) {
-      await CodeStore.instance.addCode(code);
+      await CodeStore.instance.updateCode(widget.code, code);
     }
   }
 
@@ -615,7 +615,7 @@ class _CodeWidgetState extends State<CodeWidget> {
       display: display.copyWith(pinned: !currentlyPinned),
     );
     unawaited(
-      CodeStore.instance.addCode(code).then(
+      CodeStore.instance.updateCode(widget.code,code).then(
             (value) => showToast(
               context,
               !currentlyPinned
@@ -694,7 +694,7 @@ class _CodeWidgetState extends State<CodeWidget> {
           final Code code = widget.code.copyWith(
             display: display.copyWith(trashed: true),
           );
-          await CodeStore.instance.addCode(code);
+          await CodeStore.instance.updateCode(widget.code, code);
         } catch (e) {
           logger.severe('Failed to trash code: ${e.toString()}');
           showGenericErrorDialog(context: context, error: e).ignore();
@@ -718,7 +718,7 @@ class _CodeWidgetState extends State<CodeWidget> {
       final Code code = widget.code.copyWith(
         display: display.copyWith(trashed: false),
       );
-      await CodeStore.instance.addCode(code);
+      await CodeStore.instance.updateCode(widget.code, code);
     } catch (e) {
       logger.severe('Failed to restore code: ${e.toString()}');
       if (mounted) {

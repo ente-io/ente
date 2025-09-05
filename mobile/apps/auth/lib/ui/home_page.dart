@@ -94,6 +94,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+
     _codeSortKey = PreferenceService.instance.codeSortKey();
     _textController.addListener(_applyFilteringAndRefresh);
     _loadCodes();
@@ -153,6 +154,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _loadCodes() {
+    debugPrint("[HOME_DEBUG] _loadCodes triggered!");
     CodeStore.instance.getAllCodes().then((codes) {
       _allCodes = codes;
       hasTrashedCodes = false;
