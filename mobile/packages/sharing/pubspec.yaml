@@ -10,15 +10,22 @@ environment:
 dependencies:
   collection: ^1.17.0
   dio: ^5.0.0
+  ente_configuration:
+    path: ../configuration
   ente_crypto_dart:
     git:
       url: https://github.com/ente-io/ente_crypto_dart.git
   ente_network:
     path: ../network
+  ente_ui:
+    path: ../ui
+  ente_utils:
+    path: ../utils
   fast_base58: ^0.2.1
   flutter:
     sdk: flutter
   logging: ^1.0.0
+  tuple: ^2.0.2
 
 dev_dependencies:
   flutter_lints: ^2.0.0
