@@ -14,8 +14,6 @@ dependencies:
     path: ../../packages/configuration
   ente_logging:
     path: ../../packages/logging
-  ente_sharing:
-    path: ../../packages/sharing
   ente_strings:
     path: ../../packages/strings
   ente_ui:
