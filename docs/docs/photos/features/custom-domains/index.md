@@ -103,3 +103,7 @@ To stop using your custom domain, we need to undo the two steps we did during se
 1. Unlink your domain in Ente. This can be done just by going to Preferences > Custom Domains, clearing the value in the "Domain" input and pressing "Update".
 
 2. Remove the CNAME record you added during setup in your DNS provider.
+
+## Implementation
+
+Our engineers also wrote [explainer](https://ente.io/blog/custom-domains/) of how this works behind the scenes.
