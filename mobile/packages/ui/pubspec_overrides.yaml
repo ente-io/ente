@@ -1,11 +1,15 @@
-# melos_managed_dependency_overrides: ente_base,ente_configuration,ente_events,ente_logging,ente_strings,ente_utils,ente_network,ente_sharing
+# melos_managed_dependency_overrides: ente_base,ente_configuration,ente_events,ente_logging,ente_strings,ente_utils,ente_network,ente_sharing,ente_accounts,ente_lock_screen
 dependency_overrides:
+  ente_accounts:
+    path: ../accounts
   ente_base:
     path: ../base
   ente_configuration:
     path: ../configuration
   ente_events:
     path: ../events
+  ente_lock_screen:
+    path: ../lock_screen
   ente_logging:
     path: ../logging
   ente_network:

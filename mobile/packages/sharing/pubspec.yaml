@@ -8,8 +8,13 @@ environment:
   flutter: ">=3.10.0"
 
 dependencies:
+  bip39: ^1.0.6
   collection: ^1.17.0
+  crypto: ^3.0.6
   dio: ^5.0.0
+  dotted_border: ^3.1.0
+  ente_accounts:
+    path: ../accounts
   ente_configuration:
     path: ../configuration
   ente_crypto_dart:
@@ -17,6 +22,8 @@ dependencies:
       url: https://github.com/ente-io/ente_crypto_dart.git
   ente_network:
     path: ../network
+  ente_strings:
+    path: ../strings
   ente_ui:
     path: ../ui
   ente_utils:
