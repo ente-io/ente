@@ -622,4 +622,174 @@ class StringsLocalizationsAr extends StringsLocalizations {
 
   @override
   String get endpointUpdatedMessage => 'حُدِّثَت نقطة الطرف بنجاح';
+
+  @override
+  String get yes => 'Yes';
+
+  @override
+  String get remove => 'Remove';
+
+  @override
+  String get addMore => 'Add more';
+
+  @override
+  String get somethingWentWrong => 'Something went wrong';
+
+  @override
+  String get legacy => 'Legacy';
+
+  @override
+  String get recoveryWarning =>
+      'A trusted contact is trying to access your account';
+
+  @override
+  String recoveryWarningBody(Object email) {
+    return '$email is trying to recover your account.';
+  }
+
+  @override
+  String get legacyPageDesc =>
+      'Legacy allows trusted contacts to access your account in your absence.';
+
+  @override
+  String get legacyPageDesc2 =>
+      'Trusted contacts can initiate account recovery, and if not blocked within 30 days, reset your password and access your account.';
+
+  @override
+  String get legacyAccounts => 'Legacy accounts';
+
+  @override
+  String get trustedContacts => 'Trusted contacts';
+
+  @override
+  String get addTrustedContact => 'Add Trusted Contact';
+
+  @override
+  String get removeInvite => 'Remove invite';
+
+  @override
+  String get rejectRecovery => 'Reject recovery';
+
+  @override
+  String get recoveryInitiated => 'Recovery initiated';
+
+  @override
+  String recoveryInitiatedDesc(int days, String email) {
+    return 'You can access the account after $days days. A notification will be sent to $email.';
+  }
+
+  @override
+  String get removeYourselfAsTrustedContact =>
+      'Remove yourself as trusted contact';
+
+  @override
+  String get declineTrustInvite => 'Decline Invite';
+
+  @override
+  String get cancelAccountRecovery => 'Cancel recovery';
+
+  @override
+  String get recoveryAccount => 'Recover account';
+
+  @override
+  String get cancelAccountRecoveryBody =>
+      'Are you sure you want to cancel recovery?';
+
+  @override
+  String get startAccountRecoveryTitle => 'Start recovery';
+
+  @override
+  String get whyAddTrustContact =>
+      'Trusted contact can help in recovering your data.';
+
+  @override
+  String recoveryReady(String email) {
+    return 'You can now recover $email\'s account by setting a new password.';
+  }
+
+  @override
+  String get warning => 'Warning';
+
+  @override
+  String get proceed => 'Proceed';
+
+  @override
+  String get done => 'Done';
+
+  @override
+  String get enterEmail => 'Enter email';
+
+  @override
+  String get verifyIDLabel => 'Verify';
+
+  @override
+  String get invalidEmailAddress => 'Invalid email address';
+
+  @override
+  String get enterValidEmail => 'Please enter a valid email address.';
+
+  @override
+  String get addANewEmail => 'Add a new email';
+
+  @override
+  String get orPickAnExistingOne => 'Or pick an existing one';
+
+  @override
+  String get shareTextRecommendUsingEnte =>
+      'Download Ente so we can easily share original quality files\n\nhttps://ente.io';
+
+  @override
+  String get sendInvite => 'Send invite';
+
+  @override
+  String trustedInviteBody(Object email) {
+    return 'You have been invited to be a legacy contact by $email.';
+  }
+
+  @override
+  String verifyEmailID(Object email) {
+    return 'Verify $email';
+  }
+
+  @override
+  String get thisIsYourVerificationId => 'This is your Verification ID';
+
+  @override
+  String get someoneSharingAlbumsWithYouShouldSeeTheSameId =>
+      'Someone sharing albums with you should see the same ID on their device.';
+
+  @override
+  String get howToViewShareeVerificationID =>
+      'Please ask them to long-press their email address on the settings screen, and verify that the IDs on both devices match.';
+
+  @override
+  String thisIsPersonVerificationId(String email) {
+    return 'This is $email\'s Verification ID';
+  }
+
+  @override
+  String confirmAddingTrustedContact(String email, int numOfDays) {
+    return 'You are about to add $email as a trusted contact. They will be able to recover your account if you are absent for $numOfDays days.';
+  }
+
+  @override
+  String get youCannotShareWithYourself => 'You cannot share with yourself';
+
+  @override
+  String emailNoEnteAccount(Object email) {
+    return '$email does not have an Ente account.\n\nSend them an invite to share files.';
+  }
+
+  @override
+  String shareMyVerificationID(Object verificationID) {
+    return 'Here\'s my verification ID: $verificationID for ente.io.';
+  }
+
+  @override
+  String shareTextConfirmOthersVerificationID(Object verificationID) {
+    return 'Hey, can you confirm that this is your ente.io verification ID: $verificationID';
+  }
+
+  @override
+  String get inviteToEnte => 'Invite to Ente';
 }

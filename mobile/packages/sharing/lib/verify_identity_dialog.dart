@@ -4,6 +4,8 @@ import 'package:bip39/bip39.dart' as bip39;
 import "package:crypto/crypto.dart";
 import "package:dotted_border/dotted_border.dart";
 import "package:ente_accounts/services/user_service.dart";
+import "package:ente_configuration/base_configuration.dart";
+import "package:ente_strings/ente_strings.dart";
 import "package:ente_ui/components/buttons/button_widget.dart";
 import "package:ente_ui/components/buttons/models/button_type.dart";
 import "package:ente_ui/components/loading_widget.dart";
@@ -11,22 +13,22 @@ import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_utils/share_utils.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
-import "package:locker/l10n/l10n.dart";
-import "package:locker/services/configuration.dart";
 import "package:logging/logging.dart";
 
-class VerifyIdentifyDialog extends StatefulWidget {
+class VerifyIdentityDialog extends StatefulWidget {
   // email id of the user who's verification ID is being displayed for
   // verification
   final String email;
 
   // self is true when the user is viewing their own verification ID
   final bool self;
+  final BaseConfiguration config;
 
-  VerifyIdentifyDialog({
+  VerifyIdentityDialog({
     super.key,
     required this.self,
     this.email = '',
+    required this.config,
   }) {
     if (!self && email.isEmpty) {
       throw ArgumentError("email cannot be empty when self is false");
@@ -34,27 +36,27 @@ class VerifyIdentifyDialog extends StatefulWidget {
   }
 
   @override
-  State<VerifyIdentifyDialog> createState() => _VerifyIdentifyDialogState();
+  State<VerifyIdentityDialog> createState() => _VerifyIdentityDialogState();
 }
 
-class _VerifyIdentifyDialogState extends State<VerifyIdentifyDialog> {
+class _VerifyIdentityDialogState extends State<VerifyIdentityDialog> {
   final bool doesUserExist = true;
 
   @override
   Widget build(BuildContext context) {
     final textStyle = getEnteTextTheme(context);
     final String subTitle = widget.self
-        ? context.l10n.thisIsYourVerificationId
-        : context.l10n.thisIsPersonVerificationId(widget.email);
+        ? context.strings.thisIsYourVerificationId
+        : context.strings.thisIsPersonVerificationId(widget.email);
     final String bottomText = widget.self
-        ? context.l10n.someoneSharingAlbumsWithYouShouldSeeTheSameId
-        : context.l10n.howToViewShareeVerificationID;
+        ? context.strings.someoneSharingAlbumsWithYouShouldSeeTheSameId
+        : context.strings.howToViewShareeVerificationID;
 
     final AlertDialog alert = AlertDialog(
       title: Text(
         widget.self
-            ? context.l10n.verificationId
-            : context.l10n.verifyEmailID(widget.email),
+            ? context.strings.verificationId
+            : context.strings.verifyEmailID(widget.email),
       ),
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,18 +72,18 @@ class _VerifyIdentifyDialogState extends State<VerifyIdentifyDialog> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        context.l10n.emailNoEnteAccount(widget.email),
+                        context.strings.emailNoEnteAccount(widget.email),
                       ),
                       const SizedBox(height: 24),
                       ButtonWidget(
                         buttonType: ButtonType.neutral,
                         icon: Icons.adaptive.share,
-                        labelText: context.l10n.sendInvite,
+                        labelText: context.strings.sendInvite,
                         isInAlert: true,
                         onTap: () async {
                           // ignore: unawaited_futures
                           shareText(
-                            context.l10n.shareTextRecommendUsingEnte,
+                            context.strings.shareTextRecommendUsingEnte,
                           );
                         },
                       ),
@@ -106,8 +108,9 @@ class _VerifyIdentifyDialogState extends State<VerifyIdentifyDialog> {
                       ButtonWidget(
                         buttonType: ButtonType.neutral,
                         isInAlert: true,
-                        labelText:
-                            widget.self ? context.l10n.ok : context.l10n.done,
+                        labelText: widget.self
+                            ? context.strings.ok
+                            : context.strings.done,
                       ),
                     ],
                   );
@@ -116,7 +119,7 @@ class _VerifyIdentifyDialogState extends State<VerifyIdentifyDialog> {
                 Logger("VerificationID")
                     .severe("failed to end userID", snapshot.error);
                 return Text(
-                  context.l10n.somethingWentWrong,
+                  context.strings.somethingWentWrong,
                   style: textStyle.bodyMuted,
                 );
               } else {
@@ -135,7 +138,7 @@ class _VerifyIdentifyDialogState extends State<VerifyIdentifyDialog> {
 
   Future<String> _getPublicKey() async {
     if (widget.self) {
-      return Configuration.instance.getKeyAttributes()!.publicKey;
+      return widget.config.getKeyAttributes()!.publicKey;
     }
     final String? userPublicKey =
         await UserService.instance.getPublicKey(widget.email);
@@ -170,8 +173,8 @@ class _VerifyIdentifyDialogState extends State<VerifyIdentifyDialog> {
               // ignore: unawaited_futures
               shareText(
                 widget.self
-                    ? context.l10n.shareMyVerificationID(verificationID)
-                    : context.l10n
+                    ? context.strings.shareMyVerificationID(verificationID)
+                    : context.strings
                         .shareTextConfirmOthersVerificationID(verificationID),
               );
             },

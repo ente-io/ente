@@ -504,5 +504,7 @@
   "filesAddedByYouWillBeRemovedFromTheCollection": "Files added by you will be removed from the collection",
   "leaveSharedCollection": "Leave shared collection?",
   "noSystemLockFound": "No system lock found",
-  "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "To enable app lock, please setup device passcode or screen lock in your system settings."
+  "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "To enable app lock, please setup device passcode or screen lock in your system settings.",
+  "legacy": "Legacy",
+  "authToManageLegacy": "Please authenticate to manage your trusted contacts"
 }

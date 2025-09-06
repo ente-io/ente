@@ -1,5 +1,7 @@
 import 'package:email_validator/email_validator.dart';
 import "package:ente_sharing/models/user.dart";
+import "package:ente_sharing/user_avator_widget.dart";
+import "package:ente_sharing/verify_identity_dialog.dart";
 import "package:ente_ui/components/buttons/button_widget.dart";
 import "package:ente_ui/components/buttons/models/button_type.dart";
 import "package:ente_ui/components/captioned_text_widget.dart";
@@ -15,8 +17,7 @@ import "package:locker/extensions/user_extension.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
-import "package:locker/ui/sharing/user_avator_widget.dart";
-import "package:locker/ui/sharing/verify_identity_dialog.dart";
+import "package:locker/services/configuration.dart";
 import "package:locker/utils/collection_actions.dart";
 
 enum ActionTypesToShow {
@@ -162,6 +163,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                               leadingIconWidget: UserAvatarWidget(
                                 currentUser,
                                 type: AvatarType.mini,
+                                config: Configuration.instance,
                               ),
                               menuItemColor:
                                   getEnteColorScheme(context).fillFaint,
@@ -188,9 +190,10 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                                   useRootNavigator: false,
                                   context: context,
                                   builder: (BuildContext context) {
-                                    return VerifyIdentifyDialog(
+                                    return VerifyIdentityDialog(
                                       self: false,
                                       email: currentUser.email,
+                                      config: Configuration.instance,
                                     );
                                   },
                                 );

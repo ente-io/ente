@@ -25,6 +25,8 @@ dependencies:
       url: https://github.com/ente-io/ente_crypto_dart.git
   ente_events:
     path: ../../packages/events
+  ente_legacy: 
+    path: ../../packages/legacy
   ente_lock_screen:
     path: ../../packages/lock_screen
   ente_logging:
@@ -52,6 +54,7 @@ dependencies:
       ref: 1ac346a04592a05fd75acccf2e01fa3c7e955d96
   flutter_localizations:
     sdk: flutter 
+  flutter_svg: ^2.2.1
   intl: ^0.20.2
   io: ^1.0.5
   listen_sharing_intent: ^1.9.2

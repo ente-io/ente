@@ -7,6 +7,7 @@ import 'package:ente_ui/components/buttons/button_widget.dart';
 import 'package:ente_ui/components/buttons/models/button_type.dart';
 import "package:ente_ui/components/dialog_widget.dart";
 import "package:ente_ui/components/progress_dialog.dart";
+import "package:ente_ui/components/user_dialogs.dart";
 import 'package:ente_ui/utils/dialog_util.dart';
 import "package:ente_utils/email_util.dart";
 import "package:ente_utils/share_utils.dart";
@@ -18,7 +19,6 @@ import "package:locker/services/collections/collections_api_client.dart";
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart'; 
 import "package:locker/services/configuration.dart";
-import "package:locker/ui/components/user_dialogs.dart";
 import 'package:locker/utils/snack_bar_utils.dart';
 import 'package:logging/logging.dart';
 

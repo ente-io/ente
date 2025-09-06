@@ -161,6 +161,10 @@ class EnteColorScheme extends ThemeExtension<EnteColorScheme> {
   //other colors
   final List<Color> avatarColors;
 
+  //golden colors
+  final Color golden700;
+  final Color golden500;
+
   bool get isLightTheme => backgroundBase == backgroundBaseLight;
 
   const EnteColorScheme(
@@ -231,6 +235,8 @@ class EnteColorScheme extends ThemeExtension<EnteColorScheme> {
     this.codeCardBackgroundColor = _defaultCodeCardBackgroundColor,
     this.primaryColor = _defaultPrimaryColor,
     this.surface = _defaultPrimaryColor,
+    this.golden700 = _golden700,
+    this.golden500 = _golden500,
   });
 
   /// Factory constructor for light theme with customizable primary colors
@@ -776,6 +782,9 @@ const Color _defaultSearchResultsBackgroundColor =
 // Default Code Card Background Color
 const Color _defaultCodeCardBackgroundColor = Color.fromRGBO(246, 246, 246, 1);
 
+
+const Color _golden700 = Color(0xFFFDB816);
+const Color _golden500 = Color(0xFFFFC336);
 /// Utility class to help apps create custom color schemes with their brand colors.
 ///
 /// This class provides convenient methods to generate complete color schemes
@@ -899,7 +908,7 @@ const List<Color> avatarLight = [
   Color.fromRGBO(50, 82, 136, 1),
   Color.fromRGBO(133, 180, 224, 1),
   Color.fromRGBO(193, 163, 163, 1),
-  Color.fromRGBO(225, 160, 89, 1),  // Fixed duplicate
+  Color.fromRGBO(225, 160, 89, 1), // Fixed duplicate
   Color.fromRGBO(66, 97, 101, 1),
   Color.fromRGBO(107, 119, 178, 1), // Fixed duplicate
   Color.fromRGBO(149, 127, 239, 1), // Fixed duplicate

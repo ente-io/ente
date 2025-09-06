@@ -1,9 +1,9 @@
-
+import "package:ente_configuration/base_configuration.dart";
 import "package:ente_sharing/models/user.dart";
 import "package:ente_ui/theme/colors.dart";
 import "package:ente_ui/theme/ente_theme.dart";
-import 'package:flutter/material.dart'; 
-import "package:locker/services/configuration.dart";
+import "package:ente_utils/extensions/user_extension.dart";
+import 'package:flutter/material.dart';
 import 'package:tuple/tuple.dart';
 
 enum AvatarType { small, mini, tiny, extra }
@@ -13,6 +13,7 @@ class UserAvatarWidget extends StatefulWidget {
   final AvatarType type;
   final int currentUserID;
   final bool thumbnailView;
+  final BaseConfiguration config;
 
   const UserAvatarWidget(
     this.user, {
@@ -20,6 +21,7 @@ class UserAvatarWidget extends StatefulWidget {
     this.currentUserID = -1,
     this.type = AvatarType.mini,
     this.thumbnailView = false,
+    required this.config,
   });
 
   @override
@@ -51,6 +53,7 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
           currentUserID: widget.currentUserID,
           thumbnailView: widget.thumbnailView,
           type: widget.type,
+          config: widget.config,
         ),
       ),
     );
@@ -62,11 +65,13 @@ class _FirstLetterCircularAvatar extends StatefulWidget {
   final int currentUserID;
   final bool thumbnailView;
   final AvatarType type;
+  final BaseConfiguration config;
   const _FirstLetterCircularAvatar({
     required this.user,
     required this.currentUserID,
     required this.thumbnailView,
     required this.type,
+    required this.config,
   });
 
   @override
@@ -80,14 +85,14 @@ class _FirstLetterCircularAvatarState
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final displayChar =
-        (widget.user.name == null || widget.user.name!.isEmpty)
+        (widget.user.displayName == null || widget.user.displayName!.isEmpty)
             ? ((widget.user.email.isEmpty)
                 ? " "
                 : widget.user.email.substring(0, 1))
-            : widget.user.name!.substring(0, 1);
+            : widget.user.displayName!.substring(0, 1);
     Color decorationColor;
     if ((widget.user.id != null && widget.user.id! < 0) ||
-        widget.user.email == Configuration.instance.getEmail()) {
+        widget.user.email == widget.config.getEmail()) {
       decorationColor = Colors.black;
     } else {
       decorationColor = colorScheme.avatarColors[(widget.user.email.length)
@@ -159,20 +164,26 @@ double getAvatarSize(
 
 class FirstLetterUserAvatar extends StatefulWidget {
   final User user;
-  const FirstLetterUserAvatar(this.user, {super.key});
+  final BaseConfiguration config;
+  const FirstLetterUserAvatar(
+    this.user, {
+    super.key,
+    required this.config,
+  });
 
   @override
   State<FirstLetterUserAvatar> createState() => _FirstLetterUserAvatarState();
 }
 
 class _FirstLetterUserAvatarState extends State<FirstLetterUserAvatar> {
-  final currentUserEmail = Configuration.instance.getEmail();
+  late String? currentUserEmail;
   late User user;
 
   @override
   void initState() {
     super.initState();
     user = widget.user;
+    currentUserEmail = widget.config.getEmail();
   }
 
   @override
@@ -188,9 +199,9 @@ class _FirstLetterUserAvatarState extends State<FirstLetterUserAvatar> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    final displayChar = (user.name == null || user.name!.isEmpty)
+    final displayChar = (user.displayName == null || user.displayName!.isEmpty)
         ? ((user.email.isEmpty) ? " " : user.email.substring(0, 1))
-        : user.name!.substring(0, 1);
+        : user.displayName!.substring(0, 1);
     Color decorationColor;
     if ((widget.user.id != null && widget.user.id! < 0) ||
         user.email == currentUserEmail) {
