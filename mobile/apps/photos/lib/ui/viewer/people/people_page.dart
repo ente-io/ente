@@ -139,7 +139,7 @@ class _PeoplePageState extends State<PeoplePage> {
             child: PeopleAppBar(
               GalleryType.peopleTag,
               _person.data.isIgnored
-                  ? S.of(context).ignored
+                  ? AppLocalizations.of(context).ignored
                   : _person.data.name,
               _selectedFiles,
               _person,

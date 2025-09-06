@@ -981,7 +981,8 @@ class FilesDB with SqlDbBase {
 
   // remove references for local files which are either already uploaded
   // or queued for upload but not yet uploaded
-  Future<int> removeQueuedLocalFiles(Set<String> localIDs) async {
+// Remove queued local files that have duplicate uploaded entries with same localID
+  Future<int> removeQueuedLocalFiles(Set<String> localIDs, int ownerID) async {
     if (localIDs.isEmpty) {
       _logger.finest("No local IDs provided for removal");
       return 0;
@@ -990,41 +991,63 @@ class FilesDB with SqlDbBase {
     final db = await instance.sqliteAsyncDB;
     const batchSize = 10000;
     int totalRemoved = 0;
-
     final localIDsList = localIDs.toList();
 
     for (int i = 0; i < localIDsList.length; i += batchSize) {
       final endIndex = (i + batchSize > localIDsList.length)
           ? localIDsList.length
           : i + batchSize;
-
       final batch = localIDsList.sublist(i, endIndex);
       final placeholders = List.filled(batch.length, '?').join(',');
 
-      final r = await db.execute(
+      // Find localIDs that already have uploaded entries
+      final result = await db.execute(
         '''
-      DELETE FROM $filesTable
-      WHERE $columnLocalID IN ($placeholders) 
-      AND ($columnCollectionID IS NULL OR $columnCollectionID = -1)
-      AND ($columnUploadedFileID IS NULL OR $columnUploadedFileID = -1)
-      ''',
+      SELECT DISTINCT $columnLocalID
+      FROM $filesTable
+      WHERE 
+      $columnOwnerID = $ownerID
+      AND $columnLocalID IN ($placeholders)
+      AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID != -1)
+    ''',
         batch,
       );
 
-      if (r.isNotEmpty) {
-        _logger
-            .fine("Batch ${(i ~/ batchSize) + 1}: Removed ${r.length} files");
-        totalRemoved += r.length;
+      if (result.isNotEmpty) {
+        final alreadyUploadedLocalIDs =
+            result.map((row) => row[columnLocalID] as String).toList();
+        final localIdPlaceholder =
+            List.filled(alreadyUploadedLocalIDs.length, '?').join(',');
+
+        // Delete queued entries for localIDs that already have uploaded versions
+        final deleteResult = await db.execute(
+          '''
+        DELETE FROM $filesTable
+        WHERE $columnLocalID IN ($localIdPlaceholder)
+        AND ($columnUploadedFileID IS NULL OR $columnUploadedFileID = -1)
+      ''',
+          alreadyUploadedLocalIDs,
+        );
+
+        final removedCount =
+            deleteResult.length; // or however your DB returns affected rows
+        if (removedCount > 0) {
+          _logger.warning(
+            "Batch ${(i ~/ batchSize) + 1}: Removed $removedCount queued duplicates",
+          );
+          totalRemoved += removedCount;
+        }
       }
     }
 
     if (totalRemoved > 0) {
       _logger.warning(
-        "Removed $totalRemoved potential dups for already queued local files",
+        "Removed $totalRemoved queued files that had uploaded duplicates",
       );
     } else {
-      _logger.finest("No duplicate id found for queued/uploaded files");
+      _logger.finest("No queued duplicates found for uploaded files");
     }
+
     return totalRemoved;
   }
 
@@ -1664,26 +1687,36 @@ class FilesDB with SqlDbBase {
     );
   }
 
-  Future<List<EnteFile>> getAllFilesAfterDate({
-    required FileType fileType,
-    required DateTime beginDate,
+  Future<List<EnteFile>> getStreamingEligibleVideoFiles({
+    DateTime? beginDate,
     required int userID,
+    bool onlyFilesWithLocalId = false,
   }) async {
     final db = await instance.sqliteAsyncDB;
-    final results = await db.getAll(
-      '''
+
+    String query = '''
       SELECT * FROM $filesTable
       WHERE $columnFileType = ?
-      AND $columnCreationTime > ?
-      AND $columnUploadedFileID  != -1
-      AND $columnOwnerID = $userID
-      AND $columnLocalID IS NOT NULL
+      AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID != -1)
+      AND $columnOwnerID = ?
       AND ($columnFileSize IS NOT NULL AND $columnFileSize <= 524288000)
       AND ($columnDuration IS NOT NULL AND ($columnDuration <= 60 AND $columnDuration > 0))
-      ORDER BY $columnCreationTime DESC
-    ''',
-      [getInt(fileType), beginDate.microsecondsSinceEpoch],
-    );
+    ''';
+
+    final List<Object> queryArgs = [getInt(FileType.video), userID];
+
+    if (beginDate != null) {
+      query += ' AND $columnCreationTime > ?';
+      queryArgs.add(beginDate.microsecondsSinceEpoch);
+    }
+
+    if (onlyFilesWithLocalId) {
+      query += ' AND $columnLocalID IS NOT NULL';
+    }
+
+    query += ' ORDER BY $columnCreationTime DESC';
+
+    final results = await db.getAll(query, queryArgs);
     return convertToFiles(results);
   }
 

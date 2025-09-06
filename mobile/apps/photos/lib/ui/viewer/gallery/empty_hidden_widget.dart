@@ -25,7 +25,7 @@ class EmptyHiddenWidget extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              S.of(context).noHiddenPhotosOrVideos,
+              AppLocalizations.of(context).noHiddenPhotosOrVideos,
               textAlign: TextAlign.center,
               style: enteTextTheme.body.copyWith(
                 color: enteColorScheme.textMuted,
@@ -35,24 +35,30 @@ class EmptyHiddenWidget extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                EmptyHiddenTextWidget(S.of(context).toHideAPhotoOrVideo),
+                EmptyHiddenTextWidget(
+                  AppLocalizations.of(context).toHideAPhotoOrVideo,
+                ),
                 const SizedBox(height: 4),
                 Padding(
                   padding: const EdgeInsets.only(left: 6),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      EmptyHiddenTextWidget(S.of(context).openTheItem),
+                      EmptyHiddenTextWidget(
+                        AppLocalizations.of(context).openTheItem,
+                      ),
                       const SizedBox(height: 2),
                       EmptyHiddenTextWidget(
-                        S.of(context).clickOnTheOverflowMenu,
+                        AppLocalizations.of(context).clickOnTheOverflowMenu,
                       ),
                       const SizedBox(height: 2),
                       SizedBox(
                         width: 120,
                         child: Row(
                           children: [
-                            EmptyHiddenTextWidget(S.of(context).click),
+                            EmptyHiddenTextWidget(
+                              AppLocalizations.of(context).click,
+                            ),
                             const SizedBox(width: 4),
                             Icon(
                               Icons.visibility_off,
@@ -63,7 +69,7 @@ class EmptyHiddenWidget extends StatelessWidget {
                               padding: EdgeInsets.all(4),
                             ),
                             Text(
-                              S.of(context).hide,
+                              AppLocalizations.of(context).hide,
                               style: TextStyle(
                                 color: enteColorScheme.textBase,
                               ),

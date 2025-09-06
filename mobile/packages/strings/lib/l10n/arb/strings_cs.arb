@@ -1,0 +1,716 @@
+{
+  "networkHostLookUpErr": "Nelze se připojit k Ente, zkontrolujte, prosím, nastavení své sítě a kontaktujte podporu, pokud chyba přetrvává",
+  "@networkHostLookUpErr": {
+    "description": "Error message shown when the app cannot connect to Ente due to network host lookup failure"
+  },
+  "networkConnectionRefusedErr": "Nepodařilo se připojit k Ente, zkuste to po nějaké době znovu. Pokud chyba přetrvává, kontaktujte, prosím, podporu.",
+  "@networkConnectionRefusedErr": {
+    "description": "Error message shown when the app cannot connect to Ente due to connection refused"
+  },
+  "itLooksLikeSomethingWentWrongPleaseRetryAfterSome": "Vypadá to, že se něco pokazilo. Zkuste to prosím znovu po nějaké době. Pokud chyba přetrvává, kontaktujte prosím naši podporu.",
+  "@itLooksLikeSomethingWentWrongPleaseRetryAfterSome": {
+    "description": "Generic error message for temporary issues"
+  },
+  "error": "Chyba",
+  "@error": {
+    "description": "Generic error title"
+  },
+  "ok": "Ok",
+  "@ok": {
+    "description": "Generic OK button label"
+  },
+  "faq": "Často kladené dotazy (FAQ)",
+  "@faq": {
+    "description": "FAQ link label"
+  },
+  "contactSupport": "Kontaktovat podporu",
+  "@contactSupport": {
+    "description": "Contact support button label"
+  },
+  "emailYourLogs": "Zašlete své logy e-mailem",
+  "@emailYourLogs": {
+    "description": "Title for emailing logs dialog"
+  },
+  "pleaseSendTheLogsTo": "Pošlete prosím logy na \n{toEmail}",
+  "@pleaseSendTheLogsTo": {
+    "description": "Message asking user to send logs to email address",
+    "placeholders": {
+      "toEmail": {
+        "type": "String",
+        "description": "Email address to send logs to"
+      }
+    }
+  },
+  "copyEmailAddress": "Kopírovat e-mailovou adresu",
+  "@copyEmailAddress": {
+    "description": "Button to copy email address to clipboard"
+  },
+  "exportLogs": "Exportovat logy",
+  "@exportLogs": {
+    "description": "Button to export logs"
+  },
+  "cancel": "Zrušit",
+  "@cancel": {
+    "description": "Cancel button label"
+  },
+  "reportABug": "Nahlásit chybu",
+  "@reportABug": {
+    "description": "Label for reporting a bug"
+  },
+  "customEndpoint": "Připojeno k {endpoint}",
+  "@customEndpoint": {
+    "description": "Text showing user is connected to a custom endpoint",
+    "placeholders": {
+      "endpoint": {
+        "type": "String",
+        "description": "URL of the custom endpoint"
+      }
+    }
+  },
+  "save": "Uložit",
+  "@save": {
+    "description": "Label for save button"
+  },
+  "send": "Odeslat",
+  "@send": {
+    "description": "Label for send button"
+  },
+  "saveOrSendDescription": "Chcete toto uložit do paměti zařízení (ve výchozím nastavení do složky Stažené soubory), nebo odeslat do jiných aplikací?",
+  "@saveOrSendDescription": {
+    "description": "Description text asking user if they want to save to storage or share with other apps"
+  },
+  "saveOnlyDescription": "Chcete toto uložit do paměti zařízení (ve výchozím nastavení do složky Stažené soubory)?",
+  "@saveOnlyDescription": {
+    "description": "Description text asking user if they want to save to storage (for platforms that don't support sharing)"
+  },
+  "email": "E-mail",
+  "@email": {
+    "description": "Email field label"
+  },
+  "verify": "Ověřit",
+  "@verify": {
+    "description": "Verify button label"
+  },
+  "invalidEmailTitle": "Neplatná e-mailová adresa",
+  "@invalidEmailTitle": {
+    "description": "Title for invalid email error dialog"
+  },
+  "invalidEmailMessage": "Prosím, zadejte platnou e-mailovou adresu.",
+  "@invalidEmailMessage": {
+    "description": "Message for invalid email error dialog"
+  },
+  "pleaseWait": "Čekejte prosím...",
+  "@pleaseWait": {
+    "description": "Please wait message"
+  },
+  "verifyPassword": "Ověření hesla",
+  "@verifyPassword": {
+    "description": "Verify password button label"
+  },
+  "incorrectPasswordTitle": "Nesprávné heslo",
+  "@incorrectPasswordTitle": {
+    "description": "Title for incorrect password error"
+  },
+  "pleaseTryAgain": "Zkuste to prosím znovu",
+  "@pleaseTryAgain": {
+    "description": "Message asking user to try again"
+  },
+  "enterPassword": "Zadejte heslo",
+  "@enterPassword": {
+    "description": "Enter password field label"
+  },
+  "enterYourPasswordHint": "Zadejte své heslo",
+  "@enterYourPasswordHint": {
+    "description": "Hint for password field"
+  },
+  "activeSessions": "Aktivní relace",
+  "@activeSessions": {
+    "description": "Title for active sessions page"
+  },
+  "oops": "Jejda",
+  "@oops": {
+    "description": "Oops error title"
+  },
+  "somethingWentWrongPleaseTryAgain": "Něco se pokazilo. Zkuste to, prosím, znovu",
+  "@somethingWentWrongPleaseTryAgain": {
+    "description": "Generic error message"
+  },
+  "thisWillLogYouOutOfThisDevice": "Tato akce Vás odhlásí z tohoto zařízení!",
+  "@thisWillLogYouOutOfThisDevice": {
+    "description": "Warning message for logging out of current device"
+  },
+  "thisWillLogYouOutOfTheFollowingDevice": "Toto Vás odhlásí z následujícího zařízení:",
+  "@thisWillLogYouOutOfTheFollowingDevice": {
+    "description": "Warning message for logging out of another device"
+  },
+  "terminateSession": "Ukončit relaci?",
+  "@terminateSession": {
+    "description": "Title for terminate session dialog"
+  },
+  "terminate": "Ukončit",
+  "@terminate": {
+    "description": "Terminate button label"
+  },
+  "thisDevice": "Toto zařízení",
+  "@thisDevice": {
+    "description": "Label for current device"
+  },
+  "createAccount": "Vytvořit účet",
+  "@createAccount": {
+    "description": "Create account button label"
+  },
+  "weakStrength": "Slabé",
+  "@weakStrength": {
+    "description": "Weak password strength label"
+  },
+  "moderateStrength": "Střední",
+  "@moderateStrength": {
+    "description": "Moderate password strength label"
+  },
+  "strongStrength": "Silné",
+  "@strongStrength": {
+    "description": "Strong password strength label"
+  },
+  "deleteAccount": "Odstranit účet",
+  "@deleteAccount": {
+    "description": "Delete account button label"
+  },
+  "deleteAccountQuery": "Mrzí nás, že odcházíte. Máte nějaké problémy s aplikací?",
+  "@deleteAccountQuery": {
+    "description": "Message asking user why they want to delete account"
+  },
+  "yesSendFeedbackAction": "Ano, poslat zpětnou vazbu",
+  "@yesSendFeedbackAction": {
+    "description": "Button to confirm sending feedback"
+  },
+  "noDeleteAccountAction": "Ne, odstranit účet",
+  "@noDeleteAccountAction": {
+    "description": "Button to proceed with account deletion"
+  },
+  "initiateAccountDeleteTitle": "Pro zahájení odstranění účtu se, prosím, ověřte",
+  "@initiateAccountDeleteTitle": {
+    "description": "Title for authentication dialog before account deletion"
+  },
+  "confirmAccountDeleteTitle": "Potvrdit odstranění účtu",
+  "@confirmAccountDeleteTitle": {
+    "description": "Title for account deletion confirmation dialog"
+  },
+  "confirmAccountDeleteMessage": " ",
+  "@confirmAccountDeleteMessage": {
+    "description": "Message warning about account deletion consequences"
+  },
+  "delete": "Smazat",
+  "@delete": {
+    "description": "Delete button label"
+  },
+  "createNewAccount": "Vytvořit nový účet",
+  "@createNewAccount": {
+    "description": "Create new account button label"
+  },
+  "password": "Heslo",
+  "@password": {
+    "description": "Password field label"
+  },
+  "confirmPassword": "Potvrzení hesla",
+  "@confirmPassword": {
+    "description": "Confirm password field label"
+  },
+  "passwordStrength": "Síla hesla: {passwordStrengthValue}",
+  "@passwordStrength": {
+    "description": "Text to indicate the password strength",
+    "placeholders": {
+      "passwordStrengthValue": {
+        "description": "The strength of the password as a string",
+        "type": "String",
+        "example": "Weak or Moderate or Strong"
+      }
+    }
+  },
+  "hearUsWhereTitle": "Jak jste se dozvěděli o Ente? (volitelné)",
+  "@hearUsWhereTitle": {
+    "description": "Title asking how user heard about Ente"
+  },
+  "hearUsExplanation": "Ne sledujeme instalace aplikace. Pomůže nám, když nám sdělíte, kde jste nás našli!",
+  "@hearUsExplanation": {
+    "description": "Explanation for asking how user heard about Ente"
+  },
+  "signUpTerms": "Souhlasím s <u-terms>podmínkami služby</u-terms> a <u-terms>zásadami ochrany osobních údajů</u-terms>",
+  "@signUpTerms": {
+    "description": "Terms agreement text for sign up"
+  },
+  "termsOfServicesTitle": "Podmínky",
+  "@termsOfServicesTitle": {
+    "description": "Terms of service title"
+  },
+  "privacyPolicyTitle": "Podmínky ochrany osobních údajů",
+  "@privacyPolicyTitle": {
+    "description": "Privacy policy title"
+  },
+  "ackPasswordLostWarning": "Rozumím, že při zapomenutí hesla mohu ztratit svá data, protože jsou zabezpečena <underline>koncovým šifrováním</underline>.",
+  "@ackPasswordLostWarning": {
+    "description": "Warning about password loss"
+  },
+  "encryption": "Šifrování",
+  "@encryption": {
+    "description": "Encryption label"
+  },
+  "logInLabel": "Přihlásit se",
+  "@logInLabel": {
+    "description": "Log in button label"
+  },
+  "welcomeBack": "Vítejte zpět!",
+  "@welcomeBack": {
+    "description": "Welcome back message"
+  },
+  "loginTerms": "Kliknutím na přihlášení souhlasím s <u-terms>podmínkami služby</u-terms> a <u-policy>zásadami ochrany osobních údajů</u-policy>",
+  "@loginTerms": {
+    "description": "Terms agreement text for login"
+  },
+  "noInternetConnection": "Žádné připojení k internetu",
+  "@noInternetConnection": {
+    "description": "No internet connection error message"
+  },
+  "pleaseCheckYourInternetConnectionAndTryAgain": "Zkontrolujte, prosím, své připojení k internetu a zkuste to znovu.",
+  "@pleaseCheckYourInternetConnectionAndTryAgain": {
+    "description": "Message asking user to check internet connection"
+  },
+  "verificationFailedPleaseTryAgain": "Ověření selhalo, přihlaste se, prosím, znovu",
+  "@verificationFailedPleaseTryAgain": {
+    "description": "Verification failed error message"
+  },
+  "recreatePasswordTitle": "Resetovat heslo",
+  "@recreatePasswordTitle": {
+    "description": "Title for recreate password dialog"
+  },
+  "recreatePasswordBody": "Aktzální zařízení není dostatečně výkonné pro ověření Vašeho hesla, ale můžeme ho regenerovat způsobem, který funguje ve všech zařízením.\n\nPřihlašte se pomocí obnovovacího klíče a znovu si vygenerujte své heslo (můžete použít opět stejné, pokud chcete).",
+  "@recreatePasswordBody": {
+    "description": "Body text for recreate password dialog"
+  },
+  "useRecoveryKey": "Použít obnovovací klíč",
+  "@useRecoveryKey": {
+    "description": "Use recovery key button label"
+  },
+  "forgotPassword": "Zapomenuté heslo",
+  "@forgotPassword": {
+    "description": "Forgot password link label"
+  },
+  "changeEmail": "Změnit e-mail",
+  "@changeEmail": {
+    "description": "Change email button label"
+  },
+  "verifyEmail": "Ověřit e-mail",
+  "@verifyEmail": {
+    "description": "Verify email title"
+  },
+  "weHaveSendEmailTo": "Odeslali jsme e-mail na <green>{email}</green>",
+  "@weHaveSendEmailTo": {
+    "description": "Text to indicate that we have sent a mail to the user",
+    "placeholders": {
+      "email": {
+        "description": "The email address of the user",
+        "type": "String",
+        "example": "example@ente.io"
+      }
+    }
+  },
+  "toResetVerifyEmail": "Pro obnovení hesla obnovte, prosím, nejprve svůj e-mail.",
+  "@toResetVerifyEmail": {
+    "description": "Message asking user to verify email before password reset"
+  },
+  "checkInboxAndSpamFolder": "Pro dokončení ověření prosím zkontrolujte, prosím, svou doručenou poštu (a spamy)",
+  "@checkInboxAndSpamFolder": {
+    "description": "Message asking user to check inbox and spam folder"
+  },
+  "tapToEnterCode": "Klepnutím zadejte kód",
+  "@tapToEnterCode": {
+    "description": "Hint for entering verification code"
+  },
+  "sendEmail": "Odeslat e-mail",
+  "resendEmail": "Odeslat e-mail znovu",
+  "@resendEmail": {
+    "description": "Resend email button label"
+  },
+  "passKeyPendingVerification": "Ověřování stále probíhá",
+  "@passKeyPendingVerification": {
+    "description": "Message when passkey verification is pending"
+  },
+  "loginSessionExpired": "Relace vypršela",
+  "@loginSessionExpired": {
+    "description": "Login session expired title"
+  },
+  "loginSessionExpiredDetails": "Vaše relace vypršela. Přihlaste se, prosím, znovu.",
+  "@loginSessionExpiredDetails": {
+    "description": "Login session expired details"
+  },
+  "waitingForVerification": "Čekání na ověření...",
+  "@waitingForVerification": {
+    "description": "Waiting for verification message"
+  },
+  "tryAgain": "Zkusit znovu",
+  "@tryAgain": {
+    "description": "Try again button label"
+  },
+  "checkStatus": "Zkontrolovat stav",
+  "@checkStatus": {
+    "description": "Check status button label"
+  },
+  "loginWithTOTP": "Přihlášení s TOTP",
+  "@loginWithTOTP": {
+    "description": "Login with TOTP button label"
+  },
+  "recoverAccount": "Obnovit účet",
+  "@recoverAccount": {
+    "description": "Recover account button label"
+  },
+  "setPasswordTitle": "Nastavit heslo",
+  "@setPasswordTitle": {
+    "description": "Set password title"
+  },
+  "changePasswordTitle": "Změnit heslo",
+  "@changePasswordTitle": {
+    "description": "Change password title"
+  },
+  "resetPasswordTitle": "Obnovit heslo",
+  "@resetPasswordTitle": {
+    "description": "Reset password title"
+  },
+  "encryptionKeys": "Šifrovací klíče",
+  "@encryptionKeys": {
+    "description": "Encryption keys title"
+  },
+  "enterPasswordToEncrypt": "Zadejte heslo, kterým můžeme zašifrovat Vaše data",
+  "@enterPasswordToEncrypt": {
+    "description": "Prompt to enter password for encryption"
+  },
+  "enterNewPasswordToEncrypt": "Zadejte nové heslo, kterým můžeme šifrovat Vaše data",
+  "@enterNewPasswordToEncrypt": {
+    "description": "Prompt to enter new password for encryption"
+  },
+  "passwordWarning": "Vaše heslo neuchováváme. Pokud ho zapomenete, <underline>nemůžeme Vaše data dešifrovat</underline>",
+  "@passwordWarning": {
+    "description": "Warning about password storage"
+  },
+  "howItWorks": "Jak to funguje",
+  "@howItWorks": {
+    "description": "How it works button label"
+  },
+  "generatingEncryptionKeys": "Generování šifrovacích klíčů...",
+  "@generatingEncryptionKeys": {
+    "description": "Generating encryption keys message"
+  },
+  "passwordChangedSuccessfully": "Heslo úspěšně změněno",
+  "@passwordChangedSuccessfully": {
+    "description": "Password changed successfully message"
+  },
+  "signOutFromOtherDevices": "Odhlásit z ostatních zařízení",
+  "@signOutFromOtherDevices": {
+    "description": "Sign out from other devices title"
+  },
+  "signOutOtherBody": "Pokud si myslíte, že by někdo mohl znát Vaše heslo, můžete vynutit odhlášení ostatních zařízení používajících Váš účet.",
+  "@signOutOtherBody": {
+    "description": "Sign out other devices explanation"
+  },
+  "signOutOtherDevices": "Odhlásit z ostatních zařízení",
+  "@signOutOtherDevices": {
+    "description": "Sign out other devices button label"
+  },
+  "doNotSignOut": "Neodhlašovat",
+  "@doNotSignOut": {
+    "description": "Do not sign out button label"
+  },
+  "generatingEncryptionKeysTitle": "Generování šifrovacích klíčů...",
+  "@generatingEncryptionKeysTitle": {
+    "description": "Generating encryption keys title"
+  },
+  "continueLabel": "Pokračovat",
+  "@continueLabel": {
+    "description": "Continue button label"
+  },
+  "insecureDevice": "Nezabezpečené zařízení",
+  "@insecureDevice": {
+    "description": "Insecure device warning title"
+  },
+  "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": "Omlouváme se, na tomto zařízení nemůžeme vygenerovat bezpečné klíče.\n\nprosím přihlaste se z jiného zařízení.",
+  "@sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": {
+    "description": "Error message for insecure device"
+  },
+  "recoveryKeyCopiedToClipboard": "Obnovovací klíč byl zkopírován",
+  "@recoveryKeyCopiedToClipboard": {
+    "description": "Recovery key copied message"
+  },
+  "recoveryKey": "Obnovovací klíč",
+  "@recoveryKey": {
+    "description": "Recovery key label"
+  },
+  "recoveryKeyOnForgotPassword": "Tento klíč je jedinou cestou pro obnovení Vašich dat, pokud zapomenete heslo.",
+  "@recoveryKeyOnForgotPassword": {
+    "description": "Recovery key importance explanation"
+  },
+  "recoveryKeySaveDescription": "Tento 24místný klíč neuchováváme, uschovejte ho, prosím, na bezpečném místě.",
+  "@recoveryKeySaveDescription": {
+    "description": "Recovery key save description"
+  },
+  "doThisLater": "Udělat později",
+  "@doThisLater": {
+    "description": "Do this later button label"
+  },
+  "saveKey": "Uložit klíč",
+  "@saveKey": {
+    "description": "Save key button label"
+  },
+  "recoveryKeySaved": "Obnovovací klíč uložen do složky Stažené soubory!",
+  "@recoveryKeySaved": {
+    "description": "Recovery key saved confirmation message"
+  },
+  "noRecoveryKeyTitle": "Nemáte obnovovací klíč?",
+  "@noRecoveryKeyTitle": {
+    "description": "No recovery key title"
+  },
+  "twoFactorAuthTitle": "Dvoufaktorové ověření",
+  "@twoFactorAuthTitle": {
+    "description": "Two-factor authentication title"
+  },
+  "enterCodeHint": "Zadejte 6místný kód ze své autentizační aplikace",
+  "@enterCodeHint": {
+    "description": "Hint for entering 2FA code"
+  },
+  "lostDeviceTitle": "Ztratili jste zařízení?",
+  "@lostDeviceTitle": {
+    "description": "Lost device title"
+  },
+  "enterRecoveryKeyHint": "Zadejte svůj obnovovací klíč",
+  "@enterRecoveryKeyHint": {
+    "description": "Hint for entering recovery key"
+  },
+  "recover": "Obnovit",
+  "@recover": {
+    "description": "Recover button label"
+  },
+  "loggingOut": "Odhlašování...",
+  "@loggingOut": {
+    "description": "Message shown while logging out"
+  },
+  "immediately": "Ihned",
+  "@immediately": {
+    "description": "Immediately option for auto lock timing"
+  },
+  "appLock": "Zámek aplikace",
+  "@appLock": {
+    "description": "App lock setting title"
+  },
+  "autoLock": "Automatické zamykání",
+  "@autoLock": {
+    "description": "Auto lock setting title"
+  },
+  "noSystemLockFound": "Zámek systému nenalezen",
+  "@noSystemLockFound": {
+    "description": "Error when no system lock is found"
+  },
+  "deviceLockEnablePreSteps": "Pro aktivaci zámku zařízení si nastavte přístupový kód zařízení nebo zámek obrazovky v nastavení systému.",
+  "@deviceLockEnablePreSteps": {
+    "description": "Instructions for enabling device lock"
+  },
+  "appLockDescription": "Vyberte si mezi zámkem obrazovky svého zařízení a vlastním zámkem obrazovky s PIN kódem nebo heslem.",
+  "@appLockDescription": {
+    "description": "Description of app lock feature"
+  },
+  "deviceLock": "Zámek zařízení",
+  "@deviceLock": {
+    "description": "Device lock option title"
+  },
+  "pinLock": "Uzamčení na PIN",
+  "@pinLock": {
+    "description": "PIN lock option title"
+  },
+  "autoLockFeatureDescription": "Interval, po kterém se aplikace běžící na pozadí uzamkne",
+  "@autoLockFeatureDescription": {
+    "description": "Description of auto lock feature"
+  },
+  "hideContent": "Skrýt obsah",
+  "@hideContent": {
+    "description": "Hide content setting title"
+  },
+  "hideContentDescriptionAndroid": "Skryje obsah aplikace ve ",
+  "@hideContentDescriptionAndroid": {
+    "description": "Description of hide content feature on Android"
+  },
+  "hideContentDescriptioniOS": "Skryje obsah aplikace při přepínání úloh",
+  "@hideContentDescriptioniOS": {
+    "description": "Description of hide content feature on iOS"
+  },
+  "tooManyIncorrectAttempts": "Příliš mnoho neúspěšných pokusů",
+  "@tooManyIncorrectAttempts": {
+    "description": "Message shown when too many incorrect attempts are made"
+  },
+  "tapToUnlock": "Pro odemčení klepněte",
+  "@tapToUnlock": {
+    "description": "Message prompting user to tap to unlock"
+  },
+  "areYouSureYouWantToLogout": "Opravdu se chcete odhlásit?",
+  "@areYouSureYouWantToLogout": {
+    "description": "Confirmation message before logout"
+  },
+  "yesLogout": "Ano, odhlásit se",
+  "@yesLogout": {
+    "description": "Confirmation button for logout"
+  },
+  "authToViewSecrets": "Pro zobrazení svých tajných údajů se musíte ověřit",
+  "@authToViewSecrets": {
+    "description": "Message prompting authentication to view secrets"
+  },
+  "next": "Další",
+  "@next": {
+    "description": "Next button label"
+  },
+  "setNewPassword": "Nastavit nové heslo",
+  "@setNewPassword": {
+    "description": "Set new password title"
+  },
+  "enterPin": "Zadejte PIN",
+  "@enterPin": {
+    "description": "Enter PIN prompt"
+  },
+  "setNewPin": "Nadra",
+  "@setNewPin": {
+    "description": "Set new PIN title"
+  },
+  "confirm": "Potvrdit",
+  "@confirm": {
+    "description": "Confirm button label"
+  },
+  "reEnterPassword": "Zadejte heslo znovu",
+  "@reEnterPassword": {
+    "description": "Re-enter password prompt"
+  },
+  "reEnterPin": "Zadejte PIN znovu",
+  "@reEnterPin": {
+    "description": "Re-enter PIN prompt"
+  },
+  "androidBiometricHint": "Ověřte svou identitu",
+  "@androidBiometricHint": {
+    "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricNotRecognized": "Nerozpoznáno. Zkuste znovu.",
+  "@androidBiometricNotRecognized": {
+    "description": "Message to let the user know that authentication was failed. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricSuccess": "Úspěch",
+  "@androidBiometricSuccess": {
+    "description": "Message to let the user know that authentication was successful. It is used on Android side. Maximum 60 characters."
+  },
+  "androidCancelButton": "Zrušit",
+  "@androidCancelButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on Android side. Maximum 30 characters."
+  },
+  "androidSignInTitle": "Je požadováno ověření",
+  "@androidSignInTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user that they need to scan biometric to continue. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricRequiredTitle": "Je požadováno biometrické ověření",
+  "@androidBiometricRequiredTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user has not set up biometric authentication on their device. It is used on Android side. Maximum 60 characters."
+  },
+  "androidDeviceCredentialsRequiredTitle": "Jsou vyžadovány přihlašovací údaje zařízení",
+  "@androidDeviceCredentialsRequiredTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user has not set up credentials authentication on their device. It is used on Android side. Maximum 60 characters."
+  },
+  "androidDeviceCredentialsSetupDescription": "Jsou vyžadovány přihlašovací údaje zařízení",
+  "@androidDeviceCredentialsSetupDescription": {
+    "description": "Message advising the user to go to the settings and configure device credentials on their device. It shows in a dialog on Android side."
+  },
+  "goToSettings": "Jít do nastavení",
+  "@goToSettings": {
+    "description": "Message showed on a button that the user can click to go to settings pages from the current dialog. It is used on both Android and iOS side. Maximum 30 characters."
+  },
+  "androidGoToSettingsDescription": "Na Vašem zařízení není nastaveno biometrické ověřování. Pro aktivaci běžte do 'Nastavení > Zabezpečení'.",
+  "@androidGoToSettingsDescription": {
+    "description": "Message advising the user to go to the settings and configure biometric on their device. It shows in a dialog on Android side."
+  },
+  "iOSLockOut": "Biometrické ověřování není povoleno. Pro povolení zamkněte a odemkněte obrazovku.",
+  "@iOSLockOut": {
+    "description": "Message advising the user to re-enable biometrics on their device. It shows in a dialog on iOS side."
+  },
+  "iOSOkButton": "OK",
+  "@iOSOkButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
+  },
+  "emailAlreadyRegistered": "E-mail je již registrován.",
+  "@emailAlreadyRegistered": {
+    "description": "Error message when email is already registered"
+  },
+  "emailNotRegistered": "E-mail není registrován.",
+  "@emailNotRegistered": {
+    "description": "Error message when email is not registered"
+  },
+  "thisEmailIsAlreadyInUse": "Tento e-mail je již používán",
+  "@thisEmailIsAlreadyInUse": {
+    "description": "Error message when email is already in use"
+  },
+  "emailChangedTo": "E-mail změněn na {newEmail}",
+  "@emailChangedTo": {
+    "description": "Message when email has been changed",
+    "placeholders": {
+      "newEmail": {
+        "description": "The new email address",
+        "type": "String",
+        "example": "new@example.com"
+      }
+    }
+  },
+  "authenticationFailedPleaseTryAgain": "Ověření selhalo, zkuste to, prosím, znovu",
+  "@authenticationFailedPleaseTryAgain": {
+    "description": "Error message when authentication fails"
+  },
+  "authenticationSuccessful": "Ověření bylo úspěšné!",
+  "@authenticationSuccessful": {
+    "description": "Success message when authentication is successful"
+  },
+  "sessionExpired": "Relace vypršela",
+  "@sessionExpired": {
+    "description": "Error message when session has expired"
+  },
+  "incorrectRecoveryKey": "Nesprávný obnovovací klíč",
+  "@incorrectRecoveryKey": {
+    "description": "Error message when recovery key is incorrect"
+  },
+  "theRecoveryKeyYouEnteredIsIncorrect": "Vámi zadaný obnovovací klíč je nesprávný",
+  "@theRecoveryKeyYouEnteredIsIncorrect": {
+    "description": "Detailed error message when recovery key is incorrect"
+  },
+  "twofactorAuthenticationSuccessfullyReset": "Dvoufázové ověření bylo úspěšně obnoveno",
+  "@twofactorAuthenticationSuccessfullyReset": {
+    "description": "Message when two-factor authentication is successfully reset"
+  },
+  "yourVerificationCodeHasExpired": "Váš ověřovací kód vypršel",
+  "@yourVerificationCodeHasExpired": {
+    "description": "Error message when verification code has expired"
+  },
+  "incorrectCode": "Nesprávný kód",
+  "@incorrectCode": {
+    "description": "Error message when code is incorrect"
+  },
+  "sorryTheCodeYouveEnteredIsIncorrect": "Omlouváme se, zadaný kód je nesprávný",
+  "@sorryTheCodeYouveEnteredIsIncorrect": {
+    "description": "Detailed error message when code is incorrect"
+  },
+  "developerSettings": "Nastavení pro vývojáře",
+  "@developerSettings": {
+    "description": "Label for developerSettings"
+  },
+  "serverEndpoint": "Koncový bod serveru",
+  "@serverEndpoint": {
+    "description": "Label for serverEndpoint"
+  },
+  "invalidEndpoint": "Neplatný koncový bod",
+  "@invalidEndpoint": {
+    "description": "Label for invalidEndpoint"
+  },
+  "invalidEndpointMessage": "Zadaný koncový bod je neplatný. Zadejte prosím platný koncový bod a zkuste to znovu.",
+  "@invalidEndpointMessage": {
+    "description": "Label for invalidEndpointMessage"
+  },
+  "endpointUpdatedMessage": "Koncový bod byl úspěšně aktualizován",
+  "@endpointUpdatedMessage": {
+    "description": "Label for endpointUpdatedMessage"
+  }
+}

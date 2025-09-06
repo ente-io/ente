@@ -1,12 +1,8 @@
 import "package:flutter/widgets.dart";
-import "package:photos/generated/l10n.dart";
+import 'package:photos/generated/intl/app_localizations.dart';
 import "package:shared_preferences/shared_preferences.dart";
 
-extension AppLocalizationsX on BuildContext {
-  S get l10n => S.of(this);
-}
-
-// list of locales which are enabled for auth app.
+// list of locales which are enabled for photos app.
 // Add more language to the list only when at least 90% of the strings are
 // translated in the corresponding language.
 const List<Locale> appSupportedLocales = <Locale>[
@@ -28,6 +24,10 @@ const List<Locale> appSupportedLocales = <Locale>[
   Locale("vi"),
   Locale("zh", "CN"),
 ];
+
+extension AppLocalizationsX on BuildContext {
+  AppLocalizations get l10n => AppLocalizations.of(this);
+}
 
 List<Locale> _onDeviceLocales = [];
 Locale? autoDetectedLocale;

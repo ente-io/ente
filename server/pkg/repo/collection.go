@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/ente-io/museum/pkg/repo/public"
 	"strconv"
 	t "time"
 
@@ -22,13 +23,13 @@ import (
 // CollectionRepository defines the methods for inserting, updating and
 // retrieving collection entities from the underlying repository
 type CollectionRepository struct {
-	DB                   *sql.DB
-	FileRepo             *FileRepository
-	PublicCollectionRepo *PublicCollectionRepository
-	TrashRepo            *TrashRepository
-	SecretEncryptionKey  []byte
-	QueueRepo            *QueueRepository
-	LatencyLogger        *prometheus.HistogramVec
+	DB                  *sql.DB
+	FileRepo            *FileRepository
+	CollectionLinkRepo  *public.CollectionLinkRepo
+	TrashRepo           *TrashRepository
+	SecretEncryptionKey []byte
+	QueueRepo           *QueueRepository
+	LatencyLogger       *prometheus.HistogramVec
 }
 
 type SharedCollection struct {
@@ -60,12 +61,12 @@ func (repo *CollectionRepository) Create(c ente.Collection) (ente.Collection, er
 
 // Get returns a collection identified by the collectionID
 func (repo *CollectionRepository) Get(collectionID int64) (ente.Collection, error) {
-	row := repo.DB.QueryRow(`SELECT collection_id, owner_id, encrypted_key, key_decryption_nonce, name, encrypted_name, name_decryption_nonce, type, attributes, updation_time, is_deleted, magic_metadata, pub_magic_metadata
+	row := repo.DB.QueryRow(`SELECT collection_id, app, owner_id, encrypted_key, key_decryption_nonce, name, encrypted_name, name_decryption_nonce, type, attributes, updation_time, is_deleted, magic_metadata, pub_magic_metadata
 		FROM collections
 		WHERE collection_id = $1`, collectionID)
 	var c ente.Collection
 	var name, encryptedName, nameDecryptionNonce sql.NullString
-	if err := row.Scan(&c.ID, &c.Owner.ID, &c.EncryptedKey, &c.KeyDecryptionNonce, &name, &encryptedName, &nameDecryptionNonce, &c.Type, &c.Attributes, &c.UpdationTime, &c.IsDeleted, &c.MagicMetadata, &c.PublicMagicMetadata); err != nil {
+	if err := row.Scan(&c.ID, &c.App, &c.Owner.ID, &c.EncryptedKey, &c.KeyDecryptionNonce, &name, &encryptedName, &nameDecryptionNonce, &c.Type, &c.Attributes, &c.UpdationTime, &c.IsDeleted, &c.MagicMetadata, &c.PublicMagicMetadata); err != nil {
 		return c, stacktrace.Propagate(err, "")
 	}
 	if name.Valid && len(name.String) > 0 {
@@ -74,7 +75,11 @@ func (repo *CollectionRepository) Get(collectionID int64) (ente.Collection, erro
 		c.EncryptedName = encryptedName.String
 		c.NameDecryptionNonce = nameDecryptionNonce.String
 	}
-	urlMap, err := repo.PublicCollectionRepo.GetCollectionToActivePublicURLMap(context.Background(), []int64{collectionID})
+	app := ente.Photos
+	if len(c.App) > 0 && ente.App(c.App).IsValid() {
+		app = ente.App(c.App)
+	}
+	urlMap, err := repo.CollectionLinkRepo.GetCollectionToActivePublicURLMap(context.Background(), []int64{collectionID}, app)
 	if err != nil {
 		return ente.Collection{}, stacktrace.Propagate(err, "failed to get publicURL info")
 	}
@@ -174,7 +179,7 @@ pct.access_token, pct.valid_till, pct.device_limit, pct.created_at, pct.updated_
 			if _, ok := addPublicUrlMap[pctToken.String]; !ok {
 				addPublicUrlMap[pctToken.String] = true
 				url := ente.PublicURL{
-					URL:             repo.PublicCollectionRepo.GetAlbumUrl(pctToken.String),
+					URL:             repo.CollectionLinkRepo.GetAlbumUrl(app, pctToken.String),
 					DeviceLimit:     int(pctDeviceLimit.Int32),
 					ValidTill:       pctValidTill.Int64,
 					EnableDownload:  pctEnableDownload.Bool,

@@ -71,7 +71,7 @@ class CollectionActions {
           shouldStickToDarkTheme: true,
           buttonAction: ButtonAction.first,
           shouldSurfaceExecutionStates: true,
-          labelText: S.of(context).yesRemove,
+          labelText: AppLocalizations.of(context).yesRemove,
           onTap: () async {
             // for quickLink collection, we need to trash the collection
             if (collection.isQuickLinkCollection() && !collection.hasSharees) {
@@ -86,13 +86,14 @@ class CollectionActions {
           buttonAction: ButtonAction.cancel,
           isInAlert: true,
           shouldStickToDarkTheme: true,
-          labelText: S.of(context).cancel,
+          labelText: AppLocalizations.of(context).cancel,
         ),
       ],
-      title: S.of(context).removePublicLink,
+      title: AppLocalizations.of(context).removePublicLink,
       body:
           //'This will remove the public link for accessing "${collection.name}".',
-          S.of(context).disableLinkMessage(collection.displayName),
+          AppLocalizations.of(context)
+              .disableLinkMessage(albumName: collection.displayName),
     );
     if (actionResult?.action != null) {
       if (actionResult!.action == ButtonAction.error) {
@@ -177,7 +178,7 @@ class CollectionActions {
           shouldStickToDarkTheme: true,
           buttonAction: ButtonAction.first,
           shouldSurfaceExecutionStates: true,
-          labelText: S.of(context).yesRemove,
+          labelText: AppLocalizations.of(context).yesRemove,
           onTap: () async {
             final newSharees = await CollectionsService.instance
                 .unshare(collection.id, user.email);
@@ -189,11 +190,12 @@ class CollectionActions {
           buttonAction: ButtonAction.cancel,
           isInAlert: true,
           shouldStickToDarkTheme: true,
-          labelText: S.of(context).cancel,
+          labelText: AppLocalizations.of(context).cancel,
         ),
       ],
-      title: S.of(context).removeWithQuestionMark,
-      body: S.of(context).removeParticipantBody(user.displayName ?? user.email),
+      title: AppLocalizations.of(context).removeWithQuestionMark,
+      body: AppLocalizations.of(context)
+          .removeParticipantBody(userEmail: user.displayName ?? user.email),
     );
     if (actionResult?.action != null) {
       if (actionResult!.action == ButtonAction.error) {
@@ -217,7 +219,7 @@ class CollectionActions {
     if (showProgress) {
       dialog = createProgressDialog(
         context,
-        S.of(context).sharing,
+        AppLocalizations.of(context).sharing,
         isDismissible: true,
       );
       await dialog.show();
@@ -253,15 +255,15 @@ class CollectionActions {
     if (!isValidEmail(email)) {
       await showErrorDialog(
         context,
-        S.of(context).invalidEmailAddress,
-        S.of(context).enterValidEmail,
+        AppLocalizations.of(context).invalidEmailAddress,
+        AppLocalizations.of(context).enterValidEmail,
       );
       return false;
     } else if (email.trim() == Configuration.instance.getEmail()) {
       await showErrorDialog(
         context,
-        S.of(context).oops,
-        S.of(context).youCannotShareWithYourself,
+        AppLocalizations.of(context).oops,
+        AppLocalizations.of(context).youCannotShareWithYourself,
       );
       return false;
     }
@@ -271,7 +273,7 @@ class CollectionActions {
     if (showProgress) {
       dialog = createProgressDialog(
         context,
-        S.of(context).sharing,
+        AppLocalizations.of(context).sharing,
         isDismissible: true,
       );
       await dialog.show();
@@ -292,20 +294,20 @@ class CollectionActions {
       // is used for error. Do this change along with handling of network errors
       await showDialogWidget(
         context: context,
-        title: S.of(context).inviteToEnte,
+        title: AppLocalizations.of(context).inviteToEnte,
         icon: Icons.info_outline,
-        body: S.of(context).emailNoEnteAccount(email),
+        body: AppLocalizations.of(context).emailNoEnteAccount(email: email),
         isDismissible: true,
         buttons: [
           ButtonWidget(
             buttonType: ButtonType.neutral,
             icon: Icons.adaptive.share,
-            labelText: S.of(context).sendInvite,
+            labelText: AppLocalizations.of(context).sendInvite,
             isInAlert: true,
             onTap: () async {
               unawaited(
                 shareText(
-                  S.of(context).shareTextRecommendUsingEnte,
+                  AppLocalizations.of(context).shareTextRecommendUsingEnte,
                 ),
               );
             },
@@ -334,15 +336,15 @@ class CollectionActions {
   }
 
   Future<bool> deleteMultipleCollectionSheet(
-    BuildContext bContext,
+    BuildContext context,
     List<Collection> collections,
   ) async {
-    final textTheme = getEnteTextTheme(bContext);
+    final textTheme = getEnteTextTheme(context);
     final actionResult = await showActionSheet(
-      context: bContext,
+      context: context,
       buttons: [
         ButtonWidget(
-          labelText: S.of(bContext).keepPhotos,
+          labelText: AppLocalizations.of(context).keepPhotos,
           buttonType: ButtonType.neutral,
           buttonSize: ButtonSize.large,
           buttonAction: ButtonAction.first,
@@ -351,7 +353,7 @@ class CollectionActions {
           onTap: () async {
             for (final collection in collections) {
               try {
-                await trashCollectionKeepingPhotos(collection, bContext);
+                await trashCollectionKeepingPhotos(collection, context);
               } catch (e, s) {
                 logger.severe(
                   "Failed to keep photos & delete collection",
@@ -364,7 +366,7 @@ class CollectionActions {
           },
         ),
         ButtonWidget(
-          labelText: S.of(bContext).deletePhotos,
+          labelText: AppLocalizations.of(context).deletePhotos,
           buttonType: ButtonType.critical,
           buttonSize: ButtonSize.large,
           buttonAction: ButtonAction.second,
@@ -382,7 +384,7 @@ class CollectionActions {
           },
         ),
         ButtonWidget(
-          labelText: S.of(bContext).cancel,
+          labelText: AppLocalizations.of(context).cancel,
           buttonType: ButtonType.secondary,
           buttonSize: ButtonSize.large,
           buttonAction: ButtonAction.third,
@@ -391,7 +393,8 @@ class CollectionActions {
         ),
       ],
       bodyWidget: StyledText(
-        text: S.of(bContext).deleteMultipleAlbumDialog(collections.length),
+        text: AppLocalizations.of(context)
+            .deleteMultipleAlbumDialog(count: collections.length),
         style: textTheme.body.copyWith(color: textMutedDark),
         tags: {
           'bold': StyledTextTag(
@@ -404,7 +407,7 @@ class CollectionActions {
     if (actionResult?.action != null &&
         actionResult!.action == ButtonAction.error) {
       await showGenericErrorDialog(
-        context: bContext,
+        context: context,
         error: actionResult.exception,
       );
       return false;
@@ -438,7 +441,7 @@ class CollectionActions {
       context: bContext,
       buttons: [
         ButtonWidget(
-          labelText: S.of(bContext).keepPhotos,
+          labelText: AppLocalizations.of(bContext).keepPhotos,
           buttonType: ButtonType.neutral,
           buttonSize: ButtonSize.large,
           buttonAction: ButtonAction.first,
@@ -454,7 +457,7 @@ class CollectionActions {
           },
         ),
         ButtonWidget(
-          labelText: S.of(bContext).deletePhotos,
+          labelText: AppLocalizations.of(bContext).deletePhotos,
           buttonType: ButtonType.critical,
           buttonSize: ButtonSize.large,
           buttonAction: ButtonAction.second,
@@ -470,7 +473,7 @@ class CollectionActions {
           },
         ),
         ButtonWidget(
-          labelText: S.of(bContext).cancel,
+          labelText: AppLocalizations.of(bContext).cancel,
           buttonType: ButtonType.secondary,
           buttonSize: ButtonSize.large,
           buttonAction: ButtonAction.third,
@@ -479,7 +482,7 @@ class CollectionActions {
         ),
       ],
       bodyWidget: StyledText(
-        text: S.of(bContext).deleteAlbumDialog,
+        text: AppLocalizations.of(bContext).deleteAlbumDialog,
         style: textTheme.body.copyWith(color: textMutedDark),
         tags: {
           'bold': StyledTextTag(
@@ -547,9 +550,9 @@ class CollectionActions {
     final actionResult = await showChoiceActionSheet(
       context,
       isCritical: true,
-      title: S.of(context).deleteSharedAlbum,
-      firstButtonLabel: S.of(context).deleteAlbum,
-      body: S.of(context).deleteSharedAlbumDialogBody,
+      title: AppLocalizations.of(context).deleteSharedAlbum,
+      firstButtonLabel: AppLocalizations.of(context).deleteAlbum,
+      body: AppLocalizations.of(context).deleteSharedAlbumDialogBody,
     );
     return actionResult?.action != null &&
         actionResult!.action == ButtonAction.first;
@@ -600,7 +603,10 @@ class CollectionActions {
     }
 
     if (!isCollectionOwner && split.ownedByOtherUsers.isNotEmpty) {
-      showShortToast(context, S.of(context).canOnlyRemoveFilesOwnedByYou);
+      showShortToast(
+        context,
+        AppLocalizations.of(context).canOnlyRemoveFilesOwnedByYou,
+      );
       return;
     }
 
@@ -723,9 +729,9 @@ class CollectionActions {
 
   Future<void> _showUnSupportedAlert(BuildContext context) async {
     final AlertDialog alert = AlertDialog(
-      title: Text(S.of(context).sorry),
+      title: Text(AppLocalizations.of(context).sorry),
       content: Text(
-        S.of(context).subscribeToEnableSharing,
+        AppLocalizations.of(context).subscribeToEnableSharing,
       ),
       actions: [
         ButtonWidget(
@@ -734,7 +740,7 @@ class CollectionActions {
           shouldStickToDarkTheme: false,
           buttonAction: ButtonAction.first,
           shouldSurfaceExecutionStates: true,
-          labelText: S.of(context).subscribe,
+          labelText: AppLocalizations.of(context).subscribe,
           onTap: () async {
             // for quickLink collection, we need to trash the collection
             Navigator.of(context).push(
@@ -753,7 +759,7 @@ class CollectionActions {
             buttonAction: ButtonAction.cancel,
             isInAlert: true,
             shouldStickToDarkTheme: false,
-            labelText: S.of(context).ok,
+            labelText: AppLocalizations.of(context).ok,
           ),
         ),
       ],

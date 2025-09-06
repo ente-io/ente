@@ -24,7 +24,7 @@ class PhotoGridSizePickerPage extends StatelessWidget {
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: S.of(context).photoGridSize,
+              title: AppLocalizations.of(context).photoGridSize,
             ),
             actionIcons: [
               IconButtonWidget(

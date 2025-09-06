@@ -37,27 +37,32 @@ class CenterBox extends $pb.GeneratedMessage {
     return $result;
   }
   CenterBox._() : super();
-  factory CenterBox.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory CenterBox.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory CenterBox.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory CenterBox.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'CenterBox', package: const $pb.PackageName(_omitMessageNames ? '' : 'ente.common'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'CenterBox',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'ente.common'),
+      createEmptyInstance: create)
     ..a<$core.double>(1, _omitFieldNames ? '' : 'x', $pb.PbFieldType.OF)
     ..a<$core.double>(2, _omitFieldNames ? '' : 'y', $pb.PbFieldType.OF)
     ..a<$core.double>(3, _omitFieldNames ? '' : 'height', $pb.PbFieldType.OF)
     ..a<$core.double>(4, _omitFieldNames ? '' : 'width', $pb.PbFieldType.OF)
-    ..hasRequiredFields = false
-  ;
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   CenterBox clone() => CenterBox()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  CenterBox copyWith(void Function(CenterBox) updates) => super.copyWith((message) => updates(message as CenterBox)) as CenterBox;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  CenterBox copyWith(void Function(CenterBox) updates) =>
+      super.copyWith((message) => updates(message as CenterBox)) as CenterBox;
 
   $pb.BuilderInfo get info_ => _i;
 
@@ -66,13 +71,17 @@ class CenterBox extends $pb.GeneratedMessage {
   CenterBox createEmptyInstance() => create();
   static $pb.PbList<CenterBox> createRepeated() => $pb.PbList<CenterBox>();
   @$core.pragma('dart2js:noInline')
-  static CenterBox getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CenterBox>(create);
+  static CenterBox getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CenterBox>(create);
   static CenterBox? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.double get x => $_getN(0);
   @$pb.TagNumber(1)
-  set x($core.double v) { $_setFloat(0, v); }
+  set x($core.double v) {
+    $_setFloat(0, v);
+  }
+
   @$pb.TagNumber(1)
   $core.bool hasX() => $_has(0);
   @$pb.TagNumber(1)
@@ -81,7 +90,10 @@ class CenterBox extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.double get y => $_getN(1);
   @$pb.TagNumber(2)
-  set y($core.double v) { $_setFloat(1, v); }
+  set y($core.double v) {
+    $_setFloat(1, v);
+  }
+
   @$pb.TagNumber(2)
   $core.bool hasY() => $_has(1);
   @$pb.TagNumber(2)
@@ -90,7 +102,10 @@ class CenterBox extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   $core.double get height => $_getN(2);
   @$pb.TagNumber(3)
-  set height($core.double v) { $_setFloat(2, v); }
+  set height($core.double v) {
+    $_setFloat(2, v);
+  }
+
   @$pb.TagNumber(3)
   $core.bool hasHeight() => $_has(2);
   @$pb.TagNumber(3)
@@ -99,13 +114,16 @@ class CenterBox extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   $core.double get width => $_getN(3);
   @$pb.TagNumber(4)
-  set width($core.double v) { $_setFloat(3, v); }
+  set width($core.double v) {
+    $_setFloat(3, v);
+  }
+
   @$pb.TagNumber(4)
   $core.bool hasWidth() => $_has(3);
   @$pb.TagNumber(4)
   void clearWidth() => clearField(4);
 }
 
-
 const _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
-const _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');
+const _omitMessageNames =
+    $core.bool.fromEnvironment('protobuf.omit_message_names');

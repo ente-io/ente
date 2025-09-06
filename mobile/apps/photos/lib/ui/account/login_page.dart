@@ -67,7 +67,7 @@ class _LoginPageState extends State<LoginPage> {
         key: const ValueKey("logInButton"),
         isKeypadOpen: isKeypadOpen,
         isFormValid: _emailIsValid,
-        buttonText: S.of(context).logInLabel,
+        buttonText: AppLocalizations.of(context).logInLabel,
         onPressedFunction: () async {
           await UserService.instance.setEmail(_email!);
           Configuration.instance.resetVolatilePassword();
@@ -178,7 +178,7 @@ class _LoginPageState extends State<LoginPage> {
                       Expanded(
                         flex: 5,
                         child: StyledText(
-                          text: S.of(context).loginTerms,
+                          text: AppLocalizations.of(context).loginTerms,
                           style: Theme.of(context)
                               .textTheme
                               .titleMedium!
@@ -190,7 +190,8 @@ class _LoginPageState extends State<LoginPage> {
                                 MaterialPageRoute(
                                   builder: (BuildContext context) {
                                     return WebPage(
-                                      S.of(context).termsOfServicesTitle,
+                                      AppLocalizations.of(context)
+                                          .termsOfServicesTitle,
                                       "https://ente.io/terms",
                                     );
                                   },
@@ -206,7 +207,8 @@ class _LoginPageState extends State<LoginPage> {
                                 MaterialPageRoute(
                                   builder: (BuildContext context) {
                                     return WebPage(
-                                      S.of(context).privacyPolicyTitle,
+                                      AppLocalizations.of(context)
+                                          .privacyPolicyTitle,
                                       "https://ente.io/privacy",
                                     );
                                   },

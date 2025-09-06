@@ -37,7 +37,7 @@ class EditCenterPointTileWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  S.of(context).centerPoint,
+                  AppLocalizations.of(context).centerPoint,
                   style: textTheme.body,
                 ),
                 const SizedBox(height: 4),

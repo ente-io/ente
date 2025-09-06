@@ -70,7 +70,7 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
                   return ButtonWidget(
                     buttonType: ButtonType.primary,
                     buttonSize: ButtonSize.large,
-                    labelText: S.of(context).save,
+                    labelText: AppLocalizations.of(context).save,
                     shouldSurfaceExecutionStates: false,
                     isDisabled: !areIdsChanged,
                     onTap: areIdsChanged
@@ -94,11 +94,11 @@ class _PeopleWidgetSettingsState extends State<PeopleWidgetSettings> {
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: S.of(context).people,
+              title: AppLocalizations.of(context).people,
             ),
             expandedHeight: MediaQuery.textScalerOf(context).scale(120),
             flexibleSpaceCaption: hasInstalledAny
-                ? S.of(context).peopleWidgetDesc
+                ? AppLocalizations.of(context).peopleWidgetDesc
                 : context.l10n.addPeopleWidgetPrompt,
             actionIcons: [
               IconButtonWidget(

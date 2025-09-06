@@ -138,9 +138,9 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
     if (filesCount > 0) {
       final result = await showTextInputDialog(
         context,
-        title: S.of(context).albumTitle,
-        submitButtonLabel: S.of(context).ok,
-        hintText: S.of(context).enterAlbumName,
+        title: AppLocalizations.of(context).albumTitle,
+        submitButtonLabel: AppLocalizations.of(context).ok,
+        hintText: AppLocalizations.of(context).enterAlbumName,
         onSubmit: (name) async {
           return await _nameAlbum(context, name);
         },
@@ -162,7 +162,7 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
       Navigator.pop(context);
       showToast(
         context,
-        S.of(context).createAlbumActionHint,
+        AppLocalizations.of(context).createAlbumActionHint,
       );
       Bus.instance.fire(
         TabChangedEvent(
@@ -243,20 +243,24 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
       bool hasVerifiedLock = false;
 
       if (widget.actionType == CollectionActionType.addFiles) {
-        toastMessage = S.of(context).addedSuccessfullyTo(item.displayName);
+        toastMessage = AppLocalizations.of(context)
+            .addedSuccessfullyTo(albumName: item.displayName);
         shouldNavigateToCollection = true;
       } else if (widget.actionType == CollectionActionType.moveFiles ||
           widget.actionType == CollectionActionType.restoreFiles ||
           widget.actionType == CollectionActionType.unHide) {
-        toastMessage = S.of(context).movedSuccessfullyTo(item.displayName);
+        toastMessage = AppLocalizations.of(context)
+            .movedSuccessfullyTo(albumName: item.displayName);
         shouldNavigateToCollection = true;
       } else if (widget.actionType ==
           CollectionActionType.moveToHiddenCollection) {
-        toastMessage = S.of(context).movedSuccessfullyTo(item.displayName);
+        toastMessage = AppLocalizations.of(context)
+            .movedSuccessfullyTo(albumName: item.displayName);
         shouldNavigateToCollection = true;
         hasVerifiedLock = true;
       } else if (widget.actionType == CollectionActionType.addToHiddenAlbum) {
-        toastMessage = S.of(context).addedSuccessfullyTo(item.displayName);
+        toastMessage = AppLocalizations.of(context)
+            .addedSuccessfullyTo(albumName: item.displayName);
         shouldNavigateToCollection = true;
         hasVerifiedLock = true;
       } else {
@@ -366,9 +370,9 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
     late final String message;
     if (widget.actionType == CollectionActionType.moveFiles ||
         widget.actionType == CollectionActionType.moveToHiddenCollection) {
-      message = S.of(context).movingFilesToAlbum;
+      message = AppLocalizations.of(context).movingFilesToAlbum;
     } else {
-      message = S.of(context).unhidingFilesToAlbum;
+      message = AppLocalizations.of(context).unhidingFilesToAlbum;
     }
 
     final dialog = createProgressDialog(context, message, isDismissible: true);
@@ -389,7 +393,11 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
     } on AssertionError catch (e) {
       await dialog.hide();
       // ignore: unawaited_futures
-      showErrorDialog(context, S.of(context).oops, e.message as String?);
+      showErrorDialog(
+        context,
+        AppLocalizations.of(context).oops,
+        e.message as String?,
+      );
       return false;
     } catch (e, s) {
       _logger.severe("Could not move to album", e, s);
@@ -405,7 +413,7 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
   ) async {
     final dialog = createProgressDialog(
       context,
-      S.of(context).restoringFiles,
+      AppLocalizations.of(context).restoringFiles,
       isDismissible: true,
     );
     await dialog.show();
@@ -419,7 +427,11 @@ class _AlbumVerticalListWidgetState extends State<AlbumVerticalListWidget> {
     } on AssertionError catch (e) {
       await dialog.hide();
       // ignore: unawaited_futures
-      showErrorDialog(context, S.of(context).oops, e.message as String?);
+      showErrorDialog(
+        context,
+        AppLocalizations.of(context).oops,
+        e.message as String?,
+      );
       return false;
     } catch (e, s) {
       _logger.severe("Could not move to album", e, s);

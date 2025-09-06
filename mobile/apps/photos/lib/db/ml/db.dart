@@ -9,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/common/base.dart";
 import "package:photos/db/ml/base.dart";
+import "package:photos/db/ml/clip_vector_db.dart";
 import "package:photos/db/ml/db_model_mappers.dart";
 import 'package:photos/db/ml/schema.dart';
 import "package:photos/events/embedding_updated_event.dart";
@@ -18,6 +19,7 @@ import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/face_with_embedding.dart";
 import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/models/ml/vector.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_db_info_for_clustering.dart";
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
 import "package:photos/services/machine_learning/ml_result.dart";
@@ -258,6 +260,9 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     await db.execute(deleteNotPersonFeedbackTable);
     await db.execute(deleteClipEmbeddingsTable);
     await db.execute(deleteFileDataTable);
+    if (await ClipVectorDB.instance.checkIfMigrationDone()) {
+      await ClipVectorDB.instance.deleteIndexFile();
+    }
   }
 
   @override
@@ -1253,6 +1258,119 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     return embeddings;
   }
 
+  Future<void> checkMigrateFillClipVectorDB({bool force = false}) async {
+    final migrationDone = await ClipVectorDB.instance.checkIfMigrationDone();
+    if (migrationDone && !force) {
+      _logger.info("ClipVectorDB migration not needed, already done");
+      return;
+    }
+    _logger.info("Starting ClipVectorDB migration");
+
+    // Get total count first to track progress
+    _logger.info("Getting total count of clip embeddings");
+    final db = await instance.asyncDB;
+    final countResult =
+        await db.getAll('SELECT COUNT($fileIDColumn) as total FROM $clipTable');
+    final totalCount = countResult.first['total'] as int;
+    if (totalCount == 0) {
+      _logger.info("No clip embeddings to migrate");
+      await ClipVectorDB.instance.setMigrationDone();
+      return;
+    }
+    _logger.info("Total count of clip embeddings: $totalCount");
+
+    _logger.info("First time referencing ClipVectorDB rust index in migration");
+    final clipVectorDB = ClipVectorDB.instance;
+    await clipVectorDB.deleteAllEmbeddings();
+    _logger.info("ClipVectorDB rust index referenced");
+    _logger.info("ClipVectorDB all embeddings cleared");
+
+    _logger
+        .info("Starting migration of $totalCount clip embeddings to vector DB");
+    const batchSize = 5000;
+    int offset = 0;
+    int processedCount = 0;
+    int weirdCount = 0;
+    int whileCount = 0;
+    const String migrationKey = "clip_vector_db_migration_in_progress";
+    final stopwatch = Stopwatch()..start();
+    try {
+      // Make sure no other heavy compute is running
+      computeController.blockCompute(blocker: migrationKey);
+      while (true) {
+        whileCount++;
+        _logger.info("$whileCount st round of while loop");
+        // Allow some time for any GC to finish
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        _logger.info("Reading $batchSize rows from DB");
+        final List<Map<String, dynamic>> results = await db.getAll('''
+        SELECT $fileIDColumn, $embeddingColumn
+        FROM $clipTable
+        ORDER BY $fileIDColumn DESC
+        LIMIT $batchSize OFFSET $offset
+      ''');
+        _logger.info("Got ${results.length} results from DB");
+        if (results.isEmpty) {
+          _logger.info("No more results, breaking out of while loop");
+          break;
+        }
+        _logger.info("Processing ${results.length} results");
+        final List<int> fileIDs = [];
+        final List<Float32List> embeddings = [];
+        for (final result in results) {
+          final embedding =
+              Float32List.view((result[embeddingColumn] as Uint8List).buffer);
+          if (embedding.length == 512) {
+            fileIDs.add(result[fileIDColumn] as int);
+            embeddings.add(Float32List.view(result[embeddingColumn].buffer));
+          } else {
+            weirdCount++;
+            _logger.warning(
+              "Weird clip embedding length ${embedding.length} for fileID ${result[fileIDColumn]}, skipping",
+            );
+          }
+        }
+        _logger.info(
+          "Got ${fileIDs.length} valid embeddings, $weirdCount weird embeddings",
+        );
+
+        await ClipVectorDB.instance
+            .bulkInsertEmbeddings(fileIDs: fileIDs, embeddings: embeddings);
+        _logger.info("Inserted ${fileIDs.length} embeddings to ClipVectorDB");
+        processedCount += fileIDs.length;
+        offset += batchSize;
+        _logger.info(
+          "migrated $processedCount/$totalCount embeddings to ClipVectorDB",
+        );
+        if (processedCount >= totalCount) {
+          _logger.info("All embeddings migrated, breaking out of while loop");
+          break;
+        }
+        // Allow some time for any GC to finish
+        _logger.info("Waiting for 100ms out of precaution, for GC to finish");
+        await Future.delayed(const Duration(milliseconds: 100));
+      }
+      _logger.info(
+        "migrated all $totalCount embeddings to ClipVectorDB in ${stopwatch.elapsed.inMilliseconds} ms, with $weirdCount weird embeddings not migrated",
+      );
+      await ClipVectorDB.instance.setMigrationDone();
+      _logger.info("ClipVectorDB migration done");
+    } catch (e, s) {
+      _logger.severe(
+        "Error migrating ClipVectorDB after ${stopwatch.elapsed.inMilliseconds} ms, clearing out DB again",
+        e,
+        s,
+      );
+      await clipVectorDB.deleteAllEmbeddings();
+      rethrow;
+    } finally {
+      stopwatch.stop();
+      // Make sure compute can run again
+      computeController.unblockCompute(blocker: migrationKey);
+    }
+  }
+
   // Get indexed FileIDs
   @override
   Future<Map<int, int>> clipIndexedFileWithVersion() async {
@@ -1286,12 +1404,27 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
         'INSERT OR REPLACE INTO $clipTable ($fileIDColumn, $embeddingColumn, $mlVersionColumn) VALUES (?, ?, ?)',
         _getRowFromEmbedding(embeddings.first),
       );
+      if (flagService.enableVectorDb &&
+          await ClipVectorDB.instance.checkIfMigrationDone()) {
+        await ClipVectorDB.instance.insertEmbedding(
+          fileID: embeddings.first.fileID,
+          embedding: embeddings.first.embedding,
+        );
+      }
     } else {
       final inputs = embeddings.map((e) => _getRowFromEmbedding(e)).toList();
       await db.executeBatch(
         'INSERT OR REPLACE INTO $clipTable ($fileIDColumn, $embeddingColumn, $mlVersionColumn) values(?, ?, ?)',
         inputs,
       );
+      if (flagService.enableVectorDb &&
+          await ClipVectorDB.instance.checkIfMigrationDone()) {
+        await ClipVectorDB.instance.bulkInsertEmbeddings(
+          fileIDs: embeddings.map((e) => e.fileID).toList(),
+          embeddings:
+              embeddings.map((e) => Float32List.fromList(e.embedding)).toList(),
+        );
+      }
     }
     Bus.instance.fire(EmbeddingUpdatedEvent());
   }
@@ -1302,6 +1435,10 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     await db.execute(
       'DELETE FROM $clipTable WHERE $fileIDColumn IN (${fileIDs.join(", ")})',
     );
+    if (flagService.enableVectorDb &&
+        await ClipVectorDB.instance.checkIfMigrationDone()) {
+      await ClipVectorDB.instance.deleteEmbeddings(fileIDs);
+    }
     Bus.instance.fire(EmbeddingUpdatedEvent());
   }
 
@@ -1309,6 +1446,10 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
   Future<void> deleteClipIndexes() async {
     final db = await instance.asyncDB;
     await db.execute('DELETE FROM $clipTable');
+    if (flagService.enableVectorDb &&
+        await ClipVectorDB.instance.checkIfMigrationDone()) {
+      await ClipVectorDB.instance.deleteAllEmbeddings();
+    }
     Bus.instance.fire(EmbeddingUpdatedEvent());
   }
 

@@ -240,7 +240,7 @@ class _PlayPauseButtonState extends State<PlayPauseButtonMediaKit> {
         width: 54,
         height: 54,
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.3),
+          color: Colors.black.withValues(alpha: 0.3),
           shape: BoxShape.circle,
           border: Border.all(
             color: strokeFaintDark,
@@ -299,7 +299,7 @@ class SeekBarAndDuration extends StatelessWidget {
           4,
         ),
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.3),
+          color: Colors.black.withValues(alpha: 0.3),
           borderRadius: const BorderRadius.all(
             Radius.circular(8),
           ),

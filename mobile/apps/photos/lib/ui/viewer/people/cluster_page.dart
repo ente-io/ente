@@ -148,8 +148,8 @@ class _ClusterPageState extends State<ClusterPage> {
                 clusterID: widget.clusterID,
               ),
               actionIcon: Icons.add_outlined,
-              text: S.of(context).savePerson,
-              subText: S.of(context).findThemQuickly,
+              text: AppLocalizations.of(context).savePerson,
+              subText: AppLocalizations.of(context).findThemQuickly,
               onTap: () async {
                 if (widget.personID == null) {
                   final result = await showAssignPersonAction(

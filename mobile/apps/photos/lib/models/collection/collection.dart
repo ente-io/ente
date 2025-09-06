@@ -13,7 +13,8 @@ class Collection {
   final User owner;
   final String encryptedKey;
   final String? keyDecryptionNonce;
-  @Deprecated("Use collectionName instead")
+
+  /// WARNING: use collectionName instead of name! Name is deprecated but can't be removed because of old accounts.
   String? name;
 
   // encryptedName & nameDecryptionNonce will be null for collections

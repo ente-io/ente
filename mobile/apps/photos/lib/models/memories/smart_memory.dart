@@ -65,7 +65,7 @@ class SmartMemory {
     return now >= firstDateToShow && now <= lastDateToShow;
   }
 
-  String createTitle(S s, String languageCode) {
+  String createTitle(AppLocalizations locals, String languageCode) {
     throw UnimplementedError("createTitle must be implemented in subclass");
   }
 

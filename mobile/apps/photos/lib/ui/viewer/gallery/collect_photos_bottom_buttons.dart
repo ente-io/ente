@@ -1,4 +1,3 @@
-import "package:fast_base58/fast_base58.dart";
 import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
@@ -45,10 +44,7 @@ class _EmptyAlbumStateNewState extends State<CollectPhotosBottomButtons> {
   }
 
   Future<void> _shareAlbumUrl() async {
-    final String collectionKey = Base58Encode(
-      CollectionsService.instance.getCollectionKey(widget.c.id),
-    );
-    final String url = "${widget.c.publicURLs.first.url}#$collectionKey";
+    final String url = CollectionsService.instance.getPublicUrl(widget.c);
     await shareAlbumLinkWithPlaceholder(
       context,
       widget.c,
@@ -60,7 +56,7 @@ class _EmptyAlbumStateNewState extends State<CollectPhotosBottomButtons> {
   Future<void> _generateAlbumUrl() async {
     final dialog = createProgressDialog(
       context,
-      S.of(context).creatingLink,
+      AppLocalizations.of(context).creatingLink,
       isDismissible: true,
     );
     await dialog.show();
@@ -119,7 +115,7 @@ class _EmptyAlbumStateNewState extends State<CollectPhotosBottomButtons> {
                       child: ButtonWidget(
                         buttonType: ButtonType.secondary,
                         buttonSize: ButtonSize.large,
-                        labelText: S.of(context).addPhotos,
+                        labelText: AppLocalizations.of(context).addPhotos,
                         icon: Icons.add_photo_alternate_outlined,
                         shouldSurfaceExecutionStates: false,
                         onTap: () async {
@@ -138,7 +134,7 @@ class _EmptyAlbumStateNewState extends State<CollectPhotosBottomButtons> {
                     ButtonWidget(
                       buttonType: ButtonType.primary,
                       buttonSize: ButtonSize.large,
-                      labelText: S.of(context).share,
+                      labelText: AppLocalizations.of(context).share,
                       icon: Icons.adaptive.share,
                       shouldSurfaceExecutionStates: false,
                       onTap: () async {

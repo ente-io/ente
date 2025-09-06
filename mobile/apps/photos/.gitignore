@@ -43,3 +43,13 @@ fastlane/report.xml
 
 # Android related
 android/app/build/
+
+# FVM Version Cache
+.fvm/
+
+lib/generated/intl/app_localizations*.dart
+
+# Generated rust bindings
+lib/src/rust/*
+rust/src/frb_generated*
+test/**/*.mocks.dart

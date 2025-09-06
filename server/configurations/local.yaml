@@ -79,9 +79,14 @@ http:
 apps:
     # Default is https://albums.ente.io
     #
-    # If you're running a self hosted instance and wish to serve public links,
+    # If you're running a self hosted instance and wish to serve public links for photos,
     # set this to the URL where your albums web app is running.
     public-albums:
+    # Default is https://locker.ente.io
+    #
+    # If you're running a self-hosted instance and wish to serve public links for locker,
+    # set this to the URL where your albums web app is running.
+    public-locker:
     # Default is https://cast.ente.io
     cast:
     # Default is https://accounts.ente.io
@@ -90,6 +95,9 @@ apps:
     accounts:
     # Default is https://family.ente.io
     family:
+    custom-domain:
+        # Default is my.ente.io
+        cname:
 
 # Database connection parameters
 db:
@@ -127,12 +135,17 @@ s3:
     #    primary: b2-eu-cen
     #    secondary: wasabi-eu-central-2-v3
     b2-eu-cen:
+        # Uncomment to override top-level bucket configuration for URL addressing and external buckets
+        # are_local_buckets: true
+        # use_path_style_urls: true
         key:
         secret:
         endpoint:
         region:
         bucket:
     wasabi-eu-central-2-v3:
+        # are_local_buckets: true
+        # use_path_style_urls: true
         key:
         secret:
         endpoint:
@@ -144,6 +157,8 @@ s3:
         # Currently this flag is only honoured for the Wasabi v3 bucket.
         compliance: true
     scw-eu-fr-v3:
+        # are_local_buckets: true
+        # use_path_style_urls: true
         key:
         secret:
         endpoint:
@@ -240,6 +255,8 @@ smtp:
     # Optional override for the sender name in the emails. If specified, it will
     # be used for all emails sent by the instance (default is email specific).
     sender-name:
+    # Optional encryption method. If tls or ssl is chosen, encryption is enabled.
+    encryption:
 
 # Zoho Zeptomail config (optional)
 #

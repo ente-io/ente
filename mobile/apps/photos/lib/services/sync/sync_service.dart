@@ -213,7 +213,7 @@ class SyncService {
     final now = DateTime.now().microsecondsSinceEpoch;
     if ((now - lastNotificationShownTime) > microSecondsInDay) {
       await _prefs.setInt(kLastStorageLimitExceededNotificationPushTime, now);
-      final s = await LanguageService.s;
+      final s = await LanguageService.locals;
       // ignore: unawaited_futures
       NotificationService.instance.showNotification(
         s.storageLimitExceeded,

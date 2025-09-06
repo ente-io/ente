@@ -28,6 +28,7 @@ import 'package:photos/services/favorites_service.dart';
 import "package:photos/services/home_widget_service.dart";
 import 'package:photos/services/ignored_files_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import "package:photos/services/machine_learning/similar_images_service.dart";
 import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/utils/file_uploader.dart';
@@ -196,6 +197,7 @@ class Configuration {
     await CollectionsDB.instance.clearTable();
     await MemoriesDB.instance.clearTable();
     await MLDataDB.instance.clearTable();
+    await SimilarImagesService.instance.clearCache();
 
     await UploadLocksDB.instance.clearTable();
     await IgnoredFilesService.instance.reset();

@@ -1,5 +1,4 @@
 import 'package:collection/collection.dart';
-import 'package:fast_base58/fast_base58.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import "package:photos/extensions/user_extension.dart";
@@ -66,7 +65,8 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
     final children = <Widget>[];
     children.add(
       MenuSectionTitle(
-        title: S.of(context).shareWithPeopleSectionTitle(_sharees.length),
+        title: AppLocalizations.of(context)
+            .shareWithPeopleSectionTitle(numberOfPeople: _sharees.length),
         iconData: Icons.workspaces,
       ),
     );
@@ -81,7 +81,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
     children.add(
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
-          title: S.of(context).addViewer,
+          title: AppLocalizations.of(context).addViewer,
           makeTextBold: true,
         ),
         leadingIcon: Icons.add,
@@ -113,7 +113,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
     children.add(
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
-          title: S.of(context).addCollaborator,
+          title: AppLocalizations.of(context).addCollaborator,
           makeTextBold: true,
         ),
         leadingIcon: Icons.add,
@@ -138,7 +138,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
     if (_sharees.isEmpty && !hasUrl) {
       children.add(
         MenuSectionDescriptionWidget(
-          content: S.of(context).sharedAlbumSectionDescription,
+          content: AppLocalizations.of(context).sharedAlbumSectionDescription,
         ),
       );
     }
@@ -150,8 +150,9 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
         height: 24,
       ),
       MenuSectionTitle(
-        title:
-            hasUrl ? S.of(context).publicLinkEnabled : S.of(context).shareALink,
+        title: hasUrl
+            ? AppLocalizations.of(context).publicLinkEnabled
+            : AppLocalizations.of(context).shareALink,
         iconData: Icons.public,
       ),
     ]);
@@ -160,7 +161,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
         children.add(
           MenuItemWidget(
             captionedTextWidget: CaptionedTextWidget(
-              title: S.of(context).linkHasExpired,
+              title: AppLocalizations.of(context).linkHasExpired,
               textColor: getEnteColorScheme(context).warning500,
             ),
             leadingIcon: Icons.error_outline,
@@ -170,16 +171,13 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
           ),
         );
       } else {
-        final String collectionKey = Base58Encode(
-          CollectionsService.instance.getCollectionKey(widget.collection.id),
-        );
         final String url =
-            "${widget.collection.publicURLs.first.url}#$collectionKey";
+            CollectionsService.instance.getPublicUrl(widget.collection);
         children.addAll(
           [
             MenuItemWidget(
               captionedTextWidget: CaptionedTextWidget(
-                title: S.of(context).copyLink,
+                title: AppLocalizations.of(context).copyLink,
                 makeTextBold: true,
               ),
               leadingIcon: Icons.copy,
@@ -187,7 +185,10 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
               showOnlyLoadingState: true,
               onTap: () async {
                 await Clipboard.setData(ClipboardData(text: url));
-                showShortToast(context, S.of(context).linkCopiedToClipboard);
+                showShortToast(
+                  context,
+                  AppLocalizations.of(context).linkCopiedToClipboard,
+                );
               },
               isBottomBorderRadiusRemoved: true,
             ),
@@ -198,7 +199,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
             MenuItemWidget(
               key: sendLinkButtonKey,
               captionedTextWidget: CaptionedTextWidget(
-                title: S.of(context).sendLink,
+                title: AppLocalizations.of(context).sendLink,
                 makeTextBold: true,
               ),
               leadingIcon: Icons.adaptive.share,
@@ -227,7 +228,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
           ),
           MenuItemWidget(
             captionedTextWidget: CaptionedTextWidget(
-              title: S.of(context).manageLink,
+              title: AppLocalizations.of(context).manageLink,
               makeTextBold: true,
             ),
             leadingIcon: Icons.link,
@@ -253,7 +254,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
       children.addAll([
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: S.of(context).createPublicLink,
+            title: AppLocalizations.of(context).createPublicLink,
             makeTextBold: true,
           ),
           leadingIcon: Icons.link,
@@ -269,19 +270,19 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
         ),
         _sharees.isEmpty
             ? MenuSectionDescriptionWidget(
-                content: S.of(context).shareWithNonenteUsers,
+                content: AppLocalizations.of(context).shareWithNonenteUsers,
               )
             : const SizedBox.shrink(),
         const SizedBox(
           height: 24,
         ),
         MenuSectionTitle(
-          title: S.of(context).collectPhotos,
+          title: AppLocalizations.of(context).collectPhotos,
           iconData: Icons.public,
         ),
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            title: S.of(context).createCollaborativeLink,
+            title: AppLocalizations.of(context).createCollaborativeLink,
             makeTextBold: true,
           ),
           leadingIcon: Icons.people_alt_outlined,
@@ -300,7 +301,8 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
         ),
         _sharees.isEmpty
             ? MenuSectionDescriptionWidget(
-                content: S.of(context).collabLinkSectionDescription,
+                content:
+                    AppLocalizations.of(context).collabLinkSectionDescription,
               )
             : const SizedBox.shrink(),
       ]);

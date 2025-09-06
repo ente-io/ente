@@ -44,7 +44,7 @@ or managing your secrets, please use our mobile or desktop app.
 
 ## 🧑‍💻 Build from source
 
-1. [Install Flutter](https://flutter.dev/docs/get-started/install)
+1. [Install Flutter v3.32.8](https://flutter.dev/docs/get-started/install).
 
 2. Pull in all submodules with `git submodule update --init --recursive`
 
@@ -98,7 +98,7 @@ more, see [docs/adding-icons](docs/adding-icons.md).
 The best way to support this project is by checking out [Ente
 Photos](../mobile/README.md) or spreading the word.
 
-For more ways to contribute, see [../CONTRIBUTING.md](../../../CONTRIBUTING.md).
+For more ways to contribute, see [../../../CONTRIBUTING.md](../../../CONTRIBUTING.md).
 
 ## Certificate Fingerprints
 

@@ -99,7 +99,8 @@ class _PersonClustersPageState extends State<PersonClustersPage> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
                                 Text(
-                                  S.of(context).photosCount(files.length),
+                                  AppLocalizations.of(context)
+                                      .photosCount(count: files.length),
                                   style: getEnteTextTheme(context).body,
                                 ),
                                 (index != 0)
@@ -142,7 +143,7 @@ class _PersonClustersPageState extends State<PersonClustersPage> {
             );
           } else if (snapshot.hasError) {
             _logger.warning("Failed to get cluster", snapshot.error);
-            return Center(child: Text(S.of(context).error));
+            return Center(child: Text(AppLocalizations.of(context).error));
           } else {
             return const Center(child: CircularProgressIndicator());
           }
@@ -216,7 +217,7 @@ class _PersonClustersWidgetState extends State<PersonClustersWidget> {
           );
         } else if (snapshot.hasError) {
           _logger.warning("Failed to get cluster", snapshot.error);
-          return Center(child: Text(S.of(context).error));
+          return Center(child: Text(AppLocalizations.of(context).error));
         } else {
           return const Center(child: CircularProgressIndicator());
         }
@@ -292,8 +293,9 @@ class __ClusterWrapperForGirdState extends State<_ClusterWrapperForGird> {
                   const SizedBox(height: 8),
                   Text(
                     context.l10n.memoryCount(
-                      widget.files.length,
-                      NumberFormat().format(widget.files.length),
+                      count: widget.files.length,
+                      formattedCount:
+                          NumberFormat().format(widget.files.length),
                     ),
                     style: getEnteTextTheme(context).small,
                     textAlign: TextAlign.center,

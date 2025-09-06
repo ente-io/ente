@@ -189,6 +189,7 @@
   "allowAddPhotosDescription": "Izinkan orang yang memiliki link untuk menambahkan foto ke album berbagi ini.",
   "passwordLock": "Kunci dengan sandi",
   "canNotOpenTitle": "Tidak dapat membuka album ini",
+  "canNotOpenBody": "Maaf, album ini tidak dapat dibuka di aplikasi.",
   "disableDownloadWarningTitle": "Perlu diketahui",
   "disableDownloadWarningBody": "Orang yang melihat masih bisa mengambil tangkapan layar atau menyalin foto kamu menggunakan alat eksternal",
   "allowDownloads": "Izinkan pengunduhan",
@@ -355,6 +356,7 @@
   "failedToLoadAlbums": "Gagal memuat album",
   "hidden": "Tersembunyi",
   "authToViewYourHiddenFiles": "Harap autentikasi untuk melihat file tersembunyi kamu",
+  "authToViewTrashedFiles": "Silakan autentikasi untuk melihat file anda yang ada di tong sampah",
   "trash": "Sampah",
   "uncategorized": "Tak Berkategori",
   "videoSmallCase": "video",
@@ -370,6 +372,21 @@
   "deleteFromBoth": "Hapus dari keduanya",
   "newAlbum": "Album baru",
   "albums": "Album",
+  "memoryCount": "{count, plural, =0{tidak ada memori} one{{formattedCount} memori} other{{formattedCount} memori}}",
+  "@memoryCount": {
+    "description": "The text to display the number of memories",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      },
+      "formattedCount": {
+        "type": "String",
+        "example": "11.513, 11,511"
+      }
+    }
+  },
   "selectedPhotos": "{count} terpilih",
   "@selectedPhotos": {
     "description": "Display the number of selected photos",
@@ -419,6 +436,7 @@
   "discover_receipts": "Tanda Terima",
   "discover_notes": "Catatan",
   "discover_memes": "Meme",
+  "discover_visiting_cards": "Kartu Nama",
   "discover_babies": "Bayi",
   "discover_pets": "Hewan",
   "discover_selfies": "Swafoto",
@@ -427,6 +445,7 @@
   "discover_celebrations": "Perayaan",
   "discover_sunset": "Senja",
   "discover_hills": "Bukit",
+  "discover_greenery": "Hijau-hijauan",
   "mlIndexingDescription": "Perlu diperhatikan bahwa pemelajaran mesin dapat meningkatkan penggunaan data dan baterai perangkat hingga seluruh item selesai terindeks. Gunakan aplikasi desktop untuk pengindeksan lebih cepat, seluruh hasil akan tersinkronkan secara otomatis.",
   "loadingModel": "Mengunduh model...",
   "waitingForWifi": "Menunggu WiFi...",
@@ -442,6 +461,21 @@
   "updatingFolderSelection": "Memperbaharui pilihan folder...",
   "itemCount": "{count, plural, other{{count} item}}",
   "deleteItemCount": "{count, plural, =1 {Hapus {count} item} other {Hapus {count} item}}",
+  "duplicateItemsGroup": "{count} berkas, masing-masing {formattedSize}",
+  "@duplicateItemsGroup": {
+    "description": "Display the number of duplicate files and their size",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "12",
+        "type": "int"
+      },
+      "formattedSize": {
+        "example": "2.3 MB",
+        "type": "String"
+      }
+    }
+  },
   "showMemories": "Lihat kenangan",
   "yearsAgo": "{count, plural, other{{count} tahun lalu}}",
   "backupSettings": "Pengaturan pencadangan",
@@ -492,6 +526,7 @@
   "viewLargeFiles": "File berukuran besar",
   "viewLargeFilesDesc": "Tampilkan file yang paling besar mengonsumsi ruang penyimpanan.",
   "noDuplicates": "✨ Tak ada file duplikat",
+  "youveNoDuplicateFilesThatCanBeCleared": "Anda tidak memiliki file duplikat yang dapat dihapus",
   "success": "Berhasil",
   "rateUs": "Beri kami nilai",
   "remindToEmptyDeviceTrash": "Kosongkan juga “Baru Dihapus” dari “Pengaturan” -> “Penyimpanan” untuk memperoleh ruang yang baru saja dibersihkan",
@@ -658,6 +693,7 @@
   "rateTheApp": "Nilai app ini",
   "startBackup": "Mulai pencadangan",
   "noPhotosAreBeingBackedUpRightNow": "Tidak ada foto yang sedang dicadangkan sekarang",
+  "preserveMore": "Amankan lebih banyak",
   "grantFullAccessPrompt": "Harap berikan akses ke semua foto di app Pengaturan",
   "allowPermTitle": "Izinkan akses ke foto",
   "allowPermBody": "Ijinkan akses ke foto Anda dari Pengaturan agar Ente dapat menampilkan dan mencadangkan pustaka Anda.",
@@ -714,6 +750,7 @@
   "lastUpdated": "Terakhir diperbarui",
   "deleteEmptyAlbums": "Hapus album kosong",
   "deleteEmptyAlbumsWithQuestionMark": "Hapus album yang kosong?",
+  "deleteAlbumsDialogBody": "Ini akan menghapus semua album kosong. Ini berguna ketika anda ingin mengurangi kekacauan di daftar album anda.",
   "deleteProgress": "Menghapus {currentlyDeleting} / {totalCount}",
   "genericProgress": "Memproses {currentlyProcessing} / {totalCount}",
   "@genericProgress": {
@@ -731,6 +768,7 @@
     }
   },
   "permanentlyDelete": "Hapus secara permanen",
+  "canOnlyCreateLinkForFilesOwnedByYou": "Hanya dapat membuat tautan untuk file yang dimiliki oleh anda",
   "publicLinkCreated": "Link publik dibuat",
   "youCanManageYourLinksInTheShareTab": "Kamu bisa atur link yang telah kamu buat di tab berbagi.",
   "linkCopiedToClipboard": "Link tersalin ke papan klip",
@@ -740,15 +778,30 @@
     "type": "text"
   },
   "moveToAlbum": "Pindahkan ke album",
+  "unhide": "Tampilkan",
   "unarchive": "Keluarkan dari arsip",
   "favorite": "Favorit",
+  "removeFromFavorite": "Hapus dari favorit",
   "shareLink": "Bagikan link",
+  "createCollage": "Buat kolase",
+  "saveCollage": "Simpan kolase",
+  "collageSaved": "Kolase tersimpan ke galeri",
   "collageLayout": "Tata letak",
   "addToEnte": "Tambah ke Ente",
   "addToAlbum": "Tambah ke album",
   "delete": "Hapus",
   "hide": "Sembunyikan",
   "share": "Bagikan",
+  "unhideToAlbum": "Tampikan ke album",
+  "restoreToAlbum": "Pulihkan ke album",
+  "moveItem": "{count, plural, =1 {Pindahkan item} other {Pindahkan item}}",
+  "@moveItem": {
+    "description": "Page title while moving one or more items to an album"
+  },
+  "addItem": "{count, plural, =1 {Tambahkan item} other {Tambahkan item}}",
+  "@addItem": {
+    "description": "Page title while adding one or more items to album"
+  },
   "createOrSelectAlbum": "Buat atau pilih album",
   "selectAlbum": "Pilih album",
   "searchByAlbumNameHint": "Nama album",
@@ -756,18 +809,33 @@
   "enterAlbumName": "Masukkan nama album",
   "restoringFiles": "Memulihkan file...",
   "movingFilesToAlbum": "Memindahkan file ke album...",
+  "unhidingFilesToAlbum": "Tampilkan berkas ke album",
+  "canNotUploadToAlbumsOwnedByOthers": "Tidak dapat mengunggah album yang dimiliki oleh orang lain",
   "uploadingFilesToAlbum": "Mengunggah file ke album...",
   "addedSuccessfullyTo": "Berhasil ditambahkan ke {albumName}",
   "movedSuccessfullyTo": "Berhasil dipindahkan ke {albumName}",
   "thisAlbumAlreadyHDACollaborativeLink": "Link kolaborasi untuk album ini sudah terbuat",
   "collaborativeLinkCreatedFor": "Link kolaborasi terbuat untuk {albumName}",
+  "askYourLovedOnesToShare": "Minta orang terkasih anda untuk berbagi",
   "invite": "Undang",
   "shareYourFirstAlbum": "Bagikan album pertamamu",
   "sharedWith": "Dibagikan dengan {emailIDs}",
   "sharedWithMe": "Dibagikan dengan saya",
   "sharedByMe": "Dibagikan oleh saya",
   "doubleYourStorage": "Gandakan kuota kamu",
+  "referFriendsAnd2xYourPlan": "Ajak teman dan gandakan paket anda",
   "shareAlbumHint": "Buka album lalu ketuk tombol bagikan di sudut kanan atas untuk berbagi.",
+  "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Item menampilkan jumlah hari yang tersisa sebelum dihapus permanen",
+  "trashDaysLeft": "{count, plural, =0 {Segera} =1 {1 hari} other {{count} hari}}",
+  "@trashDaysLeft": {
+    "description": "Text to indicate number of days remaining before permanent deletion",
+    "placeholders": {
+      "count": {
+        "example": "1|2|3",
+        "type": "int"
+      }
+    }
+  },
   "deleteAll": "Hapus Semua",
   "renameAlbum": "Ubah nama album",
   "convertToAlbum": "Ubah menjadi album",
@@ -782,13 +850,16 @@
   "leaveSharedAlbum": "Tinggalkan album bersama?",
   "leaveAlbum": "Tinggalkan album",
   "photosAddedByYouWillBeRemovedFromTheAlbum": "Foto yang telah kamu tambahkan akan dihapus dari album ini",
+  "youveNoFilesInThisAlbumThatCanBeDeleted": "Anda tidak memiliki file di album ini yang dapat dihapus",
   "youDontHaveAnyArchivedItems": "Kamu tidak memiliki item di arsip.",
   "ignoredFolderUploadReason": "Sejumlah file di album ini tidak terunggah karena telah dihapus sebelumnya dari Ente.",
+  "resetIgnoredFiles": "Atur ulang file yang diabaikan",
   "deviceFilesAutoUploading": "File yang ditambahkan ke album perangkat ini akan diunggah ke Ente secara otomatis.",
   "turnOnBackupForAutoUpload": "Aktifkan pencadangan untuk mengunggah file yang ditambahkan ke folder ini ke Ente secara otomatis.",
   "noHiddenPhotosOrVideos": "Tidak ada foto atau video tersembunyi",
   "toHideAPhotoOrVideo": "Untuk menyembunyikan foto atau video",
   "openTheItem": "• Buka item-nya",
+  "clickOnTheOverflowMenu": "• Klik pada menu overflow",
   "click": "• Click",
   "nothingToSeeHere": "Tidak ada apa-apa di sini! 👀",
   "unarchiveAlbum": "Keluarkan album dari arsip",
@@ -796,6 +867,7 @@
   "calculating": "Menghitung...",
   "pleaseWaitDeletingAlbum": "Harap tunggu, sedang menghapus album",
   "searchByExamples": "• Nama album (cth. \"Kamera\")\n• Jenis file (cth. \"Video\", \".gif\")\n• Tahun atau bulan (cth. \"2022\", \"Januari\")\n• Musim liburan (cth. \"Natal\")\n• Keterangan foto (cth. “#seru”)",
+  "youCanTrySearchingForADifferentQuery": "Anda dapat mencoba mencari dengan kata-kata yang berbeda",
   "noResultsFound": "Tidak ditemukan hasil",
   "addedBy": "Ditambahkan oleh {emailOrName}",
   "loadingExifData": "Memuat data EXIF...",
@@ -804,6 +876,7 @@
   "thisImageHasNoExifData": "Gambar ini tidak memiliki data exif",
   "exif": "EXIF",
   "noResults": "Tidak ada hasil",
+  "weDontSupportEditingPhotosAndAlbumsThatYouDont": "Kami belum mendukung pengeditan foto dan album yang bukan milik anda",
   "failedToFetchOriginalForEdit": "Gagal memuat file asli untuk mengedit",
   "close": "Tutup",
   "setAs": "Pasang sebagai",
@@ -814,12 +887,19 @@
   "pressAndHoldToPlayVideo": "Tekan dan tahan untuk memutar video",
   "pressAndHoldToPlayVideoDetailed": "Tekan dan tahan gambar untuk memutar video",
   "downloadFailed": "Gagal mengunduh",
+  "deduplicateFiles": "Hilangkan Duplikasi File",
+  "deselectAll": "Batalkan semua pilihan",
   "reviewDeduplicateItems": "Silakan lihat dan hapus item yang merupakan duplikat.",
+  "clubByCaptureTime": "Kelompokkan berdasarkan waktu pengambilan",
+  "clubByFileName": "Kelompokkan berdasarkan nama berkas",
   "count": "Jumlah",
+  "totalSize": "Ukuran total",
+  "longpressOnAnItemToViewInFullscreen": "Tekan lama pada item untuk melihat dalam layar penuh",
   "decryptingVideo": "Mendekripsi video...",
   "authToViewYourMemories": "Harap autentikasi untuk melihat kenanganmu",
   "unlock": "Buka",
   "freeUpSpace": "Bersihkan ruang",
+  "freeUpSpaceSaving": "{count, plural, =1 {Itu dapat dihapus dari perangkat untuk mengosongkan {formattedSize}} other {Itu dapat dihapus dari perangkat untuk mengosongkan {formattedSize}}}",
   "filesBackedUpInAlbum": "{count, plural, other {{formattedNumber} file}} dalam album ini telah berhasil dicadangkan",
   "@filesBackedUpInAlbum": {
     "description": "Text to tell user how many files have been backed up in the album",
@@ -850,11 +930,24 @@
       }
     }
   },
+  "@freeUpSpaceSaving": {
+    "description": "Text to tell user how much space they can free up by deleting items from the device"
+  },
+  "freeUpAccessPostDelete": "anda masih dapat mengakses {count, plural, =1 {itu} other {mereka}} di Ente selama anda memiliki langganan aktif",
+  "@freeUpAccessPostDelete": {
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      }
+    }
+  },
   "freeUpAmount": "Bersihkan {sizeInMBorGB}",
   "thisEmailIsAlreadyInUse": "Email ini telah digunakan",
   "incorrectCode": "Kode salah",
   "authenticationFailedPleaseTryAgain": "Autentikasi gagal, silakan coba lagi",
   "verificationFailedPleaseTryAgain": "Verifikasi gagal, silakan coba lagi",
+  "authenticating": "Autentikasi...",
   "authenticationSuccessful": "Autentikasi berhasil!",
   "incorrectRecoveryKey": "Kunci pemulihan salah",
   "theRecoveryKeyYouEnteredIsIncorrect": "Kunci pemulihan yang kamu masukkan salah",
@@ -865,12 +958,35 @@
   "sorryTheCodeYouveEnteredIsIncorrect": "Maaf, kode yang kamu masukkan salah",
   "yourVerificationCodeHasExpired": "Kode verifikasi kamu telah kedaluwarsa",
   "emailChangedTo": "Email diubah menjadi {newEmail}",
+  "verifying": "Memverifikasi...",
   "disablingTwofactorAuthentication": "Menonaktifkan autentikasi dua langkah...",
   "allMemoriesPreserved": "Semua kenangan terpelihara",
   "loadingGallery": "Memuat galeri...",
   "syncing": "Menyinkronkan...",
   "encryptingBackup": "Mengenkripsi cadangan...",
   "syncStopped": "Sinkronisasi terhenti",
+  "syncProgress": "{completed}/{total} memori tersimpan",
+  "uploadingMultipleMemories": "Menyimpan {count} memori...",
+  "@uploadingMultipleMemories": {
+    "description": "Text to tell user how many memories are being preserved",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "uploadingSingleMemory": "Menyimpan 1 memori...",
+  "@syncProgress": {
+    "description": "Text to tell user how many memories have been preserved",
+    "placeholders": {
+      "completed": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
   "archiving": "Mengarsipkan...",
   "unarchiving": "Mengeluarkan dari arsip...",
   "successfullyArchived": "Berhasil diarsipkan",
@@ -885,6 +1001,8 @@
   "empty": "Kosongkan",
   "couldNotFreeUpSpace": "Tidak dapat membersihkan ruang",
   "permanentlyDeleteFromDevice": "Hapus dari perangkat secara permanen?",
+  "someOfTheFilesYouAreTryingToDeleteAre": "Beberapa file yang anda coba hapus hanya tersedia di perangkat anda dan tidak dapat dipulihkan jika dihapus",
+  "theyWillBeDeletedFromAllAlbums": "Mereka akan dihapus dari semua album.",
   "someItemsAreInBothEnteAndYourDevice": "Sejumlah item tersimpan di Ente serta di perangkat ini.",
   "selectedItemsWillBeDeletedFromAllAlbumsAndMoved": "Item terpilih akan dihapus dari semua album dan dipindahkan ke sampah.",
   "theseItemsWillBeDeletedFromYourDevice": "Item ini akan dihapus dari perangkat ini.",
@@ -894,12 +1012,17 @@
   "networkHostLookUpErr": "Tidak dapat terhubung dengan Ente, harap periksa pengaturan jaringan kamu dan hubungi dukungan jika masalah berlanjut.",
   "networkConnectionRefusedErr": "Tidak dapat terhubung dengan Ente, silakan coba lagi setelah beberapa saat. Jika masalah berlanjut, harap hubungi dukungan.",
   "cachedData": "Data cache",
+  "clearCaches": "Bersihkan cache",
+  "remoteImages": "Gambar jarak jauh",
+  "remoteVideos": "Video jarak jauh",
   "remoteThumbnails": "Thumbnail jarak jauh",
   "pendingSync": "Sinkronisasi tertunda",
   "localGallery": "Galeri lokal",
   "todaysLogs": "Log hari ini",
   "viewLogs": "Lihat log",
+  "logsDialogBody": "Ini akan mengirimkan log untuk membantu kami memperbaiki masalah anda. Harap diperhatikan bahwa nama file akan disertakan untuk membantu melacak masalah pada file tertentu.",
   "preparingLogs": "Menyiapkan log...",
+  "emailYourLogs": "Kirim log anda melalui email",
   "pleaseSendTheLogsTo": "Silakan kirim log-nya ke \n{toEmail}",
   "copyEmailAddress": "Salin alamat email",
   "exportLogs": "Ekspor log",

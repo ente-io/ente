@@ -111,7 +111,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
       floatingActionButton: DynamicFAB(
         isKeypadOpen: isKeypadOpen,
         isFormValid: _isFormValid(),
-        buttonText: S.of(context).createAccount,
+        buttonText: AppLocalizations.of(context).createAccount,
         onPressedFunction: () {
           _config.setVolatilePassword(_passwordController1.text);
           UserService.instance.setEmail(_email!);
@@ -131,13 +131,13 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   }
 
   Widget _getBody() {
-    var passwordStrengthText = S.of(context).weakStrength;
+    var passwordStrengthText = AppLocalizations.of(context).weakStrength;
     var passwordStrengthColor = Colors.redAccent;
     if (_passwordStrength > kStrongPasswordStrengthThreshold) {
-      passwordStrengthText = S.of(context).strongStrength;
+      passwordStrengthText = AppLocalizations.of(context).strongStrength;
       passwordStrengthColor = Colors.greenAccent;
     } else if (_passwordStrength > kMildPasswordStrengthThreshold) {
-      passwordStrengthText = S.of(context).moderateStrength;
+      passwordStrengthText = AppLocalizations.of(context).moderateStrength;
       passwordStrengthColor = Colors.orangeAccent;
     }
     return Column(
@@ -150,7 +150,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   padding:
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
-                    S.of(context).createNewAccount,
+                    AppLocalizations.of(context).createNewAccount,
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
                 ),
@@ -164,7 +164,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                           ? _validFieldValueColor
                           : getEnteColorScheme(context).fillFaint,
                       filled: true,
-                      hintText: S.of(context).email,
+                      hintText: AppLocalizations.of(context).email,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 14,
@@ -212,7 +212,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                           ? _validFieldValueColor
                           : getEnteColorScheme(context).fillFaint,
                       filled: true,
-                      hintText: S.of(context).password,
+                      hintText: AppLocalizations.of(context).password,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 14,
@@ -281,7 +281,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                           ? _validFieldValueColor
                           : getEnteColorScheme(context).fillFaint,
                       filled: true,
-                      hintText: S.of(context).confirmPassword,
+                      hintText: AppLocalizations.of(context).confirmPassword,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 14,
@@ -338,15 +338,16 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       onTap: () {
                         showInfoDialog(
                           context,
-                          body: S.of(context).passwordStrengthInfo,
+                          body:
+                              AppLocalizations.of(context).passwordStrengthInfo,
                         );
                       },
                       child: Row(
                         children: [
                           Text(
-                            S
-                                .of(context)
-                                .passwordStrength(passwordStrengthText),
+                            AppLocalizations.of(context).passwordStrength(
+                              passwordStrengthValue: passwordStrengthText,
+                            ),
                             style: TextStyle(
                               color: passwordStrengthColor,
                               fontWeight: FontWeight.w500,
@@ -369,7 +370,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   padding:
                       const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
                   child: Text(
-                    S.of(context).hearUsWhereTitle,
+                    AppLocalizations.of(context).hearUsWhereTitle,
                     style: getEnteTextTheme(context).smallFaint,
                   ),
                 ),
@@ -393,7 +394,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                         onTap: () {
                           showToast(
                             context,
-                            S.of(context).hearUsExplanation,
+                            AppLocalizations.of(context).hearUsExplanation,
                             iosLongToastLengthInSec: 4,
                           );
                         },
@@ -459,7 +460,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
           ),
           Expanded(
             child: StyledText(
-              text: S.of(context).signUpTerms,
+              text: AppLocalizations.of(context).signUpTerms,
               style: Theme.of(context)
                   .textTheme
                   .titleMedium!
@@ -471,7 +472,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     MaterialPageRoute(
                       builder: (BuildContext context) {
                         return WebPage(
-                          S.of(context).termsOfServicesTitle,
+                          AppLocalizations.of(context).termsOfServicesTitle,
                           "https://ente.io/terms",
                         );
                       },
@@ -487,7 +488,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     MaterialPageRoute(
                       builder: (BuildContext context) {
                         return WebPage(
-                          S.of(context).privacyPolicyTitle,
+                          AppLocalizations.of(context).privacyPolicyTitle,
                           "https://ente.io/privacy",
                         );
                       },
@@ -526,7 +527,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
           ),
           Expanded(
             child: StyledText(
-              text: S.of(context).ackPasswordLostWarning,
+              text: AppLocalizations.of(context).ackPasswordLostWarning,
               style: Theme.of(context)
                   .textTheme
                   .titleMedium!
@@ -538,7 +539,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     MaterialPageRoute(
                       builder: (BuildContext context) {
                         return WebPage(
-                          S.of(context).encryption,
+                          AppLocalizations.of(context).encryption,
                           "https://ente.io/architecture",
                         );
                       },

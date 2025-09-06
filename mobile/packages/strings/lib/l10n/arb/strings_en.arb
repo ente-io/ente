@@ -1,0 +1,783 @@
+{
+  "networkHostLookUpErr": "Unable to connect to Ente, please check your network settings and contact support if the error persists.",
+  "@networkHostLookUpErr": {
+    "description": "Error message shown when the app cannot connect to Ente due to network host lookup failure"
+  },
+  "networkConnectionRefusedErr": "Unable to connect to Ente, please retry after sometime. If the error persists, please contact support.",
+  "@networkConnectionRefusedErr": {
+    "description": "Error message shown when the app cannot connect to Ente due to connection refused"
+  },
+  "itLooksLikeSomethingWentWrongPleaseRetryAfterSome": "It looks like something went wrong. Please retry after some time. If the error persists, please contact our support team.",
+  "@itLooksLikeSomethingWentWrongPleaseRetryAfterSome": {
+    "description": "Generic error message for temporary issues"
+  },
+  "error": "Error",
+  "@error": {
+    "description": "Generic error title"
+  },
+  "ok": "Ok",
+  "@ok": {
+    "description": "Generic OK button label"
+  },
+  "faq": "FAQ",
+  "@faq": {
+    "description": "FAQ link label"
+  },
+  "contactSupport": "Contact support",
+  "@contactSupport": {
+    "description": "Contact support button label"
+  },
+  "emailYourLogs": "Email your logs",
+  "@emailYourLogs": {
+    "description": "Title for emailing logs dialog"
+  },
+  "pleaseSendTheLogsTo": "Please send the logs to \n{toEmail}",
+  "@pleaseSendTheLogsTo": {
+    "description": "Message asking user to send logs to email address",
+    "placeholders": {
+      "toEmail": {
+        "type": "String",
+        "description": "Email address to send logs to"
+      }
+    }
+  },
+  "copyEmailAddress": "Copy email address",
+  "@copyEmailAddress": {
+    "description": "Button to copy email address to clipboard"
+  },
+  "exportLogs": "Export logs",
+  "@exportLogs": {
+    "description": "Button to export logs"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button label"
+  },
+  "pleaseEmailUsAt": "Email us at {toEmail}",
+  "@pleaseEmailUsAt": {
+    "description": "Message showing email address for support",
+    "placeholders": {
+      "toEmail": {
+        "type": "String",
+        "description": "Support email address"
+      }
+    }
+  },
+  "emailAddressCopied": "Email address copied",
+  "@emailAddressCopied": {
+    "description": "Snackbar message when email address is copied"
+  },
+  "supportEmailSubject": "[Support]",
+  "@supportEmailSubject": {
+    "description": "Default subject for support emails"
+  },
+  "clientDebugInfoLabel": "Following information can help us in debugging if you are facing any issue",
+  "@clientDebugInfoLabel": {
+    "description": "Label for debug information in emails"
+  },
+  "registeredEmailLabel": "Registered email:",
+  "@registeredEmailLabel": {
+    "description": "Label for registered email in debug info"
+  },
+  "clientLabel": "Client:",
+  "@clientLabel": {
+    "description": "Label for client information in debug info"
+  },
+  "versionLabel": "Version :",
+  "@versionLabel": {
+    "description": "Label for version information in debug info"
+  },
+  "notAvailable": "N/A",
+  "@notAvailable": {
+    "description": "Not available text"
+  },
+
+  "reportABug": "Report a bug",
+  "@reportABug": {
+    "description": "Label for reporting a bug"
+  },
+  "logsDialogBody": "This will send across logs to help us debug your issue. Please note that file names will be included to help track issues with specific files.",
+  "@logsDialogBody": {
+    "description": "Body text for the logs dialog explaining what will be sent"
+  },
+  "viewLogs": "View logs",
+  "@viewLogs": {
+    "description": "Button to view logs"
+  },
+  "customEndpoint": "Connected to {endpoint}",
+  "@customEndpoint": {
+    "description": "Text showing user is connected to a custom endpoint",
+    "placeholders": {
+      "endpoint": {
+        "type": "String",
+        "description": "URL of the custom endpoint"
+      }
+    }
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Label for save button"
+  },
+  "send": "Send",
+  "@send": {
+    "description": "Label for send button"
+  },
+  "saveOrSendDescription": "Do you want to save this to your storage (Downloads folder by default) or send it to other apps?",
+  "@saveOrSendDescription": {
+    "description": "Description text asking user if they want to save to storage or share with other apps"
+  },
+  "saveOnlyDescription": "Do you want to save this to your storage (Downloads folder by default)?",
+  "@saveOnlyDescription": {
+    "description": "Description text asking user if they want to save to storage (for platforms that don't support sharing)"
+  },
+  "enterNewEmailHint": "Enter your new email address",
+  "@enterNewEmailHint": {
+    "description": "Hint text for entering new email address"
+  },
+  "email": "Email",
+  "@email": {
+    "description": "Email field label"
+  },
+  "verify": "Verify",
+  "@verify": {
+    "description": "Verify button label"
+  },
+  "invalidEmailTitle": "Invalid email address",
+  "@invalidEmailTitle": {
+    "description": "Title for invalid email error dialog"
+  },
+  "invalidEmailMessage": "Please enter a valid email address.",
+  "@invalidEmailMessage": {
+    "description": "Message for invalid email error dialog"
+  },
+  "pleaseWait": "Please wait...",
+  "@pleaseWait": {
+    "description": "Please wait message"
+  },
+  "verifyPassword": "Verify password",
+  "@verifyPassword": {
+    "description": "Verify password button label"
+  },
+  "incorrectPasswordTitle": "Incorrect password",
+  "@incorrectPasswordTitle": {
+    "description": "Title for incorrect password error"
+  },
+  "pleaseTryAgain": "Please try again",
+  "@pleaseTryAgain": {
+    "description": "Message asking user to try again"
+  },
+  "enterPassword": "Enter password",
+  "@enterPassword": {
+    "description": "Enter password field label"
+  },
+  "enterYourPasswordHint": "Enter your password",
+  "@enterYourPasswordHint": {
+    "description": "Hint for password field"
+  },
+  "activeSessions": "Active sessions",
+  "@activeSessions": {
+    "description": "Title for active sessions page"
+  },
+  "oops": "Oops",
+  "@oops": {
+    "description": "Oops error title"
+  },
+  "somethingWentWrongPleaseTryAgain": "Something went wrong, please try again",
+  "@somethingWentWrongPleaseTryAgain": {
+    "description": "Generic error message"
+  },
+  "thisWillLogYouOutOfThisDevice": "This will log you out of this device!",
+  "@thisWillLogYouOutOfThisDevice": {
+    "description": "Warning message for logging out of current device"
+  },
+  "thisWillLogYouOutOfTheFollowingDevice": "This will log you out of the following device:",
+  "@thisWillLogYouOutOfTheFollowingDevice": {
+    "description": "Warning message for logging out of another device"
+  },
+  "terminateSession": "Terminate session?",
+  "@terminateSession": {
+    "description": "Title for terminate session dialog"
+  },
+  "terminate": "Terminate",
+  "@terminate": {
+    "description": "Terminate button label"
+  },
+  "thisDevice": "This device",
+  "@thisDevice": {
+    "description": "Label for current device"
+  },
+  "createAccount": "Create account",
+  "@createAccount": {
+    "description": "Create account button label"
+  },
+  "weakStrength": "Weak",
+  "@weakStrength": {
+    "description": "Weak password strength label"
+  },
+  "moderateStrength": "Moderate",
+  "@moderateStrength": {
+    "description": "Moderate password strength label"
+  },
+  "strongStrength": "Strong",
+  "@strongStrength": {
+    "description": "Strong password strength label"
+  },
+  "deleteAccount": "Delete account",
+  "@deleteAccount": {
+    "description": "Delete account button label"
+  },
+  "deleteAccountQuery": "We'll be sorry to see you go. Are you facing some issue?",
+  "@deleteAccountQuery": {
+    "description": "Message asking user why they want to delete account"
+  },
+  "yesSendFeedbackAction": "Yes, send feedback",
+  "@yesSendFeedbackAction": {
+    "description": "Button to confirm sending feedback"
+  },
+  "noDeleteAccountAction": "No, delete account",
+  "@noDeleteAccountAction": {
+    "description": "Button to proceed with account deletion"
+  },
+  "initiateAccountDeleteTitle": "Please authenticate to initiate account deletion",
+  "@initiateAccountDeleteTitle": {
+    "description": "Title for authentication dialog before account deletion"
+  },
+  "confirmAccountDeleteTitle": "Confirm account deletion",
+  "@confirmAccountDeleteTitle": {
+    "description": "Title for account deletion confirmation dialog"
+  },
+  "confirmAccountDeleteMessage": "This account is linked to other Ente apps, if you use any.\n\nYour uploaded data, across all Ente apps, will be scheduled for deletion, and your account will be permanently deleted.",
+  "@confirmAccountDeleteMessage": {
+    "description": "Message warning about account deletion consequences"
+  },
+  "delete": "Delete",
+  "@delete": {
+    "description": "Delete button label"
+  },
+  "createNewAccount": "Create new account",
+  "@createNewAccount": {
+    "description": "Create new account button label"
+  },
+  "password": "Password",
+  "@password": {
+    "description": "Password field label"
+  },
+  "confirmPassword": "Confirm password",
+  "@confirmPassword": {
+    "description": "Confirm password field label"
+  },
+  "passwordStrength": "Password strength: {passwordStrengthValue}",
+  "@passwordStrength": {
+    "description": "Text to indicate the password strength",
+    "placeholders": {
+      "passwordStrengthValue": {
+        "description": "The strength of the password as a string",
+        "type": "String",
+        "example": "Weak or Moderate or Strong"
+      }
+    }
+  },
+  "hearUsWhereTitle": "How did you hear about Ente? (optional)",
+  "@hearUsWhereTitle": {
+    "description": "Title asking how user heard about Ente"
+  },
+  "hearUsExplanation": "We don't track app installs. It'd help if you told us where you found us!",
+  "@hearUsExplanation": {
+    "description": "Explanation for asking how user heard about Ente"
+  },
+  "signUpTerms": "I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>",
+  "@signUpTerms": {
+    "description": "Terms agreement text for sign up"
+  },
+  "termsOfServicesTitle": "Terms",
+  "@termsOfServicesTitle": {
+    "description": "Terms of service title"
+  },
+  "privacyPolicyTitle": "Privacy Policy",
+  "@privacyPolicyTitle": {
+    "description": "Privacy policy title"
+  },
+  "ackPasswordLostWarning": "I understand that if I lose my password, I may lose my data since my data is <underline>end-to-end encrypted</underline>.",
+  "@ackPasswordLostWarning": {
+    "description": "Warning about password loss"
+  },
+  "encryption": "Encryption",
+  "@encryption": {
+    "description": "Encryption label"
+  },
+  "logInLabel": "Log in",
+  "@logInLabel": {
+    "description": "Log in button label"
+  },
+  "welcomeBack": "Welcome back!",
+  "@welcomeBack": {
+    "description": "Welcome back message"
+  },
+  "loginTerms": "By clicking log in, I agree to the <u-terms>terms of service</u-terms> and <u-policy>privacy policy</u-policy>",
+  "@loginTerms": {
+    "description": "Terms agreement text for login"
+  },
+  "noInternetConnection": "No internet connection",
+  "@noInternetConnection": {
+    "description": "No internet connection error message"
+  },
+  "pleaseCheckYourInternetConnectionAndTryAgain": "Please check your internet connection and try again.",
+  "@pleaseCheckYourInternetConnectionAndTryAgain": {
+    "description": "Message asking user to check internet connection"
+  },
+  "verificationFailedPleaseTryAgain": "Verification failed, please try again",
+  "@verificationFailedPleaseTryAgain": {
+    "description": "Verification failed error message"
+  },
+  "recreatePasswordTitle": "Recreate password",
+  "@recreatePasswordTitle": {
+    "description": "Title for recreate password dialog"
+  },
+  "recreatePasswordBody": "The current device is not powerful enough to verify your password, but we can regenerate in a way that works with all devices.\n\nPlease login using your recovery key and regenerate your password (you can use the same one again if you wish).",
+  "@recreatePasswordBody": {
+    "description": "Body text for recreate password dialog"
+  },
+  "useRecoveryKey": "Use recovery key",
+  "@useRecoveryKey": {
+    "description": "Use recovery key button label"
+  },
+  "forgotPassword": "Forgot password",
+  "@forgotPassword": {
+    "description": "Forgot password link label"
+  },
+  "changeEmail": "Change email",
+  "@changeEmail": {
+    "description": "Change email button label"
+  },
+  "verifyEmail": "Verify email",
+  "@verifyEmail": {
+    "description": "Verify email title"
+  },
+  "weHaveSendEmailTo": "We have sent a mail to <green>{email}</green>",
+  "@weHaveSendEmailTo": {
+    "description": "Text to indicate that we have sent a mail to the user",
+    "placeholders": {
+      "email": {
+        "description": "The email address of the user",
+        "type": "String",
+        "example": "example@ente.io"
+      }
+    }
+  },
+  "toResetVerifyEmail": "To reset your password, please verify your email first.",
+  "@toResetVerifyEmail": {
+    "description": "Message asking user to verify email before password reset"
+  },
+  "checkInboxAndSpamFolder": "Please check your inbox (and spam) to complete verification",
+  "@checkInboxAndSpamFolder": {
+    "description": "Message asking user to check inbox and spam folder"
+  },
+  "tapToEnterCode": "Tap to enter code",
+  "@tapToEnterCode": {
+    "description": "Hint for entering verification code"
+  },
+  "sendEmail": "Send email",
+  "resendEmail": "Resend email",
+  "@resendEmail": {
+    "description": "Resend email button label"
+  },
+  "passKeyPendingVerification": "Verification is still pending",
+  "@passKeyPendingVerification": {
+    "description": "Message when passkey verification is pending"
+  },
+  "loginSessionExpired": "Session expired",
+  "@loginSessionExpired": {
+    "description": "Login session expired title"
+  },
+  "loginSessionExpiredDetails": "Your session has expired. Please login again.",
+  "@loginSessionExpiredDetails": {
+    "description": "Login session expired details"
+  },
+  "passkeyAuthTitle": "Passkey verification",
+  "@passkeyAuthTitle": {
+    "description": "Passkey authentication title"
+  },
+  "waitingForVerification": "Waiting for verification...",
+  "@waitingForVerification": {
+    "description": "Waiting for verification message"
+  },
+  "tryAgain": "Try again",
+  "@tryAgain": {
+    "description": "Try again button label"
+  },
+  "checkStatus": "Check status",
+  "@checkStatus": {
+    "description": "Check status button label"
+  },
+  "loginWithTOTP": "Login with TOTP",
+  "@loginWithTOTP": {
+    "description": "Login with TOTP button label"
+  },
+  "recoverAccount": "Recover account",
+  "@recoverAccount": {
+    "description": "Recover account button label"
+  },
+  "setPasswordTitle": "Set password",
+  "@setPasswordTitle": {
+    "description": "Set password title"
+  },
+  "changePasswordTitle": "Change password",
+  "@changePasswordTitle": {
+    "description": "Change password title"
+  },
+  "resetPasswordTitle": "Reset password",
+  "@resetPasswordTitle": {
+    "description": "Reset password title"
+  },
+  "encryptionKeys": "Encryption keys",
+  "@encryptionKeys": {
+    "description": "Encryption keys title"
+  },
+  "enterPasswordToEncrypt": "Enter a password we can use to encrypt your data",
+  "@enterPasswordToEncrypt": {
+    "description": "Prompt to enter password for encryption"
+  },
+  "enterNewPasswordToEncrypt": "Enter a new password we can use to encrypt your data",
+  "@enterNewPasswordToEncrypt": {
+    "description": "Prompt to enter new password for encryption"
+  },
+  "passwordWarning": "We don't store this password, so if you forget, <underline>we cannot decrypt your data</underline>",
+  "@passwordWarning": {
+    "description": "Warning about password storage"
+  },
+  "howItWorks": "How it works",
+  "@howItWorks": {
+    "description": "How it works button label"
+  },
+  "generatingEncryptionKeys": "Generating encryption keys...",
+  "@generatingEncryptionKeys": {
+    "description": "Generating encryption keys message"
+  },
+  "passwordChangedSuccessfully": "Password changed successfully",
+  "@passwordChangedSuccessfully": {
+    "description": "Password changed successfully message"
+  },
+  "signOutFromOtherDevices": "Sign out from other devices",
+  "@signOutFromOtherDevices": {
+    "description": "Sign out from other devices title"
+  },
+  "signOutOtherBody": "If you think someone might know your password, you can force all other devices using your account to sign out.",
+  "@signOutOtherBody": {
+    "description": "Sign out other devices explanation"
+  },
+  "signOutOtherDevices": "Sign out other devices",
+  "@signOutOtherDevices": {
+    "description": "Sign out other devices button label"
+  },
+  "doNotSignOut": "Do not sign out",
+  "@doNotSignOut": {
+    "description": "Do not sign out button label"
+  },
+  "generatingEncryptionKeysTitle": "Generating encryption keys...",
+  "@generatingEncryptionKeysTitle": {
+    "description": "Generating encryption keys title"
+  },
+  "continueLabel": "Continue",
+  "@continueLabel": {
+    "description": "Continue button label"
+  },
+  "insecureDevice": "Insecure device",
+  "@insecureDevice": {
+    "description": "Insecure device warning title"
+  },
+  "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": "Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device.",
+  "@sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": {
+    "description": "Error message for insecure device"
+  },
+  "recoveryKeyCopiedToClipboard": "Recovery key copied to clipboard",
+  "@recoveryKeyCopiedToClipboard": {
+    "description": "Recovery key copied message"
+  },
+  "recoveryKey": "Recovery key",
+  "@recoveryKey": {
+    "description": "Recovery key label"
+  },
+  "recoveryKeyOnForgotPassword": "If you forget your password, the only way you can recover your data is with this key.",
+  "@recoveryKeyOnForgotPassword": {
+    "description": "Recovery key importance explanation"
+  },
+  "recoveryKeySaveDescription": "We don't store this key, please save this 24 word key in a safe place.",
+  "@recoveryKeySaveDescription": {
+    "description": "Recovery key save description"
+  },
+  "doThisLater": "Do this later",
+  "@doThisLater": {
+    "description": "Do this later button label"
+  },
+  "saveKey": "Save key",
+  "@saveKey": {
+    "description": "Save key button label"
+  },
+  "recoveryKeySaved": "Recovery key saved in Downloads folder!",
+  "@recoveryKeySaved": {
+    "description": "Recovery key saved confirmation message"
+  },
+  "noRecoveryKeyTitle": "No recovery key?",
+  "@noRecoveryKeyTitle": {
+    "description": "No recovery key title"
+  },
+  "twoFactorAuthTitle": "Two-factor authentication",
+  "@twoFactorAuthTitle": {
+    "description": "Two-factor authentication title"
+  },
+  "enterCodeHint": "Enter the 6-digit code from\nyour authenticator app",
+  "@enterCodeHint": {
+    "description": "Hint for entering 2FA code"
+  },
+  "lostDeviceTitle": "Lost device?",
+  "@lostDeviceTitle": {
+    "description": "Lost device title"
+  },
+  "enterRecoveryKeyHint": "Enter your recovery key",
+  "@enterRecoveryKeyHint": {
+    "description": "Hint for entering recovery key"
+  },
+  "recover": "Recover",
+  "@recover": {
+    "description": "Recover button label"
+  },
+  "loggingOut": "Logging out...",
+  "@loggingOut": {
+    "description": "Message shown while logging out"
+  },
+  "immediately": "Immediately",
+  "@immediately": {
+    "description": "Immediately option for auto lock timing"
+  },
+  "appLock": "App lock",
+  "@appLock": {
+    "description": "App lock setting title"
+  },
+  "autoLock": "Auto lock",
+  "@autoLock": {
+    "description": "Auto lock setting title"
+  },
+  "noSystemLockFound": "No system lock found",
+  "@noSystemLockFound": {
+    "description": "Error when no system lock is found"
+  },
+  "deviceLockEnablePreSteps": "To enable device lock, please setup device passcode or screen lock in your system settings.",
+  "@deviceLockEnablePreSteps": {
+    "description": "Instructions for enabling device lock"
+  },
+  "appLockDescription": "Choose between your device's default lock screen and a custom lock screen with a PIN or password.",
+  "@appLockDescription": {
+    "description": "Description of app lock feature"
+  },
+  "deviceLock": "Device lock",
+  "@deviceLock": {
+    "description": "Device lock option title"
+  },
+  "pinLock": "Pin lock",
+  "@pinLock": {
+    "description": "PIN lock option title"
+  },
+  "autoLockFeatureDescription": "Time after which the app locks after being put in the background",
+  "@autoLockFeatureDescription": {
+    "description": "Description of auto lock feature"
+  },
+  "hideContent": "Hide content",
+  "@hideContent": {
+    "description": "Hide content setting title"
+  },
+  "hideContentDescriptionAndroid": "Hides app content in the app switcher and disables screenshots",
+  "@hideContentDescriptionAndroid": {
+    "description": "Description of hide content feature on Android"
+  },
+  "hideContentDescriptioniOS": "Hides app content in the app switcher",
+  "@hideContentDescriptioniOS": {
+    "description": "Description of hide content feature on iOS"
+  },
+  "tooManyIncorrectAttempts": "Too many incorrect attempts",
+  "@tooManyIncorrectAttempts": {
+    "description": "Message shown when too many incorrect attempts are made"
+  },
+  "tapToUnlock": "Tap to unlock",
+  "@tapToUnlock": {
+    "description": "Message prompting user to tap to unlock"
+  },
+  "areYouSureYouWantToLogout": "Are you sure you want to logout?",
+  "@areYouSureYouWantToLogout": {
+    "description": "Confirmation message before logout"
+  },
+  "yesLogout": "Yes, logout",
+  "@yesLogout": {
+    "description": "Confirmation button for logout"
+  },
+  "authToViewSecrets": "Please authenticate to view your secrets",
+  "@authToViewSecrets": {
+    "description": "Message prompting authentication to view secrets"
+  },
+  "next": "Next",
+  "@next": {
+    "description": "Next button label"
+  },
+  "setNewPassword": "Set new password",
+  "@setNewPassword": {
+    "description": "Set new password title"
+  },
+  "enterPin": "Enter PIN",
+  "@enterPin": {
+    "description": "Enter PIN prompt"
+  },
+  "setNewPin": "Set new PIN",
+  "@setNewPin": {
+    "description": "Set new PIN title"
+  },
+  "confirm": "Confirm",
+  "@confirm": {
+    "description": "Confirm button label"
+  },
+  "reEnterPassword": "Re-enter password",
+  "@reEnterPassword": {
+    "description": "Re-enter password prompt"
+  },
+  "reEnterPin": "Re-enter PIN",
+  "@reEnterPin": {
+    "description": "Re-enter PIN prompt"
+  },
+  "androidBiometricHint": "Verify identity",
+  "@androidBiometricHint": {
+    "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricNotRecognized": "Not recognized. Try again.",
+  "@androidBiometricNotRecognized": {
+    "description": "Message to let the user know that authentication was failed. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricSuccess": "Success",
+  "@androidBiometricSuccess": {
+    "description": "Message to let the user know that authentication was successful. It is used on Android side. Maximum 60 characters."
+  },
+  "androidCancelButton": "Cancel",
+  "@androidCancelButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on Android side. Maximum 30 characters."
+  },
+  "androidSignInTitle": "Authentication required",
+  "@androidSignInTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user that they need to scan biometric to continue. It is used on Android side. Maximum 60 characters."
+  },
+  "androidBiometricRequiredTitle": "Biometric required",
+  "@androidBiometricRequiredTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user has not set up biometric authentication on their device. It is used on Android side. Maximum 60 characters."
+  },
+  "androidDeviceCredentialsRequiredTitle": "Device credentials required",
+  "@androidDeviceCredentialsRequiredTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user has not set up credentials authentication on their device. It is used on Android side. Maximum 60 characters."
+  },
+  "androidDeviceCredentialsSetupDescription": "Device credentials required",
+  "@androidDeviceCredentialsSetupDescription": {
+    "description": "Message advising the user to go to the settings and configure device credentials on their device. It shows in a dialog on Android side."
+  },
+  "goToSettings": "Go to settings",
+  "@goToSettings": {
+    "description": "Message showed on a button that the user can click to go to settings pages from the current dialog. It is used on both Android and iOS side. Maximum 30 characters."
+  },
+  "androidGoToSettingsDescription": "Biometric authentication is not set up on your device. Go to 'Settings > Security' to add biometric authentication.",
+  "@androidGoToSettingsDescription": {
+    "description": "Message advising the user to go to the settings and configure biometric on their device. It shows in a dialog on Android side."
+  },
+  "iOSLockOut": "Biometric authentication is disabled. Please lock and unlock your screen to enable it.",
+  "@iOSLockOut": {
+    "description": "Message advising the user to re-enable biometrics on their device. It shows in a dialog on iOS side."
+  },
+  "iOSOkButton": "OK",
+  "@iOSOkButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
+  },
+  "emailAlreadyRegistered": "Email already registered.",
+  "@emailAlreadyRegistered": {
+    "description": "Error message when email is already registered"
+  },
+  "emailNotRegistered": "Email not registered.",
+  "@emailNotRegistered": {
+    "description": "Error message when email is not registered"
+  },
+  "thisEmailIsAlreadyInUse": "This email is already in use",
+  "@thisEmailIsAlreadyInUse": {
+    "description": "Error message when email is already in use"
+  },
+  "emailChangedTo": "Email changed to {newEmail}",
+  "@emailChangedTo": {
+    "description": "Message when email has been changed",
+    "placeholders": {
+      "newEmail": {
+        "description": "The new email address",
+        "type": "String",
+        "example": "new@example.com"
+      }
+    }
+  },
+  "authenticationFailedPleaseTryAgain": "Authentication failed, please try again",
+  "@authenticationFailedPleaseTryAgain": {
+    "description": "Error message when authentication fails"
+  },
+  "authenticationSuccessful": "Authentication successful!",
+  "@authenticationSuccessful": {
+    "description": "Success message when authentication is successful"
+  },
+  "sessionExpired": "Session expired",
+  "@sessionExpired": {
+    "description": "Error message when session has expired"
+  },
+  "incorrectRecoveryKey": "Incorrect recovery key",
+  "@incorrectRecoveryKey": {
+    "description": "Error message when recovery key is incorrect"
+  },
+  "theRecoveryKeyYouEnteredIsIncorrect": "The recovery key you entered is incorrect",
+  "@theRecoveryKeyYouEnteredIsIncorrect": {
+    "description": "Detailed error message when recovery key is incorrect"
+  },
+  "twofactorAuthenticationSuccessfullyReset": "Two-factor authentication successfully reset",
+  "@twofactorAuthenticationSuccessfullyReset": {
+    "description": "Message when two-factor authentication is successfully reset"
+  },
+  "noRecoveryKey": "No recovery key",
+  "@noRecoveryKey": {
+    "description": "Error message when no recovery key is found"
+  },
+  "yourAccountHasBeenDeleted": "Your account has been deleted",
+  "@yourAccountHasBeenDeleted": {
+    "description": "Confirmation message when account has been deleted"
+  },
+  "verificationId": "Verification ID",
+  "@verificationId": {
+    "description": "Label for verification ID"
+  },
+  "yourVerificationCodeHasExpired": "Your verification code has expired",
+  "@yourVerificationCodeHasExpired": {
+    "description": "Error message when verification code has expired"
+  },
+  "incorrectCode": "Incorrect code",
+  "@incorrectCode": {
+    "description": "Error message when code is incorrect"
+  },
+  "sorryTheCodeYouveEnteredIsIncorrect": "Sorry, the code you've entered is incorrect",
+  "@sorryTheCodeYouveEnteredIsIncorrect": {
+    "description": "Detailed error message when code is incorrect"
+  },
+  "developerSettings": "Developer settings",
+  "@developerSettings": {
+    "description": "Label for developer settings"
+  },
+  "serverEndpoint": "Server endpoint",
+  "@serverEndpoint": {
+    "description": "Label for server endpoint setting"
+  },
+  "invalidEndpoint": "Invalid endpoint",
+  "@invalidEndpoint": {
+    "description": "Error message when endpoint is invalid"
+  },
+  "invalidEndpointMessage": "Sorry, the endpoint you entered is invalid. Please enter a valid endpoint and try again.",
+  "@invalidEndpointMessage": {
+    "description": "Detailed error message when endpoint is invalid"
+  },
+  "endpointUpdatedMessage": "Endpoint updated successfully",
+  "@endpointUpdatedMessage": {
+    "description": "Success message when endpoint is updated"
+  }
+}

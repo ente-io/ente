@@ -111,6 +111,7 @@
   "importAegisGuide": "Utilisez l'option \"Exporter le coffre-fort\" dans les paramètres d'Aegis.\n\nSi votre coffre-fort est crypté, vous devrez saisir le mot de passe du coffre-fort pour déchiffrer le coffre-fort.",
   "import2FasGuide": "Utilisez l'option \"Paramètres->Sauvegarde -Export\" dans 2FAS.\n\nSi votre sauvegarde est chiffrée, vous devrez entrer le mot de passe pour déchiffrer la sauvegarde",
   "importLastpassGuide": "Utilisez l'option \"Transférer des comptes\" dans les paramètres de l'authentificateur Lastpass et appuyez sur \"Exporter des comptes vers un fichier\". Importez le JSON téléchargé.",
+  "importProtonAuthGuide": "Utilisez l'option \"Export\" dans les paramètres de Proton Authenticator pour exporter vos codes.",
   "exportCodes": "Exporter les codes",
   "importLabel": "Importer",
   "importInstruction": "Veuillez sélectionner un fichier qui contient une liste de vos codes dans le format suivant",
@@ -519,5 +520,12 @@
   "algorithm": "Algorithme",
   "type": "Type",
   "period": "Période",
-  "digits": "Chiffres"
+  "digits": "Chiffres",
+  "importFromGallery": "Importer depuis la galerie",
+  "errorCouldNotReadImage": "Impossible de lire le fichier sélectionné.",
+  "errorInvalidQRCode": "QR Code invalide",
+  "errorInvalidQRCodeBody": "Le code QR scanné n'est pas un compte 2FA valide.",
+  "errorNoQRCode": "Aucun code QR trouvé",
+  "errorGenericTitle": "Une erreur s'est produite",
+  "errorGenericBody": "Une erreur inattendue est survenue lors de l'importation."
 }

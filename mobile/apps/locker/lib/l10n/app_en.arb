@@ -1,0 +1,353 @@
+{
+  "onBoardingBody": "Securely backup your documents",
+  "newUser": "New to Ente",
+  "existingUser": "Existing User",
+  "developerSettings": "Developer settings",
+  "yes": "Yes",
+  "developerSettingsWarning": "Are you sure that you want to modify Developer settings?",
+  "serverEndpoint": "Server endpoint",
+  "endpointUpdatedMessage": "Endpoint updated successfully",
+  "invalidEndpoint": "Invalid endpoint",
+  "invalidEndpointMessage": "Sorry, the endpoint you entered is invalid. Please enter a valid endpoint and try again.",
+  "saveAction": "Save",
+  "untitled": "Untitled",
+  "edit": "Edit",
+  "delete": "Delete",
+  "noFilesFound": "No files here",
+  "addFiles": "Add Files",
+  "name": "Name",
+  "date": "Date",
+  "pleaseWait": "Please wait...",
+  "downloading": "Downloading...",
+  "downloadingProgress": "Downloading... {percentage}%",
+  "@downloadingProgress": {
+    "description": "Download progress message",
+    "placeholders": {
+      "percentage": {
+        "type": "int",
+        "example": "75"
+      }
+    }
+  },
+  "downloadFailed": "Download Failed",
+  "failedToDownloadOrDecrypt": "Failed to download or decrypt file",
+  "errorOpeningFile": "Error opening file",
+  "errorOpeningFileMessage": "Error opening file: {error}",
+  "@errorOpeningFileMessage": {
+    "description": "Error message when opening a file fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "File not found"
+      }
+    }
+  },
+  "couldNotOpenFile": "Could not open file: {error}",
+  "@couldNotOpenFile": {
+    "description": "Error message when file cannot be opened",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Permission denied"
+      }
+    }
+  },
+  "minutesAgo": "{minutes}m ago",
+  "@minutesAgo": {
+    "description": "Time format for minutes ago",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "hoursAgo": "{hours}h ago",
+  "@hoursAgo": {
+    "description": "Time format for hours ago",
+    "placeholders": {
+      "hours": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "yesterday": "Yesterday",
+  "daysAgo": "{days}d ago",
+  "@daysAgo": {
+    "description": "Time format for days ago",
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "collectionRenamedSuccessfully": "Collection renamed successfully",
+  "failedToRenameCollection": "Failed to rename collection: {error}",
+  "@failedToRenameCollection": {
+    "description": "Error message when collection rename fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "collectionCannotBeDeleted": "This collection cannot be deleted",
+  "deleteCollection": "Delete collection",
+  "deleteCollectionConfirmation": "Are you sure you want to delete \"{collectionName}\"?",
+  "@deleteCollectionConfirmation": {
+    "description": "Confirmation message for deleting a collection",
+    "placeholders": {
+      "collectionName": {
+        "type": "String",
+        "example": "My Collection"
+      }
+    }
+  },
+  "cancel": "Cancel",
+  "collectionDeletedSuccessfully": "Collection deleted successfully",
+  "failedToDeleteCollection": "Failed to delete collection: {error}",
+  "@failedToDeleteCollection": {
+    "description": "Error message when collection deletion fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "collections": "Collections",
+  "retry": "Retry",
+  "failedToSyncTrash": "Failed to sync trash: {error}",
+  "@failedToSyncTrash": {
+    "description": "Error message when trash sync fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "pleaseSelectAtLeastOneCollection": "Please select at least one collection",
+  "unknownItemType": "Unknown item type",
+  "fileDeletedSuccessfully": "File deleted successfully",
+  "failedToDeleteFile": "Failed to delete file: {error}",
+  "@failedToDeleteFile": {
+    "description": "Error message when file deletion fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "fileUpdatedSuccessfully": "File updated successfully!",
+  "failedToUpdateFile": "Failed to update file: {error}",
+  "@failedToUpdateFile": {
+    "description": "Error message when file update fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "noChangesWereMade": "No changes were made",
+  "noCollectionsAvailableForRestore": "No collections available for restore",
+  "trashClearedSuccessfully": "Trash cleared successfully",
+  "failedToClearTrash": "Failed to clear trash: {error}",
+  "@failedToClearTrash": {
+    "description": "Error message when clearing trash fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "trash": "Trash",
+  "deletedPermanently": "Deleted \"{fileName}\" permanently",
+  "@deletedPermanently": {
+    "description": "Message when file is permanently deleted from trash",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      }
+    }
+  },
+  "failedToRestoreFile": "Failed to restore \"{fileName}\": {error}",
+  "@failedToRestoreFile": {
+    "description": "Error message when file restoration fails",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      },
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "createNewCollection": "Create new collection",
+  "create": "Create",
+  "renameCollection": "Rename collection",
+  "save": "Save",
+  "deleteFile": "Delete File",
+  "deleteFileConfirmation": "Are you sure you want to delete \"{fileName}\"?",
+  "@deleteFileConfirmation": {
+    "description": "Confirmation message for file deletion",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      }
+    }
+  },
+  "noCollectionsFound": "No collections found",
+  "createYourFirstCollection": "Create your first collection to get started",
+  "createCollection": "Create Collection",
+  "nothingYet": "Nothing yet",
+  "uploadYourFirstDocument": "Upload your first document to get started",
+  "uploadDocument": "Upload Document",
+  "items": "{count} items",
+  "@items": {
+    "description": "Number of items in a collection",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "files": "{count, plural, =0{no files} =1{1 file} other{{count} files}}",
+  "@files": {
+    "description": "Number of files in a collection",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "createCollectionTooltip": "Create collection",
+  "uploadDocumentTooltip": "Upload document",
+  "restore": "Restore",
+  "restoreFile": "Restore {fileName}",
+  "@restoreFile": {
+    "description": "Dialog title for restoring a file from trash",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      }
+    }
+  },
+  "noCollectionsAvailable": "No collections available",
+  "emptyTrash": "Empty trash",
+  "emptyTrashTooltip": "Empty trash",
+  "emptyTrashConfirmation": "Are you sure you want to permanently delete all items in trash? This action cannot be undone.",
+  "fileTitle": "File title",
+  "note": "Note",
+  "optionalNote": "Optional note",
+  "upload": "Upload",
+  "documentsHint": "Documents",
+  "searchHint": "Search...",
+  "noCollectionsFoundForQuery": "No collections found for \"{query}\"",
+  "@noCollectionsFoundForQuery": {
+    "description": "Message when no collections match the search query",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "vacation"
+      }
+    }
+  },
+  "uncategorized": "Uncategorized",
+  "syncingTrash": "Syncing trash...",
+  "restoring": "Restoring...",
+  "restoredFileToCollection": "Restored \"{fileName}\" to \"{collectionName}\"",
+  "@restoredFileToCollection": {
+    "description": "Success message when file is restored to a collection",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      },
+      "collectionName": {
+        "type": "String",
+        "example": "Vacation Photos"
+      }
+    }
+  },
+  "clearingTrash": "Clearing trash...",
+  "trashIsEmpty": "Trash is empty",
+  "share": "Share",
+  "shareLink": "Share link",
+  "creatingShareLink": "Creating link...",
+  "shareThisLink": "Anyone with this link can access your file.",
+  "copyLink": "Copy link",
+  "deleteLink": "Delete link",
+  "close": "Close",
+  "linkCopiedToClipboard": "Link copied to clipboard",
+  "deleteShareLink": "Delete link",
+  "deleteShareLinkDialogTitle": "Delete link?",
+  "deleteShareLinkConfirmation": "People with this link will no longer be able to access the file.",
+  "deletingShareLink": "Deleting link...",
+  "shareLinkDeletedSuccessfully": "Link deleted successfully",
+  "failedToCreateShareLink": "Failed to create link",
+  "failedToDeleteShareLink": "Failed to delete link",
+  "deletingFile": "Deleting file...",
+  "changeEmail": "Change email",
+  "authToChangeYourEmail": "Please authenticate to change your email",
+  "changePasswordTitle": "Change password",
+  "authToChangeYourPassword": "Please authenticate to change your password",
+  "recoveryKey": "Recovery key",
+  "ok": "Ok",
+  "logout": "Logout",
+  "deleteAccount": "Delete account",
+  "areYouSureYouWantToLogout": "Are you sure you want to logout?",
+  "yesLogout": "Yes, logout",
+  "changePassword": "Change password",
+  "authToViewYourRecoveryKey": "Please authenticate to view your recovery key",
+  "account": "Account",
+  "security": "Security",
+  "emailVerificationToggle": "Email verification",
+  "authToChangeEmailVerificationSetting": "Please authenticate to change email verification",
+  "passkey": "Passkey",
+  "authenticateGeneric": "Please authenticate",
+  "somethingWentWrong": "Something went wrong",
+  "appLock": "App lock",
+  "warning": "Warning",
+  "appLockOfflineModeWarning": "You have chosen to proceed without backups. If you forget your applock, you will be locked out from accessing your data.",
+  "authToChangeLockscreenSetting": "Please authenticate to change lockscreen setting",
+  "authToViewPasskey": "Please authenticate to view passkey",
+  "theme": "Theme",
+  "lightTheme": "Light",
+  "darkTheme": "Dark",
+  "systemTheme": "System",
+  "settings": "Settings",
+  "about": "About",
+  "weAreOpenSource": "We are open source!",
+  "privacy": "Privacy",
+  "terms": "Terms",
+  "termsOfServicesTitle": "Terms",
+  "support": "Support",
+  "contactSupport": "Contact support",
+  "help": "Help",
+  "suggestFeatures": "Suggest features",
+  "reportABug": "Report a bug",
+  "reportBug": "Report bug",
+  "social": "Social",
+  "rateUsOnStore": "Rate us on {storeName}",
+  "blog": "Blog",
+  "merchandise": "Merchandise",
+  "twitter": "Twitter",
+  "mastodon": "Mastodon",
+  "matrix": "Matrix",
+  "discord": "Discord",
+  "reddit": "Reddit"
+}

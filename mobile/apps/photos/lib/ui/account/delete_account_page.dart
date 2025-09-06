@@ -27,19 +27,19 @@ class DeleteAccountPage extends StatefulWidget {
 class _DeleteAccountPageState extends State<DeleteAccountPage> {
   bool _hasConfirmedDeletion = false;
   final _feedbackTextCtrl = TextEditingController();
-  late String _defaultSelection = S.of(context).selectReason;
+  late String _defaultSelection = AppLocalizations.of(context).selectReason;
   String? _dropdownValue;
   late final List<String> _deletionReason = [
     _defaultSelection,
-    S.of(context).deleteReason1,
-    S.of(context).deleteReason2,
-    S.of(context).deleteReason3,
-    S.of(context).deleteReason4,
+    AppLocalizations.of(context).deleteReason1,
+    AppLocalizations.of(context).deleteReason2,
+    AppLocalizations.of(context).deleteReason3,
+    AppLocalizations.of(context).deleteReason4,
   ];
 
   @override
   Widget build(BuildContext context) {
-    _defaultSelection = S.of(context).selectReason;
+    _defaultSelection = AppLocalizations.of(context).selectReason;
     _dropdownValue ??= _defaultSelection;
     final double dropDownTextSize = MediaQuery.of(context).size.width - 120;
 
@@ -47,7 +47,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: Text(S.of(context).deleteAccount),
+        title: Text(AppLocalizations.of(context).deleteAccount),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           color: Theme.of(context).iconTheme.color,
@@ -67,7 +67,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Text(
-                  S.of(context).askDeleteReason,
+                  AppLocalizations.of(context).askDeleteReason,
                   style: getEnteTextTheme(context).body,
                 ),
               ),
@@ -110,7 +110,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Text(
-                  S.of(context).deleteAccountFeedbackPrompt,
+                  AppLocalizations.of(context).deleteAccountFeedbackPrompt,
                   style: getEnteTextTheme(context).body,
                 ),
               ),
@@ -130,7 +130,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                   ),
                   filled: true,
                   fillColor: Colors.transparent,
-                  hintText: S.of(context).feedback,
+                  hintText: AppLocalizations.of(context).feedback,
                   contentPadding: const EdgeInsets.all(12),
                 ),
                 controller: _feedbackTextCtrl,
@@ -153,7 +153,8 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          S.of(context).kindlyHelpUsWithThisInformation,
+                          AppLocalizations.of(context)
+                              .kindlyHelpUsWithThisInformation,
                           style: getEnteTextTheme(context)
                               .smallBold
                               .copyWith(color: colorScheme.warning700),
@@ -184,7 +185,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         child: Text(
-                          S.of(context).confirmDeletePrompt,
+                          AppLocalizations.of(context).confirmDeletePrompt,
                           style: getEnteTextTheme(context).bodyMuted,
                           textAlign: TextAlign.left,
                         ),
@@ -199,7 +200,8 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                   children: [
                     ButtonWidget(
                       buttonType: ButtonType.critical,
-                      labelText: S.of(context).confirmAccountDeletion,
+                      labelText:
+                          AppLocalizations.of(context).confirmAccountDeletion,
                       isDisabled: _shouldBlockDeletion(),
                       onTap: () async {
                         await _initiateDelete(context);
@@ -209,7 +211,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                     const SizedBox(height: 8),
                     ButtonWidget(
                       buttonType: ButtonType.secondary,
-                      labelText: S.of(context).cancel,
+                      labelText: AppLocalizations.of(context).cancel,
                       onTap: () async {
                         Navigator.of(context).pop();
                       },
@@ -242,9 +244,10 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
   Future<void> _initiateDelete(BuildContext context) async {
     final choice = await showChoiceDialog(
       context,
-      title: S.of(context).confirmAccountDeletion,
-      body: S.of(context).deleteConfirmDialogBody,
-      firstButtonLabel: S.of(context).deleteAccountPermanentlyButton,
+      title: AppLocalizations.of(context).confirmAccountDeletion,
+      body: AppLocalizations.of(context).deleteConfirmDialogBody,
+      firstButtonLabel:
+          AppLocalizations.of(context).deleteAccountPermanentlyButton,
       firstButtonType: ButtonType.critical,
       firstButtonOnTap: () async {
         final deleteChallengeResponse =
@@ -283,7 +286,10 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
         feedback: _feedbackTextCtrl.text.trim(),
       );
       Navigator.of(context).popUntil((route) => route.isFirst);
-      showShortToast(context, S.of(context).yourAccountHasBeenDeleted);
+      showShortToast(
+        context,
+        AppLocalizations.of(context).yourAccountHasBeenDeleted,
+      );
     } catch (e, s) {
       Logger("DeleteAccount").severe("failed to delete", e, s);
       await showGenericErrorDialog(context: context, error: e);

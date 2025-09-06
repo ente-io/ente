@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:archive/archive_io.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:ente_auth/core/configuration.dart';
-import 'package:ente_auth/core/logging/super_logging.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/dialog_widget.dart';
@@ -14,11 +13,11 @@ import 'package:ente_auth/utils/directory_utils.dart';
 import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/share_utils.dart';
 import 'package:ente_auth/utils/toast_util.dart';
+import 'package:ente_logging/logging.dart';
 import "package:file_saver/file_saver.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import "package:intl/intl.dart";
-import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -232,9 +231,13 @@ Future<void> exportLogs(
       MimeType.zip,
     );
   } else {
-    await Share.shareXFiles(
-      [XFile(zipFilePath, mimeType: 'application/zip')],
-      sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
+    await SharePlus.instance.share(
+      ShareParams(
+        files: <XFile>[
+          XFile(zipFilePath, mimeType: 'application/zip'),
+        ],
+        sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
+      ),
     );
   }
 }

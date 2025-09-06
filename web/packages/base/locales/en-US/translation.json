@@ -685,5 +685,17 @@
     "person_favorites": "{{name}}'s favorites",
     "shared_favorites": "Shared favorites",
     "added_by_name": "Added by {{name}}",
-    "unowned_files_not_processed": "Files added by other users were not processed"
+    "unowned_files_not_processed": "Files added by other users were not processed",
+    "custom_domains": "Custom domains",
+    "custom_domains_desc": "Use your own domain when sharing",
+    "link_your_domain": "Link your domain",
+    "domain": "Domain",
+    "domain_help": "Any domain or subdomain you own",
+    "invalid_domain": "Invalid domain",
+    "already_linked_domain": "Domain already linked by a user",
+    "add_dns_entry": "Add DNS entry",
+    "add_dns_entry_hint": "On your DNS provider, add a CNAME from your domain to <b>{{host}}</b>",
+    "custom_domains_help": "For more information, see <a>help</a>",
+    "num_1": "1",
+    "num_2": "2"
 }

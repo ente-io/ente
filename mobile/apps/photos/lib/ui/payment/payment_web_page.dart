@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:collection/collection.dart' show IterableNullableExtension;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -63,7 +62,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(S.of(context).subscription),
+          title: Text(AppLocalizations.of(context).subscription),
         ),
         body: Column(
           children: <Widget>[
@@ -110,7 +109,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
                 },
               ),
             ),
-          ].whereNotNull().toList(),
+          ].nonNulls.toList(),
         ),
       ),
     );
@@ -146,11 +145,11 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
       useRootNavigator: false,
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(S.of(context).areYouSureYouWantToExit),
+        title: Text(AppLocalizations.of(context).areYouSureYouWantToExit),
         actions: <Widget>[
           TextButton(
             child: Text(
-              S.of(context).yes,
+              AppLocalizations.of(context).yes,
               style: const TextStyle(
                 color: Colors.redAccent,
               ),
@@ -159,7 +158,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
           ),
           TextButton(
             child: Text(
-              S.of(context).no,
+              AppLocalizations.of(context).no,
               style: TextStyle(
                 color: Theme.of(context).colorScheme.greenAlternative,
               ),
@@ -204,11 +203,11 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: Text(S.of(context).paymentFailed),
-        content: Text(S.of(context).paymentFailedMessage),
+        title: Text(AppLocalizations.of(context).paymentFailed),
+        content: Text(AppLocalizations.of(context).paymentFailedMessage),
         actions: <Widget>[
           TextButton(
-            child: Text(S.of(context).contactSupport),
+            child: Text(AppLocalizations.of(context).contactSupport),
             onPressed: () async {
               Navigator.of(context).pop('dialog');
               await sendEmail(
@@ -235,17 +234,18 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
         paymentProvider: stripe,
       );
       final content = widget.actionType == 'buy'
-          ? S.of(context).yourPurchaseWasSuccessful
-          : S.of(context).yourSubscriptionWasUpdatedSuccessfully;
+          ? AppLocalizations.of(context).yourPurchaseWasSuccessful
+          : AppLocalizations.of(context).yourSubscriptionWasUpdatedSuccessfully;
       await _showExitPageDialog(
-        title: S.of(context).thankYou,
+        title: AppLocalizations.of(context).thankYou,
         content: content,
       );
     } catch (error) {
       _logger.severe(error);
       await _showExitPageDialog(
-        title: S.of(context).failedToVerifyPaymentStatus,
-        content: S.of(context).pleaseWaitForSometimeBeforeRetrying,
+        title: AppLocalizations.of(context).failedToVerifyPaymentStatus,
+        content:
+            AppLocalizations.of(context).pleaseWaitForSometimeBeforeRetrying,
       );
     }
   }
@@ -262,7 +262,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
         actions: <Widget>[
           TextButton(
             child: Text(
-              S.of(context).ok,
+              AppLocalizations.of(context).ok,
               style: TextStyle(
                 color: Theme.of(context).colorScheme.greenAlternative,
               ),

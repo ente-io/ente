@@ -90,7 +90,7 @@ class FileBottomBarState extends State<FileBottomBar> {
         widget.file.ownerID == null || widget.file.ownerID == widget.userID;
     children.add(
       Tooltip(
-        message: S.of(context).info,
+        message: AppLocalizations.of(context).info,
         child: Padding(
           padding: const EdgeInsets.only(top: 12),
           child: IconButton(
@@ -115,7 +115,7 @@ class FileBottomBarState extends State<FileBottomBar> {
           (widget.file.fileType == FileType.video)) {
         children.add(
           Tooltip(
-            message: S.of(context).edit,
+            message: AppLocalizations.of(context).edit,
             child: Padding(
               padding: const EdgeInsets.only(top: 12),
               child: IconButton(
@@ -134,7 +134,7 @@ class FileBottomBarState extends State<FileBottomBar> {
       if (isOwnedByUser) {
         children.add(
           Tooltip(
-            message: S.of(context).delete,
+            message: AppLocalizations.of(context).delete,
             child: Padding(
               padding: const EdgeInsets.only(top: 12),
               child: IconButton(
@@ -155,7 +155,7 @@ class FileBottomBarState extends State<FileBottomBar> {
 
       children.add(
         Tooltip(
-          message: S.of(context).share,
+          message: AppLocalizations.of(context).share,
           child: Padding(
             padding: const EdgeInsets.only(top: 12),
             child: IconButton(
@@ -192,8 +192,8 @@ class FileBottomBarState extends State<FileBottomBar> {
                     end: Alignment.bottomCenter,
                     colors: [
                       Colors.transparent,
-                      Colors.black.withOpacity(0.6),
-                      Colors.black.withOpacity(0.72),
+                      Colors.black.withValues(alpha: 0.6),
+                      Colors.black.withValues(alpha: 0.72),
                     ],
                     stops: const [0, 0.8, 1],
                   ),
@@ -226,7 +226,7 @@ class FileBottomBarState extends State<FileBottomBar> {
   void _addTrashOptions(List<Widget> children) {
     children.add(
       Tooltip(
-        message: S.of(context).restore,
+        message: AppLocalizations.of(context).restore,
         child: Padding(
           padding: const EdgeInsets.only(top: 12),
           child: IconButton(
@@ -250,7 +250,7 @@ class FileBottomBarState extends State<FileBottomBar> {
 
     children.add(
       Tooltip(
-        message: S.of(context).delete,
+        message: AppLocalizations.of(context).delete,
         child: Padding(
           padding: const EdgeInsets.only(top: 12),
           child: IconButton(

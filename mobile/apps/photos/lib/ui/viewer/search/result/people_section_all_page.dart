@@ -217,8 +217,8 @@ class SelectablePersonSearchExample extends StatelessWidget {
                           ),
                           child: ColorFiltered(
                             colorFilter: ColorFilter.mode(
-                              Colors.black.withOpacity(
-                                isSelected ? 0.4 : 0,
+                              Colors.black.withValues(
+                                alpha: isSelected ? 0.4 : 0,
                               ),
                               BlendMode.darken,
                             ),
@@ -456,7 +456,9 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
         } else if (snapshot.hasError) {
           return const Center(child: Icon(Icons.error_outline_rounded));
         } else if (normalFaces.isEmpty && _isLoaded) {
-          return Center(child: Text(S.of(context).noResultsFound + '.'));
+          return Center(
+            child: Text(AppLocalizations.of(context).noResultsFound + '.'),
+          );
         } else {
           final screenWidth = MediaQuery.of(context).size.width;
           final crossAxisCount = (screenWidth / 100).floor();
@@ -596,7 +598,10 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
               side: BorderSide(
-                color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                color: Theme.of(context)
+                    .colorScheme
+                    .outline
+                    .withValues(alpha: 0.3),
                 width: 1,
               ),
             ),
@@ -606,8 +611,8 @@ class _PeopleSectionAllWidgetState extends State<PeopleSectionAllWidget> {
             children: [
               Text(
                 _showingAllFaces
-                    ? S.of(context).showLessFaces
-                    : S.of(context).showMoreFaces,
+                    ? AppLocalizations.of(context).showLessFaces
+                    : AppLocalizations.of(context).showMoreFaces,
                 style: getEnteTextTheme(context).small.copyWith(
                       color: Theme.of(context).colorScheme.primary,
                     ),

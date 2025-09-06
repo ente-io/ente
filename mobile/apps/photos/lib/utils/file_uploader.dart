@@ -23,7 +23,7 @@ import "package:photos/events/file_uploaded_event.dart";
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
-import 'package:photos/main.dart';
+import "package:photos/main.dart";
 import "package:photos/models/api/metadata.dart";
 import "package:photos/models/backup/backup_item.dart";
 import "package:photos/models/backup/backup_item_status.dart";
@@ -519,7 +519,8 @@ class FileUploader {
         DateTime.now().microsecondsSinceEpoch,
       );
     } catch (e) {
-      _logger.warning("Lock was already taken for " + file.toString());
+      final lockInfo = await _uploadLocks.getLockData(lockKey);
+      _logger.warning("Lock was already taken ($lockInfo) for " + file.tag);
       throw LockAlreadyAcquiredError();
     }
 

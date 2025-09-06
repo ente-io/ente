@@ -2,34 +2,38 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:ente_accounts/services/user_service.dart';
 import "package:ente_auth/app/view/app.dart";
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/constants.dart';
-import 'package:ente_auth/core/logging/super_logging.dart';
-import 'package:ente_auth/core/network.dart';
 import 'package:ente_auth/ente_theme_data.dart';
+import 'package:ente_auth/l10n/l10n.dart'; 
 import 'package:ente_auth/locale.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
 import 'package:ente_auth/services/billing_service.dart';
 import 'package:ente_auth/services/notification_service.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/services/update_service.dart';
-import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/services/window_listener_service.dart';
+import 'package:ente_auth/store/authenticator_db.dart';
 import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/store/code_store.dart';
-import 'package:ente_auth/ui/tools/app_lock.dart';
-import 'package:ente_auth/ui/tools/lock_screen.dart';
+import 'package:ente_auth/ui/home_page.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
 import 'package:ente_auth/utils/directory_utils.dart';
-import 'package:ente_auth/utils/lock_screen_settings.dart';
 import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/window_protocol_handler.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import 'package:ente_lock_screen/lock_screen_settings.dart';
+import 'package:ente_lock_screen/ui/app_lock.dart';
+import 'package:ente_lock_screen/ui/lock_screen.dart';
+import 'package:ente_logging/logging.dart';
+import 'package:ente_network/network.dart';
+import 'package:ente_strings/l10n/strings_localizations.dart';
+import 'package:ente_ui/theme/theme_config.dart';
 import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
 import 'package:flutter_displaymode/flutter_displaymode.dart';
-import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
@@ -40,8 +44,10 @@ Future<void> initSystemTray() async {
   if (PlatformUtil.isMobile()) return;
   String path = Platform.isWindows
       ? 'assets/icons/auth-icon.ico'
-      : 'assets/icons/auth-icon.png';
-  await trayManager.setIcon(path);
+      : Platform.isMacOS
+          ? 'assets/icons/auth-icon-monochrome.png'
+          : 'assets/icons/auth-icon.png';
+  await trayManager.setIcon(path, isTemplate: true);
   Menu menu = Menu(
     items: [
       MenuItem(
@@ -87,7 +93,9 @@ void main() async {
 }
 
 Future<void> _runInForeground() async {
+  AppThemeConfig.initialize(EnteApp.auth);
   final savedThemeMode = _themeMode(await AdaptiveTheme.getThemeMode());
+  final configuration = Configuration.instance;
   return await _runWithLogs(() async {
     _logger.info("Starting app in foreground");
     try {
@@ -101,12 +109,19 @@ Future<void> _runInForeground() async {
     runApp(
       AppLock(
         builder: (args) => App(locale: locale),
-        lockScreen: const LockScreen(),
+        lockScreen: LockScreen(configuration),
         enabled: await LockScreenSettings.instance.shouldShowLockScreen(),
         locale: locale,
         lightTheme: lightThemeData,
         darkTheme: darkThemeData,
         savedThemeMode: savedThemeMode,
+        localeListResolutionCallback: localResolutionCallBack,
+        localizationsDelegates:  const [
+          ...StringsLocalizations.localizationsDelegates,
+          ...AppLocalizations.localizationsDelegates,
+        ],
+        supportedLocales: appSupportedLocales,
+        backgroundLockLatency: const Duration(seconds: 0),
       ),
     );
   });
@@ -152,13 +167,13 @@ Future<void> _init(bool bool, {String? via}) async {
   await PreferenceService.instance.init();
   await CodeStore.instance.init();
   await CodeDisplayStore.instance.init();
-  await Configuration.instance.init();
-  await Network.instance.init();
-  await UserService.instance.init();
+  await Configuration.instance.init([AuthenticatorDB.instance]);
+  await Network.instance.init(Configuration.instance);
+  await UserService.instance.init(Configuration.instance, const HomePage());
   await AuthenticatorService.instance.init();
   await BillingService.instance.init();
   await NotificationService.instance.init();
   await UpdateService.instance.init();
   await IconUtils.instance.init();
-  await LockScreenSettings.instance.init();
+  await LockScreenSettings.instance.init(Configuration.instance);
 }
