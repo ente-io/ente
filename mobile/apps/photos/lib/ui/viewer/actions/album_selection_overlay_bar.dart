@@ -5,6 +5,7 @@ import "package:photos/models/selected_albums.dart";
 import "package:photos/theme/effects.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/collection_list_page.dart";
+import "package:photos/ui/components/bottom_action_bar/album_action_bar_widget.dart";
 import "package:photos/ui/components/bottom_action_bar/album_bottom_action_bar_widget.dart";
 
 class AlbumSelectionOverlayBar extends StatefulWidget {
@@ -14,6 +15,8 @@ class AlbumSelectionOverlayBar extends StatefulWidget {
   final Color? backgroundColor;
   final UISectionType sectionType;
   final bool showSelectAllButton;
+  final VoidCallback? onCancel;
+  final bool isCollapsed;
 
   const AlbumSelectionOverlayBar(
     this.selectedAlbums,
@@ -21,7 +24,9 @@ class AlbumSelectionOverlayBar extends StatefulWidget {
     this.collections, {
     super.key,
     this.onClose,
+    this.onCancel,
     this.backgroundColor,
+    this.isCollapsed = false,
     this.showSelectAllButton = false,
   });
 
@@ -62,6 +67,14 @@ class _AlbumSelectionOverlayBarState extends State<AlbumSelectionOverlayBar> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
+              AlbumActionBarWidget(
+                selectedAlbums: widget.selectedAlbums,
+                onCancel: () {
+                  if (widget.selectedAlbums.albums.isNotEmpty) {
+                    widget.selectedAlbums.clearAll();
+                  }
+                },
+              ),
               if (widget.showSelectAllButton)
                 Padding(
                   padding: const EdgeInsets.only(right: 4),
@@ -77,6 +90,7 @@ class _AlbumSelectionOverlayBarState extends State<AlbumSelectionOverlayBar> {
                 child: AlbumBottomActionBarWidget(
                   widget.selectedAlbums,
                   widget.sectionType,
+                  isCollapsed: widget.isCollapsed,
                   onCancel: () {
                     if (widget.selectedAlbums.albums.isNotEmpty) {
                       widget.selectedAlbums.clearAll();

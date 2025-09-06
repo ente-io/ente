@@ -24,10 +24,12 @@ import "package:smooth_page_indicator/smooth_page_indicator.dart";
 class AlbumSelectionActionWidget extends StatefulWidget {
   final SelectedAlbums selectedAlbums;
   final UISectionType sectionType;
+  final bool isCollapsed;
 
   const AlbumSelectionActionWidget(
     this.selectedAlbums,
     this.sectionType, {
+    this.isCollapsed = false,
     super.key,
   });
 
@@ -71,17 +73,17 @@ class _AlbumSelectionActionWidgetState
         widget.sectionType == UISectionType.outgoingCollections) {
       items.add(
         SelectionActionButton(
-          labelText: S.of(context).share,
-          icon: Icons.adaptive.share,
-          onTap: _shareCollection,
-        ),
-      );
-      items.add(
-        SelectionActionButton(
           labelText: "Pin",
           icon: Icons.push_pin_rounded,
           onTap: _onPinClick,
           shouldShow: hasUnpinnedAlbum,
+        ),
+      );
+      items.add(
+        SelectionActionButton(
+          labelText: S.of(context).share,
+          icon: Icons.adaptive.share,
+          onTap: _shareCollection,
         ),
       );
 
@@ -132,10 +134,16 @@ class _AlbumSelectionActionWidgetState
         .where((item) => item.shouldShow == null || item.shouldShow == true)
         .toList();
 
-    final List<List<SelectionActionButton>> groupedItems = [];
-    for (int i = 0; i < visibleItems.length; i += 4) {
-      int end = (i + 4 < visibleItems.length) ? i + 4 : visibleItems.length;
-      groupedItems.add(visibleItems.sublist(i, end));
+    final List<SelectionActionButton> firstThreeItems =
+        visibleItems.length > 3 ? visibleItems.take(3).toList() : visibleItems;
+
+    final List<SelectionActionButton> otherItems =
+        visibleItems.length > 3 ? visibleItems.sublist(3) : [];
+
+    final List<List<SelectionActionButton>> groupedOtherItems = [];
+    for (int i = 0; i < otherItems.length; i += 4) {
+      int end = (i + 4 < otherItems.length) ? i + 4 : otherItems.length;
+      groupedOtherItems.add(otherItems.sublist(i, end));
     }
 
     if (visibleItems.isNotEmpty) {
@@ -150,81 +158,130 @@ class _AlbumSelectionActionWidgetState
             ),
             child: Column(
               children: [
-                if (groupedItems.isNotEmpty) ...[
-                  const SizedBox(height: 24),
-                  Container(
-                    width: double.infinity,
-                    height: 74,
-                    decoration: BoxDecoration(
-                      color: getEnteColorScheme(context).backgroundElevated2,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: PageView.builder(
-                      controller: _pageController,
-                      itemCount: groupedItems.length,
-                      onPageChanged: (index) {
-                        if (index >= groupedItems.length &&
-                            groupedItems.isNotEmpty) {
-                          _pageController.animateToPage(
-                            groupedItems.length - 1,
-                            duration: const Duration(seconds: 5),
-                            curve: Curves.easeInOut,
-                          );
-                        }
-                      },
-                      itemBuilder: (context, pageIndex) {
-                        if (pageIndex >= groupedItems.length) {
-                          return const SizedBox();
-                        }
+                // First Row
+                const SizedBox(
+                  height: 4,
+                ),
+                Row(
+                  children: [
+                    for (int i = 0; i < firstThreeItems.length; i++) ...[
+                      Expanded(
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Container(
+                              height: MediaQuery.of(context).size.height * 0.10,
+                              decoration: BoxDecoration(
+                                color: getEnteColorScheme(context)
+                                    .backgroundElevated2,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                            ),
+                            firstThreeItems[i],
+                          ],
+                        ),
+                      ),
+                      if (i != firstThreeItems.length - 1)
+                        const SizedBox(width: 15),
+                    ],
+                  ],
+                ),
 
-                        final currentGroup = groupedItems[pageIndex];
+                // Second Row
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 350),
+                  curve: Curves.easeInOutCubic,
+                  height: widget.isCollapsed ? 0 : null,
+                  child: AnimatedOpacity(
+                    opacity: widget.isCollapsed ? 0.0 : 1.0,
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeInOut,
+                    child: ClipRect(
+                      child: Column(
+                        children: [
+                          if (groupedOtherItems.isNotEmpty) ...[
+                            const SizedBox(height: 24),
+                            Container(
+                              width: double.infinity,
+                              height: 74,
+                              decoration: BoxDecoration(
+                                color: getEnteColorScheme(context)
+                                    .backgroundElevated2,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: PageView.builder(
+                                controller: _pageController,
+                                itemCount: groupedOtherItems.length,
+                                onPageChanged: (index) {
+                                  if (index >= groupedOtherItems.length &&
+                                      groupedOtherItems.isNotEmpty) {
+                                    _pageController.animateToPage(
+                                      groupedOtherItems.length - 1,
+                                      duration: const Duration(seconds: 5),
+                                      curve: Curves.easeInOut,
+                                    );
+                                  }
+                                },
+                                itemBuilder: (context, pageIndex) {
+                                  if (pageIndex >= groupedOtherItems.length) {
+                                    return const SizedBox();
+                                  }
 
-                        return Row(
-                          children: currentGroup.map((item) {
-                            return Expanded(
-                              child: AnimatedSwitcher(
-                                duration: const Duration(seconds: 5),
-                                transitionBuilder: (
-                                  Widget child,
-                                  Animation<double> animation,
-                                ) {
-                                  return FadeTransition(
-                                    opacity: animation,
-                                    child: child,
+                                  final currentGroup =
+                                      groupedOtherItems[pageIndex];
+
+                                  return Row(
+                                    children: currentGroup.map((item) {
+                                      return Expanded(
+                                        child: AnimatedSwitcher(
+                                          duration: const Duration(seconds: 5),
+                                          transitionBuilder: (
+                                            Widget child,
+                                            Animation<double> animation,
+                                          ) {
+                                            return FadeTransition(
+                                              opacity: animation,
+                                              child: child,
+                                            );
+                                          },
+                                          child: item is Widget
+                                              ? KeyedSubtree(
+                                                  key: ValueKey(item.hashCode),
+                                                  child: item,
+                                                )
+                                              : const SizedBox(),
+                                        ),
+                                      );
+                                    }).toList(),
                                   );
                                 },
-                                child: item is Widget
-                                    ? KeyedSubtree(
-                                        key: ValueKey(item.hashCode),
-                                        child: item,
-                                      )
-                                    : const SizedBox(),
                               ),
-                            );
-                          }).toList(),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  if (groupedItems.length > 1)
-                    SmoothPageIndicator(
-                      controller: _pageController,
-                      count: groupedItems.length,
-                      effect: const WormEffect(
-                        dotHeight: 6,
-                        dotWidth: 6,
-                        spacing: 6,
-                        activeDotColor: Colors.white,
+                            ),
+                            const SizedBox(height: 16),
+                            if (groupedOtherItems.length > 1)
+                              SmoothPageIndicator(
+                                controller: _pageController,
+                                count: groupedOtherItems.length,
+                                effect: const WormEffect(
+                                  dotHeight: 6,
+                                  dotWidth: 6,
+                                  spacing: 6,
+                                  activeDotColor: Colors.white,
+                                ),
+                              ),
+                          ],
+                        ],
                       ),
                     ),
-                ],
+                  ),
+                ),
               ],
             ),
           ),
         ),
       );
     }
+
     return const SizedBox.shrink();
   }
 

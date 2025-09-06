@@ -35,6 +35,8 @@ class _AlbumActionBarWidgetState extends State<AlbumActionBarWidget> {
   @override
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
+    final colorScheme = getEnteColorScheme(context);
+
     return SizedBox(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
@@ -43,29 +45,56 @@ class _AlbumActionBarWidgetState extends State<AlbumActionBarWidget> {
           children: [
             Flexible(
               flex: 1,
-              child: ValueListenableBuilder(
-                valueListenable: _selectedAlbumNotifier,
-                builder: (context, value, child) {
-                  return Text(
-                    S.of(context).selectedAlbums(
-                          widget.selectedAlbums?.albums.length ?? 0,
-                        ),
-                    style: textTheme.miniMuted,
-                  );
-                },
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                decoration: BoxDecoration(
+                  color: colorScheme.backgroundElevated2,
+                  borderRadius: BorderRadius.circular(100),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 4,
+                      offset: const Offset(0, -1),
+                    ),
+                  ],
+                ),
+                child: ValueListenableBuilder(
+                  valueListenable: _selectedAlbumNotifier,
+                  builder: (context, value, child) {
+                    return Text(
+                      S.of(context).selectedAlbums(
+                            widget.selectedAlbums?.albums.length ?? 0,
+                          ),
+                      style: textTheme.miniMuted,
+                    );
+                  },
+                ),
               ),
             ),
             Flexible(
               flex: 1,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () {
-                    widget.onCancel?.call();
-                  },
-                  child: Align(
-                    alignment: Alignment.centerRight,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  widget.onCancel?.call();
+                },
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: colorScheme.backgroundElevated2,
+                      borderRadius: BorderRadius.circular(100),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 4,
+                          offset: const Offset(0, -1),
+                        ),
+                      ],
+                    ),
                     child: Text(
                       S.of(context).cancel,
                       style: textTheme.mini,
