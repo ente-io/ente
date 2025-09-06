@@ -16,7 +16,7 @@ When uploading, Ente will ignore exact duplicate files. This allows you to
 resume interrupted uploads, or drag and drop the same folder, or reinstall the
 app, and expect Ente to automatically skip duplicates and only add new files.
 
-The duplicate detection works slightly different on each platform, to cater to
+The duplicate detection works slightly differently on each platform, to cater to
 the platform's nuances.
 
 #### Mobile
