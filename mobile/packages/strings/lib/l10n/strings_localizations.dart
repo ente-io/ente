@@ -1547,6 +1547,12 @@ abstract class StringsLocalizations {
   /// **'You are about to add {email} as a trusted contact. They will be able to recover your account if you are absent for {numOfDays} days.'**
   String confirmAddingTrustedContact(String email, int numOfDays);
 
+  /// No description provided for @youCannotShareWithYourself.
+  ///
+  /// In en, this message translates to:
+  /// **'You cannot share with yourself'**
+  String get youCannotShareWithYourself;
+
   /// No description provided for @emailNoEnteAccount.
   ///
   /// In en, this message translates to:
@@ -1564,6 +1570,12 @@ abstract class StringsLocalizations {
   /// In en, this message translates to:
   /// **'Hey, can you confirm that this is your ente.io verification ID: {verificationID}'**
   String shareTextConfirmOthersVerificationID(Object verificationID);
+
+  /// No description provided for @inviteToEnte.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite to Ente'**
+  String get inviteToEnte;
 }
 
 class _StringsLocalizationsDelegate
