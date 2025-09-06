@@ -15,7 +15,7 @@ import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:logging/logging.dart";
 
-class VerifyIdentifyDialog extends StatefulWidget {
+class VerifyIdentityDialog extends StatefulWidget {
   // email id of the user who's verification ID is being displayed for
   // verification
   final String email;
@@ -24,7 +24,7 @@ class VerifyIdentifyDialog extends StatefulWidget {
   final bool self;
   final BaseConfiguration config;
 
-  VerifyIdentifyDialog({
+  VerifyIdentityDialog({
     super.key,
     required this.self,
     this.email = '',
@@ -36,10 +36,10 @@ class VerifyIdentifyDialog extends StatefulWidget {
   }
 
   @override
-  State<VerifyIdentifyDialog> createState() => _VerifyIdentifyDialogState();
+  State<VerifyIdentityDialog> createState() => _VerifyIdentityDialogState();
 }
 
-class _VerifyIdentifyDialogState extends State<VerifyIdentifyDialog> {
+class _VerifyIdentityDialogState extends State<VerifyIdentityDialog> {
   final bool doesUserExist = true;
 
   @override
