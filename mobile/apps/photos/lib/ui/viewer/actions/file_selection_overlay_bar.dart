@@ -128,10 +128,10 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
           widget.onExpand?.call();
         }
       },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 350),
+      child: AnimatedSize(
+        duration: const Duration(milliseconds: 500),
         curve: Curves.easeInOutCubic,
-        width: double.infinity,
+        alignment: Alignment.topCenter,
         child: ValueListenableBuilder(
           valueListenable: _hasSelectedFilesNotifier,
           builder: (context, value, child) {
@@ -142,7 +142,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
               crossFadeState: _hasSelectedFilesNotifier.value
                   ? CrossFadeState.showFirst
                   : CrossFadeState.showSecond,
-              duration: const Duration(milliseconds: 350),
+              duration: const Duration(milliseconds: 500),
               firstChild: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
