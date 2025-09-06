@@ -1593,6 +1593,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Legacy'**
   String get legacy;
+
+  /// No description provided for @authToManageLegacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Please authenticate to manage your trusted contacts'**
+  String get authToManageLegacy;
 }
 
 class _AppLocalizationsDelegate
