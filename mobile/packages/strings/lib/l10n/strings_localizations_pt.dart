@@ -777,6 +777,9 @@ class StringsLocalizationsPt extends StringsLocalizations {
   }
 
   @override
+  String get youCannotShareWithYourself => 'You cannot share with yourself';
+
+  @override
   String emailNoEnteAccount(Object email) {
     return '$email does not have an Ente account.\n\nSend them an invite to share files.';
   }
@@ -790,4 +793,7 @@ class StringsLocalizationsPt extends StringsLocalizations {
   String shareTextConfirmOthersVerificationID(Object verificationID) {
     return 'Hey, can you confirm that this is your ente.io verification ID: $verificationID';
   }
+
+  @override
+  String get inviteToEnte => 'Invite to Ente';
 }
