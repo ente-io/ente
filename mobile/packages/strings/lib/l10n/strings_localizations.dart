@@ -1439,11 +1439,131 @@ abstract class StringsLocalizations {
   /// **'You can now recover {email}\'s account by setting a new password.'**
   String recoveryReady(String email);
 
+  /// No description provided for @warning.
+  ///
+  /// In en, this message translates to:
+  /// **'Warning'**
+  String get warning;
+
+  /// No description provided for @proceed.
+  ///
+  /// In en, this message translates to:
+  /// **'Proceed'**
+  String get proceed;
+
+  /// No description provided for @done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get done;
+
+  /// No description provided for @enterEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter email'**
+  String get enterEmail;
+
+  /// No description provided for @verifyIDLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify'**
+  String get verifyIDLabel;
+
+  /// No description provided for @invalidEmailAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email address'**
+  String get invalidEmailAddress;
+
+  /// No description provided for @enterValidEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid email address.'**
+  String get enterValidEmail;
+
+  /// No description provided for @addANewEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a new email'**
+  String get addANewEmail;
+
+  /// No description provided for @orPickAnExistingOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Or pick an existing one'**
+  String get orPickAnExistingOne;
+
+  /// No description provided for @shareTextRecommendUsingEnte.
+  ///
+  /// In en, this message translates to:
+  /// **'Download Ente so we can easily share original quality files\n\nhttps://ente.io'**
+  String get shareTextRecommendUsingEnte;
+
+  /// No description provided for @sendInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Send invite'**
+  String get sendInvite;
+
   /// No description provided for @trustedInviteBody.
   ///
   /// In en, this message translates to:
   /// **'You have been invited to be a legacy contact by {email}.'**
   String trustedInviteBody(Object email);
+
+  /// No description provided for @verifyEmailID.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify {email}'**
+  String verifyEmailID(Object email);
+
+  /// No description provided for @thisIsYourVerificationId.
+  ///
+  /// In en, this message translates to:
+  /// **'This is your Verification ID'**
+  String get thisIsYourVerificationId;
+
+  /// No description provided for @someoneSharingAlbumsWithYouShouldSeeTheSameId.
+  ///
+  /// In en, this message translates to:
+  /// **'Someone sharing albums with you should see the same ID on their device.'**
+  String get someoneSharingAlbumsWithYouShouldSeeTheSameId;
+
+  /// No description provided for @howToViewShareeVerificationID.
+  ///
+  /// In en, this message translates to:
+  /// **'Please ask them to long-press their email address on the settings screen, and verify that the IDs on both devices match.'**
+  String get howToViewShareeVerificationID;
+
+  /// No description provided for @thisIsPersonVerificationId.
+  ///
+  /// In en, this message translates to:
+  /// **'This is {email}\'s Verification ID'**
+  String thisIsPersonVerificationId(String email);
+
+  /// No description provided for @confirmAddingTrustedContact.
+  ///
+  /// In en, this message translates to:
+  /// **'You are about to add {email} as a trusted contact. They will be able to recover your account if you are absent for {numOfDays} days.'**
+  String confirmAddingTrustedContact(String email, int numOfDays);
+
+  /// No description provided for @emailNoEnteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'{email} does not have an Ente account.\n\nSend them an invite to share files.'**
+  String emailNoEnteAccount(Object email);
+
+  /// No description provided for @shareMyVerificationID.
+  ///
+  /// In en, this message translates to:
+  /// **'Here\'s my verification ID: {verificationID} for ente.io.'**
+  String shareMyVerificationID(Object verificationID);
+
+  /// No description provided for @shareTextConfirmOthersVerificationID.
+  ///
+  /// In en, this message translates to:
+  /// **'Hey, can you confirm that this is your ente.io verification ID: {verificationID}'**
+  String shareTextConfirmOthersVerificationID(Object verificationID);
 }
 
 class _StringsLocalizationsDelegate

@@ -823,5 +823,45 @@
       }
     }
   },
-  "trustedInviteBody": "You have been invited to be a legacy contact by {email}."
+  "warning": "Warning",
+  "proceed": "Proceed",
+  "done": "Done",
+  "enterEmail": "Enter email",
+  "verifyIDLabel": "Verify",
+  "invalidEmailAddress": "Invalid email address",
+  "enterValidEmail": "Please enter a valid email address.",
+  "addANewEmail": "Add a new email",
+  "orPickAnExistingOne": "Or pick an existing one",
+  "shareTextRecommendUsingEnte": "Download Ente so we can easily share original quality files\n\nhttps://ente.io",
+  "sendInvite": "Send invite",
+  "trustedInviteBody": "You have been invited to be a legacy contact by {email}.",
+  "verifyEmailID": "Verify {email}",
+  "thisIsYourVerificationId": "This is your Verification ID",
+  "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Someone sharing albums with you should see the same ID on their device.",
+  "howToViewShareeVerificationID": "Please ask them to long-press their email address on the settings screen, and verify that the IDs on both devices match.",
+  "thisIsPersonVerificationId": "This is {email}'s Verification ID",
+  "@thisIsPersonVerificationId": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@ente.io"
+      }
+    }
+  },
+  "confirmAddingTrustedContact": "You are about to add {email} as a trusted contact. They will be able to recover your account if you are absent for {numOfDays} days.",
+  "@confirmAddingTrustedContact": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "emailNoEnteAccount": "{email} does not have an Ente account.\n\nSend them an invite to share files.",
+  "shareMyVerificationID": "Here's my verification ID: {verificationID} for ente.io.",
+  "shareTextConfirmOthersVerificationID": "Hey, can you confirm that this is your ente.io verification ID: {verificationID}"
 }

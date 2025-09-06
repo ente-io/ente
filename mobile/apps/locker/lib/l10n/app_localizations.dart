@@ -1587,6 +1587,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'To enable app lock, please setup device passcode or screen lock in your system settings.'**
   String get toEnableAppLockPleaseSetupDevicePasscodeOrScreen;
+
+  /// No description provided for @legacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Legacy'**
+  String get legacy;
 }
 
 class _AppLocalizationsDelegate

@@ -709,7 +709,82 @@ class StringsLocalizationsEn extends StringsLocalizations {
   }
 
   @override
+  String get warning => 'Warning';
+
+  @override
+  String get proceed => 'Proceed';
+
+  @override
+  String get done => 'Done';
+
+  @override
+  String get enterEmail => 'Enter email';
+
+  @override
+  String get verifyIDLabel => 'Verify';
+
+  @override
+  String get invalidEmailAddress => 'Invalid email address';
+
+  @override
+  String get enterValidEmail => 'Please enter a valid email address.';
+
+  @override
+  String get addANewEmail => 'Add a new email';
+
+  @override
+  String get orPickAnExistingOne => 'Or pick an existing one';
+
+  @override
+  String get shareTextRecommendUsingEnte =>
+      'Download Ente so we can easily share original quality files\n\nhttps://ente.io';
+
+  @override
+  String get sendInvite => 'Send invite';
+
+  @override
   String trustedInviteBody(Object email) {
     return 'You have been invited to be a legacy contact by $email.';
+  }
+
+  @override
+  String verifyEmailID(Object email) {
+    return 'Verify $email';
+  }
+
+  @override
+  String get thisIsYourVerificationId => 'This is your Verification ID';
+
+  @override
+  String get someoneSharingAlbumsWithYouShouldSeeTheSameId =>
+      'Someone sharing albums with you should see the same ID on their device.';
+
+  @override
+  String get howToViewShareeVerificationID =>
+      'Please ask them to long-press their email address on the settings screen, and verify that the IDs on both devices match.';
+
+  @override
+  String thisIsPersonVerificationId(String email) {
+    return 'This is $email\'s Verification ID';
+  }
+
+  @override
+  String confirmAddingTrustedContact(String email, int numOfDays) {
+    return 'You are about to add $email as a trusted contact. They will be able to recover your account if you are absent for $numOfDays days.';
+  }
+
+  @override
+  String emailNoEnteAccount(Object email) {
+    return '$email does not have an Ente account.\n\nSend them an invite to share files.';
+  }
+
+  @override
+  String shareMyVerificationID(Object verificationID) {
+    return 'Here\'s my verification ID: $verificationID for ente.io.';
+  }
+
+  @override
+  String shareTextConfirmOthersVerificationID(Object verificationID) {
+    return 'Hey, can you confirm that this is your ente.io verification ID: $verificationID';
   }
 }
