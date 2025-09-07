@@ -14,6 +14,31 @@ class CodeDisplayStore {
 
   late CodeStore _codeStore;
 
+  final ValueNotifier<bool> isSelectionModeActive = ValueNotifier(false);
+  final ValueNotifier<Set<String>> selectedCodeIds = ValueNotifier(<String>{});
+
+  // toggles the selection status of a code
+  void toggleSelection(String codeId){
+    final newSelection = Set<String>.from(selectedCodeIds.value);
+
+    if(newSelection.contains(codeId)){
+      newSelection.remove(codeId);
+    } 
+  
+    else{
+      newSelection.add(codeId);
+    }
+
+    selectedCodeIds.value = newSelection; //if we selected atleast one code, then we're in selection mode.. else: exit selection mode
+    isSelectionModeActive.value = newSelection.isNotEmpty;
+  }
+
+  //method to clear the entire selection
+  void clearSelection(){
+    selectedCodeIds.value = <String>{};
+    isSelectionModeActive.value = false;
+  }
+
   Future<void> init() async {
     _codeStore = CodeStore.instance;
   }

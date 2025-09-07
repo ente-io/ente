@@ -11,6 +11,7 @@
   "setupFirstAccount": "Setup your first account",
   "importScanQrCode": "Scan a QR Code",
   "qrCode": "QR Code",
+  "qr": "QR",
   "importEnterSetupKey": "Enter a setup key",
   "importAccountPageTitle": "Enter account details",
   "secretCanNotBeEmpty": "Secret can not be empty",
@@ -139,6 +140,7 @@
   "existingUser": "Existing User",
   "newUser": "New to Ente",
   "delete": "Delete",
+  "addTag": "Add tag",
   "enterYourPasswordHint": "Enter your password",
   "forgotPassword": "Forgot password",
   "oops": "Oops",
@@ -546,5 +548,9 @@
   "saveAction":"Save",
   "saveBackup":"Save backup",
   "changeLocation": "Change location",
-  "changeCurrentLocation": "Change current location"
+  "changeCurrentLocation": "Change current location",
+  "done": "Done",
+  "addNew": "Add new",
+  "selected": "selected",
+  "moveMultipleToTrashMessage": "Are you sure you want to move {count} item(s) to the trash?"
 }

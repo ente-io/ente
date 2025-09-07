@@ -14,6 +14,7 @@ import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/onboarding/model/tag_enums.dart';
 import 'package:ente_auth/onboarding/view/common/tag_chip.dart';
 import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
+import 'package:ente_auth/onboarding/view/view_qr_page.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/store/code_store.dart';
@@ -26,17 +27,22 @@ import 'package:ente_auth/ui/common/loading_widget.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/dialog_widget.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
+import 'package:ente_auth/ui/home/add_tag_sheet.dart';
 import 'package:ente_auth/ui/home/coach_mark_widget.dart';
 import 'package:ente_auth/ui/home/home_empty_state.dart';
 import 'package:ente_auth/ui/home/speed_dial_label_widget.dart';
 import 'package:ente_auth/ui/reorder_codes_page.dart';
 import 'package:ente_auth/ui/scanner_page.dart';
 import 'package:ente_auth/ui/settings_page.dart';
+import 'package:ente_auth/ui/share/code_share.dart';
 import 'package:ente_auth/ui/sort_option_menu.dart';
+import 'package:ente_auth/ui/utils/icon_utils.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/platform_util.dart';
+import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
 import 'package:ente_events/event_bus.dart';
+import 'package:ente_lock_screen/local_authentication_service.dart';
 import 'package:ente_lock_screen/lock_screen_settings.dart';
 import 'package:ente_lock_screen/ui/app_lock.dart';
 import 'package:ente_qr/ente_qr.dart';
@@ -58,6 +64,7 @@ class HomePage extends BaseHomePage {
 }
 
 class _HomePageState extends State<HomePage> {
+  final _codeDisplayStore = CodeDisplayStore.instance;
   late final _settingsPage = SettingsPage(
     emailNotifier: UserService.instance.emailValueNotifier,
     scaffoldKey: scaffoldKey,
@@ -119,6 +126,568 @@ class _HomePageState extends State<HomePage> {
     searchBoxFocusNode = FocusNode();
     ServicesBinding.instance.keyboard.addHandler(_handleKeyEvent);
   }
+
+  void _onAddTagPressed() {
+  final selectedIds = _codeDisplayStore.selectedCodeIds.value;
+  final selectedCodes = _allCodes?.where((c) => selectedIds.contains(c.rawData)).toList() ?? [];
+
+  if (selectedCodes.isEmpty) return;
+
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true, 
+    builder: (_) {
+      return AddTagSheet(selectedCodes: selectedCodes);
+    },
+  ).then((_) {
+    _codeDisplayStore.clearSelection();
+  });
+}
+
+Future<void> _onRestoreSelectedPressed() async {
+  final selectedIds = _codeDisplayStore.selectedCodeIds.value;
+  if (selectedIds.isEmpty) return;
+  
+  FocusScope.of(context).requestFocus();
+
+  try {
+    final codesToRestore = _allCodes?.where((c) => selectedIds.contains(c.rawData)).toList() ?? [];
+    for (final code in codesToRestore) {
+      final updatedCode = code.copyWith(display: code.display.copyWith(trashed: false));
+      unawaited(CodeStore.instance.updateCode(code, updatedCode));
+    }
+  } catch (e) {
+    if (mounted) {
+      showGenericErrorDialog(context: context, error: e).ignore();
+    }
+  } finally {
+    _codeDisplayStore.clearSelection();
+  }
+}
+
+Future<void> _onDeleteForeverPressed() async {
+  final l10n = context.l10n;
+  final selectedIds = _codeDisplayStore.selectedCodeIds.value;
+  if (selectedIds.isEmpty) return;
+
+  bool isAuthSuccessful =
+    await LocalAuthenticationService.instance.requestLocalAuthentication(
+      context,
+      context.l10n.deleteCodeAuthMessage,
+    );
+
+  if (!isAuthSuccessful) return;
+
+  FocusScope.of(context).requestFocus();
+  await showChoiceActionSheet(
+    context,
+    title: l10n.deleteCodeTitle,
+    body: l10n.deleteCodeMessage,
+    firstButtonLabel: l10n.delete,
+    isCritical: true,
+    firstButtonOnTap: () async {
+      try {
+        final codesToDelete = _allCodes?.where((c) => selectedIds.contains(c.rawData)).toList() ?? [];
+        for (final code in codesToDelete) {
+          await CodeStore.instance.removeCode(code);
+        }
+      } 
+      catch (e) {
+        if (mounted) {
+          showGenericErrorDialog(context: context, error: e).ignore();
+        }
+      } 
+      
+      finally {
+        _codeDisplayStore.clearSelection();
+      }
+    },
+  );
+}
+
+Widget _buildTrashSelectActions() {
+  return Container(
+    decoration: BoxDecoration(
+      color: Theme.of(context).brightness == Brightness.light
+    ? const Color(0xFFF7F7F7)
+    : const Color(0xFF1E1E1E),
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Row(
+      children: [
+        _buildClearActionButton(Icons.restore,context.l10n.restore, _onRestoreSelectedPressed,),
+        _buildClearActionButton(Icons.delete_forever,context.l10n.delete, _onDeleteForeverPressed),
+      ],
+    ),
+  );
+}
+
+
+  Future<void> _onPinSelectedPressed() async {
+  final selectedIds = _codeDisplayStore.selectedCodeIds.value;
+  if (selectedIds.isEmpty) return;
+
+  final codesToUpdate = _allCodes?.where((c) => selectedIds.contains(c.rawData)).toList() ?? [];
+  if (codesToUpdate.isEmpty) return;
+
+  // Determine the state of the current selection
+  final bool allArePinned = codesToUpdate.every((code) => code.isPinned);
+
+  //If all selected codes are already pinned, UNPIN all of them
+  if (allArePinned) {
+    for (final code in codesToUpdate) {
+      final updatedCode = code.copyWith(display: code.display.copyWith(pinned: false));
+      unawaited(CodeStore.instance.updateCode(code, updatedCode));
+    }
+
+    if (codesToUpdate.length == 1) {
+      showToast(context, context.l10n.unpinnedCodeMessage(codesToUpdate.first.issuer));
+    } 
+    else {
+      showToast(context, 'Unpinned ${codesToUpdate.length} item(s)');
+    }
+  } 
+  //If there's a mix or if all are unpinned, PIN selected unpinned codes
+  else {
+    int pinnedCount = 0;
+    for (final code in codesToUpdate) {
+      if (!code.isPinned) { // Only pin the codes that are currently unpinned
+        final updatedCode = code.copyWith(display: code.display.copyWith(pinned: true));
+        unawaited(CodeStore.instance.updateCode(code, updatedCode));
+        pinnedCount++;
+      }
+    }
+
+    if (pinnedCount == 1){
+      final pinnedCode = codesToUpdate.firstWhere((c) => !c.isPinned);
+      showToast(context, context.l10n.pinnedCodeMessage(pinnedCode.issuer));
+    } 
+    else if (pinnedCount > 0) {
+      showToast(context, 'Pinned $pinnedCount item(s)');
+    }
+  }
+  
+  _codeDisplayStore.clearSelection();
+}
+
+  Future<void> _onTrashSelectedPressed() async {
+  final l10n = context.l10n;
+  final selectedIds = _codeDisplayStore.selectedCodeIds.value;
+  if (selectedIds.isEmpty) return;
+
+  bool isAuthSuccessful =
+      await LocalAuthenticationService.instance.requestLocalAuthentication(
+    context,
+    context.l10n.deleteCodeAuthMessage,
+  );
+  if (!isAuthSuccessful) return;
+
+  FocusScope.of(context).requestFocus();
+  await showChoiceActionSheet(
+    context,
+    title: l10n.trashCode,
+
+    body: ((){
+      if (selectedIds.length == 1){
+        final code = _allCodes!.firstWhere((c) => c.rawData == selectedIds.first);
+        final issuerAccount = code.account.isNotEmpty ? '${code.issuer} (${code.account})' : code.issuer;
+        return l10n.trashCodeMessage(issuerAccount);
+      } 
+      else{
+        return l10n.moveMultipleToTrashMessage(selectedIds.length);
+      }
+    })(),
+    
+    firstButtonLabel: l10n.trash,
+    isCritical: true, 
+    firstButtonOnTap: () async {
+      try {
+        final codesToTrash = _allCodes?.where((c) => selectedIds.contains(c.rawData)).toList() ?? [];
+
+        for (final code in codesToTrash) {
+          final updatedCode = code.copyWith(
+            display: code.display.copyWith(trashed: true),
+          );
+          unawaited(CodeStore.instance.updateCode(code, updatedCode));
+        }
+      } catch (e) {
+        _logger.severe('Failed to trash code(s): ${e.toString()}');
+        if (mounted) {
+          showGenericErrorDialog(context: context, error: e).ignore();
+        }
+      } finally {
+        _codeDisplayStore.clearSelection();
+      }
+    },
+  );
+}
+
+
+Future<void> _onEditPressed(Code code) async {
+  bool isAuthSuccessful = await LocalAuthenticationService.instance
+      .requestLocalAuthentication(context, context.l10n.editCodeAuthMessage);
+      await PlatformUtil.refocusWindows();
+      if (!isAuthSuccessful) return;
+
+      _codeDisplayStore.clearSelection();
+      final Code? updatedCode = await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (BuildContext context) {
+            return SetupEnterSecretKeyPage(code: code);
+          },
+        ),
+      );
+
+      if (updatedCode != null){
+        await CodeStore.instance.updateCode(code, updatedCode);
+      }
+}
+
+Future<void> _onSharePressed(Code code) async {
+  bool isAuthSuccessful = await LocalAuthenticationService.instance
+      .requestLocalAuthentication(context, context.l10n.authenticateGeneric);
+  await PlatformUtil.refocusWindows();
+  if (!isAuthSuccessful) return;
+  
+  _codeDisplayStore.clearSelection(); 
+  showShareDialog(context, code);
+}
+
+Future<void> _onShowQrPressed(Code code) async {
+  bool isAuthSuccessful = await LocalAuthenticationService.instance
+      .requestLocalAuthentication(context, context.l10n.showQRAuthMessage);
+  await PlatformUtil.refocusWindows();
+  if (!isAuthSuccessful) return;
+
+  _codeDisplayStore.clearSelection(); 
+  await Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (BuildContext context) {
+        return ViewQrPage(code: code);
+      },
+    ),
+  );
+}
+
+Widget _buildClearActionButton(IconData icon, String label, VoidCallback onTap) {
+  final colorScheme = getEnteColorScheme(context);
+  final textTheme = getEnteTextTheme(context);
+
+  return Expanded(
+    child: InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      highlightColor: colorScheme.textBase.withValues(alpha: 0.1),
+      splashColor: colorScheme.textBase.withValues(alpha: 0.1),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: colorScheme.textBase, size: 18),  //bottom row icon props
+            const SizedBox(height: 8),
+            Text(label, style: textTheme.small.copyWith(color: colorScheme.textBase, fontSize: 11)),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+Widget _buildSingleSelectActions(Code code) {
+  final colorScheme = getEnteColorScheme(context);
+  return Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Row(
+        children: [
+          _buildActionButton(Icons.edit_outlined, context.l10n.edit, () => _onEditPressed(code)),
+          const SizedBox(width: 10),
+          _buildActionButton(Icons.share_outlined, context.l10n.share, () => _onSharePressed(code)),
+          const SizedBox(width: 10),
+          _buildActionButton(Icons.qr_code, context.l10n.qrCode, () => _onShowQrPressed(code)),
+        ],
+      ),
+      const SizedBox(height: 16),
+      Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).brightness == Brightness.dark
+    ? colorScheme.backgroundElevated2 
+    : const Color(0xFFF7F7F7),
+ //color of the bottom button row on single select
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            ValueListenableBuilder<Set<String>>(
+  valueListenable: _codeDisplayStore.selectedCodeIds,
+  builder: (context, selectedIds, child) {
+    if (selectedIds.isEmpty) return const Expanded(child: SizedBox.shrink());
+
+    final selectedCodes = _allCodes?.where((c) => selectedIds.contains(c.rawData)).toList() ?? [];
+    if (selectedCodes.isEmpty) return const Expanded(child: SizedBox.shrink());
+
+    final bool allArePinned = selectedCodes.every((code) => code.isPinned);
+    
+    return _buildClearActionButton(
+      allArePinned ? Icons.push_pin : Icons.push_pin_outlined,
+      allArePinned ? context.l10n.unpinText : context.l10n.pinText,
+      _onPinSelectedPressed,
+    );
+  },
+),
+            _buildClearActionButton(Icons.label_outline, context.l10n.addTag, _onAddTagPressed),
+            _buildClearActionButton(Icons.delete_outline, context.l10n.trash, _onTrashSelectedPressed),
+          ],
+        ),
+      ),
+    ],
+  );
+}
+
+Widget _buildMultiSelectActions(Set<String> selectedIds) {
+  final colorScheme = getEnteColorScheme(context);
+  return Container(
+    decoration: BoxDecoration(
+      color: Theme.of(context).brightness == Brightness.dark
+    ? colorScheme.backgroundElevated2 
+    : const Color(0xFFF7F7F7),
+ //color of the bottom button row on multi select
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Row(
+      children: [
+        ValueListenableBuilder<Set<String>>(
+  valueListenable: _codeDisplayStore.selectedCodeIds,
+  builder: (context, selectedIds, child) {
+    if (selectedIds.isEmpty) return const Expanded(child: SizedBox.shrink());
+
+    final selectedCodes = _allCodes?.where((c) => selectedIds.contains(c.rawData)).toList() ?? [];
+    if (selectedCodes.isEmpty) return const Expanded(child: SizedBox.shrink());
+
+    final bool allArePinned = selectedCodes.every((code) => code.isPinned);
+    
+    return _buildClearActionButton(
+      allArePinned ? Icons.push_pin : Icons.push_pin_outlined,
+      allArePinned ? context.l10n.unpinText : context.l10n.pinText,
+      _onPinSelectedPressed,
+    );
+  },
+),
+        _buildClearActionButton(Icons.label_outline, context.l10n.addTag, _onAddTagPressed),
+        _buildClearActionButton(Icons.delete_outline, context.l10n.trash, _onTrashSelectedPressed),
+      ],
+    ),
+  );
+}
+  Widget _buildActionButton(IconData icon, String label, VoidCallback onTap) {
+  final colorScheme = getEnteColorScheme(context);
+  final textTheme = getEnteTextTheme(context);
+
+  return Expanded(
+    child: Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).brightness == Brightness.dark
+    ? colorScheme.backgroundElevated2 
+    : const Color(0xFFF7F7F7),
+ 
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        highlightColor: colorScheme.textBase.withValues(alpha: 0.7),
+        splashColor: colorScheme.textBase.withValues(alpha: 0.7),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: colorScheme.textBase, size: 18),    //top row icon props
+              const SizedBox(height: 8),
+              Text(
+                label,
+                style: textTheme.small.copyWith(color: colorScheme.textBase, fontSize: 11),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+Widget _buildActionButtons() {
+  if (_isTrashOpen) {
+    return _buildTrashSelectActions();
+  }
+  return ValueListenableBuilder<Set<String>>(
+    valueListenable: _codeDisplayStore.selectedCodeIds,
+    builder: (context, selectedIds, child) {
+      if (selectedIds.isEmpty) {
+        return const SizedBox.shrink();
+      }
+
+      if (selectedIds.length == 1) {
+        final selectedCode = _allCodes?.firstWhereOrNull(
+          (c) => c.rawData == selectedIds.first,
+        );
+        if (selectedCode == null) return const SizedBox.shrink();
+        return _buildSingleSelectActions(selectedCode);
+      } else {
+        return _buildMultiSelectActions(selectedIds);
+      }
+    },
+  );
+}
+
+  Widget _buildSelectionActionBar() {
+  final bottomPadding = MediaQuery.of(context).padding.bottom;
+  final colorScheme = getEnteColorScheme(context);
+
+  return ConstrainedBox(
+    constraints: BoxConstraints(
+    maxHeight: MediaQuery.of(context).size.height * 0.4,
+  ),
+    child: Card(
+      margin: EdgeInsets.zero,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
+        ),
+      ),
+      elevation: 4,
+      color: Theme.of(context).brightness == Brightness.dark
+    ? colorScheme.fillFaint
+    : colorScheme.backgroundElevated2,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomPadding),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+  Row(
+    children: [
+    //Select all pill
+      Material(
+        shape: StadiumBorder(
+          side: BorderSide(color: colorScheme.strokeMuted, width: 0.5),
+        ),
+        color: colorScheme.backgroundElevated2,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () {
+            final allVisibleCodeIds =
+            _filteredCodes.map((c) => c.rawData).toSet();
+            _codeDisplayStore.selectedCodeIds.value = allVisibleCodeIds;
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.check_circle_outline_outlined,
+                  color: Colors.grey,
+                  size: 15,
+                ),
+                const SizedBox(width: 6),
+                Text(context.l10n.selectAll, style: const TextStyle(fontSize: 11)),
+              ],
+            ),
+          ),
+        ),
+      ),
+
+    // Center code logo icon
+    Expanded(
+      child: ValueListenableBuilder<Set<String>>(
+        valueListenable: _codeDisplayStore.selectedCodeIds,
+        builder: (context, selectedIds, child) {
+          if (selectedIds.isEmpty) {
+            return const SizedBox.shrink();
+          }
+          final selectedCodes = _allCodes
+                  ?.where((c) => selectedIds.contains(c.rawData))
+                  .toList() ??
+              [];
+          final codesToShow = selectedCodes.take(3).toList();
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ...codesToShow.map((code) {
+                final iconData = code.display.isCustomIcon
+                    ? code.display.iconID
+                    : code.issuer;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                  child: IconUtils.instance
+                      .getIcon(context, iconData.trim(), width: 17),
+                );
+              }),
+              if (selectedIds.length > 3)
+                Padding(
+                  padding: const EdgeInsets.only(left: 4.0),
+                  child: Text(
+                    '+${selectedIds.length - 3}',
+                    style: const TextStyle(),
+                  ),
+                ),
+            ],
+          );
+        },
+      ),
+    ),
+
+    // N selected pill
+    ValueListenableBuilder<Set<String>>(
+      valueListenable: _codeDisplayStore.selectedCodeIds,
+      builder: (context, selectedIds, child) {
+        return Material(
+          shape: StadiumBorder(
+            side: BorderSide(color: colorScheme.strokeMuted, width: 0.5),
+          ),
+          color: colorScheme.backgroundElevated2,
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: () {
+              _codeDisplayStore.clearSelection();
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '${selectedIds.length} selected',
+                    style: const TextStyle(fontSize: 11),
+                  ),
+                  const SizedBox(width: 6),
+                  const Icon(
+                    Icons.close,
+                    size: 15,
+                    color: Colors.grey,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    ),
+  ],
+),
+              const SizedBox(height: 16),
+              _buildActionButtons(),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+}
 
   bool _handleKeyEvent(KeyEvent event) {
     if (event is KeyDownEvent) {
@@ -420,120 +989,135 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    LockScreenSettings.instance
-        .setLightMode(getEnteColorScheme(context).isLightTheme);
-    final l10n = context.l10n;
-    isCompactMode = PreferenceService.instance.isCompactMode();
+Widget build(BuildContext context) {
+  LockScreenSettings.instance
+      .setLightMode(getEnteColorScheme(context).isLightTheme);
+  final l10n = context.l10n;
+  isCompactMode = PreferenceService.instance.isCompactMode();
 
-    return PopScope(
-      onPopInvokedWithResult: (_, result) async {
-        if (_isSettingsOpen) {
-          scaffoldKey.currentState!.closeDrawer();
-          return;
-        } else if (!Platform.isAndroid) {
-          Navigator.of(context).pop();
-          return;
-        }
-        await MoveToBackground.moveTaskToBack();
-      },
-      canPop: false,
-      child: Scaffold(
-        key: scaffoldKey,
-        drawerEnableOpenDragGesture: !Platform.isAndroid,
-        drawer: Drawer(
-          width: 428,
-          child: _settingsPage,
-        ),
-        onDrawerChanged: (isOpened) => _isSettingsOpen = isOpened,
-        body: SafeArea(
+  return ValueListenableBuilder<bool>(
+    valueListenable: _codeDisplayStore.isSelectionModeActive,
+    builder: (context, isSelecting, child) {
+      return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (_, result) async {
+          if (isSelecting) {
+            _codeDisplayStore.clearSelection();
+            return;
+          }
+
+          if (_isSettingsOpen) {
+            scaffoldKey.currentState!.closeDrawer();
+            return;
+          } else if (!Platform.isAndroid) {
+            Navigator.of(context).pop();
+            return;
+          }
+          await MoveToBackground.moveTaskToBack();
+        },
+        child: Scaffold(
+          key: scaffoldKey,
+          drawerEnableOpenDragGesture: !Platform.isAndroid,
+          drawer: Drawer(
+            width: 428,
+            child: _settingsPage,
+          ),
+          onDrawerChanged: (isOpened) => _isSettingsOpen = isOpened,
+          body: SafeArea(
           bottom: false,
           child: Builder(
             builder: (context) {
               return _getBody();
             },
           ),
-        ),
-        resizeToAvoidBottomInset: false,
-        appBar: AppBar(
-          title: !_showSearchBox
-              ? const Text('Ente Auth', style: brandStyleMedium)
-              : TextField(
-                  autocorrect: false,
-                  enableSuggestions: false,
-                  autofocus: _autoFocusSearch,
-                  controller: _textController,
-                  onChanged: (val) {
-                    _searchText = val;
-                    _applyFilteringAndRefresh();
-                  },
-                  decoration: InputDecoration(
-                    hintText: l10n.searchHint,
-                    border: InputBorder.none,
-                    focusedBorder: InputBorder.none,
+          ),
+          bottomNavigationBar: isSelecting ? _buildSelectionActionBar() : null,
+          resizeToAvoidBottomInset: false,
+          appBar: AppBar(
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            surfaceTintColor: Colors.transparent,
+            title: !_showSearchBox
+                ? const Text('Ente Auth', style: brandStyleMedium)
+                : TextField(
+                    autocorrect: false,
+                    enableSuggestions: false,
+                    autofocus: _autoFocusSearch,
+                    controller: _textController,
+                    onChanged: (val) {
+                      _searchText = val;
+                      _applyFilteringAndRefresh();
+                    },
+                    decoration: InputDecoration(
+                      hintText: l10n.searchHint,
+                      border: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                    ),
+                    focusNode: searchBoxFocusNode,
                   ),
-                  focusNode: searchBoxFocusNode,
-                ),
-          centerTitle: PlatformUtil.isDesktop() ? false : true,
-          actions: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: SortCodeMenuWidget(
-                currentKey: PreferenceService.instance.codeSortKey(),
-                onSelected: (newOrder) async {
-                  await PreferenceService.instance.setCodeSortKey(newOrder);
-                  if (newOrder == CodeSortKey.manual &&
-                      newOrder == _codeSortKey) {
-                    await navigateToReorderPage(_allCodes!);
-                  }
-                  setState(() {
-                    _codeSortKey = newOrder;
-                  });
-                  if (mounted) {
-                    _applyFilteringAndRefresh();
-                  }
-                },
-              ),
-            ),
-            if (PlatformUtil.isDesktop())
-              IconButton(
-                icon: const Icon(Icons.lock),
-                tooltip: l10n.appLock,
+            centerTitle: PlatformUtil.isDesktop() ? false : true,
+            actions: <Widget>[
+              Padding(
                 padding: const EdgeInsets.all(8.0),
-                onPressed: () async {
-                  await navigateToLockScreen();
+                child: SortCodeMenuWidget(
+                  currentKey: PreferenceService.instance.codeSortKey(),
+                  onSelected: (newOrder) async {
+                    await PreferenceService.instance.setCodeSortKey(newOrder);
+                    if (newOrder == CodeSortKey.manual &&
+                        newOrder == _codeSortKey) {
+                      await navigateToReorderPage(_allCodes!);
+                    }
+                    setState(() {
+                      _codeSortKey = newOrder;
+                    });
+                    if (mounted) {
+                      _applyFilteringAndRefresh();
+                    }
+                  },
+                ),
+              ),
+              if (PlatformUtil.isDesktop())
+                IconButton(
+                  icon: const Icon(Icons.lock),
+                  tooltip: l10n.appLock,
+                  padding: const EdgeInsets.all(8.0),
+                  onPressed: () async {
+                    await navigateToLockScreen();
+                  },
+                ),
+              IconButton(
+                icon: _showSearchBox
+                    ? const Icon(Icons.clear)
+                    : const Icon(Icons.search),
+                tooltip: l10n.search,
+                padding: const EdgeInsets.all(8.0),
+                onPressed: () {
+                  setState(() {
+                    _showSearchBox = !_showSearchBox;
+                    if (!_showSearchBox) {
+                      _textController.clear();
+                      _searchText = "";
+                    } else {
+                      _searchText = _textController.text;
+                      searchBoxFocusNode.requestFocus();
+                    }
+                    _applyFilteringAndRefresh();
+                  });
                 },
               ),
-            IconButton(
-              icon: _showSearchBox
-                  ? const Icon(Icons.clear)
-                  : const Icon(Icons.search),
-              tooltip: l10n.search,
-              padding: const EdgeInsets.all(8.0),
-              onPressed: () {
-                setState(() {
-                  _showSearchBox = !_showSearchBox;
-                  if (!_showSearchBox) {
-                    _textController.clear();
-                    _searchText = "";
-                  } else {
-                    _searchText = _textController.text;
-                    searchBoxFocusNode.requestFocus();
-                  }
-                  _applyFilteringAndRefresh();
-                });
-              },
-            ),
-          ],
+            ],
+          ),
+          floatingActionButton: isSelecting
+              ? null
+              : (!_hasLoaded ||
+                      (_allCodes?.isEmpty ?? true) ||
+                      !PreferenceService.instance.hasShownCoachMark()
+                  ? null
+                  : _getFab()),
         ),
-        floatingActionButton: !_hasLoaded ||
-                (_allCodes?.isEmpty ?? true) ||
-                !PreferenceService.instance.hasShownCoachMark()
-            ? null
-            : _getFab(),
-      ),
-    );
-  }
+      );
+    },
+  );
+}
 
   Widget _getBody() {
     final l10n = context.l10n;
@@ -571,6 +1155,7 @@ class _HomePageState extends State<HomePage> {
                             ? TagChipState.selected
                             : TagChipState.unselected,
                         onTap: () {
+                          _codeDisplayStore.clearSelection();
                           selectedTag = "";
                           _isTrashOpen = false;
 
@@ -587,6 +1172,7 @@ class _HomePageState extends State<HomePage> {
                             ? TagChipState.selected
                             : TagChipState.unselected,
                         onTap: () {
+                          _codeDisplayStore.clearSelection();
                           selectedTag = "";
                           _isTrashOpen = !_isTrashOpen;
                           setState(() {});
@@ -604,6 +1190,7 @@ class _HomePageState extends State<HomePage> {
                             ? TagChipState.selected
                             : TagChipState.unselected,
                         onTap: () {
+                          _codeDisplayStore.clearSelection();
                           _isTrashOpen = false;
                           if (selectedTag == tags[customTagIndex]) {
                             selectedTag = "";
