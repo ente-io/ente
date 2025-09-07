@@ -1,36 +1,36 @@
-ente is a simple app to backup and share your photos and videos.
+ente je jednoduchá aplikace pro automatické zálohování a organizaci vašich fotek a videí.
 
-If you've been looking for a privacy-friendly alternative to Google Photos, you've come to the right place. With ente, they are stored end-to-end encrypted (e2ee). This means that only you can view them.
+Pokud hledáte alternativu ke službě Google Photos, která respektuje vaše soukromí, jste na správném místě. S Ente jsou uloženy s koncovým "end-to-end" šifrováním (e2ee). To znamená, že je můžete vidět pouze vy.
 
-We have open-source apps across Android, iOS, web and desktop, and your photos will seamlessly sync between all of them in an end-to-end encrypted (e2ee) manner.
+Máme aplikace napříč všemi platformami a vaše fotky se budou bezproblémově synchronizovat mezi všemi vašimi zařízeními tak, aby byly koncově šifrovány mezi jednotlivými zařízeními (e2ee).
 
-ente also makes it simple to share your albums with your loved ones, even if they aren't on ente. You can share publicly viewable links, where they can view your album and collaborate by adding photos to it, even without an account or app.
+ente také usnadňuje sdílení vašich alb s vašimi blízkými, i když nejsou na ente. Můžete sdílet veřejně přístupné odkazy, kde si mohou prohlížet vaše album a spolupracovat přidáváním fotografií, a to i bez účtu nebo aplikace.
 
-Your encrypted data is replicated to 3 different locations, including a fall-out shelter in Paris. We take posterity seriously and make it easy to ensure that your memories outlive you.
+Vaše šifrovaná data jsou uložena na 3 místech, včetně protiatomového krytu v Paříži. Bereme budoucnost vážně a usnadňujeme vám zajistit, aby vaše vzpomínky přežily vás samotné.
 
-We are here to make the safest photos app ever, come join our journey!
+Jsme tu, abychom vytvořili nejbezpečnější aplikaci pro fotografie, jaká kdy byla. Přidejte se k nám!
 
-FEATURES
-- Original quality backups, because every pixel is important
-- Family plans, so you can share storage with your family
-- Collaborative albums, so you can pool together photos after a trip
-- Shared folders, in case you want your partner to enjoy your "Camera" clicks
-- Album links, that can be protected with a password
-- Ability to free up space, by removing files that have been safely backed up
-- Human support, because you're worth it
-- Descriptions, so you can caption your memories and find them easily
-- Image editor, to add finishing touches
-- Favorite, hide and relive your memories, for they are precious
-- One-click import from Google, Apple, your hard drive and more
-- Dark theme, because your photos look good in it
-- 2FA, 3FA, biometric auth
-- and a LOT more!
+VLASTNOSTI
+- Zálohování v původní kvalitě, protože každý pixel je důležitý
+- Rodinné plány, takže můžete sdílet úložiště s rodinou
+- Společná alba, do kterých můžete po cestě shromažďovat fotografie
+- Sdílené složky, aby i váš partner mohl obdivovat vaše fotografie
+- Odkazy na alba, které lze chránit heslem a nastavit jejich platnost
+- Možnost uvolnit místo odstraněním souborů, které byly bezpečně zálohovány
+- Lidská podpora, protože si to zasloužíte
+- Popisy, abyste mohli své vzpomínky opatřit popisky a snadno je najít
+- Editor obrázků pro doladění detailů
+- Označte si své oblíbené fotografie, skryjte je a nebo je prožijte znovu pomocí vzpomínek
+- Import jedním kliknutím z Google, Apple, pevného disku a dalších zdrojů
+- Tmavý motiv, protože vaše fotografie v něm vypadají dobře
+- 2FA, 3FA, biometrické ověření
+- a ještě MNOHEM víc!
 
 OPRÁVNĚNÍ
-ente requests for certain permissions to serve the purpose of a photo storage provider, which can be reviewed here: https://github.com/ente-io/ente/blob/f-droid/mobile/android/permissions.md
+ente žádá o určitá oprávnění, aby mohla plnit funkci poskytovatele úložiště fotografií. Tyto oprávnění si můžete prohlédnout zde: https://github.com/ente-io/ente/blob/f-droid/mobile/android/permissions.md
 
-PRICING
-We don't offer forever free plans, because it is important to us that we remain sustainable and withstand the test of time. Instead we offer affordable plans that you can freely share with your family. You can find more information at ente.io.
+CENY
+Nenabízíme doživotní tarify, protože je pro nás důležité zůstat udržitelnými a obstát ve zkoušce času. Místo toho nabízíme cenově dostupné plány, které můžete svobodně sdílet se svou rodinou. Více informací najdete na ente.io.
 
 PODPORA
-We take pride in offering human support. If you are our paid customer, you can reach out to team@ente.io and expect a response from our team within 24 hours.
+Jsme hrdí na to, že poskytujeme lidskou podporu. Pokud máte placený tarif, můžete se obrátit na team@ente.io a do 24 hodin od našeho týmu očekávat odpověď.

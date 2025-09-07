@@ -18,6 +18,9 @@ final tempDirCleanUpInterval = kDebugMode
     ? const Duration(hours: 1).inMicroseconds
     : const Duration(hours: 6).inMicroseconds;
 
+// Note: 0 indicates no device limit
+const publicLinkDeviceLimits = [0, 50, 25, 10, 5, 2, 1];
+
 const uploadTempFilePrefix = "upload_file_";
 
 const blackThumbnailBase64 = '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAEBAQEBAQEB'

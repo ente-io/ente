@@ -4,12 +4,14 @@ import 'dart:io';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:ente_accounts/services/user_service.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import "package:ente_legacy/services/emergency_service.dart";
 import 'package:ente_lock_screen/lock_screen_settings.dart';
 import 'package:ente_lock_screen/ui/app_lock.dart';
 import 'package:ente_lock_screen/ui/lock_screen.dart';
 import 'package:ente_logging/logging.dart';
 import 'package:ente_network/network.dart';
 import "package:ente_strings/l10n/strings_localizations.dart";
+import "package:ente_ui/theme/ente_theme_data.dart";
 import "package:ente_ui/theme/theme_config.dart";
 import 'package:ente_ui/utils/window_listener_service.dart';
 import 'package:ente_utils/platform_util.dart';
@@ -103,6 +105,8 @@ Future<void> _runInForeground() async {
         lockScreen: LockScreen(Configuration.instance),
         enabled: await LockScreenSettings.instance.shouldShowLockScreen(),
         locale: locale,
+        lightTheme: lightThemeData,
+        darkTheme: darkThemeData,
         savedThemeMode: savedThemeMode,
         supportedLocales: appSupportedLocales,
         localizationsDelegates: const [
@@ -166,4 +170,8 @@ Future<void> _init(bool bool, {String? via}) async {
     packageInfo,
   );
   await TrashService.instance.init(preferences);
+  await EmergencyContactService.instance.init(
+    UserService.instance,
+    Configuration.instance,
+  );
 }

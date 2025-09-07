@@ -250,7 +250,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                     SizedBox(
                       width: double.infinity,
                       child: ButtonWidget(
-                        labelText: "Unselect all", // TODO: lau: extract string
+                        labelText: AppLocalizations.of(context).unselectAll,
                         buttonType: ButtonType.secondary,
                         onTap: () async {
                           setState(() {

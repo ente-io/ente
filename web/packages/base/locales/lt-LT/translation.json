@@ -685,7 +685,7 @@
     "person_favorites": "{{name}} mėgstami",
     "shared_favorites": "Bendrinami mėgstami",
     "added_by_name": "Įtraukė {{name}}",
-    "unowned_files_not_processed": "Kiti naudotojai pridėti failai nebuvo apdoroti",
+    "unowned_files_not_processed": "Kitų naudotojų įtraukti failai nebuvo apdoroti",
     "custom_domains": "Pasirinktiniai domenai",
     "custom_domains_desc": "Naudokite savo domeną, kai bendrinate.",
     "link_your_domain": "Susieti savo domeną",

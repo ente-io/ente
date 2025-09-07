@@ -4,10 +4,15 @@ import 'dart:typed_data';
 
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_events/models/signed_in_event.dart';
+import "package:ente_sharing/models/user.dart";
+import "package:fast_base58/fast_base58.dart";
+import "package:flutter/foundation.dart";
 import 'package:locker/events/collections_updated_event.dart';
 import "package:locker/services/collections/collections_api_client.dart";
 import "package:locker/services/collections/collections_db.dart";
 import 'package:locker/services/collections/models/collection.dart';
+import "package:locker/services/collections/models/collection_items.dart";
+import "package:locker/services/collections/models/public_url.dart"; 
 import 'package:locker/services/configuration.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/services/trash/models/trash_item_request.dart';
@@ -16,8 +21,6 @@ import "package:locker/utils/crypto_helper.dart";
 import 'package:logging/logging.dart';
 
 class CollectionService {
-  CollectionService._privateConstructor();
-
   static final CollectionService instance =
       CollectionService._privateConstructor();
 
@@ -36,7 +39,16 @@ class CollectionService {
   };
 
   final _logger = Logger("CollectionService");
-  final _apiClient = CollectionApiClient.instance;
+
+  late CollectionApiClient _apiClient;
+  late CollectionDB _db;
+
+  final _collectionIDToCollections = <int, Collection>{};
+
+  CollectionService._privateConstructor() {
+    _db = CollectionDB.instance;
+    _apiClient = CollectionApiClient.instance;
+  }
 
   Future<void> init() async {
     if (Configuration.instance.hasConfiguredAccount()) {
@@ -50,41 +62,45 @@ class CollectionService {
   }
 
   Future<void> sync() async {
-    final updatedCollections = await CollectionApiClient.instance
-        .getCollections(CollectionDB.instance.getSyncTime());
+    final updatedCollections =
+        await CollectionApiClient.instance.getCollections(_db.getSyncTime());
     if (updatedCollections.isEmpty) {
       _logger.info("No collections to sync.");
       return;
     }
-    await CollectionDB.instance.updateCollections(updatedCollections);
-    await CollectionDB.instance
-        .setSyncTime(updatedCollections.last.updationTime);
+    await _db.updateCollections(updatedCollections);
+    // Update the cache with new/updated collections
+    for (final collection in updatedCollections) {
+      _collectionIDToCollections[collection.id] = collection;
+    }
+    await _db.setSyncTime(updatedCollections.last.updationTime);
+
     final List<Future> fileFutures = [];
     for (final collection in updatedCollections) {
       if (collection.isDeleted) {
-        await CollectionDB.instance.deleteCollection(collection);
+        await _db.deleteCollection(collection);
+        _collectionIDToCollections.remove(collection.id);
         continue;
       }
-      final syncTime =
-          CollectionDB.instance.getCollectionSyncTime(collection.id);
+      final syncTime = _db.getCollectionSyncTime(collection.id);
       fileFutures.add(
-        CollectionApiClient.instance
-            .getFiles(collection, syncTime)
-            .then((diff) async {
+        _apiClient.getFiles(collection, syncTime).then((diff) async {
           if (diff.updatedFiles.isNotEmpty) {
-            await CollectionDB.instance.addFilesToCollection(
+            await _db.addFilesToCollection(
               collection,
               diff.updatedFiles,
             );
           }
           if (diff.deletedFiles.isNotEmpty) {
-            await CollectionDB.instance.deleteFilesFromCollection(
+            await _db.deleteFilesFromCollection(
               collection,
               diff.deletedFiles,
             );
           }
-          await CollectionDB.instance
-              .setCollectionSyncTime(collection.id, diff.latestUpdatedAtTime);
+          await _db.setCollectionSyncTime(
+            collection.id,
+            diff.latestUpdatedAtTime,
+          );
         }).catchError((e) {
           _logger.warning(
             "Failed to fetch files for collection ${collection.id}: $e",
@@ -100,7 +116,7 @@ class CollectionService {
 
   bool hasCompletedFirstSync() {
     return Configuration.instance.hasConfiguredAccount() &&
-        CollectionDB.instance.getSyncTime() > 0;
+        _db.getSyncTime() > 0;
   }
 
   Future<Collection> createCollection(
@@ -120,17 +136,37 @@ class CollectionService {
   }
 
   Future<List<Collection>> getCollections() async {
-    return CollectionDB.instance.getCollections();
+    return _db.getCollections();
+  }
+
+  Future<SharedCollections> getSharedCollections() async {
+    final List<Collection> outgoing = [];
+    final List<Collection> incoming = [];
+    final List<Collection> quickLinks = [];
+
+    final List<Collection> collections = await getCollections();
+
+    for (final c in collections) {
+      if (c.owner.id == Configuration.instance.getUserID()) {
+        if (c.hasSharees || c.hasLink && !c.isQuickLinkCollection()) {
+          outgoing.add(c);
+        } else if (c.isQuickLinkCollection()) {
+          quickLinks.add(c);
+        }
+      } else {
+        incoming.add(c);
+      }
+    }
+    return SharedCollections(outgoing, incoming, quickLinks);
   }
 
   Future<List<Collection>> getCollectionsForFile(EnteFile file) async {
-    return CollectionDB.instance.getCollectionsForFile(file);
+    return _db.getCollectionsForFile(file);
   }
 
   Future<List<EnteFile>> getFilesInCollection(Collection collection) async {
     try {
-      final files =
-          await CollectionDB.instance.getFilesInCollection(collection);
+      final files = await _db.getFilesInCollection(collection);
       return files;
     } catch (e) {
       _logger.severe(
@@ -142,7 +178,7 @@ class CollectionService {
 
   Future<List<EnteFile>> getAllFiles() async {
     try {
-      final allFiles = await CollectionDB.instance.getAllFiles();
+      final allFiles = await _db.getAllFiles();
       return allFiles;
     } catch (e) {
       _logger.severe("Failed to fetch all files: $e");
@@ -178,7 +214,7 @@ class CollectionService {
 
   Future<void> rename(Collection collection, String newName) async {
     try {
-      await CollectionApiClient.instance.rename(
+      await _apiClient.rename(
         collection,
         newName,
       );
@@ -212,6 +248,10 @@ class CollectionService {
     }).catchError((error) {
       _logger.severe("Failed to initialize collections: $error");
     });
+    final collections = await _db.getCollections();
+    for (final collection in collections) {
+      _collectionIDToCollections[collection.id] = collection;
+    }
   }
 
   Future<Collection> _getOrCreateImportantCollection() async {
@@ -313,12 +353,17 @@ class CollectionService {
   }
 
   Future<Collection> getCollection(int collectionID) async {
-    return await CollectionDB.instance.getCollection(collectionID);
+    if (_collectionIDToCollections.containsKey(collectionID)) {
+      return _collectionIDToCollections[collectionID]!;
+    }
+    final collection = await _db.getCollection(collectionID);
+    _collectionIDToCollections[collectionID] = collection;
+    return collection;
   }
 
-  Future<Uint8List> getCollectionKey(int collectionID) async {
-    final collection = await getCollection(collectionID);
-    final collectionKey = CryptoHelper.instance.getCollectionKey(collection);
+  Uint8List getCollectionKey(int collectionID) {
+    final collection = _collectionIDToCollections[collectionID];
+    final collectionKey = CryptoHelper.instance.getCollectionKey(collection!);
     return collectionKey;
   }
 
@@ -339,5 +384,95 @@ class CollectionService {
       _logger.severe("Failed to get file key: $e");
       rethrow;
     }
+  }
+
+  // getActiveCollections returns list of collections which are not deleted yet
+  List<Collection> getActiveCollections() {
+    return _collectionIDToCollections.values
+        .toList()
+        .where((element) => !element.isDeleted)
+        .toList();
+  }
+
+  /// Returns Contacts(Users) that are relevant to the account owner.
+  /// Note: "User" refers to the account owner in the points below.
+  /// This includes:
+  /// 	- Collaborators and viewers of collections owned by user
+  ///   - Owners of collections shared to user.
+  ///   - All collaborators of collections in which user is a collaborator or
+  ///     a viewer.
+  List<User> getRelevantContacts() {
+    final List<User> relevantUsers = [];
+    final existingEmails = <String>{};
+    final int ownerID = Configuration.instance.getUserID()!;
+    final String ownerEmail = Configuration.instance.getEmail()!;
+    existingEmails.add(ownerEmail);
+
+    for (final c in getActiveCollections()) {
+      // Add collaborators and viewers of collections owned by user
+      if (c.owner.id == ownerID) {
+        for (final User u in c.sharees) {
+          if (u.id != null && u.email.isNotEmpty) {
+            if (!existingEmails.contains(u.email)) {
+              relevantUsers.add(u);
+              existingEmails.add(u.email);
+            }
+          }
+        }
+      } else if (c.owner.id != null && c.owner.email.isNotEmpty) {
+        // Add owners of collections shared with user
+        if (!existingEmails.contains(c.owner.email)) {
+          relevantUsers.add(c.owner);
+          existingEmails.add(c.owner.email);
+        }
+        // Add collaborators of collections shared with user where user is a
+        // viewer or a collaborator
+        for (final User u in c.sharees) {
+          if (u.id != null &&
+              u.email.isNotEmpty &&
+              u.email == ownerEmail &&
+              (u.isCollaborator || u.isViewer)) {
+            for (final User u in c.sharees) {
+              if (u.id != null && u.email.isNotEmpty && u.isCollaborator) {
+                if (!existingEmails.contains(u.email)) {
+                  relevantUsers.add(u);
+                  existingEmails.add(u.email);
+                }
+              }
+            }
+            break;
+          }
+        }
+      }
+    }
+
+    return relevantUsers;
+  }
+
+  String getPublicUrl(Collection c) {
+    final PublicURL url = c.publicURLs.firstOrNull!;
+    final Uri publicUrl = Uri.parse(url.url);
+
+    final cKey = getCollectionKey(c.id);
+    final String collectionKey = Base58Encode(cKey);
+    final String urlValue = "${publicUrl.toString()}#$collectionKey";
+    return urlValue;
+  }
+
+  void clearCache() {
+    _collectionIDToCollections.clear();
+  }
+
+  // Methods for managing collection cache
+  void updateCollectionCache(Collection collection) {
+    _collectionIDToCollections[collection.id] = collection;
+  }
+
+  void removeFromCache(int collectionId) {
+    _collectionIDToCollections.remove(collectionId);
+  }
+
+  Collection? getFromCache(int collectionId) {
+    return _collectionIDToCollections[collectionId];
   }
 }

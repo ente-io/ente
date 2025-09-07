@@ -953,7 +953,8 @@ Widget _buildActionButtons() {
     final bool shouldShowLockScreen =
         await LockScreenSettings.instance.shouldShowLockScreen();
     if (shouldShowLockScreen) {
-      await AppLock.of(context)!.showLockScreen();
+      // Manual lock: do not auto-prompt Touch ID; wait for user tap
+      await AppLock.of(context)!.showManualLockScreen();
     } else {
       await showDialogWidget(
         context: context,

@@ -1776,14 +1776,6 @@
   "same": "Chính xác",
   "different": "Khác",
   "sameperson": "Cùng một người?",
-  "cLTitle1": "Trình chỉnh sửa ảnh nâng cao",
-  "cLDesc1": "Chúng tôi phát hành một trình chỉnh sửa ảnh tân tiến, bổ sung thêm cắt ảnh, bộ lọc có sẵn để chỉnh sửa nhanh, các tùy chọn tinh chỉnh bao gồm độ bão hòa, độ tương phản, độ sáng, độ ấm và nhiều hơn nữa. Trình chỉnh sửa mới cũng bao gồm khả năng vẽ lên ảnh và thêm emoji dưới dạng nhãn dán.",
-  "cLTitle2": "Album thông minh",
-  "cLDesc2": "Giờ đây, bạn có thể tự động thêm ảnh của những người đã chọn vào bất kỳ album nào. Chỉ cần mở album và chọn \"Tự động thêm người\" trong menu. Nếu sử dụng cùng với album chia sẻ, bạn có thể chia sẻ ảnh mà không cần tốn công.",
-  "cLTitle3": "Cải tiến Thư viện ảnh",
-  "cLDesc3": "Chúng tôi bổ sung tính năng phân nhóm thư viện ảnh theo tuần, tháng và năm. Giờ đây, bạn có thể tùy chỉnh thư viện ảnh theo đúng ý muốn với các tùy chọn mới này, cùng với các lưới tùy chỉnh.",
-  "cLTitle4": "Cuộn nhanh hơn",
-  "cLDesc4": "Cùng với một loạt cải tiến ngầm nhằm nâng cao trải nghiệm cuộn thư viện, chúng tôi cũng đã thiết kế lại thanh cuộn để hiển thị các điểm đánh dấu, cho phép bạn nhanh chóng nhảy cóc trên dòng thời gian.",
   "indexingPausedStatusDescription": "Lập chỉ mục bị tạm dừng. Nó sẽ tự động tiếp tục khi thiết bị đã sẵn sàng. Thiết bị được coi là sẵn sàng khi mức pin, tình trạng pin và trạng thái nhiệt độ nằm trong phạm vi tốt.",
   "thisWeek": "Tuần này",
   "lastWeek": "Tuần trước",
@@ -1827,5 +1819,123 @@
         "type": "int"
       }
     }
-  }
+  },
+  "videosProcessed": "Video đã được xử lý",
+  "totalVideos": "Tổng số video",
+  "skippedVideos": "Video bị bỏ qua",
+  "videoStreamingDescriptionLine1": "Phát video trên bất kỳ thiết bị.",
+  "videoStreamingDescriptionLine2": "Bật để xử lý luồng phát video trên thiết bị này.",
+  "videoStreamingNote": "Thiết bị này chỉ xử lý các video từ 60 ngày trở xuống và có thời lượng dưới 1 phút. Đối với các video cũ hơn/dài hơn, hãy bật tính năng phát trực tuyến trong ứng dụng máy tính để bàn.",
+  "createStream": "Tạo phát trực tiếp",
+  "recreateStream": "Tạo lại phát trực tiếp",
+  "addedToStreamCreationQueue": "Đã thêm vào hàng đợi tạo luồng",
+  "addedToStreamRecreationQueue": "Đã thêm vào hàng đợi tạo lại luồng",
+  "videoPreviewAlreadyExists": "Bản xem trước video đã tồn tại",
+  "videoAlreadyInQueue": "Tệp video đã có trong hàng đợi",
+  "addedToQueue": "Đã thêm vào hàng đợi",
+  "creatingStream": "Đang tạo luồng",
+  "similarImages": "Ảnh giống nhau",
+  "findSimilarImages": "Tìm ảnh giống nhau",
+  "noSimilarImagesFound": "Không tìm thấy ảnh giống nhau",
+  "yourPhotosLookUnique": "Ảnh của bạn trông độc đáo",
+  "similarGroupsFound": "{count, plural, =1{{count} nhóm được tìm thấy} other{{count} nhóm được tìm thấy}}",
+  "@similarGroupsFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewAndRemoveSimilarImages": "Xem lại và xóa ảnh giống nhau",
+  "deletePhotosWithSize": "Xóa {count} ảnh ({size})",
+  "@deletePhotosWithSize": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "selectionOptions": "Tùy chọn lựa chọn",
+  "selectExactWithCount": "Giống nhau hoàn toàn ({count})",
+  "@selectExactWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectExact": "Chọn chính xác",
+  "selectSimilarWithCount": "Giống nhau một phần ({count})",
+  "@selectSimilarWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectSimilar": "Chọn giống nhau",
+  "selectAllWithCount": "Tất cả giống nhau ({count})",
+  "@selectAllWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectSimilarImagesTitle": "Chọn những ảnh giống nhau",
+  "chooseSimilarImagesToSelect": "Chọn ảnh dựa trên sự tương đồng thị giác",
+  "clearSelection": "Bỏ chọn",
+  "similarImagesCount": "{count} ảnh giống nhau",
+  "@similarImagesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteWithCount": "Xóa ({count})",
+  "@deleteWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteFiles": "Xóa các tệp",
+  "areYouSureDeleteFiles": "Bạn có chắc muốn xóa các tệp này?",
+  "greatJob": "Tốt lắm!",
+  "cleanedUpSimilarImages": "Bạn tiết kiệm được {size}",
+  "@cleanedUpSimilarImages": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "size": "Dung lượng",
+  "similarity": "Sự giống nhau",
+  "analyzingPhotosLocally": "Phân tích ảnh của bạn trên thiết bị...",
+  "lookingForVisualSimilarities": "Tìm theo sự tương đồng thị giác...",
+  "comparingImageDetails": "So sánh các đặc điểm ảnh...",
+  "findingSimilarImages": "Tìm các ảnh giống nhau...",
+  "almostDone": "Sắp xong...",
+  "processingLocally": "Đang xử lý cục bộ",
+  "useMLToFindSimilarImages": "Xem lại và xóa những ảnh có vẻ giống nhau.",
+  "all": "Tất cả",
+  "similar": "Giống nhau",
+  "identical": "Giống hệt nhau",
+  "nothingHereTryAnotherFilter": "Không thấy gì, hãy thử thay đổi bộ lọc! 👀",
+  "related": "Có liên quan",
+  "hoorayyyy": "Hoorayyyy!",
+  "nothingToTidyUpHere": "Ở đây đã ngon lành rồi",
+  "deletingDash": "Đang xóa - ",
+  "cLTitle1": "Hình ảnh tương tự",
+  "cLDesc1": "Chúng tôi đang giới thiệu một hệ thống dựa trên ML mới để phát hiện hình ảnh tương tự, bạn có thể dùng để dọn dẹp thư viện của mình. Có sẵn trong Cài đặt -> Sao lưu -> Giải phóng dung lượng",
+  "cLTitle2": "Cải thiện streaming video",
+  "cLDesc2": "Bây giờ bạn có thể kích hoạt tạo luồng cho video trực tiếp từ ứng dụng. Chúng tôi cũng đã thêm màn hình cài đặt phát trực tuyến video mới sẽ cho bạn biết bao nhiêu phần trăm video của bạn đã được xử lý để phát trực tuyến",
+  "cLTitle3": "Cải Thiện Hiệu Suất",
+  "cLDesc3": "Nhiều cải thiện bên trong, bao gồm sử dụng bộ nhớ đệm tốt hơn và trải nghiệm cuộn mượt mà hơn"
 }

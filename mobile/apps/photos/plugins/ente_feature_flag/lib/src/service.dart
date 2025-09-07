@@ -58,7 +58,7 @@ class FlagService {
 
   bool get enableMobMultiPart => flags.enableMobMultiPart || internalUser;
 
-  bool get enableVectorDb => flags.internalUser;
+  bool get enableVectorDb => hasGrantedMLConsent;
 
   String get castUrl => flags.castUrl;
 

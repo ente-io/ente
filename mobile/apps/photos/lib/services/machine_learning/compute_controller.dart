@@ -10,7 +10,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/compute_control_event.dart";
 import "package:thermal/thermal.dart";
 
-enum _ComputeRunState {
+enum ComputeRunState {
   idle,
   runningML,
   generatingStream,
@@ -32,66 +32,109 @@ class ComputeController {
   bool _isDeviceHealthy = true;
   bool _isUserInteracting = true;
   bool _canRunCompute = false;
+
+  /// If true, user interaction is ignored and compute tasks can run regardless of user activity.
   bool interactionOverride = false;
+
+  /// If true, compute tasks are paused regardless of device health or user activity.
+  bool get computeBlocked => _computeBlocks.isNotEmpty;
+  final Set<String> _computeBlocks = {};
+
   late Timer _userInteractionTimer;
 
-  _ComputeRunState _currentRunState = _ComputeRunState.idle;
+  ComputeRunState _currentRunState = ComputeRunState.idle;
   bool _waitingToRunML = false;
 
   bool get isDeviceHealthy => _isDeviceHealthy;
 
   ComputeController() {
     _logger.info('ComputeController constructor');
+    init();
+    _logger.info('init done ');
+  }
+
+  // Directly assign the values + Attach listener for compute controller
+  Future<void> init() async {
+    // Interaction Timer
     _startInteractionTimer(kDefaultInteractionTimeout);
+
+    // Thermal related
+    _onThermalStateUpdate(await _thermal.thermalStatus);
+    _thermal.onThermalStatusChanged.listen((ThermalStatus thermalState) {
+      _onThermalStateUpdate(thermalState);
+    });
+
+    // Battery State
     if (Platform.isIOS) {
       if (kDebugMode) {
-        _logger.info(
+        _logger.fine(
           "iOS battery info stream is not available in simulator, disabling in debug mode",
         );
-        // if you need to test on physical device, uncomment this check
-        return;
+      } else {
+        // Update Battery state for iOS
+        _oniOSBatteryStateUpdate(await BatteryInfoPlugin().iosBatteryInfo);
+        BatteryInfoPlugin()
+            .iosBatteryInfoStream
+            .listen((IosBatteryInfo? batteryInfo) {
+          _oniOSBatteryStateUpdate(batteryInfo);
+        });
       }
-      BatteryInfoPlugin()
-          .iosBatteryInfoStream
-          .listen((IosBatteryInfo? batteryInfo) {
-        _oniOSBatteryStateUpdate(batteryInfo);
-      });
-    }
-    if (Platform.isAndroid) {
+    } else if (Platform.isAndroid) {
+      // Update Battery state for Android
+      _onAndroidBatteryStateUpdate(
+        await BatteryInfoPlugin().androidBatteryInfo,
+      );
       BatteryInfoPlugin()
           .androidBatteryInfoStream
           .listen((AndroidBatteryInfo? batteryInfo) {
         _onAndroidBatteryStateUpdate(batteryInfo);
       });
     }
-    _thermal.onThermalStatusChanged.listen((ThermalStatus thermalState) {
-      _onThermalStateUpdate(thermalState);
-    });
-    _logger.info('init done ');
   }
 
-  bool requestCompute({bool ml = false, bool stream = false}) {
-    _logger.info("Requesting compute: ml: $ml, stream: $stream");
-    if (!_isDeviceHealthy || !_canRunGivenUserInteraction()) {
-      _logger.info("Device not healthy or user interacting, denying request.");
+  bool requestCompute({
+    bool ml = false,
+    bool stream = false,
+    bool bypassInteractionCheck = false,
+    bool bypassMLWaiting = false,
+  }) {
+    _logger.info(
+      "Requesting compute: ml: $ml, stream: $stream, bypassInteraction: $bypassInteractionCheck, bypassMLWaiting: $bypassMLWaiting",
+    );
+    if (!_isDeviceHealthy) {
+      _logger.info("Device not healthy, denying request.");
       return false;
     }
-    if (ml) {
-      return _requestML();
-    } else if (stream) {
-      return _requestStream();
+    if (!bypassInteractionCheck && !_canRunGivenUserInteraction()) {
+      _logger.info("User interacting, denying request.");
+      return false;
     }
-    _logger.severe("No compute request specified, denying request.");
-    return false;
+    if (computeBlocked) {
+      _logger.info("Compute is blocked by: $_computeBlocks, denying request.");
+      return false;
+    }
+    bool result = false;
+    if (ml) {
+      result = _requestML();
+    } else if (stream) {
+      result = _requestStream(bypassMLWaiting);
+    } else {
+      _logger.severe("No compute request specified, denying request.");
+    }
+    return result;
+  }
+
+  ComputeRunState get computeState {
+    return _currentRunState;
   }
 
   bool _requestML() {
-    if (_currentRunState == _ComputeRunState.idle) {
-      _currentRunState = _ComputeRunState.runningML;
+    if (_currentRunState == ComputeRunState.idle) {
+      _currentRunState = ComputeRunState.runningML;
       _waitingToRunML = false;
       _logger.info("ML request granted");
       return true;
-    } else if (_currentRunState == _ComputeRunState.runningML) {
+    } else if (_currentRunState == ComputeRunState.runningML) {
       return true;
     }
     _logger.info(
@@ -101,17 +144,15 @@ class ComputeController {
     return false;
   }
 
-  bool _requestStream() {
-    if (_currentRunState == _ComputeRunState.idle && !_waitingToRunML) {
+  bool _requestStream([bool bypassMLWaiting = false]) {
+    if (_currentRunState == ComputeRunState.idle &&
+        (bypassMLWaiting || !_waitingToRunML)) {
       _logger.info("Stream request granted");
-      _currentRunState = _ComputeRunState.generatingStream;
-      return true;
-    } else if (_currentRunState == _ComputeRunState.generatingStream &&
-        !_waitingToRunML) {
+      _currentRunState = ComputeRunState.generatingStream;
       return true;
     }
     _logger.info(
-      "Stream request denied, current state: $_currentRunState, wants to run ML: $_waitingToRunML",
+      "Stream request denied, current state: $_currentRunState, wants to run ML: $_waitingToRunML, bypassMLWaiting: $bypassMLWaiting",
     );
     return false;
   }
@@ -122,13 +163,13 @@ class ComputeController {
     );
 
     if (ml) {
-      if (_currentRunState == _ComputeRunState.runningML) {
-        _currentRunState = _ComputeRunState.idle;
+      if (_currentRunState == ComputeRunState.runningML) {
+        _currentRunState = ComputeRunState.idle;
       }
       _waitingToRunML = false;
     } else if (stream) {
-      if (_currentRunState == _ComputeRunState.generatingStream) {
-        _currentRunState = _ComputeRunState.idle;
+      if (_currentRunState == ComputeRunState.generatingStream) {
+        _currentRunState = ComputeRunState.idle;
       }
     }
   }
@@ -152,12 +193,25 @@ class ComputeController {
     _fireControlEvent();
   }
 
+  void blockCompute({required String blocker}) {
+    _computeBlocks.add(blocker);
+    _logger.info("Forcing to pauze compute due to: $blocker");
+    _fireControlEvent();
+  }
+
+  void unblockCompute({required String blocker}) {
+    _computeBlocks.remove(blocker);
+    _logger.info("removed blocker: $blocker, now blocked: $computeBlocked");
+    _fireControlEvent();
+  }
+
   void _fireControlEvent() {
-    final shouldRunCompute = _isDeviceHealthy && _canRunGivenUserInteraction();
+    final shouldRunCompute =
+        _isDeviceHealthy && _canRunGivenUserInteraction() && !computeBlocked;
     if (shouldRunCompute != _canRunCompute) {
       _canRunCompute = shouldRunCompute;
       _logger.info(
-        "Firing event: $shouldRunCompute      (device health: $_isDeviceHealthy, user interaction: $_isUserInteracting, mlInteractionOverride: $interactionOverride)",
+        "Firing event: $shouldRunCompute      (device health: $_isDeviceHealthy, user interaction: $_isUserInteracting, mlInteractionOverride: $interactionOverride, blockers: $_computeBlocks)",
       );
       Bus.instance.fire(ComputeControlEvent(shouldRunCompute));
     }

@@ -1,0 +1,1 @@
+class SharingNotPermittedForFreeAccountsError extends Error {}

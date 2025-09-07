@@ -75,3 +75,4 @@ analyzer:
     - rust_builder/**
     - lib/src/rust/**
     - rust/src/**
+    - test/**
