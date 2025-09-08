@@ -46,7 +46,6 @@ import 'package:photos/services/collections_service.dart';
 import "package:photos/services/date_parse_service.dart";
 import "package:photos/services/filter/db_filters.dart";
 import "package:photos/services/location_service.dart";
-import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import "package:photos/services/memories_cache_service.dart";
@@ -725,7 +724,7 @@ class SearchService {
 
   Future<List<GenericSearchResult>> getAllFace(
     int? limit, {
-    int minClusterSize = kMinimumClusterSizeSearchResult,
+    required int minClusterSize,
   }) async {
     try {
       debugPrint("getting faces");
@@ -894,13 +893,7 @@ class SearchService {
           ),
         );
       }
-      if (facesResult.isEmpty) {
-        if (kMinimumClusterSizeAllFaces < minClusterSize) {
-          return getAllFace(limit, minClusterSize: kMinimumClusterSizeAllFaces);
-        } else {
-          return [];
-        }
-      }
+      if (facesResult.isEmpty) return [];
       if (limit != null) {
         return facesResult.sublist(0, min(limit, facesResult.length));
       } else {
