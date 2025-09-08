@@ -252,7 +252,7 @@ class SearchWidgetState extends State<SearchWidget> {
       },
     );
 
-    _searchService.getAllFace(null).then(
+    _searchService.getAllFace(null, minClusterSize: 10).then(
       (faceResult) {
         final List<GenericSearchResult> filteredResults = [];
         for (final result in faceResult) {
