@@ -191,7 +191,9 @@ func (m *CollectionLinkMiddleware) validatePassword(c *gin.Context, reqPath stri
 func (m *CollectionLinkMiddleware) validateOrigin(c *gin.Context, ownerID int64) error {
 	origin := c.Request.Header.Get("Origin")
 
-	if origin == "" || origin == viper.GetString("apps.public-albums") {
+	if origin == "" ||
+		origin == viper.GetString("apps.public-albums") ||
+		strings.HasSuffix(strings.ToLower(origin), "http://localhost:") {
 		return nil
 	}
 	reqId := requestid.Get(c)
