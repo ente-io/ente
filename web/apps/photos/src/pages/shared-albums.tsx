@@ -17,6 +17,7 @@ import Typography from "@mui/material/Typography";
 import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
 import { type FileListHeaderOrFooter } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
+import { TripMapViewer } from "components/TripMapViewer";
 import { Upload } from "components/Upload";
 import {
     AccountsPageContents,
@@ -462,6 +463,8 @@ export default function PublicCollectionGallery() {
         );
     }
 
+    const isTripsTemplate = process.env.NEXT_PUBLIC_USE_TRIPS_VIEWER === "true";
+
     return (
         <FullScreenDropZone
             disabled={shouldDisableDropzone}
@@ -493,20 +496,23 @@ export default function PublicCollectionGallery() {
                     </SpacedRow>
                 )}
             </NavbarBase>
-
-            <FileListWithViewer
-                files={publicFiles}
-                header={fileListHeader}
-                footer={fileListFooter}
-                enableDownload={downloadEnabled}
-                enableSelect={downloadEnabled}
-                selected={selected}
-                setSelected={setSelected}
-                activeCollectionID={PseudoCollectionID.all}
-                onRemotePull={publicAlbumsRemotePull}
-                onVisualFeedback={handleVisualFeedback}
-                onAddSaveGroup={onAddSaveGroup}
-            />
+            {isTripsTemplate ? (
+                <TripMapViewer files={publicFiles} collection={publicCollection} />
+            ) : (
+                <FileListWithViewer
+                    files={publicFiles}
+                    header={fileListHeader}
+                    footer={fileListFooter}
+                    enableDownload={downloadEnabled}
+                    enableSelect={downloadEnabled}
+                    selected={selected}
+                    setSelected={setSelected}
+                    activeCollectionID={PseudoCollectionID.all}
+                    onRemotePull={publicAlbumsRemotePull}
+                    onVisualFeedback={handleVisualFeedback}
+                    onAddSaveGroup={onAddSaveGroup}
+                />
+            )}
             {blockingLoad && <TranslucentLoadingOverlay />}
             <Upload
                 publicAlbumsCredentials={credentials.current}
