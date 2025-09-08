@@ -344,7 +344,8 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                         const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                     child: Text(
                       AppLocalizations.of(context).passwordStrength(
-                          passwordStrengthValue: passwordStrengthText,),
+                        passwordStrengthValue: passwordStrengthText,
+                      ),
                       style: TextStyle(
                         color: passwordStrengthColor,
                       ),

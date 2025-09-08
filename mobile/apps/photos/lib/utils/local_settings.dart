@@ -42,7 +42,7 @@ class LocalSettings {
   static const kCollectionViewType = "collection_view_type";
   static const kCollectionSortDirection = "collection_sort_direction";
   static const kShowLocalIDOverThumbnails = "show_local_id_over_thumbnails";
-  
+
   // Thumbnail queue configuration keys
   static const kSmallQueueMaxConcurrent = "small_queue_max_concurrent";
   static const kSmallQueueTimeout = "small_queue_timeout_seconds";
@@ -235,39 +235,41 @@ class LocalSettings {
   }
 
   // Thumbnail queue configuration - Small queue
-  int get smallQueueMaxConcurrent => _prefs.getInt(kSmallQueueMaxConcurrent) ?? 15;
-  
+  int get smallQueueMaxConcurrent =>
+      _prefs.getInt(kSmallQueueMaxConcurrent) ?? 15;
+
   int get smallQueueTimeoutSeconds => _prefs.getInt(kSmallQueueTimeout) ?? 60;
-  
+
   int get smallQueueMaxSize => _prefs.getInt(kSmallQueueMaxSize) ?? 200;
-  
+
   Future<void> setSmallQueueMaxConcurrent(int value) async {
     await _prefs.setInt(kSmallQueueMaxConcurrent, value);
   }
-  
+
   Future<void> setSmallQueueTimeout(int seconds) async {
     await _prefs.setInt(kSmallQueueTimeout, seconds);
   }
-  
+
   Future<void> setSmallQueueMaxSize(int value) async {
     await _prefs.setInt(kSmallQueueMaxSize, value);
   }
 
   // Thumbnail queue configuration - Large queue
-  int get largeQueueMaxConcurrent => _prefs.getInt(kLargeQueueMaxConcurrent) ?? 5;
-  
+  int get largeQueueMaxConcurrent =>
+      _prefs.getInt(kLargeQueueMaxConcurrent) ?? 5;
+
   int get largeQueueTimeoutSeconds => _prefs.getInt(kLargeQueueTimeout) ?? 60;
-  
+
   int get largeQueueMaxSize => _prefs.getInt(kLargeQueueMaxSize) ?? 200;
-  
+
   Future<void> setLargeQueueMaxConcurrent(int value) async {
     await _prefs.setInt(kLargeQueueMaxConcurrent, value);
   }
-  
+
   Future<void> setLargeQueueTimeout(int seconds) async {
     await _prefs.setInt(kLargeQueueTimeout, seconds);
   }
-  
+
   Future<void> setLargeQueueMaxSize(int value) async {
     await _prefs.setInt(kLargeQueueMaxSize, value);
   }

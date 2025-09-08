@@ -156,7 +156,9 @@ class _LinkContactToPersonSelectionPageState
       title: context.l10n.linkPersonToEmail(email: emailToLink),
       icon: Icons.info_outline,
       body: context.l10n.linkPersonToEmailConfirmation(
-          personName: personName, email: emailToLink,),
+        personName: personName,
+        email: emailToLink,
+      ),
       isDismissible: true,
       buttons: [
         ButtonWidget(

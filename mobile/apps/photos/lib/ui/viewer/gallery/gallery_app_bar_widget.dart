@@ -224,7 +224,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         context,
         AppLocalizations.of(context)
             .typeOfGallerGallerytypeIsNotSupportedForRename(
-                galleryType: "$galleryType",),
+          galleryType: "$galleryType",
+        ),
       );
 
       return;
