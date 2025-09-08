@@ -67,13 +67,16 @@ class _AlbumSelectionOverlayBarState extends State<AlbumSelectionOverlayBar> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              AlbumActionBarWidget(
-                selectedAlbums: widget.selectedAlbums,
-                onCancel: () {
-                  if (widget.selectedAlbums.albums.isNotEmpty) {
-                    widget.selectedAlbums.clearAll();
-                  }
-                },
+              Padding(
+                padding: const EdgeInsets.only(right: 12.0),
+                child: AlbumActionBarWidget(
+                  selectedAlbums: widget.selectedAlbums,
+                  onCancel: () {
+                    if (widget.selectedAlbums.albums.isNotEmpty) {
+                      widget.selectedAlbums.clearAll();
+                    }
+                  },
+                ),
               ),
               if (widget.showSelectAllButton)
                 Padding(
