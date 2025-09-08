@@ -67,26 +67,31 @@ class _AlbumSelectionOverlayBarState extends State<AlbumSelectionOverlayBar> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Padding(
-                padding: const EdgeInsets.only(right: 12.0),
-                child: AlbumActionBarWidget(
-                  selectedAlbums: widget.selectedAlbums,
-                  onCancel: () {
-                    if (widget.selectedAlbums.albums.isNotEmpty) {
-                      widget.selectedAlbums.clearAll();
-                    }
-                  },
-                ),
-              ),
-              if (widget.showSelectAllButton)
-                Padding(
-                  padding: const EdgeInsets.only(right: 4),
-                  child: SelectAllAlbumsButton(
-                    widget.selectedAlbums,
-                    widget.collections,
-                    backgroundColor: widget.backgroundColor,
+              Row(
+                children: [
+                  if (widget.showSelectAllButton)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 12),
+                      child: SelectAllAlbumsButton(
+                        widget.selectedAlbums,
+                        widget.collections,
+                        backgroundColor: widget.backgroundColor,
+                      ),
+                    ),
+                  const Spacer(),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 12.0),
+                    child: AlbumActionBarWidget(
+                      selectedAlbums: widget.selectedAlbums,
+                      onCancel: () {
+                        if (widget.selectedAlbums.albums.isNotEmpty) {
+                          widget.selectedAlbums.clearAll();
+                        }
+                      },
+                    ),
                   ),
-                ),
+                ],
+              ),
               const SizedBox(height: 8),
               Container(
                 decoration: BoxDecoration(boxShadow: shadowFloatFaintLight),
@@ -150,50 +155,47 @@ class _SelectAllAlbumsButtonState extends State<SelectAllAlbumsButton> {
           _allSelected = !_allSelected;
         });
       },
-      child: Padding(
-        padding: const EdgeInsets.only(top: 8),
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: widget.backgroundColor ?? colorScheme.backgroundElevated2,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 4,
-                offset: const Offset(0, -1),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                S.of(context).selectAllShort,
-                style: getEnteTextTheme(context).miniMuted,
-              ),
-              const SizedBox(width: 4),
-              ListenableBuilder(
-                listenable: widget.selectedAlbums,
-                builder: (context, _) {
-                  if (widget.selectedAlbums.albums.length ==
-                      widget.collections.length) {
-                    _allSelected = true;
-                  } else {
-                    _allSelected = false;
-                  }
-                  return Icon(
-                    _allSelected
-                        ? Icons.check_circle
-                        : Icons.check_circle_outline,
-                    color: _allSelected ? null : colorScheme.strokeMuted,
-                    size: 18,
-                  );
-                },
-              ),
-            ],
-          ),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+        decoration: BoxDecoration(
+          color: widget.backgroundColor ?? colorScheme.backgroundElevated2,
+          borderRadius: BorderRadius.circular(100),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 4,
+              offset: const Offset(0, -1),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              S.of(context).selectAll,
+              style: getEnteTextTheme(context).mini,
+            ),
+            const SizedBox(width: 4),
+            ListenableBuilder(
+              listenable: widget.selectedAlbums,
+              builder: (context, _) {
+                if (widget.selectedAlbums.albums.length ==
+                    widget.collections.length) {
+                  _allSelected = true;
+                } else {
+                  _allSelected = false;
+                }
+                return Icon(
+                  _allSelected
+                      ? Icons.check_circle
+                      : Icons.check_circle_outline,
+                  color: _allSelected ? null : colorScheme.strokeBase,
+                  size: 16,
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
