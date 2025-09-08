@@ -1,0 +1,10 @@
+{
+  "configurations": [
+    {
+      "name": "Release Build",
+      "scheme": "Runner",
+      "archive_configuration": "Release",
+      "destination": "generic/platform=iOS"
+    }
+  ]
+}
