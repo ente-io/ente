@@ -121,8 +121,10 @@
 		<array>
 			<string>_googlecast._tcp</string>
 			<string>_F5BCEC64._googlecast._tcp</string>
+			<string>_airplay._tcp</string>
+			<string>_raop._tcp</string>
 		</array>
 		<key>NSLocalNetworkUsageDescription</key>
-		<string>${PRODUCT_NAME} uses the local network to discover Cast-enabled devices on your WiFi network.</string>
+		<string>${PRODUCT_NAME} uses the local network to discover Cast-enabled devices and AirPlay devices on your WiFi network.</string>
 	</dict>
 </plist>

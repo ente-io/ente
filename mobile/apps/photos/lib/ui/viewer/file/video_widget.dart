@@ -42,12 +42,14 @@ class VideoWidget extends StatefulWidget {
 class _VideoWidgetState extends State<VideoWidget> {
   final _logger = Logger("VideoWidget");
   bool useNativeVideoPlayer = true;
+  bool useAirPlay = false;
   late final StreamSubscription<UseMediaKitForVideo>
       useMediaKitForVideoSubscription;
   late bool selectPreviewForPlay = widget.file.localID == null;
   PlaylistData? playlistData;
   final nativePlayerKey = GlobalKey();
   final mediaKitKey = GlobalKey();
+  final airPlayKey = GlobalKey();
 
   bool isPreviewLoadable = false;
 

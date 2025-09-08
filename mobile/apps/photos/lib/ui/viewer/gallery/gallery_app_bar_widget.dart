@@ -26,6 +26,7 @@ import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/service_locator.dart';
+import 'package:photos/services/airplay_service.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/files_service.dart";
 import "package:photos/states/location_screen_state.dart";
@@ -964,6 +965,13 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   Future<void> _castChoiceDialog() async {
     final gw = CastGateway(NetworkClient.instance.enteDio);
+
+    // On iOS, show AirPlay button instead of Cast
+    if (Platform.isIOS) {
+      await _showAirPlayDialog();
+      return;
+    }
+
     if (castService.getActiveSessions().isNotEmpty) {
       await showChoiceDialog(
         context,
@@ -1088,5 +1096,45 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       castNotifier.value++;
       return false;
     }
+  }
+
+  Future<void> _showAirPlayDialog() async {
+    final airPlayService = AirPlayService.instance;
+
+    if (!airPlayService.isSupported) {
+      showToast(context, 'AirPlay is not supported on this device');
+      return;
+    }
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(AppLocalizations.of(context).playOnTv),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Select an AirPlay device to stream your album'),
+              const SizedBox(height: 20),
+              airPlayService.buildAirPlayButton(
+                width: 60,
+                height: 60,
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                'Tap the AirPlay button above to select a device',
+                style: TextStyle(fontSize: 12),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(AppLocalizations.of(context).cancel),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
