@@ -8,7 +8,7 @@ set -e
 echo "🚀 Starting post-clone setup..."
 
 # Navigate to the Flutter project root
-cd ../../../  # Adjust path based on your structure
+cd ../../  # Adjust path based on your structure
 
 # Install Flutter
 echo "📦 Installing Flutter..."
