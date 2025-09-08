@@ -1,4 +1,5 @@
 import { downloadManager } from "ente-gallery/services/download";
+import { FileViewer } from "ente-gallery/components/viewer/FileViewer";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
@@ -256,7 +257,6 @@ const TripStartedSection = ({
                 {firstDate.toLocaleDateString("en-US", {
                     month: "long",
                     day: "2-digit",
-                    year: "numeric",
                 })}
             </div>
 
@@ -381,13 +381,20 @@ const TimelineBaseLine = ({
 };
 
 // Component for photo fan display
-const PhotoFan = ({ cluster }: { cluster: JourneyPoint[] }) => {
+const PhotoFan = ({ 
+    cluster, 
+    onPhotoClick 
+}: { 
+    cluster: JourneyPoint[];
+    onPhotoClick?: (cluster: JourneyPoint[], fileId: number) => void;
+}) => {
     if (!cluster || cluster.length === 0) return null;
 
     return (
         <div style={{ position: "relative", width: "180px", height: "240px" }}>
             {cluster.length === 2 && cluster[1] && (
                 <div
+                    onClick={() => cluster[1] && onPhotoClick?.(cluster, cluster[1].fileId)}
                     style={{
                         position: "absolute",
                         border: "2px solid white",
@@ -402,6 +409,7 @@ const PhotoFan = ({ cluster }: { cluster: JourneyPoint[] }) => {
                         top: "50%",
                         left: "0",
                         marginTop: "-103.5px",
+                        cursor: "pointer",
                     }}
                 >
                     <div
@@ -426,6 +434,7 @@ const PhotoFan = ({ cluster }: { cluster: JourneyPoint[] }) => {
                 <>
                     {cluster[1] && (
                         <div
+                            onClick={() => cluster[1] && onPhotoClick?.(cluster, cluster[1].fileId)}
                             style={{
                                 position: "absolute",
                                 border: "2px solid white",
@@ -439,6 +448,7 @@ const PhotoFan = ({ cluster }: { cluster: JourneyPoint[] }) => {
                                 transform: "translateX(-33px) skewY(-8deg)",
                                 top: "16.5px",
                                 left: "0",
+                                cursor: "pointer",
                             }}
                         >
                             <div
@@ -461,6 +471,7 @@ const PhotoFan = ({ cluster }: { cluster: JourneyPoint[] }) => {
                     )}
                     {cluster[2] && (
                         <div
+                            onClick={() => cluster[2] && onPhotoClick?.(cluster, cluster[2].fileId)}
                             style={{
                                 position: "absolute",
                                 border: "2px solid white",
@@ -474,6 +485,7 @@ const PhotoFan = ({ cluster }: { cluster: JourneyPoint[] }) => {
                                 transform: "translateX(33px) skewY(8deg)",
                                 top: "16.5px",
                                 left: "0",
+                                cursor: "pointer",
                             }}
                         >
                             <div
@@ -499,6 +511,7 @@ const PhotoFan = ({ cluster }: { cluster: JourneyPoint[] }) => {
 
             {cluster[0] && (
                 <div
+                    onClick={() => cluster[0] && onPhotoClick?.(cluster, cluster[0].fileId)}
                     style={{
                         position: "relative",
                         width: "100%",
@@ -509,6 +522,7 @@ const PhotoFan = ({ cluster }: { cluster: JourneyPoint[] }) => {
                         zIndex: 20,
                         borderRadius: "14px",
                         overflow: "hidden",
+                        cursor: "pointer",
                     }}
                 >
                     <Image
@@ -555,6 +569,7 @@ const TimelineLocation = ({
     scrollProgress,
     journeyData,
     onRef,
+    onPhotoClick,
 }: {
     cluster: JourneyPoint[];
     index: number;
@@ -562,6 +577,7 @@ const TimelineLocation = ({
     scrollProgress: number;
     journeyData: JourneyPoint[];
     onRef: (el: HTMLDivElement | null) => void;
+    onPhotoClick?: (cluster: JourneyPoint[], fileId: number) => void;
 }) => {
     const isLeft = index % 2 === 0;
     const firstPhoto = cluster[0];
@@ -701,7 +717,7 @@ const TimelineLocation = ({
                             paddingLeft: cluster.length >= 3 ? "72px" : "40px",
                         }}
                     >
-                        <PhotoFan cluster={cluster} />
+                        <PhotoFan cluster={cluster} onPhotoClick={onPhotoClick} />
                     </div>
                 </>
             ) : (
@@ -714,7 +730,7 @@ const TimelineLocation = ({
                             paddingRight: cluster.length >= 3 ? "72px" : "40px",
                         }}
                     >
-                        <PhotoFan cluster={cluster} />
+                        <PhotoFan cluster={cluster} onPhotoClick={onPhotoClick} />
                     </div>
                     <div
                         style={{
@@ -785,6 +801,11 @@ interface TripMapViewerProps {
     collection?: Collection;
     albumTitle?: string;
     ownerName?: string;
+    user?: any; // User object for FileViewer
+    // FileViewer related props (optional, can be added as needed)
+    enableDownload?: boolean;
+    onSetOpenFileViewer?: (open: boolean) => void;
+    onRemotePull?: () => Promise<void>;
 }
 
 export const TripMapViewer: React.FC<TripMapViewerProps> = ({
@@ -792,6 +813,10 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
     collection,
     albumTitle,
     ownerName,
+    user,
+    enableDownload,
+    onSetOpenFileViewer,
+    onRemotePull,
 }) => {
     // Extract collection info if available
     const collectionTitle = collection?.name || albumTitle || "Trip Journey";
@@ -834,6 +859,11 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
     const isClusterClickScrollingRef = useRef(false); // Use ref for immediate updates
     const clusterClickTimeoutRef = useRef<NodeJS.Timeout | null>(null); // Timeout for cluster clicks
 
+    // FileViewer state
+    const [openFileViewer, setOpenFileViewer] = useState(false);
+    const [currentFileIndex, setCurrentFileIndex] = useState(0);
+    const [viewerFiles, setViewerFiles] = useState<EnteFile[]>([]); // Files to show in viewer
+
     // Track screen dimensions for responsive zoom calculation
     useEffect(() => {
         const updateScreenDimensions = () => {
@@ -855,6 +885,38 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
             window.removeEventListener("resize", updateScreenDimensions);
         };
     }, []);
+
+    // FileViewer handlers
+    const handleOpenFileViewer = useCallback((cluster: JourneyPoint[], clickedFileId: number) => {
+        // Get the EnteFile objects for all photos in this cluster
+        const clusterFileIds = cluster.map(point => point.fileId);
+        const clusterFiles = files.filter(file => clusterFileIds.includes(file.id));
+        
+        // Sort cluster files by creation time (same as cluster photos)
+        clusterFiles.sort((a, b) => 
+            new Date(a.metadata.creationTime / 1000).getTime() - 
+            new Date(b.metadata.creationTime / 1000).getTime()
+        );
+        
+        // Find the index of the clicked photo in the cluster
+        const clickedIndex = clusterFiles.findIndex(f => f.id === clickedFileId);
+        
+        if (clickedIndex !== -1 && clusterFiles.length > 0) {
+            setViewerFiles(clusterFiles);
+            setCurrentFileIndex(clickedIndex);
+            setOpenFileViewer(true);
+            onSetOpenFileViewer?.(true);
+        }
+    }, [files, onSetOpenFileViewer]);
+
+    const handleCloseFileViewer = useCallback(() => {
+        setOpenFileViewer(false);
+        onSetOpenFileViewer?.(false);
+    }, [onSetOpenFileViewer]);
+
+    const handleTriggerRemotePull = useCallback(() => {
+        return onRemotePull?.() || Promise.resolve();
+    }, [onRemotePull]);
 
     // Geographic clustering with responsive distance thresholds
     const clusterPhotosByProximity = (photos: JourneyPoint[]) => {
@@ -1884,6 +1946,7 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
                                                                 index
                                                             ] = el;
                                                         }}
+                                                        onPhotoClick={handleOpenFileViewer}
                                                     />
                                                 ),
                                             )}
@@ -2202,6 +2265,34 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
                     })}
                 </MapContainer>
             </div>
+            
+            {/* FileViewer for photo gallery */}
+            <FileViewer
+                open={openFileViewer}
+                onClose={handleCloseFileViewer}
+                initialIndex={currentFileIndex}
+                files={viewerFiles}
+                user={user}
+                disableDownload={!enableDownload}
+                onTriggerRemotePull={handleTriggerRemotePull}
+                // Add minimal required props - can be extended based on needs
+                isInIncomingSharedCollection={false}
+                isInHiddenSection={false}
+                fileNormalCollectionIDs={new Map()}
+                collectionNameByID={new Map()}
+                favoriteFileIDs={new Set<number>()}
+                pendingFavoriteUpdates={new Set<number>()}
+                pendingVisibilityUpdates={new Set<number>()}
+                onRemoteFilesPull={handleTriggerRemotePull}
+                onVisualFeedback={() => {}}
+                onToggleFavorite={() => Promise.resolve()}
+                onFileVisibilityUpdate={() => Promise.resolve()}
+                onSelectCollection={() => {}}
+                onSelectPerson={() => {}}
+                onDownload={() => {}}
+                onDelete={() => Promise.resolve()}
+                onSaveEditedImageCopy={() => {}}
+            />
         </div>
     );
 };
