@@ -1303,10 +1303,10 @@ packages:
     dependency: "direct main"
     description:
       name: in_app_purchase
-      sha256: "5cddd7f463f3bddb1d37a72b95066e840d5822d66291331d7f8f05ce32c24b6c"
+      sha256: "11a40f148eeb4f681a0572003e2b33432e110c90c1bbb4f9ef83b81ec0c4f737"
       url: "https://pub.dev"
     source: hosted
-    version: "3.2.3"
+    version: "3.2.1"
   in_app_purchase_android:
     dependency: transitive
     description:
@@ -1327,10 +1327,10 @@ packages:
     dependency: transitive
     description:
       name: in_app_purchase_storekit
-      sha256: ceddd5a70d268f762d29993ed470054bc2baf8793e41800bc82cde05110260d0
+      sha256: "6ce1361278cacc0481508989ba419b2c9f46a2b0dc54b3fe54f5ee63c2718fef"
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.2"
+    version: "0.3.22+1"
   integration_test:
     dependency: "direct dev"
     description: flutter
