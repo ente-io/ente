@@ -153,8 +153,9 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
             .toString()
             .padLeft(collections.length.toString().length, '0');
         _deleteProgress.value = AppLocalizations.of(context).deleteProgress(
-            currentlyDeleting: currentlyDeleting,
-            totalCount: collections.length,);
+          currentlyDeleting: currentlyDeleting,
+          totalCount: collections.length,
+        );
         try {
           await CollectionsService.instance.trashEmptyCollection(
             collections[i],
