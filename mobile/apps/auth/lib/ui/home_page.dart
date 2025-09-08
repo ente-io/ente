@@ -129,7 +129,7 @@ class _HomePageState extends State<HomePage> {
 
   void _onAddTagPressed() {
   final selectedIds = _codeDisplayStore.selectedCodeIds.value;
-  final selectedCodes = _allCodes?.where((c) => selectedIds.contains(c.rawData)).toList() ?? [];
+  final selectedCodes = _allCodes?.where((c) => selectedIds.contains(c.secret)).toList() ?? [];
 
   if (selectedCodes.isEmpty) return;
 
@@ -151,7 +151,7 @@ Future<void> _onRestoreSelectedPressed() async {
   FocusScope.of(context).requestFocus();
 
   try {
-    final codesToRestore = _allCodes?.where((c) => selectedIds.contains(c.rawData)).toList() ?? [];
+    final codesToRestore = _allCodes?.where((c) => selectedIds.contains(c.secret)).toList() ?? [];
     for (final code in codesToRestore) {
       final updatedCode = code.copyWith(display: code.display.copyWith(trashed: false));
       unawaited(CodeStore.instance.updateCode(code, updatedCode));
@@ -187,7 +187,7 @@ Future<void> _onDeleteForeverPressed() async {
     isCritical: true,
     firstButtonOnTap: () async {
       try {
-        final codesToDelete = _allCodes?.where((c) => selectedIds.contains(c.rawData)).toList() ?? [];
+        final codesToDelete = _allCodes?.where((c) => selectedIds.contains(c.secret)).toList() ?? [];
         for (final code in codesToDelete) {
           await CodeStore.instance.removeCode(code);
         }
@@ -227,7 +227,7 @@ Widget _buildTrashSelectActions() {
   final selectedIds = _codeDisplayStore.selectedCodeIds.value;
   if (selectedIds.isEmpty) return;
 
-  final codesToUpdate = _allCodes?.where((c) => selectedIds.contains(c.rawData)).toList() ?? [];
+  final codesToUpdate = _allCodes?.where((c) => selectedIds.contains(c.secret)).toList() ?? [];
   if (codesToUpdate.isEmpty) return;
 
   // Determine the state of the current selection
@@ -289,7 +289,7 @@ Widget _buildTrashSelectActions() {
 
     body: ((){
       if (selectedIds.length == 1){
-        final code = _allCodes!.firstWhere((c) => c.rawData == selectedIds.first);
+        final code = _allCodes!.firstWhere((c) => c.secret == selectedIds.first);
         final issuerAccount = code.account.isNotEmpty ? '${code.issuer} (${code.account})' : code.issuer;
         return l10n.trashCodeMessage(issuerAccount);
       } 
@@ -302,7 +302,7 @@ Widget _buildTrashSelectActions() {
     isCritical: true, 
     firstButtonOnTap: () async {
       try {
-        final codesToTrash = _allCodes?.where((c) => selectedIds.contains(c.rawData)).toList() ?? [];
+        final codesToTrash = _allCodes?.where((c) => selectedIds.contains(c.secret)).toList() ?? [];
 
         for (final code in codesToTrash) {
           final updatedCode = code.copyWith(
@@ -423,7 +423,7 @@ Widget _buildSingleSelectActions(Code code) {
   builder: (context, selectedIds, child) {
     if (selectedIds.isEmpty) return const Expanded(child: SizedBox.shrink());
 
-    final selectedCodes = _allCodes?.where((c) => selectedIds.contains(c.rawData)).toList() ?? [];
+    final selectedCodes = _allCodes?.where((c) => selectedIds.contains(c.secret)).toList() ?? [];
     if (selectedCodes.isEmpty) return const Expanded(child: SizedBox.shrink());
 
     final bool allArePinned = selectedCodes.every((code) => code.isPinned);
@@ -461,7 +461,7 @@ Widget _buildMultiSelectActions(Set<String> selectedIds) {
   builder: (context, selectedIds, child) {
     if (selectedIds.isEmpty) return const Expanded(child: SizedBox.shrink());
 
-    final selectedCodes = _allCodes?.where((c) => selectedIds.contains(c.rawData)).toList() ?? [];
+    final selectedCodes = _allCodes?.where((c) => selectedIds.contains(c.secret)).toList() ?? [];
     if (selectedCodes.isEmpty) return const Expanded(child: SizedBox.shrink());
 
     final bool allArePinned = selectedCodes.every((code) => code.isPinned);
@@ -531,7 +531,7 @@ Widget _buildActionButtons() {
 
       if (selectedIds.length == 1) {
         final selectedCode = _allCodes?.firstWhereOrNull(
-          (c) => c.rawData == selectedIds.first,
+          (c) => c.secret == selectedIds.first,
         );
         if (selectedCode == null) return const SizedBox.shrink();
         return _buildSingleSelectActions(selectedCode);
@@ -580,7 +580,7 @@ Widget _buildActionButtons() {
         child: InkWell(
           onTap: () {
             final allVisibleCodeIds =
-            _filteredCodes.map((c) => c.rawData).toSet();
+            _filteredCodes.map((c) => c.secret).toSet();
             _codeDisplayStore.selectedCodeIds.value = allVisibleCodeIds;
           },
           child: Padding(
@@ -610,7 +610,7 @@ Widget _buildActionButtons() {
             return const SizedBox.shrink();
           }
           final selectedCodes = _allCodes
-                  ?.where((c) => selectedIds.contains(c.rawData))
+                  ?.where((c) => selectedIds.contains(c.secret))
                   .toList() ??
               [];
           final codesToShow = selectedCodes.take(3).toList();

@@ -204,7 +204,7 @@ Widget clippedCard(AppLocalizations l10n) {
   return ValueListenableBuilder<Set<String>>(
     valueListenable: CodeDisplayStore.instance.selectedCodeIds,
     builder: (context, selectedIds, child) {
-      final isSelected = selectedIds.contains(widget.code.rawData);
+      final isSelected = selectedIds.contains(widget.code.secret);
 
       return Container(
         decoration: BoxDecoration(
@@ -230,7 +230,7 @@ Widget clippedCard(AppLocalizations l10n) {
               onTap: () {
                 final store = CodeDisplayStore.instance;
                 if (store.isSelectionModeActive.value) {
-                  store.toggleSelection(widget.code.rawData);
+                  store.toggleSelection(widget.code.secret);
                 } else {
                   _copyCurrentOTPToClipboard();
                 }
@@ -247,7 +247,7 @@ Widget clippedCard(AppLocalizations l10n) {
               onLongPress: widget.isReordering
                   ? null
                   : () {
-                      CodeDisplayStore.instance.toggleSelection(widget.code.rawData);
+                      CodeDisplayStore.instance.toggleSelection(widget.code.secret);
                     },
               child: getCardContents(l10n, isSelected: isSelected),
             ),
