@@ -208,4 +208,4 @@ lib/
 - Always follow existing code conventions and patterns in neighboring files
 
 # Individual Preferences
-- @~/.claude/my-project-instructions.md
+- @~/.claude/ente-photos-instructions.md
