@@ -17,6 +17,7 @@ class AlbumSelectionOverlayBar extends StatefulWidget {
   final bool showSelectAllButton;
   final VoidCallback? onCancel;
   final bool isCollapsed;
+  final VoidCallback? onExpand;
 
   const AlbumSelectionOverlayBar(
     this.selectedAlbums,
@@ -28,6 +29,7 @@ class AlbumSelectionOverlayBar extends StatefulWidget {
     this.backgroundColor,
     this.isCollapsed = false,
     this.showSelectAllButton = false,
+    this.onExpand,
   });
 
   @override
@@ -52,66 +54,78 @@ class _AlbumSelectionOverlayBarState extends State<AlbumSelectionOverlayBar> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: _hasSelectedAlbumsNotifier,
-      builder: (context, value, child) {
-        return AnimatedCrossFade(
-          firstCurve: Curves.easeInOutExpo,
-          secondCurve: Curves.easeInOutExpo,
-          sizeCurve: Curves.easeInOutExpo,
-          crossFadeState: _hasSelectedAlbumsNotifier.value
-              ? CrossFadeState.showFirst
-              : CrossFadeState.showSecond,
-          duration: const Duration(milliseconds: 400),
-          firstChild: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Row(
+    return GestureDetector(
+      onVerticalDragUpdate: (details) {
+        if (details.primaryDelta! < -10) {
+          widget.onExpand?.call();
+        }
+      },
+      child: AnimatedSize(
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOutCubic,
+        alignment: Alignment.topCenter,
+        child: ValueListenableBuilder(
+          valueListenable: _hasSelectedAlbumsNotifier,
+          builder: (context, value, child) {
+            return AnimatedCrossFade(
+              firstCurve: Curves.easeInOutExpo,
+              secondCurve: Curves.easeInOutExpo,
+              sizeCurve: Curves.easeInOutExpo,
+              crossFadeState: _hasSelectedAlbumsNotifier.value
+                  ? CrossFadeState.showFirst
+                  : CrossFadeState.showSecond,
+              duration: const Duration(milliseconds: 400),
+              firstChild: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  if (widget.showSelectAllButton)
-                    Padding(
-                      padding: const EdgeInsets.only(left: 12),
-                      child: SelectAllAlbumsButton(
-                        widget.selectedAlbums,
-                        widget.collections,
-                        backgroundColor: widget.backgroundColor,
+                  Row(
+                    children: [
+                      if (widget.showSelectAllButton)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 12),
+                          child: SelectAllAlbumsButton(
+                            widget.selectedAlbums,
+                            widget.collections,
+                            backgroundColor: widget.backgroundColor,
+                          ),
+                        ),
+                      const Spacer(),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 12.0),
+                        child: AlbumActionBarWidget(
+                          selectedAlbums: widget.selectedAlbums,
+                          onCancel: () {
+                            if (widget.selectedAlbums.albums.isNotEmpty) {
+                              widget.selectedAlbums.clearAll();
+                            }
+                          },
+                        ),
                       ),
-                    ),
-                  const Spacer(),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 12.0),
-                    child: AlbumActionBarWidget(
-                      selectedAlbums: widget.selectedAlbums,
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    decoration: BoxDecoration(boxShadow: shadowFloatFaintLight),
+                    child: AlbumBottomActionBarWidget(
+                      widget.selectedAlbums,
+                      widget.sectionType,
+                      isCollapsed: widget.isCollapsed,
                       onCancel: () {
                         if (widget.selectedAlbums.albums.isNotEmpty) {
                           widget.selectedAlbums.clearAll();
                         }
                       },
+                      backgroundColor: widget.backgroundColor,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
-              Container(
-                decoration: BoxDecoration(boxShadow: shadowFloatFaintLight),
-                child: AlbumBottomActionBarWidget(
-                  widget.selectedAlbums,
-                  widget.sectionType,
-                  isCollapsed: widget.isCollapsed,
-                  onCancel: () {
-                    if (widget.selectedAlbums.albums.isNotEmpty) {
-                      widget.selectedAlbums.clearAll();
-                    }
-                  },
-                  backgroundColor: widget.backgroundColor,
-                ),
-              ),
-            ],
-          ),
-          secondChild: const SizedBox(width: double.infinity),
-        );
-      },
+              secondChild: const SizedBox(width: double.infinity),
+            );
+          },
+        ),
+      ),
     );
   }
 

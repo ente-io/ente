@@ -85,7 +85,7 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
       });
 
       _selectionTimer?.cancel();
-      _selectionTimer = Timer(const Duration(milliseconds: 1000), () {});
+      _selectionTimer = Timer(const Duration(milliseconds: 10), () {});
     } else if (!hasSelection && _hasFilesSelected) {
       setState(() {
         _hasFilesSelected = false;
