@@ -31,7 +31,7 @@ import (
 )
 
 var passwordWhiteListedURLs = []string{"/public-collection/info", "/public-collection/report-abuse", "/public-collection/verify-password"}
-var whitelistedCollectionShareIDs = []int64{111}
+var whitelistedCollectionShareIDs = []int64{111, 12172}
 
 // CollectionLinkMiddleware intercepts and authenticates incoming requests
 type CollectionLinkMiddleware struct {
@@ -191,7 +191,9 @@ func (m *CollectionLinkMiddleware) validatePassword(c *gin.Context, reqPath stri
 func (m *CollectionLinkMiddleware) validateOrigin(c *gin.Context, ownerID int64) error {
 	origin := c.Request.Header.Get("Origin")
 
-	if origin == "" || origin == viper.GetString("apps.public-albums") {
+	if origin == "" ||
+		origin == viper.GetString("apps.public-albums") ||
+		strings.HasSuffix(strings.ToLower(origin), "http://localhost:") {
 		return nil
 	}
 	reqId := requestid.Get(c)
