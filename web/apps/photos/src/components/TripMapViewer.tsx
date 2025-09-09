@@ -3,10 +3,34 @@ import { downloadManager } from "ente-gallery/services/download";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
+import L from "leaflet";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+    memo,
+    startTransition,
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import { useMap } from "react-leaflet";
+
+// Throttle utility function
+const throttle = <T extends (...args: unknown[]) => void>(
+    func: T,
+    limit: number,
+): T => {
+    let inThrottle = false;
+    return ((...args: unknown[]) => {
+        if (!inThrottle) {
+            func(...args as Parameters<T>);
+            inThrottle = true;
+            setTimeout(() => (inThrottle = false), limit);
+        }
+    }) as T;
+};
 
 // Dynamically import react-leaflet components to prevent SSR issues
 const MapContainer = dynamic(
@@ -32,13 +56,43 @@ interface JourneyPoint {
     fileId: number;
 }
 
-// Reverse geocoding function using Stadia Maps
+// Geocoding cache to avoid repeated API calls
+const geocodingCache = new Map<string, { place: string; country: string }>();
+
+// Icon cache to avoid recreating identical icons
+const iconCache = new Map<string, L.DivIcon>();
+
+interface GeocodingResponse {
+    features?: {
+        properties?: {
+            locality?: string;
+            neighbourhood?: string;
+            county?: string;
+            region?: string;
+            name?: string;
+            country?: string;
+        };
+    }[];
+}
+
+// Reverse geocoding function using Stadia Maps with caching
 // Works without API key for localhost development
 const getLocationName = async (
     lat: number,
     lng: number,
     photoIndex?: number,
 ): Promise<{ place: string; country: string }> => {
+    // Round coordinates to 3 decimal places for cache key (~100m precision)
+    const roundedLat = Math.round(lat * 1000) / 1000;
+    const roundedLng = Math.round(lng * 1000) / 1000;
+    const cacheKey = `${roundedLat},${roundedLng}`;
+
+    // Check cache first
+    const cached = geocodingCache.get(cacheKey);
+    if (cached) {
+        return cached;
+    }
+
     try {
         const response = await fetch(
             `https://api.stadiamaps.com/geocoding/v1/reverse?point.lat=${lat}&point.lon=${lng}`,
@@ -48,10 +102,12 @@ const getLocationName = async (
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.json();
+        const data = await response.json() as GeocodingResponse;
 
         // Extract location name from the response
         const feature = data.features?.[0];
+        let result: { place: string; country: string };
+
         if (feature?.properties) {
             const props = feature.properties;
 
@@ -65,759 +121,808 @@ const getLocationName = async (
             // Get country info
             const country = props.country || "Unknown";
 
-            return { place: locationName, country: country };
+            result = { place: locationName, country: country };
+        } else {
+            // Fallback if no location found
+            result = {
+                place: photoIndex
+                    ? `Location ${photoIndex}`
+                    : `Location ${lat.toFixed(2)}, ${lng.toFixed(2)}`,
+                country: "Unknown",
+            };
         }
 
-        // Fallback if no location found
-        return {
-            place: photoIndex
-                ? `Location ${photoIndex}`
-                : `Location ${lat.toFixed(2)}, ${lng.toFixed(2)}`,
-            country: "Unknown",
-        };
-    } catch (error) {
-        console.error("Stadia Maps geocoding error:", error);
+        // Cache the result
+        geocodingCache.set(cacheKey, result);
+        return result;
+    } catch {
         // Fallback on error
-        return {
+        const fallbackResult = {
             place: photoIndex ? `Location ${photoIndex}` : `Unknown Location`,
             country: "Unknown",
         };
+        // Cache the fallback to avoid repeated failures
+        geocodingCache.set(cacheKey, fallbackResult);
+        return fallbackResult;
     }
 };
 
 // Component to handle map events inside MapContainer
-const MapEvents = ({
-    setMapRef,
-    setCurrentZoom,
-    setTargetZoom,
-}: {
-    setMapRef: (map: any) => void;
-    setCurrentZoom: (zoom: number) => void;
-    setTargetZoom: (zoom: number | null) => void;
-}) => {
-    const map = useMap();
+const MapEvents = memo(
+    ({
+        setMapRef,
+        setCurrentZoom,
+        setTargetZoom,
+    }: {
+        setMapRef: (map: L.Map) => void;
+        setCurrentZoom: (zoom: number) => void;
+        setTargetZoom: (zoom: number | null) => void;
+    }) => {
+        const map = useMap();
 
-    useEffect(() => {
-        if (typeof window !== "undefined" && map) {
+        useEffect(() => {
             setMapRef(map);
 
-            map.on("zoomend", () => {
+            const handleZoomEnd = () => {
                 setCurrentZoom(map.getZoom());
                 setTargetZoom(null);
-            });
+            };
+
+            map.on("zoomend", handleZoomEnd);
 
             return () => {
-                map.off("zoomend");
+                map.off("zoomend", handleZoomEnd);
             };
-        }
-    }, [map, setMapRef, setCurrentZoom, setTargetZoom]);
+        }, [map, setMapRef, setCurrentZoom, setTargetZoom]);
 
-    return null;
-};
+        return null;
+    },
+);
 
 // Component for the trip cover section only
-const TripCover = ({
-    journeyData,
-    photoClusters,
-    albumTitle,
-    ownerName,
-}: {
-    journeyData: JourneyPoint[];
-    photoClusters: JourneyPoint[][];
-    albumTitle?: string;
-    ownerName?: string;
-}) => {
-    const sortedData = [...journeyData].sort(
-        (a, b) =>
-            new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
-    );
-    const firstDate = new Date(sortedData[0].timestamp);
-    const lastDate = new Date(sortedData[sortedData.length - 1].timestamp);
-    const diffTime = Math.abs(lastDate.getTime() - firstDate.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    const monthYear = firstDate.toLocaleDateString("en-US", {
-        month: "long",
-        year: "numeric",
-    });
+const TripCover = memo(
+    ({
+        journeyData,
+        photoClusters,
+        albumTitle,
+    }: {
+        journeyData: JourneyPoint[];
+        photoClusters: JourneyPoint[][];
+        albumTitle?: string;
+    }) => {
+        const sortedData = [...journeyData].sort(
+            (a, b) =>
+                new Date(a.timestamp).getTime() -
+                new Date(b.timestamp).getTime(),
+        );
+        const firstData = sortedData[0];
+        const lastData = sortedData[sortedData.length - 1];
+        if (!firstData || !lastData) {
+            return null;
+        }
+        const firstDate = new Date(firstData.timestamp);
+        const lastDate = new Date(lastData.timestamp);
+        const diffTime = Math.abs(lastDate.getTime() - firstDate.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const monthYear = firstDate.toLocaleDateString("en-US", {
+            month: "long",
+            year: "numeric",
+        });
 
-    return (
-        <div style={{ marginBottom: "96px" }}>
-            <div
-                style={{
-                    aspectRatio: "16/8",
-                    position: "relative",
-                    marginBottom: "12px",
-                    borderRadius: "24px",
-                    overflow: "hidden",
-                }}
-            >
-                <Image
-                    src={journeyData[0].image}
-                    alt="Trip Cover"
-                    fill
-                    style={{ objectFit: "cover" }}
-                    sizes="300px"
-                />
+        return (
+            <div style={{ marginBottom: "96px" }}>
                 <div
                     style={{
-                        position: "absolute",
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        height: "128px",
-                        background:
-                            "linear-gradient(to top, black, transparent)",
-                    }}
-                ></div>
-                <div
-                    style={{
-                        position: "absolute",
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        padding: "24px",
-                        color: "white",
+                        aspectRatio: "16/8",
+                        position: "relative",
+                        marginBottom: "12px",
+                        borderRadius: "24px",
+                        overflow: "hidden",
                     }}
                 >
-                    <h1
+                    <Image
+                        src={journeyData[0]?.image || ""}
+                        alt="Trip Cover"
+                        fill
+                        style={{ objectFit: "cover" }}
+                        sizes="300px"
+                    />
+                    <div
                         style={{
-                            fontSize: "30px",
-                            fontWeight: "bold",
-                            marginBottom: "2px",
+                            position: "absolute",
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            height: "128px",
+                            background:
+                                "linear-gradient(to top, black, transparent)",
+                        }}
+                    ></div>
+                    <div
+                        style={{
+                            position: "absolute",
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            padding: "24px",
+                            color: "white",
                         }}
                     >
-                        {albumTitle || "Trip Journey"}
-                    </h1>
-                    <p
-                        style={{
-                            color: "rgba(255, 255, 255, 0.8)",
-                            fontSize: "16px",
-                            fontWeight: "600",
-                            margin: "0",
-                        }}
-                    >
-                        {monthYear} • {diffDays} days • {photoClusters.length}{" "}
-                        locations
-                    </p>
+                        <h1
+                            style={{
+                                fontSize: "30px",
+                                fontWeight: "bold",
+                                marginBottom: "2px",
+                            }}
+                        >
+                            {albumTitle || "Trip Journey"}
+                        </h1>
+                        <p
+                            style={{
+                                color: "rgba(255, 255, 255, 0.8)",
+                                fontSize: "16px",
+                                fontWeight: "600",
+                                margin: "0",
+                            }}
+                        >
+                            {monthYear} • {diffDays} days •{" "}
+                            {photoClusters.length} locations
+                        </p>
+                    </div>
                 </div>
             </div>
-        </div>
-    );
-};
+        );
+    },
+);
 
 // Component for the trip started section
-const TripStartedSection = ({
-    journeyData,
-}: {
-    journeyData: JourneyPoint[];
-}) => {
-    const sortedData = [...journeyData].sort(
-        (a, b) =>
-            new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
-    );
-    const firstDate = new Date(sortedData[0].timestamp);
+const TripStartedSection = memo(
+    ({ journeyData }: { journeyData: JourneyPoint[] }) => {
+        const sortedData = [...journeyData].sort(
+            (a, b) =>
+                new Date(a.timestamp).getTime() -
+                new Date(b.timestamp).getTime(),
+        );
+        const firstData = sortedData[0];
+        if (!firstData) {
+            return null;
+        }
+        const firstDate = new Date(firstData.timestamp);
 
-    return (
-        <div
-            style={{
-                position: "relative",
-                marginTop: "64px",
-                marginBottom: "200px",
-                textAlign: "center",
-                zIndex: 1,
-            }}
-        >
+        return (
             <div
                 style={{
-                    fontSize: "20px",
-                    fontWeight: "600",
-                    color: "#111827",
-                    marginBottom: "2px",
-                    lineHeight: "1.2",
-                    backgroundColor: "white",
-                    padding: "4px 8px",
-                    borderRadius: "4px",
-                    display: "inline-block",
+                    position: "relative",
+                    marginTop: "64px",
+                    marginBottom: "200px",
+                    textAlign: "center",
+                    zIndex: 1,
                 }}
             >
-                Trip started
-            </div>
-            <br />
-            <div
-                style={{
-                    fontSize: "14px",
-                    color: "#6b7280",
-                    backgroundColor: "white",
-                    padding: "2px 6px",
-                    borderRadius: "4px",
-                    display: "inline-block",
-                    marginTop: "0px",
-                }}
-            >
-                {firstDate.toLocaleDateString("en-US", {
-                    month: "long",
-                    day: "2-digit",
-                })}
-            </div>
-
-            {/* Starting dot after some space */}
-            <div
-                style={{
-                    position: "absolute",
-                    left: "50%",
-                    top: "80px",
-                    transform: "translate(-50%, 0)",
-                    borderRadius: "50%",
-                    border: "2px solid white",
-                    zIndex: 20,
-                    width: "12px",
-                    height: "12px",
-                    backgroundColor: "#d1d5db",
-                }}
-            ></div>
-        </div>
-    );
-};
-
-// Component for the timeline progress line
-const TimelineProgressLine = ({
-    locationPositions,
-    scrollProgress,
-    hasUserScrolled,
-    photoClusters,
-}: {
-    locationPositions: { top: number; center: number }[];
-    scrollProgress: number;
-    hasUserScrolled: boolean;
-    photoClusters: JourneyPoint[][];
-}) => {
-    if (photoClusters.length === 0 || locationPositions.length === 0) {
-        return null;
-    }
-
-    const firstLocationCenter = locationPositions[0].center;
-    const lastLocationCenter =
-        locationPositions[locationPositions.length - 1].center;
-
-    if (scrollProgress <= 0 || !hasUserScrolled) {
-        return null;
-    }
-
-    return (
-        <div
-            style={{
-                position: "absolute",
-                left: "50%",
-                transform: "translateX(-1.5px)",
-                width: "3px",
-                backgroundColor: "#10b981",
-                top: `${firstLocationCenter}px`,
-                height: `${
-                    (lastLocationCenter - firstLocationCenter) * scrollProgress
-                }px`,
-            }}
-        />
-    );
-};
-
-// Component for timeline base line
-const TimelineBaseLine = ({
-    locationPositions,
-}: {
-    locationPositions: { top: number; center: number }[];
-}) => {
-    const timelineContainer = document.querySelector("#timeline-container");
-    if (!timelineContainer || locationPositions.length === 0) {
-        return null;
-    }
-
-    const locationElements =
-        timelineContainer.querySelectorAll(".timeline-location");
-    if (locationElements.length === 0) {
-        return null;
-    }
-
-    const lastLocation = locationElements[
-        locationElements.length - 1
-    ] as HTMLElement;
-    const lastLocationRect = lastLocation.getBoundingClientRect();
-    const heightToLastDot =
-        lastLocation.offsetTop + lastLocationRect.height / 2;
-
-    const firstLocationCenter = locationPositions[0]?.center || 0;
-
-    return (
-        <>
-            {/* Long dashed line from trip started dot to first location */}
-            <div
-                style={{
-                    position: "absolute",
-                    left: "50%",
-                    transform: "translateX(-1.5px)",
-                    width: "3px",
-                    backgroundImage:
-                        "linear-gradient(to bottom, #d1d5db 55%, transparent 55%)",
-                    backgroundSize: "100% 22px",
-                    backgroundRepeat: "repeat-y",
-                    top: "-158px",
-                    height: `${firstLocationCenter + 158}px`,
-                    zIndex: 0,
-                }}
-            />
-            {/* Solid line from first location to end */}
-            <div
-                style={{
-                    position: "absolute",
-                    left: "50%",
-                    transform: "translateX(-1.5px)",
-                    width: "3px",
-                    backgroundColor: "#d1d5db",
-                    top: `${firstLocationCenter}px`,
-                    height: `${heightToLastDot - firstLocationCenter}px`,
-                }}
-            />
-        </>
-    );
-};
-
-// Component for photo fan display
-const PhotoFan = ({
-    cluster,
-    onPhotoClick,
-}: {
-    cluster: JourneyPoint[];
-    onPhotoClick?: (cluster: JourneyPoint[], fileId: number) => void;
-}) => {
-    if (!cluster || cluster.length === 0) return null;
-
-    return (
-        <div style={{ position: "relative", width: "180px", height: "240px" }}>
-            {cluster.length === 2 && cluster[1] && (
                 <div
-                    onClick={() =>
-                        cluster[1] && onPhotoClick?.(cluster, cluster[1].fileId)
-                    }
                     style={{
-                        position: "absolute",
-                        border: "2px solid white",
-                        boxShadow:
-                            "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
-                        zIndex: 10,
-                        width: "180px",
-                        height: "207px",
-                        borderRadius: "14px",
-                        overflow: "hidden",
-                        transform: "translateX(33px) skewY(8deg)",
-                        top: "50%",
-                        left: "0",
-                        marginTop: "-103.5px",
-                        cursor: "pointer",
+                        fontSize: "20px",
+                        fontWeight: "600",
+                        color: "#111827",
+                        marginBottom: "2px",
+                        lineHeight: "1.2",
+                        backgroundColor: "white",
+                        padding: "4px 8px",
+                        borderRadius: "4px",
+                        display: "inline-block",
                     }}
                 >
+                    Trip started
+                </div>
+                <br />
+                <div
+                    style={{
+                        fontSize: "14px",
+                        color: "#6b7280",
+                        backgroundColor: "white",
+                        padding: "2px 6px",
+                        borderRadius: "4px",
+                        display: "inline-block",
+                        marginTop: "0px",
+                    }}
+                >
+                    {firstDate.toLocaleDateString("en-US", {
+                        month: "long",
+                        day: "2-digit",
+                    })}
+                </div>
+
+                {/* Starting dot after some space */}
+                <div
+                    style={{
+                        position: "absolute",
+                        left: "50%",
+                        top: "80px",
+                        transform: "translate(-50%, 0)",
+                        borderRadius: "50%",
+                        border: "2px solid white",
+                        zIndex: 20,
+                        width: "12px",
+                        height: "12px",
+                        backgroundColor: "#d1d5db",
+                    }}
+                ></div>
+            </div>
+        );
+    },
+);
+
+// Component for the timeline progress line
+const TimelineProgressLine = memo(
+    ({
+        locationPositions,
+        scrollProgress,
+        hasUserScrolled,
+        photoClusters,
+    }: {
+        locationPositions: { top: number; center: number }[];
+        scrollProgress: number;
+        hasUserScrolled: boolean;
+        photoClusters: JourneyPoint[][];
+    }) => {
+        if (photoClusters.length === 0 || locationPositions.length === 0) {
+            return null;
+        }
+
+        const firstPosition = locationPositions[0];
+        const lastPosition = locationPositions[locationPositions.length - 1];
+        if (!firstPosition || !lastPosition) {
+            return null;
+        }
+        const firstLocationCenter = firstPosition.center;
+        const lastLocationCenter = lastPosition.center;
+
+        if (scrollProgress <= 0 || !hasUserScrolled) {
+            return null;
+        }
+
+        return (
+            <div
+                style={{
+                    position: "absolute",
+                    left: "50%",
+                    transform: "translateX(-1.5px)",
+                    width: "3px",
+                    backgroundColor: "#10b981",
+                    top: `${firstLocationCenter}px`,
+                    height: `${
+                        (lastLocationCenter - firstLocationCenter) *
+                        scrollProgress
+                    }px`,
+                }}
+            />
+        );
+    },
+);
+
+// Component for timeline base line
+const TimelineBaseLine = memo(
+    ({
+        locationPositions,
+    }: {
+        locationPositions: { top: number; center: number }[];
+    }) => {
+        const timelineContainer = document.querySelector("#timeline-container");
+        if (!timelineContainer || locationPositions.length === 0) {
+            return null;
+        }
+
+        const locationElements =
+            timelineContainer.querySelectorAll(".timeline-location");
+        if (locationElements.length === 0) {
+            return null;
+        }
+
+        const lastLocation = locationElements[
+            locationElements.length - 1
+        ] as HTMLElement;
+        const lastLocationRect = lastLocation.getBoundingClientRect();
+        const heightToLastDot =
+            lastLocation.offsetTop + lastLocationRect.height / 2;
+
+        const firstLocationCenter = locationPositions[0]?.center || 0;
+
+        return (
+            <>
+                {/* Long dashed line from trip started dot to first location */}
+                <div
+                    style={{
+                        position: "absolute",
+                        left: "50%",
+                        transform: "translateX(-1.5px)",
+                        width: "3px",
+                        backgroundImage:
+                            "linear-gradient(to bottom, #d1d5db 55%, transparent 55%)",
+                        backgroundSize: "100% 22px",
+                        backgroundRepeat: "repeat-y",
+                        top: "-158px",
+                        height: `${firstLocationCenter + 158}px`,
+                        zIndex: 0,
+                    }}
+                />
+                {/* Solid line from first location to end */}
+                <div
+                    style={{
+                        position: "absolute",
+                        left: "50%",
+                        transform: "translateX(-1.5px)",
+                        width: "3px",
+                        backgroundColor: "#d1d5db",
+                        top: `${firstLocationCenter}px`,
+                        height: `${heightToLastDot - firstLocationCenter}px`,
+                    }}
+                />
+            </>
+        );
+    },
+);
+
+// Component for photo fan display
+const PhotoFan = memo(
+    ({
+        cluster,
+        onPhotoClick,
+    }: {
+        cluster: JourneyPoint[];
+        onPhotoClick?: (cluster: JourneyPoint[], fileId: number) => void;
+    }) => {
+        if (cluster.length === 0) {
+            return null;
+        }
+
+        return (
+            <div
+                style={{
+                    position: "relative",
+                    width: "180px",
+                    height: "240px",
+                }}
+            >
+                {cluster.length === 2 && cluster[1] && (
                     <div
+                        onClick={() =>
+                            cluster[1] &&
+                            onPhotoClick?.(cluster, cluster[1].fileId)
+                        }
+                        style={{
+                            position: "absolute",
+                            border: "2px solid white",
+                            boxShadow:
+                                "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+                            zIndex: 10,
+                            width: "180px",
+                            height: "207px",
+                            borderRadius: "14px",
+                            overflow: "hidden",
+                            transform: "translateX(33px) skewY(8deg)",
+                            top: "50%",
+                            left: "0",
+                            marginTop: "-103.5px",
+                            cursor: "pointer",
+                        }}
+                    >
+                        <div
+                            style={{
+                                position: "relative",
+                                width: "100%",
+                                height: "100%",
+                                transform: "skewY(-8deg) scale(1.1)",
+                            }}
+                        >
+                            <Image
+                                src={cluster[1].image}
+                                alt={cluster[1].name}
+                                fill
+                                style={{ objectFit: "cover" }}
+                                sizes="200px"
+                            />
+                        </div>
+                    </div>
+                )}
+                {cluster.length >= 3 && (
+                    <>
+                        {cluster[1] && (
+                            <div
+                                onClick={() =>
+                                    cluster[1] &&
+                                    onPhotoClick?.(cluster, cluster[1].fileId)
+                                }
+                                style={{
+                                    position: "absolute",
+                                    border: "2px solid white",
+                                    boxShadow:
+                                        "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+                                    zIndex: 10,
+                                    width: "180px",
+                                    height: "207px",
+                                    borderRadius: "14px",
+                                    overflow: "hidden",
+                                    transform: "translateX(-33px) skewY(-8deg)",
+                                    top: "16.5px",
+                                    left: "0",
+                                    cursor: "pointer",
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        position: "relative",
+                                        width: "100%",
+                                        height: "100%",
+                                        transform: "skewY(8deg) scale(1.1)",
+                                    }}
+                                >
+                                    <Image
+                                        src={cluster[1].image}
+                                        alt={cluster[1].name}
+                                        fill
+                                        style={{ objectFit: "cover" }}
+                                        sizes="200px"
+                                    />
+                                </div>
+                            </div>
+                        )}
+                        {cluster[2] && (
+                            <div
+                                onClick={() =>
+                                    cluster[2] &&
+                                    onPhotoClick?.(cluster, cluster[2].fileId)
+                                }
+                                style={{
+                                    position: "absolute",
+                                    border: "2px solid white",
+                                    boxShadow:
+                                        "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+                                    zIndex: 10,
+                                    width: "180px",
+                                    height: "207px",
+                                    borderRadius: "14px",
+                                    overflow: "hidden",
+                                    transform: "translateX(33px) skewY(8deg)",
+                                    top: "16.5px",
+                                    left: "0",
+                                    cursor: "pointer",
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        position: "relative",
+                                        width: "100%",
+                                        height: "100%",
+                                        transform: "skewY(-8deg) scale(1.1)",
+                                    }}
+                                >
+                                    <Image
+                                        src={cluster[2].image}
+                                        alt={cluster[2].name}
+                                        fill
+                                        style={{ objectFit: "cover" }}
+                                        sizes="200px"
+                                    />
+                                </div>
+                            </div>
+                        )}
+                    </>
+                )}
+
+                {cluster[0] && (
+                    <div
+                        onClick={() =>
+                            cluster[0] &&
+                            onPhotoClick?.(cluster, cluster[0].fileId)
+                        }
                         style={{
                             position: "relative",
                             width: "100%",
                             height: "100%",
-                            transform: "skewY(-8deg) scale(1.1)",
+                            border: "2px solid white",
+                            boxShadow:
+                                "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+                            zIndex: 20,
+                            borderRadius: "14px",
+                            overflow: "hidden",
+                            cursor: "pointer",
                         }}
                     >
                         <Image
-                            src={cluster[1].image}
-                            alt={cluster[1].name}
+                            src={cluster[0].image}
+                            alt={cluster[0].name}
                             fill
                             style={{ objectFit: "cover" }}
-                            sizes="200px"
+                            sizes="150px"
                         />
+
+                        {cluster.length > 3 && (
+                            <div
+                                style={{
+                                    position: "absolute",
+                                    bottom: "6px",
+                                    right: "6px",
+                                    background: "white",
+                                    color: "black",
+                                    borderRadius: "6px",
+                                    padding: "4px 6px",
+                                    minHeight: "20px",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    fontSize: "11px",
+                                    fontWeight: "600",
+                                    boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
+                                }}
+                            >
+                                +{cluster.length - 3}
+                            </div>
+                        )}
                     </div>
-                </div>
-            )}
-            {cluster.length >= 3 && (
-                <>
-                    {cluster[1] && (
-                        <div
-                            onClick={() =>
-                                cluster[1] &&
-                                onPhotoClick?.(cluster, cluster[1].fileId)
-                            }
-                            style={{
-                                position: "absolute",
-                                border: "2px solid white",
-                                boxShadow:
-                                    "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
-                                zIndex: 10,
-                                width: "180px",
-                                height: "207px",
-                                borderRadius: "14px",
-                                overflow: "hidden",
-                                transform: "translateX(-33px) skewY(-8deg)",
-                                top: "16.5px",
-                                left: "0",
-                                cursor: "pointer",
-                            }}
-                        >
-                            <div
-                                style={{
-                                    position: "relative",
-                                    width: "100%",
-                                    height: "100%",
-                                    transform: "skewY(8deg) scale(1.1)",
-                                }}
-                            >
-                                <Image
-                                    src={cluster[1].image}
-                                    alt={cluster[1].name}
-                                    fill
-                                    style={{ objectFit: "cover" }}
-                                    sizes="200px"
-                                />
-                            </div>
-                        </div>
-                    )}
-                    {cluster[2] && (
-                        <div
-                            onClick={() =>
-                                cluster[2] &&
-                                onPhotoClick?.(cluster, cluster[2].fileId)
-                            }
-                            style={{
-                                position: "absolute",
-                                border: "2px solid white",
-                                boxShadow:
-                                    "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
-                                zIndex: 10,
-                                width: "180px",
-                                height: "207px",
-                                borderRadius: "14px",
-                                overflow: "hidden",
-                                transform: "translateX(33px) skewY(8deg)",
-                                top: "16.5px",
-                                left: "0",
-                                cursor: "pointer",
-                            }}
-                        >
-                            <div
-                                style={{
-                                    position: "relative",
-                                    width: "100%",
-                                    height: "100%",
-                                    transform: "skewY(-8deg) scale(1.1)",
-                                }}
-                            >
-                                <Image
-                                    src={cluster[2].image}
-                                    alt={cluster[2].name}
-                                    fill
-                                    style={{ objectFit: "cover" }}
-                                    sizes="200px"
-                                />
-                            </div>
-                        </div>
-                    )}
-                </>
-            )}
-
-            {cluster[0] && (
-                <div
-                    onClick={() =>
-                        cluster[0] && onPhotoClick?.(cluster, cluster[0].fileId)
-                    }
-                    style={{
-                        position: "relative",
-                        width: "100%",
-                        height: "100%",
-                        border: "2px solid white",
-                        boxShadow:
-                            "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
-                        zIndex: 20,
-                        borderRadius: "14px",
-                        overflow: "hidden",
-                        cursor: "pointer",
-                    }}
-                >
-                    <Image
-                        src={cluster[0].image}
-                        alt={cluster[0].name}
-                        fill
-                        style={{ objectFit: "cover" }}
-                        sizes="150px"
-                    />
-
-                    {cluster.length > 3 && (
-                        <div
-                            style={{
-                                position: "absolute",
-                                bottom: "6px",
-                                right: "6px",
-                                background: "white",
-                                color: "black",
-                                borderRadius: "6px",
-                                padding: "4px 6px",
-                                minHeight: "20px",
-                                display: "inline-flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                fontSize: "11px",
-                                fontWeight: "600",
-                                boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
-                            }}
-                        >
-                            +{cluster.length - 3}
-                        </div>
-                    )}
-                </div>
-            )}
-        </div>
-    );
-};
+                )}
+            </div>
+        );
+    },
+);
 
 // Component for timeline location item
-const TimelineLocation = ({
-    cluster,
-    index,
-    photoClusters,
-    scrollProgress,
-    journeyData,
-    onRef,
-    onPhotoClick,
-}: {
-    cluster: JourneyPoint[];
-    index: number;
-    photoClusters: JourneyPoint[][];
-    scrollProgress: number;
-    journeyData: JourneyPoint[];
-    onRef: (el: HTMLDivElement | null) => void;
-    onPhotoClick?: (cluster: JourneyPoint[], fileId: number) => void;
-}) => {
-    const isLeft = index % 2 === 0;
-    const firstPhoto = cluster[0];
-    if (!firstPhoto) return null;
-    const sortedData = [...journeyData].sort(
-        (a, b) =>
-            new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
-    );
-    const firstDate = new Date(sortedData[0].timestamp);
-    const photoDate = new Date(firstPhoto.timestamp);
+const TimelineLocation = memo(
+    ({
+        cluster,
+        index,
+        photoClusters,
+        scrollProgress,
+        journeyData,
+        onRef,
+        onPhotoClick,
+    }: {
+        cluster: JourneyPoint[];
+        index: number;
+        photoClusters: JourneyPoint[][];
+        scrollProgress: number;
+        journeyData: JourneyPoint[];
+        onRef: (el: HTMLDivElement | null) => void;
+        onPhotoClick?: (cluster: JourneyPoint[], fileId: number) => void;
+    }) => {
+        const isLeft = index % 2 === 0;
+        const firstPhoto = cluster[0];
+        if (!firstPhoto) return null;
+        const sortedData = [...journeyData].sort(
+            (a, b) =>
+                new Date(a.timestamp).getTime() -
+                new Date(b.timestamp).getTime(),
+        );
+        const firstData = sortedData[0];
+        if (!firstData) return null;
+        const firstDate = new Date(firstData.timestamp);
+        const photoDate = new Date(firstPhoto.timestamp);
 
-    const firstDateOnly = new Date(
-        firstDate.getFullYear(),
-        firstDate.getMonth(),
-        firstDate.getDate(),
-    );
-    const photoDateOnly = new Date(
-        photoDate.getFullYear(),
-        photoDate.getMonth(),
-        photoDate.getDate(),
-    );
-    const diffTime = photoDateOnly.getTime() - firstDateOnly.getTime();
-    const dayNumber = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        const firstDateOnly = new Date(
+            firstDate.getFullYear(),
+            firstDate.getMonth(),
+            firstDate.getDate(),
+        );
+        const photoDateOnly = new Date(
+            photoDate.getFullYear(),
+            photoDate.getMonth(),
+            photoDate.getDate(),
+        );
+        const diffTime = photoDateOnly.getTime() - firstDateOnly.getTime();
+        const dayNumber = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
 
-    const isReached =
-        scrollProgress >= index / Math.max(1, photoClusters.length - 1);
+        const isReached =
+            scrollProgress >= index / Math.max(1, photoClusters.length - 1);
 
-    return (
-        <div
-            ref={onRef}
-            id={`location-${index}`}
-            className="timeline-location"
-            style={{
-                position: "relative",
-                display: "flex",
-                alignItems: "center",
-                marginBottom:
-                    index === photoClusters.length - 1 ? "24px" : "192px",
-            }}
-        >
+        return (
             <div
+                ref={onRef}
+                id={`location-${index}`}
+                className="timeline-location"
                 style={{
-                    position: "absolute",
-                    left: "50%",
-                    top: "50%",
-                    transform: "translate(-50%, -50%)",
-                    width: "24px",
-                    height: "40px",
-                    borderRadius: "50%",
-                    zIndex: 10,
-                    backgroundColor: "white",
+                    position: "relative",
+                    display: "flex",
+                    alignItems: "center",
+                    marginBottom:
+                        index === photoClusters.length - 1 ? "24px" : "192px",
                 }}
-            ></div>
-            <div
-                className="timeline-dot"
-                style={{
-                    position: "absolute",
-                    left: "50%",
-                    top: "50%",
-                    transform: "translate(-50%, -50%)",
-                    borderRadius: "50%",
-                    border: "2px solid white",
-                    zIndex: 20,
-                    width: "12px",
-                    height: "12px",
-                    transition: "all 0.3s",
-                    backgroundColor: isReached ? "#10b981" : "#111827",
-                    boxShadow: isReached
-                        ? "0 0 0 3px rgba(34, 197, 94, 0.3), 0 0 0 6px rgba(34, 197, 94, 0.15)"
-                        : "none",
-                }}
-            ></div>
+            >
+                <div
+                    style={{
+                        position: "absolute",
+                        left: "50%",
+                        top: "50%",
+                        transform: "translate(-50%, -50%)",
+                        width: "24px",
+                        height: "40px",
+                        borderRadius: "50%",
+                        zIndex: 10,
+                        backgroundColor: "white",
+                    }}
+                ></div>
+                <div
+                    className="timeline-dot"
+                    style={{
+                        position: "absolute",
+                        left: "50%",
+                        top: "50%",
+                        transform: "translate(-50%, -50%)",
+                        borderRadius: "50%",
+                        border: "2px solid white",
+                        zIndex: 20,
+                        width: "12px",
+                        height: "12px",
+                        transition: "all 0.3s",
+                        backgroundColor: isReached ? "#10b981" : "#111827",
+                        boxShadow: isReached
+                            ? "0 0 0 3px rgba(34, 197, 94, 0.3), 0 0 0 6px rgba(34, 197, 94, 0.15)"
+                            : "none",
+                    }}
+                ></div>
 
-            {isLeft ? (
-                <>
-                    <div
-                        style={{
-                            width: "50%",
-                            paddingRight: "32px",
-                            textAlign: "right",
-                        }}
-                    >
+                {isLeft ? (
+                    <>
                         <div
                             style={{
-                                display: "inline-flex",
-                                alignItems: "center",
-                                border: "1px solid #e5e7eb",
-                                borderRadius: "8px",
-                                padding: "4px 12px",
-                                marginBottom: "10px",
+                                width: "50%",
+                                paddingRight: "32px",
+                                textAlign: "right",
                             }}
                         >
-                            <span
+                            <div
                                 style={{
-                                    fontSize: "11px",
-                                    fontWeight: "600",
-                                    color: "#4b5563",
-                                    textTransform: "uppercase",
-                                    letterSpacing: "0.15em",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    border: "1px solid #e5e7eb",
+                                    borderRadius: "8px",
+                                    padding: "4px 12px",
+                                    marginBottom: "10px",
                                 }}
                             >
-                                DAY {dayNumber} •{" "}
-                                {new Date(firstPhoto.timestamp)
-                                    .toLocaleDateString("en-US", {
-                                        month: "short",
-                                        day: "numeric",
-                                    })
-                                    .toUpperCase()}
-                            </span>
+                                <span
+                                    style={{
+                                        fontSize: "11px",
+                                        fontWeight: "600",
+                                        color: "#4b5563",
+                                        textTransform: "uppercase",
+                                        letterSpacing: "0.15em",
+                                    }}
+                                >
+                                    DAY {dayNumber} •{" "}
+                                    {new Date(firstPhoto.timestamp)
+                                        .toLocaleDateString("en-US", {
+                                            month: "short",
+                                            day: "numeric",
+                                        })
+                                        .toUpperCase()}
+                                </span>
+                            </div>
+                            <h3
+                                style={{
+                                    fontSize: "20px",
+                                    fontWeight: "600",
+                                    color: "#111827",
+                                    textAlign: "right",
+                                    margin: "0",
+                                    lineHeight: "1.2",
+                                }}
+                            >
+                                {firstPhoto.name}
+                            </h3>
+                            <p
+                                style={{
+                                    fontSize: "14px",
+                                    color: "#6b7280",
+                                    textAlign: "right",
+                                    margin: "4px 0 0 0",
+                                }}
+                            >
+                                {firstPhoto.country}
+                            </p>
                         </div>
-                        <h3
-                            style={{
-                                fontSize: "20px",
-                                fontWeight: "600",
-                                color: "#111827",
-                                textAlign: "right",
-                                margin: "0",
-                                lineHeight: "1.2",
-                            }}
-                        >
-                            {firstPhoto.name}
-                        </h3>
-                        <p
-                            style={{
-                                fontSize: "14px",
-                                color: "#6b7280",
-                                textAlign: "right",
-                                margin: "4px 0 0 0",
-                            }}
-                        >
-                            {firstPhoto.country}
-                        </p>
-                    </div>
-                    <div
-                        style={{
-                            width: "50%",
-                            paddingLeft: cluster.length >= 3 ? "72px" : "40px",
-                        }}
-                    >
-                        <PhotoFan
-                            cluster={cluster}
-                            onPhotoClick={onPhotoClick}
-                        />
-                    </div>
-                </>
-            ) : (
-                <>
-                    <div
-                        style={{
-                            width: "50%",
-                            display: "flex",
-                            justifyContent: "flex-end",
-                            paddingRight: cluster.length >= 3 ? "72px" : "40px",
-                        }}
-                    >
-                        <PhotoFan
-                            cluster={cluster}
-                            onPhotoClick={onPhotoClick}
-                        />
-                    </div>
-                    <div
-                        style={{
-                            width: "50%",
-                            paddingLeft: "32px",
-                            textAlign: "left",
-                        }}
-                    >
                         <div
                             style={{
-                                display: "inline-flex",
-                                alignItems: "center",
-                                border: "1px solid #e5e7eb",
-                                borderRadius: "8px",
-                                padding: "4px 12px",
-                                marginBottom: "10px",
+                                width: "50%",
+                                paddingLeft:
+                                    cluster.length >= 3 ? "72px" : "40px",
                             }}
                         >
-                            <span
+                            <PhotoFan
+                                cluster={cluster}
+                                onPhotoClick={onPhotoClick}
+                            />
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        <div
+                            style={{
+                                width: "50%",
+                                display: "flex",
+                                justifyContent: "flex-end",
+                                paddingRight:
+                                    cluster.length >= 3 ? "72px" : "40px",
+                            }}
+                        >
+                            <PhotoFan
+                                cluster={cluster}
+                                onPhotoClick={onPhotoClick}
+                            />
+                        </div>
+                        <div
+                            style={{
+                                width: "50%",
+                                paddingLeft: "32px",
+                                textAlign: "left",
+                            }}
+                        >
+                            <div
                                 style={{
-                                    fontSize: "11px",
-                                    fontWeight: "600",
-                                    color: "#4b5563",
-                                    textTransform: "uppercase",
-                                    letterSpacing: "0.15em",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    border: "1px solid #e5e7eb",
+                                    borderRadius: "8px",
+                                    padding: "4px 12px",
+                                    marginBottom: "10px",
                                 }}
                             >
-                                DAY {dayNumber} •{" "}
-                                {new Date(firstPhoto.timestamp)
-                                    .toLocaleDateString("en-US", {
-                                        month: "short",
-                                        day: "numeric",
-                                    })
-                                    .toUpperCase()}
-                            </span>
+                                <span
+                                    style={{
+                                        fontSize: "11px",
+                                        fontWeight: "600",
+                                        color: "#4b5563",
+                                        textTransform: "uppercase",
+                                        letterSpacing: "0.15em",
+                                    }}
+                                >
+                                    DAY {dayNumber} •{" "}
+                                    {new Date(firstPhoto.timestamp)
+                                        .toLocaleDateString("en-US", {
+                                            month: "short",
+                                            day: "numeric",
+                                        })
+                                        .toUpperCase()}
+                                </span>
+                            </div>
+                            <h3
+                                style={{
+                                    fontSize: "20px",
+                                    fontWeight: "600",
+                                    color: "#111827",
+                                    textAlign: "left",
+                                    margin: "0",
+                                    lineHeight: "1.2",
+                                }}
+                            >
+                                {firstPhoto.name}
+                            </h3>
+                            <p
+                                style={{
+                                    fontSize: "14px",
+                                    color: "#6b7280",
+                                    textAlign: "left",
+                                    margin: "4px 0 0 0",
+                                }}
+                            >
+                                {firstPhoto.country}
+                            </p>
                         </div>
-                        <h3
-                            style={{
-                                fontSize: "20px",
-                                fontWeight: "600",
-                                color: "#111827",
-                                textAlign: "left",
-                                margin: "0",
-                                lineHeight: "1.2",
-                            }}
-                        >
-                            {firstPhoto.name}
-                        </h3>
-                        <p
-                            style={{
-                                fontSize: "14px",
-                                color: "#6b7280",
-                                textAlign: "left",
-                                margin: "4px 0 0 0",
-                            }}
-                        >
-                            {firstPhoto.country}
-                        </p>
-                    </div>
-                </>
-            )}
-        </div>
-    );
-};
+                    </>
+                )}
+            </div>
+        );
+    },
+);
 
 interface TripMapViewerProps {
     files: EnteFile[];
     collection?: Collection;
     albumTitle?: string;
-    ownerName?: string;
-    user?: any; // User object for FileViewer
+    user?: {
+        id: number;
+        email: string;
+        token: string;
+        [key: string]: unknown;
+    }; // User object for FileViewer
     // FileViewer related props (optional, can be added as needed)
     enableDownload?: boolean;
     onSetOpenFileViewer?: (open: boolean) => void;
@@ -828,7 +933,6 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
     files,
     collection,
     albumTitle,
-    ownerName,
     user,
     enableDownload,
     onSetOpenFileViewer,
@@ -836,7 +940,6 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
 }) => {
     // Extract collection info if available
     const collectionTitle = collection?.name || albumTitle || "Trip Journey";
-    const collectionOwner = collection?.owner?.email || ownerName;
     // Add CSS animation for spinner
     useEffect(() => {
         if (typeof document !== "undefined") {
@@ -852,18 +955,21 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
                 document.head.removeChild(style);
             };
         }
+        return undefined;
     }, []);
 
     const [journeyData, setJourneyData] = useState<JourneyPoint[]>([]);
     const [isClient, setIsClient] = useState(false);
-    const [isLoadingPhotos, setIsLoadingPhotos] = useState(true);
     const [isLoadingLocations, setIsLoadingLocations] = useState(false);
     const [currentZoom, setCurrentZoom] = useState(7); // Default zoom, will be updated by MapEvents and optimalZoom
-    const [mapRef, setMapRef] = useState<any>(null);
+    const [mapRef, setMapRef] = useState<L.Map | null>(null);
     const [targetZoom, setTargetZoom] = useState<number | null>(null);
     const [scrollProgress, setScrollProgress] = useState(0); // 0 to 1 representing scroll progress
     const [hasUserScrolled, setHasUserScrolled] = useState(false); // Track if user has actually scrolled
-    const [screenDimensions, setScreenDimensions] = useState({
+    const [screenDimensions, setScreenDimensions] = useState<{
+        width: number;
+        height: number;
+    }>({
         width: 1400,
         height: 800,
     });
@@ -918,6 +1024,7 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
             );
 
             if (clickedIndex !== -1 && sortedFiles.length > 0) {
+                // Batch state updates to avoid multiple re-renders
                 setViewerFiles(sortedFiles);
                 setCurrentFileIndex(clickedIndex);
                 setOpenFileViewer(true);
@@ -928,6 +1035,7 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
     );
 
     const handleCloseFileViewer = useCallback(() => {
+        // Batch state updates
         setOpenFileViewer(false);
         onSetOpenFileViewer?.(false);
     }, [onSetOpenFileViewer]);
@@ -956,7 +1064,7 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
         photos.forEach((photo) => {
             const date = new Date(photo.timestamp);
             const dayKey = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
-            
+
             if (!photosByDay.has(dayKey)) {
                 photosByDay.set(dayKey, []);
             }
@@ -965,10 +1073,10 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
 
         // Then cluster within each day
         const allClusters: JourneyPoint[][] = [];
-        
+
         photosByDay.forEach((dayPhotos) => {
             const visited = new Set<number>();
-            
+
             dayPhotos.forEach((photo, i) => {
                 if (visited.has(i)) return;
 
@@ -1025,29 +1133,24 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
             return { lat: avgLat, lng: avgLng };
         });
 
-        // Find the bounding box of all clusters
+        // Find the bounding box of all clusters (only need lng values for calculations)
         const allLats = clusterCenters.map((c) => c.lat);
         const allLngs = clusterCenters.map((c) => c.lng);
-        const minLat = Math.min(...allLats);
-        const maxLat = Math.max(...allLats);
-        const minLng = Math.min(...allLngs);
-        const maxLng = Math.max(...allLngs);
 
-        // Calculate the span
-        const latSpan = maxLat - minLat;
-        const lngSpan = maxLng - minLng;
-        const maxSpan = Math.max(latSpan, lngSpan);
+        // Calculate the span (not used directly but kept for potential future use)
+        // const latSpan = maxLat - minLat;
+        // const lngSpan = maxLng - minLng;
 
         // Calculate minimum distances between clusters to avoid over-clustering
         let minDistance = Infinity;
         for (let i = 0; i < clusterCenters.length - 1; i++) {
             for (let j = i + 1; j < clusterCenters.length; j++) {
+                const centerI = clusterCenters[i];
+                const centerJ = clusterCenters[j];
+                if (!centerI || !centerJ) continue;
                 const distance = Math.sqrt(
-                    Math.pow(clusterCenters[i].lat - clusterCenters[j].lat, 2) +
-                        Math.pow(
-                            clusterCenters[i].lng - clusterCenters[j].lng,
-                            2,
-                        ),
+                    Math.pow(centerI.lat - centerJ.lat, 2) +
+                        Math.pow(centerI.lng - centerJ.lng, 2),
                 );
                 minDistance = Math.min(minDistance, distance);
             }
@@ -1068,10 +1171,20 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
         // Use 90th percentile span instead of full min/max to ignore outliers
         const p10Index = Math.floor(sortedClusterLngs.length * 0.1);
         const p90Index = Math.floor(sortedClusterLngs.length * 0.9);
-        const effectiveLngSpan =
-            sortedClusterLngs[p90Index] - sortedClusterLngs[p10Index];
-        const effectiveLatSpan =
-            sortedClusterLats[p90Index] - sortedClusterLats[p10Index];
+        const p10Lng = sortedClusterLngs[p10Index];
+        const p90Lng = sortedClusterLngs[p90Index];
+        const p10Lat = sortedClusterLats[p10Index];
+        const p90Lat = sortedClusterLats[p90Index];
+        if (
+            p10Lng === undefined ||
+            p90Lng === undefined ||
+            p10Lat === undefined ||
+            p90Lat === undefined
+        ) {
+            return 7; // fallback zoom
+        }
+        const effectiveLngSpan = p90Lng - p10Lng;
+        const effectiveLatSpan = p90Lat - p10Lat;
 
         // Add more padding (40%) to prevent cropping at edges
         const paddedLngSpan = effectiveLngSpan * 1.4;
@@ -1104,27 +1217,12 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
         );
         const clampedZoom = Math.max(6, Math.min(14, calculatedZoom));
 
-        console.log(
-            `🗺️  Cluster analysis: ${
-                photoClusters.length
-            } clusters, span: ${maxSpan.toFixed(
-                4,
-            )}°, minDistance: ${minDistance.toFixed(4)}°, screen: ${
-                screenDimensions.width
-            }x${screenDimensions.height}, optimalZoom: ${clampedZoom.toFixed(
-                1,
-            )}, effectiveSpan: ${effectiveLngSpan.toFixed(4)}°`,
-        );
-
         return Math.round(clampedZoom);
     }, [photoClusters, screenDimensions]);
 
     // Update currentZoom when optimalZoom changes and there's no mapRef yet
     useEffect(() => {
         if (!mapRef && optimalZoom !== currentZoom) {
-            console.log(
-                `📊 Updating currentZoom from ${currentZoom} to optimalZoom ${optimalZoom} (no mapRef)`,
-            );
             setCurrentZoom(optimalZoom);
         }
     }, [optimalZoom, mapRef, currentZoom]);
@@ -1134,23 +1232,18 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
 
         // Process EnteFiles to extract location data
         const loadPhotosData = async () => {
-            console.log("Starting to process EnteFiles...");
             const photoData: JourneyPoint[] = [];
 
-            if (!files || files.length === 0) {
-                console.warn("No files provided");
-                setIsLoadingPhotos(false);
+            if (files.length === 0) {
                 return;
             }
-
-            console.log(`Processing ${files.length} files`);
 
             // Process each EnteFile
             for (const file of files) {
                 try {
                     // Extract location from metadata
-                    const lat = file.metadata?.latitude;
-                    const lng = file.metadata?.longitude;
+                    const lat = file.metadata.latitude;
+                    const lng = file.metadata.longitude;
 
                     if (lat && lng) {
                         // Get thumbnail URL for the file
@@ -1168,18 +1261,12 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
                             image: thumbnailUrl || "",
                             fileId: file.id,
                         });
-                        console.log(
-                            `Added ${fileFileName(file)} to journey data with lat: ${lat}, lng: ${lng}`,
-                        );
-                    } else {
-                        console.log(`${fileFileName(file)} has no GPS data`);
+                    // Photo has no GPS data
                     }
-                } catch (error) {
-                    console.error(`Error processing file ${file.id}:`, error);
+                } catch {
+                    // Silently ignore processing errors for individual files
                 }
             }
-
-            console.log(`Total photos with GPS data: ${photoData.length}`);
 
             // Sort by timestamp
             photoData.sort(
@@ -1190,22 +1277,14 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
 
             // Set journey data (location names will be fetched later)
             setJourneyData(photoData);
-            setIsLoadingPhotos(false);
 
             // Set loading locations to true since we'll start fetching them
             if (photoData.length > 0) {
                 setIsLoadingLocations(true);
-                console.log(
-                    "🔄 Will start loading locations for",
-                    photoData.length,
-                    "photos",
-                );
             }
-
-            console.log("Journey data set:", photoData);
         };
 
-        loadPhotosData();
+        void loadPhotosData();
     }, [files]);
 
     // Fetch location names for clusters after they're created
@@ -1214,11 +1293,6 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
             if (photoClusters.length === 0 || journeyData.length === 0) return;
 
             setIsLoadingLocations(true);
-            console.log(
-                "🔄 Started fetching location names for",
-                photoClusters.length,
-                "clusters",
-            );
 
             // Create a map to track which photos have been updated
             const updatedPhotos = new Map<
@@ -1252,11 +1326,8 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
                             country: locationInfo.country,
                         });
                     });
-                } catch (error) {
-                    console.error(
-                        `Error fetching location for cluster ${i}:`,
-                        error,
-                    );
+                } catch {
+                    // Silently ignore processing errors for individual files
                 }
             }
 
@@ -1274,13 +1345,10 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
             }
 
             setIsLoadingLocations(false);
-            console.log("✅ Finished loading location names");
         };
 
-        fetchLocationNames().catch((error) => {
-            console.error("Error fetching location names:", error);
+        void fetchLocationNames().catch(() => {
             setIsLoadingLocations(false);
-            console.log("✅ Finished loading location names");
         });
         // Only run when photoClusters changes, not journeyData to avoid infinite loop
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1297,18 +1365,30 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
     }, []);
 
     // Function to create icon with specific image and progress styling
-    const createIcon = (
-        imageSrc: string,
-        size = 40,
-        borderColor = "#ffffff",
-        _clusterCount?: number,
-        isReached = false,
-    ) => {
-        if (typeof window === "undefined") return null;
+    const createIcon = useCallback(
+        (
+            imageSrc: string,
+            size = 40,
+            borderColor = "#ffffff",
+            _clusterCount?: number,
+            isReached = false,
+        ): L.DivIcon => {
+            if (typeof window === "undefined") {
+                // Fallback icon for SSR
+                return L.divIcon({ html: '', className: 'empty-marker' });
+            }
 
-        const L = require("leaflet");
-        return L.divIcon({
-            html: `
+            // Create cache key based on all parameters
+            const cacheKey = `icon_${imageSrc}_${size}_${borderColor}_${isReached}`;
+
+            const cachedIcon = iconCache.get(cacheKey);
+            if (cachedIcon) {
+                return cachedIcon;
+            }
+
+            // L is imported at the top of the file
+            const icon = L.divIcon({
+                html: `
         <div class="photo-marker${isReached ? " reached" : ""}" style="
           width: ${size}px;
           height: ${size}px;
@@ -1349,27 +1429,45 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
           />
         </div>
       `,
-            className: "custom-image-marker",
-            iconSize: [size, size],
-            iconAnchor: [size / 2, size / 2],
-            popupAnchor: [0, -size / 2],
-        });
-    };
+                className: "custom-image-marker",
+                iconSize: [size, size],
+                iconAnchor: [size / 2, size / 2],
+                popupAnchor: [0, -size / 2],
+            });
+
+            // Cache the icon
+            iconCache.set(cacheKey, icon);
+            return icon;
+        },
+        [],
+    );
 
     // Function to create super-cluster icon with badge
-    const createSuperClusterIcon = (
-        imageSrc: string,
-        clusterCount: number,
-        size = 45,
-        isReached = false,
-    ) => {
-        if (typeof window === "undefined") return null;
+    const createSuperClusterIcon = useCallback(
+        (
+            imageSrc: string,
+            clusterCount: number,
+            size = 45,
+            isReached = false,
+        ): L.DivIcon => {
+            if (typeof window === "undefined") {
+                // Fallback icon for SSR
+                return L.divIcon({ html: '', className: 'empty-marker' });
+            }
 
-        const L = require("leaflet");
-        const containerSize = size + 28;
+            // Create cache key based on all parameters
+            const cacheKey = `super_icon_${imageSrc}_${clusterCount}_${size}_${isReached}`;
 
-        return L.divIcon({
-            html: `
+            const cachedIcon = iconCache.get(cacheKey);
+            if (cachedIcon) {
+                return cachedIcon;
+            }
+
+            // L is imported at the top of the file
+            const containerSize = size + 28;
+
+            const icon = L.divIcon({
+                html: `
         <div class="super-cluster-container" style="
           width: ${containerSize}px;
           height: ${containerSize}px;
@@ -1440,12 +1538,18 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
           ">${clusterCount}</div>
         </div>
       `,
-            className: "super-cluster-marker",
-            iconSize: [containerSize, containerSize],
-            iconAnchor: [containerSize / 2, containerSize / 2],
-            popupAnchor: [0, -size / 2],
-        });
-    };
+                className: "super-cluster-marker",
+                iconSize: [containerSize, containerSize],
+                iconAnchor: [containerSize / 2, containerSize / 2],
+                popupAnchor: [0, -size / 2],
+            });
+
+            // Cache the icon
+            iconCache.set(cacheKey, icon);
+            return icon;
+        },
+        [],
+    );
 
     // Calculate super-clusters based on screen collisions
     const { superClusters, visibleClusters } = useMemo(() => {
@@ -1513,6 +1617,7 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
                         totalLng = 0;
                     overlappingClusters.forEach((idx) => {
                         const c = clusters[idx];
+                        if (!c) return;
                         totalLat +=
                             c.reduce((sum, p) => sum + p.lat, 0) / c.length;
                         totalLng +=
@@ -1520,8 +1625,15 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
                     });
 
                     // Get the first photo from the first cluster as representative image
-                    const representativePhoto =
-                        clusters[overlappingClusters[0]][0];
+                    const firstClusterIdx = overlappingClusters[0];
+                    const firstCluster =
+                        firstClusterIdx !== undefined
+                            ? clusters[firstClusterIdx]
+                            : undefined;
+                    const representativePhoto = firstCluster?.[0];
+                    if (!representativePhoto) {
+                        return;
+                    }
 
                     superClusters.push({
                         lat: totalLat / overlappingClusters.length,
@@ -1542,13 +1654,6 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
         };
 
         const result = detectScreenCollisions(photoClusters, currentZoom);
-        console.log(
-            `🔍 Super-cluster detection: ${
-                result.superClusters.length
-            } super-clusters, ${
-                result.visibleClusters.length
-            } visible clusters, currentZoom: ${currentZoom}, optimalZoom: ${optimalZoom}, mapRef: ${!!mapRef}`,
-        );
         return result;
     }, [photoClusters, currentZoom, mapRef, targetZoom, optimalZoom]);
 
@@ -1564,7 +1669,10 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
             return { top, center };
         });
 
-        setLocationPositions(positions);
+        // Use startTransition for lower-priority layout updates
+        startTransition(() => {
+            setLocationPositions(positions);
+        });
     }, []);
 
     // Calculate scroll progress based on timeline scroll position and update map center
@@ -1603,9 +1711,13 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
 
         // Normal scroll handling - mark that user has scrolled
         setHasUserScrolled(true);
-        setScrollProgress(clampedProgress);
+        // Use startTransition for lower-priority scroll progress updates
+        startTransition(() => {
+            setScrollProgress(clampedProgress);
+        });
 
         // Real-time map center update based on scroll progress
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (mapRef && !isClusterClickScrollingRef.current) {
             const clusterCenters = photoClusters.map((cluster) => {
                 const avgLat =
@@ -1619,14 +1731,18 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
                 let targetLat, targetLng;
 
                 // Always start at first cluster (journey always starts at first location)
+                const firstCenter = clusterCenters[0];
+                const lastCenter = clusterCenters[clusterCenters.length - 1];
+                if (!firstCenter || !lastCenter) return;
+                
                 if (clampedProgress <= 0) {
                     // At the start, focus on first cluster
-                    targetLat = clusterCenters[0].lat;
-                    targetLng = clusterCenters[0].lng;
+                    targetLat = firstCenter.lat;
+                    targetLng = firstCenter.lng;
                 } else if (clampedProgress === 1) {
                     // At the end, focus on last cluster
-                    targetLat = clusterCenters[clusterCenters.length - 1].lat;
-                    targetLng = clusterCenters[clusterCenters.length - 1].lng;
+                    targetLat = lastCenter.lat;
+                    targetLng = lastCenter.lng;
                 } else {
                     // Interpolate between clusters based on progress
                     const clusterProgress =
@@ -1694,12 +1810,6 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
                 }
             }
         }
-
-        console.log("Scroll Progress Debug:", {
-            calculatedProgress: clampedProgress,
-            scrollTop,
-            isClusterClickScrolling: isClusterClickScrollingRef.current,
-        });
     }, [
         timelineRef,
         photoClusters,
@@ -1719,14 +1829,21 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
             const timer = setTimeout(updateLocationPositions, 100);
             return () => clearTimeout(timer);
         }
+        return undefined;
     }, [photoClusters, updateLocationPositions]);
 
-    // Add scroll event listener to timeline - real-time, no debounce
+    // Throttled scroll handler for better performance
+    const throttledTimelineScroll = useMemo(
+        () => throttle(handleTimelineScroll, 16), // ~60fps
+        [handleTimelineScroll],
+    );
+
+    // Add scroll event listener to timeline with throttling
     useEffect(() => {
         const timelineContainer = timelineRef.current;
         if (!timelineContainer) return;
 
-        timelineContainer.addEventListener("scroll", handleTimelineScroll);
+        timelineContainer.addEventListener("scroll", throttledTimelineScroll);
 
         // Trigger initial scroll progress calculation after a brief delay to ensure layout is complete
         setTimeout(() => {
@@ -1736,10 +1853,10 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
         return () => {
             timelineContainer.removeEventListener(
                 "scroll",
-                handleTimelineScroll,
+                throttledTimelineScroll,
             );
         };
-    }, [handleTimelineScroll]);
+    }, [throttledTimelineScroll, handleTimelineScroll]);
 
     // Function to scroll timeline to specific location
     const scrollTimelineToLocation = useCallback(
@@ -1776,6 +1893,77 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
             });
         },
         [photoClusters, timelineRef, locationPositions],
+    );
+
+    // Shared marker click handler to avoid duplication
+    const handleMarkerClick = useCallback(
+        (clusterIndex: number, clusterLat: number, clusterLng: number) => {
+            // Calculate target progress for immediate update
+            const targetProgress =
+                clusterIndex / Math.max(1, photoClusters.length - 1);
+
+            // Clear any existing timeout
+            if (clusterClickTimeoutRef.current) {
+                clearTimeout(clusterClickTimeoutRef.current);
+            }
+
+            // Block scroll handler during cluster click
+            isClusterClickScrollingRef.current = true;
+
+            // Immediately update scroll progress to show green state
+            setScrollProgress(targetProgress);
+
+            // Calculate positioning offset for timeline visibility
+            const allClusterLngs = photoClusters.map(
+                (cluster) =>
+                    cluster.reduce((sum, p) => sum + p.lng, 0) / cluster.length,
+            );
+            const minLng = Math.min(...allClusterLngs);
+            const maxLng = Math.max(...allClusterLngs);
+            const lngSpan = maxLng - minLng;
+            const paddedSpan = Math.max(lngSpan * 1.4, 0.1);
+
+            const isMobile = screenDimensions.width < 768;
+            const timelineSizeRatio = isMobile ? 0.5 : 0.5;
+            const mapSizeRatio = 1 - timelineSizeRatio;
+            const screenWidthInDegrees = paddedSpan / mapSizeRatio;
+            const shiftAmount = screenWidthInDegrees * (timelineSizeRatio / 2);
+            const offsetLng = clusterLng - shiftAmount;
+
+            if (mapRef) {
+                const currentZoom = mapRef.getZoom();
+                if (currentZoom > optimalZoom) {
+                    mapRef.flyTo([clusterLat, offsetLng], optimalZoom, {
+                        animate: true,
+                        duration: 1.2,
+                        easeLinearity: 0.25,
+                    });
+                } else {
+                    mapRef.panTo([clusterLat, offsetLng], {
+                        animate: true,
+                        duration: 1.0,
+                    });
+                }
+            }
+
+            // Start timeline scrolling and set timeout to re-enable handler
+            setTimeout(() => {
+                scrollTimelineToLocation(clusterIndex);
+            }, 50);
+
+            // Re-enable scroll handler after animation completes
+            clusterClickTimeoutRef.current = setTimeout(() => {
+                isClusterClickScrollingRef.current = false;
+                clusterClickTimeoutRef.current = null;
+            }, 1500);
+        },
+        [
+            photoClusters,
+            screenDimensions,
+            mapRef,
+            optimalZoom,
+            scrollTimelineToLocation,
+        ],
     );
 
     // Calculate map center - start at first location to match timeline initial state
@@ -1854,34 +2042,13 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
                     borderRadius: "32px",
                 }}
             >
-                {isLoadingPhotos ? (
-                    <div
-                        style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            height: "100%",
-                        }}
-                    >
-                        <div
-                            style={{
-                                animation: "spin 1s linear infinite",
-                                borderRadius: "50%",
-                                height: "48px",
-                                width: "48px",
-                                borderBottom: "2px solid #3b82f6",
-                            }}
-                        ></div>
-                    </div>
-                ) : (
-                    <div style={{ padding: "32px" }}>
-                        {journeyData.length > 0 ? (
-                            <div>
+                <div style={{ padding: "32px" }}>
+                    {journeyData.length > 0 ? (
+                        <div>
                                 <TripCover
                                     journeyData={journeyData}
                                     photoClusters={photoClusters}
                                     albumTitle={collectionTitle}
-                                    ownerName={collectionOwner}
                                 />
 
                                 {/* Show either loading spinner or trip started section + timeline */}
@@ -1981,9 +2148,8 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
                                     No photos with location data found.
                                 </p>
                             </div>
-                        )}
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
 
             {/* Map Container */}
@@ -2019,22 +2185,23 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
                             // Get all photos from all clusters involved in this supercluster
                             const allPhotosInSuperCluster =
                                 superCluster.clustersInvolved.flatMap(
-                                    (clusterIdx) => photoClusters[clusterIdx],
+                                    (clusterIdx) =>
+                                        photoClusters[clusterIdx] || [],
                                 );
 
                             // Find the most recent photo/place
                             const mostRecentPhotos = [
                                 ...allPhotosInSuperCluster,
-                            ].sort(
-                                (a, b) =>
-                                    new Date(b.timestamp).getTime() -
-                                    new Date(a.timestamp).getTime(),
-                            );
+                            ].sort((a, b) => {
+                                const timeA = new Date(a.timestamp).getTime();
+                                const timeB = new Date(b.timestamp).getTime();
+                                return timeB - timeA;
+                            });
 
                             // Check if this super-cluster has been reached
                             const firstClusterIndex =
                                 superCluster.clustersInvolved[0];
-                            const isReached =
+                            const isReached = firstClusterIndex !== undefined &&
                                 scrollProgress >=
                                 firstClusterIndex /
                                     Math.max(1, photoClusters.length - 1);
@@ -2047,7 +2214,7 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
                                         superCluster.lng,
                                     ]}
                                     icon={createSuperClusterIcon(
-                                        mostRecentPhotos[0].image, // Use most recent photo for display
+                                        mostRecentPhotos[0]?.image || "", // Use most recent photo for display
                                         superCluster.clusterCount,
                                         45,
                                         isReached,
@@ -2057,94 +2224,15 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
                                             const firstClusterIndex =
                                                 superCluster
                                                     .clustersInvolved[0];
-
-                                            // Calculate target progress for immediate update
-                                            const targetProgress =
-                                                firstClusterIndex /
-                                                Math.max(
-                                                    1,
-                                                    photoClusters.length - 1,
-                                                );
-
-                                            // Clear any existing timeout
                                             if (
-                                                clusterClickTimeoutRef.current
+                                                firstClusterIndex !== undefined
                                             ) {
-                                                clearTimeout(
-                                                    clusterClickTimeoutRef.current,
-                                                );
-                                            }
-
-                                            // Block scroll handler during cluster click
-                                            isClusterClickScrollingRef.current = true;
-
-                                            // Immediately update scroll progress to show green state
-                                            setScrollProgress(targetProgress);
-
-                                            // Center super cluster in the visible area
-                                            // Use same logic as timeline scroll for consistent positioning
-                                            const allClusterLngs =
-                                                photoClusters.map(
-                                                    (cluster) =>
-                                                        cluster.reduce(
-                                                            (sum, p) =>
-                                                                sum + p.lng,
-                                                            0,
-                                                        ) / cluster.length,
-                                                );
-                                            const minLng = Math.min(
-                                                ...allClusterLngs,
-                                            );
-                                            const maxLng = Math.max(
-                                                ...allClusterLngs,
-                                            );
-                                            const lngSpan = maxLng - minLng;
-                                            const paddedSpan = Math.max(
-                                                lngSpan * 1.4,
-                                                0.1,
-                                            ); // Same as timeline scroll
-
-                                            const isMobile =
-                                                screenDimensions.width < 768;
-                                            const timelineSizeRatio = isMobile
-                                                ? 0.5
-                                                : 0.5;
-                                            const mapSizeRatio =
-                                                1 - timelineSizeRatio;
-                                            const screenWidthInDegrees =
-                                                paddedSpan / mapSizeRatio;
-                                            const shiftAmount =
-                                                screenWidthInDegrees *
-                                                (timelineSizeRatio / 2);
-                                            const offsetLng =
-                                                superCluster.lng - shiftAmount;
-                                            if (mapRef) {
-                                                mapRef.panTo(
-                                                    [
-                                                        superCluster.lat,
-                                                        offsetLng,
-                                                    ],
-                                                    {
-                                                        animate: true,
-                                                        duration: 1.0,
-                                                    },
-                                                );
-                                            }
-
-                                            // Start timeline scrolling and set timeout to re-enable handler
-                                            setTimeout(() => {
-                                                scrollTimelineToLocation(
+                                                handleMarkerClick(
                                                     firstClusterIndex,
+                                                    superCluster.lat,
+                                                    superCluster.lng,
                                                 );
-                                            }, 50);
-
-                                            // Re-enable scroll handler after animation completes
-                                            clusterClickTimeoutRef.current =
-                                                setTimeout(() => {
-                                                    isClusterClickScrollingRef.current = false;
-                                                    clusterClickTimeoutRef.current =
-                                                        null;
-                                                }, 1500);
+                                            }
                                         },
                                     }}
                                 />
@@ -2154,6 +2242,7 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
                         {/* Draw visible regular clusters */}
                         {visibleClusters.map((cluster, index) => {
                             const firstPhoto = cluster[0];
+                            if (!firstPhoto) return null;
                             const avgLat =
                                 cluster.reduce((sum, p) => sum + p.lat, 0) /
                                 cluster.length;
@@ -2167,8 +2256,8 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
                                     (originalCluster) =>
                                         originalCluster.length ===
                                             cluster.length &&
-                                        originalCluster[0].image ===
-                                            cluster[0].image,
+                                        originalCluster[0]?.image ===
+                                            cluster[0]?.image,
                                 );
                             // Check if this location has been reached based on progress
                             const isReached =
@@ -2189,30 +2278,7 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
                                     )}
                                     eventHandlers={{
                                         click: () => {
-                                            // Calculate target progress for immediate update
-                                            const targetProgress =
-                                                originalClusterIndex /
-                                                Math.max(
-                                                    1,
-                                                    photoClusters.length - 1,
-                                                );
-
-                                            // Clear any existing timeout
-                                            if (
-                                                clusterClickTimeoutRef.current
-                                            ) {
-                                                clearTimeout(
-                                                    clusterClickTimeoutRef.current,
-                                                );
-                                            }
-
-                                            // Block scroll handler during cluster click
-                                            isClusterClickScrollingRef.current = true;
-
-                                            // Immediately update scroll progress to show green state
-                                            setScrollProgress(targetProgress);
-
-                                            // Get cluster center and pan map directly
+                                            // Calculate cluster center
                                             const avgLat =
                                                 cluster.reduce(
                                                     (sum, p) => sum + p.lat,
@@ -2223,82 +2289,11 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
                                                     (sum, p) => sum + p.lng,
                                                     0,
                                                 ) / cluster.length;
-                                            // Use same logic as timeline scroll for consistent positioning
-                                            const allClusterLngs =
-                                                photoClusters.map(
-                                                    (cluster) =>
-                                                        cluster.reduce(
-                                                            (sum, p) =>
-                                                                sum + p.lng,
-                                                            0,
-                                                        ) / cluster.length,
-                                                );
-                                            const minLng = Math.min(
-                                                ...allClusterLngs,
+                                            handleMarkerClick(
+                                                originalClusterIndex,
+                                                avgLat,
+                                                avgLng,
                                             );
-                                            const maxLng = Math.max(
-                                                ...allClusterLngs,
-                                            );
-                                            const lngSpan = maxLng - minLng;
-                                            const paddedSpan = Math.max(
-                                                lngSpan * 1.4,
-                                                0.1,
-                                            ); // Same as timeline scroll
-
-                                            const isMobile =
-                                                screenDimensions.width < 768;
-                                            const timelineSizeRatio = isMobile
-                                                ? 0.5
-                                                : 0.5;
-                                            const mapSizeRatio =
-                                                1 - timelineSizeRatio;
-                                            const screenWidthInDegrees =
-                                                paddedSpan / mapSizeRatio;
-                                            const shiftAmount =
-                                                screenWidthInDegrees *
-                                                (timelineSizeRatio / 2);
-                                            const offsetLng =
-                                                avgLng - shiftAmount;
-
-                                            if (mapRef) {
-                                                if (
-                                                    mapRef.getZoom() >
-                                                    optimalZoom
-                                                ) {
-                                                    mapRef.flyTo(
-                                                        [avgLat, offsetLng],
-                                                        optimalZoom,
-                                                        {
-                                                            animate: true,
-                                                            duration: 1.2,
-                                                            easeLinearity: 0.25,
-                                                        },
-                                                    );
-                                                } else {
-                                                    mapRef.panTo(
-                                                        [avgLat, offsetLng],
-                                                        {
-                                                            animate: true,
-                                                            duration: 1.0,
-                                                        },
-                                                    );
-                                                }
-                                            }
-
-                                            // Start timeline scrolling and set timeout to re-enable handler
-                                            setTimeout(() => {
-                                                scrollTimelineToLocation(
-                                                    originalClusterIndex,
-                                                );
-                                            }, 50);
-
-                                            // Re-enable scroll handler after animation completes
-                                            clusterClickTimeoutRef.current =
-                                                setTimeout(() => {
-                                                    isClusterClickScrollingRef.current = false;
-                                                    clusterClickTimeoutRef.current =
-                                                        null;
-                                                }, 1500);
                                         },
                                     }}
                                 />
@@ -2326,14 +2321,24 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
                 pendingFavoriteUpdates={new Set<number>()}
                 pendingVisibilityUpdates={new Set<number>()}
                 onRemoteFilesPull={handleTriggerRemotePull}
-                onVisualFeedback={() => {}}
+                onVisualFeedback={() => {
+                    /* no-op */
+                }}
                 onToggleFavorite={() => Promise.resolve()}
                 onFileVisibilityUpdate={() => Promise.resolve()}
-                onSelectCollection={() => {}}
-                onSelectPerson={() => {}}
-                onDownload={() => {}}
+                onSelectCollection={() => {
+                    /* no-op */
+                }}
+                onSelectPerson={() => {
+                    /* no-op */
+                }}
+                onDownload={() => {
+                    /* no-op */
+                }}
                 onDelete={() => Promise.resolve()}
-                onSaveEditedImageCopy={() => {}}
+                onSaveEditedImageCopy={() => {
+                    /* no-op */
+                }}
             />
         </div>
     );
