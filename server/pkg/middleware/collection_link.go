@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
+	"golang.org/x/net/idna"
 	"net/http"
 	"net/url"
 	"strings"
@@ -220,8 +221,10 @@ func (m *CollectionLinkMiddleware) validateOrigin(c *gin.Context, ownerID int64)
 		m.DiscordController.NotifyPotentialAbuse(alertMessage + " - originParseFailed")
 		return nil
 	}
-	if !strings.Contains(strings.ToLower(parse.Host), strings.ToLower(*domain)) {
-		logger.Warnf("domainMismatch for owner %d, origin %s, domain %s host %s", ownerID, origin, *domain, parse.Host)
+
+	unicodeDomain, _ := idna.ToUnicode(*domain)
+	if !strings.Contains(strings.ToLower(parse.Host), strings.ToLower(*domain)) && !strings.Contains(strings.ToLower(parse.Host), strings.ToLower(unicodeDomain)) {
+		logger.Warnf("domainMismatch for owner  domain %s (unicode %s) vs host %s", *domain, unicodeDomain, parse.Host)
 		m.DiscordController.NotifyPotentialAbuse(alertMessage + " - domainMismatch")
 		return ente.NewPermissionDeniedError("unknown custom domain")
 	}
