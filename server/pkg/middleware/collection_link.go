@@ -224,9 +224,17 @@ func (m *CollectionLinkMiddleware) validateOrigin(c *gin.Context, ownerID int64)
 
 	unicodeDomain, _ := idna.ToUnicode(*domain)
 	if !strings.Contains(strings.ToLower(parse.Host), strings.ToLower(*domain)) && !strings.Contains(strings.ToLower(parse.Host), strings.ToLower(unicodeDomain)) {
-		logger.Warnf("domainMismatch for owner  domain %s (unicode %s) vs host %s", *domain, unicodeDomain, parse.Host)
+		logger.Warnf("domainMismatch: domain %s (unicode %s) vs originHost %s", *domain, unicodeDomain, parse.Host)
 		m.DiscordController.NotifyPotentialAbuse(alertMessage + " - domainMismatch")
 		return ente.NewPermissionDeniedError("unknown custom domain")
+	}
+	// Additional exact match check. In the future, remove the contains check above and only keep this exact match check.
+	if !strings.EqualFold(parse.Host, *domain) && !strings.EqualFold(parse.Host, unicodeDomain) {
+		logger.Warnf("exactDomainMismatch: domain %s (unicode %s) vs originHost %s", *domain, unicodeDomain, parse.Host)
+		m.DiscordController.NotifyPotentialAbuse(alertMessage + " - exactDomainMismatch")
+		// Do not return error here till we are fully sure that this won't cause any issues for existing
+		// custom domains.
+		// return ente.NewPermissionDeniedError("unknown custom domain")
 	}
 	return nil
 }
