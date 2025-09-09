@@ -25,7 +25,7 @@ const throttle = <T extends (...args: unknown[]) => void>(
     let inThrottle = false;
     return ((...args: unknown[]) => {
         if (!inThrottle) {
-            func(...args as Parameters<T>);
+            func(...(args as Parameters<T>));
             inThrottle = true;
             setTimeout(() => (inThrottle = false), limit);
         }
@@ -102,7 +102,7 @@ const getLocationName = async (
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.json() as GeocodingResponse;
+        const data = (await response.json()) as GeocodingResponse;
 
         // Extract location name from the response
         const feature = data.features?.[0];
@@ -917,12 +917,7 @@ interface TripMapViewerProps {
     files: EnteFile[];
     collection?: Collection;
     albumTitle?: string;
-    user?: {
-        id: number;
-        email: string;
-        token: string;
-        [key: string]: unknown;
-    }; // User object for FileViewer
+    user?: { id: number; email: string; token: string; [key: string]: unknown }; // User object for FileViewer
     // FileViewer related props (optional, can be added as needed)
     enableDownload?: boolean;
     onSetOpenFileViewer?: (open: boolean) => void;
@@ -949,6 +944,10 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
         }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
       `;
             document.head.appendChild(style);
             return () => {
@@ -961,6 +960,7 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
     const [journeyData, setJourneyData] = useState<JourneyPoint[]>([]);
     const [isClient, setIsClient] = useState(false);
     const [isLoadingLocations, setIsLoadingLocations] = useState(false);
+    const [isInitialLoad, setIsInitialLoad] = useState(true);
     const [currentZoom, setCurrentZoom] = useState(7); // Default zoom, will be updated by MapEvents and optimalZoom
     const [mapRef, setMapRef] = useState<L.Map | null>(null);
     const [targetZoom, setTargetZoom] = useState<number | null>(null);
@@ -969,10 +969,7 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
     const [screenDimensions, setScreenDimensions] = useState<{
         width: number;
         height: number;
-    }>({
-        width: 1400,
-        height: 800,
-    });
+    }>({ width: 1400, height: 800 });
     const [locationPositions, setLocationPositions] = useState<
         { top: number; center: number }[]
     >([]);
@@ -1261,7 +1258,7 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
                             image: thumbnailUrl || "",
                             fileId: file.id,
                         });
-                    // Photo has no GPS data
+                        // Photo has no GPS data
                     }
                 } catch {
                     // Silently ignore processing errors for individual files
@@ -1277,6 +1274,9 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
 
             // Set journey data (location names will be fetched later)
             setJourneyData(photoData);
+
+            // Mark initial load as complete
+            setIsInitialLoad(false);
 
             // Set loading locations to true since we'll start fetching them
             if (photoData.length > 0) {
@@ -1375,7 +1375,7 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
         ): L.DivIcon => {
             if (typeof window === "undefined") {
                 // Fallback icon for SSR
-                return L.divIcon({ html: '', className: 'empty-marker' });
+                return L.divIcon({ html: "", className: "empty-marker" });
             }
 
             // Create cache key based on all parameters
@@ -1386,53 +1386,69 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
                 return cachedIcon;
             }
 
+            const pinSize = size + 16; // Make it square and bigger
+            const pinHeight = pinSize + 12; // Add space for triangle
+            const triangleHeight = 10;
+
             // L is imported at the top of the file
             const icon = L.divIcon({
                 html: `
-        <div class="photo-marker${isReached ? " reached" : ""}" style="
-          width: ${size}px;
-          height: ${size}px;
-          border-radius: 50%;
-          border: 3px solid ${
-              isReached ? "rgba(34, 197, 94, 0.8)" : borderColor
-          };
-          overflow: hidden;
-          background: white;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow: ${
-              isReached
-                  ? "0 0 0 3px rgba(34, 197, 94, 0.3), 0 0 0 6px rgba(34, 197, 94, 0.15), 0 2px 4px rgba(0,0,0,0.3)"
-                  : "0 2px 4px rgba(0,0,0,0.3)"
-          };
+        <div class="photo-pin${isReached ? " reached" : ""}" style="
+          width: ${pinSize}px;
+          height: ${pinHeight}px;
           position: relative;
-          transition: all 0.3s ease;
           cursor: pointer;
-        "
-        onmouseover="this.style.borderColor='${
-            isReached ? "rgba(34, 197, 94, 0.8)" : "#10B981"
-        }';"
-        onmouseout="this.style.borderColor='${
-            isReached ? "rgba(34, 197, 94, 0.8)" : "#ffffff"
-        }';"
-        >
-          <img 
-            src="${imageSrc}" 
-            style="
-              width: 100%;
-              height: 100%;
-              object-fit: cover;
-              border-radius: 50%;
-            "
-            alt="Location"
-          />
+          transition: all 0.3s ease;
+        ">
+          <!-- Main rounded rectangle container -->
+          <div style="
+            width: ${pinSize}px;
+            height: ${pinSize}px;
+            border-radius: 16px;
+            background: ${isReached ? "#22c55e" : "white"};
+            border: 2px solid ${isReached ? "#22c55e" : borderColor};
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            padding: 4px;
+            position: relative;
+            overflow: hidden;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+          "
+          onmouseover="this.style.background='#22c55e'; this.style.borderColor='#22c55e'; this.nextElementSibling.style.borderTopColor='#22c55e';"
+          onmouseout="this.style.background='${isReached ? "#22c55e" : "white"}'; this.style.borderColor='${isReached ? "#22c55e" : "#ffffff"}'; this.nextElementSibling.style.borderTopColor='${isReached ? "#22c55e" : "white"}';"
+          >
+            <!-- Image inside the rounded rectangle -->
+            <img 
+              src="${imageSrc}" 
+              style="
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                border-radius: 12px;
+              "
+              alt="Location"
+            />
+          </div>
+          
+          <!-- Triangle at the bottom -->
+          <div style="
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: ${triangleHeight}px solid transparent;
+            border-right: ${triangleHeight}px solid transparent;
+            border-top: ${triangleHeight}px solid ${isReached ? "#22c55e" : "white"};
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            transition: border-top-color 0.3s ease;
+          "></div>
         </div>
       `,
-                className: "custom-image-marker",
-                iconSize: [size, size],
-                iconAnchor: [size / 2, size / 2],
-                popupAnchor: [0, -size / 2],
+                className: "custom-pin-marker",
+                iconSize: [pinSize, pinHeight],
+                iconAnchor: [pinSize / 2, pinHeight],
+                popupAnchor: [0, -pinHeight],
             });
 
             // Cache the icon
@@ -1452,7 +1468,7 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
         ): L.DivIcon => {
             if (typeof window === "undefined") {
                 // Fallback icon for SSR
-                return L.divIcon({ html: '', className: 'empty-marker' });
+                return L.divIcon({ html: "", className: "empty-marker" });
             }
 
             // Create cache key based on all parameters
@@ -1463,64 +1479,78 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
                 return cachedIcon;
             }
 
-            // L is imported at the top of the file
-            const containerSize = size + 28;
+            const pinSize = size + 16; // Make it square and bigger
+            const pinHeight = pinSize + 12; // Add space for triangle
+            const triangleHeight = 10;
+            const containerSize = pinSize + 24;
 
             const icon = L.divIcon({
                 html: `
         <div class="super-cluster-container" style="
           width: ${containerSize}px;
-          height: ${containerSize}px;
+          height: ${pinHeight + 12}px;
           position: relative;
-          display: flex;
-          align-items: center;
-          justify-content: center;
           cursor: pointer;
         ">
-          <div class="super-cluster-marker${
-              isReached ? " reached" : ""
-          }" style="
-            width: ${size}px;
-            height: ${size}px;
-            border-radius: 50%;
-            border: 3px solid ${
-                isReached ? "rgba(34, 197, 94, 0.8)" : "#ffffff"
-            };
-            overflow: hidden;
-            background: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: ${
-                isReached
-                    ? "0 0 0 3px rgba(34, 197, 94, 0.3), 0 0 0 6px rgba(34, 197, 94, 0.15), 0 4px 8px rgba(0,0,0,0.25)"
-                    : "0 4px 8px rgba(0,0,0,0.25)"
-            };
-            position: relative;
-            transition: all 0.2s ease;
-          "
-          onmouseover="this.style.borderColor='${
-              isReached ? "rgba(34, 197, 94, 0.8)" : "#10B981"
-          }';"
-          onmouseout="this.style.borderColor='${
-              isReached ? "rgba(34, 197, 94, 0.8)" : "#ffffff"
-          }';"
-          >
-            <img 
-              src="${imageSrc}" 
-              style="
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                border-radius: 50%;
-              "
-              alt="Location"
-            />
+          <!-- Main pin container -->
+          <div class="photo-pin${isReached ? " reached" : ""}" style="
+            width: ${pinSize}px;
+            height: ${pinHeight}px;
+            position: absolute;
+            left: 12px;
+            top: 0;
+            transition: all 0.3s ease;
+          ">
+            <!-- Main rounded rectangle container -->
+            <div style="
+              width: ${pinSize}px;
+              height: ${pinSize}px;
+              border-radius: 16px;
+              background: ${isReached ? "#22c55e" : "white"};
+              border: 2px solid ${isReached ? "#22c55e" : "#ffffff"};
+              box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+              padding: 4px;
+              position: relative;
+              overflow: hidden;
+              transition: background-color 0.3s ease, border-color 0.3s ease;
+            "
+            onmouseover="this.style.background='#22c55e'; this.style.borderColor='#22c55e'; this.nextElementSibling.style.borderTopColor='#22c55e';"
+            onmouseout="this.style.background='${isReached ? "#22c55e" : "white"}'; this.style.borderColor='${isReached ? "#22c55e" : "#ffffff"}'; this.nextElementSibling.style.borderTopColor='${isReached ? "#22c55e" : "white"}';"
+            >
+              <!-- Image inside the rounded rectangle -->
+              <img 
+                src="${imageSrc}" 
+                style="
+                  width: 100%;
+                  height: 100%;
+                  object-fit: cover;
+                  border-radius: 12px;
+                "
+                alt="Location"
+              />
+            </div>
+            
+            <!-- Triangle at the bottom -->
+            <div style="
+              position: absolute;
+              bottom: 2px;
+              left: 50%;
+              transform: translateX(-50%);
+              width: 0;
+              height: 0;
+              border-left: ${triangleHeight}px solid transparent;
+              border-right: ${triangleHeight}px solid transparent;
+              border-top: ${triangleHeight}px solid ${isReached ? "#22c55e" : "white"};
+              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+              transition: border-top-color 0.3s ease;
+            "></div>
           </div>
+          
+          <!-- Badge -->
           <div style="
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: -6px;
+            right: 0;
             background: #000000;
             color: white;
             border-radius: 50%;
@@ -1531,17 +1561,17 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
             justify-content: center;
             font-size: 11px;
             font-weight: 600;
-            padding: 0 0 0 1px;
             border: 2px solid white;
             box-shadow: 0 2px 6px rgba(0,0,0,0.3);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            z-index: 10;
           ">${clusterCount}</div>
         </div>
       `,
-                className: "super-cluster-marker",
-                iconSize: [containerSize, containerSize],
-                iconAnchor: [containerSize / 2, containerSize / 2],
-                popupAnchor: [0, -size / 2],
+                className: "super-cluster-pin-marker",
+                iconSize: [containerSize, pinHeight + 12],
+                iconAnchor: [containerSize / 2, pinHeight + 12],
+                popupAnchor: [0, -(pinHeight + 12)],
             });
 
             // Cache the icon
@@ -1734,7 +1764,7 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
                 const firstCenter = clusterCenters[0];
                 const lastCenter = clusterCenters[clusterCenters.length - 1];
                 if (!firstCenter || !lastCenter) return;
-                
+
                 if (clampedProgress <= 0) {
                     // At the start, focus on first cluster
                     targetLat = firstCenter.lat;
@@ -2043,111 +2073,179 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
                 }}
             >
                 <div style={{ padding: "32px" }}>
-                    {journeyData.length > 0 ? (
-                        <div>
-                                <TripCover
-                                    journeyData={journeyData}
-                                    photoClusters={photoClusters}
-                                    albumTitle={collectionTitle}
-                                />
-
-                                {/* Show either loading spinner or trip started section + timeline */}
-                                {isLoadingLocations ? (
+                    {isInitialLoad ? (
+                        // Show loading cover placeholder
+                        <div style={{ marginBottom: "96px" }}>
+                            <div
+                                style={{
+                                    aspectRatio: "16/8",
+                                    position: "relative",
+                                    marginBottom: "12px",
+                                    borderRadius: "24px",
+                                    overflow: "hidden",
+                                    backgroundColor: "#f3f4f6",
+                                    animation:
+                                        "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        position: "absolute",
+                                        bottom: 0,
+                                        left: 0,
+                                        right: 0,
+                                        height: "128px",
+                                        background:
+                                            "linear-gradient(to top, rgba(0,0,0,0.3), transparent)",
+                                    }}
+                                ></div>
+                                <div
+                                    style={{
+                                        position: "absolute",
+                                        bottom: 0,
+                                        left: 0,
+                                        right: 0,
+                                        padding: "24px",
+                                        color: "rgba(255, 255, 255, 0.7)",
+                                    }}
+                                >
                                     <div
                                         style={{
-                                            display: "flex",
-                                            justifyContent: "center",
-                                            alignItems: "center",
-                                            padding: "60px 20px",
-                                            minHeight: "200px",
+                                            height: "30px",
+                                            width: "200px",
+                                            backgroundColor:
+                                                "rgba(255, 255, 255, 0.2)",
+                                            borderRadius: "4px",
+                                            marginBottom: "8px",
                                         }}
+                                    ></div>
+                                    <div
+                                        style={{
+                                            height: "16px",
+                                            width: "120px",
+                                            backgroundColor:
+                                                "rgba(255, 255, 255, 0.2)",
+                                            borderRadius: "4px",
+                                        }}
+                                    ></div>
+                                </div>
+                            </div>
+                            <div
+                                style={{
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    padding: "60px 20px",
+                                    minHeight: "200px",
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        animation: "spin 1s linear infinite",
+                                        borderRadius: "50%",
+                                        height: "40px",
+                                        width: "40px",
+                                        borderTop: "3px solid #10b981",
+                                        borderRight: "3px solid transparent",
+                                        borderBottom: "3px solid #10b981",
+                                        borderLeft: "3px solid transparent",
+                                    }}
+                                ></div>
+                            </div>
+                        </div>
+                    ) : journeyData.length > 0 ? (
+                        <div>
+                            <TripCover
+                                journeyData={journeyData}
+                                photoClusters={photoClusters}
+                                albumTitle={collectionTitle}
+                            />
+
+                            {/* Show either loading spinner or trip started section + timeline */}
+                            {isLoadingLocations ? (
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        padding: "60px 20px",
+                                        minHeight: "200px",
+                                    }}
+                                >
+                                    <div
+                                        style={{
+                                            animation:
+                                                "spin 1s linear infinite",
+                                            borderRadius: "50%",
+                                            height: "40px",
+                                            width: "40px",
+                                            borderTop: "3px solid #10b981",
+                                            borderRight:
+                                                "3px solid transparent",
+                                            borderBottom: "3px solid #10b981",
+                                            borderLeft: "3px solid transparent",
+                                        }}
+                                    ></div>
+                                </div>
+                            ) : (
+                                <>
+                                    <TripStartedSection
+                                        journeyData={journeyData}
+                                    />
+
+                                    {/* Timeline */}
+                                    <div
+                                        style={{ position: "relative" }}
+                                        id="timeline-container"
                                     >
-                                        <div
-                                            style={{
-                                                animation:
-                                                    "spin 1s linear infinite",
-                                                borderRadius: "50%",
-                                                height: "40px",
-                                                width: "40px",
-                                                borderTop: "3px solid #10b981",
-                                                borderRight:
-                                                    "3px solid transparent",
-                                                borderBottom:
-                                                    "3px solid #10b981",
-                                                borderLeft:
-                                                    "3px solid transparent",
-                                            }}
-                                        ></div>
-                                    </div>
-                                ) : (
-                                    <>
-                                        <TripStartedSection
-                                            journeyData={journeyData}
+                                        <TimelineBaseLine
+                                            locationPositions={
+                                                locationPositions
+                                            }
                                         />
 
-                                        {/* Timeline */}
-                                        <div
-                                            style={{ position: "relative" }}
-                                            id="timeline-container"
-                                        >
-                                            <TimelineBaseLine
-                                                locationPositions={
-                                                    locationPositions
-                                                }
-                                            />
+                                        <TimelineProgressLine
+                                            locationPositions={
+                                                locationPositions
+                                            }
+                                            scrollProgress={scrollProgress}
+                                            hasUserScrolled={hasUserScrolled}
+                                            photoClusters={photoClusters}
+                                        />
 
-                                            <TimelineProgressLine
-                                                locationPositions={
-                                                    locationPositions
-                                                }
-                                                scrollProgress={scrollProgress}
-                                                hasUserScrolled={
-                                                    hasUserScrolled
-                                                }
+                                        {photoClusters.map((cluster, index) => (
+                                            <TimelineLocation
+                                                key={index}
+                                                cluster={cluster}
+                                                index={index}
                                                 photoClusters={photoClusters}
+                                                scrollProgress={scrollProgress}
+                                                journeyData={journeyData}
+                                                onRef={(el) => {
+                                                    locationRefs.current[
+                                                        index
+                                                    ] = el;
+                                                }}
+                                                onPhotoClick={
+                                                    handleOpenFileViewer
+                                                }
                                             />
+                                        ))}
 
-                                            {photoClusters.map(
-                                                (cluster, index) => (
-                                                    <TimelineLocation
-                                                        key={index}
-                                                        cluster={cluster}
-                                                        index={index}
-                                                        photoClusters={
-                                                            photoClusters
-                                                        }
-                                                        scrollProgress={
-                                                            scrollProgress
-                                                        }
-                                                        journeyData={
-                                                            journeyData
-                                                        }
-                                                        onRef={(el) => {
-                                                            locationRefs.current[
-                                                                index
-                                                            ] = el;
-                                                        }}
-                                                        onPhotoClick={
-                                                            handleOpenFileViewer
-                                                        }
-                                                    />
-                                                ),
-                                            )}
-
-                                            {/* Bottom padding for scrolling */}
-                                            <div
-                                                style={{ marginBottom: "24px" }}
-                                            ></div>
-                                        </div>
-                                    </>
-                                )}
-                            </div>
-                        ) : (
-                            <div style={{ textAlign: "center" }}>
-                                <p style={{ color: "#4b5563" }}>
-                                    No photos with location data found.
-                                </p>
-                            </div>
+                                        {/* Bottom padding for scrolling */}
+                                        <div
+                                            style={{ marginBottom: "24px" }}
+                                        ></div>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    ) : (
+                        <div style={{ textAlign: "center" }}>
+                            <p style={{ color: "#4b5563" }}>
+                                No photos with location data found.
+                            </p>
+                        </div>
                     )}
                 </div>
             </div>
@@ -2201,10 +2299,11 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
                             // Check if this super-cluster has been reached
                             const firstClusterIndex =
                                 superCluster.clustersInvolved[0];
-                            const isReached = firstClusterIndex !== undefined &&
+                            const isReached =
+                                firstClusterIndex !== undefined &&
                                 scrollProgress >=
-                                firstClusterIndex /
-                                    Math.max(1, photoClusters.length - 1);
+                                    firstClusterIndex /
+                                        Math.max(1, photoClusters.length - 1);
 
                             return (
                                 <Marker
@@ -2216,7 +2315,7 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
                                     icon={createSuperClusterIcon(
                                         mostRecentPhotos[0]?.image || "", // Use most recent photo for display
                                         superCluster.clusterCount,
-                                        45,
+                                        55,
                                         isReached,
                                     )}
                                     eventHandlers={{
@@ -2271,7 +2370,7 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
                                     position={[avgLat, avgLng]}
                                     icon={createIcon(
                                         firstPhoto.image,
-                                        45,
+                                        55,
                                         "#ffffff",
                                         cluster.length,
                                         isReached,

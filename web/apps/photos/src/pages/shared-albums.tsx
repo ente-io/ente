@@ -470,48 +470,73 @@ export default function PublicCollectionGallery() {
             disabled={shouldDisableDropzone}
             onDrop={setDragAndDropFiles}
         >
-            <NavbarBase
-                sx={{
-                    mb: "16px",
-                    px: "24px",
-                    "@media (width < 720px)": { px: "4px" },
-                }}
-            >
-                {selected.count > 0 ? (
-                    <SelectedFileOptions
-                        count={selected.count}
-                        clearSelection={clearSelection}
-                        downloadFilesHelper={downloadFilesHelper}
-                    />
-                ) : (
-                    <SpacedRow sx={{ flex: 1 }}>
-                        <EnteLogoLink href="https://ente.io">
-                            <EnteLogo height={15} />
-                        </EnteLogoLink>
-                        {onAddPhotos ? (
-                            <AddPhotosButton onClick={onAddPhotos} />
-                        ) : (
-                            <GoToEnte />
-                        )}
-                    </SpacedRow>
-                )}
-            </NavbarBase>
             {isTripsTemplate ? (
-                <TripMapViewer files={publicFiles} collection={publicCollection} />
+                <>
+                    <NavbarBase
+                        sx={{
+                            mb: "16px",
+                            px: "24px",
+                            "@media (width < 720px)": { px: "4px" },
+                        }}
+                    >
+                        <SpacedRow sx={{ flex: 1 }}>
+                            <EnteLogoLink href="https://ente.io">
+                                <EnteLogo height={15} />
+                            </EnteLogoLink>
+                            {onAddPhotos ? (
+                                <AddPhotosButton onClick={onAddPhotos} />
+                            ) : (
+                                <GoToEnte />
+                            )}
+                        </SpacedRow>
+                    </NavbarBase>
+                    <TripMapViewer
+                        files={publicFiles}
+                        collection={publicCollection}
+                    />
+                </>
             ) : (
-                <FileListWithViewer
-                    files={publicFiles}
-                    header={fileListHeader}
-                    footer={fileListFooter}
-                    enableDownload={downloadEnabled}
-                    enableSelect={downloadEnabled}
-                    selected={selected}
-                    setSelected={setSelected}
-                    activeCollectionID={PseudoCollectionID.all}
-                    onRemotePull={publicAlbumsRemotePull}
-                    onVisualFeedback={handleVisualFeedback}
-                    onAddSaveGroup={onAddSaveGroup}
-                />
+                <>
+                    <NavbarBase
+                        sx={{
+                            mb: "16px",
+                            px: "24px",
+                            "@media (width < 720px)": { px: "4px" },
+                        }}
+                    >
+                        {selected.count > 0 ? (
+                            <SelectedFileOptions
+                                count={selected.count}
+                                clearSelection={clearSelection}
+                                downloadFilesHelper={downloadFilesHelper}
+                            />
+                        ) : (
+                            <SpacedRow sx={{ flex: 1 }}>
+                                <EnteLogoLink href="https://ente.io">
+                                    <EnteLogo height={15} />
+                                </EnteLogoLink>
+                                {onAddPhotos ? (
+                                    <AddPhotosButton onClick={onAddPhotos} />
+                                ) : (
+                                    <GoToEnte />
+                                )}
+                            </SpacedRow>
+                        )}
+                    </NavbarBase>
+                    <FileListWithViewer
+                        files={publicFiles}
+                        header={fileListHeader}
+                        footer={fileListFooter}
+                        enableDownload={downloadEnabled}
+                        enableSelect={downloadEnabled}
+                        selected={selected}
+                        setSelected={setSelected}
+                        activeCollectionID={PseudoCollectionID.all}
+                        onRemotePull={publicAlbumsRemotePull}
+                        onVisualFeedback={handleVisualFeedback}
+                        onAddSaveGroup={onAddSaveGroup}
+                    />
+                </>
             )}
             {blockingLoad && <TranslucentLoadingOverlay />}
             <Upload
