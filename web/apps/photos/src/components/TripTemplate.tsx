@@ -1,3 +1,4 @@
+import { EnteLogo } from "ente-base/components/EnteLogo";
 import { FileViewer } from "ente-gallery/components/viewer/FileViewer";
 import { downloadManager } from "ente-gallery/services/download";
 import { type Collection } from "ente-media/collection";
@@ -210,7 +211,7 @@ const TripCover = memo(
         });
 
         return (
-            <div style={{ marginBottom: "96px" }}>
+            <div style={{ marginBottom: "48px" }}>
                 <div
                     style={{
                         aspectRatio: "16/8",
@@ -230,14 +231,24 @@ const TripCover = memo(
                     <div
                         style={{
                             position: "absolute",
-                            bottom: 0,
-                            left: 0,
-                            right: 0,
-                            height: "128px",
+                            inset: 0,
                             background:
-                                "linear-gradient(to top, black, transparent)",
+                                "linear-gradient(to bottom, rgba(0,0,0,0.4), transparent 30%, transparent 70%, rgba(0,0,0,0.7))",
                         }}
                     ></div>
+
+                    {/* Ente logo */}
+                    <div
+                        style={{
+                            position: "absolute",
+                            top: "20px",
+                            left: "20px",
+                            color: "#22c55e",
+                        }}
+                    >
+                        <EnteLogo height={24} />
+                    </div>
+
                     <div
                         style={{
                             position: "absolute",
@@ -255,7 +266,7 @@ const TripCover = memo(
                                 marginBottom: "2px",
                             }}
                         >
-                            {albumTitle || "Trip Journey"}
+                            {albumTitle || "Trip"}
                         </h1>
                         <p
                             style={{
@@ -293,8 +304,8 @@ const TripStartedSection = memo(
             <div
                 style={{
                     position: "relative",
-                    marginTop: "64px",
-                    marginBottom: "200px",
+                    marginTop: "32px",
+                    marginBottom: "100px",
                     textAlign: "center",
                     zIndex: 1,
                 }}
@@ -437,11 +448,11 @@ const TimelineBaseLine = memo(
                         transform: "translateX(-1.5px)",
                         width: "3px",
                         backgroundImage:
-                            "linear-gradient(to bottom, #d1d5db 55%, transparent 55%)",
+                            "linear-gradient(to bottom, #d1d5db 58%, transparent 58%)",
                         backgroundSize: "100% 22px",
                         backgroundRepeat: "repeat-y",
-                        top: "-158px",
-                        height: `${firstLocationCenter + 158}px`,
+                        top: "-60px",
+                        height: `${firstLocationCenter + 60}px`,
                         zIndex: 0,
                     }}
                 />
@@ -916,7 +927,7 @@ const TimelineLocation = memo(
     },
 );
 
-interface TripMapViewerProps {
+interface TripTemplateProps {
     files: EnteFile[];
     collection?: Collection;
     albumTitle?: string;
@@ -925,9 +936,10 @@ interface TripMapViewerProps {
     enableDownload?: boolean;
     onSetOpenFileViewer?: (open: boolean) => void;
     onRemotePull?: () => Promise<void>;
+    onAddPhotos?: () => void; // Callback for add photos button
 }
 
-export const TripMapViewer: React.FC<TripMapViewerProps> = ({
+export const TripTemplate: React.FC<TripTemplateProps> = ({
     files,
     collection,
     albumTitle,
@@ -935,9 +947,10 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
     enableDownload,
     onSetOpenFileViewer,
     onRemotePull,
+    onAddPhotos,
 }) => {
     // Extract collection info if available
-    const collectionTitle = collection?.name || albumTitle || "Trip Journey";
+    const collectionTitle = collection?.name || albumTitle || "Trip";
     // Add CSS animation for spinner
     useEffect(() => {
         if (typeof document !== "undefined") {
@@ -2060,6 +2073,112 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
 
     return (
         <div style={{ position: "relative", width: "100%", height: "100%" }}>
+            {/* Top right buttons - Fixed to viewport */}
+            <div
+                style={{
+                    position: "fixed",
+                    top: "20px",
+                    right: "20px",
+                    display: "flex",
+                    gap: "8px",
+                    zIndex: 2000,
+                }}
+            >
+                {onAddPhotos && (
+                    <button
+                        onClick={onAddPhotos}
+                        style={{
+                            padding: "8px 16px",
+                            backgroundColor: "rgba(255, 255, 255, 0.9)",
+                            border: "none",
+                            borderRadius: "8px",
+                            fontSize: "14px",
+                            fontWeight: "500",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "6px",
+                            color: "#1f2937",
+                            transition: "background-color 0.2s",
+                            backdropFilter: "blur(10px)",
+                            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor =
+                                "rgba(255, 255, 255, 1)";
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor =
+                                "rgba(255, 255, 255, 0.9)";
+                        }}
+                    >
+                        <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        >
+                            <rect x="3" y="3" width="18" height="18" rx="2" />
+                            <circle cx="8.5" cy="8.5" r="1.5" />
+                            <path d="m21 15-5-5L5 21" />
+                        </svg>
+                        Add photos
+                    </button>
+                )}
+                <button
+                    onClick={() => {
+                        if (typeof window !== "undefined") {
+                            void navigator.clipboard.writeText(
+                                window.location.href,
+                            );
+                        }
+                    }}
+                    style={{
+                        padding: "8px 16px",
+                        backgroundColor: "rgba(255, 255, 255, 0.9)",
+                        border: "none",
+                        borderRadius: "8px",
+                        fontSize: "14px",
+                        fontWeight: "500",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        color: "#1f2937",
+                        transition: "background-color 0.2s",
+                        backdropFilter: "blur(10px)",
+                        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor =
+                            "rgba(255, 255, 255, 1)";
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor =
+                            "rgba(255, 255, 255, 0.9)";
+                    }}
+                >
+                    <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    >
+                        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+                        <polyline points="16 6 12 2 8 6" />
+                        <line x1="12" y1="2" x2="12" y2="15" />
+                    </svg>
+                    Share
+                </button>
+            </div>
             {/* Left Sidebar - Floating Timeline */}
             <div
                 ref={timelineRef}
@@ -2419,32 +2538,9 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
                 user={user}
                 disableDownload={!enableDownload}
                 onTriggerRemotePull={handleTriggerRemotePull}
-                // Add minimal required props - can be extended based on needs
-                isInIncomingSharedCollection={false}
-                isInHiddenSection={false}
-                fileNormalCollectionIDs={new Map()}
-                collectionNameByID={new Map()}
-                favoriteFileIDs={new Set<number>()}
-                pendingFavoriteUpdates={new Set<number>()}
-                pendingVisibilityUpdates={new Set<number>()}
                 onRemoteFilesPull={handleTriggerRemotePull}
                 onVisualFeedback={() => {
-                    /* no-op */
-                }}
-                onToggleFavorite={() => Promise.resolve()}
-                onFileVisibilityUpdate={() => Promise.resolve()}
-                onSelectCollection={() => {
-                    /* no-op */
-                }}
-                onSelectPerson={() => {
-                    /* no-op */
-                }}
-                onDownload={() => {
-                    /* no-op */
-                }}
-                onDelete={() => Promise.resolve()}
-                onSaveEditedImageCopy={() => {
-                    /* no-op */
+                    // No-op: Trip viewer is read-only and doesn't need visual feedback
                 }}
             />
         </div>

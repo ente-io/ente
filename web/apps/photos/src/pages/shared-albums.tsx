@@ -17,7 +17,7 @@ import Typography from "@mui/material/Typography";
 import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
 import { type FileListHeaderOrFooter } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
-import { TripMapViewer } from "components/TripMapViewer";
+import { TripTemplate } from "components/TripTemplate";
 import { Upload } from "components/Upload";
 import {
     AccountsPageContents,
@@ -471,30 +471,11 @@ export default function PublicCollectionGallery() {
             onDrop={setDragAndDropFiles}
         >
             {isTripsTemplate ? (
-                <>
-                    <NavbarBase
-                        sx={{
-                            mb: "16px",
-                            px: "24px",
-                            "@media (width < 720px)": { px: "4px" },
-                        }}
-                    >
-                        <SpacedRow sx={{ flex: 1 }}>
-                            <EnteLogoLink href="https://ente.io">
-                                <EnteLogo height={15} />
-                            </EnteLogoLink>
-                            {onAddPhotos ? (
-                                <AddPhotosButton onClick={onAddPhotos} />
-                            ) : (
-                                <GoToEnte />
-                            )}
-                        </SpacedRow>
-                    </NavbarBase>
-                    <TripMapViewer
-                        files={publicFiles}
-                        collection={publicCollection}
-                    />
-                </>
+                <TripTemplate
+                    files={publicFiles}
+                    collection={publicCollection}
+                    onAddPhotos={onAddPhotos}
+                />
             ) : (
                 <>
                     <NavbarBase
