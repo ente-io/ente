@@ -1,5 +1,5 @@
-import { downloadManager } from "ente-gallery/services/download";
 import { FileViewer } from "ente-gallery/components/viewer/FileViewer";
+import { downloadManager } from "ente-gallery/services/download";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
@@ -356,8 +356,8 @@ const TimelineBaseLine = ({
                     transform: "translateX(-1.5px)",
                     width: "3px",
                     backgroundImage:
-                        "linear-gradient(to bottom, #d1d5db 70%, transparent 70%)",
-                    backgroundSize: "100% 24px",
+                        "linear-gradient(to bottom, #d1d5db 55%, transparent 55%)",
+                    backgroundSize: "100% 22px",
                     backgroundRepeat: "repeat-y",
                     top: "-158px",
                     height: `${firstLocationCenter + 158}px`,
@@ -381,10 +381,10 @@ const TimelineBaseLine = ({
 };
 
 // Component for photo fan display
-const PhotoFan = ({ 
-    cluster, 
-    onPhotoClick 
-}: { 
+const PhotoFan = ({
+    cluster,
+    onPhotoClick,
+}: {
     cluster: JourneyPoint[];
     onPhotoClick?: (cluster: JourneyPoint[], fileId: number) => void;
 }) => {
@@ -394,7 +394,9 @@ const PhotoFan = ({
         <div style={{ position: "relative", width: "180px", height: "240px" }}>
             {cluster.length === 2 && cluster[1] && (
                 <div
-                    onClick={() => cluster[1] && onPhotoClick?.(cluster, cluster[1].fileId)}
+                    onClick={() =>
+                        cluster[1] && onPhotoClick?.(cluster, cluster[1].fileId)
+                    }
                     style={{
                         position: "absolute",
                         border: "2px solid white",
@@ -434,7 +436,10 @@ const PhotoFan = ({
                 <>
                     {cluster[1] && (
                         <div
-                            onClick={() => cluster[1] && onPhotoClick?.(cluster, cluster[1].fileId)}
+                            onClick={() =>
+                                cluster[1] &&
+                                onPhotoClick?.(cluster, cluster[1].fileId)
+                            }
                             style={{
                                 position: "absolute",
                                 border: "2px solid white",
@@ -471,7 +476,10 @@ const PhotoFan = ({
                     )}
                     {cluster[2] && (
                         <div
-                            onClick={() => cluster[2] && onPhotoClick?.(cluster, cluster[2].fileId)}
+                            onClick={() =>
+                                cluster[2] &&
+                                onPhotoClick?.(cluster, cluster[2].fileId)
+                            }
                             style={{
                                 position: "absolute",
                                 border: "2px solid white",
@@ -511,7 +519,9 @@ const PhotoFan = ({
 
             {cluster[0] && (
                 <div
-                    onClick={() => cluster[0] && onPhotoClick?.(cluster, cluster[0].fileId)}
+                    onClick={() =>
+                        cluster[0] && onPhotoClick?.(cluster, cluster[0].fileId)
+                    }
                     style={{
                         position: "relative",
                         width: "100%",
@@ -717,7 +727,10 @@ const TimelineLocation = ({
                             paddingLeft: cluster.length >= 3 ? "72px" : "40px",
                         }}
                     >
-                        <PhotoFan cluster={cluster} onPhotoClick={onPhotoClick} />
+                        <PhotoFan
+                            cluster={cluster}
+                            onPhotoClick={onPhotoClick}
+                        />
                     </div>
                 </>
             ) : (
@@ -730,7 +743,10 @@ const TimelineLocation = ({
                             paddingRight: cluster.length >= 3 ? "72px" : "40px",
                         }}
                     >
-                        <PhotoFan cluster={cluster} onPhotoClick={onPhotoClick} />
+                        <PhotoFan
+                            cluster={cluster}
+                            onPhotoClick={onPhotoClick}
+                        />
                     </div>
                     <div
                         style={{
@@ -887,27 +903,29 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
     }, []);
 
     // FileViewer handlers
-    const handleOpenFileViewer = useCallback((cluster: JourneyPoint[], clickedFileId: number) => {
-        // Get the EnteFile objects for all photos in this cluster
-        const clusterFileIds = cluster.map(point => point.fileId);
-        const clusterFiles = files.filter(file => clusterFileIds.includes(file.id));
-        
-        // Sort cluster files by creation time (same as cluster photos)
-        clusterFiles.sort((a, b) => 
-            new Date(a.metadata.creationTime / 1000).getTime() - 
-            new Date(b.metadata.creationTime / 1000).getTime()
-        );
-        
-        // Find the index of the clicked photo in the cluster
-        const clickedIndex = clusterFiles.findIndex(f => f.id === clickedFileId);
-        
-        if (clickedIndex !== -1 && clusterFiles.length > 0) {
-            setViewerFiles(clusterFiles);
-            setCurrentFileIndex(clickedIndex);
-            setOpenFileViewer(true);
-            onSetOpenFileViewer?.(true);
-        }
-    }, [files, onSetOpenFileViewer]);
+    const handleOpenFileViewer = useCallback(
+        (_cluster: JourneyPoint[], clickedFileId: number) => {
+            // Sort all files by creation time
+            const sortedFiles = [...files].sort(
+                (a, b) =>
+                    new Date(a.metadata.creationTime / 1000).getTime() -
+                    new Date(b.metadata.creationTime / 1000).getTime(),
+            );
+
+            // Find the index of the clicked photo in all files
+            const clickedIndex = sortedFiles.findIndex(
+                (f) => f.id === clickedFileId,
+            );
+
+            if (clickedIndex !== -1 && sortedFiles.length > 0) {
+                setViewerFiles(sortedFiles);
+                setCurrentFileIndex(clickedIndex);
+                setOpenFileViewer(true);
+                onSetOpenFileViewer?.(true);
+            }
+        },
+        [files, onSetOpenFileViewer],
+    );
 
     const handleCloseFileViewer = useCallback(() => {
         setOpenFileViewer(false);
@@ -918,7 +936,7 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
         return onRemotePull?.() || Promise.resolve();
     }, [onRemotePull]);
 
-    // Geographic clustering with responsive distance thresholds
+    // Geographic clustering with responsive distance thresholds and day separation
     const clusterPhotosByProximity = (photos: JourneyPoint[]) => {
         if (photos.length === 0) return [];
 
@@ -933,33 +951,49 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
         // Desktop: 10km clustering distance (roughly 0.1 degrees)
         const distanceThreshold = 0.1; // About 10km in degrees
 
-        const clusters: JourneyPoint[][] = [];
-        const visited = new Set<number>();
-
-        photos.forEach((photo, i) => {
-            if (visited.has(i)) return;
-
-            const cluster = [photo];
-            visited.add(i);
-
-            photos.forEach((otherPhoto, j) => {
-                if (i === j || visited.has(j)) return;
-
-                const distance = Math.sqrt(
-                    Math.pow(photo.lat - otherPhoto.lat, 2) +
-                        Math.pow(photo.lng - otherPhoto.lng, 2),
-                );
-
-                if (distance < distanceThreshold) {
-                    cluster.push(otherPhoto);
-                    visited.add(j);
-                }
-            });
-
-            clusters.push(cluster);
+        // First, group photos by day
+        const photosByDay = new Map<string, JourneyPoint[]>();
+        photos.forEach((photo) => {
+            const date = new Date(photo.timestamp);
+            const dayKey = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+            
+            if (!photosByDay.has(dayKey)) {
+                photosByDay.set(dayKey, []);
+            }
+            photosByDay.get(dayKey)!.push(photo);
         });
 
-        return clusters;
+        // Then cluster within each day
+        const allClusters: JourneyPoint[][] = [];
+        
+        photosByDay.forEach((dayPhotos) => {
+            const visited = new Set<number>();
+            
+            dayPhotos.forEach((photo, i) => {
+                if (visited.has(i)) return;
+
+                const cluster = [photo];
+                visited.add(i);
+
+                dayPhotos.forEach((otherPhoto, j) => {
+                    if (i === j || visited.has(j)) return;
+
+                    const distance = Math.sqrt(
+                        Math.pow(photo.lat - otherPhoto.lat, 2) +
+                            Math.pow(photo.lng - otherPhoto.lng, 2),
+                    );
+
+                    if (distance < distanceThreshold) {
+                        cluster.push(otherPhoto);
+                        visited.add(j);
+                    }
+                });
+
+                allClusters.push(cluster);
+            });
+        });
+
+        return allClusters;
     };
 
     const photoClusters = useMemo(() => {
@@ -1608,8 +1642,8 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
                     const nextCluster = clusterCenters[nextClusterIndex];
 
                     if (!currentCluster || !nextCluster) {
-                        targetLat = clusterCenters[0]?.lat || 28;
-                        targetLng = clusterCenters[0]?.lng || 77;
+                        targetLat = clusterCenters[0]?.lat || 0;
+                        targetLng = clusterCenters[0]?.lng || 0;
                     } else {
                         // Linear interpolation between clusters
                         targetLat =
@@ -1748,16 +1782,14 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
     const getMapCenter = (): [number, number] => {
         // If no clusters yet, check journey data
         if (photoClusters.length === 0) {
-            if (journeyData.length === 0) return [28, 77]; // Default to India center
-
             const firstPoint = journeyData[0];
-            if (!firstPoint) return [28, 77];
+            if (!firstPoint) return [0, 0]; // Fallback, but map won't render anyway
             return [firstPoint.lat, firstPoint.lng];
         }
 
         // Start at first cluster center to match the timeline starting position
         const firstCluster = photoClusters[0];
-        if (!firstCluster || firstCluster.length === 0) return [28, 77];
+        if (!firstCluster || firstCluster.length === 0) return [0, 0]; // Fallback, but map won't render anyway
 
         const firstLat =
             firstCluster.reduce((sum, p) => sum + p.lat, 0) /
@@ -1794,32 +1826,14 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
         return [firstLat, adjustedLng];
     };
 
-    // Wait until we have photo clusters and optimal zoom calculated before rendering the map
-    // This prevents the sudden shift on first map load
-    if (!isClient || photoClusters.length === 0 || !journeyData.length) {
-        return (
-            <div
-                style={{
-                    width: "100%",
-                    height: "100%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    backgroundColor: "#f3f4f6",
-                }}
-            >
-                <div
-                    style={{
-                        animation: "spin 1s linear infinite",
-                        borderRadius: "50%",
-                        height: "48px",
-                        width: "48px",
-                        borderBottom: "2px solid #3b82f6",
-                    }}
-                ></div>
-            </div>
-        );
+    // Only wait for client-side rendering (needed for maps), but show layout immediately
+    // Let individual components handle their own loading states
+    if (!isClient) {
+        return null; // SSR compatibility
     }
+
+    // Show black background if no photo data yet
+    const hasPhotoData = journeyData.length > 0;
 
     return (
         <div style={{ position: "relative", width: "100%", height: "100%" }}>
@@ -1946,7 +1960,9 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
                                                                 index
                                                             ] = el;
                                                         }}
-                                                        onPhotoClick={handleOpenFileViewer}
+                                                        onPhotoClick={
+                                                            handleOpenFileViewer
+                                                        }
                                                     />
                                                 ),
                                             )}
@@ -1971,301 +1987,327 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
             </div>
 
             {/* Map Container */}
-            <div style={{ width: "100%", height: "100%" }}>
-                <MapContainer
-                    center={getMapCenter()}
-                    zoom={optimalZoom}
-                    style={{ width: "100%", height: "100%" }}
-                    scrollWheelZoom={true}
-                    zoomControl={false}
-                >
-                    <MapEvents
-                        setMapRef={setMapRef}
-                        setCurrentZoom={setCurrentZoom}
-                        setTargetZoom={setTargetZoom}
-                    />
-                    {/* Stadia Alidade Satellite - includes both imagery and labels */}
-                    <TileLayer
-                        attribution='&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
-                        url="https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg"
-                        maxZoom={20}
-                    />
+            <div
+                style={{
+                    width: "100%",
+                    height: "100%",
+                    backgroundColor: hasPhotoData ? "transparent" : "#000000",
+                }}
+            >
+                {hasPhotoData ? (
+                    <MapContainer
+                        center={getMapCenter()}
+                        zoom={optimalZoom}
+                        style={{ width: "100%", height: "100%" }}
+                        scrollWheelZoom={true}
+                        zoomControl={false}
+                    >
+                        <MapEvents
+                            setMapRef={setMapRef}
+                            setCurrentZoom={setCurrentZoom}
+                            setTargetZoom={setTargetZoom}
+                        />
+                        {/* Stadia Alidade Satellite - includes both imagery and labels */}
+                        <TileLayer
+                            attribution='&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
+                            url="https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg"
+                            maxZoom={20}
+                        />
 
-                    {/* Draw super-clusters (clickable for zoom and gallery) */}
-                    {superClusters.map((superCluster, index) => {
-                        // Get all photos from all clusters involved in this supercluster
-                        const allPhotosInSuperCluster =
-                            superCluster.clustersInvolved.flatMap(
-                                (clusterIdx) => photoClusters[clusterIdx],
+                        {/* Draw super-clusters (clickable for zoom and gallery) */}
+                        {superClusters.map((superCluster, index) => {
+                            // Get all photos from all clusters involved in this supercluster
+                            const allPhotosInSuperCluster =
+                                superCluster.clustersInvolved.flatMap(
+                                    (clusterIdx) => photoClusters[clusterIdx],
+                                );
+
+                            // Find the most recent photo/place
+                            const mostRecentPhotos = [
+                                ...allPhotosInSuperCluster,
+                            ].sort(
+                                (a, b) =>
+                                    new Date(b.timestamp).getTime() -
+                                    new Date(a.timestamp).getTime(),
                             );
 
-                        // Find the most recent photo/place
-                        const mostRecentPhotos = [
-                            ...allPhotosInSuperCluster,
-                        ].sort(
-                            (a, b) =>
-                                new Date(b.timestamp).getTime() -
-                                new Date(a.timestamp).getTime(),
-                        );
+                            // Check if this super-cluster has been reached
+                            const firstClusterIndex =
+                                superCluster.clustersInvolved[0];
+                            const isReached =
+                                scrollProgress >=
+                                firstClusterIndex /
+                                    Math.max(1, photoClusters.length - 1);
 
-                        // Check if this super-cluster has been reached
-                        const firstClusterIndex =
-                            superCluster.clustersInvolved[0];
-                        const isReached =
-                            scrollProgress >=
-                            firstClusterIndex /
-                                Math.max(1, photoClusters.length - 1);
+                            return (
+                                <Marker
+                                    key={`super-cluster-${index}`}
+                                    position={[
+                                        superCluster.lat,
+                                        superCluster.lng,
+                                    ]}
+                                    icon={createSuperClusterIcon(
+                                        mostRecentPhotos[0].image, // Use most recent photo for display
+                                        superCluster.clusterCount,
+                                        45,
+                                        isReached,
+                                    )}
+                                    eventHandlers={{
+                                        click: () => {
+                                            const firstClusterIndex =
+                                                superCluster
+                                                    .clustersInvolved[0];
 
-                        return (
-                            <Marker
-                                key={`super-cluster-${index}`}
-                                position={[superCluster.lat, superCluster.lng]}
-                                icon={createSuperClusterIcon(
-                                    mostRecentPhotos[0].image, // Use most recent photo for display
-                                    superCluster.clusterCount,
-                                    45,
-                                    isReached,
-                                )}
-                                eventHandlers={{
-                                    click: () => {
-                                        const firstClusterIndex =
-                                            superCluster.clustersInvolved[0];
-
-                                        // Calculate target progress for immediate update
-                                        const targetProgress =
-                                            firstClusterIndex /
-                                            Math.max(
-                                                1,
-                                                photoClusters.length - 1,
-                                            );
-
-                                        // Clear any existing timeout
-                                        if (clusterClickTimeoutRef.current) {
-                                            clearTimeout(
-                                                clusterClickTimeoutRef.current,
-                                            );
-                                        }
-
-                                        // Block scroll handler during cluster click
-                                        isClusterClickScrollingRef.current = true;
-
-                                        // Immediately update scroll progress to show green state
-                                        setScrollProgress(targetProgress);
-
-                                        // Center super cluster in the visible area
-                                        // Use same logic as timeline scroll for consistent positioning
-                                        const allClusterLngs =
-                                            photoClusters.map(
-                                                (cluster) =>
-                                                    cluster.reduce(
-                                                        (sum, p) => sum + p.lng,
-                                                        0,
-                                                    ) / cluster.length,
-                                            );
-                                        const minLng = Math.min(
-                                            ...allClusterLngs,
-                                        );
-                                        const maxLng = Math.max(
-                                            ...allClusterLngs,
-                                        );
-                                        const lngSpan = maxLng - minLng;
-                                        const paddedSpan = Math.max(
-                                            lngSpan * 1.4,
-                                            0.1,
-                                        ); // Same as timeline scroll
-
-                                        const isMobile =
-                                            screenDimensions.width < 768;
-                                        const timelineSizeRatio = isMobile
-                                            ? 0.5
-                                            : 0.5;
-                                        const mapSizeRatio =
-                                            1 - timelineSizeRatio;
-                                        const screenWidthInDegrees =
-                                            paddedSpan / mapSizeRatio;
-                                        const shiftAmount =
-                                            screenWidthInDegrees *
-                                            (timelineSizeRatio / 2);
-                                        const offsetLng =
-                                            superCluster.lng - shiftAmount;
-                                        if (mapRef) {
-                                            mapRef.panTo(
-                                                [superCluster.lat, offsetLng],
-                                                {
-                                                    animate: true,
-                                                    duration: 1.0,
-                                                },
-                                            );
-                                        }
-
-                                        // Start timeline scrolling and set timeout to re-enable handler
-                                        setTimeout(() => {
-                                            scrollTimelineToLocation(
-                                                firstClusterIndex,
-                                            );
-                                        }, 50);
-
-                                        // Re-enable scroll handler after animation completes
-                                        clusterClickTimeoutRef.current =
-                                            setTimeout(() => {
-                                                isClusterClickScrollingRef.current = false;
-                                                clusterClickTimeoutRef.current =
-                                                    null;
-                                            }, 1500);
-                                    },
-                                }}
-                            />
-                        );
-                    })}
-
-                    {/* Draw visible regular clusters */}
-                    {visibleClusters.map((cluster, index) => {
-                        const firstPhoto = cluster[0];
-                        const avgLat =
-                            cluster.reduce((sum, p) => sum + p.lat, 0) /
-                            cluster.length;
-                        const avgLng =
-                            cluster.reduce((sum, p) => sum + p.lng, 0) /
-                            cluster.length;
-
-                        // Find the original cluster index
-                        const originalClusterIndex = photoClusters.findIndex(
-                            (originalCluster) =>
-                                originalCluster.length === cluster.length &&
-                                originalCluster[0].image === cluster[0].image,
-                        );
-                        // Check if this location has been reached based on progress
-                        const isReached =
-                            scrollProgress >=
-                            originalClusterIndex /
-                                Math.max(1, photoClusters.length - 1);
-
-                        return (
-                            <Marker
-                                key={`cluster-${index}`}
-                                position={[avgLat, avgLng]}
-                                icon={createIcon(
-                                    firstPhoto.image,
-                                    45,
-                                    "#ffffff",
-                                    cluster.length,
-                                    isReached,
-                                )}
-                                eventHandlers={{
-                                    click: () => {
-                                        // Calculate target progress for immediate update
-                                        const targetProgress =
-                                            originalClusterIndex /
-                                            Math.max(
-                                                1,
-                                                photoClusters.length - 1,
-                                            );
-
-                                        // Clear any existing timeout
-                                        if (clusterClickTimeoutRef.current) {
-                                            clearTimeout(
-                                                clusterClickTimeoutRef.current,
-                                            );
-                                        }
-
-                                        // Block scroll handler during cluster click
-                                        isClusterClickScrollingRef.current = true;
-
-                                        // Immediately update scroll progress to show green state
-                                        setScrollProgress(targetProgress);
-
-                                        // Get cluster center and pan map directly
-                                        const avgLat =
-                                            cluster.reduce(
-                                                (sum, p) => sum + p.lat,
-                                                0,
-                                            ) / cluster.length;
-                                        const avgLng =
-                                            cluster.reduce(
-                                                (sum, p) => sum + p.lng,
-                                                0,
-                                            ) / cluster.length;
-                                        // Use same logic as timeline scroll for consistent positioning
-                                        const allClusterLngs =
-                                            photoClusters.map(
-                                                (cluster) =>
-                                                    cluster.reduce(
-                                                        (sum, p) => sum + p.lng,
-                                                        0,
-                                                    ) / cluster.length,
-                                            );
-                                        const minLng = Math.min(
-                                            ...allClusterLngs,
-                                        );
-                                        const maxLng = Math.max(
-                                            ...allClusterLngs,
-                                        );
-                                        const lngSpan = maxLng - minLng;
-                                        const paddedSpan = Math.max(
-                                            lngSpan * 1.4,
-                                            0.1,
-                                        ); // Same as timeline scroll
-
-                                        const isMobile =
-                                            screenDimensions.width < 768;
-                                        const timelineSizeRatio = isMobile
-                                            ? 0.5
-                                            : 0.5;
-                                        const mapSizeRatio =
-                                            1 - timelineSizeRatio;
-                                        const screenWidthInDegrees =
-                                            paddedSpan / mapSizeRatio;
-                                        const shiftAmount =
-                                            screenWidthInDegrees *
-                                            (timelineSizeRatio / 2);
-                                        const offsetLng = avgLng - shiftAmount;
-
-                                        if (mapRef) {
-                                            if (
-                                                mapRef.getZoom() > optimalZoom
-                                            ) {
-                                                mapRef.flyTo(
-                                                    [avgLat, offsetLng],
-                                                    optimalZoom,
-                                                    {
-                                                        animate: true,
-                                                        duration: 1.2,
-                                                        easeLinearity: 0.25,
-                                                    },
+                                            // Calculate target progress for immediate update
+                                            const targetProgress =
+                                                firstClusterIndex /
+                                                Math.max(
+                                                    1,
+                                                    photoClusters.length - 1,
                                                 );
-                                            } else {
+
+                                            // Clear any existing timeout
+                                            if (
+                                                clusterClickTimeoutRef.current
+                                            ) {
+                                                clearTimeout(
+                                                    clusterClickTimeoutRef.current,
+                                                );
+                                            }
+
+                                            // Block scroll handler during cluster click
+                                            isClusterClickScrollingRef.current = true;
+
+                                            // Immediately update scroll progress to show green state
+                                            setScrollProgress(targetProgress);
+
+                                            // Center super cluster in the visible area
+                                            // Use same logic as timeline scroll for consistent positioning
+                                            const allClusterLngs =
+                                                photoClusters.map(
+                                                    (cluster) =>
+                                                        cluster.reduce(
+                                                            (sum, p) =>
+                                                                sum + p.lng,
+                                                            0,
+                                                        ) / cluster.length,
+                                                );
+                                            const minLng = Math.min(
+                                                ...allClusterLngs,
+                                            );
+                                            const maxLng = Math.max(
+                                                ...allClusterLngs,
+                                            );
+                                            const lngSpan = maxLng - minLng;
+                                            const paddedSpan = Math.max(
+                                                lngSpan * 1.4,
+                                                0.1,
+                                            ); // Same as timeline scroll
+
+                                            const isMobile =
+                                                screenDimensions.width < 768;
+                                            const timelineSizeRatio = isMobile
+                                                ? 0.5
+                                                : 0.5;
+                                            const mapSizeRatio =
+                                                1 - timelineSizeRatio;
+                                            const screenWidthInDegrees =
+                                                paddedSpan / mapSizeRatio;
+                                            const shiftAmount =
+                                                screenWidthInDegrees *
+                                                (timelineSizeRatio / 2);
+                                            const offsetLng =
+                                                superCluster.lng - shiftAmount;
+                                            if (mapRef) {
                                                 mapRef.panTo(
-                                                    [avgLat, offsetLng],
+                                                    [
+                                                        superCluster.lat,
+                                                        offsetLng,
+                                                    ],
                                                     {
                                                         animate: true,
                                                         duration: 1.0,
                                                     },
                                                 );
                                             }
-                                        }
 
-                                        // Start timeline scrolling and set timeout to re-enable handler
-                                        setTimeout(() => {
-                                            scrollTimelineToLocation(
-                                                originalClusterIndex,
-                                            );
-                                        }, 50);
-
-                                        // Re-enable scroll handler after animation completes
-                                        clusterClickTimeoutRef.current =
+                                            // Start timeline scrolling and set timeout to re-enable handler
                                             setTimeout(() => {
-                                                isClusterClickScrollingRef.current = false;
-                                                clusterClickTimeoutRef.current =
-                                                    null;
-                                            }, 1500);
-                                    },
-                                }}
-                            />
-                        );
-                    })}
-                </MapContainer>
+                                                scrollTimelineToLocation(
+                                                    firstClusterIndex,
+                                                );
+                                            }, 50);
+
+                                            // Re-enable scroll handler after animation completes
+                                            clusterClickTimeoutRef.current =
+                                                setTimeout(() => {
+                                                    isClusterClickScrollingRef.current = false;
+                                                    clusterClickTimeoutRef.current =
+                                                        null;
+                                                }, 1500);
+                                        },
+                                    }}
+                                />
+                            );
+                        })}
+
+                        {/* Draw visible regular clusters */}
+                        {visibleClusters.map((cluster, index) => {
+                            const firstPhoto = cluster[0];
+                            const avgLat =
+                                cluster.reduce((sum, p) => sum + p.lat, 0) /
+                                cluster.length;
+                            const avgLng =
+                                cluster.reduce((sum, p) => sum + p.lng, 0) /
+                                cluster.length;
+
+                            // Find the original cluster index
+                            const originalClusterIndex =
+                                photoClusters.findIndex(
+                                    (originalCluster) =>
+                                        originalCluster.length ===
+                                            cluster.length &&
+                                        originalCluster[0].image ===
+                                            cluster[0].image,
+                                );
+                            // Check if this location has been reached based on progress
+                            const isReached =
+                                scrollProgress >=
+                                originalClusterIndex /
+                                    Math.max(1, photoClusters.length - 1);
+
+                            return (
+                                <Marker
+                                    key={`cluster-${index}`}
+                                    position={[avgLat, avgLng]}
+                                    icon={createIcon(
+                                        firstPhoto.image,
+                                        45,
+                                        "#ffffff",
+                                        cluster.length,
+                                        isReached,
+                                    )}
+                                    eventHandlers={{
+                                        click: () => {
+                                            // Calculate target progress for immediate update
+                                            const targetProgress =
+                                                originalClusterIndex /
+                                                Math.max(
+                                                    1,
+                                                    photoClusters.length - 1,
+                                                );
+
+                                            // Clear any existing timeout
+                                            if (
+                                                clusterClickTimeoutRef.current
+                                            ) {
+                                                clearTimeout(
+                                                    clusterClickTimeoutRef.current,
+                                                );
+                                            }
+
+                                            // Block scroll handler during cluster click
+                                            isClusterClickScrollingRef.current = true;
+
+                                            // Immediately update scroll progress to show green state
+                                            setScrollProgress(targetProgress);
+
+                                            // Get cluster center and pan map directly
+                                            const avgLat =
+                                                cluster.reduce(
+                                                    (sum, p) => sum + p.lat,
+                                                    0,
+                                                ) / cluster.length;
+                                            const avgLng =
+                                                cluster.reduce(
+                                                    (sum, p) => sum + p.lng,
+                                                    0,
+                                                ) / cluster.length;
+                                            // Use same logic as timeline scroll for consistent positioning
+                                            const allClusterLngs =
+                                                photoClusters.map(
+                                                    (cluster) =>
+                                                        cluster.reduce(
+                                                            (sum, p) =>
+                                                                sum + p.lng,
+                                                            0,
+                                                        ) / cluster.length,
+                                                );
+                                            const minLng = Math.min(
+                                                ...allClusterLngs,
+                                            );
+                                            const maxLng = Math.max(
+                                                ...allClusterLngs,
+                                            );
+                                            const lngSpan = maxLng - minLng;
+                                            const paddedSpan = Math.max(
+                                                lngSpan * 1.4,
+                                                0.1,
+                                            ); // Same as timeline scroll
+
+                                            const isMobile =
+                                                screenDimensions.width < 768;
+                                            const timelineSizeRatio = isMobile
+                                                ? 0.5
+                                                : 0.5;
+                                            const mapSizeRatio =
+                                                1 - timelineSizeRatio;
+                                            const screenWidthInDegrees =
+                                                paddedSpan / mapSizeRatio;
+                                            const shiftAmount =
+                                                screenWidthInDegrees *
+                                                (timelineSizeRatio / 2);
+                                            const offsetLng =
+                                                avgLng - shiftAmount;
+
+                                            if (mapRef) {
+                                                if (
+                                                    mapRef.getZoom() >
+                                                    optimalZoom
+                                                ) {
+                                                    mapRef.flyTo(
+                                                        [avgLat, offsetLng],
+                                                        optimalZoom,
+                                                        {
+                                                            animate: true,
+                                                            duration: 1.2,
+                                                            easeLinearity: 0.25,
+                                                        },
+                                                    );
+                                                } else {
+                                                    mapRef.panTo(
+                                                        [avgLat, offsetLng],
+                                                        {
+                                                            animate: true,
+                                                            duration: 1.0,
+                                                        },
+                                                    );
+                                                }
+                                            }
+
+                                            // Start timeline scrolling and set timeout to re-enable handler
+                                            setTimeout(() => {
+                                                scrollTimelineToLocation(
+                                                    originalClusterIndex,
+                                                );
+                                            }, 50);
+
+                                            // Re-enable scroll handler after animation completes
+                                            clusterClickTimeoutRef.current =
+                                                setTimeout(() => {
+                                                    isClusterClickScrollingRef.current = false;
+                                                    clusterClickTimeoutRef.current =
+                                                        null;
+                                                }, 1500);
+                                        },
+                                    }}
+                                />
+                            );
+                        })}
+                    </MapContainer>
+                ) : null}
             </div>
-            
+
             {/* FileViewer for photo gallery */}
             <FileViewer
                 open={openFileViewer}
