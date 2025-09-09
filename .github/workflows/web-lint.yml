@@ -40,9 +40,8 @@ jobs:
 
             - name: Audit dependencies
               run: |
-                  yarn audit --level critical
-                  exit_code=$?
-                  if [ $exit_code -ge 16 ]; then
+                  yarn audit --level critical || exit_code=$?
+                  if [[ $exit_code -ge 16 ]]; then
                       echo "::error::Yarn audit found critical issues"
                       exit 1
                   fi
