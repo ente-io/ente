@@ -38,12 +38,11 @@ func NewFileLinkRepo(db *sql.DB) *FileLinkRepository {
 	}
 }
 
-func (pcr *FileLinkRepository) PhotoLink(token string) string {
-	return fmt.Sprintf("%s/?t=%s", pcr.photoHost, token)
-}
-
-func (pcr *FileLinkRepository) LockerFileLink(token string) string {
-	return fmt.Sprintf("%s/?t=%s", pcr.lockerHost, token)
+func (pcr *FileLinkRepository) FileLink(app ente.App, token string) string {
+	if app == ente.Locker {
+		return fmt.Sprintf("%s/file/?t=%s", pcr.lockerHost, token)
+	}
+	return fmt.Sprintf("%s/file/?t=%s", pcr.photoHost, token)
 }
 
 func (pcr *FileLinkRepository) Insert(

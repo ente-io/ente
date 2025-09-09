@@ -255,8 +255,49 @@ const parseDateComponents = (
 const parseChrono = (
     s: string,
     locale: string,
-): LabelledSearchDateComponents[] =>
-    chrono
+): LabelledSearchDateComponents[] => {
+    // Use the appropriate chrono parser based on locale
+    // For US locales, use the default parser (MM/DD/YYYY)
+    // For other locales, use the GB parser (DD/MM/YYYY)
+    const isUSLocale =
+        locale.toLowerCase().includes("en-us") || locale.toLowerCase() === "en";
+
+    // Select the appropriate chrono instance based on locale
+    let chronoInstance;
+    if (isUSLocale) {
+        // For US locale, use the default chrono parser (MM/DD/YYYY)
+        chronoInstance = chrono;
+    } else {
+        // For non-US locales, use GB parser (DD/MM/YYYY) and add DD.MM.YYYY support
+        chronoInstance = new chrono.Chrono(chrono.en.GB);
+
+        // Add parser for DD.MM.YYYY format (common in Germany, Switzerland, etc.)
+        // This format uses dots as separators instead of slashes
+        chronoInstance.parsers.push({
+            pattern: () => /\b(\d{1,2})\.(\d{1,2})\.(\d{2,4})\b/,
+            extract: (_context, match) => {
+                if (!match[1] || !match[2] || !match[3]) return null;
+
+                const day = parseInt(match[1]);
+                const month = parseInt(match[2]);
+                let year = parseInt(match[3]);
+
+                // Handle 2-digit years
+                if (year < 100) {
+                    year = year > 50 ? 1900 + year : 2000 + year;
+                }
+
+                // Validate the date
+                if (day < 1 || day > 31 || month < 1 || month > 12) {
+                    return null;
+                }
+
+                return { day, month, year };
+            },
+        });
+    }
+
+    return chronoInstance
         .parse(s)
         .map((result) => {
             const p = result.start;
@@ -287,6 +328,7 @@ const parseChrono = (
             return { components, label };
         })
         .filter((x) => x !== undefined);
+};
 
 /** chrono does not parse years like "2024", so do it manually. */
 const parseYearComponents = (s: string): LabelledSearchDateComponents[] => {
