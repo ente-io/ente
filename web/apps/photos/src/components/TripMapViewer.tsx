@@ -477,6 +477,7 @@ const PhotoFan = memo(
 
         return (
             <div
+                className="photo-fan-hover"
                 style={{
                     position: "relative",
                     width: "180px",
@@ -765,6 +766,7 @@ const TimelineLocation = memo(
                             style={{
                                 width: "50%",
                                 paddingRight: "32px",
+                                paddingTop: "58px",
                                 textAlign: "right",
                             }}
                         >
@@ -790,7 +792,7 @@ const TimelineLocation = memo(
                                     DAY {dayNumber} •{" "}
                                     {new Date(firstPhoto.timestamp)
                                         .toLocaleDateString("en-US", {
-                                            month: "short",
+                                            month: "long",
                                             day: "numeric",
                                         })
                                         .toUpperCase()}
@@ -852,6 +854,7 @@ const TimelineLocation = memo(
                             style={{
                                 width: "50%",
                                 paddingLeft: "32px",
+                                paddingTop: "58px",
                                 textAlign: "left",
                             }}
                         >
@@ -877,7 +880,7 @@ const TimelineLocation = memo(
                                     DAY {dayNumber} •{" "}
                                     {new Date(firstPhoto.timestamp)
                                         .toLocaleDateString("en-US", {
-                                            month: "short",
+                                            month: "long",
                                             day: "numeric",
                                         })
                                         .toUpperCase()}
@@ -947,6 +950,13 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
         @keyframes pulse {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.5; }
+        }
+        .photo-fan-hover {
+          transition: transform 0.3s ease-in-out;
+          cursor: pointer;
+        }
+        .photo-fan-hover:hover {
+          transform: scale(1.05);
         }
       `;
             document.head.appendChild(style);
@@ -1875,11 +1885,6 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
 
         timelineContainer.addEventListener("scroll", throttledTimelineScroll);
 
-        // Trigger initial scroll progress calculation after a brief delay to ensure layout is complete
-        setTimeout(() => {
-            handleTimelineScroll();
-        }, 50);
-
         return () => {
             timelineContainer.removeEventListener(
                 "scroll",
@@ -2069,7 +2074,7 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
                         "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
                     backgroundColor: "white",
                     zIndex: 1000,
-                    borderRadius: "32px",
+                    borderRadius: "48px",
                 }}
             >
                 <div style={{ padding: "32px" }}>
@@ -2116,7 +2121,7 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
                                             backgroundColor:
                                                 "rgba(255, 255, 255, 0.2)",
                                             borderRadius: "4px",
-                                            marginBottom: "8px",
+                                            marginBottom: "2px",
                                         }}
                                     ></div>
                                     <div
@@ -2126,6 +2131,7 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
                                             backgroundColor:
                                                 "rgba(255, 255, 255, 0.2)",
                                             borderRadius: "4px",
+                                            margin: "0",
                                         }}
                                     ></div>
                                 </div>
@@ -2165,11 +2171,13 @@ export const TripMapViewer: React.FC<TripMapViewerProps> = ({
                             {isLoadingLocations ? (
                                 <div
                                     style={{
+                                        position: "relative",
+                                        marginTop: "64px",
+                                        marginBottom: "200px",
+                                        textAlign: "center",
                                         display: "flex",
                                         justifyContent: "center",
                                         alignItems: "center",
-                                        padding: "60px 20px",
-                                        minHeight: "200px",
                                     }}
                                 >
                                     <div
