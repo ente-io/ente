@@ -221,8 +221,13 @@ func (m *CollectionLinkMiddleware) validateOrigin(c *gin.Context, ownerID int64)
 		m.DiscordController.NotifyPotentialAbuse(alertMessage + " - originParseFailed")
 		return nil
 	}
+	unicodeDomain, err := idna.ToUnicode(*domain)
+	if err != nil {
+		logger.WithError(err).Error("domainToUnicodeFailed")
+		m.DiscordController.NotifyPotentialAbuse(alertMessage + " - domainToUnicodeFailed")
+		return nil
+	}
 
-	unicodeDomain, _ := idna.ToUnicode(*domain)
 	if !strings.Contains(strings.ToLower(parse.Host), strings.ToLower(*domain)) && !strings.Contains(strings.ToLower(parse.Host), strings.ToLower(unicodeDomain)) {
 		logger.Warnf("domainMismatch: domain %s (unicode %s) vs originHost %s", *domain, unicodeDomain, parse.Host)
 		m.DiscordController.NotifyPotentialAbuse(alertMessage + " - domainMismatch")

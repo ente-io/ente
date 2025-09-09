@@ -144,7 +144,7 @@ func isValidDomainWithoutScheme(input string) error {
 	// Convert IDN to ASCII (Punycode) for validation
 	asciiDomain, err := idna.ToASCII(trimmed)
 	if err != nil {
-		return NewBadRequestWithMessage(fmt.Sprintf("invalid domain format: %s", trimmed))
+		return NewBadRequestWithMessage(fmt.Sprintf("invalid idn domain format: %s", trimmed))
 	}
 
 	// Validate the ASCII version
