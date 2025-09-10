@@ -348,7 +348,6 @@ flutter:
     - assets/image-editor/
     - assets/icons/
     - assets/launcher_icon/
-    - assets/ml/
   fonts:
     - family: Inter
       fonts:
