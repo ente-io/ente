@@ -177,6 +177,7 @@ dependencies:
       url: https://github.com/ente-io/privacy_screen.git
       ref: v2-only
   pro_image_editor: ^6.0.0
+  qr_flutter: ^4.1.0
   receive_sharing_intent: # pub.dev is behind
     git:
       url: https://github.com/KasemJaffer/receive_sharing_intent.git
