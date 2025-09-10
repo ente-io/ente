@@ -1035,6 +1035,8 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
     const isClusterClickScrollingRef = useRef(false); // Use ref for immediate updates
     const clusterClickTimeoutRef = useRef<NodeJS.Timeout | null>(null); // Timeout for cluster clicks
     const thumbnailsGeneratedRef = useRef(false); // Track if thumbnails have been generated
+    const locationDataRef = useRef<Map<number, { name: string; country: string }>>(new Map()); // Track location data to prevent resets
+    const filesCountRef = useRef<number>(0); // Track files count to detect real changes
 
     // FileViewer state
     const [openFileViewer, setOpenFileViewer] = useState(false);
@@ -1286,6 +1288,16 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
     useEffect(() => {
         setIsClient(true);
         
+        // Check if the files count has actually changed (not just array reference)
+        const hasFilesCountChanged = files.length !== filesCountRef.current;
+        filesCountRef.current = files.length;
+
+
+        // Only reload data if the count changed or this is the initial load
+        if (!hasFilesCountChanged && journeyData.length > 0) {
+            return;
+        }
+        
         // Reset thumbnail generation flag when files change
         thumbnailsGeneratedRef.current = false;
 
@@ -1297,6 +1309,8 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
                 return;
             }
 
+            // Use cached location data to preserve location names
+
             // Process each EnteFile (without thumbnails first)
             for (const file of files) {
                 try {
@@ -1305,11 +1319,17 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
                     const lng = file.metadata.longitude;
 
                     if (lat && lng) {
+                        // Check if we have cached location data for this file
+                        const cachedLocation = locationDataRef.current.get(file.id);
+                        const finalName = cachedLocation?.name || fileFileName(file);
+                        const finalCountry = cachedLocation?.country || "Unknown";
+                        
+                        
                         photoData.push({
                             lat: lat,
                             lng: lng,
-                            name: fileFileName(file), // Temporary name, will be updated after clustering
-                            country: "Unknown",
+                            name: finalName, // Use cached name if available, otherwise fallback to filename
+                            country: finalCountry,
                             timestamp: new Date(
                                 file.metadata.creationTime / 1000,
                             ).toISOString(),
@@ -1343,7 +1363,7 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
         };
 
         loadPhotosData();
-    }, [files]);
+    }, [files, journeyData.length]);
 
     // Load high quality cover image after initial data loads
     useEffect(() => {
@@ -1419,6 +1439,11 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
                             name: locationInfo.place,
                             country: locationInfo.country,
                         });
+                        // Also cache it in the ref for persistence
+                        locationDataRef.current.set(photo.fileId, {
+                            name: locationInfo.place,
+                            country: locationInfo.country,
+                        });
                     });
                 } catch {
                     // Silently ignore processing errors for individual files
@@ -1471,25 +1496,32 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
                 neededFileIds.has(file.id)
             );
 
-            // Generate thumbnails and update journey data
-            const updatedJourneyData = [...journeyData];
+            // Generate thumbnails and update journey data while preserving location names
+            const thumbnailUpdates = new Map<number, string>();
             
             for (const file of filesToProcess) {
                 try {
                     const thumbnailUrl = await downloadManager.renderableThumbnailURL(file);
-                    
-                    // Update all photos with this file ID
-                    updatedJourneyData.forEach(photo => {
-                        if (photo.fileId === file.id && !photo.image) {
-                            photo.image = thumbnailUrl || "";
-                        }
-                    });
+                    if (thumbnailUrl) {
+                        thumbnailUpdates.set(file.id, thumbnailUrl);
+                    }
                 } catch {
                     // Silently ignore thumbnail generation errors
                 }
             }
 
-            setJourneyData(updatedJourneyData);
+            // Update journey data by preserving all existing data and only updating images
+            if (thumbnailUpdates.size > 0) {
+                setJourneyData((prevData) =>
+                    prevData.map((photo) => {
+                        const thumbnailUrl = thumbnailUpdates.get(photo.fileId);
+                        if (thumbnailUrl && !photo.image) {
+                            return { ...photo, image: thumbnailUrl };
+                        }
+                        return photo;
+                    }),
+                );
+            }
             thumbnailsGeneratedRef.current = true;
         };
 
