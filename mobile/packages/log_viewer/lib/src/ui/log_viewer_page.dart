@@ -203,17 +203,17 @@ class _LogViewerPageState extends State<LogViewerPage> {
     _loadLogs();
   }
 
-  String _formatTimeRange(double hours) {
-    if (hours < 1) {
-      final minutes = (hours * 60).round();
-      return '${minutes}m';
-    } else if (hours < 24) {
-      return '${hours.round()}h';
-    } else {
-      final days = (hours / 24).round();
-      return '${days}d';
-    }
-  }
+  // String _formatTimeRange(double hours) {
+  //   if (hours < 1) {
+  //     final minutes = (hours * 60).round();
+  //     return '${minutes}m';
+  //   } else if (hours < 24) {
+  //     return '${hours.round()}h';
+  //   } else {
+  //     final days = (hours / 24).round();
+  //     return '${days}d';
+  //   }
+  // }
 
   Future<void> _showFilterDialog() async {
     final newFilter = await showDialog<LogFilter>(
@@ -265,7 +265,7 @@ class _LogViewerPageState extends State<LogViewerPage> {
     try {
       final logText = await _logStore.exportLogs(filter: _filter);
       
-      await Share.share(logText);
+      await Share.share(logText, subject: 'App Logs');
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

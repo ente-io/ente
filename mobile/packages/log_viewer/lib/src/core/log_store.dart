@@ -17,7 +17,7 @@ class LogStore {
   // Buffer for batch inserts - optimized for small entries
   final List<LogEntry> _buffer = [];
   Timer? _flushTimer;
-  static const int _bufferSize = 50; // Increased from 10 for better batching
+  static const int _bufferSize = 10; 
   static const int _maxBufferSize = 200; // Safety limit
 
   bool _initialized = false;
@@ -86,7 +86,7 @@ class LogStore {
     unawaited(_database.insertLogs(toInsert).catchError((e) {
       // ignore: avoid_print
       print('Failed to insert logs to database: $e');
-    }));
+    }),);
   }
 
   /// Get logs with filtering
@@ -170,6 +170,18 @@ class LogStore {
     return buffer.toString();
   }
 
+  /// Get time range of all logs
+  Future<TimeRange?> getTimeRange() async {
+    await _flush();
+    return _database.getTimeRange();
+  }
+
+  /// Get all log timestamps for timeline visualization
+  Future<List<DateTime>> getLogTimestamps() async {
+    await _flush();
+    return _database.getLogTimestamps();
+  }
+
   /// Export logs as JSON
   Future<String> exportLogsAsJson({LogFilter? filter}) async {
     final logs = await getLogs(filter: filter, limit: 10000);
@@ -200,16 +212,6 @@ class LogStore {
     buffer.writeln(']');
 
     return buffer.toString();
-  }
-
-  /// Get time range of all logs
-  Future<TimeRange?> getTimeRange() async {
-    return _database.getTimeRange();
-  }
-
-  /// Get all log timestamps for timeline visualization
-  Future<List<DateTime>> getLogTimestamps() async {
-    return _database.getLogTimestamps();
   }
 
   /// Dispose resources

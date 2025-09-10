@@ -9,14 +9,14 @@ class TimelineWidget extends StatefulWidget {
   final List<DateTime> logTimestamps;
 
   const TimelineWidget({
-    Key? key,
+    super.key,
     required this.startTime,
     required this.endTime,
     required this.currentStart,
     required this.currentEnd,
     required this.onTimeRangeChanged,
     this.logTimestamps = const [],
-  }) : super(key: key);
+  });
 
   @override
   State<TimelineWidget> createState() => _TimelineWidgetState();
@@ -109,7 +109,7 @@ class _TimelineWidgetState extends State<TimelineWidget> {
                       bottom: 20,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.surfaceVariant,
+                          color: theme.colorScheme.surfaceContainerHighest,
                           borderRadius: BorderRadius.circular(4),
                           border: Border.all(
                             color: theme.colorScheme.outline.withValues(alpha: 0.3),
