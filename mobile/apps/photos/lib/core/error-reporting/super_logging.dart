@@ -311,15 +311,16 @@ class SuperLogging {
     printLog(str);
 
     saveLogString(str, rec.error);
-
     // Hook for external log viewer (if available)
     // This allows the log_viewer package to capture logs without creating a dependency
+    if(_logViewerCallback != null) {
     try {
       if (_logViewerCallback != null) {
         _logViewerCallback!(rec, config.prefix);
       }
     } catch (_) {
       // Silently ignore any errors from the log viewer
+    }
     }
   }
 
