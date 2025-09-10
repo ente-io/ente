@@ -1,4 +1,4 @@
-import 'dart:async';
+  import 'dart:async';
 import 'dart:io';
 
 import "package:adaptive_theme/adaptive_theme.dart";
@@ -11,7 +11,6 @@ import "package:flutter/rendering.dart";
 import "package:flutter/services.dart";
 import "package:flutter_displaymode/flutter_displaymode.dart";
 import "package:intl/date_symbol_data_local.dart";
-import 'package:log_viewer/log_viewer.dart';
 import 'package:logging/logging.dart';
 import "package:media_kit/media_kit.dart";
 import "package:package_info_plus/package_info_plus.dart";
@@ -356,20 +355,6 @@ Future runWithLogs(Function() function, {String prefix = ""}) async {
       prefix: prefix,
     ),
   );
-  
-  // Initialize log viewer in debug mode only
-  if (kDebugMode) {
-    try {
-      await LogViewer.initialize();
-      
-      // Register LogViewer with SuperLogging to receive logs with process prefix
-      LogViewer.registerWithSuperLogging(SuperLogging.registerLogCallback);
-      
-      _logger.info("Log viewer initialized successfully");
-    } catch (e) {
-      _logger.warning("Failed to initialize log viewer: $e");
-    }
-  }
 }
 
 Future<void> _scheduleHeartBeat(
