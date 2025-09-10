@@ -1,1 +1,2 @@
+- Laurens: text embedding caching for memories and discover
 - Neeraj: Potential fix for ios in-app payment
