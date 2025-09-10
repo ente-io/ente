@@ -1452,25 +1452,31 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
   /// WARNING: don't confuse this with [getAllClipVectors]. If you're not sure, use [getAllClipVectors]
   Future<List<double>?> getRepeatedTextEmbeddingCache(String query) async {
     final db = await asyncDB;
-    final threeMonthsAgo = DateTime.now().millisecondsSinceEpoch -
-        (90 * 24 * 60 * 60 * 1000); // 90 days in milliseconds
-
     final results = await db.getAll(
-      'SELECT $embeddingColumn, $createdAtColumn FROM $textEmbeddingsCacheTable '
-      'WHERE $textQueryColumn = ? AND $mlVersionColumn = ? AND $createdAtColumn > ?',
-      [query, clipMlVersion, threeMonthsAgo],
+      'SELECT $embeddingColumn, $mlVersionColumn, $createdAtColumn '
+      'FROM $textEmbeddingsCacheTable '
+      'WHERE $textQueryColumn = ?',
+      [query],
     );
 
-    if (results.isNotEmpty) {
-      final blob = results.first[embeddingColumn] as Uint8List;
-      return Float32List.view(blob.buffer).toList();
-    } else {
-      // Clean up old/invalid entries if they exist
-      await db.execute(
-        'DELETE FROM $textEmbeddingsCacheTable WHERE $textQueryColumn = ?',
-        [query],
-      );
+    if (results.isEmpty) return null;
+
+    final threeMonthsAgo =
+        DateTime.now().millisecondsSinceEpoch - (90 * 24 * 60 * 60 * 1000);
+
+    // Find first valid entry
+    for (final result in results) {
+      if (result[mlVersionColumn] == clipMlVersion &&
+          result[createdAtColumn] as int > threeMonthsAgo) {
+        return Float32List.view((result[embeddingColumn] as Uint8List).buffer);
+      }
     }
+
+    // No valid entry found, clean up
+    await db.execute(
+      'DELETE FROM $textEmbeddingsCacheTable WHERE $textQueryColumn = ?',
+      [query],
+    );
     return null;
   }
 
