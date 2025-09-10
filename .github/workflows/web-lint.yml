@@ -24,6 +24,8 @@ jobs:
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
+              with:
+                  persist-credentials: false
 
             - name: Setup node and enable yarn caching
               uses: actions/setup-node@v4
@@ -32,6 +34,14 @@ jobs:
                   cache: "yarn"
                   cache-dependency-path: "web/yarn.lock"
 
-            - run: yarn install
+            - run: yarn install --frozen-lockfile
 
             - run: yarn lint
+
+            - name: Audit dependencies
+              run: |
+                  yarn audit --level critical || exit_code=$?
+                  if [[ $exit_code -ge 16 ]]; then
+                      echo "::error::Yarn audit found critical issues"
+                      exit 1
+                  fi

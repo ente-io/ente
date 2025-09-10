@@ -1512,6 +1512,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.11"
+  log_viewer:
+    dependency: "direct main"
+    description:
+      path: "../../packages/log_viewer"
+      relative: true
+    source: path
+    version: "1.0.0"
   logger:
     dependency: transitive
     description:
