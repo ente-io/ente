@@ -401,8 +401,8 @@ class MagicCacheService {
     for (Prompt prompt in magicPromptsData) {
       queryToScore[prompt.query] = prompt.minScore;
     }
-    final clipResults =
-        await SemanticSearchService.instance.getMatchingFileIDs(queryToScore);
+    final clipResults = await SemanticSearchService.instance
+        .getMatchingFileIDsForCommonQueries(queryToScore);
     for (Prompt prompt in magicPromptsData) {
       final List<int> fileUploadedIDs = clipResults[prompt.query] ?? [];
       if (fileUploadedIDs.isNotEmpty) {

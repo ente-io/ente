@@ -62,6 +62,7 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
     createClipEmbeddingsTable,
     createFileDataTable,
     createFaceCacheTable,
+    createTextEmbeddingsCacheTable,
   ];
 
   // only have a single app-wide reference to the database
@@ -1427,6 +1428,50 @@ class MLDataDB with SqlDbBase implements IMLDataDB<int> {
       }
     }
     Bus.instance.fire(EmbeddingUpdatedEvent());
+  }
+
+  /// WARNING: don't confuse this with [putClip]. If you're not sure, use [putClip]
+  Future<void> putRepeatedTextEmbeddingCache(
+    String query,
+    List<double> embedding,
+  ) async {
+    final db = await asyncDB;
+    await db.execute(
+      'INSERT OR REPLACE INTO $textEmbeddingsCacheTable '
+      '($textQueryColumn, $embeddingColumn, $mlVersionColumn, $createdAtColumn) '
+      'VALUES (?, ?, ?, ?)',
+      [
+        query,
+        Float32List.fromList(embedding).buffer.asUint8List(),
+        clipMlVersion,
+        DateTime.now().millisecondsSinceEpoch,
+      ],
+    );
+  }
+
+  /// WARNING: don't confuse this with [getAllClipVectors]. If you're not sure, use [getAllClipVectors]
+  Future<List<double>?> getRepeatedTextEmbeddingCache(String query) async {
+    final db = await asyncDB;
+    final threeMonthsAgo = DateTime.now().millisecondsSinceEpoch -
+        (90 * 24 * 60 * 60 * 1000); // 90 days in milliseconds
+
+    final results = await db.getAll(
+      'SELECT $embeddingColumn, $createdAtColumn FROM $textEmbeddingsCacheTable '
+      'WHERE $textQueryColumn = ? AND $mlVersionColumn = ? AND $createdAtColumn > ?',
+      [query, clipMlVersion, threeMonthsAgo],
+    );
+
+    if (results.isNotEmpty) {
+      final blob = results.first[embeddingColumn] as Uint8List;
+      return Float32List.view(blob.buffer).toList();
+    } else {
+      // Clean up old/invalid entries if they exist
+      await db.execute(
+        'DELETE FROM $textEmbeddingsCacheTable WHERE $textQueryColumn = ?',
+        [query],
+      );
+    }
+    return null;
   }
 
   @override
