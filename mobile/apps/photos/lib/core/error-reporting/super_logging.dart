@@ -230,6 +230,7 @@ class SuperLogging {
     } catch (e) {
       $.warning("Failed to initialize log viewer: $e");
     }
+  }
 
     if (appConfig.body == null) return;
 
@@ -312,14 +313,14 @@ class SuperLogging {
     saveLogString(str, rec.error);
     // Hook for external log viewer (if available)
     // This allows the log_viewer package to capture logs without creating a dependency
-    if (_logViewerCallback != null) {
-      try {
-        if (_logViewerCallback != null) {
-          _logViewerCallback!(rec, config.prefix);
-        }
-      } catch (_) {
-        // Silently ignore any errors from the log viewer
+    if(_logViewerCallback != null) {
+    try {
+      if (_logViewerCallback != null) {
+        _logViewerCallback!(rec, config.prefix);
       }
+    } catch (_) {
+      // Silently ignore any errors from the log viewer
+    }
     }
   }
 
