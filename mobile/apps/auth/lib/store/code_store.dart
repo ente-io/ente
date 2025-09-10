@@ -141,6 +141,7 @@ class CodeStore {
     bool shouldSync = true,
     AccountMode? accountMode,
     List<Code>? existingAllCodes,
+    bool isFrequencyOrRecencyUpdate = false,
   }) async {
 
     final mode = accountMode ?? _authenticatorService.getAccountMode();
@@ -172,6 +173,9 @@ class CodeStore {
         shouldSync,
         mode,
       );
+      if (!isFrequencyOrRecencyUpdate) {
+        LocalBackupService.instance.triggerAutomaticBackup().ignore();
+      }
     } else {
       result = AddResult.newCode;
       code.generatedID = await _authenticatorService.addEntry(

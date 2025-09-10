@@ -502,7 +502,7 @@ class _CodeWidgetState extends State<CodeWidget> {
               lastUsedAt: DateTime.now().microsecondsSinceEpoch,
             ),
           );
-          unawaited(CodeStore.instance.updateCode(widget.code, code));
+          unawaited(CodeStore.instance.addCode(code, isFrequencyOrRecencyUpdate: true));
         }
       }
     });
@@ -568,7 +568,7 @@ class _CodeWidgetState extends State<CodeWidget> {
       ),
     );
     if (code != null) {
-      await CodeStore.instance.updateCode(widget.code, code);
+      await CodeStore.instance.addCode(code);
     }
   }
 
@@ -615,7 +615,7 @@ class _CodeWidgetState extends State<CodeWidget> {
       display: display.copyWith(pinned: !currentlyPinned),
     );
     unawaited(
-      CodeStore.instance.updateCode(widget.code,code).then(
+      CodeStore.instance.addCode(code).then(
             (value) => showToast(
               context,
               !currentlyPinned
@@ -694,7 +694,7 @@ class _CodeWidgetState extends State<CodeWidget> {
           final Code code = widget.code.copyWith(
             display: display.copyWith(trashed: true),
           );
-          await CodeStore.instance.updateCode(widget.code, code);
+          await CodeStore.instance.addCode(code);
         } catch (e) {
           logger.severe('Failed to trash code: ${e.toString()}');
           showGenericErrorDialog(context: context, error: e).ignore();
@@ -718,7 +718,7 @@ class _CodeWidgetState extends State<CodeWidget> {
       final Code code = widget.code.copyWith(
         display: display.copyWith(trashed: false),
       );
-      await CodeStore.instance.updateCode(widget.code, code);
+      await CodeStore.instance.addCode(code);
     } catch (e) {
       logger.severe('Failed to restore code: ${e.toString()}');
       if (mounted) {

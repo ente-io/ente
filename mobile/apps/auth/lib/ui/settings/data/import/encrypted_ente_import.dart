@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/models/export/ente.dart';
+import 'package:ente_auth/services/authenticator_service.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/dialog_widget.dart';
@@ -57,9 +58,6 @@ Future<void> _decryptExportData(
   final l10n = context.l10n;
   bool isPasswordIncorrect = false;
   int? importedCodeCount;
-  
-  bool importHasRun = false;
-
   await showTextInputDialog(
     context,
     title: l10n.passwordForDecryptingExport,
@@ -69,11 +67,6 @@ Future<void> _decryptExportData(
     alwaysShowSuccessState: false,
     showOnlyLoadingState: true,
     onSubmit: (String password) async {
-      if (importHasRun) {
-        return;
-      }
-      importHasRun = true;
-
       if (password.isEmpty) {
         showToast(context, l10n.passwordEmptyError);
         Future.delayed(const Duration(seconds: 0), () {
@@ -85,7 +78,6 @@ Future<void> _decryptExportData(
         final progressDialog = createProgressDialog(context, l10n.pleaseWait);
         try {
           await progressDialog.show();
-
           final derivedKey = await CryptoUtil.deriveKey(
             utf8.encode(password),
             CryptoUtil.base642bin(enteAuthExport.kdfParams.salt),
@@ -111,57 +103,32 @@ Future<void> _decryptExportData(
             });
             return;
           }
-
           String content = utf8.decode(decryptedContent!);
           List<String> splitCodes = content.split("\n");
-          
-          final List<Code> parsedCodes = [];
-          for (final line in splitCodes) {
-            if (line.trim().isEmpty) continue; 
+          final parsedCodes = [];
+          for (final code in splitCodes) {
+            if (code.trim().isEmpty) continue; 
             try {
-              String otpUrl = jsonDecode(line);
+              String otpUrl;
+              if (code.startsWith('"') && code.endsWith('"')) {
+                otpUrl = jsonDecode(code);  // decode json wrapped URL
+              } 
+              else {
+                otpUrl = code;  // use raw URL directly
+              }
               parsedCodes.add(Code.fromOTPAuthUrl(otpUrl));
-            } catch (e) {
+            } 
+            catch (e) {
               Logger('EncryptedText').severe("Could not parse code", e);
             }
-          }
+          } 
 
-          final List<Code> codesInApp = await CodeStore.instance.getAllCodes();
-          final Map<String, Code> appCodesBySecret = { for (var code in codesInApp) code.secret: code };
-          final List<Code> codesToImportAsNew = [];
-          final List<Code> codesToUpdate = [];
-          final Set<String> processedSecrets = {};
-
-          for (final codeFromFile in parsedCodes) {
-            if (processedSecrets.contains(codeFromFile.secret)) {
-              continue;
-            }
-            processedSecrets.add(codeFromFile.secret);
-            if (appCodesBySecret.containsKey(codeFromFile.secret)) {
-              final originalCodeInApp = appCodesBySecret[codeFromFile.secret]!;
-              final updatedCode = codeFromFile.copyWith();
-              updatedCode.generatedID = originalCodeInApp.generatedID;
-              codesToUpdate.add(updatedCode);
-            } else {
-              codesToImportAsNew.add(codeFromFile);
-            }
+          for (final code in parsedCodes) {
+            await CodeStore.instance.addCode(code, shouldSync: false);
           }
+          unawaited(AuthenticatorService.instance.onlineSync());
+          importedCodeCount = parsedCodes.length;
           
-
-          if (codesToUpdate.isNotEmpty) {
-            for (final codeToUpdate in codesToUpdate) {
-              final originalCode = appCodesBySecret[codeToUpdate.secret]!;
-              await CodeStore.instance.updateCode(originalCode, codeToUpdate, shouldSync: false);
-            }
-          }
-          if (codesToImportAsNew.isNotEmpty) {
-            for (final newCode in codesToImportAsNew) {
-              await CodeStore.instance.addCode(newCode, shouldSync: false);
-            }
-          }
-          
-          importedCodeCount = codesToImportAsNew.length + codesToUpdate.length;
-
           await progressDialog.hide();
         } catch (e, s) {
           await progressDialog.hide();

@@ -361,7 +361,7 @@ class _LocalBackupSettingsPageState extends State<LocalBackupSettingsPage> {
                           const SizedBox(height: 4),
                           if (_backupPath != null)
                             Text(
-                              _backupPath!,
+                              _simplifyPath(_backupPath!),
                               style: getEnteTextTheme(context).small,
                             )
                           else
@@ -385,7 +385,7 @@ class _LocalBackupSettingsPageState extends State<LocalBackupSettingsPage> {
                                   );
                                 } else {
                                   return Text(
-                                    snapshot.data ?? '',
+                                    _simplifyPath(snapshot.data ?? ''),
                                     style: getEnteTextTheme(context)
                                         .small
                                         .copyWith(color: Colors.grey),
