@@ -36,6 +36,7 @@ class SettingsPage extends StatelessWidget {
 
   const SettingsPage({super.key, required this.emailNotifier});
 
+
   @override
   Widget build(BuildContext context) {
     Bus.instance.fire(OpenedSettingsEvent());
@@ -82,7 +83,7 @@ class SettingsPage extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (kDebugMode)
+                    if (localSettings.enableDatabaseLogging)
                       GestureDetector(
                         onTap: () {
                           Navigator.of(context).push(

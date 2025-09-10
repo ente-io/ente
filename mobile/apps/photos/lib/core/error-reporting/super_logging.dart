@@ -221,7 +221,7 @@ class SuperLogging {
 
     // Initialize log viewer integration in debug mode
     // Initialize log viewer in debug mode only
-  if (kDebugMode) {
+  if (_preferences.getBool("enable_db_logging") ?? kDebugMode) {
     try {
       await LogViewer.initialize();
       // Register LogViewer with SuperLogging to receive logs with process prefix

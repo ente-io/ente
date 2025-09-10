@@ -1,1 +1,2 @@
 - Neeraj: Potential fix for ios in-app payment
+- Neeraj: (i) Debug option to enable logViewer
