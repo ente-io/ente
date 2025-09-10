@@ -1,2 +1,3 @@
-- Neeraj: Potential fix for ios in-app payment
+- Laurens: text embedding caching for memories and discover
 - Neeraj: (i) Debug option to enable logViewer
+- Neeraj: Potential fix for ios in-app payment
