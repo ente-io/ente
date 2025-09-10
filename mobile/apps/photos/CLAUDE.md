@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude, Codex, and any other agent when working with code in this repository.
 
 ## Project Philosophy
 
