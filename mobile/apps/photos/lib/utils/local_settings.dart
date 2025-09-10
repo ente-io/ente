@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import 'package:photos/core/constants.dart';
 import 'package:photos/ui/viewer/gallery/component/group/type.dart';
 import "package:photos/utils/ram_check_util.dart";
@@ -42,6 +44,7 @@ class LocalSettings {
   static const kCollectionViewType = "collection_view_type";
   static const kCollectionSortDirection = "collection_sort_direction";
   static const kShowLocalIDOverThumbnails = "show_local_id_over_thumbnails";
+  static const kEnableDatabaseLogging = "enable_db_logging";
 
   // Thumbnail queue configuration keys
   static const kSmallQueueMaxConcurrent = "small_queue_max_concurrent";
@@ -232,6 +235,13 @@ class LocalSettings {
 
   Future<void> setShowLocalIDOverThumbnails(bool value) async {
     await _prefs.setBool(kShowLocalIDOverThumbnails, value);
+  }
+
+  bool get enableDatabaseLogging =>
+      _prefs.getBool(kEnableDatabaseLogging) ?? kDebugMode;
+
+  Future<void> setEnableDatabaseLogging(bool value) async {
+    await _prefs.setBool(kEnableDatabaseLogging, value);
   }
 
   // Thumbnail queue configuration - Small queue

@@ -23,6 +23,7 @@ class DebugSectionWidget extends StatefulWidget {
 }
 
 class _DebugSectionWidgetState extends State<DebugSectionWidget> {
+
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(
@@ -35,6 +36,27 @@ class _DebugSectionWidgetState extends State<DebugSectionWidget> {
   Widget _getSectionOptions(BuildContext context) {
     return Column(
       children: [
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Enable database logging",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingWidget: ToggleSwitchWidget(
+            value: () => localSettings.enableDatabaseLogging,
+            onChanged: () async {
+              final newValue = !localSettings.enableDatabaseLogging;
+              await localSettings.setEnableDatabaseLogging(newValue);
+              setState(() {});
+              showShortToast(
+                context,
+                newValue
+                    ? "Database logging enabled. Restart app."
+                    : "Database logging disabled. Restart app.",
+              );
+            },
+          ),
+        ),
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
