@@ -1,9 +1,17 @@
+import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import ShareIcon from "@mui/icons-material/Share";
+import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
 import { EnteLogo } from "ente-base/components/EnteLogo";
+import { useIsTouchscreen } from "ente-base/components/utils/hooks";
+import { useSaveGroups } from "ente-gallery/components/utils/save-groups";
 import { FileViewer } from "ente-gallery/components/viewer/FileViewer";
 import { downloadManager } from "ente-gallery/services/download";
+import { downloadAndSaveCollectionFiles } from "ente-gallery/services/save";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
+import { t } from "i18next";
 import L from "leaflet";
 import dynamic from "next/dynamic";
 import Image from "next/image";
@@ -186,10 +194,12 @@ const TripCover = memo(
         journeyData,
         photoClusters,
         albumTitle,
+        coverImageUrl,
     }: {
         journeyData: JourneyPoint[];
         photoClusters: JourneyPoint[][];
         albumTitle?: string;
+        coverImageUrl?: string | null;
     }) => {
         const sortedData = [...journeyData].sort(
             (a, b) =>
@@ -222,11 +232,11 @@ const TripCover = memo(
                     }}
                 >
                     <Image
-                        src={journeyData[0]?.image || ""}
+                        src={coverImageUrl || journeyData[0]?.image || ""}
                         alt="Trip Cover"
                         fill
                         style={{ objectFit: "cover" }}
-                        sizes="300px"
+                        sizes="(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 600px"
                     />
                     <div
                         style={{
@@ -951,6 +961,24 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
 }) => {
     // Extract collection info if available
     const collectionTitle = collection?.name || albumTitle || "Trip";
+
+    // Save groups hook for download progress tracking
+    const { saveGroups, onAddSaveGroup, onRemoveSaveGroup } = useSaveGroups();
+
+    // Check if device is touchscreen for signup button text
+    const isTouchscreen = useIsTouchscreen();
+
+    // Download all files functionality
+    const downloadAllFiles = () => {
+        if (!collection) return;
+        void downloadAndSaveCollectionFiles(
+            collectionTitle,
+            collection.id,
+            files,
+            undefined,
+            onAddSaveGroup,
+        );
+    };
     // Add CSS animation for spinner
     useEffect(() => {
         if (typeof document !== "undefined") {
@@ -963,6 +991,11 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
         @keyframes pulse {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.5; }
+        }
+        @keyframes fadeInOut {
+          0% { opacity: 0; transform: translateY(-10px); }
+          15%, 85% { opacity: 1; transform: translateY(0); }
+          100% { opacity: 0; transform: translateY(-10px); }
         }
         .photo-fan-hover {
           transition: transform 0.3s ease-in-out;
@@ -981,6 +1014,7 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
     }, []);
 
     const [journeyData, setJourneyData] = useState<JourneyPoint[]>([]);
+    const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
     const [isClient, setIsClient] = useState(false);
     const [isLoadingLocations, setIsLoadingLocations] = useState(false);
     const [isInitialLoad, setIsInitialLoad] = useState(true);
@@ -1005,6 +1039,7 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
     const [openFileViewer, setOpenFileViewer] = useState(false);
     const [currentFileIndex, setCurrentFileIndex] = useState(0);
     const [viewerFiles, setViewerFiles] = useState<EnteFile[]>([]); // Files to show in viewer
+    const [showCopiedMessage, setShowCopiedMessage] = useState(false);
 
     // Track screen dimensions for responsive zoom calculation
     useEffect(() => {
@@ -1266,7 +1301,7 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
                     const lng = file.metadata.longitude;
 
                     if (lat && lng) {
-                        // Get thumbnail URL for the file
+                        // Get thumbnail URL for the file (fast loading)
                         const thumbnailUrl =
                             await downloadManager.renderableThumbnailURL(file);
 
@@ -1309,6 +1344,42 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
 
         void loadPhotosData();
     }, [files]);
+
+    // Load high quality cover image after initial data loads
+    useEffect(() => {
+        const loadCoverImage = async () => {
+            if (journeyData.length === 0) return;
+
+            let coverFile: EnteFile | undefined;
+
+            // Check if there's a designated cover image in collection metadata
+            const coverID = collection?.pubMagicMetadata?.data.coverID;
+            if (coverID) {
+                coverFile = files.find((f) => f.id === coverID);
+            }
+
+            // Fall back to first chronological photo if no cover is designated
+            if (!coverFile) {
+                const firstPhoto = journeyData[0];
+                if (!firstPhoto) return;
+                coverFile = files.find((f) => f.id === firstPhoto.fileId);
+            }
+
+            if (!coverFile) return;
+
+            try {
+                const sourceURLs =
+                    await downloadManager.renderableSourceURLs(coverFile);
+                if (sourceURLs.type === "image") {
+                    setCoverImageUrl(sourceURLs.imageURL);
+                }
+            } catch {
+                // Keep using thumbnail if high quality fails
+            }
+        };
+
+        void loadCoverImage();
+    }, [journeyData, files, collection]);
 
     // Fetch location names for clusters after they're created
     useEffect(() => {
@@ -2088,20 +2159,20 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
                     <button
                         onClick={onAddPhotos}
                         style={{
-                            padding: "8px 16px",
+                            padding: "12px",
                             backgroundColor: "rgba(255, 255, 255, 0.9)",
                             border: "none",
                             borderRadius: "8px",
-                            fontSize: "14px",
-                            fontWeight: "500",
                             cursor: "pointer",
                             display: "flex",
                             alignItems: "center",
-                            gap: "6px",
+                            justifyContent: "center",
                             color: "#1f2937",
                             transition: "background-color 0.2s",
                             backdropFilter: "blur(10px)",
                             boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+                            width: "44px",
+                            height: "44px",
                         }}
                         onMouseEnter={(e) => {
                             e.currentTarget.style.backgroundColor =
@@ -2112,21 +2183,9 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
                                 "rgba(255, 255, 255, 0.9)";
                         }}
                     >
-                        <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        >
-                            <rect x="3" y="3" width="18" height="18" rx="2" />
-                            <circle cx="8.5" cy="8.5" r="1.5" />
-                            <path d="m21 15-5-5L5 21" />
-                        </svg>
-                        Add photos
+                        <AddPhotoAlternateOutlinedIcon
+                            style={{ fontSize: "22px" }}
+                        />
                     </button>
                 )}
                 <button
@@ -2135,23 +2194,25 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
                             void navigator.clipboard.writeText(
                                 window.location.href,
                             );
+                            setShowCopiedMessage(true);
+                            setTimeout(() => setShowCopiedMessage(false), 2000);
                         }
                     }}
                     style={{
-                        padding: "8px 16px",
+                        padding: "12px",
                         backgroundColor: "rgba(255, 255, 255, 0.9)",
                         border: "none",
                         borderRadius: "8px",
-                        fontSize: "14px",
-                        fontWeight: "500",
                         cursor: "pointer",
                         display: "flex",
                         alignItems: "center",
-                        gap: "6px",
+                        justifyContent: "center",
                         color: "#1f2937",
                         transition: "background-color 0.2s",
                         backdropFilter: "blur(10px)",
                         boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+                        width: "44px",
+                        height: "44px",
                     }}
                     onMouseEnter={(e) => {
                         e.currentTarget.style.backgroundColor =
@@ -2162,23 +2223,103 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
                             "rgba(255, 255, 255, 0.9)";
                     }}
                 >
-                    <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+                    <ShareIcon style={{ fontSize: "20px" }} />
+                </button>
+                {!enableDownload && (
+                    <button
+                        onClick={downloadAllFiles}
+                        style={{
+                            padding: "12px",
+                            backgroundColor: "rgba(255, 255, 255, 0.9)",
+                            border: "none",
+                            borderRadius: "8px",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            color: "#1f2937",
+                            transition: "background-color 0.2s",
+                            backdropFilter: "blur(10px)",
+                            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+                            width: "44px",
+                            height: "44px",
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor =
+                                "rgba(255, 255, 255, 1)";
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor =
+                                "rgba(255, 255, 255, 0.9)";
+                        }}
                     >
-                        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-                        <polyline points="16 6 12 2 8 6" />
-                        <line x1="12" y1="2" x2="12" y2="15" />
-                    </svg>
-                    Share
+                        <FileDownloadOutlinedIcon
+                            style={{ fontSize: "23px" }}
+                        />
+                    </button>
+                )}
+                <button
+                    onClick={() => {
+                        if (typeof window !== "undefined") {
+                            window.open(
+                                "https://ente.io",
+                                "_blank",
+                                "noopener,noreferrer",
+                            );
+                        }
+                    }}
+                    style={{
+                        padding: "12px 16px",
+                        marginLeft: "12px",
+                        backgroundColor: "rgba(255, 255, 255, 0.9)",
+                        border: "none",
+                        borderRadius: "8px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "#1f2937",
+                        transition: "background-color 0.2s",
+                        backdropFilter: "blur(10px)",
+                        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+                        fontSize: "16px",
+                        fontWeight: "600",
+                        whiteSpace: "nowrap",
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor =
+                            "rgba(255, 255, 255, 1)";
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor =
+                            "rgba(255, 255, 255, 0.9)";
+                    }}
+                >
+                    {isTouchscreen ? t("install") : t("sign_up")}
                 </button>
             </div>
+
+            {/* Copied message */}
+            {showCopiedMessage && (
+                <div
+                    style={{
+                        position: "fixed",
+                        top: "80px",
+                        right: "20px",
+                        backgroundColor: "#22c55e",
+                        color: "white",
+                        padding: "8px 16px",
+                        borderRadius: "8px",
+                        fontSize: "14px",
+                        fontWeight: "500",
+                        zIndex: 2001,
+                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+                        animation: "fadeInOut 2s ease-in-out forwards",
+                    }}
+                >
+                    Copied!
+                </div>
+            )}
             {/* Left Sidebar - Floating Timeline */}
             <div
                 ref={timelineRef}
@@ -2284,6 +2425,7 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
                                 journeyData={journeyData}
                                 photoClusters={photoClusters}
                                 albumTitle={collectionTitle}
+                                coverImageUrl={coverImageUrl}
                             />
 
                             {/* Show either loading spinner or trip started section + timeline */}
@@ -2542,6 +2684,12 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
                 onVisualFeedback={() => {
                     // No-op: Trip viewer is read-only and doesn't need visual feedback
                 }}
+            />
+
+            {/* Download progress notifications */}
+            <DownloadStatusNotifications
+                saveGroups={saveGroups}
+                onRemoveSaveGroup={onRemoveSaveGroup}
             />
         </div>
     );
