@@ -858,7 +858,12 @@ func runServer(environment string, server *gin.Engine) {
 
 		log.Fatal(server.RunTLS(":443", certPath, keyPath))
 	} else {
-		server.Run(":8080")
+		port := 8080
+		if viper.IsSet("http.port") {
+			port = viper.GetInt("http.port")
+		}
+		log.Infof("starting server on port %d", port)
+		server.Run(fmt.Sprintf(":%d", port))
 	}
 }
 
