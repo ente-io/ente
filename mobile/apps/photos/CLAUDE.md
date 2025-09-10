@@ -196,6 +196,10 @@ lib/
 - Ensure documentation reflects the current implementation
 - Update examples in specs if behavior changes
 
+### 5. Database Methods - BEST PRACTICE
+**Write database methods with simple SQL queries and filter in Dart for readability**
+- Keep SQL queries simple and fetch all relevant data, then filter in Dart code rather than complex WHERE clauses
+
 ## Important Notes
 
 - Large service files (some 70k+ lines) - consider file context when editing
