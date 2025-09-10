@@ -197,8 +197,9 @@ lib/
 - Update examples in specs if behavior changes
 
 ### 5. Database Methods - BEST PRACTICE
-**Write database methods with simple SQL queries and filter in Dart for readability**
-- Keep SQL queries simple and fetch all relevant data, then filter in Dart code rather than complex WHERE clauses
+**Prioritize readability in database methods**
+- For small result sets (e.g., 1-2 stale entries), prefer filtering in Dart for cleaner, more readable code
+- For large datasets, use SQL WHERE clauses for performance - they're much more efficient in SQLite
 
 ## Important Notes
 
