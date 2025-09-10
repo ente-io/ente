@@ -1034,6 +1034,7 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
     const locationRefs = useRef<(HTMLDivElement | null)[]>([]);
     const isClusterClickScrollingRef = useRef(false); // Use ref for immediate updates
     const clusterClickTimeoutRef = useRef<NodeJS.Timeout | null>(null); // Timeout for cluster clicks
+    const thumbnailsGeneratedRef = useRef(false); // Track if thumbnails have been generated
 
     // FileViewer state
     const [openFileViewer, setOpenFileViewer] = useState(false);
@@ -1284,16 +1285,19 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
 
     useEffect(() => {
         setIsClient(true);
+        
+        // Reset thumbnail generation flag when files change
+        thumbnailsGeneratedRef.current = false;
 
         // Process EnteFiles to extract location data
-        const loadPhotosData = async () => {
+        const loadPhotosData = () => {
             const photoData: JourneyPoint[] = [];
 
             if (files.length === 0) {
                 return;
             }
 
-            // Process each EnteFile
+            // Process each EnteFile (without thumbnails first)
             for (const file of files) {
                 try {
                     // Extract location from metadata
@@ -1301,10 +1305,6 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
                     const lng = file.metadata.longitude;
 
                     if (lat && lng) {
-                        // Get thumbnail URL for the file (fast loading)
-                        const thumbnailUrl =
-                            await downloadManager.renderableThumbnailURL(file);
-
                         photoData.push({
                             lat: lat,
                             lng: lng,
@@ -1313,7 +1313,7 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
                             timestamp: new Date(
                                 file.metadata.creationTime / 1000,
                             ).toISOString(),
-                            image: thumbnailUrl || "",
+                            image: "", // Will be populated later for photos that need thumbnails
                             fileId: file.id,
                         });
                         // Photo has no GPS data
@@ -1342,7 +1342,7 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
             }
         };
 
-        void loadPhotosData();
+        loadPhotosData();
     }, [files]);
 
     // Load high quality cover image after initial data loads
@@ -1445,6 +1445,57 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
             setIsLoadingLocations(false);
         });
         // Only run when photoClusters changes, not journeyData to avoid infinite loop
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [photoClusters.length]);
+
+    // Generate thumbnails only for photos that are actually used after clustering
+    useEffect(() => {
+        const generateNeededThumbnails = async () => {
+            if (photoClusters.length === 0 || journeyData.length === 0) return;
+            
+            // Check if thumbnails have already been generated
+            if (thumbnailsGeneratedRef.current) return;
+
+            // Collect file IDs that need thumbnails
+            const neededFileIds = new Set<number>();
+
+            // First 3 photos of each cluster (covers map markers, super clusters, and timeline photo fans)
+            photoClusters.forEach(cluster => {
+                cluster.slice(0, 3).forEach(photo => {
+                    neededFileIds.add(photo.fileId);
+                });
+            });
+
+            // Find the files that need thumbnails
+            const filesToProcess = files.filter(file => 
+                neededFileIds.has(file.id)
+            );
+
+            // Generate thumbnails and update journey data
+            const updatedJourneyData = [...journeyData];
+            
+            for (const file of filesToProcess) {
+                try {
+                    const thumbnailUrl = await downloadManager.renderableThumbnailURL(file);
+                    
+                    // Update all photos with this file ID
+                    updatedJourneyData.forEach(photo => {
+                        if (photo.fileId === file.id && !photo.image) {
+                            photo.image = thumbnailUrl || "";
+                        }
+                    });
+                } catch {
+                    // Silently ignore thumbnail generation errors
+                }
+            }
+
+            setJourneyData(updatedJourneyData);
+            thumbnailsGeneratedRef.current = true;
+        };
+
+        void generateNeededThumbnails().catch(() => {
+            // Silently ignore thumbnail generation errors
+        });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [photoClusters.length]);
 
@@ -2582,7 +2633,7 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
                                         superCluster.lng,
                                     ]}
                                     icon={createSuperClusterIcon(
-                                        mostRecentPhotos[0]?.image || "", // Use most recent photo for display
+                                        superCluster.image, // Use representative photo (first photo of first cluster)
                                         superCluster.clusterCount,
                                         55,
                                         isReached,
