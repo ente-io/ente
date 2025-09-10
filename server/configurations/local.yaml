@@ -71,8 +71,13 @@ log-file: ""
 
 # HTTP connection parameters
 http:
-    # If true, bind to 443 and use TLS.
-    # By default, this is false, and museum will bind to 8080 without TLS.
+    # The port to bind to.
+    # If not specified, defaults to 8080 (HTTP) or 443 (HTTPS with use-tls: true)
+    # port: 8080
+
+    # If true, use TLS for HTTPS connections.
+    # When true and port is not specified, defaults to port 443.
+    # When false and port is not specified, defaults to port 8080.
     # use-tls: true
 
 # Specify the base endpoints for various apps

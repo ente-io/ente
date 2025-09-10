@@ -6,6 +6,7 @@ import "package:flutter_svg/flutter_svg.dart";
 import "package:local_auth/local_auth.dart";
 import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension.dart';
+import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/generated/l10n.dart";
@@ -23,6 +24,7 @@ import "package:photos/services/local_authentication_service.dart";
 import "package:photos/services/video_preview_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/collections/collection_action_sheet.dart';
+import "package:photos/ui/common/popup_item.dart";
 import 'package:photos/ui/notification/toast.dart';
 import "package:photos/ui/viewer/file_details/favorite_widget.dart";
 import "package:photos/ui/viewer/file_details/upload_icon_widget.dart";
@@ -193,22 +195,13 @@ class FileAppBarState extends State<FileAppBar> {
     final List<PopupMenuItem> items = [];
     if (widget.file.isRemoteFile) {
       items.add(
-        PopupMenuItem(
+        EntePopupMenuItem(
+          AppLocalizations.of(context).download,
           value: 1,
-          child: Row(
-            children: [
-              Icon(
-                Platform.isAndroid
-                    ? Icons.download
-                    : Icons.cloud_download_outlined,
-                color: Theme.of(context).iconTheme.color,
-              ),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text(AppLocalizations.of(context).download),
-            ],
-          ),
+          icon: Platform.isAndroid
+              ? Icons.download
+              : Icons.cloud_download_outlined,
+          iconColor: Theme.of(context).iconTheme.color,
         ),
       );
     }
@@ -217,24 +210,13 @@ class FileAppBarState extends State<FileAppBar> {
       final bool isArchived =
           widget.file.magicMetadata.visibility == archiveVisibility;
       items.add(
-        PopupMenuItem(
+        EntePopupMenuItem(
+          isArchived
+              ? AppLocalizations.of(context).unarchive
+              : AppLocalizations.of(context).archive,
           value: 2,
-          child: Row(
-            children: [
-              Icon(
-                isArchived ? Icons.unarchive : Icons.archive_outlined,
-                color: Theme.of(context).iconTheme.color,
-              ),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text(
-                isArchived
-                    ? AppLocalizations.of(context).unarchive
-                    : AppLocalizations.of(context).archive,
-              ),
-            ],
-          ),
+          icon: isArchived ? Icons.unarchive : Icons.archive_outlined,
+          iconColor: Theme.of(context).iconTheme.color,
         ),
       );
     }
@@ -242,118 +224,100 @@ class FileAppBarState extends State<FileAppBar> {
             widget.file.fileType == FileType.livePhoto) &&
         Platform.isAndroid) {
       items.add(
-        PopupMenuItem(
+        EntePopupMenuItem(
+          AppLocalizations.of(context).setAs,
           value: 3,
-          child: Row(
-            children: [
-              Icon(
-                Icons.wallpaper_outlined,
-                color: Theme.of(context).iconTheme.color,
-              ),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text(AppLocalizations.of(context).setAs),
-            ],
-          ),
+          icon: Icons.wallpaper_outlined,
+          iconColor: Theme.of(context).iconTheme.color,
         ),
       );
     }
     if (isOwnedByUser && widget.file.isUploaded) {
       if (!isFileHidden) {
         items.add(
-          PopupMenuItem(
+          EntePopupMenuItem(
+            AppLocalizations.of(context).hide,
             value: 4,
-            child: Row(
-              children: [
-                Icon(
-                  Icons.visibility_off,
-                  color: Theme.of(context).iconTheme.color,
-                ),
-                const Padding(
-                  padding: EdgeInsets.all(8),
-                ),
-                Text(AppLocalizations.of(context).hide),
-              ],
-            ),
+            icon: Icons.visibility_off,
+            iconColor: Theme.of(context).iconTheme.color,
           ),
         );
       } else {
         items.add(
-          PopupMenuItem(
+          EntePopupMenuItem(
+            AppLocalizations.of(context).unhide,
             value: 5,
-            child: Row(
-              children: [
-                Icon(
-                  Icons.visibility,
-                  color: Theme.of(context).iconTheme.color,
-                ),
-                const Padding(
-                  padding: EdgeInsets.all(8),
-                ),
-                Text(AppLocalizations.of(context).unhide),
-              ],
-            ),
+            icon: Icons.visibility,
+            iconColor: Theme.of(context).iconTheme.color,
           ),
         );
       }
     }
 
     items.add(
-      PopupMenuItem(
+      EntePopupMenuItem(
+        AppLocalizations.of(context).guestView,
         value: 6,
-        child: Row(
-          children: [
-            SvgPicture.asset(
-              "assets/icons/guest_view_icon.svg",
-              colorFilter: ColorFilter.mode(
-                getEnteColorScheme(context).textBase,
-                BlendMode.srcIn,
-              ),
-            ),
-            const Padding(
-              padding: EdgeInsets.all(8),
-            ),
-            Text(AppLocalizations.of(context).guestView),
-          ],
+        iconWidget: SvgPicture.asset(
+          "assets/icons/guest_view_icon.svg",
+          colorFilter: ColorFilter.mode(
+            getEnteColorScheme(context).textBase,
+            BlendMode.srcIn,
+          ),
         ),
       ),
     );
 
     if (widget.file.isVideo) {
+      // Video streaming options
+      if (_shouldShowCreateStreamOption()) {
+        items.add(
+          EntePopupMenuItem(
+            AppLocalizations.of(context).createStream,
+            value: 8,
+            icon: Icons.video_settings_outlined,
+            iconColor: Theme.of(context).iconTheme.color,
+          ),
+        );
+      }
+
+      if (_shouldShowRecreateStreamOption()) {
+        items.add(
+          EntePopupMenuItem(
+            AppLocalizations.of(context).recreateStream,
+            value: 9,
+            icon: Icons.refresh_outlined,
+            iconColor: Theme.of(context).iconTheme.color,
+          ),
+        );
+      }
+
       items.add(
-        PopupMenuItem(
+        EntePopupMenuItem(
+          shouldLoopVideo
+              ? AppLocalizations.of(context).loopVideoOn
+              : AppLocalizations.of(context).loopVideoOff,
           value: 7,
-          child: Row(
+          iconWidget: Stack(
+            alignment: Alignment.center,
             children: [
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  Icon(
-                    Icons.loop_rounded,
-                    color: Theme.of(context).iconTheme.color,
-                  ),
-                  shouldLoopVideo
-                      ? const SizedBox.shrink()
-                      : Transform.rotate(
-                          angle: 3.14 / 4,
-                          child: Container(
-                            width: 2,
-                            height: 24,
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).iconTheme.color,
-                              borderRadius: BorderRadius.circular(1),
-                            ),
-                          ),
-                        ),
-                ],
-              ),
-              const Padding(
-                padding: EdgeInsets.all(8),
+              Icon(
+                Icons.loop_rounded,
+                color: Theme.of(context).iconTheme.color,
               ),
               shouldLoopVideo
-                  ? Text(AppLocalizations.of(context).loopVideoOn)
-                  : Text(AppLocalizations.of(context).loopVideoOff),
+                  ? const SizedBox.shrink()
+                  : Transform.rotate(
+                      angle: 3.14 / 4,
+                      child: Container(
+                        width: 2,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).iconTheme.color,
+                          borderRadius: BorderRadius.circular(1),
+                        ),
+                      ),
+                    ),
             ],
           ),
         ),
@@ -392,6 +356,10 @@ class FileAppBarState extends State<FileAppBar> {
               }
             } else if (value == 7) {
               _onToggleLoopVideo();
+            } else if (value == 8) {
+              await _handleVideoStream('create');
+            } else if (value == 9) {
+              await _handleVideoStream('recreate');
             }
           },
         ),
@@ -509,6 +477,56 @@ class FileAppBarState extends State<FileAppBar> {
     if (hasAuthenticated) {
       Bus.instance.fire(GuestViewEvent(false, false));
       await localSettings.setOnGuestView(false);
+    }
+  }
+
+  bool _shouldShowCreateStreamOption() {
+    // Show "Create Stream" option for uploaded video files without streams
+    return _ensureBasicRequirements() &&
+        !fileDataService.previewIds.containsKey(widget.file.uploadedFileID!);
+  }
+
+  bool _shouldShowRecreateStreamOption() {
+    // Show "Recreate Stream" option for uploaded video files with existing streams
+    return _ensureBasicRequirements() &&
+        fileDataService.previewIds.containsKey(widget.file.uploadedFileID!);
+  }
+
+  bool _ensureBasicRequirements() {
+    // Skip if sv=1 (server indicates streaming not needed)
+    final userId = Configuration.instance.getUserID();
+    return widget.file.fileType == FileType.video &&
+        widget.file.isUploaded &&
+        widget.file.fileSize != null &&
+        (widget.file.pubMagicMetadata?.sv ?? 0) != 1 &&
+        widget.file.ownerID == userId &&
+        VideoPreviewService.instance.isVideoStreamingEnabled;
+  }
+
+  Future<void> _handleVideoStream(String streamType) async {
+    try {
+      final bool wasAdded = await VideoPreviewService.instance
+          .addToManualQueue(widget.file, streamType);
+
+      if (!wasAdded) {
+        // File was already in queue
+        showToast(
+          context,
+          AppLocalizations.of(context).videoAlreadyInQueue,
+        );
+        return;
+      }
+
+      showToast(context, AppLocalizations.of(context).addedToQueue);
+
+      if (mounted) {
+        setState(() {
+          _reloadActions = true;
+        });
+      }
+    } catch (e, s) {
+      _logger.severe("Failed to $streamType video stream", e, s);
+      await showGenericErrorDialog(context: context, error: e);
     }
   }
 }

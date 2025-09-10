@@ -6,7 +6,7 @@
   "@counterAppBarTitle": {
     "description": "Text shown in the AppBar of the Counter Page"
   },
-  "onBoardingBody": "妥善保管您的两步验证码",
+  "onBoardingBody": "妥善保管您的双重认证代码",
   "onBoardingGetStarted": "开始",
   "setupFirstAccount": "设置您的第一个账户",
   "importScanQrCode": "扫描二维码",
@@ -111,13 +111,14 @@
   "importAegisGuide": "使用 Aegis 设置中的“导出密码库”选项。\n\n如果您的密码库已加密，则需要输入密码库密码才能解密密码库。",
   "import2FasGuide": "使用 2FAS 中的“设置 -> 备份 -> 导出”选项。\n\n如果您的备份已加密，则需要输入密码来解密备份",
   "importLastpassGuide": "使用 Lastpass Authenticator 设置中的“转移账户”选项，然后按“将账户导出到文件”。导入下载的 JSON。",
+  "importProtonAuthGuide": "使用 Proton Authenticator 设置中的“导出”选项导出您的代码。",
   "exportCodes": "导出代码",
   "importLabel": "导入",
   "importInstruction": "请选择一个包含以下格式的代码列表的文件",
   "importCodeDelimiterInfo": "代码可以用逗号或换行符分隔",
   "selectFile": "选择文件",
   "emailVerificationToggle": "电子邮件验证",
-  "emailVerificationEnableWarning": "为避免被锁在您的账户之外，请在启用电子邮件验证之前确保在 Ente Auth 之外存储电子邮件两步验证的副本。",
+  "emailVerificationEnableWarning": "为避免被锁在您的账户之外，请在启用电子邮件验证之前确保在 Ente Auth 之外存储电子邮件双重认证的副本。",
   "authToChangeEmailVerificationSetting": "请进行身份验证以更改电子邮件验证",
   "authenticateGeneric": "请验证",
   "authToViewYourRecoveryKey": "请验证以查看您的恢复密钥",
@@ -155,7 +156,7 @@
   "verifyEmail": "验证电子邮件",
   "enterCodeHint": "从你的身份验证器应用中\n输入6位数字代码",
   "lostDeviceTitle": "丢失了设备吗？",
-  "twoFactorAuthTitle": "两步验证",
+  "twoFactorAuthTitle": "双重认证",
   "passkeyAuthTitle": "通行密钥验证",
   "verifyPasskey": "验证通行密钥",
   "loginWithTOTP": "使用 TOTP 登录",
@@ -519,5 +520,12 @@
   "algorithm": "算法",
   "type": "类型",
   "period": "周期",
-  "digits": "数字"
+  "digits": "数字",
+  "importFromGallery": "从图库导入",
+  "errorCouldNotReadImage": "无法读取所选图片文件。",
+  "errorInvalidQRCode": "二维码无效",
+  "errorInvalidQRCodeBody": "扫描的二维码不是有效的双重认证账户。",
+  "errorNoQRCode": "未找到二维码",
+  "errorGenericTitle": "出错了",
+  "errorGenericBody": "导入时发生意外错误。"
 }

@@ -29,6 +29,8 @@ jobs:
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
+              with:
+                  persist-credentials: false
 
             - name: Setup node and enable yarn caching
               uses: actions/setup-node@v4
@@ -38,7 +40,7 @@ jobs:
                   cache-dependency-path: "web/yarn.lock"
 
             - name: Install dependencies
-              run: yarn install
+              run: yarn install --frozen-lockfile
 
             - name: Build ${{ inputs.app }}
               run: yarn build:${{ inputs.app }}

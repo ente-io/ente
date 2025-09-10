@@ -139,12 +139,8 @@ func (c *FileLinkController) ValidateJWTToken(ctx *gin.Context, jwtToken string,
 
 func (c *FileLinkController) mapRowToFileUrl(ctx *gin.Context, row *ente.FileLinkRow) *ente.FileUrl {
 	app := auth.GetApp(ctx)
-	var url string
-	if app == ente.Locker {
-		url = c.FileLinkRepo.LockerFileLink(row.Token)
-	} else {
-		url = c.FileLinkRepo.PhotoLink(row.Token)
-	}
+	url := c.FileLinkRepo.FileLink(app, row.Token)
+
 	return &ente.FileUrl{
 		LinkID:          row.LinkID,
 		FileID:          row.FileID,

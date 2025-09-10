@@ -1,4 +1,4 @@
-import 'dart:async';
+  import 'dart:async';
 import 'dart:io';
 
 import "package:adaptive_theme/adaptive_theme.dart";
@@ -280,7 +280,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       }).ignore();
     }
     _logger.info("PushService/HomeWidget done $tlog");
-    VideoPreviewService.instance.init(preferences);
     unawaited(SemanticSearchService.instance.init());
     unawaited(MLService.instance.init());
     await PersonService.init(

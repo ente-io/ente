@@ -4,6 +4,7 @@ import "package:ente_accounts/pages/password_entry_page.dart";
 import "package:ente_accounts/pages/recovery_key_page.dart";
 import "package:ente_accounts/services/user_service.dart";
 import "package:ente_crypto_dart/ente_crypto_dart.dart";
+import "package:ente_legacy/pages/emergency_page.dart";
 import "package:ente_lock_screen/local_authentication_service.dart";
 import "package:ente_ui/components/captioned_text_widget.dart";
 import "package:ente_ui/components/menu_item_widget.dart";
@@ -11,6 +12,7 @@ import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_utils/navigation_util.dart";
 import "package:ente_utils/platform_util.dart";
+import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/configuration.dart";
@@ -131,6 +133,35 @@ class AccountSectionWidget extends StatelessWidget {
                 onDone: () {},
               ),
             );
+          }
+        },
+      ),
+      sectionOptionSpacing,
+      MenuItemWidget(
+        captionedTextWidget: CaptionedTextWidget(
+          title: context.l10n.legacy,
+        ),
+        pressedColor: getEnteColorScheme(context).fillFaint,
+        trailingIcon: Icons.chevron_right_outlined,
+        trailingIconIsMuted: true,
+        showOnlyLoadingState: true,
+        onTap: () async {
+          final hasAuthenticated = kDebugMode ||
+              await LocalAuthenticationService.instance
+                  .requestLocalAuthentication(
+                context,
+                "Authenticate to manage legacy contacts",
+              );
+          if (hasAuthenticated) {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return EmergencyPage(
+                    config: Configuration.instance,
+                  );
+                },
+              ),
+            ).ignore();
           }
         },
       ),

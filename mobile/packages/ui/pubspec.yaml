@@ -22,10 +22,11 @@ dependencies:
   expandable: ^5.0.1
   flutter:
     sdk: flutter
+  flutter_animate: ^4.5.2
   flutter_inappwebview: ^6.1.4
   fluttertoast: ^8.1.1
   modal_bottom_sheet: ^3.0.0
-  shared_preferences: ^2.5.3
+  shared_preferences: ^2.5.3 
   window_manager: ^0.5.0
 
 dev_dependencies:

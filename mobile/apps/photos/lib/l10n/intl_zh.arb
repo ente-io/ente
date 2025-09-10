@@ -1776,14 +1776,6 @@
   "same": "相同",
   "different": "不同",
   "sameperson": "是同一个人？",
-  "cLTitle1": "高级图像编辑器",
-  "cLDesc1": "我们正在发布一款全新且高级的图像编辑器，新增更多裁剪框架、快速编辑的滤镜预设，以及包括饱和度、对比度、亮度、色温等在内的精细调整选项。新的编辑器还支持在照片上绘制和添加表情符号作为贴纸。",
-  "cLTitle2": "智能相册",
-  "cLDesc2": "您现在可以将所选人物的照片自动添加到任何相册。只需进入相册，从溢出菜单中选择“自动添加人物”。如果与共享相册一起使用，您可以零点击分享照片。",
-  "cLTitle3": "改进的相册",
-  "cLDesc3": "我们新增了按周、月、年对图库进行分组的功能。您现在可以通过这些新的分组选项以及自定义网格，定制图库的外观，完全按照您的喜好进行设置",
-  "cLTitle4": "更快滚动",
-  "cLDesc4": "除了多项后台改进以提升图库滚动体验外，我们还重新设计了滚动条，添加了标记功能，让您可以快速跳转到时间轴上的不同位置。",
   "indexingPausedStatusDescription": "索引已暂停。待设备准备就绪后，索引将自动恢复。当设备的电池电量、电池健康度和温度状态处于健康范围内时，设备即被视为准备就绪。",
   "thisWeek": "本周",
   "lastWeek": "上周",
@@ -1827,5 +1819,117 @@
         "type": "int"
       }
     }
-  }
+  },
+  "videosProcessed": "视频已处理",
+  "totalVideos": "视频总数",
+  "skippedVideos": "已跳过的视频",
+  "videoStreamingDescriptionLine1": "在任何设备上立即播放视频。",
+  "videoStreamingDescriptionLine2": "启用以处理此设备上的视频流。",
+  "videoStreamingNote": "此设备仅处理过去 60 天内时长不超过 1 分钟的视频。对于更早/更长的视频，请在桌面应用中启用流式传输。",
+  "createStream": "创建流",
+  "recreateStream": "重建流",
+  "addedToStreamCreationQueue": "已添加到流创建队列",
+  "addedToStreamRecreationQueue": "已添加到流重建队列",
+  "videoPreviewAlreadyExists": "视频预览已存在",
+  "videoAlreadyInQueue": "视频文件已存在于队列中",
+  "addedToQueue": "已添加至队列",
+  "creatingStream": "正在创建流",
+  "similarImages": "相似图片",
+  "findSimilarImages": "查找相似图片",
+  "noSimilarImagesFound": "未找到相似图片",
+  "yourPhotosLookUnique": "您的照片看起来很独特",
+  "similarGroupsFound": "{count, plural, =1{{count} 组已找到} other{{count} 组已找到}}",
+  "@similarGroupsFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewAndRemoveSimilarImages": "查看并删除相似图片",
+  "deletePhotosWithSize": "删除 {count} 张照片 ({size})",
+  "@deletePhotosWithSize": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "selectionOptions": "选择选项",
+  "selectExactWithCount": "完全相似 ({count})",
+  "@selectExactWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectExact": "精确选择",
+  "selectSimilarWithCount": "部分相似 ({count})",
+  "@selectSimilarWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectSimilar": "选择相似项",
+  "selectAllWithCount": "所有相似项 ({count})",
+  "@selectAllWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectSimilarImagesTitle": "选择所有相似图片",
+  "chooseSimilarImagesToSelect": "根据视觉相似性选择图像",
+  "clearSelection": "清除选择",
+  "similarImagesCount": "{count} 张相似图片",
+  "@similarImagesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteWithCount": "删除 ({count}) 项",
+  "@deleteWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteFiles": "删除文件",
+  "areYouSureDeleteFiles": "您确定要删除这些文件吗？",
+  "greatJob": "做得好！",
+  "cleanedUpSimilarImages": "您已释放了 {size} 的空间",
+  "@cleanedUpSimilarImages": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "size": "大小",
+  "similarity": "相似度",
+  "processingLocally": "正在本地处理",
+  "useMLToFindSimilarImages": "审查并删除看起来彼此相似的图像。",
+  "all": "全部",
+  "similar": "相似的",
+  "identical": "完全相同",
+  "nothingHereTryAnotherFilter": "此处无内容，请尝试其他过滤器！👀",
+  "related": "相关",
+  "hoorayyyy": "耶～～！",
+  "nothingToTidyUpHere": "这里没什么可清理的",
+  "cLTitle1": "相似图像",
+  "cLDesc1": "我们正在推出一个基于机器学习的新系统来检测相似图像，您可以用它来清理您的图库。在 设置 -> 备份 -> 释放空间 中可用",
+  "cLTitle2": "视频流媒体增强",
+  "cLDesc2": "您现在可以直接从应用程序手动触发视频的流生成。我们还添加了一个新的视频流设置屏幕，它将显示您的视频中有百分之几已被处理用于流媒体播放",
+  "cLTitle3": "性能改进",
+  "cLDesc3": "多个底层改进，包括更好的缓存使用和更流畅的滚动体验"
 }
