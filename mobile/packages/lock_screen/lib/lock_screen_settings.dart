@@ -9,6 +9,7 @@ import "package:ente_events/models/signed_out_event.dart";
 import "package:ente_utils/platform_util.dart";
 import "package:flutter/material.dart";
 import "package:flutter_secure_storage/flutter_secure_storage.dart";
+import "package:local_auth/local_auth.dart";
 import "package:privacy_screen/privacy_screen.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -245,5 +246,9 @@ class LockScreenSettings {
       await _secureStorage.delete(key: pin);
       await _secureStorage.delete(key: saltKey);
     }
+  }
+
+  Future<bool> isDeviceSupported() async{
+    return await LocalAuthentication().isDeviceSupported();
   }
 }

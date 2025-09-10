@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:ente_accounts/services/user_service.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import "package:ente_legacy/services/emergency_service.dart";
 import 'package:ente_lock_screen/lock_screen_settings.dart';
 import 'package:ente_lock_screen/ui/app_lock.dart';
 import 'package:ente_lock_screen/ui/lock_screen.dart';
@@ -169,4 +170,8 @@ Future<void> _init(bool bool, {String? via}) async {
     packageInfo,
   );
   await TrashService.instance.init(preferences);
+  await EmergencyContactService.instance.init(
+    UserService.instance,
+    Configuration.instance,
+  );
 }

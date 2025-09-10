@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import "package:flutter_animate/flutter_animate.dart";
+import "package:log_viewer/log_viewer.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/opened_settings_event.dart';
@@ -34,6 +35,7 @@ class SettingsPage extends StatelessWidget {
   final ValueNotifier<String?> emailNotifier;
 
   const SettingsPage({super.key, required this.emailNotifier});
+
 
   @override
   Widget build(BuildContext context) {
@@ -70,12 +72,36 @@ class SettingsPage extends StatelessWidget {
               // [AnimatedBuilder] accepts any [Listenable] subtype.
               animation: emailNotifier,
               builder: (BuildContext context, Widget? child) {
-                return Text(
-                  emailNotifier.value!,
-                  style: enteTextTheme.body.copyWith(
-                    color: colorScheme.textMuted,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                return Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        emailNotifier.value!,
+                        style: enteTextTheme.body.copyWith(
+                          color: colorScheme.textMuted,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                    if (localSettings.enableDatabaseLogging)
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const LogViewerPage(),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          child: Icon(
+                            Icons.bug_report,
+                            size: 20,
+                            color: colorScheme.textMuted,
+                          ),
+                        ),
+                      ),
+                  ],
                 );
               },
             ),

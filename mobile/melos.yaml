@@ -6,6 +6,7 @@ name: ente_workspace
 packages:
   - apps/*
   - packages/*
+  - apps/photos/plugins/*
 
 # Scripts that can be run with `melos run <script_name>`
 scripts:
@@ -68,3 +69,12 @@ scripts:
   build:locker:ios:
     run: melos exec --scope="locker" -- "flutter build ios --release"
     description: Build a release iOS archive for the 'locker' app.
+
+  # --- PLUGIN-SPECIFIC COMMANDS ---
+  get:plugins:
+    run: melos exec --depends-on="flutter" --scope="ente_*" -- "flutter pub get"
+    description: Run "flutter pub get" in all plugin packages.
+
+  clean:plugins:
+    run: melos exec --depends-on="flutter" --scope="ente_*" -- "flutter clean"
+    description: Clean all plugin packages.

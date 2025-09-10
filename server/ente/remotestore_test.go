@@ -11,7 +11,9 @@ func TestIsValidDomainWithoutScheme(t *testing.T) {
 		// ✅ Valid cases
 		{"simple domain", "google.com", false},
 		{"multi-level domain", "sub.example.co.in", false},
+		{"multi-level domain", "photos.ä.com", false},
 		{"numeric in label", "a1b2c3.com", false},
+		{"idn", "テスト.jp", false},
 		{"long but valid label", "my-very-long-subdomain-name.example.com", false},
 
 		// ❌ Leading/trailing spaces

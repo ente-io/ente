@@ -13,7 +13,7 @@ import "package:ente_lock_screen/ui/lock_screen_options.dart";
 import "package:ente_ui/components/captioned_text_widget.dart";
 import "package:ente_ui/components/menu_item_widget.dart";
 import "package:ente_ui/components/toggle_switch_widget.dart";
-import "package:ente_ui/theme/ente_theme.dart";
+import "package:ente_ui/theme/ente_theme.dart"; 
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_ui/utils/toast_util.dart";
 import "package:ente_utils/navigation_util.dart";
@@ -122,7 +122,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
         onTap: () async {
-          if (await LockScreenSettings.instance.shouldShowLockScreen()) {
+          if (await LockScreenSettings.instance.isDeviceSupported()) {
             final bool result = await requestAuthentication(
               context,
               context.l10n.authToChangeLockscreenSetting,
@@ -137,19 +137,17 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               );
             }
           } else {
-            await Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return const LockScreenOptions();
-                },
-              ),
+            await showErrorDialog(
+              context,
+              context.l10n.noSystemLockFound,
+              context.l10n.toEnableAppLockPleaseSetupDevicePasscodeOrScreen,
             );
           }
         },
       ),
       sectionOptionSpacing,
     ]);
-    
+
     return Column(
       children: children,
     );

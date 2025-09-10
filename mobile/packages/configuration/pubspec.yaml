@@ -8,8 +8,6 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
-  flutter:
-    sdk: flutter
   bip39: ^1.0.6
   ente_base:
     path: ../../packages/base
@@ -20,14 +18,16 @@ dependencies:
     path: ../../packages/events
   ente_logging:
     path: ../../packages/logging
+  flutter:
+    sdk: flutter
   flutter_secure_storage: ^9.0.0
   path_provider: ^2.1.5
   shared_preferences: ^2.5.3
   tuple: ^2.0.2
 
 dev_dependencies:
+  flutter_lints: ^5.0.0
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
 
 flutter:

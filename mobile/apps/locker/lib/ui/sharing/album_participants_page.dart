@@ -1,4 +1,5 @@
 import "package:ente_sharing/models/user.dart";
+import "package:ente_sharing/user_avator_widget.dart";
 import "package:ente_ui/components/captioned_text_widget.dart";
 import "package:ente_ui/components/divider_widget.dart";
 import "package:ente_ui/components/menu_item_widget.dart";
@@ -14,7 +15,6 @@ import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/configuration.dart";
 import "package:locker/ui/sharing/add_participant_page.dart";
 import "package:locker/ui/sharing/manage_album_participant.dart";
-import "package:locker/ui/sharing/user_avator_widget.dart";
 
 class AlbumParticipantsPage extends StatefulWidget {
   final Collection collection;
@@ -119,6 +119,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                             leadingIconWidget: UserAvatarWidget(
                               owner,
                               currentUserID: currentUserID,
+                              config: Configuration.instance,
                             ),
                             leadingIconSize: 24,
                             menuItemColor: colorScheme.fillFaint,
@@ -165,6 +166,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                             currentUser,
                             type: AvatarType.mini,
                             currentUserID: currentUserID,
+                            config: Configuration.instance,
                           ),
                           menuItemColor: getEnteColorScheme(context).fillFaint,
                           trailingIcon: isOwner ? Icons.chevron_right : null,
@@ -243,6 +245,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                             currentUser,
                             type: AvatarType.mini,
                             currentUserID: currentUserID,
+                            config: Configuration.instance,
                           ),
                           menuItemColor: getEnteColorScheme(context).fillFaint,
                           trailingIcon: isOwner ? Icons.chevron_right : null,

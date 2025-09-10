@@ -47,15 +47,16 @@ class _VideoStreamChangeWidgetState extends State<VideoStreamChangeWidget> {
       final status = event.status;
 
       // Handle different states - will be false for different files or non-processing states
-      final newProcessingState = widget.file.uploadedFileID == fileId && switch (status) {
-        PreviewItemStatus.inQueue ||
-        PreviewItemStatus.retry ||
-        PreviewItemStatus.compressing ||
-        PreviewItemStatus.uploading =>
-          true,
-        _ => false,
-      };
-      
+      final newProcessingState = widget.file.uploadedFileID == fileId &&
+          switch (status) {
+            PreviewItemStatus.inQueue ||
+            PreviewItemStatus.retry ||
+            PreviewItemStatus.compressing ||
+            PreviewItemStatus.uploading =>
+              true,
+            _ => false,
+          };
+
       // Only update state if value changed
       if (isCurrentlyProcessing != newProcessingState) {
         isCurrentlyProcessing = newProcessingState;

@@ -896,4 +896,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get leaveSharedCollection => 'Leave shared collection?';
+
+  @override
+  String get noSystemLockFound => 'No system lock found';
+
+  @override
+  String get toEnableAppLockPleaseSetupDevicePasscodeOrScreen =>
+      'To enable app lock, please setup device passcode or screen lock in your system settings.';
+
+  @override
+  String get legacy => 'Legacy';
+
+  @override
+  String get authToManageLegacy =>
+      'Please authenticate to manage your trusted contacts';
 }

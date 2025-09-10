@@ -1294,6 +1294,288 @@ abstract class StringsLocalizations {
   /// In en, this message translates to:
   /// **'Endpoint updated successfully'**
   String get endpointUpdatedMessage;
+
+  /// No description provided for @yes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get yes;
+
+  /// No description provided for @remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get remove;
+
+  /// No description provided for @addMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Add more'**
+  String get addMore;
+
+  /// No description provided for @somethingWentWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong'**
+  String get somethingWentWrong;
+
+  /// No description provided for @legacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Legacy'**
+  String get legacy;
+
+  /// No description provided for @recoveryWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'A trusted contact is trying to access your account'**
+  String get recoveryWarning;
+
+  /// No description provided for @recoveryWarningBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{email} is trying to recover your account.'**
+  String recoveryWarningBody(Object email);
+
+  /// No description provided for @legacyPageDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Legacy allows trusted contacts to access your account in your absence.'**
+  String get legacyPageDesc;
+
+  /// No description provided for @legacyPageDesc2.
+  ///
+  /// In en, this message translates to:
+  /// **'Trusted contacts can initiate account recovery, and if not blocked within 30 days, reset your password and access your account.'**
+  String get legacyPageDesc2;
+
+  /// No description provided for @legacyAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Legacy accounts'**
+  String get legacyAccounts;
+
+  /// No description provided for @trustedContacts.
+  ///
+  /// In en, this message translates to:
+  /// **'Trusted contacts'**
+  String get trustedContacts;
+
+  /// No description provided for @addTrustedContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Trusted Contact'**
+  String get addTrustedContact;
+
+  /// No description provided for @removeInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove invite'**
+  String get removeInvite;
+
+  /// No description provided for @rejectRecovery.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject recovery'**
+  String get rejectRecovery;
+
+  /// No description provided for @recoveryInitiated.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery initiated'**
+  String get recoveryInitiated;
+
+  /// No description provided for @recoveryInitiatedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'You can access the account after {days} days. A notification will be sent to {email}.'**
+  String recoveryInitiatedDesc(int days, String email);
+
+  /// No description provided for @removeYourselfAsTrustedContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove yourself as trusted contact'**
+  String get removeYourselfAsTrustedContact;
+
+  /// No description provided for @declineTrustInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline Invite'**
+  String get declineTrustInvite;
+
+  /// No description provided for @cancelAccountRecovery.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel recovery'**
+  String get cancelAccountRecovery;
+
+  /// No description provided for @recoveryAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Recover account'**
+  String get recoveryAccount;
+
+  /// No description provided for @cancelAccountRecoveryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to cancel recovery?'**
+  String get cancelAccountRecoveryBody;
+
+  /// No description provided for @startAccountRecoveryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start recovery'**
+  String get startAccountRecoveryTitle;
+
+  /// No description provided for @whyAddTrustContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Trusted contact can help in recovering your data.'**
+  String get whyAddTrustContact;
+
+  /// No description provided for @recoveryReady.
+  ///
+  /// In en, this message translates to:
+  /// **'You can now recover {email}\'s account by setting a new password.'**
+  String recoveryReady(String email);
+
+  /// No description provided for @warning.
+  ///
+  /// In en, this message translates to:
+  /// **'Warning'**
+  String get warning;
+
+  /// No description provided for @proceed.
+  ///
+  /// In en, this message translates to:
+  /// **'Proceed'**
+  String get proceed;
+
+  /// No description provided for @done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get done;
+
+  /// No description provided for @enterEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter email'**
+  String get enterEmail;
+
+  /// No description provided for @verifyIDLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify'**
+  String get verifyIDLabel;
+
+  /// No description provided for @invalidEmailAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email address'**
+  String get invalidEmailAddress;
+
+  /// No description provided for @enterValidEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid email address.'**
+  String get enterValidEmail;
+
+  /// No description provided for @addANewEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a new email'**
+  String get addANewEmail;
+
+  /// No description provided for @orPickAnExistingOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Or pick an existing one'**
+  String get orPickAnExistingOne;
+
+  /// No description provided for @shareTextRecommendUsingEnte.
+  ///
+  /// In en, this message translates to:
+  /// **'Download Ente so we can easily share original quality files\n\nhttps://ente.io'**
+  String get shareTextRecommendUsingEnte;
+
+  /// No description provided for @sendInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Send invite'**
+  String get sendInvite;
+
+  /// No description provided for @trustedInviteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You have been invited to be a legacy contact by {email}.'**
+  String trustedInviteBody(Object email);
+
+  /// No description provided for @verifyEmailID.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify {email}'**
+  String verifyEmailID(Object email);
+
+  /// No description provided for @thisIsYourVerificationId.
+  ///
+  /// In en, this message translates to:
+  /// **'This is your Verification ID'**
+  String get thisIsYourVerificationId;
+
+  /// No description provided for @someoneSharingAlbumsWithYouShouldSeeTheSameId.
+  ///
+  /// In en, this message translates to:
+  /// **'Someone sharing albums with you should see the same ID on their device.'**
+  String get someoneSharingAlbumsWithYouShouldSeeTheSameId;
+
+  /// No description provided for @howToViewShareeVerificationID.
+  ///
+  /// In en, this message translates to:
+  /// **'Please ask them to long-press their email address on the settings screen, and verify that the IDs on both devices match.'**
+  String get howToViewShareeVerificationID;
+
+  /// No description provided for @thisIsPersonVerificationId.
+  ///
+  /// In en, this message translates to:
+  /// **'This is {email}\'s Verification ID'**
+  String thisIsPersonVerificationId(String email);
+
+  /// No description provided for @confirmAddingTrustedContact.
+  ///
+  /// In en, this message translates to:
+  /// **'You are about to add {email} as a trusted contact. They will be able to recover your account if you are absent for {numOfDays} days.'**
+  String confirmAddingTrustedContact(String email, int numOfDays);
+
+  /// No description provided for @youCannotShareWithYourself.
+  ///
+  /// In en, this message translates to:
+  /// **'You cannot share with yourself'**
+  String get youCannotShareWithYourself;
+
+  /// No description provided for @emailNoEnteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'{email} does not have an Ente account.\n\nSend them an invite to share files.'**
+  String emailNoEnteAccount(Object email);
+
+  /// No description provided for @shareMyVerificationID.
+  ///
+  /// In en, this message translates to:
+  /// **'Here\'s my verification ID: {verificationID} for ente.io.'**
+  String shareMyVerificationID(Object verificationID);
+
+  /// No description provided for @shareTextConfirmOthersVerificationID.
+  ///
+  /// In en, this message translates to:
+  /// **'Hey, can you confirm that this is your ente.io verification ID: {verificationID}'**
+  String shareTextConfirmOthersVerificationID(Object verificationID);
+
+  /// No description provided for @inviteToEnte.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite to Ente'**
+  String get inviteToEnte;
 }
 
 class _StringsLocalizationsDelegate

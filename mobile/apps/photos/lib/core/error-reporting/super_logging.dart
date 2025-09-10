@@ -5,9 +5,10 @@ import 'dart:io';
 
 import "package:dio/dio.dart";
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:log_viewer/log_viewer.dart';
 import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart';
@@ -218,6 +219,19 @@ class SuperLogging {
       }),
     );
 
+    // Initialize log viewer integration in debug mode
+    // Initialize log viewer in debug mode only
+  if (_preferences.getBool("enable_db_logging") ?? kDebugMode) {
+    try {
+      await LogViewer.initialize();
+      // Register LogViewer with SuperLogging to receive logs with process prefix
+      LogViewer.registerWithSuperLogging(SuperLogging.registerLogCallback);
+      $.info("Log viewer initialized successfully");
+    } catch (e) {
+      $.warning("Failed to initialize log viewer: $e");
+    }
+  }
+
     if (appConfig.body == null) return;
 
     if (enable && sentryIsEnabled) {
@@ -297,6 +311,17 @@ class SuperLogging {
     printLog(str);
 
     saveLogString(str, rec.error);
+    // Hook for external log viewer (if available)
+    // This allows the log_viewer package to capture logs without creating a dependency
+    if(_logViewerCallback != null) {
+    try {
+      if (_logViewerCallback != null) {
+        _logViewerCallback!(rec, config.prefix);
+      }
+    } catch (_) {
+      // Silently ignore any errors from the log viewer
+    }
+    }
   }
 
   static void saveLogString(String str, Object? error) {
@@ -312,6 +337,15 @@ class SuperLogging {
     if (sentryIsEnabled && error != null) {
       _sendErrorToSentry(error, null).ignore();
     }
+  }
+
+  // Callback that can be set by external packages (like log_viewer)
+  static void Function(LogRecord, String)? _logViewerCallback;
+
+  /// Register a callback to receive log records
+  /// This is used by the log_viewer package to capture logs
+  static void registerLogCallback(void Function(LogRecord, String) callback) {
+    _logViewerCallback = callback;
   }
 
   static final Queue<String> fileQueueEntries = Queue();
@@ -454,5 +488,16 @@ class SuperLogging {
     }
     final pkgName = (await PackageInfo.fromPlatform()).packageName;
     return pkgName.startsWith("io.ente.photos.fdroid");
+  }
+
+  /// Show the log viewer page
+  /// This is the main integration point for accessing the log viewer
+  static void showLogViewer(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const LogViewerPage(),
+      ),
+    );
   }
 }

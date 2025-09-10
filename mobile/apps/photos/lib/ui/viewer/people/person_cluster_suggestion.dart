@@ -104,7 +104,8 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
               return Center(
                 child: Text(
                   AppLocalizations.of(context).noSuggestionsForPerson(
-                      personName: widget.person.data.name,),
+                    personName: widget.person.data.name,
+                  ),
                   style: getEnteTextTheme(context).largeMuted,
                 ),
               );
