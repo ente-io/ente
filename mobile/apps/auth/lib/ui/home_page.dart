@@ -231,7 +231,6 @@ Widget _buildTrashSelectActions() {
 
   // Determine the state of the current selection (pinned/unpinned)
   final bool allArePinned = codesToUpdate.every((code) => code.isPinned);
-  final bool allAreUnpinned = codesToUpdate.every((code) => !code.isPinned);
 
   if (allArePinned) {
     // if all are pinned, unpin all
