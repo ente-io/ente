@@ -17,7 +17,7 @@ class LogStore {
   // Buffer for batch inserts - optimized for small entries
   final List<LogEntry> _buffer = [];
   Timer? _flushTimer;
-  static const int _bufferSize = 10; 
+  static const int _bufferSize = 10;
   static const int _maxBufferSize = 200; // Safety limit
 
   bool _initialized = false;
@@ -83,10 +83,12 @@ class LogStore {
     _buffer.clear();
 
     // Use non-blocking database insert for better write performance
-    unawaited(_database.insertLogs(toInsert).catchError((e) {
-      // ignore: avoid_print
-      print('Failed to insert logs to database: $e');
-    }),);
+    unawaited(
+      _database.insertLogs(toInsert).catchError((e) {
+        // ignore: avoid_print
+        print('Failed to insert logs to database: $e');
+      }),
+    );
   }
 
   /// Get logs with filtering
@@ -187,14 +189,16 @@ class LogStore {
     final logs = await getLogs(filter: filter, limit: 10000);
 
     final jsonLogs = logs
-        .map((log) => {
-              'timestamp': log.timestamp.toIso8601String(),
-              'level': log.level,
-              'logger': log.loggerName,
-              'message': log.message,
-              if (log.error != null) 'error': log.error,
-              if (log.stackTrace != null) 'stackTrace': log.stackTrace,
-            },)
+        .map(
+          (log) => {
+            'timestamp': log.timestamp.toIso8601String(),
+            'level': log.level,
+            'logger': log.loggerName,
+            'message': log.message,
+            if (log.error != null) 'error': log.error,
+            if (log.stackTrace != null) 'stackTrace': log.stackTrace,
+          },
+        )
         .toList();
 
     // Manual JSON formatting for readability

@@ -1,1 +1,4 @@
+- Laurens: text embedding caching for memories and discover
+- Neeraj: (i) Option to send qr for link
+- Neeraj: (i) Debug option to enable logViewer
 - Neeraj: Potential fix for ios in-app payment

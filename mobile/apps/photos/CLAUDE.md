@@ -196,6 +196,11 @@ lib/
 - Ensure documentation reflects the current implementation
 - Update examples in specs if behavior changes
 
+### 5. Database Methods - BEST PRACTICE
+**Prioritize readability in database methods**
+- For small result sets (e.g., 1-2 stale entries), prefer filtering in Dart for cleaner, more readable code
+- For large datasets, use SQL WHERE clauses for performance - they're much more efficient in SQLite
+
 ## Important Notes
 
 - Large service files (some 70k+ lines) - consider file context when editing

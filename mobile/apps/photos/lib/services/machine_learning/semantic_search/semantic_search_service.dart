@@ -193,15 +193,22 @@ class SemanticSearchService {
     return results;
   }
 
-  Future<Map<String, List<int>>> getMatchingFileIDs(
+  /// Get matching file IDs for common repeated queries like smart memories and magic cache.
+  /// WARNING: Use this method carefully - it uses persistent caching which is only
+  /// beneficial for queries that are repeated across app sessions.
+  /// For regular user searches, use getMatchingFiles instead.
+  Future<Map<String, List<int>>> getMatchingFileIDsForCommonQueries(
     Map<String, double> queryToScore,
   ) async {
     final textEmbeddings = <String, List<double>>{};
     final minimumSimilarityMap = <String, double>{};
+
     for (final entry in queryToScore.entries) {
       final query = entry.key;
       final score = entry.value;
-      final textEmbedding = await _getTextEmbedding(query);
+      // Use cache service instead of _getTextEmbedding
+      final textEmbedding =
+          await textEmbeddingsCacheService.getEmbedding(query);
       textEmbeddings[query] = textEmbedding;
       minimumSimilarityMap[query] = score;
     }
@@ -210,6 +217,7 @@ class SemanticSearchService {
       textEmbeddings,
       minimumSimilarityMap: minimumSimilarityMap,
     );
+
     final result = <String, List<int>>{};
     for (final entry in queryResults.entries) {
       final query = entry.key;
