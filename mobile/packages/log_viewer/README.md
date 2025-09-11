@@ -10,6 +10,7 @@ A Flutter package that provides an in-app log viewer with advanced filtering cap
 - 📊 SQLite-based storage with automatic truncation
 - 📤 Export filtered logs as text
 - ⚡ Performance optimized with batch inserts and indexing
+- 🏷️ Optional prefix support for multi-process logging
 
 ## Usage
 
@@ -21,8 +22,11 @@ import 'package:log_viewer/log_viewer.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize log viewer
+  // Initialize log viewer (basic)
   await LogViewer.initialize();
+  
+  // Or with a prefix for multi-process apps
+  await LogViewer.initialize(prefix: '[MAIN]');
   
   runApp(MyApp());
 }
@@ -38,9 +42,9 @@ LogViewer.openViewer(context);
 LogViewer.getViewerPage()
 ```
 
-### 3. The log viewer will automatically capture all logs
+### 3. Automatic log capture
 
-The package integrates with the Ente logging system to automatically capture and store logs.
+The log viewer automatically registers with `Logger.root.onRecord` to capture all logs from the logging package. No additional setup is required.
 
 ## Filtering Options
 
