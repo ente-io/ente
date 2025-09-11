@@ -18,8 +18,8 @@ import { TripMap } from "./TripMap";
 import { TripStartedSection } from "./TripStartedSection";
 
 // Import hooks
-import { useFileViewer } from "./hooks/useFileViewer";
 import { useDataProcessing } from "./hooks/useDataProcessing";
+import { useFileViewer } from "./hooks/useFileViewer";
 import { useLocationFetching } from "./hooks/useLocationFetching";
 import { useScrollHandling } from "./hooks/useScrollHandling";
 import { useThumbnailGeneration } from "./hooks/useThumbnailGeneration";
@@ -383,6 +383,18 @@ const TimelineSidebar = styled(Box)(({ theme }) => ({
     backgroundColor: theme.palette.background.paper,
     zIndex: 1000,
     borderRadius: "48px",
+    "&::-webkit-scrollbar": { width: "8px" },
+    "&::-webkit-scrollbar-track": {
+        background: "transparent",
+        borderRadius: "48px",
+    },
+    "&::-webkit-scrollbar-thumb": {
+        background: theme.palette.divider,
+        borderRadius: "48px",
+        "&:hover": { background: theme.palette.text.disabled },
+    },
+    scrollbarWidth: "thin",
+    scrollbarColor: `${theme.palette.divider} transparent`,
 }));
 
 const TimelineContent = styled(Box)({ padding: "32px" });
