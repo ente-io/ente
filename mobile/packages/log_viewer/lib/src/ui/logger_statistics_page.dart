@@ -167,64 +167,78 @@ class _LoggerStatisticsPageState extends State<LoggerStatisticsPage> {
 
                                 return Card(
                                   margin: const EdgeInsets.only(bottom: 8),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(16),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Expanded(
-                                              child: Text(
-                                                stat.loggerName,
+                                  child: InkWell(
+                                    onTap: () {
+                                      // Navigate back to log viewer with logger filter in search
+                                      Navigator.pop(
+                                        context,
+                                        'logger:${stat.loggerName}',
+                                      );
+                                    },
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                  stat.loggerName,
+                                                  style: theme
+                                                      .textTheme.titleMedium
+                                                      ?.copyWith(
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                              Text(
+                                                stat.formattedPercentage,
                                                 style: theme
                                                     .textTheme.titleMedium
                                                     ?.copyWith(
+                                                  color: color,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: LinearProgressIndicator(
+                                                  value: stat.percentage / 100,
+                                                  backgroundColor: color
+                                                      .withValues(alpha: 0.2),
+                                                  valueColor:
+                                                      AlwaysStoppedAnimation(
+                                                    color,
+                                                  ),
+                                                  minHeight: 6,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 12),
+                                              Text(
+                                                '${stat.count} logs',
+                                                style: theme
+                                                    .textTheme.bodyMedium
+                                                    ?.copyWith(
+                                                  color: theme.colorScheme
+                                                      .onSurfaceVariant,
                                                   fontWeight: FontWeight.w500,
                                                 ),
-                                                overflow: TextOverflow.ellipsis,
                                               ),
-                                            ),
-                                            Text(
-                                              stat.formattedPercentage,
-                                              style: theme.textTheme.titleMedium
-                                                  ?.copyWith(
-                                                color: color,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Row(
-                                          children: [
-                                            Expanded(
-                                              child: LinearProgressIndicator(
-                                                value: stat.percentage / 100,
-                                                backgroundColor:
-                                                    color.withValues(alpha: 0.2),
-                                                valueColor:
-                                                    AlwaysStoppedAnimation(
-                                                        color,),
-                                                minHeight: 6,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 12),
-                                            Text(
-                                              '${stat.count} logs',
-                                              style: theme.textTheme.bodyMedium
-                                                  ?.copyWith(
-                                                color: theme.colorScheme
-                                                    .onSurfaceVariant,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
+                                            ],
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 );

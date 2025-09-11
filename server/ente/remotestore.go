@@ -3,6 +3,7 @@ package ente
 import (
 	"fmt"
 	"github.com/ente-io/stacktrace"
+	"golang.org/x/net/idna"
 	"regexp"
 	"strings"
 )
@@ -139,8 +140,17 @@ func isValidDomainWithoutScheme(input string) error {
 	if strings.Contains(trimmed, "://") {
 		return NewBadRequestWithMessage("domain should not contain scheme (e.g., http:// or https://)")
 	}
-	if !domainRegex.MatchString(trimmed) {
+
+	// Convert IDN to ASCII (Punycode) for validation
+	asciiDomain, err := idna.ToASCII(trimmed)
+	if err != nil {
+		return NewBadRequestWithMessage(fmt.Sprintf("invalid idn domain format: %s", trimmed))
+	}
+
+	// Validate the ASCII version
+	if !domainRegex.MatchString(asciiDomain) {
 		return NewBadRequestWithMessage(fmt.Sprintf("invalid domain format: %s", trimmed))
 	}
+
 	return nil
 }

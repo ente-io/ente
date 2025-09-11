@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 1.2.5+1205
+version: 1.2.6+1205
 publish_to: none
 
 environment:
@@ -177,6 +177,7 @@ dependencies:
       url: https://github.com/ente-io/privacy_screen.git
       ref: v2-only
   pro_image_editor: ^6.0.0
+  qr_flutter: ^4.1.0
   receive_sharing_intent: # pub.dev is behind
     git:
       url: https://github.com/KasemJaffer/receive_sharing_intent.git
@@ -348,7 +349,6 @@ flutter:
     - assets/image-editor/
     - assets/icons/
     - assets/launcher_icon/
-    - assets/ml/
   fonts:
     - family: Inter
       fonts:

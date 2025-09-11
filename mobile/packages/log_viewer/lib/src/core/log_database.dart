@@ -10,7 +10,7 @@ class LogDatabase {
   static const String _databaseName = 'log_viewer.db';
   static const String _tableName = 'logs';
   static const int _databaseVersion = 1;
-  
+
   final int maxEntries;
   Database? _database;
 
@@ -55,7 +55,6 @@ class LogDatabase {
       'CREATE INDEX idx_timestamp ON $_tableName(timestamp DESC)',
     );
   }
-
 
   /// Called when database is opened
   Future<void> _onOpen(Database db) async {
@@ -275,14 +274,17 @@ class LogDatabase {
       final toDelete = count - maxEntries;
 
       // Delete oldest entries
-      await db.execute('''
+      await db.execute(
+        '''
         DELETE FROM $_tableName 
         WHERE id IN (
           SELECT id FROM $_tableName 
           ORDER BY timestamp ASC 
           LIMIT ?
         )
-      ''', [toDelete],);
+      ''',
+        [toDelete],
+      );
     }
   }
 
@@ -358,11 +360,13 @@ class LogDatabase {
     final results = await db.rawQuery(statsQuery, args);
 
     return results
-        .map((row) => LoggerStatistic(
-              loggerName: row['logger_name'] as String,
-              logCount: row['count'] as int,
-              percentage: row['percentage'] as double,
-            ),)
+        .map(
+          (row) => LoggerStatistic(
+            loggerName: row['logger_name'] as String,
+            logCount: row['count'] as int,
+            percentage: row['percentage'] as double,
+          ),
+        )
         .toList();
   }
 
@@ -378,8 +382,12 @@ class LogDatabase {
 
     if (result.isNotEmpty && result.first['min_timestamp'] != null) {
       return TimeRange(
-        start: DateTime.fromMillisecondsSinceEpoch(result.first['min_timestamp'] as int),
-        end: DateTime.fromMillisecondsSinceEpoch(result.first['max_timestamp'] as int),
+        start: DateTime.fromMillisecondsSinceEpoch(
+          result.first['min_timestamp'] as int,
+        ),
+        end: DateTime.fromMillisecondsSinceEpoch(
+          result.first['max_timestamp'] as int,
+        ),
       );
     }
 
@@ -396,7 +404,11 @@ class LogDatabase {
     ''');
 
     return result
-        .map((row) => DateTime.fromMillisecondsSinceEpoch(row['timestamp'] as int))
+        .map(
+          (row) => DateTime.fromMillisecondsSinceEpoch(
+            row['timestamp'] as int,
+          ),
+        )
         .toList();
   }
 

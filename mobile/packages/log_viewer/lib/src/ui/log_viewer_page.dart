@@ -25,7 +25,9 @@ class _LogViewerPageState extends State<LogViewerPage> {
   List<LogEntry> _logs = [];
   List<String> _availableLoggers = [];
   List<String> _availableProcesses = [];
-  LogFilter _filter = const LogFilter();
+  LogFilter _filter = const LogFilter(
+    selectedLevels: {'WARNING', 'SEVERE', 'SHOUT'},
+  );
   bool _isLoading = true;
   bool _isLoadingMore = false;
   bool _hasMoreLogs = true;
@@ -35,7 +37,7 @@ class _LogViewerPageState extends State<LogViewerPage> {
 
   // Time filtering state
   bool _timeFilterEnabled = false;
-  
+
   // Timeline state
   DateTime? _overallStartTime;
   DateTime? _overallEndTime;
@@ -178,10 +180,55 @@ class _LogViewerPageState extends State<LogViewerPage> {
   }
 
   void _onSearchChanged(String query) {
+    // Parse query for special syntax like "logger:SomeName"
+    String? searchText = query;
+    Set<String>? loggerFilters;
+
+    if (query.isNotEmpty) {
+      // Regular expression to match logger:name patterns
+      final loggerPattern = RegExp(r'logger:(\S+)');
+      final matches = loggerPattern.allMatches(query);
+
+      if (matches.isNotEmpty) {
+        loggerFilters = {};
+        for (final match in matches) {
+          final loggerName = match.group(1);
+          if (loggerName != null) {
+            // Support wildcards (e.g., Auth* matches AuthService, Authentication, etc.)
+            if (loggerName.endsWith('*')) {
+              final prefix = loggerName.substring(0, loggerName.length - 1);
+              // Find all loggers that start with this prefix
+              for (final logger in _availableLoggers) {
+                if (logger.startsWith(prefix)) {
+                  loggerFilters.add(logger);
+                }
+              }
+            } else {
+              loggerFilters.add(loggerName);
+            }
+          }
+        }
+
+        // Remove logger:name patterns from search text
+        searchText = query.replaceAll(loggerPattern, '').trim();
+        if (searchText.isEmpty) {
+          searchText = null;
+        }
+      }
+    } else {
+      // Clear logger filters when search is empty
+      loggerFilters = {};
+    }
+
     setState(() {
+      // Only update logger filters if logger: syntax was found or query is empty
+      final newLoggerFilters = loggerFilters ??
+          (query.isEmpty ? <String>{} : _filter.selectedLoggers);
+
       _filter = _filter.copyWith(
-        searchQuery: query.isEmpty ? null : query,
+        searchQuery: searchText,
         clearSearchQuery: query.isEmpty,
+        selectedLoggers: newLoggerFilters,
       );
     });
     _loadLogs();
@@ -189,7 +236,9 @@ class _LogViewerPageState extends State<LogViewerPage> {
 
   void _updateTimeFilter() {
     setState(() {
-      if (_timeFilterEnabled && _timelineStartTime != null && _timelineEndTime != null) {
+      if (_timeFilterEnabled &&
+          _timelineStartTime != null &&
+          _timelineEndTime != null) {
         _filter = _filter.copyWith(
           startTime: _timelineStartTime,
           endTime: _timelineEndTime,
@@ -264,7 +313,7 @@ class _LogViewerPageState extends State<LogViewerPage> {
   Future<void> _exportLogs() async {
     try {
       final logText = await _logStore.exportLogs(filter: _filter);
-      
+
       await Share.share(logText, subject: 'App Logs');
     } catch (e) {
       if (mounted) {
@@ -284,13 +333,19 @@ class _LogViewerPageState extends State<LogViewerPage> {
     _loadLogs();
   }
 
-  void _showAnalytics() {
-    Navigator.push(
+  void _showAnalytics() async {
+    final result = await Navigator.push<String>(
       context,
       MaterialPageRoute(
         builder: (context) => LoggerStatisticsPage(filter: _filter),
       ),
     );
+
+    // If a logger filter was returned, apply it to the search box
+    if (result != null && mounted) {
+      _searchController.text = result;
+      _onSearchChanged(result);
+    }
   }
 
   void _showLogDetail(LogEntry log) {
@@ -301,7 +356,6 @@ class _LogViewerPageState extends State<LogViewerPage> {
       ),
     );
   }
-
 
   @override
   void dispose() {
@@ -349,9 +403,11 @@ class _LogViewerPageState extends State<LogViewerPage> {
               tooltip: 'Filters',
             ),
           IconButton(
-            icon: Icon(_filter.sortNewestFirst
-                ? Icons.arrow_downward
-                : Icons.arrow_upward,),
+            icon: Icon(
+              _filter.sortNewestFirst
+                  ? Icons.arrow_downward
+                  : Icons.arrow_upward,
+            ),
             onPressed: _toggleSort,
             tooltip: _filter.sortNewestFirst
                 ? 'Sort oldest first'
@@ -406,15 +462,17 @@ class _LogViewerPageState extends State<LogViewerPage> {
           // Search bar
           Container(
             color: theme.appBarTheme.backgroundColor,
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
             child: TextField(
               controller: _searchController,
+              style: const TextStyle(fontSize: 14),
               decoration: InputDecoration(
                 hintText: 'Search logs...',
-                prefixIcon: const Icon(Icons.search),
+                hintStyle: const TextStyle(fontSize: 14),
+                prefixIcon: const Icon(Icons.search, size: 20),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
-                        icon: const Icon(Icons.clear),
+                        icon: const Icon(Icons.clear, size: 20),
                         onPressed: () {
                           _searchController.clear();
                           _onSearchChanged('');
@@ -424,7 +482,9 @@ class _LogViewerPageState extends State<LogViewerPage> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                isDense: true,
               ),
               onChanged: _onSearchChanged,
             ),
@@ -470,7 +530,9 @@ class _LogViewerPageState extends State<LogViewerPage> {
                       });
                       _updateTimeFilter();
                     },
-                    tooltip: _timeFilterEnabled ? 'Disable Timeline Filter' : 'Enable Timeline Filter',
+                    tooltip: _timeFilterEnabled
+                        ? 'Disable Timeline Filter'
+                        : 'Enable Timeline Filter',
                   ),
                 ],
               ),
@@ -496,76 +558,89 @@ class _LogViewerPageState extends State<LogViewerPage> {
                 scrollDirection: Axis.horizontal,
                 children: [
                   if (_filter.selectedLoggers.isNotEmpty)
-                    ..._filter.selectedLoggers.map((logger) => Padding(
-                          padding: const EdgeInsets.only(right: 4),
-                          child: Chip(
-                            label: Text(logger,
-                                style: const TextStyle(fontSize: 12),),
-                            deleteIcon: const Icon(Icons.close, size: 16),
-                            onDeleted: () {
-                              setState(() {
-                                final newLoggers =
-                                    Set<String>.from(_filter.selectedLoggers);
-                                newLoggers.remove(logger);
-                                _filter = _filter.copyWith(
-                                    selectedLoggers: newLoggers,);
-                              });
-                              _loadLogs();
-                            },
+                    ..._filter.selectedLoggers.map(
+                      (logger) => Padding(
+                        padding: const EdgeInsets.only(right: 4),
+                        child: Chip(
+                          label: Text(
+                            logger,
+                            style: const TextStyle(fontSize: 12),
                           ),
-                        ),),
+                          deleteIcon: const Icon(Icons.close, size: 16),
+                          onDeleted: () {
+                            setState(() {
+                              final newLoggers =
+                                  Set<String>.from(_filter.selectedLoggers);
+                              newLoggers.remove(logger);
+                              _filter = _filter.copyWith(
+                                selectedLoggers: newLoggers,
+                              );
+                            });
+                            _loadLogs();
+                          },
+                        ),
+                      ),
+                    ),
                   if (_filter.selectedLevels.isNotEmpty)
-                    ..._filter.selectedLevels.map((level) => Padding(
-                          padding: const EdgeInsets.only(right: 4),
-                          child: Chip(
-                            label: Text(level,
-                                style: const TextStyle(fontSize: 12),),
-                            backgroundColor: LogEntry(
+                    ..._filter.selectedLevels.map(
+                      (level) => Padding(
+                        padding: const EdgeInsets.only(right: 4),
+                        child: Chip(
+                          label: Text(
+                            level,
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                          backgroundColor: LogEntry(
+                            message: '',
+                            level: level,
+                            timestamp: DateTime.now(),
+                            loggerName: '',
+                          ).levelColor.withValues(alpha: 0.2),
+                          deleteIcon: const Icon(Icons.close, size: 16),
+                          onDeleted: () {
+                            setState(() {
+                              final newLevels =
+                                  Set<String>.from(_filter.selectedLevels);
+                              newLevels.remove(level);
+                              _filter =
+                                  _filter.copyWith(selectedLevels: newLevels);
+                            });
+                            _loadLogs();
+                          },
+                        ),
+                      ),
+                    ),
+                  if (_filter.selectedProcesses.isNotEmpty)
+                    ..._filter.selectedProcesses.map(
+                      (process) => Padding(
+                        padding: const EdgeInsets.only(right: 4),
+                        child: Chip(
+                          label: Text(
+                            LogEntry(
                               message: '',
-                              level: level,
+                              level: 'INFO',
                               timestamp: DateTime.now(),
                               loggerName: '',
-                            ).levelColor.withValues(alpha: 0.2),
-                            deleteIcon: const Icon(Icons.close, size: 16),
-                            onDeleted: () {
-                              setState(() {
-                                final newLevels =
-                                    Set<String>.from(_filter.selectedLevels);
-                                newLevels.remove(level);
-                                _filter =
-                                    _filter.copyWith(selectedLevels: newLevels);
-                              });
-                              _loadLogs();
-                            },
+                              processPrefix: process,
+                            ).processDisplayName,
+                            style: const TextStyle(fontSize: 12),
                           ),
-                        ),),
-                  if (_filter.selectedProcesses.isNotEmpty)
-                    ..._filter.selectedProcesses.map((process) => Padding(
-                          padding: const EdgeInsets.only(right: 4),
-                          child: Chip(
-                            label: Text(
-                                LogEntry(
-                                  message: '',
-                                  level: 'INFO',
-                                  timestamp: DateTime.now(),
-                                  loggerName: '',
-                                  processPrefix: process,
-                                ).processDisplayName,
-                                style: const TextStyle(fontSize: 12),),
-                            backgroundColor: Colors.purple.withValues(alpha: 0.2),
-                            deleteIcon: const Icon(Icons.close, size: 16),
-                            onDeleted: () {
-                              setState(() {
-                                final newProcesses =
-                                    Set<String>.from(_filter.selectedProcesses);
-                                newProcesses.remove(process);
-                                _filter =
-                                    _filter.copyWith(selectedProcesses: newProcesses);
-                              });
-                              _loadLogs();
-                            },
-                          ),
-                        ),),
+                          backgroundColor: Colors.purple.withValues(alpha: 0.2),
+                          deleteIcon: const Icon(Icons.close, size: 16),
+                          onDeleted: () {
+                            setState(() {
+                              final newProcesses =
+                                  Set<String>.from(_filter.selectedProcesses);
+                              newProcesses.remove(process);
+                              _filter = _filter.copyWith(
+                                selectedProcesses: newProcesses,
+                              );
+                            });
+                            _loadLogs();
+                          },
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -611,7 +686,8 @@ class _LogViewerPageState extends State<LogViewerPage> {
                                 return const Padding(
                                   padding: EdgeInsets.all(16),
                                   child: Center(
-                                      child: CircularProgressIndicator(),),
+                                    child: CircularProgressIndicator(),
+                                  ),
                                 );
                               } else {
                                 // Trigger loading more when reaching the end
