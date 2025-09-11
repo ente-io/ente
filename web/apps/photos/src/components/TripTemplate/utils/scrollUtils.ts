@@ -214,6 +214,7 @@ export interface HandleMarkerClickParams {
     isClusterClickScrollingRef: React.MutableRefObject<boolean>;
     clusterClickTimeoutRef: React.MutableRefObject<NodeJS.Timeout | null>;
     setScrollProgress: (progress: number) => void;
+    setHasUserScrolled: (scrolled: boolean) => void;
     scrollTimelineToLocation: (locationIndex: number) => void;
 }
 
@@ -222,12 +223,13 @@ export const handleMarkerClick = ({
     clusterLat,
     clusterLng,
     photoClusters,
-    screenDimensions,
+    screenDimensions: _screenDimensions,
     mapRef,
     optimalZoom,
     isClusterClickScrollingRef,
     clusterClickTimeoutRef,
     setScrollProgress,
+    setHasUserScrolled,
     scrollTimelineToLocation,
 }: HandleMarkerClickParams) => {
     const targetProgress = clusterIndex / Math.max(1, photoClusters.length - 1);
@@ -238,6 +240,7 @@ export const handleMarkerClick = ({
 
     isClusterClickScrollingRef.current = true;
     setScrollProgress(targetProgress);
+    setHasUserScrolled(true);
 
     const allClusterLngs = photoClusters.map(
         (cluster) => cluster.reduce((sum, p) => sum + p.lng, 0) / cluster.length,

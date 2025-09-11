@@ -105,6 +105,7 @@ export const useScrollHandling = ({
                 isClusterClickScrollingRef,
                 clusterClickTimeoutRef,
                 setScrollProgress,
+                setHasUserScrolled,
                 scrollTimelineToLocation: scrollToLocation,
             });
         },
@@ -116,6 +117,7 @@ export const useScrollHandling = ({
             isClusterClickScrollingRef,
             clusterClickTimeoutRef,
             setScrollProgress,
+            setHasUserScrolled,
             scrollToLocation,
         ],
     );
