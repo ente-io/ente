@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { JourneyPoint } from "./types";
+import type { JourneyPoint } from "./types";
 import { PhotoFan } from "./PhotoFan";
 
 interface TimelineLocationProps {

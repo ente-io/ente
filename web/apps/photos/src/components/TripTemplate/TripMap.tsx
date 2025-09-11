@@ -1,0 +1,200 @@
+import L from "leaflet";
+import dynamic from "next/dynamic";
+import type { JourneyPoint } from "./types";
+import { MapEvents } from "./MapEvents";
+import {
+    createIcon,
+    createSuperClusterIcon,
+    detectScreenCollisions,
+    getMapCenter,
+} from "./mapHelpers";
+
+// Dynamically import react-leaflet components to prevent SSR issues
+const MapContainer = dynamic(
+    () => import("react-leaflet").then((mod) => mod.MapContainer),
+    { ssr: false },
+);
+const TileLayer = dynamic(
+    () => import("react-leaflet").then((mod) => mod.TileLayer),
+    { ssr: false },
+);
+const Marker = dynamic(
+    () => import("react-leaflet").then((mod) => mod.Marker),
+    { ssr: false },
+);
+
+interface TripMapProps {
+    journeyData: JourneyPoint[];
+    photoClusters: JourneyPoint[][];
+    hasPhotoData: boolean;
+    optimalZoom: number;
+    currentZoom: number;
+    targetZoom: number | null;
+    mapRef: L.Map | null;
+    scrollProgress: number;
+    screenDimensions: { width: number; height: number };
+    setMapRef: (map: L.Map | null) => void;
+    setCurrentZoom: (zoom: number) => void;
+    setTargetZoom: (zoom: number | null) => void;
+    onMarkerClick: (
+        clusterIndex: number,
+        clusterLat: number,
+        clusterLng: number,
+    ) => void;
+}
+
+export const TripMap: React.FC<TripMapProps> = ({
+    journeyData,
+    photoClusters,
+    hasPhotoData,
+    optimalZoom,
+    currentZoom,
+    targetZoom,
+    mapRef,
+    scrollProgress,
+    screenDimensions,
+    setMapRef,
+    setCurrentZoom,
+    setTargetZoom,
+    onMarkerClick,
+}) => {
+    // Calculate super-clusters based on screen collisions
+    const { superClusters, visibleClusters } = detectScreenCollisions(
+        photoClusters,
+        currentZoom,
+        targetZoom,
+        mapRef,
+        optimalZoom,
+    );
+
+    return (
+        <div
+            style={{
+                width: "100%",
+                height: "100%",
+                backgroundColor: hasPhotoData ? "transparent" : "#000000",
+            }}
+        >
+            {hasPhotoData ? (
+                <MapContainer
+                    center={getMapCenter(
+                        photoClusters,
+                        journeyData,
+                        screenDimensions,
+                    )}
+                    zoom={optimalZoom}
+                    style={{ width: "100%", height: "100%" }}
+                    scrollWheelZoom={true}
+                    zoomControl={false}
+                >
+                    <MapEvents
+                        setMapRef={setMapRef}
+                        setCurrentZoom={setCurrentZoom}
+                        setTargetZoom={setTargetZoom}
+                    />
+                    {/* Stadia Alidade Satellite - includes both imagery and labels */}
+                    <TileLayer
+                        attribution='&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
+                        url="https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg"
+                        maxZoom={20}
+                    />
+
+                    {/* Draw super-clusters (clickable for zoom and gallery) */}
+                    {superClusters.map((superCluster, index) => {
+                        // Check if this super-cluster has been reached
+                        const firstClusterIndex = superCluster.clustersInvolved[0];
+                        const isReached =
+                            firstClusterIndex !== undefined &&
+                            scrollProgress >=
+                                firstClusterIndex /
+                                    Math.max(1, photoClusters.length - 1);
+
+                        return (
+                            <Marker
+                                key={`super-cluster-${index}`}
+                                position={[superCluster.lat, superCluster.lng]}
+                                icon={createSuperClusterIcon(
+                                    superCluster.image, // Use representative photo (first photo of first cluster)
+                                    superCluster.clusterCount,
+                                    55,
+                                    isReached,
+                                )}
+                                eventHandlers={{
+                                    click: () => {
+                                        const firstClusterIndex =
+                                            superCluster.clustersInvolved[0];
+                                        if (firstClusterIndex !== undefined) {
+                                            onMarkerClick(
+                                                firstClusterIndex,
+                                                superCluster.lat,
+                                                superCluster.lng,
+                                            );
+                                        }
+                                    },
+                                }}
+                            />
+                        );
+                    })}
+
+                    {/* Draw visible regular clusters */}
+                    {visibleClusters.map((cluster, index) => {
+                        const firstPhoto = cluster[0];
+                        if (!firstPhoto) return null;
+                        const avgLat =
+                            cluster.reduce((sum, p) => sum + p.lat, 0) /
+                            cluster.length;
+                        const avgLng =
+                            cluster.reduce((sum, p) => sum + p.lng, 0) /
+                            cluster.length;
+
+                        // Find the original cluster index
+                        const originalClusterIndex = photoClusters.findIndex(
+                            (originalCluster) =>
+                                originalCluster.length === cluster.length &&
+                                originalCluster[0]?.image === cluster[0]?.image,
+                        );
+                        // Check if this location has been reached based on progress
+                        const isReached =
+                            scrollProgress >=
+                            originalClusterIndex /
+                                Math.max(1, photoClusters.length - 1);
+
+                        return (
+                            <Marker
+                                key={`cluster-${index}`}
+                                position={[avgLat, avgLng]}
+                                icon={createIcon(
+                                    firstPhoto.image,
+                                    55,
+                                    "#ffffff",
+                                    cluster.length,
+                                    isReached,
+                                )}
+                                eventHandlers={{
+                                    click: () => {
+                                        // Calculate cluster center
+                                        const avgLat =
+                                            cluster.reduce(
+                                                (sum, p) => sum + p.lat,
+                                                0,
+                                            ) / cluster.length;
+                                        const avgLng =
+                                            cluster.reduce(
+                                                (sum, p) => sum + p.lng,
+                                                0,
+                                            ) / cluster.length;
+                                        onMarkerClick(
+                                            originalClusterIndex,
+                                            avgLat,
+                                            avgLng,
+                                        );
+                                    },
+                                }}
+                            />
+                        );
+                    })}
+                </MapContainer>
+            ) : null}
+        </div>
+    );
+};

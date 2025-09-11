@@ -1,7 +1,7 @@
 import { memo } from "react";
 import Image from "next/image";
 import { EnteLogo } from "ente-base/components/EnteLogo";
-import { JourneyPoint } from "./types";
+import type { JourneyPoint } from "./types";
 
 interface TripCoverProps {
     journeyData: JourneyPoint[];

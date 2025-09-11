@@ -1,6 +1,6 @@
 import { memo } from "react";
 import Image from "next/image";
-import { JourneyPoint } from "./types";
+import type { JourneyPoint } from "./types";
 
 interface PhotoFanProps {
     cluster: JourneyPoint[];

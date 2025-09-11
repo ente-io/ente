@@ -1,5 +1,5 @@
 import L from "leaflet";
-import { GeocodingResponse } from "./types";
+import type { GeocodingResponse } from "./types";
 
 // Geocoding cache to avoid repeated API calls
 export const geocodingCache = new Map<string, { place: string; country: string }>();
@@ -8,7 +8,7 @@ export const geocodingCache = new Map<string, { place: string; country: string }
 export const iconCache = new Map<string, L.DivIcon>();
 
 // Throttle function for performance optimization
-export const throttle = <T extends (...args: any[]) => void>(
+export const throttle = <T extends (...args: unknown[]) => void>(
     func: T,
     delay: number
 ): ((...args: Parameters<T>) => void) => {
