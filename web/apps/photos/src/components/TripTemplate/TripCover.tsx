@@ -1,3 +1,4 @@
+import { Box, Typography, styled } from "@mui/material";
 import { memo } from "react";
 import Image from "next/image";
 import { EnteLogo } from "ente-base/components/EnteLogo";
@@ -36,16 +37,8 @@ export const TripCover = memo<TripCoverProps>(({
     });
 
     return (
-        <div style={{ marginBottom: "48px" }}>
-            <div
-                style={{
-                    aspectRatio: "16/8",
-                    position: "relative",
-                    marginBottom: "12px",
-                    borderRadius: "24px",
-                    overflow: "hidden",
-                }}
-            >
+        <CoverContainer>
+            <CoverImageContainer>
                 <Image
                     src={coverImageUrl || journeyData[0]?.image || ""}
                     alt="Trip Cover"
@@ -53,59 +46,72 @@ export const TripCover = memo<TripCoverProps>(({
                     style={{ objectFit: "cover" }}
                     sizes="(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 600px"
                 />
-                <div
-                    style={{
-                        position: "absolute",
-                        inset: 0,
-                        background:
-                            "linear-gradient(to bottom, rgba(0,0,0,0.4), transparent 30%, transparent 70%, rgba(0,0,0,0.7))",
-                    }}
-                ></div>
+                <GradientOverlay />
 
-                {/* Ente logo */}
-                <div
-                    style={{
-                        position: "absolute",
-                        top: "20px",
-                        left: "20px",
-                        color: "#22c55e",
-                    }}
-                >
+                <LogoContainer>
                     <EnteLogo height={24} />
-                </div>
+                </LogoContainer>
 
-                <div
-                    style={{
-                        position: "absolute",
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        padding: "24px",
-                        color: "white",
-                    }}
-                >
-                    <h1
-                        style={{
-                            fontSize: "30px",
-                            fontWeight: "bold",
-                            marginBottom: "2px",
-                        }}
-                    >
+                <ContentContainer>
+                    <TripTitle>
                         {albumTitle || "Trip"}
-                    </h1>
-                    <p
-                        style={{
-                            color: "rgba(255, 255, 255, 0.8)",
-                            fontSize: "16px",
-                            fontWeight: "600",
-                            margin: "0",
-                        }}
-                    >
+                    </TripTitle>
+                    <TripSubtitle>
                         {monthYear} • {diffDays} days •{" "}
                         {photoClusters.length} locations
-                    </p>
-                </div>
-            </div>
-        </div>
+                    </TripSubtitle>
+                </ContentContainer>
+            </CoverImageContainer>
+        </CoverContainer>
     );
+});
+
+// Styled components
+const CoverContainer = styled(Box)({
+    marginBottom: "48px",
+});
+
+const CoverImageContainer = styled(Box)({
+    aspectRatio: "16/8",
+    position: "relative",
+    marginBottom: "12px",
+    borderRadius: "24px",
+    overflow: "hidden",
+});
+
+const GradientOverlay = styled(Box)({
+    position: "absolute",
+    inset: 0,
+    background:
+        "linear-gradient(to bottom, rgba(0,0,0,0.4), transparent 30%, transparent 70%, rgba(0,0,0,0.7))",
+});
+
+const LogoContainer = styled(Box)(({ theme }) => ({
+    position: "absolute",
+    top: "20px",
+    left: "20px",
+    color: theme.palette.success.main,
+}));
+
+const ContentContainer = styled(Box)({
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: "24px",
+    color: "white",
+});
+
+const TripTitle = styled(Typography)({
+    fontSize: "30px",
+    fontWeight: "bold",
+    marginBottom: "2px",
+    component: "h1",
+});
+
+const TripSubtitle = styled(Typography)({
+    color: "rgba(255, 255, 255, 0.8)",
+    fontSize: "16px",
+    fontWeight: "600",
+    margin: "0",
 });

@@ -1,3 +1,4 @@
+import { Box, styled } from "@mui/material";
 import { memo } from "react";
 
 interface TimelineBaseLineProps {
@@ -29,30 +30,14 @@ export const TimelineBaseLine = memo<TimelineBaseLineProps>(({
 
     return (
         <>
-            {/* Long dashed line from trip started dot to first location */}
-            <div
-                style={{
-                    position: "absolute",
-                    left: "50%",
-                    transform: "translateX(-1.5px)",
-                    width: "3px",
-                    backgroundImage:
-                        "linear-gradient(to bottom, #d1d5db 58%, transparent 58%)",
-                    backgroundSize: "100% 22px",
-                    backgroundRepeat: "repeat-y",
+            <DashedLine
+                sx={{
                     top: "-60px",
                     height: `${firstLocationCenter + 60}px`,
-                    zIndex: 0,
                 }}
             />
-            {/* Solid line from first location to end */}
-            <div
-                style={{
-                    position: "absolute",
-                    left: "50%",
-                    transform: "translateX(-1.5px)",
-                    width: "3px",
-                    backgroundColor: "#d1d5db",
+            <SolidLine
+                sx={{
                     top: `${firstLocationCenter}px`,
                     height: `${heightToLastDot - firstLocationCenter}px`,
                 }}
@@ -60,3 +45,22 @@ export const TimelineBaseLine = memo<TimelineBaseLineProps>(({
         </>
     );
 });
+
+// Styled components
+const BaseLine = styled(Box)(({ theme }) => ({
+    position: "absolute",
+    left: "50%",
+    transform: "translateX(-1.5px)",
+    width: "3px",
+    zIndex: 0,
+}));
+
+const DashedLine = styled(BaseLine)(({ theme }) => ({
+    backgroundImage: `linear-gradient(to bottom, ${theme.palette.grey[300]} 58%, transparent 58%)`,
+    backgroundSize: "100% 22px",
+    backgroundRepeat: "repeat-y",
+}));
+
+const SolidLine = styled(BaseLine)(({ theme }) => ({
+    backgroundColor: theme.palette.grey[300],
+}));

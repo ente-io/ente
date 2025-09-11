@@ -1,3 +1,4 @@
+import { Box, styled } from "@mui/material";
 import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
 import { useSaveGroups } from "ente-gallery/components/utils/save-groups";
 import { FileViewer } from "ente-gallery/components/viewer/FileViewer";
@@ -82,39 +83,6 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
             onAddSaveGroup,
         );
     };
-    // Add CSS animation for spinner
-    useEffect(() => {
-        if (typeof document !== "undefined") {
-            const style = document.createElement("style");
-            style.textContent = `
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
-        }
-        @keyframes fadeInOut {
-          0% { opacity: 0; transform: translateY(-10px); }
-          15%, 85% { opacity: 1; transform: translateY(0); }
-          100% { opacity: 0; transform: translateY(-10px); }
-        }
-        .photo-fan-hover {
-          transition: transform 0.3s ease-in-out;
-          cursor: pointer;
-        }
-        .photo-fan-hover:hover {
-          transform: scale(1.05);
-        }
-      `;
-            document.head.appendChild(style);
-            return () => {
-                document.head.removeChild(style);
-            };
-        }
-        return undefined;
-    }, []);
 
     const [journeyData, setJourneyData] = useState<JourneyPoint[]>([]);
     const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
@@ -768,111 +736,28 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
     const hasPhotoData = journeyData.length > 0;
 
     return (
-        <div style={{ position: "relative", width: "100%", height: "100%" }}>
+        <TripTemplateContainer>
             <TopNavButtons
                 onAddPhotos={onAddPhotos}
                 downloadAllFiles={downloadAllFiles}
                 enableDownload={enableDownload}
             />
             {/* Left Sidebar - Floating Timeline */}
-            <div
-                ref={timelineRef}
-                style={{
-                    position: "absolute",
-                    left: "16px",
-                    top: "16px",
-                    bottom: "16px",
-                    width: "min(50%, 1000px)",
-                    overflow: "auto",
-                    boxShadow:
-                        "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
-                    backgroundColor: "white",
-                    zIndex: 1000,
-                    borderRadius: "48px",
-                }}
-            >
-                <div style={{ padding: "32px" }}>
+            <TimelineSidebar ref={timelineRef}>
+                <TimelineContent>
                     {isInitialLoad ? (
-                        // Show loading cover placeholder
-                        <div style={{ marginBottom: "96px" }}>
-                            <div
-                                style={{
-                                    aspectRatio: "16/8",
-                                    position: "relative",
-                                    marginBottom: "12px",
-                                    borderRadius: "24px",
-                                    overflow: "hidden",
-                                    backgroundColor: "#f3f4f6",
-                                    animation:
-                                        "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
-                                }}
-                            >
-                                <div
-                                    style={{
-                                        position: "absolute",
-                                        bottom: 0,
-                                        left: 0,
-                                        right: 0,
-                                        height: "128px",
-                                        background:
-                                            "linear-gradient(to top, rgba(0,0,0,0.3), transparent)",
-                                    }}
-                                ></div>
-                                <div
-                                    style={{
-                                        position: "absolute",
-                                        bottom: 0,
-                                        left: 0,
-                                        right: 0,
-                                        padding: "24px",
-                                        color: "rgba(255, 255, 255, 0.7)",
-                                    }}
-                                >
-                                    <div
-                                        style={{
-                                            height: "30px",
-                                            width: "200px",
-                                            backgroundColor:
-                                                "rgba(255, 255, 255, 0.2)",
-                                            borderRadius: "4px",
-                                            marginBottom: "2px",
-                                        }}
-                                    ></div>
-                                    <div
-                                        style={{
-                                            height: "16px",
-                                            width: "120px",
-                                            backgroundColor:
-                                                "rgba(255, 255, 255, 0.2)",
-                                            borderRadius: "4px",
-                                            margin: "0",
-                                        }}
-                                    ></div>
-                                </div>
-                            </div>
-                            <div
-                                style={{
-                                    display: "flex",
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                    padding: "60px 20px",
-                                    minHeight: "200px",
-                                }}
-                            >
-                                <div
-                                    style={{
-                                        animation: "spin 1s linear infinite",
-                                        borderRadius: "50%",
-                                        height: "40px",
-                                        width: "40px",
-                                        borderTop: "3px solid #10b981",
-                                        borderRight: "3px solid transparent",
-                                        borderBottom: "3px solid #10b981",
-                                        borderLeft: "3px solid transparent",
-                                    }}
-                                ></div>
-                            </div>
-                        </div>
+                        <LoadingCoverPlaceholder>
+                            <LoadingCoverImage>
+                                <CoverGradientOverlay />
+                                <CoverPlaceholderContent>
+                                    <PlaceholderTextBox sx={{ height: '30px', width: '200px', mb: '2px' }} />
+                                    <PlaceholderTextBox sx={{ height: '16px', width: '120px', margin: 0 }} />
+                                </CoverPlaceholderContent>
+                            </LoadingCoverImage>
+                            <LoadingSpinnerContainer>
+                                <LoadingSpinner />
+                            </LoadingSpinnerContainer>
+                        </LoadingCoverPlaceholder>
                     ) : journeyData.length > 0 ? (
                         <div>
                             <TripCover
@@ -882,45 +767,17 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
                                 coverImageUrl={coverImageUrl}
                             />
 
-                            {/* Show either loading spinner or trip started section + timeline */}
                             {isLoadingLocations ? (
-                                <div
-                                    style={{
-                                        position: "relative",
-                                        marginTop: "64px",
-                                        marginBottom: "200px",
-                                        textAlign: "center",
-                                        display: "flex",
-                                        justifyContent: "center",
-                                        alignItems: "center",
-                                    }}
-                                >
-                                    <div
-                                        style={{
-                                            animation:
-                                                "spin 1s linear infinite",
-                                            borderRadius: "50%",
-                                            height: "40px",
-                                            width: "40px",
-                                            borderTop: "3px solid #10b981",
-                                            borderRight:
-                                                "3px solid transparent",
-                                            borderBottom: "3px solid #10b981",
-                                            borderLeft: "3px solid transparent",
-                                        }}
-                                    ></div>
-                                </div>
+                                <LocationsLoadingContainer>
+                                    <LoadingSpinner />
+                                </LocationsLoadingContainer>
                             ) : (
                                 <>
                                     <TripStartedSection
                                         journeyData={journeyData}
                                     />
 
-                                    {/* Timeline */}
-                                    <div
-                                        style={{ position: "relative" }}
-                                        id="timeline-container"
-                                    >
+                                    <TimelineContainer id="timeline-container">
                                         <TimelineBaseLine
                                             locationPositions={
                                                 locationPositions
@@ -955,23 +812,20 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
                                             />
                                         ))}
 
-                                        {/* Bottom padding for scrolling */}
-                                        <div
-                                            style={{ marginBottom: "24px" }}
-                                        ></div>
-                                    </div>
+                                        <Box sx={{ mb: 3 }} />
+                                    </TimelineContainer>
                                 </>
                             )}
                         </div>
                     ) : (
-                        <div style={{ textAlign: "center" }}>
-                            <p style={{ color: "#4b5563" }}>
+                        <NoPhotosContainer>
+                            <Box sx={{ color: 'text.muted' }}>
                                 No photos with location data found.
-                            </p>
-                        </div>
+                            </Box>
+                        </NoPhotosContainer>
                     )}
-                </div>
-            </div>
+                </TimelineContent>
+            </TimelineSidebar>
 
             {/* Map Container */}
             <TripMap
@@ -1010,6 +864,112 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
                 saveGroups={saveGroups}
                 onRemoveSaveGroup={onRemoveSaveGroup}
             />
-        </div>
+        </TripTemplateContainer>
     );
 };
+
+// Styled components
+const TripTemplateContainer = styled(Box)({
+    position: "relative",
+    width: "100%",
+    height: "100%",
+});
+
+const TimelineSidebar = styled(Box)(({ theme }) => ({
+    position: "absolute",
+    left: "16px",
+    top: "16px",
+    bottom: "16px",
+    width: "min(50%, 1000px)",
+    overflow: "auto",
+    boxShadow: theme.shadows[10],
+    backgroundColor: theme.palette.background.paper,
+    zIndex: 1000,
+    borderRadius: "48px",
+}));
+
+const TimelineContent = styled(Box)({
+    padding: "32px",
+});
+
+const LoadingCoverPlaceholder = styled(Box)({
+    marginBottom: "96px",
+});
+
+const LoadingCoverImage = styled(Box)(({ theme }) => ({
+    aspectRatio: "16/8",
+    position: "relative",
+    marginBottom: "12px",
+    borderRadius: "24px",
+    overflow: "hidden",
+    backgroundColor: theme.palette.grey[200],
+    animation: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+    "@keyframes pulse": {
+        "0%, 100%": { opacity: 1 },
+        "50%": { opacity: 0.5 },
+    },
+}));
+
+const CoverGradientOverlay = styled(Box)({
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: "128px",
+    background: "linear-gradient(to top, rgba(0,0,0,0.3), transparent)",
+});
+
+const CoverPlaceholderContent = styled(Box)({
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: "24px",
+    color: "rgba(255, 255, 255, 0.7)",
+});
+
+const PlaceholderTextBox = styled(Box)({
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    borderRadius: "4px",
+});
+
+const LoadingSpinnerContainer = styled(Box)({
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: "60px 20px",
+    minHeight: "200px",
+});
+
+const LoadingSpinner = styled(Box)(({ theme }) => ({
+    animation: "spin 1s linear infinite",
+    borderRadius: "50%",
+    height: "40px",
+    width: "40px",
+    borderTop: `3px solid ${theme.palette.success.main}`,
+    borderRight: "3px solid transparent",
+    borderBottom: `3px solid ${theme.palette.success.main}`,
+    borderLeft: "3px solid transparent",
+    "@keyframes spin": {
+        from: { transform: "rotate(0deg)" },
+        to: { transform: "rotate(360deg)" },
+    },
+}));
+
+const LocationsLoadingContainer = styled(Box)({
+    position: "relative",
+    marginTop: "64px",
+    marginBottom: "200px",
+    textAlign: "center",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+});
+
+const TimelineContainer = styled(Box)({
+    position: "relative",
+});
+
+const NoPhotosContainer = styled(Box)({
+    textAlign: "center",
+});

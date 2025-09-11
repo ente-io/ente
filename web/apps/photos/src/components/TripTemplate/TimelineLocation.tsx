@@ -1,3 +1,4 @@
+import { Box, Typography, styled } from "@mui/material";
 import { memo } from "react";
 import type { JourneyPoint } from "./types";
 import { PhotoFan } from "./PhotoFan";
@@ -52,115 +53,39 @@ export const TimelineLocation = memo<TimelineLocationProps>(({
         scrollProgress >= index / Math.max(1, photoClusters.length - 1);
 
     return (
-        <div
+        <LocationContainer
             ref={onRef}
             id={`location-${index}`}
             className="timeline-location"
-            style={{
-                position: "relative",
-                display: "flex",
-                alignItems: "center",
+            sx={{
                 marginBottom:
                     index === photoClusters.length - 1 ? "24px" : "192px",
             }}
         >
-            <div
-                style={{
-                    position: "absolute",
-                    left: "50%",
-                    top: "50%",
-                    transform: "translate(-50%, -50%)",
-                    width: "24px",
-                    height: "40px",
-                    borderRadius: "50%",
-                    zIndex: 10,
-                    backgroundColor: "white",
-                }}
-            ></div>
-            <div
-                className="timeline-dot"
-                style={{
-                    position: "absolute",
-                    left: "50%",
-                    top: "50%",
-                    transform: "translate(-50%, -50%)",
-                    borderRadius: "50%",
-                    border: "2px solid white",
-                    zIndex: 20,
-                    width: "12px",
-                    height: "12px",
-                    transition: "all 0.3s",
-                    backgroundColor: isReached ? "#10b981" : "#111827",
-                    boxShadow: isReached
-                        ? "0 0 0 3px rgba(34, 197, 94, 0.3), 0 0 0 6px rgba(34, 197, 94, 0.15)"
-                        : "none",
-                }}
-            ></div>
+            <DotBackground />
+            <TimelineDot isReached={isReached} />
 
             {isLeft ? (
                 <>
-                    <div
-                        style={{
-                            width: "50%",
-                            paddingRight: "32px",
-                            paddingTop: "58px",
-                            textAlign: "right",
-                        }}
-                    >
-                        <div
-                            style={{
-                                display: "inline-flex",
-                                alignItems: "center",
-                                border: "1px solid #e5e7eb",
-                                borderRadius: "8px",
-                                padding: "4px 12px",
-                                marginBottom: "10px",
-                            }}
-                        >
-                            <span
-                                style={{
-                                    fontSize: "11px",
-                                    fontWeight: "600",
-                                    color: "#4b5563",
-                                    textTransform: "uppercase",
-                                    letterSpacing: "0.15em",
-                                }}
-                            >
-                                DAY {dayNumber} •{" "}
-                                {new Date(firstPhoto.timestamp)
-                                    .toLocaleDateString("en-US", {
-                                        month: "long",
-                                        day: "numeric",
-                                    })
-                                    .toUpperCase()}
-                            </span>
-                        </div>
-                        <h3
-                            style={{
-                                fontSize: "20px",
-                                fontWeight: "600",
-                                color: "#111827",
-                                textAlign: "right",
-                                margin: "0",
-                                lineHeight: "1.2",
-                            }}
-                        >
+                    <LeftContent>
+                        <DayBadge>
+                            DAY {dayNumber} •{" "}
+                            {new Date(firstPhoto.timestamp)
+                                .toLocaleDateString("en-US", {
+                                    month: "long",
+                                    day: "numeric",
+                                })
+                                .toUpperCase()}
+                        </DayBadge>
+                        <LocationTitle sx={{ textAlign: "right" }}>
                             {firstPhoto.name}
-                        </h3>
-                        <p
-                            style={{
-                                fontSize: "14px",
-                                color: "#6b7280",
-                                textAlign: "right",
-                                margin: "4px 0 0 0",
-                            }}
-                        >
+                        </LocationTitle>
+                        <LocationCountry sx={{ textAlign: "right" }}>
                             {firstPhoto.country}
-                        </p>
-                    </div>
-                    <div
-                        style={{
-                            width: "50%",
+                        </LocationCountry>
+                    </LeftContent>
+                    <RightPhotoContainer
+                        sx={{
                             paddingLeft:
                                 cluster.length >= 3 ? "72px" : "40px",
                         }}
@@ -169,15 +94,12 @@ export const TimelineLocation = memo<TimelineLocationProps>(({
                             cluster={cluster}
                             onPhotoClick={onPhotoClick}
                         />
-                    </div>
+                    </RightPhotoContainer>
                 </>
             ) : (
                 <>
-                    <div
-                        style={{
-                            width: "50%",
-                            display: "flex",
-                            justifyContent: "flex-end",
+                    <LeftPhotoContainer
+                        sx={{
                             paddingRight:
                                 cluster.length >= 3 ? "72px" : "40px",
                         }}
@@ -186,68 +108,118 @@ export const TimelineLocation = memo<TimelineLocationProps>(({
                             cluster={cluster}
                             onPhotoClick={onPhotoClick}
                         />
-                    </div>
-                    <div
-                        style={{
-                            width: "50%",
-                            paddingLeft: "32px",
-                            paddingTop: "58px",
-                            textAlign: "left",
-                        }}
-                    >
-                        <div
-                            style={{
-                                display: "inline-flex",
-                                alignItems: "center",
-                                border: "1px solid #e5e7eb",
-                                borderRadius: "8px",
-                                padding: "4px 12px",
-                                marginBottom: "10px",
-                            }}
-                        >
-                            <span
-                                style={{
-                                    fontSize: "11px",
-                                    fontWeight: "600",
-                                    color: "#4b5563",
-                                    textTransform: "uppercase",
-                                    letterSpacing: "0.15em",
-                                }}
-                            >
-                                DAY {dayNumber} •{" "}
-                                {new Date(firstPhoto.timestamp)
-                                    .toLocaleDateString("en-US", {
-                                        month: "long",
-                                        day: "numeric",
-                                    })
-                                    .toUpperCase()}
-                            </span>
-                        </div>
-                        <h3
-                            style={{
-                                fontSize: "20px",
-                                fontWeight: "600",
-                                color: "#111827",
-                                textAlign: "left",
-                                margin: "0",
-                                lineHeight: "1.2",
-                            }}
-                        >
+                    </LeftPhotoContainer>
+                    <RightContent>
+                        <DayBadge>
+                            DAY {dayNumber} •{" "}
+                            {new Date(firstPhoto.timestamp)
+                                .toLocaleDateString("en-US", {
+                                    month: "long",
+                                    day: "numeric",
+                                })
+                                .toUpperCase()}
+                        </DayBadge>
+                        <LocationTitle sx={{ textAlign: "left" }}>
                             {firstPhoto.name}
-                        </h3>
-                        <p
-                            style={{
-                                fontSize: "14px",
-                                color: "#6b7280",
-                                textAlign: "left",
-                                margin: "4px 0 0 0",
-                            }}
-                        >
+                        </LocationTitle>
+                        <LocationCountry sx={{ textAlign: "left" }}>
                             {firstPhoto.country}
-                        </p>
-                    </div>
+                        </LocationCountry>
+                    </RightContent>
                 </>
             )}
-        </div>
+        </LocationContainer>
     );
 });
+
+// Styled components
+const LocationContainer = styled(Box)({
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+});
+
+const DotBackground = styled(Box)(({ theme }) => ({
+    position: "absolute",
+    left: "50%",
+    top: "50%",
+    transform: "translate(-50%, -50%)",
+    width: "24px",
+    height: "40px",
+    borderRadius: "50%",
+    zIndex: 10,
+    backgroundColor: theme.palette.background.paper,
+}));
+
+const TimelineDot = styled(Box)<{ isReached: boolean }>(({ theme, isReached }) => ({
+    position: "absolute",
+    left: "50%",
+    top: "50%",
+    transform: "translate(-50%, -50%)",
+    borderRadius: "50%",
+    border: `2px solid ${theme.palette.background.paper}`,
+    zIndex: 20,
+    width: "12px",
+    height: "12px",
+    transition: "all 0.3s",
+    backgroundColor: isReached ? theme.palette.success.main : theme.palette.text.primary,
+    boxShadow: isReached
+        ? `0 0 0 3px ${theme.palette.success.main}30, 0 0 0 6px ${theme.palette.success.main}15`
+        : "none",
+}));
+
+const ContentContainer = styled(Box)({
+    width: "50%",
+    paddingTop: "58px",
+});
+
+const LeftContent = styled(ContentContainer)({
+    paddingRight: "32px",
+    textAlign: "right",
+});
+
+const RightContent = styled(ContentContainer)({
+    paddingLeft: "32px",
+    textAlign: "left",
+});
+
+const PhotoContainer = styled(Box)({
+    width: "50%",
+});
+
+const LeftPhotoContainer = styled(PhotoContainer)({
+    display: "flex",
+    justifyContent: "flex-end",
+});
+
+const RightPhotoContainer = styled(PhotoContainer)({});
+
+const DayBadge = styled(Box)(({ theme }) => ({
+    display: "inline-flex",
+    alignItems: "center",
+    border: `1px solid ${theme.palette.grey[300]}`,
+    borderRadius: "8px",
+    padding: "4px 12px",
+    marginBottom: "10px",
+    fontSize: "11px",
+    fontWeight: "600",
+    color: theme.palette.text.secondary,
+    textTransform: "uppercase",
+    letterSpacing: "0.15em",
+}));
+
+const LocationTitle = styled(Typography)(({ theme }) => ({
+    fontSize: "20px",
+    fontWeight: "600",
+    color: theme.palette.text.primary,
+    margin: "0",
+    lineHeight: "1.2",
+    component: "h3",
+}));
+
+const LocationCountry = styled(Typography)(({ theme }) => ({
+    fontSize: "14px",
+    color: theme.palette.text.secondary,
+    margin: "4px 0 0 0",
+    component: "p",
+}));

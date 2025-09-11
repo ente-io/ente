@@ -1,3 +1,4 @@
+import { Box, styled } from "@mui/material";
 import { memo } from "react";
 import type { JourneyPoint } from "./types";
 
@@ -31,13 +32,8 @@ export const TimelineProgressLine = memo<TimelineProgressLineProps>(({
     }
 
     return (
-        <div
-            style={{
-                position: "absolute",
-                left: "50%",
-                transform: "translateX(-1.5px)",
-                width: "3px",
-                backgroundColor: "#10b981",
+        <ProgressLine
+            sx={{
                 top: `${firstLocationCenter}px`,
                 height: `${
                     (lastLocationCenter - firstLocationCenter) *
@@ -47,3 +43,12 @@ export const TimelineProgressLine = memo<TimelineProgressLineProps>(({
         />
     );
 });
+
+// Styled components
+const ProgressLine = styled(Box)(({ theme }) => ({
+    position: "absolute",
+    left: "50%",
+    transform: "translateX(-1.5px)",
+    width: "3px",
+    backgroundColor: theme.palette.success.main,
+}));

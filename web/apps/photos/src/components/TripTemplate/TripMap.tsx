@@ -1,3 +1,4 @@
+import { Box, styled } from "@mui/material";
 import L from "leaflet";
 import dynamic from "next/dynamic";
 import type { JourneyPoint } from "./types";
@@ -68,22 +69,15 @@ export const TripMap: React.FC<TripMapProps> = ({
     );
 
     return (
-        <div
-            style={{
-                width: "100%",
-                height: "100%",
-                backgroundColor: hasPhotoData ? "transparent" : "#000000",
-            }}
-        >
+        <MapContainerWrapper hasPhotoData={hasPhotoData}>
             {hasPhotoData ? (
-                <MapContainer
+                <StyledMapContainer
                     center={getMapCenter(
                         photoClusters,
                         journeyData,
                         screenDimensions,
                     )}
                     zoom={optimalZoom}
-                    style={{ width: "100%", height: "100%" }}
                     scrollWheelZoom={true}
                     zoomControl={false}
                 >
@@ -193,8 +187,20 @@ export const TripMap: React.FC<TripMapProps> = ({
                             />
                         );
                     })}
-                </MapContainer>
+                </StyledMapContainer>
             ) : null}
-        </div>
+        </MapContainerWrapper>
     );
 };
+
+// Styled components
+const MapContainerWrapper = styled(Box)<{ hasPhotoData: boolean }>(({ hasPhotoData }) => ({
+    width: "100%",
+    height: "100%",
+    backgroundColor: hasPhotoData ? "transparent" : "#000000",
+}));
+
+const StyledMapContainer = styled(MapContainer)({
+    width: "100%",
+    height: "100%",
+});

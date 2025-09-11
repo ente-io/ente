@@ -1,3 +1,4 @@
+import { Box, styled } from "@mui/material";
 import { memo } from "react";
 import Image from "next/image";
 import type { JourneyPoint } from "./types";
@@ -16,45 +17,15 @@ export const PhotoFan = memo<PhotoFanProps>(({
     }
 
     return (
-        <div
-            className="photo-fan-hover"
-            style={{
-                position: "relative",
-                width: "180px",
-                height: "240px",
-            }}
-        >
+        <PhotoFanContainer>
             {cluster.length === 2 && cluster[1] && (
-                <div
+                <PhotoFrameTwo
                     onClick={() =>
                         cluster[1] &&
                         onPhotoClick?.(cluster, cluster[1].fileId)
                     }
-                    style={{
-                        position: "absolute",
-                        border: "2px solid white",
-                        boxShadow:
-                            "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
-                        zIndex: 10,
-                        width: "180px",
-                        height: "207px",
-                        borderRadius: "14px",
-                        overflow: "hidden",
-                        transform: "translateX(33px) skewY(8deg)",
-                        top: "50%",
-                        left: "0",
-                        marginTop: "-103.5px",
-                        cursor: "pointer",
-                    }}
                 >
-                    <div
-                        style={{
-                            position: "relative",
-                            width: "100%",
-                            height: "100%",
-                            transform: "skewY(-8deg) scale(1.1)",
-                        }}
-                    >
+                    <ImageWrapper sx={{ transform: 'skewY(-8deg) scale(1.1)' }}>
                         <Image
                             src={cluster[1].image}
                             alt={cluster[1].name}
@@ -62,41 +33,19 @@ export const PhotoFan = memo<PhotoFanProps>(({
                             style={{ objectFit: "cover" }}
                             sizes="200px"
                         />
-                    </div>
-                </div>
+                    </ImageWrapper>
+                </PhotoFrameTwo>
             )}
             {cluster.length >= 3 && (
                 <>
                     {cluster[1] && (
-                        <div
+                        <PhotoFrameLeft
                             onClick={() =>
                                 cluster[1] &&
                                 onPhotoClick?.(cluster, cluster[1].fileId)
                             }
-                            style={{
-                                position: "absolute",
-                                border: "2px solid white",
-                                boxShadow:
-                                    "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
-                                zIndex: 10,
-                                width: "180px",
-                                height: "207px",
-                                borderRadius: "14px",
-                                overflow: "hidden",
-                                transform: "translateX(-33px) skewY(-8deg)",
-                                top: "16.5px",
-                                left: "0",
-                                cursor: "pointer",
-                            }}
                         >
-                            <div
-                                style={{
-                                    position: "relative",
-                                    width: "100%",
-                                    height: "100%",
-                                    transform: "skewY(8deg) scale(1.1)",
-                                }}
-                            >
+                            <ImageWrapper sx={{ transform: 'skewY(8deg) scale(1.1)' }}>
                                 <Image
                                     src={cluster[1].image}
                                     alt={cluster[1].name}
@@ -104,39 +53,17 @@ export const PhotoFan = memo<PhotoFanProps>(({
                                     style={{ objectFit: "cover" }}
                                     sizes="200px"
                                 />
-                            </div>
-                        </div>
+                            </ImageWrapper>
+                        </PhotoFrameLeft>
                     )}
                     {cluster[2] && (
-                        <div
+                        <PhotoFrameRight
                             onClick={() =>
                                 cluster[2] &&
                                 onPhotoClick?.(cluster, cluster[2].fileId)
                             }
-                            style={{
-                                position: "absolute",
-                                border: "2px solid white",
-                                boxShadow:
-                                    "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
-                                zIndex: 10,
-                                width: "180px",
-                                height: "207px",
-                                borderRadius: "14px",
-                                overflow: "hidden",
-                                transform: "translateX(33px) skewY(8deg)",
-                                top: "16.5px",
-                                left: "0",
-                                cursor: "pointer",
-                            }}
                         >
-                            <div
-                                style={{
-                                    position: "relative",
-                                    width: "100%",
-                                    height: "100%",
-                                    transform: "skewY(-8deg) scale(1.1)",
-                                }}
-                            >
+                            <ImageWrapper sx={{ transform: 'skewY(-8deg) scale(1.1)' }}>
                                 <Image
                                     src={cluster[2].image}
                                     alt={cluster[2].name}
@@ -144,30 +71,18 @@ export const PhotoFan = memo<PhotoFanProps>(({
                                     style={{ objectFit: "cover" }}
                                     sizes="200px"
                                 />
-                            </div>
-                        </div>
+                            </ImageWrapper>
+                        </PhotoFrameRight>
                     )}
                 </>
             )}
 
             {cluster[0] && (
-                <div
+                <MainPhotoFrame
                     onClick={() =>
                         cluster[0] &&
                         onPhotoClick?.(cluster, cluster[0].fileId)
                     }
-                    style={{
-                        position: "relative",
-                        width: "100%",
-                        height: "100%",
-                        border: "2px solid white",
-                        boxShadow:
-                            "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
-                        zIndex: 20,
-                        borderRadius: "14px",
-                        overflow: "hidden",
-                        cursor: "pointer",
-                    }}
                 >
                     <Image
                         src={cluster[0].image}
@@ -178,29 +93,90 @@ export const PhotoFan = memo<PhotoFanProps>(({
                     />
 
                     {cluster.length > 3 && (
-                        <div
-                            style={{
-                                position: "absolute",
-                                bottom: "6px",
-                                right: "6px",
-                                background: "white",
-                                color: "black",
-                                borderRadius: "6px",
-                                padding: "4px 6px",
-                                minHeight: "20px",
-                                display: "inline-flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                fontSize: "11px",
-                                fontWeight: "600",
-                                boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
-                            }}
-                        >
+                        <CountBadge>
                             +{cluster.length - 3}
-                        </div>
+                        </CountBadge>
                     )}
-                </div>
+                </MainPhotoFrame>
             )}
-        </div>
+        </PhotoFanContainer>
     );
+});
+
+// Styled components
+const PhotoFanContainer = styled(Box)({
+    position: "relative",
+    width: "180px",
+    height: "240px",
+    transition: "transform 0.3s ease-in-out",
+    cursor: "pointer",
+    "&:hover": {
+        transform: "scale(1.05)",
+    },
+});
+
+const PhotoFrame = styled(Box)(({ theme }) => ({
+    position: "absolute",
+    border: "2px solid white",
+    boxShadow: theme.shadows[10],
+    zIndex: 10,
+    width: "180px",
+    height: "207px",
+    borderRadius: "14px",
+    overflow: "hidden",
+    cursor: "pointer",
+}));
+
+const PhotoFrameTwo = styled(PhotoFrame)({
+    transform: "translateX(33px) skewY(8deg)",
+    top: "50%",
+    left: "0",
+    marginTop: "-103.5px",
+});
+
+const PhotoFrameLeft = styled(PhotoFrame)({
+    transform: "translateX(-33px) skewY(-8deg)",
+    top: "16.5px",
+    left: "0",
+});
+
+const PhotoFrameRight = styled(PhotoFrame)({
+    transform: "translateX(33px) skewY(8deg)",
+    top: "16.5px",
+    left: "0",
+});
+
+const MainPhotoFrame = styled(Box)(({ theme }) => ({
+    position: "relative",
+    width: "100%",
+    height: "100%",
+    border: "2px solid white",
+    boxShadow: theme.shadows[10],
+    zIndex: 20,
+    borderRadius: "14px",
+    overflow: "hidden",
+    cursor: "pointer",
+}));
+
+const ImageWrapper = styled(Box)({
+    position: "relative",
+    width: "100%",
+    height: "100%",
+});
+
+const CountBadge = styled(Box)({
+    position: "absolute",
+    bottom: "6px",
+    right: "6px",
+    background: "white",
+    color: "black",
+    borderRadius: "6px",
+    padding: "4px 6px",
+    minHeight: "20px",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "11px",
+    fontWeight: "600",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
 });
