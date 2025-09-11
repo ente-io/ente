@@ -188,7 +188,6 @@ export const createIcon = (
             border-radius: 16px;
             background: ${isReached ? "#22c55e" : "white"};
             border: 2px solid ${isReached ? "#22c55e" : borderColor};
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
             padding: 4px;
             position: relative;
             overflow: hidden;
@@ -242,7 +241,6 @@ export const createIcon = (
             border-left: ${triangleHeight}px solid transparent;
             border-right: ${triangleHeight}px solid transparent;
             border-top: ${triangleHeight}px solid ${isReached ? "#22c55e" : "white"};
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
             transition: border-top-color 0.3s ease;
           "></div>
         </div>
@@ -308,8 +306,7 @@ export const createSuperClusterIcon = (
               border-radius: 16px;
               background: ${isReached ? "#22c55e" : "white"};
               border: 2px solid ${isReached ? "#22c55e" : "#ffffff"};
-              box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-              padding: 4px;
+                padding: 4px;
               position: relative;
               overflow: hidden;
               transition: background-color 0.3s ease, border-color 0.3s ease;
@@ -362,8 +359,7 @@ export const createSuperClusterIcon = (
               border-left: ${triangleHeight}px solid transparent;
               border-right: ${triangleHeight}px solid transparent;
               border-top: ${triangleHeight}px solid ${isReached ? "#22c55e" : "white"};
-              filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
-              transition: border-top-color 0.3s ease;
+                transition: border-top-color 0.3s ease;
             "></div>
           </div>
           
@@ -378,7 +374,6 @@ export const createSuperClusterIcon = (
             width: 24px;
             height: 24px;
             border: 2px solid white;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
             font-size: 12px;
             font-weight: 700;
