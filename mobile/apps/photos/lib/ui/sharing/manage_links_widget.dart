@@ -53,6 +53,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
         widget.collection!.publicURLs.firstOrNull?.enableDownload ?? true;
     final isPasswordEnabled =
         widget.collection!.publicURLs.firstOrNull?.passwordEnabled ?? false;
+    final isJoinEnabled =
+        widget.collection!.publicURLs.firstOrNull?.enableJoin ?? false;
     final enteColorScheme = getEnteColorScheme(context);
     final PublicURL url = widget.collection!.publicURLs.firstOrNull!;
     final String urlValue =
@@ -94,6 +96,31 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                         AppLocalizations.of(context).allowAddPhotosDescription,
                   ),
                   const SizedBox(height: 24),
+                  if (flagService.internalUser)
+                    MenuItemWidget(
+                      key: ValueKey("Allow join $isJoinEnabled"),
+                      captionedTextWidget: const CaptionedTextWidget(
+                        title: "Allow joining album (i)",
+                      ),
+                      alignCaptionedTextToLeft: true,
+                      menuItemColor: getEnteColorScheme(context).fillFaint,
+                      trailingWidget: ToggleSwitchWidget(
+                        value: () => isJoinEnabled,
+                        onChanged: () async {
+                          await _updateUrlSettings(
+                            context,
+                            {'enableJoin': !isJoinEnabled},
+                          );
+                        },
+                      ),
+                    ),
+                  if (flagService.internalUser)
+                    MenuSectionDescriptionWidget(
+                      content: isCollectEnabled
+                          ? "Allow people with link to join your album as Collaborator"
+                          : "Allow people with link to join your album as Viewer",
+                    ),
+                  if (flagService.internalUser) const SizedBox(height: 24),
                   MenuItemWidget(
                     alignCaptionedTextToLeft: true,
                     captionedTextWidget: CaptionedTextWidget(
