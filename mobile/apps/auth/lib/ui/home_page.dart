@@ -222,7 +222,6 @@ Widget _buildTrashSelectActions() {
   );
 }
 
-
   Future<void> _onPinSelectedPressed() async {
   final selectedIds = _codeDisplayStore.selectedCodeIds.value;
   if (selectedIds.isEmpty) return;
@@ -230,11 +229,12 @@ Widget _buildTrashSelectActions() {
   final codesToUpdate = _allCodes?.where((c) => selectedIds.contains(c.secret)).toList() ?? [];
   if (codesToUpdate.isEmpty) return;
 
-  // Determine the state of the current selection
+  // Determine the state of the current selection (pinned/unpinned)
   final bool allArePinned = codesToUpdate.every((code) => code.isPinned);
+  final bool allAreUnpinned = codesToUpdate.every((code) => !code.isPinned);
 
-  //If all selected codes are already pinned, UNPIN all of them
   if (allArePinned) {
+    // if all are pinned, unpin all
     for (final code in codesToUpdate) {
       final updatedCode = code.copyWith(display: code.display.copyWith(pinned: false));
       unawaited(CodeStore.instance.updateCode(code, updatedCode));
@@ -242,13 +242,10 @@ Widget _buildTrashSelectActions() {
 
     if (codesToUpdate.length == 1) {
       showToast(context, context.l10n.unpinnedCodeMessage(codesToUpdate.first.issuer));
-    } 
-    else {
+    } else {
       showToast(context, 'Unpinned ${codesToUpdate.length} item(s)');
     }
-  } 
-  //If there's a mix or if all are unpinned, PIN selected unpinned codes
-  else {
+  } else {
     int pinnedCount = 0;
     for (final code in codesToUpdate) {
       if (!code.isPinned) { // Only pin the codes that are currently unpinned
@@ -258,17 +255,45 @@ Widget _buildTrashSelectActions() {
       }
     }
 
-    if (pinnedCount == 1){
+    if (pinnedCount == 1) {
       final pinnedCode = codesToUpdate.firstWhere((c) => !c.isPinned);
       showToast(context, context.l10n.pinnedCodeMessage(pinnedCode.issuer));
-    } 
-    else if (pinnedCount > 0) {
+    } else if (pinnedCount > 0) {
       showToast(context, 'Pinned $pinnedCount item(s)');
     }
   }
-  
+
   _codeDisplayStore.clearSelection();
 }
+
+
+  Future<void> _onUnpinSelectedPressed() async {
+  final selectedIds = _codeDisplayStore.selectedCodeIds.value;
+  if (selectedIds.isEmpty) return;
+
+  final codesToUpdate = _allCodes?.where((c) => selectedIds.contains(c.secret)).toList() ?? [];
+  if (codesToUpdate.isEmpty) return;
+
+  int unpinnedCount = 0;
+  for (final code in codesToUpdate) {
+    if (code.isPinned) { // only unpin the codes that are currently pinned
+      final updatedCode = code.copyWith(display: code.display.copyWith(pinned: false));
+      unawaited(CodeStore.instance.updateCode(code, updatedCode));
+      unpinnedCount++;
+    }
+  }
+
+  if (unpinnedCount == 1) {
+    final unpinnedCode = codesToUpdate.firstWhere((c) => c.isPinned);
+    showToast(context, context.l10n.unpinnedCodeMessage(unpinnedCode.issuer));
+  } else if (unpinnedCount > 0) {
+    showToast(context, 'Unpinned $unpinnedCount item(s)');
+  }
+
+  _codeDisplayStore.clearSelection();
+}
+
+
 
   Future<void> _onTrashSelectedPressed() async {
   final l10n = context.l10n;
@@ -449,36 +474,75 @@ Widget _buildMultiSelectActions(Set<String> selectedIds) {
   return Container(
     decoration: BoxDecoration(
       color: Theme.of(context).brightness == Brightness.dark
-    ? colorScheme.backgroundElevated2 
-    : const Color(0xFFF7F7F7),
- //color of the bottom button row on multi select
+          ? colorScheme.backgroundElevated2
+          : const Color(0xFFF7F7F7),
       borderRadius: BorderRadius.circular(12),
     ),
-    child: Row(
-      children: [
-        ValueListenableBuilder<Set<String>>(
-  valueListenable: _codeDisplayStore.selectedCodeIds,
-  builder: (context, selectedIds, child) {
-    if (selectedIds.isEmpty) return const Expanded(child: SizedBox.shrink());
+    child: ValueListenableBuilder<Set<String>>(
+      valueListenable: _codeDisplayStore.selectedCodeIds,
+      builder: (context, selectedIds, child) {
+        if (selectedIds.isEmpty) return const SizedBox.shrink();
 
-    final selectedCodes = _allCodes?.where((c) => selectedIds.contains(c.secret)).toList() ?? [];
-    if (selectedCodes.isEmpty) return const Expanded(child: SizedBox.shrink());
+        final selectedCodes = _allCodes?.where((c) => selectedIds.contains(c.secret)).toList() ?? [];
+        if (selectedCodes.isEmpty) return const SizedBox.shrink();
 
-    final bool allArePinned = selectedCodes.every((code) => code.isPinned);
-    
-    return _buildClearActionButton(
-      allArePinned ? Icons.push_pin : Icons.push_pin_outlined,
-      allArePinned ? context.l10n.unpinText : context.l10n.pinText,
-      _onPinSelectedPressed,
-    );
-  },
-),
-        _buildClearActionButton(Icons.label_outline, context.l10n.addTag, _onAddTagPressed),
-        _buildClearActionButton(Icons.delete_outline, context.l10n.trash, _onTrashSelectedPressed),
-      ],
+        final bool allArePinned = selectedCodes.every((code) => code.isPinned);
+        final bool allAreUnpinned = selectedCodes.every((code) => !code.isPinned);
+        final bool isMixed = !allArePinned && !allAreUnpinned;
+
+        if (isMixed) {
+          //mixed state: when selection contains both pinned and unpinned codes
+          return Row(
+            children: [
+              _buildClearActionButton(
+                Icons.push_pin_outlined,
+                context.l10n.pinText,
+                _onPinSelectedPressed,
+              ),
+              _buildClearActionButton(
+                Icons.push_pin,
+                context.l10n.unpinText,
+                _onUnpinSelectedPressed,
+              ),
+              _buildClearActionButton(
+                Icons.label_outline,
+                context.l10n.addTag,
+                _onAddTagPressed,
+              ),
+              _buildClearActionButton(
+                Icons.delete_outline,
+                context.l10n.trash,
+                _onTrashSelectedPressed,
+              ),
+            ],
+          );
+        } else {
+          //when selection contains either only pinned OR only unpinned codes
+          return Row(
+            children: [
+              _buildClearActionButton(
+                allArePinned ? Icons.push_pin : Icons.push_pin_outlined,
+                allArePinned ? context.l10n.unpinText : context.l10n.pinText,
+                _onPinSelectedPressed,
+              ),
+              _buildClearActionButton(
+                Icons.label_outline,
+                context.l10n.addTag,
+                _onAddTagPressed,
+              ),
+              _buildClearActionButton(
+                Icons.delete_outline,
+                context.l10n.trash,
+                _onTrashSelectedPressed,
+              ),
+            ],
+          );
+        }
+      },
     ),
   );
 }
+
   Widget _buildActionButton(IconData icon, String label, VoidCallback onTap) {
   final colorScheme = getEnteColorScheme(context);
   final textTheme = getEnteTextTheme(context);
