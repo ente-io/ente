@@ -475,6 +475,7 @@ export default function PublicCollectionGallery() {
                     files={publicFiles}
                     collection={publicCollection}
                     onAddPhotos={onAddPhotos}
+                    enableDownload={downloadEnabled}
                 />
             ) : (
                 <>

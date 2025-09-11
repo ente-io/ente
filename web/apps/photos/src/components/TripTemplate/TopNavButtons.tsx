@@ -1,8 +1,10 @@
 import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
+import CheckIcon from "@mui/icons-material/Check";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import ShareIcon from "@mui/icons-material/Share";
-import { Box, IconButton, Button, styled } from "@mui/material";
+import { Box, Button, IconButton, styled } from "@mui/material";
 import { useIsTouchscreen } from "ente-base/components/utils/hooks";
+import { Notification } from "ente-new/photos/components/Notification";
 import { t } from "i18next";
 import { useState } from "react";
 
@@ -49,11 +51,9 @@ export const TopNavButtons: React.FC<TopNavButtonsProps> = ({
                     </NavButton>
                 )}
 
-                {!enableDownload && (
+                {enableDownload && (
                     <NavButton onClick={downloadAllFiles}>
-                        <FileDownloadOutlinedIcon
-                            sx={{ fontSize: "23px" }}
-                        />
+                        <FileDownloadOutlinedIcon sx={{ fontSize: "23px" }} />
                     </NavButton>
                 )}
 
@@ -62,11 +62,16 @@ export const TopNavButtons: React.FC<TopNavButtonsProps> = ({
                 </SignUpButton>
             </ButtonContainer>
 
-            {showCopiedMessage && (
-                <CopiedMessage>
-                    Copied!
-                </CopiedMessage>
-            )}
+            <Notification
+                open={showCopiedMessage}
+                onClose={() => setShowCopiedMessage(false)}
+                horizontal="left"
+                attributes={{
+                    color: "secondary",
+                    startIcon: <CheckIcon />,
+                    title: "Copied!",
+                }}
+            />
         </>
     );
 };
@@ -91,9 +96,7 @@ const NavButton = styled(IconButton)({
     boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
     width: "44px",
     height: "44px",
-    "&:hover": {
-        backgroundColor: "rgba(255, 255, 255, 1)",
-    },
+    "&:hover": { backgroundColor: "rgba(255, 255, 255, 1)" },
 });
 
 const SignUpButton = styled(Button)({
@@ -108,27 +111,5 @@ const SignUpButton = styled(Button)({
     transition: "background-color 0.2s",
     backdropFilter: "blur(10px)",
     boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-    "&:hover": {
-        backgroundColor: "rgba(255, 255, 255, 1)",
-    },
+    "&:hover": { backgroundColor: "rgba(255, 255, 255, 1)" },
 });
-
-const CopiedMessage = styled(Box)(({ theme }) => ({
-    position: "fixed",
-    top: "118px",
-    right: "180px",
-    backgroundColor: theme.palette.success.main,
-    color: "white",
-    padding: "8px 16px",
-    borderRadius: "8px",
-    fontSize: "14px",
-    fontWeight: "500",
-    zIndex: 2001,
-    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
-    animation: "fadeInOut 2s ease-in-out forwards",
-    "@keyframes fadeInOut": {
-        "0%": { opacity: 0, transform: "translateY(-10px)" },
-        "15%, 85%": { opacity: 1, transform: "translateY(0)" },
-        "100%": { opacity: 0, transform: "translateY(-10px)" },
-    },
-}));
