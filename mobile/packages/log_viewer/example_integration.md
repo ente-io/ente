@@ -14,20 +14,13 @@ import 'package:logging/logging.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize the log viewer with custom configuration
-  await LogViewer.initialize(
-    maxEntries: 5000, // Optional: default is 10000
-  );
+  // Initialize the log viewer
+  await LogViewer.initialize();
   
   // Set up logging
   Logger.root.level = Level.ALL;
-  Logger.root.onRecord.listen((record) {
-    // Send logs to log viewer
-    LogViewer.addLog(record);
-    
-    // Also print to console
-    print('${record.level.name}: ${record.time}: ${record.message}');
-  });
+  
+  // Log viewer automatically captures all logs - no manual setup needed!
   
   runApp(MyApp());
 }
@@ -60,11 +53,7 @@ class _MyHomePageState extends State<MyHomePage> {
             icon: Icon(Icons.bug_report),
             onPressed: () {
               // Navigate to log viewer
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const LogViewerPage(),
-                ),
-              );
+              LogViewer.openViewer(context);
             },
           ),
         ],
@@ -141,14 +130,10 @@ class SuperLogging {
     
     WidgetsFlutterBinding.ensureInitialized();
     
-    // Initialize log viewer in debug mode only
+    // Initialize log viewer in debug mode with prefix
     if (kDebugMode) {
       try {
-        await LogViewer.initialize();
-        
-        // Register LogViewer with SuperLogging to receive logs with process prefix
-        LogViewer.registerWithSuperLogging(SuperLogging.registerLogCallback);
-        
+        await LogViewer.initialize(prefix: appConfig.prefix);
         _logger.info("Log viewer initialized successfully");
       } catch (e) {
         _logger.warning("Failed to initialize log viewer: $e");
@@ -171,23 +156,7 @@ class SuperLogging {
       print(str);
     }
     
-    // Send to log viewer callback if registered
-    try {
-      if (_logViewerCallback != null) {
-        _logViewerCallback!(rec, config.prefix);
-      }
-    } catch (_) {
-      // Silently ignore any errors from the log viewer
-    }
-  }
-  
-  // Callback that can be set by external packages (like log_viewer)
-  static void Function(LogRecord, String)? _logViewerCallback;
-  
-  /// Register a callback to receive log records
-  /// This is used by the log_viewer package to capture logs
-  static void registerLogCallback(void Function(LogRecord, String) callback) {
-    _logViewerCallback = callback;
+    // Log viewer automatically captures all logs - no manual integration needed!
   }
 }
 
@@ -209,7 +178,7 @@ Future<void> main() async {
 
 ### Ente Photos Integration Example
 
-In your Ente Photos app's main.dart, add the log viewer initialization in the `runWithLogs` function:
+In your Ente Photos app's main.dart or SuperLogging class, add the log viewer initialization:
 
 ```dart
 Future runWithLogs(Function() function, {String prefix = ""}) async {
@@ -224,19 +193,16 @@ Future runWithLogs(Function() function, {String prefix = ""}) async {
       prefix: prefix,
     ),
   );
-  
-  // Initialize log viewer in debug mode only
-  if (kDebugMode) {
-    try {
-      await LogViewer.initialize();
-      
-      // Register LogViewer with SuperLogging to receive logs with process prefix
-      LogViewer.registerWithSuperLogging(SuperLogging.registerLogCallback);
-      
-      _logger.info("Log viewer initialized successfully");
-    } catch (e) {
-      _logger.warning("Failed to initialize log viewer: $e");
-    }
+}
+
+// In SuperLogging.main():
+if (kDebugMode) {
+  try {
+    // Simply initialize with prefix - no callbacks needed!
+    await LogViewer.initialize(prefix: appConfig.prefix);
+    _logger.info("Log viewer initialized successfully");
+  } catch (e) {
+    _logger.warning("Failed to initialize log viewer: $e");
   }
 }
 ```
@@ -268,11 +234,7 @@ class SettingsPage extends StatelessWidget {
               if (kDebugMode)
                 GestureDetector(
                   onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const LogViewerPage(),
-                      ),
-                    );
+                    LogViewer.openViewer(context);
                   },
                   child: Container(
                     padding: const EdgeInsets.all(8),
@@ -307,17 +269,19 @@ Once integrated, users will have access to:
 
 ## How It Works
 
-1. The `log_viewer` package listens to all logs via `Logger.root.onRecord`
-2. Logs are stored in a local SQLite database (auto-truncated to 2000 entries)
+1. The `log_viewer` package automatically registers with `Logger.root.onRecord` on initialization
+2. Logs are stored in a local SQLite database (auto-truncated to 10000 entries by default)
 3. The UI provides filtering and search capabilities
-4. The integration with `super_logging` is automatic - no changes needed
+4. When a prefix is provided, it's automatically prepended to all log messages
+5. No manual callback registration or integration needed - just initialize and go!
 
 ## Troubleshooting
 
 If logs aren't appearing:
-1. Ensure `LogViewer.initialize()` is called after logging is set up
+1. Ensure `LogViewer.initialize()` is called early in app initialization
 2. Check that the app has write permissions for the database
 3. Verify that `Logger.root.level` is set appropriately (not OFF)
+4. If using a prefix, verify it's being passed correctly to `LogViewer.initialize(prefix: yourPrefix)`
 
 ## Performance Notes
 
