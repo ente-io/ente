@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:locker/models/file_type.dart';
 import 'package:locker/services/files/download/file_url.dart';
 import 'package:locker/services/files/sync/models/file_magic.dart';
 import 'package:logging/logging.dart';
@@ -23,6 +24,7 @@ class EnteFile {
   String? thumbnailDecryptionHeader;
   String? metadataDecryptionHeader;
   int? fileSize;
+  FileType? fileType;
 
   String? mMdEncodedJson;
   int mMdVersion = 0;
