@@ -7,6 +7,7 @@ import "package:flutter/services.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/public_url.dart";
 import 'package:photos/models/collection/collection.dart';
+import 'package:photos/service_locator.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -19,6 +20,7 @@ import "package:photos/ui/components/toggle_switch_widget.dart";
 import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/ui/sharing/pickers/device_limit_picker_page.dart';
 import 'package:photos/ui/sharing/pickers/link_expiry_picker_page.dart';
+import 'package:photos/ui/sharing/qr_code_dialog_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import "package:photos/utils/share_util.dart";
@@ -51,6 +53,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
         widget.collection!.publicURLs.firstOrNull?.enableDownload ?? true;
     final isPasswordEnabled =
         widget.collection!.publicURLs.firstOrNull?.passwordEnabled ?? false;
+    final isJoinEnabled =
+        widget.collection!.publicURLs.firstOrNull?.enableJoin ?? false;
     final enteColorScheme = getEnteColorScheme(context);
     final PublicURL url = widget.collection!.publicURLs.firstOrNull!;
     final String urlValue =
@@ -92,6 +96,31 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                         AppLocalizations.of(context).allowAddPhotosDescription,
                   ),
                   const SizedBox(height: 24),
+                  if (flagService.internalUser)
+                    MenuItemWidget(
+                      key: ValueKey("Allow join $isJoinEnabled"),
+                      captionedTextWidget: const CaptionedTextWidget(
+                        title: "Allow joining album (i)",
+                      ),
+                      alignCaptionedTextToLeft: true,
+                      menuItemColor: getEnteColorScheme(context).fillFaint,
+                      trailingWidget: ToggleSwitchWidget(
+                        value: () => isJoinEnabled,
+                        onChanged: () async {
+                          await _updateUrlSettings(
+                            context,
+                            {'enableJoin': !isJoinEnabled},
+                          );
+                        },
+                      ),
+                    ),
+                  if (flagService.internalUser)
+                    MenuSectionDescriptionWidget(
+                      content: isCollectEnabled
+                          ? "Allow people with link to join your album as Collaborator"
+                          : "Allow people with link to join your album as Viewer",
+                    ),
+                  if (flagService.internalUser) const SizedBox(height: 24),
                   MenuItemWidget(
                     alignCaptionedTextToLeft: true,
                     captionedTextWidget: CaptionedTextWidget(
@@ -288,6 +317,32 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                           widget.collection!,
                           urlValue,
                           sendLinkButtonKey,
+                        );
+                      },
+                      isTopBorderRadiusRemoved: true,
+                      isBottomBorderRadiusRemoved: flagService.internalUser,
+                    ),
+                  if (!url.isExpired && flagService.internalUser)
+                    DividerWidget(
+                      dividerType: DividerType.menu,
+                      bgColor: getEnteColorScheme(context).fillFaint,
+                    ),
+                  if (!url.isExpired && flagService.internalUser)
+                    MenuItemWidget(
+                      captionedTextWidget: const CaptionedTextWidget(
+                        title: "Send QR Code (i)",
+                        makeTextBold: true,
+                      ),
+                      leadingIcon: Icons.qr_code_outlined,
+                      menuItemColor: getEnteColorScheme(context).fillFaint,
+                      onTap: () async {
+                        await showDialog<void>(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return QrCodeDialogWidget(
+                              collection: widget.collection!,
+                            );
+                          },
                         );
                       },
                       isTopBorderRadiusRemoved: true,

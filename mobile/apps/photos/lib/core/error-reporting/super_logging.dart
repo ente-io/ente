@@ -5,9 +5,10 @@ import 'dart:io';
 
 import "package:dio/dio.dart";
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:log_viewer/log_viewer.dart';
 import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart';
@@ -187,6 +188,15 @@ class SuperLogging {
 
     Logger.root.level = kDebugMode ? Level.ALL : Level.INFO;
     Logger.root.onRecord.listen(onLogRecord);
+
+    if (_preferences.getBool("enable_db_logging") ?? kDebugMode) {
+      try {
+        await LogViewer.initialize(prefix: appConfig.prefix);
+        $.info("Log viewer initialized successfully");
+      } catch (e) {
+        $.warning("Failed to initialize log viewer: $e");
+      }
+    }
 
     if (isFDroidClient) {
       assert(
@@ -454,5 +464,16 @@ class SuperLogging {
     }
     final pkgName = (await PackageInfo.fromPlatform()).packageName;
     return pkgName.startsWith("io.ente.photos.fdroid");
+  }
+
+  /// Show the log viewer page
+  /// This is the main integration point for accessing the log viewer
+  static void showLogViewer(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const LogViewerPage(),
+      ),
+    );
   }
 }

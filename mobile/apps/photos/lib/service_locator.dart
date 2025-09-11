@@ -19,6 +19,7 @@ import "package:photos/services/smart_albums_service.dart";
 import "package:photos/services/smart_memories_service.dart";
 import "package:photos/services/storage_bonus_service.dart";
 import "package:photos/services/sync/trash_sync_service.dart";
+import "package:photos/services/text_embeddings_cache_service.dart";
 import "package:photos/services/update_service.dart";
 import "package:photos/utils/local_settings.dart";
 import "package:shared_preferences/shared_preferences.dart";
@@ -134,6 +135,12 @@ SmartMemoriesService? _smartMemoriesService;
 SmartMemoriesService get smartMemoriesService {
   _smartMemoriesService ??= SmartMemoriesService();
   return _smartMemoriesService!;
+}
+
+TextEmbeddingsCacheService? _textEmbeddingsCacheService;
+TextEmbeddingsCacheService get textEmbeddingsCacheService {
+  _textEmbeddingsCacheService ??= TextEmbeddingsCacheService.instance;
+  return _textEmbeddingsCacheService!;
 }
 
 BillingService? _billingService;

@@ -1,4 +1,4 @@
-# melos_managed_dependency_overrides: ente_cast,ente_cast_normal,ente_crypto,ente_feature_flag,onnx_dart,ffi,flutter_sodium,intl,js,media_kit,media_kit_libs_ios_video,media_kit_libs_video,media_kit_video,protobuf,video_player,watcher,win32
+# melos_managed_dependency_overrides: ente_cast,ente_cast_normal,ente_crypto,ente_feature_flag,onnx_dart,ffi,flutter_sodium,intl,js,media_kit,media_kit_libs_ios_video,media_kit_libs_video,media_kit_video,protobuf,video_player,watcher,win32,log_viewer
 dependency_overrides:
   ente_cast:
     path: plugins/ente_cast
@@ -41,3 +41,5 @@ dependency_overrides:
       path: packages/video_player/video_player/
   watcher: ^1.1.0
   win32: 5.10.1
+  log_viewer:
+    path: ../../packages/log_viewer

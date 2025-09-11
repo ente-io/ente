@@ -54,7 +54,9 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
         ? AppLocalizations.of(context)
             .filesBackedUpInAlbum(count: count, formattedNumber: formattedCount)
         : AppLocalizations.of(context).filesBackedUpFromDevice(
-            count: count, formattedNumber: formattedCount,);
+            count: count,
+            formattedNumber: formattedCount,
+          );
     final informationTextStyle = TextStyle(
       fontSize: 14,
       height: 1.3,
@@ -121,7 +123,9 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
               Expanded(
                 child: Text(
                   AppLocalizations.of(context).freeUpSpaceSaving(
-                      count: count, formattedSize: formatBytes(status.size),),
+                    count: count,
+                    formattedSize: formatBytes(status.size),
+                  ),
                   style: informationTextStyle,
                 ),
               ),

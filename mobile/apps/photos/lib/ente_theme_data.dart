@@ -228,7 +228,7 @@ extension CustomColorScheme on ColorScheme {
   Color get videoPlayerPrimaryColor => brightness == Brightness.light
       ? const Color.fromRGBO(0, 179, 60, 1)
       : const Color.fromRGBO(1, 222, 77, 1);
-      
+
   Color get videoPlayerBorderColor => brightness == Brightness.light
       ? const Color(0xFF424242)
       : const Color(0xFFFFFFFF);
