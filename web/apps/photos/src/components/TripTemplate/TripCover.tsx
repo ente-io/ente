@@ -42,7 +42,7 @@ export const TripCover = memo<TripCoverProps>(
                                 alt="Trip Cover"
                                 fill
                                 style={{ objectFit: "cover" }}
-                                sizes="(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 600px"
+                                sizes="600px"
                             />
                             <GradientOverlay />
                         </>
@@ -56,7 +56,7 @@ export const TripCover = memo<TripCoverProps>(
                     )}
 
                     <LogoContainer>
-                        <EnteLogo height={24} />
+                        <EnteLogo height={20} />
                     </LogoContainer>
 
                     <ContentContainer>

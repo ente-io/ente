@@ -131,7 +131,6 @@ const PhotoFanContainer = styled(Box)({
 const PhotoFrame = styled(Box)(({ theme }) => ({
     position: "absolute",
     border: "2px solid white",
-    boxShadow: theme.shadows[10],
     zIndex: 10,
     width: "180px",
     height: "207px",
@@ -164,7 +163,6 @@ const MainPhotoFrame = styled(Box)(({ theme }) => ({
     width: "100%",
     height: "100%",
     border: "2px solid white",
-    boxShadow: theme.shadows[10],
     zIndex: 20,
     borderRadius: "14px",
     overflow: "hidden",

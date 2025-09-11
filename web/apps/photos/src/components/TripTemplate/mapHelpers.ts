@@ -9,15 +9,7 @@ export const clusterPhotosByProximity = (
 ) => {
     if (photos.length === 0) return [];
 
-    // Mobile: no clustering for better timeline experience
-    // Desktop: 1km clustering for cleaner map display
-    const isMobile = screenDimensions.width < 768;
-    if (isMobile) {
-        // Return each photo as its own cluster on mobile
-        return photos.map((photo) => [photo]);
-    }
-
-    // Desktop: 10km clustering distance (roughly 0.1 degrees)
+    // 10km clustering distance (roughly 0.1 degrees)
     const distanceThreshold = 0.1; // About 10km in degrees
 
     // First, group photos by day
@@ -101,9 +93,7 @@ export const calculateOptimalZoom = (
     }
 
     // Calculate zoom based on cluster density and actual screen dimensions
-    // Timeline takes more space on mobile (50%) vs desktop (50%)
-    const isMobile = screenDimensions.width < 768;
-    const timelineSizeRatio = isMobile ? 0.5 : 0.5;
+    const timelineSizeRatio = 0.5;
     const visibleMapWidth = screenDimensions.width * (1 - timelineSizeRatio);
 
     // Calculate effective span considering cluster density
@@ -547,8 +537,7 @@ export const getMapCenter = (
     const lngSpan = maxLng - minLng;
     const paddedSpan = Math.max(lngSpan * 1.4, 0.1); // Minimum span for single locations
 
-    const isMobile = screenDimensions.width < 768;
-    const timelineSizeRatio = isMobile ? 0.5 : 0.5;
+    const timelineSizeRatio = 0.5;
     const mapSizeRatio = 1 - timelineSizeRatio;
 
     const screenWidthInDegrees = paddedSpan / mapSizeRatio;

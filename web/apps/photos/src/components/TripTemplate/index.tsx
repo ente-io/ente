@@ -220,11 +220,13 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
 
     return (
         <TripTemplateContainer>
-            <TopNavButtons
-                onAddPhotos={onAddPhotos}
-                downloadAllFiles={downloadAllFiles}
-                enableDownload={enableDownload}
-            />
+            {!openFileViewer && (
+                <TopNavButtons
+                    onAddPhotos={onAddPhotos}
+                    downloadAllFiles={downloadAllFiles}
+                    enableDownload={enableDownload}
+                />
+            )}
             {/* Left Sidebar - Floating Timeline */}
             <TimelineSidebar ref={timelineRef}>
                 <TimelineContent>

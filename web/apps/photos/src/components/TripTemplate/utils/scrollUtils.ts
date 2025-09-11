@@ -135,8 +135,7 @@ export const handleTimelineScroll = ({
                 }
             }
 
-            const isMobile = screenDimensions.width < 768;
-            const timelineSizeRatio = isMobile ? 0.5 : 0.5;
+            const timelineSizeRatio = 0.5;
 
             const allLngs = clusterCenters.map((c) => c.lng);
             const minLng = Math.min(...allLngs);
@@ -248,8 +247,7 @@ export const handleMarkerClick = ({
     const lngSpan = maxLng - minLng;
     const paddedSpan = Math.max(lngSpan * 1.4, 0.1);
 
-    const isMobile = screenDimensions.width < 768;
-    const timelineSizeRatio = isMobile ? 0.5 : 0.5;
+    const timelineSizeRatio = 0.5;
     const mapSizeRatio = 1 - timelineSizeRatio;
     const screenWidthInDegrees = paddedSpan / mapSizeRatio;
     const shiftAmount = screenWidthInDegrees * (timelineSizeRatio / 2);
