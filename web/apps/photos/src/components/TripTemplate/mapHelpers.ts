@@ -1,6 +1,6 @@
 import L from "leaflet";
 import type { JourneyPoint } from "./types";
-import { iconCache } from "./utils";
+import { iconCache } from "./utils/geocoding";
 
 // Geographic clustering with responsive distance thresholds and day separation
 export const clusterPhotosByProximity = (
