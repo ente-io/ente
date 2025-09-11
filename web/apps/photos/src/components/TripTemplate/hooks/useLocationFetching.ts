@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import type { JourneyPoint } from "../types";
 import { fetchLocationNames } from "../utils/dataProcessing";
@@ -21,10 +21,32 @@ export const useLocationFetching = ({
     setJourneyData,
     setIsLoadingLocations,
 }: UseLocationFetchingParams) => {
+    const processedPhotoIdsRef = useRef<Set<number>>(new Set());
+
     // Fetch location names for clusters
     useEffect(() => {
         const fetchNames = async () => {
             if (photoClusters.length === 0) return;
+
+            // Get all current photo IDs
+            const currentPhotoIds = new Set(
+                photoClusters.flat().map((photo) => photo.fileId)
+            );
+
+            // Check if we have new photos that haven't been processed
+            const hasNewPhotos = Array.from(currentPhotoIds).some(
+                (id) => !processedPhotoIdsRef.current.has(id)
+            );
+
+            // Check if any photos need location fetching
+            const needsFetching = photoClusters.some((cluster) =>
+                cluster.some((photo) => !locationDataRef.current?.has(photo.fileId))
+            );
+
+            if (!hasNewPhotos && !needsFetching) {
+                setIsLoadingLocations(false);
+                return;
+            }
 
             setIsLoadingLocations(true);
 
@@ -46,6 +68,9 @@ export const useLocationFetching = ({
                         }),
                     );
                 }
+
+                // Update processed photos set
+                processedPhotoIdsRef.current = currentPhotoIds;
             } finally {
                 setIsLoadingLocations(false);
             }
@@ -53,7 +78,7 @@ export const useLocationFetching = ({
 
         void fetchNames();
     }, [
-        photoClusters.length,
+        photoClusters,
         locationDataRef,
         setJourneyData,
         setIsLoadingLocations,

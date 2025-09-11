@@ -1,5 +1,5 @@
 import { type EnteFile } from "ente-media/file";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import type { JourneyPoint } from "../types";
 import { generateNeededThumbnails } from "../utils/dataProcessing";
@@ -20,11 +20,27 @@ export const useThumbnailGeneration = ({
     thumbnailsGeneratedRef,
     setJourneyData,
 }: UseThumbnailGenerationParams) => {
+    const processedPhotoIdsRef = useRef<Set<number>>(new Set());
+
     // Generate thumbnails for needed photos with progressive loading
     useEffect(() => {
         const generateThumbs = async () => {
-            if (photoClusters.length === 0 || thumbnailsGeneratedRef.current)
-                return;
+            if (photoClusters.length === 0) return;
+
+            // Get all current photo IDs
+            const currentPhotoIds = new Set(
+                photoClusters.flat().map((photo) => photo.fileId)
+            );
+
+            // Check if we have photos that need thumbnails
+            const photosNeedingThumbnails = photoClusters
+                .flat()
+                .filter((photo) => 
+                    !photo.image && 
+                    (!processedPhotoIdsRef.current.has(photo.fileId) || !thumbnailsGeneratedRef.current)
+                );
+
+            if (photosNeedingThumbnails.length === 0) return;
 
             const { thumbnailUpdates } = await generateNeededThumbnails({
                 photoClusters,
@@ -42,9 +58,12 @@ export const useThumbnailGeneration = ({
                     }),
                 );
             }
+
+            // Update processed photos set and mark as generated
+            processedPhotoIdsRef.current = new Set([...processedPhotoIdsRef.current, ...currentPhotoIds]);
             thumbnailsGeneratedRef.current = true;
         };
 
         void generateThumbs();
-    }, [photoClusters.length, files, thumbnailsGeneratedRef, setJourneyData]);
+    }, [photoClusters, files, thumbnailsGeneratedRef, setJourneyData]);
 };
