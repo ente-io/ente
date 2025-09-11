@@ -189,6 +189,15 @@ class SuperLogging {
     Logger.root.level = kDebugMode ? Level.ALL : Level.INFO;
     Logger.root.onRecord.listen(onLogRecord);
 
+    if (_preferences.getBool("enable_db_logging") ?? kDebugMode) {
+      try {
+        await LogViewer.initialize(prefix: appConfig.prefix);
+        $.info("Log viewer initialized successfully");
+      } catch (e) {
+        $.warning("Failed to initialize log viewer: $e");
+      }
+    }
+
     if (isFDroidClient) {
       assert(
         sentryIsEnabled == false,
@@ -218,19 +227,6 @@ class SuperLogging {
         if (ram != null) $.info("Device RAM: ${ram}MB");
       }),
     );
-
-    // Initialize log viewer integration in debug mode
-    // Initialize log viewer in debug mode only
-  if (_preferences.getBool("enable_db_logging") ?? kDebugMode) {
-    try {
-      await LogViewer.initialize();
-      // Register LogViewer with SuperLogging to receive logs with process prefix
-      LogViewer.registerWithSuperLogging(SuperLogging.registerLogCallback);
-      $.info("Log viewer initialized successfully");
-    } catch (e) {
-      $.warning("Failed to initialize log viewer: $e");
-    }
-  }
 
     if (appConfig.body == null) return;
 
@@ -311,17 +307,6 @@ class SuperLogging {
     printLog(str);
 
     saveLogString(str, rec.error);
-    // Hook for external log viewer (if available)
-    // This allows the log_viewer package to capture logs without creating a dependency
-    if(_logViewerCallback != null) {
-    try {
-      if (_logViewerCallback != null) {
-        _logViewerCallback!(rec, config.prefix);
-      }
-    } catch (_) {
-      // Silently ignore any errors from the log viewer
-    }
-    }
   }
 
   static void saveLogString(String str, Object? error) {
@@ -337,15 +322,6 @@ class SuperLogging {
     if (sentryIsEnabled && error != null) {
       _sendErrorToSentry(error, null).ignore();
     }
-  }
-
-  // Callback that can be set by external packages (like log_viewer)
-  static void Function(LogRecord, String)? _logViewerCallback;
-
-  /// Register a callback to receive log records
-  /// This is used by the log_viewer package to capture logs
-  static void registerLogCallback(void Function(LogRecord, String) callback) {
-    _logViewerCallback = callback;
   }
 
   static final Queue<String> fileQueueEntries = Queue();
