@@ -47,7 +47,7 @@ export const TimelineBaseLine = memo<TimelineBaseLineProps>(({
 });
 
 // Styled components
-const BaseLine = styled(Box)(({ theme }) => ({
+const BaseLine = styled(Box)(() => ({
     position: "absolute",
     left: "50%",
     transform: "translateX(-1.5px)",

@@ -1,5 +1,17 @@
 import L from "leaflet";
-import type { GeocodingResponse } from "./types";
+
+interface GeocodingResponse {
+    features?: {
+        properties?: {
+            locality?: string;
+            neighbourhood?: string;
+            county?: string;
+            region?: string;
+            name?: string;
+            country?: string;
+        };
+    }[];
+}
 
 // Geocoding cache to avoid repeated API calls
 export const geocodingCache = new Map<string, { place: string; country: string }>();
