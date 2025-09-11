@@ -55,7 +55,6 @@ class _LogFilterDialogState extends State<LogFilterDialog> {
     });
   }
 
-
   Widget _buildLevelChip(String level) {
     final isSelected = _selectedLevels.contains(level);
     final color = LogEntry(
@@ -69,13 +68,20 @@ class _LogFilterDialogState extends State<LogFilterDialog> {
       label: Text(
         level,
         style: TextStyle(
-          color: isSelected ? Colors.white : null,
-          fontSize: 12,
+          color: isSelected ? Colors.white : color,
+          fontSize: 13,
+          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
         ),
       ),
       selected: isSelected,
       selectedColor: color,
+      backgroundColor: color.withValues(alpha: 0.15),
       checkmarkColor: Colors.white,
+      side: BorderSide(
+        color: isSelected ? color : color.withValues(alpha: 0.3),
+        width: isSelected ? 2 : 1,
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       onSelected: (selected) {
         setState(() {
           if (selected) {
@@ -93,18 +99,22 @@ class _LogFilterDialogState extends State<LogFilterDialog> {
     final theme = Theme.of(context);
 
     return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: Container(
         constraints: const BoxConstraints(maxWidth: 400, maxHeight: 600),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             // Header
             Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: theme.primaryColor.withValues(alpha: 0.1),
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(4)),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              decoration: const BoxDecoration(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -112,12 +122,15 @@ class _LogFilterDialogState extends State<LogFilterDialog> {
                   Text(
                     'Filter Logs',
                     style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 20,
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close),
+                    icon: const Icon(Icons.close, size: 22),
                     onPressed: () => Navigator.pop(context),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
                   ),
                 ],
               ),
@@ -126,7 +139,8 @@ class _LogFilterDialogState extends State<LogFilterDialog> {
             // Content
             Flexible(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -134,10 +148,11 @@ class _LogFilterDialogState extends State<LogFilterDialog> {
                     Text(
                       'Log Levels',
                       style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
@@ -146,110 +161,103 @@ class _LogFilterDialogState extends State<LogFilterDialog> {
                           .map(_buildLevelChip)
                           .toList(),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 20),
 
                     // Loggers
                     if (widget.availableLoggers.isNotEmpty) ...[
                       Text(
                         'Loggers',
                         style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 12),
                       Container(
-                        constraints: const BoxConstraints(maxHeight: 150),
+                        constraints: const BoxConstraints(maxHeight: 180),
                         decoration: BoxDecoration(
-                          border: Border.all(color: theme.dividerColor),
-                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(
+                            color: theme.dividerColor.withValues(alpha: 0.5),
+                            width: 1,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                          color: theme.cardColor,
                         ),
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: widget.availableLoggers.length,
-                          itemBuilder: (context, index) {
-                            final logger = widget.availableLoggers[index];
-                            return CheckboxListTile(
-                              title: Text(
-                                logger,
-                                style: const TextStyle(fontSize: 14),
-                              ),
-                              value: _selectedLoggers.contains(logger),
-                              dense: true,
-                              onChanged: (selected) {
-                                setState(() {
-                                  if (selected == true) {
-                                    _selectedLoggers.add(logger);
-                                  } else {
-                                    _selectedLoggers.remove(logger);
-                                  }
-                                });
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                    ],
-
-                    // Processes
-                    if (widget.availableProcesses.isNotEmpty) ...[
-                      Text(
-                        'Processes',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Container(
-                        constraints: const BoxConstraints(maxHeight: 120),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: theme.dividerColor),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: widget.availableProcesses.length,
-                          itemBuilder: (context, index) {
-                            final process = widget.availableProcesses[index];
-                            final displayName = LogEntry(
-                              message: '',
-                              level: 'INFO',
-                              timestamp: DateTime.now(),
-                              loggerName: '',
-                              processPrefix: process,
-                            ).processDisplayName;
-                            return CheckboxListTile(
-                              title: Text(
-                                displayName,
-                                style: const TextStyle(fontSize: 14),
-                              ),
-                              subtitle: process.isNotEmpty 
-                                  ? Text(
-                                      'Prefix: $process',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: theme.textTheme.bodySmall?.color,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: ListView.separated(
+                            shrinkWrap: true,
+                            itemCount: widget.availableLoggers.length,
+                            separatorBuilder: (context, index) => Divider(
+                              height: 1,
+                              thickness: 0.5,
+                              color: theme.dividerColor.withValues(alpha: 0.3),
+                            ),
+                            itemBuilder: (context, index) {
+                              final logger = widget.availableLoggers[index];
+                              final isSelected =
+                                  _selectedLoggers.contains(logger);
+                              return InkWell(
+                                onTap: () {
+                                  setState(() {
+                                    if (isSelected) {
+                                      _selectedLoggers.remove(logger);
+                                    } else {
+                                      _selectedLoggers.add(logger);
+                                    }
+                                  });
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 12,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          logger,
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: isSelected
+                                                ? theme.primaryColor
+                                                : theme
+                                                    .textTheme.bodyLarge?.color,
+                                            fontWeight: isSelected
+                                                ? FontWeight.w500
+                                                : FontWeight.normal,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
                                       ),
-                                    )
-                                  : null,
-                              value: _selectedProcesses.contains(process),
-                              dense: true,
-                              onChanged: (selected) {
-                                setState(() {
-                                  if (selected == true) {
-                                    _selectedProcesses.add(process);
-                                  } else {
-                                    _selectedProcesses.remove(process);
-                                  }
-                                });
-                              },
-                            );
-                          },
+                                      SizedBox(
+                                        width: 24,
+                                        height: 24,
+                                        child: Checkbox(
+                                          value: isSelected,
+                                          onChanged: (selected) {
+                                            setState(() {
+                                              if (selected == true) {
+                                                _selectedLoggers.add(logger);
+                                              } else {
+                                                _selectedLoggers.remove(logger);
+                                              }
+                                            });
+                                          },
+                                          materialTapTargetSize:
+                                              MaterialTapTargetSize.shrinkWrap,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 20),
                     ],
-
                   ],
                 ),
               ),
@@ -259,27 +267,69 @@ class _LogFilterDialogState extends State<LogFilterDialog> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: theme.cardColor,
+                border: Border(
+                  top: BorderSide(
+                    color: theme.dividerColor.withValues(alpha: 0.2),
+                    width: 1,
+                  ),
+                ),
                 borderRadius:
-                    const BorderRadius.vertical(bottom: Radius.circular(4)),
+                    const BorderRadius.vertical(bottom: Radius.circular(16)),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   TextButton(
                     onPressed: _clearFilters,
-                    child: const Text('Clear All'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: theme.colorScheme.error,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
+                    ),
+                    child: const Text(
+                      'Clear All',
+                      style: TextStyle(fontSize: 14),
+                    ),
                   ),
                   Row(
                     children: [
                       TextButton(
                         onPressed: () => Navigator.pop(context),
-                        child: const Text('Cancel'),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 10,
+                          ),
+                        ),
+                        child: Text(
+                          'Cancel',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: theme.textTheme.bodyLarge?.color,
+                          ),
+                        ),
                       ),
-                      const SizedBox(width: 8),
-                      ElevatedButton(
+                      const SizedBox(width: 12),
+                      FilledButton(
                         onPressed: _applyFilters,
-                        child: const Text('Apply'),
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 10,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text(
+                          'Apply',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                     ],
                   ),

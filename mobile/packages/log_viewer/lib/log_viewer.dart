@@ -16,11 +16,14 @@ export 'src/ui/log_viewer_page.dart';
 /// Main entry point for the log viewer functionality
 class LogViewer {
   static bool _initialized = false;
+  static String _prefix = '';
 
   /// Initialize the log viewer
   /// This should be called once during app startup
-  static Future<void> initialize() async {
+  static Future<void> initialize({String prefix = ''}) async {
     if (_initialized) return;
+
+    _prefix = prefix;
 
     // Initialize the log store
     await LogStore.instance.initialize();
@@ -38,7 +41,7 @@ class LogViewer {
       // This will be called dynamically by the main app if SuperLogging is available
       // For now, fallback to direct logger listening without prefix
       log.Logger.root.onRecord.listen((record) {
-        LogStore.addLogRecord(record, '');
+        LogStore.addLogRecord(record, _prefix);
       });
     } catch (e) {
       // SuperLogging not available, fallback to direct logger
@@ -48,24 +51,12 @@ class LogViewer {
     }
   }
 
-  /// Register with SuperLogging callback system (called by main app)
-  static void registerWithSuperLogging(
-      void Function(void Function(log.LogRecord, String)) registerCallback,) {
-    try {
-      registerCallback((record, processPrefix) {
-        LogStore.addLogRecord(record, processPrefix);
-      });
-    } catch (e) {
-      // Fallback if registration fails
-      _registerWithSuperLogging();
-    }
-  }
-
   /// Get the log viewer page widget
   static Widget getViewerPage() {
     if (!_initialized) {
       throw StateError(
-          'LogViewer not initialized. Call LogViewer.initialize() first.',);
+        'LogViewer not initialized. Call LogViewer.initialize() first.',
+      );
     }
     return const LogViewerPage();
   }
