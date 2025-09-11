@@ -69,7 +69,7 @@ class _LogFilterDialogState extends State<LogFilterDialog> {
         level,
         style: TextStyle(
           color: isSelected ? Colors.white : color,
-          fontSize: 13,
+          fontSize: 9,
           fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
         ),
       ),
@@ -79,9 +79,9 @@ class _LogFilterDialogState extends State<LogFilterDialog> {
       checkmarkColor: Colors.white,
       side: BorderSide(
         color: isSelected ? color : color.withValues(alpha: 0.3),
-        width: isSelected ? 2 : 1,
+        width: isSelected ? 1.5 : 1,
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
       onSelected: (selected) {
         setState(() {
           if (selected) {
@@ -103,7 +103,7 @@ class _LogFilterDialogState extends State<LogFilterDialog> {
         borderRadius: BorderRadius.circular(16),
       ),
       child: Container(
-        constraints: const BoxConstraints(maxWidth: 400, maxHeight: 600),
+        constraints: const BoxConstraints(maxWidth: 380, maxHeight: 500),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
         ),
@@ -112,7 +112,7 @@ class _LogFilterDialogState extends State<LogFilterDialog> {
           children: [
             // Header
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: const BoxDecoration(
                 borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
               ),
@@ -123,7 +123,7 @@ class _LogFilterDialogState extends State<LogFilterDialog> {
                     'Filter Logs',
                     style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w600,
-                      fontSize: 20,
+                      fontSize: 18,
                     ),
                   ),
                   IconButton(
@@ -140,7 +140,7 @@ class _LogFilterDialogState extends State<LogFilterDialog> {
             Flexible(
               child: SingleChildScrollView(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -149,19 +149,124 @@ class _LogFilterDialogState extends State<LogFilterDialog> {
                       'Log Levels',
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
-                        fontSize: 16,
+                        fontSize: 14,
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
-                      runSpacing: 8,
+                      runSpacing: 3,
                       children: LogLevels.all
                           .where((level) => level != 'ALL' && level != 'OFF')
                           .map(_buildLevelChip)
                           .toList(),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 16),
+
+                    // Process Prefixes
+                    if (widget.availableProcesses.isNotEmpty) ...[
+                      Text(
+                        'Process',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        constraints: const BoxConstraints(maxHeight: 120),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: theme.dividerColor.withValues(alpha: 0.5),
+                            width: 1,
+                          ),
+                          borderRadius: BorderRadius.circular(6),
+                          color: theme.cardColor,
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(6),
+                          child: ListView.separated(
+                            shrinkWrap: true,
+                            itemCount: widget.availableProcesses.length,
+                            separatorBuilder: (context, index) => Divider(
+                              height: 1,
+                              thickness: 0.5,
+                              color: theme.dividerColor.withValues(alpha: 0.3),
+                            ),
+                            itemBuilder: (context, index) {
+                              final process = widget.availableProcesses[index];
+                              final isSelected =
+                                  _selectedProcesses.contains(process);
+                              final displayName = LogEntry(
+                                message: '',
+                                level: 'INFO',
+                                timestamp: DateTime.now(),
+                                loggerName: '',
+                                processPrefix: process,
+                              ).processDisplayName;
+
+                              return InkWell(
+                                onTap: () {
+                                  setState(() {
+                                    if (isSelected) {
+                                      _selectedProcesses.remove(process);
+                                    } else {
+                                      _selectedProcesses.add(process);
+                                    }
+                                  });
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          displayName,
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: isSelected
+                                                ? theme.primaryColor
+                                                : theme
+                                                    .textTheme.bodyLarge?.color,
+                                            fontWeight: isSelected
+                                                ? FontWeight.w500
+                                                : FontWeight.normal,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: Checkbox(
+                                          value: isSelected,
+                                          onChanged: (selected) {
+                                            setState(() {
+                                              if (selected == true) {
+                                                _selectedProcesses.add(process);
+                                              } else {
+                                                _selectedProcesses
+                                                    .remove(process);
+                                              }
+                                            });
+                                          },
+                                          materialTapTargetSize:
+                                              MaterialTapTargetSize.shrinkWrap,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
 
                     // Loggers
                     if (widget.availableLoggers.isNotEmpty) ...[
@@ -169,22 +274,22 @@ class _LogFilterDialogState extends State<LogFilterDialog> {
                         'Loggers',
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
-                          fontSize: 16,
+                          fontSize: 15,
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 8),
                       Container(
-                        constraints: const BoxConstraints(maxHeight: 180),
+                        constraints: const BoxConstraints(maxHeight: 120),
                         decoration: BoxDecoration(
                           border: Border.all(
                             color: theme.dividerColor.withValues(alpha: 0.5),
                             width: 1,
                           ),
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(6),
                           color: theme.cardColor,
                         ),
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(6),
                           child: ListView.separated(
                             shrinkWrap: true,
                             itemCount: widget.availableLoggers.length,
@@ -209,8 +314,8 @@ class _LogFilterDialogState extends State<LogFilterDialog> {
                                 },
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 12,
+                                    horizontal: 12,
+                                    vertical: 8,
                                   ),
                                   child: Row(
                                     children: [
@@ -218,7 +323,7 @@ class _LogFilterDialogState extends State<LogFilterDialog> {
                                         child: Text(
                                           logger,
                                           style: TextStyle(
-                                            fontSize: 14,
+                                            fontSize: 13,
                                             color: isSelected
                                                 ? theme.primaryColor
                                                 : theme
@@ -231,8 +336,8 @@ class _LogFilterDialogState extends State<LogFilterDialog> {
                                         ),
                                       ),
                                       SizedBox(
-                                        width: 24,
-                                        height: 24,
+                                        width: 20,
+                                        height: 20,
                                         child: Checkbox(
                                           value: isSelected,
                                           onChanged: (selected) {
@@ -256,7 +361,7 @@ class _LogFilterDialogState extends State<LogFilterDialog> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 16),
                     ],
                   ],
                 ),
@@ -265,7 +370,7 @@ class _LogFilterDialogState extends State<LogFilterDialog> {
 
             // Actions
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 border: Border(
                   top: BorderSide(
@@ -284,8 +389,8 @@ class _LogFilterDialogState extends State<LogFilterDialog> {
                     style: TextButton.styleFrom(
                       foregroundColor: theme.colorScheme.error,
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
+                        horizontal: 12,
+                        vertical: 8,
                       ),
                     ),
                     child: const Text(
@@ -299,8 +404,8 @@ class _LogFilterDialogState extends State<LogFilterDialog> {
                         onPressed: () => Navigator.pop(context),
                         style: TextButton.styleFrom(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 10,
+                            horizontal: 16,
+                            vertical: 8,
                           ),
                         ),
                         child: Text(
@@ -311,13 +416,13 @@ class _LogFilterDialogState extends State<LogFilterDialog> {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 8),
                       FilledButton(
                         onPressed: _applyFilters,
                         style: FilledButton.styleFrom(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 10,
+                            horizontal: 20,
+                            vertical: 8,
                           ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
