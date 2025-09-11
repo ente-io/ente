@@ -368,21 +368,20 @@ export const createSuperClusterIcon = (
           <!-- Badge -->
           <div style="
             position: absolute;
-            top: -6px;
-            right: 0;
+            top: -8px;
+            right: 8px;
             background: #000000;
             color: white;
             border-radius: 50%;
-            width: 22px;
-            height: 22px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 11px;
-            font-weight: 600;
+            width: 24px;
+            height: 24px;
             border: 2px solid white;
             box-shadow: 0 2px 6px rgba(0,0,0,0.3);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 20px;
+            text-align: center;
             z-index: 10;
           ">${clusterCount}</div>
         </div>
