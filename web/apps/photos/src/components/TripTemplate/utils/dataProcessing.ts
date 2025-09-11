@@ -126,24 +126,78 @@ export const generateNeededThumbnails = async ({
         return { thumbnailUpdates };
     }
 
-    const neededFileIds = new Set<number>();
+    // Define priority groups with specific file collections
+    const priorityGroups: EnteFile[][] = [];
 
-    photoClusters.forEach((cluster) => {
+    // Priority 1: Cover image (handled separately in loadCoverImage, skip here)
+    
+    // Priority 2: First 3 locations photosfans (first 3 photos from each)
+    const firstLocationsFiles: EnteFile[] = [];
+    photoClusters.slice(0, 3).forEach((cluster) => {
         cluster.slice(0, 3).forEach((photo) => {
-            neededFileIds.add(photo.fileId);
+            const file = files.find((f) => f.id === photo.fileId);
+            if (file && !firstLocationsFiles.includes(file)) {
+                firstLocationsFiles.push(file);
+            }
         });
     });
+    if (firstLocationsFiles.length > 0) {
+        priorityGroups.push(firstLocationsFiles);
+    }
 
-    const filesToProcess = files.filter((file) => neededFileIds.has(file.id));
-
-    for (const file of filesToProcess) {
-        try {
-            const thumbnailUrl = await downloadManager.renderableThumbnailURL(file);
-            if (thumbnailUrl) {
-                thumbnailUpdates.set(file.id, thumbnailUrl);
+    // Priority 3: Map marker photos (first photo from each cluster for markers)
+    const mapMarkerFiles: EnteFile[] = [];
+    photoClusters.forEach((cluster) => {
+        if (cluster.length > 0 && cluster[0]) {
+            const file = files.find((f) => f.id === cluster[0].fileId);
+            if (file && !firstLocationsFiles.includes(file) && !mapMarkerFiles.includes(file)) {
+                mapMarkerFiles.push(file);
             }
-        } catch {
-            // Silently ignore thumbnail generation errors
+        }
+    });
+    if (mapMarkerFiles.length > 0) {
+        priorityGroups.push(mapMarkerFiles);
+    }
+
+    // Priority 4: Rest of locations photosfans (remaining locations, first 3 from each)
+    const remainingLocationFiles: EnteFile[] = [];
+    photoClusters.slice(3).forEach((cluster) => {
+        cluster.slice(0, 3).forEach((photo) => {
+            const file = files.find((f) => f.id === photo.fileId);
+            if (file && 
+                !firstLocationsFiles.includes(file) && 
+                !mapMarkerFiles.includes(file) && 
+                !remainingLocationFiles.includes(file)) {
+                remainingLocationFiles.push(file);
+            }
+        });
+    });
+    if (remainingLocationFiles.length > 0) {
+        priorityGroups.push(remainingLocationFiles);
+    }
+
+    // Process priority groups sequentially with delays
+    for (let groupIndex = 0; groupIndex < priorityGroups.length; groupIndex++) {
+        const group = priorityGroups[groupIndex];
+        if (!group) continue;
+        
+        // Process files in parallel within each priority group
+        const groupPromises = group.map(async (file) => {
+            try {
+                const thumbnailUrl = await downloadManager.renderableThumbnailURL(file);
+                if (thumbnailUrl) {
+                    thumbnailUpdates.set(file.id, thumbnailUrl);
+                }
+            } catch {
+                // Silently ignore thumbnail generation errors
+            }
+        });
+
+        await Promise.all(groupPromises);
+        
+        // Add small delay between priority groups to allow UI updates
+        if (groupIndex < priorityGroups.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 50));
         }
     }
 
@@ -165,11 +219,13 @@ export const loadCoverImage = async ({
 
     let coverFile: EnteFile | undefined;
 
+    // Priority 1: Use explicit cover ID if set
     const coverID = collection?.pubMagicMetadata?.data.coverID;
     if (coverID) {
         coverFile = files.find((f) => f.id === coverID);
     }
 
+    // Priority 2: Use first chronological photo as cover (highest priority)
     if (!coverFile) {
         const firstPhoto = journeyData[0];
         if (!firstPhoto) return null;
@@ -179,6 +235,7 @@ export const loadCoverImage = async ({
     if (!coverFile) return null;
 
     try {
+        // Load cover image at highest quality first (highest priority)
         const sourceURLs = await downloadManager.renderableSourceURLs(coverFile);
         if (sourceURLs.type === "image") {
             return sourceURLs.imageURL;

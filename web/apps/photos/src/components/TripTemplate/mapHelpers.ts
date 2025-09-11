@@ -186,6 +186,7 @@ export const createIcon = (
     const pinSize = size + 16; // Make it square and bigger
     const pinHeight = pinSize + 12; // Add space for triangle
     const triangleHeight = 10;
+    const hasImage = imageSrc && imageSrc.trim() !== "";
 
     const icon = L.divIcon({
         html: `
@@ -212,17 +213,34 @@ export const createIcon = (
           onmouseover="this.style.background='#22c55e'; this.style.borderColor='#22c55e'; this.nextElementSibling.style.borderTopColor='#22c55e';"
           onmouseout="this.style.background='${isReached ? "#22c55e" : "white"}'; this.style.borderColor='${isReached ? "#22c55e" : "#ffffff"}'; this.nextElementSibling.style.borderTopColor='${isReached ? "#22c55e" : "white"}';"
           >
-            <!-- Image inside the rounded rectangle -->
-            <img 
-              src="${imageSrc}" 
-              style="
+            ${hasImage ? `
+              <!-- Image inside the rounded rectangle -->
+              <img 
+                src="${imageSrc}" 
+                style="
+                  width: 100%;
+                  height: 100%;
+                  object-fit: cover;
+                  border-radius: 12px;
+                "
+                alt="Location"
+              />
+            ` : `
+              <!-- Loading skeleton when no image -->
+              <div style="
                 width: 100%;
                 height: 100%;
-                object-fit: cover;
                 border-radius: 12px;
-              "
-              alt="Location"
-            />
+                animation: skeleton-pulse 1.5s ease-in-out infinite;
+              "></div>
+              <style>
+                @keyframes skeleton-pulse {
+                  0% { background-color: #ffffff; }
+                  50% { background-color: #f0f0f0; }
+                  100% { background-color: #ffffff; }
+                }
+              </style>
+            `}
           </div>
           
           <!-- Triangle at the bottom -->
@@ -276,6 +294,7 @@ export const createSuperClusterIcon = (
     const pinHeight = pinSize + 12; // Add space for triangle
     const triangleHeight = 10;
     const containerSize = pinSize + 24;
+    const hasImage = imageSrc && imageSrc.trim() !== "";
 
     const icon = L.divIcon({
         html: `
@@ -310,17 +329,34 @@ export const createSuperClusterIcon = (
             onmouseover="this.style.background='#22c55e'; this.style.borderColor='#22c55e'; this.nextElementSibling.style.borderTopColor='#22c55e';"
             onmouseout="this.style.background='${isReached ? "#22c55e" : "white"}'; this.style.borderColor='${isReached ? "#22c55e" : "#ffffff"}'; this.nextElementSibling.style.borderTopColor='${isReached ? "#22c55e" : "white"}';"
             >
-              <!-- Image inside the rounded rectangle -->
-              <img 
-                src="${imageSrc}" 
-                style="
+              ${hasImage ? `
+                <!-- Image inside the rounded rectangle -->
+                <img 
+                  src="${imageSrc}" 
+                  style="
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    border-radius: 12px;
+                  "
+                  alt="Location"
+                />
+              ` : `
+                <!-- Loading skeleton when no image -->
+                <div style="
                   width: 100%;
                   height: 100%;
-                  object-fit: cover;
                   border-radius: 12px;
-                "
-                alt="Location"
-              />
+                  animation: skeleton-pulse 1.5s ease-in-out infinite;
+                "></div>
+                <style>
+                  @keyframes skeleton-pulse {
+                    0% { background-color: #ffffff; }
+                    50% { background-color: #f0f0f0; }
+                    100% { background-color: #ffffff; }
+                  }
+                </style>
+              `}
             </div>
             
             <!-- Triangle at the bottom -->

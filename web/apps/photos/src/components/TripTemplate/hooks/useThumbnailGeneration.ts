@@ -18,7 +18,7 @@ export const useThumbnailGeneration = ({
     thumbnailsGeneratedRef,
     setJourneyData,
 }: UseThumbnailGenerationParams) => {
-    // Generate thumbnails for needed photos
+    // Generate thumbnails for needed photos with progressive loading
     useEffect(() => {
         const generateThumbs = async () => {
             if (photoClusters.length === 0 || thumbnailsGeneratedRef.current) return;

@@ -1,7 +1,7 @@
-import { Box, Typography, styled } from "@mui/material";
-import { memo } from "react";
-import Image from "next/image";
+import { Box, Skeleton, styled, Typography } from "@mui/material";
 import { EnteLogo } from "ente-base/components/EnteLogo";
+import Image from "next/image";
+import { memo } from "react";
 import type { JourneyPoint } from "./types";
 
 interface TripCoverProps {
@@ -11,65 +11,91 @@ interface TripCoverProps {
     coverImageUrl?: string | null;
 }
 
-export const TripCover = memo<TripCoverProps>(({
-    journeyData,
-    photoClusters,
-    albumTitle,
-    coverImageUrl,
-}) => {
-    const sortedData = [...journeyData].sort(
-        (a, b) =>
-            new Date(a.timestamp).getTime() -
-            new Date(b.timestamp).getTime(),
-    );
-    const firstData = sortedData[0];
-    const lastData = sortedData[sortedData.length - 1];
-    if (!firstData || !lastData) {
-        return null;
-    }
-    const firstDate = new Date(firstData.timestamp);
-    const lastDate = new Date(lastData.timestamp);
-    const diffTime = Math.abs(lastDate.getTime() - firstDate.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    const monthYear = firstDate.toLocaleDateString("en-US", {
-        month: "long",
-        year: "numeric",
-    });
+export const TripCover = memo<TripCoverProps>(
+    ({ journeyData, photoClusters, albumTitle, coverImageUrl }) => {
+        const sortedData = [...journeyData].sort(
+            (a, b) =>
+                new Date(a.timestamp).getTime() -
+                new Date(b.timestamp).getTime(),
+        );
+        const firstData = sortedData[0];
+        const lastData = sortedData[sortedData.length - 1];
+        if (!firstData || !lastData) {
+            return null;
+        }
+        const firstDate = new Date(firstData.timestamp);
+        const lastDate = new Date(lastData.timestamp);
+        const diffTime = Math.abs(lastDate.getTime() - firstDate.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const monthYear = firstDate.toLocaleDateString("en-US", {
+            month: "long",
+            year: "numeric",
+        });
 
-    return (
-        <CoverContainer>
-            <CoverImageContainer>
-                <Image
-                    src={coverImageUrl || journeyData[0]?.image || ""}
-                    alt="Trip Cover"
-                    fill
-                    style={{ objectFit: "cover" }}
-                    sizes="(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 600px"
-                />
-                <GradientOverlay />
+        return (
+            <CoverContainer>
+                <CoverImageContainer>
+                    {coverImageUrl ? (
+                        <>
+                            <Image
+                                src={coverImageUrl}
+                                alt="Trip Cover"
+                                fill
+                                style={{ objectFit: "cover" }}
+                                sizes="(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 600px"
+                            />
+                            <GradientOverlay />
+                        </>
+                    ) : (
+                        <Skeleton
+                            variant="rectangular"
+                            width="100%"
+                            height="100%"
+                            sx={{ bgcolor: "#f5f5f5" }}
+                        />
+                    )}
 
-                <LogoContainer>
-                    <EnteLogo height={24} />
-                </LogoContainer>
+                    <LogoContainer>
+                        <EnteLogo height={24} />
+                    </LogoContainer>
 
-                <ContentContainer>
-                    <TripTitle>
-                        {albumTitle || "Trip"}
-                    </TripTitle>
-                    <TripSubtitle>
-                        {monthYear} • {diffDays} days •{" "}
-                        {photoClusters.length} locations
-                    </TripSubtitle>
-                </ContentContainer>
-            </CoverImageContainer>
-        </CoverContainer>
-    );
-});
+                    <ContentContainer>
+                        {coverImageUrl ? (
+                            <>
+                                <TripTitle>{albumTitle || "Trip"}</TripTitle>
+                                <TripSubtitle>
+                                    {monthYear} • {diffDays} days •{" "}
+                                    {photoClusters.length} locations
+                                </TripSubtitle>
+                            </>
+                        ) : (
+                            <>
+                                <Skeleton
+                                    variant="text"
+                                    width="200px"
+                                    height="40px"
+                                    sx={{
+                                        mb: "5px",
+                                        bgcolor: "rgba(255,255,255,0.95)",
+                                    }}
+                                />
+                                <Skeleton
+                                    variant="text"
+                                    width="270px"
+                                    height="24px"
+                                    sx={{ bgcolor: "rgba(255,255,255,0.7)" }}
+                                />
+                            </>
+                        )}
+                    </ContentContainer>
+                </CoverImageContainer>
+            </CoverContainer>
+        );
+    },
+);
 
 // Styled components
-const CoverContainer = styled(Box)({
-    marginBottom: "48px",
-});
+const CoverContainer = styled(Box)({ marginBottom: "48px" });
 
 const CoverImageContainer = styled(Box)({
     aspectRatio: "16/8",
@@ -77,6 +103,7 @@ const CoverImageContainer = styled(Box)({
     marginBottom: "12px",
     borderRadius: "24px",
     overflow: "hidden",
+    backgroundColor: "#e0e0e0",
 });
 
 const GradientOverlay = styled(Box)({
@@ -105,7 +132,7 @@ const ContentContainer = styled(Box)({
 const TripTitle = styled(Typography)({
     fontSize: "30px",
     fontWeight: "bold",
-    marginBottom: "12px",
+    marginBottom: "16px",
     component: "h1",
 });
 
