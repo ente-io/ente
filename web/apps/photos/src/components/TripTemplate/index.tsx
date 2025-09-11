@@ -23,12 +23,12 @@ import {
 } from "react";
 
 // Import extracted components
-import { TripCover } from "./TripCover";
-import { TripStartedSection } from "./TripStartedSection";
-import { TimelineProgressLine } from "./TimelineProgressLine";
+import { MapEvents } from "./MapEvents";
 import { TimelineBaseLine } from "./TimelineBaseLine";
 import { TimelineLocation } from "./TimelineLocation";
-import { MapEvents } from "./MapEvents";
+import { TimelineProgressLine } from "./TimelineProgressLine";
+import { TripCover } from "./TripCover";
+import { TripStartedSection } from "./TripStartedSection";
 
 // Import types and utils
 import type { JourneyPoint } from "./types";
@@ -146,7 +146,9 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
     const isClusterClickScrollingRef = useRef(false); // Use ref for immediate updates
     const clusterClickTimeoutRef = useRef<NodeJS.Timeout | null>(null); // Timeout for cluster clicks
     const thumbnailsGeneratedRef = useRef(false); // Track if thumbnails have been generated
-    const locationDataRef = useRef<Map<number, { name: string; country: string }>>(new Map()); // Track location data to prevent resets
+    const locationDataRef = useRef<
+        Map<number, { name: string; country: string }>
+    >(new Map()); // Track location data to prevent resets
     const filesCountRef = useRef<number>(0); // Track files count to detect real changes
 
     // FileViewer state
@@ -398,17 +400,16 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
 
     useEffect(() => {
         setIsClient(true);
-        
+
         // Check if the files count has actually changed (not just array reference)
         const hasFilesCountChanged = files.length !== filesCountRef.current;
         filesCountRef.current = files.length;
-
 
         // Only reload data if the count changed or this is the initial load
         if (!hasFilesCountChanged && journeyData.length > 0) {
             return;
         }
-        
+
         // Reset thumbnail generation flag when files change
         thumbnailsGeneratedRef.current = false;
 
@@ -431,11 +432,14 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
 
                     if (lat && lng) {
                         // Check if we have cached location data for this file
-                        const cachedLocation = locationDataRef.current.get(file.id);
-                        const finalName = cachedLocation?.name || fileFileName(file);
-                        const finalCountry = cachedLocation?.country || "Unknown";
-                        
-                        
+                        const cachedLocation = locationDataRef.current.get(
+                            file.id,
+                        );
+                        const finalName =
+                            cachedLocation?.name || fileFileName(file);
+                        const finalCountry =
+                            cachedLocation?.country || "Unknown";
+
                         photoData.push({
                             lat: lat,
                             lng: lng,
@@ -588,7 +592,7 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
     useEffect(() => {
         const generateNeededThumbnails = async () => {
             if (photoClusters.length === 0 || journeyData.length === 0) return;
-            
+
             // Check if thumbnails have already been generated
             if (thumbnailsGeneratedRef.current) return;
 
@@ -596,23 +600,24 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
             const neededFileIds = new Set<number>();
 
             // First 3 photos of each cluster (covers map markers, super clusters, and timeline photo fans)
-            photoClusters.forEach(cluster => {
-                cluster.slice(0, 3).forEach(photo => {
+            photoClusters.forEach((cluster) => {
+                cluster.slice(0, 3).forEach((photo) => {
                     neededFileIds.add(photo.fileId);
                 });
             });
 
             // Find the files that need thumbnails
-            const filesToProcess = files.filter(file => 
-                neededFileIds.has(file.id)
+            const filesToProcess = files.filter((file) =>
+                neededFileIds.has(file.id),
             );
 
             // Generate thumbnails and update journey data while preserving location names
             const thumbnailUpdates = new Map<number, string>();
-            
+
             for (const file of filesToProcess) {
                 try {
-                    const thumbnailUrl = await downloadManager.renderableThumbnailURL(file);
+                    const thumbnailUrl =
+                        await downloadManager.renderableThumbnailURL(file);
                     if (thumbnailUrl) {
                         thumbnailUpdates.set(file.id, thumbnailUrl);
                     }
@@ -1342,46 +1347,13 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
             <div
                 style={{
                     position: "fixed",
-                    top: "20px",
-                    right: "20px",
+                    top: "58px",
+                    right: "58px",
                     display: "flex",
                     gap: "8px",
                     zIndex: 2000,
                 }}
             >
-                {onAddPhotos && (
-                    <button
-                        onClick={onAddPhotos}
-                        style={{
-                            padding: "12px",
-                            backgroundColor: "rgba(255, 255, 255, 0.9)",
-                            border: "none",
-                            borderRadius: "8px",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            color: "#1f2937",
-                            transition: "background-color 0.2s",
-                            backdropFilter: "blur(10px)",
-                            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-                            width: "44px",
-                            height: "44px",
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor =
-                                "rgba(255, 255, 255, 1)";
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor =
-                                "rgba(255, 255, 255, 0.9)";
-                        }}
-                    >
-                        <AddPhotoAlternateOutlinedIcon
-                            style={{ fontSize: "22px" }}
-                        />
-                    </button>
-                )}
                 <button
                     onClick={() => {
                         if (typeof window !== "undefined") {
@@ -1419,6 +1391,39 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
                 >
                     <ShareIcon style={{ fontSize: "20px" }} />
                 </button>
+                {onAddPhotos && (
+                    <button
+                        onClick={onAddPhotos}
+                        style={{
+                            padding: "12px",
+                            backgroundColor: "rgba(255, 255, 255, 0.9)",
+                            border: "none",
+                            borderRadius: "8px",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            color: "#1f2937",
+                            transition: "background-color 0.2s",
+                            backdropFilter: "blur(10px)",
+                            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+                            width: "44px",
+                            height: "44px",
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor =
+                                "rgba(255, 255, 255, 1)";
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor =
+                                "rgba(255, 255, 255, 0.9)";
+                        }}
+                    >
+                        <AddPhotoAlternateOutlinedIcon
+                            style={{ fontSize: "22px" }}
+                        />
+                    </button>
+                )}
                 {!enableDownload && (
                     <button
                         onClick={downloadAllFiles}
@@ -1498,8 +1503,8 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
                 <div
                     style={{
                         position: "fixed",
-                        top: "80px",
-                        right: "20px",
+                        top: "118px",
+                        right: "180px",
                         backgroundColor: "#22c55e",
                         color: "white",
                         padding: "8px 16px",
@@ -1749,7 +1754,6 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
                                     (clusterIdx) =>
                                         photoClusters[clusterIdx] || [],
                                 );
-
 
                             // Check if this super-cluster has been reached
                             const firstClusterIndex =
