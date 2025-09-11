@@ -7,6 +7,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';  //for time based file naming
 import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+//we gonn change
 
 class LocalBackupService {
   final _logger = Logger('LocalBackupService');
@@ -40,7 +41,28 @@ class LocalBackupService {
 
       _logger.info("Change detected, triggering automatic encrypted backup...");
 
-      final plainTextContent = await CodeStore.instance.getCodesForExport();
+
+      String rawContent = await CodeStore.instance.getCodesForExport();
+
+      List<String> lines = rawContent.split('\n');
+      List<String> cleanedLines = [];
+
+      for (String line in lines) {
+        if (line.trim().isEmpty) continue;
+  
+        String cleanUrl;
+        if (line.startsWith('"') && line.endsWith('"')) {
+          cleanUrl = jsonDecode(line); 
+        }
+
+        else {
+          cleanUrl = line;
+        }
+
+        cleanedLines.add(cleanUrl);
+      }
+
+      final plainTextContent = cleanedLines.join('\n');
 
       if (plainTextContent.trim().isEmpty) {
         return;

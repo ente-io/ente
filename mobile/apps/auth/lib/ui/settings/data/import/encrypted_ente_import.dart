@@ -46,7 +46,7 @@ Future<void> showEncryptedImportInstruction(BuildContext context) async {
   if (result?.action != null && result!.action != ButtonAction.cancel) {
     if (result.action == ButtonAction.first) {
       await _pickEnteJsonFile(context);
-    }
+    } else {}
   }
 }
 
@@ -85,6 +85,7 @@ Future<void> _decryptExportData(
             enteAuthExport.kdfParams.opsLimit,
           );
           Uint8List? decryptedContent;
+          // Encrypt the key with this derived key
           try {
             decryptedContent = await CryptoUtil.decryptData(
               CryptoUtil.base642bin(enteAuthExport.encryptedData),
@@ -98,6 +99,7 @@ Future<void> _decryptExportData(
           }
           if (isPasswordIncorrect) {
             await progressDialog.hide();
+
             Future.delayed(const Duration(seconds: 0), () {
               _decryptExportData(context, enteAuthExport, password: password);
             });
@@ -107,28 +109,17 @@ Future<void> _decryptExportData(
           List<String> splitCodes = content.split("\n");
           final parsedCodes = [];
           for (final code in splitCodes) {
-            if (code.trim().isEmpty) continue; 
             try {
-              String otpUrl;
-              if (code.startsWith('"') && code.endsWith('"')) {
-                otpUrl = jsonDecode(code);  // decode json wrapped URL
-              } 
-              else {
-                otpUrl = code;  // use raw URL directly
-              }
-              parsedCodes.add(Code.fromOTPAuthUrl(otpUrl));
-            } 
-            catch (e) {
+              parsedCodes.add(Code.fromOTPAuthUrl(code));
+            } catch (e) {
               Logger('EncryptedText').severe("Could not parse code", e);
             }
-          } 
-
+          }
           for (final code in parsedCodes) {
             await CodeStore.instance.addCode(code, shouldSync: false);
           }
           unawaited(AuthenticatorService.instance.onlineSync());
           importedCodeCount = parsedCodes.length;
-          
           await progressDialog.hide();
         } catch (e, s) {
           await progressDialog.hide();
