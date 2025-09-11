@@ -312,9 +312,7 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
                         </div>
                     ) : (
                         <NoPhotosContainer>
-                            <Box sx={{ color: "text.muted" }}>
-                                No photos with location data found.
-                            </Box>
+                            No photos found with location information.
                         </NoPhotosContainer>
                     )}
                 </TimelineContent>
@@ -392,7 +390,12 @@ const TimelineSidebar = styled(Box)(({ theme }) => ({
     scrollbarColor: `${theme.palette.divider} transparent`,
 }));
 
-const TimelineContent = styled(Box)({ padding: "32px" });
+const TimelineContent = styled(Box)({ 
+    padding: "32px",
+    height: "100%",
+    display: "flex",
+    flexDirection: "column",
+});
 
 const LoadingCoverPlaceholder = styled(Box)({ marginBottom: "96px" });
 
@@ -465,4 +468,14 @@ const LocationsLoadingContainer = styled(Box)({
 
 const TimelineContainer = styled(Box)({ position: "relative" });
 
-const NoPhotosContainer = styled(Box)({ textAlign: "center" });
+const NoPhotosContainer = styled(Box)(({ theme }) => ({
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    textAlign: "center",
+    width: "100%",
+    flex: 1,
+    padding: "40px 20px",
+    color: theme.palette.text.secondary,
+    fontSize: "16px",
+}));
