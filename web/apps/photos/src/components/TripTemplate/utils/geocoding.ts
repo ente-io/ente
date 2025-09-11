@@ -14,7 +14,10 @@ interface GeocodingResponse {
 }
 
 // Geocoding cache to avoid repeated API calls
-export const geocodingCache = new Map<string, { place: string; country: string }>();
+export const geocodingCache = new Map<
+    string,
+    { place: string; country: string }
+>();
 
 // Icon cache to avoid recreating identical icons
 export const iconCache = new Map<string, L.DivIcon>();
@@ -22,23 +25,26 @@ export const iconCache = new Map<string, L.DivIcon>();
 // Throttle function for performance optimization
 export const throttle = <T extends (...args: unknown[]) => void>(
     func: T,
-    delay: number
+    delay: number,
 ): ((...args: Parameters<T>) => void) => {
     let timeoutId: NodeJS.Timeout | null = null;
     let lastExecTime = 0;
-    
+
     return (...args: Parameters<T>) => {
         const currentTime = Date.now();
-        
+
         if (currentTime - lastExecTime > delay) {
             func(...args);
             lastExecTime = currentTime;
         } else {
             if (timeoutId) clearTimeout(timeoutId);
-            timeoutId = setTimeout(() => {
-                func(...args);
-                lastExecTime = Date.now();
-            }, delay - (currentTime - lastExecTime));
+            timeoutId = setTimeout(
+                () => {
+                    func(...args);
+                    lastExecTime = Date.now();
+                },
+                delay - (currentTime - lastExecTime),
+            );
         }
     };
 };

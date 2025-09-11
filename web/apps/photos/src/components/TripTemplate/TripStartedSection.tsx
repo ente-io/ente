@@ -6,35 +6,35 @@ interface TripStartedSectionProps {
     journeyData: JourneyPoint[];
 }
 
-export const TripStartedSection = memo<TripStartedSectionProps>(({ journeyData }) => {
-    const sortedData = [...journeyData].sort(
-        (a, b) =>
-            new Date(a.timestamp).getTime() -
-            new Date(b.timestamp).getTime(),
-    );
-    const firstData = sortedData[0];
-    if (!firstData) {
-        return null;
-    }
-    const firstDate = new Date(firstData.timestamp);
+export const TripStartedSection = memo<TripStartedSectionProps>(
+    ({ journeyData }) => {
+        const sortedData = [...journeyData].sort(
+            (a, b) =>
+                new Date(a.timestamp).getTime() -
+                new Date(b.timestamp).getTime(),
+        );
+        const firstData = sortedData[0];
+        if (!firstData) {
+            return null;
+        }
+        const firstDate = new Date(firstData.timestamp);
 
-    return (
-        <SectionContainer>
-            <TripStartedLabel>
-                Trip started
-            </TripStartedLabel>
-            <br />
-            <DateLabel>
-                {firstDate.toLocaleDateString("en-US", {
-                    month: "long",
-                    day: "2-digit",
-                })}
-            </DateLabel>
+        return (
+            <SectionContainer>
+                <TripStartedLabel>Trip started</TripStartedLabel>
+                <br />
+                <DateLabel>
+                    {firstDate.toLocaleDateString("en-US", {
+                        month: "long",
+                        day: "2-digit",
+                    })}
+                </DateLabel>
 
-            <StartingDot />
-        </SectionContainer>
-    );
-});
+                <StartingDot />
+            </SectionContainer>
+        );
+    },
+);
 
 // Styled components
 const SectionContainer = styled(Box)({

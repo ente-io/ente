@@ -1,14 +1,16 @@
-import React from "react";
 import { downloadManager } from "ente-gallery/services/download";
 import { type EnteFile } from "ente-media/file";
 import { fileFileName } from "ente-media/file-metadata";
+import React from "react";
 
-import { getLocationName } from "./geocoding";
 import type { JourneyPoint } from "../types";
+import { getLocationName } from "./geocoding";
 
 export interface ProcessPhotosDataParams {
     files: EnteFile[];
-    locationDataRef: React.MutableRefObject<Map<number, { name: string; country: string }>>;
+    locationDataRef: React.RefObject<
+        Map<number, { name: string; country: string }>
+    >;
 }
 
 export interface ProcessPhotosDataResult {
@@ -41,7 +43,9 @@ export const processPhotosData = ({
                     lng: lng,
                     name: finalName,
                     country: finalCountry,
-                    timestamp: new Date(file.metadata.creationTime / 1000).toISOString(),
+                    timestamp: new Date(
+                        file.metadata.creationTime / 1000,
+                    ).toISOString(),
                     image: "",
                     fileId: file.id,
                 });
@@ -62,7 +66,9 @@ export const processPhotosData = ({
 export interface FetchLocationNamesParams {
     photoClusters: JourneyPoint[][];
     journeyData: JourneyPoint[];
-    locationDataRef: React.MutableRefObject<Map<number, { name: string; country: string }>>;
+    locationDataRef: React.RefObject<
+        Map<number, { name: string; country: string }>
+    >;
 }
 
 export interface FetchLocationNamesResult {
@@ -83,8 +89,10 @@ export const fetchLocationNames = async ({
         const cluster = photoClusters[i];
         if (!cluster || cluster.length === 0) continue;
 
-        const avgLat = cluster.reduce((sum, p) => sum + p.lat, 0) / cluster.length;
-        const avgLng = cluster.reduce((sum, p) => sum + p.lng, 0) / cluster.length;
+        const avgLat =
+            cluster.reduce((sum, p) => sum + p.lat, 0) / cluster.length;
+        const avgLng =
+            cluster.reduce((sum, p) => sum + p.lng, 0) / cluster.length;
 
         try {
             const locationInfo = await getLocationName(avgLat, avgLng, i + 1);
@@ -130,7 +138,7 @@ export const generateNeededThumbnails = async ({
     const priorityGroups: EnteFile[][] = [];
 
     // Priority 1: Cover image (handled separately in loadCoverImage, skip here)
-    
+
     // Priority 2: First 3 locations photosfans (first 3 photos from each)
     const firstLocationsFiles: EnteFile[] = [];
     photoClusters.slice(0, 3).forEach((cluster) => {
@@ -149,8 +157,13 @@ export const generateNeededThumbnails = async ({
     const mapMarkerFiles: EnteFile[] = [];
     photoClusters.forEach((cluster) => {
         if (cluster.length > 0 && cluster[0]) {
-            const file = files.find((f) => f.id === cluster[0].fileId);
-            if (file && !firstLocationsFiles.includes(file) && !mapMarkerFiles.includes(file)) {
+            const firstPhoto = cluster[0];
+            const file = files.find((f) => f.id === firstPhoto.fileId);
+            if (
+                file &&
+                !firstLocationsFiles.includes(file) &&
+                !mapMarkerFiles.includes(file)
+            ) {
                 mapMarkerFiles.push(file);
             }
         }
@@ -164,10 +177,12 @@ export const generateNeededThumbnails = async ({
     photoClusters.slice(3).forEach((cluster) => {
         cluster.slice(0, 3).forEach((photo) => {
             const file = files.find((f) => f.id === photo.fileId);
-            if (file && 
-                !firstLocationsFiles.includes(file) && 
-                !mapMarkerFiles.includes(file) && 
-                !remainingLocationFiles.includes(file)) {
+            if (
+                file &&
+                !firstLocationsFiles.includes(file) &&
+                !mapMarkerFiles.includes(file) &&
+                !remainingLocationFiles.includes(file)
+            ) {
                 remainingLocationFiles.push(file);
             }
         });
@@ -180,11 +195,12 @@ export const generateNeededThumbnails = async ({
     for (let groupIndex = 0; groupIndex < priorityGroups.length; groupIndex++) {
         const group = priorityGroups[groupIndex];
         if (!group) continue;
-        
+
         // Process files in parallel within each priority group
         const groupPromises = group.map(async (file) => {
             try {
-                const thumbnailUrl = await downloadManager.renderableThumbnailURL(file);
+                const thumbnailUrl =
+                    await downloadManager.renderableThumbnailURL(file);
                 if (thumbnailUrl) {
                     thumbnailUpdates.set(file.id, thumbnailUrl);
                 }
@@ -194,10 +210,10 @@ export const generateNeededThumbnails = async ({
         });
 
         await Promise.all(groupPromises);
-        
+
         // Add small delay between priority groups to allow UI updates
         if (groupIndex < priorityGroups.length - 1) {
-            await new Promise(resolve => setTimeout(resolve, 50));
+            await new Promise((resolve) => setTimeout(resolve, 50));
         }
     }
 
@@ -236,7 +252,8 @@ export const loadCoverImage = async ({
 
     try {
         // Load cover image at highest quality first (highest priority)
-        const sourceURLs = await downloadManager.renderableSourceURLs(coverFile);
+        const sourceURLs =
+            await downloadManager.renderableSourceURLs(coverFile);
         if (sourceURLs.type === "image") {
             return sourceURLs.imageURL;
         }

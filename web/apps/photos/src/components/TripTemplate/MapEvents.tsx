@@ -1,6 +1,6 @@
+import L from "leaflet";
 import { memo, useEffect } from "react";
 import { useMap } from "react-leaflet";
-import L from "leaflet";
 
 interface MapEventsProps {
     setMapRef: (map: L.Map) => void;
@@ -8,27 +8,25 @@ interface MapEventsProps {
     setTargetZoom: (zoom: number | null) => void;
 }
 
-export const MapEvents = memo<MapEventsProps>(({
-    setMapRef,
-    setCurrentZoom,
-    setTargetZoom,
-}) => {
-    const map = useMap();
+export const MapEvents = memo<MapEventsProps>(
+    ({ setMapRef, setCurrentZoom, setTargetZoom }) => {
+        const map = useMap();
 
-    useEffect(() => {
-        setMapRef(map);
+        useEffect(() => {
+            setMapRef(map);
 
-        const handleZoomEnd = () => {
-            setCurrentZoom(map.getZoom());
-            setTargetZoom(null);
-        };
+            const handleZoomEnd = () => {
+                setCurrentZoom(map.getZoom());
+                setTargetZoom(null);
+            };
 
-        map.on("zoomend", handleZoomEnd);
+            map.on("zoomend", handleZoomEnd);
 
-        return () => {
-            map.off("zoomend", handleZoomEnd);
-        };
-    }, [map, setMapRef, setCurrentZoom, setTargetZoom]);
+            return () => {
+                map.off("zoomend", handleZoomEnd);
+            };
+        }, [map, setMapRef, setCurrentZoom, setTargetZoom]);
 
-    return null;
-});
+        return null;
+    },
+);

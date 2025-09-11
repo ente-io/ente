@@ -129,10 +129,7 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
     }, []);
 
     const photoClusters = useMemo(() => {
-        const clusters = clusterPhotosByProximity(
-            journeyData,
-            screenDimensions,
-        );
+        const clusters = clusterPhotosByProximity(journeyData);
 
         // Sort clusters by their earliest timestamp to maintain chronological order
         return clusters.sort((a, b) => {
@@ -144,7 +141,7 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
             );
             return earliestA - earliestB;
         });
-    }, [journeyData, screenDimensions]);
+    }, [journeyData]);
 
     // Calculate optimal zoom level based on cluster spread
     const optimalZoom = useMemo(() => {
@@ -199,7 +196,6 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
         photoClusters,
         locationPositions,
         mapRef,
-        screenDimensions,
         optimalZoom,
         locationRefs,
         isClusterClickScrollingRef,
@@ -334,7 +330,6 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
                 targetZoom={targetZoom}
                 mapRef={mapRef}
                 scrollProgress={scrollProgress}
-                screenDimensions={screenDimensions}
                 setMapRef={setMapRef}
                 setCurrentZoom={setCurrentZoom}
                 setTargetZoom={setTargetZoom}

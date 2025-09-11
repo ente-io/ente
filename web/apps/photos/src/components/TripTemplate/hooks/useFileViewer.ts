@@ -1,6 +1,6 @@
 import { type EnteFile } from "ente-media/file";
 import { useCallback, useState } from "react";
-import type { JourneyPoint } from "./types";
+import type { JourneyPoint } from "../types";
 
 interface UseFileViewerProps {
     files: EnteFile[];

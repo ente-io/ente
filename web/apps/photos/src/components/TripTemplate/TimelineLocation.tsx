@@ -1,7 +1,7 @@
 import { Box, Typography, styled } from "@mui/material";
 import { memo } from "react";
-import type { JourneyPoint } from "./types";
 import { PhotoFan } from "./PhotoFan";
+import type { JourneyPoint } from "./types";
 
 interface TimelineLocationProps {
     cluster: JourneyPoint[];
@@ -14,123 +14,125 @@ interface TimelineLocationProps {
 }
 
 // Component for timeline location item
-export const TimelineLocation = memo<TimelineLocationProps>(({
-    cluster,
-    index,
-    photoClusters,
-    scrollProgress,
-    journeyData,
-    onRef,
-    onPhotoClick,
-}) => {
-    const isLeft = index % 2 === 0;
-    const firstPhoto = cluster[0];
-    if (!firstPhoto) return null;
-    const sortedData = [...journeyData].sort(
-        (a, b) =>
-            new Date(a.timestamp).getTime() -
-            new Date(b.timestamp).getTime(),
-    );
-    const firstData = sortedData[0];
-    if (!firstData) return null;
-    const firstDate = new Date(firstData.timestamp);
-    const photoDate = new Date(firstPhoto.timestamp);
+export const TimelineLocation = memo<TimelineLocationProps>(
+    ({
+        cluster,
+        index,
+        photoClusters,
+        scrollProgress,
+        journeyData,
+        onRef,
+        onPhotoClick,
+    }) => {
+        const isLeft = index % 2 === 0;
+        const firstPhoto = cluster[0];
+        if (!firstPhoto) return null;
+        const sortedData = [...journeyData].sort(
+            (a, b) =>
+                new Date(a.timestamp).getTime() -
+                new Date(b.timestamp).getTime(),
+        );
+        const firstData = sortedData[0];
+        if (!firstData) return null;
+        const firstDate = new Date(firstData.timestamp);
+        const photoDate = new Date(firstPhoto.timestamp);
 
-    const firstDateOnly = new Date(
-        firstDate.getFullYear(),
-        firstDate.getMonth(),
-        firstDate.getDate(),
-    );
-    const photoDateOnly = new Date(
-        photoDate.getFullYear(),
-        photoDate.getMonth(),
-        photoDate.getDate(),
-    );
-    const diffTime = photoDateOnly.getTime() - firstDateOnly.getTime();
-    const dayNumber = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        const firstDateOnly = new Date(
+            firstDate.getFullYear(),
+            firstDate.getMonth(),
+            firstDate.getDate(),
+        );
+        const photoDateOnly = new Date(
+            photoDate.getFullYear(),
+            photoDate.getMonth(),
+            photoDate.getDate(),
+        );
+        const diffTime = photoDateOnly.getTime() - firstDateOnly.getTime();
+        const dayNumber = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
 
-    const isReached =
-        scrollProgress >= index / Math.max(1, photoClusters.length - 1);
+        const isReached =
+            scrollProgress >= index / Math.max(1, photoClusters.length - 1);
 
-    return (
-        <LocationContainer
-            ref={onRef}
-            id={`location-${index}`}
-            className="timeline-location"
-            sx={{
-                marginBottom:
-                    index === photoClusters.length - 1 ? "24px" : "192px",
-            }}
-        >
-            <DotBackground />
-            <TimelineDot isReached={isReached} />
+        return (
+            <LocationContainer
+                ref={onRef}
+                id={`location-${index}`}
+                className="timeline-location"
+                sx={{
+                    marginBottom:
+                        index === photoClusters.length - 1 ? "24px" : "192px",
+                }}
+            >
+                <DotBackground />
+                <TimelineDot isReached={isReached} />
 
-            {isLeft ? (
-                <>
-                    <LeftContent>
-                        <DayBadge>
-                            DAY {dayNumber} •{" "}
-                            {new Date(firstPhoto.timestamp)
-                                .toLocaleDateString("en-US", {
-                                    month: "long",
-                                    day: "numeric",
-                                })
-                                .toUpperCase()}
-                        </DayBadge>
-                        <LocationTitle sx={{ textAlign: "right" }}>
-                            {firstPhoto.name}
-                        </LocationTitle>
-                        <LocationCountry sx={{ textAlign: "right" }}>
-                            {firstPhoto.country}
-                        </LocationCountry>
-                    </LeftContent>
-                    <RightPhotoContainer
-                        sx={{
-                            paddingLeft:
-                                cluster.length >= 3 ? "72px" : "40px",
-                        }}
-                    >
-                        <PhotoFan
-                            cluster={cluster}
-                            onPhotoClick={onPhotoClick}
-                        />
-                    </RightPhotoContainer>
-                </>
-            ) : (
-                <>
-                    <LeftPhotoContainer
-                        sx={{
-                            paddingRight:
-                                cluster.length >= 3 ? "72px" : "40px",
-                        }}
-                    >
-                        <PhotoFan
-                            cluster={cluster}
-                            onPhotoClick={onPhotoClick}
-                        />
-                    </LeftPhotoContainer>
-                    <RightContent>
-                        <DayBadge>
-                            DAY {dayNumber} •{" "}
-                            {new Date(firstPhoto.timestamp)
-                                .toLocaleDateString("en-US", {
-                                    month: "long",
-                                    day: "numeric",
-                                })
-                                .toUpperCase()}
-                        </DayBadge>
-                        <LocationTitle sx={{ textAlign: "left" }}>
-                            {firstPhoto.name}
-                        </LocationTitle>
-                        <LocationCountry sx={{ textAlign: "left" }}>
-                            {firstPhoto.country}
-                        </LocationCountry>
-                    </RightContent>
-                </>
-            )}
-        </LocationContainer>
-    );
-});
+                {isLeft ? (
+                    <>
+                        <LeftContent>
+                            <DayBadge>
+                                DAY {dayNumber} •{" "}
+                                {new Date(firstPhoto.timestamp)
+                                    .toLocaleDateString("en-US", {
+                                        month: "long",
+                                        day: "numeric",
+                                    })
+                                    .toUpperCase()}
+                            </DayBadge>
+                            <LocationTitle sx={{ textAlign: "right" }}>
+                                {firstPhoto.name}
+                            </LocationTitle>
+                            <LocationCountry sx={{ textAlign: "right" }}>
+                                {firstPhoto.country}
+                            </LocationCountry>
+                        </LeftContent>
+                        <RightPhotoContainer
+                            sx={{
+                                paddingLeft:
+                                    cluster.length >= 3 ? "72px" : "40px",
+                            }}
+                        >
+                            <PhotoFan
+                                cluster={cluster}
+                                onPhotoClick={onPhotoClick}
+                            />
+                        </RightPhotoContainer>
+                    </>
+                ) : (
+                    <>
+                        <LeftPhotoContainer
+                            sx={{
+                                paddingRight:
+                                    cluster.length >= 3 ? "72px" : "40px",
+                            }}
+                        >
+                            <PhotoFan
+                                cluster={cluster}
+                                onPhotoClick={onPhotoClick}
+                            />
+                        </LeftPhotoContainer>
+                        <RightContent>
+                            <DayBadge>
+                                DAY {dayNumber} •{" "}
+                                {new Date(firstPhoto.timestamp)
+                                    .toLocaleDateString("en-US", {
+                                        month: "long",
+                                        day: "numeric",
+                                    })
+                                    .toUpperCase()}
+                            </DayBadge>
+                            <LocationTitle sx={{ textAlign: "left" }}>
+                                {firstPhoto.name}
+                            </LocationTitle>
+                            <LocationCountry sx={{ textAlign: "left" }}>
+                                {firstPhoto.country}
+                            </LocationCountry>
+                        </RightContent>
+                    </>
+                )}
+            </LocationContainer>
+        );
+    },
+);
 
 // Styled components
 const LocationContainer = styled(Box)({
@@ -151,27 +153,28 @@ const DotBackground = styled(Box)(({ theme }) => ({
     backgroundColor: theme.palette.background.paper,
 }));
 
-const TimelineDot = styled(Box)<{ isReached: boolean }>(({ theme, isReached }) => ({
-    position: "absolute",
-    left: "50%",
-    top: "50%",
-    transform: "translate(-50%, -50%)",
-    borderRadius: "50%",
-    border: `2px solid ${theme.palette.background.paper}`,
-    zIndex: 20,
-    width: "12px",
-    height: "12px",
-    transition: "all 0.3s",
-    backgroundColor: isReached ? theme.palette.success.main : theme.palette.text.primary,
-    boxShadow: isReached
-        ? `0 0 0 3px ${theme.palette.success.main}30, 0 0 0 6px ${theme.palette.success.main}15`
-        : "none",
-}));
+const TimelineDot = styled(Box)<{ isReached: boolean }>(
+    ({ theme, isReached }) => ({
+        position: "absolute",
+        left: "50%",
+        top: "50%",
+        transform: "translate(-50%, -50%)",
+        borderRadius: "50%",
+        border: `2px solid ${theme.palette.background.paper}`,
+        zIndex: 20,
+        width: "12px",
+        height: "12px",
+        transition: "all 0.3s",
+        backgroundColor: isReached
+            ? theme.palette.success.main
+            : theme.palette.text.primary,
+        boxShadow: isReached
+            ? `0 0 0 3px ${theme.palette.success.main}30, 0 0 0 6px ${theme.palette.success.main}15`
+            : "none",
+    }),
+);
 
-const ContentContainer = styled(Box)({
-    width: "50%",
-    paddingTop: "58px",
-});
+const ContentContainer = styled(Box)({ width: "50%", paddingTop: "58px" });
 
 const LeftContent = styled(ContentContainer)({
     paddingRight: "32px",
@@ -183,9 +186,7 @@ const RightContent = styled(ContentContainer)({
     textAlign: "left",
 });
 
-const PhotoContainer = styled(Box)({
-    width: "50%",
-});
+const PhotoContainer = styled(Box)({ width: "50%" });
 
 const LeftPhotoContainer = styled(PhotoContainer)({
     display: "flex",

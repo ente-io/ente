@@ -1,5 +1,5 @@
-import { useEffect } from "react";
 import { type EnteFile } from "ente-media/file";
+import { useEffect } from "react";
 
 import type { JourneyPoint } from "../types";
 import { generateNeededThumbnails } from "../utils/dataProcessing";
@@ -8,8 +8,10 @@ export interface UseThumbnailGenerationParams {
     photoClusters: JourneyPoint[][];
     journeyData: JourneyPoint[];
     files: EnteFile[];
-    thumbnailsGeneratedRef: React.MutableRefObject<boolean>;
-    setJourneyData: (data: JourneyPoint[] | ((prev: JourneyPoint[]) => JourneyPoint[])) => void;
+    thumbnailsGeneratedRef: React.RefObject<boolean>;
+    setJourneyData: (
+        data: JourneyPoint[] | ((prev: JourneyPoint[]) => JourneyPoint[]),
+    ) => void;
 }
 
 export const useThumbnailGeneration = ({
@@ -21,7 +23,8 @@ export const useThumbnailGeneration = ({
     // Generate thumbnails for needed photos with progressive loading
     useEffect(() => {
         const generateThumbs = async () => {
-            if (photoClusters.length === 0 || thumbnailsGeneratedRef.current) return;
+            if (photoClusters.length === 0 || thumbnailsGeneratedRef.current)
+                return;
 
             const { thumbnailUpdates } = await generateNeededThumbnails({
                 photoClusters,

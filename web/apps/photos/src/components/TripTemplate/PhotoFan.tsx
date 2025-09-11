@@ -1,6 +1,6 @@
 import { Box, styled } from "@mui/material";
-import { memo } from "react";
 import Image from "next/image";
+import { memo } from "react";
 import type { JourneyPoint } from "./types";
 
 interface PhotoFanProps {
@@ -8,10 +8,7 @@ interface PhotoFanProps {
     onPhotoClick?: (cluster: JourneyPoint[], fileId: number) => void;
 }
 
-export const PhotoFan = memo<PhotoFanProps>(({
-    cluster,
-    onPhotoClick,
-}) => {
+export const PhotoFan = memo<PhotoFanProps>(({ cluster, onPhotoClick }) => {
     if (cluster.length === 0) {
         return null;
     }
@@ -21,18 +18,17 @@ export const PhotoFan = memo<PhotoFanProps>(({
             {cluster.length === 2 && cluster[1] && (
                 <PhotoFrameTwo
                     onClick={() =>
-                        cluster[1] &&
-                        onPhotoClick?.(cluster, cluster[1].fileId)
+                        cluster[1] && onPhotoClick?.(cluster, cluster[1].fileId)
                     }
                 >
                     <BackgroundLoadingBox />
-                    <ImageWrapper sx={{ transform: 'skewY(-8deg) scale(1.1)' }}>
+                    <ImageWrapper sx={{ transform: "skewY(-8deg) scale(1.1)" }}>
                         {cluster[1].image && cluster[1].image.trim() !== "" && (
                             <Image
                                 src={cluster[1].image}
                                 alt={cluster[1].name}
                                 fill
-style={{ objectFit: "cover", zIndex: 1 }}
+                                style={{ objectFit: "cover", zIndex: 1 }}
                                 sizes="200px"
                             />
                         )}
@@ -49,16 +45,22 @@ style={{ objectFit: "cover", zIndex: 1 }}
                             }
                         >
                             <BackgroundLoadingBox />
-                            <ImageWrapper sx={{ transform: 'skewY(8deg) scale(1.1)' }}>
-                                {cluster[1].image && cluster[1].image.trim() !== "" && (
-                                    <Image
-                                        src={cluster[1].image}
-                                        alt={cluster[1].name}
-                                        fill
-        style={{ objectFit: "cover", zIndex: 1 }}
-                                        sizes="200px"
-                                    />
-                                )}
+                            <ImageWrapper
+                                sx={{ transform: "skewY(8deg) scale(1.1)" }}
+                            >
+                                {cluster[1].image &&
+                                    cluster[1].image.trim() !== "" && (
+                                        <Image
+                                            src={cluster[1].image}
+                                            alt={cluster[1].name}
+                                            fill
+                                            style={{
+                                                objectFit: "cover",
+                                                zIndex: 1,
+                                            }}
+                                            sizes="200px"
+                                        />
+                                    )}
                             </ImageWrapper>
                         </PhotoFrameLeft>
                     )}
@@ -70,16 +72,22 @@ style={{ objectFit: "cover", zIndex: 1 }}
                             }
                         >
                             <BackgroundLoadingBox />
-                            <ImageWrapper sx={{ transform: 'skewY(-8deg) scale(1.1)' }}>
-                                {cluster[2].image && cluster[2].image.trim() !== "" && (
-                                    <Image
-                                        src={cluster[2].image}
-                                        alt={cluster[2].name}
-                                        fill
-        style={{ objectFit: "cover", zIndex: 1 }}
-                                        sizes="200px"
-                                    />
-                                )}
+                            <ImageWrapper
+                                sx={{ transform: "skewY(-8deg) scale(1.1)" }}
+                            >
+                                {cluster[2].image &&
+                                    cluster[2].image.trim() !== "" && (
+                                        <Image
+                                            src={cluster[2].image}
+                                            alt={cluster[2].name}
+                                            fill
+                                            style={{
+                                                objectFit: "cover",
+                                                zIndex: 1,
+                                            }}
+                                            sizes="200px"
+                                        />
+                                    )}
                             </ImageWrapper>
                         </PhotoFrameRight>
                     )}
@@ -89,8 +97,7 @@ style={{ objectFit: "cover", zIndex: 1 }}
             {cluster[0] && (
                 <MainPhotoFrame
                     onClick={() =>
-                        cluster[0] &&
-                        onPhotoClick?.(cluster, cluster[0].fileId)
+                        cluster[0] && onPhotoClick?.(cluster, cluster[0].fileId)
                     }
                 >
                     {cluster[0].image && cluster[0].image.trim() !== "" ? (
@@ -106,9 +113,7 @@ style={{ objectFit: "cover", zIndex: 1 }}
                     )}
 
                     {cluster.length > 3 && (
-                        <CountBadge>
-                            +{cluster.length - 3}
-                        </CountBadge>
+                        <CountBadge>+{cluster.length - 3}</CountBadge>
                     )}
                 </MainPhotoFrame>
             )}
@@ -123,12 +128,10 @@ const PhotoFanContainer = styled(Box)({
     height: "240px",
     transition: "transform 0.3s ease-in-out",
     cursor: "pointer",
-    "&:hover": {
-        transform: "scale(1.05)",
-    },
+    "&:hover": { transform: "scale(1.05)" },
 });
 
-const PhotoFrame = styled(Box)(({ theme }) => ({
+const PhotoFrame = styled(Box)(() => ({
     position: "absolute",
     border: "2px solid white",
     zIndex: 10,
@@ -158,7 +161,7 @@ const PhotoFrameRight = styled(PhotoFrame)({
     left: "0",
 });
 
-const MainPhotoFrame = styled(Box)(({ theme }) => ({
+const MainPhotoFrame = styled(Box)(() => ({
     position: "relative",
     width: "100%",
     height: "100%",
@@ -200,7 +203,7 @@ const LoadingBox = styled(Box)({
     "@keyframes skeleton-pulse": {
         "0%": { backgroundColor: "#ffffff" },
         "50%": { backgroundColor: "#f0f0f0" },
-        "100%": { backgroundColor: "#ffffff" }
+        "100%": { backgroundColor: "#ffffff" },
     },
 });
 
@@ -216,6 +219,6 @@ const BackgroundLoadingBox = styled(Box)({
     "@keyframes skeleton-pulse": {
         "0%": { backgroundColor: "#ffffff" },
         "50%": { backgroundColor: "#f0f0f0" },
-        "100%": { backgroundColor: "#ffffff" }
+        "100%": { backgroundColor: "#ffffff" },
     },
 });

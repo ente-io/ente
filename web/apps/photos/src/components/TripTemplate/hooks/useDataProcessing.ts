@@ -1,21 +1,22 @@
-import { useEffect } from "react";
-import { type EnteFile } from "ente-media/file";
 import { type Collection } from "ente-media/collection";
+import { type EnteFile } from "ente-media/file";
+import { useEffect } from "react";
 
 import type { JourneyPoint } from "../types";
-import {
-    processPhotosData,
-    loadCoverImage,
-} from "../utils/dataProcessing";
+import { loadCoverImage, processPhotosData } from "../utils/dataProcessing";
 
 export interface UseDataProcessingParams {
     files: EnteFile[];
     collection?: Collection;
     journeyData: JourneyPoint[];
-    thumbnailsGeneratedRef: React.MutableRefObject<boolean>;
-    filesCountRef: React.MutableRefObject<number>;
-    locationDataRef: React.MutableRefObject<Map<number, { name: string; country: string }>>;
-    setJourneyData: (data: JourneyPoint[] | ((prev: JourneyPoint[]) => JourneyPoint[])) => void;
+    thumbnailsGeneratedRef: React.RefObject<boolean>;
+    filesCountRef: React.RefObject<number>;
+    locationDataRef: React.RefObject<
+        Map<number, { name: string; country: string }>
+    >;
+    setJourneyData: (
+        data: JourneyPoint[] | ((prev: JourneyPoint[]) => JourneyPoint[]),
+    ) => void;
     setIsInitialLoad: (loading: boolean) => void;
     setIsLoadingLocations: (loading: boolean) => void;
     setCoverImageUrl: (url: string | null) => void;
@@ -55,7 +56,16 @@ export const useDataProcessing = ({
         if (hasLocationData) {
             setIsLoadingLocations(true);
         }
-    }, [files, journeyData.length, filesCountRef, locationDataRef, thumbnailsGeneratedRef, setJourneyData, setIsInitialLoad, setIsLoadingLocations]);
+    }, [
+        files,
+        journeyData.length,
+        filesCountRef,
+        locationDataRef,
+        thumbnailsGeneratedRef,
+        setJourneyData,
+        setIsInitialLoad,
+        setIsLoadingLocations,
+    ]);
 
     // Load cover image after data loads
     useEffect(() => {

@@ -6,8 +6,12 @@ import { fetchLocationNames } from "../utils/dataProcessing";
 export interface UseLocationFetchingParams {
     photoClusters: JourneyPoint[][];
     journeyData: JourneyPoint[];
-    locationDataRef: React.MutableRefObject<Map<number, { name: string; country: string }>>;
-    setJourneyData: (data: JourneyPoint[] | ((prev: JourneyPoint[]) => JourneyPoint[])) => void;
+    locationDataRef: React.RefObject<
+        Map<number, { name: string; country: string }>
+    >;
+    setJourneyData: (
+        data: JourneyPoint[] | ((prev: JourneyPoint[]) => JourneyPoint[]),
+    ) => void;
     setIsLoadingLocations: (loading: boolean) => void;
 }
 
@@ -48,5 +52,10 @@ export const useLocationFetching = ({
         };
 
         void fetchNames();
-    }, [photoClusters.length, locationDataRef, setJourneyData, setIsLoadingLocations]);
+    }, [
+        photoClusters.length,
+        locationDataRef,
+        setJourneyData,
+        setIsLoadingLocations,
+    ]);
 };

@@ -1,7 +1,6 @@
 import { Box, styled } from "@mui/material";
 import L from "leaflet";
 import dynamic from "next/dynamic";
-import type { JourneyPoint } from "./types";
 import { MapEvents } from "./MapEvents";
 import {
     createIcon,
@@ -9,6 +8,7 @@ import {
     detectScreenCollisions,
     getMapCenter,
 } from "./mapHelpers";
+import type { JourneyPoint } from "./types";
 
 // Dynamically import react-leaflet components to prevent SSR issues
 const MapContainer = dynamic(
@@ -33,7 +33,6 @@ interface TripMapProps {
     targetZoom: number | null;
     mapRef: L.Map | null;
     scrollProgress: number;
-    screenDimensions: { width: number; height: number };
     setMapRef: (map: L.Map | null) => void;
     setCurrentZoom: (zoom: number) => void;
     setTargetZoom: (zoom: number | null) => void;
@@ -53,7 +52,6 @@ export const TripMap: React.FC<TripMapProps> = ({
     targetZoom,
     mapRef,
     scrollProgress,
-    screenDimensions,
     setMapRef,
     setCurrentZoom,
     setTargetZoom,
@@ -72,11 +70,7 @@ export const TripMap: React.FC<TripMapProps> = ({
         <MapContainerWrapper hasPhotoData={hasPhotoData}>
             {hasPhotoData ? (
                 <StyledMapContainer
-                    center={getMapCenter(
-                        photoClusters,
-                        journeyData,
-                        screenDimensions,
-                    )}
+                    center={getMapCenter(photoClusters, journeyData)}
                     zoom={optimalZoom}
                     scrollWheelZoom={true}
                     zoomControl={false}
@@ -96,7 +90,8 @@ export const TripMap: React.FC<TripMapProps> = ({
                     {/* Draw super-clusters (clickable for zoom and gallery) */}
                     {superClusters.map((superCluster, index) => {
                         // Check if this super-cluster has been reached
-                        const firstClusterIndex = superCluster.clustersInvolved[0];
+                        const firstClusterIndex =
+                            superCluster.clustersInvolved[0];
                         const isReached =
                             firstClusterIndex !== undefined &&
                             scrollProgress >=
@@ -194,11 +189,13 @@ export const TripMap: React.FC<TripMapProps> = ({
 };
 
 // Styled components
-const MapContainerWrapper = styled(Box)<{ hasPhotoData: boolean }>(({ hasPhotoData }) => ({
-    width: "100%",
-    height: "100%",
-    backgroundColor: hasPhotoData ? "transparent" : "#000000",
-}));
+const MapContainerWrapper = styled(Box)<{ hasPhotoData: boolean }>(
+    ({ hasPhotoData }) => ({
+        width: "100%",
+        height: "100%",
+        backgroundColor: hasPhotoData ? "transparent" : "#000000",
+    }),
+);
 
 const StyledMapContainer = styled(MapContainer)({
     width: "100%",

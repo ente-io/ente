@@ -3,10 +3,10 @@ import { useCallback, useEffect, useMemo } from "react";
 import type { JourneyPoint } from "../types";
 import { throttle } from "../utils/geocoding";
 import {
-    updateLocationPositions,
+    handleMarkerClick,
     handleTimelineScroll,
     scrollTimelineToLocation,
-    handleMarkerClick,
+    updateLocationPositions,
     type PositionInfo,
 } from "../utils/scrollUtils";
 
@@ -15,11 +15,10 @@ export interface UseScrollHandlingParams {
     photoClusters: JourneyPoint[][];
     locationPositions: PositionInfo[];
     mapRef: L.Map | null;
-    screenDimensions: { width: number; height: number };
     optimalZoom: number;
-    locationRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;
-    isClusterClickScrollingRef: React.MutableRefObject<boolean>;
-    clusterClickTimeoutRef: React.MutableRefObject<NodeJS.Timeout | null>;
+    locationRefs: React.RefObject<(HTMLDivElement | null)[]>;
+    isClusterClickScrollingRef: React.RefObject<boolean>;
+    clusterClickTimeoutRef: React.RefObject<NodeJS.Timeout | null>;
     setLocationPositions: (positions: PositionInfo[]) => void;
     setHasUserScrolled: (scrolled: boolean) => void;
     setScrollProgress: (progress: number) => void;
@@ -30,7 +29,6 @@ export const useScrollHandling = ({
     photoClusters,
     locationPositions,
     mapRef,
-    screenDimensions,
     optimalZoom,
     locationRefs,
     isClusterClickScrollingRef,
@@ -54,7 +52,6 @@ export const useScrollHandling = ({
             photoClusters,
             locationPositions,
             mapRef,
-            screenDimensions,
             optimalZoom,
             isClusterClickScrollingRef,
             setHasUserScrolled,
@@ -65,7 +62,6 @@ export const useScrollHandling = ({
         photoClusters,
         locationPositions,
         mapRef,
-        screenDimensions,
         optimalZoom,
         isClusterClickScrollingRef,
         setHasUserScrolled,
@@ -99,7 +95,6 @@ export const useScrollHandling = ({
                 clusterLat,
                 clusterLng,
                 photoClusters,
-                screenDimensions,
                 mapRef,
                 optimalZoom,
                 isClusterClickScrollingRef,
@@ -111,7 +106,6 @@ export const useScrollHandling = ({
         },
         [
             photoClusters,
-            screenDimensions,
             mapRef,
             optimalZoom,
             isClusterClickScrollingRef,
@@ -142,7 +136,10 @@ export const useScrollHandling = ({
         timelineContainer.addEventListener("scroll", throttledTimelineScroll);
 
         return () => {
-            timelineContainer.removeEventListener("scroll", throttledTimelineScroll);
+            timelineContainer.removeEventListener(
+                "scroll",
+                throttledTimelineScroll,
+            );
         };
     }, [throttledTimelineScroll, timelineRef]);
 
@@ -156,9 +153,5 @@ export const useScrollHandling = ({
         };
     }, [clusterClickTimeoutRef]);
 
-    return {
-        updatePositions,
-        scrollToLocation,
-        markerClickHandler,
-    };
+    return { updatePositions, scrollToLocation, markerClickHandler };
 };

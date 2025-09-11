@@ -3,10 +3,7 @@ import type { JourneyPoint } from "./types";
 import { iconCache } from "./utils/geocoding";
 
 // Geographic clustering with responsive distance thresholds and day separation
-export const clusterPhotosByProximity = (
-    photos: JourneyPoint[],
-    screenDimensions: { width: number; height: number },
-) => {
+export const clusterPhotosByProximity = (photos: JourneyPoint[]) => {
     if (photos.length === 0) return [];
 
     // 10km clustering distance (roughly 0.1 degrees)
@@ -143,10 +140,7 @@ export const calculateOptimalZoom = (
     );
 
     // Prioritize fitting bounds with some buffer for cluster separation
-    const calculatedZoom = Math.min(
-        zoomToFitBounds,
-        optimalZoomFromSeparation,
-    );
+    const calculatedZoom = Math.min(zoomToFitBounds, optimalZoomFromSeparation);
     const clampedZoom = Math.max(6, Math.min(14, calculatedZoom));
 
     return Math.round(clampedZoom);
@@ -203,7 +197,9 @@ export const createIcon = (
           onmouseover="this.style.background='#22c55e'; this.style.borderColor='#22c55e'; this.nextElementSibling.style.borderTopColor='#22c55e';"
           onmouseout="this.style.background='${isReached ? "#22c55e" : "white"}'; this.style.borderColor='${isReached ? "#22c55e" : "#ffffff"}'; this.nextElementSibling.style.borderTopColor='${isReached ? "#22c55e" : "white"}';"
           >
-            ${hasImage ? `
+            ${
+                hasImage
+                    ? `
               <!-- Image inside the rounded rectangle -->
               <img 
                 src="${imageSrc}" 
@@ -215,7 +211,8 @@ export const createIcon = (
                 "
                 alt="Location"
               />
-            ` : `
+            `
+                    : `
               <!-- Loading skeleton when no image -->
               <div style="
                 width: 100%;
@@ -230,7 +227,8 @@ export const createIcon = (
                   100% { background-color: #ffffff; }
                 }
               </style>
-            `}
+            `
+            }
           </div>
           
           <!-- Triangle at the bottom -->
@@ -319,7 +317,9 @@ export const createSuperClusterIcon = (
             onmouseover="this.style.background='#22c55e'; this.style.borderColor='#22c55e'; this.nextElementSibling.style.borderTopColor='#22c55e';"
             onmouseout="this.style.background='${isReached ? "#22c55e" : "white"}'; this.style.borderColor='${isReached ? "#22c55e" : "#ffffff"}'; this.nextElementSibling.style.borderTopColor='${isReached ? "#22c55e" : "white"}';"
             >
-              ${hasImage ? `
+              ${
+                  hasImage
+                      ? `
                 <!-- Image inside the rounded rectangle -->
                 <img 
                   src="${imageSrc}" 
@@ -331,7 +331,8 @@ export const createSuperClusterIcon = (
                   "
                   alt="Location"
                 />
-              ` : `
+              `
+                      : `
                 <!-- Loading skeleton when no image -->
                 <div style="
                   width: 100%;
@@ -346,7 +347,8 @@ export const createSuperClusterIcon = (
                     100% { background-color: #ffffff; }
                   }
                 </style>
-              `}
+              `
+              }
             </div>
             
             <!-- Triangle at the bottom -->
@@ -503,7 +505,6 @@ export const detectScreenCollisions = (
 export const getMapCenter = (
     photoClusters: JourneyPoint[][],
     journeyData: JourneyPoint[],
-    screenDimensions: { width: number; height: number },
 ): [number, number] => {
     // If no clusters yet, check journey data
     if (photoClusters.length === 0) {

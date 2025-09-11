@@ -9,40 +9,37 @@ interface TimelineProgressLineProps {
     photoClusters: JourneyPoint[][];
 }
 
-export const TimelineProgressLine = memo<TimelineProgressLineProps>(({
-    locationPositions,
-    scrollProgress,
-    hasUserScrolled,
-    photoClusters,
-}) => {
-    if (photoClusters.length === 0 || locationPositions.length === 0) {
-        return null;
-    }
+export const TimelineProgressLine = memo<TimelineProgressLineProps>(
+    ({ locationPositions, scrollProgress, hasUserScrolled, photoClusters }) => {
+        if (photoClusters.length === 0 || locationPositions.length === 0) {
+            return null;
+        }
 
-    const firstPosition = locationPositions[0];
-    const lastPosition = locationPositions[locationPositions.length - 1];
-    if (!firstPosition || !lastPosition) {
-        return null;
-    }
-    const firstLocationCenter = firstPosition.center;
-    const lastLocationCenter = lastPosition.center;
+        const firstPosition = locationPositions[0];
+        const lastPosition = locationPositions[locationPositions.length - 1];
+        if (!firstPosition || !lastPosition) {
+            return null;
+        }
+        const firstLocationCenter = firstPosition.center;
+        const lastLocationCenter = lastPosition.center;
 
-    if (scrollProgress <= 0 || !hasUserScrolled) {
-        return null;
-    }
+        if (scrollProgress <= 0 || !hasUserScrolled) {
+            return null;
+        }
 
-    return (
-        <ProgressLine
-            sx={{
-                top: `${firstLocationCenter}px`,
-                height: `${
-                    (lastLocationCenter - firstLocationCenter) *
-                    scrollProgress
-                }px`,
-            }}
-        />
-    );
-});
+        return (
+            <ProgressLine
+                sx={{
+                    top: `${firstLocationCenter}px`,
+                    height: `${
+                        (lastLocationCenter - firstLocationCenter) *
+                        scrollProgress
+                    }px`,
+                }}
+            />
+        );
+    },
+);
 
 // Styled components
 const ProgressLine = styled(Box)(({ theme }) => ({

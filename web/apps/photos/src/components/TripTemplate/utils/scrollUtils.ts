@@ -37,9 +37,8 @@ export interface HandleTimelineScrollParams {
     photoClusters: JourneyPoint[][];
     locationPositions: PositionInfo[];
     mapRef: L.Map | null;
-    screenDimensions: { width: number; height: number };
     optimalZoom: number;
-    isClusterClickScrollingRef: React.MutableRefObject<boolean>;
+    isClusterClickScrollingRef: React.RefObject<boolean>;
     setHasUserScrolled: (scrolled: boolean) => void;
     setScrollProgress: (progress: number) => void;
 }
@@ -49,7 +48,6 @@ export const handleTimelineScroll = ({
     photoClusters,
     locationPositions,
     mapRef,
-    screenDimensions,
     optimalZoom,
     isClusterClickScrollingRef,
     setHasUserScrolled,
@@ -90,10 +88,12 @@ export const handleTimelineScroll = ({
         setScrollProgress(clampedProgress);
     });
 
-    if (mapRef && !isClusterClickScrollingRef.current) {
+    if (mapRef) {
         const clusterCenters = photoClusters.map((cluster) => {
-            const avgLat = cluster.reduce((sum, p) => sum + p.lat, 0) / cluster.length;
-            const avgLng = cluster.reduce((sum, p) => sum + p.lng, 0) / cluster.length;
+            const avgLat =
+                cluster.reduce((sum, p) => sum + p.lat, 0) / cluster.length;
+            const avgLng =
+                cluster.reduce((sum, p) => sum + p.lng, 0) / cluster.length;
             return { lat: avgLat, lng: avgLng };
         });
 
@@ -111,7 +111,8 @@ export const handleTimelineScroll = ({
                 targetLat = lastCenter.lat;
                 targetLng = lastCenter.lng;
             } else {
-                const clusterProgress = clampedProgress * (clusterCenters.length - 1);
+                const clusterProgress =
+                    clampedProgress * (clusterCenters.length - 1);
                 const currentClusterIndex = Math.floor(clusterProgress);
                 const nextClusterIndex = Math.min(
                     currentClusterIndex + 1,
@@ -194,7 +195,8 @@ export const scrollTimelineToLocation = ({
     const clientHeight = timelineContainer.clientHeight;
     const maxScrollableDistance = scrollHeight - clientHeight;
 
-    const targetProgress = locationIndex / Math.max(1, photoClusters.length - 1);
+    const targetProgress =
+        locationIndex / Math.max(1, photoClusters.length - 1);
     const targetScrollTop = targetProgress * maxScrollableDistance;
 
     timelineContainer.scrollTo({
@@ -208,11 +210,10 @@ export interface HandleMarkerClickParams {
     clusterLat: number;
     clusterLng: number;
     photoClusters: JourneyPoint[][];
-    screenDimensions: { width: number; height: number };
     mapRef: L.Map | null;
     optimalZoom: number;
-    isClusterClickScrollingRef: React.MutableRefObject<boolean>;
-    clusterClickTimeoutRef: React.MutableRefObject<NodeJS.Timeout | null>;
+    isClusterClickScrollingRef: React.RefObject<boolean>;
+    clusterClickTimeoutRef: React.RefObject<NodeJS.Timeout | null>;
     setScrollProgress: (progress: number) => void;
     setHasUserScrolled: (scrolled: boolean) => void;
     scrollTimelineToLocation: (locationIndex: number) => void;
@@ -223,7 +224,6 @@ export const handleMarkerClick = ({
     clusterLat,
     clusterLng,
     photoClusters,
-    screenDimensions: _screenDimensions,
     mapRef,
     optimalZoom,
     isClusterClickScrollingRef,
@@ -243,7 +243,8 @@ export const handleMarkerClick = ({
     setHasUserScrolled(true);
 
     const allClusterLngs = photoClusters.map(
-        (cluster) => cluster.reduce((sum, p) => sum + p.lng, 0) / cluster.length,
+        (cluster) =>
+            cluster.reduce((sum, p) => sum + p.lng, 0) / cluster.length,
     );
     const minLng = Math.min(...allClusterLngs);
     const maxLng = Math.max(...allClusterLngs);
