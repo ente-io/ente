@@ -50,8 +50,9 @@ export const TimelineLocation = memo<TimelineLocationProps>(
         const diffTime = photoDateOnly.getTime() - firstDateOnly.getTime();
         const dayNumber = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
 
-        const isReached =
-            scrollProgress >= index / Math.max(1, photoClusters.length - 1);
+        // Only show green for the current location (not all reached locations)
+        const currentLocationIndex = Math.round(scrollProgress * Math.max(0, photoClusters.length - 1));
+        const isCurrent = index === currentLocationIndex;
 
         return (
             <LocationContainer
@@ -64,7 +65,7 @@ export const TimelineLocation = memo<TimelineLocationProps>(
                 }}
             >
                 <DotBackground />
-                <TimelineDot isReached={isReached} />
+                <TimelineDot isReached={isCurrent} />
 
                 {isLeft ? (
                     <>

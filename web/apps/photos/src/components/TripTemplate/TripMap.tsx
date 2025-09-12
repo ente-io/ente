@@ -89,14 +89,13 @@ export const TripMap: React.FC<TripMapProps> = ({
 
                     {/* Draw super-clusters (clickable for zoom and gallery) */}
                     {superClusters.map((superCluster, index) => {
-                        // Check if this super-cluster has been reached
+                        // Only show green for the current location (not all reached locations)
                         const firstClusterIndex =
                             superCluster.clustersInvolved[0];
-                        const isReached =
+                        const currentLocationIndex = Math.round(scrollProgress * Math.max(0, photoClusters.length - 1));
+                        const isCurrent =
                             firstClusterIndex !== undefined &&
-                            scrollProgress >=
-                                firstClusterIndex /
-                                    Math.max(1, photoClusters.length - 1);
+                            firstClusterIndex === currentLocationIndex;
 
                         return (
                             <Marker
@@ -106,7 +105,7 @@ export const TripMap: React.FC<TripMapProps> = ({
                                     superCluster.image, // Use representative photo (first photo of first cluster)
                                     superCluster.clusterCount,
                                     55,
-                                    isReached,
+                                    isCurrent,
                                 )}
                                 eventHandlers={{
                                     click: () => {
@@ -142,11 +141,9 @@ export const TripMap: React.FC<TripMapProps> = ({
                                 originalCluster.length === cluster.length &&
                                 originalCluster[0]?.image === cluster[0]?.image,
                         );
-                        // Check if this location has been reached based on progress
-                        const isReached =
-                            scrollProgress >=
-                            originalClusterIndex /
-                                Math.max(1, photoClusters.length - 1);
+                        // Only show green for the current location (not all reached locations)
+                        const currentLocationIndex = Math.round(scrollProgress * Math.max(0, photoClusters.length - 1));
+                        const isCurrent = originalClusterIndex === currentLocationIndex;
 
                         return (
                             <Marker
@@ -157,7 +154,7 @@ export const TripMap: React.FC<TripMapProps> = ({
                                     55,
                                     "#ffffff",
                                     cluster.length,
-                                    isReached,
+                                    isCurrent,
                                 )}
                                 eventHandlers={{
                                     click: () => {
