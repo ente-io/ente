@@ -65,27 +65,6 @@ class CodeStore {
     return true;
   }
 
-  Future<void> updateCode(Code originalCode, Code updatedCode, {bool shouldSync = true}) async {
-    if (updatedCode.generatedID == null) return; 
-
-    await _authenticatorService.updateEntry(
-      updatedCode.generatedID!,
-      updatedCode.toOTPAuthUrlFormat(),
-      shouldSync, 
-      _authenticatorService.getAccountMode(),
-    );
-    Bus.instance.fire(CodesUpdatedEvent());
-
-    final bool isMajorChange = originalCode.issuer != updatedCode.issuer ||
-        originalCode.account != updatedCode.account ||
-        originalCode.secret != updatedCode.secret ||
-        originalCode.display.note != updatedCode.display.note;
-        
-    if (isMajorChange) {
-      LocalBackupService.instance.triggerAutomaticBackup().ignore();
-    }
-  }
-
   Future<List<Code>> getAllCodes({
     AccountMode? accountMode,
     bool sortCodes = true,
@@ -141,9 +120,7 @@ class CodeStore {
     bool shouldSync = true,
     AccountMode? accountMode,
     List<Code>? existingAllCodes,
-    bool isFrequencyOrRecencyUpdate = false,
   }) async {
-
     final mode = accountMode ?? _authenticatorService.getAccountMode();
     final allCodes = existingAllCodes ?? (await getAllCodes(accountMode: mode));
     bool isExistingCode = false;
@@ -173,9 +150,6 @@ class CodeStore {
         shouldSync,
         mode,
       );
-      if (!isFrequencyOrRecencyUpdate) {
-        LocalBackupService.instance.triggerAutomaticBackup().ignore();
-      }
     } else {
       result = AddResult.newCode;
       code.generatedID = await _authenticatorService.addEntry(
@@ -183,7 +157,6 @@ class CodeStore {
         shouldSync,
         mode,
       );
-      LocalBackupService.instance.triggerAutomaticBackup().ignore();
     }
     Bus.instance.fire(CodesUpdatedEvent());
     return result;
@@ -193,7 +166,6 @@ class CodeStore {
     final mode = accountMode ?? _authenticatorService.getAccountMode();
     await _authenticatorService.deleteEntry(code.generatedID!, mode);
     Bus.instance.fire(CodesUpdatedEvent());
-    LocalBackupService.instance.triggerAutomaticBackup().ignore();
   }
 
   bool _isOfflineImportRunning = false;
@@ -267,15 +239,14 @@ class CodeStore {
   }
 
   Future<String> getCodesForExport() async {
-  final allCodes = await getAllCodes(sortCodes: false);
-  String data = "";
-  for (final code in allCodes) {
-    if (code.hasError) continue;
-    data += "${code.toOTPAuthUrlFormat()}\n";
+    final allCodes = await getAllCodes(sortCodes: false);
+    String data = "";
+    for (final code in allCodes) {
+      if (code.hasError) continue;
+      data += "${code.toOTPAuthUrlFormat()}\n";
+    }
+    return data;
   }
-  return data;
-}
-
 }
 
 enum AddResult {
