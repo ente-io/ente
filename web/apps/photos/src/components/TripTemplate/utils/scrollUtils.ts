@@ -1,6 +1,7 @@
 import L from "leaflet";
 import { startTransition } from "react";
 
+import { calculateDistance, getLocationPosition } from "../mapHelpers";
 import type { JourneyPoint } from "../types";
 
 export interface PositionInfo {
@@ -37,10 +38,10 @@ export interface HandleTimelineScrollParams {
     photoClusters: JourneyPoint[][];
     locationPositions: PositionInfo[];
     mapRef: L.Map | null;
-    optimalZoom: number;
     isClusterClickScrollingRef: React.RefObject<boolean>;
     setHasUserScrolled: (scrolled: boolean) => void;
     setScrollProgress: (progress: number) => void;
+    previousActiveLocationRef: React.RefObject<number>;
 }
 
 export const handleTimelineScroll = ({
@@ -48,10 +49,10 @@ export const handleTimelineScroll = ({
     photoClusters,
     locationPositions,
     mapRef,
-    optimalZoom,
     isClusterClickScrollingRef,
     setHasUserScrolled,
     setScrollProgress,
+    previousActiveLocationRef,
 }: HandleTimelineScrollParams) => {
     if (
         !timelineRef.current ||
@@ -65,6 +66,7 @@ export const handleTimelineScroll = ({
     const clientHeight = timelineContainer.clientHeight;
     const scrollTop = timelineContainer.scrollTop;
 
+    // Calculate scroll progress (0 to 1)
     const isAtBottom = scrollTop + clientHeight >= scrollHeight - 10;
     let progress = 0;
     if (isAtBottom) {
@@ -88,81 +90,72 @@ export const handleTimelineScroll = ({
         setScrollProgress(clampedProgress);
     });
 
-    if (mapRef) {
+    // Calculate current active location index based on scroll progress
+    const currentActiveLocationIndex = Math.round(clampedProgress * Math.max(0, photoClusters.length - 1));
+    const previousActiveLocationIndex = previousActiveLocationRef.current;
+
+    // Only pan map when active location changes (discrete panning)
+    if (mapRef && currentActiveLocationIndex !== previousActiveLocationIndex) {
+        previousActiveLocationRef.current = currentActiveLocationIndex;
+
         const clusterCenters = photoClusters.map((cluster) => {
-            const avgLat =
-                cluster.reduce((sum, p) => sum + p.lat, 0) / cluster.length;
-            const avgLng =
-                cluster.reduce((sum, p) => sum + p.lng, 0) / cluster.length;
+            const avgLat = cluster.reduce((sum, p) => sum + p.lat, 0) / cluster.length;
+            const avgLng = cluster.reduce((sum, p) => sum + p.lng, 0) / cluster.length;
             return { lat: avgLat, lng: avgLng };
         });
 
-        if (clusterCenters.length > 0) {
-            let targetLat, targetLng;
+        const targetCluster = clusterCenters[currentActiveLocationIndex];
+        if (!targetCluster) return;
 
-            const firstCenter = clusterCenters[0];
-            const lastCenter = clusterCenters[clusterCenters.length - 1];
-            if (!firstCenter || !lastCenter) return;
+        // Position active location at 20% from right edge
+        const [positionedLat, positionedLng] = getLocationPosition(targetCluster.lat, targetCluster.lng);
 
-            if (clampedProgress <= 0) {
-                targetLat = firstCenter.lat;
-                targetLng = firstCenter.lng;
-            } else if (clampedProgress === 1) {
-                targetLat = lastCenter.lat;
-                targetLng = lastCenter.lng;
-            } else {
-                const clusterProgress =
-                    clampedProgress * (clusterCenters.length - 1);
-                const currentClusterIndex = Math.floor(clusterProgress);
-                const nextClusterIndex = Math.min(
-                    currentClusterIndex + 1,
-                    clusterCenters.length - 1,
+        // Check if this is a distant location (>500km from previous)
+        let isDistantLocation = false;
+        if (previousActiveLocationIndex !== -1 && previousActiveLocationIndex !== currentActiveLocationIndex) {
+            const previousCluster = clusterCenters[previousActiveLocationIndex];
+            if (previousCluster) {
+                const distance = calculateDistance(
+                    previousCluster.lat,
+                    previousCluster.lng,
+                    targetCluster.lat,
+                    targetCluster.lng
                 );
-                const lerpFactor = clusterProgress - currentClusterIndex;
-
-                const currentCluster = clusterCenters[currentClusterIndex];
-                const nextCluster = clusterCenters[nextClusterIndex];
-
-                if (!currentCluster || !nextCluster) {
-                    targetLat = clusterCenters[0]?.lat || 0;
-                    targetLng = clusterCenters[0]?.lng || 0;
-                } else {
-                    targetLat =
-                        currentCluster.lat +
-                        (nextCluster.lat - currentCluster.lat) * lerpFactor;
-                    targetLng =
-                        currentCluster.lng +
-                        (nextCluster.lng - currentCluster.lng) * lerpFactor;
-                }
+                isDistantLocation = distance > 500; // 500km threshold
             }
+        }
 
-            const timelineSizeRatio = 0.5;
+        const targetZoom = 10; // Fixed zoom level
 
-            const allLngs = clusterCenters.map((c) => c.lng);
-            const minLng = Math.min(...allLngs);
-            const maxLng = Math.max(...allLngs);
-            const lngSpan = maxLng - minLng;
-            const paddedSpan = Math.max(lngSpan * 1.4, 0.1);
-
-            const mapSizeRatio = 1 - timelineSizeRatio;
-            const screenWidthInDegrees = paddedSpan / mapSizeRatio;
-            const shiftAmount = screenWidthInDegrees * (timelineSizeRatio / 2);
-
-            const adjustedLng = targetLng - shiftAmount;
-
-            const currentMapZoom = mapRef.getZoom();
-
-            if (currentMapZoom !== optimalZoom) {
-                mapRef.flyTo([targetLat, adjustedLng], optimalZoom, {
+        if (isDistantLocation) {
+            // For distant locations: zoom out → pan → zoom in
+            mapRef.flyTo([positionedLat, positionedLng], 4, {
+                animate: true,
+                duration: 0.8,
+                easeLinearity: 0.3,
+            });
+            
+            setTimeout(() => {
+                mapRef.flyTo([positionedLat, positionedLng], targetZoom, {
                     animate: true,
-                    duration: 0.5,
-                    easeLinearity: 0.5,
+                    duration: 0.6,
+                    easeLinearity: 0.3,
+                });
+            }, 900);
+        } else {
+            // For nearby locations: simple pan to target location
+            const currentMapZoom = mapRef.getZoom();
+            if (Math.abs(currentMapZoom - targetZoom) > 0.5) {
+                mapRef.flyTo([positionedLat, positionedLng], targetZoom, {
+                    animate: true,
+                    duration: 0.8,
+                    easeLinearity: 0.3,
                 });
             } else {
-                mapRef.panTo([targetLat, adjustedLng], {
+                mapRef.panTo([positionedLat, positionedLng], {
                     animate: true,
-                    duration: 0.3,
-                    easeLinearity: 0.8,
+                    duration: 0.8,
+                    easeLinearity: 0.3,
                 });
             }
         }
@@ -211,7 +204,6 @@ export interface HandleMarkerClickParams {
     clusterLng: number;
     photoClusters: JourneyPoint[][];
     mapRef: L.Map | null;
-    optimalZoom: number;
     isClusterClickScrollingRef: React.RefObject<boolean>;
     clusterClickTimeoutRef: React.RefObject<NodeJS.Timeout | null>;
     setScrollProgress: (progress: number) => void;
@@ -225,7 +217,6 @@ export const handleMarkerClick = ({
     clusterLng,
     photoClusters,
     mapRef,
-    optimalZoom,
     isClusterClickScrollingRef,
     clusterClickTimeoutRef,
     setScrollProgress,
@@ -242,35 +233,16 @@ export const handleMarkerClick = ({
     setScrollProgress(targetProgress);
     setHasUserScrolled(true);
 
-    const allClusterLngs = photoClusters.map(
-        (cluster) =>
-            cluster.reduce((sum, p) => sum + p.lng, 0) / cluster.length,
-    );
-    const minLng = Math.min(...allClusterLngs);
-    const maxLng = Math.max(...allClusterLngs);
-    const lngSpan = maxLng - minLng;
-    const paddedSpan = Math.max(lngSpan * 1.4, 0.1);
-
-    const timelineSizeRatio = 0.5;
-    const mapSizeRatio = 1 - timelineSizeRatio;
-    const screenWidthInDegrees = paddedSpan / mapSizeRatio;
-    const shiftAmount = screenWidthInDegrees * (timelineSizeRatio / 2);
-    const offsetLng = clusterLng - shiftAmount;
+    // Position clicked location at 20% from right edge
+    const [positionedLat, positionedLng] = getLocationPosition(clusterLat, clusterLng);
 
     if (mapRef) {
-        const currentZoom = mapRef.getZoom();
-        if (currentZoom > optimalZoom) {
-            mapRef.flyTo([clusterLat, offsetLng], optimalZoom, {
-                animate: true,
-                duration: 1.2,
-                easeLinearity: 0.25,
-            });
-        } else {
-            mapRef.panTo([clusterLat, offsetLng], {
-                animate: true,
-                duration: 1.0,
-            });
-        }
+        const targetZoom = 10; // Fixed zoom level
+        mapRef.flyTo([positionedLat, positionedLng], targetZoom, {
+            animate: true,
+            duration: 1.0,
+            easeLinearity: 0.3,
+        });
     }
 
     setTimeout(() => {

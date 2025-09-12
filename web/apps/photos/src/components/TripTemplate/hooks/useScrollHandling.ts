@@ -15,10 +15,10 @@ export interface UseScrollHandlingParams {
     photoClusters: JourneyPoint[][];
     locationPositions: PositionInfo[];
     mapRef: L.Map | null;
-    optimalZoom: number;
     locationRefs: React.RefObject<(HTMLDivElement | null)[]>;
     isClusterClickScrollingRef: React.RefObject<boolean>;
     clusterClickTimeoutRef: React.RefObject<NodeJS.Timeout | null>;
+    previousActiveLocationRef: React.RefObject<number>;
     setLocationPositions: (positions: PositionInfo[]) => void;
     setHasUserScrolled: (scrolled: boolean) => void;
     setScrollProgress: (progress: number) => void;
@@ -29,10 +29,10 @@ export const useScrollHandling = ({
     photoClusters,
     locationPositions,
     mapRef,
-    optimalZoom,
     locationRefs,
     isClusterClickScrollingRef,
     clusterClickTimeoutRef,
+    previousActiveLocationRef,
     setLocationPositions,
     setHasUserScrolled,
     setScrollProgress,
@@ -52,20 +52,20 @@ export const useScrollHandling = ({
             photoClusters,
             locationPositions,
             mapRef,
-            optimalZoom,
             isClusterClickScrollingRef,
             setHasUserScrolled,
             setScrollProgress,
+            previousActiveLocationRef,
         });
     }, [
         timelineRef,
         photoClusters,
         locationPositions,
         mapRef,
-        optimalZoom,
         isClusterClickScrollingRef,
         setHasUserScrolled,
         setScrollProgress,
+        previousActiveLocationRef,
     ]);
 
     // Throttled scroll handler
@@ -96,7 +96,6 @@ export const useScrollHandling = ({
                 clusterLng,
                 photoClusters,
                 mapRef,
-                optimalZoom,
                 isClusterClickScrollingRef,
                 clusterClickTimeoutRef,
                 setScrollProgress,
@@ -107,7 +106,6 @@ export const useScrollHandling = ({
         [
             photoClusters,
             mapRef,
-            optimalZoom,
             isClusterClickScrollingRef,
             clusterClickTimeoutRef,
             setScrollProgress,

@@ -89,10 +89,6 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
     const [targetZoom, setTargetZoom] = useState<number | null>(null);
     const [scrollProgress, setScrollProgress] = useState(0); // 0 to 1 representing scroll progress
     const [hasUserScrolled, setHasUserScrolled] = useState(false); // Track if user has actually scrolled
-    const [screenDimensions, setScreenDimensions] = useState<{
-        width: number;
-        height: number;
-    }>({ width: 1400, height: 800 });
     const [locationPositions, setLocationPositions] = useState<PositionInfo[]>(
         [],
     );
@@ -105,28 +101,8 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
         Map<number, { name: string; country: string }>
     >(new Map()); // Track location data to prevent resets
     const filesCountRef = useRef<number>(0); // Track files count to detect real changes
+    const previousActiveLocationRef = useRef<number>(-1); // Track previous active location for discrete panning
 
-    // Track screen dimensions for responsive zoom calculation
-    useEffect(() => {
-        const updateScreenDimensions = () => {
-            if (typeof window !== "undefined") {
-                setScreenDimensions({
-                    width: window.innerWidth,
-                    height: window.innerHeight,
-                });
-            }
-        };
-
-        // Set initial dimensions
-        updateScreenDimensions();
-
-        // Listen for window resize
-        window.addEventListener("resize", updateScreenDimensions);
-
-        return () => {
-            window.removeEventListener("resize", updateScreenDimensions);
-        };
-    }, []);
 
     const photoClusters = useMemo(() => {
         const clusters = clusterPhotosByProximity(journeyData);
@@ -145,8 +121,8 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
 
     // Calculate optimal zoom level based on cluster spread
     const optimalZoom = useMemo(() => {
-        return calculateOptimalZoom(photoClusters, screenDimensions);
-    }, [photoClusters, screenDimensions]);
+        return calculateOptimalZoom();
+    }, []);
 
     // Update currentZoom when optimalZoom changes and there's no mapRef yet
     useEffect(() => {
@@ -196,10 +172,10 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
         photoClusters,
         locationPositions,
         mapRef,
-        optimalZoom,
         locationRefs,
         isClusterClickScrollingRef,
         clusterClickTimeoutRef,
+        previousActiveLocationRef,
         setLocationPositions,
         setHasUserScrolled,
         setScrollProgress,

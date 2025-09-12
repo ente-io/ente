@@ -2,6 +2,26 @@ import L from "leaflet";
 import type { JourneyPoint } from "./types";
 import { iconCache } from "./utils/geocoding";
 
+// Calculate distance between two points using Haversine formula (returns distance in km)
+export const calculateDistance = (
+    lat1: number,
+    lng1: number,
+    lat2: number,
+    lng2: number,
+): number => {
+    const R = 6371; // Radius of Earth in kilometers
+    const dLat = (lat2 - lat1) * (Math.PI / 180);
+    const dLng = (lng2 - lng1) * (Math.PI / 180);
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * (Math.PI / 180)) *
+            Math.cos(lat2 * (Math.PI / 180)) *
+            Math.sin(dLng / 2) *
+            Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+};
+
 // Geographic clustering with responsive distance thresholds and day separation
 export const clusterPhotosByProximity = (photos: JourneyPoint[]) => {
     if (photos.length === 0) return [];
@@ -54,96 +74,10 @@ export const clusterPhotosByProximity = (photos: JourneyPoint[]) => {
     return allClusters;
 };
 
-// Calculate optimal zoom level based on cluster spread
-export const calculateOptimalZoom = (
-    photoClusters: JourneyPoint[][],
-    screenDimensions: { width: number; height: number },
-): number => {
-    if (photoClusters.length === 0) return 7;
-
-    // Calculate cluster centers
-    const clusterCenters = photoClusters.map((cluster) => {
-        const avgLat =
-            cluster.reduce((sum, p) => sum + p.lat, 0) / cluster.length;
-        const avgLng =
-            cluster.reduce((sum, p) => sum + p.lng, 0) / cluster.length;
-        return { lat: avgLat, lng: avgLng };
-    });
-
-    // Find the bounding box of all clusters (only need lng values for calculations)
-    const allLats = clusterCenters.map((c) => c.lat);
-    const allLngs = clusterCenters.map((c) => c.lng);
-
-    // Calculate minimum distances between clusters to avoid over-clustering
-    let minDistance = Infinity;
-    for (let i = 0; i < clusterCenters.length - 1; i++) {
-        for (let j = i + 1; j < clusterCenters.length; j++) {
-            const centerI = clusterCenters[i];
-            const centerJ = clusterCenters[j];
-            if (!centerI || !centerJ) continue;
-            const distance = Math.sqrt(
-                Math.pow(centerI.lat - centerJ.lat, 2) +
-                    Math.pow(centerI.lng - centerJ.lng, 2),
-            );
-            minDistance = Math.min(minDistance, distance);
-        }
-    }
-
-    // Calculate zoom based on cluster density and actual screen dimensions
-    const timelineSizeRatio = 0.5;
-    const visibleMapWidth = screenDimensions.width * (1 - timelineSizeRatio);
-
-    // Calculate effective span considering cluster density
-    // Sort clusters by longitude to find the core data area
-    const sortedClusterLngs = allLngs.slice().sort((a, b) => a - b);
-    const sortedClusterLats = allLats.slice().sort((a, b) => a - b);
-
-    // Use 90th percentile span instead of full min/max to ignore outliers
-    const p10Index = Math.floor(sortedClusterLngs.length * 0.1);
-    const p90Index = Math.floor(sortedClusterLngs.length * 0.9);
-    const p10Lng = sortedClusterLngs[p10Index];
-    const p90Lng = sortedClusterLngs[p90Index];
-    const p10Lat = sortedClusterLats[p10Index];
-    const p90Lat = sortedClusterLats[p90Index];
-    if (
-        p10Lng === undefined ||
-        p90Lng === undefined ||
-        p10Lat === undefined ||
-        p90Lat === undefined
-    ) {
-        return 7; // fallback zoom
-    }
-    const effectiveLngSpan = p90Lng - p10Lng;
-    const effectiveLatSpan = p90Lat - p10Lat;
-
-    // Add more padding (40%) to prevent cropping at edges
-    const paddedLngSpan = effectiveLngSpan * 1.4;
-    const paddedLatSpan = effectiveLatSpan * 1.4;
-
-    // Calculate zoom to fit the padded effective span
-    const zoomForLngSpan = Math.log2(
-        (visibleMapWidth * 360) / (paddedLngSpan * 256),
-    );
-    const visibleMapHeight = screenDimensions.height; // Full height available for map
-    const zoomForLatSpan = Math.log2(
-        (visibleMapHeight * 360) / (paddedLatSpan * 256),
-    );
-
-    // Take the more restrictive zoom
-    const zoomToFitBounds = Math.min(zoomForLngSpan, zoomForLatSpan);
-
-    // Also ensure reasonable cluster separation
-    const targetPixelSeparation = 100;
-    const pixelsPerDegreeAtOptimalZoom = targetPixelSeparation / minDistance;
-    const optimalZoomFromSeparation = Math.log2(
-        (pixelsPerDegreeAtOptimalZoom * 360) / 256,
-    );
-
-    // Prioritize fitting bounds with some buffer for cluster separation
-    const calculatedZoom = Math.min(zoomToFitBounds, optimalZoomFromSeparation);
-    const clampedZoom = Math.max(6, Math.min(14, calculatedZoom));
-
-    return Math.round(clampedZoom);
+// Return fixed zoom level of 10 for consistent positioning
+export const calculateOptimalZoom = (): number => {
+    // Return fixed zoom of 10 as per new requirements
+    return 10;
 };
 
 // Function to create icon with specific image and progress styling
@@ -496,7 +430,7 @@ export const detectScreenCollisions = (
     return { superClusters, visibleClusters };
 };
 
-// Calculate map center - start at first location to match timeline initial state
+// Calculate map center with first location positioned at 20% from right edge
 export const getMapCenter = (
     photoClusters: JourneyPoint[][],
     journeyData: JourneyPoint[],
@@ -508,7 +442,7 @@ export const getMapCenter = (
         return [firstPoint.lat, firstPoint.lng];
     }
 
-    // Start at first cluster center to match the timeline starting position
+    // Start at first cluster center
     const firstCluster = photoClusters[0];
     if (!firstCluster || firstCluster.length === 0) return [0, 0]; // Fallback, but map won't render anyway
 
@@ -517,29 +451,32 @@ export const getMapCenter = (
     const firstLng =
         firstCluster.reduce((sum, p) => sum + p.lng, 0) / firstCluster.length;
 
-    // Calculate shift for timeline positioning
-    const clusterCenters = photoClusters.map((cluster) => {
-        const avgLat =
-            cluster.reduce((sum, p) => sum + p.lat, 0) / cluster.length;
-        const avgLng =
-            cluster.reduce((sum, p) => sum + p.lng, 0) / cluster.length;
-        return { lat: avgLat, lng: avgLng };
-    });
-
-    const allLngs = clusterCenters.map((c) => c.lng);
-    const minLng = Math.min(...allLngs);
-    const maxLng = Math.max(...allLngs);
-    const lngSpan = maxLng - minLng;
-    const paddedSpan = Math.max(lngSpan * 1.4, 0.1); // Minimum span for single locations
-
-    const timelineSizeRatio = 0.5;
-    const mapSizeRatio = 1 - timelineSizeRatio;
-
-    const screenWidthInDegrees = paddedSpan / mapSizeRatio;
-    const shiftAmount = screenWidthInDegrees * (timelineSizeRatio / 2);
-
-    // Shift the first location left so it appears centered in visible area
-    const adjustedLng = firstLng - shiftAmount;
+    // Position first location at 20% from right edge (80% from left)
+    // At zoom level 10, each pixel represents approximately 152.87 meters
+    // Timeline takes up 50% of screen width, so visible map area is 50%
+    // We want the first location to be at 20% from right of the visible map area
+    // This means 80% from left of visible map, or 40% from left of total screen
+    
+    const timelineWidthRatio = 0.5; // Timeline takes up 50% of screen
+    
+    // At zoom 10, approximately 0.35 degrees per 1000px at equator
+    // For positioning, we need to shift the longitude to place marker at desired position
+    const degreesPerPixelAtZoom10 = 0.35 / 1000; // rough approximation
+    const pixelsToShiftFor20Percent = (window.innerWidth || 1400) * timelineWidthRatio * 0.3; // 30% of visible map width
+    const lngShift = pixelsToShiftFor20Percent * degreesPerPixelAtZoom10;
+    
+    const adjustedLng = firstLng - lngShift;
 
     return [firstLat, adjustedLng];
+};
+
+// Calculate position for a location to be at 20% from right edge of visible map
+export const getLocationPosition = (lat: number, lng: number): [number, number] => {
+    // Position location at 20% from right edge (80% from left) of visible map area
+    const timelineWidthRatio = 0.5; // Timeline takes up 50% of screen
+    const degreesPerPixelAtZoom10 = 0.35 / 1000; // rough approximation at zoom 10
+    const pixelsToShiftFor20Percent = (window.innerWidth || 1400) * timelineWidthRatio * 0.3; // 30% of visible map width
+    const lngShift = pixelsToShiftFor20Percent * degreesPerPixelAtZoom10;
+    
+    return [lat, lng - lngShift];
 };
