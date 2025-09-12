@@ -639,6 +639,48 @@ body {
     border-left: 4px solid var(--ente-warning);
 }
 
+/* Context mode highlighting */
+.log-entry.highlighted {
+    background: var(--ente-background-secondary);
+    border: 2px solid var(--ente-color-accent-photos);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateX(0px);
+    position: relative;
+    animation: pulseHighlight 2s ease-in-out;
+}
+
+.log-entry.highlighted:hover {
+    background: var(--ente-background-secondary);
+    transform: translateX(0px);
+}
+
+.highlight-icon {
+    color: var(--ente-color-accent-photos);
+    font-size: 18px;
+    margin-left: auto;
+}
+
+/* Context header styles */
+.context-header {
+    display: flex;
+    align-items: center;
+    gap: var(--ente-spacing-sm);
+    font-size: 20px;
+}
+
+@keyframes pulseHighlight {
+    0% {
+        box-shadow: 0 0 0 0 rgba(var(--ente-color-accent-photos-rgb), 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(var(--ente-color-accent-photos-rgb), 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(var(--ente-color-accent-photos-rgb), 0);
+    }
+}
+
 .log-level {
     width: 12px;
     height: 12px;
