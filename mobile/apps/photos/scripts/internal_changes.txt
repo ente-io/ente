@@ -1,3 +1,4 @@
+- Neeraj: Fix IDN domain display in public URLs [#7079](https://github.com/ente-io/ente/issues/7079)
 - Neeraj: (i) Add allow joining album option in manage links
 - Neeraj: Fix lock error + improve logViewer
 - Laurens: text embedding caching for memories and discover
