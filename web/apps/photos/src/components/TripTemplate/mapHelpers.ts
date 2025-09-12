@@ -455,14 +455,14 @@ export const getMapCenter = (
     // At zoom level 10, each pixel represents approximately 152.87 meters
     // Timeline takes up 50% of screen width, so visible map area is 50%
     // We want the first location to be at 20% from right of the visible map area
-    // This means 80% from left of visible map, or 40% from left of total screen
+    // This means shifting map center left so marker appears more to the right
     
     const timelineWidthRatio = 0.5; // Timeline takes up 50% of screen
     
     // At zoom 10, approximately 0.35 degrees per 1000px at equator
     // For positioning, we need to shift the longitude to place marker at desired position
     const degreesPerPixelAtZoom10 = 0.35 / 1000; // rough approximation
-    const pixelsToShiftFor20Percent = (window.innerWidth || 1400) * timelineWidthRatio * 0.3; // 30% of visible map width
+    const pixelsToShiftFor20Percent = (window.innerWidth || 1400) * timelineWidthRatio * 3.0; // 300% of visible map width to shift map left
     const lngShift = pixelsToShiftFor20Percent * degreesPerPixelAtZoom10;
     
     const adjustedLng = firstLng - lngShift;
@@ -475,7 +475,9 @@ export const getLocationPosition = (lat: number, lng: number): [number, number] 
     // Position location at 20% from right edge (80% from left) of visible map area
     const timelineWidthRatio = 0.5; // Timeline takes up 50% of screen
     const degreesPerPixelAtZoom10 = 0.35 / 1000; // rough approximation at zoom 10
-    const pixelsToShiftFor20Percent = (window.innerWidth || 1400) * timelineWidthRatio * 0.3; // 30% of visible map width
+    // Calculate shift to position marker at 20% from right edge of visible map
+    // Need to shift map center left so the marker appears more to the right
+    const pixelsToShiftFor20Percent = (window.innerWidth || 1400) * timelineWidthRatio * 3.0; // 300% of visible map width to shift map left
     const lngShift = pixelsToShiftFor20Percent * degreesPerPixelAtZoom10;
     
     return [lat, lng - lngShift];
