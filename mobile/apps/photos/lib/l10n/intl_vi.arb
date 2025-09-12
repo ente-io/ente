@@ -1932,10 +1932,10 @@
   "hoorayyyy": "Hoorayyyy!",
   "nothingToTidyUpHere": "Ở đây đã ngon lành rồi",
   "deletingDash": "Đang xóa - ",
-  "cLTitle1": "Hình ảnh tương tự",
-  "cLDesc1": "Chúng tôi đang giới thiệu một hệ thống dựa trên ML mới để phát hiện hình ảnh tương tự, bạn có thể dùng để dọn dẹp thư viện của mình. Có sẵn trong Cài đặt -> Sao lưu -> Giải phóng dung lượng",
-  "cLTitle2": "Cải thiện streaming video",
-  "cLDesc2": "Bây giờ bạn có thể kích hoạt tạo luồng cho video trực tiếp từ ứng dụng. Chúng tôi cũng đã thêm màn hình cài đặt phát trực tuyến video mới sẽ cho bạn biết bao nhiêu phần trăm video của bạn đã được xử lý để phát trực tuyến",
-  "cLTitle3": "Cải Thiện Hiệu Suất",
-  "cLDesc3": "Nhiều cải thiện bên trong, bao gồm sử dụng bộ nhớ đệm tốt hơn và trải nghiệm cuộn mượt mà hơn"
+  "cLTitle1": "Ảnh giống nhau",
+  "cLDesc1": "Chúng tôi ra mắt một hệ thống dựa trên ML mới để phát hiện các hình ảnh giống nhau, giúp bạn có thể dọn dẹp thư viện của mình. Có sẵn trong Cài đặt->Sao lưu->Giải phóng dung lượng",
+  "cLTitle2": "Nâng cao phát video",
+  "cLDesc2": "Giờ đây, bạn có thể kích hoạt thủ công việc tạo luồng video trực tiếp từ ứng dụng. Chúng tôi cũng đã thêm màn hình cài đặt phát trực tuyến video mới, hiển thị tỷ lệ phần trăm video đã được xử lý để phát trực tuyến",
+  "cLTitle3": "Cải thiện hiệu suất",
+  "cLDesc3": "Nhiều cải tiến bên trong, bao gồm sử dụng bộ nhớ đệm tốt hơn và trải nghiệm cuộn mượt mà hơn"
 }

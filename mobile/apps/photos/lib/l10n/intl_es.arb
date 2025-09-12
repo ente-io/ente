@@ -1917,6 +1917,11 @@
   },
   "size": "Tamaño",
   "similarity": "Similitud",
+  "analyzingPhotosLocally": "Analizando tus fotos localmente...",
+  "lookingForVisualSimilarities": "Buscando similitudes visuales...",
+  "comparingImageDetails": "Comparando detalles de imágenes...",
+  "findingSimilarImages": "Buscando imágenes similares...",
+  "almostDone": "Ya casi terminamos...",
   "processingLocally": "Procesando localmente",
   "useMLToFindSimilarImages": "Revisar y eliminar imágenes que se parecen entre sí.",
   "all": "Todas",
@@ -1926,10 +1931,11 @@
   "related": "Relacionado",
   "hoorayyyy": "¡Hurraaaa!",
   "nothingToTidyUpHere": "Nada que limpiar aquí",
+  "deletingDash": "Eliminando - ",
   "cLTitle1": "Imágenes similares",
-  "cLDesc1": "Estamos introduciendo un nuevo sistema basado en ML para detectar imágenes similares, con el cual puedes limpiar tu biblioteca. Disponible en Configuración -> Copia de seguridad -> Liberar espacio",
-  "cLTitle2": "Mejoras de transmisión de video",
-  "cLDesc2": "Ahora puedes activar manualmente la generación de transmisión para videos directamente desde la aplicación. También hemos agregado una nueva pantalla de configuración de transmisión de video que te mostrará qué porcentaje de tus videos han sido procesados para transmisión",
+  "cLDesc1": "Estamos introduciendo un nuevo sistema basado en ML para detectar imágenes similares, utilizando el cual puede limpiar tu biblioteca. Disponible en Ajustes -> Copia de seguridad -> Liberar espacio",
+  "cLTitle2": "Mejoras de transmisión de vídeo",
+  "cLDesc2": "Ahora puedes activar manualmente la generación de transmisión de vídeos directamente desde la aplicación. También hemos añadido una nueva pantalla de configuración de transmisión de vídeo que te mostrará qué porcentaje de tus vídeos han sido procesados para la transmisión",
   "cLTitle3": "Mejoras de rendimiento",
-  "cLDesc3": "Múltiples mejoras internas, incluyendo mejor uso de caché y una experiencia de desplazamiento más fluida"
+  "cLDesc3": "Múltiples mejoras bajo la capa, incluyendo un mejor uso de caché y una experiencia de desplazamiento más suave"
 }

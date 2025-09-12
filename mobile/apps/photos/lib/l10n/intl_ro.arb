@@ -1521,11 +1521,5 @@
   "joinAlbum": "Alăturați-vă albumului",
   "joinAlbumSubtext": "pentru a vedea și a adăuga fotografii",
   "joinAlbumSubtextViewer": "pentru a adăuga la albumele distribuite",
-  "join": "Alăturare",
-  "cLTitle1": "Imagini similare",
-  "cLDesc1": "Introducem un nou sistem bazat pe ML pentru detectarea imaginilor similare, cu care vă puteți curăța biblioteca. Disponibil în Setări->Backup->Eliberați Spațiu",
-  "cLTitle2": "Îmbunătățiri streaming video",
-  "cLDesc2": "Acum puteți declanșa manual generarea fluxului pentru videoclipuri direct din aplicație. Am adăugat, de asemenea, un nou ecran de setări pentru streaming video care vă va arăta ce procent din videoclipurile dvs. au fost procesate pentru streaming",
-  "cLTitle3": "Îmbunătățiri de Performanță",
-  "cLDesc3": "Multiple îmbunătățiri în fundal, inclusiv o utilizare mai bună a cache-ului și o experiență de defilare mai fluidă"
+  "join": "Alăturare"
 }
