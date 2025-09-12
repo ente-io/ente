@@ -50,7 +50,7 @@ class _QrCodeDialogWidgetState extends State<QrCodeDialogWidget> {
           text:
               'Scan this QR code to view my ${widget.collection.displayName} album on ente',
         );
-        
+
         // Close the dialog after sharing is initiated
         if (mounted) {
           Navigator.of(context).pop();
