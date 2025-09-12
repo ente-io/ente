@@ -956,26 +956,26 @@ class LogViewer {
         detailContent.innerHTML = `
             <div class="log-detail">
                 <h3>Log Entry Details</h3>
-                <table style="width: 100%; margin-top: 1rem;">
-                    <tr><th style="text-align: left; padding: 0.5rem; background: #f5f5f5;">Timestamp</th><td style="padding: 0.5rem;">${formatTimestamp(log.timestamp)}</td></tr>
-                    <tr><th style="text-align: left; padding: 0.5rem; background: #f5f5f5;">Level</th><td style="padding: 0.5rem;"><span class="level-chip ${log.level} active">${log.level}</span></td></tr>
-                    <tr><th style="text-align: left; padding: 0.5rem; background: #f5f5f5;">Logger</th><td style="padding: 0.5rem;">${log.loggerName}</td></tr>
-                    <tr><th style="text-align: left; padding: 0.5rem; background: #f5f5f5;">Process</th><td style="padding: 0.5rem;">${this.getProcessDisplayName(log.processPrefix)}</td></tr>
-                    ${log.filename ? `<tr><th style="text-align: left; padding: 0.5rem; background: #f5f5f5;">File</th><td style="padding: 0.5rem;">${log.filename}</td></tr>` : ''}
-                    ${log.id ? `<tr><th style="text-align: left; padding: 0.5rem; background: #f5f5f5;">ID</th><td style="padding: 0.5rem; font-family: monospace;">${log.id}</td></tr>` : ''}
+                <table class="log-detail-table">
+                    <tr><th>Timestamp</th><td>${formatTimestamp(log.timestamp)}</td></tr>
+                    <tr><th>Level</th><td><span class="level-chip ${log.level} active">${log.level}</span></td></tr>
+                    <tr><th>Logger</th><td>${log.loggerName}</td></tr>
+                    <tr><th>Process</th><td>${this.getProcessDisplayName(log.processPrefix)}</td></tr>
+                    ${log.filename ? `<tr><th>File</th><td>${log.filename}</td></tr>` : ''}
+                    ${log.id ? `<tr><th>ID</th><td style="font-family: monospace;">${log.id}</td></tr>` : ''}
                 </table>
                 
-                <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem;">Message</h4>
-                <pre style="background: #f8f9fa; padding: 1rem; border-radius: 4px; white-space: pre-wrap; word-break: break-word; max-height: 300px; overflow-y: auto;">${this.escapeHtml(log.message)}</pre>
+                <h4>Message</h4>
+                <pre class="log-detail-message">${this.escapeHtml(log.message)}</pre>
                 
                 ${log.error ? `
-                    <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; color: #f44336;">Error</h4>
-                    <pre style="background: #ffebee; padding: 1rem; border-radius: 4px; white-space: pre-wrap; word-break: break-word; color: #c62828; border-left: 4px solid #f44336;">${this.escapeHtml(log.error)}</pre>
+                    <h4 class="log-detail-error-heading">Error</h4>
+                    <pre class="log-detail-error">${this.escapeHtml(log.error)}</pre>
                 ` : ''}
                 
                 ${log.stackTrace ? `
-                    <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; color: #f44336;">Stack Trace</h4>
-                    <pre style="background: #ffebee; padding: 1rem; border-radius: 4px; white-space: pre-wrap; word-break: break-word; color: #c62828; border-left: 4px solid #f44336; font-size: 0.8rem; max-height: 300px; overflow-y: auto;">${this.escapeHtml(log.stackTrace)}</pre>
+                    <h4 class="log-detail-error-heading">Stack Trace</h4>
+                    <pre class="log-detail-stack-trace">${this.escapeHtml(log.stackTrace)}</pre>
                 ` : ''}
             </div>
         `;
