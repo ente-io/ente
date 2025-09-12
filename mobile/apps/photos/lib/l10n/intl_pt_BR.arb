@@ -1819,11 +1819,5 @@
         "type": "int"
       }
     }
-  },
-  "cLTitle1": "Imagens similares",
-  "cLDesc1": "Estamos introduzindo um novo sistema baseado em ML para detectar imagens similares, com o qual você pode limpar sua biblioteca. Disponível em Configurações -> Backup -> Liberar espaço",
-  "cLTitle2": "Melhorias do streaming de vídeo",
-  "cLDesc2": "Agora você pode acionar manualmente a geração de stream para vídeos diretamente do aplicativo. Também adicionamos uma nova tela de configurações de streaming de vídeo que mostrará qual porcentagem dos seus vídeos foram processados para streaming",
-  "cLTitle3": "Melhorias de desempenho",
-  "cLDesc3": "Múltiplas melhorias internas, incluindo melhor uso de cache e uma experiência de rolagem mais suave"
+  }
 }

@@ -1811,15 +1811,55 @@
   "font": "Šriftas",
   "background": "Fonas",
   "align": "Lygiuoti",
+  "videosProcessed": "Vaizdo įrašai apdoroti",
+  "totalVideos": "Iš viso vaizdo įrašų",
+  "skippedVideos": "Praleisti vaizdo įrašai",
   "similarImages": "Panašūs vaizdai",
   "findSimilarImages": "Rasti panašų vaizdų",
   "noSimilarImagesFound": "Panašių vaizdų nerasta",
   "yourPhotosLookUnique": "Jūsų nuotraukos atrodo ypatingos",
   "selectionOptions": "Pasirinkimo parinktys",
+  "selectAllWithCount": "Visi panašumai ({count})",
+  "@selectAllWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "chooseSimilarImagesToSelect": "Pasirinkite vaizdus pagal jų vizualinį panašumą.",
   "deleteFiles": "Ištrinti failus",
   "areYouSureDeleteFiles": "Ar tikrai norite ištrinti šiuos failus?",
   "greatJob": "Puiku!",
+  "cleanedUpSimilarImages": "Atlaisvinote {size} vietos.",
+  "@cleanedUpSimilarImages": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
   "size": "Dydis",
   "similarity": "Panašumas",
-  "processingLocally": "Apdorojama vietoje"
+  "analyzingPhotosLocally": "Analizuojamos jūsų nuotraukos vietoje...",
+  "lookingForVisualSimilarities": "Ieškoma vizualių panašumų...",
+  "comparingImageDetails": "Lyginama vaizdo išsami informacija...",
+  "findingSimilarImages": "Randama panašių vaizdų...",
+  "almostDone": "Beveik baigta...",
+  "processingLocally": "Apdorojama vietoje",
+  "useMLToFindSimilarImages": "Peržiūrėkite ir pašalinkite vaizdus, kurie atrodo panašūs vienas į kitą.",
+  "all": "Visi",
+  "similar": "Panašūs",
+  "identical": "Vienodi",
+  "nothingHereTryAnotherFilter": "Čia nieko nėra. Bandykite kitą filtrą. 👀",
+  "related": "Susiję",
+  "hoorayyyy": "Puiiiiku!",
+  "nothingToTidyUpHere": "Čia nėra ko tvarkyti.",
+  "deletingDash": "Ištrinama - ",
+  "cLTitle1": "Panašūs vaizdai",
+  "cLDesc1": "Pristatome naują MM sistemą, skirtą aptikti panašius vaizdus, kurią naudojant galite išvalyti savo biblioteką. Pasiekiama Nustatymuose -> Atsarginė kopija -> Atlaisvinti vietą.",
+  "cLTitle2": "Vaizdo įrašų srautinio perdavimo patobulinimai",
+  "cLDesc2": "Dabar galite rankiniu būdu paleisti vaizdo įrašų srauto perdavimo generavimą tiesiai iš programos. Taip pat pridėjome naują vaizdo įrašų srauto perdavimo nustatymų ekraną, kuriame bus rodomas procentinis vaizdo įrašų skaičius, apdorotų srauto perdavimui.",
+  "cLTitle3": "Našumo patobulinimai",
+  "cLDesc3": "Daugybė patobulinimų, įskaitant geresnį podėlio naudojimą ir sklandesnį slinkimo patirtį."
 }

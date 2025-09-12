@@ -1909,6 +1909,11 @@
   },
   "size": "Taille",
   "similarity": "Similitude",
+  "analyzingPhotosLocally": "Analyse de vos photos en local ...",
+  "lookingForVisualSimilarities": "Recherche de ressemblances visuelles...",
+  "comparingImageDetails": "Comparaison des détails de l'image...",
+  "findingSimilarImages": "Recherche d'images similaires...",
+  "almostDone": "C'est presque terminé...",
   "processingLocally": "Traitement local",
   "useMLToFindSimilarImages": "Examinez et supprimez les images qui se ressemblent entre elles.",
   "all": "Toutes",
@@ -1918,10 +1923,11 @@
   "related": "Liés",
   "hoorayyyy": "Houraaa !",
   "nothingToTidyUpHere": "Rien à nettoyer ici",
+  "deletingDash": "Suppression - ",
   "cLTitle1": "Images similaires",
-  "cLDesc1": "Nous introduisons un nouveau système basé sur l'IA pour détecter les images similaires, avec lequel vous pouvez nettoyer votre bibliothèque. Disponible dans Paramètres -> Sauvegarde -> Libérer de l'espace",
-  "cLTitle2": "Améliorations de la diffusion vidéo",
-  "cLDesc2": "Vous pouvez maintenant déclencher manuellement la génération de flux pour les vidéos directement depuis l'application. Nous avons également ajouté un nouvel écran de paramètres de diffusion vidéo qui vous montrera quel pourcentage de vos vidéos ont été traitées pour la diffusion",
-  "cLTitle3": "Améliorations des performances",
-  "cLDesc3": "Plusieurs améliorations internes, incluant une meilleure utilisation du cache et une expérience de défilement plus fluide"
+  "cLDesc1": "Nous introduisons un nouveau système basé sur le ML pour détecter des images similaires, en utilisant lesquelles vous pouvez nettoyer de votre bibliothèque. Disponible dans Paramètres->Sauvegarde->Espace libre",
+  "cLTitle2": "Améliorations du streaming vidéo",
+  "cLDesc2": "Vous pouvez maintenant déclencher manuellement la génération de flux vidéos directement depuis l'application. Nous avons également ajouté un nouvel écran de paramètres de streaming vidéo qui vous montrera quel pourcentage de vos vidéos ont été traitées pour le streaming",
+  "cLTitle3": "Amélioration des performances",
+  "cLDesc3": "Plusieurs améliorations invisibles, y compris une meilleure utilisation du cache et une expérience de défilement plus fluide"
 }
