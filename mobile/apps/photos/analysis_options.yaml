@@ -36,6 +36,7 @@ linter:
 
 analyzer:
   errors:
+    deprecated_member_use: warning
     avoid_empty_else: error
     exhaustive_cases: error
     curly_braces_in_flow_control_structures: error

@@ -183,7 +183,8 @@ class UploadLocksDB {
       return "No lock found for $id";
     }
     final row = rows.first;
-    final time = int.tryParse(row[_uploadLocksTable.columnTime].toString()) ?? 0  ;
+    final time =
+        int.tryParse(row[_uploadLocksTable.columnTime].toString()) ?? 0;
     final owner = row[_uploadLocksTable.columnOwner] as String;
     final duration = DateTime.now().millisecondsSinceEpoch - time;
     return "Lock for $id acquired by $owner since ${Duration(milliseconds: duration)}";
