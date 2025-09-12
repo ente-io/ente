@@ -444,7 +444,7 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
           const SizedBox(width: crossAxisSpacing),
           _buildTabButton(
             TabFilter.close,
-            AppLocalizations.of(context).close,
+            AppLocalizations.of(context).closeBy,
             colorScheme,
             textTheme,
           ),
