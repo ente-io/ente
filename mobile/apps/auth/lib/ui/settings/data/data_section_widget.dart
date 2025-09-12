@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/deduplication_service.dart';
+import 'package:ente_auth/services/flagservice.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/expandable_menu_item_widget.dart';
@@ -91,18 +92,19 @@ class DataSectionWidget extends StatelessWidget {
           );
         },
       ),
-      MenuItemWidget(
-        captionedTextWidget: CaptionedTextWidget(
-          title: l10n.localBackupSidebarTitle,
+      if (FeatureFlagService.isInternalUserOrDebugBuild())
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
+            title: l10n.localBackupSidebarTitle + "(i)",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            await _handleLocalBackupClick(context);
+          },
         ),
-        pressedColor: getEnteColorScheme(context).fillFaint,
-        trailingIcon: Icons.chevron_right_outlined,
-        trailingIconIsMuted: true,
-        onTap: () async {
-          await _handleLocalBackupClick(context);
-        },
-      ),
-      sectionOptionSpacing,
+      if (FeatureFlagService.isInternalUserOrDebugBuild()) sectionOptionSpacing,
     ]);
     return Column(
       children: children,

@@ -7,7 +7,6 @@ import 'package:ente_auth/events/codes_updated_event.dart';
 import 'package:ente_auth/models/authenticator/entity_result.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
-import 'package:ente_auth/services/local_backup_service.dart';
 import 'package:ente_auth/store/offline_authenticator_db.dart';
 import 'package:ente_events/event_bus.dart';
 import 'package:logging/logging.dart';
