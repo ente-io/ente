@@ -407,6 +407,9 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
                   cacheExtent: 400,
                   itemCount: _filteredGroups.length,
                   itemBuilder: (context, index) {
+                    if (index >= _filteredGroups.length) {
+                      return const SizedBox.shrink();
+                    }
                     final similarFiles = _filteredGroups[index];
                     return Column(
                       children: [
