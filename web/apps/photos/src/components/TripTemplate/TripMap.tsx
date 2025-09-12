@@ -90,12 +90,8 @@ export const TripMap: React.FC<TripMapProps> = ({
                     {/* Draw super-clusters (clickable for zoom and gallery) */}
                     {superClusters.map((superCluster, index) => {
                         // Only show green for the current location (not all reached locations)
-                        const firstClusterIndex =
-                            superCluster.clustersInvolved[0];
                         const currentLocationIndex = Math.round(scrollProgress * Math.max(0, photoClusters.length - 1));
-                        const isCurrent =
-                            firstClusterIndex !== undefined &&
-                            firstClusterIndex === currentLocationIndex;
+                        const isCurrent = superCluster.clustersInvolved.includes(currentLocationIndex);
 
                         return (
                             <Marker
