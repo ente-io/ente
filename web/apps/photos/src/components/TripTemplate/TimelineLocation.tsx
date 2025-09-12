@@ -61,7 +61,7 @@ export const TimelineLocation = memo<TimelineLocationProps>(
                 className="timeline-location"
                 sx={{
                     marginBottom:
-                        index === photoClusters.length - 1 ? "24px" : "192px",
+                        index === photoClusters.length - 1 ? "48px" : "96px",
                 }}
             >
                 <DotBackground />

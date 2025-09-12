@@ -15,7 +15,6 @@ import { TimelineProgressLine } from "./TimelineProgressLine";
 import { TopNavButtons } from "./TopNavButtons";
 import { TripCover } from "./TripCover";
 import { TripMap } from "./TripMap";
-import { TripStartedSection } from "./TripStartedSection";
 
 // Import hooks
 import { useDataProcessing } from "./hooks/useDataProcessing";
@@ -102,7 +101,6 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
     >(new Map()); // Track location data to prevent resets
     const filesCountRef = useRef<number>(0); // Track files count to detect real changes
     const previousActiveLocationRef = useRef<number>(-1); // Track previous active location for discrete panning
-
 
     const photoClusters = useMemo(() => {
         const clusters = clusterPhotosByProximity(journeyData);
@@ -242,10 +240,6 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
                                 </LocationsLoadingContainer>
                             ) : (
                                 <>
-                                    <TripStartedSection
-                                        journeyData={journeyData}
-                                    />
-
                                     <TimelineContainer id="timeline-container">
                                         <TimelineBaseLine
                                             locationPositions={
@@ -280,8 +274,6 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
                                                 }
                                             />
                                         ))}
-
-                                        <Box sx={{ mb: 3 }} />
                                     </TimelineContainer>
                                 </>
                             )}
@@ -346,7 +338,7 @@ const TimelineSidebar = styled(Box)(({ theme }) => ({
     left: "16px",
     top: "16px",
     bottom: "16px",
-    width: "min(50%, 1000px)",
+    width: "680px",
     overflow: "auto",
     boxShadow: theme.shadows[10],
     backgroundColor: theme.palette.background.paper,
@@ -364,9 +356,10 @@ const TimelineSidebar = styled(Box)(({ theme }) => ({
     },
     scrollbarWidth: "thin",
     scrollbarColor: `${theme.palette.divider} transparent`,
+    [theme.breakpoints.up(1600)]: { width: "960px" },
 }));
 
-const TimelineContent = styled(Box)({ 
+const TimelineContent = styled(Box)({
     padding: "32px",
     height: "100%",
     display: "flex",

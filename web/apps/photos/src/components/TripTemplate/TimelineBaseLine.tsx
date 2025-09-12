@@ -28,20 +28,12 @@ export const TimelineBaseLine = memo<TimelineBaseLineProps>(
         const firstLocationCenter = locationPositions[0]?.center || 0;
 
         return (
-            <>
-                <DashedLine
-                    sx={{
-                        top: "-60px",
-                        height: `${firstLocationCenter + 60}px`,
-                    }}
-                />
-                <SolidLine
-                    sx={{
-                        top: `${firstLocationCenter}px`,
-                        height: `${heightToLastDot - firstLocationCenter}px`,
-                    }}
-                />
-            </>
+            <SolidLine
+                sx={{
+                    top: `${firstLocationCenter}px`,
+                    height: `${heightToLastDot - firstLocationCenter}px`,
+                }}
+            />
         );
     },
 );

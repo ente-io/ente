@@ -97,14 +97,17 @@ export const TripCover = memo<TripCoverProps>(
 // Styled components
 const CoverContainer = styled(Box)({ marginBottom: "48px" });
 
-const CoverImageContainer = styled(Box)({
+const CoverImageContainer = styled(Box)(({ theme }) => ({
     aspectRatio: "16/8",
     position: "relative",
     marginBottom: "12px",
     borderRadius: "24px",
     overflow: "hidden",
     backgroundColor: "#e0e0e0",
-});
+    [theme.breakpoints.down(1440)]: {
+        aspectRatio: "16/6",
+    },
+}));
 
 const GradientOverlay = styled(Box)({
     position: "absolute",
