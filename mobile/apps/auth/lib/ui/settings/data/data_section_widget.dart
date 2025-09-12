@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/deduplication_service.dart';
+import 'package:ente_auth/services/flagservice.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/expandable_menu_item_widget.dart';
@@ -10,6 +11,7 @@ import 'package:ente_auth/ui/settings/common_settings.dart';
 import 'package:ente_auth/ui/settings/data/duplicate_code_page.dart';
 import 'package:ente_auth/ui/settings/data/export_widget.dart';
 import 'package:ente_auth/ui/settings/data/import_page.dart';
+import 'package:ente_auth/ui/settings/data/local_backup_settings_page.dart'; //for local backup
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:flutter/material.dart';
@@ -27,6 +29,10 @@ class DataSectionWidget extends StatelessWidget {
       selectionOptionsWidget: _getSectionOptions(context),
       leadingIcon: Icons.key_outlined,
     );
+  }
+
+  Future<void> _handleLocalBackupClick(BuildContext context) async {
+    await routeToPage(context, const LocalBackupSettingsPage());
   }
 
   Column _getSectionOptions(BuildContext context) {
@@ -86,7 +92,19 @@ class DataSectionWidget extends StatelessWidget {
           );
         },
       ),
-      sectionOptionSpacing,
+      if (FeatureFlagService.isInternalUserOrDebugBuild())
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
+            title: l10n.localBackupSidebarTitle + "(i)",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            await _handleLocalBackupClick(context);
+          },
+        ),
+      if (FeatureFlagService.isInternalUserOrDebugBuild()) sectionOptionSpacing,
     ]);
     return Column(
       children: children,

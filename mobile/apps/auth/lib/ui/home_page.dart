@@ -14,6 +14,7 @@ import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/onboarding/model/tag_enums.dart';
 import 'package:ente_auth/onboarding/view/common/tag_chip.dart';
 import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
+import 'package:ente_auth/services/local_backup_service.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/store/code_store.dart';
@@ -362,6 +363,7 @@ class _HomePageState extends State<HomePage> {
       if ((_allCodes?.where((e) => !e.hasError).length ?? 0) > 2) {
         _focusNewCode(code);
       }
+      LocalBackupService.instance.triggerAutomaticBackup().ignore();
     }
   }
 
@@ -375,6 +377,7 @@ class _HomePageState extends State<HomePage> {
     );
     if (code != null) {
       await CodeStore.instance.addCode(code);
+      LocalBackupService.instance.triggerAutomaticBackup().ignore();
     }
   }
 
