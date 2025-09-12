@@ -45,10 +45,12 @@ class _QrCodeDialogWidgetState extends State<QrCodeDialogWidget> {
         );
         await file.writeAsBytes(pngBytes);
 
-        await Share.shareXFiles(
-          [XFile(file.path)],
-          text:
-              'Scan this QR code to view my ${widget.collection.displayName} album on ente',
+        await SharePlus.instance.share(
+          ShareParams(
+            files: [XFile(file.path)],
+            text:
+                'Scan this QR code to view my ${widget.collection.displayName} album on ente',
+          ),
         );
 
         // Close the dialog after sharing is initiated
