@@ -131,17 +131,17 @@ export const handleTimelineScroll = ({
             // For distant locations: zoom out → pan → zoom in
             mapRef.flyTo([positionedLat, positionedLng], 4, {
                 animate: true,
-                duration: 0.8,
-                easeLinearity: 0.3,
+                duration: 1.5,
+                easeLinearity: 0.25,
             });
             
             setTimeout(() => {
                 mapRef.flyTo([positionedLat, positionedLng], targetZoom, {
                     animate: true,
-                    duration: 0.6,
-                    easeLinearity: 0.3,
+                    duration: 1.2,
+                    easeLinearity: 0.25,
                 });
-            }, 900);
+            }, 1600);
         } else {
             // For nearby locations: simple pan to target location
             const currentMapZoom = mapRef.getZoom();
