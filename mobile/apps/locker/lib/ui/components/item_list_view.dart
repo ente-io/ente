@@ -19,6 +19,7 @@ import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/services/info_file_service.dart';
 import 'package:locker/ui/components/file_edit_dialog.dart';
 import 'package:locker/ui/pages/account_credentials_page.dart';
+import 'package:locker/ui/pages/base_info_page.dart';
 import 'package:locker/ui/pages/collection_page.dart';
 import 'package:locker/ui/pages/emergency_contact_page.dart';
 import 'package:locker/ui/pages/personal_note_page.dart';
@@ -1120,27 +1121,31 @@ class FileRowWidget extends StatelessWidget {
         return;
       }
 
-      // Navigate to the appropriate page based on info type
+      // Navigate to the appropriate page based on info type in view mode
       Widget page;
       switch (infoItem.type) {
         case InfoType.note:
           page = PersonalNotePage(
             existingData: infoItem.data as PersonalNoteData,
+            mode: InfoPageMode.view,
           );
           break;
         case InfoType.accountCredential:
           page = AccountCredentialsPage(
             existingData: infoItem.data as AccountCredentialData,
+            mode: InfoPageMode.view,
           );
           break;
         case InfoType.physicalRecord:
           page = PhysicalRecordsPage(
             existingData: infoItem.data as PhysicalRecordData,
+            mode: InfoPageMode.view,
           );
           break;
         case InfoType.emergencyContact:
           page = EmergencyContactPage(
             existingData: infoItem.data as EmergencyContactData,
+            mode: InfoPageMode.view,
           );
           break;
       }

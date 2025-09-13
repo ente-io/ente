@@ -5,7 +5,11 @@ import 'package:locker/ui/components/form_text_input_widget.dart';
 import 'package:locker/ui/pages/base_info_page.dart';
 
 class PhysicalRecordsPage extends BaseInfoPage<PhysicalRecordData> {
-  const PhysicalRecordsPage({super.key, super.existingData});
+  const PhysicalRecordsPage({
+    super.key,
+    super.existingData,
+    super.mode = InfoPageMode.edit,
+  });
 
   @override
   State<PhysicalRecordsPage> createState() => _PhysicalRecordsPageState();
@@ -68,7 +72,6 @@ class _PhysicalRecordsPageState
   @override
   List<Widget> buildFormFields() {
     return [
-      const SizedBox(height: 20),
       FormTextInputWidget(
         labelText: context.l10n.recordName,
         hintText: context.l10n.recordNameHint,
@@ -100,6 +103,29 @@ class _PhysicalRecordsPageState
         maxLines: 3,
       ),
       const SizedBox(height: 24),
+    ];
+  }
+
+  @override
+  List<Widget> buildViewFields() {
+    return [
+      buildViewField(
+        label: context.l10n.recordName,
+        value: _nameController.text,
+      ),
+      const SizedBox(height: 16),
+      buildViewField(
+        label: context.l10n.recordLocation,
+        value: _locationController.text,
+      ),
+      if (_notesController.text.isNotEmpty) ...[
+        const SizedBox(height: 16),
+        buildViewField(
+          label: context.l10n.recordNotes,
+          value: _notesController.text,
+          maxLines: 3,
+        ),
+      ],
     ];
   }
 }

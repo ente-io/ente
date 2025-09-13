@@ -5,7 +5,11 @@ import 'package:locker/ui/components/form_text_input_widget.dart';
 import 'package:locker/ui/pages/base_info_page.dart';
 
 class AccountCredentialsPage extends BaseInfoPage<AccountCredentialData> {
-  const AccountCredentialsPage({super.key, super.existingData});
+  const AccountCredentialsPage({
+    super.key,
+    super.existingData,
+    super.mode = InfoPageMode.edit,
+  });
 
   @override
   State<AccountCredentialsPage> createState() => _AccountCredentialsPageState();
@@ -81,7 +85,6 @@ class _AccountCredentialsPageState
   @override
   List<Widget> buildFormFields() {
     return [
-      const SizedBox(height: 20),
       FormTextInputWidget(
         labelText: context.l10n.credentialName,
         hintText: context.l10n.credentialNameHint,
@@ -136,6 +139,35 @@ class _AccountCredentialsPageState
         maxLines: 3,
       ),
       const SizedBox(height: 24),
+    ];
+  }
+
+  @override
+  List<Widget> buildViewFields() {
+    return [
+      buildViewField(
+        label: context.l10n.credentialName,
+        value: _nameController.text,
+      ),
+      const SizedBox(height: 16),
+      buildViewField(
+        label: context.l10n.username,
+        value: _usernameController.text,
+      ),
+      const SizedBox(height: 16),
+      buildViewField(
+        label: context.l10n.password,
+        value: _passwordController.text,
+        isSecret: true,
+      ),
+      if (_notesController.text.isNotEmpty) ...[
+        const SizedBox(height: 16),
+        buildViewField(
+          label: context.l10n.credentialNotes,
+          value: _notesController.text,
+          maxLines: 3,
+        ),
+      ],
     ];
   }
 }

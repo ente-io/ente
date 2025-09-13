@@ -5,7 +5,11 @@ import 'package:locker/ui/components/form_text_input_widget.dart';
 import 'package:locker/ui/pages/base_info_page.dart';
 
 class EmergencyContactPage extends BaseInfoPage<EmergencyContactData> {
-  const EmergencyContactPage({super.key, super.existingData});
+  const EmergencyContactPage({
+    super.key,
+    super.existingData,
+    super.mode = InfoPageMode.edit,
+  });
 
   @override
   State<EmergencyContactPage> createState() => _EmergencyContactPageState();
@@ -69,7 +73,6 @@ class _EmergencyContactPageState
   @override
   List<Widget> buildFormFields() {
     return [
-      const SizedBox(height: 20),
       FormTextInputWidget(
         labelText: context.l10n.contactName,
         hintText: context.l10n.contactNameHint,
@@ -101,6 +104,29 @@ class _EmergencyContactPageState
         maxLines: 3,
       ),
       const SizedBox(height: 24),
+    ];
+  }
+
+  @override
+  List<Widget> buildViewFields() {
+    return [
+      buildViewField(
+        label: context.l10n.contactName,
+        value: _nameController.text,
+      ),
+      const SizedBox(height: 16),
+      buildViewField(
+        label: context.l10n.contactDetails,
+        value: _contactDetailsController.text,
+      ),
+      if (_notesController.text.isNotEmpty) ...[
+        const SizedBox(height: 16),
+        buildViewField(
+          label: context.l10n.contactNotes,
+          value: _notesController.text,
+          maxLines: 3,
+        ),
+      ],
     ];
   }
 }

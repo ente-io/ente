@@ -5,7 +5,11 @@ import 'package:locker/ui/components/form_text_input_widget.dart';
 import 'package:locker/ui/pages/base_info_page.dart';
 
 class PersonalNotePage extends BaseInfoPage<PersonalNoteData> {
-  const PersonalNotePage({super.key, super.existingData});
+  const PersonalNotePage({
+    super.key,
+    super.existingData,
+    super.mode = InfoPageMode.edit,
+  });
 
   @override
   State<PersonalNotePage> createState() => _PersonalNotePageState();
@@ -62,7 +66,6 @@ class _PersonalNotePageState
   @override
   List<Widget> buildFormFields() {
     return [
-      const SizedBox(height: 20),
       FormTextInputWidget(
         labelText: context.l10n.noteName,
         hintText: context.l10n.noteNameHint,
@@ -88,6 +91,22 @@ class _PersonalNotePageState
         },
       ),
       const SizedBox(height: 24),
+    ];
+  }
+
+  @override
+  List<Widget> buildViewFields() {
+    return [
+      buildViewField(
+        label: context.l10n.noteName,
+        value: _nameController.text,
+      ),
+      const SizedBox(height: 16),
+      buildViewField(
+        label: context.l10n.noteContent,
+        value: _contentController.text,
+        maxLines: 5,
+      ),
     ];
   }
 }

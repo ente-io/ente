@@ -130,20 +130,17 @@ class _FormTextInputWidgetState extends State<FormTextInputWidget> {
                       textTheme.body.copyWith(color: colorScheme.textMuted),
                   filled: true,
                   fillColor: colorScheme.fillFaint,
-                  contentPadding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                  contentPadding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
                   border: const UnderlineInputBorder(
                     borderSide: BorderSide.none,
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: colorScheme.strokeFaint,
-                      width: 1,
-                    ),
+                    borderSide: BorderSide.none,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderSide: BorderSide(
-                      color: colorScheme.primary500,
+                      color: colorScheme.strokeFaint,
                       width: 2,
                     ),
                     borderRadius: BorderRadius.circular(8),

@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:ente_ui/components/buttons/gradient_button.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/models/info/info_item.dart';
 import 'package:locker/services/collections/collections_service.dart';
@@ -9,16 +12,24 @@ import 'package:locker/services/info_file_service.dart';
 import 'package:locker/ui/components/collection_selection_widget.dart';
 import 'package:locker/ui/pages/home_page.dart';
 
+enum InfoPageMode { view, edit }
+
 abstract class BaseInfoPage<T extends InfoData> extends StatefulWidget {
   final T? existingData;
+  final InfoPageMode mode;
 
-  const BaseInfoPage({super.key, this.existingData});
+  const BaseInfoPage({
+    super.key,
+    this.existingData,
+    this.mode = InfoPageMode.edit,
+  });
 }
 
 abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
     extends State<W> {
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
+  late InfoPageMode _currentMode;
 
   // Collection selection state
   List<Collection> _availableCollections = [];
@@ -30,11 +41,13 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   InfoType get infoType;
   T createInfoData();
   List<Widget> buildFormFields();
+  List<Widget> buildViewFields();
   bool validateForm();
 
   @override
   void initState() {
     super.initState();
+    _currentMode = widget.mode;
     _loadCollections();
     loadExistingData();
   }
@@ -166,51 +179,176 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(pageTitle),
+  void _toggleMode() {
+    setState(() {
+      _currentMode = _currentMode == InfoPageMode.view
+          ? InfoPageMode.edit
+          : InfoPageMode.view;
+    });
+  }
+
+  void _copyToClipboard(String text, String fieldName) {
+    Clipboard.setData(ClipboardData(text: text));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$fieldName copied to clipboard'),
+        duration: const Duration(seconds: 2),
+        backgroundColor: Colors.green,
       ),
-      body: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Form fields implemented by subclass
-                      ...buildFormFields(),
-                      const SizedBox(height: 24),
-                      // Collection selection
-                      Text(
-                        'Select collections',
-                        style: getEnteTextTheme(context).body,
-                      ),
-                      const SizedBox(height: 12),
-                      CollectionSelectionWidget(
-                        collections: _availableCollections,
-                        selectedCollectionIds: _selectedCollectionIds,
-                        onToggleCollection: _onToggleCollection,
-                        onCollectionsUpdated: _onCollectionsUpdated,
-                      ),
-                    ],
+    );
+  }
+
+  Widget buildViewField({
+    required String label,
+    required String value,
+    bool isSecret = false,
+    int? maxLines,
+  }) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (label.isNotEmpty) ...[
+          Text(label), // Use default style to match FormTextInputWidget
+          const SizedBox(height: 4),
+        ],
+        ClipRRect(
+          borderRadius: const BorderRadius.all(Radius.circular(8)),
+          child: Material(
+            color: Colors.transparent,
+            child: Stack(
+              children: [
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+                  decoration: BoxDecoration(
+                    color: colorScheme.fillFaint,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    isSecret ? '••••••••' : value,
+                    style: textTheme.body,
+                    maxLines: maxLines,
+                    overflow: maxLines != null ? TextOverflow.ellipsis : null,
                   ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: GradientButton(
-                  onTap: _isLoading ? null : _saveRecord,
-                  text: _isLoading ? context.l10n.pleaseWait : submitButtonText,
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: InkWell(
+                    onTap: () => _copyToClipboard(value, label),
+                    borderRadius: BorderRadius.circular(4),
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      child: Icon(
+                        Icons.copy,
+                        size: 16,
+                        color: colorScheme.textMuted,
+                      ),
+                    ),
+                  ),
                 ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isViewMode = _currentMode == InfoPageMode.view;
+    final isEditMode = _currentMode == InfoPageMode.edit;
+
+    return PopScope(
+      canPop: isViewMode,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop && isEditMode) {
+          // If in edit mode and trying to go back, switch to view mode instead
+          _toggleMode();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(pageTitle),
+          leading: isEditMode && widget.existingData != null
+              ? IconButton(
+                  icon: Icon(
+                    Platform.isIOS ? Icons.arrow_back_ios : Icons.arrow_back,
+                  ),
+                  onPressed: _toggleMode,
+                  tooltip: 'Back to view',
+                )
+              : IconButton(
+                  icon: Icon(
+                    Platform.isIOS ? Icons.arrow_back_ios : Icons.arrow_back,
+                  ),
+                  onPressed: () => Navigator.of(context).pop(),
+                  tooltip: 'Back',
+                ),
+          automaticallyImplyLeading: false,
+          actions: [
+            if (isViewMode && widget.existingData != null)
+              IconButton(
+                icon: const Icon(Icons.edit),
+                onPressed: _toggleMode,
+                tooltip: 'Edit',
               ),
-            ],
+          ],
+        ),
+        body: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Fields based on current mode
+                          if (isViewMode)
+                            ...buildViewFields()
+                          else
+                            ...buildFormFields(),
+
+                          // Collection selection only in edit mode
+                          if (isEditMode) ...[
+                            const SizedBox(height: 24),
+                            CollectionSelectionWidget(
+                              collections: _availableCollections,
+                              selectedCollectionIds: _selectedCollectionIds,
+                              onToggleCollection: _onToggleCollection,
+                              onCollectionsUpdated: _onCollectionsUpdated,
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Save button only in edit mode
+                if (isEditMode) ...[
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    child: GradientButton(
+                      onTap: _isLoading ? null : _saveRecord,
+                      text: _isLoading
+                          ? context.l10n.pleaseWait
+                          : submitButtonText,
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
         ),
       ),
