@@ -618,12 +618,7 @@ class FileRowWidget extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Icon(
-                          FileIconUtils.getFileIcon(file.displayName),
-                          color:
-                              FileIconUtils.getFileIconColor(file.displayName),
-                          size: 20,
-                        ),
+                        _buildFileIcon(),
                         const SizedBox(width: 12),
                         Flexible(
                           child: Text(
@@ -1036,6 +1031,57 @@ class FileRowWidget extends StatelessWidget {
           context.l10n.noChangesWereMade,
         );
       }
+    }
+  }
+
+  Widget _buildFileIcon() {
+    // Check if this is an info file
+    if (InfoFileService.instance.isInfoFile(file)) {
+      try {
+        final infoItem = InfoFileService.instance.extractInfoFromFile(file);
+        if (infoItem != null) {
+          return Icon(
+            _getInfoTypeIcon(infoItem.type),
+            color: _getInfoTypeColor(infoItem.type),
+            size: 20,
+          );
+        }
+      } catch (e) {
+        // Fallback to default icon if extraction fails
+      }
+    }
+
+    // For non-info files or if extraction fails, use the original logic
+    return Icon(
+      FileIconUtils.getFileIcon(file.displayName),
+      color: FileIconUtils.getFileIconColor(file.displayName),
+      size: 20,
+    );
+  }
+
+  IconData _getInfoTypeIcon(InfoType type) {
+    switch (type) {
+      case InfoType.note:
+        return Icons.note;
+      case InfoType.accountCredential:
+        return Icons.key;
+      case InfoType.physicalRecord:
+        return Icons.inventory;
+      case InfoType.emergencyContact:
+        return Icons.emergency;
+    }
+  }
+
+  Color _getInfoTypeColor(InfoType type) {
+    switch (type) {
+      case InfoType.note:
+        return Colors.blue;
+      case InfoType.accountCredential:
+        return Colors.orange;
+      case InfoType.physicalRecord:
+        return Colors.green;
+      case InfoType.emergencyContact:
+        return Colors.red;
     }
   }
 
