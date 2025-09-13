@@ -8,6 +8,7 @@ import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/info_file_service.dart';
 import 'package:locker/ui/components/collection_selection_widget.dart';
 import 'package:locker/ui/components/form_text_input_widget.dart';
+import 'package:locker/ui/pages/home_page.dart';
 
 class PhysicalRecordsPage extends StatefulWidget {
   final PhysicalRecordData? existingData;
@@ -232,21 +233,33 @@ class _PhysicalRecordsPageState extends State<PhysicalRecordsPage> {
         );
       }
 
-      if (mounted) {
-        Navigator.of(context).pop(); // Go back to information page
+      // Trigger sync after successful save
+      await CollectionService.instance.sync();
 
+      if (mounted) {
         // Show success message
         final collectionCount = selectedCollections.length;
         final message = collectionCount == 1
             ? context.l10n.recordSavedSuccessfully
             : 'Record saved to $collectionCount collections successfully';
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-            backgroundColor: Colors.green,
-          ),
+        // Navigate to home page and clear all previous routes
+        await Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const HomePage()),
+          (route) => false,
         );
+
+        // Show success message after navigation
+        Future.delayed(const Duration(milliseconds: 100), () {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(message),
+                backgroundColor: Colors.green,
+              ),
+            );
+          }
+        });
       }
     } catch (e) {
       if (mounted) {
