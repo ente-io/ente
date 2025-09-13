@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import "package:ente_base/models/database.dart";
+import 'package:locker/models/file_type.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/collections/models/public_url.dart';
 import 'package:locker/services/collections/models/user.dart';
@@ -106,6 +107,7 @@ class CollectionDB extends EnteBaseDatabase {
         thumbnail_decryption_header TEXT,
         metadata_decryption_header TEXT,
         file_size INTEGER,
+        file_type INTEGER,
         m_md_encoded_json TEXT,
         m_md_version INTEGER DEFAULT 0,
         pub_mmd_encoded_json TEXT,
@@ -483,6 +485,7 @@ class CollectionDB extends EnteBaseDatabase {
       'thumbnail_decryption_header': file.thumbnailDecryptionHeader,
       'metadata_decryption_header': file.metadataDecryptionHeader,
       'file_size': file.fileSize,
+      'file_type': file.fileType?.index,
       'm_md_encoded_json': file.mMdEncodedJson,
       'm_md_version': file.mMdVersion,
       'pub_mmd_encoded_json': file.pubMmdEncodedJson,
@@ -510,6 +513,9 @@ class CollectionDB extends EnteBaseDatabase {
     file.thumbnailDecryptionHeader = map['thumbnail_decryption_header'];
     file.metadataDecryptionHeader = map['metadata_decryption_header'];
     file.fileSize = map['file_size'];
+    if (map['file_type'] != null) {
+      file.fileType = getFileType(map['file_type']);
+    }
     file.mMdEncodedJson = map['m_md_encoded_json'];
     file.mMdVersion = map['m_md_version'] ?? 0;
     file.pubMmdEncodedJson = map['pub_mmd_encoded_json'];

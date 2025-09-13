@@ -48,14 +48,13 @@ class EnteFile {
 
   static final _logger = Logger('File');
 
-  EnteFile();
-
   static EnteFile fromFile(File file) {
     final enteFile = EnteFile();
     enteFile.localPath = file.path;
     enteFile.title = file.path.split('/').last;
     enteFile.creationTime = file.statSync().changed.millisecondsSinceEpoch;
     enteFile.modificationTime = file.statSync().modified.millisecondsSinceEpoch;
+    enteFile.fileType = FileType.other;
     return enteFile;
   }
 
@@ -70,6 +69,9 @@ class EnteFile {
     }
     if (metadataVersion != null) {
       metadata["version"] = metadataVersion;
+    }
+    if (fileType != null) {
+      metadata["fileType"] = fileType!.index;
     }
     return metadata;
   }
@@ -102,6 +104,11 @@ class EnteFile {
     modificationTime = metadata["modificationTime"] ?? creationTime;
     hash = metadata["hash"];
     metadataVersion = metadata["version"] ?? 0;
+    if (metadata["fileType"] != null) {
+      fileType = getFileType(metadata["fileType"]);
+    } else {
+      fileType = FileType.other;
+    }
   }
 
   @override
