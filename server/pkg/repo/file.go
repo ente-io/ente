@@ -162,7 +162,7 @@ func (repo *FileRepository) CreateMetaFile(
 
 	_, err = tx.ExecContext(ctx, `INSERT INTO collection_files
 			(collection_id, file_id, encrypted_key, key_decryption_nonce, is_deleted, updation_time, c_owner_id, f_owner_id)
-			VALUES($1, $2, $3, $4, $5, $6, $7, $8)`, metaFile.CollectionID, metaFile.ID,
+			VALUES($1, $2, $3, $4, $5, $6, $7, $8)`, metaFile.CollectionID, fileID,
 		metaFile.EncryptedKey, metaFile.KeyDecryptionNonce, false, metaFile.UpdationTime, metaFile.OwnerID, collectionOwnerID)
 	if err != nil {
 		tx.Rollback()
