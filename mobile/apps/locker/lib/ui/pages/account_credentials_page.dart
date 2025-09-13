@@ -10,7 +10,9 @@ import 'package:locker/ui/components/collection_selection_widget.dart';
 import 'package:locker/ui/components/form_text_input_widget.dart';
 
 class AccountCredentialsPage extends StatefulWidget {
-  const AccountCredentialsPage({super.key});
+  final AccountCredentialData? existingData;
+
+  const AccountCredentialsPage({super.key, this.existingData});
 
   @override
   State<AccountCredentialsPage> createState() => _AccountCredentialsPageState();
@@ -41,6 +43,16 @@ class _AccountCredentialsPageState extends State<AccountCredentialsPage> {
       });
     });
     _loadCollections();
+    _loadExistingData();
+  }
+
+  void _loadExistingData() {
+    if (widget.existingData != null) {
+      _nameController.text = widget.existingData!.name;
+      _usernameController.text = widget.existingData!.username;
+      _passwordController.text = widget.existingData!.password;
+      _notesController.text = widget.existingData!.notes ?? '';
+    }
   }
 
   Future<void> _loadCollections() async {

@@ -10,7 +10,9 @@ import 'package:locker/ui/components/collection_selection_widget.dart';
 import 'package:locker/ui/components/form_text_input_widget.dart';
 
 class EmergencyContactPage extends StatefulWidget {
-  const EmergencyContactPage({super.key});
+  final EmergencyContactData? existingData;
+
+  const EmergencyContactPage({super.key, this.existingData});
 
   @override
   State<EmergencyContactPage> createState() => _EmergencyContactPageState();
@@ -33,6 +35,15 @@ class _EmergencyContactPageState extends State<EmergencyContactPage> {
   void initState() {
     super.initState();
     _loadCollections();
+    _loadExistingData();
+  }
+
+  void _loadExistingData() {
+    if (widget.existingData != null) {
+      _nameController.text = widget.existingData!.name;
+      _contactDetailsController.text = widget.existingData!.contactDetails;
+      _notesController.text = widget.existingData!.notes ?? '';
+    }
   }
 
   Future<void> _loadCollections() async {

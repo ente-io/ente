@@ -8,6 +8,7 @@ import 'package:ente_utils/share_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:locker/l10n/l10n.dart';
+import 'package:locker/models/info/info_item.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/configuration.dart';
@@ -15,8 +16,13 @@ import 'package:locker/services/files/download/file_downloader.dart';
 import 'package:locker/services/files/links/links_service.dart';
 import 'package:locker/services/files/sync/metadata_updater_service.dart';
 import 'package:locker/services/files/sync/models/file.dart';
+import 'package:locker/services/info_file_service.dart';
 import 'package:locker/ui/components/file_edit_dialog.dart';
+import 'package:locker/ui/pages/account_credentials_page.dart';
 import 'package:locker/ui/pages/collection_page.dart';
+import 'package:locker/ui/pages/emergency_contact_page.dart';
+import 'package:locker/ui/pages/personal_note_page.dart';
+import 'package:locker/ui/pages/physical_records_page.dart';
 import 'package:locker/utils/collection_actions.dart';
 import 'package:locker/utils/collection_sort_util.dart';
 import 'package:locker/utils/date_time_util.dart';
@@ -1033,6 +1039,12 @@ class FileRowWidget extends StatelessWidget {
   }
 
   Future<void> _openFile(BuildContext context) async {
+    // Check if this is an info file
+    if (InfoFileService.instance.isInfoFile(file)) {
+      return _openInfoFile(context);
+    }
+
+    // Original file opening logic for non-info files
     if (file.localPath != null) {
       final localFile = File(file.localPath!);
       if (await localFile.exists()) {
@@ -1092,6 +1104,55 @@ class FileRowWidget extends StatelessWidget {
         context,
         context.l10n.errorOpeningFile,
         context.l10n.errorOpeningFileMessage(e.toString()),
+      );
+    }
+  }
+
+  Future<void> _openInfoFile(BuildContext context) async {
+    try {
+      final infoItem = InfoFileService.instance.extractInfoFromFile(file);
+      if (infoItem == null) {
+        await showErrorDialog(
+          context,
+          context.l10n.errorOpeningFile,
+          'Unable to extract information from this file',
+        );
+        return;
+      }
+
+      // Navigate to the appropriate page based on info type
+      Widget page;
+      switch (infoItem.type) {
+        case InfoType.note:
+          page = PersonalNotePage(
+            existingData: infoItem.data as PersonalNoteData,
+          );
+          break;
+        case InfoType.accountCredential:
+          page = AccountCredentialsPage(
+            existingData: infoItem.data as AccountCredentialData,
+          );
+          break;
+        case InfoType.physicalRecord:
+          page = PhysicalRecordsPage(
+            existingData: infoItem.data as PhysicalRecordData,
+          );
+          break;
+        case InfoType.emergencyContact:
+          page = EmergencyContactPage(
+            existingData: infoItem.data as EmergencyContactData,
+          );
+          break;
+      }
+
+      await Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => page),
+      );
+    } catch (e) {
+      await showErrorDialog(
+        context,
+        context.l10n.errorOpeningFile,
+        'Failed to open info file: ${e.toString()}',
       );
     }
   }

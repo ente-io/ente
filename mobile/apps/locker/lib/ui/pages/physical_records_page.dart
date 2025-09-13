@@ -10,7 +10,9 @@ import 'package:locker/ui/components/collection_selection_widget.dart';
 import 'package:locker/ui/components/form_text_input_widget.dart';
 
 class PhysicalRecordsPage extends StatefulWidget {
-  const PhysicalRecordsPage({super.key});
+  final PhysicalRecordData? existingData;
+
+  const PhysicalRecordsPage({super.key, this.existingData});
 
   @override
   State<PhysicalRecordsPage> createState() => _PhysicalRecordsPageState();
@@ -32,6 +34,15 @@ class _PhysicalRecordsPageState extends State<PhysicalRecordsPage> {
   void initState() {
     super.initState();
     _loadCollections();
+    _loadExistingData();
+  }
+
+  void _loadExistingData() {
+    if (widget.existingData != null) {
+      _nameController.text = widget.existingData!.name;
+      _locationController.text = widget.existingData!.location;
+      _notesController.text = widget.existingData!.notes ?? '';
+    }
   }
 
   Future<void> _loadCollections() async {
