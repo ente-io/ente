@@ -6,7 +6,7 @@
   "@counterAppBarTitle": {
     "description": "Text shown in the AppBar of the Counter Page"
   },
-  "onBoardingBody": "Sauvegarder vos codes A2F",
+  "onBoardingBody": "Sécurisez vos codes A2F",
   "onBoardingGetStarted": "Premiers pas",
   "setupFirstAccount": "Configurez votre premier compte",
   "importScanQrCode": "Scannez un QR Code",

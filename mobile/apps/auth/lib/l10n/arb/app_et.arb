@@ -89,7 +89,7 @@
   "changePassword": "Muuda salasõna",
   "data": "Andmed",
   "importCodes": "Impordi koode",
-  "importTypePlainText": "Votmindamata tekstina",
+  "importTypePlainText": "Vormindamata tekstina",
   "importTypeEnteEncrypted": "Ente krüptitud ekspordina",
   "passwordForDecryptingExport": "Salasõna eksporditud andmete dekrüptimiseks",
   "passwordEmptyError": "Salasõna väli ei saa olla tühi",
@@ -214,7 +214,40 @@
   "@iUnderStand": {
     "description": "Text for the button to confirm the user understands the warning"
   },
+  "authToExportCodes": "Oma koodide eksportimiseks palun tuvasta end",
+  "importSuccessDesc": "Sa oled importinud {count} koodi!",
+  "@importSuccessDesc": {
+    "placeholders": {
+      "count": {
+        "description": "The number of codes imported",
+        "type": "int",
+        "example": "1"
+      }
+    }
+  },
+  "pendingSyncsWarningBody": "Mõned sinu koodid on varundamata.\n\nEnne väljalogimist palun kontrolli, et sa oleksid nad varundanud.",
+  "tapToEnterCode": "Koodi sisestamiseks klõpsa",
+  "terminateSession": "Kas lõpetad sessiooni?",
+  "terminate": "Lõpeta",
+  "thisDevice": "See seade",
+  "toResetVerifyEmail": "Salasõna lähtestamiseks palun esmalt kinnita oma e-posti aadress.",
+  "thisEmailIsAlreadyInUse": "See e-posti aadress on juba kasutuses",
+  "verificationFailedPleaseTryAgain": "Kinnitamine ei õnnestunud, palun proovi uuesti",
+  "yourVerificationCodeHasExpired": "Sinu verifitseerimiskood on aegunud",
+  "incorrectCode": "Vigane kood",
+  "sorryTheCodeYouveEnteredIsIncorrect": "Vabandust, sinu sisestatud kood on vigane",
+  "emailChangedTo": "E-posti aadress on nüüd muudetud, uus aadress on {newEmail}",
+  "authenticationFailedPleaseTryAgain": "Autentimine ei õnnestunud, palun proovi uuesti",
+  "authenticationSuccessful": "Autentimine õnnestus!",
+  "incorrectRecoveryKey": "Vigane taasetvõti",
+  "theRecoveryKeyYouEnteredIsIncorrect": "Sinu sisestatud taasetvõti on vigane",
   "enterPassword": "Sisesta salasõna",
+  "selectExportFormat": "Vali ekspordivorming",
+  "exportDialogDesc": "Krüptitud ekspordifailid on kaitstud sinu sisestatud salasõnaga.",
+  "encrypted": "Krüptitud",
+  "plainText": "Vormindamata tekst",
+  "pinnedCodeMessage": "{code} on tõstetud esile",
+  "unpinnedCodeMessage": "{code} esiletõstmine on lõppenud",
   "createNewTag": "Lisa uus silt",
   "tag": "Silt",
   "create": "Loo",
@@ -225,5 +258,9 @@
   "reEnterPassword": "Sisesta salasõna uuesti",
   "setNewPassword": "Sisesta uus salasõna",
   "enterPin": "Sisesta PIN-kood",
-  "setNewPin": "Määra uus PIN-kood"
+  "setNewPin": "Määra uus PIN-kood",
+  "plainHTML": "Tavaline HTML",
+  "errorInvalidQRCode": "Vigane QR-kood",
+  "errorInvalidQRCodeBody": "Skaneeritud QR-kood pole korrektne 2FA kasutajakonto.",
+  "errorNoQRCode": "QR-koodi ei leidu"
 }
