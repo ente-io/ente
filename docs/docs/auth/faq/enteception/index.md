@@ -21,11 +21,11 @@ Another option is to use a separate account for Ente Auth.
 Also, taking exporting the encrypted backup is also another good way to reduce
 the risk (you can easily import the encrypted backup without signing in).
 
-Ente also offers [Legacy](/photos/features/legacy/) (emergency contacts) and support for [Passkeys](/photos/features/passkeys/). Both help reduce the risk of being locked out of your Ente account.
+Ente also offers [Legacy](/photos/features/legacy/) (emergency contacts) and support for [Passkeys](/photos/features/passkeys). Both help reduce the risk of being locked out of your Ente account.
 
 [Legacy](/photos/features/legacy/) allows you to designate trusted contacts who can recover your account in case you are unavailable. The primary use case is to pass on your memories after your death, but it also helps recover your account in case you forget your password and recovery key. Trusted contacts can initiate account recovery, and if you do not block this within 30 days, they can reset the password and access your account.
 
-[Passkeys](/photos/features/passkeys/) serve as a modern and secure alternative to traditional 2FA codes. Instead of entering a code, you can authenticate using biometric data, hardware security keys, or device-based authentication.
+[Passkeys](/photos/features/passkeys) serve as a modern and secure alternative to traditional 2FA codes. Instead of entering a code, you can authenticate using biometric data, hardware security keys, or device-based authentication.
 
 ## Email verification for Ente Auth
 
