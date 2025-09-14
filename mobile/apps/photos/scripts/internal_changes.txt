@@ -1,3 +1,4 @@
+- Neeraj: (i) Add collection-level guest view option in album overflow menu
 - Neeraj: (i) Add allow joining album option in manage links
 - Neeraj: Fix lock error + improve logViewer
 - Laurens: text embedding caching for memories and discover
