@@ -18,6 +18,11 @@ class LogViewer {
         this.currentOffset = 0;
         this.pageSize = 100;
         this.isLoading = false;
+        
+        // Context mode state
+        this.isContextMode = false;
+        this.contextTargetLog = null;
+        this.contextLogs = [];
 
         this.initializeEventListeners();
     }
@@ -94,10 +99,12 @@ class LogViewer {
         const closeDetail = document.getElementById('close-detail');
         const closeDetailBtn = document.getElementById('close-detail-btn');
         const copyLog = document.getElementById('copy-log');
+        const showContext = document.getElementById('show-context');
 
         closeDetail.addEventListener('click', this.hideDetailDialog.bind(this));
         closeDetailBtn.addEventListener('click', this.hideDetailDialog.bind(this));
         copyLog.addEventListener('click', this.copyLogDetail.bind(this));
+        showContext.addEventListener('click', this.showLogContext.bind(this));
 
         // Export and clear
         const exportBtn = document.getElementById('export-btn');
@@ -660,20 +667,22 @@ class LogViewer {
         }, 100);
     }
 
-    createLogEntryHTML(log) {
+    createLogEntryHTML(log, isHighlighted = false) {
         const levelClass = log.level.toLowerCase();
         const processDisplay = this.getProcessDisplayName(log.processPrefix);
         const formattedTime = this.formatTime(log.timestamp);
         const truncatedMessage = this.truncateMessage(log.message);
+        const highlightClass = isHighlighted ? 'highlighted' : '';
         
         return `
-            <div class="log-entry ${levelClass}" data-level="${log.level}">
+            <div class="log-entry ${levelClass} ${highlightClass}" data-level="${log.level}">
                 <div class="log-level ${log.level}"></div>
                 <div class="log-content">
                     <div class="log-header">
                         <span class="log-time">${formattedTime}</span>
                         <span class="log-logger">${log.loggerName}</span>
                         ${processDisplay !== 'Foreground' ? `<span class="log-process">${processDisplay}</span>` : ''}
+                        ${isHighlighted ? '<span class="material-icons highlight-icon">my_location</span>' : ''}
                     </div>
                     <div class="log-message">${this.escapeHtml(truncatedMessage)}</div>
                     ${log.error ? `<div class="log-error">${this.escapeHtml(log.error)}</div>` : ''}
@@ -956,26 +965,26 @@ class LogViewer {
         detailContent.innerHTML = `
             <div class="log-detail">
                 <h3>Log Entry Details</h3>
-                <table style="width: 100%; margin-top: 1rem;">
-                    <tr><th style="text-align: left; padding: 0.5rem; background: #f5f5f5;">Timestamp</th><td style="padding: 0.5rem;">${formatTimestamp(log.timestamp)}</td></tr>
-                    <tr><th style="text-align: left; padding: 0.5rem; background: #f5f5f5;">Level</th><td style="padding: 0.5rem;"><span class="level-chip ${log.level} active">${log.level}</span></td></tr>
-                    <tr><th style="text-align: left; padding: 0.5rem; background: #f5f5f5;">Logger</th><td style="padding: 0.5rem;">${log.loggerName}</td></tr>
-                    <tr><th style="text-align: left; padding: 0.5rem; background: #f5f5f5;">Process</th><td style="padding: 0.5rem;">${this.getProcessDisplayName(log.processPrefix)}</td></tr>
-                    ${log.filename ? `<tr><th style="text-align: left; padding: 0.5rem; background: #f5f5f5;">File</th><td style="padding: 0.5rem;">${log.filename}</td></tr>` : ''}
-                    ${log.id ? `<tr><th style="text-align: left; padding: 0.5rem; background: #f5f5f5;">ID</th><td style="padding: 0.5rem; font-family: monospace;">${log.id}</td></tr>` : ''}
+                <table class="log-detail-table">
+                    <tr><th>Timestamp</th><td>${formatTimestamp(log.timestamp)}</td></tr>
+                    <tr><th>Level</th><td><span class="level-chip ${log.level} active">${log.level}</span></td></tr>
+                    <tr><th>Logger</th><td>${log.loggerName}</td></tr>
+                    <tr><th>Process</th><td>${this.getProcessDisplayName(log.processPrefix)}</td></tr>
+                    ${log.filename ? `<tr><th>File</th><td>${log.filename}</td></tr>` : ''}
+                    ${log.id ? `<tr><th>ID</th><td style="font-family: monospace;">${log.id}</td></tr>` : ''}
                 </table>
                 
-                <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem;">Message</h4>
-                <pre style="background: #f8f9fa; padding: 1rem; border-radius: 4px; white-space: pre-wrap; word-break: break-word; max-height: 300px; overflow-y: auto;">${this.escapeHtml(log.message)}</pre>
+                <h4>Message</h4>
+                <pre class="log-detail-message">${this.escapeHtml(log.message)}</pre>
                 
                 ${log.error ? `
-                    <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; color: #f44336;">Error</h4>
-                    <pre style="background: #ffebee; padding: 1rem; border-radius: 4px; white-space: pre-wrap; word-break: break-word; color: #c62828; border-left: 4px solid #f44336;">${this.escapeHtml(log.error)}</pre>
+                    <h4 class="log-detail-error-heading">Error</h4>
+                    <pre class="log-detail-error">${this.escapeHtml(log.error)}</pre>
                 ` : ''}
                 
                 ${log.stackTrace ? `
-                    <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; color: #f44336;">Stack Trace</h4>
-                    <pre style="background: #ffebee; padding: 1rem; border-radius: 4px; white-space: pre-wrap; word-break: break-word; color: #c62828; border-left: 4px solid #f44336; font-size: 0.8rem; max-height: 300px; overflow-y: auto;">${this.escapeHtml(log.stackTrace)}</pre>
+                    <h4 class="log-detail-error-heading">Stack Trace</h4>
+                    <pre class="log-detail-stack-trace">${this.escapeHtml(log.stackTrace)}</pre>
                 ` : ''}
             </div>
         `;
@@ -1002,6 +1011,106 @@ class LogViewer {
                 }, 1000);
             });
         }
+    }
+
+    showLogContext() {
+        if (this.currentDetailLog) {
+            this.isContextMode = true;
+            this.contextTargetLog = this.currentDetailLog;
+            
+            // Get logs around the target log (±50 logs)
+            const targetIndex = this.logs.findIndex(log => 
+                log.timestamp === this.contextTargetLog.timestamp && 
+                log.message === this.contextTargetLog.message
+            );
+            
+            if (targetIndex !== -1) {
+                const contextSize = 50;
+                const startIndex = Math.max(0, targetIndex - contextSize);
+                const endIndex = Math.min(this.logs.length, targetIndex + contextSize + 1);
+                
+                this.contextLogs = this.logs.slice(startIndex, endIndex);
+                
+                // Update UI to show context mode
+                this.updateContextModeUI();
+                this.displayContextLogs();
+                
+                // Close detail dialog
+                this.hideDetailDialog();
+            }
+        }
+    }
+
+    updateContextModeUI() {
+        const headerTitle = document.querySelector('.header-content h1');
+        const searchSection = document.querySelector('.search-section');
+        const timelineSection = document.getElementById('timeline-section');
+        const activeFilters = document.getElementById('active-filters');
+        
+        if (this.isContextMode) {
+            headerTitle.innerHTML = `
+                <div class="context-header">
+                    <span class="material-icons">timeline</span>
+                    <span>Log Context - ${new Date(this.contextTargetLog.timestamp).toISOString().replace('T', ' ').slice(0, 19)}</span>
+                    <button id="exit-context" class="mui-button secondary" style="margin-left: 16px;">
+                        <span class="material-icons">close</span>
+                        Exit Context
+                    </button>
+                </div>
+            `;
+            
+            // Add exit context button listener
+            document.getElementById('exit-context').addEventListener('click', this.exitContextMode.bind(this));
+            
+            // Hide search and timeline sections
+            searchSection.style.display = 'none';
+            timelineSection.style.display = 'none';
+            activeFilters.style.display = 'none';
+        } else {
+            headerTitle.textContent = '📋 Ente Log Viewer';
+            searchSection.style.display = 'block';
+            timelineSection.style.display = this.logs.length > 0 ? 'block' : 'none';
+        }
+    }
+
+    displayContextLogs() {
+        const logList = document.getElementById('log-list');
+        const targetIndex = this.contextLogs.findIndex(log => 
+            log.timestamp === this.contextTargetLog.timestamp && 
+            log.message === this.contextTargetLog.message
+        );
+        
+        logList.innerHTML = this.contextLogs.map((log, index) => {
+            const isTarget = index === targetIndex;
+            const entryHtml = this.createLogEntryHTML(log, isTarget);
+            return entryHtml;
+        }).join('');
+        
+        // Add click listeners
+        logList.querySelectorAll('.log-entry').forEach((entry, index) => {
+            entry.addEventListener('click', () => this.showLogDetail(this.contextLogs[index]));
+        });
+        
+        // Scroll to target log
+        if (targetIndex !== -1) {
+            const targetEntry = logList.children[targetIndex];
+            if (targetEntry) {
+                targetEntry.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+        
+        // Update stats
+        const logCount = document.getElementById('log-count');
+        logCount.textContent = `Showing context: ${this.contextLogs.length} logs around target`;
+    }
+
+    exitContextMode() {
+        this.isContextMode = false;
+        this.contextTargetLog = null;
+        this.contextLogs = [];
+        
+        this.updateContextModeUI();
+        this.displayLogs();
     }
 
     // Analytics

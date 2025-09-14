@@ -32,7 +32,7 @@ import (
 )
 
 var passwordWhiteListedURLs = []string{"/public-collection/info", "/public-collection/report-abuse", "/public-collection/verify-password"}
-var whitelistedCollectionShareIDs = []int64{111, 12172}
+var whitelistedCollectionShareIDs = []int64{111, 2275}
 
 // CollectionLinkMiddleware intercepts and authenticates incoming requests
 type CollectionLinkMiddleware struct {

@@ -756,16 +756,33 @@ class CollectionsService {
   String getPublicUrl(Collection c) {
     final PublicURL url = c.publicURLs.firstOrNull!;
     Uri publicUrl = Uri.parse(url.url);
+
+    // Replace with custom domain if configured
     final String customDomain = flagService.customDomain;
     if (customDomain.isNotEmpty) {
-      publicUrl =
-          publicUrl.replace(host: customDomain, scheme: "https", port: 443);
+      publicUrl = publicUrl.replace(
+        host: customDomain,
+        scheme: "https",
+        port: 443,
+      );
     }
+
+    // Get the collection key for the URL fragment
     final String collectionKey = Base58Encode(
       CollectionsService.instance.getCollectionKey(c.id),
     );
-    final String urlValue = "${publicUrl.toString()}#$collectionKey";
-    return urlValue;
+
+    // Build the final URL
+    String finalUrl = publicUrl.toString();
+
+    // Handle IDN domains - if the host was percent-encoded by Uri.replace,
+    // decode it for user-friendly display
+    if (customDomain.isNotEmpty && publicUrl.host.contains('%')) {
+      final decodedHost = Uri.decodeComponent(publicUrl.host);
+      finalUrl = finalUrl.replaceFirst(publicUrl.host, decodedHost);
+    }
+
+    return "$finalUrl#$collectionKey";
   }
 
   Uint8List _getAndCacheDecryptedKey(

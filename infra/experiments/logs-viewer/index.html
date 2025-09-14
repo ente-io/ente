@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ente Log Viewer</title>
     
+    <!-- Dark Reader support -->
+    <meta name="darkreader-lock">
+    <meta name="color-scheme" content="light dark">
+    
     <!-- Material-UI CSS -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
@@ -202,6 +206,10 @@
                 </div>
             </div>
             <div class="dialog-actions">
+                <button id="show-context" class="primary-btn">
+                    <span class="material-icons">timeline</span>
+                    Show Context
+                </button>
                 <button id="copy-log" class="secondary-btn">Copy</button>
                 <button id="close-detail-btn" class="secondary-btn">Close</button>
             </div>

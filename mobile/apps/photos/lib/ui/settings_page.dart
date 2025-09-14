@@ -36,7 +36,6 @@ class SettingsPage extends StatelessWidget {
 
   const SettingsPage({super.key, required this.emailNotifier});
 
-
   @override
   Widget build(BuildContext context) {
     Bus.instance.fire(OpenedSettingsEvent());
