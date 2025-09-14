@@ -64,6 +64,8 @@ class FlagService {
 
   String get customDomain => flags.customDomain;
 
+  bool get albumGuestView => internalUser;
+
   bool hasSyncedAccountFlags() {
     return _prefs.containsKey("remote_flags");
   }
