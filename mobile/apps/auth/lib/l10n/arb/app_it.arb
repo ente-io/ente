@@ -519,5 +519,14 @@
   "algorithm": "Algoritmo",
   "type": "Tipo",
   "period": "Periodo",
-  "digits": "Cifre"
+  "digits": "Cifre",
+  "importFromGallery": "Importa dalla galleria",
+  "errorCouldNotReadImage": "Impossibile leggere il file immagine selezionato.",
+  "errorInvalidQRCode": "Codice QR non valido",
+  "errorInvalidQRCodeBody": "Il codice QR scansionato non è un account 2FA valido.",
+  "errorNoQRCode": "Nessun codice QR trovato",
+  "errorGenericTitle": "Si è verificato un errore",
+  "errorGenericBody": "Si è verificato un errore imprevisto durante l'importazione.",
+  "localBackupSettingsTitle": "Backup locale",
+  "localBackupSidebarTitle": "Backup locale"
 }
