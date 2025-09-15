@@ -89,9 +89,9 @@ export const TripMap: React.FC<TripMapProps> = ({
 
                     {/* Draw super-clusters (clickable for zoom and gallery) */}
                     {superClusters.map((superCluster, index) => {
-                        // Only show green for the current location (not all reached locations)
+                        // Show green for all covered locations (up to current position)
                         const currentLocationIndex = Math.round(scrollProgress * Math.max(0, photoClusters.length - 1));
-                        const isCurrent = superCluster.clustersInvolved.includes(currentLocationIndex);
+                        const isCovered = superCluster.clustersInvolved.some(clusterIndex => clusterIndex <= currentLocationIndex);
 
                         return (
                             <Marker
@@ -101,7 +101,7 @@ export const TripMap: React.FC<TripMapProps> = ({
                                     superCluster.image, // Use representative photo (first photo of first cluster)
                                     superCluster.clusterCount,
                                     55,
-                                    isCurrent,
+                                    isCovered,
                                 )}
                                 eventHandlers={{
                                     click: () => {
@@ -137,9 +137,9 @@ export const TripMap: React.FC<TripMapProps> = ({
                                 originalCluster.length === cluster.length &&
                                 originalCluster[0]?.image === cluster[0]?.image,
                         );
-                        // Only show green for the current location (not all reached locations)
+                        // Show green for all covered locations (up to current position)
                         const currentLocationIndex = Math.round(scrollProgress * Math.max(0, photoClusters.length - 1));
-                        const isCurrent = originalClusterIndex === currentLocationIndex;
+                        const isCovered = originalClusterIndex <= currentLocationIndex;
 
                         return (
                             <Marker
@@ -150,7 +150,7 @@ export const TripMap: React.FC<TripMapProps> = ({
                                     55,
                                     "#ffffff",
                                     cluster.length,
-                                    isCurrent,
+                                    isCovered,
                                 )}
                                 eventHandlers={{
                                     click: () => {
