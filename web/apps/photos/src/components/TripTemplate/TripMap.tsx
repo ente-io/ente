@@ -182,7 +182,9 @@ export const TripMap: React.FC<TripMapProps> = ({
 };
 
 // Styled components
-const MapContainerWrapper = styled(Box)<{ hasPhotoData: boolean }>(
+const MapContainerWrapper = styled(Box, {
+    shouldForwardProp: (prop) => prop !== 'hasPhotoData',
+})<{ hasPhotoData: boolean }>(
     ({ hasPhotoData }) => ({
         width: "100%",
         height: "100%",

@@ -154,7 +154,9 @@ const DotBackground = styled(Box)(({ theme }) => ({
     backgroundColor: theme.palette.background.paper,
 }));
 
-const TimelineDot = styled(Box)<{ isReached: boolean }>(
+const TimelineDot = styled(Box, {
+    shouldForwardProp: (prop) => prop !== 'isReached',
+})<{ isReached: boolean }>(
     ({ theme, isReached }) => ({
         position: "absolute",
         left: "50%",
