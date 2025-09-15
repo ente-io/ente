@@ -696,6 +696,6 @@
     "add_dns_entry": "Dodaj wpis DNS",
     "add_dns_entry_hint": "Na swoim dostawcy DNS, dodaj CNAME ze swojej domeny do <b>{{host}}</b>",
     "custom_domains_help": "Aby uzyskać więcej informacji, zobacz <a>pomoc</a>",
-    "num_1": "",
-    "num_2": ""
+    "num_1": "1",
+    "num_2": "2"
 }
