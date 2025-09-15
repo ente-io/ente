@@ -1,5 +1,6 @@
 import { Box, styled } from "@mui/material";
 import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
+import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import { useSaveGroups } from "ente-gallery/components/utils/save-groups";
 import { FileViewer } from "ente-gallery/components/viewer/FileViewer";
 import { downloadAndSaveCollectionFiles } from "ente-gallery/services/save";
@@ -9,12 +10,15 @@ import L from "leaflet";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 // Import extracted components
+import { MobileCover } from "./MobileCover";
+import { MobileNavBar } from "./MobileNavBar";
 import { TimelineBaseLine } from "./TimelineBaseLine";
 import { TimelineLocation } from "./TimelineLocation";
 import { TimelineProgressLine } from "./TimelineProgressLine";
 import { TopNavButtons } from "./TopNavButtons";
 import { TripCover } from "./TripCover";
 import { TripMap } from "./TripMap";
+import { TripStarted } from "./TripStarted";
 
 // Import hooks
 import { useDataProcessing } from "./hooks/useDataProcessing";
@@ -53,6 +57,9 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
     // Extract collection info if available
     const collectionTitle = collection?.name || albumTitle || "Trip";
 
+    // Check if mobile screen
+    const isMobile = useIsSmallWidth();
+
     // Save groups hook for download progress tracking
     const { saveGroups, onAddSaveGroup, onRemoveSaveGroup } = useSaveGroups();
 
@@ -88,11 +95,13 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
     const [targetZoom, setTargetZoom] = useState<number | null>(null);
     const [scrollProgress, setScrollProgress] = useState(0); // 0 to 1 representing scroll progress
     const [hasUserScrolled, setHasUserScrolled] = useState(false); // Track if user has actually scrolled
+    const [showMobileCover, setShowMobileCover] = useState(true); // Track mobile cover state
     const [locationPositions, setLocationPositions] = useState<PositionInfo[]>(
         [],
     );
     const timelineRef = useRef<HTMLDivElement>(null);
     const locationRefs = useRef<(HTMLDivElement | null)[]>([]);
+    const tripStartedRef = useRef<HTMLDivElement | null>(null);
     const isClusterClickScrollingRef = useRef(false); // Use ref for immediate updates
     const clusterClickTimeoutRef = useRef<NodeJS.Timeout | null>(null); // Timeout for cluster clicks
     const thumbnailsGeneratedRef = useRef(false); // Track if thumbnails have been generated
@@ -175,7 +184,23 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
         clusterClickTimeoutRef,
         previousActiveLocationRef,
         setLocationPositions,
-        setHasUserScrolled,
+        setHasUserScrolled: (scrolled: boolean) => {
+            setHasUserScrolled(scrolled);
+            if (isMobile && tripStartedRef.current && timelineRef.current) {
+                const timelineContainer = timelineRef.current;
+                const tripStartedElement = tripStartedRef.current;
+                const tripStartedRect = tripStartedElement.getBoundingClientRect();
+                const timelineRect = timelineContainer.getBoundingClientRect();
+
+                // Show/hide cover based on trip started position
+                const threshold = timelineRect.top + timelineRect.height * 0.3;
+                if (tripStartedRect.bottom < threshold) {
+                    setShowMobileCover(false);
+                } else {
+                    setShowMobileCover(true);
+                }
+            }
+        },
         setScrollProgress,
     });
 
@@ -191,14 +216,136 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
     return (
         <TripTemplateContainer>
             {!openFileViewer && (
-                <TopNavButtons
-                    onAddPhotos={onAddPhotos}
-                    downloadAllFiles={downloadAllFiles}
-                    enableDownload={enableDownload}
-                />
+                isMobile ? (
+                    <MobileNavBar
+                        onAddPhotos={onAddPhotos}
+                        downloadAllFiles={downloadAllFiles}
+                        enableDownload={enableDownload}
+                    />
+                ) : (
+                    <TopNavButtons
+                        onAddPhotos={onAddPhotos}
+                        downloadAllFiles={downloadAllFiles}
+                        enableDownload={enableDownload}
+                    />
+                )
             )}
-            {/* Left Sidebar - Floating Timeline */}
-            <TimelineSidebar ref={timelineRef}>
+            {/* Mobile Layout */}
+            {isMobile ? (
+                <MobileContainer>
+                    {/* Map takes 60% of height */}
+                    <MobileMapContainer>
+                        <TripMap
+                            journeyData={journeyData}
+                            photoClusters={photoClusters}
+                            hasPhotoData={hasPhotoData}
+                            optimalZoom={optimalZoom}
+                            currentZoom={currentZoom}
+                            targetZoom={targetZoom}
+                            mapRef={mapRef}
+                            scrollProgress={scrollProgress}
+                            setMapRef={setMapRef}
+                            setCurrentZoom={setCurrentZoom}
+                            setTargetZoom={setTargetZoom}
+                            onMarkerClick={markerClickHandler}
+                        />
+                        {/* Cover overlay */}
+                        {!isInitialLoad && journeyData.length > 0 && (
+                            <MobileCoverOverlay show={showMobileCover}>
+                                <MobileCover
+                                    journeyData={journeyData}
+                                    photoClusters={photoClusters}
+                                    albumTitle={collectionTitle}
+                                    coverImageUrl={coverImageUrl}
+                                />
+                            </MobileCoverOverlay>
+                        )}
+                    </MobileMapContainer>
+
+                    {/* Timeline takes 40% of height */}
+                    <MobileTimelineContainer ref={timelineRef}>
+                        <TimelineContent>
+                            {isInitialLoad ? (
+                                <LoadingCoverPlaceholder>
+                                    <LoadingCoverImage>
+                                        <CoverGradientOverlay />
+                                        <CoverPlaceholderContent>
+                                            <PlaceholderTextBox
+                                                sx={{
+                                                    height: "30px",
+                                                    width: "200px",
+                                                    mb: "2px",
+                                                }}
+                                            />
+                                            <PlaceholderTextBox
+                                                sx={{
+                                                    height: "16px",
+                                                    width: "120px",
+                                                    margin: 0,
+                                                }}
+                                            />
+                                        </CoverPlaceholderContent>
+                                    </LoadingCoverImage>
+                                    <LoadingSpinnerContainer>
+                                        <LoadingSpinner />
+                                    </LoadingSpinnerContainer>
+                                </LoadingCoverPlaceholder>
+                            ) : journeyData.length > 0 ? (
+                                <div>
+                                    {isLoadingLocations ? (
+                                        <LocationsLoadingContainer>
+                                            <LoadingSpinner />
+                                        </LocationsLoadingContainer>
+                                    ) : (
+                                        <>
+                                            <TripStarted
+                                                onRef={(el) => {
+                                                    tripStartedRef.current = el;
+                                                }}
+                                            />
+
+                                            <TimelineContainer id="timeline-container">
+                                                <TimelineBaseLine
+                                                    locationPositions={locationPositions}
+                                                />
+
+                                                <TimelineProgressLine
+                                                    locationPositions={locationPositions}
+                                                    scrollProgress={scrollProgress}
+                                                    hasUserScrolled={hasUserScrolled}
+                                                    photoClusters={photoClusters}
+                                                />
+
+                                                {photoClusters.map((cluster, index) => (
+                                                    <TimelineLocation
+                                                        key={index}
+                                                        cluster={cluster}
+                                                        index={index}
+                                                        photoClusters={photoClusters}
+                                                        scrollProgress={scrollProgress}
+                                                        journeyData={journeyData}
+                                                        onRef={(el) => {
+                                                            locationRefs.current[index] = el;
+                                                        }}
+                                                        onPhotoClick={handleOpenFileViewer}
+                                                    />
+                                                ))}
+                                            </TimelineContainer>
+                                        </>
+                                    )}
+                                </div>
+                            ) : (
+                                <NoPhotosContainer>
+                                    No photos found with location information.
+                                </NoPhotosContainer>
+                            )}
+                        </TimelineContent>
+                    </MobileTimelineContainer>
+                </MobileContainer>
+            ) : (
+                <>
+                    {/* Desktop Layout - Left Sidebar - Floating Timeline */}
+                    <TimelineSidebar ref={timelineRef}>
                 <TimelineContent>
                     {isInitialLoad ? (
                         <LoadingCoverPlaceholder>
@@ -283,24 +430,26 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
                             No photos found with location information.
                         </NoPhotosContainer>
                     )}
-                </TimelineContent>
-            </TimelineSidebar>
+                    </TimelineContent>
+                </TimelineSidebar>
 
-            {/* Map Container */}
-            <TripMap
-                journeyData={journeyData}
-                photoClusters={photoClusters}
-                hasPhotoData={hasPhotoData}
-                optimalZoom={optimalZoom}
-                currentZoom={currentZoom}
-                targetZoom={targetZoom}
-                mapRef={mapRef}
-                scrollProgress={scrollProgress}
-                setMapRef={setMapRef}
-                setCurrentZoom={setCurrentZoom}
-                setTargetZoom={setTargetZoom}
-                onMarkerClick={markerClickHandler}
-            />
+                {/* Desktop Map Container */}
+                <TripMap
+                    journeyData={journeyData}
+                    photoClusters={photoClusters}
+                    hasPhotoData={hasPhotoData}
+                    optimalZoom={optimalZoom}
+                    currentZoom={currentZoom}
+                    targetZoom={targetZoom}
+                    mapRef={mapRef}
+                    scrollProgress={scrollProgress}
+                    setMapRef={setMapRef}
+                    setCurrentZoom={setCurrentZoom}
+                    setTargetZoom={setTargetZoom}
+                    onMarkerClick={markerClickHandler}
+                />
+            </>
+        )}
 
             {/* FileViewer for photo gallery */}
             <FileViewer
@@ -447,4 +596,48 @@ const NoPhotosContainer = styled(Box)(({ theme }) => ({
     padding: "40px 20px",
     color: theme.palette.text.secondary,
     fontSize: "16px",
+}));
+
+// Mobile specific styled components
+const MobileContainer = styled(Box)({
+    display: "flex",
+    flexDirection: "column",
+    height: "100vh",
+    width: "100%",
+});
+
+const MobileMapContainer = styled(Box)({
+    height: "60%",
+    position: "relative",
+    overflow: "hidden",
+});
+
+const MobileTimelineContainer = styled(Box)(({ theme }) => ({
+    height: "40%",
+    overflow: "auto",
+    backgroundColor: theme.palette.background.paper,
+    boxShadow: `0 -4px 20px rgba(0, 0, 0, 0.1)`,
+    "&::-webkit-scrollbar": { width: "6px" },
+    "&::-webkit-scrollbar-track": {
+        background: "transparent",
+    },
+    "&::-webkit-scrollbar-thumb": {
+        background: theme.palette.divider,
+        borderRadius: "20px",
+        "&:hover": { background: theme.palette.text.disabled },
+    },
+    scrollbarWidth: "thin",
+    scrollbarColor: `${theme.palette.divider} transparent`,
+}));
+
+const MobileCoverOverlay = styled(Box)<{ show: boolean }>(({ show }) => ({
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 1000,
+    opacity: show ? 1 : 0,
+    transition: "opacity 0.5s ease-in-out",
+    pointerEvents: show ? "auto" : "none",
 }));

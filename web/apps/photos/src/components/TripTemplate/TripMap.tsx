@@ -1,4 +1,5 @@
 import { Box, styled } from "@mui/material";
+import { useIsSmallWidth } from "ente-base/components/utils/hooks";
 import L from "leaflet";
 import dynamic from "next/dynamic";
 import { MapEvents } from "./MapEvents";
@@ -57,6 +58,8 @@ export const TripMap: React.FC<TripMapProps> = ({
     setTargetZoom,
     onMarkerClick,
 }) => {
+    const isMobile = useIsSmallWidth();
+
     // Calculate super-clusters based on screen collisions
     const { superClusters, visibleClusters } = detectScreenCollisions(
         photoClusters,
@@ -71,9 +74,10 @@ export const TripMap: React.FC<TripMapProps> = ({
             {hasPhotoData ? (
                 <StyledMapContainer
                     center={getMapCenter(photoClusters, journeyData)}
-                    zoom={optimalZoom}
+                    zoom={isMobile ? Math.max(1, optimalZoom - 2) : optimalZoom}
                     scrollWheelZoom={true}
                     zoomControl={false}
+                    attributionControl={!isMobile}
                 >
                     <MapEvents
                         setMapRef={setMapRef}
@@ -82,7 +86,7 @@ export const TripMap: React.FC<TripMapProps> = ({
                     />
                     {/* Stadia Alidade Satellite - includes both imagery and labels */}
                     <TileLayer
-                        attribution='&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
+                        attribution={isMobile ? '' : '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'}
                         url="https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg"
                         maxZoom={20}
                     />
@@ -100,7 +104,7 @@ export const TripMap: React.FC<TripMapProps> = ({
                                 icon={createSuperClusterIcon(
                                     superCluster.image, // Use representative photo (first photo of first cluster)
                                     superCluster.clusterCount,
-                                    55,
+                                    isMobile ? 40 : 55,
                                     isCovered,
                                 )}
                                 eventHandlers={{
@@ -147,7 +151,7 @@ export const TripMap: React.FC<TripMapProps> = ({
                                 position={[avgLat, avgLng]}
                                 icon={createIcon(
                                     firstPhoto.image,
-                                    55,
+                                    isMobile ? 40 : 55,
                                     "#ffffff",
                                     cluster.length,
                                     isCovered,
