@@ -602,17 +602,21 @@ const MobileContainer = styled(Box)({
 });
 
 const MobileMapContainer = styled(Box)({
-    height: "60%",
+    height: "calc(60% + 12px)",
     position: "relative",
     overflow: "hidden",
 });
 
 const MobileTimelineContainer = styled(Box)(({ theme }) => ({
     height: "40%",
+    marginTop: "-12px",
     overflow: "auto",
     backgroundColor: theme.palette.background.paper,
     boxShadow: `0 -4px 20px rgba(0, 0, 0, 0.1)`,
     scrollSnapType: "y mandatory",
+    borderTopLeftRadius: "24px",
+    borderTopRightRadius: "24px",
+    zIndex: 1001,
     "&::-webkit-scrollbar": { width: "6px" },
     "&::-webkit-scrollbar-track": {
         background: "transparent",

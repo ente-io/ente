@@ -53,7 +53,6 @@ export const MobileCover = memo<MobileCoverProps>(
                     />
                 )}
 
-
                 <ContentContainer>
                     {coverImageUrl ? (
                         <>
@@ -102,7 +101,6 @@ const GradientOverlay = styled(Box)({
         "linear-gradient(to bottom, rgba(0,0,0,0.3), transparent 30%, transparent 60%, rgba(0,0,0,0.8))",
 });
 
-
 const ContentContainer = styled(Box)({
     position: "absolute",
     bottom: "20px",
@@ -114,12 +112,13 @@ const ContentContainer = styled(Box)({
 const TripTitle = styled(Typography)({
     fontSize: "28px",
     fontWeight: "bold",
-    marginBottom: "8px",
+    marginBottom: "12px",
     component: "h1",
 });
 
 const TripSubtitle = styled(Typography)({
-    color: "rgba(255, 255, 255, 0.9)",
+    color: "rgba(255, 255, 255, 0.8)",
     fontSize: "15px",
     fontWeight: "600",
+    paddingBottom: "16px",
 });

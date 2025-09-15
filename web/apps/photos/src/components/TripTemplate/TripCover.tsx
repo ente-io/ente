@@ -104,9 +104,7 @@ const CoverImageContainer = styled(Box)(({ theme }) => ({
     borderRadius: "24px",
     overflow: "hidden",
     backgroundColor: "#e0e0e0",
-    [theme.breakpoints.down(1440)]: {
-        aspectRatio: "16/6",
-    },
+    [theme.breakpoints.down(1440)]: { aspectRatio: "16/6" },
 }));
 
 const GradientOverlay = styled(Box)({

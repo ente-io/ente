@@ -61,7 +61,7 @@ const MobileTripStartedContent = styled(Box)({
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: "60px",
+    marginBottom: "20px",
 });
 
 const MobileTripStartedText = styled(Typography)(({ theme }) => ({
