@@ -73,13 +73,15 @@ export const MobileTimelineLocation = memo<MobileTimelineLocationProps>(
                                 DAY {dayNumber} •{" "}
                                 {new Date(firstPhoto.timestamp)
                                     .toLocaleDateString("en-US", {
-                                        month: "long",
+                                        month: "short",
                                         day: "numeric",
                                     })
                                     .toUpperCase()}
                             </DayBadge>
                             <LocationTitle>
-                                {firstPhoto.name}
+                                {firstPhoto.name && firstPhoto.name.length > 17
+                                    ? firstPhoto.name.substring(0, 14) + "..."
+                                    : firstPhoto.name}
                             </LocationTitle>
                             <LocationCountry>
                                 {firstPhoto.country}
@@ -119,9 +121,9 @@ const PhotoFanWrapper = styled(Box)({
 
 const PhotoOverlay = styled(Box)({
     position: "absolute",
-    bottom: "0",
-    left: "0",
-    right: "0",
+    bottom: "2px",
+    left: "2px",
+    right: "2px",
     zIndex: 30,
     pointerEvents: "none",
     background: "linear-gradient(to top, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.3), transparent)",
@@ -133,25 +135,24 @@ const PhotoOverlay = styled(Box)({
 const DayBadge = styled(Box)(({ theme }) => ({
     display: "inline-flex",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.95)",
-    border: `1px solid ${theme.palette.grey[300]}`,
-    borderRadius: "8px",
-    padding: "4px 12px",
-    marginBottom: "8px",
+    backgroundColor: "transparent",
+    border: "none",
+    borderRadius: "0",
+    padding: "0",
+    marginBottom: "4px",
     fontSize: "10px",
     fontWeight: "600",
-    color: theme.palette.text.secondary,
+    color: "white",
     textTransform: "uppercase",
     letterSpacing: "0.15em",
-    backdropFilter: "blur(10px)",
-    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+    textShadow: "0 2px 8px rgba(0, 0, 0, 0.8)",
 }));
 
 const LocationTitle = styled(Typography)(() => ({
     fontSize: "18px",
     fontWeight: "600",
     color: "white",
-    margin: "0 0 4px 0",
+    margin: "0 0 2px 0",
     lineHeight: "1.2",
     textShadow: "0 2px 8px rgba(0, 0, 0, 0.5)",
     component: "h3",
@@ -159,7 +160,7 @@ const LocationTitle = styled(Typography)(() => ({
 
 const LocationCountry = styled(Typography)(() => ({
     fontSize: "13px",
-    color: "rgba(255, 255, 255, 0.9)",
+    color: "rgba(200, 200, 200, 0.9)",
     margin: "0",
     textShadow: "0 1px 4px rgba(0, 0, 0, 0.5)",
     component: "p",
