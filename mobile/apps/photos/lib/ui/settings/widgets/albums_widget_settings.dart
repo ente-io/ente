@@ -159,8 +159,8 @@ class _AlbumsWidgetSettingsState extends State<AlbumsWidgetSettings> {
               )
             else
               FutureBuilder<List<Collection>>(
-                future:
-                    CollectionsService.instance.getCollectionForOnEnteSection(),
+                future: CollectionsService.instance
+                    .getCollectionForWidgetSelection(),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     final data = snapshot.data!;
