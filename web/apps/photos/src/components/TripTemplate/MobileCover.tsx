@@ -98,7 +98,7 @@ const GradientOverlay = styled(Box)({
     position: "absolute",
     inset: 0,
     background:
-        "linear-gradient(to bottom, rgba(0,0,0,0.3), transparent 30%, transparent 60%, rgba(0,0,0,0.8))",
+        "linear-gradient(to bottom, rgba(0,0,0,0.3), transparent 30%, transparent 70%, rgba(0,0,0,0.9))",
 });
 
 const ContentContainer = styled(Box)({
@@ -120,5 +120,5 @@ const TripSubtitle = styled(Typography)({
     color: "rgba(255, 255, 255, 0.8)",
     fontSize: "15px",
     fontWeight: "600",
-    paddingBottom: "16px",
+    paddingBottom: "20px",
 });

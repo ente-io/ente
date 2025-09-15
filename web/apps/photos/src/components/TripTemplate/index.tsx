@@ -190,7 +190,8 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
             if (isMobile && tripStartedRef.current && timelineRef.current) {
                 const timelineContainer = timelineRef.current;
                 const tripStartedElement = tripStartedRef.current;
-                const tripStartedRect = tripStartedElement.getBoundingClientRect();
+                const tripStartedRect =
+                    tripStartedElement.getBoundingClientRect();
                 const timelineRect = timelineContainer.getBoundingClientRect();
 
                 // Show/hide cover based on trip started position
@@ -216,8 +217,8 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
 
     return (
         <TripTemplateContainer>
-            {!openFileViewer && (
-                isMobile ? (
+            {!openFileViewer &&
+                (isMobile ? (
                     <MobileNavBar
                         onAddPhotos={onAddPhotos}
                         downloadAllFiles={downloadAllFiles}
@@ -229,8 +230,7 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
                         downloadAllFiles={downloadAllFiles}
                         enableDownload={enableDownload}
                     />
-                )
-            )}
+                ))}
             {/* Mobile Layout */}
             {isMobile ? (
                 <MobileContainer>
@@ -308,23 +308,37 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
 
                                             <TimelineContainer id="timeline-container">
                                                 <MobileTimelineBaseLine
-                                                    photoClusters={photoClusters}
+                                                    photoClusters={
+                                                        photoClusters
+                                                    }
                                                 />
 
-                                                {photoClusters.map((cluster, index) => (
-                                                    <MobileTimelineLocation
-                                                        key={index}
-                                                        cluster={cluster}
-                                                        index={index}
-                                                        photoClusters={photoClusters}
-                                                        scrollProgress={scrollProgress}
-                                                        journeyData={journeyData}
-                                                        onRef={(el) => {
-                                                            locationRefs.current[index] = el;
-                                                        }}
-                                                        onPhotoClick={handleOpenFileViewer}
-                                                    />
-                                                ))}
+                                                {photoClusters.map(
+                                                    (cluster, index) => (
+                                                        <MobileTimelineLocation
+                                                            key={index}
+                                                            cluster={cluster}
+                                                            index={index}
+                                                            photoClusters={
+                                                                photoClusters
+                                                            }
+                                                            scrollProgress={
+                                                                scrollProgress
+                                                            }
+                                                            journeyData={
+                                                                journeyData
+                                                            }
+                                                            onRef={(el) => {
+                                                                locationRefs.current[
+                                                                    index
+                                                                ] = el;
+                                                            }}
+                                                            onPhotoClick={
+                                                                handleOpenFileViewer
+                                                            }
+                                                        />
+                                                    ),
+                                                )}
                                             </TimelineContainer>
                                         </>
                                     )}
@@ -341,110 +355,124 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
                 <>
                     {/* Desktop Layout - Left Sidebar - Floating Timeline */}
                     <TimelineSidebar ref={timelineRef}>
-                <TimelineContent>
-                    {isInitialLoad ? (
-                        <LoadingCoverPlaceholder>
-                            <LoadingCoverImage>
-                                <CoverGradientOverlay />
-                                <CoverPlaceholderContent>
-                                    <PlaceholderTextBox
-                                        sx={{
-                                            height: "30px",
-                                            width: "200px",
-                                            mb: "2px",
-                                        }}
-                                    />
-                                    <PlaceholderTextBox
-                                        sx={{
-                                            height: "16px",
-                                            width: "120px",
-                                            margin: 0,
-                                        }}
-                                    />
-                                </CoverPlaceholderContent>
-                            </LoadingCoverImage>
-                            <LoadingSpinnerContainer>
-                                <LoadingSpinner />
-                            </LoadingSpinnerContainer>
-                        </LoadingCoverPlaceholder>
-                    ) : journeyData.length > 0 ? (
-                        <div>
-                            <TripCover
-                                journeyData={journeyData}
-                                photoClusters={photoClusters}
-                                albumTitle={collectionTitle}
-                                coverImageUrl={coverImageUrl}
-                            />
-
-                            {isLoadingLocations ? (
-                                <LocationsLoadingContainer>
-                                    <LoadingSpinner />
-                                </LocationsLoadingContainer>
-                            ) : (
-                                <>
-                                    <TimelineContainer id="timeline-container">
-                                        <TimelineBaseLine
-                                            locationPositions={
-                                                locationPositions
-                                            }
-                                        />
-
-                                        <TimelineProgressLine
-                                            locationPositions={
-                                                locationPositions
-                                            }
-                                            scrollProgress={scrollProgress}
-                                            hasUserScrolled={hasUserScrolled}
-                                            photoClusters={photoClusters}
-                                        />
-
-                                        {photoClusters.map((cluster, index) => (
-                                            <TimelineLocation
-                                                key={index}
-                                                cluster={cluster}
-                                                index={index}
-                                                photoClusters={photoClusters}
-                                                scrollProgress={scrollProgress}
-                                                journeyData={journeyData}
-                                                onRef={(el) => {
-                                                    locationRefs.current[
-                                                        index
-                                                    ] = el;
+                        <TimelineContent>
+                            {isInitialLoad ? (
+                                <LoadingCoverPlaceholder>
+                                    <LoadingCoverImage>
+                                        <CoverGradientOverlay />
+                                        <CoverPlaceholderContent>
+                                            <PlaceholderTextBox
+                                                sx={{
+                                                    height: "30px",
+                                                    width: "200px",
+                                                    mb: "2px",
                                                 }}
-                                                onPhotoClick={
-                                                    handleOpenFileViewer
-                                                }
                                             />
-                                        ))}
-                                    </TimelineContainer>
-                                </>
-                            )}
-                        </div>
-                    ) : (
-                        <NoPhotosContainer>
-                            No photos found with location information.
-                        </NoPhotosContainer>
-                    )}
-                    </TimelineContent>
-                </TimelineSidebar>
+                                            <PlaceholderTextBox
+                                                sx={{
+                                                    height: "16px",
+                                                    width: "120px",
+                                                    margin: 0,
+                                                }}
+                                            />
+                                        </CoverPlaceholderContent>
+                                    </LoadingCoverImage>
+                                    <LoadingSpinnerContainer>
+                                        <LoadingSpinner />
+                                    </LoadingSpinnerContainer>
+                                </LoadingCoverPlaceholder>
+                            ) : journeyData.length > 0 ? (
+                                <div>
+                                    <TripCover
+                                        journeyData={journeyData}
+                                        photoClusters={photoClusters}
+                                        albumTitle={collectionTitle}
+                                        coverImageUrl={coverImageUrl}
+                                    />
 
-                {/* Desktop Map Container */}
-                <TripMap
-                    journeyData={journeyData}
-                    photoClusters={photoClusters}
-                    hasPhotoData={hasPhotoData}
-                    optimalZoom={optimalZoom}
-                    currentZoom={currentZoom}
-                    targetZoom={targetZoom}
-                    mapRef={mapRef}
-                    scrollProgress={scrollProgress}
-                    setMapRef={setMapRef}
-                    setCurrentZoom={setCurrentZoom}
-                    setTargetZoom={setTargetZoom}
-                    onMarkerClick={markerClickHandler}
-                />
-            </>
-        )}
+                                    {isLoadingLocations ? (
+                                        <LocationsLoadingContainer>
+                                            <LoadingSpinner />
+                                        </LocationsLoadingContainer>
+                                    ) : (
+                                        <>
+                                            <TimelineContainer id="timeline-container">
+                                                <TimelineBaseLine
+                                                    locationPositions={
+                                                        locationPositions
+                                                    }
+                                                />
+
+                                                <TimelineProgressLine
+                                                    locationPositions={
+                                                        locationPositions
+                                                    }
+                                                    scrollProgress={
+                                                        scrollProgress
+                                                    }
+                                                    hasUserScrolled={
+                                                        hasUserScrolled
+                                                    }
+                                                    photoClusters={
+                                                        photoClusters
+                                                    }
+                                                />
+
+                                                {photoClusters.map(
+                                                    (cluster, index) => (
+                                                        <TimelineLocation
+                                                            key={index}
+                                                            cluster={cluster}
+                                                            index={index}
+                                                            photoClusters={
+                                                                photoClusters
+                                                            }
+                                                            scrollProgress={
+                                                                scrollProgress
+                                                            }
+                                                            journeyData={
+                                                                journeyData
+                                                            }
+                                                            onRef={(el) => {
+                                                                locationRefs.current[
+                                                                    index
+                                                                ] = el;
+                                                            }}
+                                                            onPhotoClick={
+                                                                handleOpenFileViewer
+                                                            }
+                                                        />
+                                                    ),
+                                                )}
+                                            </TimelineContainer>
+                                        </>
+                                    )}
+                                </div>
+                            ) : (
+                                <NoPhotosContainer>
+                                    No photos found with location information.
+                                </NoPhotosContainer>
+                            )}
+                        </TimelineContent>
+                    </TimelineSidebar>
+
+                    {/* Desktop Map Container */}
+                    <TripMap
+                        journeyData={journeyData}
+                        photoClusters={photoClusters}
+                        hasPhotoData={hasPhotoData}
+                        optimalZoom={optimalZoom}
+                        currentZoom={currentZoom}
+                        targetZoom={targetZoom}
+                        mapRef={mapRef}
+                        scrollProgress={scrollProgress}
+                        setMapRef={setMapRef}
+                        setCurrentZoom={setCurrentZoom}
+                        setTargetZoom={setTargetZoom}
+                        onMarkerClick={markerClickHandler}
+                    />
+                </>
+            )}
 
             {/* FileViewer for photo gallery */}
             <FileViewer
@@ -602,14 +630,14 @@ const MobileContainer = styled(Box)({
 });
 
 const MobileMapContainer = styled(Box)({
-    height: "calc(60% + 12px)",
+    height: "calc(60% + 20px)",
     position: "relative",
     overflow: "hidden",
 });
 
 const MobileTimelineContainer = styled(Box)(({ theme }) => ({
     height: "40%",
-    marginTop: "-12px",
+    marginTop: "-20px",
     overflow: "auto",
     backgroundColor: theme.palette.background.paper,
     boxShadow: `0 -4px 20px rgba(0, 0, 0, 0.1)`,
@@ -618,9 +646,7 @@ const MobileTimelineContainer = styled(Box)(({ theme }) => ({
     borderTopRightRadius: "24px",
     zIndex: 1001,
     "&::-webkit-scrollbar": { width: "6px" },
-    "&::-webkit-scrollbar-track": {
-        background: "transparent",
-    },
+    "&::-webkit-scrollbar-track": { background: "transparent" },
     "&::-webkit-scrollbar-thumb": {
         background: theme.palette.divider,
         borderRadius: "20px",
@@ -631,7 +657,7 @@ const MobileTimelineContainer = styled(Box)(({ theme }) => ({
 }));
 
 const MobileCoverOverlay = styled(Box, {
-    shouldForwardProp: (prop) => prop !== 'show',
+    shouldForwardProp: (prop) => prop !== "show",
 })<{ show: boolean }>(({ show }) => ({
     position: "absolute",
     top: 0,
@@ -652,7 +678,7 @@ const MobileTimelineContent = styled(Box)({
 });
 
 const MobileTimelineBaseLine = styled(Box, {
-    shouldForwardProp: (prop) => prop !== 'photoClusters',
+    shouldForwardProp: (prop) => prop !== "photoClusters",
 })<{ photoClusters: JourneyPoint[][] }>(({ theme, photoClusters }) => ({
     position: "absolute",
     left: "50%",
