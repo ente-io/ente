@@ -87,12 +87,6 @@ export const MobileTimelineLocation = memo<MobileTimelineLocationProps>(
                         </PhotoOverlay>
                     </PhotoFanWrapper>
                 </CenteredPhotoContainer>
-
-                {/* Dots positioned after the photo fan */}
-                <DotsContainer>
-                    <DotBackground />
-                    <TimelineDot isReached={isCovered} />
-                </DotsContainer>
             </MobileLocationContainer>
         );
     },
@@ -106,16 +100,15 @@ const MobileLocationContainer = styled(Box)({
     alignItems: "center",
     justifyContent: "center",
     width: "100%",
-    minHeight: "100vh",
+    height: "40vh",
     scrollSnapAlign: "start",
-    padding: "40px 20px",
+    padding: "20px",
 });
 
 const CenteredPhotoContainer = styled(Box)({
     position: "relative",
     display: "flex",
     justifyContent: "center",
-    marginBottom: "16px",
 });
 
 const PhotoFanWrapper = styled(Box)({
@@ -136,45 +129,6 @@ const PhotoOverlay = styled(Box)({
     padding: "24px 16px 16px 16px",
 });
 
-const DotsContainer = styled(Box)({
-    position: "relative",
-    width: "32px",
-    height: "32px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: "32px",
-});
-
-const DotBackground = styled(Box)(({ theme }) => ({
-    position: "absolute",
-    width: "32px",
-    height: "32px",
-    borderRadius: "50%",
-    zIndex: 10,
-    backgroundColor: theme.palette.background.paper,
-    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-}));
-
-const TimelineDot = styled(Box, {
-    shouldForwardProp: (prop) => prop !== 'isReached',
-})<{ isReached: boolean }>(
-    ({ theme, isReached }) => ({
-        position: "absolute",
-        borderRadius: "50%",
-        border: `3px solid ${theme.palette.background.paper}`,
-        zIndex: 20,
-        width: "16px",
-        height: "16px",
-        transition: "all 0.3s",
-        backgroundColor: isReached
-            ? theme.palette.success.main
-            : theme.palette.text.primary,
-        boxShadow: isReached
-            ? `0 0 0 4px ${theme.palette.success.main}30, 0 0 0 8px ${theme.palette.success.main}15`
-            : "0 2px 8px rgba(0, 0, 0, 0.2)",
-    }),
-);
 
 const DayBadge = styled(Box)(({ theme }) => ({
     display: "inline-flex",

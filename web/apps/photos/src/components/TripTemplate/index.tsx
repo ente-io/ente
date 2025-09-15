@@ -265,7 +265,7 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
 
                     {/* Timeline takes 40% of height */}
                     <MobileTimelineContainer ref={timelineRef}>
-                        <TimelineContent>
+                        <MobileTimelineContent>
                             {isInitialLoad ? (
                                 <LoadingCoverPlaceholder>
                                     <LoadingCoverImage>
@@ -303,9 +303,14 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
                                                 onRef={(el) => {
                                                     tripStartedRef.current = el;
                                                 }}
+                                                journeyData={journeyData}
                                             />
 
                                             <TimelineContainer id="timeline-container">
+                                                <MobileTimelineBaseLine
+                                                    photoClusters={photoClusters}
+                                                />
+
                                                 {photoClusters.map((cluster, index) => (
                                                     <MobileTimelineLocation
                                                         key={index}
@@ -329,7 +334,7 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
                                     No photos found with location information.
                                 </NoPhotosContainer>
                             )}
-                        </TimelineContent>
+                        </MobileTimelineContent>
                     </MobileTimelineContainer>
                 </MobileContainer>
             ) : (
@@ -631,4 +636,22 @@ const MobileCoverOverlay = styled(Box)<{ show: boolean }>(({ show }) => ({
     opacity: show ? 1 : 0,
     transition: "opacity 0.5s ease-in-out",
     pointerEvents: show ? "auto" : "none",
+}));
+
+const MobileTimelineContent = styled(Box)({
+    padding: "16px 20px",
+    height: "100%",
+    display: "flex",
+    flexDirection: "column",
+});
+
+const MobileTimelineBaseLine = styled(Box)<{ photoClusters: JourneyPoint[][] }>(({ theme, photoClusters }) => ({
+    position: "absolute",
+    left: "50%",
+    top: "-15vh",
+    height: `${(photoClusters.length - 1) * 40 + 35}vh`,
+    width: "3px",
+    backgroundColor: theme.palette.grey[300],
+    transform: "translateX(-1.5px)",
+    zIndex: 0,
 }));

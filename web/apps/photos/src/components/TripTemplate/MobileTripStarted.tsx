@@ -1,30 +1,60 @@
 import { Box, styled, Typography } from "@mui/material";
 import { memo } from "react";
+import type { JourneyPoint } from "./types";
 
 interface MobileTripStartedProps {
     onRef: (el: HTMLDivElement | null) => void;
+    journeyData: JourneyPoint[];
 }
 
-export const MobileTripStarted = memo<MobileTripStartedProps>(({ onRef }) => {
-    return (
-        <MobileTripStartedContainer ref={onRef}>
-            <MobileTripStartedContent>
-                <MobileTripStartedText>Trip Started</MobileTripStartedText>
-            </MobileTripStartedContent>
-            <MobileTripStartedLine />
-        </MobileTripStartedContainer>
-    );
-});
+export const MobileTripStarted = memo<MobileTripStartedProps>(
+    ({ onRef, journeyData }) => {
+        // Get the first photo's date
+        const sortedData = [...journeyData].sort(
+            (a, b) =>
+                new Date(a.timestamp).getTime() -
+                new Date(b.timestamp).getTime(),
+        );
+        const firstPhoto = sortedData[0];
+        const firstPhotoDate = firstPhoto
+            ? new Date(firstPhoto.timestamp).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+              })
+            : "";
+
+        return (
+            <MobileTripStartedContainer ref={onRef}>
+                <MobileTripStartedContent>
+                    <MobileTripStartedText>
+                        <TripStartedTitle>Trip started</TripStartedTitle>
+                        {firstPhotoDate && (
+                            <>
+                                <br />
+                                <TripStartedDate>
+                                    {firstPhotoDate}
+                                </TripStartedDate>
+                            </>
+                        )}
+                    </MobileTripStartedText>
+                </MobileTripStartedContent>
+                <MobileTripStartedLine />
+            </MobileTripStartedContainer>
+        );
+    },
+);
 
 const MobileTripStartedContainer = styled(Box)({
     position: "relative",
-    minHeight: "100vh",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
+    height: "40vh",
     scrollSnapAlign: "start",
-    padding: "40px 20px",
+    padding: "60px 20px 40px 20px",
+    overflow: "visible",
 });
 
 const MobileTripStartedContent = styled(Box)({
@@ -35,24 +65,31 @@ const MobileTripStartedContent = styled(Box)({
 });
 
 const MobileTripStartedText = styled(Typography)(({ theme }) => ({
-    fontSize: "24px",
-    fontWeight: "600",
-    color: theme.palette.success.main,
-    backgroundColor: theme.palette.background.paper,
-    padding: "16px 32px",
-    borderRadius: "30px",
-    border: `3px solid ${theme.palette.success.main}`,
-    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
+    fontSize: "16px",
+    fontWeight: "500",
+    color: theme.palette.text.secondary,
     textAlign: "center",
 }));
 
 const MobileTripStartedLine = styled(Box)(({ theme }) => ({
     position: "absolute",
     left: "50%",
-    top: "70%",
-    bottom: "0",
-    width: "4px",
-    backgroundColor: theme.palette.success.main,
-    transform: "translateX(-50%)",
-    borderRadius: "2px",
+    bottom: "-100px",
+    height: "200px",
+    width: "3px",
+    backgroundColor: theme.palette.grey[300],
+    transform: "translateX(-1.5px)",
+    zIndex: 1,
+}));
+
+const TripStartedTitle = styled("span")(({ theme }) => ({
+    fontSize: "14px",
+    fontWeight: 500,
+    color: theme.palette.text.primary,
+}));
+
+const TripStartedDate = styled("span")(({ theme }) => ({
+    fontSize: "12px",
+    fontWeight: "normal",
+    color: theme.palette.text.secondary,
 }));
