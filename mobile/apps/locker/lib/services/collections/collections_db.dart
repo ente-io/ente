@@ -90,7 +90,7 @@ class CollectionDB extends EnteBaseDatabase {
 
     await db.execute('''
       CREATE TABLE $_filesTable (
-        uploaded_file_id INTEGER,
+        uploaded_file_id INTEGER PRIMARY KEY,
         local_path TEXT,
         owner_id INTEGER,
         collection_id INTEGER,

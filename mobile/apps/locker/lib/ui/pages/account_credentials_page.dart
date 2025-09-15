@@ -7,8 +7,8 @@ import 'package:locker/ui/pages/base_info_page.dart';
 class AccountCredentialsPage extends BaseInfoPage<AccountCredentialData> {
   const AccountCredentialsPage({
     super.key,
-    super.existingData,
     super.mode = InfoPageMode.edit,
+    super.existingFile,
   });
 
   @override
@@ -36,12 +36,19 @@ class _AccountCredentialsPageState
   }
 
   void _loadExistingData() {
-    if (widget.existingData != null) {
-      _nameController.text = widget.existingData!.name;
-      _usernameController.text = widget.existingData!.username;
-      _passwordController.text = widget.existingData!.password;
-      _notesController.text = widget.existingData!.notes ?? '';
+    final data = currentData;
+    if (data != null) {
+      _nameController.text = data.name;
+      _usernameController.text = data.username;
+      _passwordController.text = data.password;
+      _notesController.text = data.notes ?? '';
     }
+  }
+
+  @override
+  void refreshUIWithCurrentData() {
+    super.refreshUIWithCurrentData();
+    _loadExistingData();
   }
 
   @override

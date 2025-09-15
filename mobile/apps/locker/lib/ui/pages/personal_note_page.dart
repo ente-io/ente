@@ -7,8 +7,8 @@ import 'package:locker/ui/pages/base_info_page.dart';
 class PersonalNotePage extends BaseInfoPage<PersonalNoteData> {
   const PersonalNotePage({
     super.key,
-    super.existingData,
     super.mode = InfoPageMode.edit,
+    super.existingFile,
   });
 
   @override
@@ -27,10 +27,17 @@ class _PersonalNotePageState
   }
 
   void _loadExistingData() {
-    if (widget.existingData != null) {
-      _nameController.text = widget.existingData!.title;
-      _contentController.text = widget.existingData!.content;
+    final data = currentData;
+    if (data != null) {
+      _nameController.text = data.title;
+      _contentController.text = data.content;
     }
+  }
+
+  @override
+  void refreshUIWithCurrentData() {
+    super.refreshUIWithCurrentData();
+    _loadExistingData();
   }
 
   @override

@@ -7,8 +7,8 @@ import 'package:locker/ui/pages/base_info_page.dart';
 class PhysicalRecordsPage extends BaseInfoPage<PhysicalRecordData> {
   const PhysicalRecordsPage({
     super.key,
-    super.existingData,
     super.mode = InfoPageMode.edit,
+    super.existingFile,
   });
 
   @override
@@ -28,11 +28,18 @@ class _PhysicalRecordsPageState
   }
 
   void _loadExistingData() {
-    if (widget.existingData != null) {
-      _nameController.text = widget.existingData!.name;
-      _locationController.text = widget.existingData!.location;
-      _notesController.text = widget.existingData!.notes ?? '';
+    final data = currentData;
+    if (data != null) {
+      _nameController.text = data.name;
+      _locationController.text = data.location;
+      _notesController.text = data.notes ?? '';
     }
+  }
+
+  @override
+  void refreshUIWithCurrentData() {
+    super.refreshUIWithCurrentData();
+    _loadExistingData();
   }
 
   @override

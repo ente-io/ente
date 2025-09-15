@@ -1,6 +1,7 @@
 import 'package:locker/models/file_type.dart';
 import 'package:locker/models/info/info_item.dart';
 import 'package:locker/services/collections/models/collection.dart';
+import 'package:locker/services/files/sync/metadata_updater_service.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/services/files/sync/models/file_magic.dart';
 import 'package:locker/services/files/upload/file_upload_service.dart';
@@ -24,7 +25,7 @@ class InfoFileService {
       enteFile.collectionID = collection.id;
 
       // Set the title based on info type and data
-      enteFile.title = _getInfoFileTitle(infoItem);
+      enteFile.title = getInfoFileTitle(infoItem);
 
       // Set creation and modification times
       final now = DateTime.now().millisecondsSinceEpoch;
@@ -53,35 +54,44 @@ class InfoFileService {
   }
 
   /// Updates an existing info file with new data
-  Future<EnteFile> updateInfoFile({
+  Future<bool> updateInfoFile({
     required EnteFile existingFile,
     required InfoItem updatedInfoItem,
   }) async {
     try {
-      // Update the public magic metadata
-      final updatedPubMagicMetadata = existingFile.pubMagicMetadata;
-      updatedPubMagicMetadata.info = {
+      // Prepare the info data structure
+      final infoData = {
         'type': updatedInfoItem.type.name,
         'data': updatedInfoItem.data.toJson(),
       };
 
-      // Update the title
-      final updatedTitle = _getInfoFileTitle(updatedInfoItem);
-      updatedPubMagicMetadata.editedName = updatedTitle;
-      updatedPubMagicMetadata.editedTime =
-          DateTime.now().millisecondsSinceEpoch;
+      // Prepare metadata updates - only update info and name/time if needed
+      final Map<String, dynamic> metadataUpdates = {
+        infoKey: infoData,
+      };
 
-      existingFile.pubMagicMetadata = updatedPubMagicMetadata;
+      // Update title if it's different
+      final updatedTitle = getInfoFileTitle(updatedInfoItem);
+      if (existingFile.title != updatedTitle) {
+        metadataUpdates[editNameKey] = updatedTitle;
+        metadataUpdates[editTimeKey] = DateTime.now().millisecondsSinceEpoch;
+      }
 
-      // Update metadata on server
-      // This would call the metadata update service
-      // TODO: Implement metadata update and sync
+      // Update metadata using the simple metadata updater service
+      final success = await MetadataUpdaterService.instance.updateFileMetadata(
+        existingFile,
+        metadataUpdates,
+      );
 
-      _logger.info('Successfully updated info file: $updatedTitle');
-      return existingFile;
+      if (success) {
+        _logger.info('Successfully updated info file: $updatedTitle');
+        return true;
+      } else {
+        throw Exception('Failed to update file metadata on server');
+      }
     } catch (e, s) {
       _logger.severe('Failed to update info file', e, s);
-      rethrow;
+      return false;
     }
   }
 
@@ -138,7 +148,8 @@ class InfoFileService {
     return file.fileType == FileType.info && file.pubMagicMetadata.info != null;
   }
 
-  String _getInfoFileTitle(InfoItem infoItem) {
+  /// Gets the display title for an info file based on its content
+  String getInfoFileTitle(InfoItem infoItem) {
     switch (infoItem.type) {
       case InfoType.note:
         final noteData = infoItem.data as PersonalNoteData;
@@ -148,15 +159,19 @@ class InfoFileService {
         return recordData.name.isNotEmpty ? recordData.name : 'Physical Record';
       case InfoType.accountCredential:
         final credData = infoItem.data as AccountCredentialData;
-        return credData.name.isNotEmpty
-            ? '${credData.name} Account'
-            : 'Account Credential';
+        return credData.name.isNotEmpty ? credData.name : 'Account Credential';
       case InfoType.emergencyContact:
         final contactData = infoItem.data as EmergencyContactData;
         return contactData.name.isNotEmpty
-            ? '${contactData.name} (Emergency Contact)'
+            ? contactData.name
             : 'Emergency Contact';
     }
+  }
+
+  /// Gets the display title directly from an EnteFile (convenience method)
+  String? getFileTitleFromFile(EnteFile file) {
+    final infoItem = extractInfoFromFile(file);
+    return infoItem != null ? getInfoFileTitle(infoItem) : null;
   }
 
   /// Special upload method for info files that don't require physical file content

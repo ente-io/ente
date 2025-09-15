@@ -8,6 +8,7 @@ import 'package:locker/l10n/l10n.dart';
 import 'package:locker/models/info/info_item.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
+import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/services/info_file_service.dart';
 import 'package:locker/ui/components/collection_selection_widget.dart';
 import 'package:locker/ui/pages/home_page.dart';
@@ -15,13 +16,13 @@ import 'package:locker/ui/pages/home_page.dart';
 enum InfoPageMode { view, edit }
 
 abstract class BaseInfoPage<T extends InfoData> extends StatefulWidget {
-  final T? existingData;
   final InfoPageMode mode;
+  final EnteFile? existingFile; // The file to edit, or null for new files
 
   const BaseInfoPage({
     super.key,
-    this.existingData,
     this.mode = InfoPageMode.edit,
+    this.existingFile,
   });
 }
 
@@ -31,9 +32,34 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   bool _isLoading = false;
   late InfoPageMode _currentMode;
 
+  // Current data state (can be updated after saving)
+  T? _currentData;
+
   // Collection selection state
   List<Collection> _availableCollections = [];
   Set<int> _selectedCollectionIds = {};
+
+  // Getter for current data - prioritizes updated data over existing file data
+  T? get currentData {
+    if (_currentData != null) {
+      return _currentData;
+    }
+
+    // Extract data from existing file if available
+    if (widget.existingFile != null) {
+      final infoItem =
+          InfoFileService.instance.extractInfoFromFile(widget.existingFile!);
+      return infoItem?.data as T?;
+    }
+
+    return null;
+  }
+
+  // Override this method in subclasses to refresh UI when data changes
+  void refreshUIWithCurrentData() {
+    // Default implementation does nothing
+    // Subclasses should override this to update their controllers/state
+  }
 
   // Abstract methods that subclasses must implement
   String get pageTitle;
@@ -97,16 +123,6 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
       return;
     }
 
-    if (_selectedCollectionIds.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select at least one collection'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
     setState(() {
       _isLoading = true;
     });
@@ -120,46 +136,32 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
         createdAt: DateTime.now(),
       );
 
-      // Upload to all selected collections
-      final selectedCollections = _availableCollections
-          .where((c) => _selectedCollectionIds.contains(c.id))
-          .toList();
-
-      // Create and upload the info file to each selected collection
-      for (final collection in selectedCollections) {
-        await InfoFileService.instance.createAndUploadInfoFile(
-          infoItem: infoItem,
-          collection: collection,
-        );
+      if (widget.existingFile != null) {
+        // Update existing file
+        await _updateExistingFile(infoItem);
+      } else {
+        // Create new file
+        await _createNewFile(infoItem);
       }
 
-      // Trigger sync after successful save
-      await CollectionService.instance.sync();
-
       if (mounted) {
-        // Show success message
-        final collectionCount = selectedCollections.length;
-        final message = collectionCount == 1
-            ? context.l10n.recordSavedSuccessfully
-            : 'Record saved to $collectionCount collections successfully';
-
-        // Navigate to home page and clear all previous routes
-        await Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const HomePage()),
-          (route) => false,
-        );
-
-        // Show success message after navigation
-        Future.delayed(const Duration(milliseconds: 100), () {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(message),
-                backgroundColor: Colors.green,
-              ),
-            );
-          }
+        setState(() {
+          _isLoading = false;
         });
+
+        if (widget.existingFile != null) {
+          // Switch to view mode with updated data
+          setState(() {
+            _currentMode = InfoPageMode.view;
+          });
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(context.l10n.recordSavedSuccessfully),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -177,6 +179,89 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
         });
       }
     }
+  }
+
+  Future<void> _updateExistingFile(InfoItem infoItem) async {
+    if (widget.existingFile == null) return;
+
+    // Use InfoFileService to handle the update logic
+    final success = await InfoFileService.instance.updateInfoFile(
+      existingFile: widget.existingFile!,
+      updatedInfoItem: infoItem,
+    );
+
+    if (!success) {
+      throw Exception('Failed to update file metadata');
+    }
+
+    // Update the local data to reflect the changes in the UI
+    // The metadata updater service already updated the file object locally
+    // Now extract the updated info data and refresh the UI
+    final updatedInfo =
+        InfoFileService.instance.extractInfoFromFile(widget.existingFile!);
+    if (updatedInfo != null) {
+      // Update the current data state to show the new values in view mode
+      setState(() {
+        _currentData = updatedInfo.data as T?;
+      });
+
+      // Refresh UI with updated data
+      refreshUIWithCurrentData();
+    }
+
+    // The info file service already performs a sync, so we don't need to sync again
+  }
+
+  Future<void> _createNewFile(InfoItem infoItem) async {
+    if (_selectedCollectionIds.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select at least one collection'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Upload to all selected collections
+    final selectedCollections = _availableCollections
+        .where((c) => _selectedCollectionIds.contains(c.id))
+        .toList();
+
+    // Create and upload the info file to each selected collection
+    for (final collection in selectedCollections) {
+      await InfoFileService.instance.createAndUploadInfoFile(
+        infoItem: infoItem,
+        collection: collection,
+      );
+    }
+
+    // Trigger sync after successful save
+    await CollectionService.instance.sync();
+
+    // Show success message
+    final collectionCount = selectedCollections.length;
+    final message = collectionCount == 1
+        ? context.l10n.recordSavedSuccessfully
+        : 'Record saved to $collectionCount collections successfully';
+
+    // Navigate to home page and clear all previous routes
+    await Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => const HomePage()),
+      (route) => false,
+    );
+
+    // Show success message after navigation
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    });
   }
 
   void _toggleMode() {
@@ -274,7 +359,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
       child: Scaffold(
         appBar: AppBar(
           title: Text(pageTitle),
-          leading: isEditMode && widget.existingData != null
+          leading: isEditMode && currentData != null
               ? IconButton(
                   icon: Icon(
                     Platform.isIOS ? Icons.arrow_back_ios : Icons.arrow_back,
@@ -291,7 +376,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
                 ),
           automaticallyImplyLeading: false,
           actions: [
-            if (isViewMode && widget.existingData != null)
+            if (isViewMode && currentData != null)
               IconButton(
                 icon: const Icon(Icons.edit),
                 onPressed: _toggleMode,

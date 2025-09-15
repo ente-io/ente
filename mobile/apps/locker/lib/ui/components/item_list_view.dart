@@ -8,6 +8,7 @@ import 'package:ente_utils/share_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:locker/l10n/l10n.dart';
+import 'package:locker/models/file_type.dart';
 import 'package:locker/models/info/info_item.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
@@ -341,6 +342,11 @@ class _FileListItem extends _ListItem {
 
   @override
   String get name {
+    // For info files, try to extract the title from the info data
+    if (_file.fileType == FileType.info) {
+      return InfoFileService.instance.getFileTitleFromFile(_file) ??
+          _file.displayName;
+    }
     return _file.displayName;
   }
 
@@ -1172,26 +1178,26 @@ class FileRowWidget extends StatelessWidget {
       switch (infoItem.type) {
         case InfoType.note:
           page = PersonalNotePage(
-            existingData: infoItem.data as PersonalNoteData,
             mode: InfoPageMode.view,
+            existingFile: file,
           );
           break;
         case InfoType.accountCredential:
           page = AccountCredentialsPage(
-            existingData: infoItem.data as AccountCredentialData,
             mode: InfoPageMode.view,
+            existingFile: file,
           );
           break;
         case InfoType.physicalRecord:
           page = PhysicalRecordsPage(
-            existingData: infoItem.data as PhysicalRecordData,
             mode: InfoPageMode.view,
+            existingFile: file,
           );
           break;
         case InfoType.emergencyContact:
           page = EmergencyContactPage(
-            existingData: infoItem.data as EmergencyContactData,
             mode: InfoPageMode.view,
+            existingFile: file,
           );
           break;
       }

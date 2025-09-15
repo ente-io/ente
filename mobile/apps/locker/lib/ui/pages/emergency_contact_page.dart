@@ -7,8 +7,8 @@ import 'package:locker/ui/pages/base_info_page.dart';
 class EmergencyContactPage extends BaseInfoPage<EmergencyContactData> {
   const EmergencyContactPage({
     super.key,
-    super.existingData,
     super.mode = InfoPageMode.edit,
+    super.existingFile,
   });
 
   @override
@@ -29,11 +29,18 @@ class _EmergencyContactPageState
   }
 
   void _loadExistingData() {
-    if (widget.existingData != null) {
-      _nameController.text = widget.existingData!.name;
-      _contactDetailsController.text = widget.existingData!.contactDetails;
-      _notesController.text = widget.existingData!.notes ?? '';
+    final data = currentData;
+    if (data != null) {
+      _nameController.text = data.name;
+      _contactDetailsController.text = data.contactDetails;
+      _notesController.text = data.notes ?? '';
     }
+  }
+
+  @override
+  void refreshUIWithCurrentData() {
+    super.refreshUIWithCurrentData();
+    _loadExistingData();
   }
 
   @override
