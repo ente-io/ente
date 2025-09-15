@@ -1937,5 +1937,9 @@
   "cLTitle2": "Verbesserungen für Video-Streaming",
   "cLDesc2": "Du kannst jetzt die Erstellung von Videos manuell direkt aus der App auslösen. Wir haben auch einen neuen Einstellungsbildschirm für das Video-Streaming hinzugefügt, der dir zeigen wird, welcher Prozentsatz deiner Videos für Streaming verarbeitet wurde",
   "cLTitle3": "Leistungsverbesserungen",
-  "cLDesc3": "Zahlreiche Verbesserungen unter der Haube, u.a. bessere Nutzung des Cache und ein sanfteres Scroll-Erlebnis"
+  "cLDesc3": "Zahlreiche Verbesserungen unter der Haube, u.a. bessere Nutzung des Cache und ein sanfteres Scroll-Erlebnis",
+  "closeBy": "Ähnlich",
+  "@closeBy": {
+    "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
+  }
 }

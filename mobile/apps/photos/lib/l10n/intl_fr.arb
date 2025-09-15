@@ -1929,5 +1929,9 @@
   "cLTitle2": "Améliorations du streaming vidéo",
   "cLDesc2": "Vous pouvez maintenant déclencher manuellement la génération de flux vidéos directement depuis l'application. Nous avons également ajouté un nouvel écran de paramètres de streaming vidéo qui vous montrera quel pourcentage de vos vidéos ont été traitées pour le streaming",
   "cLTitle3": "Amélioration des performances",
-  "cLDesc3": "Plusieurs améliorations invisibles, y compris une meilleure utilisation du cache et une expérience de défilement plus fluide"
+  "cLDesc3": "Plusieurs améliorations invisibles, y compris une meilleure utilisation du cache et une expérience de défilement plus fluide",
+  "closeBy": "Similaire",
+  "@closeBy": {
+    "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
+  }
 }
