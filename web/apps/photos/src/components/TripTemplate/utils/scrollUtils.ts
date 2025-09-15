@@ -93,16 +93,38 @@ export const handleTimelineScroll = ({
     });
 
     // Calculate current active location index based on scroll progress
-    const currentActiveLocationIndex = Math.round(clampedProgress * Math.max(0, photoClusters.length - 1));
+    let currentActiveLocationIndex = -1; // Start with no location selected
+    if (photoClusters.length > 0) {
+        if (isMobile) {
+            // Mobile: Slower progression - stay on each location longer
+            currentActiveLocationIndex = Math.floor(
+                clampedProgress * (photoClusters.length - 0.5),
+            );
+        } else {
+            // Desktop: Use original logic
+            currentActiveLocationIndex = Math.round(
+                clampedProgress * Math.max(0, photoClusters.length - 1),
+            );
+        }
+    }
     const previousActiveLocationIndex = previousActiveLocationRef.current;
 
     // Only pan map when active location changes (discrete panning)
-    if (mapRef && mapRef.getContainer() && mapRef._loaded && currentActiveLocationIndex !== previousActiveLocationIndex) {
+    if (
+        mapRef &&
+        mapRef.getContainer() &&
+        currentActiveLocationIndex !== previousActiveLocationIndex
+    ) {
         previousActiveLocationRef.current = currentActiveLocationIndex;
 
+        // Skip panning if no location is selected (mobile default view)
+        if (currentActiveLocationIndex === -1) return;
+
         const clusterCenters = photoClusters.map((cluster) => {
-            const avgLat = cluster.reduce((sum, p) => sum + p.lat, 0) / cluster.length;
-            const avgLng = cluster.reduce((sum, p) => sum + p.lng, 0) / cluster.length;
+            const avgLat =
+                cluster.reduce((sum, p) => sum + p.lat, 0) / cluster.length;
+            const avgLng =
+                cluster.reduce((sum, p) => sum + p.lng, 0) / cluster.length;
             return { lat: avgLat, lng: avgLng };
         });
 
@@ -110,18 +132,24 @@ export const handleTimelineScroll = ({
         if (!targetCluster) return;
 
         // Position active location at 20% from right edge
-        const [positionedLat, positionedLng] = getLocationPosition(targetCluster.lat, targetCluster.lng);
+        const [positionedLat, positionedLng] = getLocationPosition(
+            targetCluster.lat,
+            targetCluster.lng,
+        );
 
         // Check if this is a distant location (>500km from previous)
         let isDistantLocation = false;
-        if (previousActiveLocationIndex !== -1 && previousActiveLocationIndex !== currentActiveLocationIndex) {
+        if (
+            previousActiveLocationIndex !== -1 &&
+            previousActiveLocationIndex !== currentActiveLocationIndex
+        ) {
             const previousCluster = clusterCenters[previousActiveLocationIndex];
             if (previousCluster) {
                 const distance = calculateDistance(
                     previousCluster.lat,
                     previousCluster.lng,
                     targetCluster.lat,
-                    targetCluster.lng
+                    targetCluster.lng,
                 );
                 isDistantLocation = distance > 500; // 500km threshold
             }
@@ -239,9 +267,12 @@ export const handleMarkerClick = ({
     setHasUserScrolled(true);
 
     // Position clicked location at 20% from right edge
-    const [positionedLat, positionedLng] = getLocationPosition(clusterLat, clusterLng);
+    const [positionedLat, positionedLng] = getLocationPosition(
+        clusterLat,
+        clusterLng,
+    );
 
-    if (mapRef && mapRef.getContainer() && mapRef._loaded) {
+    if (mapRef && mapRef.getContainer()) {
         const targetZoom = isMobile ? 8 : 10; // Mobile-aware zoom level
         mapRef.flyTo([positionedLat, positionedLng], targetZoom, {
             animate: true,

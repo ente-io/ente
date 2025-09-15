@@ -94,7 +94,16 @@ export const TripMap: React.FC<TripMapProps> = ({
                     {/* Draw super-clusters (clickable for zoom and gallery) */}
                     {superClusters.map((superCluster, index) => {
                         // Show green for all covered locations (up to current position)
-                        const currentLocationIndex = Math.round(scrollProgress * Math.max(0, photoClusters.length - 1));
+                        let currentLocationIndex;
+                        if (isMobile) {
+                            // Mobile: Slower progression - stay on each location longer
+                            currentLocationIndex = Math.floor(
+                                scrollProgress * (photoClusters.length - 0.5),
+                            );
+                        } else {
+                            // Desktop: Use original logic
+                            currentLocationIndex = Math.round(scrollProgress * Math.max(0, photoClusters.length - 1));
+                        }
                         const isCovered = superCluster.clustersInvolved.some(clusterIndex => clusterIndex <= currentLocationIndex);
 
                         return (
@@ -142,7 +151,16 @@ export const TripMap: React.FC<TripMapProps> = ({
                                 originalCluster[0]?.image === cluster[0]?.image,
                         );
                         // Show green for all covered locations (up to current position)
-                        const currentLocationIndex = Math.round(scrollProgress * Math.max(0, photoClusters.length - 1));
+                        let currentLocationIndex;
+                        if (isMobile) {
+                            // Mobile: Slower progression - stay on each location longer
+                            currentLocationIndex = Math.floor(
+                                scrollProgress * (photoClusters.length - 0.5),
+                            );
+                        } else {
+                            // Desktop: Use original logic
+                            currentLocationIndex = Math.round(scrollProgress * Math.max(0, photoClusters.length - 1));
+                        }
                         const isCovered = originalClusterIndex <= currentLocationIndex;
 
                         return (
