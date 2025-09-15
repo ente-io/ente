@@ -66,6 +66,8 @@ class FlagService {
 
   bool get albumGuestView => internalUser;
 
+  bool get addToAlbumFeature => internalUser;
+
   bool hasSyncedAccountFlags() {
     return _prefs.containsKey("remote_flags");
   }
@@ -114,10 +116,7 @@ class FlagService {
     try {
       final response = await _enteDio.post(
         "/remote-store/update",
-        data: {
-          "key": key,
-          "value": value,
-        },
+        data: {"key": key, "value": value},
       );
       if (response.statusCode != HttpStatus.ok) {
         throw Exception("Unexpected state");
