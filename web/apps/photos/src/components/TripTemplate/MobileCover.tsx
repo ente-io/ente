@@ -77,7 +77,10 @@ export const MobileCover = memo<MobileCoverProps>(
                                 variant="text"
                                 width="270px"
                                 height="24px"
-                                sx={{ bgcolor: "rgba(255,255,255,0.7)" }}
+                                sx={{
+                                    mb: "20px",
+                                    bgcolor: "rgba(255,255,255,0.7)",
+                                }}
                             />
                         </>
                     )}
@@ -98,7 +101,7 @@ const GradientOverlay = styled(Box)({
     position: "absolute",
     inset: 0,
     background:
-        "linear-gradient(to bottom, rgba(0,0,0,0.3), transparent 30%, transparent 70%, rgba(0,0,0,0.9))",
+        "linear-gradient(to bottom, rgba(0,0,0,0.3), transparent 30%, transparent 65%, rgba(0,0,0,0.9))",
 });
 
 const ContentContainer = styled(Box)({
