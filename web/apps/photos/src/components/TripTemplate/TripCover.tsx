@@ -116,11 +116,11 @@ const GradientOverlay = styled(Box)({
         "linear-gradient(to bottom, rgba(0,0,0,0.4), transparent 30%, transparent 70%, rgba(0,0,0,0.7))",
 });
 
-const LogoContainer = styled(Box)(({ theme }) => ({
+const LogoContainer = styled(Box)(() => ({
     position: "absolute",
     top: "20px",
     left: "20px",
-    color: theme.palette.success.main,
+    color: "white",
 }));
 
 const ContentContainer = styled(Box)({

@@ -12,13 +12,14 @@ import { useEffect, useMemo, useRef, useState } from "react";
 // Import extracted components
 import { MobileCover } from "./MobileCover";
 import { MobileNavBar } from "./MobileNavBar";
+import { MobileTimelineLocation } from "./MobileTimelineLocation";
+import { MobileTripStarted } from "./MobileTripStarted";
 import { TimelineBaseLine } from "./TimelineBaseLine";
 import { TimelineLocation } from "./TimelineLocation";
 import { TimelineProgressLine } from "./TimelineProgressLine";
 import { TopNavButtons } from "./TopNavButtons";
 import { TripCover } from "./TripCover";
 import { TripMap } from "./TripMap";
-import { TripStarted } from "./TripStarted";
 
 // Import hooks
 import { useDataProcessing } from "./hooks/useDataProcessing";
@@ -298,26 +299,15 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
                                         </LocationsLoadingContainer>
                                     ) : (
                                         <>
-                                            <TripStarted
+                                            <MobileTripStarted
                                                 onRef={(el) => {
                                                     tripStartedRef.current = el;
                                                 }}
                                             />
 
                                             <TimelineContainer id="timeline-container">
-                                                <TimelineBaseLine
-                                                    locationPositions={locationPositions}
-                                                />
-
-                                                <TimelineProgressLine
-                                                    locationPositions={locationPositions}
-                                                    scrollProgress={scrollProgress}
-                                                    hasUserScrolled={hasUserScrolled}
-                                                    photoClusters={photoClusters}
-                                                />
-
                                                 {photoClusters.map((cluster, index) => (
-                                                    <TimelineLocation
+                                                    <MobileTimelineLocation
                                                         key={index}
                                                         cluster={cluster}
                                                         index={index}
@@ -617,6 +607,7 @@ const MobileTimelineContainer = styled(Box)(({ theme }) => ({
     overflow: "auto",
     backgroundColor: theme.palette.background.paper,
     boxShadow: `0 -4px 20px rgba(0, 0, 0, 0.1)`,
+    scrollSnapType: "y mandatory",
     "&::-webkit-scrollbar": { width: "6px" },
     "&::-webkit-scrollbar-track": {
         background: "transparent",

@@ -180,7 +180,7 @@ const ImageWrapper = styled(Box)({
 
 const CountBadge = styled(Box)({
     position: "absolute",
-    bottom: "6px",
+    top: "6px",
     right: "6px",
     background: "white",
     color: "black",
