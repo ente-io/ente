@@ -18,22 +18,30 @@ export const useFileViewer = ({
     const [viewerFiles, setViewerFiles] = useState<EnteFile[]>([]);
 
     const handleOpenFileViewer = useCallback(
-        (_cluster: JourneyPoint[], clickedFileId: number) => {
-            // Sort all files by creation time
-            const sortedFiles = [...files].sort(
+        (cluster: JourneyPoint[], clickedFileId: number) => {
+            // Get file IDs from the cluster
+            const clusterFileIds = cluster.map((point) => point.fileId);
+
+            // Filter files to only include those from the cluster
+            const clusterFiles = files.filter((file) =>
+                clusterFileIds.includes(file.id)
+            );
+
+            // Sort cluster files by creation time
+            const sortedClusterFiles = [...clusterFiles].sort(
                 (a, b) =>
                     new Date(a.metadata.creationTime / 1000).getTime() -
                     new Date(b.metadata.creationTime / 1000).getTime(),
             );
 
-            // Find the index of the clicked photo in all files
-            const clickedIndex = sortedFiles.findIndex(
+            // Find the index of the clicked photo in the cluster files
+            const clickedIndex = sortedClusterFiles.findIndex(
                 (f) => f.id === clickedFileId,
             );
 
-            if (clickedIndex !== -1 && sortedFiles.length > 0) {
+            if (clickedIndex !== -1 && sortedClusterFiles.length > 0) {
                 // Batch state updates to avoid multiple re-renders
-                setViewerFiles(sortedFiles);
+                setViewerFiles(sortedClusterFiles);
                 setCurrentFileIndex(clickedIndex);
                 setOpenFileViewer(true);
                 onSetOpenFileViewer?.(true);

@@ -97,6 +97,17 @@ const MobileNavContainer = styled(Box)({
     padding: "0 16px",
     backgroundColor: "transparent",
     zIndex: 2000,
+    "&::after": {
+        content: '""',
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        height: "90px",
+        background: "linear-gradient(180deg, rgba(0, 0, 0, 0.7) 0%, transparent 100%)",
+        zIndex: -1,
+        pointerEvents: "none",
+    },
 });
 
 const LogoContainer = styled(Box)({

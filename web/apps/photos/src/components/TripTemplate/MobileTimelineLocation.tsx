@@ -117,6 +117,9 @@ const PhotoFanWrapper = styled(Box)({
     position: "relative",
     width: "180px",
     height: "240px",
+    transition: "transform 0.3s ease-in-out",
+    cursor: "pointer",
+    "&:hover": { transform: "scale(1.05)" },
 });
 
 const PhotoOverlay = styled(Box)({
@@ -126,13 +129,14 @@ const PhotoOverlay = styled(Box)({
     right: "2px",
     zIndex: 30,
     pointerEvents: "none",
-    background: "linear-gradient(to top, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.3), transparent)",
-    borderRadius: "0 0 14px 14px",
-    padding: "24px 16px 16px 16px",
+    background: "linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 60%, transparent 100%)",
+    borderRadius: "0 0 12px 12px",
+    padding: "16px",
+    minHeight: "fit-content",
 });
 
 
-const DayBadge = styled(Box)(({ theme }) => ({
+const DayBadge = styled(Box)({
     display: "inline-flex",
     alignItems: "center",
     backgroundColor: "transparent",
@@ -146,7 +150,7 @@ const DayBadge = styled(Box)(({ theme }) => ({
     textTransform: "uppercase",
     letterSpacing: "0.15em",
     textShadow: "0 2px 8px rgba(0, 0, 0, 0.8)",
-}));
+});
 
 const LocationTitle = styled(Typography)(() => ({
     fontSize: "18px",

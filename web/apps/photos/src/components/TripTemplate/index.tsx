@@ -630,7 +630,9 @@ const MobileTimelineContainer = styled(Box)(({ theme }) => ({
     scrollbarColor: `${theme.palette.divider} transparent`,
 }));
 
-const MobileCoverOverlay = styled(Box)<{ show: boolean }>(({ show }) => ({
+const MobileCoverOverlay = styled(Box, {
+    shouldForwardProp: (prop) => prop !== 'show',
+})<{ show: boolean }>(({ show }) => ({
     position: "absolute",
     top: 0,
     left: 0,
@@ -649,7 +651,9 @@ const MobileTimelineContent = styled(Box)({
     flexDirection: "column",
 });
 
-const MobileTimelineBaseLine = styled(Box)<{ photoClusters: JourneyPoint[][] }>(({ theme, photoClusters }) => ({
+const MobileTimelineBaseLine = styled(Box, {
+    shouldForwardProp: (prop) => prop !== 'photoClusters',
+})<{ photoClusters: JourneyPoint[][] }>(({ theme, photoClusters }) => ({
     position: "absolute",
     left: "50%",
     top: "-15vh",
