@@ -23,7 +23,6 @@ class DebugSectionWidget extends StatefulWidget {
 }
 
 class _DebugSectionWidgetState extends State<DebugSectionWidget> {
-
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(

@@ -34,7 +34,7 @@ type UpdatePublicAccessTokenRequest struct {
 
 func (ut *UpdatePublicAccessTokenRequest) Validate() error {
 	if ut.DeviceLimit == nil && ut.ValidTill == nil && ut.DisablePassword == nil &&
-		ut.Nonce == nil && ut.PassHash == nil && ut.EnableDownload == nil && ut.EnableCollect == nil {
+		ut.Nonce == nil && ut.PassHash == nil && ut.EnableDownload == nil && ut.EnableCollect == nil && ut.EnableJoin == nil {
 		return NewBadRequestWithMessage("all parameters are missing")
 	}
 

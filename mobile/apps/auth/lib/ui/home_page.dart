@@ -15,6 +15,7 @@ import 'package:ente_auth/onboarding/model/tag_enums.dart';
 import 'package:ente_auth/onboarding/view/common/tag_chip.dart';
 import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
 import 'package:ente_auth/onboarding/view/view_qr_page.dart';
+import 'package:ente_auth/services/local_backup_service.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/store/code_store.dart';
@@ -101,7 +102,6 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-
     _codeSortKey = PreferenceService.instance.codeSortKey();
     _textController.addListener(_applyFilteringAndRefresh);
     _loadCodes();
@@ -154,7 +154,7 @@ Future<void> _onRestoreSelectedPressed() async {
     final codesToRestore = _allCodes?.where((c) => selectedIds.contains(c.secret)).toList() ?? [];
     for (final code in codesToRestore) {
       final updatedCode = code.copyWith(display: code.display.copyWith(trashed: false));
-      unawaited(CodeStore.instance.updateCode(code, updatedCode));
+      unawaited(CodeStore.instance.addCode(updatedCode));
     }
   } catch (e) {
     if (mounted) {
@@ -236,7 +236,7 @@ Widget _buildTrashSelectActions() {
     // if all are pinned, unpin all
     for (final code in codesToUpdate) {
       final updatedCode = code.copyWith(display: code.display.copyWith(pinned: false));
-      unawaited(CodeStore.instance.updateCode(code, updatedCode));
+      unawaited(CodeStore.instance.addCode(updatedCode));
     }
 
     if (codesToUpdate.length == 1) {
@@ -249,7 +249,7 @@ Widget _buildTrashSelectActions() {
     for (final code in codesToUpdate) {
       if (!code.isPinned) { // Only pin the codes that are currently unpinned
         final updatedCode = code.copyWith(display: code.display.copyWith(pinned: true));
-        unawaited(CodeStore.instance.updateCode(code, updatedCode));
+        unawaited(CodeStore.instance.addCode(updatedCode));
         pinnedCount++;
       }
     }
@@ -277,7 +277,7 @@ Widget _buildTrashSelectActions() {
   for (final code in codesToUpdate) {
     if (code.isPinned) { // only unpin the codes that are currently pinned
       final updatedCode = code.copyWith(display: code.display.copyWith(pinned: false));
-      unawaited(CodeStore.instance.updateCode(code, updatedCode));
+      unawaited(CodeStore.instance.addCode(updatedCode));
       unpinnedCount++;
     }
   }
@@ -332,7 +332,7 @@ Widget _buildTrashSelectActions() {
           final updatedCode = code.copyWith(
             display: code.display.copyWith(trashed: true),
           );
-          unawaited(CodeStore.instance.updateCode(code, updatedCode));
+          unawaited(CodeStore.instance.addCode(updatedCode));
         }
       } catch (e) {
         _logger.severe('Failed to trash code(s): ${e.toString()}');
@@ -363,7 +363,7 @@ Future<void> _onEditPressed(Code code) async {
       );
 
       if (updatedCode != null){
-        await CodeStore.instance.updateCode(code, updatedCode);
+        await CodeStore.instance.addCode(updatedCode);
       }
 }
 
@@ -786,7 +786,6 @@ Widget _buildActionButtons() {
   }
 
   void _loadCodes() {
-    debugPrint("[HOME_DEBUG] _loadCodes triggered!");
     CodeStore.instance.getAllCodes().then((codes) {
       _allCodes = codes;
       hasTrashedCodes = false;
@@ -996,6 +995,7 @@ Widget _buildActionButtons() {
       if ((_allCodes?.where((e) => !e.hasError).length ?? 0) > 2) {
         _focusNewCode(code);
       }
+      LocalBackupService.instance.triggerAutomaticBackup().ignore();
     }
   }
 
@@ -1009,6 +1009,7 @@ Widget _buildActionButtons() {
     );
     if (code != null) {
       await CodeStore.instance.addCode(code);
+      LocalBackupService.instance.triggerAutomaticBackup().ignore();
     }
   }
 

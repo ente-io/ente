@@ -1776,6 +1776,7 @@
   "same": "نفس",
   "different": "مختلف",
   "sameperson": "نفس الشخص؟",
+  "indexingPausedStatusDescription": "يتم إيقاف الفهرسة مؤقتاً. سوف تستأنف تلقائياً عندما يكون الجهاز جاهزاً. يعدّ الجهاز جاهزا عندما يكون مستوى البطارية وصحة البطارية والحالة الحرارية في نطاق سليم.",
   "thisWeek": "هذا الأسبوع",
   "lastWeek": "الأسبوع الماضي",
   "thisMonth": "هذا الشهر",
@@ -1786,11 +1787,14 @@
   "editAutoAddPeople": "تحرير إضافة الأشخاص التلقائية",
   "autoAddPeople": "إضافة الأشخاص التلقائية",
   "autoAddToAlbum": "إضافة تلقائية إلى الألبوم",
+  "shouldRemoveFilesSmartAlbumsDesc": "هل ينبغي إزالة الملفات المتعلقة بالشخص الذي تم اختياره سابقا في الألبومات الذكية؟",
   "addingPhotos": "جاري إضافة الصور",
   "gettingReady": "جاري الإعداد",
+  "addSomePhotosDesc1": "إضافة بعض الصور أو الاختيار ",
   "addSomePhotosDesc2": "وجوه مألوفة",
   "addSomePhotosDesc3": "\nللبدء بـ",
   "ignorePerson": "تجاهل الشخص",
+  "mixedGrouping": "تجميع مختلط؟",
   "analysis": "تحليل",
   "doesGroupContainMultiplePeople": "هل هذه المجموعة تحتوي على أشخاص متعددين؟",
   "automaticallyAnalyzeAndSplitGrouping": "سنقوم تلقائيا بتحليل المجموعة لتحديد ما إذا كان هناك عدة أشخاص، وفصلهم مرة أخرى. قد يستغرق هذا بضع ثوان.",
@@ -1815,5 +1819,6 @@
         "type": "int"
       }
     }
-  }
+  },
+  "videosProcessed": "تم معالجة الفيديو"
 }

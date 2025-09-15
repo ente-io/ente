@@ -9,6 +9,7 @@ import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
 import 'package:ente_auth/onboarding/view/view_qr_page.dart';
+import 'package:ente_auth/services/local_backup_service.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/store/code_store.dart';
@@ -516,7 +517,7 @@ Widget clippedCard(AppLocalizations l10n) {
               lastUsedAt: DateTime.now().microsecondsSinceEpoch,
             ),
           );
-          unawaited(CodeStore.instance.updateCode(widget.code, code));
+          unawaited(CodeStore.instance.addCode(code));
         }
       }
     });
@@ -582,7 +583,7 @@ Widget clippedCard(AppLocalizations l10n) {
       ),
     );
     if (code != null) {
-      await CodeStore.instance.updateCode(widget.code, code);
+      await CodeStore.instance.addCode(code);
     }
   }
 
@@ -629,7 +630,7 @@ Widget clippedCard(AppLocalizations l10n) {
       display: display.copyWith(pinned: !currentlyPinned),
     );
     unawaited(
-      CodeStore.instance.updateCode(widget.code,code).then(
+      CodeStore.instance.addCode(code).then(
             (value) => showToast(
               context,
               !currentlyPinned
@@ -667,6 +668,7 @@ Widget clippedCard(AppLocalizations l10n) {
       firstButtonOnTap: () async {
         try {
           await CodeStore.instance.removeCode(widget.code);
+          LocalBackupService.instance.triggerAutomaticBackup().ignore();
         } catch (e, s) {
           logger.severe('Failed to delete code', e, s);
           showGenericErrorDialog(context: context, error: e).ignore();
@@ -708,7 +710,7 @@ Widget clippedCard(AppLocalizations l10n) {
           final Code code = widget.code.copyWith(
             display: display.copyWith(trashed: true),
           );
-          await CodeStore.instance.updateCode(widget.code, code);
+          await CodeStore.instance.addCode(code);
         } catch (e) {
           logger.severe('Failed to trash code: ${e.toString()}');
           showGenericErrorDialog(context: context, error: e).ignore();
@@ -732,7 +734,7 @@ Widget clippedCard(AppLocalizations l10n) {
       final Code code = widget.code.copyWith(
         display: display.copyWith(trashed: false),
       );
-      await CodeStore.instance.updateCode(widget.code, code);
+      await CodeStore.instance.addCode(code);
     } catch (e) {
       logger.severe('Failed to restore code: ${e.toString()}');
       if (mounted) {

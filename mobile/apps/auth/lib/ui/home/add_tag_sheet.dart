@@ -58,7 +58,7 @@ class _AddTagSheetState extends State<AddTagSheet> {
       final updatedCode = code.copyWith(
         display: code.display.copyWith(tags: _selectedTagsInSheet.toList()),
       );
-      updateFutures.add(CodeStore.instance.updateCode(code, updatedCode));
+      updateFutures.add(CodeStore.instance.addCode(updatedCode));
     }
     await Future.wait(updateFutures);
     if (mounted) {
