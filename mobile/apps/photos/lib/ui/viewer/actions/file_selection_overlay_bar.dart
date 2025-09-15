@@ -132,12 +132,12 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
         valueListenable: _hasSelectedFilesNotifier,
         builder: (context, value, child) {
           return AnimatedSize(
-            duration: const Duration(milliseconds: 350),
+            duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOutCubic,
             alignment: Alignment.topCenter,
             child: AnimatedOpacity(
               opacity: _hasSelectedFilesNotifier.value ? 1.0 : 0.0,
-              duration: const Duration(milliseconds: 300),
+              duration: const Duration(milliseconds: 250),
               curve: Curves.easeInOut,
               child: _hasSelectedFilesNotifier.value
                   ? Column(
