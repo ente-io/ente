@@ -60,71 +60,69 @@ class _AlbumSelectionOverlayBarState extends State<AlbumSelectionOverlayBar> {
           widget.onExpand?.call();
         }
       },
-      child: AnimatedSize(
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeInOutCubic,
-        alignment: Alignment.topCenter,
-        child: ValueListenableBuilder(
-          valueListenable: _hasSelectedAlbumsNotifier,
-          builder: (context, value, child) {
-            return AnimatedCrossFade(
-              firstCurve: Curves.easeInOutExpo,
-              secondCurve: Curves.easeInOutExpo,
-              sizeCurve: Curves.easeInOutExpo,
-              crossFadeState: _hasSelectedAlbumsNotifier.value
-                  ? CrossFadeState.showFirst
-                  : CrossFadeState.showSecond,
-              duration: const Duration(milliseconds: 400),
-              firstChild: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Row(
-                    children: [
-                      if (widget.showSelectAllButton)
-                        Padding(
-                          padding: const EdgeInsets.only(left: 12),
-                          child: SelectAllAlbumsButton(
+      child: ValueListenableBuilder(
+        valueListenable: _hasSelectedAlbumsNotifier,
+        builder: (context, value, child) {
+          return AnimatedSize(
+            duration: const Duration(milliseconds: 350),
+            curve: Curves.easeInOutCubic,
+            alignment: Alignment.topCenter,
+            child: AnimatedOpacity(
+              opacity: _hasSelectedAlbumsNotifier.value ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              child: _hasSelectedAlbumsNotifier.value
+                  ? Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Row(
+                          children: [
+                            if (widget.showSelectAllButton)
+                              Padding(
+                                padding: const EdgeInsets.only(left: 12),
+                                child: SelectAllAlbumsButton(
+                                  widget.selectedAlbums,
+                                  widget.collections,
+                                  backgroundColor: widget.backgroundColor,
+                                ),
+                              ),
+                            const Spacer(),
+                            Padding(
+                              padding: const EdgeInsets.only(right: 12.0),
+                              child: AlbumActionBarWidget(
+                                selectedAlbums: widget.selectedAlbums,
+                                onCancel: () {
+                                  if (widget.selectedAlbums.albums.isNotEmpty) {
+                                    widget.selectedAlbums.clearAll();
+                                  }
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          decoration:
+                              BoxDecoration(boxShadow: shadowFloatFaintLight),
+                          child: AlbumBottomActionBarWidget(
                             widget.selectedAlbums,
-                            widget.collections,
+                            widget.sectionType,
+                            isCollapsed: widget.isCollapsed,
+                            onCancel: () {
+                              if (widget.selectedAlbums.albums.isNotEmpty) {
+                                widget.selectedAlbums.clearAll();
+                              }
+                            },
                             backgroundColor: widget.backgroundColor,
                           ),
                         ),
-                      const Spacer(),
-                      Padding(
-                        padding: const EdgeInsets.only(right: 12.0),
-                        child: AlbumActionBarWidget(
-                          selectedAlbums: widget.selectedAlbums,
-                          onCancel: () {
-                            if (widget.selectedAlbums.albums.isNotEmpty) {
-                              widget.selectedAlbums.clearAll();
-                            }
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    decoration: BoxDecoration(boxShadow: shadowFloatFaintLight),
-                    child: AlbumBottomActionBarWidget(
-                      widget.selectedAlbums,
-                      widget.sectionType,
-                      isCollapsed: widget.isCollapsed,
-                      onCancel: () {
-                        if (widget.selectedAlbums.albums.isNotEmpty) {
-                          widget.selectedAlbums.clearAll();
-                        }
-                      },
-                      backgroundColor: widget.backgroundColor,
-                    ),
-                  ),
-                ],
-              ),
-              secondChild: const SizedBox(width: double.infinity),
-            );
-          },
-        ),
+                      ],
+                    )
+                  : const SizedBox.shrink(),
+            ),
+          );
+        },
       ),
     );
   }

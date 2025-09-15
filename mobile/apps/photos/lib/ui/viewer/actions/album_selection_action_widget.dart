@@ -81,18 +81,17 @@ class _AlbumSelectionActionWidgetState
       );
       items.add(
         SelectionActionButton(
-          labelText: S.of(context).share,
-          icon: Icons.adaptive.share,
-          onTap: _shareCollection,
-        ),
-      );
-
-      items.add(
-        SelectionActionButton(
           labelText: "Unpin",
           icon: CupertinoIcons.pin_slash,
           onTap: _onUnpinClick,
           shouldShow: hasPinnedAlbum,
+        ),
+      );
+      items.add(
+        SelectionActionButton(
+          labelText: S.of(context).share,
+          icon: Icons.adaptive.share,
+          onTap: _shareCollection,
         ),
       );
 
@@ -111,14 +110,6 @@ class _AlbumSelectionActionWidgetState
         ),
       );
     }
-
-    items.add(
-      SelectionActionButton(
-        labelText: S.of(context).archive,
-        icon: Icons.archive_outlined,
-        onTap: _archiveClick,
-      ),
-    );
 
     if (widget.sectionType == UISectionType.incomingCollections) {
       items.add(
@@ -139,6 +130,14 @@ class _AlbumSelectionActionWidgetState
 
     final List<SelectionActionButton> otherItems =
         visibleItems.length > 3 ? visibleItems.sublist(3) : [];
+
+    otherItems.add(
+      SelectionActionButton(
+        labelText: S.of(context).archive,
+        icon: Icons.archive_outlined,
+        onTap: _archiveClick,
+      ),
+    );
 
     final List<List<SelectionActionButton>> groupedOtherItems = [];
     for (int i = 0; i < otherItems.length; i += 4) {
@@ -188,91 +187,95 @@ class _AlbumSelectionActionWidgetState
                 ),
 
                 // Second Row
-                AnimatedContainer(
+                AnimatedSize(
                   duration: const Duration(milliseconds: 350),
                   curve: Curves.easeInOutCubic,
-                  height: widget.isCollapsed ? 0 : null,
                   child: AnimatedOpacity(
                     opacity: widget.isCollapsed ? 0.0 : 1.0,
-                    duration: const Duration(milliseconds: 250),
+                    duration: const Duration(milliseconds: 300),
                     curve: Curves.easeInOut,
-                    child: ClipRect(
-                      child: Column(
-                        children: [
-                          if (groupedOtherItems.isNotEmpty) ...[
-                            const SizedBox(height: 24),
-                            Container(
-                              width: double.infinity,
-                              height: 74,
-                              decoration: BoxDecoration(
-                                color: getEnteColorScheme(context)
-                                    .backgroundElevated2,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: PageView.builder(
-                                controller: _pageController,
-                                itemCount: groupedOtherItems.length,
-                                onPageChanged: (index) {
-                                  if (index >= groupedOtherItems.length &&
-                                      groupedOtherItems.isNotEmpty) {
-                                    _pageController.animateToPage(
-                                      groupedOtherItems.length - 1,
-                                      duration: const Duration(seconds: 5),
-                                      curve: Curves.easeInOut,
-                                    );
-                                  }
-                                },
-                                itemBuilder: (context, pageIndex) {
-                                  if (pageIndex >= groupedOtherItems.length) {
-                                    return const SizedBox();
-                                  }
+                    child: widget.isCollapsed
+                        ? const SizedBox.shrink()
+                        : Column(
+                            children: [
+                              if (groupedOtherItems.isNotEmpty) ...[
+                                const SizedBox(height: 24),
+                                Container(
+                                  width: double.infinity,
+                                  height: 74,
+                                  decoration: BoxDecoration(
+                                    color: getEnteColorScheme(context)
+                                        .backgroundElevated2,
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: PageView.builder(
+                                    controller: _pageController,
+                                    itemCount: groupedOtherItems.length,
+                                    onPageChanged: (index) {
+                                      if (index >= groupedOtherItems.length &&
+                                          groupedOtherItems.isNotEmpty) {
+                                        _pageController.animateToPage(
+                                          groupedOtherItems.length - 1,
+                                          duration:
+                                              const Duration(milliseconds: 100),
+                                          curve: Curves.easeInOut,
+                                        );
+                                      }
+                                    },
+                                    itemBuilder: (context, pageIndex) {
+                                      if (pageIndex >=
+                                          groupedOtherItems.length) {
+                                        return const SizedBox();
+                                      }
 
-                                  final currentGroup =
-                                      groupedOtherItems[pageIndex];
+                                      final currentGroup =
+                                          groupedOtherItems[pageIndex];
 
-                                  return Row(
-                                    children: currentGroup.map((item) {
-                                      return Expanded(
-                                        child: AnimatedSwitcher(
-                                          duration: const Duration(seconds: 5),
-                                          transitionBuilder: (
-                                            Widget child,
-                                            Animation<double> animation,
-                                          ) {
-                                            return FadeTransition(
-                                              opacity: animation,
-                                              child: child,
-                                            );
-                                          },
-                                          child: item is Widget
-                                              ? KeyedSubtree(
-                                                  key: ValueKey(item.hashCode),
-                                                  child: item,
-                                                )
-                                              : const SizedBox(),
-                                        ),
+                                      return Row(
+                                        children: currentGroup.map((item) {
+                                          return Expanded(
+                                            child: AnimatedSwitcher(
+                                              duration: const Duration(
+                                                  milliseconds: 100),
+                                              transitionBuilder: (
+                                                Widget child,
+                                                Animation<double> animation,
+                                              ) {
+                                                return FadeTransition(
+                                                  opacity: animation,
+                                                  child: child,
+                                                );
+                                              },
+                                              child: item is Widget
+                                                  ? KeyedSubtree(
+                                                      key: ValueKey(
+                                                        item.hashCode,
+                                                      ),
+                                                      child: item,
+                                                    )
+                                                  : const SizedBox(),
+                                            ),
+                                          );
+                                        }).toList(),
                                       );
-                                    }).toList(),
-                                  );
-                                },
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            if (groupedOtherItems.length > 1)
-                              SmoothPageIndicator(
-                                controller: _pageController,
-                                count: groupedOtherItems.length,
-                                effect: const WormEffect(
-                                  dotHeight: 6,
-                                  dotWidth: 6,
-                                  spacing: 6,
-                                  activeDotColor: Colors.white,
+                                    },
+                                  ),
                                 ),
-                              ),
-                          ],
-                        ],
-                      ),
-                    ),
+                                const SizedBox(height: 16),
+                                if (groupedOtherItems.length > 1)
+                                  SmoothPageIndicator(
+                                    controller: _pageController,
+                                    count: groupedOtherItems.length,
+                                    effect: const WormEffect(
+                                      dotHeight: 6,
+                                      dotWidth: 6,
+                                      spacing: 6,
+                                      activeDotColor: Colors.white,
+                                    ),
+                                  ),
+                              ],
+                            ],
+                          ),
                   ),
                 ),
               ],

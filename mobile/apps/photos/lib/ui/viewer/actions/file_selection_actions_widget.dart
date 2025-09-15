@@ -530,11 +530,11 @@ class _FileSelectionActionsWidgetState
 
                 // Second Row
                 AnimatedSize(
-                  duration: const Duration(milliseconds: 500),
+                  duration: const Duration(milliseconds: 350),
                   curve: Curves.easeInOutCubic,
                   child: AnimatedOpacity(
                     opacity: widget.isCollapsed ? 0.0 : 1.0,
-                    duration: const Duration(milliseconds: 250),
+                    duration: const Duration(milliseconds: 300),
                     curve: Curves.easeInOut,
                     child: widget.isCollapsed
                         ? const SizedBox.shrink()
@@ -558,7 +558,8 @@ class _FileSelectionActionsWidgetState
                                           groupedOtherItems.isNotEmpty) {
                                         _pageController.animateToPage(
                                           groupedOtherItems.length - 1,
-                                          duration: const Duration(seconds: 5),
+                                          duration:
+                                              const Duration(milliseconds: 100),
                                           curve: Curves.easeInOut,
                                         );
                                       }
@@ -576,8 +577,9 @@ class _FileSelectionActionsWidgetState
                                         children: currentGroup.map((item) {
                                           return Expanded(
                                             child: AnimatedSwitcher(
-                                              duration:
-                                                  const Duration(seconds: 5),
+                                              duration: const Duration(
+                                                milliseconds: 100,
+                                              ),
                                               transitionBuilder: (
                                                 Widget child,
                                                 Animation<double> animation,
