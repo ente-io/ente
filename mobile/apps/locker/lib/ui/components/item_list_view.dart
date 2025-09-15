@@ -256,7 +256,7 @@ class _ItemListViewState extends State<ItemListView> {
                             ? Icons.arrow_upward
                             : Icons.arrow_downward,
                         size: 16,
-                        color: Theme.of(context).primaryColor,
+                        color: getEnteColorScheme(context).primary500,
                       ),
                   ],
                 ),
@@ -289,7 +289,7 @@ class _ItemListViewState extends State<ItemListView> {
                             ? Icons.arrow_upward
                             : Icons.arrow_downward,
                         size: 16,
-                        color: Theme.of(context).primaryColor,
+                        color: getEnteColorScheme(context).primary500,
                       ),
                   ],
                 ),
@@ -1384,30 +1384,6 @@ class FileListViewHelpers {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class FileDataTable extends StatelessWidget {
-  final List<EnteFile> files;
-  final Function(EnteFile)? onFileTap;
-  final bool enableSorting;
-
-  const FileDataTable({
-    super.key,
-    required this.files,
-    this.onFileTap,
-    this.enableSorting = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: const Text(
-        'FileDataTable is deprecated. Use FileListView instead.',
-        style: TextStyle(color: Colors.red),
       ),
     );
   }
