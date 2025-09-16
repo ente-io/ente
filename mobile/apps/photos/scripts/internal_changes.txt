@@ -1,4 +1,5 @@
 - Laurens: Fix edge case bug in similar images cache when user hasn't indexed ML yet
+- Neeraj: (i) Show shared albums in widget selection screen
 - Neeraj: (i) Add to album option in file overflow menu and file details [#3291](https://github.com/ente-io/ente/discussions/3291)
 - Neeraj: (i) Add collection-level guest view option in album overflow menu
 - Neeraj: Fix IDN domain display in public URLs [#7079](https://github.com/ente-io/ente/issues/7079)
