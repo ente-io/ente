@@ -45,12 +45,11 @@ class CollectionService {
 
   final _collectionIDToCollections = <int, Collection>{};
 
-  CollectionService._privateConstructor() {
-    _db = CollectionDB.instance;
-    _apiClient = CollectionApiClient.instance;
-  }
+  CollectionService._privateConstructor();
 
   Future<void> init() async {
+    _db = CollectionDB.instance;
+    _apiClient = CollectionApiClient.instance;
     if (Configuration.instance.hasConfiguredAccount()) {
       await _init();
     } else {
@@ -115,8 +114,12 @@ class CollectionService {
   }
 
   bool hasCompletedFirstSync() {
-    return Configuration.instance.hasConfiguredAccount() &&
+    final completed = Configuration.instance.hasConfiguredAccount() &&
         _db.getSyncTime() > 0;
+    _logger.info("Account configured: ${Configuration.instance.hasConfiguredAccount()}");
+    _logger.info("Account Time: ${_db.getSyncTime()}");
+    _logger.info("hasCompletedFirstSync: $completed");
+    return completed;
   }
 
   Future<Collection> createCollection(

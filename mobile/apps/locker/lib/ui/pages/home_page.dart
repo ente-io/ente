@@ -134,6 +134,8 @@ class _HomePageState extends UploaderPageState<HomePage>
       ),
     );
 
+    _loadCollections();
+
     if (CollectionService.instance.hasCompletedFirstSync()) {
       _loadCollections();
     }
