@@ -42,7 +42,7 @@ export interface HandleTimelineScrollParams {
     setHasUserScrolled: (scrolled: boolean) => void;
     setScrollProgress: (progress: number) => void;
     previousActiveLocationRef: React.RefObject<number>;
-    isMobile: boolean;
+    isTouchDevice: boolean;
 }
 
 export const handleTimelineScroll = ({
@@ -54,7 +54,7 @@ export const handleTimelineScroll = ({
     setHasUserScrolled,
     setScrollProgress,
     previousActiveLocationRef,
-    isMobile,
+    isTouchDevice,
 }: HandleTimelineScrollParams) => {
     if (
         !timelineRef.current ||
@@ -95,7 +95,7 @@ export const handleTimelineScroll = ({
     // Calculate current active location index based on scroll progress
     let currentActiveLocationIndex = -1; // Start with no location selected
     if (photoClusters.length > 0) {
-        if (isMobile) {
+        if (isTouchDevice) {
             // Mobile: Slower progression - stay on each location longer
             currentActiveLocationIndex = Math.floor(
                 clampedProgress * (photoClusters.length - 0.5),
@@ -155,12 +155,12 @@ export const handleTimelineScroll = ({
             }
         }
 
-        const targetZoom = isMobile ? 8 : 10; // Mobile-aware zoom level
+        const targetZoom = isTouchDevice ? 8 : 10; // Touch device-aware zoom level
 
         try {
             if (isDistantLocation) {
                 // For distant locations: zoom out → pan → zoom in
-                const intermediateZoom = isMobile ? 2 : 4;
+                const intermediateZoom = isTouchDevice ? 2 : 4;
                 mapRef.flyTo([positionedLat, positionedLng], intermediateZoom, {
                     animate: true,
                     duration: 1.5,
@@ -246,7 +246,7 @@ export interface HandleMarkerClickParams {
     setScrollProgress: (progress: number) => void;
     setHasUserScrolled: (scrolled: boolean) => void;
     scrollTimelineToLocation: (locationIndex: number) => void;
-    isMobile: boolean;
+    isTouchDevice: boolean;
 }
 
 export const handleMarkerClick = ({
@@ -260,7 +260,7 @@ export const handleMarkerClick = ({
     setScrollProgress,
     setHasUserScrolled,
     scrollTimelineToLocation,
-    isMobile,
+    isTouchDevice,
 }: HandleMarkerClickParams) => {
     const targetProgress = clusterIndex / Math.max(1, photoClusters.length - 1);
 
@@ -280,7 +280,7 @@ export const handleMarkerClick = ({
 
     if (mapRef && mapRef.getContainer()) {
         try {
-            const targetZoom = isMobile ? 8 : 10; // Mobile-aware zoom level
+            const targetZoom = isTouchDevice ? 8 : 10; // Touch device-aware zoom level
             mapRef.flyTo([positionedLat, positionedLng], targetZoom, {
                 animate: true,
                 duration: 1.0,

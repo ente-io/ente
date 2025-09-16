@@ -1,5 +1,5 @@
 import { Box, styled } from "@mui/material";
-import { useIsSmallWidth } from "ente-base/components/utils/hooks";
+import { useIsTouchscreen } from "ente-base/components/utils/hooks";
 import L from "leaflet";
 import dynamic from "next/dynamic";
 import { MapEvents } from "./MapEvents";
@@ -58,7 +58,7 @@ export const TripMap: React.FC<TripMapProps> = ({
     setTargetZoom,
     onMarkerClick,
 }) => {
-    const isMobile = useIsSmallWidth();
+    const isTouchDevice = useIsTouchscreen();
 
     // Calculate super-clusters based on screen collisions
     const { superClusters, visibleClusters } = detectScreenCollisions(
@@ -74,10 +74,10 @@ export const TripMap: React.FC<TripMapProps> = ({
             {hasPhotoData ? (
                 <StyledMapContainer
                     center={getMapCenter(photoClusters, journeyData)}
-                    zoom={isMobile ? Math.max(1, optimalZoom - 2) : optimalZoom}
+                    zoom={isTouchDevice ? Math.max(1, optimalZoom - 2) : optimalZoom}
                     scrollWheelZoom={true}
                     zoomControl={false}
-                    attributionControl={!isMobile}
+                    attributionControl={!isTouchDevice}
                 >
                     <MapEvents
                         setMapRef={setMapRef}
@@ -86,7 +86,7 @@ export const TripMap: React.FC<TripMapProps> = ({
                     />
                     {/* Stadia Alidade Satellite - includes both imagery and labels */}
                     <TileLayer
-                        attribution={isMobile ? '' : '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'}
+                        attribution={isTouchDevice ? '' : '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'}
                         url="https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg"
                         maxZoom={20}
                     />
@@ -95,7 +95,7 @@ export const TripMap: React.FC<TripMapProps> = ({
                     {superClusters.map((superCluster, index) => {
                         // Show green for all covered locations (up to current position)
                         let currentLocationIndex;
-                        if (isMobile) {
+                        if (isTouchDevice) {
                             // Mobile: Slower progression - stay on each location longer
                             currentLocationIndex = Math.floor(
                                 scrollProgress * (photoClusters.length - 0.5),
@@ -113,7 +113,7 @@ export const TripMap: React.FC<TripMapProps> = ({
                                 icon={createSuperClusterIcon(
                                     superCluster.image, // Use representative photo (first photo of first cluster)
                                     superCluster.clusterCount,
-                                    isMobile ? 40 : 55,
+                                    isTouchDevice ? 40 : 55,
                                     isCovered,
                                 )}
                                 eventHandlers={{
@@ -152,7 +152,7 @@ export const TripMap: React.FC<TripMapProps> = ({
                         );
                         // Show green for all covered locations (up to current position)
                         let currentLocationIndex;
-                        if (isMobile) {
+                        if (isTouchDevice) {
                             // Mobile: Slower progression - stay on each location longer
                             currentLocationIndex = Math.floor(
                                 scrollProgress * (photoClusters.length - 0.5),
@@ -169,7 +169,7 @@ export const TripMap: React.FC<TripMapProps> = ({
                                 position={[avgLat, avgLng]}
                                 icon={createIcon(
                                     firstPhoto.image,
-                                    isMobile ? 40 : 55,
+                                    isTouchDevice ? 40 : 55,
                                     "#ffffff",
                                     cluster.length,
                                     isCovered,

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo } from "react";
-import { useIsSmallWidth } from "ente-base/components/utils/hooks";
+import { useIsTouchscreen } from "ente-base/components/utils/hooks";
 
 import type { JourneyPoint } from "../types";
 import { throttle } from "../utils/geocoding";
@@ -38,7 +38,7 @@ export const useScrollHandling = ({
     setHasUserScrolled,
     setScrollProgress,
 }: UseScrollHandlingParams) => {
-    const isMobile = useIsSmallWidth();
+    const isTouchDevice = useIsTouchscreen();
     // Update location positions callback
     const updatePositions = useCallback(() => {
         updateLocationPositions({
@@ -58,7 +58,7 @@ export const useScrollHandling = ({
             setHasUserScrolled,
             setScrollProgress,
             previousActiveLocationRef,
-            isMobile,
+            isTouchDevice,
         });
     }, [
         timelineRef,
@@ -69,7 +69,7 @@ export const useScrollHandling = ({
         setHasUserScrolled,
         setScrollProgress,
         previousActiveLocationRef,
-        isMobile,
+        isTouchDevice,
     ]);
 
     // Throttled scroll handler
@@ -105,7 +105,7 @@ export const useScrollHandling = ({
                 setScrollProgress,
                 setHasUserScrolled,
                 scrollTimelineToLocation: scrollToLocation,
-                isMobile,
+                isTouchDevice,
             });
         },
         [
@@ -116,7 +116,7 @@ export const useScrollHandling = ({
             setScrollProgress,
             setHasUserScrolled,
             scrollToLocation,
-            isMobile,
+            isTouchDevice,
         ],
     );
 

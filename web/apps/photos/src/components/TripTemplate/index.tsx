@@ -1,6 +1,6 @@
 import { Box, styled } from "@mui/material";
 import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
-import { useIsSmallWidth } from "ente-base/components/utils/hooks";
+import { useIsTouchscreen } from "ente-base/components/utils/hooks";
 import { useSaveGroups } from "ente-gallery/components/utils/save-groups";
 import { FileViewer } from "ente-gallery/components/viewer/FileViewer";
 import { downloadAndSaveCollectionFiles } from "ente-gallery/services/save";
@@ -59,7 +59,7 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
     const collectionTitle = collection?.name || albumTitle || "Trip";
 
     // Check if mobile screen
-    const isMobile = useIsSmallWidth();
+    const isTouchDevice = useIsTouchscreen();
 
     // Save groups hook for download progress tracking
     const { saveGroups, onAddSaveGroup, onRemoveSaveGroup } = useSaveGroups();
@@ -187,7 +187,7 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
         setLocationPositions,
         setHasUserScrolled: (scrolled: boolean) => {
             setHasUserScrolled(scrolled);
-            if (isMobile && tripStartedRef.current && timelineRef.current) {
+            if (isTouchDevice && tripStartedRef.current && timelineRef.current) {
                 const timelineContainer = timelineRef.current;
                 const tripStartedElement = tripStartedRef.current;
                 const tripStartedRect =
@@ -218,7 +218,7 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
     return (
         <TripTemplateContainer>
             {!openFileViewer &&
-                (isMobile ? (
+                (isTouchDevice ? (
                     <MobileNavBar
                         onAddPhotos={onAddPhotos}
                         downloadAllFiles={downloadAllFiles}
@@ -232,7 +232,7 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
                     />
                 ))}
             {/* Mobile Layout */}
-            {isMobile ? (
+            {isTouchDevice ? (
                 <MobileContainer>
                     {/* Map takes 60% of height */}
                     <MobileMapContainer>
