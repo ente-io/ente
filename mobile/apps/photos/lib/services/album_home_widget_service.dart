@@ -208,11 +208,14 @@ class AlbumHomeWidgetService {
 
   // Private methods
   String _calculateHash(List<int> albumIds) {
+    if (albumIds.isEmpty) return "";
+    
+    // Get all collections in one shot instead of individual queries
+    final collections = CollectionsService.instance.getActiveCollections();
     String updationTimestamps = "";
-
-    // TODO: This can be done in one shot by querying the database directly
+    
     for (final albumId in albumIds) {
-      final collection = CollectionsService.instance.getCollectionByID(albumId);
+      final collection = collections.firstWhereOrNull((c) => c.id == albumId);
       if (collection != null) {
         updationTimestamps += "$albumId:${collection.updationTime.toString()}_";
       }

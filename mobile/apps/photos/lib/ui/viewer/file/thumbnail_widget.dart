@@ -189,9 +189,8 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         fit: widget.fit,
       );
     }
-    // todo: [2ndJuly22] pref-review if the content Widget which depends on
-    // thumbnail fetch logic should be part of separate stateFull widget.
-    // If yes, parent thumbnail widget can be stateless
+    // Note: Content widget depends on thumbnail fetch logic.
+    // Consider separating into a stateful widget in future refactor if needed
     Widget? content;
     if (image != null) {
       if (widget.rawThumbnail) {
@@ -256,7 +255,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     } else if (widget.file.debugCaption != null) {
       viewChildren.add(FileOverlayText(widget.file.debugCaption!));
     }
-    // todo: Move this icon overlay to the collection widget.
+    // Archive and pin icon overlays specific to collection context
     if (widget.shouldShowArchiveStatus) {
       viewChildren.add(const ArchiveOverlayIcon());
     }
