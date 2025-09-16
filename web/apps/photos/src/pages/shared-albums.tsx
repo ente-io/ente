@@ -463,7 +463,8 @@ export default function PublicCollectionGallery() {
         );
     }
 
-    const isTripsTemplate = process.env.NEXT_PUBLIC_USE_TRIPS_VIEWER === "true";
+    const isTripsTemplate =
+        publicCollection?.pubMagicMetadata?.data.template === "trip";
 
     return (
         <FullScreenDropZone

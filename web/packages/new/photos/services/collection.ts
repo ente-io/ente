@@ -1037,6 +1037,22 @@ export const updateCollectionSortOrder = async (
 ) => updateCollectionPublicMagicMetadata(collection, { asc });
 
 /**
+ * Change the template type of a collection on remote.
+ *
+ * Remote only, does not modify local state.
+ *
+ * This function works only for collections owned by the user.
+ *
+ * @param collection The collection whose template we want to change.
+ *
+ * @param template The template type ("default", "trip").
+ */
+export const updateCollectionTemplate = async (
+    collection: Collection,
+    template: string,
+) => updateCollectionPublicMagicMetadata(collection, { template });
+
+/**
  * Update the private magic metadata of a collection on remote.
  *
  * Remote only, does not modify local state.

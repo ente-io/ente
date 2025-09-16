@@ -65,6 +65,7 @@ import {
     deleteShareURL,
     shareCollection,
     unshareCollection,
+    updateCollectionTemplate,
     updatePublicURL,
     type CreatePublicURLAttributes,
     type UpdatePublicURLAttributes,
@@ -1424,6 +1425,14 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
                     {...{ onRootClose, publicURL }}
                     onUpdate={handlePublicURLUpdate}
                 />
+                <ManageTemplate
+                    {...{
+                        collection,
+                        onRootClose,
+                        onRemotePull,
+                        setBlockingLoad,
+                    }}
+                />
                 <RowButtonGroup>
                     <ManageDeviceLimit
                         {...{ onRootClose, publicURL }}
@@ -1806,3 +1815,88 @@ const SetPublicLinkPassword: React.FC<SetPublicLinkPasswordProps> = ({
         </Dialog>
     );
 };
+
+interface ManageTemplateProps {
+    onRootClose: () => void;
+    collection: Collection;
+    onRemotePull: (opts?: RemotePullOpts) => Promise<void>;
+    setBlockingLoad: (value: boolean) => void;
+}
+
+const ManageTemplate: React.FC<ManageTemplateProps> = ({
+    onRootClose,
+    collection,
+    onRemotePull,
+    setBlockingLoad,
+}) => {
+    const { show: showTemplateOptions, props: templateOptionsVisibilityProps } =
+        useModalVisibility();
+
+    const options = useMemo(() => templateOptions(), []);
+
+    const currentTemplate =
+        collection.pubMagicMetadata?.data?.template || "default";
+
+    const changeTemplateValue = (value: string) => async () => {
+        if (value === currentTemplate) return;
+
+        setBlockingLoad(true);
+        try {
+            await updateCollectionTemplate(collection, value);
+            await onRemotePull({ silent: true });
+            templateOptionsVisibilityProps.onClose();
+        } catch (e) {
+            log.error("Could not update collection template", e);
+        } finally {
+            setBlockingLoad(false);
+        }
+    };
+
+    return (
+        <>
+            <RowButtonGroup>
+                <RowButton
+                    label={t("Template")}
+                    caption={
+                        currentTemplate === "trip" ? t("Trip") : t("Default")
+                    }
+                    onClick={showTemplateOptions}
+                    endIcon={<ChevronRightIcon />}
+                />
+            </RowButtonGroup>
+            <TitledNestedSidebarDrawer
+                anchor="right"
+                {...templateOptionsVisibilityProps}
+                onRootClose={onRootClose}
+                title={t("Template")}
+            >
+                <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
+                    <RowButtonGroup>
+                        {options.map(({ label, value }, index) => (
+                            <React.Fragment key={value}>
+                                <RowButton
+                                    fontWeight="regular"
+                                    onClick={changeTemplateValue(value)}
+                                    label={label}
+                                    endIcon={
+                                        currentTemplate === value && (
+                                            <DoneIcon />
+                                        )
+                                    }
+                                />
+                                {index != options.length - 1 && (
+                                    <RowButtonDivider />
+                                )}
+                            </React.Fragment>
+                        ))}
+                    </RowButtonGroup>
+                </Stack>
+            </TitledNestedSidebarDrawer>
+        </>
+    );
+};
+
+const templateOptions = () => [
+    { label: t("Default"), value: "default" },
+    { label: t("Trip"), value: "trip" },
+];
