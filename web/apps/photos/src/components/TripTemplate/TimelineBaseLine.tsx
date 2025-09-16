@@ -47,12 +47,6 @@ const BaseLine = styled(Box)(() => ({
     zIndex: 0,
 }));
 
-const DashedLine = styled(BaseLine)(({ theme }) => ({
-    backgroundImage: `linear-gradient(to bottom, ${theme.palette.grey[300]} 58%, transparent 58%)`,
-    backgroundSize: "100% 22px",
-    backgroundRepeat: "repeat-y",
-}));
-
 const SolidLine = styled(BaseLine)(({ theme }) => ({
     backgroundColor: theme.palette.grey[300],
 }));

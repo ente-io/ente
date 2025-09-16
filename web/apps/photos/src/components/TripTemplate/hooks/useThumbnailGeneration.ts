@@ -29,15 +29,17 @@ export const useThumbnailGeneration = ({
 
             // Get all current photo IDs
             const currentPhotoIds = new Set(
-                photoClusters.flat().map((photo) => photo.fileId)
+                photoClusters.flat().map((photo) => photo.fileId),
             );
 
             // Check if we have photos that need thumbnails
             const photosNeedingThumbnails = photoClusters
                 .flat()
-                .filter((photo) => 
-                    !photo.image && 
-                    (!processedPhotoIdsRef.current.has(photo.fileId) || !thumbnailsGeneratedRef.current)
+                .filter(
+                    (photo) =>
+                        !photo.image &&
+                        (!processedPhotoIdsRef.current.has(photo.fileId) ||
+                            !thumbnailsGeneratedRef.current),
                 );
 
             if (photosNeedingThumbnails.length === 0) return;
@@ -60,7 +62,10 @@ export const useThumbnailGeneration = ({
             }
 
             // Update processed photos set and mark as generated
-            processedPhotoIdsRef.current = new Set([...processedPhotoIdsRef.current, ...currentPhotoIds]);
+            processedPhotoIdsRef.current = new Set([
+                ...processedPhotoIdsRef.current,
+                ...currentPhotoIds,
+            ]);
             thumbnailsGeneratedRef.current = true;
         };
 

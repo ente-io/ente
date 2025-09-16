@@ -30,17 +30,19 @@ export const useLocationFetching = ({
 
             // Get all current photo IDs
             const currentPhotoIds = new Set(
-                photoClusters.flat().map((photo) => photo.fileId)
+                photoClusters.flat().map((photo) => photo.fileId),
             );
 
             // Check if we have new photos that haven't been processed
             const hasNewPhotos = Array.from(currentPhotoIds).some(
-                (id) => !processedPhotoIdsRef.current.has(id)
+                (id) => !processedPhotoIdsRef.current.has(id),
             );
 
             // Check if any photos need location fetching
             const needsFetching = photoClusters.some((cluster) =>
-                cluster.some((photo) => !locationDataRef.current?.has(photo.fileId))
+                cluster.some(
+                    (photo) => !locationDataRef.current.has(photo.fileId),
+                ),
             );
 
             if (!hasNewPhotos && !needsFetching) {
@@ -77,10 +79,5 @@ export const useLocationFetching = ({
         };
 
         void fetchNames();
-    }, [
-        photoClusters,
-        locationDataRef,
-        setJourneyData,
-        setIsLoadingLocations,
-    ]);
+    }, [photoClusters, locationDataRef, setJourneyData, setIsLoadingLocations]);
 };

@@ -6,23 +6,13 @@ import type { JourneyPoint } from "./types";
 interface MobileTimelineLocationProps {
     cluster: JourneyPoint[];
     index: number;
-    photoClusters: JourneyPoint[][];
-    scrollProgress: number;
     journeyData: JourneyPoint[];
     onRef: (el: HTMLDivElement | null) => void;
     onPhotoClick?: (cluster: JourneyPoint[], fileId: number) => void;
 }
 
 export const MobileTimelineLocation = memo<MobileTimelineLocationProps>(
-    ({
-        cluster,
-        index,
-        photoClusters,
-        scrollProgress,
-        journeyData,
-        onRef,
-        onPhotoClick,
-    }) => {
+    ({ cluster, index, journeyData, onRef, onPhotoClick }) => {
         const firstPhoto = cluster[0];
         if (!firstPhoto) return null;
 
@@ -48,10 +38,6 @@ export const MobileTimelineLocation = memo<MobileTimelineLocationProps>(
         );
         const diffTime = photoDateOnly.getTime() - firstDateOnly.getTime();
         const dayNumber = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
-
-        // Show green for all covered locations (up to current position)
-        const currentLocationIndex = Math.round(scrollProgress * Math.max(0, photoClusters.length - 1));
-        const isCovered = index <= currentLocationIndex;
 
         return (
             <MobileLocationContainer
@@ -129,12 +115,12 @@ const PhotoOverlay = styled(Box)({
     right: "2px",
     zIndex: 30,
     pointerEvents: "none",
-    background: "linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 60%, transparent 100%)",
+    background:
+        "linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 60%, transparent 100%)",
     borderRadius: "0 0 12px 12px",
     padding: "16px",
     minHeight: "fit-content",
 });
-
 
 const DayBadge = styled(Box)({
     display: "inline-flex",

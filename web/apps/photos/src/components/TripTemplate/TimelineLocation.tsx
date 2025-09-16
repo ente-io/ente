@@ -51,7 +51,9 @@ export const TimelineLocation = memo<TimelineLocationProps>(
         const dayNumber = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
 
         // Show green for all covered locations (up to current position)
-        const currentLocationIndex = Math.round(scrollProgress * Math.max(0, photoClusters.length - 1));
+        const currentLocationIndex = Math.round(
+            scrollProgress * Math.max(0, photoClusters.length - 1),
+        );
         const isCovered = index <= currentLocationIndex;
 
         return (
@@ -155,27 +157,25 @@ const DotBackground = styled(Box)(({ theme }) => ({
 }));
 
 const TimelineDot = styled(Box, {
-    shouldForwardProp: (prop) => prop !== 'isReached',
-})<{ isReached: boolean }>(
-    ({ theme, isReached }) => ({
-        position: "absolute",
-        left: "50%",
-        top: "50%",
-        transform: "translate(-50%, -50%)",
-        borderRadius: "50%",
-        border: `2px solid ${theme.palette.background.paper}`,
-        zIndex: 20,
-        width: "12px",
-        height: "12px",
-        transition: "all 0.3s",
-        backgroundColor: isReached
-            ? theme.palette.success.main
-            : theme.palette.text.primary,
-        boxShadow: isReached
-            ? `0 0 0 3px ${theme.palette.success.main}30, 0 0 0 6px ${theme.palette.success.main}15`
-            : "none",
-    }),
-);
+    shouldForwardProp: (prop) => prop !== "isReached",
+})<{ isReached: boolean }>(({ theme, isReached }) => ({
+    position: "absolute",
+    left: "50%",
+    top: "50%",
+    transform: "translate(-50%, -50%)",
+    borderRadius: "50%",
+    border: `2px solid ${theme.palette.background.paper}`,
+    zIndex: 20,
+    width: "12px",
+    height: "12px",
+    transition: "all 0.3s",
+    backgroundColor: isReached
+        ? theme.palette.success.main
+        : theme.palette.text.primary,
+    boxShadow: isReached
+        ? `0 0 0 3px ${theme.palette.success.main}30, 0 0 0 6px ${theme.palette.success.main}15`
+        : "none",
+}));
 
 const ContentContainer = styled(Box)({ width: "50%", paddingTop: "58px" });
 

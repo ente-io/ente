@@ -111,8 +111,7 @@ export const handleTimelineScroll = ({
 
     // Only pan map when active location changes (discrete panning)
     if (
-        mapRef &&
-        mapRef.getContainer() &&
+        mapRef?.getContainer() &&
         currentActiveLocationIndex !== previousActiveLocationIndex
     ) {
         previousActiveLocationRef.current = currentActiveLocationIndex;
@@ -168,12 +167,16 @@ export const handleTimelineScroll = ({
                 });
 
                 setTimeout(() => {
-                    if (mapRef && mapRef.getContainer()) {
-                        mapRef.flyTo([positionedLat, positionedLng], targetZoom, {
-                            animate: true,
-                            duration: 1.2,
-                            easeLinearity: 0.25,
-                        });
+                    if (mapRef?.getContainer()) {
+                        mapRef.flyTo(
+                            [positionedLat, positionedLng],
+                            targetZoom,
+                            {
+                                animate: true,
+                                duration: 1.2,
+                                easeLinearity: 0.25,
+                            },
+                        );
                     }
                 }, 1600);
             } else {
@@ -278,7 +281,7 @@ export const handleMarkerClick = ({
         clusterLng,
     );
 
-    if (mapRef && mapRef.getContainer()) {
+    if (mapRef?.getContainer()) {
         try {
             const targetZoom = isTouchDevice ? 8 : 10; // Touch device-aware zoom level
             mapRef.flyTo([positionedLat, positionedLng], targetZoom, {

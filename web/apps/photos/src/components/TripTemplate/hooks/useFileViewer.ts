@@ -24,7 +24,7 @@ export const useFileViewer = ({
 
             // Filter files to only include those from the cluster
             const clusterFiles = files.filter((file) =>
-                clusterFileIds.includes(file.id)
+                clusterFileIds.includes(file.id),
             );
 
             // Sort cluster files by creation time

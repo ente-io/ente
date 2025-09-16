@@ -187,7 +187,11 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
         setLocationPositions,
         setHasUserScrolled: (scrolled: boolean) => {
             setHasUserScrolled(scrolled);
-            if (isTouchDevice && tripStartedRef.current && timelineRef.current) {
+            if (
+                isTouchDevice &&
+                tripStartedRef.current &&
+                timelineRef.current
+            ) {
                 const timelineContainer = timelineRef.current;
                 const tripStartedElement = tripStartedRef.current;
                 const tripStartedRect =
@@ -319,12 +323,6 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
                                                             key={index}
                                                             cluster={cluster}
                                                             index={index}
-                                                            photoClusters={
-                                                                photoClusters
-                                                            }
-                                                            scrollProgress={
-                                                                scrollProgress
-                                                            }
                                                             journeyData={
                                                                 journeyData
                                                             }

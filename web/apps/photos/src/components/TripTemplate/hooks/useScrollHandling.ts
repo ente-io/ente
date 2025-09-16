@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo } from "react";
 import { useIsTouchscreen } from "ente-base/components/utils/hooks";
+import { useCallback, useEffect, useMemo } from "react";
 
 import type { JourneyPoint } from "../types";
 import { throttle } from "../utils/geocoding";

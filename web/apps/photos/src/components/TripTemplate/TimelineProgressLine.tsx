@@ -8,9 +8,7 @@ interface TimelineProgressLineProps {
     photoClusters: JourneyPoint[][];
 }
 
-export const TimelineProgressLine = memo<TimelineProgressLineProps>(
-    () => {
-        // No longer showing progressive green line - green indicators only for current location
-        return null;
-    },
-);
+export const TimelineProgressLine = memo<TimelineProgressLineProps>(() => {
+    // No longer showing progressive green line - green indicators only for current location
+    return null;
+});

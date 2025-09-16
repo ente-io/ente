@@ -74,7 +74,11 @@ export const TripMap: React.FC<TripMapProps> = ({
             {hasPhotoData ? (
                 <StyledMapContainer
                     center={getMapCenter(photoClusters, journeyData)}
-                    zoom={isTouchDevice ? Math.max(1, optimalZoom - 2) : optimalZoom}
+                    zoom={
+                        isTouchDevice
+                            ? Math.max(1, optimalZoom - 2)
+                            : optimalZoom
+                    }
                     scrollWheelZoom={true}
                     zoomControl={false}
                     attributionControl={!isTouchDevice}
@@ -86,7 +90,11 @@ export const TripMap: React.FC<TripMapProps> = ({
                     />
                     {/* Stadia Alidade Satellite - includes both imagery and labels */}
                     <TileLayer
-                        attribution={isTouchDevice ? '' : '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'}
+                        attribution={
+                            isTouchDevice
+                                ? ""
+                                : '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
+                        }
                         url="https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg"
                         maxZoom={20}
                     />
@@ -102,9 +110,15 @@ export const TripMap: React.FC<TripMapProps> = ({
                             );
                         } else {
                             // Desktop: Use original logic
-                            currentLocationIndex = Math.round(scrollProgress * Math.max(0, photoClusters.length - 1));
+                            currentLocationIndex = Math.round(
+                                scrollProgress *
+                                    Math.max(0, photoClusters.length - 1),
+                            );
                         }
-                        const isCovered = superCluster.clustersInvolved.some(clusterIndex => clusterIndex <= currentLocationIndex);
+                        const isCovered = superCluster.clustersInvolved.some(
+                            (clusterIndex) =>
+                                clusterIndex <= currentLocationIndex,
+                        );
 
                         return (
                             <Marker
@@ -159,9 +173,13 @@ export const TripMap: React.FC<TripMapProps> = ({
                             );
                         } else {
                             // Desktop: Use original logic
-                            currentLocationIndex = Math.round(scrollProgress * Math.max(0, photoClusters.length - 1));
+                            currentLocationIndex = Math.round(
+                                scrollProgress *
+                                    Math.max(0, photoClusters.length - 1),
+                            );
                         }
-                        const isCovered = originalClusterIndex <= currentLocationIndex;
+                        const isCovered =
+                            originalClusterIndex <= currentLocationIndex;
 
                         return (
                             <Marker
@@ -205,14 +223,12 @@ export const TripMap: React.FC<TripMapProps> = ({
 
 // Styled components
 const MapContainerWrapper = styled(Box, {
-    shouldForwardProp: (prop) => prop !== 'hasPhotoData',
-})<{ hasPhotoData: boolean }>(
-    ({ hasPhotoData }) => ({
-        width: "100%",
-        height: "100%",
-        backgroundColor: hasPhotoData ? "transparent" : "#000000",
-    }),
-);
+    shouldForwardProp: (prop) => prop !== "hasPhotoData",
+})<{ hasPhotoData: boolean }>(({ hasPhotoData }) => ({
+    width: "100%",
+    height: "100%",
+    backgroundColor: hasPhotoData ? "transparent" : "#000000",
+}));
 
 const StyledMapContainer = styled(MapContainer)({
     width: "100%",
