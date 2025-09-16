@@ -28,70 +28,77 @@ class CollectionRowWidget extends StatelessWidget {
     final updateTime =
         DateTime.fromMicrosecondsSinceEpoch(collection.updationTime);
 
-    return InkWell(
-      onTap: () => _openCollection(context),
-      child: Container(
-        padding: EdgeInsets.fromLTRB(16.0, 2, 16.0, isLastItem ? 8 : 2),
-        decoration: BoxDecoration(
-          border: isLastItem
-              ? null
-              : Border(
-                  bottom: BorderSide(
-                    color: Theme.of(context).dividerColor.withAlpha(30),
-                    width: 0.5,
-                  ),
+    final textTheme = getEnteTextTheme(context);
+    final colorScheme = getEnteColorScheme(context);
+
+    final collectionRowWidget = Flexible(
+      flex: 6,
+      child: Row(
+        children: [
+          SizedBox(
+            height: 60,
+            width: 48,
+            child: Icon(
+              Icons.folder_open,
+              color: collection.type == CollectionType.favorites
+                  ? colorScheme.primary500
+                  : Colors.grey,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  collection.name ?? 'Unnamed Collection',
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  style: textTheme.body,
                 ),
+                Text(
+                  formatDate(context, updateTime),
+                  style: textTheme.small.copyWith(
+                    color: getEnteColorScheme(context).textMuted,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+
+    return GestureDetector(
+      onTap: () => _openCollection(context),
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: colorScheme.strokeFaint,
+          ),
+          borderRadius: const BorderRadius.all(Radius.circular(6)),
         ),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Expanded(
-              flex: 2,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.folder_open,
-                        color: collection.type == CollectionType.favorites
-                            ? getEnteColorScheme(context).primary500
-                            : Colors.grey,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 12),
-                      Flexible(
-                        child: Text(
-                          collection.name ?? 'Unnamed Collection',
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                          style: getEnteTextTheme(context).body,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
+            collectionRowWidget,
+            Flexible(
               flex: 1,
-              child: Text(
-                formatDate(context, updateTime),
-                style: getEnteTextTheme(context).small.copyWith(
-                      color: Theme.of(context).textTheme.bodySmall?.color,
-                    ),
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
+              child: PopupMenuButton<String>(
+                onSelected: (value) => _handleMenuAction(context, value),
+                icon: const Icon(
+                  Icons.more_vert,
+                  size: 20,
+                ),
+                itemBuilder: (BuildContext context) {
+                  return _buildPopupMenuItems(context);
+                },
               ),
-            ),
-            PopupMenuButton<String>(
-              onSelected: (value) => _handleMenuAction(context, value),
-              icon: const Icon(
-                Icons.more_vert,
-                size: 20,
-              ),
-              itemBuilder: (BuildContext context) {
-                return _buildPopupMenuItems(context);
-              },
             ),
           ],
         ),

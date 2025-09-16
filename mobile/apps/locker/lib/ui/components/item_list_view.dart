@@ -1,6 +1,5 @@
-
 import 'package:ente_ui/theme/ente_theme.dart';
-import 'package:flutter/material.dart'; 
+import 'package:flutter/material.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/models/file.dart';
@@ -139,31 +138,30 @@ class _ItemListViewState extends State<ItemListView> {
       return _buildDefaultEmptyState(context);
     }
 
-    return Card(
-      margin: EdgeInsets.zero,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (widget.enableSorting) _buildSortingHeader(context),
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            padding: EdgeInsets.zero,
-            itemCount: _sortedItems.length,
-            itemBuilder: (context, index) {
-              final item = _sortedItems[index];
-              final isLastItem = index == _sortedItems.length - 1;
-              return ListItemWidget(
-                item: item,
-                collections: widget.collections,
-                fileOverflowActions: widget.fileOverflowActions,
-                collectionOverflowActions: widget.collectionOverflowActions,
-                isLastItem: isLastItem,
-              );
-            },
-          ),
-        ],
-      ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (widget.enableSorting) _buildSortingHeader(context),
+        ListView.separated(
+          separatorBuilder: (context, index) {
+            return const SizedBox(height: 8);
+          },
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: _sortedItems.length,
+          itemBuilder: (context, index) {
+            final item = _sortedItems[index];
+            final isLastItem = index == _sortedItems.length - 1;
+            return ListItemWidget(
+              item: item,
+              collections: widget.collections,
+              fileOverflowActions: widget.fileOverflowActions,
+              collectionOverflowActions: widget.collectionOverflowActions,
+              isLastItem: isLastItem,
+            );
+          },
+        ),
+      ],
     );
   }
 
@@ -196,14 +194,6 @@ class _ItemListViewState extends State<ItemListView> {
   Widget _buildSortingHeader(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: Theme.of(context).dividerColor,
-            width: 0.1,
-          ),
-        ),
-      ),
       child: Row(
         children: [
           Expanded(
@@ -232,7 +222,7 @@ class _ItemListViewState extends State<ItemListView> {
                             ? Icons.arrow_upward
                             : Icons.arrow_downward,
                         size: 16,
-                        color: Theme.of(context).primaryColor,
+                        color: getEnteColorScheme(context).textMuted,
                       ),
                   ],
                 ),
@@ -265,7 +255,7 @@ class _ItemListViewState extends State<ItemListView> {
                             ? Icons.arrow_upward
                             : Icons.arrow_downward,
                         size: 16,
-                        color: Theme.of(context).primaryColor,
+                        color: getEnteColorScheme(context).textMuted,
                       ),
                   ],
                 ),
