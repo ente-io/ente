@@ -39,6 +39,7 @@ export const MobileTripStarted = memo<MobileTripStartedProps>(
                         )}
                     </MobileTripStartedText>
                 </MobileTripStartedContent>
+                <MobileTripStartedDot />
                 <MobileTripStartedLine />
             </MobileTripStartedContainer>
         );
@@ -92,4 +93,14 @@ const TripStartedDate = styled("span")(({ theme }) => ({
     fontSize: "12px",
     fontWeight: "normal",
     color: theme.palette.text.secondary,
+}));
+
+const MobileTripStartedDot = styled(Box)(({ theme }) => ({
+    width: "8px",
+    height: "8px",
+    backgroundColor: theme.palette.grey[500],
+    borderRadius: "50%",
+    margin: "10px auto 0 auto",
+    position: "relative",
+    zIndex: 1,
 }));
