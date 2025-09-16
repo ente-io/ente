@@ -52,6 +52,13 @@ configuration body.
 Use the `s3.hot_storage.primary` option if you'd like to set one of the other
 pre-defined buckets as the primary bucket.
 
+To enable replication after configuring all 3 storage buckets, set `replication.enabled` to `true` in [museum.yaml](https://github.com/ente-io/ente/blob/main/server/configurations/local.yaml):
+
+```yaml
+replication:
+    enabled: true
+```
+
 ### Bucket configuration
 
 The keys `b2-eu-cen` (primary storage), `wasabi-eu-central-2-v3` (secondary

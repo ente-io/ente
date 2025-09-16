@@ -220,6 +220,19 @@ class FileAppBarState extends State<FileAppBar> {
         ),
       );
     }
+    // Add to album option for uploaded files (behind feature flag)
+    if (flagService.addToAlbumFeature &&
+        widget.file.isUploaded &&
+        !isFileHidden) {
+      items.add(
+        EntePopupMenuItem(
+          "+ (i)",
+          value: 10,
+          icon: Icons.add,
+          iconColor: Theme.of(context).iconTheme.color,
+        ),
+      );
+    }
     if ((widget.file.fileType == FileType.image ||
             widget.file.fileType == FileType.livePhoto) &&
         Platform.isAndroid) {
@@ -360,6 +373,8 @@ class FileAppBarState extends State<FileAppBar> {
               await _handleVideoStream('create');
             } else if (value == 9) {
               await _handleVideoStream('recreate');
+            } else if (value == 10) {
+              await _handleAddToAlbum();
             }
           },
         ),
@@ -528,5 +543,15 @@ class FileAppBarState extends State<FileAppBar> {
       _logger.severe("Failed to $streamType video stream", e, s);
       await showGenericErrorDialog(context: context, error: e);
     }
+  }
+
+  Future<void> _handleAddToAlbum() async {
+    final selectedFiles = SelectedFiles();
+    selectedFiles.files.add(widget.file);
+    showCollectionActionSheet(
+      context,
+      selectedFiles: selectedFiles,
+      actionType: CollectionActionType.addFiles,
+    );
   }
 }

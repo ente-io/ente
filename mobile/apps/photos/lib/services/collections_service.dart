@@ -532,6 +532,65 @@ class CollectionsService {
     return favorites + pinned + rest;
   }
 
+  Future<List<Collection>> getCollectionForWidgetSelection() async {
+    final AlbumSortKey sortKey = localSettings.albumSortKey();
+    final AlbumSortDirection sortDirection = localSettings.albumSortDirection();
+    final bool includeShared = flagService.widgetSharedAlbums;
+    final List<Collection> collections = CollectionsService.instance
+        .getCollectionsForUI(includedShared: includeShared);
+    final bool hasFavorites = FavoritesService.instance.hasFavorites();
+    late Map<int, int> collectionIDToNewestPhotoTime;
+    if (sortKey == AlbumSortKey.newestPhoto) {
+      collectionIDToNewestPhotoTime =
+          await CollectionsService.instance.getCollectionIDToNewestFileTime();
+    }
+    collections.sort(
+      (first, second) {
+        int comparison;
+        if (sortKey == AlbumSortKey.albumName) {
+          comparison = compareAsciiLowerCaseNatural(
+            first.displayName,
+            second.displayName,
+          );
+        } else if (sortKey == AlbumSortKey.newestPhoto) {
+          comparison =
+              (collectionIDToNewestPhotoTime[second.id] ?? -1 * intMaxValue)
+                  .compareTo(
+            collectionIDToNewestPhotoTime[first.id] ?? -1 * intMaxValue,
+          );
+        } else {
+          comparison = second.updationTime.compareTo(first.updationTime);
+        }
+        return sortDirection == AlbumSortDirection.ascending
+            ? comparison
+            : -comparison;
+      },
+    );
+    final List<Collection> favorites = [];
+    final List<Collection> pinned = [];
+    final List<Collection> rest = [];
+    for (final collection in collections) {
+      if (collection.type == CollectionType.uncategorized ||
+          collection.isQuickLinkCollection() ||
+          collection.isHidden() ||
+          collection.isArchived()) {
+        continue;
+      }
+      if (collection.type == CollectionType.favorites) {
+        // Hide fav collection if it's empty
+        if (hasFavorites) {
+          favorites.add(collection);
+        }
+      } else if (collection.isPinned) {
+        pinned.add(collection);
+      } else {
+        rest.add(collection);
+      }
+    }
+
+    return favorites + pinned + rest;
+  }
+
   User getFileOwner(int userID, int? collectionID) {
     if (_cachedUserIdToUser.containsKey(userID)) {
       return _cachedUserIdToUser[userID]!;
