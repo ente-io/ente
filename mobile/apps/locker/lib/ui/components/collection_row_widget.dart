@@ -46,7 +46,7 @@ class CollectionRowWidget extends StatelessWidget {
               size: 22,
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 12),
           Flexible(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,13 +55,12 @@ class CollectionRowWidget extends StatelessWidget {
                 Text(
                   collection.name ?? 'Unnamed Collection',
                   overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                  style: textTheme.body,
+                  maxLines: 1, 
                 ),
                 Text(
                   formatDate(context, updateTime),
                   style: textTheme.small.copyWith(
-                    color: getEnteColorScheme(context).textMuted,
+                    color: colorScheme.textMuted,
                   ),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
