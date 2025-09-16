@@ -1029,8 +1029,6 @@ const Page: React.FC = () => {
                         mb: "12px",
                         px: "24px",
                         "@media (width < 720px)": { px: "4px" },
-                        opacity: isFileViewerOpen ? 0 : 1,
-                        pointerEvents: isFileViewerOpen ? "none" : "auto",
                     },
                     showSelectionBar && { borderColor: "accent.main" },
                 ]}

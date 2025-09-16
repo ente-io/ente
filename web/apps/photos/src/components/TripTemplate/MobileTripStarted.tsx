@@ -79,7 +79,7 @@ const MobileTripStartedLine = styled(Box)(({ theme }) => ({
     width: "3px",
     backgroundColor: theme.palette.grey[300],
     transform: "translateX(-1.5px)",
-    zIndex: 1,
+    zIndex: 0,
 }));
 
 const TripStartedTitle = styled("span")(({ theme }) => ({

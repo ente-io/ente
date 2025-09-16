@@ -157,38 +157,44 @@ export const handleTimelineScroll = ({
 
         const targetZoom = isMobile ? 8 : 10; // Mobile-aware zoom level
 
-        if (isDistantLocation) {
-            // For distant locations: zoom out → pan → zoom in
-            const intermediateZoom = isMobile ? 2 : 4;
-            mapRef.flyTo([positionedLat, positionedLng], intermediateZoom, {
-                animate: true,
-                duration: 1.5,
-                easeLinearity: 0.25,
-            });
-
-            setTimeout(() => {
-                mapRef.flyTo([positionedLat, positionedLng], targetZoom, {
+        try {
+            if (isDistantLocation) {
+                // For distant locations: zoom out → pan → zoom in
+                const intermediateZoom = isMobile ? 2 : 4;
+                mapRef.flyTo([positionedLat, positionedLng], intermediateZoom, {
                     animate: true,
-                    duration: 1.2,
+                    duration: 1.5,
                     easeLinearity: 0.25,
                 });
-            }, 1600);
-        } else {
-            // For nearby locations: simple pan to target location
-            const currentMapZoom = mapRef.getZoom();
-            if (Math.abs(currentMapZoom - targetZoom) > 0.5) {
-                mapRef.flyTo([positionedLat, positionedLng], targetZoom, {
-                    animate: true,
-                    duration: 0.8,
-                    easeLinearity: 0.3,
-                });
+
+                setTimeout(() => {
+                    if (mapRef && mapRef.getContainer()) {
+                        mapRef.flyTo([positionedLat, positionedLng], targetZoom, {
+                            animate: true,
+                            duration: 1.2,
+                            easeLinearity: 0.25,
+                        });
+                    }
+                }, 1600);
             } else {
-                mapRef.panTo([positionedLat, positionedLng], {
-                    animate: true,
-                    duration: 0.8,
-                    easeLinearity: 0.3,
-                });
+                // For nearby locations: simple pan to target location
+                const currentMapZoom = mapRef.getZoom();
+                if (Math.abs(currentMapZoom - targetZoom) > 0.5) {
+                    mapRef.flyTo([positionedLat, positionedLng], targetZoom, {
+                        animate: true,
+                        duration: 0.8,
+                        easeLinearity: 0.3,
+                    });
+                } else {
+                    mapRef.panTo([positionedLat, positionedLng], {
+                        animate: true,
+                        duration: 0.8,
+                        easeLinearity: 0.3,
+                    });
+                }
             }
+        } catch (error) {
+            console.warn("Map operation failed:", error);
         }
     }
 };
@@ -273,12 +279,16 @@ export const handleMarkerClick = ({
     );
 
     if (mapRef && mapRef.getContainer()) {
-        const targetZoom = isMobile ? 8 : 10; // Mobile-aware zoom level
-        mapRef.flyTo([positionedLat, positionedLng], targetZoom, {
-            animate: true,
-            duration: 1.0,
-            easeLinearity: 0.3,
-        });
+        try {
+            const targetZoom = isMobile ? 8 : 10; // Mobile-aware zoom level
+            mapRef.flyTo([positionedLat, positionedLng], targetZoom, {
+                animate: true,
+                duration: 1.0,
+                easeLinearity: 0.3,
+            });
+        } catch (error) {
+            console.warn("Map operation failed:", error);
+        }
     }
 
     setTimeout(() => {
