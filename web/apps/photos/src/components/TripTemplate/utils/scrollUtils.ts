@@ -167,17 +167,11 @@ export const handleTimelineScroll = ({
                 });
 
                 setTimeout(() => {
-                    if (mapRef?.getContainer()) {
-                        mapRef.flyTo(
-                            [positionedLat, positionedLng],
-                            targetZoom,
-                            {
-                                animate: true,
-                                duration: 1.2,
-                                easeLinearity: 0.25,
-                            },
-                        );
-                    }
+                    mapRef.flyTo([positionedLat, positionedLng], targetZoom, {
+                        animate: true,
+                        duration: 1.2,
+                        easeLinearity: 0.25,
+                    });
                 }, 1600);
             } else {
                 // For nearby locations: simple pan to target location
