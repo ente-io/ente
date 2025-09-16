@@ -14,6 +14,7 @@ import "package:photos/services/machine_learning/semantic_search/clip/clip_text_
 import "package:photos/services/machine_learning/semantic_search/query_result.dart";
 import "package:photos/src/rust/frb_generated.dart" show RustLib;
 import "package:photos/utils/image_ml_util.dart";
+import "package:photos/utils/isolate/widget_image_operations.dart";
 import "package:photos/utils/ml_util.dart";
 
 final Map<String, dynamic> _isolateCache = {};
@@ -56,6 +57,9 @@ enum IsolateOperation {
   setIsolateCache,
   clearIsolateCache,
   clearAllIsolateCache,
+
+  /// Widget image processing
+  processWidgetImage,
 }
 
 /// WARNING: Only return primitives unless you know the method is only going
@@ -218,6 +222,11 @@ Future<dynamic> isolateFunction(
       return true;
 
     /// Cases for Caching stop here
+
+    /// Widget image processing
+    case IsolateOperation.processWidgetImage:
+      final result = await WidgetImageOperations.processWidgetImage(args);
+      return result;
   }
 }
 

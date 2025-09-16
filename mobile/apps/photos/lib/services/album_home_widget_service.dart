@@ -209,11 +209,11 @@ class AlbumHomeWidgetService {
   // Private methods
   String _calculateHash(List<int> albumIds) {
     if (albumIds.isEmpty) return "";
-    
+
     // Get all collections in one shot instead of individual queries
     final collections = CollectionsService.instance.getActiveCollections();
     String updationTimestamps = "";
-    
+
     for (final albumId in albumIds) {
       final collection = collections.firstWhereOrNull((c) => c.id == albumId);
       if (collection != null) {

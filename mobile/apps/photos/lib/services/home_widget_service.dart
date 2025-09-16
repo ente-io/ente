@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart' as hw;
 import 'package:home_widget/home_widget.dart';
@@ -9,12 +10,14 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path_provider_foundation/path_provider_foundation.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file/file.dart';
+import 'package:photos/service_locator.dart';
 import 'package:photos/services/album_home_widget_service.dart';
 import 'package:photos/services/memory_home_widget_service.dart';
 import 'package:photos/services/people_home_widget_service.dart';
 import 'package:photos/services/smart_memories_service.dart';
-import 'package:photos/utils/thumbnail_util.dart';
 import "package:synchronized/synchronized.dart";
+
+import 'package:photos/utils/widget_image_util.dart';
 
 enum WidgetStatus {
   // notSynced means the widget is not initialized or has no data
@@ -33,7 +36,9 @@ enum WidgetStatus {
 /// Handles widget initialization, updates, and interaction with platform-specific widget APIs
 class HomeWidgetService {
   // Constants
-  static const double THUMBNAIL_SIZE = 512.0;
+  static const double THUMBNAIL_SIZE = 512.0; // Legacy size for compatibility
+  static const double WIDGET_IMAGE_SIZE =
+      1280.0; // Optimal size for mobile widgets (xxxhdpi screens)
   static const String WIDGET_DIRECTORY = 'home_widget';
 
   // URI schemes for different widget types
@@ -101,13 +106,15 @@ class HomeWidgetService {
     String title,
     String? mainKey,
   ) async {
-    final result = await _captureFile(file, key, title, mainKey);
-    if (!result) {
+    final actualSize = await _captureFile(file, key, title, mainKey);
+    if (actualSize == null) {
       _logger.warning("Failed to capture file ${file.displayName}");
       return null;
     }
 
-    return const Size(THUMBNAIL_SIZE, THUMBNAIL_SIZE);
+    final imageSize =
+        flagService.enhancedWidgetImage ? WIDGET_IMAGE_SIZE : THUMBNAIL_SIZE;
+    return Size(imageSize, imageSize);
   }
 
   Future<int> countHomeWidgets(
@@ -130,18 +137,25 @@ class HomeWidgetService {
     return await hw.HomeWidget.getInstalledWidgets();
   }
 
-  Future<bool> _captureFile(
+  Future<Size?> _captureFile(
     EnteFile file,
     String key,
     String title,
     String? mainKey,
   ) async {
     try {
-      // Get thumbnail data
-      final thumbnail = await getThumbnail(file);
-      if (thumbnail == null) {
-        _logger.warning("Failed to get thumbnail for file ${file.displayName}");
-        return false;
+      // Get widget image with proper EXIF handling
+      const imageSize = WIDGET_IMAGE_SIZE; // 1280px for optimal quality
+      final imageData = await getWidgetImage(
+        file,
+        maxSize: imageSize,
+        quality: flagService.enhancedWidgetImage ? 85 : 70,
+      );
+
+      if (imageData == null) {
+        _logger
+            .warning("Failed to get widget image for file ${file.displayName}");
+        return null;
       }
 
       // Get appropriate directory for widget assets
@@ -156,13 +170,20 @@ class HomeWidgetService {
         await thumbnailFile.create(recursive: true);
       }
 
-      await thumbnailFile.writeAsBytes(thumbnail);
+      await thumbnailFile.writeAsBytes(imageData);
       await setData(key, thumbnailPath);
 
       // Format date for display
-      final subText = await SmartMemoriesService.getDateFormattedLocale(
+      final baseSubText = await SmartMemoriesService.getDateFormattedLocale(
         creationTime: file.creationTime!,
       );
+
+      // In debug mode, show actual image size with (i) suffix
+      String subText = baseSubText;
+      if (kDebugMode) {
+        final qualityIndicator = "${imageSize.toInt()}px";
+        subText = "$baseSubText • $qualityIndicator (i)";
+      }
 
       // Create metadata
       final Map<String, dynamic> metadata = {
@@ -175,10 +196,10 @@ class HomeWidgetService {
       // Save metadata in platform-specific format
       await _saveWidgetMetadata(key, metadata);
 
-      return true;
+      return Size(WIDGET_IMAGE_SIZE, WIDGET_IMAGE_SIZE);
     } catch (error, stackTrace) {
       _logger.severe("Failed to save the thumbnail", error, stackTrace);
-      return false;
+      return null;
     }
   }
 

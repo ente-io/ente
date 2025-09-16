@@ -11,3 +11,4 @@
 - Neeraj: (i) Debug option to enable logViewer
 - Neeraj: Potential fix for ios in-app payment
 - Prateek: (i) Optimize album widget hash calculation to use batch query
+- Prateek: (i) Fix widget image quality and rotation with isolate-based processing pipeline
