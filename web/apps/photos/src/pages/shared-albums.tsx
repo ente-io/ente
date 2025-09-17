@@ -17,7 +17,6 @@ import Typography from "@mui/material/Typography";
 import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
 import { type FileListHeaderOrFooter } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
-import { TripTemplate } from "components/TripTemplate";
 import { Upload } from "components/Upload";
 import {
     AccountsPageContents,
@@ -92,6 +91,7 @@ import {
 import { PseudoCollectionID } from "ente-new/photos/services/collection-summary";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { t } from "i18next";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type FileWithPath } from "react-dropzone";
@@ -465,6 +465,14 @@ export default function PublicCollectionGallery() {
 
     const isTripsTemplate =
         publicCollection?.pubMagicMetadata?.data.template === "trip";
+
+    const TripTemplate = dynamic(
+        () =>
+            import("components/TripTemplate").then((mod) => ({
+                default: mod.TripTemplate,
+            })),
+        { ssr: false },
+    );
 
     return (
         <FullScreenDropZone
