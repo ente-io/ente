@@ -590,100 +590,146 @@ when (modelType) {
 **File**: `lib/utils/image_ml_util.dart`
 
 ```dart
-// Text detection preprocessing - resize to multiple of 32, normalize
-Future<Float32List> preprocessImageTextDetection(
+/// Preprocesses an image for text detection.
+/// Takes raw RGBA image data and:
+/// 1. Resizes the image so minimum dimension is 736px, rounded to nearest 32
+/// 2. Normalizes pixels using ((pixel/255 - 0.5)/0.5)
+/// 3. Converts from HWC to CHW format
+/// Returns a tuple of (preprocessedData, resizedDimensions).
+Future<(Float32List, Dimensions)> preprocessImageTextDetection(
   Dimensions dim,
   Uint8List rawRgbaBytes,
 ) async {
-  // Calculate resize dimensions (min 736px, round to 32)
+  // Step 1: Calculate resize dimensions according to spec
   double ratio = 1.0;
-  if (math.min(dim.height, dim.width) < 736) {
-    ratio = 736.0 / math.min(dim.height, dim.width);
+  if (min(dim.height, dim.width) < 736) {
+    ratio = 736.0 / min(dim.height, dim.width);
   }
-  int resizeH = ((dim.height * ratio) / 32).round() * 32;
-  int resizeW = ((dim.width * ratio) / 32).round() * 32;
+
+  int resizeH = (dim.height * ratio).round();
+  int resizeW = (dim.width * ratio).round();
+
+  // Round to nearest 32
+  resizeH = (resizeH / 32).round() * 32;
+  resizeW = (resizeW / 32).round() * 32;
 
   // Ensure minimum dimensions
-  resizeH = math.max(32, resizeH);
-  resizeW = math.max(32, resizeW);
+  if (resizeH < 32) resizeH = 32;
+  if (resizeW < 32) resizeW = 32;
 
-  final processedBytes = Float32List(3 * resizeH * resizeW);
-  final buffer = Float32List.view(processedBytes.buffer);
+  const int channels = 3;
+  final int totalSize = channels * resizeH * resizeW;
+  final Float32List processedBytes = Float32List(totalSize);
 
-  int pixelIndex = 0;
+  // Calculate scaling factors for resizing
+  final double scaleX = resizeW / dim.width;
+  final double scaleY = resizeH / dim.height;
+
+  // Channel offsets for CHW format: [C, H, W]
   final int channelOffsetGreen = resizeH * resizeW;
   final int channelOffsetBlue = 2 * resizeH * resizeW;
 
-  for (var h = 0; h < resizeH; h++) {
-    for (var w = 0; w < resizeW; w++) {
-      // Use bilinear interpolation for resizing
+  int pixelIndex = 0;
+
+  // Step 2 & 3: Process each pixel, normalize, and store in CHW format
+  for (int h = 0; h < resizeH; h++) {
+    for (int w = 0; w < resizeW; w++) {
+      // Map output coordinates back to original image coordinates
+      final double originalX = w / scaleX;
+      final double originalY = h / scaleY;
+
+      // Get pixel using bilinear interpolation
       final RGB pixel = _getPixelBilinear(
-        w / ratio,
-        h / ratio,
+        originalX,
+        originalY,
         dim,
         rawRgbaBytes,
       );
 
-      // Normalize: ((pixel/255 - 0.5) / 0.5)
-      buffer[pixelIndex] = ((pixel.$1 / 255.0) - 0.5) / 0.5;
-      buffer[pixelIndex + channelOffsetGreen] = ((pixel.$2 / 255.0) - 0.5) / 0.5;
-      buffer[pixelIndex + channelOffsetBlue] = ((pixel.$3 / 255.0) - 0.5) / 0.5;
+      // Step 2: Normalize using ((pixel/255 - 0.5)/0.5)
+      final double normalizedR = ((pixel.$1 / 255.0) - 0.5) / 0.5;
+      final double normalizedG = ((pixel.$2 / 255.0) - 0.5) / 0.5;
+      final double normalizedB = ((pixel.$3 / 255.0) - 0.5) / 0.5;
+
+      // Step 3: Store in CHW format
+      processedBytes[pixelIndex] = normalizedR;
+      processedBytes[pixelIndex + channelOffsetGreen] = normalizedG;
+      processedBytes[pixelIndex + channelOffsetBlue] = normalizedB;
+
       pixelIndex++;
     }
   }
 
-  return processedBytes;
+  final resizedDimensions = Dimensions(width: resizeW, height: resizeH);
+  return (processedBytes, resizedDimensions);
 }
 
-// Text classification/recognition preprocessing - fixed size with padding
-Future<Float32List> preprocessImageTextFixed(
+/// Preprocesses cropped text regions for text orientation classification.
+/// Resizes each region to fixed 192x48 dimensions and normalizes pixels.
+/// Returns Float32List in CHW format for [N, 3, 48, 192] input where N is batch size.
+Future<Float32List> preprocessTextOrientationClassifier(
   List<Uint8List> textRegions,
-  int targetHeight,
-  int targetWidth,
 ) async {
-  final batchSize = textRegions.length;
-  final processedBytes = Float32List(3 * targetHeight * targetWidth * batchSize);
-  final buffer = Float32List.view(processedBytes.buffer);
+  const int requiredWidth = 192;
+  const int requiredHeight = 48;
+  const int channels = 3;
 
-  for (int b = 0; b < batchSize; b++) {
-    final region = textRegions[b];
-    // Decode region to get dimensions
-    final decodedRegion = await decodeImageFromData(region);
-    final regionDim = Dimensions(
-      width: decodedRegion.width,
-      height: decodedRegion.height,
-    );
-    final regionRgba = await _getRawRgbaBytes(decodedRegion);
+  if (textRegions.isEmpty) {
+    throw ArgumentError('textRegions cannot be empty');
+  }
 
-    // Calculate scale to fit target height
-    double scale = targetHeight.toDouble() / regionDim.height;
-    int scaledWidth = math.min((regionDim.width * scale).round(), targetWidth);
+  final int batchSize = textRegions.length;
+  final int totalSize = batchSize * channels * requiredHeight * requiredWidth;
+  final Float32List processedBytes = Float32List(totalSize);
 
-    final batchOffset = b * 3 * targetHeight * targetWidth;
+  for (int regionIndex = 0; regionIndex < batchSize; regionIndex++) {
+    final Uint8List regionBytes = textRegions[regionIndex];
+
+    // Decode the image from bytes
+    final Image image = await decodeImageFromData(regionBytes);
+
+    // Get raw RGBA bytes for processing
+    final Uint8List rawRgbaBytes = await _getRawRgbaBytes(image);
+    final Dimensions originalDim = Dimensions(width: image.width, height: image.height);
+
+    // Calculate scaling factors for resizing to 192x48
+    final double scaleX = requiredWidth / originalDim.width;
+    final double scaleY = requiredHeight / originalDim.height;
+
+    // Calculate the starting index for this region in the batch
+    final int regionStartIndex = regionIndex * channels * requiredHeight * requiredWidth;
+
+    // Channel offsets in CHW format: [N, C, H, W]
+    const int channelOffsetGreen = requiredHeight * requiredWidth;
+    const int channelOffsetBlue = 2 * requiredHeight * requiredWidth;
+
     int pixelIndex = 0;
-    final int greenOffset = targetHeight * targetWidth;
-    final int blueOffset = 2 * targetHeight * targetWidth;
 
-    for (var h = 0; h < targetHeight; h++) {
-      for (var w = 0; w < targetWidth; w++) {
-        RGB pixel;
-        if (w < scaledWidth) {
-          // Use bilinear interpolation for scaled content
-          pixel = _getPixelBilinear(
-            w / scale,
-            h / scale,
-            regionDim,
-            regionRgba,
-          );
-        } else {
-          // Pad with zeros (black) for recognition model
-          pixel = const (0, 0, 0);
-        }
+    // Process each pixel in the resized 48x192 output
+    for (int h = 0; h < requiredHeight; h++) {
+      for (int w = 0; w < requiredWidth; w++) {
+        // Map output coordinates back to original image coordinates
+        final double originalX = w / scaleX;
+        final double originalY = h / scaleY;
 
-        // Normalize: ((pixel/255 - 0.5) / 0.5)
-        buffer[batchOffset + pixelIndex] = ((pixel.$1 / 255.0) - 0.5) / 0.5;
-        buffer[batchOffset + pixelIndex + greenOffset] = ((pixel.$2 / 255.0) - 0.5) / 0.5;
-        buffer[batchOffset + pixelIndex + blueOffset] = ((pixel.$3 / 255.0) - 0.5) / 0.5;
+        // Get pixel using bilinear interpolation
+        final RGB pixel = _getPixelBilinear(
+          originalX,
+          originalY,
+          originalDim,
+          rawRgbaBytes,
+        );
+
+        // Normalize: ((pixel/255 - 0.5)/0.5) = (pixel - 127.5) / 127.5
+        final double normalizedR = (pixel.$1 - 127.5) / 127.5;
+        final double normalizedG = (pixel.$2 - 127.5) / 127.5;
+        final double normalizedB = (pixel.$3 - 127.5) / 127.5;
+
+        // Store in CHW format: [N, C, H, W]
+        processedBytes[regionStartIndex + pixelIndex] = normalizedR;
+        processedBytes[regionStartIndex + pixelIndex + channelOffsetGreen] = normalizedG;
+        processedBytes[regionStartIndex + pixelIndex + channelOffsetBlue] = normalizedB;
+
         pixelIndex++;
       }
     }
@@ -691,142 +737,466 @@ Future<Float32List> preprocessImageTextFixed(
 
   return processedBytes;
 }
+
+/// Preprocesses oriented text region images for text recognition model.
+/// Takes a list of oriented text regions and returns preprocessed data in CHW format.
+/// Output: Float32List in CHW format for [N, 3, 48, 320] input tensor
+Future<Float32List> preprocessTextRecognition(
+  List<Uint8List> textRegions,
+) async {
+  const int targetHeight = 48;
+  const int maxWidth = 320;
+  const int channels = 3;
+
+  final int batchSize = textRegions.length;
+  final Float32List preprocessedData =
+      Float32List(batchSize * channels * targetHeight * maxWidth);
+
+  for (int batchIndex = 0; batchIndex < batchSize; batchIndex++) {
+    final Uint8List regionBytes = textRegions[batchIndex];
+
+    // Decode the image from bytes
+    final Image image = await decodeImageFromData(regionBytes);
+    final int originalWidth = image.width;
+    final int originalHeight = image.height;
+
+    // Calculate resize ratio maintaining aspect ratio
+    double ratio = targetHeight.toDouble() / originalHeight;
+    int targetWidth = (originalWidth * ratio).round();
+
+    // Limit maximum width
+    if (targetWidth > maxWidth) {
+      targetWidth = maxWidth;
+      ratio = maxWidth.toDouble() / originalWidth;
+    }
+
+    // Get raw RGBA bytes for processing
+    final Uint8List rawRgbaBytes = await _getRawRgbaBytes(image);
+    final Dimensions originalDimensions =
+        Dimensions(width: originalWidth, height: originalHeight);
+
+    // Process each pixel for the resized and padded image
+    final int batchOffset = batchIndex * channels * targetHeight * maxWidth;
+    final int channelSize = targetHeight * maxWidth;
+
+    for (int h = 0; h < targetHeight; h++) {
+      for (int w = 0; w < maxWidth; w++) {
+        late RGB pixel;
+
+        if (w >= targetWidth) {
+          // Right padding with black (0, 0, 0)
+          pixel = const (0, 0, 0);
+        } else {
+          // Map back to original image coordinates
+          final double originalX = w / ratio;
+          final double originalY = h / ratio;
+
+          // Get pixel using bilinear interpolation
+          pixel = _getPixelBilinear(
+            originalX,
+            originalY,
+            originalDimensions,
+            rawRgbaBytes,
+          );
+        }
+
+        // Normalize pixels: ((pixel/255 - 0.5)/0.5)
+        final double normalizedR = ((pixel.$1 / 255.0) - 0.5) / 0.5;
+        final double normalizedG = ((pixel.$2 / 255.0) - 0.5) / 0.5;
+        final double normalizedB = ((pixel.$3 / 255.0) - 0.5) / 0.5;
+
+        // Store in CHW format
+        final int pixelIndex = h * maxWidth + w;
+        preprocessedData[batchOffset + pixelIndex] = normalizedR; // R channel
+        preprocessedData[batchOffset + channelSize + pixelIndex] = normalizedG; // G channel
+        preprocessedData[batchOffset + 2 * channelSize + pixelIndex] = normalizedB; // B channel
+      }
+    }
+  }
+
+  return preprocessedData;
+}
 ```
 
 ### 10. Postprocessing Functions
 **File**: `lib/services/machine_learning/ocr/text_detection_postprocessing.dart`
 
 ```dart
-import 'dart:math' as math;
-import 'dart:typed_data';
-
-class TextBox {
-  final List<Point<double>> points;
-  final double score;
-
-  TextBox(this.points, this.score);
-
-  double get width => /* calculate from points */;
-  double get height => /* calculate from points */;
-}
-
+/// Postprocesses text detection model output to extract text bounding boxes.
+/// Takes model output [1, 1, H/4, W/4] probability map and:
+/// 1. Applies threshold (0.3) to create binary map
+/// 2. Finds contours and converts to text boxes
+/// 3. Unclips boxes by factor 1.6
+/// 4. Filters boxes (score > 0.5, size > 3x3)
+/// 5. Maps coordinates back to original image dimensions
+/// Returns list of TextBox objects with normalized coordinates.
 List<TextBox> postprocessTextDetection(
   Float32List output,
-  Dimensions originalDim,
-  Dimensions scaledDim,
-) {
-  // Output shape: [1, 1, H/4, W/4]
-  final outputHeight = scaledDim.height ~/ 4;
-  final outputWidth = scaledDim.width ~/ 4;
+  Dimensions originalImageSize,
+  Dimensions preprocessedSize, {
+  double threshold = 0.3,
+  double boxThresh = 0.5,
+  double unclipRatio = 1.6,
+  int minSize = 3,
+}) {
+  // Extract dimensions - output is [1, 1, H/4, W/4]
+  final int featureMapHeight = preprocessedSize.height ~/ 4;
+  final int featureMapWidth = preprocessedSize.width ~/ 4;
 
-  // 1. Extract probability map and apply threshold
-  final threshold = 0.3;
-  final binaryMap = List.generate(outputHeight, (h) =>
-    List.generate(outputWidth, (w) {
-      final idx = h * outputWidth + w;
-      return output[idx] > threshold;
+  if (output.length != featureMapHeight * featureMapWidth) {
+    throw ArgumentError(
+      'Output size mismatch. Expected ${featureMapHeight * featureMapWidth}, got ${output.length}',
+    );
+  }
+
+  // Step 1: Apply threshold to create binary map
+  final List<List<bool>> binaryMap = List.generate(
+    featureMapHeight,
+    (y) => List.generate(featureMapWidth, (x) {
+      final int index = y * featureMapWidth + x;
+      return output[index] > threshold;
     }),
   );
 
-  // 2. Find contours (connected components)
-  final contours = findContours(binaryMap);
+  // Step 2: Find contours using a simple contour detection algorithm
+  final List<List<List<int>>> contours = _findContours(binaryMap);
 
-  // 3. Convert contours to boxes and unclip
-  final boxes = <TextBox>[];
-  final unclipRatio = 1.6;
+  final List<TextBox> textBoxes = [];
 
+  // Process each contour
   for (final contour in contours) {
-    // Approximate polygon
-    final polygon = approximatePolygon(contour);
+    if (contour.length < 4) continue; // Skip small contours
 
-    // Calculate score from probability map
-    double score = calculateAverageScore(polygon, output, outputWidth);
+    // Step 3: Calculate contour properties for unclipping
+    final double area = _calculateContourArea(contour);
+    final double perimeter = _calculateContourPerimeter(contour);
 
-    // Filter by score threshold
-    if (score < 0.5) continue;
+    if (perimeter == 0) continue; // Avoid division by zero
 
-    // Unclip (expand) the box
-    final area = calculatePolygonArea(polygon);
-    final perimeter = calculatePolygonPerimeter(polygon);
-    final distance = area * unclipRatio / perimeter;
-    final expandedPolygon = expandPolygon(polygon, distance);
+    // Calculate confidence score (average probability in the contour region)
+    final double score = _calculateContourScore(output, contour, featureMapWidth);
 
-    // Scale back to original image coordinates
-    final scaledPoints = expandedPolygon.map((p) =>
-      Point<double>(
-        p.x * 4 * originalDim.width / scaledDim.width,
-        p.y * 4 * originalDim.height / scaledDim.height,
-      ),
-    ).toList();
+    if (score < boxThresh) continue; // Filter by score threshold
 
-    // Filter by minimum size
-    final box = TextBox(scaledPoints, score);
-    if (box.width >= 3 && box.height >= 3) {
-      boxes.add(box);
+    // Step 4: Unclip the contour (expand by factor)
+    final double distance = area * unclipRatio / perimeter;
+    final List<List<double>> unclippedPolygon = _expandPolygon(contour, distance);
+
+    // Step 5: Filter by size
+    final boundingRect = _getBoundingRect(unclippedPolygon);
+    final double width = boundingRect[2] - boundingRect[0];
+    final double height = boundingRect[3] - boundingRect[1];
+
+    if (width < minSize || height < minSize) continue;
+
+    // Step 6: Convert coordinates from feature map to original image coordinates
+    final List<List<double>> normalizedPolygon = unclippedPolygon.map((point) {
+      // Map from feature map coordinates to preprocessed image coordinates
+      final double preprocessedX = point[0] * 4.0;
+      final double preprocessedY = point[1] * 4.0;
+
+      // Map from preprocessed image coordinates to original image coordinates
+      final double scaleX = originalImageSize.width / preprocessedSize.width;
+      final double scaleY = originalImageSize.height / preprocessedSize.height;
+
+      final double originalX = preprocessedX * scaleX;
+      final double originalY = preprocessedY * scaleY;
+
+      // Normalize to [0, 1] range
+      return [
+        originalX / originalImageSize.width,
+        originalY / originalImageSize.height,
+      ];
+    }).toList();
+
+    textBoxes.add(TextBox(
+      polygon: normalizedPolygon,
+      score: score,
+      featureMapWidth: featureMapWidth,
+      featureMapHeight: featureMapHeight,
+    ));
+  }
+
+  // Sort boxes from top to bottom, left to right
+  textBoxes.sort((a, b) {
+    final aRect = a.getBoundingRect();
+    final bRect = b.getBoundingRect();
+
+    // First sort by top coordinate (y)
+    final int yComparison = aRect[1].compareTo(bRect[1]);
+    if (yComparison != 0) return yComparison;
+
+    // Then by left coordinate (x)
+    return aRect[0].compareTo(bRect[0]);
+  });
+
+  return textBoxes;
+}
+
+/// Simple contour detection using connected components
+List<List<List<int>>> _findContours(List<List<bool>> binaryMap) {
+  final int height = binaryMap.length;
+  final int width = binaryMap[0].length;
+
+  // Visited map to track processed pixels
+  final List<List<bool>> visited = List.generate(
+    height,
+    (_) => List.filled(width, false),
+  );
+
+  final List<List<List<int>>> contours = [];
+
+  // 8-connectivity directions (including diagonals)
+  final List<List<int>> directions = [
+    [-1, -1], [-1, 0], [-1, 1],
+    [0, -1],           [0, 1],
+    [1, -1],  [1, 0],  [1, 1],
+  ];
+
+  for (int y = 0; y < height; y++) {
+    for (int x = 0; x < width; x++) {
+      if (binaryMap[y][x] && !visited[y][x]) {
+        // Found a new component, trace its boundary
+        final List<List<int>> contour = [];
+        final List<List<int>> stack = [[y, x]];
+        visited[y][x] = true;
+
+        while (stack.isNotEmpty) {
+          final List<int> current = stack.removeLast();
+          final int cy = current[0];
+          final int cx = current[1];
+
+          contour.add([cx, cy]); // Store as [x, y]
+
+          // Check all 8 neighbors
+          for (final dir in directions) {
+            final int ny = cy + dir[0];
+            final int nx = cx + dir[1];
+
+            if (ny >= 0 && ny < height && nx >= 0 && nx < width &&
+                binaryMap[ny][nx] && !visited[ny][nx]) {
+              visited[ny][nx] = true;
+              stack.add([ny, nx]);
+            }
+          }
+        }
+
+        if (contour.length >= 4) {
+          // Simplify contour to approximate polygon
+          final List<List<int>> simplifiedContour = _simplifyContour(contour);
+          contours.add(simplifiedContour);
+        }
+      }
     }
   }
 
-  // Sort boxes top-to-bottom, left-to-right
-  boxes.sort((a, b) {
-    final yDiff = a.points.first.y - b.points.first.y;
-    if (yDiff.abs() > 10) return yDiff.toInt();
-    return (a.points.first.x - b.points.first.x).toInt();
-  });
+  return contours;
+}
 
-  return boxes;
+/// Simplifies a contour to an approximate polygon (simplified version)
+List<List<int>> _simplifyContour(List<List<int>> contour) {
+  if (contour.length <= 4) return contour;
+
+  // Find extreme points (min/max x and y)
+  List<int> minX = contour[0];
+  List<int> maxX = contour[0];
+  List<int> minY = contour[0];
+  List<int> maxY = contour[0];
+
+  for (final point in contour) {
+    if (point[0] < minX[0]) minX = point;
+    if (point[0] > maxX[0]) maxX = point;
+    if (point[1] < minY[1]) minY = point;
+    if (point[1] > maxY[1]) maxY = point;
+  }
+
+  // Return a simplified quadrilateral
+  return [minX, minY, maxX, maxY];
+}
+
+/// Calculates the area of a contour using the shoelace formula
+double _calculateContourArea(List<List<int>> contour) {
+  if (contour.length < 3) return 0.0;
+
+  double area = 0.0;
+  final int n = contour.length;
+
+  for (int i = 0; i < n; i++) {
+    final int j = (i + 1) % n;
+    area += contour[i][0] * contour[j][1];
+    area -= contour[j][0] * contour[i][1];
+  }
+
+  return (area / 2.0).abs();
+}
+
+/// Calculates the perimeter of a contour
+double _calculateContourPerimeter(List<List<int>> contour) {
+  if (contour.length < 2) return 0.0;
+
+  double perimeter = 0.0;
+  final int n = contour.length;
+
+  for (int i = 0; i < n; i++) {
+    final int j = (i + 1) % n;
+    final double dx = (contour[j][0] - contour[i][0]).toDouble();
+    final double dy = (contour[j][1] - contour[i][1]).toDouble();
+    perimeter += math.sqrt(dx * dx + dy * dy);
+  }
+
+  return perimeter;
+}
+
+/// Calculates the average score (confidence) for pixels within a contour
+double _calculateContourScore(
+  Float32List output,
+  List<List<int>> contour,
+  int featureMapWidth,
+) {
+  if (contour.isEmpty) return 0.0;
+
+  double totalScore = 0.0;
+  int pixelCount = 0;
+
+  // Average the scores of all pixels in the contour
+  for (final point in contour) {
+    final int x = point[0];
+    final int y = point[1];
+    final int index = y * featureMapWidth + x;
+
+    if (index >= 0 && index < output.length) {
+      totalScore += output[index];
+      pixelCount++;
+    }
+  }
+
+  return pixelCount > 0 ? totalScore / pixelCount : 0.0;
+}
+
+/// Expands a polygon by a given distance using offset polygons
+List<List<double>> _expandPolygon(List<List<int>> polygon, double distance) {
+  if (polygon.length < 3) {
+    return polygon.map((p) => [p[0].toDouble(), p[1].toDouble()]).toList();
+  }
+
+  final List<List<double>> expandedPolygon = [];
+  final int n = polygon.length;
+
+  for (int i = 0; i < n; i++) {
+    final int prev = (i - 1 + n) % n;
+    final int curr = i;
+    final int next = (i + 1) % n;
+
+    // Calculate normal vectors for the two adjacent edges
+    final double dx1 = (polygon[curr][0] - polygon[prev][0]).toDouble();
+    final double dy1 = (polygon[curr][1] - polygon[prev][1]).toDouble();
+    final double len1 = math.sqrt(dx1 * dx1 + dy1 * dy1);
+
+    final double dx2 = (polygon[next][0] - polygon[curr][0]).toDouble();
+    final double dy2 = (polygon[next][1] - polygon[curr][1]).toDouble();
+    final double len2 = math.sqrt(dx2 * dx2 + dy2 * dy2);
+
+    if (len1 == 0 || len2 == 0) {
+      expandedPolygon.add([polygon[curr][0].toDouble(), polygon[curr][1].toDouble()]);
+      continue;
+    }
+
+    // Normalize the vectors
+    final double nx1 = -dy1 / len1; // Normal to first edge
+    final double ny1 = dx1 / len1;
+
+    final double nx2 = -dy2 / len2; // Normal to second edge
+    final double ny2 = dx2 / len2;
+
+    // Average the normals to get the offset direction
+    double nx = (nx1 + nx2) / 2.0;
+    double ny = (ny1 + ny2) / 2.0;
+    final double nlen = math.sqrt(nx * nx + ny * ny);
+
+    if (nlen > 0) {
+      nx /= nlen;
+      ny /= nlen;
+    }
+
+    // Calculate the expanded point
+    final double expandedX = polygon[curr][0] + nx * distance;
+    final double expandedY = polygon[curr][1] + ny * distance;
+
+    expandedPolygon.add([expandedX, expandedY]);
+  }
+
+  return expandedPolygon;
+}
+
+/// Gets the bounding rectangle of a polygon
+/// Returns [minX, minY, maxX, maxY]
+List<double> _getBoundingRect(List<List<double>> polygon) {
+  if (polygon.isEmpty) return [0, 0, 0, 0];
+
+  double minX = polygon[0][0];
+  double minY = polygon[0][1];
+  double maxX = polygon[0][0];
+  double maxY = polygon[0][1];
+
+  for (final point in polygon) {
+    minX = minX < point[0] ? minX : point[0];
+    minY = minY < point[1] ? minY : point[1];
+    maxX = maxX > point[0] ? maxX : point[0];
+    maxY = maxY > point[1] ? maxY : point[1];
+  }
+
+  return [minX, minY, maxX, maxY];
 }
 ```
 
 ### 11. CTC Decoding for Text Recognition
-**File**: `lib/services/machine_learning/ocr/text_recognition_postprocessing.dart`
+**File**: `lib/utils/image_ml_util.dart` (or could be in separate postprocessing file)
 
 ```dart
+/// Decodes CTC output to text strings.
+/// Takes model output [N, 80, 97] and character dictionary.
+/// Returns list of decoded text strings.
 List<String> ctcDecode(
   Float32List output,
-  List<String> characterDict,
-  int batchSize,
-) {
-  // Output shape: [N, 80, 97] where:
-  // N = batch size
-  // 80 = sequence length (timesteps)
-  // 97 = vocabulary size (96 chars + blank token)
+  List<String> characterDict, {
+  int batchSize = 1,
+  int sequenceLength = 80,
+  int vocabSize = 97,
+}) {
+  final List<String> results = [];
 
-  final results = <String>[];
-  final sequenceLength = 80;
-  final vocabSize = 97;
+  for (int batchIndex = 0; batchIndex < batchSize; batchIndex++) {
+    String decodedText = "";
+    int previousIndex = -1;
 
-  for (int b = 0; b < batchSize; b++) {
-    final batchOffset = b * sequenceLength * vocabSize;
-    String text = '';
-    int prevIndex = -1;
-
-    // Process each timestep
-    for (int t = 0; t < sequenceLength; t++) {
-      final timestepOffset = batchOffset + t * vocabSize;
-
+    // For each time step in the sequence
+    for (int timeStep = 0; timeStep < sequenceLength; timeStep++) {
       // Find character with highest probability
       int maxIndex = 0;
-      double maxProb = output[timestepOffset];
+      double maxProb = output[batchIndex * sequenceLength * vocabSize +
+                             timeStep * vocabSize + 0];
 
-      for (int c = 1; c < vocabSize; c++) {
-        final prob = output[timestepOffset + c];
-        if (prob > maxProb) {
-          maxProb = prob;
-          maxIndex = c;
+      for (int charIndex = 1; charIndex < vocabSize; charIndex++) {
+        final double currentProb = output[batchIndex * sequenceLength * vocabSize +
+                                         timeStep * vocabSize + charIndex];
+        if (currentProb > maxProb) {
+          maxProb = currentProb;
+          maxIndex = charIndex;
         }
       }
 
       // Apply CTC decoding rules
-      if (maxIndex > 0 && maxIndex != prevIndex) {
-        // Index 0 is blank token, skip it
-        // Also skip repeated characters (CTC collapse rule)
-        text += characterDict[maxIndex - 1];
+      if (maxIndex > 0 && maxIndex != previousIndex) {
+        // maxIndex 0 is blank token, skip it
+        // Also skip repeated characters (CTC rule)
+        if (maxIndex - 1 < characterDict.length) {
+          decodedText += characterDict[maxIndex - 1];
+        }
       }
-
-      prevIndex = maxIndex;
+      previousIndex = maxIndex;
     }
 
-    results.add(text.trim());
+    results.add(decodedText.trim());
   }
 
   return results;
