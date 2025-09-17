@@ -436,12 +436,15 @@ Widget clippedCard(AppLocalizations l10n) {
                     : Theme.of(context).textTheme.titleLarge,
               ),
               if (!isCompactMode) const SizedBox(height: 2),
-              Text(
-                safeDecode(widget.code.account).trim(),
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontSize: isCompactMode ? 12 : 12,
-                      color: Colors.grey,
-                    ),
+              Transform.translate(
+                offset: Offset(isSelected ? -30.0 : 0, 0),
+                child: Text(
+                  safeDecode(widget.code.account).trim(),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontSize: isCompactMode ? 12 : 12,
+                        color: Colors.grey,
+                      ),
+                ),
               ),
             ],
           ),

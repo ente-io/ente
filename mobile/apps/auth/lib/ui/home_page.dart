@@ -408,7 +408,7 @@ Widget _buildClearActionButton(IconData icon, String label, VoidCallback onTap) 
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: colorScheme.textBase, size: 18),  //bottom row icon props
+            Icon(icon, color: colorScheme.textBase, size: 21),  //bottom row icon props
             const SizedBox(height: 8),
             Text(label, style: textTheme.small.copyWith(color: colorScheme.textBase, fontSize: 11)),
           ],
@@ -420,6 +420,7 @@ Widget _buildClearActionButton(IconData icon, String label, VoidCallback onTap) 
 Widget _buildSingleSelectActions(Code code) {
   final colorScheme = getEnteColorScheme(context);
   return Column(
+    key: const ValueKey('single_select_actions'),
     mainAxisSize: MainAxisSize.min,
     children: [
       Row(
@@ -471,6 +472,7 @@ Widget _buildSingleSelectActions(Code code) {
 Widget _buildMultiSelectActions(Set<String> selectedIds) {
   final colorScheme = getEnteColorScheme(context);
   return Container(
+    key: const ValueKey('multi_select_actions'),
     decoration: BoxDecoration(
       color: Theme.of(context).brightness == Brightness.dark
           ? colorScheme.backgroundElevated2
@@ -566,7 +568,7 @@ Widget _buildMultiSelectActions(Set<String> selectedIds) {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, color: colorScheme.textBase, size: 18),    //top row icon props
+              Icon(icon, color: colorScheme.textBase, size: 21),    //top row icon props
               const SizedBox(height: 8),
               Text(
                 label,
@@ -592,15 +594,27 @@ Widget _buildActionButtons() {
         return const SizedBox.shrink();
       }
 
+      final Widget actionWidget;
       if (selectedIds.length == 1) {
         final selectedCode = _allCodes?.firstWhereOrNull(
           (c) => c.secret == selectedIds.first,
         );
         if (selectedCode == null) return const SizedBox.shrink();
-        return _buildSingleSelectActions(selectedCode);
+        actionWidget = _buildSingleSelectActions(selectedCode);
       } else {
-        return _buildMultiSelectActions(selectedIds);
+        actionWidget = _buildMultiSelectActions(selectedIds);
       }
+      return AnimatedSwitcher(  //size transition for multi/single select action bar
+        duration: const Duration(milliseconds: 250),
+        transitionBuilder: (Widget child, Animation<double> animation) {
+          return SizeTransition(
+            axisAlignment: 1.0, 
+            sizeFactor: animation,
+            child: child,
+          );
+        },
+        child: actionWidget,
+      );
     },
   );
 }
@@ -608,140 +622,152 @@ Widget _buildActionButtons() {
   Widget _buildSelectionActionBar() {
   final bottomPadding = MediaQuery.of(context).padding.bottom;
   final colorScheme = getEnteColorScheme(context);
+  final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
   return ConstrainedBox(
     constraints: BoxConstraints(
-    maxHeight: MediaQuery.of(context).size.height * 0.4,
-  ),
+      maxHeight: MediaQuery.of(context).size.height * 0.4,
+    ),
     child: Card(
       margin: EdgeInsets.zero,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
+      
+      shape: RoundedRectangleBorder(
+        borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(16),
           topRight: Radius.circular(16),
         ),
+        side: BorderSide(
+          color: colorScheme.strokeMuted.withValues(alpha: 0.1),
+          width: 1,
+        ),
       ),
+      shadowColor: isDarkMode ? Colors.black.withOpacity(0.7) : Colors.grey.withOpacity(0.5),
       elevation: 4,
-      color: Theme.of(context).brightness == Brightness.dark
-    ? colorScheme.fillFaint
-    : colorScheme.backgroundElevated2,
+      color: isDarkMode
+          ? colorScheme.fillFaint
+          : colorScheme.backgroundElevated2,
       child: Padding(
-        padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomPadding),
+        padding: EdgeInsets.fromLTRB(16, 16, 16, 28 + bottomPadding),
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-  Row(
-    children: [
-    //Select all pill
-      Material(
-        shape: StadiumBorder(
-          side: BorderSide(color: colorScheme.strokeMuted, width: 0.5),
-        ),
-        color: colorScheme.backgroundElevated2,
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: () {
-            final allVisibleCodeIds =
-            _filteredCodes.map((c) => c.secret).toSet();
-            _codeDisplayStore.selectedCodeIds.value = allVisibleCodeIds;
-          },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.check_circle_outline_outlined,
-                  color: Colors.grey,
-                  size: 15,
-                ),
-                const SizedBox(width: 6),
-                Text(context.l10n.selectAll, style: const TextStyle(fontSize: 11)),
-              ],
-            ),
-          ),
-        ),
-      ),
-
-    // Center code logo icon
-    Expanded(
-      child: ValueListenableBuilder<Set<String>>(
-        valueListenable: _codeDisplayStore.selectedCodeIds,
-        builder: (context, selectedIds, child) {
-          if (selectedIds.isEmpty) {
-            return const SizedBox.shrink();
-          }
-          final selectedCodes = _allCodes
-                  ?.where((c) => selectedIds.contains(c.secret))
-                  .toList() ??
-              [];
-          final codesToShow = selectedCodes.take(3).toList();
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ...codesToShow.map((code) {
-                final iconData = code.display.isCustomIcon
-                    ? code.display.iconID
-                    : code.issuer;
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                  child: IconUtils.instance
-                      .getIcon(context, iconData.trim(), width: 17),
-                );
-              }),
-              if (selectedIds.length > 3)
-                Padding(
-                  padding: const EdgeInsets.only(left: 4.0),
-                  child: Text(
-                    '+${selectedIds.length - 3}',
-                    style: const TextStyle(),
-                  ),
-                ),
-            ],
-          );
-        },
-      ),
-    ),
-
-    // N selected pill
-    ValueListenableBuilder<Set<String>>(
-      valueListenable: _codeDisplayStore.selectedCodeIds,
-      builder: (context, selectedIds, child) {
-        return Material(
-          shape: StadiumBorder(
-            side: BorderSide(color: colorScheme.strokeMuted, width: 0.5),
-          ),
-          color: colorScheme.backgroundElevated2,
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: () {
-              _codeDisplayStore.clearSelection();
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
+              Row(
                 children: [
-                  Text(
-                    '${selectedIds.length} selected',
-                    style: const TextStyle(fontSize: 11),
+                  //Select all pill
+                  Material(
+                    shape: StadiumBorder(
+                      side: BorderSide(color: colorScheme.strokeMuted, width: 0.5),
+                    ),
+                    color: colorScheme.backgroundElevated2,
+                    clipBehavior: Clip.antiAlias,
+                    child: InkWell(
+                      onTap: () {
+                        final allVisibleCodeIds =
+                            _filteredCodes.map((c) => c.secret).toSet();
+                        _codeDisplayStore.selectedCodeIds.value = allVisibleCodeIds;
+                      },
+                      child: Padding(
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(context.l10n.selectAll,
+                                style: const TextStyle(fontSize: 11),),
+                            const SizedBox(width: 6),
+                            const Icon(
+                              Icons.check_circle_outline_outlined,
+                              color: Colors.grey,
+                              size: 15,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
-                  const SizedBox(width: 6),
-                  const Icon(
-                    Icons.close,
-                    size: 15,
-                    color: Colors.grey,
+
+                  // Center code logo icon
+                  Expanded(
+                    child: ValueListenableBuilder<Set<String>>(
+                      valueListenable: _codeDisplayStore.selectedCodeIds,
+                      builder: (context, selectedIds, child) {
+                        if (selectedIds.isEmpty) {
+                          return const SizedBox.shrink();
+                        }
+                        final selectedCodes = _allCodes
+                                ?.where((c) => selectedIds.contains(c.secret))
+                                .toList() ??
+                            [];
+                        final codesToShow = selectedCodes.take(3).toList();
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ...codesToShow.map((code) {
+                              final iconData = code.display.isCustomIcon
+                                  ? code.display.iconID
+                                  : code.issuer;
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 4.0),
+                                child: IconUtils.instance
+                                    .getIcon(context, iconData.trim(), width: 17),
+                              );
+                            }),
+                            if (selectedIds.length > 3)
+                              Padding(
+                                padding: const EdgeInsets.only(left: 4.0),
+                                child: Text(
+                                  '+${selectedIds.length - 3}',
+                                  style: const TextStyle(),
+                                ),
+                              ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+
+                  // N selected pill
+                  ValueListenableBuilder<Set<String>>(
+                    valueListenable: _codeDisplayStore.selectedCodeIds,
+                    builder: (context, selectedIds, child) {
+                      return Material(
+                        shape: StadiumBorder(
+                          side: BorderSide(
+                              color: colorScheme.strokeMuted, width: 0.5,),
+                        ),
+                        color: colorScheme.backgroundElevated2,
+                        clipBehavior: Clip.antiAlias,
+                        child: InkWell(
+                          onTap: () {
+                            _codeDisplayStore.clearSelection();
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12.0, vertical: 8.0,),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  '${selectedIds.length} selected',
+                                  style: const TextStyle(fontSize: 11),
+                                ),
+                                const SizedBox(width: 6),
+                                const Icon(
+                                  Icons.close,
+                                  size: 15,
+                                  color: Colors.grey,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
-            ),
-          ),
-        );
-      },
-    ),
-  ],
-),
               const SizedBox(height: 16),
               _buildActionButtons(),
             ],

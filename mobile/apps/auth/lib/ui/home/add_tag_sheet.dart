@@ -141,6 +141,9 @@ class _AddTagSheetState extends State<AddTagSheet> {
               IconButton(
                 icon: const Icon(Icons.close),
                 onPressed: () => Navigator.of(context).pop(),
+                style: IconButton.styleFrom(
+                  backgroundColor: colorScheme.fillFaint.withValues(alpha: 0.025),
+                ),
               ),
             ],
           ),
@@ -157,20 +160,30 @@ class _AddTagSheetState extends State<AddTagSheet> {
                     code.display.isCustomIcon ? code.display.iconID : code.issuer;
                 
                 return SizedBox(
-                  width: 60,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconUtils.instance.getIcon(context, iconData.trim(), width: 40),
-                      const SizedBox(height: 8),
-                      Text(
-                        code.issuer,
-                        overflow: TextOverflow.ellipsis,
-                        style: textTheme.mini.copyWith(color: colorScheme.textMuted,),
-                      ),
-                    ],
-                  ),
-                );
+  width: 60,
+  child: Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      Container(
+        width: 50,   
+        height: 50,   
+        decoration: BoxDecoration(
+          color: colorScheme.fillFaint.withValues(alpha: 0.02),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Center(  
+          child: IconUtils.instance.getIcon(context, iconData.trim(), width: 28),
+        ),
+    ),
+      const SizedBox(height: 8),
+      Text(
+        code.issuer,
+        overflow: TextOverflow.ellipsis,
+        style: textTheme.mini.copyWith(color: colorScheme.textMuted,),
+      ),
+    ],
+  ),
+);
               },
             ),
           ),
@@ -188,13 +201,24 @@ class _AddTagSheetState extends State<AddTagSheet> {
                   ..._allTags.map((tag) {
                     final isSelected = _selectedTagsInSheet.contains(tag);
                     return ChoiceChip(
-                      label: Text(tag),
+                      label: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(tag),
+                            if (isSelected) ...[
+                            const SizedBox(width: 6),
+                            const Icon(Icons.check, size: 16, color: Colors.white,),
+                          ],
+                        ],
+                      ),
                       selected: isSelected,
+                      showCheckmark: false, 
                       onSelected: (selected) {
                         setState(() {
                           if (selected) {
                             _selectedTagsInSheet.add(tag);
-                          } else {
+                          } 
+                          else {
                             _selectedTagsInSheet.remove(tag);
                           }
                         });
@@ -204,7 +228,6 @@ class _AddTagSheetState extends State<AddTagSheet> {
                       labelStyle: TextStyle(
                         color: isSelected ? Colors.white : colorScheme.textBase,
                       ),
-                      avatar: isSelected ? const Icon(Icons.check, color: Colors.white, size: 16) : null,
                       side: BorderSide.none,
                       shape: const StadiumBorder(),
                     );
