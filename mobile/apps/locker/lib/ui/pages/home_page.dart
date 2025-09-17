@@ -54,6 +54,7 @@ class _HomePageState extends UploaderPageState<HomePage>
   List<Collection> outgoingCollections = [];
   List<Collection> incomingCollections = [];
   List<Collection> quickLinks = [];
+  List<Collection> homeCollections = [];
   Map<int, int> _outgoingCollectionFileCounts = {};
   Map<int, int> _incomingCollectionFileCounts = {};
   Map<int, int> _homeCollectionFileCounts = {};
@@ -100,7 +101,6 @@ class _HomePageState extends UploaderPageState<HomePage>
       collections = _filteredCollections;
     } else {
       final excludeIds = {
-        ...incomingCollections.map((c) => c.id),
         ...quickLinks.map((c) => c.id),
       };
       collections =
@@ -111,6 +111,15 @@ class _HomePageState extends UploaderPageState<HomePage>
 
   List<Collection> _filterOutUncategorized(List<Collection> collections) {
     return CollectionSortUtil.filterAndSortCollections(collections);
+  }
+
+  List<Collection> getOnEnteCollections(List<Collection> collections) {
+    final excludeIds = {
+      ...incomingCollections.map((c) => c.id),
+      ...quickLinks.map((c) => c.id),
+    };
+    collections = collections.where((c) => !excludeIds.contains(c.id)).toList();
+    return _filterOutUncategorized(collections);
   }
 
   final ValueNotifier<bool> _isFabOpen = ValueNotifier<bool>(false);
@@ -291,6 +300,7 @@ class _HomePageState extends UploaderPageState<HomePage>
           await CollectionService.instance.getSharedCollections();
 
       setState(() {
+        homeCollections = getOnEnteCollections(sortedCollections);
         _collections = sortedCollections;
         _filteredCollections = _filterOutUncategorized(sortedCollections);
         _filteredFiles = _recentFiles;
@@ -518,7 +528,7 @@ class _HomePageState extends UploaderPageState<HomePage>
               children: [
                 ..._buildCollectionSection(
                   title: context.l10n.collections,
-                  collections: _displayedCollections,
+                  collections: homeCollections,
                   viewType: UISectionType.homeCollections,
                   fileCounts: _homeCollectionFileCounts,
                 ),
@@ -737,7 +747,7 @@ class _HomePageState extends UploaderPageState<HomePage>
     final incomingCounts = <int, int>{};
 
     await Future.wait([
-      ..._displayedCollections.take(4).map((collection) async {
+      ...homeCollections.take(4).map((collection) async {
         try {
           final files =
               await CollectionService.instance.getFilesInCollection(collection);
@@ -766,13 +776,11 @@ class _HomePageState extends UploaderPageState<HomePage>
       }),
     ]);
 
-    if (mounted) {
-      setState(() {
-        _homeCollectionFileCounts = mainCounts;
-        _outgoingCollectionFileCounts = outgoingCounts;
-        _incomingCollectionFileCounts = incomingCounts;
-      });
-    }
+    setState(() {
+      _homeCollectionFileCounts = mainCounts;
+      _outgoingCollectionFileCounts = outgoingCounts;
+      _incomingCollectionFileCounts = incomingCounts;
+    });
   }
 
   List<Widget> _buildCollectionSection({
