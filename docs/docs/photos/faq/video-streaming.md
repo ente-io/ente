@@ -57,7 +57,7 @@ the generated stream.
 ### On desktop and web
 
 Desktop and web app will automatically play the streaming version of a video if
-it has been already generated. The quality selector will show "Auto" when
+it has already been generated. The quality selector will show "Auto" when
 playing the stream.
 
 ### What is a stream?
@@ -66,7 +66,7 @@ Stream is an encrypted HLS file with an `.m3u8` playlist that helps play a video
 with support for seeking **without** downloading the full file.
 
 Currently it converts videos into `720p` with `2mbps` bitrate in `H.264` format.
-The generated stream is single blob (encrypted with AES) while the playlist file
+The generated stream is a single blob (encrypted with AES) while the playlist file
 (`.m3u8`) is another blob (encrypted using XChaCha20).
 
 We cannot read the contents, duration or the number of chunks within the
