@@ -231,9 +231,22 @@ class TextBox {
 
 ## Phase 2: Image Preprocessing Functions
 
+### ⚠️ CRITICAL: READ BEFORE IMPLEMENTATION ⚠️
+
+**MANDATORY**: Before implementing ANY preprocessing functions, you MUST:
+1. **Fully read and understand** `.claude/specs/OCR_MODELS_SPECIFICATION.md`
+2. **Follow the specifications EXACTLY** - even the tiniest deviation in preprocessing can lead to complete OCR failure
+3. **Pay special attention to**:
+   - Normalization formula: `((pixel/255.0 - 0.5) / 0.5)` - must be exact
+   - Dimension calculations: resize ratios, rounding to 32, minimum sizes
+   - CHW format ordering: channels must be in correct order
+   - Padding values and directions for recognition model
+
+**WARNING**: The RapidOCR models are extremely sensitive to preprocessing. A single incorrect normalization or resize calculation will result in garbage output or no detections at all.
+
 ### Overview
 
-Add OCR-specific preprocessing functions following RapidOCR specifications.
+Add OCR-specific preprocessing functions following RapidOCR specifications EXACTLY as documented in the OCR Models Specification.
 
 ### Changes Required:
 
@@ -357,9 +370,27 @@ Future<List<Uint8List>> cropTextRegions(
 
 ## Phase 3: Postprocessing & CTC Decoding
 
+### ⚠️ CRITICAL: READ BEFORE IMPLEMENTATION ⚠️
+
+**MANDATORY**: Before implementing ANY postprocessing functions, you MUST:
+1. **Fully read and understand** `.claude/specs/OCR_MODELS_SPECIFICATION.md`
+2. **Follow the specifications EXACTLY** - postprocessing is just as critical as preprocessing
+3. **Pay special attention to**:
+   - Threshold values: 0.3 for detection, 0.5 for box filtering, 0.9 for orientation
+   - Unclip ratio: exactly 1.6 for expanding detected boxes
+   - CTC decoding rules: blank token at index 0, skip repeated characters
+   - Coordinate mapping: from feature map (H/4, W/4) back to original image
+   - Sorting order: top-to-bottom, left-to-right for text boxes
+
+**WARNING**: Incorrect postprocessing will result in:
+- Missing text detections (wrong threshold or unclip ratio)
+- Upside-down text (wrong orientation threshold)
+- Garbled text output (incorrect CTC decoding)
+- Wrong text locations (incorrect coordinate mapping)
+
 ### Overview
 
-Implement detection postprocessing and CTC decoding for text recognition.
+Implement detection postprocessing and CTC decoding for text recognition EXACTLY as specified in the OCR Models Specification.
 
 ### Changes Required:
 
