@@ -226,7 +226,7 @@ class FileAppBarState extends State<FileAppBar> {
         !isFileHidden) {
       items.add(
         EntePopupMenuItem(
-          "+ (i)",
+          AppLocalizations.of(context).addToAlbum + "(i)",
           value: 10,
           icon: Icons.add,
           iconColor: Theme.of(context).iconTheme.color,
