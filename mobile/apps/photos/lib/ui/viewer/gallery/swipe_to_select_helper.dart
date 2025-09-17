@@ -38,6 +38,11 @@ class SwipeToSelectHelper {
     _lastToIndex = index;
     // Use forced mode if provided, otherwise determine based on initial file's selection state
     _selecting = forceSelecting ?? !selectedFiles.isFileSelected(file);
+
+    // If we're in selecting mode, immediately select the starting file
+    if (_selecting == true) {
+      selectedFiles.selectAll({file});
+    }
   }
 
   /// Update selection as the pointer moves to a new file
