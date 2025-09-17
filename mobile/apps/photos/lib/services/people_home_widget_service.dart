@@ -39,6 +39,9 @@ class PeopleHomeWidgetService {
   final Logger _logger = Logger((PeopleHomeWidgetService).toString());
   SharedPreferences get _prefs => ServiceLocator.instance.prefs;
   final peopleChangedLock = Lock();
+  
+  // Track the latest request generation to skip outdated operations
+  int _requestGeneration = 0;
 
   // Public methods
   List<String>? getSelectedPeople() {
@@ -61,7 +64,15 @@ class PeopleHomeWidgetService {
   }
 
   Future<void> initPeopleHomeWidget() async {
+    // Increment generation for this request
+    final currentGeneration = ++_requestGeneration;
+    
     await HomeWidgetService.instance.computeLock.synchronized(() async {
+      // Skip if a newer request has already been made
+      if (currentGeneration != _requestGeneration) {
+        _logger.info("Skipping outdated people widget request (gen $currentGeneration, latest $_requestGeneration)");
+        return;
+      }
       if (await _hasAnyBlockers()) {
         await clearWidget();
         return;

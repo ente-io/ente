@@ -34,6 +34,9 @@ class MemoryHomeWidgetService {
   // Properties
   final Logger _logger = Logger((MemoryHomeWidgetService).toString());
   SharedPreferences get _prefs => ServiceLocator.instance.prefs;
+  
+  // Track the latest request generation to skip outdated operations
+  int _requestGeneration = 0;
 
   // Preference getters and setters
   bool? hasLastYearMemoriesSelected() {
@@ -62,7 +65,15 @@ class MemoryHomeWidgetService {
 
   // Public methods
   Future<void> initMemoryHomeWidget() async {
+    // Increment generation for this request
+    final currentGeneration = ++_requestGeneration;
+    
     await HomeWidgetService.instance.computeLock.synchronized(() async {
+      // Skip if a newer request has already been made
+      if (currentGeneration != _requestGeneration) {
+        _logger.info("Skipping outdated memory widget request (gen $currentGeneration, latest $_requestGeneration)");
+        return;
+      }
       if (await _hasAnyBlockers()) {
         await clearWidget();
         return;

@@ -42,6 +42,9 @@ class AlbumHomeWidgetService {
   // Properties
   final Logger _logger = Logger((AlbumHomeWidgetService).toString());
   SharedPreferences get _prefs => ServiceLocator.instance.prefs;
+  
+  // Track the latest request generation to skip outdated operations
+  int _requestGeneration = 0;
 
   // Public methods
   List<int>? getSelectedAlbumIds() {
@@ -63,7 +66,15 @@ class AlbumHomeWidgetService {
   }
 
   Future<void> initAlbumHomeWidget(bool isBg) async {
+    // Increment generation for this request
+    final currentGeneration = ++_requestGeneration;
+    
     await HomeWidgetService.instance.computeLock.synchronized(() async {
+      // Skip if a newer request has already been made
+      if (currentGeneration != _requestGeneration) {
+        _logger.info("Skipping outdated album widget request (gen $currentGeneration, latest $_requestGeneration)");
+        return;
+      }
       if (await _hasAnyBlockers(isBg)) {
         await clearWidget();
         return;
