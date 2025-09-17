@@ -231,12 +231,13 @@ Input Image → [Detection] → Text Regions → [Classification] → Oriented R
 
 The codebase is **ready for OCR implementation** with all infrastructure in place. The implementation would be straightforward following existing patterns:
 
-1. Download OCR models using the provided script
-2. Create **separate ML model services** for each OCR model (detection, classification, recognition)
-3. Create main `OCRService` that orchestrates the three model services
-4. Add simple OCR option to photo viewer app bar
-5. Add feature flag for gradual rollout
-6. Test with internal users first
+1. Create **separate ML model services** for each OCR model (models will auto-download from CDN)
+2. Create main `OCRService` that orchestrates the three model services
+3. Add simple OCR option to photo viewer app bar
+4. Add feature flag for gradual rollout
+5. Test with internal users first
+
+**Note on Model Downloads**: The OCR models are **already uploaded** to `https://models.ente.io/`. The existing `MlModel` abstract class and `RemoteAssetsService` will automatically handle downloading and caching when the model services are initialized. No manual download is needed.
 
 **Important**: Following the existing ML architecture, we need **four separate services**:
 - `TextDetectionService` - Manages the detection model
@@ -256,24 +257,39 @@ bool get ocrEnabled => internalUser;
 ### 2. Text Detection Model Service
 **File**: `lib/services/machine_learning/ocr/text_detection_service.dart`
 ```dart
+import "package:photos/services/machine_learning/ml_model.dart";
+
 class TextDetectionService extends MlModel {
-  static const _modelName = 'text_detection_rapidOCR_v1.onnx';
+  static const kRemoteBucketModelPath = 'text_detection_rapidOCR_v1.onnx';
+  static const _modelName = 'TextDetection';
 
   @override
-  String get modelRemotePath => _modelName;
+  String get modelRemotePath => kModelBucketEndpoint + kRemoteBucketModelPath;
 
   @override
-  Future<int> loadModel([int sessionIndex = 0]) async {
-    final (name, path) = await getModelNameAndPath();
-    return MlModel.loadModel(name, path, sessionIndex);
-  }
+  String get modelName => _modelName;
 
-  Future<List<TextBox>> detectText(Uint8List imageData) async {
+  @override
+  Logger get logger => _logger;
+  static final _logger = Logger('TextDetectionService');
+
+  // Singleton pattern
+  TextDetectionService._privateConstructor();
+  static final instance = TextDetectionService._privateConstructor();
+  factory TextDetectionService() => instance;
+
+  static Future<List<TextBox>> predict(
+    Dimensions dimensions,
+    Uint8List rawRgbaBytes,
+    int sessionAddress,
+  ) async {
     // Preprocess: resize to multiple of 32, normalize
-    final input = _preprocessImage(imageData);
+    final input = await _preprocessImage(dimensions, rawRgbaBytes);
 
-    // Run inference
-    final output = await runModel(input);
+    // Run inference using platform plugin or FFI
+    final output = MlModel.usePlatformPlugin
+        ? await _runPlatformPluginPredict(input)
+        : _runFFIBasedPredict(sessionAddress, input);
 
     // Postprocess: threshold, find contours, unclip
     return _postprocessDetection(output);
@@ -285,12 +301,29 @@ class TextDetectionService extends MlModel {
 **File**: `lib/services/machine_learning/ocr/text_classification_service.dart`
 ```dart
 class TextClassificationService extends MlModel {
-  static const _modelName = 'text_classifier_rapidOCR_v1.onnx';
+  static const kRemoteBucketModelPath = 'text_classifier_rapidOCR_v1.onnx';
+  static const _modelName = 'TextClassification';
 
-  Future<List<bool>> classifyOrientation(List<Uint8List> textRegions) async {
-    // Batch process up to 6 regions
-    final input = _preprocessBatch(textRegions, targetSize: Size(192, 48));
-    final output = await runModel(input);
+  @override
+  String get modelRemotePath => kModelBucketEndpoint + kRemoteBucketModelPath;
+
+  @override
+  String get modelName => _modelName;
+
+  // Singleton pattern
+  TextClassificationService._privateConstructor();
+  static final instance = TextClassificationService._privateConstructor();
+
+  static Future<List<bool>> predict(
+    List<Uint8List> textRegions,
+    int sessionAddress,
+  ) async {
+    // Batch process up to 6 regions, resize to 192x48
+    final input = await _preprocessBatch(textRegions);
+
+    final output = MlModel.usePlatformPlugin
+        ? await _runPlatformPluginPredict(input)
+        : _runFFIBasedPredict(sessionAddress, input);
 
     // Return true if needs 180° rotation
     return output.map((probs) => probs[1] > probs[0] && probs[1] > 0.9).toList();
@@ -302,23 +335,46 @@ class TextClassificationService extends MlModel {
 **File**: `lib/services/machine_learning/ocr/text_recognition_service.dart`
 ```dart
 class TextRecognitionService extends MlModel {
-  static const _modelName = 'text_recognition_rapidOCR_v1.onnx';
+  static const kRemoteBucketModelPath = 'text_recognition_rapidOCR_v1.onnx';
+  static const kDictRemotePath = 'en_dict_rapidOCR_v1.txt';
+  static const _modelName = 'TextRecognition';
+
+  @override
+  String get modelRemotePath => kModelBucketEndpoint + kRemoteBucketModelPath;
+
+  @override
+  String get modelName => _modelName;
+
+  // Singleton pattern
+  TextRecognitionService._privateConstructor();
+  static final instance = TextRecognitionService._privateConstructor();
+
   late List<String> _characterDict;
 
-  Future<void> initialize() async {
-    await super.initialize();
-    _characterDict = await _loadDictionary('en_dict_rapidOCR_v1.txt');
+  Future<void> loadDictionary() async {
+    // Load dictionary from remote assets service
+    final dictPath = await remoteAssetsService.getAsset(
+      kModelBucketEndpoint + kDictRemotePath,
+    );
+    _characterDict = await File(dictPath).readAsLines();
   }
 
-  Future<List<String>> recognizeText(List<Uint8List> orientedRegions) async {
-    final input = _preprocessBatch(orientedRegions, targetSize: Size(320, 48));
-    final output = await runModel(input);  // [N, 80, 97]
+  static Future<List<String>> predict(
+    List<Uint8List> orientedRegions,
+    int sessionAddress,
+  ) async {
+    // Preprocess: resize to height 48, max width 320
+    final input = await _preprocessBatch(orientedRegions);
 
-    // CTC decode
-    return _ctcDecode(output, _characterDict);
+    final output = MlModel.usePlatformPlugin
+        ? await _runPlatformPluginPredict(input)
+        : _runFFIBasedPredict(sessionAddress, input);
+
+    // CTC decode with character dictionary
+    return _ctcDecode(output, instance._characterDict);
   }
 
-  List<String> _ctcDecode(Float32List output, List<String> dict) {
+  static List<String> _ctcDecode(List<double> output, List<String> dict) {
     // Implement CTC decoding as per spec
     // Skip blanks and repeated characters
   }
@@ -329,42 +385,76 @@ class TextRecognitionService extends MlModel {
 **File**: `lib/services/machine_learning/ocr/ocr_service.dart`
 ```dart
 class OCRService {
-  static final OCRService _instance = OCRService._internal();
-  static OCRService get instance => _instance;
+  static final OCRService instance = OCRService._internal();
+  OCRService._internal();
 
-  final _detection = TextDetectionService();
-  final _classification = TextClassificationService();
-  final _recognition = TextRecognitionService();
-  bool _isInitialized = false;
+  static final _logger = Logger('OCRService');
 
-  Future<String> extractText(Uint8List imageBytes) async {
+  int? _detectionSession;
+  int? _classificationSession;
+  int? _recognitionSession;
+
+  Future<String> extractText(Uint8List imageBytes, Dimensions dimensions) async {
     try {
-      // Lazy load models on first use
-      if (!_isInitialized) {
-        await _initializeModels();
-        _isInitialized = true;
-      }
+      // Initialize models and sessions if needed
+      await _initializeIfNeeded();
 
       // Step 1: Detect text regions
-      final textBoxes = await _detection.detectText(imageBytes);
+      final textBoxes = await TextDetectionService.predict(
+        dimensions,
+        imageBytes,
+        _detectionSession!,
+      );
       if (textBoxes.isEmpty) return '';
 
       // Step 2: Crop regions from image
-      final textRegions = _cropTextRegions(imageBytes, textBoxes);
+      final textRegions = await _cropTextRegions(imageBytes, textBoxes);
 
       // Step 3: Classify orientation
-      final needsRotation = await _classification.classifyOrientation(textRegions);
+      final needsRotation = await TextClassificationService.predict(
+        textRegions,
+        _classificationSession!,
+      );
       final orientedRegions = _applyRotations(textRegions, needsRotation);
 
       // Step 4: Recognize text
-      final texts = await _recognition.recognizeText(orientedRegions);
+      final texts = await TextRecognitionService.predict(
+        orientedRegions,
+        _recognitionSession!,
+      );
 
       return texts.join('\n');
+    } catch (e, s) {
+      _logger.severe('OCR extraction failed', e, s);
+      rethrow;
     } finally {
       // Unload models after use to save memory
-      await _unloadModels();
-      _isInitialized = false;
+      await _unloadSessions();
     }
+  }
+
+  Future<void> _initializeIfNeeded() async {
+    if (_detectionSession == null) {
+      // Download models if needed (handled by MlModel)
+      await TextDetectionService.instance.downloadModelSafe();
+      await TextClassificationService.instance.downloadModelSafe();
+      await TextRecognitionService.instance.downloadModelSafe();
+      await TextRecognitionService.instance.loadDictionary();
+
+      // Load models into sessions
+      _detectionSession = await TextDetectionService.instance.loadModel();
+      _classificationSession = await TextClassificationService.instance.loadModel();
+      _recognitionSession = await TextRecognitionService.instance.loadModel();
+    }
+  }
+
+  Future<void> _unloadSessions() async {
+    // Unload models to free memory
+    if (_detectionSession != null) {
+      await TextDetectionService.instance.releaseModel(_detectionSession!);
+      _detectionSession = null;
+    }
+    // Similar for other sessions...
   }
 }
 ```
@@ -496,4 +586,315 @@ when (modelType) {
 }
 ```
 
-The extensive planning documents and mature infrastructure make this a well-scoped, achievable feature addition.
+### 9. Preprocessing Functions in image_ml_util.dart
+**File**: `lib/utils/image_ml_util.dart`
+
+```dart
+// Text detection preprocessing - resize to multiple of 32, normalize
+Future<Float32List> preprocessImageTextDetection(
+  Dimensions dim,
+  Uint8List rawRgbaBytes,
+) async {
+  // Calculate resize dimensions (min 736px, round to 32)
+  double ratio = 1.0;
+  if (math.min(dim.height, dim.width) < 736) {
+    ratio = 736.0 / math.min(dim.height, dim.width);
+  }
+  int resizeH = ((dim.height * ratio) / 32).round() * 32;
+  int resizeW = ((dim.width * ratio) / 32).round() * 32;
+
+  // Ensure minimum dimensions
+  resizeH = math.max(32, resizeH);
+  resizeW = math.max(32, resizeW);
+
+  final processedBytes = Float32List(3 * resizeH * resizeW);
+  final buffer = Float32List.view(processedBytes.buffer);
+
+  int pixelIndex = 0;
+  final int channelOffsetGreen = resizeH * resizeW;
+  final int channelOffsetBlue = 2 * resizeH * resizeW;
+
+  for (var h = 0; h < resizeH; h++) {
+    for (var w = 0; w < resizeW; w++) {
+      // Use bilinear interpolation for resizing
+      final RGB pixel = _getPixelBilinear(
+        w / ratio,
+        h / ratio,
+        dim,
+        rawRgbaBytes,
+      );
+
+      // Normalize: ((pixel/255 - 0.5) / 0.5)
+      buffer[pixelIndex] = ((pixel.$1 / 255.0) - 0.5) / 0.5;
+      buffer[pixelIndex + channelOffsetGreen] = ((pixel.$2 / 255.0) - 0.5) / 0.5;
+      buffer[pixelIndex + channelOffsetBlue] = ((pixel.$3 / 255.0) - 0.5) / 0.5;
+      pixelIndex++;
+    }
+  }
+
+  return processedBytes;
+}
+
+// Text classification/recognition preprocessing - fixed size with padding
+Future<Float32List> preprocessImageTextFixed(
+  List<Uint8List> textRegions,
+  int targetHeight,
+  int targetWidth,
+) async {
+  final batchSize = textRegions.length;
+  final processedBytes = Float32List(3 * targetHeight * targetWidth * batchSize);
+  final buffer = Float32List.view(processedBytes.buffer);
+
+  for (int b = 0; b < batchSize; b++) {
+    final region = textRegions[b];
+    // Decode region to get dimensions
+    final decodedRegion = await decodeImageFromData(region);
+    final regionDim = Dimensions(
+      width: decodedRegion.width,
+      height: decodedRegion.height,
+    );
+    final regionRgba = await _getRawRgbaBytes(decodedRegion);
+
+    // Calculate scale to fit target height
+    double scale = targetHeight.toDouble() / regionDim.height;
+    int scaledWidth = math.min((regionDim.width * scale).round(), targetWidth);
+
+    final batchOffset = b * 3 * targetHeight * targetWidth;
+    int pixelIndex = 0;
+    final int greenOffset = targetHeight * targetWidth;
+    final int blueOffset = 2 * targetHeight * targetWidth;
+
+    for (var h = 0; h < targetHeight; h++) {
+      for (var w = 0; w < targetWidth; w++) {
+        RGB pixel;
+        if (w < scaledWidth) {
+          // Use bilinear interpolation for scaled content
+          pixel = _getPixelBilinear(
+            w / scale,
+            h / scale,
+            regionDim,
+            regionRgba,
+          );
+        } else {
+          // Pad with zeros (black) for recognition model
+          pixel = const (0, 0, 0);
+        }
+
+        // Normalize: ((pixel/255 - 0.5) / 0.5)
+        buffer[batchOffset + pixelIndex] = ((pixel.$1 / 255.0) - 0.5) / 0.5;
+        buffer[batchOffset + pixelIndex + greenOffset] = ((pixel.$2 / 255.0) - 0.5) / 0.5;
+        buffer[batchOffset + pixelIndex + blueOffset] = ((pixel.$3 / 255.0) - 0.5) / 0.5;
+        pixelIndex++;
+      }
+    }
+  }
+
+  return processedBytes;
+}
+```
+
+### 10. Postprocessing Functions
+**File**: `lib/services/machine_learning/ocr/text_detection_postprocessing.dart`
+
+```dart
+import 'dart:math' as math;
+import 'dart:typed_data';
+
+class TextBox {
+  final List<Point<double>> points;
+  final double score;
+
+  TextBox(this.points, this.score);
+
+  double get width => /* calculate from points */;
+  double get height => /* calculate from points */;
+}
+
+List<TextBox> postprocessTextDetection(
+  Float32List output,
+  Dimensions originalDim,
+  Dimensions scaledDim,
+) {
+  // Output shape: [1, 1, H/4, W/4]
+  final outputHeight = scaledDim.height ~/ 4;
+  final outputWidth = scaledDim.width ~/ 4;
+
+  // 1. Extract probability map and apply threshold
+  final threshold = 0.3;
+  final binaryMap = List.generate(outputHeight, (h) =>
+    List.generate(outputWidth, (w) {
+      final idx = h * outputWidth + w;
+      return output[idx] > threshold;
+    }),
+  );
+
+  // 2. Find contours (connected components)
+  final contours = findContours(binaryMap);
+
+  // 3. Convert contours to boxes and unclip
+  final boxes = <TextBox>[];
+  final unclipRatio = 1.6;
+
+  for (final contour in contours) {
+    // Approximate polygon
+    final polygon = approximatePolygon(contour);
+
+    // Calculate score from probability map
+    double score = calculateAverageScore(polygon, output, outputWidth);
+
+    // Filter by score threshold
+    if (score < 0.5) continue;
+
+    // Unclip (expand) the box
+    final area = calculatePolygonArea(polygon);
+    final perimeter = calculatePolygonPerimeter(polygon);
+    final distance = area * unclipRatio / perimeter;
+    final expandedPolygon = expandPolygon(polygon, distance);
+
+    // Scale back to original image coordinates
+    final scaledPoints = expandedPolygon.map((p) =>
+      Point<double>(
+        p.x * 4 * originalDim.width / scaledDim.width,
+        p.y * 4 * originalDim.height / scaledDim.height,
+      ),
+    ).toList();
+
+    // Filter by minimum size
+    final box = TextBox(scaledPoints, score);
+    if (box.width >= 3 && box.height >= 3) {
+      boxes.add(box);
+    }
+  }
+
+  // Sort boxes top-to-bottom, left-to-right
+  boxes.sort((a, b) {
+    final yDiff = a.points.first.y - b.points.first.y;
+    if (yDiff.abs() > 10) return yDiff.toInt();
+    return (a.points.first.x - b.points.first.x).toInt();
+  });
+
+  return boxes;
+}
+```
+
+### 11. CTC Decoding for Text Recognition
+**File**: `lib/services/machine_learning/ocr/text_recognition_postprocessing.dart`
+
+```dart
+List<String> ctcDecode(
+  Float32List output,
+  List<String> characterDict,
+  int batchSize,
+) {
+  // Output shape: [N, 80, 97] where:
+  // N = batch size
+  // 80 = sequence length (timesteps)
+  // 97 = vocabulary size (96 chars + blank token)
+
+  final results = <String>[];
+  final sequenceLength = 80;
+  final vocabSize = 97;
+
+  for (int b = 0; b < batchSize; b++) {
+    final batchOffset = b * sequenceLength * vocabSize;
+    String text = '';
+    int prevIndex = -1;
+
+    // Process each timestep
+    for (int t = 0; t < sequenceLength; t++) {
+      final timestepOffset = batchOffset + t * vocabSize;
+
+      // Find character with highest probability
+      int maxIndex = 0;
+      double maxProb = output[timestepOffset];
+
+      for (int c = 1; c < vocabSize; c++) {
+        final prob = output[timestepOffset + c];
+        if (prob > maxProb) {
+          maxProb = prob;
+          maxIndex = c;
+        }
+      }
+
+      // Apply CTC decoding rules
+      if (maxIndex > 0 && maxIndex != prevIndex) {
+        // Index 0 is blank token, skip it
+        // Also skip repeated characters (CTC collapse rule)
+        text += characterDict[maxIndex - 1];
+      }
+
+      prevIndex = maxIndex;
+    }
+
+    results.add(text.trim());
+  }
+
+  return results;
+}
+```
+
+### 12. Image Cropping for Text Regions
+**File**: `lib/services/machine_learning/ocr/ocr_image_utils.dart`
+
+```dart
+Future<List<Uint8List>> cropTextRegions(
+  Uint8List imageBytes,
+  List<TextBox> textBoxes,
+  Dimensions imageDim,
+) async {
+  final image = await decodeImageFromData(imageBytes);
+  final croppedRegions = <Uint8List>[];
+
+  for (final box in textBoxes) {
+    // Get bounding rectangle from polygon points
+    final minX = box.points.map((p) => p.x).reduce(math.min);
+    final maxX = box.points.map((p) => p.x).reduce(math.max);
+    final minY = box.points.map((p) => p.y).reduce(math.min);
+    final maxY = box.points.map((p) => p.y).reduce(math.max);
+
+    // Calculate crop dimensions with padding
+    final padding = 2.0;
+    final x = math.max(0, minX - padding);
+    final y = math.max(0, minY - padding);
+    final width = math.min(imageDim.width - x, maxX - minX + 2 * padding);
+    final height = math.min(imageDim.height - y, maxY - minY + 2 * padding);
+
+    // Crop using canvas (similar to existing _cropImage function)
+    final recorder = PictureRecorder();
+    final canvas = Canvas(
+      recorder,
+      Rect.fromLTWH(0, 0, width, height),
+    );
+
+    // Handle rotated text boxes using transform
+    if (isRotatedBox(box)) {
+      // Calculate rotation angle from box points
+      final angle = calculateRotationAngle(box.points);
+      canvas.save();
+      canvas.translate(width / 2, height / 2);
+      canvas.rotate(-angle);
+      canvas.translate(-width / 2, -height / 2);
+    }
+
+    canvas.drawImageRect(
+      image,
+      Rect.fromLTWH(x, y, width, height),
+      Rect.fromLTWH(0, 0, width, height),
+      Paint()..filterQuality = FilterQuality.high,
+    );
+
+    if (isRotatedBox(box)) {
+      canvas.restore();
+    }
+
+    final picture = recorder.endRecording();
+    final croppedImage = await picture.toImage(width.toInt(), height.toInt());
+    final byteData = await croppedImage.toByteData(format: ImageByteFormat.png);
+    croppedRegions.add(byteData!.buffer.asUint8List());
+  }
+
+  return croppedRegions;
+}
+```
+
+The extensive planning documents and mature infrastructure make this a well-scoped, achievable feature addition. These preprocessing and postprocessing functions follow the existing patterns in the codebase while implementing the exact specifications for the RapidOCR models.
