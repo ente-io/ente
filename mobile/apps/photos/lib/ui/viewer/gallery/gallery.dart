@@ -521,6 +521,7 @@ class GalleryState extends State<Gallery> {
     _headerHeightNotifier.dispose();
     widget.selectedFiles?.removeListener(_selectedFilesListener);
     scrollbarBottomPaddingNotifier.dispose();
+    _swipeHelper?.dispose();
     super.dispose();
   }
 

@@ -17,7 +17,9 @@ class SwipeToSelectHelper {
   SwipeToSelectHelper({
     required this.allFiles,
     required this.selectedFiles,
-  });
+  }) {
+    selectedFiles.addListener(_onSelectionChanged);
+  }
 
   int? _fromIndex; // Anchor point (where swipe started)
   int? _lastToIndex; // Previous position during drag
@@ -136,5 +138,18 @@ class SwipeToSelectHelper {
   /// Reset the helper (e.g., when gallery files change)
   void reset() {
     endSelection();
+  }
+
+  /// Listener for selection changes
+  void _onSelectionChanged() {
+    // Reset swipe state when all selections are cleared
+    if (selectedFiles.files.isEmpty && isActive) {
+      reset();
+    }
+  }
+
+  /// Clean up resources
+  void dispose() {
+    selectedFiles.removeListener(_onSelectionChanged);
   }
 }
