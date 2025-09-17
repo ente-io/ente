@@ -50,6 +50,8 @@ After implementation, users will be able to:
 
 ## Implementation Approach
 
+### Implementation Strategy
+
 Following the existing face detection pattern, we'll create four services:
 1. Three model services extending `MlModel` (detection, classification, recognition)
 2. Main OCR service orchestrating the pipeline
@@ -63,6 +65,29 @@ Following the existing face detection pattern, we'll create four services:
 - [ ] Phase 5: Feature Flag Setup
 - [ ] Phase 6: UI Integration
 - [ ] Phase 7: Final Integration & Testing
+
+### ⚠️ CRITICAL: Required Reading Before Implementation ⚠️
+
+**MANDATORY**: Before starting ANY implementation work, you MUST thoroughly read and understand ALL of the following documents in order:
+
+1. **OCR MVP Implementation Specification** (`.claude/specs/ocr_mvp_implementation_spec.md`)
+   - High-level requirements and constraints
+   - Architecture decisions and trade-offs
+   - Success criteria and verification steps
+
+2. **OCR Research Document** (`.claude/research/research_ocr_mvp_implementation.md`)
+   - Detailed analysis of existing codebase patterns
+   - Specific code examples from face detection to follow
+   - File locations and integration points
+   - Implementation notes and warnings
+
+3. **OCR Models Specification** (`.claude/specs/OCR_MODELS_SPECIFICATION.md`)
+   - Complete technical specifications for all three RapidOCR models
+   - EXACT preprocessing requirements (even tiny deviations will cause failures)
+   - EXACT postprocessing algorithms (thresholds, CTC decoding, etc.)
+   - Model input/output tensor shapes and data formats
+
+**WARNING**: Skipping or skimming these documents will result in implementation failures. The OCR models are extremely sensitive to preprocessing and postprocessing - even the slightest deviation from specifications will produce garbage output or no detections.
 
 ## Phase 1: Model Services & Core OCR Logic
 
@@ -825,7 +850,15 @@ Not applicable - this is a new feature with no existing data to migrate.
 
 ## References
 
-- Original specification: `.claude/specs/ocr_mvp_implementation_spec.md`
-- Model specifications: `.claude/specs/OCR_MODELS_SPECIFICATION.md`
-- Research document: `.claude/research/research_ocr_mvp_implementation.md`
-- Face detection reference: `lib/services/machine_learning/face_ml/face_detection/face_detection_service.dart:17-187`
+### Required Documentation (MUST read before implementation)
+- **Implementation spec**: `.claude/specs/ocr_mvp_implementation_spec.md` - High-level requirements and architecture
+- **Research document**: `.claude/research/research_ocr_mvp_implementation.md` - Codebase analysis and integration points
+- **Model specifications**: `.claude/specs/OCR_MODELS_SPECIFICATION.md` - Complete technical specs for all models
+
+### Code References
+- **Face detection pattern**: `lib/services/machine_learning/face_ml/face_detection/face_detection_service.dart:17-187`
+- **MlModel base class**: `lib/services/machine_learning/ml_model.dart:11-194`
+- **Image preprocessing utilities**: `lib/utils/image_ml_util.dart:608-742`
+- **FileAppBar for UI integration**: `lib/ui/viewer/file/file_app_bar.dart:157-384`
+- **Feature flag service**: `plugins/ente_feature_flag/lib/src/service.dart:71`
+- **Android ONNX plugin**: `plugins/onnx_dart/android/src/main/kotlin/io/ente/photos/onnx_dart/OnnxDartPlugin.kt:38-40`
