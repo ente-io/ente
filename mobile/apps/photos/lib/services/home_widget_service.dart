@@ -265,6 +265,14 @@ class HomeWidgetService {
     } catch (e) {
       _logger.severe("Failed to clear widget directory", e);
     }
+    
+    // Clear widget image cache
+    try {
+      await WidgetCacheManager().emptyCache();
+      _logger.info("Widget cache cleared successfully");
+    } catch (e) {
+      _logger.severe("Failed to clear widget cache", e);
+    }
   }
 
   /// Cancel ongoing widget operation for a specific widget type
