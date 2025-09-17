@@ -1,3 +1,5 @@
+import "dart:async";
+
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 import "package:media_extension/media_extension.dart";
@@ -7,10 +9,12 @@ import 'package:photos/models/file/file.dart';
 import "package:photos/models/selected_files.dart";
 import "package:photos/services/app_lifecycle_service.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/common/touch_cross_detector.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
+import "package:photos/ui/viewer/gallery/state/gallery_swipe_helper.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/navigation_util.dart";
 
@@ -45,6 +49,10 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
     _isFileSelected =
         widget.selectedFiles?.isFileSelected(widget.file) ?? false;
     widget.selectedFiles?.addListener(_selectedFilesListener);
+    // Timer.periodic(const Duration(seconds: 2), (_) {
+    //   final len = GallerySwipeHelper.of(context)?.allFiles.length;
+    //   print("--------- len: $len");
+    // });
   }
 
   @override
@@ -55,6 +63,7 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final swipeHelper = GallerySwipeHelper.of(context);
     Color selectionColor = Colors.white;
     if (_isFileSelected &&
         widget.file.isUploaded &&
@@ -76,72 +85,87 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
       shouldShowOwnerAvatar: !_isFileSelected,
       shouldShowVideoDuration: true,
     );
-    return GestureDetector(
-      onTap: () {
-        widget.limitSelectionToOne
-            ? _onTapWithSelectionLimit(widget.file)
-            : _onTapNoSelectionLimit(context, widget.file);
+    return TouchCrossDetector(
+      onPointerDown: (event) {
+        if (swipeHelper != null && widget.selectedFiles != null) {
+          swipeHelper.startSelection(widget.file);
+        }
       },
-      onLongPress: () {
-        widget.limitSelectionToOne
-            ? _onLongPressWithSelectionLimit(context, widget.file)
-            : _onLongPressNoSelectionLimit(context, widget.file);
+      onEnter: (event) {
+        if (swipeHelper?.isActive ?? false) {
+          swipeHelper!.updateSelection(widget.file);
+        }
       },
-      child: _isFileSelected
-          ? Stack(
-              clipBehavior: Clip.none,
-              children: [
-                ClipRRect(
-                  key: ValueKey(heroTag),
-                  borderRadius: borderRadius,
-                  child: Hero(
-                    tag: heroTag,
-                    flightShuttleBuilder: (
-                      flightContext,
-                      animation,
-                      flightDirection,
-                      fromHeroContext,
-                      toHeroContext,
-                    ) =>
-                        thumbnailWidget,
-                    transitionOnUserGestures: true,
-                    child: thumbnailWidget,
-                  ),
-                ),
-                Container(
-                  decoration: const BoxDecoration(
-                    color: Color.fromARGB(102, 0, 0, 0),
+      onExit: (event) {
+        // Handle exit if needed
+      },
+      child: GestureDetector(
+        onTap: () {
+          widget.limitSelectionToOne
+              ? _onTapWithSelectionLimit(widget.file)
+              : _onTapNoSelectionLimit(context, widget.file);
+        },
+        onLongPress: () {
+          widget.limitSelectionToOne
+              ? _onLongPressWithSelectionLimit(context, widget.file)
+              : _onLongPressNoSelectionLimit(context, widget.file);
+        },
+        child: _isFileSelected
+            ? Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  ClipRRect(
+                    key: ValueKey(heroTag),
                     borderRadius: borderRadius,
+                    child: Hero(
+                      tag: heroTag,
+                      flightShuttleBuilder: (
+                        flightContext,
+                        animation,
+                        flightDirection,
+                        fromHeroContext,
+                        toHeroContext,
+                      ) =>
+                          thumbnailWidget,
+                      transitionOnUserGestures: true,
+                      child: thumbnailWidget,
+                    ),
                   ),
-                ),
-                Positioned(
-                  right: 4,
-                  top: 4,
-                  child: Icon(
-                    Icons.check_circle_rounded,
-                    size: 20,
-                    color: selectionColor, //same for both themes
+                  Container(
+                    decoration: const BoxDecoration(
+                      color: Color.fromARGB(102, 0, 0, 0),
+                      borderRadius: borderRadius,
+                    ),
                   ),
+                  Positioned(
+                    right: 4,
+                    top: 4,
+                    child: Icon(
+                      Icons.check_circle_rounded,
+                      size: 20,
+                      color: selectionColor, //same for both themes
+                    ),
+                  ),
+                ],
+              )
+            : ClipRRect(
+                key: ValueKey(heroTag),
+                borderRadius: borderRadius,
+                child: Hero(
+                  tag: heroTag,
+                  flightShuttleBuilder: (
+                    flightContext,
+                    animation,
+                    flightDirection,
+                    fromHeroContext,
+                    toHeroContext,
+                  ) =>
+                      thumbnailWidget,
+                  transitionOnUserGestures: true,
+                  child: thumbnailWidget,
                 ),
-              ],
-            )
-          : ClipRRect(
-              key: ValueKey(heroTag),
-              borderRadius: borderRadius,
-              child: Hero(
-                tag: heroTag,
-                flightShuttleBuilder: (
-                  flightContext,
-                  animation,
-                  flightDirection,
-                  fromHeroContext,
-                  toHeroContext,
-                ) =>
-                    thumbnailWidget,
-                transitionOnUserGestures: true,
-                child: thumbnailWidget,
               ),
-            ),
+      ),
     );
   }
 

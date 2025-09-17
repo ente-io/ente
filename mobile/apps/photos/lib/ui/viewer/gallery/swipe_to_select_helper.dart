@@ -1,0 +1,139 @@
+import 'dart:math';
+
+import 'package:photos/models/file/file.dart';
+import 'package:photos/models/selected_files.dart';
+
+/// Helper class to manage swipe-to-select gesture logic.
+///
+/// This class implements an efficient range selection algorithm that:
+/// - Maintains a continuous selection from anchor to current position
+/// - Only modifies the delta between previous and current position
+/// - Supports bidirectional dragging
+/// - Has two modes: adding (from unselected) or removing (from selected)
+class SwipeToSelectHelper {
+  final List<EnteFile> allFiles;
+  final SelectedFiles selectedFiles;
+
+  SwipeToSelectHelper({
+    required this.allFiles,
+    required this.selectedFiles,
+  });
+
+  int? _fromIndex; // Anchor point (where swipe started)
+  int? _lastToIndex; // Previous position during drag
+  bool? _selecting; // true = adding, false = removing
+
+  /// Whether a swipe gesture is currently active
+  bool get isActive => _fromIndex != null;
+
+  /// Start a selection gesture at the given file
+  void startSelection(EnteFile file) {
+    final index = allFiles.indexOf(file);
+    if (index == -1) return;
+
+    _fromIndex = index;
+    _lastToIndex = index;
+    // Determine mode based on initial file's selection state
+    _selecting = !selectedFiles.isFileSelected(file);
+  }
+
+  /// Update selection as the pointer moves to a new file
+  void updateSelection(EnteFile file) {
+    if (_fromIndex == null) return;
+
+    final toIndex = allFiles.indexOf(file);
+    if (toIndex == -1 || toIndex == _lastToIndex) return;
+
+    _toggleSelectionToIndex(toIndex);
+    _lastToIndex = toIndex;
+  }
+
+  /// End the selection gesture
+  void endSelection() {
+    _fromIndex = null;
+    _lastToIndex = null;
+    _selecting = null;
+  }
+
+  /// Core algorithm that efficiently updates selection ranges
+  void _toggleSelectionToIndex(int toIndex) {
+    if (_fromIndex == null || _lastToIndex == null || _selecting == null) {
+      return;
+    }
+
+    final fromIndex = _fromIndex!;
+    final lastToIndex = _lastToIndex!;
+    final selecting = _selecting!;
+
+    // Helper function to get range of files
+    Set<EnteFile> getRange(int start, int end) {
+      if (start < end && start >= 0 && end <= allFiles.length) {
+        return allFiles.getRange(start, end).toSet();
+      }
+      return {};
+    }
+
+    if (selecting) {
+      // Adding mode: maintain continuous selection from fromIndex to toIndex
+      if (toIndex <= fromIndex) {
+        // Moving left of starting point
+        if (toIndex < lastToIndex) {
+          // Extending leftward
+          final itemsToAdd = getRange(toIndex, min(fromIndex, lastToIndex));
+          if (itemsToAdd.isNotEmpty) {
+            selectedFiles.selectAll(itemsToAdd);
+          }
+          // Remove items to the right of start if we were previously there
+          if (fromIndex < lastToIndex) {
+            final itemsToRemove = getRange(fromIndex + 1, lastToIndex + 1);
+            if (itemsToRemove.isNotEmpty) {
+              selectedFiles.unSelectAll(itemsToRemove);
+            }
+          }
+        } else if (lastToIndex < toIndex) {
+          // Contracting from left
+          final itemsToRemove = getRange(lastToIndex, toIndex);
+          if (itemsToRemove.isNotEmpty) {
+            selectedFiles.unSelectAll(itemsToRemove);
+          }
+        }
+      } else if (fromIndex < toIndex) {
+        // Moving right of starting point
+        if (lastToIndex < toIndex) {
+          // Extending rightward
+          final itemsToAdd = getRange(max(fromIndex, lastToIndex), toIndex + 1);
+          if (itemsToAdd.isNotEmpty) {
+            selectedFiles.selectAll(itemsToAdd);
+          }
+          // Remove items to the left of start if we were previously there
+          if (lastToIndex < fromIndex) {
+            final itemsToRemove = getRange(lastToIndex, fromIndex);
+            if (itemsToRemove.isNotEmpty) {
+              selectedFiles.unSelectAll(itemsToRemove);
+            }
+          }
+        } else if (toIndex < lastToIndex) {
+          // Contracting from right
+          final itemsToRemove = getRange(toIndex + 1, lastToIndex + 1);
+          if (itemsToRemove.isNotEmpty) {
+            selectedFiles.unSelectAll(itemsToRemove);
+          }
+        }
+      }
+    } else {
+      // Removing mode: remove the range from fromIndex to toIndex
+      final itemsToRemove = getRange(
+        min(fromIndex, toIndex),
+        max(fromIndex, toIndex) + 1,
+      );
+      if (itemsToRemove.isNotEmpty) {
+        selectedFiles.unSelectAll(itemsToRemove);
+      }
+    }
+  }
+
+  /// Reset the helper (e.g., when gallery files change)
+  void reset() {
+    endSelection();
+  }
+}
