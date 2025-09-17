@@ -54,7 +54,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
     final isPasswordEnabled =
         widget.collection!.publicURLs.firstOrNull?.passwordEnabled ?? false;
     final isJoinEnabled =
-        widget.collection!.publicURLs.firstOrNull?.enableJoin ?? false;
+        widget.collection!.publicURLs.firstOrNull?.enableJoin ?? true;
     final enteColorScheme = getEnteColorScheme(context);
     final PublicURL url = widget.collection!.publicURLs.firstOrNull!;
     final String urlValue =
