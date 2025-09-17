@@ -7,7 +7,7 @@ Implement minimal on-the-fly OCR functionality for extracting text from images i
 ## Scope
 
 - **In Scope**: Single-image text extraction with manual trigger
-- **Out of Scope**: Background indexing, batch processing, search integration
+- **Out of Scope**: Using isolate (add in future), Background indexing, batch processing, search integration
 
 ## User Flow
 
