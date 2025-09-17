@@ -232,9 +232,268 @@ Input Image → [Detection] → Text Regions → [Classification] → Oriented R
 The codebase is **ready for OCR implementation** with all infrastructure in place. The implementation would be straightforward following existing patterns:
 
 1. Download OCR models using the provided script
-2. Create `OCRService` following the `MlModel` pattern
-3. Add UI components to photo viewer
-4. Add feature flag for gradual rollout
-5. Test with internal users first
+2. Create **separate ML model services** for each OCR model (detection, classification, recognition)
+3. Create main `OCRService` that orchestrates the three model services
+4. Add simple OCR option to photo viewer app bar
+5. Add feature flag for gradual rollout
+6. Test with internal users first
+
+**Important**: Following the existing ML architecture, we need **four separate services**:
+- `TextDetectionService` - Manages the detection model
+- `TextClassificationService` - Manages the orientation classifier model
+- `TextRecognitionService` - Manages the recognition model
+- `OCRService` - Orchestrates the three models and handles the complete pipeline
+
+## Key Implementation Code Snippets
+
+### 1. Feature Flag Addition
+**File**: `plugins/ente_feature_flag/lib/src/service.dart`
+```dart
+// Add to FlagService class
+bool get ocrEnabled => internalUser;
+```
+
+### 2. Text Detection Model Service
+**File**: `lib/services/machine_learning/ocr/text_detection_service.dart`
+```dart
+class TextDetectionService extends MlModel {
+  static const _modelName = 'text_detection_rapidOCR_v1.onnx';
+
+  @override
+  String get modelRemotePath => _modelName;
+
+  @override
+  Future<int> loadModel([int sessionIndex = 0]) async {
+    final (name, path) = await getModelNameAndPath();
+    return MlModel.loadModel(name, path, sessionIndex);
+  }
+
+  Future<List<TextBox>> detectText(Uint8List imageData) async {
+    // Preprocess: resize to multiple of 32, normalize
+    final input = _preprocessImage(imageData);
+
+    // Run inference
+    final output = await runModel(input);
+
+    // Postprocess: threshold, find contours, unclip
+    return _postprocessDetection(output);
+  }
+}
+```
+
+### 3. Text Classification Model Service
+**File**: `lib/services/machine_learning/ocr/text_classification_service.dart`
+```dart
+class TextClassificationService extends MlModel {
+  static const _modelName = 'text_classifier_rapidOCR_v1.onnx';
+
+  Future<List<bool>> classifyOrientation(List<Uint8List> textRegions) async {
+    // Batch process up to 6 regions
+    final input = _preprocessBatch(textRegions, targetSize: Size(192, 48));
+    final output = await runModel(input);
+
+    // Return true if needs 180° rotation
+    return output.map((probs) => probs[1] > probs[0] && probs[1] > 0.9).toList();
+  }
+}
+```
+
+### 4. Text Recognition Model Service
+**File**: `lib/services/machine_learning/ocr/text_recognition_service.dart`
+```dart
+class TextRecognitionService extends MlModel {
+  static const _modelName = 'text_recognition_rapidOCR_v1.onnx';
+  late List<String> _characterDict;
+
+  Future<void> initialize() async {
+    await super.initialize();
+    _characterDict = await _loadDictionary('en_dict_rapidOCR_v1.txt');
+  }
+
+  Future<List<String>> recognizeText(List<Uint8List> orientedRegions) async {
+    final input = _preprocessBatch(orientedRegions, targetSize: Size(320, 48));
+    final output = await runModel(input);  // [N, 80, 97]
+
+    // CTC decode
+    return _ctcDecode(output, _characterDict);
+  }
+
+  List<String> _ctcDecode(Float32List output, List<String> dict) {
+    // Implement CTC decoding as per spec
+    // Skip blanks and repeated characters
+  }
+}
+```
+
+### 5. Main OCR Service
+**File**: `lib/services/machine_learning/ocr/ocr_service.dart`
+```dart
+class OCRService {
+  static final OCRService _instance = OCRService._internal();
+  static OCRService get instance => _instance;
+
+  final _detection = TextDetectionService();
+  final _classification = TextClassificationService();
+  final _recognition = TextRecognitionService();
+  bool _isInitialized = false;
+
+  Future<String> extractText(Uint8List imageBytes) async {
+    try {
+      // Lazy load models on first use
+      if (!_isInitialized) {
+        await _initializeModels();
+        _isInitialized = true;
+      }
+
+      // Step 1: Detect text regions
+      final textBoxes = await _detection.detectText(imageBytes);
+      if (textBoxes.isEmpty) return '';
+
+      // Step 2: Crop regions from image
+      final textRegions = _cropTextRegions(imageBytes, textBoxes);
+
+      // Step 3: Classify orientation
+      final needsRotation = await _classification.classifyOrientation(textRegions);
+      final orientedRegions = _applyRotations(textRegions, needsRotation);
+
+      // Step 4: Recognize text
+      final texts = await _recognition.recognizeText(orientedRegions);
+
+      return texts.join('\n');
+    } finally {
+      // Unload models after use to save memory
+      await _unloadModels();
+      _isInitialized = false;
+    }
+  }
+}
+```
+
+### 6. UI Integration - OCR Button
+**File**: `lib/ui/viewer/file/file_app_bar.dart` (around line 200)
+```dart
+List<Widget> _getActions() {
+  _actions.clear();
+
+  // Existing actions...
+
+  // Add OCR button for internal users
+  if (flagService.ocrEnabled && widget.file.fileType == FileType.image) {
+    _actions.add(
+      IconButton(
+        icon: Icon(Icons.text_fields_outlined,
+          color: getEnteColorScheme(context).blurTextBase),
+        onPressed: _extractText,
+        tooltip: 'Extract text',
+      ),
+    );
+  }
+
+  // Existing popup menu...
+}
+
+Future<void> _extractText() async {
+  final l10n = AppLocalizations.of(context)!;
+
+  showLoadingDialog(context: context, message: 'Extracting text...');
+
+  try {
+    final fileData = await getFile(widget.file);
+    if (fileData == null) throw Exception('Could not load image');
+
+    final text = await OCRService.instance.extractText(fileData);
+
+    Navigator.of(context).pop(); // Close loading dialog
+
+    if (text.isEmpty) {
+      showToast(context, 'No text found in image');
+      return;
+    }
+
+    await _showOCRResultDialog(text);
+  } catch (e) {
+    Navigator.of(context).pop();
+    showToast(context, 'Failed to extract text');
+    _logger.severe('OCR failed', e);
+  }
+}
+```
+
+### 7. OCR Result Dialog
+**File**: `lib/ui/viewer/file/ocr_result_dialog.dart`
+```dart
+class OCRResultDialog extends StatelessWidget {
+  final String extractedText;
+
+  const OCRResultDialog({required this.extractedText});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+
+    return DialogWidget(
+      title: 'Extracted Text',
+      body: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            constraints: BoxConstraints(maxHeight: 400),
+            padding: EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: colorScheme.fillFaint,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: SingleChildScrollView(
+              child: SelectableText(
+                extractedText,
+                style: textTheme.body,
+              ),
+            ),
+          ),
+        ],
+      ),
+      buttons: [
+        ButtonWidget(
+          buttonType: ButtonType.secondary,
+          labelText: 'Copy',
+          onTap: () {
+            Clipboard.setData(ClipboardData(text: extractedText));
+            showToast(context, 'Copied to clipboard');
+          },
+        ),
+        ButtonWidget(
+          buttonType: ButtonType.primary,
+          labelText: 'Done',
+          onTap: () => Navigator.of(context).pop(),
+        ),
+      ],
+    );
+  }
+}
+```
+
+### 8. Android Plugin Extension
+**File**: `plugins/onnx_dart/android/src/main/kotlin/.../OnnxDartPlugin.kt`
+```kotlin
+// Add to ModelType enum
+enum class ModelType {
+  ClipTextEncoder,
+  ClipImageEncoder,
+  YOLOv5Face,
+  MobileFaceNet,
+  TextDetection,      // Add
+  TextClassification, // Add
+  TextRecognition    // Add
+}
+
+// Add to when statement in relevant methods
+when (modelType) {
+  // Existing cases...
+  ModelType.TextDetection -> processTextDetection(input)
+  ModelType.TextClassification -> processTextClassification(input)
+  ModelType.TextRecognition -> processTextRecognition(input)
+}
+```
 
 The extensive planning documents and mature infrastructure make this a well-scoped, achievable feature addition.
