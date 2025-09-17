@@ -27,14 +27,15 @@ class SwipeToSelectHelper {
   bool get isActive => _fromIndex != null;
 
   /// Start a selection gesture at the given file
-  void startSelection(EnteFile file) {
+  /// [forceSelecting] - if true, forces adding mode regardless of file's current state
+  void startSelection(EnteFile file, {bool? forceSelecting}) {
     final index = allFiles.indexOf(file);
     if (index == -1) return;
 
     _fromIndex = index;
     _lastToIndex = index;
-    // Determine mode based on initial file's selection state
-    _selecting = !selectedFiles.isFileSelected(file);
+    // Use forced mode if provided, otherwise determine based on initial file's selection state
+    _selecting = forceSelecting ?? !selectedFiles.isFileSelected(file);
   }
 
   /// Update selection as the pointer moves to a new file

@@ -42,6 +42,7 @@ class GalleryFileWidget extends StatefulWidget {
 class _GalleryFileWidgetState extends State<GalleryFileWidget> {
   static const borderRadius = BorderRadius.all(Radius.circular(1));
   late bool _isFileSelected;
+  int? _currentPointerId;
 
   @override
   void initState() {
@@ -87,7 +88,10 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
     );
     return TouchCrossDetector(
       onPointerDown: (event) {
-        if (swipeHelper != null && widget.selectedFiles != null) {
+        _currentPointerId = event.pointer;
+        if (swipeHelper != null &&
+            widget.selectedFiles != null &&
+            widget.selectedFiles!.files.isNotEmpty) {
           swipeHelper.startSelection(widget.file);
         }
       },
@@ -97,7 +101,9 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
         }
       },
       onExit: (event) {
-        // Handle exit if needed
+        if (_currentPointerId == event.pointer) {
+          _currentPointerId = null;
+        }
       },
       child: GestureDetector(
         onTap: () {
@@ -218,6 +224,15 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
     } else {
       HapticFeedback.lightImpact();
       _toggleFileSelection(file);
+      // Start swipe selection if pointer is still down after long press
+      // Force selecting mode since we just selected this file
+      final swipeHelper = GallerySwipeHelper.of(context);
+      if (_currentPointerId != null &&
+          TouchCrossDetector.isPointerActive(_currentPointerId!) &&
+          swipeHelper != null &&
+          widget.selectedFiles!.files.isNotEmpty) {
+        swipeHelper.startSelection(file, forceSelecting: true);
+      }
     }
   }
 
