@@ -228,6 +228,8 @@ PODS:
     - sqlite3/rtree
   - system_info_plus (0.0.1):
     - Flutter
+  - text_detector (0.0.1):
+    - Flutter
   - thermal (0.0.1):
     - Flutter
   - ua_client_hints (1.4.1):
@@ -301,6 +303,7 @@ DEPENDENCIES:
   - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
   - sqlite3_flutter_libs (from `.symlinks/plugins/sqlite3_flutter_libs/darwin`)
   - system_info_plus (from `.symlinks/plugins/system_info_plus/ios`)
+  - text_detector (from `.symlinks/plugins/text_detector/ios`)
   - thermal (from `.symlinks/plugins/thermal/ios`)
   - ua_client_hints (from `.symlinks/plugins/ua_client_hints/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
@@ -437,6 +440,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/sqlite3_flutter_libs/darwin"
   system_info_plus:
     :path: ".symlinks/plugins/system_info_plus/ios"
+  text_detector:
+    :path: ".symlinks/plugins/text_detector/ios"
   thermal:
     :path: ".symlinks/plugins/thermal/ios"
   ua_client_hints:
@@ -527,6 +532,7 @@ SPEC CHECKSUMS:
   sqlite3: 1d85290c3321153511f6e900ede7a1608718bbd5
   sqlite3_flutter_libs: e7fc8c9ea2200ff3271f08f127842131746b70e2
   system_info_plus: 555ce7047fbbf29154726db942ae785c29211740
+  text_detector: b0b2c2f11be76fd4cd71d5d11dbbd36864172d5c
   thermal: d4c48be750d1ddbab36b0e2dcb2471531bc8df41
   ua_client_hints: 92fe0d139619b73ec9fcb46cc7e079a26178f586
   url_launcher_ios: 694010445543906933d732453a59da0a173ae33d

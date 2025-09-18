@@ -26,12 +26,14 @@ import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/collections/collection_action_sheet.dart';
 import "package:photos/ui/common/popup_item.dart";
 import 'package:photos/ui/notification/toast.dart';
+import "package:photos/ui/viewer/file/text_detection_page.dart";
 import "package:photos/ui/viewer/file_details/favorite_widget.dart";
 import "package:photos/ui/viewer/file_details/upload_icon_widget.dart";
 import 'package:photos/utils/dialog_util.dart';
 import "package:photos/utils/file_download_util.dart";
 import 'package:photos/utils/file_util.dart';
 import "package:photos/utils/magic_util.dart";
+import "package:photos/utils/navigation_util.dart";
 
 class FileAppBar extends StatefulWidget {
   final EnteFile file;
@@ -281,6 +283,18 @@ class FileAppBarState extends State<FileAppBar> {
       ),
     );
 
+    // Text detection for internal iOS users (images and live photos, but not videos)
+    if (flagService.textDetection && widget.file.fileType != FileType.video) {
+      items.add(
+        EntePopupMenuItem(
+          "Detect Text (i)",
+          value: 11,
+          icon: Icons.text_fields,
+          iconColor: Theme.of(context).iconTheme.color,
+        ),
+      );
+    }
+
     if (widget.file.isVideo) {
       // Video streaming options
       if (_shouldShowCreateStreamOption()) {
@@ -375,6 +389,8 @@ class FileAppBarState extends State<FileAppBar> {
               await _handleVideoStream('recreate');
             } else if (value == 10) {
               await _handleAddToAlbum();
+            } else if (value == 11) {
+              await _handleTextDetection();
             }
           },
         ),
@@ -541,6 +557,24 @@ class FileAppBarState extends State<FileAppBar> {
       }
     } catch (e, s) {
       _logger.severe("Failed to $streamType video stream", e, s);
+      await showGenericErrorDialog(context: context, error: e);
+    }
+  }
+
+  Future<void> _handleTextDetection() async {
+    try {
+      final File? localFile = await getFile(widget.file);
+      if (localFile == null) {
+        throw Exception("Failed to get file for text detection");
+      }
+      if (mounted) {
+        await routeToPage(
+          context,
+          TextDetectionPage(imagePath: localFile.path),
+        );
+      }
+    } catch (e) {
+      _logger.severe("Failed to start text detection", e);
       await showGenericErrorDialog(context: context, error: e);
     }
   }

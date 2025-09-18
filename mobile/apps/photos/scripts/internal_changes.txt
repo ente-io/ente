@@ -1,3 +1,4 @@
+- Neeraj: (i) Add text detection option for images (iOS internal users)
 - Prateek: Fix logout failure for custom endpoints when server is unreachable
 - Prateek: Ensure comprehensive cache clearing on logout
 - Neeraj: Simplify location display in file info - show "Location" title with "Add location" chip
