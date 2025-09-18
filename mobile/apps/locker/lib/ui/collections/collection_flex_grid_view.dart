@@ -22,6 +22,7 @@ class CollectionFlexGridViewWidget extends StatefulWidget {
 class _CollectionFlexGridViewWidgetState
     extends State<CollectionFlexGridViewWidget> {
   late List<Collection> _displayedCollections; 
+  
   @override
   void initState() {
     super.initState();

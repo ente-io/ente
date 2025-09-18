@@ -114,7 +114,7 @@ class CollectionService {
   }
 
   bool hasCompletedFirstSync() {
-   return Configuration.instance.hasConfiguredAccount() &&
+    return Configuration.instance.hasConfiguredAccount() &&
         _db.getSyncTime() > 0;
   }
 
@@ -178,6 +178,18 @@ class CollectionService {
   Future<int> getFileCount(Collection collection) async {
     final files = await getFilesInCollection(collection);
     return files.length;
+  }
+
+  Future<int> getFileSize(EnteFile file) async {
+    int fileSize;
+    if (file.fileSize != null) {
+      fileSize = file.fileSize!;
+    } else {
+      // TODO: Need to write the code to getFile from server
+      // fileSize = await getFile(file).then((f) => f!.length());
+      fileSize = 0;
+    }
+    return fileSize;
   }
 
   Future<List<EnteFile>> getAllFiles() async {

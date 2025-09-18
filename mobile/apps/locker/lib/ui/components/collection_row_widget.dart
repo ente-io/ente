@@ -3,6 +3,7 @@ import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 import "package:locker/events/collections_updated_event.dart";
 import "package:locker/l10n/l10n.dart";
+import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/collections/models/collection_view_type.dart";
 import "package:locker/services/configuration.dart";
@@ -55,15 +56,32 @@ class CollectionRowWidget extends StatelessWidget {
                 Text(
                   collection.name ?? 'Unnamed Collection',
                   overflow: TextOverflow.ellipsis,
-                  maxLines: 1, 
-                ),
-                Text(
-                  formatDate(context, updateTime),
-                  style: textTheme.small.copyWith(
-                    color: colorScheme.textMuted,
-                  ),
-                  overflow: TextOverflow.ellipsis,
                   maxLines: 1,
+                ),
+                Row(
+                  children: [
+                    Text(
+                      formatDate(context, updateTime),
+                      style: textTheme.small.copyWith(
+                        color: colorScheme.textMuted,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                    FutureBuilder<int>(
+                      future:
+                          CollectionService.instance.getFileCount(collection),
+                      builder: (context, snapshot) {
+                        final fileCount = snapshot.data ?? 0;
+                        return Text(
+                          ' • ' + context.l10n.items(fileCount),
+                          style: textTheme.small.copyWith(
+                            color: colorScheme.textMuted,
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),
