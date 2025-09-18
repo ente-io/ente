@@ -8,12 +8,10 @@ import "package:locker/services/collections/models/collection.dart";
 import "package:locker/ui/pages/collection_page.dart";
 
 class CollectionFlexGridViewWidget extends StatefulWidget {
-  final List<Collection> collections;
-  final Map<int, int> collectionFileCounts;
+  final List<Collection> collections; 
   const CollectionFlexGridViewWidget({
     super.key,
-    required this.collections,
-    required this.collectionFileCounts,
+    required this.collections, 
   });
 
   @override
@@ -23,14 +21,11 @@ class CollectionFlexGridViewWidget extends StatefulWidget {
 
 class _CollectionFlexGridViewWidgetState
     extends State<CollectionFlexGridViewWidget> {
-  late List<Collection> _displayedCollections;
-  late Map<int, int> _collectionFileCounts;
-
+  late List<Collection> _displayedCollections; 
   @override
   void initState() {
     super.initState();
-    _displayedCollections = widget.collections;
-    _collectionFileCounts = widget.collectionFileCounts;
+    _displayedCollections = widget.collections; 
   }
 
   @override
