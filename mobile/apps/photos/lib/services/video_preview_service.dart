@@ -317,7 +317,8 @@ class VideoPreviewService {
         if (e is DioException && e.response?.statusCode == 404) {
           // 404 is expected when checking if preview exists
           _logger.fine(
-              "No preview found for ${enteFile.displayName}, will create one");
+            "No preview found for ${enteFile.displayName}, will create one",
+          );
         } else {
           _logger.warning("Failed to get playlist for $enteFile", e, s);
           error = e;
