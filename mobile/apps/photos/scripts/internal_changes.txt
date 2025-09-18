@@ -1,3 +1,5 @@
+- Prateek: Fix logout failure for custom endpoints when server is unreachable
+- Prateek: Ensure comprehensive cache clearing on logout
 - Neeraj: Simplify location display in file info - show "Location" title with "Add location" chip
 - Laurens: Fix edge case bug in similar images cache when user hasn't indexed ML yet
 - Neeraj: (i) Show shared albums in widget selection screen
