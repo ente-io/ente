@@ -17,6 +17,7 @@ import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/ui/components/button/copy_button.dart";
 import "package:locker/ui/components/file_edit_dialog.dart";
 import "package:locker/ui/components/item_list_view.dart";
+import "package:locker/utils/data_util.dart";
 import "package:locker/utils/date_time_util.dart";
 import "package:locker/utils/file_icon_utils.dart";
 import "package:locker/utils/snack_bar_utils.dart";
@@ -45,6 +46,7 @@ class FileRowWidget extends StatelessWidget {
             : (file.creationTime != null
                 ? DateTime.fromMillisecondsSinceEpoch(file.creationTime!)
                 : DateTime.now()));
+
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
 
@@ -70,15 +72,31 @@ class FileRowWidget extends StatelessWidget {
                 Text(
                   file.displayName,
                   overflow: TextOverflow.ellipsis,
-                  maxLines: 1, 
-                ),
-                Text(
-                  formatDate(context, updateTime),
-                  style: textTheme.small.copyWith(
-                    color: colorScheme.textMuted,
-                  ),
-                  overflow: TextOverflow.ellipsis,
                   maxLines: 1,
+                ),
+                Row(
+                  children: [
+                    Text(
+                      formatDate(context, updateTime),
+                      style: textTheme.small.copyWith(
+                        color: colorScheme.textMuted,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                    FutureBuilder<int>(
+                      future: CollectionService.instance.getFileSize(file),
+                      builder: (context, snapshot) {
+                        final size = snapshot.data ?? 0;
+                        return Text(
+                          ' • ' + formatBytes(size),
+                          style: getEnteTextTheme(context).small.copyWith(
+                                color: colorScheme.textMuted,
+                              ),
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),
