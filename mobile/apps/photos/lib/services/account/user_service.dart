@@ -273,12 +273,31 @@ class UserService {
         throw Exception("Log out action failed");
       }
     } catch (e) {
-      // check if token is already invalid
-      if (e is DioException && e.response?.statusCode == 401) {
+      // Determine if we should silently ignore the error and proceed with logout
+      final bool silentlyIgnoreError = 
+          // Token is already invalid (401 response)
+          (e is DioException && e.response?.statusCode == 401) ||
+          // Custom endpoints where server might be non-existent or unavailable
+          !_config.isEnteProduction();
+
+      if (silentlyIgnoreError) {
+        if (!_config.isEnteProduction()) {
+          _logger.info(
+            "Custom endpoint detected, proceeding with local logout despite server error",
+          );
+        } else {
+          _logger.info("Token already invalid, proceeding with local logout");
+        }
+        
         await Configuration.instance.logout();
-        Navigator.of(context).popUntil((route) => route.isFirst);
+        
+        // Navigate to first route if context is still mounted
+        if (context.mounted) {
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        }
         return;
       }
+
       _logger.severe("Failed to logout", e);
       //This future is for waiting for the dialog from which logout() is called
       //to close and only then to show the error dialog.

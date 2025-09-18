@@ -222,6 +222,19 @@ class FileAppBarState extends State<FileAppBar> {
         ),
       );
     }
+    // Add to album option for uploaded files (behind feature flag)
+    if (flagService.addToAlbumFeature &&
+        widget.file.isUploaded &&
+        !isFileHidden) {
+      items.add(
+        EntePopupMenuItem(
+          AppLocalizations.of(context).addToAlbum + "(i)",
+          value: 10,
+          icon: Icons.add,
+          iconColor: Theme.of(context).iconTheme.color,
+        ),
+      );
+    }
     if ((widget.file.fileType == FileType.image ||
             widget.file.fileType == FileType.livePhoto) &&
         Platform.isAndroid) {
@@ -275,7 +288,7 @@ class FileAppBarState extends State<FileAppBar> {
       items.add(
         EntePopupMenuItem(
           "Detect Text (i)",
-          value: 10,
+          value: 11,
           icon: Icons.text_fields,
           iconColor: Theme.of(context).iconTheme.color,
         ),
@@ -375,6 +388,8 @@ class FileAppBarState extends State<FileAppBar> {
             } else if (value == 9) {
               await _handleVideoStream('recreate');
             } else if (value == 10) {
+              await _handleAddToAlbum();
+            } else if (value == 11) {
               await _handleTextDetection();
             }
           },
@@ -547,8 +562,6 @@ class FileAppBarState extends State<FileAppBar> {
   }
 
   Future<void> _handleTextDetection() async {
-    
-
     try {
       final File? localFile = await getFile(widget.file);
       if (localFile == null) {
@@ -561,9 +574,18 @@ class FileAppBarState extends State<FileAppBar> {
         );
       }
     } catch (e) {
-
       _logger.severe("Failed to start text detection", e);
       await showGenericErrorDialog(context: context, error: e);
     }
+  }
+
+  Future<void> _handleAddToAlbum() async {
+    final selectedFiles = SelectedFiles();
+    selectedFiles.files.add(widget.file);
+    showCollectionActionSheet(
+      context,
+      selectedFiles: selectedFiles,
+      actionType: CollectionActionType.addFiles,
+    );
   }
 }
