@@ -262,17 +262,6 @@ class Configuration {
     } else {
       await _preferences.setBool("auto_logout", true);
     }
-
-    // Clear temporary directories
-    try {
-      final tempDir = Directory(_tempDocumentsDirPath);
-      if (await tempDir.exists()) {
-        await tempDir.delete(recursive: true);
-        await tempDir.create(recursive: true);
-      }
-    } catch (e) {
-      _logger.warning("Failed to clear temp directory", e);
-    }
   }
 
   bool showAutoLogoutDialog() {
