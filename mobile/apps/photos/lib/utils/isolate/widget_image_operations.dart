@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image/image.dart' as img;
 import 'package:logging/logging.dart';
 
@@ -9,7 +8,7 @@ final _logger = Logger("WidgetImageOperations");
 
 class WidgetImageOperations {
   static const int kDefaultMaxSize = 1024;
-  static const int kDefaultQuality = 85;
+  static const int kDefaultQuality = 100;
 
   /// Process widget image with proper EXIF handling and sizing
   /// Runs in isolate via Computer.shared() to avoid blocking UI
@@ -54,48 +53,8 @@ class WidgetImageOperations {
     int maxSize,
     int quality,
   ) async {
-    // Option 1: Use flutter_image_compress (preferred - handles EXIF automatically)
-    if (imagePath != null) {
-      try {
-        final result = await FlutterImageCompress.compressWithFile(
-          imagePath,
-          minWidth: maxSize,
-          minHeight: maxSize,
-          quality: quality,
-          autoCorrectionAngle: true, // This applies EXIF orientation!
-          keepExif: false, // We don't need EXIF in final widget image
-        );
-
-        if (result != null) {
-          return Uint8List.fromList(result);
-        }
-      } catch (e) {
-        _logger.warning(
-            "flutter_image_compress failed, falling back to image package", e);
-      }
-    }
-
-    // Option 2: Use flutter_image_compress with bytes
-    if (imageBytes != null && imagePath == null) {
-      try {
-        final result = await FlutterImageCompress.compressWithList(
-          imageBytes,
-          minWidth: maxSize,
-          minHeight: maxSize,
-          quality: quality,
-          autoCorrectionAngle: true, // This applies EXIF orientation!
-          keepExif: false,
-        );
-
-        return Uint8List.fromList(result);
-      } catch (e) {
-        _logger.warning(
-            "flutter_image_compress with bytes failed, falling back to image package",
-            e);
-      }
-    }
-
-    // Option 3: Fallback to image package (requires manual EXIF handling)
+    // Use image package directly for proper max size control
+    // flutter_image_compress only has minWidth/minHeight which doesn't limit size properly
     if (imageBytes != null || imagePath != null) {
       try {
         List<int> data;

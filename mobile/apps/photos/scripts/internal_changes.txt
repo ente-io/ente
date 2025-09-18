@@ -1,3 +1,4 @@
+- Prateek: (i) Widget improvements - HEIC support for iOS, 6-hour refresh cycle with 10 image cache, circuit breaker protection, optimized hash calculation, higher image quality (1280px), cancellation mechanism. FLAG=enhancedWidgetImage
 - Neeraj: Simplify location display in file info - show "Location" title with "Add location" chip
 - Laurens: Fix edge case bug in similar images cache when user hasn't indexed ML yet
 - Neeraj: (i) Show shared albums in widget selection screen
@@ -10,5 +11,3 @@
 - Neeraj: (i) Option to send qr for link
 - Neeraj: (i) Debug option to enable logViewer
 - Neeraj: Potential fix for ios in-app payment
-- Prateek: (i) Optimize album widget hash calculation to use batch query
-- Prateek: (i) Fix widget image quality and rotation with isolate-based processing pipeline
