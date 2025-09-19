@@ -65,7 +65,7 @@ import {
     deleteShareURL,
     shareCollection,
     unshareCollection,
-    updateCollectionTemplate,
+    updateCollectionView,
     updatePublicURL,
     type CreatePublicURLAttributes,
     type UpdatePublicURLAttributes,
@@ -1425,14 +1425,6 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
                     {...{ onRootClose, publicURL }}
                     onUpdate={handlePublicURLUpdate}
                 />
-                <ManageTemplate
-                    {...{
-                        collection,
-                        onRootClose,
-                        onRemotePull,
-                        setBlockingLoad,
-                    }}
-                />
                 <RowButtonGroup>
                     <ManageDeviceLimit
                         {...{ onRootClose, publicURL }}
@@ -1449,6 +1441,14 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
                         onUpdate={handlePublicURLUpdate}
                     />
                 </RowButtonGroup>
+                <ManageView
+                    {...{
+                        collection,
+                        onRootClose,
+                        onRemotePull,
+                        setBlockingLoad,
+                    }}
+                />
                 <RowButtonGroup>
                     <RowButton
                         startIcon={
@@ -1816,39 +1816,39 @@ const SetPublicLinkPassword: React.FC<SetPublicLinkPasswordProps> = ({
     );
 };
 
-interface ManageTemplateProps {
+interface ManageViewProps {
     onRootClose: () => void;
     collection: Collection;
     onRemotePull: (opts?: RemotePullOpts) => Promise<void>;
     setBlockingLoad: (value: boolean) => void;
 }
 
-const ManageTemplate: React.FC<ManageTemplateProps> = ({
+const ManageView: React.FC<ManageViewProps> = ({
     onRootClose,
     collection,
     onRemotePull,
     setBlockingLoad,
 }) => {
-    const { show: showTemplateOptions, props: templateOptionsVisibilityProps } =
+    const { show: showViewOptions, props: viewOptionsVisibilityProps } =
         useModalVisibility();
     const [errorMessage, setErrorMessage] = useState("");
 
-    const options = useMemo(() => templateOptions(), []);
+    const options = useMemo(() => viewOptions(), []);
 
-    const currentTemplate =
-        collection.pubMagicMetadata?.data?.template || "grouped";
+    const currentView =
+        collection.pubMagicMetadata?.data?.view || "grouped";
 
-    const changeTemplateValue = (value: string) => async () => {
-        if (value === currentTemplate) return;
+    const changeViewValue = (value: string) => async () => {
+        if (value === currentView) return;
 
         setBlockingLoad(true);
         setErrorMessage("");
         try {
-            await updateCollectionTemplate(collection, value);
+            await updateCollectionView(collection, value);
             await onRemotePull({ silent: true });
-            templateOptionsVisibilityProps.onClose();
+            viewOptionsVisibilityProps.onClose();
         } catch (e) {
-            log.error("Could not update collection template", e);
+            log.error("Could not update collection view", e);
             setErrorMessage(t("generic_error"));
         } finally {
             setBlockingLoad(false);
@@ -1859,17 +1859,17 @@ const ManageTemplate: React.FC<ManageTemplateProps> = ({
         <>
             <RowButtonGroup>
                 <RowButton
-                    label={t("template")}
-                    caption={t(currentTemplate)}
-                    onClick={showTemplateOptions}
+                    label="View"
+                    caption={t(currentView)}
+                    onClick={showViewOptions}
                     endIcon={<ChevronRightIcon />}
                 />
             </RowButtonGroup>
             <TitledNestedSidebarDrawer
                 anchor="right"
-                {...templateOptionsVisibilityProps}
+                {...viewOptionsVisibilityProps}
                 onRootClose={onRootClose}
-                title={t("template")}
+                title="View"
             >
                 <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
                     <RowButtonGroup>
@@ -1877,10 +1877,10 @@ const ManageTemplate: React.FC<ManageTemplateProps> = ({
                             <React.Fragment key={value}>
                                 <RowButton
                                     fontWeight="regular"
-                                    onClick={changeTemplateValue(value)}
+                                    onClick={changeViewValue(value)}
                                     label={label}
                                     endIcon={
-                                        currentTemplate === value && (
+                                        currentView === value && (
                                             <DoneIcon />
                                         )
                                     }
@@ -1905,7 +1905,7 @@ const ManageTemplate: React.FC<ManageTemplateProps> = ({
     );
 };
 
-const templateOptions = () => [
+const viewOptions = () => [
     { label: t("grouped"), value: "grouped" },
     { label: t("continuous"), value: "continuous" },
     { label: t("trip"), value: "trip" },

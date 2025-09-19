@@ -1037,20 +1037,20 @@ export const updateCollectionSortOrder = async (
 ) => updateCollectionPublicMagicMetadata(collection, { asc });
 
 /**
- * Change the template type of a collection on remote.
+ * Change the view type of a collection on remote.
  *
  * Remote only, does not modify local state.
  *
  * This function works only for collections owned by the user.
  *
- * @param collection The collection whose template we want to change.
+ * @param collection The collection whose view we want to change.
  *
- * @param template The template type ("grouped", "continuous", "trip").
+ * @param view The view type ("grouped", "continuous", "trip").
  */
-export const updateCollectionTemplate = async (
+export const updateCollectionView = async (
     collection: Collection,
-    template: string,
-) => updateCollectionPublicMagicMetadata(collection, { template });
+    view: string,
+) => updateCollectionPublicMagicMetadata(collection, { view });
 
 /**
  * Update the private magic metadata of a collection on remote.

@@ -676,13 +676,13 @@ export interface CollectionPublicMagicMetadataData {
      */
     coverID?: number;
     /**
-     * The template type for the public collection view.
+     * The view type for the public collection display.
      *
      * Expected to be one of: "grouped", "continuous", "trip".
      *
      * When undefined, the UI defaults to "grouped" behavior.
      */
-    template?: string;
+    view?: string;
 }
 
 /**
@@ -691,7 +691,7 @@ export interface CollectionPublicMagicMetadataData {
 export const CollectionPublicMagicMetadataData = z.looseObject({
     asc: z.boolean().nullish().transform(nullToUndefined),
     coverID: z.number().nullish().transform(nullToUndefined),
-    template: z.string().nullish().transform(nullToUndefined),
+    view: z.string().nullish().transform(nullToUndefined),
 });
 
 /**

@@ -31,7 +31,7 @@ import { useThumbnailGeneration } from "./hooks/useThumbnailGeneration";
 import type { JourneyPoint } from "./types";
 import type { PositionInfo } from "./utils/scrollUtils";
 
-interface TripTemplateProps {
+interface TripViewProps {
     files: EnteFile[];
     collection?: Collection;
     albumTitle?: string;
@@ -43,7 +43,7 @@ interface TripTemplateProps {
     onAddPhotos?: () => void; // Callback for add photos button
 }
 
-export const TripTemplate: React.FC<TripTemplateProps> = ({
+export const TripView: React.FC<TripViewProps> = ({
     files,
     collection,
     albumTitle,
@@ -246,7 +246,7 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
     const hasPhotoData = journeyData.length > 0;
 
     return (
-        <TripTemplateContainer>
+        <TripViewContainer>
             {!openFileViewer &&
                 (isTouchDevice ? (
                     <MobileNavBar
@@ -522,12 +522,12 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
                 saveGroups={saveGroups}
                 onRemoveSaveGroup={onRemoveSaveGroup}
             />
-        </TripTemplateContainer>
+        </TripViewContainer>
     );
 };
 
 // Styled components
-const TripTemplateContainer = styled(Box)({
+const TripViewContainer = styled(Box)({
     position: "relative",
     width: "100%",
     height: "100%",
