@@ -10,6 +10,7 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/event.dart';
 import 'package:photos/events/files_updated_event.dart';
+import "package:photos/events/homepage_swipe_to_select_in_progress_event.dart";
 import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file_load_result.dart';
@@ -293,6 +294,16 @@ class GalleryState extends State<Gallery> {
     });
 
     widget.selectedFiles?.addListener(_selectedFilesListener);
+
+    if (widget.galleryType == GalleryType.homepage) {
+      _swipeActiveNotifier.addListener(() {
+        Bus.instance.fire(
+          HomepageSwipeToSelectInProgressEvent(
+            isInProgress: _swipeActiveNotifier.value,
+          ),
+        );
+      });
+    }
   }
 
   @override

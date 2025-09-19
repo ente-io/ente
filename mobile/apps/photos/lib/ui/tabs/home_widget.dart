@@ -21,6 +21,7 @@ import 'package:photos/events/account_configured_event.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import "package:photos/events/collection_updated_event.dart";
 import "package:photos/events/files_updated_event.dart";
+import "package:photos/events/homepage_swipe_to_select_in_progress_event.dart";
 import 'package:photos/events/permission_granted_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
@@ -107,6 +108,8 @@ class _HomeWidgetState extends State<HomeWidget> {
   bool _shouldRenderCreateCollectionSheet = false;
   bool _showShowBackupHook = false;
   final isOnSearchTabNotifier = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> _swipeToSelectInProgressNotifier =
+      ValueNotifier<bool>(false);
 
   late StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
   late StreamSubscription<SubscriptionPurchasedEvent>
@@ -119,6 +122,8 @@ class _HomeWidgetState extends State<HomeWidget> {
   late StreamSubscription<AccountConfiguredEvent> _accountConfiguredEvent;
   late StreamSubscription<CollectionUpdatedEvent> _collectionUpdatedEvent;
   late StreamSubscription _publicAlbumLinkSubscription;
+  late StreamSubscription<HomepageSwipeToSelectInProgressEvent>
+      _homepageSwipeToSelectInProgressEventSubscription;
 
   final DiffFetcher _diffFetcher = DiffFetcher();
 
@@ -273,6 +278,12 @@ class _HomeWidgetState extends State<HomeWidget> {
         }
       });
     }
+
+    _homepageSwipeToSelectInProgressEventSubscription = Bus.instance
+        .on<HomepageSwipeToSelectInProgressEvent>()
+        .listen((inProgress) {
+      _swipeToSelectInProgressNotifier.value = inProgress.isInProgress;
+    });
   }
 
   Future<void> syncWidget() async {
@@ -478,6 +489,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     if (Platform.isIOS) {
       _publicAlbumLinkSubscription.cancel();
     }
+    _homepageSwipeToSelectInProgressEventSubscription.cancel();
     super.dispose();
   }
 
@@ -738,32 +750,42 @@ class _HomeWidgetState extends State<HomeWidget> {
       children: [
         Builder(
           builder: (context) {
-            return ExtentsPageView(
-              onPageChanged: (page) {
-                Bus.instance.fire(
-                  TabChangedEvent(
-                    page,
-                    TabChangedEventSource.pageView,
-                  ),
+            return ValueListenableBuilder(
+              valueListenable: _swipeToSelectInProgressNotifier,
+              builder: (context, inProgress, child) {
+                return ExtentsPageView(
+                  onPageChanged: (page) {
+                    Bus.instance.fire(
+                      TabChangedEvent(
+                        page,
+                        TabChangedEventSource.pageView,
+                      ),
+                    );
+                  },
+                  controller: _pageController,
+                  openDrawer: Scaffold.of(context).openDrawer,
+                  physics: inProgress
+                      ? const NeverScrollableScrollPhysics()
+                      : const BouncingScrollPhysics(),
+                  children: [
+                    _showShowBackupHook
+                        ? const StartBackupHookWidget(
+                            headerWidget: HeaderWidget(),
+                          )
+                        : child!,
+                    UserCollectionsTab(selectedAlbums: _selectedAlbums),
+                    _sharedCollectionTab,
+                    _searchTab,
+                  ],
                 );
               },
-              controller: _pageController,
-              openDrawer: Scaffold.of(context).openDrawer,
-              physics: const BouncingScrollPhysics(),
-              children: [
-                _showShowBackupHook
-                    ? const StartBackupHookWidget(headerWidget: HeaderWidget())
-                    : HomeGalleryWidget(
-                        header: const HeaderWidget(),
-                        footer: const SizedBox(
-                          height: 160,
-                        ),
-                        selectedFiles: _selectedFiles,
-                      ),
-                UserCollectionsTab(selectedAlbums: _selectedAlbums),
-                _sharedCollectionTab,
-                _searchTab,
-              ],
+              child: HomeGalleryWidget(
+                header: const HeaderWidget(),
+                footer: const SizedBox(
+                  height: 160,
+                ),
+                selectedFiles: _selectedFiles,
+              ),
             );
           },
         ),
