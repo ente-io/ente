@@ -1,10 +1,14 @@
 import 'package:ente_ui/theme/ente_theme.dart';
+import "package:ente_utils/ente_utils.dart";
 import 'package:flutter/material.dart';
+import "package:flutter/services.dart";
 import 'package:locker/l10n/l10n.dart';
+import 'package:locker/models/selected_collections.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import "package:locker/ui/components/collection_row_widget.dart";
 import "package:locker/ui/components/file_row_widget.dart";
+import 'package:locker/ui/pages/collection_page.dart';
 import 'package:locker/utils/collection_sort_util.dart';
 
 class OverflowMenuAction {
@@ -32,6 +36,7 @@ class ItemListView extends StatefulWidget {
   final Widget? emptyStateWidget;
   final List<OverflowMenuAction>? fileOverflowActions;
   final List<OverflowMenuAction>? collectionOverflowActions;
+  final SelectedCollections? selectedCollections;
 
   const ItemListView({
     super.key,
@@ -41,6 +46,7 @@ class ItemListView extends StatefulWidget {
     this.emptyStateWidget,
     this.fileOverflowActions,
     this.collectionOverflowActions,
+    this.selectedCollections,
   });
 
   @override
@@ -51,6 +57,7 @@ class _ItemListViewState extends State<ItemListView> {
   List<_ListItem> _sortedItems = [];
   int _sortColumnIndex = 1;
   bool _sortAscending = false;
+  bool isAnyCollectionSelected = false;
 
   @override
   void initState() {
@@ -128,6 +135,19 @@ class _ItemListViewState extends State<ItemListView> {
     });
   }
 
+  Future<void> _navigateToCollectionPage(Collection collection) async {
+    await routeToPage(context, CollectionPage(collection: collection));
+  }
+
+  Future<void> _toggleCollectionSelection(Collection collection) async {
+    await HapticFeedback.lightImpact();
+    widget.selectedCollections!.toggleSelection(collection);
+    setState(() {
+      isAnyCollectionSelected =
+          widget.selectedCollections!.collections.isNotEmpty;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_sortedItems.isEmpty && widget.emptyStateWidget != null) {
@@ -158,6 +178,17 @@ class _ItemListViewState extends State<ItemListView> {
               fileOverflowActions: widget.fileOverflowActions,
               collectionOverflowActions: widget.collectionOverflowActions,
               isLastItem: isLastItem,
+              selectedCollections: widget.selectedCollections,
+              onCollectionTap: (c) {
+                isAnyCollectionSelected
+                    ? _toggleCollectionSelection(c)
+                    : _navigateToCollectionPage(c);
+              },
+              onCollectionLongPress: (c) {
+                isAnyCollectionSelected
+                    ? _navigateToCollectionPage(c)
+                    : _toggleCollectionSelection(c);
+              },
             );
           },
         ),
@@ -339,6 +370,9 @@ class ListItemWidget extends StatelessWidget {
   final List<OverflowMenuAction>? fileOverflowActions;
   final List<OverflowMenuAction>? collectionOverflowActions;
   final bool isLastItem;
+  final SelectedCollections? selectedCollections;
+  final Function(Collection)? onCollectionTap;
+  final Function(Collection)? onCollectionLongPress;
 
   const ListItemWidget({
     super.key,
@@ -348,15 +382,22 @@ class ListItemWidget extends StatelessWidget {
     this.fileOverflowActions,
     this.collectionOverflowActions,
     this.isLastItem = false,
+    this.selectedCollections,
+    this.onCollectionTap,
+    this.onCollectionLongPress,
   });
 
   @override
   Widget build(BuildContext context) {
     if (item.isCollection && item.collection != null) {
+      final collection = item.collection!;
       return CollectionRowWidget(
-        collection: item.collection!,
+        collection: collection,
         overflowActions: collectionOverflowActions,
         isLastItem: isLastItem,
+        selectedCollections: selectedCollections,
+        onTapCallback: onCollectionTap,
+        onLongPressCallback: onCollectionLongPress,
       );
     } else if (!item.isCollection && item.file != null) {
       return FileRowWidget(
