@@ -27,12 +27,18 @@ class AlbumHomeWidgetService {
   static const String WIDGET_TYPE = "album"; // Identifier for this widget type
   static const String SELECTED_ALBUMS_KEY = "selectedAlbumsHW";
   static const String ALBUMS_LAST_HASH_KEY = "albumsLastHash";
+  static const String ALBUMS_LAST_REFRESH_KEY = "albumsLastRefresh";
   static const String ANDROID_CLASS_NAME = "EnteAlbumsWidgetProvider";
   static const String IOS_CLASS_NAME = "EnteAlbumWidget";
   static const String ALBUMS_CHANGED_KEY = "albumsChanged.widget";
   static const String ALBUMS_STATUS_KEY = "albumsStatusKey.widget";
   static const String TOTAL_ALBUMS_KEY = "totalAlbums";
-  static const int MAX_ALBUMS_LIMIT = 50;
+  // Widget optimization constants (internal users only)
+  static const int MAX_ALBUMS_LIMIT_INTERNAL =
+      10; // Optimized for 6-hour refresh
+  static const int MAX_ALBUMS_LIMIT_DEFAULT = 50; // Original limit
+  static const Duration REFRESH_INTERVAL =
+      Duration(hours: 6); // Refresh every 6 hours
 
   // Singleton pattern
   static final AlbumHomeWidgetService instance =
@@ -42,9 +48,13 @@ class AlbumHomeWidgetService {
   // Properties
   final Logger _logger = Logger((AlbumHomeWidgetService).toString());
   SharedPreferences get _prefs => ServiceLocator.instance.prefs;
-  
+
   // Track the latest request generation to skip outdated operations
   int _requestGeneration = 0;
+
+  // Debounce timer to prevent rapid consecutive widget sync calls
+  Timer? _debounceTimer;
+  static const Duration _debounceDuration = Duration(seconds: 2);
 
   // Public methods
   List<int>? getSelectedAlbumIds() {
@@ -66,13 +76,30 @@ class AlbumHomeWidgetService {
   }
 
   Future<void> initAlbumHomeWidget(bool isBg) async {
+    // Cancel any pending debounced calls
+    _debounceTimer?.cancel();
+
+    // Debounce rapid consecutive calls (except for background calls)
+    if (!isBg) {
+      _debounceTimer = Timer(_debounceDuration, () async {
+        await _initAlbumHomeWidgetInternal(isBg);
+      });
+    } else {
+      // Background calls are executed immediately
+      await _initAlbumHomeWidgetInternal(isBg);
+    }
+  }
+
+  Future<void> _initAlbumHomeWidgetInternal(bool isBg) async {
     // Increment generation for this request
     final currentGeneration = ++_requestGeneration;
-    
+
     await HomeWidgetService.instance.computeLock.synchronized(() async {
       // Skip if a newer request has already been made
       if (currentGeneration != _requestGeneration) {
-        _logger.info("Skipping outdated album widget request (gen $currentGeneration, latest $_requestGeneration)");
+        _logger.info(
+          "Skipping outdated album widget request (gen $currentGeneration, latest $_requestGeneration)",
+        );
         return;
       }
       if (await _hasAnyBlockers(isBg)) {
@@ -87,17 +114,18 @@ class AlbumHomeWidgetService {
       if (forceFetchNewAlbums) {
         // Only cancel album operations, not other widget types
         await HomeWidgetService.instance.cancelWidgetOperation(WIDGET_TYPE);
-        
+
         // Create a cancellable operation for this album widget update
         final completer = CancelableCompleter<void>();
-        HomeWidgetService.instance.setWidgetOperation(WIDGET_TYPE, completer.operation);
-        
+        HomeWidgetService.instance
+            .setWidgetOperation(WIDGET_TYPE, completer.operation);
+
         await _updateAlbumsWidgetCacheWithCancellation(completer);
         if (!completer.isCanceled) {
           await setSelectionChange(false);
           _logger.info("Force fetch new albums complete");
         }
-        
+
         if (!completer.isCompleted && !completer.isCanceled) {
           completer.complete();
         }
@@ -154,7 +182,8 @@ class AlbumHomeWidgetService {
 
     _logger.info("Checking pending albums sync");
     if (await _shouldUpdateWidgetCache()) {
-      await initAlbumHomeWidget(false);
+      // Use internal method to bypass debouncing for scheduled checks
+      await _initAlbumHomeWidgetInternal(false);
     }
   }
 
@@ -294,6 +323,39 @@ class AlbumHomeWidgetService {
       return false;
     }
 
+    // Widget optimization for enhanced widget feature
+    if (flagService.enhancedWidgetImage) {
+      // Check if we already have all available images (less than limit)
+      // If the last sync was successful and we had less than the limit, no need to refresh
+      final lastStatus = getAlbumsStatus();
+      final totalAlbums = await _getTotalAlbums();
+      const maxLimit = MAX_ALBUMS_LIMIT_INTERNAL;
+
+      if (lastStatus == WidgetStatus.syncedAll &&
+          totalAlbums != null &&
+          totalAlbums < maxLimit) {
+        _logger.info(
+          "[Enhanced] Skipping refresh: already have all available images ($totalAlbums < $maxLimit)",
+        );
+        return false;
+      }
+
+      // Check if enough time has passed for a refresh (even if content hasn't changed)
+      final lastRefreshStr = _prefs.getString(ALBUMS_LAST_REFRESH_KEY);
+      if (lastRefreshStr != null) {
+        final lastRefresh = DateTime.tryParse(lastRefreshStr);
+        if (lastRefresh != null) {
+          final timeSinceRefresh = DateTime.now().difference(lastRefresh);
+          if (timeSinceRefresh >= REFRESH_INTERVAL) {
+            _logger.info(
+              "[Enhanced] Time-based refresh triggered (last refresh: ${timeSinceRefresh.inHours} hours ago)",
+            );
+            return true;
+          }
+        }
+      }
+    }
+
     // Check if hash has changed
     final currentHash = _calculateHash(selectedAlbumIds);
     final lastHash = getAlbumsLastHash();
@@ -372,15 +434,23 @@ class AlbumHomeWidgetService {
     return albumsWithFiles;
   }
 
+  Future<int?> _getTotalAlbums() async {
+    return await HomeWidgetService.instance.getData<int>(TOTAL_ALBUMS_KEY);
+  }
+
   Future<void> _setTotalAlbums(int? total) async {
     await HomeWidgetService.instance.setData(TOTAL_ALBUMS_KEY, total);
   }
 
-  Future<void> _updateAlbumsWidgetCacheWithCancellation(CancelableCompleter completer) async {
+  Future<void> _updateAlbumsWidgetCacheWithCancellation(
+    CancelableCompleter completer,
+  ) async {
     return _updateAlbumsWidgetCache(completer);
   }
-  
-  Future<void> _updateAlbumsWidgetCache([CancelableCompleter? completer]) async {
+
+  Future<void> _updateAlbumsWidgetCache([
+    CancelableCompleter? completer,
+  ]) async {
     final selectedAlbumIds = await _getEffectiveSelectedAlbumIds();
     final albumsWithFiles = await _getAlbumsWithFiles();
 
@@ -391,11 +461,26 @@ class AlbumHomeWidgetService {
 
     final bool isWidgetPresent = await countHomeWidgets() > 0;
 
-    final limit = isWidgetPresent ? MAX_ALBUMS_LIMIT : 5;
-    final maxAttempts = limit * 10;
+    // Use optimized limits for enhanced widget feature
+    final maxLimit = flagService.enhancedWidgetImage
+        ? MAX_ALBUMS_LIMIT_INTERNAL
+        : MAX_ALBUMS_LIMIT_DEFAULT;
+    final limit = isWidgetPresent ? maxLimit : 5;
+
+    // Record the refresh time for enhanced widget feature
+    if (flagService.enhancedWidgetImage) {
+      await _prefs.setString(
+        ALBUMS_LAST_REFRESH_KEY,
+        DateTime.now().toIso8601String(),
+      );
+    }
+    final maxAttempts =
+        limit * 3; // Reduce max attempts to avoid excessive retries
 
     int renderedCount = 0;
     int attemptsCount = 0;
+    // Track files that have already failed to avoid retrying them
+    final Set<String> failedFiles = {};
 
     await updateAlbumsStatus(WidgetStatus.notSynced);
 
@@ -409,7 +494,7 @@ class AlbumHomeWidgetService {
         _logger.info("Albums widget update cancelled during rendering");
         return;
       }
-      
+
       final randomEntry =
           albumsWithFilesEntries[random.nextInt(albumsWithFilesLength)];
 
@@ -418,6 +503,15 @@ class AlbumHomeWidgetService {
       final randomAlbumFile = randomEntry.value.$2.elementAt(
         random.nextInt(randomEntry.value.$2.length),
       );
+
+      // Skip files that have already failed
+      final fileKey =
+          '${randomAlbumFile.uploadedFileID ?? randomAlbumFile.localID}_${randomAlbumFile.displayName}';
+      if (failedFiles.contains(fileKey)) {
+        attemptsCount++;
+        continue;
+      }
+
       final albumId = randomEntry.key;
       final albumName = randomEntry.value.$1;
 
@@ -439,7 +533,7 @@ class AlbumHomeWidgetService {
           _logger.info("Albums widget update cancelled after rendering");
           return;
         }
-        
+
         // Check for blockers again before continuing
         if (await _hasAnyBlockers()) {
           await clearWidget();
@@ -457,6 +551,9 @@ class AlbumHomeWidgetService {
         }
 
         renderedCount++;
+      } else {
+        // Mark this file as failed to avoid retrying it
+        failedFiles.add(fileKey);
       }
 
       attemptsCount++;
