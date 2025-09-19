@@ -6,7 +6,6 @@ import "package:photos/extensions/user_extension.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
 import 'package:photos/models/collection/collection.dart';
-import 'package:photos/service_locator.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
@@ -217,17 +216,15 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
                 );
               },
               isTopBorderRadiusRemoved: true,
-              isBottomBorderRadiusRemoved: flagService.internalUser,
+              isBottomBorderRadiusRemoved: true,
             ),
-            if (flagService.internalUser)
-              DividerWidget(
-                dividerType: DividerType.menu,
-                bgColor: getEnteColorScheme(context).fillFaint,
-              ),
-            if (flagService.internalUser)
-              MenuItemWidget(
-                captionedTextWidget: const CaptionedTextWidget(
-                  title: "Send QR Code (i)",
+            DividerWidget(
+              dividerType: DividerType.menu,
+              bgColor: getEnteColorScheme(context).fillFaint,
+            ),
+            MenuItemWidget(
+              captionedTextWidget: CaptionedTextWidget(
+                title: AppLocalizations.of(context).sendQrCode,
                   makeTextBold: true,
                 ),
                 leadingIcon: Icons.qr_code_outlined,

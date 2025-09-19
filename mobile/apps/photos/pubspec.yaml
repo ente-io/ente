@@ -201,6 +201,9 @@ dependencies:
   syncfusion_flutter_sliders: ^29.1.38
   synchronized: ^3.3.0+3
   system_info_plus: ^0.0.6
+  text_detector:
+    git:
+      url: https://github.com/neeraj-pilot/text_detector.git
   thermal: ^1.1.11
   timezone: ^0.10.0
   tuple: ^2.0.0

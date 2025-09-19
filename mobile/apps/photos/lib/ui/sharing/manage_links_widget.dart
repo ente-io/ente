@@ -54,7 +54,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
     final isPasswordEnabled =
         widget.collection!.publicURLs.firstOrNull?.passwordEnabled ?? false;
     final isJoinEnabled =
-        widget.collection!.publicURLs.firstOrNull?.enableJoin ?? false;
+        widget.collection!.publicURLs.firstOrNull?.enableJoin ?? true;
     final enteColorScheme = getEnteColorScheme(context);
     final PublicURL url = widget.collection!.publicURLs.firstOrNull!;
     final String urlValue =
@@ -320,17 +320,17 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                         );
                       },
                       isTopBorderRadiusRemoved: true,
-                      isBottomBorderRadiusRemoved: flagService.internalUser,
+                      isBottomBorderRadiusRemoved: true,
                     ),
-                  if (!url.isExpired && flagService.internalUser)
+                  if (!url.isExpired)
                     DividerWidget(
                       dividerType: DividerType.menu,
                       bgColor: getEnteColorScheme(context).fillFaint,
                     ),
-                  if (!url.isExpired && flagService.internalUser)
+                  if (!url.isExpired)
                     MenuItemWidget(
-                      captionedTextWidget: const CaptionedTextWidget(
-                        title: "Send QR Code (i)",
+                      captionedTextWidget: CaptionedTextWidget(
+                        title: AppLocalizations.of(context).sendQrCode,
                         makeTextBold: true,
                       ),
                       leadingIcon: Icons.qr_code_outlined,

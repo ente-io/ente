@@ -57,6 +57,12 @@ class SimilarImagesService {
     await mlDataDB.checkMigrateFillClipVectorDB();
     w?.log("checkMigrateFillClipVectorDB");
 
+    // Get all files with CLIP embeddings first to avoid caching unindexed files
+    final Map<int, int> clipIndexedFiles =
+        await mlDataDB.clipIndexedFileWithVersion();
+    final Set<int> clipIndexedFileIDs = clipIndexedFiles.keys.toSet();
+    w?.log("getClipIndexedFiles");
+
     // Get all files, and all potential embedding IDs, and create a map of fileID to file
     final allFiles = Set<EnteFile>.from(
       await SearchService.instance.getAllFilesForSearch(),
@@ -64,7 +70,10 @@ class SimilarImagesService {
     final allFileIdsToFile = <int, EnteFile>{};
     final fileIDs = <int>[];
     for (final file in allFiles) {
-      if (file.uploadedFileID != null && file.isOwner && !file.isVideo) {
+      if (file.uploadedFileID != null &&
+          file.isOwner &&
+          !file.isVideo &&
+          clipIndexedFileIDs.contains(file.uploadedFileID!)) {
         allFileIdsToFile[file.uploadedFileID!] = file;
         fileIDs.add(file.uploadedFileID!);
       }
