@@ -355,8 +355,19 @@ class CollectionDB extends EnteBaseDatabase {
     ''',
       [collection.id],
     );
+    final Set<int> seenFileIds = {};
+    final List<EnteFile> uniqueFiles = [];
 
-    return result.map((row) => _mapToFile(row)).toList();
+    for (final row in result) {
+      final file = _mapToFile(row);
+
+      if (!seenFileIds.contains(file.uploadedFileID)) {
+        seenFileIds.add(file.uploadedFileID!);
+        uniqueFiles.add(file);
+      }
+    }
+
+    return uniqueFiles;
   }
 
   Future<List<Collection>> getCollectionsForFile(EnteFile file) async {
