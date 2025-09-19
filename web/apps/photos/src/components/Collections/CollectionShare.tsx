@@ -1416,14 +1416,16 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
             title={t("share_album")}
         >
             <Stack sx={{ gap: 3, py: "20px", px: "8px" }}>
-                <ManageLayout
-                    {...{
-                        collection,
-                        onRootClose,
-                        onRemotePull,
-                        setBlockingLoad,
-                    }}
-                />
+                {process.env.NEXT_PUBLIC_LAYOUT_FEATURE_ENABLED && (
+                    <ManageLayout
+                        {...{
+                            collection,
+                            onRootClose,
+                            onRemotePull,
+                            setBlockingLoad,
+                        }}
+                    />
+                )}
                 <ManagePublicCollect
                     {...{ publicURL }}
                     onUpdate={handlePublicURLUpdate}
@@ -1831,7 +1833,8 @@ const ManageLayout: React.FC<ManageLayoutProps> = ({
 
     const options = useMemo(() => layoutOptions(), []);
 
-    const currentLayout = collection.pubMagicMetadata?.data?.layout || "grouped";
+    const currentLayout =
+        collection.pubMagicMetadata?.data?.layout || "grouped";
 
     const changeLayoutValue = (value: string) => async () => {
         if (value === currentLayout) return;
