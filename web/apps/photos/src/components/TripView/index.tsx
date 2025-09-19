@@ -8,7 +8,6 @@ import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
 import { useEffect, useRef, useState } from "react";
 
-
 // Import extracted components
 import { MobileCover } from "./MobileCover";
 import { MobileNavBar } from "./MobileNavBar";
@@ -112,20 +111,25 @@ export const TripView: React.FC<TripViewProps> = ({
 
     const [photoClusters, setPhotoClusters] = useState<JourneyPoint[][]>([]);
     const [optimalZoom, setOptimalZoom] = useState(7);
-    const [TripMapComponent, setTripMapComponent] = useState<React.ComponentType<{
-        journeyData: JourneyPoint[];
-        photoClusters: JourneyPoint[][];
-        hasPhotoData: boolean;
-        optimalZoom: number;
-        currentZoom: number;
-        targetZoom: number | null;
-        mapRef: import("leaflet").Map | null;
-        scrollProgress: number;
-        setMapRef: (map: import("leaflet").Map | null) => void;
-        setCurrentZoom: (zoom: number) => void;
-        setTargetZoom: (zoom: number | null) => void;
-        onMarkerClick: (clusterIndex: number, clusterLat: number, clusterLng: number) => void;
-    }> | null>(null);
+    const [TripMapComponent, setTripMapComponent] =
+        useState<React.ComponentType<{
+            journeyData: JourneyPoint[];
+            photoClusters: JourneyPoint[][];
+            hasPhotoData: boolean;
+            optimalZoom: number;
+            currentZoom: number;
+            targetZoom: number | null;
+            mapRef: import("leaflet").Map | null;
+            scrollProgress: number;
+            setMapRef: (map: import("leaflet").Map | null) => void;
+            setCurrentZoom: (zoom: number) => void;
+            setTargetZoom: (zoom: number | null) => void;
+            onMarkerClick: (
+                clusterIndex: number,
+                clusterLat: number,
+                clusterLng: number,
+            ) => void;
+        }> | null>(null);
 
     // Load client-side components and calculations
     useEffect(() => {
@@ -137,23 +141,29 @@ export const TripView: React.FC<TripViewProps> = ({
 
             // Load mapHelpers and calculate clusters if we have data
             if (journeyData.length > 0) {
-                void import("./mapHelpers").then(({ clusterPhotosByProximity, calculateOptimalZoom }) => {
-                    const clusters = clusterPhotosByProximity(journeyData);
+                void import("./mapHelpers").then(
+                    ({ clusterPhotosByProximity, calculateOptimalZoom }) => {
+                        const clusters = clusterPhotosByProximity(journeyData);
 
-                    // Sort clusters by their earliest timestamp to maintain chronological order
-                    const sortedClusters = clusters.sort((a, b) => {
-                        const earliestA = Math.min(
-                            ...a.map((p) => new Date(p.timestamp).getTime()),
-                        );
-                        const earliestB = Math.min(
-                            ...b.map((p) => new Date(p.timestamp).getTime()),
-                        );
-                        return earliestA - earliestB;
-                    });
+                        // Sort clusters by their earliest timestamp to maintain chronological order
+                        const sortedClusters = clusters.sort((a, b) => {
+                            const earliestA = Math.min(
+                                ...a.map((p) =>
+                                    new Date(p.timestamp).getTime(),
+                                ),
+                            );
+                            const earliestB = Math.min(
+                                ...b.map((p) =>
+                                    new Date(p.timestamp).getTime(),
+                                ),
+                            );
+                            return earliestA - earliestB;
+                        });
 
-                    setPhotoClusters(sortedClusters);
-                    setOptimalZoom(calculateOptimalZoom());
-                });
+                        setPhotoClusters(sortedClusters);
+                        setOptimalZoom(calculateOptimalZoom());
+                    },
+                );
             }
         }
     }, [isClient, journeyData]);

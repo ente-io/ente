@@ -32,7 +32,7 @@ export const PhotoFan = memo<PhotoFanProps>(({ cluster, onPhotoClick }) => {
                                     width: "100%",
                                     height: "100%",
                                     objectFit: "cover",
-                                    zIndex: 1
+                                    zIndex: 1,
                                 }}
                             />
                         )}
@@ -63,7 +63,7 @@ export const PhotoFan = memo<PhotoFanProps>(({ cluster, onPhotoClick }) => {
                                                 width: "100%",
                                                 height: "100%",
                                                 objectFit: "cover",
-                                                zIndex: 1
+                                                zIndex: 1,
                                             }}
                                         />
                                     )}
@@ -92,7 +92,7 @@ export const PhotoFan = memo<PhotoFanProps>(({ cluster, onPhotoClick }) => {
                                                 width: "100%",
                                                 height: "100%",
                                                 objectFit: "cover",
-                                                zIndex: 1
+                                                zIndex: 1,
                                             }}
                                         />
                                     )}
@@ -117,7 +117,7 @@ export const PhotoFan = memo<PhotoFanProps>(({ cluster, onPhotoClick }) => {
                                 inset: 0,
                                 width: "100%",
                                 height: "100%",
-                                objectFit: "cover"
+                                objectFit: "cover",
                             }}
                         />
                     ) : (

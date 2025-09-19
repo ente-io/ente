@@ -1835,8 +1835,7 @@ const ManageView: React.FC<ManageViewProps> = ({
 
     const options = useMemo(() => viewOptions(), []);
 
-    const currentView =
-        collection.pubMagicMetadata?.data?.view || "grouped";
+    const currentView = collection.pubMagicMetadata?.data?.view || "grouped";
 
     const changeViewValue = (value: string) => async () => {
         if (value === currentView) return;
@@ -1880,9 +1879,7 @@ const ManageView: React.FC<ManageViewProps> = ({
                                     onClick={changeViewValue(value)}
                                     label={label}
                                     endIcon={
-                                        currentView === value && (
-                                            <DoneIcon />
-                                        )
+                                        currentView === value && <DoneIcon />
                                     }
                                 />
                                 {index != options.length - 1 && (

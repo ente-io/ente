@@ -1,4 +1,3 @@
-
 interface GeocodingResponse {
     features?: {
         properties?: {
