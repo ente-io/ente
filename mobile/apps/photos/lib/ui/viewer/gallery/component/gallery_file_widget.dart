@@ -121,6 +121,8 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
           onHover: (event) {
             _isPointerInside = true;
             // Handle the initial file selection when swipe becomes active
+            // This is mainly for horizontal swipe detection since vertical after long press
+            // is already handled by swipeHelper being active
             if (swipeActiveNotifier?.value == true &&
                 swipeHelper != null &&
                 !swipeHelper.isActive &&
@@ -132,8 +134,10 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
           },
           onEnter: (event) {
             _isPointerInside = true;
-            // Check if horizontal swipe is active before starting or updating selection
-            if (swipeActiveNotifier?.value == true && swipeHelper != null) {
+            // Check if swipe is active (either from horizontal swipe or from long press)
+            if ((swipeActiveNotifier?.value == true ||
+                    swipeHelper?.isActive == true) &&
+                swipeHelper != null) {
               if (!swipeHelper.isActive) {
                 // Start selection when first entering a file during active swipe
                 swipeHelper.startSelection(widget.file);
