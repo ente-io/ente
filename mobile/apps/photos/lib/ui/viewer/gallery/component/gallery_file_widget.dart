@@ -7,6 +7,7 @@ import "package:media_extension/media_extension_action_types.dart";
 import "package:photos/core/constants.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/selected_files.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/app_lifecycle_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/touch_cross_detector.dart";
@@ -51,10 +52,6 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
     _isFileSelected =
         widget.selectedFiles?.isFileSelected(widget.file) ?? false;
     widget.selectedFiles?.addListener(_selectedFilesListener);
-    // Timer.periodic(const Duration(seconds: 2), (_) {
-    //   final len = GallerySwipeHelper.of(context)?.allFiles.length;
-    //   print("--------- len: $len");
-    // });
   }
 
   @override
@@ -65,144 +62,203 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final swipeHelper = GallerySwipeHelper.of(context);
-    Color selectionColor = Colors.white;
-    if (_isFileSelected &&
-        widget.file.isUploaded &&
-        widget.file.ownerID != widget.currentUserID) {
-      final avatarColors = getEnteColorScheme(context).avatarColors;
-      selectionColor =
-          avatarColors[(widget.file.ownerID!).remainder(avatarColors.length)];
-    }
-    final String heroTag = widget.tag + widget.file.tag;
-    final Widget thumbnailWidget = ThumbnailWidget(
-      widget.file,
-      diskLoadDeferDuration: galleryThumbnailDiskLoadDeferDuration,
-      serverLoadDeferDuration: galleryThumbnailServerLoadDeferDuration,
-      shouldShowLivePhotoOverlay: true,
-      key: Key(heroTag),
-      thumbnailSize: widget.photoGridSize < photoGridSizeDefault
-          ? thumbnailLargeSize
-          : thumbnailSmallSize,
-      shouldShowOwnerAvatar: !_isFileSelected,
-      shouldShowVideoDuration: true,
-    );
-    final swipeActiveNotifier =
-        GallerySwipeHelper.swipeActiveNotifierOf(context);
+    if (flagService.internalUser) {
+      final swipeHelper = GallerySwipeHelper.of(context);
+      Color selectionColor = Colors.white;
+      if (_isFileSelected &&
+          widget.file.isUploaded &&
+          widget.file.ownerID != widget.currentUserID) {
+        final avatarColors = getEnteColorScheme(context).avatarColors;
+        selectionColor =
+            avatarColors[(widget.file.ownerID!).remainder(avatarColors.length)];
+      }
+      final String heroTag = widget.tag + widget.file.tag;
+      final Widget thumbnailWidget = ThumbnailWidget(
+        widget.file,
+        diskLoadDeferDuration: galleryThumbnailDiskLoadDeferDuration,
+        serverLoadDeferDuration: galleryThumbnailServerLoadDeferDuration,
+        shouldShowLivePhotoOverlay: true,
+        key: Key(heroTag),
+        thumbnailSize: widget.photoGridSize < photoGridSizeDefault
+            ? thumbnailLargeSize
+            : thumbnailSmallSize,
+        shouldShowOwnerAvatar: !_isFileSelected,
+        shouldShowVideoDuration: true,
+      );
+      final swipeActiveNotifier =
+          GallerySwipeHelper.swipeActiveNotifierOf(context);
 
-    return ValueListenableBuilder<bool>(
-      valueListenable: swipeActiveNotifier ?? ValueNotifier(false),
-      builder: (context, isSwipeActive, child) {
-        // Check if we need to start selection when swipe becomes active
-        if (isSwipeActive &&
-            _isPointerInside &&
-            swipeHelper != null &&
-            !swipeHelper.isActive &&
-            widget.selectedFiles != null &&
-            widget.selectedFiles!.files.isNotEmpty) {
-          // Schedule the selection to happen after the current build
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted &&
-                isSwipeActive &&
-                _isPointerInside &&
-                !swipeHelper.isActive) {
-              swipeHelper.startSelection(widget.file);
-            }
-          });
-        }
-
-        return TouchCrossDetector(
-          onPointerDown: (event) {
-            _currentPointerId = event.pointer;
-            _isPointerInside = true;
-            // If files are already selected and swipe is not active, prepare for potential swipe
-            // The actual selection will start when horizontal movement is detected
-          },
-          onHover: (event) {
-            _isPointerInside = true;
-            // Handle the initial file selection when swipe becomes active
-            // This is mainly for horizontal swipe detection since vertical after long press
-            // is already handled by swipeHelper being active
-            if (swipeActiveNotifier?.value == true &&
-                swipeHelper != null &&
-                !swipeHelper.isActive &&
-                widget.selectedFiles != null &&
-                widget.selectedFiles!.files.isNotEmpty) {
-              // Start selection for the first file when horizontal swipe is detected
-              swipeHelper.startSelection(widget.file);
-            }
-          },
-          onEnter: (event) {
-            _isPointerInside = true;
-            // Check if swipe is active (either from horizontal swipe or from long press)
-            if ((swipeActiveNotifier?.value == true ||
-                    swipeHelper?.isActive == true) &&
-                swipeHelper != null) {
-              if (!swipeHelper.isActive) {
-                // Start selection when first entering a file during active swipe
+      return ValueListenableBuilder<bool>(
+        valueListenable: swipeActiveNotifier ?? ValueNotifier(false),
+        builder: (context, isSwipeActive, child) {
+          // Check if we need to start selection when swipe becomes active
+          if (isSwipeActive &&
+              _isPointerInside &&
+              swipeHelper != null &&
+              !swipeHelper.isActive &&
+              widget.selectedFiles != null &&
+              widget.selectedFiles!.files.isNotEmpty) {
+            // Schedule the selection to happen after the current build
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted &&
+                  isSwipeActive &&
+                  _isPointerInside &&
+                  !swipeHelper.isActive) {
                 swipeHelper.startSelection(widget.file);
-              } else {
-                // Update selection for subsequent files
-                swipeHelper.updateSelection(widget.file);
               }
-            }
-          },
-          onExit: (event) {
-            _isPointerInside = false;
-            if (_currentPointerId == event.pointer) {
-              _currentPointerId = null;
-            }
-          },
-          child: GestureDetector(
-            onTap: () {
-              widget.limitSelectionToOne
-                  ? _onTapWithSelectionLimit(widget.file)
-                  : _onTapNoSelectionLimit(context, widget.file);
+            });
+          }
+
+          return TouchCrossDetector(
+            onPointerDown: (event) {
+              _currentPointerId = event.pointer;
+              _isPointerInside = true;
+              // If files are already selected and swipe is not active, prepare for potential swipe
+              // The actual selection will start when horizontal movement is detected
             },
-            onLongPress: () {
-              widget.limitSelectionToOne
-                  ? _onLongPressWithSelectionLimit(context, widget.file)
-                  : _onLongPressNoSelectionLimit(context, widget.file);
+            onHover: (event) {
+              _isPointerInside = true;
+              // Handle the initial file selection when swipe becomes active
+              // This is mainly for horizontal swipe detection since vertical after long press
+              // is already handled by swipeHelper being active
+              if (swipeActiveNotifier?.value == true &&
+                  swipeHelper != null &&
+                  !swipeHelper.isActive &&
+                  widget.selectedFiles != null &&
+                  widget.selectedFiles!.files.isNotEmpty) {
+                // Start selection for the first file when horizontal swipe is detected
+                swipeHelper.startSelection(widget.file);
+              }
             },
-            child: _isFileSelected
-                ? Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      ClipRRect(
-                        key: ValueKey(heroTag),
-                        borderRadius: borderRadius,
-                        child: Hero(
-                          tag: heroTag,
-                          flightShuttleBuilder: (
-                            flightContext,
-                            animation,
-                            flightDirection,
-                            fromHeroContext,
-                            toHeroContext,
-                          ) =>
-                              thumbnailWidget,
-                          transitionOnUserGestures: true,
-                          child: thumbnailWidget,
-                        ),
-                      ),
-                      Container(
-                        decoration: const BoxDecoration(
-                          color: Color.fromARGB(102, 0, 0, 0),
+            onEnter: (event) {
+              _isPointerInside = true;
+              // Check if swipe is active (either from horizontal swipe or from long press)
+              if ((swipeActiveNotifier?.value == true ||
+                      swipeHelper?.isActive == true) &&
+                  swipeHelper != null) {
+                if (!swipeHelper.isActive) {
+                  // Start selection when first entering a file during active swipe
+                  swipeHelper.startSelection(widget.file);
+                } else {
+                  // Update selection for subsequent files
+                  swipeHelper.updateSelection(widget.file);
+                }
+              }
+            },
+            onExit: (event) {
+              _isPointerInside = false;
+              if (_currentPointerId == event.pointer) {
+                _currentPointerId = null;
+              }
+            },
+            child: GestureDetector(
+              onTap: () {
+                widget.limitSelectionToOne
+                    ? _onTapWithSelectionLimit(widget.file)
+                    : _onTapNoSelectionLimit(context, widget.file);
+              },
+              onLongPress: () {
+                widget.limitSelectionToOne
+                    ? _onLongPressWithSelectionLimit(context, widget.file)
+                    : _onLongPressNoSelectionLimit(context, widget.file);
+              },
+              child: _isFileSelected
+                  ? Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        ClipRRect(
+                          key: ValueKey(heroTag),
                           borderRadius: borderRadius,
+                          child: Hero(
+                            tag: heroTag,
+                            flightShuttleBuilder: (
+                              flightContext,
+                              animation,
+                              flightDirection,
+                              fromHeroContext,
+                              toHeroContext,
+                            ) =>
+                                thumbnailWidget,
+                            transitionOnUserGestures: true,
+                            child: thumbnailWidget,
+                          ),
                         ),
-                      ),
-                      Positioned(
-                        right: 4,
-                        top: 4,
-                        child: Icon(
-                          Icons.check_circle_rounded,
-                          size: 20,
-                          color: selectionColor, //same for both themes
+                        Container(
+                          decoration: const BoxDecoration(
+                            color: Color.fromARGB(102, 0, 0, 0),
+                            borderRadius: borderRadius,
+                          ),
                         ),
+                        Positioned(
+                          right: 4,
+                          top: 4,
+                          child: Icon(
+                            Icons.check_circle_rounded,
+                            size: 20,
+                            color: selectionColor, //same for both themes
+                          ),
+                        ),
+                      ],
+                    )
+                  : ClipRRect(
+                      key: ValueKey(heroTag),
+                      borderRadius: borderRadius,
+                      child: Hero(
+                        tag: heroTag,
+                        flightShuttleBuilder: (
+                          flightContext,
+                          animation,
+                          flightDirection,
+                          fromHeroContext,
+                          toHeroContext,
+                        ) =>
+                            thumbnailWidget,
+                        transitionOnUserGestures: true,
+                        child: thumbnailWidget,
                       ),
-                    ],
-                  )
-                : ClipRRect(
+                    ),
+            ),
+          );
+        },
+      );
+    } else {
+      Color selectionColor = Colors.white;
+      if (_isFileSelected &&
+          widget.file.isUploaded &&
+          widget.file.ownerID != widget.currentUserID) {
+        final avatarColors = getEnteColorScheme(context).avatarColors;
+        selectionColor =
+            avatarColors[(widget.file.ownerID!).remainder(avatarColors.length)];
+      }
+      final String heroTag = widget.tag + widget.file.tag;
+      final Widget thumbnailWidget = ThumbnailWidget(
+        widget.file,
+        diskLoadDeferDuration: galleryThumbnailDiskLoadDeferDuration,
+        serverLoadDeferDuration: galleryThumbnailServerLoadDeferDuration,
+        shouldShowLivePhotoOverlay: true,
+        key: Key(heroTag),
+        thumbnailSize: widget.photoGridSize < photoGridSizeDefault
+            ? thumbnailLargeSize
+            : thumbnailSmallSize,
+        shouldShowOwnerAvatar: !_isFileSelected,
+        shouldShowVideoDuration: true,
+      );
+      return GestureDetector(
+        onTap: () {
+          widget.limitSelectionToOne
+              ? _onTapWithSelectionLimit(widget.file)
+              : _onTapNoSelectionLimit(context, widget.file);
+        },
+        onLongPress: () {
+          widget.limitSelectionToOne
+              ? _onLongPressWithSelectionLimit(context, widget.file)
+              : _onLongPressNoSelectionLimit(context, widget.file);
+        },
+        child: _isFileSelected
+            ? Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  ClipRRect(
                     key: ValueKey(heroTag),
                     borderRadius: borderRadius,
                     child: Hero(
@@ -219,10 +275,42 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
                       child: thumbnailWidget,
                     ),
                   ),
-          ),
-        );
-      },
-    );
+                  Container(
+                    decoration: const BoxDecoration(
+                      color: Color.fromARGB(102, 0, 0, 0),
+                      borderRadius: borderRadius,
+                    ),
+                  ),
+                  Positioned(
+                    right: 4,
+                    top: 4,
+                    child: Icon(
+                      Icons.check_circle_rounded,
+                      size: 20,
+                      color: selectionColor, //same for both themes
+                    ),
+                  ),
+                ],
+              )
+            : ClipRRect(
+                key: ValueKey(heroTag),
+                borderRadius: borderRadius,
+                child: Hero(
+                  tag: heroTag,
+                  flightShuttleBuilder: (
+                    flightContext,
+                    animation,
+                    flightDirection,
+                    fromHeroContext,
+                    toHeroContext,
+                  ) =>
+                      thumbnailWidget,
+                  transitionOnUserGestures: true,
+                  child: thumbnailWidget,
+                ),
+              ),
+      );
+    }
   }
 
   void _selectedFilesListener() {
@@ -274,14 +362,17 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
     } else {
       HapticFeedback.lightImpact();
       _toggleFileSelection(file);
-      // Start swipe selection if pointer is still down after long press
-      // Force selecting mode since we just selected this file
-      final swipeHelper = GallerySwipeHelper.of(context);
-      if (_currentPointerId != null &&
-          TouchCrossDetector.isPointerActive(_currentPointerId!) &&
-          swipeHelper != null &&
-          widget.selectedFiles!.files.isNotEmpty) {
-        swipeHelper.startSelection(file, forceSelecting: true);
+
+      if (flagService.internalUser) {
+// Start swipe selection if pointer is still down after long press
+        // Force selecting mode since we just selected this file
+        final swipeHelper = GallerySwipeHelper.of(context);
+        if (_currentPointerId != null &&
+            TouchCrossDetector.isPointerActive(_currentPointerId!) &&
+            swipeHelper != null &&
+            widget.selectedFiles!.files.isNotEmpty) {
+          swipeHelper.startSelection(file, forceSelecting: true);
+        }
       }
     }
   }
