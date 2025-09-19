@@ -1831,6 +1831,7 @@ const ManageTemplate: React.FC<ManageTemplateProps> = ({
 }) => {
     const { show: showTemplateOptions, props: templateOptionsVisibilityProps } =
         useModalVisibility();
+    const [errorMessage, setErrorMessage] = useState("");
 
     const options = useMemo(() => templateOptions(), []);
 
@@ -1841,12 +1842,14 @@ const ManageTemplate: React.FC<ManageTemplateProps> = ({
         if (value === currentTemplate) return;
 
         setBlockingLoad(true);
+        setErrorMessage("");
         try {
             await updateCollectionTemplate(collection, value);
             await onRemotePull({ silent: true });
             templateOptionsVisibilityProps.onClose();
         } catch (e) {
             log.error("Could not update collection template", e);
+            setErrorMessage(t("generic_error"));
         } finally {
             setBlockingLoad(false);
         }
@@ -1890,6 +1893,14 @@ const ManageTemplate: React.FC<ManageTemplateProps> = ({
                             </React.Fragment>
                         ))}
                     </RowButtonGroup>
+                    {errorMessage && (
+                        <Typography
+                            variant="small"
+                            sx={{ color: "critical.main", textAlign: "center" }}
+                        >
+                            {errorMessage}
+                        </Typography>
+                    )}
                 </Stack>
             </TitledNestedSidebarDrawer>
         </>
