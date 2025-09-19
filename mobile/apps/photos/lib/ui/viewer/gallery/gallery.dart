@@ -293,6 +293,7 @@ class GalleryState extends State<Gallery> {
     });
 
     widget.selectedFiles?.addListener(_selectedFilesListener);
+
   }
 
   @override
@@ -469,13 +470,6 @@ class GalleryState extends State<Gallery> {
     }
   }
 
-  void _checkAndUpdateSwipeStatus() {
-    // Update swipe active status based on helper state
-    final isActive = _swipeHelper?.isActive ?? false;
-    if (_swipeActiveNotifier.value != isActive) {
-      _swipeActiveNotifier.value = isActive;
-    }
-  }
 
   Future<FileLoadResult> _loadFiles({int? limit}) async {
     _logger.info("Loading ${limit ?? "all"} files");
@@ -583,6 +577,7 @@ class GalleryState extends State<Gallery> {
     }
     return GallerySwipeHelper(
       helper: _swipeHelper,
+      swipeActiveNotifier: _swipeActiveNotifier,
       child: Listener(
         onPointerMove: (event) {
           // Only check for horizontal swipe if files are selected and swipe is not already active
@@ -593,15 +588,21 @@ class GalleryState extends State<Gallery> {
             final dx = event.delta.dx.abs();
             final dy = event.delta.dy.abs();
             if (dx > dy * 2 && dx > 0.1) {
-              // Horizontal swipe detected, check if swipe helper is active
-              _checkAndUpdateSwipeStatus();
+              // Horizontal swipe detected, activate swipe mode
+              _swipeActiveNotifier.value = true;
             }
           }
-          // To handle case where pointer is dragged downwards after first selection in gallery
+          // To handle case where pointer is dragged after first selection in gallery
           else if (widget.selectedFiles != null &&
               widget.selectedFiles!.files.isNotEmpty &&
-              widget.selectedFiles!.files.length == 1) {
-            _checkAndUpdateSwipeStatus();
+              widget.selectedFiles!.files.length == 1 &&
+              !_swipeActiveNotifier.value) {
+            // Check if this is horizontal movement when only one file is selected
+            final dx = event.delta.dx.abs();
+            final dy = event.delta.dy.abs();
+            if (dx > dy * 2 && dx > 0.1) {
+              _swipeActiveNotifier.value = true;
+            }
           }
         },
         onPointerUp: (_) {

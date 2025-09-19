@@ -7,10 +7,12 @@ import 'package:photos/ui/viewer/gallery/swipe_to_select_helper.dart';
 /// without passing it through multiple widget constructors.
 class GallerySwipeHelper extends InheritedWidget {
   final SwipeToSelectHelper? helper;
+  final ValueNotifier<bool>? swipeActiveNotifier;
 
   const GallerySwipeHelper({
     super.key,
     this.helper,
+    this.swipeActiveNotifier,
     required super.child,
   });
 
@@ -21,9 +23,17 @@ class GallerySwipeHelper extends InheritedWidget {
     return widget?.helper;
   }
 
+  /// Get the swipeActiveNotifier from the nearest ancestor GallerySwipeHelper.
+  static ValueNotifier<bool>? swipeActiveNotifierOf(BuildContext context) {
+    final widget =
+        context.dependOnInheritedWidgetOfExactType<GallerySwipeHelper>();
+    return widget?.swipeActiveNotifier;
+  }
+
   @override
   bool updateShouldNotify(GallerySwipeHelper oldWidget) {
-    // Only notify if the helper instance changes
-    return helper != oldWidget.helper;
+    // Notify if either the helper instance or notifier changes
+    return helper != oldWidget.helper ||
+        swipeActiveNotifier != oldWidget.swipeActiveNotifier;
   }
 }

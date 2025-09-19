@@ -86,18 +86,24 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
       shouldShowOwnerAvatar: !_isFileSelected,
       shouldShowVideoDuration: true,
     );
+    final swipeActiveNotifier =
+        GallerySwipeHelper.swipeActiveNotifierOf(context);
+
     return TouchCrossDetector(
       onPointerDown: (event) {
         _currentPointerId = event.pointer;
-        if (swipeHelper != null &&
-            widget.selectedFiles != null &&
-            widget.selectedFiles!.files.isNotEmpty) {
-          swipeHelper.startSelection(widget.file);
-        }
+        // Don't start selection immediately - wait for horizontal swipe detection
       },
       onEnter: (event) {
-        if (swipeHelper?.isActive ?? false) {
-          swipeHelper!.updateSelection(widget.file);
+        // Check if horizontal swipe is active before starting or updating selection
+        if (swipeActiveNotifier?.value == true && swipeHelper != null) {
+          if (!swipeHelper.isActive) {
+            // Start selection when first entering a file during active swipe
+            swipeHelper.startSelection(widget.file);
+          } else {
+            // Update selection for subsequent files
+            swipeHelper.updateSelection(widget.file);
+          }
         }
       },
       onExit: (event) {
