@@ -17,7 +17,7 @@ import Typography from "@mui/material/Typography";
 import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
 import { type FileListHeaderOrFooter } from "components/FileList";
 import { FileListWithViewer } from "components/FileListWithViewer";
-import { TripView } from "components/TripView";
+import { TripLayout } from "components/TripLayout";
 import { Upload } from "components/Upload";
 import {
     AccountsPageContents,
@@ -463,15 +463,15 @@ export default function PublicCollectionGallery() {
         );
     }
 
-    const view = publicCollection?.pubMagicMetadata?.data.view || "grouped";
+    const layout = publicCollection?.pubMagicMetadata?.data.layout || "grouped";
 
     return (
         <FullScreenDropZone
             disabled={shouldDisableDropzone}
             onDrop={setDragAndDropFiles}
         >
-            {view === "trip" ? (
-                <TripView
+            {layout === "trip" ? (
+                <TripLayout
                     files={publicFiles}
                     collection={publicCollection}
                     onAddPhotos={onAddPhotos}
@@ -514,7 +514,7 @@ export default function PublicCollectionGallery() {
                         selected={selected}
                         setSelected={setSelected}
                         activeCollectionID={PseudoCollectionID.all}
-                        disableGrouping={view === "continuous"}
+                        disableGrouping={layout === "continuous"}
                         onRemotePull={publicAlbumsRemotePull}
                         onVisualFeedback={handleVisualFeedback}
                         onAddSaveGroup={onAddSaveGroup}

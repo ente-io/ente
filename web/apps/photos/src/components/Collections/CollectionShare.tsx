@@ -64,7 +64,7 @@ import {
     deleteShareURL,
     shareCollection,
     unshareCollection,
-    updateCollectionView,
+    updateCollectionLayout,
     updatePublicURL,
     type CreatePublicURLAttributes,
     type UpdatePublicURLAttributes,
@@ -1416,7 +1416,7 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
             title={t("share_album")}
         >
             <Stack sx={{ gap: 3, py: "20px", px: "8px" }}>
-                <ManageView
+                <ManageLayout
                     {...{
                         collection,
                         onRootClose,
@@ -1812,38 +1812,38 @@ const SetPublicLinkPassword: React.FC<SetPublicLinkPasswordProps> = ({
     );
 };
 
-interface ManageViewProps {
+interface ManageLayoutProps {
     onRootClose: () => void;
     collection: Collection;
     onRemotePull: (opts?: RemotePullOpts) => Promise<void>;
     setBlockingLoad: (value: boolean) => void;
 }
 
-const ManageView: React.FC<ManageViewProps> = ({
+const ManageLayout: React.FC<ManageLayoutProps> = ({
     onRootClose,
     collection,
     onRemotePull,
     setBlockingLoad,
 }) => {
-    const { show: showViewOptions, props: viewOptionsVisibilityProps } =
+    const { show: showLayoutOptions, props: layoutOptionsVisibilityProps } =
         useModalVisibility();
     const [errorMessage, setErrorMessage] = useState("");
 
-    const options = useMemo(() => viewOptions(), []);
+    const options = useMemo(() => layoutOptions(), []);
 
-    const currentView = collection.pubMagicMetadata?.data?.view || "grouped";
+    const currentLayout = collection.pubMagicMetadata?.data?.layout || "grouped";
 
-    const changeViewValue = (value: string) => async () => {
-        if (value === currentView) return;
+    const changeLayoutValue = (value: string) => async () => {
+        if (value === currentLayout) return;
 
         setBlockingLoad(true);
         setErrorMessage("");
         try {
-            await updateCollectionView(collection, value);
+            await updateCollectionLayout(collection, value);
             await onRemotePull({ silent: true });
-            viewOptionsVisibilityProps.onClose();
+            layoutOptionsVisibilityProps.onClose();
         } catch (e) {
-            log.error("Could not update collection view", e);
+            log.error("Could not update collection layout", e);
             setErrorMessage(t("generic_error"));
         } finally {
             setBlockingLoad(false);
@@ -1854,17 +1854,17 @@ const ManageView: React.FC<ManageViewProps> = ({
         <>
             <RowButtonGroup>
                 <RowButton
-                    label="View"
-                    caption={t(currentView)}
-                    onClick={showViewOptions}
+                    label="Layout"
+                    caption={t(currentLayout)}
+                    onClick={showLayoutOptions}
                     endIcon={<ChevronRightIcon />}
                 />
             </RowButtonGroup>
             <TitledNestedSidebarDrawer
                 anchor="right"
-                {...viewOptionsVisibilityProps}
+                {...layoutOptionsVisibilityProps}
                 onRootClose={onRootClose}
-                title="View"
+                title="Layout"
             >
                 <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
                     <RowButtonGroup>
@@ -1872,10 +1872,10 @@ const ManageView: React.FC<ManageViewProps> = ({
                             <React.Fragment key={value}>
                                 <RowButton
                                     fontWeight="regular"
-                                    onClick={changeViewValue(value)}
+                                    onClick={changeLayoutValue(value)}
                                     label={label}
                                     endIcon={
-                                        currentView === value && <DoneIcon />
+                                        currentLayout === value && <DoneIcon />
                                     }
                                 />
                                 {index != options.length - 1 && (
@@ -1898,7 +1898,7 @@ const ManageView: React.FC<ManageViewProps> = ({
     );
 };
 
-const viewOptions = () => [
+const layoutOptions = () => [
     { label: t("grouped"), value: "grouped" },
     { label: t("continuous"), value: "continuous" },
     { label: t("trip"), value: "trip" },

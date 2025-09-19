@@ -1037,20 +1037,20 @@ export const updateCollectionSortOrder = async (
 ) => updateCollectionPublicMagicMetadata(collection, { asc });
 
 /**
- * Change the view type of a collection on remote.
+ * Change the layout type of a collection on remote.
  *
  * Remote only, does not modify local state.
  *
  * This function works only for collections owned by the user.
  *
- * @param collection The collection whose view we want to change.
+ * @param collection The collection whose layout we want to change.
  *
- * @param view The view type ("grouped", "continuous", "trip").
+ * @param layout The layout type ("grouped", "continuous", "trip").
  */
-export const updateCollectionView = async (
+export const updateCollectionLayout = async (
     collection: Collection,
-    view: string,
-) => updateCollectionPublicMagicMetadata(collection, { view });
+    layout: string,
+) => updateCollectionPublicMagicMetadata(collection, { layout });
 
 /**
  * Update the private magic metadata of a collection on remote.
