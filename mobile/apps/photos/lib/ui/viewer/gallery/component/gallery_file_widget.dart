@@ -94,6 +94,17 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
         _currentPointerId = event.pointer;
         // Don't start selection immediately - wait for horizontal swipe detection
       },
+      onHover: (event) {
+        // Only handle the initial file selection when swipe becomes active
+        if (swipeActiveNotifier?.value == true &&
+            swipeHelper != null &&
+            !swipeHelper.isActive &&
+            widget.selectedFiles != null &&
+            widget.selectedFiles!.files.isNotEmpty) {
+          // Start selection for the first file when horizontal swipe is detected
+          swipeHelper.startSelection(widget.file);
+        }
+      },
       onEnter: (event) {
         // Check if horizontal swipe is active before starting or updating selection
         if (swipeActiveNotifier?.value == true && swipeHelper != null) {

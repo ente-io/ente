@@ -293,7 +293,6 @@ class GalleryState extends State<Gallery> {
     });
 
     widget.selectedFiles?.addListener(_selectedFilesListener);
-
   }
 
   @override
@@ -469,7 +468,6 @@ class GalleryState extends State<Gallery> {
       );
     }
   }
-
 
   Future<FileLoadResult> _loadFiles({int? limit}) async {
     _logger.info("Loading ${limit ?? "all"} files");
