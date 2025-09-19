@@ -17,6 +17,7 @@ import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/ui/components/button/copy_button.dart";
 import "package:locker/ui/components/file_edit_dialog.dart";
 import "package:locker/ui/components/item_list_view.dart";
+import "package:locker/utils/data_util.dart";
 import "package:locker/utils/date_time_util.dart";
 import "package:locker/utils/file_icon_utils.dart";
 import "package:locker/utils/snack_bar_utils.dart";
@@ -46,125 +47,145 @@ class FileRowWidget extends StatelessWidget {
                 ? DateTime.fromMillisecondsSinceEpoch(file.creationTime!)
                 : DateTime.now()));
 
-    return InkWell(
-      onTap: () => _openFile(context),
-      child: Container(
-        padding: EdgeInsets.fromLTRB(16.0, 2, 16.0, isLastItem ? 8 : 2),
-        decoration: BoxDecoration(
-          border: isLastItem
-              ? null
-              : Border(
-                  bottom: BorderSide(
-                    color: Theme.of(context).dividerColor.withOpacity(0.3),
-                    width: 0.5,
-                  ),
+    final textTheme = getEnteTextTheme(context);
+    final colorScheme = getEnteColorScheme(context);
+
+    final fileRowWidget = Flexible(
+      flex: 6,
+      child: Row(
+        children: [
+          SizedBox(
+            height: 60,
+            width: 48,
+            child: Icon(
+              FileIconUtils.getFileIcon(file.displayName),
+              color: FileIconUtils.getFileIconColor(file.displayName),
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  file.displayName,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                 ),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: const EdgeInsets.only(right: 16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                Row(
                   children: [
-                    Row(
-                      children: [
-                        Icon(
-                          FileIconUtils.getFileIcon(file.displayName),
-                          color:
-                              FileIconUtils.getFileIconColor(file.displayName),
-                          size: 20,
-                        ),
-                        const SizedBox(width: 12),
-                        Flexible(
-                          child: Text(
-                            file.displayName,
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                            style: getEnteTextTheme(context).body,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      formatDate(context, updateTime),
+                      style: textTheme.small.copyWith(
+                        color: colorScheme.textMuted,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                    FutureBuilder<int>(
+                      future: CollectionService.instance.getFileSize(file),
+                      builder: (context, snapshot) {
+                        final size = snapshot.data ?? 0;
+                        return Text(
+                          ' • ' + formatBytes(size),
+                          style: getEnteTextTheme(context).small.copyWith(
+                                color: colorScheme.textMuted,
+                              ),
+                        );
+                      },
                     ),
                   ],
                 ),
-              ),
+              ],
             ),
-            Expanded(
-              flex: 1,
-              child: Text(
-                formatDate(context, updateTime),
-                style: getEnteTextTheme(context).small.copyWith(
-                      color: Theme.of(context).textTheme.bodySmall?.color,
-                    ),
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
+          ),
+        ],
+      ),
+    );
+
+    return GestureDetector(
+      onTap: () => _openFile(context),
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: colorScheme.strokeFaint,
+          ),
+          borderRadius: const BorderRadius.all(Radius.circular(6)),
+        ),
+        child: Row(
+          children: [
+            fileRowWidget,
+            Flexible(
+              child: PopupMenuButton<String>(
+                onSelected: (value) => _handleMenuAction(context, value),
+                icon: const Icon(
+                  Icons.more_vert,
+                  size: 20,
+                ),
+                itemBuilder: (BuildContext context) {
+                  return _buildPopupMenuItems(context);
+                },
               ),
-            ),
-            PopupMenuButton<String>(
-              onSelected: (value) => _handleMenuAction(context, value),
-              icon: const Icon(
-                Icons.more_vert,
-                size: 20,
-              ),
-              itemBuilder: (BuildContext context) {
-                if (overflowActions != null && overflowActions!.isNotEmpty) {
-                  return overflowActions!
-                      .map(
-                        (action) => PopupMenuItem<String>(
-                          value: action.id,
-                          child: Row(
-                            children: [
-                              Icon(action.icon, size: 16),
-                              const SizedBox(width: 8),
-                              Text(action.label),
-                            ],
-                          ),
-                        ),
-                      )
-                      .toList();
-                } else {
-                  return [
-                    PopupMenuItem<String>(
-                      value: 'edit',
-                      child: Row(
-                        children: [
-                          const Icon(Icons.edit, size: 16),
-                          const SizedBox(width: 8),
-                          Text(context.l10n.edit),
-                        ],
-                      ),
-                    ),
-                    PopupMenuItem<String>(
-                      value: 'share_link',
-                      child: Row(
-                        children: [
-                          const Icon(Icons.share, size: 16),
-                          const SizedBox(width: 8),
-                          Text(context.l10n.share),
-                        ],
-                      ),
-                    ),
-                    PopupMenuItem<String>(
-                      value: 'delete',
-                      child: Row(
-                        children: [
-                          const Icon(Icons.delete, size: 16),
-                          const SizedBox(width: 8),
-                          Text(context.l10n.delete),
-                        ],
-                      ),
-                    ),
-                  ];
-                }
-              },
             ),
           ],
         ),
       ),
     );
+  }
+
+  List<PopupMenuItem<String>> _buildPopupMenuItems(BuildContext context) {
+    if (overflowActions != null && overflowActions!.isNotEmpty) {
+      return overflowActions!
+          .map(
+            (action) => PopupMenuItem<String>(
+              value: action.id,
+              child: Row(
+                children: [
+                  Icon(action.icon, size: 16),
+                  const SizedBox(width: 8),
+                  Text(action.label),
+                ],
+              ),
+            ),
+          )
+          .toList();
+    } else {
+      return [
+        PopupMenuItem<String>(
+          value: 'edit',
+          child: Row(
+            children: [
+              const Icon(Icons.edit, size: 16),
+              const SizedBox(width: 8),
+              Text(context.l10n.edit),
+            ],
+          ),
+        ),
+        PopupMenuItem<String>(
+          value: 'share_link',
+          child: Row(
+            children: [
+              const Icon(Icons.share, size: 16),
+              const SizedBox(width: 8),
+              Text(context.l10n.share),
+            ],
+          ),
+        ),
+        PopupMenuItem<String>(
+          value: 'delete',
+          child: Row(
+            children: [
+              const Icon(Icons.delete, size: 16),
+              const SizedBox(width: 8),
+              Text(context.l10n.delete),
+            ],
+          ),
+        ),
+      ];
+    }
   }
 
   void _handleMenuAction(BuildContext context, String action) {
