@@ -463,15 +463,14 @@ export default function PublicCollectionGallery() {
         );
     }
 
-    const isTripsTemplate =
-        publicCollection?.pubMagicMetadata?.data.template === "trip";
+    const template = publicCollection?.pubMagicMetadata?.data.template || "grouped";
 
     return (
         <FullScreenDropZone
             disabled={shouldDisableDropzone}
             onDrop={setDragAndDropFiles}
         >
-            {isTripsTemplate ? (
+            {template === "trip" ? (
                 <TripTemplate
                     files={publicFiles}
                     collection={publicCollection}
@@ -515,6 +514,7 @@ export default function PublicCollectionGallery() {
                         selected={selected}
                         setSelected={setSelected}
                         activeCollectionID={PseudoCollectionID.all}
+                        disableGrouping={template === "continuous"}
                         onRemotePull={publicAlbumsRemotePull}
                         onVisualFeedback={handleVisualFeedback}
                         onAddSaveGroup={onAddSaveGroup}

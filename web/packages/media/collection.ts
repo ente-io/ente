@@ -678,9 +678,9 @@ export interface CollectionPublicMagicMetadataData {
     /**
      * The template type for the public collection view.
      *
-     * Expected to be one of: "default", "trip".
+     * Expected to be one of: "grouped", "continuous", "trip".
      *
-     * The default is "default".
+     * When undefined, the UI defaults to "grouped" behavior.
      */
     template?: string;
 }

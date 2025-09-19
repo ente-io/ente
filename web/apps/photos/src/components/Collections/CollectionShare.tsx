@@ -1836,7 +1836,7 @@ const ManageTemplate: React.FC<ManageTemplateProps> = ({
     const options = useMemo(() => templateOptions(), []);
 
     const currentTemplate =
-        collection.pubMagicMetadata?.data?.template || "default";
+        collection.pubMagicMetadata?.data?.template || "grouped";
 
     const changeTemplateValue = (value: string) => async () => {
         if (value === currentTemplate) return;
@@ -1860,9 +1860,7 @@ const ManageTemplate: React.FC<ManageTemplateProps> = ({
             <RowButtonGroup>
                 <RowButton
                     label={t("template")}
-                    caption={
-                        currentTemplate === "trip" ? t("trip") : t("default")
-                    }
+                    caption={t(currentTemplate)}
                     onClick={showTemplateOptions}
                     endIcon={<ChevronRightIcon />}
                 />
@@ -1908,6 +1906,7 @@ const ManageTemplate: React.FC<ManageTemplateProps> = ({
 };
 
 const templateOptions = () => [
-    { label: t("default"), value: "default" },
+    { label: t("grouped"), value: "grouped" },
+    { label: t("continuous"), value: "continuous" },
     { label: t("trip"), value: "trip" },
 ];

@@ -1045,7 +1045,7 @@ export const updateCollectionSortOrder = async (
  *
  * @param collection The collection whose template we want to change.
  *
- * @param template The template type ("default", "trip").
+ * @param template The template type ("grouped", "continuous", "trip").
  */
 export const updateCollectionTemplate = async (
     collection: Collection,
