@@ -66,12 +66,18 @@ class CollectionPubMagicMetadata {
   // cover photo id for the collection
   int? coverID;
 
-  CollectionPubMagicMetadata({this.asc, this.coverID});
+  // layout for public link sharing (grouped, continuous, trip)
+  String? layout;
+
+  CollectionPubMagicMetadata({this.asc, this.coverID, this.layout});
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> result = {"asc": asc ?? false};
     if (coverID != null) {
       result["coverID"] = coverID!;
+    }
+    if (layout != null) {
+      result["layout"] = layout!;
     }
     return result;
   }
@@ -87,6 +93,7 @@ class CollectionPubMagicMetadata {
     return CollectionPubMagicMetadata(
       asc: map["asc"] as bool?,
       coverID: map["coverID"],
+      layout: map["layout"] as String? ?? "grouped",
     );
   }
 }
