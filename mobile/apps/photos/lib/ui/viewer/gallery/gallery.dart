@@ -588,7 +588,7 @@ class GalleryState extends State<Gallery> {
       return widget.loadingWidget;
     }
 
-    if (flagService.internalUser) {
+    if (flagService.internalUser && widget.limitSelectionToOne == false) {
       return GallerySwipeHelper(
         helper: _swipeHelper,
         swipeActiveNotifier: _swipeActiveNotifier,
