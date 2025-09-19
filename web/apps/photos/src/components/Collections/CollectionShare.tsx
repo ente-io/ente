@@ -1859,9 +1859,9 @@ const ManageTemplate: React.FC<ManageTemplateProps> = ({
         <>
             <RowButtonGroup>
                 <RowButton
-                    label={t("Template")}
+                    label={t("template")}
                     caption={
-                        currentTemplate === "trip" ? t("Trip") : t("Default")
+                        currentTemplate === "trip" ? t("trip") : t("default")
                     }
                     onClick={showTemplateOptions}
                     endIcon={<ChevronRightIcon />}
@@ -1871,7 +1871,7 @@ const ManageTemplate: React.FC<ManageTemplateProps> = ({
                 anchor="right"
                 {...templateOptionsVisibilityProps}
                 onRootClose={onRootClose}
-                title={t("Template")}
+                title={t("template")}
             >
                 <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
                     <RowButtonGroup>
@@ -1908,6 +1908,6 @@ const ManageTemplate: React.FC<ManageTemplateProps> = ({
 };
 
 const templateOptions = () => [
-    { label: t("Default"), value: "default" },
-    { label: t("Trip"), value: "trip" },
+    { label: t("default"), value: "default" },
+    { label: t("trip"), value: "trip" },
 ];
