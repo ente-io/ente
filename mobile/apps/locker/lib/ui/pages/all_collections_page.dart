@@ -463,7 +463,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
             child: Row(
               children: [
                 ListenableBuilder(
@@ -477,43 +477,41 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
                         ? Icons.remove_circle_outline
                         : Icons.check_circle_outline_outlined;
 
-                    return Material(
-                      shape: StadiumBorder(
-                        side: BorderSide(
-                          color: colorScheme.strokeMuted,
-                          width: 0.5,
+                    return InkWell(
+                      onTap: () {
+                        if (isAllSelected) {
+                          widget.selectedCollections!.clearAll();
+                        } else {
+                          widget.selectedCollections!
+                              .select(_sortedCollections.toSet());
+                        }
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: colorScheme.strokeMuted,
+                            width: 0.5,
+                          ),
+                          borderRadius: BorderRadius.circular(50),
+                          color: colorScheme.backgroundElevated2,
                         ),
-                      ),
-                      color: colorScheme.backgroundElevated2,
-                      clipBehavior: Clip.antiAlias,
-                      child: InkWell(
-                        onTap: () {
-                          if (isAllSelected) {
-                            widget.selectedCollections!.clearAll();
-                          } else {
-                            widget.selectedCollections!
-                                .select(_sortedCollections.toSet());
-                          }
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12.0,
-                            vertical: 8.0,
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                buttonText,
-                              ),
-                              const SizedBox(width: 6),
-                              Icon(
-                                iconData,
-                                color: Colors.grey,
-                                size: 15,
-                              ),
-                            ],
-                          ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12.0,
+                          vertical: 8.0,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              buttonText,
+                            ),
+                            const SizedBox(width: 6),
+                            Icon(
+                              iconData,
+                              color: Colors.grey,
+                              size: 15,
+                            ),
+                          ],
                         ),
                       ),
                     );
@@ -527,38 +525,36 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
                     final countText =
                         count == 1 ? '1 selected' : '$count selected';
 
-                    return Material(
-                      shape: StadiumBorder(
-                        side: BorderSide(
-                          color: colorScheme.strokeMuted,
-                          width: 0.5,
+                    return InkWell(
+                      onTap: () {
+                        widget.selectedCollections!.clearAll();
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: colorScheme.strokeMuted,
+                            width: 0.5,
+                          ),
+                          borderRadius: BorderRadius.circular(50),
+                          color: colorScheme.backgroundElevated2,
                         ),
-                      ),
-                      color: colorScheme.backgroundElevated2,
-                      clipBehavior: Clip.antiAlias,
-                      child: InkWell(
-                        onTap: () {
-                          widget.selectedCollections!.clearAll();
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12.0,
-                            vertical: 8.0,
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                countText,
-                              ),
-                              const SizedBox(width: 6),
-                              const Icon(
-                                Icons.close,
-                                size: 15,
-                                color: Colors.grey,
-                              ),
-                            ],
-                          ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12.0,
+                          vertical: 8.0,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              countText,
+                            ),
+                            const SizedBox(width: 6),
+                            const Icon(
+                              Icons.close,
+                              size: 15,
+                              color: Colors.grey,
+                            ),
+                          ],
                         ),
                       ),
                     );
@@ -567,22 +563,15 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
               ],
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           Card(
             margin: EdgeInsets.zero,
-            shape: RoundedRectangleBorder(
-              borderRadius: const BorderRadius.only(
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
               ),
-              side: BorderSide(
-                color: colorScheme.strokeMuted.withValues(alpha: 0.1),
-                width: 1,
-              ),
             ),
-            shadowColor: isDarkMode
-                ? Colors.black.withValues(alpha: 0.7)
-                : Colors.grey.withValues(alpha: 0.5),
             elevation: 4,
             color: isDarkMode
                 ? colorScheme.fillFaint
