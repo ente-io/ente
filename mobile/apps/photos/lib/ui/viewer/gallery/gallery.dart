@@ -597,6 +597,12 @@ class GalleryState extends State<Gallery> {
               _checkAndUpdateSwipeStatus();
             }
           }
+          // To handle case where pointer is dragged downwards after first selection in gallery
+          else if (widget.selectedFiles != null &&
+              widget.selectedFiles!.files.isNotEmpty &&
+              widget.selectedFiles!.files.length == 1) {
+            _checkAndUpdateSwipeStatus();
+          }
         },
         onPointerUp: (_) {
           // End swipe selection when pointer is released
