@@ -111,7 +111,7 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
         setState(() {
           title = AppLocalizations.of(context).location;
           leadingIcon = Icons.pin_drop_outlined;
-          hasChipButtons = true;
+          hasChipButtons = false;
           onTap = null;
         });
       }
@@ -151,8 +151,7 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
           .toList();
       result.add(
         ChipButtonWidget(
-          null,
-          leadingIcon: Icons.add_outlined,
+          "+",
           onTap: () => showAddLocationSheet(context, widget.file.location!),
         ),
       );
