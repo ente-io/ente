@@ -1,9 +1,8 @@
-import L from "leaflet";
 import { memo, useEffect } from "react";
 import { useMap } from "react-leaflet";
 
 interface MapEventsProps {
-    setMapRef: (map: L.Map) => void;
+    setMapRef: (map: import("leaflet").Map) => void;
     setCurrentZoom: (zoom: number) => void;
     setTargetZoom: (zoom: number | null) => void;
 }
