@@ -320,17 +320,17 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                         );
                       },
                       isTopBorderRadiusRemoved: true,
-                      isBottomBorderRadiusRemoved: flagService.internalUser,
+                      isBottomBorderRadiusRemoved: true,
                     ),
-                  if (!url.isExpired && flagService.internalUser)
+                  if (!url.isExpired)
                     DividerWidget(
                       dividerType: DividerType.menu,
                       bgColor: getEnteColorScheme(context).fillFaint,
                     ),
-                  if (!url.isExpired && flagService.internalUser)
+                  if (!url.isExpired)
                     MenuItemWidget(
-                      captionedTextWidget: const CaptionedTextWidget(
-                        title: "Send QR Code (i)",
+                      captionedTextWidget: CaptionedTextWidget(
+                        title: AppLocalizations.of(context).sendQrCode,
                         makeTextBold: true,
                       ),
                       leadingIcon: Icons.qr_code_outlined,
