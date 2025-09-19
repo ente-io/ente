@@ -57,7 +57,6 @@ class _ItemListViewState extends State<ItemListView> {
   List<_ListItem> _sortedItems = [];
   int _sortColumnIndex = 1;
   bool _sortAscending = false;
-  bool isAnyCollectionSelected = false;
 
   @override
   void initState() {
@@ -139,13 +138,9 @@ class _ItemListViewState extends State<ItemListView> {
     await routeToPage(context, CollectionPage(collection: collection));
   }
 
-  Future<void> _toggleCollectionSelection(Collection collection) async {
-    await HapticFeedback.lightImpact();
+  void _toggleCollectionSelection(Collection collection) {
+    HapticFeedback.lightImpact();
     widget.selectedCollections!.toggleSelection(collection);
-    setState(() {
-      isAnyCollectionSelected =
-          widget.selectedCollections!.collections.isNotEmpty;
-    });
   }
 
   @override
@@ -172,24 +167,46 @@ class _ItemListViewState extends State<ItemListView> {
           itemBuilder: (context, index) {
             final item = _sortedItems[index];
             final isLastItem = index == _sortedItems.length - 1;
-            return ListItemWidget(
-              item: item,
-              collections: widget.collections,
-              fileOverflowActions: widget.fileOverflowActions,
-              collectionOverflowActions: widget.collectionOverflowActions,
-              isLastItem: isLastItem,
-              selectedCollections: widget.selectedCollections,
-              onCollectionTap: (c) {
-                isAnyCollectionSelected
-                    ? _toggleCollectionSelection(c)
-                    : _navigateToCollectionPage(c);
-              },
-              onCollectionLongPress: (c) {
-                isAnyCollectionSelected
-                    ? _navigateToCollectionPage(c)
-                    : _toggleCollectionSelection(c);
-              },
-            );
+
+            if (widget.selectedCollections != null) {
+              return ListenableBuilder(
+                listenable: widget.selectedCollections!,
+                builder: (context, child) {
+                  final isAnyCollectionSelected =
+                      widget.selectedCollections!.hasSelections;
+
+                  return ListItemWidget(
+                    item: item,
+                    collections: widget.collections,
+                    fileOverflowActions: widget.fileOverflowActions,
+                    collectionOverflowActions: widget.collectionOverflowActions,
+                    isLastItem: isLastItem,
+                    selectedCollections: widget.selectedCollections,
+                    onCollectionTap: (c) {
+                      isAnyCollectionSelected
+                          ? _toggleCollectionSelection(c)
+                          : _navigateToCollectionPage(c);
+                    },
+                    onCollectionLongPress: (c) {
+                      isAnyCollectionSelected
+                          ? _navigateToCollectionPage(c)
+                          : _toggleCollectionSelection(c);
+                    },
+                  );
+                },
+              );
+            } else {
+              return ListItemWidget(
+                item: item,
+                collections: widget.collections,
+                fileOverflowActions: widget.fileOverflowActions,
+                collectionOverflowActions: widget.collectionOverflowActions,
+                isLastItem: isLastItem,
+                selectedCollections: widget.selectedCollections,
+                onCollectionTap: (c) => _navigateToCollectionPage(c),
+                onCollectionLongPress: (c) => _toggleCollectionSelection(c),
+              );
+            }
           },
         ),
       ],

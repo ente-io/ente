@@ -539,7 +539,6 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
                       child: InkWell(
                         onTap: () {
                           widget.selectedCollections!.clearAll();
-                          setState(() {});
                         },
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
