@@ -589,10 +589,10 @@ class GalleryState extends State<Gallery> {
           if (!_swipeActiveNotifier.value &&
               widget.selectedFiles != null &&
               widget.selectedFiles!.files.isNotEmpty) {
-            // Check if movement is primarily horizontal (2x more than vertical)
+            // Check if movement is primarily horizontal (2x more than vertical) and if delta x is significant
             final dx = event.delta.dx.abs();
             final dy = event.delta.dy.abs();
-            if (dx > dy * 2) {
+            if (dx > dy * 2 && dx > 0.1) {
               // Horizontal swipe detected, check if swipe helper is active
               _checkAndUpdateSwipeStatus();
             }
