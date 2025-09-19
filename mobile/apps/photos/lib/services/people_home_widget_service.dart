@@ -1,5 +1,6 @@
 import "dart:math";
 
+import 'package:async/async.dart';
 import "package:collection/collection.dart";
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -19,14 +20,21 @@ import 'package:synchronized/synchronized.dart';
 
 class PeopleHomeWidgetService {
   // Constants
+  static const String WIDGET_TYPE = "people"; // Identifier for this widget type
   static const String SELECTED_PEOPLE_KEY = "selectedPeopleHW";
   static const String PEOPLE_LAST_HASH_KEY = "peopleLastHash";
   static const String ANDROID_CLASS_NAME = "EntePeopleWidgetProvider";
   static const String IOS_CLASS_NAME = "EntePeopleWidget";
   static const String PEOPLE_STATUS_KEY = "peopleStatusKey.widget";
   static const String PEOPLE_CHANGED_KEY = "peopleChanged.widget";
+  static const String PEOPLE_LAST_REFRESH_KEY = "peopleLastRefresh";
   static const String TOTAL_PEOPLE_KEY = "totalPeople";
-  static const int MAX_PEOPLE_LIMIT = 50;
+  // Widget optimization constants (internal users only)
+  static const int MAX_PEOPLE_LIMIT_INTERNAL =
+      10; // Optimized for 6-hour refresh
+  static const int MAX_PEOPLE_LIMIT_DEFAULT = 50; // Original limit
+  static const Duration REFRESH_INTERVAL =
+      Duration(hours: 6); // Refresh every 6 hours
 
   // Singleton pattern
   static final PeopleHomeWidgetService instance =
@@ -37,6 +45,9 @@ class PeopleHomeWidgetService {
   final Logger _logger = Logger((PeopleHomeWidgetService).toString());
   SharedPreferences get _prefs => ServiceLocator.instance.prefs;
   final peopleChangedLock = Lock();
+
+  // Track the latest request generation to skip outdated operations
+  int _requestGeneration = 0;
 
   // Public methods
   List<String>? getSelectedPeople() {
@@ -59,7 +70,17 @@ class PeopleHomeWidgetService {
   }
 
   Future<void> initPeopleHomeWidget() async {
+    // Increment generation for this request
+    final currentGeneration = ++_requestGeneration;
+
     await HomeWidgetService.instance.computeLock.synchronized(() async {
+      // Skip if a newer request has already been made
+      if (currentGeneration != _requestGeneration) {
+        _logger.info(
+          "Skipping outdated people widget request (gen $currentGeneration, latest $_requestGeneration)",
+        );
+        return;
+      }
       if (await _hasAnyBlockers()) {
         await clearWidget();
         return;
@@ -70,9 +91,23 @@ class PeopleHomeWidgetService {
       final bool forceFetchNewPeople = await _shouldUpdateWidgetCache();
 
       if (forceFetchNewPeople) {
-        await _updatePeopleWidgetCache();
-        await updatePeopleChanged(false);
-        _logger.info("Force fetch new people complete");
+        // Only cancel people operations, not other widget types
+        await HomeWidgetService.instance.cancelWidgetOperation(WIDGET_TYPE);
+
+        // Create a cancellable operation for this people widget update
+        final completer = CancelableCompleter<void>();
+        HomeWidgetService.instance
+            .setWidgetOperation(WIDGET_TYPE, completer.operation);
+
+        await _updatePeopleWidgetCacheWithCancellation(completer);
+        if (!completer.isCanceled) {
+          await updatePeopleChanged(false);
+          _logger.info("Force fetch new people complete");
+        }
+
+        if (!completer.isCompleted && !completer.isCanceled) {
+          completer.complete();
+        }
       } else {
         await _refreshPeopleWidget();
         _logger.info("Refresh people widget complete");
@@ -261,6 +296,39 @@ class PeopleHomeWidgetService {
       return true;
     }
 
+    // Widget optimization for enhanced widget feature
+    if (flagService.enhancedWidgetImage) {
+      // Check if we already have all available images (less than limit)
+      // If the last sync was successful and we had less than the limit, no need to refresh
+      final lastStatus = getPeopleStatus();
+      final totalPeople = await _getTotalPeople();
+      const maxLimit = MAX_PEOPLE_LIMIT_INTERNAL;
+
+      if (lastStatus == WidgetStatus.syncedAll &&
+          totalPeople != null &&
+          totalPeople < maxLimit) {
+        _logger.info(
+          "[Enhanced] Skipping refresh: already have all available images ($totalPeople < $maxLimit)",
+        );
+        return false;
+      }
+
+      // Check if enough time has passed for a refresh (even if content hasn't changed)
+      final lastRefreshStr = _prefs.getString(PEOPLE_LAST_REFRESH_KEY);
+      if (lastRefreshStr != null) {
+        final lastRefresh = DateTime.tryParse(lastRefreshStr);
+        if (lastRefresh != null) {
+          final timeSinceRefresh = DateTime.now().difference(lastRefresh);
+          if (timeSinceRefresh >= REFRESH_INTERVAL) {
+            _logger.info(
+              "[Enhanced] Time-based refresh triggered (last refresh: ${timeSinceRefresh.inHours} hours ago)",
+            );
+            return true;
+          }
+        }
+      }
+    }
+
     // update widget cache if
     // - people not synced
     // - people synced partially but now home widget is present
@@ -310,11 +378,23 @@ class PeopleHomeWidgetService {
     _logger.info("Home Widget updated: ${message ?? "standard update"}");
   }
 
+  Future<int?> _getTotalPeople() async {
+    return await HomeWidgetService.instance.getData<int>(TOTAL_PEOPLE_KEY);
+  }
+
   Future<void> _setTotalPeople(int? total) async {
     await HomeWidgetService.instance.setData(TOTAL_PEOPLE_KEY, total);
   }
 
-  Future<void> _updatePeopleWidgetCache() async {
+  Future<void> _updatePeopleWidgetCacheWithCancellation(
+    CancelableCompleter completer,
+  ) async {
+    return _updatePeopleWidgetCache(completer);
+  }
+
+  Future<void> _updatePeopleWidgetCache([
+    CancelableCompleter? completer,
+  ]) async {
     final peopleIds = await _getEffectiveSelections();
     final peopleWithFiles = await _getPeople(peopleIds);
 
@@ -324,11 +404,25 @@ class PeopleHomeWidgetService {
       return;
     }
 
-    const limit = MAX_PEOPLE_LIMIT;
-    const maxAttempts = limit * 10;
+    // Use optimized limits for enhanced widget feature
+    final limit = flagService.enhancedWidgetImage
+        ? MAX_PEOPLE_LIMIT_INTERNAL
+        : MAX_PEOPLE_LIMIT_DEFAULT;
+    final maxAttempts =
+        limit * 3; // Reduce max attempts to avoid excessive retries
+
+    // Record the refresh time for enhanced widget feature
+    if (flagService.enhancedWidgetImage) {
+      await _prefs.setString(
+        PEOPLE_LAST_REFRESH_KEY,
+        DateTime.now().toIso8601String(),
+      );
+    }
 
     int renderedCount = 0;
     int attemptsCount = 0;
+    // Track files that have already failed to avoid retrying them
+    final Set<String> failedFiles = {};
 
     await updatePeopleStatus(WidgetStatus.notSynced);
 
@@ -337,6 +431,12 @@ class PeopleHomeWidgetService {
     final random = Random();
 
     while (renderedCount < limit && attemptsCount < maxAttempts) {
+      // Check if operation was cancelled
+      if (completer != null && completer.isCanceled) {
+        _logger.info("People widget update cancelled during rendering");
+        return;
+      }
+
       final randomEntry =
           peopleWithFilesEntries[random.nextInt(peopleWithFilesLength)];
 
@@ -345,6 +445,15 @@ class PeopleHomeWidgetService {
       final randomPersonFile = randomEntry.value.$2.elementAt(
         random.nextInt(randomEntry.value.$2.length),
       );
+
+      // Skip files that have already failed
+      final fileKey =
+          '${randomPersonFile.uploadedFileID ?? randomPersonFile.localID}_${randomPersonFile.displayName}';
+      if (failedFiles.contains(fileKey)) {
+        attemptsCount++;
+        continue;
+      }
+
       final personId = randomEntry.key;
       final personName = randomEntry.value.$1;
 
@@ -361,6 +470,12 @@ class PeopleHomeWidgetService {
       });
 
       if (renderResult != null) {
+        // Check if cancelled before continuing
+        if (completer != null && completer.isCanceled) {
+          _logger.info("People widget update cancelled after rendering");
+          return;
+        }
+
         // Check for blockers again before continuing
         if (await _hasAnyBlockers()) {
           return;
@@ -377,6 +492,9 @@ class PeopleHomeWidgetService {
         }
 
         renderedCount++;
+      } else {
+        // Mark this file as failed to avoid retrying it
+        failedFiles.add(fileKey);
       }
 
       attemptsCount++;
