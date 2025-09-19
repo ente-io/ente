@@ -985,6 +985,7 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, collectionLinkRep
 	})
 
 	scheduleAndRun(c, "@every 60m", func() {
+		emergencyCtrl.SendRecoveryReminder()
 		err := taskRepo.CleanupExpiredLocks()
 		if err != nil {
 			log.Printf("Error while cleaning up lock table, %s", err)
