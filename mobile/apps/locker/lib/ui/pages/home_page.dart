@@ -54,9 +54,7 @@ class _HomePageState extends UploaderPageState<HomePage>
   List<Collection> outgoingCollections = [];
   List<Collection> incomingCollections = [];
   List<Collection> quickLinks = [];
-  Map<int, int> _outgoingCollectionFileCounts = {};
-  Map<int, int> _incomingCollectionFileCounts = {};
-  Map<int, int> _homeCollectionFileCounts = {};
+  List<Collection> homeCollections = [];
 
   String? _error;
   final _logger = Logger('HomePage');
@@ -100,7 +98,6 @@ class _HomePageState extends UploaderPageState<HomePage>
       collections = _filteredCollections;
     } else {
       final excludeIds = {
-        ...incomingCollections.map((c) => c.id),
         ...quickLinks.map((c) => c.id),
       };
       collections =
@@ -111,6 +108,15 @@ class _HomePageState extends UploaderPageState<HomePage>
 
   List<Collection> _filterOutUncategorized(List<Collection> collections) {
     return CollectionSortUtil.filterAndSortCollections(collections);
+  }
+
+  List<Collection> getOnEnteCollections(List<Collection> collections) {
+    final excludeIds = {
+      ...incomingCollections.map((c) => c.id),
+      ...quickLinks.map((c) => c.id),
+    };
+    collections = collections.where((c) => !excludeIds.contains(c.id)).toList();
+    return _filterOutUncategorized(collections);
   }
 
   final ValueNotifier<bool> _isFabOpen = ValueNotifier<bool>(false);
@@ -133,6 +139,8 @@ class _HomePageState extends UploaderPageState<HomePage>
         curve: Curves.easeInOut,
       ),
     );
+
+    _loadCollections();
 
     if (CollectionService.instance.hasCompletedFirstSync()) {
       _loadCollections();
@@ -289,6 +297,7 @@ class _HomePageState extends UploaderPageState<HomePage>
           await CollectionService.instance.getSharedCollections();
 
       setState(() {
+        homeCollections = getOnEnteCollections(sortedCollections);
         _collections = sortedCollections;
         _filteredCollections = _filterOutUncategorized(sortedCollections);
         _filteredFiles = _recentFiles;
@@ -297,8 +306,6 @@ class _HomePageState extends UploaderPageState<HomePage>
         quickLinks = sharedCollections.quickLinks;
         _isLoading = false;
       });
-
-      await _loadCollectionFileCounts();
     } catch (error) {
       setState(() {
         _error = 'Error fetching collections: $error';
@@ -516,23 +523,20 @@ class _HomePageState extends UploaderPageState<HomePage>
               children: [
                 ..._buildCollectionSection(
                   title: context.l10n.collections,
-                  collections: _displayedCollections,
+                  collections: homeCollections,
                   viewType: UISectionType.homeCollections,
-                  fileCounts: _homeCollectionFileCounts,
                 ),
                 if (outgoingCollections.isNotEmpty)
                   ..._buildCollectionSection(
                     title: context.l10n.sharedByYou,
                     collections: outgoingCollections,
                     viewType: UISectionType.outgoingCollections,
-                    fileCounts: _outgoingCollectionFileCounts,
                   ),
                 if (incomingCollections.isNotEmpty)
                   ..._buildCollectionSection(
                     title: context.l10n.sharedWithYou,
                     collections: incomingCollections,
                     viewType: UISectionType.incomingCollections,
-                    fileCounts: _incomingCollectionFileCounts,
                   ),
                 _buildRecentsSection(),
               ],
@@ -729,55 +733,10 @@ class _HomePageState extends UploaderPageState<HomePage>
     }
   }
 
-  Future<void> _loadCollectionFileCounts() async {
-    final mainCounts = <int, int>{};
-    final outgoingCounts = <int, int>{};
-    final incomingCounts = <int, int>{};
-
-    await Future.wait([
-      ..._displayedCollections.take(4).map((collection) async {
-        try {
-          final files =
-              await CollectionService.instance.getFilesInCollection(collection);
-          mainCounts[collection.id] = files.length;
-        } catch (e) {
-          mainCounts[collection.id] = 0;
-        }
-      }),
-      ...outgoingCollections.take(4).map((collection) async {
-        try {
-          final files =
-              await CollectionService.instance.getFilesInCollection(collection);
-          outgoingCounts[collection.id] = files.length;
-        } catch (e) {
-          outgoingCounts[collection.id] = 0;
-        }
-      }),
-      ...incomingCollections.take(4).map((collection) async {
-        try {
-          final files =
-              await CollectionService.instance.getFilesInCollection(collection);
-          incomingCounts[collection.id] = files.length;
-        } catch (e) {
-          incomingCounts[collection.id] = 0;
-        }
-      }),
-    ]);
-
-    if (mounted) {
-      setState(() {
-        _homeCollectionFileCounts = mainCounts;
-        _outgoingCollectionFileCounts = outgoingCounts;
-        _incomingCollectionFileCounts = incomingCounts;
-      });
-    }
-  }
-
   List<Widget> _buildCollectionSection({
     required String title,
     required List<Collection> collections,
     required UISectionType viewType,
-    required Map<int, int> fileCounts,
   }) {
     return [
       SectionOptions(
@@ -800,7 +759,6 @@ class _HomePageState extends UploaderPageState<HomePage>
       const SizedBox(height: 24),
       CollectionFlexGridViewWidget(
         collections: collections,
-        collectionFileCounts: fileCounts,
       ),
       const SizedBox(height: 24),
     ];

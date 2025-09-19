@@ -1,5 +1,4 @@
 import { Box, Skeleton, styled, Typography } from "@mui/material";
-import Image from "next/image";
 import { memo } from "react";
 import type { JourneyPoint } from "./types";
 
@@ -35,12 +34,16 @@ export const MobileCover = memo<MobileCoverProps>(
             <MobileCoverContainer>
                 {coverImageUrl ? (
                     <>
-                        <Image
+                        <img
                             src={coverImageUrl}
                             alt="Trip Cover"
-                            fill
-                            style={{ objectFit: "cover" }}
-                            sizes="100vw"
+                            style={{
+                                position: "absolute",
+                                inset: 0,
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                            }}
                         />
                         <GradientOverlay />
                     </>

@@ -1,6 +1,15 @@
-import L from "leaflet";
+import { haveWindow } from "ente-base/env";
 import type { JourneyPoint } from "./types";
 import { iconCache } from "./utils/geocoding";
+
+// Conditionally import leaflet only in browser environment
+const getLeaflet = () => {
+    if (haveWindow()) {
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        return require("leaflet") as typeof import("leaflet");
+    }
+    return null;
+};
 
 // Calculate distance between two points using Haversine formula (returns distance in km)
 export const calculateDistance = (
@@ -87,10 +96,11 @@ export const createIcon = (
     borderColor = "#ffffff",
     _clusterCount?: number,
     isReached = false,
-): L.DivIcon => {
-    if (typeof window === "undefined") {
+): import("leaflet").DivIcon | null => {
+    const leaflet = getLeaflet();
+    if (typeof window === "undefined" || !leaflet) {
         // Fallback icon for SSR
-        return L.divIcon({ html: "", className: "empty-marker" });
+        return null;
     }
 
     // Create cache key based on all parameters
@@ -106,7 +116,7 @@ export const createIcon = (
     const triangleHeight = 10;
     const hasImage = imageSrc && imageSrc.trim() !== "";
 
-    const icon = L.divIcon({
+    const icon = leaflet.divIcon({
         html: `
         <div class="photo-pin${isReached ? " reached" : ""}" style="
           width: ${pinSize}px;
@@ -196,10 +206,11 @@ export const createSuperClusterIcon = (
     clusterCount: number,
     size = 45,
     isReached = false,
-): L.DivIcon => {
-    if (typeof window === "undefined") {
+): import("leaflet").DivIcon | null => {
+    const leaflet = getLeaflet();
+    if (typeof window === "undefined" || !leaflet) {
         // Fallback icon for SSR
-        return L.divIcon({ html: "", className: "empty-marker" });
+        return null;
     }
 
     // Create cache key based on all parameters
@@ -216,7 +227,7 @@ export const createSuperClusterIcon = (
     const containerSize = pinSize + 24;
     const hasImage = imageSrc && imageSrc.trim() !== "";
 
-    const icon = L.divIcon({
+    const icon = leaflet.divIcon({
         html: `
         <div class="super-cluster-container" style="
           width: ${containerSize}px;
@@ -333,7 +344,7 @@ export const detectScreenCollisions = (
     clusters: JourneyPoint[][],
     zoom: number,
     targetZoom: number | null,
-    mapRef: L.Map | null,
+    mapRef: import("leaflet").Map | null,
     optimalZoom: number,
 ) => {
     // Use target zoom if we're in the middle of a zoom animation, otherwise use optimal zoom

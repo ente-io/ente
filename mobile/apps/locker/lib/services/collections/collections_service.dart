@@ -12,7 +12,7 @@ import "package:locker/services/collections/collections_api_client.dart";
 import "package:locker/services/collections/collections_db.dart";
 import 'package:locker/services/collections/models/collection.dart';
 import "package:locker/services/collections/models/collection_items.dart";
-import "package:locker/services/collections/models/public_url.dart"; 
+import "package:locker/services/collections/models/public_url.dart";
 import 'package:locker/services/configuration.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/services/trash/models/trash_item_request.dart';
@@ -45,12 +45,11 @@ class CollectionService {
 
   final _collectionIDToCollections = <int, Collection>{};
 
-  CollectionService._privateConstructor() {
-    _db = CollectionDB.instance;
-    _apiClient = CollectionApiClient.instance;
-  }
+  CollectionService._privateConstructor();
 
   Future<void> init() async {
+    _db = CollectionDB.instance;
+    _apiClient = CollectionApiClient.instance;
     if (Configuration.instance.hasConfiguredAccount()) {
       await _init();
     } else {
@@ -174,6 +173,23 @@ class CollectionService {
       );
       rethrow;
     }
+  }
+
+  Future<int> getFileCount(Collection collection) async {
+    final files = await getFilesInCollection(collection);
+    return files.length;
+  }
+
+  Future<int> getFileSize(EnteFile file) async {
+    int fileSize;
+    if (file.fileSize != null) {
+      fileSize = file.fileSize!;
+    } else {
+      // TODO: Need to write the code to getFile from server
+      // fileSize = await getFile(file).then((f) => f!.length());
+      fileSize = 0;
+    }
+    return fileSize;
   }
 
   Future<List<EnteFile>> getAllFiles() async {

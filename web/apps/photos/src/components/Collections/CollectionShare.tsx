@@ -30,7 +30,6 @@ import {
     RowButtonDivider,
     RowButtonEndActivityIndicator,
     RowButtonGroup,
-    RowButtonGroupHint,
     RowButtonGroupTitle,
     RowLabel,
     RowSwitch,
@@ -65,6 +64,7 @@ import {
     deleteShareURL,
     shareCollection,
     unshareCollection,
+    updateCollectionLayout,
     updatePublicURL,
     type CreatePublicURLAttributes,
     type UpdatePublicURLAttributes,
@@ -1416,6 +1416,16 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
             title={t("share_album")}
         >
             <Stack sx={{ gap: 3, py: "20px", px: "8px" }}>
+                {process.env.NEXT_PUBLIC_LAYOUT_FEATURE_ENABLED && (
+                    <ManageLayout
+                        {...{
+                            collection,
+                            onRootClose,
+                            onRemotePull,
+                            setBlockingLoad,
+                        }}
+                    />
+                )}
                 <ManagePublicCollect
                     {...{ publicURL }}
                     onUpdate={handlePublicURLUpdate}
@@ -1508,9 +1518,6 @@ const ManagePublicCollect: React.FC<ManagePublicLinkSettingProps> = ({
                     onClick={handleFileDownloadSetting}
                 />
             </RowButtonGroup>
-            <RowButtonGroupHint>
-                {t("allow_adding_photos_hint")}
-            </RowButtonGroupHint>
         </Stack>
     );
 };
@@ -1806,3 +1813,96 @@ const SetPublicLinkPassword: React.FC<SetPublicLinkPasswordProps> = ({
         </Dialog>
     );
 };
+
+interface ManageLayoutProps {
+    onRootClose: () => void;
+    collection: Collection;
+    onRemotePull: (opts?: RemotePullOpts) => Promise<void>;
+    setBlockingLoad: (value: boolean) => void;
+}
+
+const ManageLayout: React.FC<ManageLayoutProps> = ({
+    onRootClose,
+    collection,
+    onRemotePull,
+    setBlockingLoad,
+}) => {
+    const { show: showLayoutOptions, props: layoutOptionsVisibilityProps } =
+        useModalVisibility();
+    const [errorMessage, setErrorMessage] = useState("");
+
+    const options = useMemo(() => layoutOptions(), []);
+
+    const currentLayout =
+        collection.pubMagicMetadata?.data?.layout || "grouped";
+
+    const changeLayoutValue = (value: string) => async () => {
+        if (value === currentLayout) return;
+
+        setBlockingLoad(true);
+        setErrorMessage("");
+        try {
+            await updateCollectionLayout(collection, value);
+            await onRemotePull({ silent: true });
+            layoutOptionsVisibilityProps.onClose();
+        } catch (e) {
+            log.error("Could not update collection layout", e);
+            setErrorMessage(t("generic_error"));
+        } finally {
+            setBlockingLoad(false);
+        }
+    };
+
+    return (
+        <>
+            <RowButtonGroup>
+                <RowButton
+                    label="Layout"
+                    caption={t(currentLayout)}
+                    onClick={showLayoutOptions}
+                    endIcon={<ChevronRightIcon />}
+                />
+            </RowButtonGroup>
+            <TitledNestedSidebarDrawer
+                anchor="right"
+                {...layoutOptionsVisibilityProps}
+                onRootClose={onRootClose}
+                title="Layout"
+            >
+                <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
+                    <RowButtonGroup>
+                        {options.map(({ label, value }, index) => (
+                            <React.Fragment key={value}>
+                                <RowButton
+                                    fontWeight="regular"
+                                    onClick={changeLayoutValue(value)}
+                                    label={label}
+                                    endIcon={
+                                        currentLayout === value && <DoneIcon />
+                                    }
+                                />
+                                {index != options.length - 1 && (
+                                    <RowButtonDivider />
+                                )}
+                            </React.Fragment>
+                        ))}
+                    </RowButtonGroup>
+                    {errorMessage && (
+                        <Typography
+                            variant="small"
+                            sx={{ color: "critical.main", textAlign: "center" }}
+                        >
+                            {errorMessage}
+                        </Typography>
+                    )}
+                </Stack>
+            </TitledNestedSidebarDrawer>
+        </>
+    );
+};
+
+const layoutOptions = () => [
+    { label: t("grouped"), value: "grouped" },
+    { label: t("continuous"), value: "continuous" },
+    { label: t("trip"), value: "trip" },
+];

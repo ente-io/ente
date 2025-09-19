@@ -1,5 +1,4 @@
 import { Box, styled } from "@mui/material";
-import Image from "next/image";
 import { memo } from "react";
 import type { JourneyPoint } from "./types";
 
@@ -24,12 +23,17 @@ export const PhotoFan = memo<PhotoFanProps>(({ cluster, onPhotoClick }) => {
                     <BackgroundLoadingBox />
                     <ImageWrapper sx={{ transform: "skewY(-8deg) scale(1.1)" }}>
                         {cluster[1].image && cluster[1].image.trim() !== "" && (
-                            <Image
+                            <img
                                 src={cluster[1].image}
                                 alt={cluster[1].name}
-                                fill
-                                style={{ objectFit: "cover", zIndex: 1 }}
-                                sizes="200px"
+                                style={{
+                                    position: "absolute",
+                                    inset: 0,
+                                    width: "100%",
+                                    height: "100%",
+                                    objectFit: "cover",
+                                    zIndex: 1,
+                                }}
                             />
                         )}
                     </ImageWrapper>
@@ -50,15 +54,17 @@ export const PhotoFan = memo<PhotoFanProps>(({ cluster, onPhotoClick }) => {
                             >
                                 {cluster[1].image &&
                                     cluster[1].image.trim() !== "" && (
-                                        <Image
+                                        <img
                                             src={cluster[1].image}
                                             alt={cluster[1].name}
-                                            fill
                                             style={{
+                                                position: "absolute",
+                                                inset: 0,
+                                                width: "100%",
+                                                height: "100%",
                                                 objectFit: "cover",
                                                 zIndex: 1,
                                             }}
-                                            sizes="200px"
                                         />
                                     )}
                             </ImageWrapper>
@@ -77,15 +83,17 @@ export const PhotoFan = memo<PhotoFanProps>(({ cluster, onPhotoClick }) => {
                             >
                                 {cluster[2].image &&
                                     cluster[2].image.trim() !== "" && (
-                                        <Image
+                                        <img
                                             src={cluster[2].image}
                                             alt={cluster[2].name}
-                                            fill
                                             style={{
+                                                position: "absolute",
+                                                inset: 0,
+                                                width: "100%",
+                                                height: "100%",
                                                 objectFit: "cover",
                                                 zIndex: 1,
                                             }}
-                                            sizes="200px"
                                         />
                                     )}
                             </ImageWrapper>
@@ -101,12 +109,16 @@ export const PhotoFan = memo<PhotoFanProps>(({ cluster, onPhotoClick }) => {
                     }
                 >
                     {cluster[0].image && cluster[0].image.trim() !== "" ? (
-                        <Image
+                        <img
                             src={cluster[0].image}
                             alt={cluster[0].name}
-                            fill
-                            style={{ objectFit: "cover" }}
-                            sizes="150px"
+                            style={{
+                                position: "absolute",
+                                inset: 0,
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                            }}
                         />
                     ) : (
                         <LoadingBox />

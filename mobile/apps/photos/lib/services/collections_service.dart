@@ -535,7 +535,7 @@ class CollectionsService {
   Future<List<Collection>> getCollectionForWidgetSelection() async {
     final AlbumSortKey sortKey = localSettings.albumSortKey();
     final AlbumSortDirection sortDirection = localSettings.albumSortDirection();
-    final bool includeShared = flagService.widgetSharedAlbums;
+    const bool includeShared = true;
     final List<Collection> collections = CollectionsService.instance
         .getCollectionsForUI(includedShared: includeShared);
     final bool hasFavorites = FavoritesService.instance.hasFavorites();

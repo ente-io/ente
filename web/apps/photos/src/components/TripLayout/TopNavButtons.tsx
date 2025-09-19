@@ -32,7 +32,7 @@ export const TopNavButtons: React.FC<TopNavButtonsProps> = ({
 
     const handleSignUp = () => {
         if (typeof window !== "undefined") {
-            window.open("https://ente.io", "_blank", "noopener,noreferrer");
+            window.open("https://ente.io", "_blank", "noopener");
         }
     };
 

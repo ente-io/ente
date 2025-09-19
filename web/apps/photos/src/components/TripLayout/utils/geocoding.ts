@@ -1,5 +1,3 @@
-import L from "leaflet";
-
 interface GeocodingResponse {
     features?: {
         properties?: {
@@ -20,7 +18,7 @@ export const geocodingCache = new Map<
 >();
 
 // Icon cache to avoid recreating identical icons
-export const iconCache = new Map<string, L.DivIcon>();
+export const iconCache = new Map<string, import("leaflet").DivIcon>();
 
 // Throttle function for performance optimization
 export const throttle = <T extends (...args: unknown[]) => void>(

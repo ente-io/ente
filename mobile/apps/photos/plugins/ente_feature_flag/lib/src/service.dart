@@ -64,7 +64,7 @@ class FlagService {
 
   String get customDomain => flags.customDomain;
 
-  bool get albumGuestView => internalUser;
+  bool get textDetection => internalUser && Platform.isIOS;
 
   bool get addToAlbumFeature => internalUser;
 

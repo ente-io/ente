@@ -1,4 +1,3 @@
-import L from "leaflet";
 import { startTransition } from "react";
 
 import { calculateDistance, getLocationPosition } from "../mapHelpers";
@@ -37,7 +36,7 @@ export interface HandleTimelineScrollParams {
     timelineRef: React.RefObject<HTMLDivElement | null>;
     photoClusters: JourneyPoint[][];
     locationPositions: PositionInfo[];
-    mapRef: L.Map | null;
+    mapRef: import("leaflet").Map | null;
     isClusterClickScrollingRef: React.RefObject<boolean>;
     setHasUserScrolled: (scrolled: boolean) => void;
     setScrollProgress: (progress: number) => void;
@@ -237,7 +236,7 @@ export interface HandleMarkerClickParams {
     clusterLat: number;
     clusterLng: number;
     photoClusters: JourneyPoint[][];
-    mapRef: L.Map | null;
+    mapRef: import("leaflet").Map | null;
     isClusterClickScrollingRef: React.RefObject<boolean>;
     clusterClickTimeoutRef: React.RefObject<NodeJS.Timeout | null>;
     setScrollProgress: (progress: number) => void;

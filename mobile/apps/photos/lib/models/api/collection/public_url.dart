@@ -17,7 +17,7 @@ class PublicURL {
     this.enableDownload = true,
     this.passwordEnabled = false,
     this.enableCollect = false,
-    this.enableJoin = false,
+    this.enableJoin = true,
     this.nonce,
     this.opsLimit,
     this.memLimit,
@@ -57,7 +57,7 @@ class PublicURL {
       nonce: map['nonce'],
       opsLimit: map['opsLimit'],
       memLimit: map['memLimit'],
-      enableJoin: map['enableJoin'] ?? false,
+      enableJoin: map['enableJoin'] ?? true,
     );
   }
 }

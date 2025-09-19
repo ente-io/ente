@@ -6,8 +6,7 @@ import { FileViewer } from "ente-gallery/components/viewer/FileViewer";
 import { downloadAndSaveCollectionFiles } from "ente-gallery/services/save";
 import { type Collection } from "ente-media/collection";
 import { type EnteFile } from "ente-media/file";
-import L from "leaflet";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // Import extracted components
 import { MobileCover } from "./MobileCover";
@@ -19,7 +18,6 @@ import { TimelineLocation } from "./TimelineLocation";
 import { TimelineProgressLine } from "./TimelineProgressLine";
 import { TopNavButtons } from "./TopNavButtons";
 import { TripCover } from "./TripCover";
-import { TripMap } from "./TripMap";
 
 // Import hooks
 import { useDataProcessing } from "./hooks/useDataProcessing";
@@ -29,11 +27,10 @@ import { useScrollHandling } from "./hooks/useScrollHandling";
 import { useThumbnailGeneration } from "./hooks/useThumbnailGeneration";
 
 // Import types and utils
-import { calculateOptimalZoom, clusterPhotosByProximity } from "./mapHelpers";
 import type { JourneyPoint } from "./types";
 import type { PositionInfo } from "./utils/scrollUtils";
 
-interface TripTemplateProps {
+interface TripLayoutProps {
     files: EnteFile[];
     collection?: Collection;
     albumTitle?: string;
@@ -45,7 +42,7 @@ interface TripTemplateProps {
     onAddPhotos?: () => void; // Callback for add photos button
 }
 
-export const TripTemplate: React.FC<TripTemplateProps> = ({
+export const TripLayout: React.FC<TripLayoutProps> = ({
     files,
     collection,
     albumTitle,
@@ -92,7 +89,7 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
     const [isLoadingLocations, setIsLoadingLocations] = useState(false);
     const [isInitialLoad, setIsInitialLoad] = useState(true);
     const [currentZoom, setCurrentZoom] = useState(7); // Default zoom, will be updated by MapEvents and optimalZoom
-    const [mapRef, setMapRef] = useState<L.Map | null>(null);
+    const [mapRef, setMapRef] = useState<import("leaflet").Map | null>(null);
     const [targetZoom, setTargetZoom] = useState<number | null>(null);
     const [scrollProgress, setScrollProgress] = useState(0); // 0 to 1 representing scroll progress
     const [hasUserScrolled, setHasUserScrolled] = useState(false); // Track if user has actually scrolled
@@ -112,25 +109,64 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
     const filesCountRef = useRef<number>(0); // Track files count to detect real changes
     const previousActiveLocationRef = useRef<number>(-1); // Track previous active location for discrete panning
 
-    const photoClusters = useMemo(() => {
-        const clusters = clusterPhotosByProximity(journeyData);
+    const [photoClusters, setPhotoClusters] = useState<JourneyPoint[][]>([]);
+    const [optimalZoom, setOptimalZoom] = useState(7);
+    const [TripMapComponent, setTripMapComponent] =
+        useState<React.ComponentType<{
+            journeyData: JourneyPoint[];
+            photoClusters: JourneyPoint[][];
+            hasPhotoData: boolean;
+            optimalZoom: number;
+            currentZoom: number;
+            targetZoom: number | null;
+            mapRef: import("leaflet").Map | null;
+            scrollProgress: number;
+            setMapRef: (map: import("leaflet").Map | null) => void;
+            setCurrentZoom: (zoom: number) => void;
+            setTargetZoom: (zoom: number | null) => void;
+            onMarkerClick: (
+                clusterIndex: number,
+                clusterLat: number,
+                clusterLng: number,
+            ) => void;
+        }> | null>(null);
 
-        // Sort clusters by their earliest timestamp to maintain chronological order
-        return clusters.sort((a, b) => {
-            const earliestA = Math.min(
-                ...a.map((p) => new Date(p.timestamp).getTime()),
-            );
-            const earliestB = Math.min(
-                ...b.map((p) => new Date(p.timestamp).getTime()),
-            );
-            return earliestA - earliestB;
-        });
-    }, [journeyData]);
+    // Load client-side components and calculations
+    useEffect(() => {
+        if (isClient) {
+            // Load TripMap component
+            void import("./TripMap").then(({ TripMap }) => {
+                setTripMapComponent(() => TripMap);
+            });
 
-    // Calculate optimal zoom level based on cluster spread
-    const optimalZoom = useMemo(() => {
-        return calculateOptimalZoom();
-    }, []);
+            // Load mapHelpers and calculate clusters if we have data
+            if (journeyData.length > 0) {
+                void import("./mapHelpers").then(
+                    ({ clusterPhotosByProximity, calculateOptimalZoom }) => {
+                        const clusters = clusterPhotosByProximity(journeyData);
+
+                        // Sort clusters by their earliest timestamp to maintain chronological order
+                        const sortedClusters = clusters.sort((a, b) => {
+                            const earliestA = Math.min(
+                                ...a.map((p) =>
+                                    new Date(p.timestamp).getTime(),
+                                ),
+                            );
+                            const earliestB = Math.min(
+                                ...b.map((p) =>
+                                    new Date(p.timestamp).getTime(),
+                                ),
+                            );
+                            return earliestA - earliestB;
+                        });
+
+                        setPhotoClusters(sortedClusters);
+                        setOptimalZoom(calculateOptimalZoom());
+                    },
+                );
+            }
+        }
+    }, [isClient, journeyData]);
 
     // Update currentZoom when optimalZoom changes and there's no mapRef yet
     useEffect(() => {
@@ -220,7 +256,7 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
     const hasPhotoData = journeyData.length > 0;
 
     return (
-        <TripTemplateContainer>
+        <TripLayoutContainer>
             {!openFileViewer &&
                 (isTouchDevice ? (
                     <MobileNavBar
@@ -240,20 +276,22 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
                 <MobileContainer>
                     {/* Map takes 60% of height */}
                     <MobileMapContainer>
-                        <TripMap
-                            journeyData={journeyData}
-                            photoClusters={photoClusters}
-                            hasPhotoData={hasPhotoData}
-                            optimalZoom={optimalZoom}
-                            currentZoom={currentZoom}
-                            targetZoom={targetZoom}
-                            mapRef={mapRef}
-                            scrollProgress={scrollProgress}
-                            setMapRef={setMapRef}
-                            setCurrentZoom={setCurrentZoom}
-                            setTargetZoom={setTargetZoom}
-                            onMarkerClick={markerClickHandler}
-                        />
+                        {TripMapComponent && (
+                            <TripMapComponent
+                                journeyData={journeyData}
+                                photoClusters={photoClusters}
+                                hasPhotoData={hasPhotoData}
+                                optimalZoom={optimalZoom}
+                                currentZoom={currentZoom}
+                                targetZoom={targetZoom}
+                                mapRef={mapRef}
+                                scrollProgress={scrollProgress}
+                                setMapRef={setMapRef}
+                                setCurrentZoom={setCurrentZoom}
+                                setTargetZoom={setTargetZoom}
+                                onMarkerClick={markerClickHandler}
+                            />
+                        )}
                         {/* Cover overlay */}
                         {!isInitialLoad && journeyData.length > 0 && (
                             <MobileCoverOverlay show={showMobileCover}>
@@ -455,20 +493,22 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
                     </TimelineSidebar>
 
                     {/* Desktop Map Container */}
-                    <TripMap
-                        journeyData={journeyData}
-                        photoClusters={photoClusters}
-                        hasPhotoData={hasPhotoData}
-                        optimalZoom={optimalZoom}
-                        currentZoom={currentZoom}
-                        targetZoom={targetZoom}
-                        mapRef={mapRef}
-                        scrollProgress={scrollProgress}
-                        setMapRef={setMapRef}
-                        setCurrentZoom={setCurrentZoom}
-                        setTargetZoom={setTargetZoom}
-                        onMarkerClick={markerClickHandler}
-                    />
+                    {TripMapComponent && (
+                        <TripMapComponent
+                            journeyData={journeyData}
+                            photoClusters={photoClusters}
+                            hasPhotoData={hasPhotoData}
+                            optimalZoom={optimalZoom}
+                            currentZoom={currentZoom}
+                            targetZoom={targetZoom}
+                            mapRef={mapRef}
+                            scrollProgress={scrollProgress}
+                            setMapRef={setMapRef}
+                            setCurrentZoom={setCurrentZoom}
+                            setTargetZoom={setTargetZoom}
+                            onMarkerClick={markerClickHandler}
+                        />
+                    )}
                 </>
             )}
 
@@ -492,12 +532,12 @@ export const TripTemplate: React.FC<TripTemplateProps> = ({
                 saveGroups={saveGroups}
                 onRemoveSaveGroup={onRemoveSaveGroup}
             />
-        </TripTemplateContainer>
+        </TripLayoutContainer>
     );
 };
 
 // Styled components
-const TripTemplateContainer = styled(Box)({
+const TripLayoutContainer = styled(Box)({
     position: "relative",
     width: "100%",
     height: "100%",
