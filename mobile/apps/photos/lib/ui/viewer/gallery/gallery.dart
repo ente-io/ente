@@ -147,6 +147,7 @@ class GalleryState extends State<Gallery> {
   final scrollbarBottomPaddingNotifier = ValueNotifier<double>(0);
   late GalleryGroups galleryGroups;
   SwipeToSelectHelper? _swipeHelper;
+  final _swipeActiveNotifier = ValueNotifier<bool>(false);
 
   @override
   void initState() {
@@ -468,6 +469,14 @@ class GalleryState extends State<Gallery> {
     }
   }
 
+  void _checkAndUpdateSwipeStatus() {
+    // Update swipe active status based on helper state
+    final isActive = _swipeHelper?.isActive ?? false;
+    if (_swipeActiveNotifier.value != isActive) {
+      _swipeActiveNotifier.value = isActive;
+    }
+  }
+
   Future<FileLoadResult> _loadFiles({int? limit}) async {
     _logger.info("Loading ${limit ?? "all"} files");
     try {
@@ -522,6 +531,7 @@ class GalleryState extends State<Gallery> {
     widget.selectedFiles?.removeListener(_selectedFilesListener);
     scrollbarBottomPaddingNotifier.dispose();
     _swipeHelper?.dispose();
+    _swipeActiveNotifier.dispose();
     super.dispose();
   }
 
@@ -574,13 +584,29 @@ class GalleryState extends State<Gallery> {
     return GallerySwipeHelper(
       helper: _swipeHelper,
       child: Listener(
+        onPointerMove: (event) {
+          // Only check for horizontal swipe if files are selected and swipe is not already active
+          if (!_swipeActiveNotifier.value &&
+              widget.selectedFiles != null &&
+              widget.selectedFiles!.files.isNotEmpty) {
+            // Check if movement is primarily horizontal (2x more than vertical)
+            final dx = event.delta.dx.abs();
+            final dy = event.delta.dy.abs();
+            if (dx > dy * 2) {
+              // Horizontal swipe detected, check if swipe helper is active
+              _checkAndUpdateSwipeStatus();
+            }
+          }
+        },
         onPointerUp: (_) {
           // End swipe selection when pointer is released
           _swipeHelper?.endSelection();
+          _swipeActiveNotifier.value = false;
         },
         onPointerCancel: (_) {
           // Also end selection on cancel
           _swipeHelper?.endSelection();
+          _swipeActiveNotifier.value = false;
         },
         child: GalleryContextState(
           sortOrderAsc: _sortOrderAsc,
@@ -625,28 +651,33 @@ class GalleryState extends State<Gallery> {
                     child: Stack(
                       clipBehavior: Clip.none,
                       children: [
-                        CustomScrollView(
-                          physics: widget.disableScroll
-                              ? const NeverScrollableScrollPhysics()
-                              : const ExponentialBouncingScrollPhysics(),
-                          controller: _scrollController,
-                          slivers: [
-                            SliverToBoxAdapter(
-                              child: SizeChangedLayoutNotifier(
-                                child: SizedBox(
-                                  key: _headerKey,
-                                  child:
-                                      widget.header ?? const SizedBox.shrink(),
+                        ValueListenableBuilder<bool>(
+                          valueListenable: _swipeActiveNotifier,
+                          builder: (context, isSwipeActive, child) {
+                            return CustomScrollView(
+                              physics: widget.disableScroll || isSwipeActive
+                                  ? const NeverScrollableScrollPhysics()
+                                  : const ExponentialBouncingScrollPhysics(),
+                              controller: _scrollController,
+                              slivers: [
+                                SliverToBoxAdapter(
+                                  child: SizeChangedLayoutNotifier(
+                                    child: SizedBox(
+                                      key: _headerKey,
+                                      child: widget.header ??
+                                          const SizedBox.shrink(),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                            SectionedListSliver(
-                              sectionLayouts: galleryGroups.groupLayouts,
-                            ),
-                            SliverToBoxAdapter(
-                              child: widget.footer,
-                            ),
-                          ],
+                                SectionedListSliver(
+                                  sectionLayouts: galleryGroups.groupLayouts,
+                                ),
+                                SliverToBoxAdapter(
+                                  child: widget.footer,
+                                ),
+                              ],
+                            );
+                          },
                         ),
                         galleryGroups.groupType.showGroupHeader() &&
                                 !widget.disablePinnedGroupHeader
