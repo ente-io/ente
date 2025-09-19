@@ -30,7 +30,6 @@ import {
     RowButtonDivider,
     RowButtonEndActivityIndicator,
     RowButtonGroup,
-    RowButtonGroupHint,
     RowButtonGroupTitle,
     RowLabel,
     RowSwitch,
@@ -1417,6 +1416,14 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
             title={t("share_album")}
         >
             <Stack sx={{ gap: 3, py: "20px", px: "8px" }}>
+                <ManageView
+                    {...{
+                        collection,
+                        onRootClose,
+                        onRemotePull,
+                        setBlockingLoad,
+                    }}
+                />
                 <ManagePublicCollect
                     {...{ publicURL }}
                     onUpdate={handlePublicURLUpdate}
@@ -1441,14 +1448,6 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
                         onUpdate={handlePublicURLUpdate}
                     />
                 </RowButtonGroup>
-                <ManageView
-                    {...{
-                        collection,
-                        onRootClose,
-                        onRemotePull,
-                        setBlockingLoad,
-                    }}
-                />
                 <RowButtonGroup>
                     <RowButton
                         startIcon={
@@ -1517,9 +1516,6 @@ const ManagePublicCollect: React.FC<ManagePublicLinkSettingProps> = ({
                     onClick={handleFileDownloadSetting}
                 />
             </RowButtonGroup>
-            <RowButtonGroupHint>
-                {t("allow_adding_photos_hint")}
-            </RowButtonGroupHint>
         </Stack>
     );
 };
