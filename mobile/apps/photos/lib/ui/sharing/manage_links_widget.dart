@@ -128,10 +128,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       },
                     ),
                   ),
-                  MenuSectionDescriptionWidget(
-                    content:
-                        AppLocalizations.of(context).allowAddPhotosDescription,
-                  ),
                   const SizedBox(height: 24),
                   if (flagService.internalUser)
                     MenuItemWidget(
