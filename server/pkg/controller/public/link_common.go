@@ -7,7 +7,7 @@ import (
 	enteJWT "github.com/ente-io/museum/ente/jwt"
 	"github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/stacktrace"
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 func validateJWTToken(secret []byte, jwtToken string, passwordHash string) error {

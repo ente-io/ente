@@ -1,6 +1,8 @@
 module github.com/ente-io/museum
 
-go 1.23
+go 1.23.0
+
+toolchain go1.23.3
 
 require (
 	firebase.google.com/go v3.13.0+incompatible
@@ -18,7 +20,7 @@ require (
 	github.com/gin-contrib/timeout v0.0.3
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-playground/validator/v10 v10.14.0
-	github.com/golang-jwt/jwt v3.2.1+incompatible
+	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/golang-migrate/migrate/v4 v4.12.2
 	github.com/google/uuid v1.6.0
 	github.com/lib/pq v1.8.0
@@ -36,9 +38,9 @@ require (
 	github.com/ua-parser/uap-go v0.0.0-20211112212520-00c877edfe0f
 	github.com/ulule/limiter/v3 v3.8.0
 	github.com/zsais/go-gin-prometheus v0.1.0
-	golang.org/x/crypto v0.21.0
-	golang.org/x/sync v0.8.0
-	golang.org/x/text v0.17.0
+	golang.org/x/crypto v0.35.0
+	golang.org/x/sync v0.11.0
+	golang.org/x/text v0.22.0
 	google.golang.org/api v0.114.0
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 )
@@ -110,9 +112,9 @@ require (
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/ugorji/go/codec v1.2.11 // indirect
 	go.opencensus.io v0.24.0 // indirect
-	golang.org/x/net v0.21.0 // indirect
+	golang.org/x/net v0.36.0
 	golang.org/x/oauth2 v0.7.0 // indirect
-	golang.org/x/sys v0.18.0 // indirect
+	golang.org/x/sys v0.30.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1 // indirect
