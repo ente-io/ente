@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/ente-io/museum/pkg/controller/commonbilling"
+	emailCtrl "github.com/ente-io/museum/pkg/controller/email"
 	"github.com/ente-io/museum/pkg/repo/storagebonus"
 
 	"github.com/ente-io/stacktrace"
@@ -22,13 +23,14 @@ import (
 
 // PlayStoreController provides abstractions for handling billing on AppStore
 type PlayStoreController struct {
-	PlayStoreClient        *playstore.Client
-	BillingRepo            *repo.BillingRepository
-	FileRepo               *repo.FileRepository
-	UserRepo               *repo.UserRepository
-	StorageBonusRepo       *storagebonus.Repository
-	BillingPlansPerCountry ente.BillingPlansPerCountry
-	CommonBillCtrl         *commonbilling.Controller
+	PlayStoreClient         *playstore.Client
+	BillingRepo             *repo.BillingRepository
+	FileRepo                *repo.FileRepository
+	UserRepo                *repo.UserRepository
+	NotificationHistoryRepo *repo.NotificationHistoryRepository
+	StorageBonusRepo        *storagebonus.Repository
+	BillingPlansPerCountry  ente.BillingPlansPerCountry
+	CommonBillCtrl          *commonbilling.Controller
 }
 
 // PlayStorePackageName is the package name of the PlayStore item
@@ -40,6 +42,7 @@ func NewPlayStoreController(
 	billingRepo *repo.BillingRepository,
 	fileRepo *repo.FileRepository,
 	userRepo *repo.UserRepository,
+	notificationHistoryRepo *repo.NotificationHistoryRepository,
 	storageBonusRepo *storagebonus.Repository,
 	commonBillCtrl *commonbilling.Controller,
 ) *PlayStoreController {
@@ -52,13 +55,14 @@ func NewPlayStoreController(
 	// environment and so playStoreClient really should've been there.
 
 	return &PlayStoreController{
-		PlayStoreClient:        playStoreClient,
-		BillingRepo:            billingRepo,
-		FileRepo:               fileRepo,
-		UserRepo:               userRepo,
-		BillingPlansPerCountry: plans,
-		StorageBonusRepo:       storageBonusRepo,
-		CommonBillCtrl:         commonBillCtrl,
+		PlayStoreClient:         playStoreClient,
+		BillingRepo:             billingRepo,
+		FileRepo:                fileRepo,
+		UserRepo:                userRepo,
+		NotificationHistoryRepo: notificationHistoryRepo,
+		BillingPlansPerCountry:  plans,
+		StorageBonusRepo:        storageBonusRepo,
+		CommonBillCtrl:          commonBillCtrl,
 	}
 }
 
@@ -188,6 +192,9 @@ func (c *PlayStoreController) HandleNotification(notification playstore.Develope
 		if err != nil {
 			return stacktrace.Propagate(err, "")
 		}
+		c.NotificationHistoryRepo.DeleteLastNotification(subscription.UserID, emailCtrl.StorageLimitExceededTemplateID)
+		c.NotificationHistoryRepo.DeleteLastNotification(subscription.UserID, emailCtrl.StorageLimitExceedingTemplateID)
+
 	} else {
 		err = c.BillingRepo.UpdateSubscriptionExpiryTime(
 			subscription.ID, purchase.ExpiryTimeMillis*1000)
