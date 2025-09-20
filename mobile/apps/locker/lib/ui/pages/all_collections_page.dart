@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
+import "package:ente_utils/navigation_util.dart";
 import 'package:flutter/material.dart';
 import 'package:locker/events/collections_updated_event.dart';
 import 'package:locker/l10n/l10n.dart';
@@ -16,6 +17,8 @@ import 'package:locker/ui/mixins/search_mixin.dart';
 import 'package:locker/ui/pages/collection_page.dart';
 import 'package:locker/ui/pages/home_page.dart';
 import 'package:locker/ui/pages/trash_page.dart';
+import "package:locker/ui/sharing/add_participant_page.dart";
+import "package:locker/utils/collection_actions.dart";
 import 'package:locker/utils/collection_sort_util.dart';
 import 'package:logging/logging.dart';
 
@@ -472,7 +475,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
                     final isAllSelected = widget.selectedCollections!.count ==
                         _sortedCollections.length;
                     final buttonText =
-                        isAllSelected ? 'Deselect all' : 'Select all';
+                        isAllSelected ? 'Deselect All' : 'Select All';
                     final iconData = isAllSelected
                         ? Icons.remove_circle_outline
                         : Icons.check_circle_outline_outlined;
@@ -493,7 +496,9 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
                             width: 0.5,
                           ),
                           borderRadius: BorderRadius.circular(50),
-                          color: colorScheme.backgroundElevated2,
+                          color: isDarkMode
+                              ? const Color.fromRGBO(27, 27, 27, 1)
+                              : colorScheme.backgroundElevated2,
                         ),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 12.0,
@@ -504,12 +509,13 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
                           children: [
                             Text(
                               buttonText,
+                              style: getEnteTextTheme(context).bodyBold,
                             ),
                             const SizedBox(width: 6),
                             Icon(
                               iconData,
-                              color: Colors.grey,
-                              size: 15,
+                              color: colorScheme.textBase,
+                              size: 16,
                             ),
                           ],
                         ),
@@ -536,7 +542,9 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
                             width: 0.5,
                           ),
                           borderRadius: BorderRadius.circular(50),
-                          color: colorScheme.backgroundElevated2,
+                          color: isDarkMode
+                              ? const Color.fromRGBO(27, 27, 27, 1)
+                              : colorScheme.backgroundElevated2,
                         ),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 12.0,
@@ -547,12 +555,13 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
                           children: [
                             Text(
                               countText,
+                              style: getEnteTextTheme(context).bodyBold,
                             ),
                             const SizedBox(width: 6),
-                            const Icon(
+                            Icon(
                               Icons.close,
-                              size: 15,
-                              color: Colors.grey,
+                              size: 16,
+                              color: colorScheme.textBase,
                             ),
                           ],
                         ),
@@ -573,9 +582,9 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
               ),
             ),
             elevation: 4,
-            color: isDarkMode
-                ? colorScheme.fillFaint
-                : colorScheme.backgroundElevated2,
+            surfaceTintColor: isDarkMode
+                ? const Color.fromRGBO(18, 18, 18, 1)
+                : colorScheme.backgroundBase,
             child: Padding(
               padding: EdgeInsets.fromLTRB(16, 16, 16, 28 + bottomPadding),
               child: Column(
@@ -592,6 +601,8 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
   }
 
   Widget _buildActionButtons() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return ListenableBuilder(
       listenable: widget.selectedCollections!,
       builder: (context, child) {
@@ -606,9 +617,9 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeInOut,
           decoration: BoxDecoration(
-            color: Theme.of(context).brightness == Brightness.dark
-                ? getEnteColorScheme(context).backgroundElevated2
-                : const Color(0xFFF7F7F7),
+            color: isDarkMode
+                ? const Color.fromRGBO(255, 255, 255, 0.04)
+                : getEnteColorScheme(context).backgroundElevated2,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Padding(
@@ -635,22 +646,15 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
         _buildActionButton(
           icon: Icons.share_outlined,
           label: context.l10n.share,
-          onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Share ${collection?.name ?? 'Collection'}'),
-              ),
-            );
-          },
+          onTap: _shareCollection,
         ),
         _buildActionButton(
           icon: Icons.edit_outlined,
           label: context.l10n.edit,
           onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Rename ${collection?.name ?? 'Collection'}'),
-              ),
+            CollectionActions.editCollection(
+              context,
+              collection!,
             );
           },
         ),
@@ -658,11 +662,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
           icon: Icons.delete_outline,
           label: context.l10n.delete,
           onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Delete ${collection?.name ?? 'Collection'}'),
-              ),
-            );
+            CollectionActions.deleteCollection(context, collection!);
           },
           isDestructive: true,
         ),
@@ -670,26 +670,12 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
     } else {
       actions.addAll([
         _buildActionButton(
-          icon: Icons.share_outlined,
-          label: 'Share All',
-          onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content:
-                    Text('Share ${selectedCollections.length} collections'),
-              ),
-            );
-          },
-        ),
-        _buildActionButton(
           icon: Icons.delete_outline,
-          label: 'Delete All',
+          label: context.l10n.delete,
           onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content:
-                    Text('Delete ${selectedCollections.length} collections'),
-              ),
+            CollectionActions.deleteMultipleCollections(
+              context,
+              selectedCollections.toList(),
             );
           },
           isDestructive: true,
@@ -697,6 +683,17 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
       ]);
     }
     return actions;
+  }
+
+  Future<void> _shareCollection() async {
+    await routeToPage(
+      context,
+      AddParticipantPage(
+        widget.selectedCollections!.collections.toList(),
+        const [ActionTypesToShow.addViewer, ActionTypesToShow.addCollaborator],
+      ),
+    );
+    widget.selectedCollections!.clearAll();
   }
 
   Widget _buildActionButton({
@@ -709,11 +706,8 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
     final textTheme = getEnteTextTheme(context);
     final color = isDestructive ? Colors.red : colorScheme.textBase;
 
-    return InkWell(
+    return GestureDetector(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      highlightColor: color.withValues(alpha: 0.1),
-      splashColor: color.withValues(alpha: 0.1),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
         child: Column(
@@ -731,8 +725,6 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
                 color: color,
               ),
               textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
