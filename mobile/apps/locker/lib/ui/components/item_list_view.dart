@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/models/selected_collections.dart';
+import 'package:locker/models/selected_files.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import "package:locker/ui/components/collection_row_widget.dart";
@@ -37,6 +38,7 @@ class ItemListView extends StatefulWidget {
   final List<OverflowMenuAction>? fileOverflowActions;
   final List<OverflowMenuAction>? collectionOverflowActions;
   final SelectedCollections? selectedCollections;
+  final SelectedFiles? selectedFiles;
 
   const ItemListView({
     super.key,
@@ -47,6 +49,7 @@ class ItemListView extends StatefulWidget {
     this.fileOverflowActions,
     this.collectionOverflowActions,
     this.selectedCollections,
+    this.selectedFiles,
   });
 
   @override
@@ -143,6 +146,11 @@ class _ItemListViewState extends State<ItemListView> {
     widget.selectedCollections!.toggleSelection(collection);
   }
 
+  void _toggleFileSelection(EnteFile file) {
+    HapticFeedback.lightImpact();
+    widget.selectedFiles!.toggleSelection(file);
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_sortedItems.isEmpty && widget.emptyStateWidget != null) {
@@ -168,12 +176,15 @@ class _ItemListViewState extends State<ItemListView> {
             final item = _sortedItems[index];
             final isLastItem = index == _sortedItems.length - 1;
 
-            if (widget.selectedCollections != null) {
+            final hasCollectionSelection = widget.selectedCollections != null;
+            final hasFileSelection = widget.selectedFiles != null;
+
+            if (hasCollectionSelection && item.isCollection) {
               return ListenableBuilder(
                 listenable: widget.selectedCollections!,
                 builder: (context, child) {
                   final isAnyCollectionSelected =
-                      widget.selectedCollections!.hasSelections;
+                      widget.selectedCollections?.hasSelections ?? false;
 
                   return ListItemWidget(
                     item: item,
@@ -182,6 +193,7 @@ class _ItemListViewState extends State<ItemListView> {
                     collectionOverflowActions: widget.collectionOverflowActions,
                     isLastItem: isLastItem,
                     selectedCollections: widget.selectedCollections,
+                    selectedFiles: widget.selectedFiles,
                     onCollectionTap: (c) {
                       isAnyCollectionSelected
                           ? _toggleCollectionSelection(c)
@@ -195,6 +207,33 @@ class _ItemListViewState extends State<ItemListView> {
                   );
                 },
               );
+            } else if (hasFileSelection && !item.isCollection) {
+              return ListenableBuilder(
+                listenable: widget.selectedFiles!,
+                builder: (context, child) {
+                  final isAnyFileSelected =
+                      widget.selectedFiles?.hasSelections ?? false;
+                  return ListItemWidget(
+                    item: item,
+                    collections: widget.collections,
+                    fileOverflowActions: widget.fileOverflowActions,
+                    collectionOverflowActions: widget.collectionOverflowActions,
+                    isLastItem: isLastItem,
+                    selectedCollections: widget.selectedCollections,
+                    selectedFiles: widget.selectedFiles,
+                    onFileTap: isAnyFileSelected
+                        ? (file) {
+                            _toggleFileSelection(file);
+                          }
+                        : null,
+                    onFileLongPress: isAnyFileSelected
+                        ? null
+                        : (file) {
+                            _toggleFileSelection(file);
+                          },
+                  );
+                },
+              );
             } else {
               return ListItemWidget(
                 item: item,
@@ -203,8 +242,7 @@ class _ItemListViewState extends State<ItemListView> {
                 collectionOverflowActions: widget.collectionOverflowActions,
                 isLastItem: isLastItem,
                 selectedCollections: widget.selectedCollections,
-                onCollectionTap: (c) => _navigateToCollectionPage(c),
-                onCollectionLongPress: (c) => _toggleCollectionSelection(c),
+                selectedFiles: widget.selectedFiles,
               );
             }
           },
@@ -388,8 +426,11 @@ class ListItemWidget extends StatelessWidget {
   final List<OverflowMenuAction>? collectionOverflowActions;
   final bool isLastItem;
   final SelectedCollections? selectedCollections;
+  final SelectedFiles? selectedFiles;
   final Function(Collection)? onCollectionTap;
   final Function(Collection)? onCollectionLongPress;
+  final Function(EnteFile)? onFileTap;
+  final Function(EnteFile)? onFileLongPress;
 
   const ListItemWidget({
     super.key,
@@ -400,8 +441,11 @@ class ListItemWidget extends StatelessWidget {
     this.collectionOverflowActions,
     this.isLastItem = false,
     this.selectedCollections,
+    this.selectedFiles,
     this.onCollectionTap,
     this.onCollectionLongPress,
+    this.onFileTap,
+    this.onFileLongPress,
   });
 
   @override
@@ -422,6 +466,9 @@ class ListItemWidget extends StatelessWidget {
         collections: collections,
         overflowActions: fileOverflowActions,
         isLastItem: isLastItem,
+        selectedFiles: selectedFiles,
+        onTapCallback: onFileTap,
+        onLongPressCallback: onFileLongPress,
       );
     } else {
       return Container(

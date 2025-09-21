@@ -1,12 +1,14 @@
 import "dart:io";
 
 import "package:ente_ui/components/buttons/button_widget.dart";
+import "package:ente_ui/components/buttons/icon_button_widget.dart";
 import "package:ente_ui/components/buttons/models/button_type.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_utils/share_utils.dart";
 import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
+import "package:locker/models/selected_files.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/configuration.dart";
@@ -28,6 +30,9 @@ class FileRowWidget extends StatelessWidget {
   final List<Collection> collections;
   final List<OverflowMenuAction>? overflowActions;
   final bool isLastItem;
+  final SelectedFiles? selectedFiles;
+  final void Function(EnteFile)? onTapCallback;
+  final void Function(EnteFile)? onLongPressCallback;
 
   const FileRowWidget({
     super.key,
@@ -35,6 +40,9 @@ class FileRowWidget extends StatelessWidget {
     required this.collections,
     this.overflowActions,
     this.isLastItem = false,
+    this.selectedFiles,
+    this.onTapCallback,
+    this.onLongPressCallback,
   });
 
   @override
@@ -106,32 +114,70 @@ class FileRowWidget extends StatelessWidget {
     );
 
     return GestureDetector(
-      onTap: () => _openFile(context),
+      onTap: () {
+        if (onTapCallback != null) {
+          onTapCallback!(file);
+        } else {
+          _openFile(context);
+        }
+      },
+      onLongPress: () {
+        if (onLongPressCallback != null) {
+          onLongPressCallback!(file);
+        } else {
+          _openFile(context);
+        }
+      },
       behavior: HitTestBehavior.opaque,
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: colorScheme.strokeFaint,
-          ),
-          borderRadius: const BorderRadius.all(Radius.circular(6)),
-        ),
-        child: Row(
-          children: [
-            fileRowWidget,
-            Flexible(
-              child: PopupMenuButton<String>(
-                onSelected: (value) => _handleMenuAction(context, value),
-                icon: const Icon(
-                  Icons.more_vert,
-                  size: 20,
-                ),
-                itemBuilder: (BuildContext context) {
-                  return _buildPopupMenuItems(context);
-                },
+      child: ListenableBuilder(
+        listenable: selectedFiles ?? ValueNotifier(false),
+        builder: (context, _) {
+          final bool isSelected = selectedFiles?.isFileSelected(file) ?? false;
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOut,
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: isSelected
+                    ? colorScheme.strokeMuted
+                    : colorScheme.strokeFainter,
               ),
+              borderRadius: const BorderRadius.all(Radius.circular(6)),
             ),
-          ],
-        ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                fileRowWidget,
+                Flexible(
+                  flex: 1,
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    switchInCurve: Curves.easeOut,
+                    switchOutCurve: Curves.easeIn,
+                    child: isSelected
+                        ? IconButtonWidget(
+                            key: const ValueKey("selected"),
+                            icon: Icons.check_circle_rounded,
+                            iconButtonType: IconButtonType.secondary,
+                            iconColor: colorScheme.blurStrokeBase,
+                          )
+                        : PopupMenuButton<String>(
+                            onSelected: (value) =>
+                                _handleMenuAction(context, value),
+                            icon: const Icon(
+                              Icons.more_vert,
+                              size: 20,
+                            ),
+                            itemBuilder: (BuildContext context) {
+                              return _buildPopupMenuItems(context);
+                            },
+                          ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
