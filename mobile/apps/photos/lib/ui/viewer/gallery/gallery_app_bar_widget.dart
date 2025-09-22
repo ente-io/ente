@@ -551,7 +551,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               ? Icons.visibility_outlined
               : Icons.visibility_off_outlined,
         ),
-      
       // Gallery Guest View option
       if (widget.collection != null)
         EntePopupMenuItem(
