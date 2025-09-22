@@ -26,6 +26,9 @@ class SwipeToSelectHelper {
   bool? _selecting; // true = adding, false = removing
 
   /// Whether a swipe gesture is currently active
+  /// Note: There is some edge case where this isn't perfectly accurate, so
+  /// _swipeActiveNotifier was added to GallerySwipeHelper for more reliable
+  /// tracking. Not removing this since this is still useful for some logic.
   bool get isActive => _fromIndex != null;
 
   /// Start a selection gesture at the given file
