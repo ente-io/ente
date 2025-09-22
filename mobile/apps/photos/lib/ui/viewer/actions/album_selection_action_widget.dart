@@ -10,12 +10,14 @@ import "package:photos/services/collections_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
 import "package:photos/ui/collections/collection_list_page.dart";
+import "package:photos/ui/common/web_page.dart";
 import "package:photos/ui/components/action_sheet_widget.dart";
 import "package:photos/ui/components/bottom_action_bar/selection_action_button_widget.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/sharing/add_participant_page.dart";
+import "package:photos/ui/viewer/gallery/hooks/add_photos_sheet.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/magic_util.dart";
 import "package:photos/utils/navigation_util.dart";
@@ -138,6 +140,18 @@ class _AlbumSelectionActionWidgetState
         onTap: _archiveClick,
       ),
     );
+
+    if (widget.sectionType == UISectionType.incomingCollections ||
+        widget.sectionType == UISectionType.homeCollections ||
+        widget.sectionType == UISectionType.outgoingCollections) {
+      otherItems.add(
+        SelectionActionButton(
+          labelText: S.of(context).addPhotos,
+          icon: Icons.add_photo_alternate_outlined,
+          onTap: _showAddPhotoDialog,
+        ),
+      );
+    }
 
     final List<List<SelectionActionButton>> groupedOtherItems = [];
     for (int i = 0; i < otherItems.length; i += 4) {
@@ -438,6 +452,57 @@ class _AlbumSelectionActionWidgetState
       }
     }
     widget.selectedAlbums.clearAll();
+  }
+
+  Future<void> _showAddPhotoDialog() async {
+    final currentUserID = CollectionsService.instance.config.getUserID();
+
+    for (final collection in widget.selectedAlbums.albums) {
+      if (collection.type == CollectionType.favorites) {
+        continue;
+      }
+
+      final bool canAddPhotos = collection.isOwner(currentUserID!) ||
+          (collection.getRole(currentUserID) ==
+              CollectionParticipantRole.collaborator);
+
+      if (!canAddPhotos) {
+        continue;
+      }
+
+      try {
+        if (collection.isCollectEnabledForPublicLink()) {
+          final authToken = CollectionsService.instance
+              .getSharedPublicAlbumToken(collection.id);
+          final albumKey = CollectionsService.instance
+              .getSharedPublicAlbumKey(collection.id);
+
+          final res = await showChoiceDialog(
+            context,
+            title: S.of(context).openAlbumInBrowserTitle,
+            firstButtonLabel: S.of(context).openAlbumInBrowser,
+            secondButtonLabel: S.of(context).cancel,
+            firstButtonType: ButtonType.primary,
+          );
+
+          if (res != null && res.action == ButtonAction.first) {
+            await Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => WebPage(
+                  collection.name ?? "",
+                  "https://albums.ente.io/?t=$authToken#$albumKey",
+                ),
+              ),
+            );
+          }
+        } else {
+          await showAddPhotosSheet(context, collection);
+        }
+      } catch (e, s) {
+        _logger.severe(e, s);
+        await showGenericErrorDialog(context: context, error: e);
+      }
+    }
   }
 
   Future<void> _leaveAlbum() async {
