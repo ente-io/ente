@@ -19,6 +19,7 @@ import 'package:photos/ui/components/menu_section_description_widget.dart';
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/ui/sharing/pickers/device_limit_picker_page.dart';
+import 'package:photos/ui/sharing/pickers/layout_picker_page.dart';
 import 'package:photos/ui/sharing/pickers/link_expiry_picker_page.dart';
 import 'package:photos/ui/sharing/qr_code_dialog_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -43,6 +44,19 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   @override
   void initState() {
     super.initState();
+  }
+
+  String _getLayoutDisplayName(String layout, BuildContext context) {
+    switch (layout.toLowerCase()) {
+      case 'grouped':
+        return AppLocalizations.of(context).layoutGrouped;
+      case 'continuous':
+        return AppLocalizations.of(context).layoutContinuous;
+      case 'trip':
+        return AppLocalizations.of(context).layoutTrip;
+      default:
+        return AppLocalizations.of(context).layoutGrouped;
+    }
   }
 
   @override
@@ -75,6 +89,29 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   MenuItemWidget(
+                    alignCaptionedTextToLeft: true,
+                    captionedTextWidget: CaptionedTextWidget(
+                      title: AppLocalizations.of(context).layout,
+                      subTitle: _getLayoutDisplayName(
+                        widget.collection!.pubMagicMetadata.layout ?? "grouped",
+                        context,
+                      ),
+                    ),
+                    trailingIcon: Icons.chevron_right,
+                    menuItemColor: enteColorScheme.fillFaint,
+                    surfaceExecutionStates: false,
+                    onTap: () async {
+                      // ignore: unawaited_futures
+                      routeToPage(
+                        context,
+                        LayoutPickerPage(widget.collection!),
+                      ).then((value) {
+                        setState(() {});
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 24),
+                  MenuItemWidget(
                     key: ValueKey("Allow collect $isCollectEnabled"),
                     captionedTextWidget: CaptionedTextWidget(
                       title: AppLocalizations.of(context).allowAddingPhotos,
@@ -90,10 +127,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                         );
                       },
                     ),
-                  ),
-                  MenuSectionDescriptionWidget(
-                    content:
-                        AppLocalizations.of(context).allowAddPhotosDescription,
                   ),
                   const SizedBox(height: 24),
                   if (flagService.internalUser)
