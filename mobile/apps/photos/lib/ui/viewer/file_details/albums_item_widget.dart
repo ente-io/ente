@@ -106,22 +106,22 @@ class AlbumsItemWidget extends StatelessWidget {
       }
 
       // Add the '+' button if feature flag is enabled
-      if (flagService.addToAlbumFeature) {
-        chipButtons.add(
-          ChipButtonWidget(
-            "+ (i)",
-            onTap: () {
-              final selectedFiles = SelectedFiles();
-              selectedFiles.files.add(file);
-              showCollectionActionSheet(
-                context,
-                selectedFiles: selectedFiles,
-                actionType: CollectionActionType.addFiles,
-              );
-            },
-          ),
-        );
-      }
+      chipButtons.add(
+        ChipButtonWidget(
+          null,
+          leadingIcon: Icons.add,
+          iconSize: 15,
+          onTap: () {
+            final selectedFiles = SelectedFiles();
+            selectedFiles.files.add(file);
+            showCollectionActionSheet(
+              context,
+              selectedFiles: selectedFiles,
+              actionType: CollectionActionType.addFiles,
+            );
+          },
+        ),
+      );
 
       return chipButtons;
     } catch (e, s) {

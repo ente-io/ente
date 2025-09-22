@@ -551,10 +551,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               ? Icons.visibility_outlined
               : Icons.visibility_off_outlined,
         ),
-      // Gallery Guest View option - Internal user only
-      if (flagService.albumGuestView && widget.collection != null)
+      if (widget.collection != null)
         EntePopupMenuItem(
-          AppLocalizations.of(context).guestView + " (i)",
+          AppLocalizations.of(context).guestView,
           value: AlbumPopupAction.galleryGuestView,
           iconWidget: SvgPicture.asset(
             "assets/icons/guest_view_icon.svg",
@@ -705,8 +704,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             editLocation();
           } else if (value == AlbumPopupAction.deleteLocation) {
             await deleteLocation();
-          } else if (value == AlbumPopupAction.galleryGuestView &&
-              flagService.albumGuestView) {
+          } else if (value == AlbumPopupAction.galleryGuestView) {
             await _onGalleryGuestViewClick();
           } else {
             showToast(context, AppLocalizations.of(context).somethingWentWrong);
@@ -1115,8 +1113,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   Future<void> _onGalleryGuestViewClick() async {
-    if (!flagService.albumGuestView) return;
-
     if (await LocalAuthentication().isDeviceSupported()) {
       // Get all files from the collection with proper sort order
       late final List<EnteFile> collectionFiles;

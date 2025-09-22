@@ -67,8 +67,6 @@ class FlagService {
   bool get albumGuestView => internalUser;
 
   bool get textDetection => internalUser && Platform.isIOS;
-  
-  bool get addToAlbumFeature => internalUser;
 
   bool get widgetSharedAlbums => internalUser;
 
