@@ -29,8 +29,8 @@ import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import "package:photos/ui/viewer/gallery/scrollbar/custom_scroll_bar.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
-import "package:photos/ui/viewer/gallery/state/gallery_swipe_helper.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
+import "package:photos/ui/viewer/gallery/swipe_selection_wrapper.dart";
 import "package:photos/ui/viewer/gallery/swipe_to_select_helper.dart";
 import "package:photos/utils/hierarchical_search_util.dart";
 import "package:photos/utils/misc_util.dart";
@@ -149,7 +149,6 @@ class GalleryState extends State<Gallery> {
   late GalleryGroups galleryGroups;
   SwipeToSelectHelper? _swipeHelper;
   final _swipeActiveNotifier = ValueNotifier<bool>(false);
-  bool? _initialMovementWasHorizontal;
 
   @override
   void initState() {
@@ -592,158 +591,16 @@ class GalleryState extends State<Gallery> {
       return widget.loadingWidget;
     }
 
-    if (flagService.internalUser && widget.limitSelectionToOne == false) {
-      return GallerySwipeHelper(
-        helper: _swipeHelper,
-        swipeActiveNotifier: _swipeActiveNotifier,
-        child: Listener(
-          onPointerDown: (_) {
-            // Reset initial movement tracking for new gesture
-            _initialMovementWasHorizontal = null;
-          },
-          onPointerMove: (event) {
-            // Only check for horizontal swipe if files are selected and swipe is not already active
-            if (!_swipeActiveNotifier.value &&
-                widget.selectedFiles != null &&
-                widget.selectedFiles!.files.isNotEmpty) {
-              // Check if movement is primarily horizontal and if delta x is significant
-              final dx = event.delta.dx.abs();
-              final dy = event.delta.dy.abs();
+    final shouldEnableSwipeSelection =
+        flagService.internalUser && widget.limitSelectionToOne == false;
 
-              // Track initial movement direction if not yet determined
-              if (_initialMovementWasHorizontal == null &&
-                  (dx > 0.1 || dy > 0.1)) {
-                _initialMovementWasHorizontal = dx > dy;
-              }
-
-              // Only activate swipe if initial movement was horizontal
-              if (_initialMovementWasHorizontal == true &&
-                  dx > dy &&
-                  dx > 0.1) {
-                // Horizontal swipe detected, activate swipe mode
-                _swipeActiveNotifier.value = true;
-              }
-            }
-            // To handle case where pointer is dragged after first selection in gallery
-            else if (widget.selectedFiles != null &&
-                widget.selectedFiles!.files.isNotEmpty &&
-                widget.selectedFiles!.files.length == 1 &&
-                !_swipeActiveNotifier.value) {
-              // Check if this is horizontal movement when only one file is selected
-              final dx = event.delta.dx.abs();
-              final dy = event.delta.dy.abs();
-              if (dx > dy && dx > 0.1) {
-                _swipeActiveNotifier.value = true;
-              }
-            }
-          },
-          onPointerUp: (_) {
-            // End swipe selection when pointer is released
-            _swipeHelper?.endSelection();
-            _swipeActiveNotifier.value = false;
-            _initialMovementWasHorizontal = null;
-          },
-          onPointerCancel: (_) {
-            // Also end selection on cancel
-            _swipeHelper?.endSelection();
-            _swipeActiveNotifier.value = false;
-            _initialMovementWasHorizontal = null;
-          },
-          child: GalleryContextState(
-            sortOrderAsc: _sortOrderAsc,
-            inSelectionMode: widget.inSelectionMode,
-            type: _groupType,
-            child: _allGalleryFiles.isEmpty
-                ? Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      if (widget.addHeaderOrFooterEmptyState)
-                        widget.header ?? const SizedBox.shrink(),
-                      Expanded(child: widget.emptyState),
-                      if (widget.addHeaderOrFooterEmptyState)
-                        widget.footer ?? const SizedBox.shrink(),
-                    ],
-                  )
-                : CustomScrollBar(
-                    scrollController: _scrollController,
-                    galleryGroups: galleryGroups,
-                    inUseNotifier: scrollBarInUseNotifier,
-                    heighOfViewport: MediaQuery.sizeOf(context).height,
-                    topPadding: widget.disableVerticalPaddingForScrollbar
-                        ? 0.0
-                        : groupHeaderExtent!,
-                    bottomPadding: widget.disableVerticalPaddingForScrollbar
-                        ? ValueNotifier(0.0)
-                        : scrollbarBottomPaddingNotifier,
-                    child: NotificationListener<SizeChangedLayoutNotification>(
-                      onNotification: (notification) {
-                        final renderBox = _headerKey.currentContext
-                            ?.findRenderObject() as RenderBox?;
-                        if (renderBox != null) {
-                          _headerHeightNotifier.value = renderBox.size.height;
-                        } else {
-                          _logger.info(
-                            "Header render box is null, cannot get height",
-                          );
-                        }
-
-                        return true;
-                      },
-                      child: Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          ValueListenableBuilder<bool>(
-                            valueListenable: _swipeActiveNotifier,
-                            builder: (context, isSwipeActive, child) {
-                              return CustomScrollView(
-                                physics: widget.disableScroll || isSwipeActive
-                                    ? const NeverScrollableScrollPhysics()
-                                    : const ExponentialBouncingScrollPhysics(),
-                                controller: _scrollController,
-                                slivers: [
-                                  SliverToBoxAdapter(
-                                    child: SizeChangedLayoutNotifier(
-                                      child: SizedBox(
-                                        key: _headerKey,
-                                        child: widget.header ??
-                                            const SizedBox.shrink(),
-                                      ),
-                                    ),
-                                  ),
-                                  SectionedListSliver(
-                                    sectionLayouts: galleryGroups.groupLayouts,
-                                  ),
-                                  SliverToBoxAdapter(
-                                    child: widget.footer,
-                                  ),
-                                ],
-                              );
-                            },
-                          ),
-                          galleryGroups.groupType.showGroupHeader() &&
-                                  !widget.disablePinnedGroupHeader
-                              ? PinnedGroupHeader(
-                                  scrollController: _scrollController,
-                                  galleryGroups: galleryGroups,
-                                  headerHeightNotifier: _headerHeightNotifier,
-                                  selectedFiles: widget.selectedFiles,
-                                  showSelectAll: widget.showSelectAll &&
-                                      !widget.limitSelectionToOne,
-                                  scrollbarInUseNotifier:
-                                      scrollBarInUseNotifier,
-                                  showGallerySettingsCTA:
-                                      widget.showGallerySettingsCTA,
-                                )
-                              : const SizedBox.shrink(),
-                        ],
-                      ),
-                    ),
-                  ),
-          ),
-        ),
-      );
-    } else {
-      return GalleryContextState(
+    return SwipeSelectionWrapper(
+      isEnabled: shouldEnableSwipeSelection,
+      swipeHelper: _swipeHelper,
+      selectedFiles: widget.selectedFiles,
+      swipeActiveNotifier: _swipeActiveNotifier,
+      scrollController: _scrollController,
+      child: GalleryContextState(
         sortOrderAsc: _sortOrderAsc,
         inSelectionMode: widget.inSelectionMode,
         type: _groupType,
@@ -832,8 +689,8 @@ class GalleryState extends State<Gallery> {
                   ),
                 ),
               ),
-      );
-    }
+      ),
+    );
   }
 }
 
