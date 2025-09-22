@@ -30,7 +30,6 @@ class OverflowMenuAction {
 class ItemListView extends StatefulWidget {
   final List<EnteFile> files;
   final List<Collection> collections;
-  final bool enableSorting;
   final Widget? emptyStateWidget;
   final List<OverflowMenuAction>? fileOverflowActions;
   final List<OverflowMenuAction>? collectionOverflowActions;
@@ -39,7 +38,6 @@ class ItemListView extends StatefulWidget {
     super.key,
     this.files = const [],
     this.collections = const [],
-    this.enableSorting = false,
     this.emptyStateWidget,
     this.fileOverflowActions,
     this.collectionOverflowActions,
@@ -51,8 +49,6 @@ class ItemListView extends StatefulWidget {
 
 class _ItemListViewState extends State<ItemListView> {
   List<_ListItem> _sortedItems = [];
-  int _sortColumnIndex = 1;
-  bool _sortAscending = false;
 
   @override
   void initState() {
@@ -77,57 +73,6 @@ class _ItemListViewState extends State<ItemListView> {
       ...sortedCollections.map((c) => _CollectionListItem(c)),
       ...widget.files.map((f) => _FileListItem(f)),
     ];
-
-    if (widget.enableSorting) {
-      _sortItems(_sortColumnIndex, _sortAscending);
-    }
-  }
-
-  void _sortItems(int columnIndex, bool ascending) {
-    if (!widget.enableSorting) return;
-
-    setState(() {
-      _sortColumnIndex = columnIndex;
-      _sortAscending = ascending;
-
-      final files = _sortedItems.whereType<_FileListItem>().toList();
-      final collections =
-          _sortedItems.whereType<_CollectionListItem>().toList();
-
-      switch (columnIndex) {
-        case 0:
-          files.sort((a, b) {
-            final nameA = a.name.toLowerCase();
-            final nameB = b.name.toLowerCase();
-            return ascending ? nameA.compareTo(nameB) : nameB.compareTo(nameA);
-          });
-          collections.sort((a, b) {
-            return CollectionSortUtil.compareCollectionsWithFavoritesPriority(
-              a.collection,
-              b.collection,
-              ascending,
-            );
-          });
-          break;
-        case 1:
-          files.sort((a, b) {
-            final dateA = a.modificationTime;
-            final dateB = b.modificationTime;
-            return ascending ? dateA.compareTo(dateB) : dateB.compareTo(dateA);
-          });
-          collections.sort((a, b) {
-            return CollectionSortUtil
-                .compareCollectionsByDateWithFavoritesPriority(
-              a.collection,
-              b.collection,
-              ascending,
-            );
-          });
-          break;
-      }
-
-      _sortedItems = [...collections, ...files];
-    });
   }
 
   @override
@@ -143,7 +88,6 @@ class _ItemListViewState extends State<ItemListView> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (widget.enableSorting) _buildSortingHeader(context),
         ListView.separated(
           separatorBuilder: (context, index) {
             return const SizedBox(height: 8);
@@ -189,83 +133,6 @@ class _ItemListViewState extends State<ItemListView> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildSortingHeader(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 2,
-            child: GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: () =>
-                  _sortItems(0, _sortColumnIndex == 0 ? !_sortAscending : true),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        context.l10n.name,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    if (_sortColumnIndex == 0)
-                      Icon(
-                        _sortAscending
-                            ? Icons.arrow_upward
-                            : Icons.arrow_downward,
-                        size: 16,
-                        color: getEnteColorScheme(context).textMuted,
-                      ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: () =>
-                  _sortItems(1, _sortColumnIndex == 1 ? !_sortAscending : true),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        context.l10n.date,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    if (_sortColumnIndex == 1)
-                      Icon(
-                        _sortAscending
-                            ? Icons.arrow_upward
-                            : Icons.arrow_downward,
-                        size: 16,
-                        color: getEnteColorScheme(context).textMuted,
-                      ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 48),
-        ],
       ),
     );
   }

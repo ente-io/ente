@@ -292,7 +292,6 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
 
     return ItemListView(
       files: _displayedFiles,
-      enableSorting: true,
     );
   }
 

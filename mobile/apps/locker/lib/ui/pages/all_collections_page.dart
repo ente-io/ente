@@ -209,7 +209,6 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
           collections: _sortedCollections,
           files: const [],
           searchQuery: searchQuery,
-          enableSorting: true,
           isHomePage: false,
           onSearchEverywhere: _searchEverywhere,
         ),
@@ -267,7 +266,6 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
           Flexible(
             child: ItemListView(
               collections: _sortedCollections,
-              enableSorting: true,
             ),
           ),
           if (!isSearchActive &&

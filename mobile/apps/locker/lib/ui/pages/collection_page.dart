@@ -314,7 +314,6 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
         collections: const [], // CollectionPage primarily shows files
         files: _filteredFiles,
         searchQuery: searchQuery,
-        enableSorting: true,
         isHomePage: false,
         onSearchEverywhere: _searchEverywhere,
       );
@@ -335,7 +334,6 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
         : ItemListView(
             key: ValueKey(_displayedFiles.length),
             files: _displayedFiles,
-            enableSorting: true,
           );
   }
 

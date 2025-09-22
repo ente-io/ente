@@ -459,7 +459,6 @@ class _HomePageState extends UploaderPageState<HomePage>
           collections: _filteredCollections,
           files: _filteredFiles,
           searchQuery: searchQuery,
-          enableSorting: true,
           isHomePage: true,
         ),
       );

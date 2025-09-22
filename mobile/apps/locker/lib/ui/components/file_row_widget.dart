@@ -24,8 +24,6 @@ import "package:locker/ui/pages/base_info_page.dart";
 import "package:locker/ui/pages/emergency_contact_page.dart";
 import "package:locker/ui/pages/personal_note_page.dart";
 import "package:locker/ui/pages/physical_records_page.dart";
-import "package:locker/utils/data_util.dart";
-import "package:locker/utils/date_time_util.dart";
 import "package:locker/utils/file_icon_utils.dart";
 import "package:locker/utils/snack_bar_utils.dart";
 import "package:open_file/open_file.dart";
@@ -46,15 +44,6 @@ class FileRowWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final updateTime = file.updationTime != null
-        ? DateTime.fromMicrosecondsSinceEpoch(file.updationTime!)
-        : (file.modificationTime != null
-            ? DateTime.fromMillisecondsSinceEpoch(file.modificationTime!)
-            : (file.creationTime != null
-                ? DateTime.fromMillisecondsSinceEpoch(file.creationTime!)
-                : DateTime.now()));
-
-    final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
 
     final fileRowWidget = Flexible(
@@ -76,30 +65,6 @@ class FileRowWidget extends StatelessWidget {
                   file.displayName,
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
-                ),
-                Row(
-                  children: [
-                    Text(
-                      formatDate(context, updateTime),
-                      style: textTheme.small.copyWith(
-                        color: colorScheme.textMuted,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                    ),
-                    FutureBuilder<int>(
-                      future: CollectionService.instance.getFileSize(file),
-                      builder: (context, snapshot) {
-                        final size = snapshot.data ?? 0;
-                        return Text(
-                          ' • ' + formatBytes(size),
-                          style: getEnteTextTheme(context).small.copyWith(
-                                color: colorScheme.textMuted,
-                              ),
-                        );
-                      },
-                    ),
-                  ],
                 ),
               ],
             ),
