@@ -237,6 +237,7 @@
   "shareWithNonenteUsers": "Поделиться с пользователями, не использующими Ente",
   "createPublicLink": "Создать публичную ссылку",
   "sendLink": "Отправить ссылку",
+  "sendQrCode": "Отправить QR-код",
   "copyLink": "Скопировать ссылку",
   "linkHasExpired": "Срок действия ссылки истёк",
   "publicLinkEnabled": "Публичная ссылка включена",
