@@ -1351,6 +1351,7 @@ class FileUploader {
   }) async {
     final startTime = DateTime.now().millisecondsSinceEpoch;
     final fileName = basename(file.path);
+    int bytesSent = 0;
     try {
       await _dio.put(
         uploadURL.url,
@@ -1360,6 +1361,9 @@ class FileUploader {
             Headers.contentLengthHeader: fileSize,
           },
         ),
+        onSendProgress: (sent, total) {
+          bytesSent = sent;
+        },
       );
       _logger.info(
         "Uploaded object $fileName of size: ${formatBytes(fileSize)} at speed: ${(fileSize / (DateTime.now().millisecondsSinceEpoch - startTime)).toStringAsFixed(2)} KB/s",
@@ -1370,7 +1374,9 @@ class FileUploader {
       if (e.message?.startsWith("HttpException: Content size") ?? false) {
         rethrow;
       } else if (attempt < kMaximumUploadAttempts) {
-        _logger.info("Upload failed for $fileName, retrying");
+        _logger.info(
+          "Upload failed for $fileName after sending ${formatBytes(bytesSent)} of ${formatBytes(fileSize)}, retrying attempt ${attempt + 1}",
+        );
         final newUploadURL = await _getUploadURL();
         return _putFile(
           newUploadURL,
