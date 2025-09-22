@@ -477,7 +477,10 @@ class GalleryState extends State<Gallery> {
     if (widget.selectedFiles != null &&
         _allGalleryFiles.isNotEmpty &&
         flagService.internalUser) {
-      _swipeHelper ??= SwipeToSelectHelper(
+      // Dispose existing helper if present
+      _swipeHelper?.dispose();
+      // Always create a new helper with the current file list
+      _swipeHelper = SwipeToSelectHelper(
         allFiles: _allGalleryFiles,
         selectedFiles: widget.selectedFiles!,
       );
