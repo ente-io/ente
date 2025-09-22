@@ -17,6 +17,7 @@ import "package:photos/services/sync/sync_service.dart";
 import "package:photos/ui/common/linear_progress_dialog.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/tools/editor/export_video_service.dart";
+import "package:photos/ui/tools/editor/native_video_export_service.dart";
 import 'package:photos/ui/tools/editor/video_crop_page.dart';
 import "package:photos/ui/tools/editor/video_editor/video_editor_bottom_action.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_main_actions.dart";
@@ -243,101 +244,104 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
       ),
     );
 
-    final config = VideoFFmpegVideoEditorConfig(
-      _controller!,
-      format: VideoExportFormat.mp4,
-      commandBuilder: (config, videoPath, outputPath) {
-        final List<String> filters = config.getExportFilters();
-
-        final String startTrimCmd = "-ss ${_controller!.startTrim}";
-        final String toTrimCmd = "-t ${_controller!.trimmedDuration}";
-        return '$startTrimCmd -i $videoPath  $toTrimCmd ${config.filtersCmd(filters)} -c:v libx264 -c:a aac $outputPath';
-      },
-    );
-
     try {
-      await ExportService.runFFmpegCommand(
-        await config.getExecuteConfig(),
-        onProgress: (stats) {
+      // Generate output path for the exported video
+      final tempDir = Directory.systemTemp;
+      final outputPath = path.join(
+        tempDir.path,
+        'exported_${DateTime.now().millisecondsSinceEpoch}.mp4',
+      );
+
+      // Use native export service which will automatically fallback to FFmpeg if needed
+      final result = await NativeVideoExportService.exportVideo(
+        controller: _controller!,
+        outputPath: outputPath,
+        onProgress: (progress) {
           if (dialogKey.currentState != null) {
-            dialogKey.currentState!
-                .setProgress(config.getFFmpegProgress(stats.getTime().toInt()));
+            dialogKey.currentState!.setProgress(progress);
           }
         },
         onError: (e, s) => _logger.severe("Error exporting video", e, s),
-        onCompleted: (result) async {
-          _isExporting.value = false;
-          if (!mounted) return;
+      );
 
-          final fileName = path.basenameWithoutExtension(widget.file.title!) +
-              "_edited_" +
-              DateTime.now().microsecondsSinceEpoch.toString() +
-              ".mp4";
-          //Disabling notifications for assets changing to insert the file into
-          //files db before triggering a sync.
-          await PhotoManager.stopChangeNotify();
+      // Process the exported file
+      await _handleExportedFile(result, dialogKey);
+    } catch (e) {
+      Navigator.of(dialogKey.currentContext!).pop('dialog');
+      _isExporting.value = false;
+    } finally {
+      await PhotoManager.startChangeNotify();
+    }
+  }
 
-          try {
-            final AssetEntity newAsset =
-                await (PhotoManager.editor.saveVideo(result, title: fileName));
-            result.deleteSync();
-            final newFile = await EnteFile.fromAsset(
-              widget.file.deviceFolder ?? '',
-              newAsset,
-            );
+  Future<void> _handleExportedFile(
+    File result,
+    GlobalKey<LinearProgressDialogState> dialogKey,
+  ) async {
+    _isExporting.value = false;
+    if (!mounted) return;
 
-            newFile.creationTime = widget.file.creationTime;
-            newFile.collectionID = widget.file.collectionID;
-            newFile.location = widget.file.location;
-            if (!newFile.hasLocation && widget.file.localID != null) {
-              final assetEntity = await widget.file.getAsset;
-              if (assetEntity != null) {
-                final latLong = await assetEntity.latlngAsync();
-                newFile.location = Location(
-                  latitude: latLong.latitude,
-                  longitude: latLong.longitude,
-                );
-              }
-            }
+    final fileName = path.basenameWithoutExtension(widget.file.title!) +
+        "_edited_" +
+        DateTime.now().microsecondsSinceEpoch.toString() +
+        ".mp4";
+    //Disabling notifications for assets changing to insert the file into
+    //files db before triggering a sync.
+    await PhotoManager.stopChangeNotify();
 
-            newFile.generatedID =
-                await FilesDB.instance.insertAndGetId(newFile);
-            Bus.instance
-                .fire(LocalPhotosUpdatedEvent([newFile], source: "editSave"));
-            SyncService.instance.sync().ignore();
-            showShortToast(context, AppLocalizations.of(context).editsSaved);
-            _logger.info("Original file " + widget.file.toString());
-            _logger.info("Saved edits to file " + newFile.toString());
-            final files = widget.detailPageConfig.files;
+    try {
+      final AssetEntity newAsset =
+          await (PhotoManager.editor.saveVideo(result, title: fileName));
+      result.deleteSync();
+      final newFile = await EnteFile.fromAsset(
+        widget.file.deviceFolder ?? '',
+        newAsset,
+      );
 
-            // the index could be -1 if the files fetched doesn't contain the newly
-            // edited files
-            int selectionIndex = files
-                .indexWhere((file) => file.generatedID == newFile.generatedID);
-            if (selectionIndex == -1) {
-              files.add(newFile);
-              selectionIndex = files.length - 1;
-            }
-            Navigator.of(dialogKey.currentContext!).pop('dialog');
+      newFile.creationTime = widget.file.creationTime;
+      newFile.collectionID = widget.file.collectionID;
+      newFile.location = widget.file.location;
+      if (!newFile.hasLocation && widget.file.localID != null) {
+        final assetEntity = await widget.file.getAsset;
+        if (assetEntity != null) {
+          final latLong = await assetEntity.latlngAsync();
+          newFile.location = Location(
+            latitude: latLong.latitude,
+            longitude: latLong.longitude,
+          );
+        }
+      }
 
-            replacePage(
-              context,
-              DetailPage(
-                widget.detailPageConfig.copyWith(
-                  files: files,
-                  selectedIndex: min(selectionIndex, files.length - 1),
-                ),
-              ),
-            );
-          } catch (_) {
-            Navigator.of(dialogKey.currentContext!).pop('dialog');
-          }
-        },
+      newFile.generatedID = await FilesDB.instance.insertAndGetId(newFile);
+      Bus.instance
+          .fire(LocalPhotosUpdatedEvent([newFile], source: "editSave"));
+      SyncService.instance.sync().ignore();
+      showShortToast(context, AppLocalizations.of(context).editsSaved);
+      _logger.info("Original file " + widget.file.toString());
+      _logger.info("Saved edits to file " + newFile.toString());
+      final files = widget.detailPageConfig.files;
+
+      // the index could be -1 if the files fetched doesn't contain the newly
+      // edited files
+      int selectionIndex = files
+          .indexWhere((file) => file.generatedID == newFile.generatedID);
+      if (selectionIndex == -1) {
+        files.add(newFile);
+        selectionIndex = files.length - 1;
+      }
+      Navigator.of(dialogKey.currentContext!).pop('dialog');
+
+      replacePage(
+        context,
+        DetailPage(
+          widget.detailPageConfig.copyWith(
+            files: files,
+            selectedIndex: min(selectionIndex, files.length - 1),
+          ),
+        ),
       );
     } catch (_) {
       Navigator.of(dialogKey.currentContext!).pop('dialog');
-    } finally {
-      await PhotoManager.startChangeNotify();
     }
   }
 

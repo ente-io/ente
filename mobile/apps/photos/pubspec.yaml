@@ -48,6 +48,8 @@ dependencies:
   dots_indicator: ^4.0.1
   dotted_border: ^2.1.0
   dropdown_button2: ^2.0.0
+  native_video_editor:
+    path: ../../packages/native_video_editor
   el_tooltip: ^2.2.1
   email_validator: ^3.0.0
   encrypt: ^5.0.3
