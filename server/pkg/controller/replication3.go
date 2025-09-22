@@ -17,7 +17,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/ente-io/museum/pkg/controller/discord"
 	"github.com/ente-io/museum/pkg/repo"
-	"github.com/ente-io/museum/pkg/utils/file"
+	fileutil "github.com/ente-io/museum/pkg/utils/file"
 	"github.com/ente-io/museum/pkg/utils/s3config"
 	"github.com/ente-io/stacktrace"
 	"github.com/prometheus/client_golang/prometheus"
@@ -146,12 +146,12 @@ func (c *ReplicationController3) createTemporaryStorage() error {
 
 	log.Infof("Temporary storage for replication v3 is: %s", tempStorage)
 
-	err := file.DeleteAllFilesInDirectory(tempStorage)
+	err := fileutil.DeleteAllFilesInDirectory(tempStorage)
 	if err != nil {
 		return stacktrace.Propagate(err, "Failed to deleting old files from %s", tempStorage)
 	}
 
-	err = file.MakeDirectoryIfNotExists(tempStorage)
+	err = fileutil.MakeDirectoryIfNotExists(tempStorage)
 	if err != nil {
 		return stacktrace.Propagate(err, "Failed to create temporary storage %s", tempStorage)
 	}
@@ -295,7 +295,7 @@ func (c *ReplicationController3) tryReplicate() error {
 		return done(nil)
 	}
 
-	err = file.EnsureSufficientSpace(ob.Size)
+	err = fileutil.EnsureSufficientSpace(ob.Size)
 	if err != nil {
 		// We don't have free space right now, maybe because other big files are
 		// being downloaded simultanously, but we might get space later, so mark
@@ -306,7 +306,7 @@ func (c *ReplicationController3) tryReplicate() error {
 		return done(stacktrace.Propagate(err, ""))
 	}
 
-	filePath, file, err := c.createTemporaryFile(objectKey)
+	filePath, file, err := fileutil.CreateTemporaryFile(c.tempStorage, objectKey)
 	if err != nil {
 		return done(stacktrace.Propagate(err, "Failed to create temporary file"))
 	}
@@ -346,19 +346,6 @@ func (c *ReplicationController3) tryReplicate() error {
 	return done(err)
 }
 
-// Create a temporary file for storing objectKey. Return both the path to the
-// file, and the handle to the file.
-//
-// The caller must Close() the returned file if it is not nil.
-func (c *ReplicationController3) createTemporaryFile(objectKey string) (string, *os.File, error) {
-	fileName := strings.ReplaceAll(objectKey, "/", "_")
-	filePath := c.tempStorage + "/" + fileName
-	f, err := os.Create(filePath)
-	if err != nil {
-		return "", nil, stacktrace.Propagate(err, "Could not create temporary file at '%s' to download object", filePath)
-	}
-	return filePath, f, nil
-}
 
 // Download the object for objectKey from B2 hot storage, writing it into file.
 //
