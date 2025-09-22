@@ -75,17 +75,19 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
           onTrimmedColor: const ColorScheme.dark().videoPlayerPrimaryColor,
           onTrimmingColor: const ColorScheme.dark().videoPlayerPrimaryColor,
           background: Theme.of(context).colorScheme.editorBackgroundColor,
-          positionLineColor:
-              Theme.of(context).colorScheme.videoPlayerBorderColor,
-          lineColor: Theme.of(context)
-              .colorScheme
-              .videoPlayerBorderColor
-              .withValues(alpha: 0.6),
+          positionLineColor: Theme.of(
+            context,
+          ).colorScheme.videoPlayerBorderColor,
+          lineColor: Theme.of(
+            context,
+          ).colorScheme.videoPlayerBorderColor.withValues(alpha: 0.6),
         ),
       );
 
       _controller!.initialize().then((_) => setState(() {})).catchError(
-        (error) {
+        (
+          error,
+        ) {
           // handle minumum duration bigger than video duration error
           Navigator.pop(context);
         },
@@ -119,10 +121,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(
-          elevation: 0,
-          toolbarHeight: 0,
-        ),
+        appBar: AppBar(elevation: 0, toolbarHeight: 0),
         body: _controller != null &&
                 _controller!.initialized &&
                 _quarterTurnsForRotationCorrection != null
@@ -202,11 +201,12 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                               ),
                               const SizedBox(height: 40),
                               VideoEditorNavigationOptions(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .videoPlayerPrimaryColor,
-                                secondaryText:
-                                    AppLocalizations.of(context).saveCopy,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.videoPlayerPrimaryColor,
+                                secondaryText: AppLocalizations.of(
+                                  context,
+                                ).saveCopy,
                                 onSecondaryPressed: () {
                                   exportVideo();
                                 },
@@ -225,6 +225,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
   }
 
   void exportVideo() async {
+    _logger.info("[VideoExport] Starting export process");
     _isExporting.value = true;
 
     final dialogKey = GlobalKey<LinearProgressDialogState>();
@@ -233,6 +234,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
       key: dialogKey,
     );
 
+    _logger.info("[VideoExport] Showing progress dialog");
     unawaited(
       showDialog(
         useRootNavigator: false,
@@ -243,44 +245,90 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
       ),
     );
 
+    _logger.info("[VideoExport] Creating FFmpeg config");
+    _logger.info("[VideoExport] Start trim: ${_controller!.startTrim}");
+    _logger.info(
+      "[VideoExport] Trimmed duration: ${_controller!.trimmedDuration}",
+    );
+
     final config = VideoFFmpegVideoEditorConfig(
       _controller!,
       format: VideoExportFormat.mp4,
       commandBuilder: (config, videoPath, outputPath) {
         final List<String> filters = config.getExportFilters();
+        _logger.info("[VideoExport] Input video path: $videoPath");
+        _logger.info("[VideoExport] Output path: $outputPath");
+        _logger.info("[VideoExport] Filters: $filters");
 
         final String startTrimCmd = "-ss ${_controller!.startTrim}";
         final String toTrimCmd = "-t ${_controller!.trimmedDuration}";
-        return '$startTrimCmd -i $videoPath  $toTrimCmd ${config.filtersCmd(filters)} -c:v libx264 -c:a aac $outputPath';
+        final command =
+            '$startTrimCmd -i $videoPath  $toTrimCmd ${config.filtersCmd(filters)} -c:v libx264 -c:a aac $outputPath';
+        _logger.info("[VideoExport] FFmpeg command: $command");
+        return command;
       },
     );
 
     try {
+      _logger.info("[VideoExport] Getting execute config");
+      final executeConfig = await config.getExecuteConfig();
+      _logger.info("[VideoExport] Execute config ready, starting FFmpeg");
+
       await ExportService.runFFmpegCommand(
-        await config.getExecuteConfig(),
+        executeConfig,
         onProgress: (stats) {
+          final progress = config.getFFmpegProgress(stats.getTime().toInt());
+          _logger.info(
+            "[VideoExport] Progress: ${(progress * 100).toStringAsFixed(1)}%",
+          );
           if (dialogKey.currentState != null) {
-            dialogKey.currentState!
-                .setProgress(config.getFFmpegProgress(stats.getTime().toInt()));
+            dialogKey.currentState!.setProgress(progress);
           }
         },
-        onError: (e, s) => _logger.severe("Error exporting video", e, s),
+        onError: (e, s) {
+          _logger.severe("[VideoExport] Error exporting video", e, s);
+          _logger.severe("[VideoExport] Error details: $e");
+        },
         onCompleted: (result) async {
+          _logger.info(
+            "[VideoExport] FFmpeg completed, result file: ${result.path}",
+          );
+          _logger.info(
+            "[VideoExport] File exists: ${result.existsSync()}, size: ${result.existsSync() ? result.lengthSync() : 0} bytes",
+          );
           _isExporting.value = false;
-          if (!mounted) return;
+          if (!mounted) {
+            _logger.warning("[VideoExport] Widget not mounted, returning");
+            return;
+          }
 
           final fileName = path.basenameWithoutExtension(widget.file.title!) +
               "_edited_" +
               DateTime.now().microsecondsSinceEpoch.toString() +
               ".mp4";
+          _logger.info("[VideoExport] New file name: $fileName");
+
           //Disabling notifications for assets changing to insert the file into
           //files db before triggering a sync.
+          _logger.info(
+            "[VideoExport] Stopping PhotoManager change notifications",
+          );
           await PhotoManager.stopChangeNotify();
 
           try {
-            final AssetEntity newAsset =
-                await (PhotoManager.editor.saveVideo(result, title: fileName));
+            _logger.info("[VideoExport] Saving video to PhotoManager");
+            final AssetEntity newAsset = await (PhotoManager.editor.saveVideo(
+              result,
+              title: fileName,
+            ));
+            _logger.info(
+              "[VideoExport] Video saved to PhotoManager, asset ID: ${newAsset.id}",
+            );
+
+            _logger.info("[VideoExport] Deleting temporary file");
             result.deleteSync();
+
+            _logger.info("[VideoExport] Creating EnteFile from asset");
             final newFile = await EnteFile.fromAsset(
               widget.file.deviceFolder ?? '',
               newAsset,
@@ -300,26 +348,46 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
               }
             }
 
-            newFile.generatedID =
-                await FilesDB.instance.insertAndGetId(newFile);
-            Bus.instance
-                .fire(LocalPhotosUpdatedEvent([newFile], source: "editSave"));
+            _logger.info("[VideoExport] Inserting file into database");
+            newFile.generatedID = await FilesDB.instance.insertAndGetId(
+              newFile,
+            );
+            _logger.info(
+              "[VideoExport] File inserted with ID: ${newFile.generatedID}",
+            );
+
+            _logger.info("[VideoExport] Firing LocalPhotosUpdatedEvent");
+            Bus.instance.fire(
+              LocalPhotosUpdatedEvent([newFile], source: "editSave"),
+            );
+
+            _logger.info("[VideoExport] Starting sync service");
             SyncService.instance.sync().ignore();
+
             showShortToast(context, AppLocalizations.of(context).editsSaved);
-            _logger.info("Original file " + widget.file.toString());
-            _logger.info("Saved edits to file " + newFile.toString());
+            _logger.info(
+              "[VideoExport] Original file: ${widget.file.toString()}",
+            );
+            _logger.info(
+              "[VideoExport] Saved edits to file: ${newFile.toString()}",
+            );
             final files = widget.detailPageConfig.files;
 
             // the index could be -1 if the files fetched doesn't contain the newly
             // edited files
-            int selectionIndex = files
-                .indexWhere((file) => file.generatedID == newFile.generatedID);
+            int selectionIndex = files.indexWhere(
+              (file) => file.generatedID == newFile.generatedID,
+            );
             if (selectionIndex == -1) {
               files.add(newFile);
               selectionIndex = files.length - 1;
             }
+            _logger.info("[VideoExport] Dismissing progress dialog");
             Navigator.of(dialogKey.currentContext!).pop('dialog');
 
+            _logger.info(
+              "[VideoExport] Navigating to detail page with new file",
+            );
             replacePage(
               context,
               DetailPage(
@@ -329,15 +397,22 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                 ),
               ),
             );
-          } catch (_) {
+            _logger.info("[VideoExport] Export process completed successfully");
+          } catch (e, s) {
+            _logger.severe("[VideoExport] Error in post-processing", e, s);
             Navigator.of(dialogKey.currentContext!).pop('dialog');
           }
         },
       );
-    } catch (_) {
+    } catch (e, s) {
+      _logger.severe("[VideoExport] Unexpected error in export process", e, s);
       Navigator.of(dialogKey.currentContext!).pop('dialog');
     } finally {
+      _logger.info(
+        "[VideoExport] Re-enabling PhotoManager change notifications",
+      );
       await PhotoManager.startChangeNotify();
+      _logger.info("[VideoExport] Export method completed");
     }
   }
 
