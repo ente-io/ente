@@ -1,3 +1,1 @@
-- Similar images detection and deletion
-- Video streaming enhancements
-- Performance improvements
+- Bug fixes & performance improvements

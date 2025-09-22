@@ -14,6 +14,7 @@ import "package:flutter/material.dart";
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:locker/core/locale.dart';
 import 'package:locker/l10n/l10n.dart';
+import "package:locker/services/collections/collections_service.dart";
 import 'package:locker/services/configuration.dart';
 import 'package:locker/ui/pages/home_page.dart';
 import 'package:locker/ui/pages/onboarding_page.dart';
@@ -65,6 +66,7 @@ class _AppState extends State<App>
     });
     _signedInEvent = Bus.instance.on<SignedInEvent>().listen((event) {
       UserService.instance.getUserDetailsV2().ignore();
+      CollectionService.instance.sync().ignore();
       if (mounted) {
         setState(() {});
       }

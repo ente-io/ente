@@ -1,0 +1,19 @@
+{{template "base" .}}
+
+{{define "content"}}
+<h2>Ente Friends - Test trial code</h2>
+
+<p>Hello,</p>
+
+<p>Here is your coupon code for a free 3 month trial of Test Search - <strong>{{.CouponCode}}</strong></p>
+
+<div style="margin: 20px 0;">
+
+    Or you can <a href="https://Test.com/p/{{.CouponCode}}" > click here </a> to start your trial.
+
+</div>
+
+<p>Best,<br>
+    Team Ente</p>
+
+{{end}}

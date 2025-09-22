@@ -9,6 +9,7 @@ import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
 import 'package:ente_auth/onboarding/view/view_qr_page.dart';
+import 'package:ente_auth/services/local_backup_service.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
@@ -478,7 +479,7 @@ class _CodeWidgetState extends State<CodeWidget> {
       _getCurrentOTP(),
       confirmationMessage: context.l10n.copiedToClipboard,
     );
-    _udateCodeMetadata().ignore();
+    _updateCodeMetadata().ignore();
   }
 
   void _copyNextToClipboard() {
@@ -486,10 +487,10 @@ class _CodeWidgetState extends State<CodeWidget> {
       _getNextTotp(),
       confirmationMessage: context.l10n.copiedNextToClipboard,
     );
-    _udateCodeMetadata().ignore();
+    _updateCodeMetadata().ignore();
   }
 
-  Future<void> _udateCodeMetadata() async {
+  Future<void> _updateCodeMetadata() async {
     if (widget.sortKey == null) return;
     Future.delayed(const Duration(milliseconds: 100), () {
       if (mounted) {
@@ -653,6 +654,7 @@ class _CodeWidgetState extends State<CodeWidget> {
       firstButtonOnTap: () async {
         try {
           await CodeStore.instance.removeCode(widget.code);
+          LocalBackupService.instance.triggerAutomaticBackup().ignore();
         } catch (e, s) {
           logger.severe('Failed to delete code', e, s);
           showGenericErrorDialog(context: context, error: e).ignore();

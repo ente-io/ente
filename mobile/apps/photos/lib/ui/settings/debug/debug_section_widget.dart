@@ -38,6 +38,27 @@ class _DebugSectionWidgetState extends State<DebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
+            title: "Enable database logging",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingWidget: ToggleSwitchWidget(
+            value: () => localSettings.enableDatabaseLogging,
+            onChanged: () async {
+              final newValue = !localSettings.enableDatabaseLogging;
+              await localSettings.setEnableDatabaseLogging(newValue);
+              setState(() {});
+              showShortToast(
+                context,
+                newValue
+                    ? "Database logging enabled. Restart app."
+                    : "Database logging disabled. Restart app.",
+              );
+            },
+          ),
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
             title: "Show local ID over thumbnails",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,

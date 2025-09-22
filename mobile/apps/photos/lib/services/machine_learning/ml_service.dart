@@ -161,7 +161,7 @@ class MLService {
       _logger.severe("runAllML failed", e, s);
       rethrow;
     } finally {
-      _logger.severe("ML finished running");
+      _logger.info("ML finished running");
       _isRunningML = false;
       computeController.releaseCompute(ml: true);
       VideoPreviewService.instance.queueFiles();

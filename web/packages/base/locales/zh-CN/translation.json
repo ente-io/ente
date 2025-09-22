@@ -697,5 +697,8 @@
     "add_dns_entry_hint": "在您的 DNS 提供商上，将您域中的 CNAME 添加到 <b>{{host}}</b>",
     "custom_domains_help": "欲了解更多信息，请参阅 <a>help</a>",
     "num_1": "1",
-    "num_2": "2"
+    "num_2": "2",
+    "grouped": "",
+    "continuous": "",
+    "trip": ""
 }

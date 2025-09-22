@@ -1,10 +1,10 @@
 import 'dart:convert';
 
 import "package:ente_base/models/database.dart";
+import "package:ente_sharing/models/user.dart";
 import 'package:locker/models/file_type.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/collections/models/public_url.dart';
-import 'package:locker/services/collections/models/user.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -357,8 +357,19 @@ class CollectionDB extends EnteBaseDatabase {
     ''',
       [collection.id],
     );
+    final Set<int> seenFileIds = {};
+    final List<EnteFile> uniqueFiles = [];
 
-    return result.map((row) => _mapToFile(row)).toList();
+    for (final row in result) {
+      final file = _mapToFile(row);
+
+      if (!seenFileIds.contains(file.uploadedFileID)) {
+        seenFileIds.add(file.uploadedFileID!);
+        uniqueFiles.add(file);
+      }
+    }
+
+    return uniqueFiles;
   }
 
   Future<List<Collection>> getCollectionsForFile(EnteFile file) async {

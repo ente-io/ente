@@ -3,6 +3,8 @@
 # use "flutter analyze ." or "dart  analyze ." for running lint checks
 
 include: package:flutter_lints/flutter.yaml
+formatter:
+  trailing_commas: preserve
 linter:
   rules:
     # Ref https://github.com/flutter/packages/blob/master/packages/flutter_lints/lib/flutter.yaml
@@ -36,6 +38,7 @@ linter:
 
 analyzer:
   errors:
+    deprecated_member_use: warning
     avoid_empty_else: error
     exhaustive_cases: error
     curly_braces_in_flow_control_structures: error

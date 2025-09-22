@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude, Codex, and any other agent when working with code in this repository.
 
 ## Project Philosophy
 
@@ -31,7 +31,10 @@ The Photos app uses two types of packages:
 **CRITICAL: CI will fail if ANY of these checks fail. Run ALL commands and ensure they ALL pass.**
 
 ```bash
-# 1. Analyze flutter code for errors and warnings
+# 1. Format Dart code
+dart format .
+
+# 2. Analyze flutter code for errors and warnings
 flutter analyze
 ```
 
@@ -164,11 +167,12 @@ lib/
 ## Critical Coding Requirements
 
 ### 1. Code Quality - MANDATORY
-**Every code change MUST pass `flutter analyze` with zero issues**
+**Every code change MUST pass `dart format .` and `flutter analyze` with zero issues**
+- Run `dart format .` first to format all Dart code
 - Run `flutter analyze` after EVERY code modification
 - Resolve ALL issues (info, warning, error) - no exceptions
 - The codebase has zero issues by default, so any issue is from your changes
-- DO NOT commit or consider work complete until `flutter analyze` passes cleanly
+- DO NOT commit or consider work complete until both commands pass cleanly
 
 ### 2. Component Reuse - MANDATORY
 **Always try to reuse existing components**
@@ -192,6 +196,11 @@ lib/
 - Ensure documentation reflects the current implementation
 - Update examples in specs if behavior changes
 
+### 5. Database Methods - BEST PRACTICE
+**Prioritize readability in database methods**
+- For small result sets (e.g., 1-2 stale entries), prefer filtering in Dart for cleaner, more readable code
+- For large datasets, use SQL WHERE clauses for performance - they're much more efficient in SQLite
+
 ## Important Notes
 
 - Large service files (some 70k+ lines) - consider file context when editing
@@ -201,4 +210,4 @@ lib/
 - Always follow existing code conventions and patterns in neighboring files
 
 # Individual Preferences
-- @~/.claude/my-project-instructions.md
+- @~/.claude/ente-photos-instructions.md

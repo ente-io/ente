@@ -1917,6 +1917,11 @@
   },
   "size": "大小",
   "similarity": "相似度",
+  "analyzingPhotosLocally": "正在本地分析您的照片...",
+  "lookingForVisualSimilarities": "正在寻找视觉相似点……",
+  "comparingImageDetails": "正在比较图像细节...",
+  "findingSimilarImages": "正在寻找相似图片...",
+  "almostDone": "即将完成...",
   "processingLocally": "正在本地处理",
   "useMLToFindSimilarImages": "审查并删除看起来彼此相似的图像。",
   "all": "全部",
@@ -1926,10 +1931,11 @@
   "related": "相关",
   "hoorayyyy": "耶～～！",
   "nothingToTidyUpHere": "这里没什么可清理的",
-  "cLTitle1": "相似图像",
-  "cLDesc1": "我们正在推出一个基于机器学习的新系统来检测相似图像，您可以用它来清理您的图库。在 设置 -> 备份 -> 释放空间 中可用",
-  "cLTitle2": "视频流媒体增强",
-  "cLDesc2": "您现在可以直接从应用程序手动触发视频的流生成。我们还添加了一个新的视频流设置屏幕，它将显示您的视频中有百分之几已被处理用于流媒体播放",
+  "deletingDash": "正在删除 - ",
+  "cLTitle1": "相似图片",
+  "cLDesc1": "我们推出了一个基于机器学习的全新系统来检测相似图片，您可以使用它来清理图库。您可以在“设置”->“备份”->“释放空间”中找到它。",
+  "cLTitle2": "视频流增强功能",
+  "cLDesc2": "您现在可以直接从应用程序手动触发视频流生成。我们还添加了一个新的视频流设置屏幕，它将显示已处理的视频流百分比",
   "cLTitle3": "性能改进",
-  "cLDesc3": "多个底层改进，包括更好的缓存使用和更流畅的滚动体验"
+  "cLDesc3": "多项底层改进，包括更好的缓存使用和更流畅的滚动体验"
 }

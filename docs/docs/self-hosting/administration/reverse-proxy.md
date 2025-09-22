@@ -89,7 +89,7 @@ cast.ente.yourdomain.tld {
 Reload Caddy for changes to take effect.
 
 ```shell
-sudo systemctl caddy reload
+sudo systemctl reload caddy
 ```
 
 ## Step 4: Verify the setup

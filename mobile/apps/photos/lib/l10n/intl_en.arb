@@ -198,6 +198,9 @@
   "@noDeviceLimit": {
     "description": "Text to indicate that there is limit on number of devices"
   },
+  "layoutGrouped": "Grouped",
+  "layoutContinuous": "Continuous",
+  "layoutTrip": "Trip",
   "linkExpiry": "Link expiry",
   "linkExpired": "Expired",
   "linkEnabled": "Enabled",
@@ -237,6 +240,7 @@
   "shareWithNonenteUsers": "Share with non-Ente users",
   "createPublicLink": "Create public link",
   "sendLink": "Send link",
+  "sendQrCode": "Send QR code",
   "copyLink": "Copy link",
   "linkHasExpired": "Link has expired",
   "publicLinkEnabled": "Public link enabled",
@@ -1937,5 +1941,9 @@
   "cLTitle2": "Video streaming enhancements",
   "cLDesc2": "You can now manually trigger stream generation for videos directly from the app. We have also added a new video streaming settings screen which will show you what percentage of your videos have been processed for streaming",
   "cLTitle3": "Performance improvements",
-  "cLDesc3": "Multiple under the hood improvements, including better cache usage and a smoother scroll experience"
+  "cLDesc3": "Multiple under the hood improvements, including better cache usage and a smoother scroll experience",
+  "closeBy": "Close",
+  "@closeBy": {
+    "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
+  }
 }

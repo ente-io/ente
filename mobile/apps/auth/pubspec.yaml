@@ -95,10 +95,10 @@ dependencies:
   local_auth_darwin: ^1.2.2
   logging: ^1.0.1
   modal_bottom_sheet: ^3.0.0
-  move_to_background: # no package updates on pub.dev
+  move_to_background: # no updates in git, replace package
     git:
-      url: https://github.com/Sayegh7/move_to_background
-      ref: 91e4d1a9c55b28bf93425d1f12faf410efc1e48d
+      url: https://github.com/ente-io/move_to_background.git
+      ref: v2-only
   native_dio_adapter: ^1.4.0
   otp: ^3.1.1
   package_info_plus: ^8.0.2
