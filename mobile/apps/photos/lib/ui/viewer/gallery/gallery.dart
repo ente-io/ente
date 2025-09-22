@@ -149,6 +149,7 @@ class GalleryState extends State<Gallery> {
   late GalleryGroups galleryGroups;
   SwipeToSelectHelper? _swipeHelper;
   final _swipeActiveNotifier = ValueNotifier<bool>(false);
+  bool? _initialMovementWasHorizontal;
 
   @override
   void initState() {
@@ -593,6 +594,10 @@ class GalleryState extends State<Gallery> {
         helper: _swipeHelper,
         swipeActiveNotifier: _swipeActiveNotifier,
         child: Listener(
+          onPointerDown: (_) {
+            // Reset initial movement tracking for new gesture
+            _initialMovementWasHorizontal = null;
+          },
           onPointerMove: (event) {
             // Only check for horizontal swipe if files are selected and swipe is not already active
             if (!_swipeActiveNotifier.value &&
@@ -601,7 +606,17 @@ class GalleryState extends State<Gallery> {
               // Check if movement is primarily horizontal and if delta x is significant
               final dx = event.delta.dx.abs();
               final dy = event.delta.dy.abs();
-              if (dx > dy && dx > 0.1) {
+
+              // Track initial movement direction if not yet determined
+              if (_initialMovementWasHorizontal == null &&
+                  (dx > 0.1 || dy > 0.1)) {
+                _initialMovementWasHorizontal = dx > dy;
+              }
+
+              // Only activate swipe if initial movement was horizontal
+              if (_initialMovementWasHorizontal == true &&
+                  dx > dy &&
+                  dx > 0.1) {
                 // Horizontal swipe detected, activate swipe mode
                 _swipeActiveNotifier.value = true;
               }
@@ -623,11 +638,13 @@ class GalleryState extends State<Gallery> {
             // End swipe selection when pointer is released
             _swipeHelper?.endSelection();
             _swipeActiveNotifier.value = false;
+            _initialMovementWasHorizontal = null;
           },
           onPointerCancel: (_) {
             // Also end selection on cancel
             _swipeHelper?.endSelection();
             _swipeActiveNotifier.value = false;
+            _initialMovementWasHorizontal = null;
           },
           child: GalleryContextState(
             sortOrderAsc: _sortOrderAsc,
