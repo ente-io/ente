@@ -24,7 +24,7 @@ class LayoutPickerPage extends StatelessWidget {
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: AppLocalizations.of(context).layout,
+              title: AppLocalizations.of(context).albumLayout,
             ),
           ),
           SliverList(
