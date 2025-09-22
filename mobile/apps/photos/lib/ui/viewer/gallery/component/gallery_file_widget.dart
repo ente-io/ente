@@ -52,10 +52,6 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
     _isFileSelected =
         widget.selectedFiles?.isFileSelected(widget.file) ?? false;
     widget.selectedFiles?.addListener(_selectedFilesListener);
-    // Timer.periodic(const Duration(seconds: 2), (_) {
-    //   final len = GallerySwipeHelper.of(context)?.allFiles.length;
-    //   print("--------- len: $len");
-    // });
   }
 
   @override
