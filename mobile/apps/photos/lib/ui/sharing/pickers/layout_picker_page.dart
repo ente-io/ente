@@ -66,11 +66,18 @@ class ItemsWidget extends StatefulWidget {
 }
 
 class _ItemsWidgetState extends State<ItemsWidget> {
+  late String currentLayout;
   late final List<Tuple2<String, String>> _layoutOptions = [
     Tuple2(AppLocalizations.of(context).layoutGrouped, "grouped"),
     Tuple2(AppLocalizations.of(context).layoutContinuous, "continuous"),
     Tuple2(AppLocalizations.of(context).layoutTrip, "trip"),
   ];
+
+  @override
+  void initState() {
+    currentLayout = widget.collection.pubMagicMetadata.layout ?? 'grouped';
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -102,11 +109,11 @@ class _ItemsWidgetState extends State<ItemsWidget> {
       captionedTextWidget: CaptionedTextWidget(
         title: layoutOption.item1,
       ),
+      trailingIcon: currentLayout == layoutOption.item2 ? Icons.check : null,
       alignCaptionedTextToLeft: true,
       isTopBorderRadiusRemoved: true,
       isBottomBorderRadiusRemoved: true,
-      alwaysShowSuccessState: true,
-      surfaceExecutionStates: true,
+      showOnlyLoadingState: true,
       onTap: () async {
         await updateLayout(layoutOption.item2, context);
       },
@@ -117,6 +124,10 @@ class _ItemsWidgetState extends State<ItemsWidget> {
     await _updateLayoutSettings(
       context,
       {'layout': newLayout},
+    ).then(
+      (value) => setState(() {
+        currentLayout = newLayout;
+      }),
     );
   }
 
