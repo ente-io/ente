@@ -51,6 +51,7 @@ import 'package:photos/theme/colors.dart';
 import "package:photos/theme/effects.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/collections/collection_action_sheet.dart';
+import "package:photos/ui/common/web_page.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import 'package:photos/ui/extents_page_view.dart';
@@ -304,6 +305,7 @@ class _HomeWidgetState extends State<HomeWidget> {
 
       final Collection collection = await CollectionsService.instance
           .getCollectionFromPublicLink(context, uri);
+
       final existingCollection =
           CollectionsService.instance.getCollectionByID(collection.id);
 
@@ -317,6 +319,20 @@ class _HomeWidgetState extends State<HomeWidget> {
         );
         return;
       }
+
+      // Check for trip layout and show in webview
+      if (collection.pubMagicMetadata.layout == "trip") {
+        await routeToPage(
+          context,
+          WebPage(
+            collection.displayName,
+            uri.toString(),
+            canOpenInBrowser: true,
+          ),
+        );
+        return;
+      }
+
       final dialog = createProgressDialog(context, "Loading...");
       final publicUrl = collection.publicURLs[0];
       if (!publicUrl.enableDownload) {
