@@ -232,16 +232,11 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
     return TouchCrossDetector(
       onEnter: (event) {
-        print('DEBUG: onEnter called - pointer: ${event.pointer}');
-        final isActive = TouchCrossDetector.isPointerActive(event.pointer);
-        print('DEBUG: isPointerActive: $isActive');
-        if (isActive) {
-          print('DEBUG: Setting zone to appbar');
+        if (TouchCrossDetector.isPointerActive(event.pointer)) {
           autoScrollState.updateZone(AutoScrollZone.appbar);
         }
       },
       onHover: (event) {
-        print('DEBUG: onHover called - pointer: ${event.pointer}, zone: ${autoScrollState.activeZone.value}');
         final RenderBox? box = context.findRenderObject() as RenderBox?;
         if (box != null) {
           final localPosition = box.globalToLocal(event.position);
@@ -252,8 +247,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               .updateIntensity(Curves.easeInOutCubic.transform(intensity));
         }
       },
-      onExit: (event) {
-        print('DEBUG: onExit called - pointer: ${event.pointer}');
+      onExit: (_) {
         autoScrollState.updateZone(null);
         autoScrollState.updateIntensity(0.0);
       },

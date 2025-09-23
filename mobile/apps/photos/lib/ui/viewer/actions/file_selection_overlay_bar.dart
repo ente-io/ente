@@ -171,16 +171,11 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
 
     return TouchCrossDetector(
       onEnter: (event) {
-        print('DEBUG OVERLAY: onEnter called - pointer: ${event.pointer}');
-        final isActive = TouchCrossDetector.isPointerActive(event.pointer);
-        print('DEBUG OVERLAY: isPointerActive: $isActive');
-        if (isActive) {
-          print('DEBUG OVERLAY: Setting zone to overlaybar');
+        if (TouchCrossDetector.isPointerActive(event.pointer)) {
           autoScrollState.updateZone(AutoScrollZone.overlaybar);
         }
       },
       onHover: (event) {
-        print('DEBUG OVERLAY: onHover called - pointer: ${event.pointer}, zone: ${autoScrollState.activeZone.value}');
         final RenderBox? box = context.findRenderObject() as RenderBox?;
         if (box != null) {
           final localPosition = box.globalToLocal(event.position);
@@ -191,8 +186,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
               .updateIntensity(Curves.easeInOutCubic.transform(intensity));
         }
       },
-      onExit: (event) {
-        print('DEBUG OVERLAY: onExit called - pointer: ${event.pointer}');
+      onExit: (_) {
         autoScrollState.updateZone(null);
         autoScrollState.updateIntensity(0.0);
       },
