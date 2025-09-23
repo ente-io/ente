@@ -198,9 +198,11 @@
   "@noDeviceLimit": {
     "description": "Text to indicate that there is limit on number of devices"
   },
+  "albumLayout": "Album layout",
   "layoutGrouped": "Grouped",
   "layoutContinuous": "Continuous",
   "layoutTrip": "Trip",
+  "preview": "Preview",
   "linkExpiry": "Link expiry",
   "linkExpired": "Expired",
   "linkEnabled": "Enabled",

@@ -472,6 +472,7 @@ func main() {
 	privateAPI.GET("/files/data/preview", fileHandler.GetPreviewURL)
 
 	privateAPI.POST("/files", fileHandler.CreateOrUpdate)
+	privateAPI.POST("/files/meta", fileHandler.CreateMetaFile)
 	privateAPI.POST("/files/copy", fileHandler.CopyFiles)
 	privateAPI.PUT("/files/update", fileHandler.Update)
 	privateAPI.POST("/files/trash", fileHandler.Trash)
