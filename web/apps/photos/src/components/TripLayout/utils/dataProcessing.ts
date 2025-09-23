@@ -85,9 +85,8 @@ export const fetchLocationNames = async ({
         return { updatedPhotos };
     }
 
-    for (let i = 0; i < photoClusters.length; i++) {
-        const cluster = photoClusters[i];
-        if (!cluster || cluster.length === 0) continue;
+    for (const cluster of photoClusters) {
+        if (cluster.length === 0) continue;
 
         const avgLat =
             cluster.reduce((sum, p) => sum + p.lat, 0) / cluster.length;
@@ -95,7 +94,7 @@ export const fetchLocationNames = async ({
             cluster.reduce((sum, p) => sum + p.lng, 0) / cluster.length;
 
         try {
-            const locationInfo = await getLocationName(avgLat, avgLng, i + 1);
+            const locationInfo = await getLocationName(avgLat, avgLng);
 
             cluster.forEach((photo) => {
                 updatedPhotos.set(photo.fileId, {

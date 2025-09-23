@@ -94,10 +94,7 @@ export const getLocationName = async (
             result = { place: locationName, country: country };
         } else {
             // Fallback if no location found
-            result = {
-                place: "Unknown",
-                country: "Unknown",
-            };
+            result = { place: "Unknown", country: "Unknown" };
         }
 
         // Cache the result
@@ -105,10 +102,7 @@ export const getLocationName = async (
         return result;
     } catch {
         // Fallback on error
-        const fallbackResult = {
-            place: "Unknown",
-            country: "Unknown",
-        };
+        const fallbackResult = { place: "Unknown", country: "Unknown" };
         // Cache the fallback to avoid repeated failures
         geocodingCache.set(cacheKey, fallbackResult);
         return fallbackResult;
