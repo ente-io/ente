@@ -97,6 +97,8 @@ export const TripMap: React.FC<TripMapProps> = ({
                         }
                         url="https://stadia-maps-proxy.ente.io/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg"
                         maxZoom={20}
+                        updateWhenZooming={false}
+                        keepBuffer={1}
                     />
 
                     {/* Draw super-clusters (clickable for zoom and gallery) */}
