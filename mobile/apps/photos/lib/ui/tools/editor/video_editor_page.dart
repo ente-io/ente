@@ -74,19 +74,17 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
           onTrimmedColor: const ColorScheme.dark().videoPlayerPrimaryColor,
           onTrimmingColor: const ColorScheme.dark().videoPlayerPrimaryColor,
           background: Theme.of(context).colorScheme.editorBackgroundColor,
-          positionLineColor: Theme.of(
-            context,
-          ).colorScheme.videoPlayerBorderColor,
-          lineColor: Theme.of(
-            context,
-          ).colorScheme.videoPlayerBorderColor.withValues(alpha: 0.6),
+          positionLineColor:
+              Theme.of(context).colorScheme.videoPlayerBorderColor,
+          lineColor: Theme.of(context)
+              .colorScheme
+              .videoPlayerBorderColor
+              .withValues(alpha: 0.6),
         ),
       );
 
       _controller!.initialize().then((_) => setState(() {})).catchError(
-        (
-          error,
-        ) {
+        (error) {
           // handle minumum duration bigger than video duration error
           Navigator.pop(context);
         },
@@ -119,7 +117,10 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(elevation: 0, toolbarHeight: 0),
+        appBar: AppBar(
+          elevation: 0,
+          toolbarHeight: 0,
+        ),
         body: _controller != null &&
                 _controller!.initialized &&
                 _quarterTurnsForRotationCorrection != null
@@ -199,12 +200,11 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                               ),
                               const SizedBox(height: 40),
                               VideoEditorNavigationOptions(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.videoPlayerPrimaryColor,
-                                secondaryText: AppLocalizations.of(
-                                  context,
-                                ).saveCopy,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .videoPlayerPrimaryColor,
+                                secondaryText:
+                                    AppLocalizations.of(context).saveCopy,
                                 onSecondaryPressed: () {
                                   exportVideo();
                                 },
@@ -285,10 +285,8 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
           await PhotoManager.stopChangeNotify();
 
           try {
-            final AssetEntity newAsset = await (PhotoManager.editor.saveVideo(
-              result,
-              title: fileName,
-            ));
+            final AssetEntity newAsset =
+                await (PhotoManager.editor.saveVideo(result, title: fileName));
 
             result.deleteSync();
 
