@@ -3,12 +3,12 @@ import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/ente_theme.dart';
+import 'package:photos/ui/common/web_page.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
-import 'package:photos/ui/components/title_bar_title_widget.dart';
-import 'package:photos/ui/components/title_bar_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/separators_util.dart';
 import 'package:tuple/tuple.dart';
 
@@ -19,14 +19,23 @@ class LayoutPickerPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        title: Text(
+          AppLocalizations.of(context).albumLayout,
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.visibility),
+            onPressed: () async {
+              await _openPublicAlbumPreview(context);
+            },
+          ),
+        ],
+      ),
       body: CustomScrollView(
         primary: false,
         slivers: <Widget>[
-          TitleBarWidget(
-            flexibleSpaceTitle: TitleBarTitleWidget(
-              title: AppLocalizations.of(context).albumLayout,
-            ),
-          ),
           SliverList(
             delegate: SliverChildBuilderDelegate(
               (context, index) {
@@ -54,6 +63,23 @@ class LayoutPickerPage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _openPublicAlbumPreview(BuildContext context) async {
+    try {
+      final String publicUrl =
+          CollectionsService.instance.getPublicUrl(collection);
+      await routeToPage(
+        context,
+        WebPage(
+          AppLocalizations.of(context).preview,
+          publicUrl,
+          canOpenInBrowser: false,
+        ),
+      );
+    } catch (e) {
+      await showGenericErrorDialog(context: context, error: e);
+    }
   }
 }
 
@@ -110,10 +136,13 @@ class _ItemsWidgetState extends State<ItemsWidget> {
         title: layoutOption.item1,
       ),
       trailingIcon: currentLayout == layoutOption.item2 ? Icons.check : null,
+      trailingIconColor: currentLayout == layoutOption.item2
+          ? getEnteColorScheme(context).primary500
+          : null,
       alignCaptionedTextToLeft: true,
       isTopBorderRadiusRemoved: true,
       isBottomBorderRadiusRemoved: true,
-      showOnlyLoadingState: true,
+      alwaysShowSuccessState: true,
       onTap: () async {
         await updateLayout(layoutOption.item2, context);
       },
