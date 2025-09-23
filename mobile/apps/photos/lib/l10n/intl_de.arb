@@ -237,6 +237,7 @@
   "shareWithNonenteUsers": "Mit Nicht-Ente-Benutzern teilen",
   "createPublicLink": "Öffentlichen Link erstellen",
   "sendLink": "Link senden",
+  "sendQrCode": "QR-Code senden",
   "copyLink": "Link kopieren",
   "linkHasExpired": "Link ist abgelaufen",
   "publicLinkEnabled": "Öffentlicher Link aktiviert",

@@ -1819,5 +1819,9 @@
         "type": "int"
       }
     }
+  },
+  "closeBy": "Parecida",
+  "@closeBy": {
+    "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
   }
 }

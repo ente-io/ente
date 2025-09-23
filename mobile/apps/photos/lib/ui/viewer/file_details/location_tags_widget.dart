@@ -36,7 +36,6 @@ class LocationTagsWidget extends StatefulWidget {
 class _LocationTagsWidgetState extends State<LocationTagsWidget> {
   String? title;
   IconData? leadingIcon;
-  bool? hasChipButtons;
   late Future<List<Widget>> locationTagChips;
   late StreamSubscription<LocationTagUpdatedEvent> _locTagUpdateListener;
   VoidCallback? onTap;
@@ -73,7 +72,6 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
         leadingIcon: leadingIcon ?? Icons.pin_drop_outlined,
         title: title,
         subtitleSection: locationTagChips,
-        hasChipButtons: hasChipButtons ?? true,
         onTap: onTap,
         endSection: _loadedLocationTags
             ? InfoMap(widget.file)
@@ -111,7 +109,6 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
         setState(() {
           title = AppLocalizations.of(context).location;
           leadingIcon = Icons.pin_drop_outlined;
-          hasChipButtons = true;
           onTap = null;
         });
       }
@@ -129,7 +126,6 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
         setState(() {
           title = AppLocalizations.of(context).location;
           leadingIcon = Icons.pin_drop_outlined;
-          hasChipButtons = true;
           onTap = null;
         });
       }
@@ -152,7 +148,8 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
       result.add(
         ChipButtonWidget(
           null,
-          leadingIcon: Icons.add_outlined,
+          leadingIcon: Icons.add,
+          iconSize: 15,
           onTap: () => showAddLocationSheet(context, widget.file.location!),
         ),
       );

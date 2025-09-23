@@ -3,10 +3,12 @@ import "package:ente_utils/ente_utils.dart";
 import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
 import 'package:locker/l10n/l10n.dart';
+import 'package:locker/models/file_type.dart';
 import 'package:locker/models/selected_collections.dart';
 import 'package:locker/models/selected_files.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/models/file.dart';
+import 'package:locker/services/info_file_service.dart';
 import "package:locker/ui/components/collection_row_widget.dart";
 import "package:locker/ui/components/file_row_widget.dart";
 import 'package:locker/ui/pages/collection_page.dart';
@@ -33,7 +35,6 @@ class OverflowMenuAction {
 class ItemListView extends StatefulWidget {
   final List<EnteFile> files;
   final List<Collection> collections;
-  final bool enableSorting;
   final Widget? emptyStateWidget;
   final List<OverflowMenuAction>? fileOverflowActions;
   final List<OverflowMenuAction>? collectionOverflowActions;
@@ -44,7 +45,6 @@ class ItemListView extends StatefulWidget {
     super.key,
     this.files = const [],
     this.collections = const [],
-    this.enableSorting = false,
     this.emptyStateWidget,
     this.fileOverflowActions,
     this.collectionOverflowActions,
@@ -58,8 +58,6 @@ class ItemListView extends StatefulWidget {
 
 class _ItemListViewState extends State<ItemListView> {
   List<_ListItem> _sortedItems = [];
-  int _sortColumnIndex = 1;
-  bool _sortAscending = false;
 
   @override
   void initState() {
@@ -84,57 +82,6 @@ class _ItemListViewState extends State<ItemListView> {
       ...sortedCollections.map((c) => _CollectionListItem(c)),
       ...widget.files.map((f) => _FileListItem(f)),
     ];
-
-    if (widget.enableSorting) {
-      _sortItems(_sortColumnIndex, _sortAscending);
-    }
-  }
-
-  void _sortItems(int columnIndex, bool ascending) {
-    if (!widget.enableSorting) return;
-
-    setState(() {
-      _sortColumnIndex = columnIndex;
-      _sortAscending = ascending;
-
-      final files = _sortedItems.whereType<_FileListItem>().toList();
-      final collections =
-          _sortedItems.whereType<_CollectionListItem>().toList();
-
-      switch (columnIndex) {
-        case 0:
-          files.sort((a, b) {
-            final nameA = a.name.toLowerCase();
-            final nameB = b.name.toLowerCase();
-            return ascending ? nameA.compareTo(nameB) : nameB.compareTo(nameA);
-          });
-          collections.sort((a, b) {
-            return CollectionSortUtil.compareCollectionsWithFavoritesPriority(
-              a.collection,
-              b.collection,
-              ascending,
-            );
-          });
-          break;
-        case 1:
-          files.sort((a, b) {
-            final dateA = a.modificationTime;
-            final dateB = b.modificationTime;
-            return ascending ? dateA.compareTo(dateB) : dateB.compareTo(dateA);
-          });
-          collections.sort((a, b) {
-            return CollectionSortUtil
-                .compareCollectionsByDateWithFavoritesPriority(
-              a.collection,
-              b.collection,
-              ascending,
-            );
-          });
-          break;
-      }
-
-      _sortedItems = [...collections, ...files];
-    });
   }
 
   Future<void> _navigateToCollectionPage(Collection collection) async {
@@ -164,7 +111,6 @@ class _ItemListViewState extends State<ItemListView> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (widget.enableSorting) _buildSortingHeader(context),
         ListView.separated(
           separatorBuilder: (context, index) {
             return const SizedBox(height: 8);
@@ -276,83 +222,6 @@ class _ItemListViewState extends State<ItemListView> {
       ),
     );
   }
-
-  Widget _buildSortingHeader(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 2,
-            child: GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: () =>
-                  _sortItems(0, _sortColumnIndex == 0 ? !_sortAscending : true),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        context.l10n.name,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    if (_sortColumnIndex == 0)
-                      Icon(
-                        _sortAscending
-                            ? Icons.arrow_upward
-                            : Icons.arrow_downward,
-                        size: 16,
-                        color: getEnteColorScheme(context).textMuted,
-                      ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: () =>
-                  _sortItems(1, _sortColumnIndex == 1 ? !_sortAscending : true),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        context.l10n.date,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    if (_sortColumnIndex == 1)
-                      Icon(
-                        _sortAscending
-                            ? Icons.arrow_upward
-                            : Icons.arrow_downward,
-                        size: 16,
-                        color: getEnteColorScheme(context).textMuted,
-                      ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 48),
-        ],
-      ),
-    );
-  }
 }
 
 abstract class _ListItem {
@@ -394,6 +263,11 @@ class _FileListItem extends _ListItem {
 
   @override
   String get name {
+    // For info files, try to extract the title from the info data
+    if (_file.fileType == FileType.info) {
+      return InfoFileService.instance.getFileTitleFromFile(_file) ??
+          _file.displayName;
+    }
     return _file.displayName;
   }
 
@@ -584,30 +458,6 @@ class FileListViewHelpers {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class FileDataTable extends StatelessWidget {
-  final List<EnteFile> files;
-  final Function(EnteFile)? onFileTap;
-  final bool enableSorting;
-
-  const FileDataTable({
-    super.key,
-    required this.files,
-    this.onFileTap,
-    this.enableSorting = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: const Text(
-        'FileDataTable is deprecated. Use FileListView instead.',
-        style: TextStyle(color: Colors.red),
       ),
     );
   }

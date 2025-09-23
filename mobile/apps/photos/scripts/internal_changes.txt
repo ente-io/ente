@@ -1,3 +1,5 @@
+- Neeraj: Fix sorting for large files viewer
+- Anand: Option to change public album layout
 - Neeraj: (i) Add text detection option for images (iOS internal users)
 - Prateek: Fix infinite retry loop in video preview service
 - Prateek: Fix logout failure for custom endpoints when server is unreachable
@@ -5,7 +7,7 @@
 - Neeraj: Simplify location display in file info - show "Location" title with "Add location" chip
 - Laurens: Fix edge case bug in similar images cache when user hasn't indexed ML yet
 - Neeraj: Show shared albums in widget selection screen
-- Neeraj: (i) Add to album option in file overflow menu and file details [#3291](https://github.com/ente-io/ente/discussions/3291)
+- Neeraj: Add to album option in file overflow menu and file details [#3291](https://github.com/ente-io/ente/discussions/3291)
 - Neeraj: Add collection-level guest view option in album overflow menu
 - Neeraj: Fix IDN domain display in public URLs [#7079](https://github.com/ente-io/ente/issues/7079)
 - Neeraj: (i) Add allow joining album option in manage links

@@ -5,12 +5,15 @@ import "package:photos/theme/ente_theme.dart";
 class ChipButtonWidget extends StatelessWidget {
   final String? label;
   final IconData? leadingIcon;
+  final double iconSize;
   final VoidCallback? onTap;
   final bool noChips;
+  
   const ChipButtonWidget(
     this.label, {
     this.leadingIcon,
     this.onTap,
+    this.iconSize = 16,
     this.noChips = false,
     super.key,
   });
@@ -34,7 +37,7 @@ class ChipButtonWidget extends StatelessWidget {
               leadingIcon != null
                   ? Icon(
                       leadingIcon,
-                      size: 16,
+                      size: iconSize,
                     )
                   : const SizedBox.shrink(),
               if (label != null && leadingIcon != null)

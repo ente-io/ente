@@ -23,6 +23,7 @@ import 'package:locker/ui/components/search_result_view.dart';
 import 'package:locker/ui/mixins/search_mixin.dart';
 import 'package:locker/ui/pages/all_collections_page.dart';
 import 'package:locker/ui/pages/collection_page.dart';
+import 'package:locker/ui/pages/information_page.dart';
 import "package:locker/ui/pages/settings_page.dart";
 import 'package:locker/ui/pages/uploader_page.dart';
 import 'package:locker/utils/collection_actions.dart';
@@ -461,7 +462,6 @@ class _HomePageState extends UploaderPageState<HomePage>
           collections: _filteredCollections,
           files: _filteredFiles,
           searchQuery: searchQuery,
-          enableSorting: true,
           isHomePage: true,
         ),
       );
@@ -633,34 +633,41 @@ class _HomePageState extends UploaderPageState<HomePage>
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: getEnteColorScheme(context).fillBase,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Text(
-                                context.l10n.createCollectionTooltip,
-                                style: getEnteTextTheme(context).small.copyWith(
-                                      color: getEnteColorScheme(context)
-                                          .backgroundBase,
-                                    ),
+                            GestureDetector(
+                              onTap: () {
+                                _toggleFab();
+                                _showInformationDialog();
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: getEnteColorScheme(context).fillBase,
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Text(
+                                  context.l10n.saveInformation,
+                                  style:
+                                      getEnteTextTheme(context).small.copyWith(
+                                            color: getEnteColorScheme(context)
+                                                .backgroundBase,
+                                          ),
+                                ),
                               ),
                             ),
                             const SizedBox(width: 8),
                             FloatingActionButton(
-                              heroTag: "createCollection",
+                              heroTag: "information",
                               mini: true,
                               onPressed: () {
                                 _toggleFab();
-                                _createCollection();
+                                _showInformationDialog();
                               },
                               backgroundColor:
                                   getEnteColorScheme(context).fillBase,
-                              child: const Icon(Icons.create_new_folder),
+                              child: const Icon(Icons.edit_document),
                             ),
                           ],
                         ),
@@ -674,22 +681,29 @@ class _HomePageState extends UploaderPageState<HomePage>
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: getEnteColorScheme(context).fillBase,
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: Text(
-                                  context.l10n.uploadDocumentTooltip,
-                                  style:
-                                      getEnteTextTheme(context).small.copyWith(
-                                            color: getEnteColorScheme(context)
-                                                .backgroundBase,
-                                          ),
+                              GestureDetector(
+                                onTap: () {
+                                  _toggleFab();
+                                  addFile();
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: getEnteColorScheme(context).fillBase,
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Text(
+                                    context.l10n.uploadDocumentTooltip,
+                                    style: getEnteTextTheme(context)
+                                        .small
+                                        .copyWith(
+                                          color: getEnteColorScheme(context)
+                                              .backgroundBase,
+                                        ),
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 8),
@@ -766,5 +780,13 @@ class _HomePageState extends UploaderPageState<HomePage>
       ),
       const SizedBox(height: 24),
     ];
+  }
+
+  void _showInformationDialog() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const InformationPage(),
+      ),
+    );
   }
 }

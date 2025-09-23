@@ -222,13 +222,11 @@ class FileAppBarState extends State<FileAppBar> {
         ),
       );
     }
-    // Add to album option for uploaded files (behind feature flag)
-    if (flagService.addToAlbumFeature &&
-        widget.file.isUploaded &&
-        !isFileHidden) {
+
+    if (widget.file.isUploaded && !isFileHidden) {
       items.add(
         EntePopupMenuItem(
-          AppLocalizations.of(context).addToAlbum + "(i)",
+          AppLocalizations.of(context).addToAlbum,
           value: 10,
           icon: Icons.add,
           iconColor: Theme.of(context).iconTheme.color,

@@ -12,7 +12,6 @@ import "package:locker/services/configuration.dart";
 import "package:locker/ui/components/item_list_view.dart";
 import "package:locker/ui/pages/collection_page.dart";
 import "package:locker/utils/collection_actions.dart";
-import "package:locker/utils/date_time_util.dart";
 
 class CollectionRowWidget extends StatelessWidget {
   final Collection collection;
@@ -34,9 +33,6 @@ class CollectionRowWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final updateTime =
-        DateTime.fromMicrosecondsSinceEpoch(collection.updationTime);
-
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
 
@@ -66,30 +62,17 @@ class CollectionRowWidget extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                 ),
-                Row(
-                  children: [
-                    Text(
-                      formatDate(context, updateTime),
+                FutureBuilder<int>(
+                  future: CollectionService.instance.getFileCount(collection),
+                  builder: (context, snapshot) {
+                    final fileCount = snapshot.data ?? 0;
+                    return Text(
+                      context.l10n.items(fileCount),
                       style: textTheme.small.copyWith(
                         color: colorScheme.textMuted,
                       ),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                    ),
-                    FutureBuilder<int>(
-                      future:
-                          CollectionService.instance.getFileCount(collection),
-                      builder: (context, snapshot) {
-                        final fileCount = snapshot.data ?? 0;
-                        return Text(
-                          ' • ' + context.l10n.items(fileCount),
-                          style: textTheme.small.copyWith(
-                            color: colorScheme.textMuted,
-                          ),
-                        );
-                      },
-                    ),
-                  ],
+                    );
+                  },
                 ),
               ],
             ),
