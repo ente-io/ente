@@ -31,16 +31,6 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper> {
   bool? _initialMovementWasHorizontal;
 
   @override
-  void initState() {
-    widget.swipeActiveNotifier.addListener(() {
-      print(
-        'DEBUG SWIPE: swipeActiveNotifier changed to ${widget.swipeActiveNotifier.value}',
-      );
-    });
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     // If swipe selection is not enabled, just return the child wrapped in GallerySwipeHelper
     if (!widget.isEnabled) {
