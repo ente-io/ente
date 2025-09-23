@@ -48,7 +48,6 @@ export const throttle = <T extends (...args: unknown[]) => void>(
 };
 
 // Reverse geocoding function using Stadia Maps with caching
-// Works without API key for localhost development
 export const getLocationName = async (
     lat: number,
     lng: number,
@@ -67,7 +66,7 @@ export const getLocationName = async (
 
     try {
         const response = await fetch(
-            `https://api.stadiamaps.com/geocoding/v1/reverse?point.lat=${lat}&point.lon=${lng}`,
+            `https://stadia-maps-proxy.ente.workers.dev/geocoding/v1/reverse?point.lat=${lat}&point.lon=${lng}`,
         );
 
         if (!response.ok) {
