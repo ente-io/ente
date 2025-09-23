@@ -7,6 +7,7 @@ import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_utils/share_utils.dart";
 import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
+import "package:locker/models/info/info_item.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/configuration.dart";
@@ -14,11 +15,15 @@ import "package:locker/services/files/download/file_downloader.dart";
 import "package:locker/services/files/links/links_service.dart";
 import "package:locker/services/files/sync/metadata_updater_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
+import "package:locker/services/info_file_service.dart";
 import "package:locker/ui/components/button/copy_button.dart";
 import "package:locker/ui/components/file_edit_dialog.dart";
 import "package:locker/ui/components/item_list_view.dart";
-import "package:locker/utils/data_util.dart";
-import "package:locker/utils/date_time_util.dart";
+import "package:locker/ui/pages/account_credentials_page.dart";
+import "package:locker/ui/pages/base_info_page.dart";
+import "package:locker/ui/pages/emergency_contact_page.dart";
+import "package:locker/ui/pages/personal_note_page.dart";
+import "package:locker/ui/pages/physical_records_page.dart";
 import "package:locker/utils/file_icon_utils.dart";
 import "package:locker/utils/snack_bar_utils.dart";
 import "package:open_file/open_file.dart";
@@ -39,15 +44,6 @@ class FileRowWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final updateTime = file.updationTime != null
-        ? DateTime.fromMicrosecondsSinceEpoch(file.updationTime!)
-        : (file.modificationTime != null
-            ? DateTime.fromMillisecondsSinceEpoch(file.modificationTime!)
-            : (file.creationTime != null
-                ? DateTime.fromMillisecondsSinceEpoch(file.creationTime!)
-                : DateTime.now()));
-
-    final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
 
     final fileRowWidget = Flexible(
@@ -57,11 +53,7 @@ class FileRowWidget extends StatelessWidget {
           SizedBox(
             height: 60,
             width: 48,
-            child: Icon(
-              FileIconUtils.getFileIcon(file.displayName),
-              color: FileIconUtils.getFileIconColor(file.displayName),
-              size: 22,
-            ),
+            child: _buildFileIcon(),
           ),
           const SizedBox(width: 12),
           Flexible(
@@ -73,30 +65,6 @@ class FileRowWidget extends StatelessWidget {
                   file.displayName,
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
-                ),
-                Row(
-                  children: [
-                    Text(
-                      formatDate(context, updateTime),
-                      style: textTheme.small.copyWith(
-                        color: colorScheme.textMuted,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                    ),
-                    FutureBuilder<int>(
-                      future: CollectionService.instance.getFileSize(file),
-                      builder: (context, snapshot) {
-                        final size = snapshot.data ?? 0;
-                        return Text(
-                          ' • ' + formatBytes(size),
-                          style: getEnteTextTheme(context).small.copyWith(
-                                color: colorScheme.textMuted,
-                              ),
-                        );
-                      },
-                    ),
-                  ],
                 ),
               ],
             ),
@@ -511,7 +479,63 @@ class FileRowWidget extends StatelessWidget {
     }
   }
 
+  Widget _buildFileIcon() {
+    // Check if this is an info file
+    if (InfoFileService.instance.isInfoFile(file)) {
+      try {
+        final infoItem = InfoFileService.instance.extractInfoFromFile(file);
+        if (infoItem != null) {
+          return Icon(
+            _getInfoTypeIcon(infoItem.type),
+            color: _getInfoTypeColor(infoItem.type),
+            size: 20,
+          );
+        }
+      } catch (e) {
+        // Fallback to default icon if extraction fails
+      }
+    }
+
+    // For non-info files or if extraction fails, use the original logic
+    return Icon(
+      FileIconUtils.getFileIcon(file.displayName),
+      color: FileIconUtils.getFileIconColor(file.displayName),
+      size: 20,
+    );
+  }
+
+  IconData _getInfoTypeIcon(InfoType type) {
+    switch (type) {
+      case InfoType.note:
+        return Icons.note;
+      case InfoType.accountCredential:
+        return Icons.key;
+      case InfoType.physicalRecord:
+        return Icons.inventory;
+      case InfoType.emergencyContact:
+        return Icons.emergency;
+    }
+  }
+
+  Color _getInfoTypeColor(InfoType type) {
+    switch (type) {
+      case InfoType.note:
+        return Colors.blue;
+      case InfoType.accountCredential:
+        return Colors.orange;
+      case InfoType.physicalRecord:
+        return Colors.green;
+      case InfoType.emergencyContact:
+        return Colors.red;
+    }
+  }
+
   Future<void> _openFile(BuildContext context) async {
+    // Check if this is an info file
+    if (InfoFileService.instance.isInfoFile(file)) {
+      return _openInfoFile(context);
+    }
+
     if (file.localPath != null) {
       final localFile = File(file.localPath!);
       if (await localFile.exists()) {
@@ -571,6 +595,59 @@ class FileRowWidget extends StatelessWidget {
         context,
         context.l10n.errorOpeningFile,
         context.l10n.errorOpeningFileMessage(e.toString()),
+      );
+    }
+  }
+
+  Future<void> _openInfoFile(BuildContext context) async {
+    try {
+      final infoItem = InfoFileService.instance.extractInfoFromFile(file);
+      if (infoItem == null) {
+        await showErrorDialog(
+          context,
+          context.l10n.errorOpeningFile,
+          'Unable to extract information from this file',
+        );
+        return;
+      }
+
+      // Navigate to the appropriate page based on info type in view mode
+      Widget page;
+      switch (infoItem.type) {
+        case InfoType.note:
+          page = PersonalNotePage(
+            mode: InfoPageMode.view,
+            existingFile: file,
+          );
+          break;
+        case InfoType.accountCredential:
+          page = AccountCredentialsPage(
+            mode: InfoPageMode.view,
+            existingFile: file,
+          );
+          break;
+        case InfoType.physicalRecord:
+          page = PhysicalRecordsPage(
+            mode: InfoPageMode.view,
+            existingFile: file,
+          );
+          break;
+        case InfoType.emergencyContact:
+          page = EmergencyContactPage(
+            mode: InfoPageMode.view,
+            existingFile: file,
+          );
+          break;
+      }
+
+      await Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => page),
+      );
+    } catch (e) {
+      await showErrorDialog(
+        context,
+        context.l10n.errorOpeningFile,
+        'Failed to open info file: ${e.toString()}',
       );
     }
   }

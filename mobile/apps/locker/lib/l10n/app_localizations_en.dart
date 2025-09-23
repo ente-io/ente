@@ -536,6 +536,157 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reddit => 'Reddit';
 
   @override
+  String get information => 'Information';
+
+  @override
+  String get saveInformation => 'Save information';
+
+  @override
+  String get informationDescription =>
+      'Save important information that can be shared and passed down to loved ones.';
+
+  @override
+  String get personalNote => 'Personal note';
+
+  @override
+  String get personalNoteDescription => 'Save important notes or thoughts';
+
+  @override
+  String get physicalRecords => 'Physical records';
+
+  @override
+  String get physicalRecordsDescription =>
+      'Save the real-world locations of important items';
+
+  @override
+  String get accountCredentials => 'Account credentials';
+
+  @override
+  String get accountCredentialsDescription =>
+      'Securely store login details for important accounts';
+
+  @override
+  String get emergencyContact => 'Emergency contact';
+
+  @override
+  String get emergencyContactDescription =>
+      'Save details of people to contact in emergencies';
+
+  @override
+  String get noteName => 'Title';
+
+  @override
+  String get noteNameHint => 'Give your note a meaningful title';
+
+  @override
+  String get noteContent => 'Content';
+
+  @override
+  String get noteContentHint =>
+      'Write down important thoughts, instructions, or memories you want to preserve';
+
+  @override
+  String get recordName => 'Record name';
+
+  @override
+  String get recordNameHint => 'Name of the real-world item';
+
+  @override
+  String get recordLocation => 'Location';
+
+  @override
+  String get recordLocationHint =>
+      'Where can this item be found? (e.g., \'Safety deposit box at First Bank, Box #123\')';
+
+  @override
+  String get recordNotes => 'Notes';
+
+  @override
+  String get recordNotesHint =>
+      'Any additional details about accessing or understanding this record';
+
+  @override
+  String get credentialName => 'Account name';
+
+  @override
+  String get credentialNameHint => 'Name of the service or account';
+
+  @override
+  String get username => 'Username';
+
+  @override
+  String get usernameHint => 'Login username or email address';
+
+  @override
+  String get password => 'Password';
+
+  @override
+  String get passwordHint => 'Account password';
+
+  @override
+  String get credentialNotes => 'Additional notes';
+
+  @override
+  String get credentialNotesHint =>
+      'Recovery methods, security questions, or other important details';
+
+  @override
+  String get contactName => 'Contact name';
+
+  @override
+  String get contactNameHint => 'Full name of the emergency contact';
+
+  @override
+  String get contactDetails => 'Contact details';
+
+  @override
+  String get contactDetailsHint =>
+      'Phone number, email, or other contact information';
+
+  @override
+  String get contactNotes => 'Message for contact';
+
+  @override
+  String get contactNotesHint =>
+      'Important information to share with this person when they are contacted';
+
+  @override
+  String get saveRecord => 'Save';
+
+  @override
+  String get recordSavedSuccessfully => 'Record saved successfully';
+
+  @override
+  String get failedToSaveRecord => 'Failed to save record';
+
+  @override
+  String get pleaseEnterNoteName => 'Please enter a title';
+
+  @override
+  String get pleaseEnterNoteContent => 'Please enter content';
+
+  @override
+  String get pleaseEnterRecordName => 'Please enter a record name';
+
+  @override
+  String get pleaseEnterLocation => 'Please enter a location';
+
+  @override
+  String get pleaseEnterAccountName => 'Please enter an account name';
+
+  @override
+  String get pleaseEnterUsername => 'Please enter a username';
+
+  @override
+  String get pleaseEnterPassword => 'Please enter a password';
+
+  @override
+  String get pleaseEnterContactName => 'Please enter a contact name';
+
+  @override
+  String get pleaseEnterContactDetails => 'Please enter contact details';
+
+  @override
   String get allowDownloads => 'Allow downloads';
 
   @override
