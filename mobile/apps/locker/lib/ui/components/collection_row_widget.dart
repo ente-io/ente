@@ -1,8 +1,10 @@
 import "package:ente_events/event_bus.dart";
+import "package:ente_ui/components/buttons/icon_button_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 import "package:locker/events/collections_updated_event.dart";
 import "package:locker/l10n/l10n.dart";
+import "package:locker/models/selected_collections.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/collections/models/collection_view_type.dart";
@@ -15,12 +17,18 @@ class CollectionRowWidget extends StatelessWidget {
   final Collection collection;
   final List<OverflowMenuAction>? overflowActions;
   final bool isLastItem;
+  final SelectedCollections? selectedCollections;
+  final void Function(Collection)? onTapCallback;
+  final void Function(Collection)? onLongPressCallback;
 
   const CollectionRowWidget({
     super.key,
     required this.collection,
     this.overflowActions,
     this.isLastItem = false,
+    this.selectedCollections,
+    this.onTapCallback,
+    this.onLongPressCallback,
   });
 
   @override
@@ -74,34 +82,69 @@ class CollectionRowWidget extends StatelessWidget {
     );
 
     return GestureDetector(
-      onTap: () => _openCollection(context),
+      onTap: () {
+        if (onTapCallback != null) {
+          onTapCallback!(collection);
+        } else {
+          _openCollection(context);
+        }
+      },
+      onLongPress: () {
+        if (onLongPressCallback != null) {
+          onLongPressCallback!(collection);
+        }
+      },
       behavior: HitTestBehavior.opaque,
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: colorScheme.strokeFaint,
-          ),
-          borderRadius: const BorderRadius.all(Radius.circular(6)),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            collectionRowWidget,
-            Flexible(
-              flex: 1,
-              child: PopupMenuButton<String>(
-                onSelected: (value) => _handleMenuAction(context, value),
-                icon: const Icon(
-                  Icons.more_vert,
-                  size: 20,
-                ),
-                itemBuilder: (BuildContext context) {
-                  return _buildPopupMenuItems(context);
-                },
+      child: ListenableBuilder(
+        listenable: selectedCollections ?? ValueNotifier(false),
+        builder: (context, _) {
+          final bool isSelected =
+              selectedCollections?.isCollectionSelected(collection) ?? false;
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOut,
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: isSelected
+                    ? colorScheme.strokeMuted
+                    : colorScheme.strokeFainter,
               ),
+              borderRadius: const BorderRadius.all(Radius.circular(6)),
             ),
-          ],
-        ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                collectionRowWidget,
+                Flexible(
+                  flex: 1,
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    switchInCurve: Curves.easeOut,
+                    switchOutCurve: Curves.easeIn,
+                    child: isSelected
+                        ? IconButtonWidget(
+                            key: const ValueKey("selected"),
+                            icon: Icons.check_circle_rounded,
+                            iconButtonType: IconButtonType.secondary,
+                            iconColor: colorScheme.blurStrokeBase,
+                          )
+                        : PopupMenuButton<String>(
+                            onSelected: (value) =>
+                                _handleMenuAction(context, value),
+                            icon: const Icon(
+                              Icons.more_vert,
+                              size: 20,
+                            ),
+                            itemBuilder: (BuildContext context) {
+                              return _buildPopupMenuItems(context);
+                            },
+                          ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

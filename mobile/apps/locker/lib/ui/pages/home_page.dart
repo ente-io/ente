@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:listen_sharing_intent/listen_sharing_intent.dart';
 import 'package:locker/events/collections_updated_event.dart';
 import 'package:locker/l10n/l10n.dart';
+import 'package:locker/models/selected_collections.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/models/file.dart';
@@ -49,6 +50,7 @@ class _HomePageState extends UploaderPageState<HomePage>
   bool _isSettingsOpen = false;
 
   List<Collection> _collections = [];
+  late final SelectedCollections _selectedCollections;
   List<Collection> _filteredCollections = [];
   List<EnteFile> _recentFiles = [];
   List<EnteFile> _filteredFiles = [];
@@ -127,6 +129,7 @@ class _HomePageState extends UploaderPageState<HomePage>
   @override
   void initState() {
     super.initState();
+    _selectedCollections = SelectedCollections();
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -759,6 +762,7 @@ class _HomePageState extends UploaderPageState<HomePage>
             MaterialPageRoute(
               builder: (context) => AllCollectionsPage(
                 viewType: viewType,
+                selectedCollections: _selectedCollections,
               ),
             ),
           );

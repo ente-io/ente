@@ -1,13 +1,14 @@
 import "dart:io";
 
 import "package:ente_ui/components/buttons/button_widget.dart";
+import "package:ente_ui/components/buttons/icon_button_widget.dart";
 import "package:ente_ui/components/buttons/models/button_type.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/dialog_util.dart";
-import "package:ente_utils/share_utils.dart";
 import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/models/info/info_item.dart";
+import "package:locker/models/selected_files.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/configuration.dart";
@@ -16,9 +17,9 @@ import "package:locker/services/files/links/links_service.dart";
 import "package:locker/services/files/sync/metadata_updater_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/services/info_file_service.dart";
-import "package:locker/ui/components/button/copy_button.dart";
 import "package:locker/ui/components/file_edit_dialog.dart";
 import "package:locker/ui/components/item_list_view.dart";
+import "package:locker/ui/components/share_link_dialog.dart";
 import "package:locker/ui/pages/account_credentials_page.dart";
 import "package:locker/ui/pages/base_info_page.dart";
 import "package:locker/ui/pages/emergency_contact_page.dart";
@@ -33,6 +34,9 @@ class FileRowWidget extends StatelessWidget {
   final List<Collection> collections;
   final List<OverflowMenuAction>? overflowActions;
   final bool isLastItem;
+  final SelectedFiles? selectedFiles;
+  final void Function(EnteFile)? onTapCallback;
+  final void Function(EnteFile)? onLongPressCallback;
 
   const FileRowWidget({
     super.key,
@@ -40,6 +44,9 @@ class FileRowWidget extends StatelessWidget {
     required this.collections,
     this.overflowActions,
     this.isLastItem = false,
+    this.selectedFiles,
+    this.onTapCallback,
+    this.onLongPressCallback,
   });
 
   @override
@@ -74,32 +81,70 @@ class FileRowWidget extends StatelessWidget {
     );
 
     return GestureDetector(
-      onTap: () => _openFile(context),
+      onTap: () {
+        if (onTapCallback != null) {
+          onTapCallback!(file);
+        } else {
+          _openFile(context);
+        }
+      },
+      onLongPress: () {
+        if (onLongPressCallback != null) {
+          onLongPressCallback!(file);
+        } else {
+          _openFile(context);
+        }
+      },
       behavior: HitTestBehavior.opaque,
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: colorScheme.strokeFaint,
-          ),
-          borderRadius: const BorderRadius.all(Radius.circular(6)),
-        ),
-        child: Row(
-          children: [
-            fileRowWidget,
-            Flexible(
-              child: PopupMenuButton<String>(
-                onSelected: (value) => _handleMenuAction(context, value),
-                icon: const Icon(
-                  Icons.more_vert,
-                  size: 20,
-                ),
-                itemBuilder: (BuildContext context) {
-                  return _buildPopupMenuItems(context);
-                },
+      child: ListenableBuilder(
+        listenable: selectedFiles ?? ValueNotifier(false),
+        builder: (context, _) {
+          final bool isSelected = selectedFiles?.isFileSelected(file) ?? false;
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOut,
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: isSelected
+                    ? colorScheme.strokeMuted
+                    : colorScheme.strokeFainter,
               ),
+              borderRadius: const BorderRadius.all(Radius.circular(6)),
             ),
-          ],
-        ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                fileRowWidget,
+                Flexible(
+                  flex: 1,
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    switchInCurve: Curves.easeOut,
+                    switchOutCurve: Curves.easeIn,
+                    child: isSelected
+                        ? IconButtonWidget(
+                            key: const ValueKey("selected"),
+                            icon: Icons.check_circle_rounded,
+                            iconButtonType: IconButtonType.secondary,
+                            iconColor: colorScheme.blurStrokeBase,
+                          )
+                        : PopupMenuButton<String>(
+                            onSelected: (value) =>
+                                _handleMenuAction(context, value),
+                            icon: const Icon(
+                              Icons.more_vert,
+                              size: 20,
+                            ),
+                            itemBuilder: (BuildContext context) {
+                              return _buildPopupMenuItems(context);
+                            },
+                          ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -195,10 +240,11 @@ class FileRowWidget extends StatelessWidget {
 
       // Show the link dialog with copy and delete options
       if (context.mounted) {
-        await _showShareLinkDialog(
+        await showShareLinkDialog(
           context,
           shareableLink.fullURL!,
           shareableLink.linkID,
+          file,
         );
       }
     } catch (e) {
@@ -209,133 +255,6 @@ class FileRowWidget extends StatelessWidget {
           context,
           '${context.l10n.failedToCreateShareLink}: ${e.toString()}',
         );
-      }
-    }
-  }
-
-  Future<void> _showShareLinkDialog(
-    BuildContext context,
-    String url,
-    String linkID,
-  ) async {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-    // Capture the root context (with Scaffold) before showing dialog
-    final rootContext = context;
-
-    await showDialog<void>(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: Text(
-                dialogContext.l10n.share,
-                style: textTheme.largeBold,
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    dialogContext.l10n.shareThisLink,
-                    style: textTheme.body,
-                  ),
-                  const SizedBox(height: 20),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: colorScheme.fillFaint,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: colorScheme.strokeFaint),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: SelectableText(
-                            url,
-                            style: textTheme.small,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        CopyButton(url: url),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () async {
-                    Navigator.of(context).pop();
-                    await _deleteShareLink(rootContext, file.uploadedFileID!);
-                  },
-                  child: Text(
-                    dialogContext.l10n.deleteLink,
-                    style:
-                        textTheme.body.copyWith(color: colorScheme.warning500),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    Navigator.of(dialogContext).pop();
-                    // Use system share sheet to share the URL
-                    await shareText(
-                      url,
-                      context: rootContext,
-                    );
-                  },
-                  child: Text(
-                    dialogContext.l10n.shareLink,
-                    style:
-                        textTheme.body.copyWith(color: colorScheme.primary500),
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
-  Future<void> _deleteShareLink(BuildContext context, int fileID) async {
-    final result = await showChoiceDialog(
-      context,
-      title: context.l10n.deleteShareLinkDialogTitle,
-      body: context.l10n.deleteShareLinkConfirmation,
-      firstButtonLabel: context.l10n.delete,
-      secondButtonLabel: context.l10n.cancel,
-      firstButtonType: ButtonType.critical,
-      isCritical: true,
-    );
-    if (result?.action == ButtonAction.first && context.mounted) {
-      final dialog = createProgressDialog(
-        context,
-        context.l10n.deletingShareLink,
-        isDismissible: false,
-      );
-
-      try {
-        await dialog.show();
-        await LinksService.instance.deleteLink(fileID);
-        await dialog.hide();
-
-        if (context.mounted) {
-          SnackBarUtils.showInfoSnackBar(
-            context,
-            context.l10n.shareLinkDeletedSuccessfully,
-          );
-        }
-      } catch (e) {
-        await dialog.hide();
-
-        if (context.mounted) {
-          SnackBarUtils.showWarningSnackBar(
-            context,
-            '${context.l10n.failedToDeleteShareLink}: ${e.toString()}',
-          );
-        }
       }
     }
   }
