@@ -25,11 +25,14 @@ class LayoutPickerPage extends StatelessWidget {
           AppLocalizations.of(context).albumLayout,
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.visibility),
-            onPressed: () async {
-              await _openPublicAlbumPreview(context);
-            },
+          Padding(
+            padding: const EdgeInsets.only(right: 3.0),
+            child: IconButton(
+              icon: const Icon(Icons.visibility),
+              onPressed: () async {
+                await _openPublicAlbumPreview(context);
+              },
+            ),
           ),
         ],
       ),
