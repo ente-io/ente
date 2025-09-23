@@ -11,7 +11,9 @@ import "package:photos/models/search/hierarchical/only_them_filter.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/theme/effects.dart";
 import "package:photos/theme/ente_theme.dart";
+import 'package:photos/ui/common/touch_cross_detector.dart';
 import 'package:photos/ui/components/bottom_action_bar/bottom_action_bar_widget.dart';
+import "package:photos/ui/viewer/gallery/state/auto_scroll_state.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
@@ -114,7 +116,9 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   }
 
   Widget _body() {
-    return ValueListenableBuilder(
+    final autoScrollState = AutoScrollState.maybeOf(context);
+
+    final Widget content = ValueListenableBuilder(
       valueListenable: _hasSelectedFilesNotifier,
       builder: (context, value, child) {
         return AnimatedCrossFade(
@@ -159,6 +163,40 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
           secondChild: const SizedBox(width: double.infinity),
         );
       },
+    );
+
+    if (autoScrollState == null) {
+      return content;
+    }
+
+    return TouchCrossDetector(
+      onEnter: (event) {
+        print('DEBUG OVERLAY: onEnter called - pointer: ${event.pointer}');
+        final isActive = TouchCrossDetector.isPointerActive(event.pointer);
+        print('DEBUG OVERLAY: isPointerActive: $isActive');
+        if (isActive) {
+          print('DEBUG OVERLAY: Setting zone to overlaybar');
+          autoScrollState.updateZone(AutoScrollZone.overlaybar);
+        }
+      },
+      onHover: (event) {
+        print('DEBUG OVERLAY: onHover called - pointer: ${event.pointer}, zone: ${autoScrollState.activeZone.value}');
+        final RenderBox? box = context.findRenderObject() as RenderBox?;
+        if (box != null) {
+          final localPosition = box.globalToLocal(event.position);
+          final height = box.size.height;
+          // Closer to bottom = higher intensity (faster downward scroll)
+          final intensity = (localPosition.dy / height).clamp(0.0, 1.0);
+          autoScrollState
+              .updateIntensity(Curves.easeInOutCubic.transform(intensity));
+        }
+      },
+      onExit: (event) {
+        print('DEBUG OVERLAY: onExit called - pointer: ${event.pointer}');
+        autoScrollState.updateZone(null);
+        autoScrollState.updateIntensity(0.0);
+      },
+      child: content,
     );
   }
 

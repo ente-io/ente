@@ -40,6 +40,7 @@ import "package:photos/ui/cast/choose.dart";
 import "package:photos/ui/collections/album/smart_album_people.dart";
 import "package:photos/ui/common/popup_item.dart";
 import "package:photos/ui/common/popup_item_async.dart";
+import "package:photos/ui/common/touch_cross_detector.dart";
 import "package:photos/ui/common/web_page.dart";
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
@@ -54,6 +55,7 @@ import 'package:photos/ui/tools/free_space_page.dart';
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/gallery/hooks/add_photos_sheet.dart";
 import 'package:photos/ui/viewer/gallery/hooks/pick_cover_photo.dart';
+import "package:photos/ui/viewer/gallery/state/auto_scroll_state.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/hierarchicial_search/applied_filters_for_appbar.dart";
 import "package:photos/ui/viewer/hierarchicial_search/recommended_filters_for_appbar.dart";
@@ -170,56 +172,93 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         InheritedSearchFilterData.maybeOf(context);
     final isHierarchicalSearchable =
         inheritedSearchFilterData?.isHierarchicalSearchable ?? false;
+    final autoScrollState = AutoScrollState.maybeOf(context);
 
-    return galleryType == GalleryType.homepage
-        ? const SizedBox.shrink()
-        : isHierarchicalSearchable
-            ? ValueListenableBuilder(
-                valueListenable: inheritedSearchFilterData!
-                    .searchFilterDataProvider!.isSearchingNotifier,
-                child: const PreferredSize(
-                  preferredSize: Size.fromHeight(0),
-                  child: Flexible(child: RecommendedFiltersForAppbar()),
-                ),
-                builder: (context, isSearching, child) {
-                  return AppBar(
-                    elevation: 0,
-                    centerTitle: false,
-                    title: isSearching
-                        ? const SizedBox(
-                            // +1 to account for the filter's outer stroke width
-                            height: kFilterChipHeight + 1,
-                            child: AppliedFiltersForAppbar(),
-                          )
-                        : Text(
-                            _appBarTitle!,
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineSmall!
-                                .copyWith(fontSize: 16),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                    actions: isSearching ? null : _getDefaultActions(context),
-                    bottom: child as PreferredSizeWidget,
-                    surfaceTintColor: Colors.transparent,
-                  );
-                },
-              )
-            : AppBar(
+    if (galleryType == GalleryType.homepage) {
+      return const SizedBox.shrink();
+    }
+
+    final Widget appBar = isHierarchicalSearchable
+        ? ValueListenableBuilder(
+            valueListenable: inheritedSearchFilterData!
+                .searchFilterDataProvider!.isSearchingNotifier,
+            child: const PreferredSize(
+              preferredSize: Size.fromHeight(0),
+              child: Flexible(child: RecommendedFiltersForAppbar()),
+            ),
+            builder: (context, isSearching, child) {
+              return AppBar(
                 elevation: 0,
                 centerTitle: false,
-                title: Text(
-                  _appBarTitle!,
-                  style: Theme.of(context)
-                      .textTheme
-                      .headlineSmall!
-                      .copyWith(fontSize: 16),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                actions: _getDefaultActions(context),
+                title: isSearching
+                    ? const SizedBox(
+                        // +1 to account for the filter's outer stroke width
+                        height: kFilterChipHeight + 1,
+                        child: AppliedFiltersForAppbar(),
+                      )
+                    : Text(
+                        _appBarTitle!,
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineSmall!
+                            .copyWith(fontSize: 16),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                actions: isSearching ? null : _getDefaultActions(context),
+                bottom: child as PreferredSizeWidget,
+                surfaceTintColor: Colors.transparent,
               );
+            },
+          )
+        : AppBar(
+            elevation: 0,
+            centerTitle: false,
+            title: Text(
+              _appBarTitle!,
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineSmall!
+                  .copyWith(fontSize: 16),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            actions: _getDefaultActions(context),
+          );
+
+    if (autoScrollState == null) {
+      return appBar;
+    }
+
+    return TouchCrossDetector(
+      onEnter: (event) {
+        print('DEBUG: onEnter called - pointer: ${event.pointer}');
+        final isActive = TouchCrossDetector.isPointerActive(event.pointer);
+        print('DEBUG: isPointerActive: $isActive');
+        if (isActive) {
+          print('DEBUG: Setting zone to appbar');
+          autoScrollState.updateZone(AutoScrollZone.appbar);
+        }
+      },
+      onHover: (event) {
+        print('DEBUG: onHover called - pointer: ${event.pointer}, zone: ${autoScrollState.activeZone.value}');
+        final RenderBox? box = context.findRenderObject() as RenderBox?;
+        if (box != null) {
+          final localPosition = box.globalToLocal(event.position);
+          final height = box.size.height;
+          // Closer to top = higher intensity (faster upward scroll)
+          final intensity = 1.0 - (localPosition.dy / height).clamp(0.0, 1.0);
+          autoScrollState
+              .updateIntensity(Curves.easeInOutCubic.transform(intensity));
+        }
+      },
+      onExit: (event) {
+        print('DEBUG: onExit called - pointer: ${event.pointer}');
+        autoScrollState.updateZone(null);
+        autoScrollState.updateIntensity(0.0);
+      },
+      child: appBar,
+    );
   }
 
   Future<dynamic> _renameAlbum(BuildContext context) async {

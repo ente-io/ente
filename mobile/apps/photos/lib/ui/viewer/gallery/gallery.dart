@@ -27,6 +27,7 @@ import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import "package:photos/ui/viewer/gallery/component/sectioned_sliver_list.dart";
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import "package:photos/ui/viewer/gallery/scrollbar/custom_scroll_bar.dart";
+import "package:photos/ui/viewer/gallery/state/auto_scroll_state.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
@@ -149,6 +150,8 @@ class GalleryState extends State<Gallery> {
   late GalleryGroups galleryGroups;
   SwipeToSelectHelper? _swipeHelper;
   final _swipeActiveNotifier = ValueNotifier<bool>(false);
+  Timer? _autoScrollTimer;
+  AutoScrollState? _autoScrollState;
 
   @override
   void initState() {
@@ -308,6 +311,14 @@ class GalleryState extends State<Gallery> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _autoScrollState = AutoScrollState.maybeOf(context);
+    _autoScrollState?.activeZone.removeListener(_handleAutoScrollZoneChange);
+    _autoScrollState?.activeZone.addListener(_handleAutoScrollZoneChange);
+  }
+
+  @override
   void didUpdateWidget(covariant Gallery oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.groupType != widget.groupType) {
@@ -316,6 +327,55 @@ class GalleryState extends State<Gallery> {
         setState(() {});
       }
     }
+  }
+
+  void _handleAutoScrollZoneChange() {
+    if (!_swipeActiveNotifier.value || widget.limitSelectionToOne) {
+      _stopAutoScroll();
+      return;
+    }
+
+    final zone = _autoScrollState?.activeZone.value;
+    if (zone != null) {
+      _startAutoScroll(zone);
+    } else {
+      _stopAutoScroll();
+    }
+  }
+
+  void _startAutoScroll(AutoScrollZone zone) {
+    _autoScrollTimer?.cancel();
+    _autoScrollTimer = Timer.periodic(const Duration(milliseconds: 8), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+
+      final intensity = _autoScrollState?.scrollIntensity.value ?? 0.0;
+      const maxSpeed = 600; // pixels per second
+      final speed = maxSpeed * intensity;
+      final distance = speed * 0.008; // 8ms in seconds
+
+      final currentOffset = _scrollController.offset;
+      final newOffset = zone == AutoScrollZone.appbar
+          ? (currentOffset - distance).clamp(
+              0.0,
+              _scrollController.position.maxScrollExtent,
+            )
+          : (currentOffset + distance).clamp(
+              0.0,
+              _scrollController.position.maxScrollExtent,
+            );
+
+      if (newOffset != currentOffset) {
+        _scrollController.jumpTo(newOffset);
+      }
+    });
+  }
+
+  void _stopAutoScroll() {
+    _autoScrollTimer?.cancel();
+    _autoScrollTimer = null;
   }
 
   void _updateGalleryGroups({bool callSetState = true}) {
@@ -534,6 +594,8 @@ class GalleryState extends State<Gallery> {
       subscription.cancel();
     }
     _debouncer.cancelDebounceTimer();
+    _autoScrollTimer?.cancel();
+    _autoScrollState?.activeZone.removeListener(_handleAutoScrollZoneChange);
     _scrollController.dispose();
     scrollBarInUseNotifier.dispose();
     _headerHeightNotifier.dispose();
