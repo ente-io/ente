@@ -95,7 +95,7 @@ export const TripMap: React.FC<TripMapProps> = ({
                                 ? ""
                                 : '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
                         }
-                        url="https://stadia-maps-proxy.ente.workers.dev/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg"
+                        url="https://stadia-maps-proxy.ente.io/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg"
                         maxZoom={20}
                     />
 
