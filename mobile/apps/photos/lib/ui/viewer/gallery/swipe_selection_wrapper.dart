@@ -51,8 +51,21 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper> {
           _initialMovementWasHorizontal = null;
         },
         onPointerMove: (event) {
-          // Only check for horizontal swipe if files are selected and swipe is not already active
-          if (!widget.swipeActiveNotifier.value &&
+          // Handle case where pointer is dragged after first selection in gallery
+          if (widget.selectedFiles != null &&
+              widget.selectedFiles!.files.length == 1 &&
+              !widget.swipeActiveNotifier.value) {
+            // Activate swipe mode for any significant movement when only one file is selected
+            // This handles the case of long-press to select first file, then immediate swipe
+            // including vertical movement without initial horizontal movement
+            final dx = event.delta.dx.abs();
+            final dy = event.delta.dy.abs();
+            if (dx > 0.1 || dy > 0.1) {
+              widget.swipeActiveNotifier.value = true;
+            }
+          }
+          // Check for horizontal swipe if multiple files are selected and swipe is not already active
+          else if (!widget.swipeActiveNotifier.value &&
               widget.selectedFiles != null &&
               widget.selectedFiles!.files.isNotEmpty) {
             // Check if movement is primarily horizontal and if delta x is significant
@@ -68,18 +81,6 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper> {
             // Only activate swipe if initial movement was horizontal
             if (_initialMovementWasHorizontal == true && dx > dy && dx > 0.1) {
               // Horizontal swipe detected, activate swipe mode
-              widget.swipeActiveNotifier.value = true;
-            }
-          }
-          // To handle case where pointer is dragged after first selection in gallery
-          else if (widget.selectedFiles != null &&
-              widget.selectedFiles!.files.isNotEmpty &&
-              widget.selectedFiles!.files.length == 1 &&
-              !widget.swipeActiveNotifier.value) {
-            // Check if this is horizontal movement when only one file is selected
-            final dx = event.delta.dx.abs();
-            final dy = event.delta.dy.abs();
-            if (dx > dy && dx > 0.1) {
               widget.swipeActiveNotifier.value = true;
             }
           }
