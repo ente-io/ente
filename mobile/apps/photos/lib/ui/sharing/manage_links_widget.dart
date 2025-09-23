@@ -91,7 +91,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   MenuItemWidget(
                     alignCaptionedTextToLeft: true,
                     captionedTextWidget: CaptionedTextWidget(
-                      title: AppLocalizations.of(context).layout,
+                      title: AppLocalizations.of(context).albumLayout,
                       subTitle: _getLayoutDisplayName(
                         widget.collection!.pubMagicMetadata.layout ?? "grouped",
                         context,
@@ -406,6 +406,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       }
                     },
                   ),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
