@@ -51,7 +51,6 @@ export const throttle = <T extends (...args: unknown[]) => void>(
 export const getLocationName = async (
     lat: number,
     lng: number,
-    photoIndex?: number,
 ): Promise<{ place: string; country: string }> => {
     // Round coordinates to 3 decimal places for cache key (~100m precision)
     const roundedLat = Math.round(lat * 1000) / 1000;
@@ -96,9 +95,7 @@ export const getLocationName = async (
         } else {
             // Fallback if no location found
             result = {
-                place: photoIndex
-                    ? `Location ${photoIndex}`
-                    : `Location ${lat.toFixed(2)}, ${lng.toFixed(2)}`,
+                place: "Unknown",
                 country: "Unknown",
             };
         }
@@ -109,7 +106,7 @@ export const getLocationName = async (
     } catch {
         // Fallback on error
         const fallbackResult = {
-            place: photoIndex ? `Location ${photoIndex}` : `Unknown Location`,
+            place: "Unknown",
             country: "Unknown",
         };
         // Cache the fallback to avoid repeated failures
