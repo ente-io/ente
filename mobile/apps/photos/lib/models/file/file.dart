@@ -63,6 +63,7 @@ class EnteFile {
   // in Version 1, live photo hash is stored as zip's hash.
   // in V2: LivePhoto hash is stored as imgHash:vidHash
   static const kCurrentMetadataVersion = 2;
+  static const kMetadataSimplifiedEncVersion = 3;
 
   static final _logger = Logger('File');
 
