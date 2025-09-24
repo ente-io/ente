@@ -73,6 +73,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
     final PublicURL url = widget.collection!.publicURLs.firstOrNull!;
     final String urlValue =
         CollectionsService.instance.getPublicUrl(widget.collection!);
+
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -88,29 +89,32 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  MenuItemWidget(
-                    alignCaptionedTextToLeft: true,
-                    captionedTextWidget: CaptionedTextWidget(
-                      title: AppLocalizations.of(context).albumLayout,
-                      subTitle: _getLayoutDisplayName(
-                        widget.collection!.pubMagicMetadata.layout ?? "grouped",
-                        context,
+                  if (flagService.internalUser)
+                    MenuItemWidget(
+                      alignCaptionedTextToLeft: true,
+                      captionedTextWidget: CaptionedTextWidget(
+                        title: AppLocalizations.of(context).albumLayout,
+                        subTitle: _getLayoutDisplayName(
+                              widget.collection!.pubMagicMetadata.layout ??
+                                  "grouped",
+                              context,
+                            ) +
+                            "(i)",
                       ),
+                      trailingIcon: Icons.chevron_right,
+                      menuItemColor: enteColorScheme.fillFaint,
+                      surfaceExecutionStates: false,
+                      onTap: () async {
+                        // ignore: unawaited_futures
+                        routeToPage(
+                          context,
+                          LayoutPickerPage(widget.collection!),
+                        ).then((value) {
+                          setState(() {});
+                        });
+                      },
                     ),
-                    trailingIcon: Icons.chevron_right,
-                    menuItemColor: enteColorScheme.fillFaint,
-                    surfaceExecutionStates: false,
-                    onTap: () async {
-                      // ignore: unawaited_futures
-                      routeToPage(
-                        context,
-                        LayoutPickerPage(widget.collection!),
-                      ).then((value) {
-                        setState(() {});
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 24),
+                  if (flagService.internalUser) const SizedBox(height: 24),
                   MenuItemWidget(
                     key: ValueKey("Allow collect $isCollectEnabled"),
                     captionedTextWidget: CaptionedTextWidget(
