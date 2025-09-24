@@ -835,7 +835,7 @@ class FileUploader {
         // file upload can not be retried in such cases without user intervention
         uploadHardFailure = true;
       }
-      if (isMultipartUpload && isPutOrUpdateFileError(e)) {
+      if (isMultipartUpload && isPutOrMultiPartError(e)) {
         await UploadLocksDB.instance.deleteMultipartTrack(lockKey);
       }
       rethrow;
@@ -881,7 +881,7 @@ class FileUploader {
     return pubMetadata;
   }
 
-  bool isPutOrUpdateFileError(Object e) {
+  bool isPutOrMultiPartError(Object e) {
     if (e is MultiPartUploadError) {
       return true;
     }
