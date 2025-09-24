@@ -82,7 +82,7 @@ class _CollectionSelectionOverlayBarState
                           children: [
                             Text(
                               buttonText,
-                              style: getEnteTextTheme(context).bodyBold,
+                              style: getEnteTextTheme(context).smallBold,
                             ),
                             const SizedBox(width: 6),
                             Icon(
@@ -128,7 +128,7 @@ class _CollectionSelectionOverlayBarState
                           children: [
                             Text(
                               countText,
-                              style: getEnteTextTheme(context).bodyBold,
+                              style: getEnteTextTheme(context).smallBold,
                             ),
                             const SizedBox(width: 6),
                             Icon(
