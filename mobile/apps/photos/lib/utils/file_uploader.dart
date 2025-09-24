@@ -547,12 +547,12 @@ class FileUploader {
                 collectionID,
               )
             : null;
-    bool multipartEntryExists = existingMultipartEncFileName != null;
+    final bool hasExistingMultiPart = existingMultipartEncFileName != null;
     final tempDirectory = Configuration.instance.getTempDirectory();
     final String uniqueID =
         '${const Uuid().v4().toString()}_${file.generatedID}';
 
-    final encryptedFilePath = multipartEntryExists
+    final encryptedFilePath = hasExistingMultiPart
         ? '$tempDirectory$existingMultipartEncFileName'
         : '$tempDirectory$uploadTempFilePrefix${uniqueID}_file.encrypted';
     final encryptedThumbnailPath =
@@ -574,11 +574,12 @@ class FileUploader {
       );
 
       Uint8List? key;
-      EncryptionResult? multiPartFileEncResult = multipartEntryExists
+      final EncryptionResult? multiPartFileEncResult = hasExistingMultiPart
           ? await _multiPartUploader.getEncryptionResult(
               lockKey,
               mediaUploadData.hashData!.fileHash!,
               collectionID,
+              existingMultipartEncFileName,
             )
           : null;
       if (isUpdatedFile) {
@@ -607,21 +608,19 @@ class FileUploader {
 
       // If the multipart entry exists but the encrypted file doesn't, it means
       // that we'll have to re-upload as the nonce is lost
-      if (multipartEntryExists) {
+      if (hasExistingMultiPart) {
+        if (!encryptedFileExists) {
+          throw MultiPartUploadError(
+            'multiPartResume: encryptedFile missing',
+          );
+        }
         final bool updateWithDiffKey = isUpdatedFile &&
             multiPartFileEncResult != null &&
             !listEquals(key, multiPartFileEncResult.key);
-        if (!encryptedFileExists || updateWithDiffKey) {
-          if (updateWithDiffKey) {
-            _logger.severe('multiPart update resumed with differentKey');
-          } else {
-            _logger.warning(
-              'multiPart EncryptedFile missing, discard multipart entry',
-            );
-          }
-          await _uploadLocks.deleteMultipartTrack(lockKey);
-          multipartEntryExists = false;
-          multiPartFileEncResult = null;
+        if (updateWithDiffKey) {
+          throw MultiPartUploadError(
+            'multiPart update resumed with differentKey',
+          );
         }
       } else if (encryptedFileExists) {
         // otherwise just delete the file for singlepart upload
@@ -678,14 +677,15 @@ class FileUploader {
       } else {
         isMultipartUpload = true;
         _logger.info(
-          "Init multipartUpload $multipartEntryExists, isUpdate $isUpdatedFile",
+          "Init multipartUpload $hasExistingMultiPart, isUpdate $isUpdatedFile",
         );
-        if (multipartEntryExists) {
+        if (hasExistingMultiPart) {
           fileObjectKey = await _multiPartUploader.putExistingMultipartFile(
             encryptedFile,
             lockKey,
             mediaUploadData.hashData!.fileHash!,
             collectionID,
+            existingMultipartEncFileName,
           );
         } else {
           final fileUploadURLs =
@@ -835,7 +835,7 @@ class FileUploader {
         // file upload can not be retried in such cases without user intervention
         uploadHardFailure = true;
       }
-      if (isMultipartUpload && isPutOrUpdateFileError(e)) {
+      if (isMultipartUpload && isPutOrMultiPartError(e)) {
         await UploadLocksDB.instance.deleteMultipartTrack(lockKey);
       }
       rethrow;
@@ -881,7 +881,10 @@ class FileUploader {
     return pubMetadata;
   }
 
-  bool isPutOrUpdateFileError(Object e) {
+  bool isPutOrMultiPartError(Object e) {
+    if (e is MultiPartUploadError) {
+      return true;
+    }
     if (e is DioException) {
       return e.requestOptions.path.contains("/files") ||
           e.requestOptions.path.contains("/files/update");
