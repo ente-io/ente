@@ -30,11 +30,12 @@ class MultiPartUploader {
     String localId,
     String fileHash,
     int collectionID,
+    String encFileName,
   ) async {
     final collectionKey =
         CollectionsService.instance.getCollectionKey(collectionID);
-    final result =
-        await _db.getFileEncryptionData(localId, fileHash, collectionID);
+    final result = await _db.getFileEncryptionData(
+        localId, fileHash, collectionID, encFileName);
     final encryptedFileKey = CryptoUtil.base642bin(result.encryptedFileKey);
     final fileNonce = CryptoUtil.base642bin(result.fileNonce);
 
@@ -115,9 +116,10 @@ class MultiPartUploader {
     String localId,
     String fileHash,
     int collectionID,
+    String encryptedFileName,
   ) async {
     final multipartInfo =
-        await _db.getCachedLinks(localId, fileHash, collectionID);
+        await _db.getCachedLinks(localId, fileHash, collectionID, encryptedFileName);
     await _db.updateLastAttempted(localId, fileHash, collectionID);
 
     Map<int, String> etags = multipartInfo.partETags ?? {};
