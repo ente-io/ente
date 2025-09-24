@@ -295,9 +295,22 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
 
         let layerInstruction = AVMutableVideoCompositionLayerInstruction(assetTrack: compositionVideoTrack)
 
-        // Apply crop transform
-        let transform = CGAffineTransform(translationX: CGFloat(-x), y: CGFloat(-y))
-        layerInstruction.setTransform(transform, at: .zero)
+        // Get the original video transform to preserve rotation/orientation
+        let originalTransform = videoTrack.preferredTransform
+        let originalSize = videoTrack.naturalSize
+
+        // Calculate the scale to fit the crop area
+        let scaleX = CGFloat(width) / originalSize.width
+        let scaleY = CGFloat(height) / originalSize.height
+
+        // Combine transforms: first apply original transform, then translate for crop
+        let cropTransform = CGAffineTransform(translationX: CGFloat(-x), y: CGFloat(-y))
+        let finalTransform = originalTransform.concatenating(cropTransform)
+
+        layerInstruction.setTransform(finalTransform, at: .zero)
+
+        // Set crop rectangle for proper clipping
+        layerInstruction.setCropRectangle(CGRect(x: 0, y: 0, width: CGFloat(width), height: CGFloat(height)), at: .zero)
 
         instruction.layerInstructions = [layerInstruction]
         videoComposition.instructions = [instruction]
@@ -385,43 +398,167 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
 
         var isReEncoded = false
 
-        // Handle rotation and crop (requires video composition)
-        if let rotateDegrees = args["rotateDegrees"] as? Int, rotateDegrees != 0 {
+        // Get the actual video size and current transform
+        let naturalSize = videoTrack.naturalSize
+        let preferredTransform = videoTrack.preferredTransform
+
+        // Default values - start with the preferred transform
+        var finalTransform = preferredTransform
+        var renderSize = naturalSize
+
+        // Handle both crop and rotation
+        if let cropX = args["cropX"] as? Int,
+           let cropY = args["cropY"] as? Int,
+           let cropWidth = args["cropWidth"] as? Int,
+           let cropHeight = args["cropHeight"] as? Int {
             isReEncoded = true
-            // Create video composition if needed
-            if videoComposition == nil {
-                videoComposition = AVMutableVideoComposition()
-                videoComposition!.frameDuration = CMTime(value: 1, timescale: 30)
+
+
+            // Set render size to crop dimensions
+            renderSize = CGSize(width: CGFloat(cropWidth), height: CGFloat(cropHeight))
+
+            // Get the oriented bounds of the video
+            let orientedBounds = CGRect(origin: .zero, size: naturalSize).applying(preferredTransform)
+            let orientedSize = CGSize(width: abs(orientedBounds.width), height: abs(orientedBounds.height))
+
+            // Build transform that properly handles crop with video orientation
+            // The crop coordinates come from Flutter in the display/oriented coordinate space
+            // We need to apply them correctly considering the video's orientation
+
+            // Important: We need to handle the transform carefully for rotated videos
+            // The challenge is that crop coordinates are in oriented/display space
+            // but we need to apply them in a way that works with AVFoundation's transform system
+
+
+            // Calculate the bounds after applying the preferred transform
+            let transformedBounds = CGRect(origin: .zero, size: naturalSize).applying(preferredTransform)
+
+            // Start with the preferred transform
+            var transform = preferredTransform
+
+            // Calculate the translation needed to position the crop correctly
+            // After rotation, the video might be at negative coordinates
+            // We need to:
+            // 1. Bring it to positive coordinates if needed
+            // 2. Apply the crop offset
+
+            var translateX: CGFloat = 0
+            var translateY: CGFloat = 0
+
+            // Correct for negative positioning after rotation
+            if transformedBounds.minX < 0 {
+                translateX = -transformedBounds.minX
+            }
+            if transformedBounds.minY < 0 {
+                translateY = -transformedBounds.minY
             }
 
-            // Apply rotation transform
-            var transform = CGAffineTransform.identity
-            let naturalSize = videoTrack.naturalSize
-            var renderSize = naturalSize
+            // Apply crop offset (negative because we're shifting the content)
+            translateX -= CGFloat(cropX)
+            translateY -= CGFloat(cropY)
 
-            switch rotateDegrees {
-            case 90:
-                transform = CGAffineTransform(rotationAngle: .pi / 2)
-                    .translatedBy(x: 0, y: -naturalSize.width)
-                renderSize = CGSize(width: naturalSize.height, height: naturalSize.width)
-            case 180:
-                transform = CGAffineTransform(rotationAngle: .pi)
-                    .translatedBy(x: -naturalSize.width, y: -naturalSize.height)
-            case 270:
-                transform = CGAffineTransform(rotationAngle: -.pi / 2)
-                    .translatedBy(x: -naturalSize.height, y: 0)
-                renderSize = CGSize(width: naturalSize.height, height: naturalSize.width)
-            default:
-                break
+            // Apply the combined translation
+            transform = transform.concatenating(CGAffineTransform(translationX: translateX, y: translateY))
+
+
+            // Handle rotation if specified
+            if let rotateDegrees = args["rotateDegrees"] as? Int, rotateDegrees != 0 {
+                let radians = CGFloat(rotateDegrees) * .pi / 180
+
+                // Calculate the center of the current render size
+                let oldCenterX = renderSize.width / 2
+                let oldCenterY = renderSize.height / 2
+
+                // For 90/270 degree rotations, we need to swap dimensions
+                if abs(rotateDegrees) == 90 || abs(rotateDegrees) == 270 {
+                    let newRenderSize = CGSize(width: renderSize.height, height: renderSize.width)
+                    renderSize = newRenderSize
+                }
+
+                // Create rotation transform around the center
+                let rotationTransform = CGAffineTransform(translationX: oldCenterX, y: oldCenterY)
+                    .rotated(by: radians)
+                    .translatedBy(x: -oldCenterX, y: -oldCenterY)
+
+                // Apply rotation to the existing transform
+                transform = transform.concatenating(rotationTransform)
+
+                // After rotation, we may need to adjust position to keep video in bounds
+                // Calculate where the video ends up after all transforms
+                let testRect = CGRect(origin: .zero, size: CGSize(width: cropWidth, height: cropHeight))
+                let finalBounds = testRect.applying(transform)
+
+
+                // Correct position if video goes outside render box
+                var additionalTranslateX: CGFloat = 0
+                var additionalTranslateY: CGFloat = 0
+
+                if finalBounds.minX < 0 {
+                    additionalTranslateX = -finalBounds.minX
+                }
+                if finalBounds.minY < 0 {
+                    additionalTranslateY = -finalBounds.minY
+                }
+
+                if additionalTranslateX != 0 || additionalTranslateY != 0 {
+                    transform = transform.concatenating(CGAffineTransform(translationX: additionalTranslateX, y: additionalTranslateY))
+                }
+
             }
 
+            finalTransform = transform
+
+        } else if let rotateDegrees = args["rotateDegrees"] as? Int, rotateDegrees != 0 {
+            // Only rotation, no crop
+            isReEncoded = true
+
+            // Get the oriented size after applying preferred transform
+            var orientedSize = naturalSize.applying(preferredTransform)
+            orientedSize = CGSize(width: abs(orientedSize.width), height: abs(orientedSize.height))
+
+            // Start with the preferred transform
+            var transform = preferredTransform
+
+            // For 90/270 degree rotations, swap render dimensions
+            if abs(rotateDegrees) == 90 || abs(rotateDegrees) == 270 {
+                renderSize = CGSize(width: orientedSize.height, height: orientedSize.width)
+            } else {
+                renderSize = orientedSize
+            }
+
+            // Apply rotation around the center of the oriented video
+            let radians = CGFloat(rotateDegrees) * .pi / 180
+            let centerX = orientedSize.width / 2
+            let centerY = orientedSize.height / 2
+
+            // Move to center, rotate, then move back
+            transform = transform.translatedBy(x: centerX, y: centerY)
+            transform = transform.rotated(by: radians)
+            transform = transform.translatedBy(x: -centerX, y: -centerY)
+
+            // Adjust position after rotation based on the rotation angle
+            if rotateDegrees == 90 {
+                transform = transform.translatedBy(x: 0, y: orientedSize.width - orientedSize.height)
+            } else if rotateDegrees == 180 {
+                // No additional translation needed for 180°
+            } else if rotateDegrees == 270 || rotateDegrees == -90 {
+                transform = transform.translatedBy(x: orientedSize.height - orientedSize.width, y: 0)
+            }
+
+            finalTransform = transform
+        }
+
+        // Apply video composition if needed
+        if isReEncoded {
+            videoComposition = AVMutableVideoComposition()
+            videoComposition!.frameDuration = CMTime(value: 1, timescale: 30)
             videoComposition!.renderSize = renderSize
 
             let instruction = AVMutableVideoCompositionInstruction()
             instruction.timeRange = CMTimeRange(start: .zero, duration: composition.duration)
 
             let layerInstruction = AVMutableVideoCompositionLayerInstruction(assetTrack: compositionVideoTrack)
-            layerInstruction.setTransform(transform, at: .zero)
+            layerInstruction.setTransform(finalTransform, at: .zero)
 
             instruction.layerInstructions = [layerInstruction]
             videoComposition!.instructions = [instruction]
@@ -473,42 +610,33 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
     private func getVideoInfo(videoPath: String, result: @escaping FlutterResult) {
         let asset = AVAsset(url: URL(fileURLWithPath: videoPath))
 
-        Task {
-            do {
-                let duration = try await asset.load(.duration)
-                let tracks = try await asset.load(.tracks)
+        // Use the synchronous properties for iOS compatibility
+        let duration = asset.duration
+        let tracks = asset.tracks
 
-                var info: [String: Any] = [
-                    "duration": CMTimeGetSeconds(duration) * 1000, // Convert to milliseconds
-                ]
+        var info: [String: Any] = [
+            "duration": CMTimeGetSeconds(duration) * 1000, // Convert to milliseconds
+        ]
 
-                if let videoTrack = tracks.first(where: { $0.mediaType == .video }) {
-                    let naturalSize = try await videoTrack.load(.naturalSize)
-                    let preferredTransform = try await videoTrack.load(.preferredTransform)
-                    let nominalFrameRate = try await videoTrack.load(.nominalFrameRate)
+        if let videoTrack = tracks.first(where: { $0.mediaType == .video }) {
+            let naturalSize = videoTrack.naturalSize
+            let preferredTransform = videoTrack.preferredTransform
+            let nominalFrameRate = videoTrack.nominalFrameRate
 
-                    info["width"] = Int(naturalSize.width)
-                    info["height"] = Int(naturalSize.height)
-                    info["frameRate"] = nominalFrameRate
+            info["width"] = Int(naturalSize.width)
+            info["height"] = Int(naturalSize.height)
+            info["frameRate"] = nominalFrameRate
 
-                    // Calculate rotation from transform
-                    let angle = atan2(preferredTransform.b, preferredTransform.a)
-                    let rotation = Int(angle * 180 / .pi)
-                    info["rotation"] = rotation
-                }
-
-                if let audioTrack = tracks.first(where: { $0.mediaType == .audio }) {
-                    info["hasAudio"] = true
-                }
-
-                DispatchQueue.main.async {
-                    result(info)
-                }
-            } catch {
-                DispatchQueue.main.async {
-                    result(FlutterError(code: "INFO_ERROR", message: error.localizedDescription, details: nil))
-                }
-            }
+            // Calculate rotation from transform
+            let angle = atan2(preferredTransform.b, preferredTransform.a)
+            let rotation = Int(angle * 180 / .pi)
+            info["rotation"] = rotation
         }
+
+        if let audioTrack = tracks.first(where: { $0.mediaType == .audio }) {
+            info["hasAudio"] = true
+        }
+
+        result(info)
     }
 }

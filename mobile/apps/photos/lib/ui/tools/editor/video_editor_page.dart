@@ -227,6 +227,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
 
   void exportVideo() async {
     _isExporting.value = true;
+    _logger.info('Starting video export');
 
     final dialogKey = GlobalKey<LinearProgressDialogState>();
     final dialog = LinearProgressDialog(
@@ -252,11 +253,16 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         'exported_${DateTime.now().millisecondsSinceEpoch}.mp4',
       );
 
+      _logger.info('Export output path: $outputPath');
+      _logger.info('Controller isTrimmed: ${_controller!.isTrimmed}');
+      _logger.info('Controller rotation: ${_controller!.rotation}');
+
       // Use native export service which will automatically fallback to FFmpeg if needed
       final result = await NativeVideoExportService.exportVideo(
         controller: _controller!,
         outputPath: outputPath,
         onProgress: (progress) {
+          _logger.info('Export progress: $progress');
           if (dialogKey.currentState != null) {
             dialogKey.currentState!.setProgress(progress);
           }
@@ -264,9 +270,11 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         onError: (e, s) => _logger.severe("Error exporting video", e, s),
       );
 
+      _logger.info('Export completed, result: ${result.path}');
       // Process the exported file
       await _handleExportedFile(result, dialogKey);
-    } catch (e) {
+    } catch (e, s) {
+      _logger.severe('Export failed', e, s);
       Navigator.of(dialogKey.currentContext!).pop('dialog');
       _isExporting.value = false;
     } finally {
@@ -313,8 +321,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
       }
 
       newFile.generatedID = await FilesDB.instance.insertAndGetId(newFile);
-      Bus.instance
-          .fire(LocalPhotosUpdatedEvent([newFile], source: "editSave"));
+      Bus.instance.fire(LocalPhotosUpdatedEvent([newFile], source: "editSave"));
       SyncService.instance.sync().ignore();
       showShortToast(context, AppLocalizations.of(context).editsSaved);
       _logger.info("Original file " + widget.file.toString());
@@ -323,8 +330,8 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
 
       // the index could be -1 if the files fetched doesn't contain the newly
       // edited files
-      int selectionIndex = files
-          .indexWhere((file) => file.generatedID == newFile.generatedID);
+      int selectionIndex =
+          files.indexWhere((file) => file.generatedID == newFile.generatedID);
       if (selectionIndex == -1) {
         files.add(newFile);
         selectionIndex = files.length - 1;

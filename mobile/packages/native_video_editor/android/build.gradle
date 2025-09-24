@@ -25,6 +25,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
 android {
+    namespace 'io.ente.native_video_editor'
     compileSdkVersion 33
 
     compileOptions {

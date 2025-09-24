@@ -1760,6 +1760,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
+  native_video_editor:
+    dependency: "direct main"
+    description:
+      path: "../../packages/native_video_editor"
+      relative: true
+    source: path
+    version: "1.0.0"
   native_video_player:
     dependency: "direct main"
     description:
