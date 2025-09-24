@@ -15,6 +15,7 @@ import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import "package:photos/ui/viewer/gallery/empty_state.dart";
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
+import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 
@@ -33,6 +34,11 @@ class ArchivePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Create boundary notifiers
+    final topBoundaryNotifier = ValueNotifier<double?>(null);
+    final bottomBoundaryNotifier = ValueNotifier<double?>(null);
+    final scrollControllerNotifier = ValueNotifier<ScrollController?>(null);
+
     final Set<int> hiddenCollectionIDs =
         CollectionsService.instance.getHiddenCollectionIds();
     final gallery = Gallery(
@@ -79,27 +85,32 @@ class ArchivePage extends StatelessWidget {
         CollectionsService.instance.getArchivedCollection,
       ),
     );
-    return GalleryFilesState(
-      child: Scaffold(
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(50.0),
-          child: GalleryAppBarWidget(
-            appBarType,
-            AppLocalizations.of(context).archive,
-            _selectedFiles,
+    return GalleryBoundariesProvider(
+      topBoundaryNotifier: topBoundaryNotifier,
+      bottomBoundaryNotifier: bottomBoundaryNotifier,
+      scrollControllerNotifier: scrollControllerNotifier,
+      child: GalleryFilesState(
+        child: Scaffold(
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(50.0),
+            child: GalleryAppBarWidget(
+              appBarType,
+              AppLocalizations.of(context).archive,
+              _selectedFiles,
+            ),
           ),
-        ),
-        body: SelectionState(
-          selectedFiles: _selectedFiles,
-          child: Stack(
-            alignment: Alignment.bottomCenter,
-            children: [
-              gallery,
-              FileSelectionOverlayBar(
-                overlayType,
-                _selectedFiles,
-              ),
-            ],
+          body: SelectionState(
+            selectedFiles: _selectedFiles,
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                gallery,
+                FileSelectionOverlayBar(
+                  overlayType,
+                  _selectedFiles,
+                ),
+              ],
+            ),
           ),
         ),
       ),

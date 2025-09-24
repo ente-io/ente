@@ -22,6 +22,7 @@ import "package:photos/ui/viewer/actions/file_selection_overlay_bar.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart";
+import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 import "package:photos/utils/dialog_util.dart";
@@ -67,6 +68,11 @@ class _SharedPublicCollectionPageState
   @override
   Widget build(BuildContext context) {
     logger.info("Building SharedPublicCollectionPage");
+    // Create boundary notifiers
+    final topBoundaryNotifier = ValueNotifier<double?>(null);
+    final bottomBoundaryNotifier = ValueNotifier<double?>(null);
+    final scrollControllerNotifier = ValueNotifier<ScrollController?>(null);
+
     final List<EnteFile>? initialFiles =
         widget.c.thumbnail != null ? [widget.c.thumbnail!] : null;
     final gallery = Gallery(
@@ -120,30 +126,35 @@ class _SharedPublicCollectionPageState
       sortAsyncFn: () => widget.c.collection.pubMagicMetadata.asc ?? false,
     );
 
-    return GalleryFilesState(
-      child: Scaffold(
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(50.0),
-          child: GalleryAppBarWidget(
-            galleryType,
-            widget.c.collection.displayName,
-            _selectedFiles,
-            collection: widget.c.collection,
-            files: widget.files,
+    return GalleryBoundariesProvider(
+      topBoundaryNotifier: topBoundaryNotifier,
+      bottomBoundaryNotifier: bottomBoundaryNotifier,
+      scrollControllerNotifier: scrollControllerNotifier,
+      child: GalleryFilesState(
+        child: Scaffold(
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(50.0),
+            child: GalleryAppBarWidget(
+              galleryType,
+              widget.c.collection.displayName,
+              _selectedFiles,
+              collection: widget.c.collection,
+              files: widget.files,
+            ),
           ),
-        ),
-        body: SelectionState(
-          selectedFiles: _selectedFiles,
-          child: Stack(
-            alignment: Alignment.bottomCenter,
-            children: [
-              gallery,
-              FileSelectionOverlayBar(
-                galleryType,
-                _selectedFiles,
-                collection: widget.c.collection,
-              ),
-            ],
+          body: SelectionState(
+            selectedFiles: _selectedFiles,
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                gallery,
+                FileSelectionOverlayBar(
+                  galleryType,
+                  _selectedFiles,
+                  collection: widget.c.collection,
+                ),
+              ],
+            ),
           ),
         ),
       ),

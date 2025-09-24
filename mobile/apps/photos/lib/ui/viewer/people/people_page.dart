@@ -20,6 +20,7 @@ import "package:photos/ui/components/end_to_end_banner.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import "package:photos/ui/viewer/gallery/hierarchical_search_gallery.dart";
+import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
@@ -129,85 +130,96 @@ class _PeoplePageState extends State<PeoplePage> {
   @override
   Widget build(BuildContext context) {
     _logger.info("Building for ${_person.data.name}");
-    return GalleryFilesState(
-      child: InheritedSearchFilterDataWrapper(
-        searchFilterDataProvider: _searchFilterDataProvider,
-        child: Scaffold(
-          appBar: PreferredSize(
-            preferredSize:
-                Size.fromHeight(widget.searchResult != null ? 90.0 : 50.0),
-            child: PeopleAppBar(
-              GalleryType.peopleTag,
-              _person.data.isIgnored
-                  ? AppLocalizations.of(context).ignored
-                  : _person.data.name,
-              _selectedFiles,
-              _person,
+    // Create boundary notifiers
+    final topBoundaryNotifier = ValueNotifier<double?>(null);
+    final bottomBoundaryNotifier = ValueNotifier<double?>(null);
+    final scrollControllerNotifier = ValueNotifier<ScrollController?>(null);
+
+    return GalleryBoundariesProvider(
+      topBoundaryNotifier: topBoundaryNotifier,
+      bottomBoundaryNotifier: bottomBoundaryNotifier,
+      scrollControllerNotifier: scrollControllerNotifier,
+      child: GalleryFilesState(
+        child: InheritedSearchFilterDataWrapper(
+          searchFilterDataProvider: _searchFilterDataProvider,
+          child: Scaffold(
+            appBar: PreferredSize(
+              preferredSize:
+                  Size.fromHeight(widget.searchResult != null ? 90.0 : 50.0),
+              child: PeopleAppBar(
+                GalleryType.peopleTag,
+                _person.data.isIgnored
+                    ? AppLocalizations.of(context).ignored
+                    : _person.data.name,
+                _selectedFiles,
+                _person,
+              ),
             ),
-          ),
-          body: FutureBuilder<List<EnteFile>>(
-            future: filesFuture,
-            builder: (context, snapshot) {
-              final inheritedSearchFilterData = InheritedSearchFilterData.of(
-                context,
-              );
-              if (snapshot.hasData) {
-                final personFiles = snapshot.data as List<EnteFile>;
-                return SelectionState(
-                  selectedFiles: _selectedFiles,
-                  child: Stack(
-                    alignment: Alignment.bottomCenter,
-                    children: [
-                      inheritedSearchFilterData.isHierarchicalSearchable
-                          ? ValueListenableBuilder(
-                              valueListenable: inheritedSearchFilterData
-                                  .searchFilterDataProvider!
-                                  .isSearchingNotifier,
-                              builder: (
-                                context,
-                                value,
-                                _,
-                              ) {
-                                return value
-                                    ? HierarchicalSearchGallery(
-                                        tagPrefix: widget.tagPrefix,
-                                        selectedFiles: _selectedFiles,
-                                      )
-                                    : _Gallery(
-                                        tagPrefix: widget.tagPrefix,
-                                        selectedFiles: _selectedFiles,
-                                        personFiles: personFiles,
-                                        loadPersonFiles: loadPersonFiles,
-                                        personEntity: _person,
-                                      );
-                              },
-                            )
-                          : _Gallery(
-                              tagPrefix: widget.tagPrefix,
-                              selectedFiles: _selectedFiles,
-                              personFiles: personFiles,
-                              loadPersonFiles: loadPersonFiles,
-                              personEntity: _person,
-                            ),
-                      FileSelectionOverlayBar(
-                        PeoplePage.overlayType,
-                        _selectedFiles,
-                        person: _person,
-                      ),
-                    ],
-                  ),
+            body: FutureBuilder<List<EnteFile>>(
+              future: filesFuture,
+              builder: (context, snapshot) {
+                final inheritedSearchFilterData = InheritedSearchFilterData.of(
+                  context,
                 );
-              } else if (snapshot.hasError) {
-                _logger
-                    .severe("Error: ${snapshot.error} ${snapshot.stackTrace}}");
-                //Need to show an error on the UI here
-                return const SizedBox.shrink();
-              } else {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-            },
+                if (snapshot.hasData) {
+                  final personFiles = snapshot.data as List<EnteFile>;
+                  return SelectionState(
+                    selectedFiles: _selectedFiles,
+                    child: Stack(
+                      alignment: Alignment.bottomCenter,
+                      children: [
+                        inheritedSearchFilterData.isHierarchicalSearchable
+                            ? ValueListenableBuilder(
+                                valueListenable: inheritedSearchFilterData
+                                    .searchFilterDataProvider!
+                                    .isSearchingNotifier,
+                                builder: (
+                                  context,
+                                  value,
+                                  _,
+                                ) {
+                                  return value
+                                      ? HierarchicalSearchGallery(
+                                          tagPrefix: widget.tagPrefix,
+                                          selectedFiles: _selectedFiles,
+                                        )
+                                      : _Gallery(
+                                          tagPrefix: widget.tagPrefix,
+                                          selectedFiles: _selectedFiles,
+                                          personFiles: personFiles,
+                                          loadPersonFiles: loadPersonFiles,
+                                          personEntity: _person,
+                                        );
+                                },
+                              )
+                            : _Gallery(
+                                tagPrefix: widget.tagPrefix,
+                                selectedFiles: _selectedFiles,
+                                personFiles: personFiles,
+                                loadPersonFiles: loadPersonFiles,
+                                personEntity: _person,
+                              ),
+                        FileSelectionOverlayBar(
+                          PeoplePage.overlayType,
+                          _selectedFiles,
+                          person: _person,
+                        ),
+                      ],
+                    ),
+                  );
+                } else if (snapshot.hasError) {
+                  _logger.severe(
+                    "Error: ${snapshot.error} ${snapshot.stackTrace}}",
+                  );
+                  //Need to show an error on the UI here
+                  return const SizedBox.shrink();
+                } else {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+              },
+            ),
           ),
         ),
       ),
@@ -239,72 +251,82 @@ class _GalleryState extends State<_Gallery> {
 
   @override
   Widget build(BuildContext context) {
-    return Gallery(
-      asyncLoader: (
-        creationStartTime,
-        creationEndTime, {
-        limit,
-        asc,
-      }) async {
-        final result = await widget.loadPersonFiles();
-        return Future.value(
-          FileLoadResult(
-            result,
-            false,
-          ),
-        );
-      },
-      reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
-      forceReloadEvents: [Bus.instance.on<PeopleChangedEvent>()],
-      removalEventTypes: const {
-        EventType.deletedFromRemote,
-        EventType.deletedFromEverywhere,
-        EventType.hide,
-      },
-      tagPrefix: widget.tagPrefix + widget.tagPrefix,
-      selectedFiles: widget.selectedFiles,
-      initialFiles:
-          widget.personFiles.isNotEmpty ? [widget.personFiles.first] : [],
-      header: Column(
-        children: [
-          (widget.personEntity.data.email != null &&
-                      widget.personEntity.data.email!.isNotEmpty) ||
-                  widget.personEntity.data.isIgnored
-              ? const SizedBox.shrink()
-              : Padding(
-                  padding: const EdgeInsets.only(top: 12, bottom: 8),
-                  child: EndToEndBanner(
-                    title: context.l10n.linkEmail,
-                    caption: context.l10n.linkEmailToContactBannerCaption,
-                    leadingIcon: Icons.email_outlined,
-                    onTap: () async {
-                      await routeToPage(
-                        context,
-                        LinkEmailScreen(widget.personEntity.remoteID),
-                      );
-                    },
+    // Create boundary notifiers
+    final topBoundaryNotifier = ValueNotifier<double?>(null);
+    final bottomBoundaryNotifier = ValueNotifier<double?>(null);
+    final scrollControllerNotifier = ValueNotifier<ScrollController?>(null);
+
+    return GalleryBoundariesProvider(
+      topBoundaryNotifier: topBoundaryNotifier,
+      bottomBoundaryNotifier: bottomBoundaryNotifier,
+      scrollControllerNotifier: scrollControllerNotifier,
+      child: Gallery(
+        asyncLoader: (
+          creationStartTime,
+          creationEndTime, {
+          limit,
+          asc,
+        }) async {
+          final result = await widget.loadPersonFiles();
+          return Future.value(
+            FileLoadResult(
+              result,
+              false,
+            ),
+          );
+        },
+        reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
+        forceReloadEvents: [Bus.instance.on<PeopleChangedEvent>()],
+        removalEventTypes: const {
+          EventType.deletedFromRemote,
+          EventType.deletedFromEverywhere,
+          EventType.hide,
+        },
+        tagPrefix: widget.tagPrefix + widget.tagPrefix,
+        selectedFiles: widget.selectedFiles,
+        initialFiles:
+            widget.personFiles.isNotEmpty ? [widget.personFiles.first] : [],
+        header: Column(
+          children: [
+            (widget.personEntity.data.email != null &&
+                        widget.personEntity.data.email!.isNotEmpty) ||
+                    widget.personEntity.data.isIgnored
+                ? const SizedBox.shrink()
+                : Padding(
+                    padding: const EdgeInsets.only(top: 12, bottom: 8),
+                    child: EndToEndBanner(
+                      title: context.l10n.linkEmail,
+                      caption: context.l10n.linkEmailToContactBannerCaption,
+                      leadingIcon: Icons.email_outlined,
+                      onTap: () async {
+                        await routeToPage(
+                          context,
+                          LinkEmailScreen(widget.personEntity.remoteID),
+                        );
+                      },
+                    ),
                   ),
-                ),
-          !userDismissedPersonGallerySuggestion
-              ? Dismissible(
-                  key: const Key("personGallerySuggestion"),
-                  direction: DismissDirection.horizontal,
-                  onDismissed: (direction) {
-                    setState(() {
-                      userDismissedPersonGallerySuggestion = true;
-                    });
-                  },
-                  child: PersonGallerySuggestion(
-                    person: widget.personEntity,
-                    onClose: () {
+            !userDismissedPersonGallerySuggestion
+                ? Dismissible(
+                    key: const Key("personGallerySuggestion"),
+                    direction: DismissDirection.horizontal,
+                    onDismissed: (direction) {
                       setState(() {
                         userDismissedPersonGallerySuggestion = true;
                       });
                     },
-                  ),
-                )
-              : const SizedBox.shrink(),
-        ],
+                    child: PersonGallerySuggestion(
+                      person: widget.personEntity,
+                      onClose: () {
+                        setState(() {
+                          userDismissedPersonGallerySuggestion = true;
+                        });
+                      },
+                    ),
+                  )
+                : const SizedBox.shrink(),
+          ],
+        ),
       ),
     );
   }

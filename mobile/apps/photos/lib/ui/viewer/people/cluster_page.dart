@@ -17,6 +17,7 @@ import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/ui/notification/toast.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
+import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
@@ -113,6 +114,11 @@ class _ClusterPageState extends State<ClusterPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Create boundary notifiers
+    final topBoundaryNotifier = ValueNotifier<double?>(null);
+    final bottomBoundaryNotifier = ValueNotifier<double?>(null);
+    final scrollControllerNotifier = ValueNotifier<ScrollController?>(null);
+
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         final result = files
@@ -176,30 +182,35 @@ class _ClusterPageState extends State<ClusterPage> {
             )
           : null,
     );
-    return GalleryFilesState(
-      child: Scaffold(
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(50.0),
-          child: ClusterAppBar(
-            SearchResultPage.appBarType,
-            "${files.length} memories${widget.appendTitle}",
-            _selectedFiles,
-            widget.clusterID,
-            key: ValueKey(files.length),
+    return GalleryBoundariesProvider(
+      topBoundaryNotifier: topBoundaryNotifier,
+      bottomBoundaryNotifier: bottomBoundaryNotifier,
+      scrollControllerNotifier: scrollControllerNotifier,
+      child: GalleryFilesState(
+        child: Scaffold(
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(50.0),
+            child: ClusterAppBar(
+              SearchResultPage.appBarType,
+              "${files.length} memories${widget.appendTitle}",
+              _selectedFiles,
+              widget.clusterID,
+              key: ValueKey(files.length),
+            ),
           ),
-        ),
-        body: SelectionState(
-          selectedFiles: _selectedFiles,
-          child: Stack(
-            alignment: Alignment.bottomCenter,
-            children: [
-              gallery,
-              FileSelectionOverlayBar(
-                ClusterPage.overlayType,
-                _selectedFiles,
-                clusterID: widget.clusterID,
-              ),
-            ],
+          body: SelectionState(
+            selectedFiles: _selectedFiles,
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                gallery,
+                FileSelectionOverlayBar(
+                  ClusterPage.overlayType,
+                  _selectedFiles,
+                  clusterID: widget.clusterID,
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -22,6 +22,7 @@ import 'package:photos/ui/components/toggle_switch_widget.dart';
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
+import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 
@@ -33,6 +34,11 @@ class DeviceFolderPage extends StatelessWidget {
 
   @override
   Widget build(Object context) {
+    // Create boundary notifiers
+    final topBoundaryNotifier = ValueNotifier<double?>(null);
+    final bottomBoundaryNotifier = ValueNotifier<double?>(null);
+    final scrollControllerNotifier = ValueNotifier<ScrollController?>(null);
+
     final int? userID = Configuration.instance.getUserID();
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
@@ -58,28 +64,33 @@ class DeviceFolderPage extends StatelessWidget {
           : const SizedBox.shrink(),
       initialFiles: [deviceCollection.thumbnail!],
     );
-    return GalleryFilesState(
-      child: Scaffold(
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(50.0),
-          child: GalleryAppBarWidget(
-            GalleryType.localFolder,
-            deviceCollection.name,
-            _selectedFiles,
-            deviceCollection: deviceCollection,
+    return GalleryBoundariesProvider(
+      topBoundaryNotifier: topBoundaryNotifier,
+      bottomBoundaryNotifier: bottomBoundaryNotifier,
+      scrollControllerNotifier: scrollControllerNotifier,
+      child: GalleryFilesState(
+        child: Scaffold(
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(50.0),
+            child: GalleryAppBarWidget(
+              GalleryType.localFolder,
+              deviceCollection.name,
+              _selectedFiles,
+              deviceCollection: deviceCollection,
+            ),
           ),
-        ),
-        body: SelectionState(
-          selectedFiles: _selectedFiles,
-          child: Stack(
-            alignment: Alignment.bottomCenter,
-            children: [
-              gallery,
-              FileSelectionOverlayBar(
-                GalleryType.localFolder,
-                _selectedFiles,
-              ),
-            ],
+          body: SelectionState(
+            selectedFiles: _selectedFiles,
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                gallery,
+                FileSelectionOverlayBar(
+                  GalleryType.localFolder,
+                  _selectedFiles,
+                ),
+              ],
+            ),
           ),
         ),
       ),

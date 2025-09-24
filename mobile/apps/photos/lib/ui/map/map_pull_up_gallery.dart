@@ -15,6 +15,7 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/actions/file_selection_overlay_bar.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
+import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 
@@ -47,44 +48,57 @@ class _MapPullUpGalleryState extends State<MapPullUpGallery> {
     final unsafeAreaProportion = widget.bottomUnsafeArea / screenHeight;
     final double initialChildSize = 0.25 + unsafeAreaProportion;
 
+    // Create boundary notifiers
+    final topBoundaryNotifier = ValueNotifier<double?>(null);
+    final bottomBoundaryNotifier = ValueNotifier<double?>(null);
+    final scrollControllerNotifier = ValueNotifier<ScrollController?>(null);
+
     Widget? cachedScrollableContent;
 
     return DeferredPointerHandler(
-      child: GalleryFilesState(
-        child: SelectionState(
-          selectedFiles: _selectedFiles,
-          child: Stack(
-            alignment: Alignment.bottomCenter,
-            clipBehavior: Clip.none,
-            children: [
-              DraggableScrollableSheet(
-                expand: false,
-                initialChildSize: initialChildSize,
-                minChildSize: initialChildSize,
-                maxChildSize: 0.8,
-                snap: true,
-                snapSizes: const [0.5],
-                builder: (context, scrollController) {
-                  //Must use cached widget here to avoid rebuilds when DraggableScrollableSheet
-                  //is snapped to it's initialChildSize
-                  cachedScrollableContent ??=
-                      cacheScrollableContent(scrollController, context, logger);
-                  return cachedScrollableContent!;
-                },
-              ),
-              DeferPointer(
-                //This is to make the FileSelectionOverlayBar respect SafeArea
-                child: MediaQuery(
-                  data: MediaQueryData.fromView(View.of(context)),
-                  child: FileSelectionOverlayBar(
-                    GalleryType.searchResults,
-                    _selectedFiles,
-                    backgroundColor:
-                        getEnteColorScheme(context).backgroundElevated2,
+      child: GalleryBoundariesProvider(
+        topBoundaryNotifier: topBoundaryNotifier,
+        bottomBoundaryNotifier: bottomBoundaryNotifier,
+        scrollControllerNotifier: scrollControllerNotifier,
+        child: GalleryFilesState(
+          child: SelectionState(
+            selectedFiles: _selectedFiles,
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              clipBehavior: Clip.none,
+              children: [
+                DraggableScrollableSheet(
+                  expand: false,
+                  initialChildSize: initialChildSize,
+                  minChildSize: initialChildSize,
+                  maxChildSize: 0.8,
+                  snap: true,
+                  snapSizes: const [0.5],
+                  builder: (context, scrollController) {
+                    //Must use cached widget here to avoid rebuilds when DraggableScrollableSheet
+                    //is snapped to it's initialChildSize
+                    cachedScrollableContent ??= cacheScrollableContent(
+                      scrollController,
+                      context,
+                      logger,
+                    );
+                    return cachedScrollableContent!;
+                  },
+                ),
+                DeferPointer(
+                  //This is to make the FileSelectionOverlayBar respect SafeArea
+                  child: MediaQuery(
+                    data: MediaQueryData.fromView(View.of(context)),
+                    child: FileSelectionOverlayBar(
+                      GalleryType.searchResults,
+                      _selectedFiles,
+                      backgroundColor:
+                          getEnteColorScheme(context).backgroundElevated2,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

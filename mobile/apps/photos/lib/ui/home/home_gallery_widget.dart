@@ -18,6 +18,7 @@ import "package:photos/services/filter/db_filters.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import 'package:photos/ui/viewer/gallery/gallery.dart';
+import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 import "package:photos/utils/standalone/debouncer.dart";
@@ -76,6 +77,11 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // Create boundary notifiers
+    final topBoundaryNotifier = ValueNotifier<double?>(null);
+    final bottomBoundaryNotifier = ValueNotifier<double?>(null);
+    final scrollControllerNotifier = ValueNotifier<ScrollController?>(null);
+
     final gallery = Gallery(
       key: ValueKey(_shouldHideSharedItems),
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
@@ -135,15 +141,23 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
       groupType: widget.groupType,
       showGallerySettingsCTA: true,
     );
-    return GalleryFilesState(
-      child: SelectionState(
-        selectedFiles: widget.selectedFiles,
-        child: Stack(
-          alignment: Alignment.bottomCenter,
-          children: [
-            gallery,
-            FileSelectionOverlayBar(GalleryType.homepage, widget.selectedFiles),
-          ],
+    return GalleryBoundariesProvider(
+      topBoundaryNotifier: topBoundaryNotifier,
+      bottomBoundaryNotifier: bottomBoundaryNotifier,
+      scrollControllerNotifier: scrollControllerNotifier,
+      child: GalleryFilesState(
+        child: SelectionState(
+          selectedFiles: widget.selectedFiles,
+          child: Stack(
+            alignment: Alignment.bottomCenter,
+            children: [
+              gallery,
+              FileSelectionOverlayBar(
+                GalleryType.homepage,
+                widget.selectedFiles,
+              ),
+            ],
+          ),
         ),
       ),
     );
