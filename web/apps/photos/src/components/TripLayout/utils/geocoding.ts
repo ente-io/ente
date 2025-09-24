@@ -65,7 +65,7 @@ export const getLocationName = async (
 
     try {
         const response = await fetch(
-            `https://stadia-maps-proxy.ente.io/geocoding/v1/reverse?point.lat=${lat}&point.lon=${lng}`,
+            `https://api.stadiamaps.com/geocoding/v1/reverse?point.lat=${lat}&point.lon=${lng}`,
         );
 
         if (!response.ok) {
