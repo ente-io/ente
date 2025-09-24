@@ -27,6 +27,7 @@ import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import "package:photos/ui/viewer/gallery/component/sectioned_sliver_list.dart";
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import "package:photos/ui/viewer/gallery/scrollbar/custom_scroll_bar.dart";
+import "package:photos/ui/viewer/gallery/state/boundary_reporter_mixin.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
@@ -733,7 +734,8 @@ class PinnedGroupHeader extends StatefulWidget {
   State<PinnedGroupHeader> createState() => _PinnedGroupHeaderState();
 }
 
-class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
+class _PinnedGroupHeaderState extends State<PinnedGroupHeader>
+    with BoundaryReporter {
   String? currentGroupId;
   final _enlargeHeader = ValueNotifier<bool>(false);
   Timer? _enlargeHeaderTimer;
@@ -753,6 +755,11 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
       _scrollControllerListenerForZeroScrollNotifier,
     );
     widget.headerHeightNotifier.addListener(_headerHeightNotifierListener);
+
+    // Report boundary after initial build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      reportBoundary(BoundaryPosition.top);
+    });
   }
 
   @override
@@ -909,25 +916,28 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
                   },
                   child: ColoredBox(
                     color: getEnteColorScheme(context).backgroundBase,
-                    child: GroupHeaderWidget(
-                      title: widget.galleryGroups
-                          .groupIdToGroupDataMap[currentGroupId!]!.groupType
-                          .getTitle(
-                        context,
-                        widget.galleryGroups.groupIDToFilesMap[currentGroupId]!
-                            .first,
+                    child: boundaryWidget(
+                      position: BoundaryPosition.top,
+                      child: GroupHeaderWidget(
+                        title: widget.galleryGroups
+                            .groupIdToGroupDataMap[currentGroupId!]!.groupType
+                            .getTitle(
+                          context,
+                          widget.galleryGroups
+                              .groupIDToFilesMap[currentGroupId]!.first,
+                        ),
+                        gridSize: localSettings.getPhotoGridSize(),
+                        height: widget.galleryGroups.groupHeaderExtent,
+                        filesInGroup: widget
+                            .galleryGroups.groupIDToFilesMap[currentGroupId!]!,
+                        selectedFiles: widget.selectedFiles,
+                        showSelectAll: widget.showSelectAll,
+                        showGalleryLayoutSettingCTA:
+                            widget.showGallerySettingsCTA,
+                        showTrailingIcons: !inUse,
+                        isPinnedHeader: true,
+                        fadeInTrailingIcons: fadeInTrailingIcons,
                       ),
-                      gridSize: localSettings.getPhotoGridSize(),
-                      height: widget.galleryGroups.groupHeaderExtent,
-                      filesInGroup: widget
-                          .galleryGroups.groupIDToFilesMap[currentGroupId!]!,
-                      selectedFiles: widget.selectedFiles,
-                      showSelectAll: widget.showSelectAll,
-                      showGalleryLayoutSettingCTA:
-                          widget.showGallerySettingsCTA,
-                      showTrailingIcons: !inUse,
-                      isPinnedHeader: true,
-                      fadeInTrailingIcons: fadeInTrailingIcons,
                     ),
                   ),
                 ),
