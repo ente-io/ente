@@ -12,6 +12,7 @@ import 'package:photos/models/selected_files.dart';
 import "package:photos/theme/effects.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/components/bottom_action_bar/bottom_action_bar_widget.dart';
+import "package:photos/ui/viewer/gallery/state/boundary_reporter_mixin.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
@@ -41,7 +42,8 @@ class FileSelectionOverlayBar extends StatefulWidget {
       _FileSelectionOverlayBarState();
 }
 
-class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
+class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar>
+    with BoundaryReporter {
   final ValueNotifier<bool> _hasSelectedFilesNotifier = ValueNotifier(false);
   late GalleryType _galleryType;
   SearchFilterDataProvider? _searchFilterDataProvider;
@@ -52,6 +54,13 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     super.initState();
     _galleryType = widget.galleryType;
     widget.selectedFiles.addListener(_selectedFilesListener);
+
+    // Report boundary when selection changes
+    widget.selectedFiles.addListener(() {
+      if (widget.selectedFiles.files.isNotEmpty) {
+        reportBoundary(BoundaryPosition.bottom);
+      }
+    });
   }
 
   @override
@@ -117,7 +126,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     return ValueListenableBuilder(
       valueListenable: _hasSelectedFilesNotifier,
       builder: (context, value, child) {
-        return AnimatedCrossFade(
+        final crossFade = AnimatedCrossFade(
           firstCurve: Curves.easeInOutExpo,
           secondCurve: Curves.easeInOutExpo,
           sizeCurve: Curves.easeInOutExpo,
@@ -158,6 +167,14 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
           ),
           secondChild: const SizedBox(width: double.infinity),
         );
+
+        // Only wrap with boundary widget when there are selected files
+        return _hasSelectedFilesNotifier.value
+            ? boundaryWidget(
+                position: BoundaryPosition.bottom,
+                child: crossFade,
+              )
+            : crossFade;
       },
     );
   }

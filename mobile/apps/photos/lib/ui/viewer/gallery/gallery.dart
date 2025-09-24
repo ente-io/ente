@@ -27,6 +27,7 @@ import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import "package:photos/ui/viewer/gallery/component/sectioned_sliver_list.dart";
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import "package:photos/ui/viewer/gallery/scrollbar/custom_scroll_bar.dart";
+import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
@@ -528,6 +529,9 @@ class GalleryState extends State<Gallery> {
 
   @override
   void dispose() {
+    // Clear scroll controller reference
+    GalleryBoundariesProvider.of(context)?.setScrollController(null);
+
     _reloadEventSubscription?.cancel();
     _tabDoubleTapEvent?.cancel();
     for (final subscription in _forceReloadEventSubscriptions) {
@@ -547,6 +551,14 @@ class GalleryState extends State<Gallery> {
   @override
   Widget build(BuildContext context) {
     _logger.info("Building Gallery  ${widget.tagPrefix}");
+
+    // Share scroll controller with boundaries provider after build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        GalleryBoundariesProvider.of(context)
+            ?.setScrollController(_scrollController);
+      }
+    });
     final widthAvailable = MediaQuery.sizeOf(context).width;
 
     if (groupHeaderExtent == null) {

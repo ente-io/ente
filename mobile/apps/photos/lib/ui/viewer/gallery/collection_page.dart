@@ -21,6 +21,7 @@ import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import "package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart";
 import "package:photos/ui/viewer/gallery/hierarchical_search_gallery.dart";
+import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
@@ -115,6 +116,11 @@ class CollectionPage extends StatelessWidget {
           : const SizedBox(height: 212),
     );
 
+    // Create boundary notifiers
+    final topBoundaryNotifier = ValueNotifier<double?>(null);
+    final bottomBoundaryNotifier = ValueNotifier<double?>(null);
+    final scrollControllerNotifier = ValueNotifier<ScrollController?>(null);
+
     return GalleryFilesState(
       child: InheritedSearchFilterDataWrapper(
         searchFilterDataProvider: SearchFilterDataProvider(
@@ -124,54 +130,59 @@ class CollectionPage extends StatelessWidget {
             occurrence: kMostRelevantFilter,
           ),
         ),
-        child: Scaffold(
-          appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(90.0),
-            child: GalleryAppBarWidget(
-              galleryType,
-              c.collection.displayName,
-              _selectedFiles,
-              collection: c.collection,
-              isFromCollectPhotos: isFromCollectPhotos,
+        child: GalleryBoundariesProvider(
+          topBoundaryNotifier: topBoundaryNotifier,
+          bottomBoundaryNotifier: bottomBoundaryNotifier,
+          scrollControllerNotifier: scrollControllerNotifier,
+          child: Scaffold(
+            appBar: PreferredSize(
+              preferredSize: const Size.fromHeight(90.0),
+              child: GalleryAppBarWidget(
+                galleryType,
+                c.collection.displayName,
+                _selectedFiles,
+                collection: c.collection,
+                isFromCollectPhotos: isFromCollectPhotos,
+              ),
             ),
-          ),
-          bottomNavigationBar: isFromCollectPhotos
-              ? CollectPhotosBottomButtons(
-                  c.collection,
-                  selectedFiles: _selectedFiles,
-                )
-              : null,
-          body: SelectionState(
-            selectedFiles: _selectedFiles,
-            child: Stack(
-              alignment: Alignment.bottomCenter,
-              children: [
-                Builder(
-                  builder: (context) {
-                    return ValueListenableBuilder(
-                      valueListenable: InheritedSearchFilterData.of(context)
-                          .searchFilterDataProvider!
-                          .isSearchingNotifier,
-                      builder: (context, value, _) {
-                        return value
-                            ? HierarchicalSearchGallery(
-                                tagPrefix: tagPrefix,
-                                selectedFiles: _selectedFiles,
-                              )
-                            : gallery;
-                      },
-                    );
-                  },
-                ),
-                SmartAlbumsStatusWidget(
-                  collection: c.collection,
-                ),
-                FileSelectionOverlayBar(
-                  galleryType,
-                  _selectedFiles,
-                  collection: c.collection,
-                ),
-              ],
+            bottomNavigationBar: isFromCollectPhotos
+                ? CollectPhotosBottomButtons(
+                    c.collection,
+                    selectedFiles: _selectedFiles,
+                  )
+                : null,
+            body: SelectionState(
+              selectedFiles: _selectedFiles,
+              child: Stack(
+                alignment: Alignment.bottomCenter,
+                children: [
+                  Builder(
+                    builder: (context) {
+                      return ValueListenableBuilder(
+                        valueListenable: InheritedSearchFilterData.of(context)
+                            .searchFilterDataProvider!
+                            .isSearchingNotifier,
+                        builder: (context, value, _) {
+                          return value
+                              ? HierarchicalSearchGallery(
+                                  tagPrefix: tagPrefix,
+                                  selectedFiles: _selectedFiles,
+                                )
+                              : gallery;
+                        },
+                      );
+                    },
+                  ),
+                  SmartAlbumsStatusWidget(
+                    collection: c.collection,
+                  ),
+                  FileSelectionOverlayBar(
+                    galleryType,
+                    _selectedFiles,
+                    collection: c.collection,
+                  ),
+                ],
+              ),
             ),
           ),
         ),

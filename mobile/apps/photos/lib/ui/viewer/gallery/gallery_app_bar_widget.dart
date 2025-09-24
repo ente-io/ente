@@ -54,6 +54,7 @@ import 'package:photos/ui/tools/free_space_page.dart';
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/gallery/hooks/add_photos_sheet.dart";
 import 'package:photos/ui/viewer/gallery/hooks/pick_cover_photo.dart';
+import "package:photos/ui/viewer/gallery/state/boundary_reporter_mixin.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/hierarchicial_search/applied_filters_for_appbar.dart";
 import "package:photos/ui/viewer/hierarchicial_search/recommended_filters_for_appbar.dart";
@@ -114,7 +115,8 @@ enum AlbumPopupAction {
   galleryGuestView,
 }
 
-class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
+class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget>
+    with BoundaryReporter {
   final _logger = Logger("GalleryAppBar");
   late StreamSubscription _userAuthEventSubscription;
   late StreamSubscription<CollectionMetaEvent> _collectionMetaEventSubscription;
@@ -147,6 +149,11 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         )
         .listen(stateRefresh);
 
+    // Report boundary after initial build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      reportBoundary(BoundaryPosition.top);
+    });
+
     _appBarTitle = widget.title;
     galleryType = widget.type;
   }
@@ -171,7 +178,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     final isHierarchicalSearchable =
         inheritedSearchFilterData?.isHierarchicalSearchable ?? false;
 
-    return galleryType == GalleryType.homepage
+    final appBar = galleryType == GalleryType.homepage
         ? const SizedBox.shrink()
         : isHierarchicalSearchable
             ? ValueListenableBuilder(
@@ -220,6 +227,14 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                 ),
                 actions: _getDefaultActions(context),
               );
+
+    // Wrap with boundary widget only if not homepage
+    return galleryType == GalleryType.homepage
+        ? appBar
+        : boundaryWidget(
+            position: BoundaryPosition.top,
+            child: appBar,
+          );
   }
 
   Future<dynamic> _renameAlbum(BuildContext context) async {
