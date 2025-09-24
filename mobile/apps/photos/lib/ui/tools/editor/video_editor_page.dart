@@ -13,6 +13,7 @@ import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/location/location.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/sync/sync_service.dart";
 import "package:photos/ui/common/linear_progress_dialog.dart";
 import "package:photos/ui/notification/toast.dart";
@@ -257,18 +258,35 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
       _logger.info('Controller isTrimmed: ${_controller!.isTrimmed}');
       _logger.info('Controller rotation: ${_controller!.rotation}');
 
-      // Use native export service which will automatically fallback to FFmpeg if needed
-      final result = await NativeVideoExportService.exportVideo(
-        controller: _controller!,
-        outputPath: outputPath,
-        onProgress: (progress) {
-          _logger.info('Export progress: $progress');
-          if (dialogKey.currentState != null) {
-            dialogKey.currentState!.setProgress(progress);
-          }
-        },
-        onError: (e, s) => _logger.severe("Error exporting video", e, s),
-      );
+      // Check feature flag to decide which export method to use
+      final File result;
+      if (flagService.useNativeVideoEditor) {
+        // Use native export service for internal users
+        result = await NativeVideoExportService.exportVideo(
+          controller: _controller!,
+          outputPath: outputPath,
+          onProgress: (progress) {
+            _logger.info('Export progress: $progress');
+            if (dialogKey.currentState != null) {
+              dialogKey.currentState!.setProgress(progress);
+            }
+          },
+          onError: (e, s) => _logger.severe("Error exporting video", e, s),
+        );
+      } else {
+        // Use FFmpeg for regular users
+        result = await ExportService.exportVideo(
+          controller: _controller!,
+          outputPath: outputPath,
+          onProgress: (progress) {
+            _logger.info('Export progress: $progress');
+            if (dialogKey.currentState != null) {
+              dialogKey.currentState!.setProgress(progress);
+            }
+          },
+          onError: (e, s) => _logger.severe("Error exporting video", e, s),
+        );
+      }
 
       _logger.info('Export completed, result: ${result.path}');
       // Process the exported file

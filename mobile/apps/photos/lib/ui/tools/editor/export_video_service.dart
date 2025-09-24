@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 
@@ -45,5 +46,52 @@ class ExportService {
       null,
       onProgress,
     );
+  }
+
+  /// Export video using FFmpeg
+  static Future<File> exportVideo({
+    required VideoEditorController controller,
+    required String outputPath,
+    void Function(double)? onProgress,
+    void Function(Object, StackTrace)? onError,
+  }) async {
+    final config = VideoFFmpegVideoEditorConfig(
+      controller,
+      format: VideoExportFormat.mp4,
+      commandBuilder: (config, videoPath, outputPath) {
+        final List<String> filters = config.getExportFilters();
+
+        final String startTrimCmd = "-ss ${controller.startTrim}";
+        final String toTrimCmd = "-t ${controller.trimmedDuration}";
+
+        // Use hardware acceleration if available
+        String hwAccel = "";
+        if (Platform.isIOS) {
+          hwAccel = "-hwaccel videotoolbox";
+        } else if (Platform.isAndroid) {
+          hwAccel = "-hwaccel mediacodec";
+        }
+
+        return '$hwAccel $startTrimCmd -i $videoPath $toTrimCmd ${config.filtersCmd(filters)} -c:v libx264 -preset ultrafast -c:a aac $outputPath';
+      },
+    );
+
+    final completer = Completer<File>();
+
+    await runFFmpegCommand(
+      await config.getExecuteConfig(),
+      onProgress: (Statistics stats) {
+        if (onProgress != null) {
+          final progress = config.getFFmpegProgress(stats.getTime().toInt());
+          onProgress(progress);
+        }
+      },
+      onError: onError,
+      onCompleted: (File file) {
+        completer.complete(file);
+      },
+    );
+
+    return completer.future;
   }
 }

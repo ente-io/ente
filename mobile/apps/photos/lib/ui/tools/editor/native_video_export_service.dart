@@ -236,7 +236,6 @@ class NativeVideoExportService {
     );
   }
 
-
   /// Get video information using native methods
   static Future<Map<String, dynamic>> getVideoInfo(String videoPath) async {
     try {
