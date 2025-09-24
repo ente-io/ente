@@ -1,5 +1,6 @@
 package io.ente.native_video_editor
 
+import android.content.Context
 import android.media.*
 import android.os.Build
 import android.util.Log
@@ -15,16 +16,24 @@ import java.nio.ByteBuffer
 
 class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler {
     private lateinit var channel: MethodChannel
+    private lateinit var context: Context
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var currentJob: Job? = null
+
+    // Unified Media3 Transformer processor for all operations
+    private lateinit var media3Processor: Media3TransformerProcessor
 
     companion object {
         private const val TAG = "NativeVideoEditorPlugin"
     }
 
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+        context = flutterPluginBinding.applicationContext
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "native_video_editor")
         channel.setMethodCallHandler(this)
+
+        // Initialize unified Media3 processor
+        media3Processor = Media3TransformerProcessor(context)
     }
 
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
@@ -37,21 +46,30 @@ class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler {
 
                 currentJob = scope.launch {
                     try {
-                        val editResult = trimVideoWithoutReencoding(
-                            inputPath,
-                            outputPath,
-                            startTimeMs * 1000, // Convert to microseconds
-                            endTimeMs * 1000
+                        Log.i(TAG, "Starting trim operation: $startTimeMs-$endTimeMs ms")
+                        // Use unified Media3 Transformer for optimized trimming
+                        val processingResult = media3Processor.trimVideo(
+                            inputPath = inputPath,
+                            outputPath = outputPath,
+                            startTimeMs = startTimeMs,
+                            endTimeMs = endTimeMs,
+                            onProgress = { progress ->
+                                Log.d(TAG, "Trim progress: ${(progress * 100).toInt()}%")
+                            }
                         )
+
                         withContext(Dispatchers.Main) {
                             result.success(
                                 mapOf(
-                                    "outputPath" to outputPath,
-                                    "isReEncoded" to false
+                                    "outputPath" to processingResult.outputPath,
+                                    "isReEncoded" to processingResult.isReEncoded,
+                                    "processingTimeMs" to processingResult.processingTimeMs,
+                                    "method" to processingResult.method
                                 )
                             )
                         }
                     } catch (e: Exception) {
+                        Log.e(TAG, "Trim failed", e)
                         withContext(Dispatchers.Main) {
                             result.error("TRIM_ERROR", e.message, null)
                         }
@@ -66,16 +84,29 @@ class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler {
 
                 currentJob = scope.launch {
                     try {
-                        val isReEncoded = rotateVideoWithMetadata(inputPath, outputPath, degrees)
+                        Log.i(TAG, "Starting rotation operation: $degrees degrees")
+                        // Use unified Media3 Transformer for rotation with proper effects
+                        val processingResult = media3Processor.rotateVideo(
+                            inputPath = inputPath,
+                            outputPath = outputPath,
+                            degrees = degrees,
+                            onProgress = { progress ->
+                                Log.d(TAG, "Rotation progress: ${(progress * 100).toInt()}%")
+                            }
+                        )
+
                         withContext(Dispatchers.Main) {
                             result.success(
                                 mapOf(
-                                    "outputPath" to outputPath,
-                                    "isReEncoded" to isReEncoded
+                                    "outputPath" to processingResult.outputPath,
+                                    "isReEncoded" to processingResult.isReEncoded,
+                                    "processingTimeMs" to processingResult.processingTimeMs,
+                                    "method" to processingResult.method
                                 )
                             )
                         }
                     } catch (e: Exception) {
+                        Log.e(TAG, "Rotation failed", e)
                         withContext(Dispatchers.Main) {
                             result.error("ROTATE_ERROR", e.message, null)
                         }
@@ -93,17 +124,32 @@ class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler {
 
                 currentJob = scope.launch {
                     try {
-                        // Cropping typically requires re-encoding
-                        cropVideoWithReencoding(inputPath, outputPath, x, y, width, height)
+                        Log.i(TAG, "Starting crop operation: [$x,$y ${width}x$height]")
+                        // Use unified Media3 Transformer for cropping with proper effects
+                        val processingResult = media3Processor.cropVideo(
+                            inputPath = inputPath,
+                            outputPath = outputPath,
+                            cropX = x,
+                            cropY = y,
+                            cropWidth = width,
+                            cropHeight = height,
+                            onProgress = { progress ->
+                                Log.d(TAG, "Crop progress: ${(progress * 100).toInt()}%")
+                            }
+                        )
+
                         withContext(Dispatchers.Main) {
                             result.success(
                                 mapOf(
-                                    "outputPath" to outputPath,
-                                    "isReEncoded" to true
+                                    "outputPath" to processingResult.outputPath,
+                                    "isReEncoded" to processingResult.isReEncoded,
+                                    "processingTimeMs" to processingResult.processingTimeMs,
+                                    "method" to processingResult.method
                                 )
                             )
                         }
                     } catch (e: Exception) {
+                        Log.e(TAG, "Crop failed", e)
                         withContext(Dispatchers.Main) {
                             result.error("CROP_ERROR", e.message, null)
                         }
@@ -894,68 +940,58 @@ class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler {
 
         currentJob = scope.launch {
             try {
-                var tempPath = inputPath
-                var isReEncoded = false
-
-                // Apply trim if specified
-                val trimStartMs = call.argument<Int>("trimStartMs")
-                val trimEndMs = call.argument<Int>("trimEndMs")
-                if (trimStartMs != null && trimEndMs != null) {
-                    val trimOutput = File.createTempFile("trim_", ".mp4").absolutePath
-                    trimVideoWithoutReencoding(
-                        tempPath,
-                        trimOutput,
-                        trimStartMs.toLong() * 1000,
-                        trimEndMs.toLong() * 1000
-                    )
-                    if (tempPath != inputPath) File(tempPath).delete()
-                    tempPath = trimOutput
-                }
-
-                // Apply rotation if specified
+                // Collect all transformation parameters
+                val trimStartMs = call.argument<Int>("trimStartMs")?.toLong()
+                val trimEndMs = call.argument<Int>("trimEndMs")?.toLong()
                 val rotateDegrees = call.argument<Int>("rotateDegrees")
-                if (rotateDegrees != null && rotateDegrees != 0) {
-                    val rotateOutput = File.createTempFile("rotate_", ".mp4").absolutePath
-                    // Use simple copy with rotation metadata for now
-                    // Note: This won't actually rotate frames, just sets metadata
-                    // Many players ignore rotation metadata on Android
-                    rotateVideoWithSimpleCopy(tempPath, rotateOutput, rotateDegrees)
-                    if (tempPath != inputPath) File(tempPath).delete()
-                    tempPath = rotateOutput
-                }
-
-                // Apply crop if specified (this will require re-encoding)
                 val cropX = call.argument<Int>("cropX")
                 val cropY = call.argument<Int>("cropY")
                 val cropWidth = call.argument<Int>("cropWidth")
                 val cropHeight = call.argument<Int>("cropHeight")
-                if (cropX != null && cropY != null && cropWidth != null && cropHeight != null) {
-                    val cropOutput = if (tempPath == outputPath) {
-                        File.createTempFile("crop_", ".mp4").absolutePath
-                    } else {
-                        outputPath
-                    }
-                    cropVideoWithReencoding(tempPath, cropOutput, cropX, cropY, cropWidth, cropHeight)
-                    if (tempPath != inputPath) File(tempPath).delete()
-                    tempPath = cropOutput
-                    isReEncoded = true
-                }
 
-                // Move final result to output path
-                if (tempPath != outputPath) {
-                    File(tempPath).copyTo(File(outputPath), overwrite = true)
-                    if (tempPath != inputPath) File(tempPath).delete()
-                }
+                Log.i(TAG, "Processing video with transformations:")
+                Log.i(TAG, "  Trim: ${if (trimStartMs != null) "$trimStartMs-$trimEndMs ms" else "none"}")
+                Log.i(TAG, "  Rotate: ${rotateDegrees ?: "none"} degrees")
+                Log.i(TAG, "  Crop: ${if (cropX != null) "[$cropX,$cropY ${cropWidth}x$cropHeight]" else "none"}")
+
+                // Process all transformations in a single pass with Media3 Transformer
+                val processingResult = media3Processor.processVideo(
+                    inputPath = inputPath,
+                    outputPath = outputPath,
+                    trimStartMs = trimStartMs,
+                    trimEndMs = trimEndMs,
+                    rotateDegrees = rotateDegrees,
+                    cropX = cropX,
+                    cropY = cropY,
+                    cropWidth = cropWidth,
+                    cropHeight = cropHeight,
+                    onProgress = { progress ->
+                        Log.d(TAG, "Processing progress: ${(progress * 100).toInt()}%")
+                    }
+                )
+
+                val processingSteps = mutableListOf<String>()
+                if (trimStartMs != null) processingSteps.add("Trim")
+                if (rotateDegrees != null && rotateDegrees != 0) processingSteps.add("Rotate")
+                if (cropX != null) processingSteps.add("Crop")
+
+                Log.i(TAG, "Video processing completed:")
+                Log.i(TAG, "  Steps: ${processingSteps.joinToString(", ")}")
+                Log.i(TAG, "  Total time: ${processingResult.processingTimeMs}ms")
+                Log.i(TAG, "  Re-encoded: ${processingResult.isReEncoded}")
 
                 withContext(Dispatchers.Main) {
                     result.success(
                         mapOf(
                             "outputPath" to outputPath,
-                            "isReEncoded" to isReEncoded
+                            "isReEncoded" to processingResult.isReEncoded,
+                            "processingTimeMs" to processingResult.processingTimeMs,
+                            "processingSteps" to processingSteps
                         )
                     )
                 }
             } catch (e: Exception) {
+                Log.e(TAG, "Process video failed", e)
                 withContext(Dispatchers.Main) {
                     result.error("PROCESS_ERROR", e.message, null)
                 }

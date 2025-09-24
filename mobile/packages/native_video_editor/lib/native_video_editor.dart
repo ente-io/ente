@@ -28,11 +28,11 @@ class VideoTrimParams {
   });
 
   Map<String, dynamic> toMap() => {
-    'inputPath': inputPath,
-    'outputPath': outputPath,
-    'startTimeMs': startTime.inMilliseconds,
-    'endTimeMs': endTime.inMilliseconds,
-  };
+        'inputPath': inputPath,
+        'outputPath': outputPath,
+        'startTimeMs': startTime.inMilliseconds,
+        'endTimeMs': endTime.inMilliseconds,
+      };
 }
 
 class VideoRotateParams {
@@ -47,10 +47,10 @@ class VideoRotateParams {
   }) : assert(degrees == 90 || degrees == 180 || degrees == 270);
 
   Map<String, dynamic> toMap() => {
-    'inputPath': inputPath,
-    'outputPath': outputPath,
-    'degrees': degrees,
-  };
+        'inputPath': inputPath,
+        'outputPath': outputPath,
+        'degrees': degrees,
+      };
 }
 
 class VideoCropParams {
@@ -73,14 +73,14 @@ class VideoCropParams {
   });
 
   Map<String, dynamic> toMap() => {
-    'inputPath': inputPath,
-    'outputPath': outputPath,
-    'x': x,
-    'y': y,
-    'width': width,
-    'height': height,
-    'forceReEncode': forceReEncode,
-  };
+        'inputPath': inputPath,
+        'outputPath': outputPath,
+        'x': x,
+        'y': y,
+        'width': width,
+        'height': height,
+        'forceReEncode': forceReEncode,
+      };
 }
 
 class NativeVideoEditor {

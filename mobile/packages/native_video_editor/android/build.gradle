@@ -49,4 +49,13 @@ android {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4"
+
+    // Media3 Transformer for efficient video operations
+    implementation "androidx.media3:media3-transformer:1.1.1"
+    implementation "androidx.media3:media3-common:1.1.1"
+    implementation "androidx.media3:media3-effect:1.1.1"
+    implementation "androidx.media3:media3-extractor:1.1.1"
+
+    // Guava for ImmutableList
+    implementation "com.google.guava:guava:31.1-android"
 }
