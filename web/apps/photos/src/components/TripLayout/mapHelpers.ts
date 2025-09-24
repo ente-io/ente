@@ -200,7 +200,7 @@ export const createIcon = (
     return icon;
 };
 
-// Function to create super-cluster icon with badge
+// Function to create super-cluster icon with background markers
 export const createSuperClusterIcon = (
     imageSrc: string,
     clusterCount: number,
@@ -224,8 +224,24 @@ export const createSuperClusterIcon = (
     const pinSize = size + 16; // Make it square and bigger
     const pinHeight = pinSize + 12; // Add space for triangle
     const triangleHeight = 10;
-    const containerSize = pinSize + 24;
+    const containerSize = pinSize + 18; // Account for stacked markers
     const hasImage = imageSrc && imageSrc.trim() !== "";
+
+    // Generate stacked marker positions for background markers
+    const generateStackedMarkerPositions = (count: number) => {
+        const positions = [];
+        const numBackgroundMarkers = Math.min(count - 1, 3); // Show up to 3 background markers
+
+        // Create a stacked effect with slight offsets
+        for (let i = 0; i < numBackgroundMarkers; i++) {
+            const offsetX = (i + 1) * 4; // Horizontal offset for stack effect
+            const offsetY = (i + 1) * 3; // Vertical offset for stack effect
+            positions.push({ x: offsetX, y: offsetY });
+        }
+        return positions;
+    };
+
+    const backgroundMarkerPositions = generateStackedMarkerPositions(clusterCount);
 
     const icon = leaflet.divIcon({
         html: `
@@ -235,14 +251,61 @@ export const createSuperClusterIcon = (
           position: relative;
           cursor: pointer;
         ">
+          ${backgroundMarkerPositions.map((pos, index) => `
+            <!-- Background marker ${index} -->
+            <div style="
+              position: absolute;
+              left: ${pos.x}px;
+              top: ${pos.y}px;
+              width: ${pinSize}px;
+              height: ${pinHeight}px;
+              z-index: ${5 - index};
+              opacity: ${0.6 - index * 0.1};
+            ">
+              <!-- Background pin rounded rectangle -->
+              <div style="
+                width: ${pinSize}px;
+                height: ${pinSize}px;
+                border-radius: 16px;
+                background: ${isReached ? "#22c55e" : "white"};
+                border: 2px solid ${isReached ? "#22c55e" : "#ffffff"};
+                padding: 4px;
+                position: relative;
+                overflow: hidden;
+              ">
+                <!-- Empty background pin -->
+                <div style="
+                  width: 100%;
+                  height: 100%;
+                  border-radius: 12px;
+                  background: ${isReached ? "#16a34a" : "#f3f4f6"};
+                "></div>
+              </div>
+
+              <!-- Background pin triangle -->
+              <div style="
+                position: absolute;
+                bottom: 2px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 0;
+                height: 0;
+                border-left: ${triangleHeight}px solid transparent;
+                border-right: ${triangleHeight}px solid transparent;
+                border-top: ${triangleHeight}px solid ${isReached ? "#22c55e" : "white"};
+              "></div>
+            </div>
+          `).join('')}
+
           <!-- Main pin container -->
           <div class="photo-pin${isReached ? " reached" : ""}" style="
             width: ${pinSize}px;
             height: ${pinHeight}px;
             position: absolute;
-            left: 12px;
+            left: 0px;
             top: 0;
             transition: all 0.3s ease;
+            z-index: 10;
           ">
             <!-- Main rounded rectangle container -->
             <div style="
@@ -251,7 +314,7 @@ export const createSuperClusterIcon = (
               border-radius: 16px;
               background: ${isReached ? "#22c55e" : "white"};
               border: 2px solid ${isReached ? "#22c55e" : "#ffffff"};
-                padding: 4px;
+              padding: 4px;
               position: relative;
               overflow: hidden;
               transition: background-color 0.3s ease, border-color 0.3s ease;
@@ -263,8 +326,8 @@ export const createSuperClusterIcon = (
                   hasImage
                       ? `
                 <!-- Image inside the rounded rectangle -->
-                <img 
-                  src="${imageSrc}" 
+                <img
+                  src="${imageSrc}"
                   style="
                     width: 100%;
                     height: 100%;
@@ -292,7 +355,7 @@ export const createSuperClusterIcon = (
               `
               }
             </div>
-            
+
             <!-- Triangle at the bottom -->
             <div style="
               position: absolute;
@@ -304,28 +367,9 @@ export const createSuperClusterIcon = (
               border-left: ${triangleHeight}px solid transparent;
               border-right: ${triangleHeight}px solid transparent;
               border-top: ${triangleHeight}px solid ${isReached ? "#22c55e" : "white"};
-                transition: border-top-color 0.3s ease;
+              transition: border-top-color 0.3s ease;
             "></div>
           </div>
-          
-          <!-- Badge -->
-          <div style="
-            position: absolute;
-            top: -8px;
-            right: 8px;
-            background: #000000;
-            color: white;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            border: 2px solid white;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-            font-size: 12px;
-            font-weight: 700;
-            line-height: 20px;
-            text-align: center;
-            z-index: 10;
-          ">${clusterCount}</div>
         </div>
       `,
         className: "super-cluster-pin-marker",
