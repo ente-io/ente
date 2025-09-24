@@ -188,7 +188,7 @@ export const handleTimelineScroll = ({
             // Handle super cluster zoom logic - check distant locations first!
             if (isInSuperCluster && !wasInSuperCluster && isDistantLocation) {
                 // Entering super cluster from distant location - full zoom out → pan → zoom in
-                const superClusterZoom = isTouchDevice ? 12 : 14;
+                const superClusterZoom = isTouchDevice ? 15 : 14; // Higher zoom on mobile to break apart clusters
                 const intermediateZoom = isTouchDevice ? 2 : 4; // Extreme zoom out for distant locations
                 const [zoomAwareLat, zoomAwareLng] = getLocationPositionAtZoom(
                     targetCluster.lat,
@@ -214,7 +214,7 @@ export const handleTimelineScroll = ({
                 }, 1600);
             } else if (isInSuperCluster && !wasInSuperCluster) {
                 // Entering super cluster from nearby location - direct zoom in
-                const superClusterZoom = isTouchDevice ? 12 : 14;
+                const superClusterZoom = isTouchDevice ? 15 : 14; // Higher zoom on mobile to break apart clusters
                 const [zoomAwareLat, zoomAwareLng] = getLocationPositionAtZoom(
                     targetCluster.lat,
                     targetCluster.lng,
@@ -276,7 +276,7 @@ export const handleTimelineScroll = ({
                 if (isDistantLocation) {
                     // Distant location from super cluster: full zoom out → pan → zoom in
                     // Since we're in the isInSuperCluster block, destination is always a super cluster
-                    const finalZoom = isTouchDevice ? 12 : 14;
+                    const finalZoom = isTouchDevice ? 15 : 14; // Higher zoom on mobile to break apart clusters
                     const intermediateZoom = isTouchDevice ? 2 : 4; // Extreme zoom out for distant locations
                     const [zoomAwareLat, zoomAwareLng] = getLocationPositionAtZoom(
                         targetCluster.lat,
@@ -302,7 +302,7 @@ export const handleTimelineScroll = ({
                     }, 1600);
                 } else if (isDifferentSuperCluster) {
                     // Different super cluster (not distant): moderate zoom out → pan → zoom in
-                    const superClusterZoom = isTouchDevice ? 12 : 14;
+                    const superClusterZoom = isTouchDevice ? 15 : 14; // Higher zoom on mobile to break apart clusters
                     const intermediateZoom = isTouchDevice ? 8 : 10; // Moderate zoom out for nearby super clusters
                     const [zoomAwareLat, zoomAwareLng] = getLocationPositionAtZoom(
                         targetCluster.lat,

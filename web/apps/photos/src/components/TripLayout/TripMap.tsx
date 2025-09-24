@@ -60,13 +60,30 @@ export const TripMap: React.FC<TripMapProps> = ({
 }) => {
     const isTouchDevice = useIsTouchscreen();
 
-    // Calculate super-clusters based on screen collisions
+    // Calculate current active location index based on scroll progress (same logic as in scrollUtils)
+    let currentActiveLocationIndex = -1;
+    if (photoClusters.length > 0) {
+        if (isTouchDevice) {
+            // Mobile: Slower progression - stay on each location longer
+            currentActiveLocationIndex = Math.floor(
+                scrollProgress * (photoClusters.length - 0.5),
+            );
+        } else {
+            // Desktop: Use original logic
+            currentActiveLocationIndex = Math.round(
+                scrollProgress * Math.max(0, photoClusters.length - 1),
+            );
+        }
+    }
+
+    // Calculate super-clusters based on screen collisions, excluding the active cluster
     const { superClusters, visibleClusters } = detectScreenCollisions(
         photoClusters,
         currentZoom,
         targetZoom,
         mapRef,
         optimalZoom,
+        currentActiveLocationIndex >= 0 ? currentActiveLocationIndex : undefined,
     );
 
     return (

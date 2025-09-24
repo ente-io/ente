@@ -346,6 +346,7 @@ export const detectScreenCollisions = (
     targetZoom: number | null,
     mapRef: import("leaflet").Map | null,
     optimalZoom: number,
+    activeClusterIndex?: number, // Currently active cluster should not be grouped into super clusters
 ) => {
     // Use target zoom if we're in the middle of a zoom animation, otherwise use optimal zoom
     const effectiveZoom =
@@ -399,7 +400,11 @@ export const detectScreenCollisions = (
         });
 
         // If we found overlapping clusters, create a super-cluster
-        if (overlappingClusters.length > 1) {
+        // But only if none of the involved clusters is the currently active cluster
+        const involvesActiveCluster = activeClusterIndex !== undefined &&
+            overlappingClusters.includes(activeClusterIndex);
+
+        if (overlappingClusters.length > 1 && !involvesActiveCluster) {
             hiddenClusterIndices.add(i); // Hide the original cluster too
 
             // Calculate center position of all overlapping clusters
@@ -429,6 +434,12 @@ export const detectScreenCollisions = (
                 clusterCount: overlappingClusters.length,
                 clustersInvolved: overlappingClusters,
                 image: representativePhoto.image,
+            });
+        } else if (involvesActiveCluster) {
+            // If active cluster is involved, unhide all overlapping clusters
+            // so they remain visible as individual clusters
+            overlappingClusters.forEach((idx) => {
+                hiddenClusterIndices.delete(idx);
             });
         }
     });
@@ -464,17 +475,20 @@ export const getMapCenter = (
 
     // Position first location at 20% from right edge (80% from left)
     // At zoom level 10, each pixel represents approximately 152.87 meters
-    // Timeline takes up 50% of screen width, so visible map area is 50%
+    // On mobile, timeline is at bottom so full width is available; on desktop, timeline takes up 50% of screen width
     // We want the first location to be at 20% from right of the visible map area
     // This means shifting map center left so marker appears more to the right
 
-    const timelineWidthRatio = 0.5; // Timeline takes up 50% of screen
+    const isMobile = typeof window !== "undefined" && window.innerWidth <= 768;
+    const timelineWidthRatio = isMobile ? 0.0 : 0.5; // Mobile: full width, Desktop: timeline takes up 50% of screen
 
     // At zoom 10, approximately 0.35 degrees per 1000px at equator
     // For positioning, we need to shift the longitude to place marker at desired position
     const degreesPerPixelAtZoom10 = 0.35 / 1000; // rough approximation
-    const pixelsToShiftFor20Percent =
-        (window.innerWidth || 1400) * timelineWidthRatio * 3.0; // 300% of visible map width to shift map left
+    const basePixelsToShift = (window.innerWidth || 1400) * (1 - timelineWidthRatio);
+    const pixelsToShiftFor20Percent = isMobile
+        ? basePixelsToShift * 0.6 // Mobile: less aggressive positioning (60% instead of 300%)
+        : basePixelsToShift * 3.0; // Desktop: 300% of visible map width to shift map left
     const lngShift = pixelsToShiftFor20Percent * degreesPerPixelAtZoom10;
 
     const adjustedLng = firstLng - lngShift;
@@ -488,12 +502,18 @@ export const getLocationPosition = (
     lng: number,
 ): [number, number] => {
     // Position location at 20% from right edge (80% from left) of visible map area
-    const timelineWidthRatio = 0.5; // Timeline takes up 50% of screen
+    // On mobile, the timeline is at the bottom, not the side, so full width is available for map
+    const isMobile = typeof window !== "undefined" && window.innerWidth <= 768;
+    const timelineWidthRatio = isMobile ? 0.0 : 0.5; // Mobile: full width, Desktop: timeline takes up 50% of screen
     const degreesPerPixelAtZoom10 = 0.35 / 1000; // rough approximation at zoom 10
+
     // Calculate shift to position marker at 20% from right edge of visible map
     // Need to shift map center left so the marker appears more to the right
-    const pixelsToShiftFor20Percent =
-        (window.innerWidth || 1400) * timelineWidthRatio * 3.0; // 300% of visible map width to shift map left
+    // On mobile, use less aggressive positioning since we have full width
+    const basePixelsToShift = (window.innerWidth || 1400) * (1 - timelineWidthRatio);
+    const pixelsToShiftFor20Percent = isMobile
+        ? basePixelsToShift * 0.6 // Mobile: less aggressive positioning (60% instead of 300%)
+        : basePixelsToShift * 3.0; // Desktop: 300% of visible map width to shift map left
     const lngShift = pixelsToShiftFor20Percent * degreesPerPixelAtZoom10;
 
     return [lat, lng - lngShift];
@@ -506,7 +526,9 @@ export const getLocationPositionAtZoom = (
     zoom: number,
 ): [number, number] => {
     // Position location at 20% from right edge (80% from left) of visible map area
-    const timelineWidthRatio = 0.5; // Timeline takes up 50% of screen
+    // On mobile, the timeline is at the bottom, not the side, so full width is available for map
+    const isMobile = typeof window !== "undefined" && window.innerWidth <= 768;
+    const timelineWidthRatio = isMobile ? 0.0 : 0.5; // Mobile: full width, Desktop: timeline takes up 50% of screen
 
     // Scale the positioning offset based on zoom level
     // At higher zoom levels, we need less offset since we're more zoomed in
@@ -515,8 +537,11 @@ export const getLocationPositionAtZoom = (
     const degreesPerPixelAtCurrentZoom = baseDegreesPerPixelAtZoom10 * zoomScaleFactor;
 
     // Calculate shift to position marker at 20% from right edge of visible map
-    const pixelsToShiftFor20Percent =
-        (window.innerWidth || 1400) * timelineWidthRatio * 3.0; // 300% of visible map width to shift map left
+    // On mobile, use less aggressive positioning since we have full width
+    const basePixelsToShift = (window.innerWidth || 1400) * (1 - timelineWidthRatio);
+    const pixelsToShiftFor20Percent = isMobile
+        ? basePixelsToShift * 0.6 // Mobile: less aggressive positioning (60% instead of 300%)
+        : basePixelsToShift * 3.0; // Desktop: 300% of visible map width to shift map left
     const lngShift = pixelsToShiftFor20Percent * degreesPerPixelAtCurrentZoom;
 
     return [lat, lng - lngShift];
