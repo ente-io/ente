@@ -498,3 +498,26 @@ export const getLocationPosition = (
 
     return [lat, lng - lngShift];
 };
+
+// Calculate position for a location to be at 20% from right edge at a specific zoom level
+export const getLocationPositionAtZoom = (
+    lat: number,
+    lng: number,
+    zoom: number,
+): [number, number] => {
+    // Position location at 20% from right edge (80% from left) of visible map area
+    const timelineWidthRatio = 0.5; // Timeline takes up 50% of screen
+
+    // Scale the positioning offset based on zoom level
+    // At higher zoom levels, we need less offset since we're more zoomed in
+    const baseDegreesPerPixelAtZoom10 = 0.35 / 1000;
+    const zoomScaleFactor = Math.pow(2, 10 - zoom); // Scale relative to zoom 10
+    const degreesPerPixelAtCurrentZoom = baseDegreesPerPixelAtZoom10 * zoomScaleFactor;
+
+    // Calculate shift to position marker at 20% from right edge of visible map
+    const pixelsToShiftFor20Percent =
+        (window.innerWidth || 1400) * timelineWidthRatio * 3.0; // 300% of visible map width to shift map left
+    const lngShift = pixelsToShiftFor20Percent * degreesPerPixelAtCurrentZoom;
+
+    return [lat, lng - lngShift];
+};

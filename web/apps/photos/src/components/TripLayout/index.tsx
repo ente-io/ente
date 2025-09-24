@@ -108,9 +108,23 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
     >(new Map()); // Track location data to prevent resets
     const filesCountRef = useRef<number>(0); // Track files count to detect real changes
     const previousActiveLocationRef = useRef<number>(-1); // Track previous active location for discrete panning
+    const previousSuperClusterStateRef = useRef<{
+        isInSuperCluster: boolean;
+        superClusterIndex: number | null;
+    }>({ isInSuperCluster: false, superClusterIndex: null }); // Track previous super cluster state for zoom logic
 
     const [photoClusters, setPhotoClusters] = useState<JourneyPoint[][]>([]);
     const [optimalZoom, setOptimalZoom] = useState(7);
+    const [superClusterInfo, setSuperClusterInfo] = useState<{
+        superClusters: {
+            lat: number;
+            lng: number;
+            clusterCount: number;
+            clustersInvolved: number[];
+            image: string;
+        }[];
+        clusterToSuperClusterMap: Map<number, number>;
+    }>({ superClusters: [], clusterToSuperClusterMap: new Map() });
     const [TripMapComponent, setTripMapComponent] =
         useState<React.ComponentType<{
             journeyData: JourneyPoint[];
@@ -142,7 +156,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
             // Load mapHelpers and calculate clusters if we have data
             if (journeyData.length > 0) {
                 void import("./mapHelpers").then(
-                    ({ clusterPhotosByProximity, calculateOptimalZoom }) => {
+                    ({ clusterPhotosByProximity, calculateOptimalZoom, detectScreenCollisions }) => {
                         const clusters = clusterPhotosByProximity(journeyData);
 
                         // Sort clusters by their earliest timestamp to maintain chronological order
@@ -160,8 +174,28 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                             return earliestA - earliestB;
                         });
 
+                        const optimalZoomLevel = calculateOptimalZoom();
+
+                        // Calculate super clusters at optimal zoom level once
+                        const { superClusters } = detectScreenCollisions(
+                            sortedClusters,
+                            optimalZoomLevel,
+                            null,
+                            null,
+                            optimalZoomLevel,
+                        );
+
+                        // Create a map of cluster index to super cluster index
+                        const clusterToSuperClusterMap = new Map<number, number>();
+                        superClusters.forEach((superCluster, superClusterIndex) => {
+                            superCluster.clustersInvolved.forEach((clusterIndex) => {
+                                clusterToSuperClusterMap.set(clusterIndex, superClusterIndex);
+                            });
+                        });
+
                         setPhotoClusters(sortedClusters);
-                        setOptimalZoom(calculateOptimalZoom());
+                        setOptimalZoom(optimalZoomLevel);
+                        setSuperClusterInfo({ superClusters, clusterToSuperClusterMap });
                     },
                 );
             }
@@ -244,6 +278,9 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
             }
         },
         setScrollProgress,
+        setTargetZoom,
+        previousSuperClusterStateRef,
+        superClusterInfo,
     });
 
     // Only wait for client-side rendering (needed for maps), but show layout immediately

@@ -23,6 +23,21 @@ export interface UseScrollHandlingParams {
     setLocationPositions: (positions: PositionInfo[]) => void;
     setHasUserScrolled: (scrolled: boolean) => void;
     setScrollProgress: (progress: number) => void;
+    setTargetZoom: (zoom: number | null) => void;
+    previousSuperClusterStateRef: React.RefObject<{
+        isInSuperCluster: boolean;
+        superClusterIndex: number | null;
+    }>;
+    superClusterInfo: {
+        superClusters: {
+            lat: number;
+            lng: number;
+            clusterCount: number;
+            clustersInvolved: number[];
+            image: string;
+        }[];
+        clusterToSuperClusterMap: Map<number, number>;
+    };
 }
 
 export const useScrollHandling = ({
@@ -37,6 +52,9 @@ export const useScrollHandling = ({
     setLocationPositions,
     setHasUserScrolled,
     setScrollProgress,
+    setTargetZoom,
+    previousSuperClusterStateRef,
+    superClusterInfo,
 }: UseScrollHandlingParams) => {
     const isTouchDevice = useIsTouchscreen();
     // Update location positions callback
@@ -59,6 +77,9 @@ export const useScrollHandling = ({
             setScrollProgress,
             previousActiveLocationRef,
             isTouchDevice,
+            setTargetZoom,
+            previousSuperClusterStateRef,
+            superClusterInfo,
         });
     }, [
         timelineRef,
@@ -70,6 +91,9 @@ export const useScrollHandling = ({
         setScrollProgress,
         previousActiveLocationRef,
         isTouchDevice,
+        setTargetZoom,
+        previousSuperClusterStateRef,
+        superClusterInfo,
     ]);
 
     // Throttled scroll handler
