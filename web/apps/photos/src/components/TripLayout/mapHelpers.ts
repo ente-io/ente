@@ -241,7 +241,8 @@ export const createSuperClusterIcon = (
         return positions;
     };
 
-    const backgroundMarkerPositions = generateStackedMarkerPositions(clusterCount);
+    const backgroundMarkerPositions =
+        generateStackedMarkerPositions(clusterCount);
 
     const icon = leaflet.divIcon({
         html: `
@@ -251,7 +252,9 @@ export const createSuperClusterIcon = (
           position: relative;
           cursor: pointer;
         ">
-          ${backgroundMarkerPositions.map((pos, index) => `
+          ${backgroundMarkerPositions
+              .map(
+                  (pos, index) => `
             <!-- Background marker ${index} -->
             <div style="
               position: absolute;
@@ -295,7 +298,9 @@ export const createSuperClusterIcon = (
                 border-top: ${triangleHeight}px solid ${isReached ? "#22c55e" : "white"};
               "></div>
             </div>
-          `).join('')}
+          `,
+              )
+              .join("")}
 
           <!-- Main pin container -->
           <div class="photo-pin${isReached ? " reached" : ""}" style="
@@ -445,7 +450,8 @@ export const detectScreenCollisions = (
 
         // If we found overlapping clusters, create a super-cluster
         // But only if none of the involved clusters is the currently active cluster
-        const involvesActiveCluster = activeClusterIndex !== undefined &&
+        const involvesActiveCluster =
+            activeClusterIndex !== undefined &&
             overlappingClusters.includes(activeClusterIndex);
 
         if (overlappingClusters.length > 1 && !involvesActiveCluster) {
@@ -529,7 +535,8 @@ export const getMapCenter = (
     // At zoom 10, approximately 0.35 degrees per 1000px at equator
     // For positioning, we need to shift the longitude to place marker at desired position
     const degreesPerPixelAtZoom10 = 0.35 / 1000; // rough approximation
-    const basePixelsToShift = (window.innerWidth || 1400) * (1 - timelineWidthRatio);
+    const basePixelsToShift =
+        (window.innerWidth || 1400) * (1 - timelineWidthRatio);
     const pixelsToShiftFor20Percent = isMobile
         ? basePixelsToShift * 0.6 // Mobile: less aggressive positioning (60% instead of 300%)
         : basePixelsToShift * 3.0; // Desktop: 300% of visible map width to shift map left
@@ -554,7 +561,8 @@ export const getLocationPosition = (
     // Calculate shift to position marker at 20% from right edge of visible map
     // Need to shift map center left so the marker appears more to the right
     // On mobile, use less aggressive positioning since we have full width
-    const basePixelsToShift = (window.innerWidth || 1400) * (1 - timelineWidthRatio);
+    const basePixelsToShift =
+        (window.innerWidth || 1400) * (1 - timelineWidthRatio);
     const pixelsToShiftFor20Percent = isMobile
         ? basePixelsToShift * 0.6 // Mobile: less aggressive positioning (60% instead of 300%)
         : basePixelsToShift * 3.0; // Desktop: 300% of visible map width to shift map left
@@ -578,11 +586,13 @@ export const getLocationPositionAtZoom = (
     // At higher zoom levels, we need less offset since we're more zoomed in
     const baseDegreesPerPixelAtZoom10 = 0.35 / 1000;
     const zoomScaleFactor = Math.pow(2, 10 - zoom); // Scale relative to zoom 10
-    const degreesPerPixelAtCurrentZoom = baseDegreesPerPixelAtZoom10 * zoomScaleFactor;
+    const degreesPerPixelAtCurrentZoom =
+        baseDegreesPerPixelAtZoom10 * zoomScaleFactor;
 
     // Calculate shift to position marker at 20% from right edge of visible map
     // On mobile, use less aggressive positioning since we have full width
-    const basePixelsToShift = (window.innerWidth || 1400) * (1 - timelineWidthRatio);
+    const basePixelsToShift =
+        (window.innerWidth || 1400) * (1 - timelineWidthRatio);
     const pixelsToShiftFor20Percent = isMobile
         ? basePixelsToShift * 0.6 // Mobile: less aggressive positioning (60% instead of 300%)
         : basePixelsToShift * 3.0; // Desktop: 300% of visible map width to shift map left

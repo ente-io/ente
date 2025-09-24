@@ -83,7 +83,9 @@ export const TripMap: React.FC<TripMapProps> = ({
         targetZoom,
         mapRef,
         optimalZoom,
-        currentActiveLocationIndex >= 0 ? currentActiveLocationIndex : undefined,
+        currentActiveLocationIndex >= 0
+            ? currentActiveLocationIndex
+            : undefined,
     );
 
     return (

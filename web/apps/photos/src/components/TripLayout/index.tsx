@@ -156,7 +156,11 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
             // Load mapHelpers and calculate clusters if we have data
             if (journeyData.length > 0) {
                 void import("./mapHelpers").then(
-                    ({ clusterPhotosByProximity, calculateOptimalZoom, detectScreenCollisions }) => {
+                    ({
+                        clusterPhotosByProximity,
+                        calculateOptimalZoom,
+                        detectScreenCollisions,
+                    }) => {
                         const clusters = clusterPhotosByProximity(journeyData);
 
                         // Sort clusters by their earliest timestamp to maintain chronological order
@@ -187,16 +191,29 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                         );
 
                         // Create a map of cluster index to super cluster index
-                        const clusterToSuperClusterMap = new Map<number, number>();
-                        superClusters.forEach((superCluster, superClusterIndex) => {
-                            superCluster.clustersInvolved.forEach((clusterIndex) => {
-                                clusterToSuperClusterMap.set(clusterIndex, superClusterIndex);
-                            });
-                        });
+                        const clusterToSuperClusterMap = new Map<
+                            number,
+                            number
+                        >();
+                        superClusters.forEach(
+                            (superCluster, superClusterIndex) => {
+                                superCluster.clustersInvolved.forEach(
+                                    (clusterIndex) => {
+                                        clusterToSuperClusterMap.set(
+                                            clusterIndex,
+                                            superClusterIndex,
+                                        );
+                                    },
+                                );
+                            },
+                        );
 
                         setPhotoClusters(sortedClusters);
                         setOptimalZoom(optimalZoomLevel);
-                        setSuperClusterInfo({ superClusters, clusterToSuperClusterMap });
+                        setSuperClusterInfo({
+                            superClusters,
+                            clusterToSuperClusterMap,
+                        });
                     },
                 );
             }

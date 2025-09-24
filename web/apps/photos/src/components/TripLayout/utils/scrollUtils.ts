@@ -1,6 +1,10 @@
 import { startTransition } from "react";
 
-import { calculateDistance, getLocationPosition, getLocationPositionAtZoom } from "../mapHelpers";
+import {
+    calculateDistance,
+    getLocationPosition,
+    getLocationPositionAtZoom,
+} from "../mapHelpers";
 import type { JourneyPoint } from "../types";
 
 export interface PositionInfo {
@@ -174,14 +178,19 @@ export const handleTimelineScroll = ({
         const targetZoom = isTouchDevice ? 8 : 10; // Touch device-aware zoom level
 
         // Use pre-calculated super cluster info instead of recalculating
-        const currentSuperClusterIndex = superClusterInfo.clusterToSuperClusterMap.get(currentActiveLocationIndex) ?? -1;
+        const currentSuperClusterIndex =
+            superClusterInfo.clusterToSuperClusterMap.get(
+                currentActiveLocationIndex,
+            ) ?? -1;
         const isInSuperCluster = currentSuperClusterIndex !== -1;
 
         // Check previous super cluster state
         const previousState = previousSuperClusterStateRef.current;
         const wasInSuperCluster = previousState.isInSuperCluster;
         const previousSuperClusterIndex = previousState.superClusterIndex;
-        const isSameSuperCluster = isInSuperCluster && wasInSuperCluster &&
+        const isSameSuperCluster =
+            isInSuperCluster &&
+            wasInSuperCluster &&
             currentSuperClusterIndex === previousSuperClusterIndex;
 
         try {
@@ -193,7 +202,7 @@ export const handleTimelineScroll = ({
                 const [zoomAwareLat, zoomAwareLng] = getLocationPositionAtZoom(
                     targetCluster.lat,
                     targetCluster.lng,
-                    superClusterZoom
+                    superClusterZoom,
                 );
 
                 // First zoom out far for distant locations
@@ -206,11 +215,11 @@ export const handleTimelineScroll = ({
                 // Then zoom back in to super cluster level
                 setTimeout(() => {
                     setTargetZoom(superClusterZoom);
-                    mapRef.flyTo([zoomAwareLat, zoomAwareLng], superClusterZoom, {
-                        animate: true,
-                        duration: 1.2,
-                        easeLinearity: 0.25,
-                    });
+                    mapRef.flyTo(
+                        [zoomAwareLat, zoomAwareLng],
+                        superClusterZoom,
+                        { animate: true, duration: 1.2, easeLinearity: 0.25 },
+                    );
                 }, 1600);
             } else if (isInSuperCluster && !wasInSuperCluster) {
                 // Entering super cluster from nearby location - direct zoom in
@@ -218,7 +227,7 @@ export const handleTimelineScroll = ({
                 const [zoomAwareLat, zoomAwareLng] = getLocationPositionAtZoom(
                     targetCluster.lat,
                     targetCluster.lng,
-                    superClusterZoom
+                    superClusterZoom,
                 );
                 setTargetZoom(superClusterZoom);
                 mapRef.flyTo([zoomAwareLat, zoomAwareLng], superClusterZoom, {
@@ -231,19 +240,23 @@ export const handleTimelineScroll = ({
                 if (isDistantLocation) {
                     // Distant location: full zoom out → pan → zoom in
                     const intermediateZoom = isTouchDevice ? 2 : 4;
-                    mapRef.flyTo([positionedLat, positionedLng], intermediateZoom, {
-                        animate: true,
-                        duration: 1.5,
-                        easeLinearity: 0.25,
-                    });
+                    mapRef.flyTo(
+                        [positionedLat, positionedLng],
+                        intermediateZoom,
+                        { animate: true, duration: 1.5, easeLinearity: 0.25 },
+                    );
 
                     setTimeout(() => {
                         setTargetZoom(targetZoom);
-                        mapRef.flyTo([positionedLat, positionedLng], targetZoom, {
-                            animate: true,
-                            duration: 1.2,
-                            easeLinearity: 0.25,
-                        });
+                        mapRef.flyTo(
+                            [positionedLat, positionedLng],
+                            targetZoom,
+                            {
+                                animate: true,
+                                duration: 1.2,
+                                easeLinearity: 0.25,
+                            },
+                        );
                     }, 1600);
                 } else {
                     // Nearby location: direct zoom out to normal view
@@ -260,7 +273,7 @@ export const handleTimelineScroll = ({
                 const [zoomAwareLat, zoomAwareLng] = getLocationPositionAtZoom(
                     targetCluster.lat,
                     targetCluster.lng,
-                    currentMapZoom
+                    currentMapZoom,
                 );
                 mapRef.panTo([zoomAwareLat, zoomAwareLng], {
                     animate: true,
@@ -270,7 +283,8 @@ export const handleTimelineScroll = ({
             } else if (isInSuperCluster) {
                 // In super cluster but different from previous - treat as distant location
                 // Check if we're switching between different super clusters
-                const isDifferentSuperCluster = wasInSuperCluster &&
+                const isDifferentSuperCluster =
+                    wasInSuperCluster &&
                     currentSuperClusterIndex !== previousSuperClusterIndex;
 
                 if (isDistantLocation) {
@@ -278,18 +292,19 @@ export const handleTimelineScroll = ({
                     // Since we're in the isInSuperCluster block, destination is always a super cluster
                     const finalZoom = isTouchDevice ? 15 : 14; // Higher zoom on mobile to break apart clusters
                     const intermediateZoom = isTouchDevice ? 2 : 4; // Extreme zoom out for distant locations
-                    const [zoomAwareLat, zoomAwareLng] = getLocationPositionAtZoom(
-                        targetCluster.lat,
-                        targetCluster.lng,
-                        finalZoom
-                    );
+                    const [zoomAwareLat, zoomAwareLng] =
+                        getLocationPositionAtZoom(
+                            targetCluster.lat,
+                            targetCluster.lng,
+                            finalZoom,
+                        );
 
                     // First zoom out far for distant locations
-                    mapRef.flyTo([zoomAwareLat, zoomAwareLng], intermediateZoom, {
-                        animate: true,
-                        duration: 1.5,
-                        easeLinearity: 0.25,
-                    });
+                    mapRef.flyTo(
+                        [zoomAwareLat, zoomAwareLng],
+                        intermediateZoom,
+                        { animate: true, duration: 1.5, easeLinearity: 0.25 },
+                    );
 
                     // Then zoom back in to appropriate level (super cluster or normal)
                     setTimeout(() => {
@@ -304,36 +319,42 @@ export const handleTimelineScroll = ({
                     // Different super cluster (not distant): moderate zoom out → pan → zoom in
                     const superClusterZoom = isTouchDevice ? 15 : 14; // Higher zoom on mobile to break apart clusters
                     const intermediateZoom = isTouchDevice ? 8 : 10; // Moderate zoom out for nearby super clusters
-                    const [zoomAwareLat, zoomAwareLng] = getLocationPositionAtZoom(
-                        targetCluster.lat,
-                        targetCluster.lng,
-                        superClusterZoom
-                    );
+                    const [zoomAwareLat, zoomAwareLng] =
+                        getLocationPositionAtZoom(
+                            targetCluster.lat,
+                            targetCluster.lng,
+                            superClusterZoom,
+                        );
 
                     // First zoom out moderately
-                    mapRef.flyTo([zoomAwareLat, zoomAwareLng], intermediateZoom, {
-                        animate: true,
-                        duration: 0.8,
-                        easeLinearity: 0.25,
-                    });
+                    mapRef.flyTo(
+                        [zoomAwareLat, zoomAwareLng],
+                        intermediateZoom,
+                        { animate: true, duration: 0.8, easeLinearity: 0.25 },
+                    );
 
                     // Then zoom back in to super cluster level
                     setTimeout(() => {
                         setTargetZoom(superClusterZoom);
-                        mapRef.flyTo([zoomAwareLat, zoomAwareLng], superClusterZoom, {
-                            animate: true,
-                            duration: 0.8,
-                            easeLinearity: 0.25,
-                        });
+                        mapRef.flyTo(
+                            [zoomAwareLat, zoomAwareLng],
+                            superClusterZoom,
+                            {
+                                animate: true,
+                                duration: 0.8,
+                                easeLinearity: 0.25,
+                            },
+                        );
                     }, 900);
                 } else {
                     // Same super cluster, different location - just pan with zoom-aware positioning
                     const currentMapZoom = mapRef.getZoom();
-                    const [zoomAwareLat, zoomAwareLng] = getLocationPositionAtZoom(
-                        targetCluster.lat,
-                        targetCluster.lng,
-                        currentMapZoom
-                    );
+                    const [zoomAwareLat, zoomAwareLng] =
+                        getLocationPositionAtZoom(
+                            targetCluster.lat,
+                            targetCluster.lng,
+                            currentMapZoom,
+                        );
                     mapRef.panTo([zoomAwareLat, zoomAwareLng], {
                         animate: true,
                         duration: 0.6,
@@ -377,7 +398,7 @@ export const handleTimelineScroll = ({
             // Update super cluster state
             previousSuperClusterStateRef.current = {
                 isInSuperCluster,
-                superClusterIndex: currentSuperClusterIndex
+                superClusterIndex: currentSuperClusterIndex,
             };
         } catch (error) {
             console.warn("Map operation failed:", error);
