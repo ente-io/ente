@@ -39,11 +39,14 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper> {
   double _currentPointerY = 0;
 
   // Auto-scroll constants
-  static const double _baseScrollSpeed = 2.0; // Base speed in pixels per frame
-  static const double _maxScrollSpeed = 15.0; // Maximum speed cap
+  static const double _maxScrollSpeed = 30.0; // Maximum speed cap
   static const double _scrollIntervalMs = 8.33; // ~120fps in milliseconds
   static const double _exponentialFactor =
       0.015; // Controls speed increase rate
+  static const double _referenceMaxDistance = 200.0; // Distance for max speed
+  // Pre-calculated denominator for speed formula: e^(factor * maxDist) - 1
+  static final double _speedDenominator =
+      math.exp(_exponentialFactor * _referenceMaxDistance) - 1;
 
   @override
   Widget build(BuildContext context) {
@@ -128,9 +131,16 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper> {
 
   /// Calculate exponential scroll speed based on distance from boundary
   double _calculateScrollSpeed(double distanceFromBoundary) {
-    // Exponential formula: speed = base * e^(factor * distance)
-    final speed =
-        _baseScrollSpeed * math.exp(_exponentialFactor * distanceFromBoundary);
+    // Modified exponential formula that starts at 0 and grows to max speed
+    // speed = maxSpeed * (e^(factor * distance) - 1) / (e^(factor * maxDist) - 1)
+    // This ensures speed starts at 0 when distance is 0
+
+    if (distanceFromBoundary <= 0) return 0;
+
+    // Calculate speed using pre-calculated denominator
+    final numerator = math.exp(_exponentialFactor * distanceFromBoundary) - 1;
+    final speed = _maxScrollSpeed * (numerator / _speedDenominator);
+
     return math.min(speed, _maxScrollSpeed);
   }
 
