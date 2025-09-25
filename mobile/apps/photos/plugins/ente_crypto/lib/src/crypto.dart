@@ -206,32 +206,43 @@ Future<void> chachaDecryptFile(Map<String, dynamic> args) async {
   logger.info("Decrypting file of size " + sourceFileLength.toString());
 
   final inputFile = sourceFile.openSync(mode: FileMode.read);
-  final pullState = Sodium.cryptoSecretstreamXchacha20poly1305InitPull(
-    args["header"],
-    args["key"],
-  );
+  int chunckIndex = 0;
+  try {
+    final pullState = Sodium.cryptoSecretstreamXchacha20poly1305InitPull(
+      args["header"],
+      args["key"],
+    );
 
-  var bytesRead = 0;
-  var tag = Sodium.cryptoSecretstreamXchacha20poly1305TagMessage;
-  while (tag != Sodium.cryptoSecretstreamXchacha20poly1305TagFinal) {
-    var chunkSize = decryptionChunkSize;
-    if (bytesRead + chunkSize >= sourceFileLength) {
-      chunkSize = sourceFileLength - bytesRead;
+    var bytesRead = 0;
+    var tag = Sodium.cryptoSecretstreamXchacha20poly1305TagMessage;
+    while (tag != Sodium.cryptoSecretstreamXchacha20poly1305TagFinal) {
+      chunckIndex++;
+      var chunkSize = decryptionChunkSize;
+      if (bytesRead + chunkSize >= sourceFileLength) {
+        chunkSize = sourceFileLength - bytesRead;
+      }
+      final buffer = await inputFile.read(chunkSize);
+      bytesRead += chunkSize;
+      final pullResult = Sodium.cryptoSecretstreamXchacha20poly1305Pull(
+        pullState,
+        buffer,
+        null,
+      );
+      await destinationFile.writeAsBytes(pullResult.m, mode: FileMode.append);
+      tag = pullResult.tag;
     }
-    final buffer = await inputFile.read(chunkSize);
-    bytesRead += chunkSize;
-    final pullResult =
-        Sodium.cryptoSecretstreamXchacha20poly1305Pull(pullState, buffer, null);
-    await destinationFile.writeAsBytes(pullResult.m, mode: FileMode.append);
-    tag = pullResult.tag;
-  }
-  inputFile.closeSync();
+    inputFile.closeSync();
 
-  logger.info(
-    "ChaCha20 Decryption time: " +
-        (DateTime.now().millisecondsSinceEpoch - decryptionStartTime)
-            .toString(),
-  );
+    logger.info(
+      "ChaCha20 Decryption time: " +
+          (DateTime.now().millisecondsSinceEpoch - decryptionStartTime)
+              .toString(),
+    );
+  } catch (e) {
+    throw Exception(
+      "at chunk $chunckIndex for $sourceFileLength bytes with err $e",
+    );
+  }
 }
 
 Uint8List chachaDecryptData(Map<String, dynamic> args) {
@@ -427,11 +438,13 @@ class CryptoUtil {
     args["destinationFilePath"] = destinationFilePath;
     args["header"] = header;
     args["key"] = key;
-    return _computer.compute(
-      chachaDecryptFile,
-      param: args,
-      taskName: "decryptFile",
-    );
+    return _computer
+        .compute(
+          chachaDecryptFile,
+          param: args,
+          taskName: "decryptFile",
+        )
+        .catchError((e) => throw CryptoErr("decryptFile", e));
   }
 
   // Generates and returns a 256-bit key.

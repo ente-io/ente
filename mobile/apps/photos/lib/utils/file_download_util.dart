@@ -81,7 +81,11 @@ Future<File?> downloadAndDecryptPublicFile(
       _logger.info('$logPrefix file saved at $decryptedFilePath');
     } catch (e, s) {
       fakeProgress?.stop();
-      _logger.severe("Critical: $logPrefix failed to decrypt", e, s);
+      _logger.severe(
+        "Critical: $logPrefix failed to decrypt  v:${file.metadataVersion}, viaMob:${(file.deviceFolder ?? '') != ''}",
+        e,
+        s,
+      );
       return null;
     }
     return File(decryptedFilePath);
@@ -184,7 +188,11 @@ Future<File?> downloadAndDecrypt(
           .info('$logPrefix decryption completed (genID ${file.generatedID})');
     } catch (e, s) {
       fakeProgress?.stop();
-      _logger.severe("Critical: $logPrefix failed to decrypt", e, s);
+      _logger.severe(
+        "Critical: $logPrefix failed to decrypt  v:${file.metadataVersion}, viaMob:${(file.deviceFolder ?? '') != ''}",
+        e,
+        s,
+      );
       return null;
     }
     await encryptedFile.delete();
