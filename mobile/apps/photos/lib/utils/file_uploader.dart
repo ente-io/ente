@@ -624,17 +624,24 @@ class FileUploader {
         }
       } else if (encryptedFileExists) {
         // otherwise just delete the file for singlepart upload
+        _logger.severe('File exists without multipart entry, deleting file');
         await File(encryptedFilePath).delete();
       }
       await _checkIfWithinStorageLimit(mediaUploadData.sourceFile!);
       final encryptedFile = File(encryptedFilePath);
 
       final EncryptionResult fileAttributes = multiPartFileEncResult ??
-          await CryptoUtil.encryptFile(
-            mediaUploadData.sourceFile!.path,
-            encryptedFilePath,
-            key: key,
-          );
+          (flagService.internalUser
+              ? await CryptoUtil.encryptFileV2(
+                  mediaUploadData.sourceFile!.path,
+                  encryptedFilePath,
+                  key: key,
+                )
+              : await CryptoUtil.encryptFile(
+                  mediaUploadData.sourceFile!.path,
+                  encryptedFilePath,
+                  key: key,
+                ));
 
       late final Uint8List? thumbnailData;
       if (mediaUploadData.thumbnail == null &&
@@ -722,6 +729,9 @@ class FileUploader {
         null,
         mediaUploadData.exifData,
       );
+      file.metadataVersion = flagService.internalUser
+          ? EnteFile.kMetadataSimplifiedEncVersion
+          : EnteFile.kCurrentMetadataVersion;
       final metadata =
           await file.getMetadataForUpload(mediaUploadData, exifTime);
 

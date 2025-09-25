@@ -272,18 +272,35 @@ class SuperLogging {
     return result;
   }
 
+  /// Send an error to sentry, if enabled.
+  /// // note: stack is not reported currently
   static Future<void> _sendErrorToSentry(
     Object error,
-    StackTrace? stack,
-  ) async {
+    StackTrace? stack, {
+    LogRecord? rec,
+  }) async {
     try {
       if (_shouldSkipSentry(error)) {
         return;
       }
-      await Sentry.captureException(
-        error,
-        stackTrace: stack,
-      );
+      if (rec != null) {
+        await Sentry.captureException(
+          error,
+          stackTrace: stack,
+          withScope: (scope) {
+            scope.setContexts('log_details', {
+              'message': rec.message,
+            });
+            scope.setTag('logger', rec.loggerName);
+            scope.setTag('level', rec.level.name);
+          },
+        );
+      } else {
+        await Sentry.captureException(
+          error,
+          stackTrace: stack,
+        );
+      }
     } catch (e) {
       $.info('Sending report to sentry failed: $e');
       $.info('Original error: $error');
@@ -306,10 +323,10 @@ class SuperLogging {
     // write to stdout
     printLog(str);
 
-    saveLogString(str, rec.error);
+    saveLogString(str, rec.error, rec: rec);
   }
 
-  static void saveLogString(String str, Object? error) {
+  static void saveLogString(String str, Object? error, {LogRecord? rec}) {
     // push to log queue
     if (fileIsEnabled) {
       fileQueueEntries.add(str + '\n');
@@ -320,7 +337,7 @@ class SuperLogging {
 
     // add error to sentry queue
     if (sentryIsEnabled && error != null) {
-      _sendErrorToSentry(error, null).ignore();
+      _sendErrorToSentry(error, null, rec: rec).ignore();
     }
   }
 
