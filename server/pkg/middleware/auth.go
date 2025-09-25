@@ -63,6 +63,7 @@ func (m *AuthMiddleware) TokenAuthMiddleware(jwtClaimScope *jwt.ClaimScope) gin.
 					return
 				}
 				if isExpired {
+					logrus.Warningf("User token expired: %d", userID)
 					c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "token expired"})
 					return
 				}
