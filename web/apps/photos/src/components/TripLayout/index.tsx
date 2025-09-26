@@ -336,6 +336,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                         onAddPhotos={onAddPhotos}
                         downloadAllFiles={downloadAllFiles}
                         enableDownload={enableDownload}
+                        collectionTitle={collectionTitle}
                     />
                 ) : (
                     <TopNavButtons
