@@ -383,30 +383,9 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                     <MobileTimelineContainer ref={timelineRef}>
                         <MobileTimelineContent>
                             {isInitialLoad ? (
-                                <LoadingCoverPlaceholder>
-                                    <LoadingCoverImage>
-                                        <CoverGradientOverlay />
-                                        <CoverPlaceholderContent>
-                                            <PlaceholderTextBox
-                                                sx={{
-                                                    height: "30px",
-                                                    width: "200px",
-                                                    mb: "2px",
-                                                }}
-                                            />
-                                            <PlaceholderTextBox
-                                                sx={{
-                                                    height: "16px",
-                                                    width: "120px",
-                                                    margin: 0,
-                                                }}
-                                            />
-                                        </CoverPlaceholderContent>
-                                    </LoadingCoverImage>
-                                    <LoadingSpinnerContainer>
-                                        <LoadingSpinner />
-                                    </LoadingSpinnerContainer>
-                                </LoadingCoverPlaceholder>
+                                <MobileLoadingContainer>
+                                    <LoadingSpinner />
+                                </MobileLoadingContainer>
                             ) : journeyData.length > 0 ? (
                                 <div>
                                     {isLoadingLocations ? (
@@ -738,18 +717,18 @@ const NoPhotosContainer = styled(Box)(({ theme }) => ({
 const MobileContainer = styled(Box)({
     display: "flex",
     flexDirection: "column",
-    height: "100vh",
+    height: "100svh",
     width: "100%",
 });
 
 const MobileMapContainer = styled(Box)({
-    height: "calc(60% + 20px)",
+    height: "calc(60svh + 20px)",
     position: "relative",
     overflow: "hidden",
 });
 
 const MobileTimelineContainer = styled(Box)(({ theme }) => ({
-    height: "40%",
+    height: "40svh",
     marginTop: "-20px",
     overflow: "auto",
     backgroundColor: theme.palette.background.paper,
@@ -784,10 +763,18 @@ const MobileCoverOverlay = styled(Box, {
 }));
 
 const MobileTimelineContent = styled(Box)({
-    padding: "16px 20px",
+    padding: "0",
     height: "100%",
     display: "flex",
     flexDirection: "column",
+});
+
+const MobileLoadingContainer = styled(Box)({
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    height: "100%",
+    width: "100%",
 });
 
 const MobileTimelineBaseLine = styled(Box, {
@@ -795,8 +782,8 @@ const MobileTimelineBaseLine = styled(Box, {
 })<{ photoClusters: JourneyPoint[][] }>(({ theme, photoClusters }) => ({
     position: "absolute",
     left: "50%",
-    top: "-15vh",
-    height: `${(photoClusters.length - 1) * 40 + 35}vh`,
+    top: "-15svh",
+    height: `${(photoClusters.length - 1) * 40 + 35}svh`,
     width: "3px",
     backgroundColor: theme.palette.grey[300],
     transform: "translateX(-1.5px)",
