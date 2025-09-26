@@ -494,12 +494,12 @@ export const detectScreenCollisions = (
         }
     });
 
-    // Return visible clusters (those not hidden by super-clusters)
-    const visibleClusters = clusters.filter(
-        (_, idx) => !hiddenClusterIndices.has(idx),
-    );
+    // Return visible clusters with their original indices preserved
+    const visibleClustersWithIndices = clusters
+        .map((cluster, originalIndex) => ({ cluster, originalIndex }))
+        .filter((item) => !hiddenClusterIndices.has(item.originalIndex));
 
-    return { superClusters, visibleClusters };
+    return { superClusters, visibleClustersWithIndices };
 };
 
 // Calculate map center with first location positioned at 20% from right edge

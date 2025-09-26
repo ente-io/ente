@@ -443,8 +443,24 @@ export const scrollTimelineToLocation = ({
     const clientHeight = timelineContainer.clientHeight;
     const maxScrollableDistance = scrollHeight - clientHeight;
 
-    const targetProgress =
-        locationIndex / Math.max(1, photoClusters.length - 1);
+    // Check if we're on a touch device
+    const isTouchDevice = typeof window !== "undefined" &&
+        ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+
+    // Calculate target progress using the same formula as scroll progress calculation
+    let targetProgress;
+    if (isTouchDevice) {
+        // Mobile: Use inverse of the slower progression formula
+        // If active index = Math.floor(progress * (length - 0.5))
+        // Then progress = (index + 0.5) / (length - 0.5) for accurate inverse
+        targetProgress = (locationIndex + 0.5) / Math.max(1, photoClusters.length - 0.5);
+    } else {
+        // Desktop: Use original formula
+        targetProgress = locationIndex / Math.max(1, photoClusters.length - 1);
+    }
+
+    // Clamp progress to valid range
+    targetProgress = Math.min(1, Math.max(0, targetProgress));
     const targetScrollTop = targetProgress * maxScrollableDistance;
 
     timelineContainer.scrollTo({

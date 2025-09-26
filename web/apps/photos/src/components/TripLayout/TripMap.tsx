@@ -88,7 +88,7 @@ export const TripMap: React.FC<TripMapProps> = ({
     }
 
     // Calculate super-clusters based on screen collisions, excluding the active cluster
-    const { superClusters, visibleClusters } = detectScreenCollisions(
+    const { superClusters, visibleClustersWithIndices } = detectScreenCollisions(
         photoClusters,
         currentZoom,
         targetZoom,
@@ -181,7 +181,8 @@ export const TripMap: React.FC<TripMapProps> = ({
                     })}
 
                     {/* Draw visible regular clusters */}
-                    {visibleClusters.map((cluster, index) => {
+                    {visibleClustersWithIndices.map((item, index) => {
+                        const { cluster, originalIndex } = item;
                         const firstPhoto = cluster[0];
                         if (!firstPhoto) return null;
                         const avgLat =
@@ -191,12 +192,8 @@ export const TripMap: React.FC<TripMapProps> = ({
                             cluster.reduce((sum, p) => sum + p.lng, 0) /
                             cluster.length;
 
-                        // Find the original cluster index
-                        const originalClusterIndex = photoClusters.findIndex(
-                            (originalCluster) =>
-                                originalCluster.length === cluster.length &&
-                                originalCluster[0]?.image === cluster[0]?.image,
-                        );
+                        // Use the preserved original index
+                        const originalClusterIndex = originalIndex;
                         // Show green only for active locations
                         let currentLocationIndex;
                         if (isTouchDevice) {
