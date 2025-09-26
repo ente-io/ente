@@ -62,7 +62,6 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
 
   @override
   void initState() {
-    _logger.info("Initializing video editor page");
     super.initState();
 
     // First determine rotation correction for Android
@@ -111,7 +110,6 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
 
   @override
   Widget build(BuildContext context) {
-    _logger.info("Building video editor page");
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
@@ -229,7 +227,6 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
 
   void exportVideo() async {
     _isExporting.value = true;
-    _logger.info('Starting video export');
 
     final dialogKey = GlobalKey<LinearProgressDialogState>();
     final dialog = LinearProgressDialog(
@@ -255,9 +252,8 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         'exported_${DateTime.now().millisecondsSinceEpoch}.mp4',
       );
 
-      _logger.info('Export output path: $outputPath');
-      _logger.info('Controller isTrimmed: ${_controller!.isTrimmed}');
-      _logger.info('Controller rotation: ${_controller!.rotation}');
+      _logger.fine(
+          'Export: path=$outputPath, trim=${_controller!.isTrimmed}, rotation=${_controller!.rotation}');
 
       // Check feature flag to decide which export method to use
       final File result;
@@ -270,7 +266,6 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
               ? _quarterTurnsForRotationCorrection! * 90
               : 0,
           onProgress: (progress) {
-            _logger.info('Export progress: $progress');
             if (dialogKey.currentState != null) {
               dialogKey.currentState!.setProgress(progress);
             }
@@ -283,7 +278,6 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
           controller: _controller!,
           outputPath: outputPath,
           onProgress: (progress) {
-            _logger.info('Export progress: $progress');
             if (dialogKey.currentState != null) {
               dialogKey.currentState!.setProgress(progress);
             }
@@ -292,7 +286,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         );
       }
 
-      _logger.info('Export completed, result: ${result.path}');
+      _logger.fine('Export completed: ${result.path}');
       // Process the exported file
       await _handleExportedFile(result, dialogKey);
     } catch (e, s) {
@@ -346,8 +340,6 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
       Bus.instance.fire(LocalPhotosUpdatedEvent([newFile], source: "editSave"));
       SyncService.instance.sync().ignore();
       showShortToast(context, AppLocalizations.of(context).editsSaved);
-      _logger.info("Original file " + widget.file.toString());
-      _logger.info("Saved edits to file " + newFile.toString());
       final files = widget.detailPageConfig.files;
 
       // the index could be -1 if the files fetched doesn't contain the newly
@@ -384,15 +376,12 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         final width = videoInfo['width'] as int? ?? 0;
         final height = videoInfo['height'] as int? ?? 0;
 
-        _logger.info(
-          'Native video info - width: $width, height: $height, rotation: $rotation',
-        );
+        _logger.fine('Video info: ${width}x$height, rotation=$rotation');
 
         if (rotation != 0) {
           _quarterTurnsForRotationCorrection = (rotation / 90).round();
-          _logger.info(
-            'Rotation $rotation detected, applying $_quarterTurnsForRotationCorrection quarter turns clockwise for correction',
-          );
+          _logger.fine(
+              'Applying rotation correction: ${rotation}° → $_quarterTurnsForRotationCorrection quarter turns');
         } else {
           _quarterTurnsForRotationCorrection = 0;
         }
@@ -404,12 +393,8 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         );
         // Fallback to the original method if native fails
         await getVideoPropsAsync(widget.ioFile).then((props) async {
-          _logger.info(
-            'FFProbeProps - width: ${props?.width}, height: ${props?.height}, rotation: ${props?.rotation}',
-          );
-          _logger.info(
-            'FFProbeProps aspect ratio: ${props?.aspectRatio}',
-          );
+          _logger.fine(
+              'FFprobe fallback: ${props?.width}x${props?.height}, rotation=${props?.rotation}');
           if (props?.rotation != null) {
             _quarterTurnsForRotationCorrection =
                 (props!.rotation! / 90).round();

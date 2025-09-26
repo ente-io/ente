@@ -13,7 +13,9 @@ dependencies:
   plugin_platform_interface: ^2.0.0
   logging: ^1.2.0
   video_editor:
-    path: ../video_editor
+    git:
+      url: https://github.com/ente-io/video_editor_fork.git
+      ref: dimension-override
 
 dev_dependencies:
   flutter_test:
