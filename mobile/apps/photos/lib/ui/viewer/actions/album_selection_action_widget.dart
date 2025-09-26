@@ -9,6 +9,7 @@ import "package:photos/models/selected_albums.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
+import "package:photos/ui/collections/album/smart_album_people.dart";
 import "package:photos/ui/collections/collection_list_page.dart";
 import "package:photos/ui/common/web_page.dart";
 import "package:photos/ui/components/action_sheet_widget.dart";
@@ -70,6 +71,23 @@ class _AlbumSelectionActionWidgetState
         widget.selectedAlbums.albums.any((album) => album.isPinned);
     final hasUnpinnedAlbum =
         widget.selectedAlbums.albums.any((album) => !album.isPinned);
+
+    final bool isOnlyOneAlbumSelected =
+        widget.selectedAlbums.albums.length == 1;
+
+    bool hasAddPhotoPermissions = false;
+    if (isOnlyOneAlbumSelected) {
+      final currentUserID = CollectionsService.instance.config.getUserID();
+      final selectedAlbum = widget.selectedAlbums.albums.first;
+
+      // Skip favorites album and check permissions
+      if (selectedAlbum.type != CollectionType.favorites &&
+          currentUserID != null) {
+        hasAddPhotoPermissions = selectedAlbum.isOwner(currentUserID) ||
+            (selectedAlbum.getRole(currentUserID) ==
+                CollectionParticipantRole.collaborator);
+      }
+    }
 
     if (widget.sectionType == UISectionType.homeCollections ||
         widget.sectionType == UISectionType.outgoingCollections) {
@@ -140,15 +158,31 @@ class _AlbumSelectionActionWidgetState
         onTap: _archiveClick,
       ),
     );
+    final isLightMode = Theme.of(context).brightness == Brightness.light;
 
-    if (widget.sectionType == UISectionType.incomingCollections ||
-        widget.sectionType == UISectionType.homeCollections ||
-        widget.sectionType == UISectionType.outgoingCollections) {
+    if ((widget.sectionType == UISectionType.incomingCollections ||
+            widget.sectionType == UISectionType.homeCollections ||
+            widget.sectionType == UISectionType.outgoingCollections) &&
+        isOnlyOneAlbumSelected &&
+        hasAddPhotoPermissions) {
       otherItems.add(
         SelectionActionButton(
           labelText: S.of(context).addPhotos,
           icon: Icons.add_photo_alternate_outlined,
           onTap: _showAddPhotoDialog,
+        ),
+      );
+
+      otherItems.add(
+        SelectionActionButton(
+          labelText: S.of(context).autoAddPeople,
+          iconWidget: Image.asset(
+            'assets/auto-add-people.png',
+            width: 24,
+            height: 24,
+            color: isLightMode ? Colors.black : Colors.white,
+          ),
+          onTap: _showAutoAddPhotoDialog,
         ),
       );
     }
@@ -455,54 +489,54 @@ class _AlbumSelectionActionWidgetState
   }
 
   Future<void> _showAddPhotoDialog() async {
-    final currentUserID = CollectionsService.instance.config.getUserID();
+    final selectedAlbum = widget.selectedAlbums.albums.first;
+    widget.selectedAlbums.clearAll();
 
-    for (final collection in widget.selectedAlbums.albums) {
-      if (collection.type == CollectionType.favorites) {
-        continue;
-      }
+    try {
+      if (selectedAlbum.isCollectEnabledForPublicLink()) {
+        final authToken = CollectionsService.instance
+            .getSharedPublicAlbumToken(selectedAlbum.id);
+        final albumKey = CollectionsService.instance
+            .getSharedPublicAlbumKey(selectedAlbum.id);
 
-      final bool canAddPhotos = collection.isOwner(currentUserID!) ||
-          (collection.getRole(currentUserID) ==
-              CollectionParticipantRole.collaborator);
+        final res = await showChoiceDialog(
+          context,
+          title: S.of(context).openAlbumInBrowserTitle,
+          firstButtonLabel: S.of(context).openAlbumInBrowser,
+          secondButtonLabel: S.of(context).cancel,
+          firstButtonType: ButtonType.primary,
+        );
 
-      if (!canAddPhotos) {
-        continue;
-      }
-
-      try {
-        if (collection.isCollectEnabledForPublicLink()) {
-          final authToken = CollectionsService.instance
-              .getSharedPublicAlbumToken(collection.id);
-          final albumKey = CollectionsService.instance
-              .getSharedPublicAlbumKey(collection.id);
-
-          final res = await showChoiceDialog(
-            context,
-            title: S.of(context).openAlbumInBrowserTitle,
-            firstButtonLabel: S.of(context).openAlbumInBrowser,
-            secondButtonLabel: S.of(context).cancel,
-            firstButtonType: ButtonType.primary,
-          );
-
-          if (res != null && res.action == ButtonAction.first) {
-            await Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => WebPage(
-                  collection.name ?? "",
-                  "https://albums.ente.io/?t=$authToken#$albumKey",
-                ),
+        if (res != null && res.action == ButtonAction.first) {
+          await Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => WebPage(
+                selectedAlbum.name ?? "",
+                "https://albums.ente.io/?t=$authToken#$albumKey",
               ),
-            );
-          }
-        } else {
-          await showAddPhotosSheet(context, collection);
+            ),
+          );
         }
-      } catch (e, s) {
-        _logger.severe(e, s);
-        await showGenericErrorDialog(context: context, error: e);
+      } else {
+        await showAddPhotosSheet(context, selectedAlbum);
       }
+    } catch (e, s) {
+      _logger.severe(e, s);
+      await showGenericErrorDialog(context: context, error: e);
     }
+  }
+
+  Future<void> _showAutoAddPhotoDialog() async {
+    final selectedAlbum = widget.selectedAlbums.albums.first;
+
+    widget.selectedAlbums.clearAll();
+
+    await routeToPage(
+      context,
+      SmartAlbumPeople(
+        collectionId: selectedAlbum.id,
+      ),
+    );
   }
 
   Future<void> _leaveAlbum() async {
