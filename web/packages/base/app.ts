@@ -86,7 +86,7 @@ export const clientPackageName = (() => {
         accounts: "io.ente.accounts.web",
         auth: "io.ente.auth.web",
         cast: "io.ente.cast.web",
-        embed: "io.ente.embed.web",
+        embed: "io.ente.photos.web", // Use photos package name for embed app
         locker: "io.ente.locker.web",
         photos: "io.ente.photos.web",
     }[appName];

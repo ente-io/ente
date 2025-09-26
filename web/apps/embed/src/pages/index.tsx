@@ -54,11 +54,10 @@ export default function EmbedGallery() {
     const collectionKey = useRef<string | undefined>(undefined);
 
     useEffect(() => {
-        const currentURL = new URL(window.location.href);
-
         const main = async () => {
             let redirectingToWebsite = false;
             try {
+                const currentURL = new URL(window.location.href);
                 const t = currentURL.searchParams.get("t");
                 const ck = await extractCollectionKeyFromShareURL(currentURL);
                 if (!t && !ck) {
@@ -99,6 +98,7 @@ export default function EmbedGallery() {
                 }
             }
         };
+
         main();
     }, []);
 

@@ -85,13 +85,16 @@ const EmbedFileTile: React.FC<EmbedFileTileProps> = memo(
 
         React.useEffect(() => {
             void loadThumbnail();
+        }, [loadThumbnail]);
 
+        // Separate cleanup effect that only runs on unmount
+        React.useEffect(() => {
             return () => {
                 if (thumbnailSrc) {
                     URL.revokeObjectURL(thumbnailSrc);
                 }
             };
-        }, [loadThumbnail, thumbnailSrc]);
+        }, [thumbnailSrc]);
 
         const content = useMemo(() => {
             if (isLoading) {
