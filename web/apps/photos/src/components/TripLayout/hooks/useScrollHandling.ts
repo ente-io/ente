@@ -38,6 +38,7 @@ export interface UseScrollHandlingParams {
         }[];
         clusterToSuperClusterMap: Map<number, number>;
     };
+    scrollProgress: number;
 }
 
 export const useScrollHandling = ({
@@ -55,6 +56,7 @@ export const useScrollHandling = ({
     setTargetZoom,
     previousSuperClusterStateRef,
     superClusterInfo,
+    scrollProgress,
 }: UseScrollHandlingParams) => {
     const isTouchDevice = useIsTouchscreen();
     // Update location positions callback
@@ -130,6 +132,8 @@ export const useScrollHandling = ({
                 setHasUserScrolled,
                 scrollTimelineToLocation: scrollToLocation,
                 isTouchDevice,
+                superClusterInfo,
+                scrollProgress,
             });
         },
         [
@@ -141,6 +145,8 @@ export const useScrollHandling = ({
             setHasUserScrolled,
             scrollToLocation,
             isTouchDevice,
+            superClusterInfo,
+            scrollProgress,
         ],
     );
 

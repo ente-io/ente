@@ -135,6 +135,16 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
             targetZoom: number | null;
             mapRef: import("leaflet").Map | null;
             scrollProgress: number;
+            superClusterInfo?: {
+                superClusters: {
+                    lat: number;
+                    lng: number;
+                    clusterCount: number;
+                    clustersInvolved: number[];
+                    image: string;
+                }[];
+                clusterToSuperClusterMap: Map<number, number>;
+            };
             setMapRef: (map: import("leaflet").Map | null) => void;
             setCurrentZoom: (zoom: number) => void;
             setTargetZoom: (zoom: number | null) => void;
@@ -306,6 +316,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
         setTargetZoom,
         previousSuperClusterStateRef,
         superClusterInfo,
+        scrollProgress,
     });
 
     // Only wait for client-side rendering (needed for maps), but show layout immediately

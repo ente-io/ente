@@ -465,6 +465,17 @@ export interface HandleMarkerClickParams {
     setHasUserScrolled: (scrolled: boolean) => void;
     scrollTimelineToLocation: (locationIndex: number) => void;
     isTouchDevice: boolean;
+    superClusterInfo?: {
+        superClusters: {
+            lat: number;
+            lng: number;
+            clusterCount: number;
+            clustersInvolved: number[];
+            image: string;
+        }[];
+        clusterToSuperClusterMap: Map<number, number>;
+    };
+    scrollProgress: number;
 }
 
 export const handleMarkerClick = ({
@@ -479,6 +490,8 @@ export const handleMarkerClick = ({
     setHasUserScrolled,
     scrollTimelineToLocation,
     isTouchDevice,
+    superClusterInfo,
+    scrollProgress,
 }: HandleMarkerClickParams) => {
     const targetProgress = clusterIndex / Math.max(1, photoClusters.length - 1);
 
@@ -490,20 +503,63 @@ export const handleMarkerClick = ({
     setScrollProgress(targetProgress);
     setHasUserScrolled(true);
 
-    // Position clicked location at 20% from right edge
-    const [positionedLat, positionedLng] = getLocationPosition(
-        clusterLat,
-        clusterLng,
-    );
+    // Calculate current active location index
+    let currentActiveLocationIndex = -1;
+    if (photoClusters.length > 0) {
+        if (isTouchDevice) {
+            currentActiveLocationIndex = Math.floor(
+                scrollProgress * (photoClusters.length - 0.5),
+            );
+        } else {
+            currentActiveLocationIndex = Math.round(
+                scrollProgress * Math.max(0, photoClusters.length - 1),
+            );
+        }
+    }
+
+    // Check if both current and target locations are in the same super cluster
+    let shouldJustPan = false;
+    if (superClusterInfo && currentActiveLocationIndex >= 0) {
+        const currentSuperClusterIndex =
+            superClusterInfo.clusterToSuperClusterMap.get(currentActiveLocationIndex);
+        const targetSuperClusterIndex =
+            superClusterInfo.clusterToSuperClusterMap.get(clusterIndex);
+
+        // If both locations are in super clusters and they're the same super cluster
+        shouldJustPan =
+            currentSuperClusterIndex !== undefined &&
+            targetSuperClusterIndex !== undefined &&
+            currentSuperClusterIndex === targetSuperClusterIndex;
+    }
 
     if (mapRef?.getContainer()) {
         try {
-            const targetZoom = isTouchDevice ? 8 : 10; // Touch device-aware zoom level
-            mapRef.flyTo([positionedLat, positionedLng], targetZoom, {
-                animate: true,
-                duration: 1.0,
-                easeLinearity: 0.3,
-            });
+            if (shouldJustPan) {
+                // Just pan to the location with zoom-aware positioning, keeping current zoom
+                const currentMapZoom = mapRef.getZoom();
+                const [zoomAwareLat, zoomAwareLng] = getLocationPositionAtZoom(
+                    clusterLat,
+                    clusterLng,
+                    currentMapZoom,
+                );
+                mapRef.panTo([zoomAwareLat, zoomAwareLng], {
+                    animate: true,
+                    duration: 0.6,
+                    easeLinearity: 0.3,
+                });
+            } else {
+                // Normal behavior: fly to with zoom
+                const [positionedLat, positionedLng] = getLocationPosition(
+                    clusterLat,
+                    clusterLng,
+                );
+                const targetZoom = isTouchDevice ? 8 : 10;
+                mapRef.flyTo([positionedLat, positionedLng], targetZoom, {
+                    animate: true,
+                    duration: 1.0,
+                    easeLinearity: 0.3,
+                });
+            }
         } catch (error) {
             console.warn("Map operation failed:", error);
         }
