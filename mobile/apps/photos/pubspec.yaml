@@ -102,7 +102,7 @@ dependencies:
   # https://github.com/juliansteenbakker/flutter_secure_storage/issues/870#issuecomment-2777447937
   # Let's wait till the issue is resolved by the package maintainer.
   # If not resolved and we need to upgrade, write a migration script.
-  flutter_secure_storage: ^9.2.4
+  flutter_secure_storage: 9.0.0
   flutter_sodium:
   flutter_spinkit: ^5.2.1
   flutter_staggered_grid_view: ^0.7.0
