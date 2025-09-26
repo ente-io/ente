@@ -52,9 +52,9 @@ const MobileTripStartedContainer = styled(Box)({
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    height: "40vh",
+    height: "40svh",
     scrollSnapAlign: "start",
-    padding: "60px 20px 40px 20px",
+    padding: "0",
     overflow: "visible",
 });
 

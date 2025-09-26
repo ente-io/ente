@@ -2,6 +2,13 @@ import { haveWindow } from "ente-base/env";
 import type { JourneyPoint } from "./types";
 import { iconCache } from "./utils/geocoding";
 
+// Mobile/tablet detection using media query breakpoint
+const isMobileDevice = () => {
+    if (typeof window === "undefined") return false;
+    // Use 960px breakpoint to match Material-UI's "md" breakpoint for mobile and tablet
+    return window.innerWidth < 960;
+};
+
 // Conditionally import leaflet only in browser environment
 const getLeaflet = () => {
     if (haveWindow()) {
@@ -200,7 +207,7 @@ export const createIcon = (
     return icon;
 };
 
-// Function to create super-cluster icon with badge
+// Function to create super-cluster icon with background markers
 export const createSuperClusterIcon = (
     imageSrc: string,
     clusterCount: number,
@@ -224,8 +231,25 @@ export const createSuperClusterIcon = (
     const pinSize = size + 16; // Make it square and bigger
     const pinHeight = pinSize + 12; // Add space for triangle
     const triangleHeight = 10;
-    const containerSize = pinSize + 24;
+    const containerSize = pinSize + 18; // Account for stacked markers
     const hasImage = imageSrc && imageSrc.trim() !== "";
+
+    // Generate stacked marker positions for background markers
+    const generateStackedMarkerPositions = (count: number) => {
+        const positions = [];
+        const numBackgroundMarkers = Math.min(count - 1, 3); // Show up to 3 background markers
+
+        // Create a stacked effect with slight offsets
+        for (let i = 0; i < numBackgroundMarkers; i++) {
+            const offsetX = (i + 1) * 4; // Horizontal offset for stack effect
+            const offsetY = (i + 1) * 3; // Vertical offset for stack effect
+            positions.push({ x: offsetX, y: offsetY });
+        }
+        return positions;
+    };
+
+    const backgroundMarkerPositions =
+        generateStackedMarkerPositions(clusterCount);
 
     const icon = leaflet.divIcon({
         html: `
@@ -235,14 +259,65 @@ export const createSuperClusterIcon = (
           position: relative;
           cursor: pointer;
         ">
+          ${backgroundMarkerPositions
+              .map(
+                  (pos, index) => `
+            <!-- Background marker ${index} -->
+            <div style="
+              position: absolute;
+              left: ${pos.x}px;
+              top: ${pos.y}px;
+              width: ${pinSize}px;
+              height: ${pinHeight}px;
+              z-index: ${5 - index};
+              opacity: ${0.6 - index * 0.1};
+            ">
+              <!-- Background pin rounded rectangle -->
+              <div style="
+                width: ${pinSize}px;
+                height: ${pinSize}px;
+                border-radius: 16px;
+                background: ${isReached ? "#22c55e" : "white"};
+                border: 2px solid ${isReached ? "#22c55e" : "#ffffff"};
+                padding: 4px;
+                position: relative;
+                overflow: hidden;
+              ">
+                <!-- Empty background pin -->
+                <div style="
+                  width: 100%;
+                  height: 100%;
+                  border-radius: 12px;
+                  background: ${isReached ? "#16a34a" : "#f3f4f6"};
+                "></div>
+              </div>
+
+              <!-- Background pin triangle -->
+              <div style="
+                position: absolute;
+                bottom: 2px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 0;
+                height: 0;
+                border-left: ${triangleHeight}px solid transparent;
+                border-right: ${triangleHeight}px solid transparent;
+                border-top: ${triangleHeight}px solid ${isReached ? "#22c55e" : "white"};
+              "></div>
+            </div>
+          `,
+              )
+              .join("")}
+
           <!-- Main pin container -->
           <div class="photo-pin${isReached ? " reached" : ""}" style="
             width: ${pinSize}px;
             height: ${pinHeight}px;
             position: absolute;
-            left: 12px;
+            left: 0px;
             top: 0;
             transition: all 0.3s ease;
+            z-index: 10;
           ">
             <!-- Main rounded rectangle container -->
             <div style="
@@ -251,7 +326,7 @@ export const createSuperClusterIcon = (
               border-radius: 16px;
               background: ${isReached ? "#22c55e" : "white"};
               border: 2px solid ${isReached ? "#22c55e" : "#ffffff"};
-                padding: 4px;
+              padding: 4px;
               position: relative;
               overflow: hidden;
               transition: background-color 0.3s ease, border-color 0.3s ease;
@@ -263,8 +338,8 @@ export const createSuperClusterIcon = (
                   hasImage
                       ? `
                 <!-- Image inside the rounded rectangle -->
-                <img 
-                  src="${imageSrc}" 
+                <img
+                  src="${imageSrc}"
                   style="
                     width: 100%;
                     height: 100%;
@@ -292,7 +367,7 @@ export const createSuperClusterIcon = (
               `
               }
             </div>
-            
+
             <!-- Triangle at the bottom -->
             <div style="
               position: absolute;
@@ -304,28 +379,9 @@ export const createSuperClusterIcon = (
               border-left: ${triangleHeight}px solid transparent;
               border-right: ${triangleHeight}px solid transparent;
               border-top: ${triangleHeight}px solid ${isReached ? "#22c55e" : "white"};
-                transition: border-top-color 0.3s ease;
+              transition: border-top-color 0.3s ease;
             "></div>
           </div>
-          
-          <!-- Badge -->
-          <div style="
-            position: absolute;
-            top: -8px;
-            right: 8px;
-            background: #000000;
-            color: white;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            border: 2px solid white;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-            font-size: 12px;
-            font-weight: 700;
-            line-height: 20px;
-            text-align: center;
-            z-index: 10;
-          ">${clusterCount}</div>
         </div>
       `,
         className: "super-cluster-pin-marker",
@@ -346,6 +402,7 @@ export const detectScreenCollisions = (
     targetZoom: number | null,
     mapRef: import("leaflet").Map | null,
     optimalZoom: number,
+    activeClusterIndex?: number, // Currently active cluster should not be grouped into super clusters
 ) => {
     // Use target zoom if we're in the middle of a zoom animation, otherwise use optimal zoom
     const effectiveZoom =
@@ -399,7 +456,12 @@ export const detectScreenCollisions = (
         });
 
         // If we found overlapping clusters, create a super-cluster
-        if (overlappingClusters.length > 1) {
+        // But only if none of the involved clusters is the currently active cluster
+        const involvesActiveCluster =
+            activeClusterIndex !== undefined &&
+            overlappingClusters.includes(activeClusterIndex);
+
+        if (overlappingClusters.length > 1 && !involvesActiveCluster) {
             hiddenClusterIndices.add(i); // Hide the original cluster too
 
             // Calculate center position of all overlapping clusters
@@ -430,21 +492,37 @@ export const detectScreenCollisions = (
                 clustersInvolved: overlappingClusters,
                 image: representativePhoto.image,
             });
+        } else if (involvesActiveCluster) {
+            // If active cluster is involved, unhide all overlapping clusters
+            // so they remain visible as individual clusters
+            overlappingClusters.forEach((idx) => {
+                hiddenClusterIndices.delete(idx);
+            });
         }
     });
 
-    // Return visible clusters (those not hidden by super-clusters)
-    const visibleClusters = clusters.filter(
-        (_, idx) => !hiddenClusterIndices.has(idx),
-    );
+    // Return visible clusters with their original indices preserved
+    const visibleClustersWithIndices = clusters
+        .map((cluster, originalIndex) => ({ cluster, originalIndex }))
+        .filter((item) => !hiddenClusterIndices.has(item.originalIndex));
 
-    return { superClusters, visibleClusters };
+    return { superClusters, visibleClustersWithIndices };
 };
 
 // Calculate map center with first location positioned at 20% from right edge
 export const getMapCenter = (
     photoClusters: JourneyPoint[][],
     journeyData: JourneyPoint[],
+    superClusterInfo?: {
+        superClusters: {
+            lat: number;
+            lng: number;
+            clusterCount: number;
+            clustersInvolved: number[];
+            image: string;
+        }[];
+        clusterToSuperClusterMap: Map<number, number>;
+    },
 ): [number, number] => {
     // If no clusters yet, check journey data
     if (photoClusters.length === 0) {
@@ -462,19 +540,38 @@ export const getMapCenter = (
     const firstLng =
         firstCluster.reduce((sum, p) => sum + p.lng, 0) / firstCluster.length;
 
+    // Check if first location is in a super cluster - apply positioning for super cluster zoom level
+    const firstLocationInSuperCluster =
+        superClusterInfo?.clusterToSuperClusterMap.has(0);
+    if (firstLocationInSuperCluster) {
+        // For super cluster first location, apply positioning calculated for super cluster zoom level
+        const isMobile = isMobileDevice();
+        const superClusterZoom = isMobile ? 15 : 14;
+        const [positionedLat, positionedLng] = getLocationPositionAtZoom(
+            firstLat,
+            firstLng,
+            superClusterZoom,
+        );
+        return [positionedLat, positionedLng];
+    }
+
     // Position first location at 20% from right edge (80% from left)
     // At zoom level 10, each pixel represents approximately 152.87 meters
-    // Timeline takes up 50% of screen width, so visible map area is 50%
+    // On mobile, timeline is at bottom so full width is available; on desktop, timeline takes up 50% of screen width
     // We want the first location to be at 20% from right of the visible map area
     // This means shifting map center left so marker appears more to the right
 
-    const timelineWidthRatio = 0.5; // Timeline takes up 50% of screen
+    const isMobile = isMobileDevice();
+    const timelineWidthRatio = isMobile ? 0.0 : 0.5; // Mobile: full width, Desktop: timeline takes up 50% of screen
 
     // At zoom 10, approximately 0.35 degrees per 1000px at equator
     // For positioning, we need to shift the longitude to place marker at desired position
     const degreesPerPixelAtZoom10 = 0.35 / 1000; // rough approximation
-    const pixelsToShiftFor20Percent =
-        (window.innerWidth || 1400) * timelineWidthRatio * 3.0; // 300% of visible map width to shift map left
+    const basePixelsToShift =
+        (window.innerWidth || 1400) * (1 - timelineWidthRatio);
+    const pixelsToShiftFor20Percent = isMobile
+        ? basePixelsToShift * 0.6 // Mobile: less aggressive positioning (60% instead of 300%)
+        : basePixelsToShift * 3.0; // Desktop: 300% of visible map width to shift map left
     const lngShift = pixelsToShiftFor20Percent * degreesPerPixelAtZoom10;
 
     const adjustedLng = firstLng - lngShift;
@@ -488,13 +585,50 @@ export const getLocationPosition = (
     lng: number,
 ): [number, number] => {
     // Position location at 20% from right edge (80% from left) of visible map area
-    const timelineWidthRatio = 0.5; // Timeline takes up 50% of screen
+    // On mobile, the timeline is at the bottom, not the side, so full width is available for map
+    const isMobile = isMobileDevice();
+    const timelineWidthRatio = isMobile ? 0.0 : 0.5; // Mobile: full width, Desktop: timeline takes up 50% of screen
     const degreesPerPixelAtZoom10 = 0.35 / 1000; // rough approximation at zoom 10
+
     // Calculate shift to position marker at 20% from right edge of visible map
     // Need to shift map center left so the marker appears more to the right
-    const pixelsToShiftFor20Percent =
-        (window.innerWidth || 1400) * timelineWidthRatio * 3.0; // 300% of visible map width to shift map left
+    // On mobile, use less aggressive positioning since we have full width
+    const basePixelsToShift =
+        (window.innerWidth || 1400) * (1 - timelineWidthRatio);
+    const pixelsToShiftFor20Percent = isMobile
+        ? basePixelsToShift * 0.6 // Mobile: less aggressive positioning (60% instead of 300%)
+        : basePixelsToShift * 3.0; // Desktop: 300% of visible map width to shift map left
     const lngShift = pixelsToShiftFor20Percent * degreesPerPixelAtZoom10;
+
+    return [lat, lng - lngShift];
+};
+
+// Calculate position for a location to be at 20% from right edge at a specific zoom level
+export const getLocationPositionAtZoom = (
+    lat: number,
+    lng: number,
+    zoom: number,
+): [number, number] => {
+    // Position location at 20% from right edge (80% from left) of visible map area
+    // On mobile, the timeline is at the bottom, not the side, so full width is available for map
+    const isMobile = isMobileDevice();
+    const timelineWidthRatio = isMobile ? 0.0 : 0.5; // Mobile: full width, Desktop: timeline takes up 50% of screen
+
+    // Scale the positioning offset based on zoom level
+    // At higher zoom levels, we need less offset since we're more zoomed in
+    const baseDegreesPerPixelAtZoom10 = 0.35 / 1000;
+    const zoomScaleFactor = Math.pow(2, 10 - zoom); // Scale relative to zoom 10
+    const degreesPerPixelAtCurrentZoom =
+        baseDegreesPerPixelAtZoom10 * zoomScaleFactor;
+
+    // Calculate shift to position marker at 20% from right edge of visible map
+    // On mobile, use less aggressive positioning since we have full width
+    const basePixelsToShift =
+        (window.innerWidth || 1400) * (1 - timelineWidthRatio);
+    const pixelsToShiftFor20Percent = isMobile
+        ? basePixelsToShift * 0.6 // Mobile: less aggressive positioning (60% instead of 300%)
+        : basePixelsToShift * 3.0; // Desktop: 300% of visible map width to shift map left
+    const lngShift = pixelsToShiftFor20Percent * degreesPerPixelAtCurrentZoom;
 
     return [lat, lng - lngShift];
 };

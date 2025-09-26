@@ -1857,7 +1857,7 @@ const ManageLayout: React.FC<ManageLayoutProps> = ({
         <>
             <RowButtonGroup>
                 <RowButton
-                    label="Layout"
+                    label={t("album_layout")}
                     caption={t(currentLayout)}
                     onClick={showLayoutOptions}
                     endIcon={<ChevronRightIcon />}
@@ -1867,7 +1867,7 @@ const ManageLayout: React.FC<ManageLayoutProps> = ({
                 anchor="right"
                 {...layoutOptionsVisibilityProps}
                 onRootClose={onRootClose}
-                title="Layout"
+                title={t("album_layout")}
             >
                 <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
                     <RowButtonGroup>
