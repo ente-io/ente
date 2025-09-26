@@ -206,7 +206,11 @@ export const handleTimelineScroll = ({
                 );
                 setTargetZoom(superClusterZoom);
                 mapRef.setView([zoomAwareLat, zoomAwareLng], superClusterZoom);
-            } else if (isInSuperCluster && !wasInSuperCluster && isDistantLocation) {
+            } else if (
+                isInSuperCluster &&
+                !wasInSuperCluster &&
+                isDistantLocation
+            ) {
                 // Entering super cluster from distant location - full zoom out → pan → zoom in
                 const superClusterZoom = isTouchDevice ? 15 : 14; // Higher zoom on mobile to break apart clusters
                 const intermediateZoom = isTouchDevice ? 2 : 4; // Extreme zoom out for distant locations
@@ -444,8 +448,9 @@ export const scrollTimelineToLocation = ({
     const maxScrollableDistance = scrollHeight - clientHeight;
 
     // Check if we're on a touch device
-    const isTouchDevice = typeof window !== "undefined" &&
-        ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+    const isTouchDevice =
+        typeof window !== "undefined" &&
+        ("ontouchstart" in window || navigator.maxTouchPoints > 0);
 
     // Calculate target progress using the same formula as scroll progress calculation
     let targetProgress;
@@ -453,7 +458,8 @@ export const scrollTimelineToLocation = ({
         // Mobile: Use inverse of the slower progression formula
         // If active index = Math.floor(progress * (length - 0.5))
         // Then progress = (index + 0.5) / (length - 0.5) for accurate inverse
-        targetProgress = (locationIndex + 0.5) / Math.max(1, photoClusters.length - 0.5);
+        targetProgress =
+            (locationIndex + 0.5) / Math.max(1, photoClusters.length - 0.5);
     } else {
         // Desktop: Use original formula
         targetProgress = locationIndex / Math.max(1, photoClusters.length - 1);
@@ -537,7 +543,9 @@ export const handleMarkerClick = ({
     let shouldJustPan = false;
     if (superClusterInfo && currentActiveLocationIndex >= 0) {
         const currentSuperClusterIndex =
-            superClusterInfo.clusterToSuperClusterMap.get(currentActiveLocationIndex);
+            superClusterInfo.clusterToSuperClusterMap.get(
+                currentActiveLocationIndex,
+            );
         const targetSuperClusterIndex =
             superClusterInfo.clusterToSuperClusterMap.get(clusterIndex);
 

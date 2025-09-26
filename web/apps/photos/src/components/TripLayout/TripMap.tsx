@@ -88,22 +88,27 @@ export const TripMap: React.FC<TripMapProps> = ({
     }
 
     // Calculate super-clusters based on screen collisions, excluding the active cluster
-    const { superClusters, visibleClustersWithIndices } = detectScreenCollisions(
-        photoClusters,
-        currentZoom,
-        targetZoom,
-        mapRef,
-        optimalZoom,
-        currentActiveLocationIndex >= 0
-            ? currentActiveLocationIndex
-            : undefined,
-    );
+    const { superClusters, visibleClustersWithIndices } =
+        detectScreenCollisions(
+            photoClusters,
+            currentZoom,
+            targetZoom,
+            mapRef,
+            optimalZoom,
+            currentActiveLocationIndex >= 0
+                ? currentActiveLocationIndex
+                : undefined,
+        );
 
     return (
         <MapContainerWrapper hasPhotoData={hasPhotoData}>
             {hasPhotoData ? (
                 <StyledMapContainer
-                    center={getMapCenter(photoClusters, journeyData, superClusterInfo)}
+                    center={getMapCenter(
+                        photoClusters,
+                        journeyData,
+                        superClusterInfo,
+                    )}
                     zoom={
                         isTouchDevice
                             ? Math.max(1, optimalZoom - 2)
@@ -147,9 +152,10 @@ export const TripMap: React.FC<TripMapProps> = ({
                                     Math.max(0, photoClusters.length - 1),
                             );
                         }
-                        const isActive = superCluster.clustersInvolved.includes(
-                            currentLocationIndex,
-                        );
+                        const isActive =
+                            superCluster.clustersInvolved.includes(
+                                currentLocationIndex,
+                            );
 
                         const icon = createSuperClusterIcon(
                             superCluster.image, // Use representative photo (first photo of first cluster)

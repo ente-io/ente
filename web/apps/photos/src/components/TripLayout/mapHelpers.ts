@@ -541,7 +541,8 @@ export const getMapCenter = (
         firstCluster.reduce((sum, p) => sum + p.lng, 0) / firstCluster.length;
 
     // Check if first location is in a super cluster - apply positioning for super cluster zoom level
-    const firstLocationInSuperCluster = superClusterInfo?.clusterToSuperClusterMap.has(0);
+    const firstLocationInSuperCluster =
+        superClusterInfo?.clusterToSuperClusterMap.has(0);
     if (firstLocationInSuperCluster) {
         // For super cluster first location, apply positioning calculated for super cluster zoom level
         const isMobile = isMobileDevice();
