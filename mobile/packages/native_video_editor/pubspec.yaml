@@ -11,6 +11,9 @@ dependencies:
   flutter:
     sdk: flutter
   plugin_platform_interface: ^2.0.0
+  logging: ^1.2.0
+  video_editor:
+    path: ../video_editor
 
 dev_dependencies:
   flutter_test:

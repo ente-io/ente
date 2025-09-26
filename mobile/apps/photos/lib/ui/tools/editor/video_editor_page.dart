@@ -4,6 +4,7 @@ import "dart:math";
 
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
+import 'package:native_video_editor/native_video_editor.dart';
 import 'package:path/path.dart' as path;
 import "package:photo_manager/photo_manager.dart";
 import "package:photos/core/event_bus.dart";
@@ -64,7 +65,9 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
     _logger.info("Initializing video editor page");
     super.initState();
 
-    Future.microtask(() {
+    // First determine rotation correction for Android
+    _doRotationCorrectionIfAndroid().then((_) {
+      // Then initialize the controller
       _controller = VideoEditorController.file(
         widget.ioFile,
         minDuration: const Duration(seconds: 1),
@@ -86,7 +89,17 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         ),
       );
 
-      _controller!.initialize().then((_) => setState(() {})).catchError(
+      _controller!.initialize().then((_) {
+        // Don't apply rotation to controller - let the widget handle display rotation
+        _logger.info(
+          'VideoEditorPage - Controller initialized: '
+          'video width=${_controller!.video.value.size.width}, '
+          'height=${_controller!.video.value.size.height}, '
+          'rotation=${_controller!.rotation}, '
+          'preferredSize=${_controller!.preferredCropAspectRatio}',
+        );
+        setState(() {});
+      }).catchError(
         (error) {
           // handle minumum duration bigger than video duration error
           Navigator.pop(context);
@@ -94,8 +107,6 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         test: (e) => e is VideoMinDurationError,
       );
     });
-
-    _doRotationCorrectionIfAndroid();
   }
 
   @override
@@ -139,12 +150,10 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                               Expanded(
                                 child: Hero(
                                   tag: "video-editor-preview",
-                                  child: RotatedBox(
-                                    quarterTurns:
-                                        _quarterTurnsForRotationCorrection!,
-                                    child: CropGridViewer.preview(
-                                      controller: _controller!,
-                                    ),
+                                  child: NativeVideoPreview(
+                                    controller: _controller!,
+                                    quarterTurnsForRotationCorrection:
+                                        _quarterTurnsForRotationCorrection,
                                   ),
                                 ),
                               ),
@@ -370,18 +379,54 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
     }
   }
 
-  void _doRotationCorrectionIfAndroid() {
+  Future<void> _doRotationCorrectionIfAndroid() async {
     if (Platform.isAndroid) {
-      getVideoPropsAsync(widget.ioFile).then((props) async {
-        if (props?.rotation != null) {
-          _quarterTurnsForRotationCorrection = -(props!.rotation! / 90).round();
+      try {
+        // Use native method to get video info more efficiently
+        final videoInfo =
+            await NativeVideoEditor.getVideoInfo(widget.ioFile.path);
+        final rotation = videoInfo['rotation'] as int? ?? 0;
+        final width = videoInfo['width'] as int? ?? 0;
+        final height = videoInfo['height'] as int? ?? 0;
+
+        _logger.info(
+          'Native video info - width: $width, height: $height, rotation: $rotation',
+        );
+
+        if (rotation != 0) {
+          _quarterTurnsForRotationCorrection = (rotation / 90).round();
+          _logger.info(
+            'Rotation $rotation detected, applying $_quarterTurnsForRotationCorrection quarter turns clockwise for correction',
+          );
         } else {
           _quarterTurnsForRotationCorrection = 0;
         }
         setState(() {});
-      });
+      } catch (e) {
+        _logger.warning(
+          'Failed to get native video info, falling back to ffprobe',
+          e,
+        );
+        // Fallback to the original method if native fails
+        await getVideoPropsAsync(widget.ioFile).then((props) async {
+          _logger.info(
+            'FFProbeProps - width: ${props?.width}, height: ${props?.height}, rotation: ${props?.rotation}',
+          );
+          _logger.info(
+            'FFProbeProps aspect ratio: ${props?.aspectRatio}',
+          );
+          if (props?.rotation != null) {
+            _quarterTurnsForRotationCorrection =
+                (props!.rotation! / 90).round();
+          } else {
+            _quarterTurnsForRotationCorrection = 0;
+          }
+          setState(() {});
+        });
+      }
     } else {
       _quarterTurnsForRotationCorrection = 0;
+      setState(() {});
     }
   }
 }

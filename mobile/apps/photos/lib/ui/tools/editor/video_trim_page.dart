@@ -41,12 +41,16 @@ class _VideoTrimPageState extends State<VideoTrimPage> {
             Expanded(
               child: Hero(
                 tag: "video-editor-preview",
-                child: RotatedBox(
-                  quarterTurns: widget.quarterTurnsForRotationCorrection,
-                  child: CropGridViewer.preview(
-                    controller: widget.controller,
-                  ),
-                ),
+                child: widget.quarterTurnsForRotationCorrection != 0
+                    ? RotatedBox(
+                        quarterTurns: widget.quarterTurnsForRotationCorrection,
+                        child: CropGridViewer.preview(
+                          controller: widget.controller,
+                        ),
+                      )
+                    : CropGridViewer.preview(
+                        controller: widget.controller,
+                      ),
               ),
             ),
             ..._trimSlider(),

@@ -36,14 +36,20 @@ class _VideoCropPageState extends State<VideoCropPage> {
             Expanded(
               child: Hero(
                 tag: "video-editor-preview",
-                child: RotatedBox(
-                  quarterTurns: widget.quarterTurnsForRotationCorrection,
-                  child: CropGridViewer.edit(
-                    controller: widget.controller,
-                    rotateCropArea: false,
-                    margin: const EdgeInsets.symmetric(horizontal: 20),
-                  ),
-                ),
+                child: widget.quarterTurnsForRotationCorrection != 0
+                    ? RotatedBox(
+                        quarterTurns: widget.quarterTurnsForRotationCorrection,
+                        child: CropGridViewer.edit(
+                          controller: widget.controller,
+                          rotateCropArea: false,
+                          margin: const EdgeInsets.symmetric(horizontal: 20),
+                        ),
+                      )
+                    : CropGridViewer.edit(
+                        controller: widget.controller,
+                        rotateCropArea: false,
+                        margin: const EdgeInsets.symmetric(horizontal: 20),
+                      ),
               ),
             ),
             VideoEditorPlayerControl(

@@ -31,12 +31,16 @@ class VideoRotatePage extends StatelessWidget {
             Expanded(
               child: Hero(
                 tag: "video-editor-preview",
-                child: RotatedBox(
-                  quarterTurns: quarterTurnsForRotationCorrection,
-                  child: CropGridViewer.preview(
-                    controller: controller,
-                  ),
-                ),
+                child: quarterTurnsForRotationCorrection != 0
+                    ? RotatedBox(
+                        quarterTurns: quarterTurnsForRotationCorrection,
+                        child: CropGridViewer.preview(
+                          controller: controller,
+                        ),
+                      )
+                    : CropGridViewer.preview(
+                        controller: controller,
+                      ),
               ),
             ),
             VideoEditorPlayerControl(

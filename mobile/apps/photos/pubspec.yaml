@@ -209,9 +209,8 @@ dependencies:
   ua_client_hints: ^1.4.0
   url_launcher: ^6.3.0
   uuid: ^4.5.0
-  video_editor: # edge cases handled in fork
-    git:
-      url: https://github.com/ente-io/video_editor_fork.git
+  video_editor: # edge cases handled in fork, modified for dimension override
+    path: ../../packages/video_editor
   video_player:
     git:
       url: https://github.com/ente-io/packages.git
