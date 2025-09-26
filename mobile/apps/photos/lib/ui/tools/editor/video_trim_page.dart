@@ -46,6 +46,10 @@ class _VideoTrimPageState extends State<VideoTrimPage> {
                         quarterTurns: widget.quarterTurnsForRotationCorrection,
                         child: CropGridViewer.preview(
                           controller: widget.controller,
+                          overrideWidth:
+                              widget.controller.video.value.size.height,
+                          overrideHeight:
+                              widget.controller.video.value.size.width,
                         ),
                       )
                     : CropGridViewer.preview(

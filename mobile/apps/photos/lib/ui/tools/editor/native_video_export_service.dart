@@ -17,6 +17,7 @@ class NativeVideoExportService {
   static Future<File> exportVideo({
     required VideoEditorController controller,
     required String outputPath,
+    int metadataRotation = 0,
     void Function(double)? onProgress,
     void Function(Object, StackTrace)? onError,
   }) async {
@@ -25,6 +26,7 @@ class NativeVideoExportService {
       _logger('Starting export from $inputPath to $outputPath');
       _logger('Input file exists: ${File(inputPath).existsSync()}');
       _logger('Input file size: ${File(inputPath).lengthSync()} bytes');
+      _logger('Metadata rotation: $metadataRotation degrees');
 
       // Analyze what operations are needed
       final needsTrim = controller.isTrimmed;
@@ -62,6 +64,7 @@ class NativeVideoExportService {
           inputPath: inputPath,
           outputPath: outputPath,
           controller: controller,
+          metadataRotation: metadataRotation,
           onProgress: onProgress,
         );
 
@@ -88,6 +91,7 @@ class NativeVideoExportService {
           inputPath: inputPath,
           outputPath: outputPath,
           controller: controller,
+          metadataRotation: metadataRotation,
           onProgress: onProgress,
         );
 
@@ -137,6 +141,7 @@ class NativeVideoExportService {
     required String inputPath,
     required String outputPath,
     required VideoEditorController controller,
+    int metadataRotation = 0,
     void Function(double)? onProgress,
   }) async {
     _logger('_performNativeOperations called');
@@ -168,27 +173,74 @@ class NativeVideoExportService {
 
       if (needsCrop) {
         // Calculate crop rectangle from controller's crop values
+        // IMPORTANT: When metadata rotation exists and we're displaying with swapped dimensions,
+        // the crop grid viewer uses those swapped dimensions, so we must too
         final videoDimension = controller.videoDimension;
-        final minX = controller.minCrop.dx * videoDimension.width;
-        final minY = controller.minCrop.dy * videoDimension.height;
-        final maxX = controller.maxCrop.dx * videoDimension.width;
-        final maxY = controller.maxCrop.dy * videoDimension.height;
+        final videoSize = controller.video.value.size;
+
+        // Use swapped dimensions if metadata rotation exists (90 or 270)
+        final cropCalcWidth =
+            (metadataRotation == 90 || metadataRotation == 270)
+                ? videoSize.height
+                : videoSize.width;
+        final cropCalcHeight =
+            (metadataRotation == 90 || metadataRotation == 270)
+                ? videoSize.width
+                : videoSize.height;
+
+        _logger('=== CROP CALCULATION DEBUG ===');
+        _logger(
+          'controller.videoDimension: ${videoDimension.width} x ${videoDimension.height}',
+        );
+        _logger(
+          'controller.video.value.size: ${videoSize.width} x ${videoSize.height}',
+        );
+        _logger('metadataRotation: $metadataRotation degrees');
+        _logger(
+          'cropCalcWidth: $cropCalcWidth, cropCalcHeight: $cropCalcHeight (dimensions used by crop grid)',
+        );
+        _logger(
+          'controller.video.value.aspectRatio: ${controller.video.value.aspectRatio}',
+        );
+        _logger('controller.rotation: ${controller.rotation}');
+        _logger('controller.minCrop: ${controller.minCrop}');
+        _logger('controller.maxCrop: ${controller.maxCrop}');
+        _logger(
+          'controller.preferredCropAspectRatio: ${controller.preferredCropAspectRatio}',
+        );
+
+        final minX = controller.minCrop.dx * cropCalcWidth;
+        final minY = controller.minCrop.dy * cropCalcHeight;
+        final maxX = controller.maxCrop.dx * cropCalcWidth;
+        final maxY = controller.maxCrop.dy * cropCalcHeight;
 
         cropRect = Rect.fromLTRB(minX, minY, maxX, maxY);
         _logger(
-          'Crop calculation: minX=$minX, minY=$minY, maxX=$maxX, maxY=$maxY',
+          'Calculated crop rect (display space): left=$minX, top=$minY, right=$maxX, bottom=$maxY',
         );
         _logger(
-          'Video dimensions: ${videoDimension.width} x ${videoDimension.height}',
+          'Crop rect dimensions (display space): width=${cropRect.width.toInt()}, height=${cropRect.height.toInt()}',
         );
         _logger(
-          'Crop controllers: minCrop=${controller.minCrop}, maxCrop=${controller.maxCrop}',
-        );
-        _logger(
-          'Will crop: x=${cropRect.left.toInt()}, y=${cropRect.top.toInt()}, width=${cropRect.width.toInt()}, height=${cropRect.height.toInt()}',
+          'Crop rect position (display space): x=${cropRect.left.toInt()}, y=${cropRect.top.toInt()}',
         );
 
-        // Validate crop parameters
+        // NOTE: No coordinate transformation needed!
+        // When metadataRotation exists, we already calculated crop using swapped dimensions
+        // (cropCalcWidth/Height), so the coordinates are already in raw file space.
+        _logger(
+          'Crop coordinates are already in file space (no transformation needed)',
+        );
+
+        _logger(
+          'Final crop to send to native: x=${cropRect.left.toInt()}, y=${cropRect.top.toInt()}, width=${cropRect.width.toInt()}, height=${cropRect.height.toInt()}',
+        );
+        _logger('===========================');
+
+        // Validate crop parameters (use the same dimensions we used for calculation)
+        final rawFileWidth = cropCalcWidth;
+        final rawFileHeight = cropCalcHeight;
+
         if (cropRect.width <= 0 || cropRect.height <= 0) {
           throw Exception(
             'Invalid crop dimensions: width=${cropRect.width.toInt()}, height=${cropRect.height.toInt()}',
@@ -199,10 +251,9 @@ class NativeVideoExportService {
             'Invalid crop position: x=${cropRect.left.toInt()}, y=${cropRect.top.toInt()}',
           );
         }
-        if (cropRect.right > videoDimension.width ||
-            cropRect.bottom > videoDimension.height) {
+        if (cropRect.right > rawFileWidth || cropRect.bottom > rawFileHeight) {
           throw Exception(
-            'Crop extends beyond video bounds: right=${cropRect.right.toInt()}, bottom=${cropRect.bottom.toInt()}, videoDim=${videoDimension.width}x${videoDimension.height}',
+            'Crop extends beyond video bounds: right=${cropRect.right.toInt()}, bottom=${cropRect.bottom.toInt()}, videoDim=${rawFileWidth}x$rawFileHeight',
           );
         }
       }

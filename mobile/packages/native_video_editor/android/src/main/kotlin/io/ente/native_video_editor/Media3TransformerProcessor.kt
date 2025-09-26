@@ -101,7 +101,12 @@ class Media3TransformerProcessor(private val context: Context) {
 
             // Add crop effect if needed
             if (cropX != null && cropY != null && cropWidth != null && cropHeight != null) {
-                logVerbose("Adding crop effect: position=($cropX,$cropY), size=${cropWidth}x$cropHeight")
+                Log.i(TAG, "=== MEDIA3 CROP PROCESSING ===")
+                Log.i(TAG, "Original video dimensions: ${originalWidth}x$originalHeight")
+                Log.i(TAG, "Crop parameters received:")
+                Log.i(TAG, "  position=($cropX,$cropY)")
+                Log.i(TAG, "  size=${cropWidth}x$cropHeight")
+                Log.i(TAG, "  crop rect: x=$cropX, y=$cropY, w=$cropWidth, h=$cropHeight")
 
                 // Calculate crop as a fraction of the video dimensions
                 val cropLeftFraction = cropX.toFloat() / originalWidth
@@ -109,8 +114,12 @@ class Media3TransformerProcessor(private val context: Context) {
                 val cropTopFraction = cropY.toFloat() / originalHeight
                 val cropBottomFraction = (cropY + cropHeight).toFloat() / originalHeight
 
-                logVerbose("Crop fractions: left=$cropLeftFraction, right=$cropRightFraction, " +
-                          "top=$cropTopFraction, bottom=$cropBottomFraction")
+                Log.i(TAG, "Crop fractions calculated:")
+                Log.i(TAG, "  left=$cropLeftFraction (cropX=$cropX / originalWidth=$originalWidth)")
+                Log.i(TAG, "  right=$cropRightFraction ((cropX+cropWidth)=${cropX + cropWidth} / originalWidth=$originalWidth)")
+                Log.i(TAG, "  top=$cropTopFraction (cropY=$cropY / originalHeight=$originalHeight)")
+                Log.i(TAG, "  bottom=$cropBottomFraction ((cropY+cropHeight)=${cropY + cropHeight} / originalHeight=$originalHeight)")
+                Log.i(TAG, "===============================")
 
                 // Use Crop effect with NDC coordinates (-1 to 1)
                 val cropEffect = Crop(
@@ -122,11 +131,13 @@ class Media3TransformerProcessor(private val context: Context) {
 
                 videoEffects.add(cropEffect)
 
-                // Add Presentation effect to resize the output to crop dimensions
+                // Add Presentation effect to set output dimensions to crop size
+                // Note: Crop effect defines the region, Presentation sets the output resolution
+                // The output should exactly match the cropped region size
                 val presentationEffect = Presentation.createForWidthAndHeight(
                     cropWidth,
                     cropHeight,
-                    Presentation.LAYOUT_SCALE_TO_FIT
+                    Presentation.LAYOUT_SCALE_TO_FIT_WITH_CROP
                 )
                 videoEffects.add(presentationEffect)
                 hasVideoEffects = true

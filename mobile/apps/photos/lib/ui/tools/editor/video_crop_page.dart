@@ -43,6 +43,10 @@ class _VideoCropPageState extends State<VideoCropPage> {
                           controller: widget.controller,
                           rotateCropArea: false,
                           margin: const EdgeInsets.symmetric(horizontal: 20),
+                          overrideWidth:
+                              widget.controller.video.value.size.height,
+                          overrideHeight:
+                              widget.controller.video.value.size.width,
                         ),
                       )
                     : CropGridViewer.edit(

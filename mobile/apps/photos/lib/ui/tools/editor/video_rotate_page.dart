@@ -36,6 +36,8 @@ class VideoRotatePage extends StatelessWidget {
                         quarterTurns: quarterTurnsForRotationCorrection,
                         child: CropGridViewer.preview(
                           controller: controller,
+                          overrideWidth: controller.video.value.size.height,
+                          overrideHeight: controller.video.value.size.width,
                         ),
                       )
                     : CropGridViewer.preview(

@@ -274,6 +274,9 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         result = await NativeVideoExportService.exportVideo(
           controller: _controller!,
           outputPath: outputPath,
+          metadataRotation: _quarterTurnsForRotationCorrection != null
+              ? _quarterTurnsForRotationCorrection! * 90
+              : 0,
           onProgress: (progress) {
             _logger.info('Export progress: $progress');
             if (dialogKey.currentState != null) {
