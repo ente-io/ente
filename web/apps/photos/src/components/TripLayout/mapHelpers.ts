@@ -2,6 +2,13 @@ import { haveWindow } from "ente-base/env";
 import type { JourneyPoint } from "./types";
 import { iconCache } from "./utils/geocoding";
 
+// Mobile/tablet detection using media query breakpoint
+const isMobileDevice = () => {
+    if (typeof window === "undefined") return false;
+    // Use 960px breakpoint to match Material-UI's "md" breakpoint for mobile and tablet
+    return window.innerWidth < 960;
+};
+
 // Conditionally import leaflet only in browser environment
 const getLeaflet = () => {
     if (haveWindow()) {
@@ -537,7 +544,7 @@ export const getMapCenter = (
     const firstLocationInSuperCluster = superClusterInfo?.clusterToSuperClusterMap.has(0);
     if (firstLocationInSuperCluster) {
         // For super cluster first location, apply positioning calculated for super cluster zoom level
-        const isMobile = typeof window !== "undefined" && window.innerWidth <= 768;
+        const isMobile = isMobileDevice();
         const superClusterZoom = isMobile ? 15 : 14;
         const [positionedLat, positionedLng] = getLocationPositionAtZoom(
             firstLat,
@@ -553,7 +560,7 @@ export const getMapCenter = (
     // We want the first location to be at 20% from right of the visible map area
     // This means shifting map center left so marker appears more to the right
 
-    const isMobile = typeof window !== "undefined" && window.innerWidth <= 768;
+    const isMobile = isMobileDevice();
     const timelineWidthRatio = isMobile ? 0.0 : 0.5; // Mobile: full width, Desktop: timeline takes up 50% of screen
 
     // At zoom 10, approximately 0.35 degrees per 1000px at equator
@@ -578,7 +585,7 @@ export const getLocationPosition = (
 ): [number, number] => {
     // Position location at 20% from right edge (80% from left) of visible map area
     // On mobile, the timeline is at the bottom, not the side, so full width is available for map
-    const isMobile = typeof window !== "undefined" && window.innerWidth <= 768;
+    const isMobile = isMobileDevice();
     const timelineWidthRatio = isMobile ? 0.0 : 0.5; // Mobile: full width, Desktop: timeline takes up 50% of screen
     const degreesPerPixelAtZoom10 = 0.35 / 1000; // rough approximation at zoom 10
 
@@ -603,7 +610,7 @@ export const getLocationPositionAtZoom = (
 ): [number, number] => {
     // Position location at 20% from right edge (80% from left) of visible map area
     // On mobile, the timeline is at the bottom, not the side, so full width is available for map
-    const isMobile = typeof window !== "undefined" && window.innerWidth <= 768;
+    const isMobile = isMobileDevice();
     const timelineWidthRatio = isMobile ? 0.0 : 0.5; // Mobile: full width, Desktop: timeline takes up 50% of screen
 
     // Scale the positioning offset based on zoom level

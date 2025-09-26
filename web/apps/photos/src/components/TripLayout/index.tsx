@@ -1,6 +1,5 @@
-import { Box, styled } from "@mui/material";
+import { Box, styled, useMediaQuery, useTheme } from "@mui/material";
 import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
-import { useIsTouchscreen } from "ente-base/components/utils/hooks";
 import { useSaveGroups } from "ente-gallery/components/utils/save-groups";
 import { FileViewer } from "ente-gallery/components/viewer/FileViewer";
 import { downloadAndSaveCollectionFiles } from "ente-gallery/services/save";
@@ -55,8 +54,9 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
     // Extract collection info if available
     const collectionTitle = collection?.name || albumTitle || "Trip";
 
-    // Check if mobile screen
-    const isTouchDevice = useIsTouchscreen();
+    // Use media query for mobile/tablet detection (up to 960px)
+    const theme = useTheme();
+    const isTouchDevice = useMediaQuery(theme.breakpoints.down("md")); // 960px breakpoint for mobile and tablet
 
     // Save groups hook for download progress tracking
     const { saveGroups, onAddSaveGroup, onRemoveSaveGroup } = useSaveGroups();
@@ -235,7 +235,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                 );
             }
         }
-    }, [isClient, journeyData]);
+    }, [isClient, journeyData, isTouchDevice]);
 
     // Update currentZoom when optimalZoom changes and there's no mapRef yet
     useEffect(() => {
