@@ -37,6 +37,7 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper> {
   // Auto-scroll related fields
   Timer? _autoScrollTimer;
   double _currentPointerY = 0;
+  double? _cachedScreenHeight;
 
   // Auto-scroll constants
   static const double _maxScrollSpeed = 30.0; // Maximum speed cap
@@ -44,9 +45,24 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper> {
   static const double _exponentialFactor =
       0.015; // Controls speed increase rate
   static const double _referenceMaxDistance = 200.0; // Distance for max speed
+  static const double _edgeThreshold =
+      20.0; // Distance from screen edge for boost
+  static const double _edgeBoostMultiplier = 1.5; // Speed multiplier at edges
+  static const double _minAvailableSpace =
+      50.0; // Minimum space for normalization
   // Pre-calculated denominator for speed formula: e^(factor * maxDist) - 1
   static final double _speedDenominator =
       math.exp(_exponentialFactor * _referenceMaxDistance) - 1;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Update cached screen height when dependencies change (includes orientation changes)
+    final newHeight = MediaQuery.of(context).size.height;
+    if (_cachedScreenHeight != newHeight) {
+      _cachedScreenHeight = newHeight;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -129,17 +145,48 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper> {
     );
   }
 
-  /// Calculate exponential scroll speed based on distance from boundary
-  double _calculateScrollSpeed(double distanceFromBoundary) {
-    // Modified exponential formula that starts at 0 and grows to max speed
-    // speed = maxSpeed * (e^(factor * distance) - 1) / (e^(factor * maxDist) - 1)
-    // This ensures speed starts at 0 when distance is 0
-
+  /// Calculate exponential scroll speed with adaptive scaling based on available space
+  double _calculateScrollSpeed(
+    double distanceFromBoundary,
+    double boundaryPosition,
+    bool scrollingUp,
+  ) {
     if (distanceFromBoundary <= 0) return 0;
 
-    // Calculate speed using pre-calculated denominator
-    final numerator = math.exp(_exponentialFactor * distanceFromBoundary) - 1;
-    final speed = _maxScrollSpeed * (numerator / _speedDenominator);
+    // Use cached screen height for better performance
+    final screenHeight =
+        _cachedScreenHeight ?? MediaQuery.of(context).size.height;
+
+    // Calculate available space from boundary to screen edge
+    final availableSpace = scrollingUp
+        ? boundaryPosition // Space from top boundary to screen top
+        : (screenHeight -
+            boundaryPosition); // Space from bottom boundary to screen bottom
+
+    // Normalize distance based on available space (adaptive scaling)
+    // This ensures consistent speed progression regardless of boundary position
+    final normalizedDistance = math.min(
+      1.0,
+      distanceFromBoundary / math.max(_minAvailableSpace, availableSpace),
+    );
+
+    // Map normalized distance (0-1) to effective distance for speed calculation
+    final effectiveDistance = normalizedDistance * _referenceMaxDistance;
+
+    // Calculate base speed using exponential formula with normalized distance
+    final numerator = math.exp(_exponentialFactor * effectiveDistance) - 1;
+    double speed = _maxScrollSpeed * (numerator / _speedDenominator);
+
+    // Apply edge boost when pointer is very close to screen edges
+    final pointerY = scrollingUp
+        ? (boundaryPosition - distanceFromBoundary)
+        : (boundaryPosition + distanceFromBoundary);
+
+    if ((scrollingUp && pointerY < _edgeThreshold) ||
+        (!scrollingUp && pointerY > screenHeight - _edgeThreshold)) {
+      // Apply boost multiplier when near screen edges
+      speed = math.min(_maxScrollSpeed, speed * _edgeBoostMultiplier);
+    }
 
     return math.min(speed, _maxScrollSpeed);
   }
@@ -170,11 +217,11 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper> {
     if (topBoundary != null && _currentPointerY < topBoundary) {
       // Pointer is above top boundary - scroll up
       final distance = topBoundary - _currentPointerY;
-      _startAutoScroll(scrollController, -1, distance);
+      _startAutoScroll(scrollController, -1, distance, topBoundary, true);
     } else if (bottomBoundary != null && _currentPointerY > bottomBoundary) {
       // Pointer is below bottom boundary - scroll down
       final distance = _currentPointerY - bottomBoundary;
-      _startAutoScroll(scrollController, 1, distance);
+      _startAutoScroll(scrollController, 1, distance, bottomBoundary, false);
     } else {
       // Pointer is within boundaries - stop scrolling
       _stopAutoScroll();
@@ -186,11 +233,14 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper> {
     ScrollController controller,
     int direction,
     double distance,
+    double boundaryPosition,
+    bool scrollingUp,
   ) {
     // Cancel existing timer if any
     _stopAutoScroll();
 
-    final scrollSpeed = _calculateScrollSpeed(distance);
+    final scrollSpeed =
+        _calculateScrollSpeed(distance, boundaryPosition, scrollingUp);
 
     // Start periodic timer for smooth scrolling at 120fps
     _autoScrollTimer = Timer.periodic(
