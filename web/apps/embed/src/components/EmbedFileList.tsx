@@ -21,19 +21,22 @@ export interface EmbedFileListProps {
     height: number;
     annotatedFiles: EmbedFileListAnnotatedFile[];
     onItemClick: (index: number) => void;
+    header?: React.ReactNode;
+    footer?: React.ReactNode;
 }
 
 const THUMBNAIL_SIZE = 200;
 const THUMBNAIL_GAP = 4;
 
 export const EmbedFileList: React.FC<EmbedFileListProps> = memo(
-    ({ width, height, annotatedFiles, onItemClick }) => {
+    ({ width, height, annotatedFiles, onItemClick, header, footer }) => {
         const columns = Math.floor(width / (THUMBNAIL_SIZE + THUMBNAIL_GAP));
         const actualThumbnailSize =
             (width - (columns - 1) * THUMBNAIL_GAP) / columns;
 
         return (
             <Container style={{ width, height }}>
+                {header}
                 <Grid columns={columns} gap={THUMBNAIL_GAP}>
                     {annotatedFiles.map((annotatedFile, index) => (
                         <EmbedFileTile
@@ -44,6 +47,7 @@ export const EmbedFileList: React.FC<EmbedFileListProps> = memo(
                         />
                     ))}
                 </Grid>
+                {footer}
             </Container>
         );
     },

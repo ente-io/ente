@@ -1,4 +1,6 @@
 import "@fontsource-variable/inter";
+import "photoswipe/dist/photoswipe.css";
+import "styles/photoswipe.css";
 import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { CustomHeadPhotosOrAlbums } from "ente-base/components/Head";

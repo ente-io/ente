@@ -234,6 +234,7 @@ export default function EmbedGallery() {
         <EmbedContainer>
             <EmbedFileListWithViewer
                 files={publicFiles}
+                publicCollection={publicCollection!}
                 onRemotePull={publicAlbumsRemotePull}
             />
         </EmbedContainer>
