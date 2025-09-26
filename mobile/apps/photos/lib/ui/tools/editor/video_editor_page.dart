@@ -90,14 +90,6 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
       );
 
       _controller!.initialize().then((_) {
-        // Don't apply rotation to controller - let the widget handle display rotation
-        _logger.info(
-          'VideoEditorPage - Controller initialized: '
-          'video width=${_controller!.video.value.size.width}, '
-          'height=${_controller!.video.value.size.height}, '
-          'rotation=${_controller!.rotation}, '
-          'preferredSize=${_controller!.preferredCropAspectRatio}',
-        );
         setState(() {});
       }).catchError(
         (error) {
