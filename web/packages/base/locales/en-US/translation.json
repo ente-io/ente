@@ -697,5 +697,8 @@
     "add_dns_entry_hint": "On your DNS provider, add a CNAME from your domain to <b>{{host}}</b>",
     "custom_domains_help": "For more information, see <a>help</a>",
     "num_1": "1",
-    "num_2": "2"
+    "num_2": "2",
+    "grouped": "Grouped",
+    "continuous": "Continuous",
+    "trip": "Trip"
 }

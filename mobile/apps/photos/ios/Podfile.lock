@@ -185,9 +185,9 @@ PODS:
     - Flutter
   - rust_lib_photos (0.0.1):
     - Flutter
-  - SDWebImage (5.21.1):
-    - SDWebImage/Core (= 5.21.1)
-  - SDWebImage/Core (5.21.1)
+  - SDWebImage (5.21.2):
+    - SDWebImage/Core (= 5.21.2)
+  - SDWebImage/Core (5.21.2)
   - SDWebImageWebPCoder (0.14.6):
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.17)
@@ -204,18 +204,18 @@ PODS:
   - sqflite_darwin (0.0.4):
     - Flutter
     - FlutterMacOS
-  - sqlite3 (3.50.1):
-    - sqlite3/common (= 3.50.1)
-  - sqlite3/common (3.50.1)
-  - sqlite3/dbstatvtab (3.50.1):
+  - sqlite3 (3.50.4):
+    - sqlite3/common (= 3.50.4)
+  - sqlite3/common (3.50.4)
+  - sqlite3/dbstatvtab (3.50.4):
     - sqlite3/common
-  - sqlite3/fts5 (3.50.1):
+  - sqlite3/fts5 (3.50.4):
     - sqlite3/common
-  - sqlite3/math (3.50.1):
+  - sqlite3/math (3.50.4):
     - sqlite3/common
-  - sqlite3/perf-threadsafe (3.50.1):
+  - sqlite3/perf-threadsafe (3.50.4):
     - sqlite3/common
-  - sqlite3/rtree (3.50.1):
+  - sqlite3/rtree (3.50.4):
     - sqlite3/common
   - sqlite3_flutter_libs (0.0.1):
     - Flutter
@@ -227,6 +227,8 @@ PODS:
     - sqlite3/perf-threadsafe
     - sqlite3/rtree
   - system_info_plus (0.0.1):
+    - Flutter
+  - text_detector (0.0.1):
     - Flutter
   - thermal (0.0.1):
     - Flutter
@@ -301,6 +303,7 @@ DEPENDENCIES:
   - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
   - sqlite3_flutter_libs (from `.symlinks/plugins/sqlite3_flutter_libs/darwin`)
   - system_info_plus (from `.symlinks/plugins/system_info_plus/ios`)
+  - text_detector (from `.symlinks/plugins/text_detector/ios`)
   - thermal (from `.symlinks/plugins/thermal/ios`)
   - ua_client_hints (from `.symlinks/plugins/ua_client_hints/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
@@ -437,6 +440,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/sqlite3_flutter_libs/darwin"
   system_info_plus:
     :path: ".symlinks/plugins/system_info_plus/ios"
+  text_detector:
+    :path: ".symlinks/plugins/text_detector/ios"
   thermal:
     :path: ".symlinks/plugins/thermal/ios"
   ua_client_hints:
@@ -517,16 +522,17 @@ SPEC CHECKSUMS:
   receive_sharing_intent: 79c848f5b045674ad60b9fea3bafea59962ad2c1
   rive_common: 4743dbfd2911c99066547a3c6454681e0fa907df
   rust_lib_photos: 8813b31af48ff02ca75520cbc81a363a13d51a84
-  SDWebImage: f29024626962457f3470184232766516dee8dfea
+  SDWebImage: 9f177d83116802728e122410fb25ad88f5c7608a
   SDWebImageWebPCoder: e38c0a70396191361d60c092933e22c20d5b1380
   Sentry: da60d980b197a46db0b35ea12cb8f39af48d8854
   sentry_flutter: 2df8b0aab7e4aba81261c230cbea31c82a62dd1b
   share_plus: 8b6f8b3447e494cca5317c8c3073de39b3600d1f
   shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
   sqflite_darwin: 5a7236e3b501866c1c9befc6771dfd73ffb8702d
-  sqlite3: 1d85290c3321153511f6e900ede7a1608718bbd5
+  sqlite3: 73513155ec6979715d3904ef53a8d68892d4032b
   sqlite3_flutter_libs: 2c48c4ee7217fd653251975e43412250d5bcbbe2
   system_info_plus: 5393c8da281d899950d751713575fbf91c7709aa
+  text_detector: 9e0c982ff0812fadd2c3d7ef805a8fd8f34841fe
   thermal: a9261044101ae8f532fa29cab4e8270b51b3f55c
   ua_client_hints: aeabd123262c087f0ce151ef96fa3ab77bfc8b38
   url_launcher_ios: 5334b05cef931de560670eeae103fd3e431ac3fe

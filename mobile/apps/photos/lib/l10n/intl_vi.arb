@@ -237,6 +237,7 @@
   "shareWithNonenteUsers": "Chia sẻ với người không dùng Ente",
   "createPublicLink": "Tạo liên kết công khai",
   "sendLink": "Gửi liên kết",
+  "sendQrCode": "Gửi mã QR",
   "copyLink": "Sao chép liên kết",
   "linkHasExpired": "Liên kết đã hết hạn",
   "publicLinkEnabled": "Liên kết công khai đã được bật",

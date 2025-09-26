@@ -250,7 +250,6 @@ class _TrashPageState extends State<TrashPage> {
       padding: const EdgeInsets.all(16.0),
       child: ItemListView(
         files: _sortedTrashFiles.cast<EnteFile>(),
-        enableSorting: true,
         fileOverflowActions: _getFileOverflowActions(),
       ),
     );

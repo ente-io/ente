@@ -2,13 +2,14 @@ package api
 
 import (
 	"fmt"
-	"github.com/ente-io/museum/pkg/controller/file_copy"
-	"github.com/ente-io/museum/pkg/controller/filedata"
-	"github.com/ente-io/museum/pkg/controller/public"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/ente-io/museum/pkg/controller/file_copy"
+	"github.com/ente-io/museum/pkg/controller/filedata"
+	"github.com/ente-io/museum/pkg/controller/public"
 
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-contrib/requestid"
@@ -64,6 +65,32 @@ func (h *FileHandler) CreateOrUpdate(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, response)
+}
+
+// CreateMetaFile creates an entry for a file
+func (h *FileHandler) CreateMetaFile(c *gin.Context) {
+	userID := auth.GetUserID(c.Request.Header)
+	var file ente.MetaFile
+	if err := c.ShouldBindJSON(&file); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	if file.ID != 0 {
+		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "fileID can't be set when creating a new file"))
+		return
+	}
+	file.UpdationTime = time.Microseconds()
+
+	// get an ente.App from the ?app= query parameter with a default of photos
+	enteApp := auth.GetApp(c)
+	file.OwnerID = userID
+	file.IsDeleted = false
+	resp, err := h.Controller.CreateMetaFile(c, userID, file, c.Request.UserAgent(), enteApp)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	c.JSON(http.StatusOK, resp)
 }
 
 // CopyFiles copies files that are owned by another user

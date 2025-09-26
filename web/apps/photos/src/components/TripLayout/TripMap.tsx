@@ -1,7 +1,7 @@
 import { Box, styled } from "@mui/material";
 import { useIsTouchscreen } from "ente-base/components/utils/hooks";
-import L from "leaflet";
 import dynamic from "next/dynamic";
+
 import { MapEvents } from "./MapEvents";
 import {
     createIcon,
@@ -32,9 +32,9 @@ interface TripMapProps {
     optimalZoom: number;
     currentZoom: number;
     targetZoom: number | null;
-    mapRef: L.Map | null;
+    mapRef: import("leaflet").Map | null;
     scrollProgress: number;
-    setMapRef: (map: L.Map | null) => void;
+    setMapRef: (map: import("leaflet").Map | null) => void;
     setCurrentZoom: (zoom: number) => void;
     setTargetZoom: (zoom: number | null) => void;
     onMarkerClick: (
@@ -120,16 +120,18 @@ export const TripMap: React.FC<TripMapProps> = ({
                                 clusterIndex <= currentLocationIndex,
                         );
 
-                        return (
+                        const icon = createSuperClusterIcon(
+                            superCluster.image, // Use representative photo (first photo of first cluster)
+                            superCluster.clusterCount,
+                            isTouchDevice ? 40 : 55,
+                            isCovered,
+                        );
+
+                        return icon ? (
                             <Marker
                                 key={`super-cluster-${index}`}
                                 position={[superCluster.lat, superCluster.lng]}
-                                icon={createSuperClusterIcon(
-                                    superCluster.image, // Use representative photo (first photo of first cluster)
-                                    superCluster.clusterCount,
-                                    isTouchDevice ? 40 : 55,
-                                    isCovered,
-                                )}
+                                icon={icon}
                                 eventHandlers={{
                                     click: () => {
                                         const firstClusterIndex =
@@ -144,7 +146,7 @@ export const TripMap: React.FC<TripMapProps> = ({
                                     },
                                 }}
                             />
-                        );
+                        ) : null;
                     })}
 
                     {/* Draw visible regular clusters */}
@@ -181,17 +183,19 @@ export const TripMap: React.FC<TripMapProps> = ({
                         const isCovered =
                             originalClusterIndex <= currentLocationIndex;
 
-                        return (
+                        const icon = createIcon(
+                            firstPhoto.image,
+                            isTouchDevice ? 40 : 55,
+                            "#ffffff",
+                            cluster.length,
+                            isCovered,
+                        );
+
+                        return icon ? (
                             <Marker
                                 key={`cluster-${index}`}
                                 position={[avgLat, avgLng]}
-                                icon={createIcon(
-                                    firstPhoto.image,
-                                    isTouchDevice ? 40 : 55,
-                                    "#ffffff",
-                                    cluster.length,
-                                    isCovered,
-                                )}
+                                icon={icon}
                                 eventHandlers={{
                                     click: () => {
                                         // Calculate cluster center
@@ -213,7 +217,7 @@ export const TripMap: React.FC<TripMapProps> = ({
                                     },
                                 }}
                             />
-                        );
+                        ) : null;
                     })}
                 </StyledMapContainer>
             ) : null}

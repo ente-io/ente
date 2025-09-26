@@ -680,6 +680,15 @@ const setupTrayItem = (mainWindow: BrowserWindow) => {
     const tray = new Tray(trayIcon);
     tray.setToolTip("Ente Photos");
     tray.setContextMenu(createTrayContextMenu(mainWindow));
+    if (process.platform === "linux") {
+        tray.on("click", () => {
+            if (mainWindow.isFocused()) {
+                mainWindow.hide();
+            } else {
+                mainWindow.show();
+            }
+        });
+    }
 };
 
 /**

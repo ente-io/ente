@@ -19,6 +19,7 @@ import 'package:photos/ui/components/menu_section_description_widget.dart';
 import "package:photos/ui/components/toggle_switch_widget.dart";
 import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/ui/sharing/pickers/device_limit_picker_page.dart';
+import 'package:photos/ui/sharing/pickers/layout_picker_page.dart';
 import 'package:photos/ui/sharing/pickers/link_expiry_picker_page.dart';
 import 'package:photos/ui/sharing/qr_code_dialog_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -45,6 +46,19 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
     super.initState();
   }
 
+  String _getLayoutDisplayName(String layout, BuildContext context) {
+    switch (layout.toLowerCase()) {
+      case 'grouped':
+        return AppLocalizations.of(context).layoutGrouped;
+      case 'continuous':
+        return AppLocalizations.of(context).layoutContinuous;
+      case 'trip':
+        return AppLocalizations.of(context).layoutTrip;
+      default:
+        return AppLocalizations.of(context).layoutGrouped;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isCollectEnabled =
@@ -54,11 +68,12 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
     final isPasswordEnabled =
         widget.collection!.publicURLs.firstOrNull?.passwordEnabled ?? false;
     final isJoinEnabled =
-        widget.collection!.publicURLs.firstOrNull?.enableJoin ?? false;
+        widget.collection!.publicURLs.firstOrNull?.enableJoin ?? true;
     final enteColorScheme = getEnteColorScheme(context);
     final PublicURL url = widget.collection!.publicURLs.firstOrNull!;
     final String urlValue =
         CollectionsService.instance.getPublicUrl(widget.collection!);
+
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -74,6 +89,32 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (flagService.internalUser)
+                    MenuItemWidget(
+                      alignCaptionedTextToLeft: true,
+                      captionedTextWidget: CaptionedTextWidget(
+                        title: AppLocalizations.of(context).albumLayout,
+                        subTitle: _getLayoutDisplayName(
+                              widget.collection!.pubMagicMetadata.layout ??
+                                  "grouped",
+                              context,
+                            ) +
+                            "(i)",
+                      ),
+                      trailingIcon: Icons.chevron_right,
+                      menuItemColor: enteColorScheme.fillFaint,
+                      surfaceExecutionStates: false,
+                      onTap: () async {
+                        // ignore: unawaited_futures
+                        routeToPage(
+                          context,
+                          LayoutPickerPage(widget.collection!),
+                        ).then((value) {
+                          setState(() {});
+                        });
+                      },
+                    ),
+                  if (flagService.internalUser) const SizedBox(height: 24),
                   MenuItemWidget(
                     key: ValueKey("Allow collect $isCollectEnabled"),
                     captionedTextWidget: CaptionedTextWidget(
@@ -90,10 +131,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                         );
                       },
                     ),
-                  ),
-                  MenuSectionDescriptionWidget(
-                    content:
-                        AppLocalizations.of(context).allowAddPhotosDescription,
                   ),
                   const SizedBox(height: 24),
                   if (flagService.internalUser)
@@ -320,17 +357,17 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                         );
                       },
                       isTopBorderRadiusRemoved: true,
-                      isBottomBorderRadiusRemoved: flagService.internalUser,
+                      isBottomBorderRadiusRemoved: true,
                     ),
-                  if (!url.isExpired && flagService.internalUser)
+                  if (!url.isExpired)
                     DividerWidget(
                       dividerType: DividerType.menu,
                       bgColor: getEnteColorScheme(context).fillFaint,
                     ),
-                  if (!url.isExpired && flagService.internalUser)
+                  if (!url.isExpired)
                     MenuItemWidget(
-                      captionedTextWidget: const CaptionedTextWidget(
-                        title: "Send QR Code (i)",
+                      captionedTextWidget: CaptionedTextWidget(
+                        title: AppLocalizations.of(context).sendQrCode,
                         makeTextBold: true,
                       ),
                       leadingIcon: Icons.qr_code_outlined,
@@ -373,6 +410,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       }
                     },
                   ),
+                  const SizedBox(height: 24),
                 ],
               ),
             ),

@@ -232,9 +232,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                         const SizedBox(height: 4),
                         GestureDetector(
                           behavior: HitTestBehavior.opaque,
-                          onTap: canGiveFeedback
-                              ? () => _saveAsAnotherPerson()
-                              : null,
+                          onTap: () => _saveAsAnotherPerson(),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
                               vertical: 12,
