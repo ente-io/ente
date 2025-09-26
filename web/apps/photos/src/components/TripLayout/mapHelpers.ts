@@ -506,6 +506,16 @@ export const detectScreenCollisions = (
 export const getMapCenter = (
     photoClusters: JourneyPoint[][],
     journeyData: JourneyPoint[],
+    superClusterInfo?: {
+        superClusters: {
+            lat: number;
+            lng: number;
+            clusterCount: number;
+            clustersInvolved: number[];
+            image: string;
+        }[];
+        clusterToSuperClusterMap: Map<number, number>;
+    },
 ): [number, number] => {
     // If no clusters yet, check journey data
     if (photoClusters.length === 0) {
@@ -522,6 +532,20 @@ export const getMapCenter = (
         firstCluster.reduce((sum, p) => sum + p.lat, 0) / firstCluster.length;
     const firstLng =
         firstCluster.reduce((sum, p) => sum + p.lng, 0) / firstCluster.length;
+
+    // Check if first location is in a super cluster - apply positioning for super cluster zoom level
+    const firstLocationInSuperCluster = superClusterInfo?.clusterToSuperClusterMap.has(0);
+    if (firstLocationInSuperCluster) {
+        // For super cluster first location, apply positioning calculated for super cluster zoom level
+        const isMobile = typeof window !== "undefined" && window.innerWidth <= 768;
+        const superClusterZoom = isMobile ? 15 : 14;
+        const [positionedLat, positionedLng] = getLocationPositionAtZoom(
+            firstLat,
+            firstLng,
+            superClusterZoom,
+        );
+        return [positionedLat, positionedLng];
+    }
 
     // Position first location at 20% from right edge (80% from left)
     // At zoom level 10, each pixel represents approximately 152.87 meters

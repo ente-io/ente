@@ -34,6 +34,16 @@ interface TripMapProps {
     targetZoom: number | null;
     mapRef: import("leaflet").Map | null;
     scrollProgress: number;
+    superClusterInfo?: {
+        superClusters: {
+            lat: number;
+            lng: number;
+            clusterCount: number;
+            clustersInvolved: number[];
+            image: string;
+        }[];
+        clusterToSuperClusterMap: Map<number, number>;
+    };
     setMapRef: (map: import("leaflet").Map | null) => void;
     setCurrentZoom: (zoom: number) => void;
     setTargetZoom: (zoom: number | null) => void;
@@ -53,6 +63,7 @@ export const TripMap: React.FC<TripMapProps> = ({
     targetZoom,
     mapRef,
     scrollProgress,
+    superClusterInfo,
     setMapRef,
     setCurrentZoom,
     setTargetZoom,
@@ -92,7 +103,7 @@ export const TripMap: React.FC<TripMapProps> = ({
         <MapContainerWrapper hasPhotoData={hasPhotoData}>
             {hasPhotoData ? (
                 <StyledMapContainer
-                    center={getMapCenter(photoClusters, journeyData)}
+                    center={getMapCenter(photoClusters, journeyData, superClusterInfo)}
                     zoom={
                         isTouchDevice
                             ? Math.max(1, optimalZoom - 2)

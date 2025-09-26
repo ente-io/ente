@@ -159,6 +159,7 @@ export const handleTimelineScroll = ({
 
         // Check if this is a distant location (>500km from previous)
         let isDistantLocation = false;
+        const isFirstLocationEver = previousActiveLocationIndex === -1;
         if (
             previousActiveLocationIndex !== -1 &&
             previousActiveLocationIndex !== currentActiveLocationIndex
@@ -195,7 +196,17 @@ export const handleTimelineScroll = ({
 
         try {
             // Handle super cluster zoom logic - check distant locations first!
-            if (isInSuperCluster && !wasInSuperCluster && isDistantLocation) {
+            if (isInSuperCluster && !wasInSuperCluster && isFirstLocationEver) {
+                // First location ever and it's in a super cluster - directly zoom to super cluster level
+                const superClusterZoom = isTouchDevice ? 15 : 14; // Higher zoom on mobile to break apart clusters
+                const [zoomAwareLat, zoomAwareLng] = getLocationPositionAtZoom(
+                    targetCluster.lat,
+                    targetCluster.lng,
+                    superClusterZoom,
+                );
+                setTargetZoom(superClusterZoom);
+                mapRef.setView([zoomAwareLat, zoomAwareLng], superClusterZoom);
+            } else if (isInSuperCluster && !wasInSuperCluster && isDistantLocation) {
                 // Entering super cluster from distant location - full zoom out → pan → zoom in
                 const superClusterZoom = isTouchDevice ? 15 : 14; // Higher zoom on mobile to break apart clusters
                 const intermediateZoom = isTouchDevice ? 2 : 4; // Extreme zoom out for distant locations
