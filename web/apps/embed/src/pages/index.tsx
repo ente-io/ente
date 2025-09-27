@@ -23,13 +23,13 @@ import {
     savedPublicCollectionByKey,
     savedPublicCollectionFiles,
     savePublicCollectionAccessTokenJWT,
-} from "ente-new/albums/services/public-albums-fdb";
+} from "../services/public-albums-storage";
 import {
     pullCollection,
     pullPublicCollectionFiles,
     removePublicCollectionFileData,
     verifyPublicAlbumPassword,
-} from "ente-new/albums/services/public-collection";
+} from "../services/public-collection";
 import { usePhotosAppContext } from "ente-new/photos/types/context";
 import { t } from "i18next";
 import { useCallback, useEffect, useRef, useState } from "react";
