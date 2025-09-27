@@ -292,18 +292,21 @@ class FileRowWidget extends StatelessWidget {
       }
 
       await dialog.hide();
-
-      SnackBarUtils.showInfoSnackBar(
-        context,
-        context.l10n.fileDeletedSuccessfully,
-      );
+      if (context.mounted) {
+        SnackBarUtils.showInfoSnackBar(
+          context,
+          context.l10n.fileDeletedSuccessfully,
+        );
+      }
     } catch (e) {
       await dialog.hide();
 
-      SnackBarUtils.showWarningSnackBar(
-        context,
-        context.l10n.failedToDeleteFile(e.toString()),
-      );
+      if (context.mounted) {
+        SnackBarUtils.showWarningSnackBar(
+          context,
+          context.l10n.failedToDeleteFile(e.toString()),
+        );
+      }
     }
   }
 

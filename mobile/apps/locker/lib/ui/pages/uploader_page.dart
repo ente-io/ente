@@ -30,19 +30,29 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
 
   /// Opens a file picker dialog and uploads the selected file
   Future<void> addFile() async {
-    final FilePickerResult? result =
-        await FilePicker.platform.pickFiles(type: FileType.any);
+    final FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.any,
+      allowMultiple: true,
+    );
 
     if (result != null && result.files.isNotEmpty) {
-      final selectedFile = result.files.first;
-      if (selectedFile.path != null) {
-        await uploadFile(File(selectedFile.path!));
+      final selectedFiles = result.files
+          .where((file) => file.path != null)
+          .map((file) => File(file.path!))
+          .toList();
+
+      if (selectedFiles.isNotEmpty) {
+        await uploadFiles(selectedFiles);
       }
     }
   }
 
-  Future<void> uploadFile(File file) async {
-    final progressDialog = createProgressDialog(context, "Uploading...");
+  Future<void> uploadFiles(List<File> files) async {
+    final progressDialog = createProgressDialog(
+      context,
+      "Uploaded 0/${files.length} files...",
+    );
+
     try {
       final List<Future> futures = [];
 
@@ -52,47 +62,57 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
           .where((c) => c.type != CollectionType.uncategorized)
           .toList();
 
+      // Show upload dialog for the first file to get collection selection
       final uploadResult = await showFileUploadDialog(
         context,
-        file: file,
+        file: files.first,
         collections: collectionsWithoutUncategorized,
         selectedCollection: selectedCollection,
       );
 
       if (uploadResult != null && uploadResult.selectedCollections.isNotEmpty) {
-        final fileUploadFuture = FileUploader.instance
-            .upload(file, uploadResult.selectedCollections.first);
-        futures.add(fileUploadFuture);
-        futures.add(
-          fileUploadFuture.then((enteFile) async {
-            // Add to additional collections if multiple were selected
-            for (int cIndex = 1;
-                cIndex < uploadResult.selectedCollections.length;
-                cIndex++) {
-              futures.add(
-                CollectionService.instance.addToCollection(
-                  uploadResult.selectedCollections[cIndex],
-                  enteFile,
-                ),
+        int completedUploads = 0;
+        for (final file in files) {
+          final fileUploadFuture = FileUploader.instance
+              .upload(file, uploadResult.selectedCollections.first);
+          futures.add(fileUploadFuture);
+          futures.add(
+            fileUploadFuture.then((enteFile) async {
+              completedUploads++;
+              progressDialog.update(
+                message: "Uploaded $completedUploads/${files.length} files...",
               );
-            }
+              // Add to additional collections if multiple were selected
+              for (int cIndex = 1;
+                  cIndex < uploadResult.selectedCollections.length;
+                  cIndex++) {
+                futures.add(
+                  CollectionService.instance.addToCollection(
+                    uploadResult.selectedCollections[cIndex],
+                    enteFile,
+                  ),
+                );
+              }
 
-            if (uploadResult.note.isNotEmpty) {
-              futures.add(
-                MetadataUpdaterService.instance
-                    .editFileCaption(enteFile, uploadResult.note),
+              if (uploadResult.note.isNotEmpty) {
+                futures.add(
+                  MetadataUpdaterService.instance
+                      .editFileCaption(enteFile, uploadResult.note),
+                );
+              }
+            }).catchError((e) {
+              completedUploads++;
+              progressDialog.update(
+                message:
+                    "Uploaded $completedUploads/${files.length} files... (${e.toString()})",
               );
-            }
-          }).catchError((e) {
-            _logger.severe('File upload failed', e);
-          }),
-        );
+            }),
+          );
+        }
       }
-
       if (futures.isNotEmpty) {
         await progressDialog.show();
         await Future.wait(futures);
-        _logger.info('File upload completed successfully');
         await CollectionService.instance.sync();
         onFileUploadComplete();
       }
