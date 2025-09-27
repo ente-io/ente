@@ -4,6 +4,7 @@ import AddIcon from "@mui/icons-material/Add";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import BlockIcon from "@mui/icons-material/Block";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import CodeIcon from "@mui/icons-material/Code";
 import ContentCopyIcon from "@mui/icons-material/ContentCopyOutlined";
 import DoneIcon from "@mui/icons-material/Done";
 import DownloadSharpIcon from "@mui/icons-material/DownloadSharp";
@@ -1372,6 +1373,13 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
 
     const [copied, handleCopyLink] = useClipboardCopy(resolvedURL);
 
+    // For embeddable HTML copy
+    const embedURL = resolvedURL?.replace("albums.ente.io", "embed.ente.io");
+    const iframeHTML = embedURL
+        ? `<iframe src="${embedURL}" width="800" height="600" frameborder="0" allowfullscreen></iframe>`
+        : "";
+    const [embedCopied, handleCopyEmbedLink] = useClipboardCopy(iframeHTML);
+
     const handleRootClose = () => {
         onClose();
         onRootClose();
@@ -1462,6 +1470,25 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
                         onClick={handleCopyLink}
                         label={t("copy_link")}
                     />
+                    {process.env.NEXT_PUBLIC_EMBED_FEATURE_ENABLED ===
+                        "true" && (
+                        <>
+                            <RowButtonDivider />
+                            <RowButton
+                                startIcon={
+                                    embedCopied ? (
+                                        <DoneIcon
+                                            sx={{ color: "accent.main" }}
+                                        />
+                                    ) : (
+                                        <CodeIcon />
+                                    )
+                                }
+                                onClick={handleCopyEmbedLink}
+                                label="Copy embed HTML"
+                            />
+                        </>
+                    )}
                 </RowButtonGroup>
                 <RowButtonGroup>
                     <RowButton
