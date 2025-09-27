@@ -3,6 +3,8 @@ package file
 import (
 	"fmt"
 	"os"
+	"path/filepath"
+	"regexp"
 	"strings"
 	"syscall"
 
@@ -54,12 +56,22 @@ func EnsureSufficientSpace(size int64) error {
 	return nil
 }
 
+// Validate that fileName only contains alphanumeric characters, underscores, and hyphens
+var validFileName = regexp.MustCompile(`^[a-zA-Z0-9_-]+$`)
+
 // CreateTemporaryFile Create a file, and return both the path to the
 // file, and the handle to the file.
 // The caller must Close() the returned file if it is not nil.
 func CreateTemporaryFile(tempStorage string, tempFileName string) (string, *os.File, error) {
 	fileName := strings.ReplaceAll(tempFileName, "/", "_")
-	filePath := tempStorage + "/" + fileName
+
+	if !validFileName.MatchString(fileName) {
+		return "", nil, fmt.Errorf("invalid filename after sanitization: contains non-alphanumeric characters (except _ and -)")
+	}
+
+	// Use filepath.Join for safe path construction
+	filePath := filepath.Join(tempStorage, fileName)
+
 	f, err := os.Create(filePath)
 	if err != nil {
 		return "", nil, stacktrace.Propagate(err, "Could not create temporary file at '%s' to download object", filePath)

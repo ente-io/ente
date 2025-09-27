@@ -1017,6 +1017,870 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reddit'**
   String get reddit;
+
+  /// No description provided for @information.
+  ///
+  /// In en, this message translates to:
+  /// **'Information'**
+  String get information;
+
+  /// No description provided for @saveInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Save information'**
+  String get saveInformation;
+
+  /// No description provided for @informationDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Save important information that can be shared and passed down to loved ones.'**
+  String get informationDescription;
+
+  /// No description provided for @personalNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal note'**
+  String get personalNote;
+
+  /// No description provided for @personalNoteDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Save important notes or thoughts'**
+  String get personalNoteDescription;
+
+  /// No description provided for @physicalRecords.
+  ///
+  /// In en, this message translates to:
+  /// **'Physical records'**
+  String get physicalRecords;
+
+  /// No description provided for @physicalRecordsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Save the real-world locations of important items'**
+  String get physicalRecordsDescription;
+
+  /// No description provided for @accountCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Account credentials'**
+  String get accountCredentials;
+
+  /// No description provided for @accountCredentialsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Securely store login details for important accounts'**
+  String get accountCredentialsDescription;
+
+  /// No description provided for @emergencyContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency contact'**
+  String get emergencyContact;
+
+  /// No description provided for @emergencyContactDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Save details of people to contact in emergencies'**
+  String get emergencyContactDescription;
+
+  /// No description provided for @noteName.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get noteName;
+
+  /// No description provided for @noteNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Give your note a meaningful title'**
+  String get noteNameHint;
+
+  /// No description provided for @noteContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Content'**
+  String get noteContent;
+
+  /// No description provided for @noteContentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write down important thoughts, instructions, or memories you want to preserve'**
+  String get noteContentHint;
+
+  /// No description provided for @recordName.
+  ///
+  /// In en, this message translates to:
+  /// **'Record name'**
+  String get recordName;
+
+  /// No description provided for @recordNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Name of the real-world item'**
+  String get recordNameHint;
+
+  /// No description provided for @recordLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get recordLocation;
+
+  /// No description provided for @recordLocationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Where can this item be found? (e.g., \'Safety deposit box at First Bank, Box #123\')'**
+  String get recordLocationHint;
+
+  /// No description provided for @recordNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get recordNotes;
+
+  /// No description provided for @recordNotesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Any additional details about accessing or understanding this record'**
+  String get recordNotesHint;
+
+  /// No description provided for @credentialName.
+  ///
+  /// In en, this message translates to:
+  /// **'Account name'**
+  String get credentialName;
+
+  /// No description provided for @credentialNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Name of the service or account'**
+  String get credentialNameHint;
+
+  /// No description provided for @username.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get username;
+
+  /// No description provided for @usernameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Login username or email address'**
+  String get usernameHint;
+
+  /// No description provided for @password.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get password;
+
+  /// No description provided for @passwordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Account password'**
+  String get passwordHint;
+
+  /// No description provided for @credentialNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional notes'**
+  String get credentialNotes;
+
+  /// No description provided for @credentialNotesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery methods, security questions, or other important details'**
+  String get credentialNotesHint;
+
+  /// No description provided for @contactName.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact name'**
+  String get contactName;
+
+  /// No description provided for @contactNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Full name of the emergency contact'**
+  String get contactNameHint;
+
+  /// No description provided for @contactDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact details'**
+  String get contactDetails;
+
+  /// No description provided for @contactDetailsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number, email, or other contact information'**
+  String get contactDetailsHint;
+
+  /// No description provided for @contactNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Message for contact'**
+  String get contactNotes;
+
+  /// No description provided for @contactNotesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Important information to share with this person when they are contacted'**
+  String get contactNotesHint;
+
+  /// No description provided for @saveRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get saveRecord;
+
+  /// No description provided for @recordSavedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Record saved successfully'**
+  String get recordSavedSuccessfully;
+
+  /// No description provided for @failedToSaveRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save record'**
+  String get failedToSaveRecord;
+
+  /// No description provided for @pleaseEnterNoteName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a title'**
+  String get pleaseEnterNoteName;
+
+  /// No description provided for @pleaseEnterNoteContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter content'**
+  String get pleaseEnterNoteContent;
+
+  /// No description provided for @pleaseEnterRecordName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a record name'**
+  String get pleaseEnterRecordName;
+
+  /// No description provided for @pleaseEnterLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a location'**
+  String get pleaseEnterLocation;
+
+  /// No description provided for @pleaseEnterAccountName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter an account name'**
+  String get pleaseEnterAccountName;
+
+  /// No description provided for @pleaseEnterUsername.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a username'**
+  String get pleaseEnterUsername;
+
+  /// No description provided for @pleaseEnterPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a password'**
+  String get pleaseEnterPassword;
+
+  /// No description provided for @pleaseEnterContactName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a contact name'**
+  String get pleaseEnterContactName;
+
+  /// No description provided for @pleaseEnterContactDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter contact details'**
+  String get pleaseEnterContactDetails;
+
+  /// No description provided for @allowDownloads.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow downloads'**
+  String get allowDownloads;
+
+  /// No description provided for @sharedByYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared by you'**
+  String get sharedByYou;
+
+  /// No description provided for @sharedWithYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared with you'**
+  String get sharedWithYou;
+
+  /// No description provided for @manageLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage link'**
+  String get manageLink;
+
+  /// No description provided for @linkExpiry.
+  ///
+  /// In en, this message translates to:
+  /// **'Link expiry'**
+  String get linkExpiry;
+
+  /// No description provided for @linkNeverExpires.
+  ///
+  /// In en, this message translates to:
+  /// **'Never'**
+  String get linkNeverExpires;
+
+  /// No description provided for @linkExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get linkExpired;
+
+  /// No description provided for @linkEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled'**
+  String get linkEnabled;
+
+  /// No description provided for @setAPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a password'**
+  String get setAPassword;
+
+  /// No description provided for @lockButtonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock'**
+  String get lockButtonLabel;
+
+  /// No description provided for @enterPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter password'**
+  String get enterPassword;
+
+  /// No description provided for @removeLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove link'**
+  String get removeLink;
+
+  /// No description provided for @sendLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Send link'**
+  String get sendLink;
+
+  /// No description provided for @setPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set password'**
+  String get setPasswordTitle;
+
+  /// No description provided for @resetPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset password'**
+  String get resetPasswordTitle;
+
+  /// No description provided for @allowAddingFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow adding files'**
+  String get allowAddingFiles;
+
+  /// No description provided for @disableDownloadWarningTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Please note'**
+  String get disableDownloadWarningTitle;
+
+  /// No description provided for @disableDownloadWarningBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Viewers can still take screenshots or save a copy of your files using external tools.'**
+  String get disableDownloadWarningBody;
+
+  /// No description provided for @allowAddFilesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow people with the link to also add files to the shared collection.'**
+  String get allowAddFilesDescription;
+
+  /// No description provided for @after1Hour.
+  ///
+  /// In en, this message translates to:
+  /// **'After 1 hour'**
+  String get after1Hour;
+
+  /// No description provided for @after1Day.
+  ///
+  /// In en, this message translates to:
+  /// **'After 1 day'**
+  String get after1Day;
+
+  /// No description provided for @after1Week.
+  ///
+  /// In en, this message translates to:
+  /// **'After 1 week'**
+  String get after1Week;
+
+  /// No description provided for @after1Month.
+  ///
+  /// In en, this message translates to:
+  /// **'After 1 month'**
+  String get after1Month;
+
+  /// No description provided for @after1Year.
+  ///
+  /// In en, this message translates to:
+  /// **'After 1 year'**
+  String get after1Year;
+
+  /// No description provided for @never.
+  ///
+  /// In en, this message translates to:
+  /// **'Never'**
+  String get never;
+
+  /// No description provided for @custom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get custom;
+
+  /// No description provided for @selectTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Select time'**
+  String get selectTime;
+
+  /// No description provided for @selectDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Select date'**
+  String get selectDate;
+
+  /// No description provided for @previous.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get previous;
+
+  /// No description provided for @done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get done;
+
+  /// No description provided for @next.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get next;
+
+  /// No description provided for @noDeviceLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get noDeviceLimit;
+
+  /// No description provided for @linkDeviceLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Device limit'**
+  String get linkDeviceLimit;
+
+  /// No description provided for @expiredLinkInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'This link has expired. Please select a new expiry time or disable link expiry.'**
+  String get expiredLinkInfo;
+
+  /// No description provided for @linkExpiresOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Link will expire on {expiryTime}'**
+  String linkExpiresOn(Object expiryTime);
+
+  /// No description provided for @shareWithPeopleSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{numberOfPeople, plural, =0 {Share with specific people} =1 {Shared with 1 person} other {Shared with {numberOfPeople} people}}'**
+  String shareWithPeopleSectionTitle(int numberOfPeople);
+
+  /// No description provided for @linkHasExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Link has expired'**
+  String get linkHasExpired;
+
+  /// No description provided for @publicLinkEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Public link enabled'**
+  String get publicLinkEnabled;
+
+  /// No description provided for @shareALink.
+  ///
+  /// In en, this message translates to:
+  /// **'Share a link'**
+  String get shareALink;
+
+  /// No description provided for @addViewer.
+  ///
+  /// In en, this message translates to:
+  /// **'Add viewer'**
+  String get addViewer;
+
+  /// No description provided for @addCollaborator.
+  ///
+  /// In en, this message translates to:
+  /// **'Add collaborator'**
+  String get addCollaborator;
+
+  /// No description provided for @addANewEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a new email'**
+  String get addANewEmail;
+
+  /// No description provided for @orPickAnExistingOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Or pick an existing one'**
+  String get orPickAnExistingOne;
+
+  /// No description provided for @sharedCollectionSectionDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Create shared and collaborative collections with other Ente users, including users on free plans.'**
+  String get sharedCollectionSectionDescription;
+
+  /// No description provided for @createPublicLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Create public link'**
+  String get createPublicLink;
+
+  /// No description provided for @addParticipants.
+  ///
+  /// In en, this message translates to:
+  /// **'Add participants'**
+  String get addParticipants;
+
+  /// No description provided for @add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get add;
+
+  /// No description provided for @collaboratorsCanAddFilesToTheSharedCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Collaborators can add files to the shared collection.'**
+  String get collaboratorsCanAddFilesToTheSharedCollection;
+
+  /// No description provided for @enterEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter email'**
+  String get enterEmail;
+
+  /// Number of viewers that were successfully added to a collection.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0 {Added 0 viewers} =1 {Added 1 viewer} other {Added {count} viewers}}'**
+  String viewersSuccessfullyAdded(int count);
+
+  /// Number of collaborators that were successfully added to a collection.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0 {Added 0 collaborator} =1 {Added 1 collaborator} other {Added {count} collaborators}}'**
+  String collaboratorsSuccessfullyAdded(int count);
+
+  /// No description provided for @addViewers.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0 {Add viewer} =1 {Add viewer} other {Add viewers}}'**
+  String addViewers(num count);
+
+  /// No description provided for @addCollaborators.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0 {Add collaborator} =1 {Add collaborator} other {Add collaborators}}'**
+  String addCollaborators(num count);
+
+  /// No description provided for @longPressAnEmailToVerifyEndToEndEncryption.
+  ///
+  /// In en, this message translates to:
+  /// **'Long press an email to verify end to end encryption.'**
+  String get longPressAnEmailToVerifyEndToEndEncryption;
+
+  /// No description provided for @sharing.
+  ///
+  /// In en, this message translates to:
+  /// **'Sharing...'**
+  String get sharing;
+
+  /// No description provided for @invalidEmailAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email address'**
+  String get invalidEmailAddress;
+
+  /// No description provided for @enterValidEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid email address.'**
+  String get enterValidEmail;
+
+  /// No description provided for @oops.
+  ///
+  /// In en, this message translates to:
+  /// **'Oops'**
+  String get oops;
+
+  /// No description provided for @youCannotShareWithYourself.
+  ///
+  /// In en, this message translates to:
+  /// **'You cannot share with yourself'**
+  String get youCannotShareWithYourself;
+
+  /// No description provided for @inviteToEnte.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite to Ente'**
+  String get inviteToEnte;
+
+  /// No description provided for @sendInvite.
+  ///
+  /// In en, this message translates to:
+  /// **'Send invite'**
+  String get sendInvite;
+
+  /// No description provided for @shareTextRecommendUsingEnte.
+  ///
+  /// In en, this message translates to:
+  /// **'Download Ente so we can easily share original quality files\n\nhttps://ente.io'**
+  String get shareTextRecommendUsingEnte;
+
+  /// No description provided for @thisIsYourVerificationId.
+  ///
+  /// In en, this message translates to:
+  /// **'This is your Verification ID'**
+  String get thisIsYourVerificationId;
+
+  /// No description provided for @someoneSharingAlbumsWithYouShouldSeeTheSameId.
+  ///
+  /// In en, this message translates to:
+  /// **'Someone sharing albums with you should see the same ID on their device.'**
+  String get someoneSharingAlbumsWithYouShouldSeeTheSameId;
+
+  /// No description provided for @howToViewShareeVerificationID.
+  ///
+  /// In en, this message translates to:
+  /// **'Please ask them to long-press their email address on the settings screen, and verify that the IDs on both devices match.'**
+  String get howToViewShareeVerificationID;
+
+  /// No description provided for @thisIsPersonVerificationId.
+  ///
+  /// In en, this message translates to:
+  /// **'This is {email}\'s Verification ID'**
+  String thisIsPersonVerificationId(String email);
+
+  /// No description provided for @verificationId.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification ID'**
+  String get verificationId;
+
+  /// No description provided for @verifyEmailID.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify {email}'**
+  String verifyEmailID(Object email);
+
+  /// No description provided for @emailNoEnteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'{email} does not have an Ente account.\n\nSend them an invite to share files.'**
+  String emailNoEnteAccount(Object email);
+
+  /// No description provided for @shareMyVerificationID.
+  ///
+  /// In en, this message translates to:
+  /// **'Here\'s my verification ID: {verificationID} for ente.io.'**
+  String shareMyVerificationID(Object verificationID);
+
+  /// No description provided for @shareTextConfirmOthersVerificationID.
+  ///
+  /// In en, this message translates to:
+  /// **'Hey, can you confirm that this is your ente.io verification ID: {verificationID}'**
+  String shareTextConfirmOthersVerificationID(Object verificationID);
+
+  /// No description provided for @passwordLock.
+  ///
+  /// In en, this message translates to:
+  /// **'Password lock'**
+  String get passwordLock;
+
+  /// No description provided for @manage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage'**
+  String get manage;
+
+  /// No description provided for @addedAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Added as'**
+  String get addedAs;
+
+  /// No description provided for @removeParticipant.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove participant'**
+  String get removeParticipant;
+
+  /// No description provided for @yesConvertToViewer.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, convert to viewer'**
+  String get yesConvertToViewer;
+
+  /// No description provided for @changePermissions.
+  ///
+  /// In en, this message translates to:
+  /// **'Change permissions'**
+  String get changePermissions;
+
+  /// Warning message when changing a collaborator to viewer
+  ///
+  /// In en, this message translates to:
+  /// **'{name} will no longer be able to add files to the collection after becoming a viewer.'**
+  String cannotAddMoreFilesAfterBecomingViewer(String name);
+
+  /// No description provided for @removeWithQuestionMark.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove?'**
+  String get removeWithQuestionMark;
+
+  /// No description provided for @removeParticipantBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{userEmail} will be removed from this shared collection\n\nAny files added by them will also be removed from the collection'**
+  String removeParticipantBody(Object userEmail);
+
+  /// No description provided for @yesRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, remove'**
+  String get yesRemove;
+
+  /// No description provided for @remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get remove;
+
+  /// No description provided for @viewer.
+  ///
+  /// In en, this message translates to:
+  /// **'Viewer'**
+  String get viewer;
+
+  /// No description provided for @collaborator.
+  ///
+  /// In en, this message translates to:
+  /// **'Collaborator'**
+  String get collaborator;
+
+  /// No description provided for @collaboratorsCanAddFilesToTheSharedAlbum.
+  ///
+  /// In en, this message translates to:
+  /// **'Collaborators can add files to the shared collection.'**
+  String get collaboratorsCanAddFilesToTheSharedAlbum;
+
+  /// The count of participants in an album
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0 {No Participants} =1 {1 Participant} other {{count} Participants}}'**
+  String albumParticipantsCount(int count);
+
+  /// No description provided for @addMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Add more'**
+  String get addMore;
+
+  /// No description provided for @you.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get you;
+
+  /// No description provided for @albumOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get albumOwner;
+
+  /// No description provided for @typeOfCollectionTypeIsNotSupportedForRename.
+  ///
+  /// In en, this message translates to:
+  /// **'Type of collection {collectionType} is not supported for rename'**
+  String typeOfCollectionTypeIsNotSupportedForRename(String collectionType);
+
+  /// No description provided for @leaveCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave collection'**
+  String get leaveCollection;
+
+  /// No description provided for @filesAddedByYouWillBeRemovedFromTheCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Files added by you will be removed from the collection'**
+  String get filesAddedByYouWillBeRemovedFromTheCollection;
+
+  /// No description provided for @leaveSharedCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave shared collection?'**
+  String get leaveSharedCollection;
+
+  /// No description provided for @noSystemLockFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No system lock found'**
+  String get noSystemLockFound;
+
+  /// No description provided for @toEnableAppLockPleaseSetupDevicePasscodeOrScreen.
+  ///
+  /// In en, this message translates to:
+  /// **'To enable app lock, please setup device passcode or screen lock in your system settings.'**
+  String get toEnableAppLockPleaseSetupDevicePasscodeOrScreen;
+
+  /// No description provided for @legacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Legacy'**
+  String get legacy;
+
+  /// No description provided for @authToManageLegacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Please authenticate to manage your trusted contacts'**
+  String get authToManageLegacy;
 }
 
 class _AppLocalizationsDelegate

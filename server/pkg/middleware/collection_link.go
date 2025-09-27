@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
+	"golang.org/x/net/idna"
 	"net/http"
 	"net/url"
 	"strings"
@@ -31,7 +32,7 @@ import (
 )
 
 var passwordWhiteListedURLs = []string{"/public-collection/info", "/public-collection/report-abuse", "/public-collection/verify-password"}
-var whitelistedCollectionShareIDs = []int64{111}
+var whitelistedCollectionShareIDs = []int64{111, 2275}
 
 // CollectionLinkMiddleware intercepts and authenticates incoming requests
 type CollectionLinkMiddleware struct {
@@ -191,7 +192,9 @@ func (m *CollectionLinkMiddleware) validatePassword(c *gin.Context, reqPath stri
 func (m *CollectionLinkMiddleware) validateOrigin(c *gin.Context, ownerID int64) error {
 	origin := c.Request.Header.Get("Origin")
 
-	if origin == "" || origin == viper.GetString("apps.public-albums") {
+	if origin == "" ||
+		origin == viper.GetString("apps.public-albums") ||
+		strings.HasSuffix(strings.ToLower(origin), "http://localhost:") {
 		return nil
 	}
 	reqId := requestid.Get(c)
@@ -218,10 +221,25 @@ func (m *CollectionLinkMiddleware) validateOrigin(c *gin.Context, ownerID int64)
 		m.DiscordController.NotifyPotentialAbuse(alertMessage + " - originParseFailed")
 		return nil
 	}
-	if !strings.Contains(strings.ToLower(parse.Host), strings.ToLower(*domain)) {
-		logger.Warnf("domainMismatch for owner %d, origin %s, domain %s host %s", ownerID, origin, *domain, parse.Host)
+	unicodeDomain, err := idna.ToUnicode(*domain)
+	if err != nil {
+		logger.WithError(err).Error("domainToUnicodeFailed")
+		m.DiscordController.NotifyPotentialAbuse(alertMessage + " - domainToUnicodeFailed")
+		return nil
+	}
+
+	if !strings.Contains(strings.ToLower(parse.Host), strings.ToLower(*domain)) && !strings.Contains(strings.ToLower(parse.Host), strings.ToLower(unicodeDomain)) {
+		logger.Warnf("domainMismatch: domain %s (unicode %s) vs originHost %s", *domain, unicodeDomain, parse.Host)
 		m.DiscordController.NotifyPotentialAbuse(alertMessage + " - domainMismatch")
 		return ente.NewPermissionDeniedError("unknown custom domain")
+	}
+	// Additional exact match check. In the future, remove the contains check above and only keep this exact match check.
+	if !strings.EqualFold(parse.Host, *domain) && !strings.EqualFold(parse.Host, unicodeDomain) {
+		logger.Warnf("exactDomainMismatch: domain %s (unicode %s) vs originHost %s", *domain, unicodeDomain, parse.Host)
+		m.DiscordController.NotifyPotentialAbuse(alertMessage + " - exactDomainMismatch")
+		// Do not return error here till we are fully sure that this won't cause any issues for existing
+		// custom domains.
+		// return ente.NewPermissionDeniedError("unknown custom domain")
 	}
 	return nil
 }

@@ -5,9 +5,10 @@ import 'dart:io';
 
 import "package:dio/dio.dart";
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:log_viewer/log_viewer.dart';
 import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart';
@@ -188,6 +189,15 @@ class SuperLogging {
     Logger.root.level = kDebugMode ? Level.ALL : Level.INFO;
     Logger.root.onRecord.listen(onLogRecord);
 
+    if (_preferences.getBool("enable_db_logging") ?? kDebugMode) {
+      try {
+        await LogViewer.initialize(prefix: appConfig.prefix);
+        $.info("Log viewer initialized successfully");
+      } catch (e) {
+        $.warning("Failed to initialize log viewer: $e");
+      }
+    }
+
     if (isFDroidClient) {
       assert(
         sentryIsEnabled == false,
@@ -262,18 +272,35 @@ class SuperLogging {
     return result;
   }
 
+  /// Send an error to sentry, if enabled.
+  /// // note: stack is not reported currently
   static Future<void> _sendErrorToSentry(
     Object error,
-    StackTrace? stack,
-  ) async {
+    StackTrace? stack, {
+    LogRecord? rec,
+  }) async {
     try {
       if (_shouldSkipSentry(error)) {
         return;
       }
-      await Sentry.captureException(
-        error,
-        stackTrace: stack,
-      );
+      if (rec != null) {
+        await Sentry.captureException(
+          error,
+          stackTrace: stack,
+          withScope: (scope) {
+            scope.setContexts('log_details', {
+              'message': rec.message,
+            });
+            scope.setTag('logger', rec.loggerName);
+            scope.setTag('level', rec.level.name);
+          },
+        );
+      } else {
+        await Sentry.captureException(
+          error,
+          stackTrace: stack,
+        );
+      }
     } catch (e) {
       $.info('Sending report to sentry failed: $e');
       $.info('Original error: $error');
@@ -296,10 +323,10 @@ class SuperLogging {
     // write to stdout
     printLog(str);
 
-    saveLogString(str, rec.error);
+    saveLogString(str, rec.error, rec: rec);
   }
 
-  static void saveLogString(String str, Object? error) {
+  static void saveLogString(String str, Object? error, {LogRecord? rec}) {
     // push to log queue
     if (fileIsEnabled) {
       fileQueueEntries.add(str + '\n');
@@ -310,7 +337,7 @@ class SuperLogging {
 
     // add error to sentry queue
     if (sentryIsEnabled && error != null) {
-      _sendErrorToSentry(error, null).ignore();
+      _sendErrorToSentry(error, null, rec: rec).ignore();
     }
   }
 
@@ -454,5 +481,16 @@ class SuperLogging {
     }
     final pkgName = (await PackageInfo.fromPlatform()).packageName;
     return pkgName.startsWith("io.ente.photos.fdroid");
+  }
+
+  /// Show the log viewer page
+  /// This is the main integration point for accessing the log viewer
+  static void showLogViewer(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const LogViewerPage(),
+      ),
+    );
   }
 }

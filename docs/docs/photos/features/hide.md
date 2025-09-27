@@ -41,13 +41,13 @@ memories sections.
 - Go to Albums tab
 - Scroll down to bottom
 - Click on _Hidden_ button
-- Authenticate in app
+- Authenticate in app with your device passcode
 
 #### Web / Desktop
 
 - Click on the topleft hamburger menu
 - Click on _Hidden_
-- Authenticate in app
+- Authenticate in app with your Ente password
 
 ### Unhide album
 

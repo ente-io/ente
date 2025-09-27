@@ -5,6 +5,7 @@ import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:locker/events/collections_updated_event.dart';
 import 'package:locker/l10n/l10n.dart';
+import 'package:locker/models/selected_collections.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/models/file.dart';
@@ -15,11 +16,25 @@ import 'package:locker/ui/mixins/search_mixin.dart';
 import 'package:locker/ui/pages/collection_page.dart';
 import 'package:locker/ui/pages/home_page.dart';
 import 'package:locker/ui/pages/trash_page.dart';
+import "package:locker/ui/viewer/actions/collection_selection_overlay_bar.dart";
 import 'package:locker/utils/collection_sort_util.dart';
 import 'package:logging/logging.dart';
 
+enum UISectionType {
+  incomingCollections,
+  outgoingCollections,
+  homeCollections,
+}
+
 class AllCollectionsPage extends StatefulWidget {
-  const AllCollectionsPage({super.key});
+  final UISectionType viewType;
+  final SelectedCollections? selectedCollections;
+
+  const AllCollectionsPage({
+    super.key,
+    this.viewType = UISectionType.homeCollections,
+    this.selectedCollections,
+  });
 
   @override
   State<AllCollectionsPage> createState() => _AllCollectionsPageState();
@@ -34,6 +49,8 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
   List<EnteFile> _allFiles = [];
   bool _isLoading = true;
   String? _error;
+  bool showTrash = false;
+  bool showUncategorized = false;
   final _logger = Logger("AllCollectionsPage");
 
   @override
@@ -68,6 +85,10 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
     Bus.instance.on<CollectionsUpdatedEvent>().listen((event) async {
       await _loadCollections();
     });
+    if (widget.viewType == UISectionType.homeCollections) {
+      showTrash = true;
+      showUncategorized = true;
+    }
   }
 
   Future<void> _loadCollections() async {
@@ -77,7 +98,19 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
     });
 
     try {
-      final collections = await CollectionService.instance.getCollections();
+      List<Collection> collections = [];
+
+      if (widget.viewType == UISectionType.homeCollections) {
+        collections = await CollectionService.instance.getCollections();
+      } else {
+        final sharedCollections =
+            await CollectionService.instance.getSharedCollections();
+        if (widget.viewType == UISectionType.outgoingCollections) {
+          collections = sharedCollections.outgoing;
+        } else if (widget.viewType == UISectionType.incomingCollections) {
+          collections = sharedCollections.incoming;
+        }
+      }
 
       final regularCollections = <Collection>[];
       Collection? uncategorized;
@@ -94,8 +127,12 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
 
       _allCollections = List.from(collections);
       _sortedCollections = List.from(regularCollections);
-      _uncategorizedCollection = uncategorized;
-      _uncategorizedFileCount = uncategorized != null
+      _uncategorizedCollection =
+          widget.viewType == UISectionType.homeCollections
+              ? uncategorized
+              : null;
+      _uncategorizedFileCount = uncategorized != null &&
+              widget.viewType == UISectionType.homeCollections
           ? (await CollectionService.instance
                   .getFilesInCollection(uncategorized))
               .length
@@ -122,7 +159,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
       child: Scaffold(
         appBar: AppBar(
           leading: buildSearchLeading(),
-          title: Text(context.l10n.collections),
+          title: Text(_getTitle(context)),
           centerTitle: false,
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
@@ -132,6 +169,19 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
           ],
         ),
         body: _buildBody(),
+        bottomNavigationBar: widget.selectedCollections != null
+            ? ListenableBuilder(
+                listenable: widget.selectedCollections!,
+                builder: (context, _) {
+                  return widget.selectedCollections!.hasSelections
+                      ? CollectionSelectionOverlayBar(
+                          collection: _sortedCollections,
+                          selectedCollections: widget.selectedCollections!,
+                        )
+                      : const SizedBox.shrink();
+                },
+              )
+            : null,
       ),
     );
   }
@@ -176,7 +226,6 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
           collections: _sortedCollections,
           files: const [],
           searchQuery: searchQuery,
-          enableSorting: true,
           isHomePage: false,
           onSearchEverywhere: _searchEverywhere,
         ),
@@ -234,12 +283,14 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
           Flexible(
             child: ItemListView(
               collections: _sortedCollections,
-              enableSorting: true,
+              selectedCollections: widget.selectedCollections,
             ),
           ),
-          if (!isSearchActive && _uncategorizedCollection != null)
+          if (!isSearchActive &&
+              _uncategorizedCollection != null &&
+              showUncategorized)
             _buildUncategorizedHook(),
-          _buildTrashHook(),
+          if (showTrash) _buildTrashHook(),
         ],
       ),
     );
@@ -254,9 +305,9 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface.withOpacity(0.3),
+            color: Theme.of(context).colorScheme.surface.withAlpha(30),
             border: Border.all(
-              color: Theme.of(context).dividerColor.withOpacity(0.5),
+              color: Theme.of(context).dividerColor.withAlpha(50),
               width: 0.5,
             ),
             borderRadius: BorderRadius.circular(12.0),
@@ -265,11 +316,8 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
             children: [
               Icon(
                 Icons.delete_outline,
-                color: Theme.of(context)
-                    .textTheme
-                    .bodyLarge
-                    ?.color
-                    ?.withOpacity(0.7),
+                color:
+                    Theme.of(context).textTheme.bodyLarge?.color?.withAlpha(70),
                 size: 22,
               ),
               const SizedBox(width: 12),
@@ -287,7 +335,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
                     .textTheme
                     .bodyMedium
                     ?.color
-                    ?.withOpacity(0.6),
+                    ?.withAlpha(60),
                 size: 20,
               ),
             ],
@@ -326,9 +374,9 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface.withOpacity(0.3),
+            color: Theme.of(context).colorScheme.surface.withAlpha(30),
             border: Border.all(
-              color: Theme.of(context).dividerColor.withOpacity(0.5),
+              color: Theme.of(context).dividerColor.withAlpha(50),
               width: 0.5,
             ),
             borderRadius: BorderRadius.circular(12.0),
@@ -337,11 +385,8 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
             children: [
               Icon(
                 Icons.folder_open_outlined,
-                color: Theme.of(context)
-                    .textTheme
-                    .bodyLarge
-                    ?.color
-                    ?.withOpacity(0.7),
+                color:
+                    Theme.of(context).textTheme.bodyLarge?.color?.withAlpha(70),
                 size: 22,
               ),
               const SizedBox(width: 12),
@@ -363,7 +408,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
                                   .textTheme
                                   .bodySmall
                                   ?.color
-                                  ?.withOpacity(0.5),
+                                  ?.withAlpha(50),
                             ),
                       ),
                       const SizedBox(width: 8),
@@ -374,7 +419,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
                                   .textTheme
                                   .bodySmall
                                   ?.color
-                                  ?.withOpacity(0.7),
+                                  ?.withAlpha(70),
                             ),
                       ),
                     ],
@@ -387,7 +432,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
                     .textTheme
                     .bodyMedium
                     ?.color
-                    ?.withOpacity(0.6),
+                    ?.withAlpha(60),
                 size: 20,
               ),
             ],
@@ -404,5 +449,16 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
             CollectionPage(collection: _uncategorizedCollection!),
       ),
     );
+  }
+
+  String _getTitle(BuildContext context) {
+    switch (widget.viewType) {
+      case UISectionType.homeCollections:
+        return context.l10n.collections;
+      case UISectionType.outgoingCollections:
+        return context.l10n.sharedByYou;
+      case UISectionType.incomingCollections:
+        return context.l10n.sharedWithYou;
+    }
   }
 }

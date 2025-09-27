@@ -1823,6 +1823,8 @@
   "videosProcessed": "Zpracovaná videa",
   "totalVideos": "Celkový počet videí",
   "skippedVideos": "Přeskočená videa",
+  "videoStreamingDescriptionLine1": "Přehrávejte videa okamžitě na jakémkoli zařízení.",
+  "videoStreamingDescriptionLine2": "Povolte pro zpracování video streamů na tomto zařízení.",
   "videoStreamingNote": "Na tomto zařízení se zpracovávají pouze videa z posledních 60 dnů, která jsou kratší než 1 minuta. U starších/delších videí povolte streamování v desktopové aplikaci.",
   "createStream": "Vytvořit stream",
   "recreateStream": "Obnovit stream",
@@ -1905,12 +1907,29 @@
   "deleteFiles": "Smazat soubory",
   "areYouSureDeleteFiles": "Opravdu chcete tyto soubory smazat?",
   "greatJob": "Dobrá práce!",
+  "cleanedUpSimilarImages": "Uvolnili jste {size} místa",
+  "@cleanedUpSimilarImages": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
   "size": "Velikost",
   "similarity": "Podobnost",
+  "analyzingPhotosLocally": "Analyzuji vaše fotografie lokálně...",
+  "lookingForVisualSimilarities": "Hledání vizuálních podobností...",
+  "comparingImageDetails": "Porovnávání detailů obrázku...",
+  "findingSimilarImages": "Hledání podobných obrázků...",
+  "almostDone": "Téměř hotovo...",
   "processingLocally": "Místní zpracování",
   "useMLToFindSimilarImages": "Zkontrolujte a odstraňte obrázky, které se navzájem podobají.",
   "all": "Vše",
   "similar": "Podobné",
   "identical": "Identické",
-  "nothingHereTryAnotherFilter": "Tady nic není, zkuste jiný filtr! 👀"
+  "nothingHereTryAnotherFilter": "Tady nic není, zkuste jiný filtr! 👀",
+  "related": "Související",
+  "hoorayyyy": "Huráááá!",
+  "nothingToTidyUpHere": "Tady není co uklízet",
+  "deletingDash": "Mazání - "
 }

@@ -180,7 +180,8 @@ class _VerifyIdentifyDialogState extends State<VerifyIdentifyDialog> {
                         .shareMyVerificationID(verificationID: verificationID)
                     : AppLocalizations.of(context)
                         .shareTextConfirmOthersVerificationID(
-                            verificationID: verificationID,),
+                        verificationID: verificationID,
+                      ),
               );
             },
             child: Container(

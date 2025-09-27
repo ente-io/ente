@@ -486,7 +486,7 @@
     "watch_folders": "Watch folders",
     "watched_folders": "Watched folders",
     "no_folders_added": "No folders added yet",
-    "watch_folders_hint_1": "The folders you add here will monitored to automatically",
+    "watch_folders_hint_1": "The folders you add here are monitored to automatically",
     "watch_folders_hint_2": "Upload new files to Ente",
     "watch_folders_hint_3": "Remove deleted files from Ente",
     "add_folder": "Add folder",
@@ -697,5 +697,9 @@
     "add_dns_entry_hint": "On your DNS provider, add a CNAME from your domain to <b>{{host}}</b>",
     "custom_domains_help": "For more information, see <a>help</a>",
     "num_1": "1",
-    "num_2": "2"
+    "num_2": "2",
+    "grouped": "Grouped",
+    "continuous": "Continuous",
+    "trip": "Trip",
+    "album_layout": "Album layout"
 }

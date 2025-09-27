@@ -91,7 +91,6 @@
   "@notAvailable": {
     "description": "Not available text"
   },
-
   "reportABug": "Report a bug",
   "@reportABug": {
     "description": "Label for reporting a bug"
@@ -779,5 +778,92 @@
   "endpointUpdatedMessage": "Endpoint updated successfully",
   "@endpointUpdatedMessage": {
     "description": "Success message when endpoint is updated"
-  }
+  },
+  "yes": "Yes",
+  "remove": "Remove",
+  "addMore": "Add more",
+  "somethingWentWrong": "Something went wrong",
+  "legacy": "Legacy",
+  "recoveryWarning": "A trusted contact is trying to access your account",
+  "recoveryWarningBody": "{email} is trying to recover your account.",
+  "legacyPageDesc": "Legacy allows trusted contacts to access your account in your absence.",
+  "legacyPageDesc2": "Trusted contacts can initiate account recovery, and if not blocked within 30 days, reset your password and access your account.",
+  "legacyAccounts": "Legacy accounts",
+  "trustedContacts": "Trusted contacts",
+  "addTrustedContact": "Add Trusted Contact",
+  "removeInvite": "Remove invite",
+  "rejectRecovery": "Reject recovery",
+  "recoveryInitiated": "Recovery initiated",
+  "recoveryInitiatedDesc": "You can access the account after {days} days. A notification will be sent to {email}.",
+  "@recoveryInitiatedDesc": {
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "30"
+      },
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "removeYourselfAsTrustedContact": "Remove yourself as trusted contact",
+  "declineTrustInvite": "Decline Invite",
+  "cancelAccountRecovery": "Cancel recovery",
+  "recoveryAccount": "Recover account",
+  "cancelAccountRecoveryBody": "Are you sure you want to cancel recovery?",
+  "startAccountRecoveryTitle": "Start recovery",
+  "whyAddTrustContact": "Trusted contact can help in recovering your data.",
+  "recoveryReady": "You can now recover {email}'s account by setting a new password.",
+  "@recoveryReady": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      }
+    }
+  },
+  "warning": "Warning",
+  "proceed": "Proceed",
+  "done": "Done",
+  "enterEmail": "Enter email",
+  "verifyIDLabel": "Verify",
+  "invalidEmailAddress": "Invalid email address",
+  "enterValidEmail": "Please enter a valid email address.",
+  "addANewEmail": "Add a new email",
+  "orPickAnExistingOne": "Or pick an existing one",
+  "shareTextRecommendUsingEnte": "Download Ente so we can easily share original quality files\n\nhttps://ente.io",
+  "sendInvite": "Send invite",
+  "trustedInviteBody": "You have been invited to be a legacy contact by {email}.",
+  "verifyEmailID": "Verify {email}",
+  "thisIsYourVerificationId": "This is your Verification ID",
+  "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Someone sharing albums with you should see the same ID on their device.",
+  "howToViewShareeVerificationID": "Please ask them to long-press their email address on the settings screen, and verify that the IDs on both devices match.",
+  "thisIsPersonVerificationId": "This is {email}'s Verification ID",
+  "@thisIsPersonVerificationId": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@ente.io"
+      }
+    }
+  },
+  "confirmAddingTrustedContact": "You are about to add {email} as a trusted contact. They will be able to recover your account if you are absent for {numOfDays} days.",
+  "@confirmAddingTrustedContact": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "me@example.com"
+      },
+      "numOfDays": {
+        "type": "int",
+        "example": "30"
+      }
+    }
+  },
+  "youCannotShareWithYourself": "You cannot share with yourself",
+  "emailNoEnteAccount": "{email} does not have an Ente account.\n\nSend them an invite to share files.",
+  "shareMyVerificationID": "Here's my verification ID: {verificationID} for ente.io.",
+  "shareTextConfirmOthersVerificationID": "Hey, can you confirm that this is your ente.io verification ID: {verificationID}",
+  "inviteToEnte": "Invite to Ente"
 }

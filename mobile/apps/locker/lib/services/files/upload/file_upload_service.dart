@@ -97,6 +97,66 @@ class FileUploader {
     return completer.future;
   }
 
+  /// Special upload method for info files that contain only metadata
+  Future<EnteFile> uploadInfoFile(
+    EnteFile infoFile,
+    Collection collection,
+  ) async {
+    try {
+      _logger.info('Starting upload of info file: ${infoFile.title}');
+
+      // Generate a file key for encryption
+      final fileKey = CryptoUtil.generateKey();
+
+      // Create metadata for the info file
+      final Map<String, dynamic> metadata = infoFile.metadata;
+      final encryptedMetadataResult = await CryptoUtil.encryptData(
+        utf8.encode(jsonEncode(metadata)),
+        fileKey,
+      );
+
+      final encryptedMetadata = CryptoUtil.bin2base64(
+        encryptedMetadataResult.encryptedData!,
+      );
+      final metadataDecryptionHeader = CryptoUtil.bin2base64(
+        encryptedMetadataResult.header!,
+      );
+
+      // Encrypt the file key with collection key
+      final encryptedFileKeyData = CryptoUtil.encryptSync(
+        fileKey,
+        CryptoHelper.instance.getCollectionKey(collection),
+      );
+      final encryptedKey =
+          CryptoUtil.bin2base64(encryptedFileKeyData.encryptedData!);
+      final keyDecryptionNonce =
+          CryptoUtil.bin2base64(encryptedFileKeyData.nonce!);
+
+      final pubMetadataRequest = await getPubMetadataRequest(
+        infoFile,
+        {'info': infoFile.pubMagicMetadata.info},
+        fileKey,
+      );
+
+      // Upload as metadata-only file (no file content or thumbnail)
+      final uploadedFile = await _uploadInfoFileMetadata(
+        infoFile,
+        collection.id,
+        encryptedKey,
+        keyDecryptionNonce,
+        encryptedMetadata,
+        metadataDecryptionHeader,
+        pubMetadataRequest,
+      );
+
+      _logger.info('Successfully uploaded info file: ${uploadedFile.title}');
+      return uploadedFile;
+    } catch (e, s) {
+      _logger.severe('Failed to upload info file: ${infoFile.title}', e, s);
+      rethrow;
+    }
+  }
+
   int getCurrentSessionUploadCount() {
     return _totalCountInUploadSession;
   }
@@ -658,6 +718,43 @@ class FileUploader {
         );
         rethrow;
       }
+    }
+  }
+
+  /// Upload method specifically for info files that don't require file content or thumbnails
+  Future<EnteFile> _uploadInfoFileMetadata(
+    EnteFile file,
+    int collectionID,
+    String encryptedKey,
+    String keyDecryptionNonce,
+    String encryptedMetadata,
+    String metadataDecryptionHeader,
+    MetadataRequest pubMetadata,
+  ) async {
+    final request = {
+      "collectionID": collectionID,
+      "encryptedKey": encryptedKey,
+      "keyDecryptionNonce": keyDecryptionNonce,
+      "metadata": {
+        "encryptedData": encryptedMetadata,
+        "decryptionHeader": metadataDecryptionHeader,
+      },
+      "pubMagicMetadata": pubMetadata,
+    };
+    try {
+      final response = await _enteDio.post("/files/meta", data: request);
+      final data = response.data;
+      file.uploadedFileID = data["id"];
+      file.collectionID = collectionID;
+      file.updationTime = data["updationTime"];
+      file.ownerID = data["ownerID"];
+      file.encryptedKey = encryptedKey;
+      file.keyDecryptionNonce = keyDecryptionNonce;
+      file.metadataDecryptionHeader = metadataDecryptionHeader;
+      return file;
+    } catch (e, s) {
+      _logger.severe("Info file upload failed", e, s);
+      rethrow;
     }
   }
 }

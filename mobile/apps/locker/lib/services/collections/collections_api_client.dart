@@ -1,16 +1,23 @@
+import "dart:async";
 import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:ente_crypto_dart/ente_crypto_dart.dart';
+import "package:ente_events/event_bus.dart";
 import 'package:ente_network/network.dart';
+import "package:ente_sharing/collection_sharing_service.dart";
+import "package:ente_sharing/models/user.dart";
 import 'package:locker/core/errors.dart';
+import "package:locker/events/collections_updated_event.dart";
+import "package:locker/services/collections/collections_db.dart";
 import "package:locker/services/collections/collections_service.dart";
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/collections/models/collection_file_item.dart';
 import 'package:locker/services/collections/models/collection_magic.dart';
 import 'package:locker/services/collections/models/diff.dart';
+import "package:locker/services/collections/models/public_url.dart";
 import 'package:locker/services/configuration.dart';
 import "package:locker/services/files/sync/metadata_updater_service.dart";
 import 'package:locker/services/files/sync/models/file.dart';
@@ -29,7 +36,11 @@ class CollectionApiClient {
   final _enteDio = Network.instance.enteDio;
   final _config = Configuration.instance;
 
-  Future<void> init() async {}
+  late CollectionDB _db;
+
+  Future<void> init() async {
+    _db = CollectionDB.instance;
+  }
 
   Future<List<Collection>> getCollections(int sinceTime) async {
     try {
@@ -159,6 +170,18 @@ class CollectionApiClient {
       _logger.warning("failed to rename collection", e);
       rethrow;
     }
+  }
+
+  Future<void> leaveCollection(Collection collection) async {
+    await CollectionSharingService.instance.leaveCollection(collection.id);
+    await _handleCollectionDeletion(collection);
+  }
+
+  Future<void> _handleCollectionDeletion(Collection collection) async {
+    await _db.deleteCollection(collection);
+    final deletedCollection = collection.copyWith(isDeleted: true);
+    await _updateCollectionInDB(deletedCollection);
+    await CollectionService.instance.sync();
   }
 
   Future<void> move(
@@ -393,6 +416,86 @@ class CollectionApiClient {
       final collection = await _fromRemoteCollection(collectionData);
       return collection;
     });
+  }
+
+  Future<void> createShareUrl(
+    Collection collection, {
+    bool enableCollect = false,
+  }) async {
+    final response = await CollectionSharingService.instance.createShareUrl(
+      collection.id,
+      enableCollect,
+    );
+
+    collection.publicURLs.add(PublicURL.fromMap(response.data["result"]));
+    await _updateCollectionInDB(collection);
+    Bus.instance.fire(CollectionsUpdatedEvent());
+  }
+
+  Future<void> disableShareUrl(Collection collection) async {
+    await CollectionSharingService.instance.disableShareUrl(collection.id);
+    collection.publicURLs.clear();
+    await _updateCollectionInDB(collection);
+    Bus.instance.fire(CollectionsUpdatedEvent());
+  }
+
+  Future<void> updateShareUrl(
+    Collection collection,
+    Map<String, dynamic> prop,
+  ) async {
+    prop.putIfAbsent('collectionID', () => collection.id);
+
+    final response = await CollectionSharingService.instance.updateShareUrl(
+      collection.id,
+      prop,
+    );
+    // remove existing url information
+    collection.publicURLs.clear();
+    collection.publicURLs.add(PublicURL.fromMap(response.data["result"]));
+    await _updateCollectionInDB(collection);
+    Bus.instance.fire(CollectionsUpdatedEvent());
+  }
+
+  Future<List<User>> share(
+    int collectionID,
+    String email,
+    String publicKey,
+    CollectionParticipantRole role,
+  ) async {
+    final collectionKey =
+        CollectionService.instance.getCollectionKey(collectionID);
+    final encryptedKey = CryptoUtil.sealSync(
+      collectionKey,
+      CryptoUtil.base642bin(publicKey),
+    );
+
+    final sharees = await CollectionSharingService.instance.share(
+      collectionID,
+      email,
+      publicKey,
+      role.toStringVal(),
+      collectionKey,
+      encryptedKey,
+    );
+
+    final collection = CollectionService.instance.getFromCache(collectionID);
+    final updatedCollection = collection!.copyWith(sharees: sharees);
+    await _updateCollectionInDB(updatedCollection);
+    return sharees;
+  }
+
+  Future<List<User>> unshare(int collectionID, String email) async {
+    final sharees =
+        await CollectionSharingService.instance.unshare(collectionID, email);
+    final collection = CollectionService.instance.getFromCache(collectionID);
+    final updatedCollection = collection!.copyWith(sharees: sharees);
+    await _updateCollectionInDB(updatedCollection);
+    return sharees;
+  }
+
+  Future<void> _updateCollectionInDB(Collection collection) async {
+    await _db.updateCollections([collection]);
+    CollectionService.instance.updateCollectionCache(collection);
   }
 }
 

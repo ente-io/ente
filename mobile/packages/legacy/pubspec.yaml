@@ -1,0 +1,49 @@
+name: ente_legacy
+description: A Flutter package containing legacy services for Ente apps
+version: 1.0.0
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=1.17.0"
+
+dependencies:
+  collection: ^1.18.0
+  dio: ^5.4.0
+  email_validator: ^3.0.0
+  ente_accounts:
+    path: ../accounts
+  ente_base:
+    path: ../base
+  ente_configuration:
+    path: ../configuration
+  ente_crypto_dart:
+    git:
+      url: https://github.com/ente-io/ente_crypto_dart.git
+  ente_network:
+    path: ../network
+  ente_sharing:
+    path: ../sharing
+  ente_strings:
+    path: ../strings
+  ente_ui:
+    path: ../ui
+  ente_utils:
+    path: ../utils
+  flutter:
+    sdk: flutter
+  flutter_svg: ^2.0.10+1
+  intl: ^0.20.2
+  logging: ^1.2.0
+  password_strength: ^0.2.0
+  pointycastle: ^3.7.3
+  uuid: ^4.2.1
+
+dev_dependencies:
+  flutter_lints: ^5.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+
+# This package is not meant to be published
+publish_to: none

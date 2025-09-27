@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import "package:photos/extensions/user_extension.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/user.dart";
@@ -19,6 +20,7 @@ import 'package:photos/ui/sharing/album_participants_page.dart';
 import "package:photos/ui/sharing/album_share_info_widget.dart";
 import "package:photos/ui/sharing/manage_album_participant.dart";
 import 'package:photos/ui/sharing/manage_links_widget.dart';
+import 'package:photos/ui/sharing/qr_code_dialog_widget.dart';
 import 'package:photos/ui/sharing/user_avator_widget.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/share_util.dart';
@@ -216,6 +218,30 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
               isTopBorderRadiusRemoved: true,
               isBottomBorderRadiusRemoved: true,
             ),
+            DividerWidget(
+              dividerType: DividerType.menu,
+              bgColor: getEnteColorScheme(context).fillFaint,
+            ),
+            MenuItemWidget(
+              captionedTextWidget: CaptionedTextWidget(
+                title: AppLocalizations.of(context).sendQrCode,
+                  makeTextBold: true,
+                ),
+                leadingIcon: Icons.qr_code_outlined,
+                menuItemColor: getEnteColorScheme(context).fillFaint,
+                onTap: () async {
+                  await showDialog<void>(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return QrCodeDialogWidget(
+                        collection: widget.collection,
+                      );
+                    },
+                  );
+                },
+                isTopBorderRadiusRemoved: true,
+                isBottomBorderRadiusRemoved: true,
+              ),
           ],
         );
       }

@@ -44,7 +44,7 @@ The first step is to let Ente know about the domain or subdomain you wish to use
 
 > [!WARNING]
 >
-> Currently (Aug 2025) the ability to link a custom domain is only present in Ente's web app, [web.ente.io](https://web.ente.io). It will come to Ente mobile and desktop when their next versions get released.
+> Currently (Sep 2025) the ability to link a custom domain is only present in Ente's web app, [web.ente.io](https://web.ente.io).
 
 Head over to Preferences > Custom domains, in the domain field enter "pics.example.org" (replace with your subdomain) and press "Save". That's it. The linking is done.
 
@@ -94,7 +94,7 @@ Using is trivial. When you go to an album's sharing options and copy the link to
 
 > [!WARNING]
 >
-> Currently (Aug 2025) the ability to automatically substitute your custom domain is only present in Ente's web app, [web.ente.io](https://web.ente.io). It will come to Ente mobile and desktop when their next versions get released.
+> Currently (Sep 2025) the ability to automatically substitute your custom domain is present in Ente's web and mobile apps, but not in the desktop app (The next desktop version to be released will have that ability too).
 
 ## Unsetting
 
@@ -103,3 +103,7 @@ To stop using your custom domain, we need to undo the two steps we did during se
 1. Unlink your domain in Ente. This can be done just by going to Preferences > Custom Domains, clearing the value in the "Domain" input and pressing "Update".
 
 2. Remove the CNAME record you added during setup in your DNS provider.
+
+## Implementation
+
+Our engineers also wrote [explainer](https://ente.io/blog/custom-domains/) of how this works behind the scenes.

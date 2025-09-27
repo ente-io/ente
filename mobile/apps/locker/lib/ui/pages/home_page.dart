@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 
 import "package:ente_accounts/services/user_service.dart";
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_ui/components/buttons/gradient_button.dart';
+import "package:ente_ui/components/buttons/icon_button_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:ente_utils/email_util.dart';
@@ -12,19 +12,22 @@ import 'package:flutter/material.dart';
 import 'package:listen_sharing_intent/listen_sharing_intent.dart';
 import 'package:locker/events/collections_updated_event.dart';
 import 'package:locker/l10n/l10n.dart';
+import 'package:locker/models/selected_collections.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/models/file.dart';
+import "package:locker/ui/collections/collection_flex_grid_view.dart";
+import "package:locker/ui/collections/section_title.dart";
 import 'package:locker/ui/components/recents_section_widget.dart';
 import 'package:locker/ui/components/search_result_view.dart';
 import 'package:locker/ui/mixins/search_mixin.dart';
 import 'package:locker/ui/pages/all_collections_page.dart';
 import 'package:locker/ui/pages/collection_page.dart';
+import 'package:locker/ui/pages/information_page.dart';
 import "package:locker/ui/pages/settings_page.dart";
 import 'package:locker/ui/pages/uploader_page.dart';
 import 'package:locker/utils/collection_actions.dart';
 import 'package:locker/utils/collection_sort_util.dart';
-import "package:locker/utils/snack_bar_utils.dart";
 import 'package:logging/logging.dart';
 
 class HomePage extends UploaderPage {
@@ -47,10 +50,15 @@ class _HomePageState extends UploaderPageState<HomePage>
   bool _isSettingsOpen = false;
 
   List<Collection> _collections = [];
+  late final SelectedCollections _selectedCollections;
   List<Collection> _filteredCollections = [];
   List<EnteFile> _recentFiles = [];
   List<EnteFile> _filteredFiles = [];
-  Map<int, int> _collectionFileCounts = {};
+  List<Collection> outgoingCollections = [];
+  List<Collection> incomingCollections = [];
+  List<Collection> quickLinks = [];
+  List<Collection> homeCollections = [];
+
   String? _error;
   final _logger = Logger('HomePage');
   StreamSubscription? _mediaStreamSubscription;
@@ -88,12 +96,30 @@ class _HomePageState extends UploaderPageState<HomePage>
   }
 
   List<Collection> get _displayedCollections {
-    final collections = isSearchActive ? _filteredCollections : _collections;
+    final List<Collection> collections;
+    if (isSearchActive) {
+      collections = _filteredCollections;
+    } else {
+      final excludeIds = {
+        ...quickLinks.map((c) => c.id),
+      };
+      collections =
+          _collections.where((c) => !excludeIds.contains(c.id)).toList();
+    }
     return _filterOutUncategorized(collections);
   }
 
   List<Collection> _filterOutUncategorized(List<Collection> collections) {
     return CollectionSortUtil.filterAndSortCollections(collections);
+  }
+
+  List<Collection> getOnEnteCollections(List<Collection> collections) {
+    final excludeIds = {
+      ...incomingCollections.map((c) => c.id),
+      ...quickLinks.map((c) => c.id),
+    };
+    collections = collections.where((c) => !excludeIds.contains(c.id)).toList();
+    return _filterOutUncategorized(collections);
   }
 
   final ValueNotifier<bool> _isFabOpen = ValueNotifier<bool>(false);
@@ -103,6 +129,7 @@ class _HomePageState extends UploaderPageState<HomePage>
   @override
   void initState() {
     super.initState();
+    _selectedCollections = SelectedCollections();
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -116,6 +143,8 @@ class _HomePageState extends UploaderPageState<HomePage>
         curve: Curves.easeInOut,
       ),
     );
+
+    _loadCollections();
 
     if (CollectionService.instance.hasCompletedFirstSync()) {
       _loadCollections();
@@ -268,14 +297,19 @@ class _HomePageState extends UploaderPageState<HomePage>
       final sortedCollections =
           CollectionSortUtil.getSortedCollections(collections);
 
+      final sharedCollections =
+          await CollectionService.instance.getSharedCollections();
+
       setState(() {
+        homeCollections = getOnEnteCollections(sortedCollections);
         _collections = sortedCollections;
         _filteredCollections = _filterOutUncategorized(sortedCollections);
         _filteredFiles = _recentFiles;
+        incomingCollections = sharedCollections.incoming;
+        outgoingCollections = sharedCollections.outgoing;
+        quickLinks = sharedCollections.quickLinks;
         _isLoading = false;
       });
-
-      await _loadCollectionFileCounts();
     } catch (error) {
       setState(() {
         _error = 'Error fetching collections: $error';
@@ -428,7 +462,6 @@ class _HomePageState extends UploaderPageState<HomePage>
           collections: _filteredCollections,
           files: _filteredFiles,
           searchQuery: searchQuery,
-          enableSorting: true,
           isHomePage: true,
         ),
       );
@@ -491,10 +524,23 @@ class _HomePageState extends UploaderPageState<HomePage>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildCollectionsHeader(),
-                const SizedBox(height: 24),
-                _buildCollectionsGrid(),
-                const SizedBox(height: 24),
+                ..._buildCollectionSection(
+                  title: context.l10n.collections,
+                  collections: homeCollections,
+                  viewType: UISectionType.homeCollections,
+                ),
+                if (outgoingCollections.isNotEmpty)
+                  ..._buildCollectionSection(
+                    title: context.l10n.sharedByYou,
+                    collections: outgoingCollections,
+                    viewType: UISectionType.outgoingCollections,
+                  ),
+                if (incomingCollections.isNotEmpty)
+                  ..._buildCollectionSection(
+                    title: context.l10n.sharedWithYou,
+                    collections: incomingCollections,
+                    viewType: UISectionType.incomingCollections,
+                  ),
                 _buildRecentsSection(),
               ],
             ),
@@ -557,105 +603,6 @@ class _HomePageState extends UploaderPageState<HomePage>
     }
   }
 
-  Widget _buildCollectionsHeader() {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () {
-        SnackBarUtils.showWarningSnackBar(context, "Hello");
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => const AllCollectionsPage(),
-          ),
-        );
-      },
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            context.l10n.collections,
-            style: getEnteTextTheme(context).h3Bold,
-          ),
-          const Icon(
-            Icons.chevron_right,
-            color: Colors.grey,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCollectionsGrid() {
-    return MediaQuery.removePadding(
-      context: context,
-      removeBottom: true,
-      removeTop: true,
-      child: GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          childAspectRatio: 2.2,
-        ),
-        itemCount: min(_displayedCollections.length, 4),
-        itemBuilder: (context, index) {
-          final collection = _displayedCollections[index];
-          final collectionName = collection.name ?? 'Unnamed Collection';
-
-          return GestureDetector(
-            onTap: () => _navigateToCollection(collection),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                color: getEnteColorScheme(context).fillFaint,
-              ),
-              padding: const EdgeInsets.all(12),
-              child: Stack(
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        collectionName,
-                        style: getEnteTextTheme(context).body.copyWith(
-                              fontWeight: FontWeight.w500,
-                            ),
-                        textAlign: TextAlign.left,
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        context.l10n
-                            .items(_collectionFileCounts[collection.id] ?? 0),
-                        style: getEnteTextTheme(context).small.copyWith(
-                              color: Colors.grey[600],
-                            ),
-                        textAlign: TextAlign.left,
-                      ),
-                    ],
-                  ),
-                  if (collection.type == CollectionType.favorites)
-                    Positioned(
-                      top: 0,
-                      right: 0,
-                      child: Icon(
-                        Icons.star,
-                        color: getEnteColorScheme(context).primary500,
-                        size: 18,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
   Widget _buildMultiOptionFab() {
     return ValueListenableBuilder<bool>(
       valueListenable: _isFabOpen,
@@ -686,34 +633,41 @@ class _HomePageState extends UploaderPageState<HomePage>
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: getEnteColorScheme(context).fillBase,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Text(
-                                context.l10n.createCollectionTooltip,
-                                style: getEnteTextTheme(context).small.copyWith(
-                                      color: getEnteColorScheme(context)
-                                          .backgroundBase,
-                                    ),
+                            GestureDetector(
+                              onTap: () {
+                                _toggleFab();
+                                _showInformationDialog();
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: getEnteColorScheme(context).fillBase,
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Text(
+                                  context.l10n.saveInformation,
+                                  style:
+                                      getEnteTextTheme(context).small.copyWith(
+                                            color: getEnteColorScheme(context)
+                                                .backgroundBase,
+                                          ),
+                                ),
                               ),
                             ),
                             const SizedBox(width: 8),
                             FloatingActionButton(
-                              heroTag: "createCollection",
+                              heroTag: "information",
                               mini: true,
                               onPressed: () {
                                 _toggleFab();
-                                _createCollection();
+                                _showInformationDialog();
                               },
                               backgroundColor:
                                   getEnteColorScheme(context).fillBase,
-                              child: const Icon(Icons.create_new_folder),
+                              child: const Icon(Icons.edit_document),
                             ),
                           ],
                         ),
@@ -727,22 +681,29 @@ class _HomePageState extends UploaderPageState<HomePage>
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: getEnteColorScheme(context).fillBase,
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: Text(
-                                  context.l10n.uploadDocumentTooltip,
-                                  style:
-                                      getEnteTextTheme(context).small.copyWith(
-                                            color: getEnteColorScheme(context)
-                                                .backgroundBase,
-                                          ),
+                              GestureDetector(
+                                onTap: () {
+                                  _toggleFab();
+                                  addFile();
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: getEnteColorScheme(context).fillBase,
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Text(
+                                    context.l10n.uploadDocumentTooltip,
+                                    style: getEnteTextTheme(context)
+                                        .small
+                                        .copyWith(
+                                          color: getEnteColorScheme(context)
+                                              .backgroundBase,
+                                        ),
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 8),
@@ -789,23 +750,43 @@ class _HomePageState extends UploaderPageState<HomePage>
     }
   }
 
-  Future<void> _loadCollectionFileCounts() async {
-    final counts = <int, int>{};
+  List<Widget> _buildCollectionSection({
+    required String title,
+    required List<Collection> collections,
+    required UISectionType viewType,
+  }) {
+    return [
+      SectionOptions(
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => AllCollectionsPage(
+                viewType: viewType,
+                selectedCollections: _selectedCollections,
+              ),
+            ),
+          );
+        },
+        SectionTitle(title: title),
+        trailingWidget: IconButtonWidget(
+          icon: Icons.chevron_right,
+          iconButtonType: IconButtonType.secondary,
+          iconColor: getEnteColorScheme(context).blurStrokePressed,
+        ),
+      ),
+      const SizedBox(height: 24),
+      CollectionFlexGridViewWidget(
+        collections: collections,
+      ),
+      const SizedBox(height: 24),
+    ];
+  }
 
-    for (final collection in _displayedCollections.take(4)) {
-      try {
-        final files =
-            await CollectionService.instance.getFilesInCollection(collection);
-        counts[collection.id] = files.length;
-      } catch (e) {
-        counts[collection.id] = 0;
-      }
-    }
-
-    if (mounted) {
-      setState(() {
-        _collectionFileCounts = counts;
-      });
-    }
+  void _showInformationDialog() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const InformationPage(),
+      ),
+    );
   }
 }

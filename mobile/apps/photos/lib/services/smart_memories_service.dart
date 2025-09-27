@@ -37,7 +37,6 @@ import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/search_service.dart";
-import "package:photos/utils/text_embeddings_util.dart";
 
 class MemoriesResult {
   final List<SmartMemory> memories;
@@ -103,18 +102,29 @@ class SmartMemoriesService {
         'allImageEmbeddings has ${allImageEmbeddings.length} entries $t',
       );
 
-      // Load pre-computed text embeddings from assets
-      final textEmbeddings = await loadTextEmbeddingsFromAssets();
-      if (textEmbeddings == null) {
-        _logger.severe('Failed to load pre-computed text embeddings');
-        throw Exception(
-          'Failed to load pre-computed text embeddings',
+      _logger.info('Loading text embeddings via cache service');
+      final clipPositiveTextVector = Vector.fromList(
+        await textEmbeddingsCacheService.getEmbedding(
+          "Photo of a precious and nostalgic memory radiating warmth, vibrant energy, or quiet beauty — alive with color, light, or emotion",
+        ),
+      );
+
+      final clipPeopleActivityVectors = <PeopleActivity, Vector>{};
+      for (final activity in PeopleActivity.values) {
+        final query = activityQuery(activity);
+        clipPeopleActivityVectors[activity] = Vector.fromList(
+          await textEmbeddingsCacheService.getEmbedding(query),
         );
       }
-      _logger.info('Using pre-computed text embeddings from assets');
-      final clipPositiveTextVector = textEmbeddings.clipPositiveVector;
-      final clipPeopleActivityVectors = textEmbeddings.peopleActivityVectors;
-      final clipMemoryTypeVectors = textEmbeddings.clipMemoryTypeVectors;
+
+      final clipMemoryTypeVectors = <ClipMemoryType, Vector>{};
+      for (final memoryType in ClipMemoryType.values) {
+        final query = clipQuery(memoryType);
+        clipMemoryTypeVectors[memoryType] = Vector.fromList(
+          await textEmbeddingsCacheService.getEmbedding(query),
+        );
+      }
+      _logger.info('Text embeddings loaded via cache service');
 
       final local = await getLocale();
       final languageCode = local?.languageCode ?? "en";
