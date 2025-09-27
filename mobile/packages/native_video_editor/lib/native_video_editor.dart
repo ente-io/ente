@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
@@ -85,6 +86,8 @@ class VideoCropParams {
 
 class NativeVideoEditor {
   static const MethodChannel _channel = MethodChannel('native_video_editor');
+  static const EventChannel _progressChannel =
+      EventChannel('native_video_editor/progress');
 
   /// Trim video without re-encoding when possible
   /// Returns the output file path
@@ -175,6 +178,7 @@ class NativeVideoEditor {
     Duration? trimEnd,
     int? rotateDegrees,
     Rect? cropRect,
+    void Function(double progress)? onProgress,
   }) async {
     try {
       final stopwatch = Stopwatch()..start();
@@ -200,22 +204,40 @@ class NativeVideoEditor {
         params['cropHeight'] = cropRect.height.toInt();
       }
 
-      final result = await _channel.invokeMethod<Map<dynamic, dynamic>>(
-        'processVideo',
-        params,
-      );
-
-      stopwatch.stop();
-
-      if (result == null) {
-        throw Exception('Failed to process video: no result');
+      StreamSubscription? progressSubscription;
+      if (onProgress != null) {
+        progressSubscription = _progressChannel.receiveBroadcastStream().listen(
+          (dynamic event) {
+            if (event is double) {
+              onProgress(event);
+            } else if (event is int) {
+              onProgress(event.toDouble());
+            }
+          },
+          onError: (error) {},
+        );
       }
 
-      return VideoEditResult(
-        outputPath: result['outputPath'] as String,
-        isReEncoded: result['isReEncoded'] as bool? ?? false,
-        processingTime: stopwatch.elapsed,
-      );
+      try {
+        final result = await _channel.invokeMethod<Map<dynamic, dynamic>>(
+          'processVideo',
+          params,
+        );
+
+        stopwatch.stop();
+
+        if (result == null) {
+          throw Exception('Failed to process video: no result');
+        }
+
+        return VideoEditResult(
+          outputPath: result['outputPath'] as String,
+          isReEncoded: result['isReEncoded'] as bool? ?? false,
+          processingTime: stopwatch.elapsed,
+        );
+      } finally {
+        await progressSubscription?.cancel();
+      }
     } on PlatformException catch (e) {
       throw Exception('Failed to process video: ${e.message}');
     }

@@ -5,11 +5,16 @@ import Photos
 
 public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
     private var currentExportSession: AVAssetExportSession?
+    private var progressEventSink: FlutterEventSink?
+    private var progressTimer: Timer?
 
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "native_video_editor", binaryMessenger: registrar.messenger())
         let instance = NativeVideoEditorPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
+
+        let progressChannel = FlutterEventChannel(name: "native_video_editor/progress", binaryMessenger: registrar.messenger())
+        progressChannel.setStreamHandler(instance)
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -96,8 +101,10 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
         exportSession.outputFileType = .mp4
         exportSession.shouldOptimizeForNetworkUse = true
 
+        startProgressReporting()
         exportSession.exportAsynchronously {
             DispatchQueue.main.async {
+                self.stopProgressReporting()
                 switch exportSession.status {
                 case .completed:
                     result([
@@ -209,13 +216,15 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
         exportSession.outputFileType = .mp4
         exportSession.shouldOptimizeForNetworkUse = true
 
+        startProgressReporting()
         exportSession.exportAsynchronously {
             DispatchQueue.main.async {
+                self.stopProgressReporting()
                 switch exportSession.status {
                 case .completed:
                     result([
                         "outputPath": outputPath,
-                        "isReEncoded": true // Rotation with transform requires re-encoding
+                        "isReEncoded": true
                     ])
                 case .failed:
                     result(FlutterError(code: "ROTATE_ERROR",
@@ -308,13 +317,15 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
         exportSession.outputFileType = .mp4
         exportSession.shouldOptimizeForNetworkUse = true
 
+        startProgressReporting()
         exportSession.exportAsynchronously {
             DispatchQueue.main.async {
+                self.stopProgressReporting()
                 switch exportSession.status {
                 case .completed:
                     result([
                         "outputPath": outputPath,
-                        "isReEncoded": true // Cropping requires re-encoding
+                        "isReEncoded": true
                     ])
                 case .failed:
                     result(FlutterError(code: "CROP_ERROR",
@@ -508,8 +519,10 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
             exportSession.timeRange = timeRange
         }
 
+        startProgressReporting()
         exportSession.exportAsynchronously {
             DispatchQueue.main.async {
+                self.stopProgressReporting()
                 switch exportSession.status {
                 case .completed:
                     result([
@@ -560,5 +573,35 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
         }
 
         result(info)
+    }
+
+    private func startProgressReporting() {
+        progressTimer?.invalidate()
+        progressTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
+            guard let self = self,
+                  let session = self.currentExportSession,
+                  let sink = self.progressEventSink else { return }
+
+            let progress = Double(session.progress)
+            sink(progress)
+        }
+    }
+
+    private func stopProgressReporting() {
+        progressTimer?.invalidate()
+        progressTimer = nil
+    }
+}
+
+extension NativeVideoEditorPlugin: FlutterStreamHandler {
+    public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+        progressEventSink = events
+        return nil
+    }
+
+    public func onCancel(withArguments arguments: Any?) -> FlutterError? {
+        progressEventSink = nil
+        stopProgressReporting()
+        return nil
     }
 }

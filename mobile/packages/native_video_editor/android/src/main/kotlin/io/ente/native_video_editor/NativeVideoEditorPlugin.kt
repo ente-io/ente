@@ -6,6 +6,7 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.NonNull
 import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
@@ -14,8 +15,10 @@ import kotlinx.coroutines.*
 import java.io.File
 import java.nio.ByteBuffer
 
-class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler {
+class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler, EventChannel.StreamHandler {
     private lateinit var channel: MethodChannel
+    private lateinit var progressChannel: EventChannel
+    private var progressEventSink: EventChannel.EventSink? = null
     private lateinit var context: Context
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var currentJob: Job? = null
@@ -31,6 +34,9 @@ class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler {
         context = flutterPluginBinding.applicationContext
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "native_video_editor")
         channel.setMethodCallHandler(this)
+
+        progressChannel = EventChannel(flutterPluginBinding.binaryMessenger, "native_video_editor/progress")
+        progressChannel.setStreamHandler(this)
 
         // Initialize unified Media3 processor
         media3Processor = Media3TransformerProcessor(context)
@@ -55,6 +61,9 @@ class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler {
                             endTimeMs = endTimeMs,
                             onProgress = { progress ->
                                 Log.d(TAG, "Trim progress: ${(progress * 100).toInt()}%")
+                                withContext(Dispatchers.Main) {
+                                    progressEventSink?.success(progress)
+                                }
                             }
                         )
 
@@ -92,6 +101,9 @@ class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler {
                             degrees = degrees,
                             onProgress = { progress ->
                                 Log.d(TAG, "Rotation progress: ${(progress * 100).toInt()}%")
+                                withContext(Dispatchers.Main) {
+                                    progressEventSink?.success(progress)
+                                }
                             }
                         )
 
@@ -135,6 +147,9 @@ class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler {
                             cropHeight = height,
                             onProgress = { progress ->
                                 Log.d(TAG, "Crop progress: ${(progress * 100).toInt()}%")
+                                withContext(Dispatchers.Main) {
+                                    progressEventSink?.success(progress)
+                                }
                             }
                         )
 
@@ -967,6 +982,9 @@ class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler {
                     cropHeight = cropHeight,
                     onProgress = { progress ->
                         Log.d(TAG, "Processing progress: ${(progress * 100).toInt()}%")
+                        withContext(Dispatchers.Main) {
+                            progressEventSink?.success(progress)
+                        }
                     }
                 )
 
@@ -1001,6 +1019,15 @@ class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler {
 
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
+        progressChannel.setStreamHandler(null)
         scope.cancel()
+    }
+
+    override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+        progressEventSink = events
+    }
+
+    override fun onCancel(arguments: Any?) {
+        progressEventSink = null
     }
 }

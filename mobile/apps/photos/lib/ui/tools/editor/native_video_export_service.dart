@@ -267,6 +267,7 @@ class NativeVideoExportService {
           trimEnd: trimEnd,
           rotateDegrees: rotateDegrees,
           cropRect: cropRect,
+          onProgress: onProgress,
         );
         _logger('NativeVideoEditor.processVideo succeeded');
         return result;
