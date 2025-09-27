@@ -1,4 +1,4 @@
-import { Link, styled, Typography } from "@mui/material";
+import { styled, Typography } from "@mui/material";
 import { EnteLogo } from "ente-base/components/EnteLogo";
 import { SpacedRow } from "ente-base/components/containers";
 import { isSameDay } from "ente-base/date";
@@ -65,8 +65,41 @@ export const EmbedFileListWithViewer: React.FC<
                         name={publicCollection.name}
                         fileCount={files.length}
                     />
-                    <Typography sx={{ color: "text.muted" }}>
-                        <EnteLogo height={16} />
+                    <Typography
+                        variant="small"
+                        sx={{
+                            color: "text.muted",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "flex-end",
+                            marginRight: "16px",
+                            fontSize: "0.8em",
+                            "&:hover .powered-text": {
+                                color: "text.base",
+                                cursor: "pointer"
+                            },
+                            "&:hover .ente-logo": {
+                                color: "#1db954",
+                                cursor: "pointer"
+                            }
+                        }}
+                    >
+                        <span
+                            className="powered-text"
+                            style={{
+                                transition: "color 0.2s ease"
+                            }}
+                        >
+                            powered by
+                        </span>
+                        <span
+                            className="ente-logo"
+                            style={{
+                                transition: "color 0.2s ease"
+                            }}
+                        >
+                            <EnteLogo height={14} />
+                        </span>
                     </Typography>
                 </SpacedRow>
             </GalleryItemsHeaderAdapter>
@@ -74,27 +107,7 @@ export const EmbedFileListWithViewer: React.FC<
         [publicCollection.name, files.length],
     );
 
-    const footer = useMemo(
-        () => (
-            <FooterContainer>
-                <Link
-                    color="text.muted"
-                    sx={{
-                        textAlign: "right",
-                        alignSelf: "flex-end",
-                        "&:hover": { color: "inherit" },
-                    }}
-                    target="_blank"
-                    href="https://ente.io"
-                >
-                    <Typography variant="small">
-                        powered by ente.io
-                    </Typography>
-                </Link>
-            </FooterContainer>
-        ),
-        [],
-    );
+    const footer = null;
 
     return (
         <Container>
@@ -129,12 +142,6 @@ export const EmbedFileListWithViewer: React.FC<
 
 const Container = styled("div")({ flex: 1, width: "100%" });
 
-const FooterContainer = styled("div")({
-    display: "flex",
-    justifyContent: "flex-end",
-    padding: "16px",
-    minHeight: "50px",
-});
 
 const fileTimelineDateString = (file: EnteFile) => {
     const date = new Date(fileCreationTime(file) / 1000);

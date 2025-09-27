@@ -106,13 +106,16 @@ export const pullCollection = async (
     accessToken: string,
     collectionKey: string,
 ) => {
-    const res = await fetch(await apiURL("/public-collection"), {
+    const res = await fetch(await apiURL("/public-collection/info"), {
         method: "GET",
         headers: authenticatedPublicAlbumsRequestHeaders({ accessToken }),
     });
     ensureOk(res);
 
-    const remoteCollection = RemoteCollection.parse(await res.json());
+    const data = await res.json();
+    const remoteCollection = RemoteCollection.parse(data.collection);
+    const referralCode = data.referralCode || "";
+
     const collection = await decryptRemoteCollection(
         remoteCollection,
         collectionKey,
@@ -120,7 +123,7 @@ export const pullCollection = async (
 
     await savePublicCollection(collection);
 
-    return { collection };
+    return { collection, referralCode };
 };
 
 /**
@@ -149,14 +152,12 @@ export const pullPublicCollectionFiles = async (
     let hasMore = true;
 
     while (hasMore) {
-        const res = await fetch(await apiURL("/public-collection/diff"), {
-            method: "POST",
-            headers: authenticatedPublicAlbumsRequestHeaders(credentials),
-            body: JSON.stringify({
-                collectionID: collection.id,
-                sinceTime: time,
-            }),
-        });
+        const res = await fetch(
+            await apiURL("/public-collection/diff", { sinceTime: time ?? 0 }),
+            {
+                headers: authenticatedPublicAlbumsRequestHeaders(credentials),
+            },
+        );
         ensureOk(res);
 
         const { diff, hasMore: hasMoreRemote } = FileDiffResponse.parse(
