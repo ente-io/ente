@@ -23,10 +23,8 @@ import { inMemoryStorage } from "./in-memory-storage";
  *
  * Use {@link savePublicCollections} to update the storage.
  */
-const savedPublicCollections = async (): Promise<Collection[]> =>
-    LocalCollections.parse(
-        (await inMemoryStorage.getItem("public-collections")) ?? [],
-    );
+const savedPublicCollections = (): Collection[] =>
+    LocalCollections.parse(inMemoryStorage.getItem("public-collections") ?? []);
 
 /**
  * Replace the list of public collections stored in our local storage.
@@ -45,12 +43,12 @@ const savePublicCollections = (collections: Collection[]) =>
  * @param key The collection key that can be used to identify the public album
  * we want from amongst all the locally saved public albums.
  */
-export const savedPublicCollectionByKey = async (
+export const savedPublicCollectionByKey = (
     collectionKey: string,
-): Promise<Collection | undefined> =>
-    savedPublicCollections().then((cs) =>
-        cs.find((c) => c.key == collectionKey),
-    );
+): Collection | undefined => {
+    const collections = savedPublicCollections();
+    return collections.find((c) => c.key == collectionKey);
+};
 
 /**
  * Save a public collection to our local storage.
@@ -58,9 +56,9 @@ export const savedPublicCollectionByKey = async (
  * The collection can later be retrieved using {@link savedPublicCollection}.
  * The collection can be removed using {@link removePublicCollection}.
  */
-export const savePublicCollection = async (collection: Collection) => {
-    const collections = await savedPublicCollections();
-    await savePublicCollections([
+export const savePublicCollection = (collection: Collection) => {
+    const collections = savedPublicCollections();
+    savePublicCollections([
         collection,
         ...collections.filter((c) => c.id != collection.id),
     ]);
@@ -73,9 +71,9 @@ export const savePublicCollection = async (collection: Collection) => {
  * @param key The collection key that can be used to identify the public album
  * we want to remove.
  */
-export const removePublicCollectionByKey = async (collectionKey: string) => {
-    const collections = await savedPublicCollections();
-    await savePublicCollections([
+export const removePublicCollectionByKey = (collectionKey: string) => {
+    const collections = savedPublicCollections();
+    savePublicCollections([
         ...collections.filter((c) => c.key != collectionKey),
     ]);
 };
@@ -100,8 +98,8 @@ const LocalString = z.string().nullish().transform(nullToUndefined);
  * 3. It gets updated as part of {@link publicAlbumsRemotePull}, which writes
  *    out a new value using {@link saveLastPublicCollectionReferralCode}.
  */
-export const savedLastPublicCollectionReferralCode = async () =>
-    LocalString.parse(await inMemoryStorage.getItem("public-referral-code"));
+export const savedLastPublicCollectionReferralCode = () =>
+    LocalString.parse(inMemoryStorage.getItem("public-referral-code"));
 
 /**
  * Update the referral code present in our local storage.
@@ -109,10 +107,8 @@ export const savedLastPublicCollectionReferralCode = async () =>
  * This is the setter corresponding to
  * {@link savedLastPublicCollectionReferralCode}.
  */
-export const saveLastPublicCollectionReferralCode = async (
-    referralCode: string,
-) => {
-    await inMemoryStorage.setItem("public-referral-code", referralCode);
+export const saveLastPublicCollectionReferralCode = (referralCode: string) => {
+    inMemoryStorage.setItem("public-referral-code", referralCode);
 };
 
 const LocalSavedPublicCollectionFilesEntry = z.object({
@@ -138,25 +134,23 @@ type LocalSavedPublicCollectionFilesEntry = z.infer<
  * @param accessToken The access token that identifies the public album whose
  * files we want.
  */
-export const savedPublicCollectionFiles = async (
-    accessToken: string,
-): Promise<EnteFile[]> => {
-    const entry = (await pcfEntries()).find(
-        (e) => e.collectionUID == accessToken,
-    );
+export const savedPublicCollectionFiles = (accessToken: string): EnteFile[] => {
+    const entry = pcfEntries().find((e) => e.collectionUID == accessToken);
     return transformFilesIfNeeded(entry ? entry.files : []);
 };
 
 /**
  * A convenience routine to read the storage entries for "public-collection-files".
  */
-const pcfEntries = async () => {
+const pcfEntries = () => {
     // A local alias to avoid the code from looking scary.
     type ES = LocalSavedPublicCollectionFilesEntry[];
 
     // See: [Note: Avoiding Zod parsing for large DB arrays] for why we use an
     // (implied) cast here instead of parsing using the Zod schema.
-    const entries = await inMemoryStorage.getItem<ES>("public-collection-files");
+    const entries = inMemoryStorage.getItem(
+        "public-collection-files",
+    ) as ES | null;
     return entries ?? [];
 };
 
@@ -170,13 +164,13 @@ const pcfEntries = async () => {
  *
  * @param files The files to save.
  */
-export const savePublicCollectionFiles = async (
+export const savePublicCollectionFiles = (
     accessToken: string,
     files: EnteFile[],
-): Promise<void> => {
-    await inMemoryStorage.setItem("public-collection-files", [
+): void => {
+    inMemoryStorage.setItem("public-collection-files", [
         { collectionUID: accessToken, files },
-        ...(await pcfEntries()).filter((e) => e.collectionUID != accessToken),
+        ...pcfEntries().filter((e) => e.collectionUID != accessToken),
     ]);
 };
 
@@ -184,11 +178,9 @@ export const savePublicCollectionFiles = async (
  * Remove the list of files, in any, in our local storage for the given
  * collection (identified by its {@link accessToken}).
  */
-export const removePublicCollectionFiles = async (
-    accessToken: string,
-): Promise<void> => {
-    await inMemoryStorage.setItem("public-collection-files", [
-        ...(await pcfEntries()).filter((e) => e.collectionUID != accessToken),
+export const removePublicCollectionFiles = (accessToken: string): void => {
+    inMemoryStorage.setItem("public-collection-files", [
+        ...pcfEntries().filter((e) => e.collectionUID != accessToken),
     ]);
 };
 
@@ -204,30 +196,26 @@ export const removePublicCollectionFiles = async (
  * @param accessToken The access token that identifies the public album whose
  * last sync time we want.
  */
-export const savedPublicCollectionLastSyncTime = async (accessToken: string) =>
-    LocalTimestamp.parse(
-        await inMemoryStorage.getItem(`public-${accessToken}-time`),
-    );
+export const savedPublicCollectionLastSyncTime = (accessToken: string) =>
+    LocalTimestamp.parse(inMemoryStorage.getItem(`public-${accessToken}-time`));
 
 /**
  * Update the locally persisted timestamp that will be returned by subsequent
  * calls to {@link savedPublicCollectionLastSyncTime}.
  */
-export const savePublicCollectionLastSyncTime = async (
+export const savePublicCollectionLastSyncTime = (
     accessToken: string,
     time: number,
 ) => {
-    await inMemoryStorage.setItem(`public-${accessToken}-time`, time);
+    inMemoryStorage.setItem(`public-${accessToken}-time`, time);
 };
 
 /**
  * Remove the locally persisted timestamp, if any, previously saved for a
  * collection using {@link savedPublicCollectionLastSyncTime}.
  */
-export const removePublicCollectionLastSyncTime = async (
-    accessToken: string,
-) => {
-    await inMemoryStorage.removeItem(`public-${accessToken}-time`);
+export const removePublicCollectionLastSyncTime = (accessToken: string) => {
+    inMemoryStorage.removeItem(`public-${accessToken}-time`);
 };
 
 /**
@@ -237,12 +225,8 @@ export const removePublicCollectionLastSyncTime = async (
  * Use {@link savePublicCollectionAccessTokenJWT} to save the value, and
  * {@link removePublicCollectionAccessTokenJWT} to remove it.
  */
-export const savedPublicCollectionAccessTokenJWT = async (
-    accessToken: string,
-) =>
-    LocalString.parse(
-        await inMemoryStorage.getItem(`public-${accessToken}-passkey`),
-    );
+export const savedPublicCollectionAccessTokenJWT = (accessToken: string) =>
+    LocalString.parse(inMemoryStorage.getItem(`public-${accessToken}-passkey`));
 
 /**
  * Update the access token JWT in our local storage for the given public
@@ -251,21 +235,19 @@ export const savedPublicCollectionAccessTokenJWT = async (
  * This is the setter corresponding to
  * {@link savedPublicCollectionAccessTokenJWT}.
  */
-export const savePublicCollectionAccessTokenJWT = async (
+export const savePublicCollectionAccessTokenJWT = (
     accessToken: string,
     passwordJWT: string,
 ) => {
-    await inMemoryStorage.setItem(`public-${accessToken}-passkey`, passwordJWT);
+    inMemoryStorage.setItem(`public-${accessToken}-passkey`, passwordJWT);
 };
 
 /**
  * Remove the access token JWT in our local storage for the given public
  * collection (as identified by its {@link accessToken}).
  */
-export const removePublicCollectionAccessTokenJWT = async (
-    accessToken: string,
-) => {
-    await inMemoryStorage.removeItem(`public-${accessToken}-passkey`);
+export const removePublicCollectionAccessTokenJWT = (accessToken: string) => {
+    inMemoryStorage.removeItem(`public-${accessToken}-passkey`);
 };
 
 /**
@@ -287,9 +269,9 @@ export const removePublicCollectionAccessTokenJWT = async (
  * @param accessToken The access token that identifies the public album whose
  * saved uploader name we want.
  */
-export const savedPublicCollectionUploaderName = async (accessToken: string) =>
+export const savedPublicCollectionUploaderName = (accessToken: string) =>
     LocalString.parse(
-        await inMemoryStorage.getItem(`public-${accessToken}-uploaderName`),
+        inMemoryStorage.getItem(`public-${accessToken}-uploaderName`),
     );
 
 /**
@@ -299,12 +281,9 @@ export const savedPublicCollectionUploaderName = async (accessToken: string) =>
  * This is the setter corresponding to
  * {@link savedPublicCollectionUploaderName}.
  */
-export const savePublicCollectionUploaderName = async (
+export const savePublicCollectionUploaderName = (
     accessToken: string,
     uploaderName: string,
 ) => {
-    await inMemoryStorage.setItem(
-        `public-${accessToken}-uploaderName`,
-        uploaderName,
-    );
+    inMemoryStorage.setItem(`public-${accessToken}-uploaderName`, uploaderName);
 };

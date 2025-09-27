@@ -13,44 +13,43 @@
 export class InMemoryStorage {
     private storage = new Map<string, unknown>();
 
-    async getItem<T>(key: string): Promise<T | null> {
+    getItem(key: string): unknown {
         const value = this.storage.get(key);
-        return value !== undefined ? (value as T) : null;
+        return value !== undefined ? value : null;
     }
 
-    async setItem<T>(key: string, value: T): Promise<T> {
+    setItem<T>(key: string, value: T): T {
         this.storage.set(key, value);
         return value;
     }
 
-    async removeItem(key: string): Promise<void> {
+    removeItem(key: string): void {
         this.storage.delete(key);
     }
 
-    async clear(): Promise<void> {
+    clear(): void {
         this.storage.clear();
     }
 
-    async ready(): Promise<void> {
+    ready(): void {
         // Always ready since it's in-memory
-        return Promise.resolve();
     }
 
-    async keys(): Promise<string[]> {
+    keys(): string[] {
         return Array.from(this.storage.keys());
     }
 
-    async length(): Promise<number> {
+    length(): number {
         return this.storage.size;
     }
 
-    async key(index: number): Promise<string | null> {
-        const keys = await this.keys();
+    key(index: number): string | null {
+        const keys = this.keys();
         return keys[index] || null;
     }
 
     // Config method to match localForage interface (no-op for in-memory)
-    config(_options: Record<string, unknown>): void {
+    config(): void {
         // No configuration needed for in-memory storage
     }
 }

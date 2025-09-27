@@ -1,6 +1,4 @@
 import "@fontsource-variable/inter";
-import "photoswipe/dist/photoswipe.css";
-import "styles/photoswipe.css";
 import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { CustomHeadPhotosOrAlbums } from "ente-base/components/Head";
@@ -16,14 +14,16 @@ import { ThemedLoadingBar } from "ente-new/photos/components/ThemedLoadingBar";
 import { useLoadingBar } from "ente-new/photos/components/utils/use-loading-bar";
 import { PhotosAppContext } from "ente-new/photos/types/context";
 import type { AppProps } from "next/app";
+import "photoswipe/dist/photoswipe.css";
 import { useCallback, useEffect, useMemo } from "react";
+import "styles/photoswipe.css";
 
 export default function App({ Component, pageProps }: AppProps) {
     useSetupLogs();
     useSetupI18n();
 
     useEffect(() => {
-        void logStartupBanner();
+        logStartupBanner();
     }, []);
 
     // Simplified - no complex dialogs needed for embed
@@ -57,9 +57,13 @@ export default function App({ Component, pageProps }: AppProps) {
         () => ({
             showLoadingBar,
             hideLoadingBar,
-            showNotification: () => {}, // No notifications in embed
+            showNotification: () => {
+                // No notifications in embed
+            },
             watchFolderView: false,
-            setWatchFolderView: () => {}, // No watch folder in embed
+            setWatchFolderView: () => {
+                // No watch folder in embed
+            },
         }),
         [showLoadingBar, hideLoadingBar],
     );

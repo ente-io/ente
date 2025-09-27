@@ -112,18 +112,21 @@ export const pullCollection = async (
     });
     ensureOk(res);
 
-    const data = await res.json();
+    const data = (await res.json()) as {
+        collection: unknown;
+        referralCode?: string;
+    };
     const remoteCollection = RemoteCollection.parse(data.collection);
-    const referralCode = data.referralCode || "";
+    const referralCode = data.referralCode ?? "";
 
     const collection = await decryptRemoteCollection(
         remoteCollection,
         collectionKey,
     );
 
-    await savePublicCollection(collection);
+    savePublicCollection(collection);
 
-    return { collection, referralCode };
+    return { collection, referralCode } as const;
 };
 
 /**
@@ -146,17 +149,13 @@ export const pullPublicCollectionFiles = async (
     collection: Collection,
     onUpdate: (files: EnteFile[]) => void,
 ) => {
-    let time = await savedPublicCollectionLastSyncTime(
-        credentials.accessToken,
-    );
+    let time = savedPublicCollectionLastSyncTime(credentials.accessToken);
     let hasMore = true;
 
     while (hasMore) {
         const res = await fetch(
             await apiURL("/public-collection/diff", { sinceTime: time ?? 0 }),
-            {
-                headers: authenticatedPublicAlbumsRequestHeaders(credentials),
-            },
+            { headers: authenticatedPublicAlbumsRequestHeaders(credentials) },
         );
         ensureOk(res);
 
@@ -168,7 +167,7 @@ export const pullPublicCollectionFiles = async (
             diff.map((f) => decryptRemoteFile(f, collection.key)),
         );
 
-        let existingFiles = await savedPublicCollectionFiles(
+        const existingFiles = savedPublicCollectionFiles(
             credentials.accessToken,
         );
 
@@ -176,14 +175,11 @@ export const pullPublicCollectionFiles = async (
         // order of their creation time.
         const newFiles = [...existingFiles, ...files];
 
-        await savePublicCollectionFiles(credentials.accessToken, newFiles);
+        savePublicCollectionFiles(credentials.accessToken, newFiles);
 
         if (files.length > 0) {
             time = Math.max(...files.map((f) => f.updationTime));
-            await savePublicCollectionLastSyncTime(
-                credentials.accessToken,
-                time,
-            );
+            savePublicCollectionLastSyncTime(credentials.accessToken, time);
         }
 
         hasMore = hasMoreRemote;
@@ -195,8 +191,8 @@ export const pullPublicCollectionFiles = async (
  * Remove all data associated with the public collection (identified by the
  * given {@link accessToken}) from our local storage.
  */
-export const removePublicCollectionFileData = async (accessToken: string) => {
-    await removePublicCollectionFiles(accessToken);
-    await removePublicCollectionLastSyncTime(accessToken);
-    await removePublicCollectionAccessTokenJWT(accessToken);
+export const removePublicCollectionFileData = (accessToken: string) => {
+    removePublicCollectionFiles(accessToken);
+    removePublicCollectionLastSyncTime(accessToken);
+    removePublicCollectionAccessTokenJWT(accessToken);
 };

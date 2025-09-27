@@ -116,7 +116,7 @@ const EmbedFileTile: React.FC<EmbedFileTileProps> = memo(
                     style={{ width: size, height: size }}
                 />
             );
-        }, [isLoading, thumbnailSrc, size]);
+        }, [isLoading, thumbnailSrc, size, file.metadata.fileType]);
 
         return (
             <TileContainer

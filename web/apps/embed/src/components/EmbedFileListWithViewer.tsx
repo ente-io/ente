@@ -40,12 +40,15 @@ export const EmbedFileListWithViewer: React.FC<
         [files],
     );
 
-    const handleThumbnailClick = useCallback((index: number) => {
-        console.log("Thumbnail clicked, index:", index);
-        console.log("Files available:", files.length);
-        setCurrentIndex(index);
-        setOpenFileViewer(true);
-    }, [files.length]);
+    const handleThumbnailClick = useCallback(
+        (index: number) => {
+            console.log("Thumbnail clicked, index:", index);
+            console.log("Files available:", files.length);
+            setCurrentIndex(index);
+            setOpenFileViewer(true);
+        },
+        [files.length],
+    );
 
     const handleCloseFileViewer = useCallback(() => {
         console.log("Closing file viewer");
@@ -76,27 +79,23 @@ export const EmbedFileListWithViewer: React.FC<
                             fontSize: "0.8em",
                             "&:hover .powered-text": {
                                 color: "text.base",
-                                cursor: "pointer"
+                                cursor: "pointer",
                             },
                             "&:hover .ente-logo": {
                                 color: "#1db954",
-                                cursor: "pointer"
-                            }
+                                cursor: "pointer",
+                            },
                         }}
                     >
                         <span
                             className="powered-text"
-                            style={{
-                                transition: "color 0.2s ease"
-                            }}
+                            style={{ transition: "color 0.2s ease" }}
                         >
                             powered by
                         </span>
                         <span
                             className="ente-logo"
-                            style={{
-                                transition: "color 0.2s ease"
-                            }}
+                            style={{ transition: "color 0.2s ease" }}
                         >
                             <EnteLogo height={14} />
                         </span>
@@ -141,7 +140,6 @@ export const EmbedFileListWithViewer: React.FC<
 };
 
 const Container = styled("div")({ flex: 1, width: "100%" });
-
 
 const fileTimelineDateString = (file: EnteFile) => {
     const date = new Date(fileCreationTime(file) / 1000);
