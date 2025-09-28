@@ -500,8 +500,8 @@ Widget _buildSingleSelectActions(Code code) {
                   _onPinSelectedPressed,
                   iconWidget: HugeIcon(
                     icon: allArePinned
-                        ? HugeIcons.strokeRoundedPin
-                        : HugeIcons.strokeRoundedPinOff,
+                        ? HugeIcons.strokeRoundedPinOff
+                        : HugeIcons.strokeRoundedPin,
                     size: 21,
                     color: getEnteColorScheme(context).textBase,
                   ),
@@ -562,7 +562,7 @@ Widget _buildMultiSelectActions(Set<String> selectedIds) {
                 context.l10n.pinText,
                 _onPinSelectedPressed,
                 iconWidget: HugeIcon(
-                  icon: HugeIcons.strokeRoundedPinOff,
+                  icon: HugeIcons.strokeRoundedPin,
                   size: 21,
                   color: getEnteColorScheme(context).textBase,
                 ),
@@ -571,7 +571,7 @@ Widget _buildMultiSelectActions(Set<String> selectedIds) {
                 context.l10n.unpinText,
                 _onUnpinSelectedPressed,
                 iconWidget: HugeIcon(
-                  icon: HugeIcons.strokeRoundedPin,
+                  icon: HugeIcons.strokeRoundedPinOff,
                   size: 21,
                   color: getEnteColorScheme(context).textBase,
                 ),
@@ -605,8 +605,8 @@ Widget _buildMultiSelectActions(Set<String> selectedIds) {
                 _onPinSelectedPressed,
                 iconWidget: HugeIcon(
                   icon: allArePinned
-                      ? HugeIcons.strokeRoundedPin
-                      : HugeIcons.strokeRoundedPinOff, 
+                      ? HugeIcons.strokeRoundedPinOff
+                      : HugeIcons.strokeRoundedPin, 
                   size: 21,
                   color: getEnteColorScheme(context).textBase,
                 ),
