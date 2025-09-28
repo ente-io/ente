@@ -1987,6 +1987,24 @@
     {
       "title": "University of Auckland",
       "slug": "uoa"
+    },
+    {
+      "title": "Autenti",
+      "slug": "autenti"
+    },
+    {
+      "title": "Creately",
+      "slug": "creately"
+    },
+    {
+      "title": "ESET",
+      "slug": "eset",
+      "altNames": [
+        "ESET Home",
+        "ESET Protect",
+        "ESET Small Business Security",
+        "ESET Home Security"
+      ]
     }
   ]
 }
