@@ -675,6 +675,14 @@ export interface CollectionPublicMagicMetadataData {
      * To reset to the default cover, set this to 0.
      */
     coverID?: number;
+    /**
+     * The layout type for the public collection display.
+     *
+     * Expected to be one of: "grouped", "continuous", "trip".
+     *
+     * When undefined, the UI defaults to "grouped" behavior.
+     */
+    layout?: string;
 }
 
 /**
@@ -683,6 +691,7 @@ export interface CollectionPublicMagicMetadataData {
 export const CollectionPublicMagicMetadataData = z.looseObject({
     asc: z.boolean().nullish().transform(nullToUndefined),
     coverID: z.number().nullish().transform(nullToUndefined),
+    layout: z.string().nullish().transform(nullToUndefined),
 });
 
 /**

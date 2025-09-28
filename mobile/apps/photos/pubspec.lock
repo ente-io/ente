@@ -1047,10 +1047,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_secure_storage
-      sha256: "9cad52d75ebc511adfae3d447d5d13da15a55a92c9410e50f67335b6d21d16ea"
+      sha256: ffdbb60130e4665d2af814a0267c481bcf522c41ae2e43caf69fa0146876d685
       url: "https://pub.dev"
     source: hosted
-    version: "9.2.4"
+    version: "9.0.0"
   flutter_secure_storage_linux:
     dependency: transitive
     description:
@@ -2632,6 +2632,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.8"
+  text_detector:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: a2d2b2e0ae5705009f8d3a5e9645caf1c5ef5ace
+      url: "https://github.com/neeraj-pilot/text_detector.git"
+    source: git
+    version: "1.0.0"
   thermal:
     dependency: "direct main"
     description:
@@ -3075,5 +3084,5 @@ packages:
     source: hosted
     version: "3.1.3"
 sdks:
-  dart: ">=3.8.0 <4.0.0"
+  dart: ">=3.8.1 <4.0.0"
   flutter: ">=3.29.0"

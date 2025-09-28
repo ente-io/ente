@@ -9,6 +9,7 @@ import "package:ente_ui/components/dialog_widget.dart";
 import "package:ente_ui/components/progress_dialog.dart";
 import "package:ente_ui/components/user_dialogs.dart";
 import 'package:ente_ui/utils/dialog_util.dart';
+import "package:ente_ui/utils/toast_util.dart";
 import "package:ente_utils/email_util.dart";
 import "package:ente_utils/share_utils.dart";
 import 'package:flutter/material.dart';
@@ -17,7 +18,7 @@ import "package:locker/extensions/user_extension.dart";
 import 'package:locker/l10n/l10n.dart';
 import "package:locker/services/collections/collections_api_client.dart";
 import 'package:locker/services/collections/collections_service.dart';
-import 'package:locker/services/collections/models/collection.dart'; 
+import 'package:locker/services/collections/models/collection.dart';
 import "package:locker/services/configuration.dart";
 import 'package:locker/utils/snack_bar_utils.dart';
 import 'package:logging/logging.dart';
@@ -117,6 +118,66 @@ class CollectionActions {
         }
       },
     );
+  }
+
+  static Future<void> deleteMultipleCollections(
+    BuildContext context,
+    List<Collection> collections, {
+    VoidCallback? onSuccess,
+  }) async {
+    if (collections.isEmpty) return;
+
+    final dialogChoice = await showChoiceDialog(
+      context,
+      title: "Delete collections",
+      body: "Delete ${collections.length} collections?",
+      firstButtonLabel: context.l10n.delete,
+      secondButtonLabel: context.l10n.cancel,
+      firstButtonType: ButtonType.critical,
+      isCritical: true,
+    );
+
+    if (dialogChoice?.action != ButtonAction.first) return;
+
+    final progressDialog =
+        createProgressDialog(context, context.l10n.pleaseWait);
+    await progressDialog.show();
+
+    bool isFavoriteCollection = false;
+
+    try {
+      for (final collection in collections) {
+        if (collection.type == CollectionType.favorites) {
+          isFavoriteCollection = true;
+          continue;
+        }
+        if (collection.type.canDelete) {
+          await CollectionService.instance.trashCollection(collection);
+        }
+      }
+      await progressDialog.hide();
+
+      SnackBarUtils.showInfoSnackBar(
+        context,
+        "${collections.length} collections deleted successfully",
+      );
+
+      if (isFavoriteCollection) {
+        showToast(
+          context,
+          "Action not supported on Favourites album",
+        );
+      }
+
+      onSuccess?.call();
+    } catch (error) {
+      await progressDialog.hide();
+
+      SnackBarUtils.showWarningSnackBar(
+        context,
+        context.l10n.failedToDeleteCollection(error.toString()),
+      );
+    }
   }
 
   /// Shows a confirmation dialog and deletes a collection

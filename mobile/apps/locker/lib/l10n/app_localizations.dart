@@ -1018,6 +1018,288 @@ abstract class AppLocalizations {
   /// **'Reddit'**
   String get reddit;
 
+  /// No description provided for @information.
+  ///
+  /// In en, this message translates to:
+  /// **'Information'**
+  String get information;
+
+  /// No description provided for @saveInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Save information'**
+  String get saveInformation;
+
+  /// No description provided for @informationDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Save important information that can be shared and passed down to loved ones.'**
+  String get informationDescription;
+
+  /// No description provided for @personalNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal note'**
+  String get personalNote;
+
+  /// No description provided for @personalNoteDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Save important notes or thoughts'**
+  String get personalNoteDescription;
+
+  /// No description provided for @physicalRecords.
+  ///
+  /// In en, this message translates to:
+  /// **'Physical records'**
+  String get physicalRecords;
+
+  /// No description provided for @physicalRecordsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Save the real-world locations of important items'**
+  String get physicalRecordsDescription;
+
+  /// No description provided for @accountCredentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Account credentials'**
+  String get accountCredentials;
+
+  /// No description provided for @accountCredentialsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Securely store login details for important accounts'**
+  String get accountCredentialsDescription;
+
+  /// No description provided for @emergencyContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency contact'**
+  String get emergencyContact;
+
+  /// No description provided for @emergencyContactDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Save details of people to contact in emergencies'**
+  String get emergencyContactDescription;
+
+  /// No description provided for @noteName.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get noteName;
+
+  /// No description provided for @noteNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Give your note a meaningful title'**
+  String get noteNameHint;
+
+  /// No description provided for @noteContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Content'**
+  String get noteContent;
+
+  /// No description provided for @noteContentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write down important thoughts, instructions, or memories you want to preserve'**
+  String get noteContentHint;
+
+  /// No description provided for @recordName.
+  ///
+  /// In en, this message translates to:
+  /// **'Record name'**
+  String get recordName;
+
+  /// No description provided for @recordNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Name of the real-world item'**
+  String get recordNameHint;
+
+  /// No description provided for @recordLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get recordLocation;
+
+  /// No description provided for @recordLocationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Where can this item be found? (e.g., \'Safety deposit box at First Bank, Box #123\')'**
+  String get recordLocationHint;
+
+  /// No description provided for @recordNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get recordNotes;
+
+  /// No description provided for @recordNotesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Any additional details about accessing or understanding this record'**
+  String get recordNotesHint;
+
+  /// No description provided for @credentialName.
+  ///
+  /// In en, this message translates to:
+  /// **'Account name'**
+  String get credentialName;
+
+  /// No description provided for @credentialNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Name of the service or account'**
+  String get credentialNameHint;
+
+  /// No description provided for @username.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get username;
+
+  /// No description provided for @usernameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Login username or email address'**
+  String get usernameHint;
+
+  /// No description provided for @password.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get password;
+
+  /// No description provided for @passwordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Account password'**
+  String get passwordHint;
+
+  /// No description provided for @credentialNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional notes'**
+  String get credentialNotes;
+
+  /// No description provided for @credentialNotesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery methods, security questions, or other important details'**
+  String get credentialNotesHint;
+
+  /// No description provided for @contactName.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact name'**
+  String get contactName;
+
+  /// No description provided for @contactNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Full name of the emergency contact'**
+  String get contactNameHint;
+
+  /// No description provided for @contactDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact details'**
+  String get contactDetails;
+
+  /// No description provided for @contactDetailsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number, email, or other contact information'**
+  String get contactDetailsHint;
+
+  /// No description provided for @contactNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Message for contact'**
+  String get contactNotes;
+
+  /// No description provided for @contactNotesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Important information to share with this person when they are contacted'**
+  String get contactNotesHint;
+
+  /// No description provided for @saveRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get saveRecord;
+
+  /// No description provided for @recordSavedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Record saved successfully'**
+  String get recordSavedSuccessfully;
+
+  /// No description provided for @failedToSaveRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save record'**
+  String get failedToSaveRecord;
+
+  /// No description provided for @pleaseEnterNoteName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a title'**
+  String get pleaseEnterNoteName;
+
+  /// No description provided for @pleaseEnterNoteContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter content'**
+  String get pleaseEnterNoteContent;
+
+  /// No description provided for @pleaseEnterRecordName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a record name'**
+  String get pleaseEnterRecordName;
+
+  /// No description provided for @pleaseEnterLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a location'**
+  String get pleaseEnterLocation;
+
+  /// No description provided for @pleaseEnterAccountName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter an account name'**
+  String get pleaseEnterAccountName;
+
+  /// No description provided for @pleaseEnterUsername.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a username'**
+  String get pleaseEnterUsername;
+
+  /// No description provided for @pleaseEnterPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a password'**
+  String get pleaseEnterPassword;
+
+  /// No description provided for @pleaseEnterContactName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a contact name'**
+  String get pleaseEnterContactName;
+
+  /// No description provided for @pleaseEnterContactDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter contact details'**
+  String get pleaseEnterContactDetails;
+
   /// No description provided for @allowDownloads.
   ///
   /// In en, this message translates to:

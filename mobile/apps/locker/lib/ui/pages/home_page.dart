@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:listen_sharing_intent/listen_sharing_intent.dart';
 import 'package:locker/events/collections_updated_event.dart';
 import 'package:locker/l10n/l10n.dart';
+import 'package:locker/models/selected_collections.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/models/file.dart';
@@ -22,6 +23,7 @@ import 'package:locker/ui/components/search_result_view.dart';
 import 'package:locker/ui/mixins/search_mixin.dart';
 import 'package:locker/ui/pages/all_collections_page.dart';
 import 'package:locker/ui/pages/collection_page.dart';
+import 'package:locker/ui/pages/information_page.dart';
 import "package:locker/ui/pages/settings_page.dart";
 import 'package:locker/ui/pages/uploader_page.dart';
 import 'package:locker/utils/collection_actions.dart';
@@ -48,15 +50,14 @@ class _HomePageState extends UploaderPageState<HomePage>
   bool _isSettingsOpen = false;
 
   List<Collection> _collections = [];
+  late final SelectedCollections _selectedCollections;
   List<Collection> _filteredCollections = [];
   List<EnteFile> _recentFiles = [];
   List<EnteFile> _filteredFiles = [];
   List<Collection> outgoingCollections = [];
   List<Collection> incomingCollections = [];
   List<Collection> quickLinks = [];
-  Map<int, int> _outgoingCollectionFileCounts = {};
-  Map<int, int> _incomingCollectionFileCounts = {};
-  Map<int, int> _homeCollectionFileCounts = {};
+  List<Collection> homeCollections = [];
 
   String? _error;
   final _logger = Logger('HomePage');
@@ -100,7 +101,6 @@ class _HomePageState extends UploaderPageState<HomePage>
       collections = _filteredCollections;
     } else {
       final excludeIds = {
-        ...incomingCollections.map((c) => c.id),
         ...quickLinks.map((c) => c.id),
       };
       collections =
@@ -113,6 +113,15 @@ class _HomePageState extends UploaderPageState<HomePage>
     return CollectionSortUtil.filterAndSortCollections(collections);
   }
 
+  List<Collection> getOnEnteCollections(List<Collection> collections) {
+    final excludeIds = {
+      ...incomingCollections.map((c) => c.id),
+      ...quickLinks.map((c) => c.id),
+    };
+    collections = collections.where((c) => !excludeIds.contains(c.id)).toList();
+    return _filterOutUncategorized(collections);
+  }
+
   final ValueNotifier<bool> _isFabOpen = ValueNotifier<bool>(false);
   late AnimationController _animationController;
   late Animation<double> _animation;
@@ -120,6 +129,7 @@ class _HomePageState extends UploaderPageState<HomePage>
   @override
   void initState() {
     super.initState();
+    _selectedCollections = SelectedCollections();
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -133,6 +143,8 @@ class _HomePageState extends UploaderPageState<HomePage>
         curve: Curves.easeInOut,
       ),
     );
+
+    _loadCollections();
 
     if (CollectionService.instance.hasCompletedFirstSync()) {
       _loadCollections();
@@ -289,6 +301,7 @@ class _HomePageState extends UploaderPageState<HomePage>
           await CollectionService.instance.getSharedCollections();
 
       setState(() {
+        homeCollections = getOnEnteCollections(sortedCollections);
         _collections = sortedCollections;
         _filteredCollections = _filterOutUncategorized(sortedCollections);
         _filteredFiles = _recentFiles;
@@ -297,8 +310,6 @@ class _HomePageState extends UploaderPageState<HomePage>
         quickLinks = sharedCollections.quickLinks;
         _isLoading = false;
       });
-
-      await _loadCollectionFileCounts();
     } catch (error) {
       setState(() {
         _error = 'Error fetching collections: $error';
@@ -451,7 +462,6 @@ class _HomePageState extends UploaderPageState<HomePage>
           collections: _filteredCollections,
           files: _filteredFiles,
           searchQuery: searchQuery,
-          enableSorting: true,
           isHomePage: true,
         ),
       );
@@ -516,23 +526,20 @@ class _HomePageState extends UploaderPageState<HomePage>
               children: [
                 ..._buildCollectionSection(
                   title: context.l10n.collections,
-                  collections: _displayedCollections,
+                  collections: homeCollections,
                   viewType: UISectionType.homeCollections,
-                  fileCounts: _homeCollectionFileCounts,
                 ),
                 if (outgoingCollections.isNotEmpty)
                   ..._buildCollectionSection(
                     title: context.l10n.sharedByYou,
                     collections: outgoingCollections,
                     viewType: UISectionType.outgoingCollections,
-                    fileCounts: _outgoingCollectionFileCounts,
                   ),
                 if (incomingCollections.isNotEmpty)
                   ..._buildCollectionSection(
                     title: context.l10n.sharedWithYou,
                     collections: incomingCollections,
                     viewType: UISectionType.incomingCollections,
-                    fileCounts: _incomingCollectionFileCounts,
                   ),
                 _buildRecentsSection(),
               ],
@@ -626,34 +633,41 @@ class _HomePageState extends UploaderPageState<HomePage>
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: getEnteColorScheme(context).fillBase,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Text(
-                                context.l10n.createCollectionTooltip,
-                                style: getEnteTextTheme(context).small.copyWith(
-                                      color: getEnteColorScheme(context)
-                                          .backgroundBase,
-                                    ),
+                            GestureDetector(
+                              onTap: () {
+                                _toggleFab();
+                                _showInformationDialog();
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: getEnteColorScheme(context).fillBase,
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Text(
+                                  context.l10n.saveInformation,
+                                  style:
+                                      getEnteTextTheme(context).small.copyWith(
+                                            color: getEnteColorScheme(context)
+                                                .backgroundBase,
+                                          ),
+                                ),
                               ),
                             ),
                             const SizedBox(width: 8),
                             FloatingActionButton(
-                              heroTag: "createCollection",
+                              heroTag: "information",
                               mini: true,
                               onPressed: () {
                                 _toggleFab();
-                                _createCollection();
+                                _showInformationDialog();
                               },
                               backgroundColor:
                                   getEnteColorScheme(context).fillBase,
-                              child: const Icon(Icons.create_new_folder),
+                              child: const Icon(Icons.edit_document),
                             ),
                           ],
                         ),
@@ -667,22 +681,29 @@ class _HomePageState extends UploaderPageState<HomePage>
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: getEnteColorScheme(context).fillBase,
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: Text(
-                                  context.l10n.uploadDocumentTooltip,
-                                  style:
-                                      getEnteTextTheme(context).small.copyWith(
-                                            color: getEnteColorScheme(context)
-                                                .backgroundBase,
-                                          ),
+                              GestureDetector(
+                                onTap: () {
+                                  _toggleFab();
+                                  addFile();
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: getEnteColorScheme(context).fillBase,
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Text(
+                                    context.l10n.uploadDocumentTooltip,
+                                    style: getEnteTextTheme(context)
+                                        .small
+                                        .copyWith(
+                                          color: getEnteColorScheme(context)
+                                              .backgroundBase,
+                                        ),
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 8),
@@ -729,55 +750,10 @@ class _HomePageState extends UploaderPageState<HomePage>
     }
   }
 
-  Future<void> _loadCollectionFileCounts() async {
-    final mainCounts = <int, int>{};
-    final outgoingCounts = <int, int>{};
-    final incomingCounts = <int, int>{};
-
-    await Future.wait([
-      ..._displayedCollections.take(4).map((collection) async {
-        try {
-          final files =
-              await CollectionService.instance.getFilesInCollection(collection);
-          mainCounts[collection.id] = files.length;
-        } catch (e) {
-          mainCounts[collection.id] = 0;
-        }
-      }),
-      ...outgoingCollections.take(4).map((collection) async {
-        try {
-          final files =
-              await CollectionService.instance.getFilesInCollection(collection);
-          outgoingCounts[collection.id] = files.length;
-        } catch (e) {
-          outgoingCounts[collection.id] = 0;
-        }
-      }),
-      ...incomingCollections.take(4).map((collection) async {
-        try {
-          final files =
-              await CollectionService.instance.getFilesInCollection(collection);
-          incomingCounts[collection.id] = files.length;
-        } catch (e) {
-          incomingCounts[collection.id] = 0;
-        }
-      }),
-    ]);
-
-    if (mounted) {
-      setState(() {
-        _homeCollectionFileCounts = mainCounts;
-        _outgoingCollectionFileCounts = outgoingCounts;
-        _incomingCollectionFileCounts = incomingCounts;
-      });
-    }
-  }
-
   List<Widget> _buildCollectionSection({
     required String title,
     required List<Collection> collections,
     required UISectionType viewType,
-    required Map<int, int> fileCounts,
   }) {
     return [
       SectionOptions(
@@ -786,6 +762,7 @@ class _HomePageState extends UploaderPageState<HomePage>
             MaterialPageRoute(
               builder: (context) => AllCollectionsPage(
                 viewType: viewType,
+                selectedCollections: _selectedCollections,
               ),
             ),
           );
@@ -800,9 +777,16 @@ class _HomePageState extends UploaderPageState<HomePage>
       const SizedBox(height: 24),
       CollectionFlexGridViewWidget(
         collections: collections,
-        collectionFileCounts: fileCounts,
       ),
       const SizedBox(height: 24),
     ];
+  }
+
+  void _showInformationDialog() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const InformationPage(),
+      ),
+    );
   }
 }
