@@ -148,7 +148,8 @@ class _CodeWidgetState extends State<CodeWidget> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          if (widget.code.type.isTOTPCompatible)
+          if (widget.code.type.isTOTPCompatible &&
+              !CodeDisplayStore.instance.isSelectionModeActive.value)
             CodeTimerProgress(
               key: ValueKey('period_${widget.code.period}'),
               period: widget.code.period,
@@ -211,7 +212,7 @@ Widget clippedCard(AppLocalizations l10n) {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           color: isSelected
-    ? colorScheme.primary400.withValues(alpha: 0.08)
+    ? colorScheme.primary400.withValues(alpha: 0.10)
     : Theme.of(context).colorScheme.codeCardBackgroundColor,
           //add purple overlay when selected
           border: isSelected
@@ -417,27 +418,47 @@ Widget clippedCard(AppLocalizations l10n) {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (isSelected)
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: Icon(
-              Icons.check_circle,
+  Padding(
+    padding: const EdgeInsets.only(right: 4.0),
+    child: Transform.translate(
+      offset: const Offset(0, 2.0),
+      child: SizedBox(
+        width: isCompactMode ? 16 : 20,
+        height: isCompactMode ? 16 : 20,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Icon(
+              Icons.circle,
               color: colorScheme.primary400,
-              size: isCompactMode ? 20 : 24,
+              size: isCompactMode ? 16 : 20, //checkbox circle size
             ),
-          ),
+            Icon(
+              Icons.check,
+              color: Colors.white, 
+              size: isCompactMode ? 8 : 12, // checkbox tick size
+            ),
+          ],
+        ),
+      ),
+    ),
+  ),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                safeDecode(widget.code.issuer).trim(),
-                style: isCompactMode
-                    ? Theme.of(context).textTheme.bodyMedium
-                    : Theme.of(context).textTheme.titleLarge,
+              Transform.translate(
+                offset: Offset(isSelected ? 0.0 : 0, 0),  //position of label when selected
+                child: Text(
+                  safeDecode(widget.code.issuer).trim(),
+                  style: isCompactMode
+                      ? Theme.of(context).textTheme.bodyMedium
+                      : Theme.of(context).textTheme.titleLarge,
+                ),
               ),
               if (!isCompactMode) const SizedBox(height: 2),
               Transform.translate(
-                offset: Offset(isSelected ? -30.0 : 0, 0),
+                offset: Offset(isSelected ? -21.0 : 0, 0), //position of mail when selected
                 child: Text(
                   safeDecode(widget.code.account).trim(),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(

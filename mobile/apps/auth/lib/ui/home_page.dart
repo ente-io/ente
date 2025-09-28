@@ -54,6 +54,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:logging/logging.dart';
 import 'package:move_to_background/move_to_background.dart';
 
@@ -209,14 +210,30 @@ Widget _buildTrashSelectActions() {
   return Container(
     decoration: BoxDecoration(
       color: Theme.of(context).brightness == Brightness.light
-    ? const Color(0xFFF7F7F7)
-    : const Color(0xFF1E1E1E),
+          ? const Color(0xFFF7F7F7)
+          : const Color(0xFF1E1E1E),
       borderRadius: BorderRadius.circular(12),
     ),
     child: Row(
       children: [
-        _buildClearActionButton(Icons.restore,context.l10n.restore, _onRestoreSelectedPressed,),
-        _buildClearActionButton(Icons.delete_forever,context.l10n.delete, _onDeleteForeverPressed),
+        _buildClearActionButton(
+          context.l10n.restore,
+          _onRestoreSelectedPressed,
+          iconWidget: HugeIcon(
+            icon: HugeIcons.strokeRoundedRestoreBin, 
+            size: 21,
+            color: getEnteColorScheme(context).textBase,
+          ),
+        ),
+        _buildClearActionButton(
+          context.l10n.delete,
+          _onDeleteForeverPressed,
+          iconWidget: HugeIcon(
+            icon: HugeIcons.strokeRoundedDelete04, 
+            size: 21,
+            color: getEnteColorScheme(context).textBase,
+          ),
+        ),
       ],
     ),
   );
@@ -393,7 +410,11 @@ Future<void> _onShowQrPressed(Code code) async {
   );
 }
 
-Widget _buildClearActionButton(IconData icon, String label, VoidCallback onTap) {
+Widget _buildClearActionButton(
+  String label, 
+  VoidCallback onTap, 
+  {IconData? icon, Widget? iconWidget,} 
+) {
   final colorScheme = getEnteColorScheme(context);
   final textTheme = getEnteTextTheme(context);
 
@@ -408,7 +429,7 @@ Widget _buildClearActionButton(IconData icon, String label, VoidCallback onTap) 
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: colorScheme.textBase, size: 21),  //bottom row icon props
+            iconWidget ?? Icon(icon!, color: colorScheme.textBase, size: 21),
             const SizedBox(height: 8),
             Text(label, style: textTheme.small.copyWith(color: colorScheme.textBase, fontSize: 11)),
           ],
@@ -425,43 +446,86 @@ Widget _buildSingleSelectActions(Code code) {
     children: [
       Row(
         children: [
-          _buildActionButton(Icons.edit_outlined, context.l10n.edit, () => _onEditPressed(code)),
+          _buildActionButton(
+            context.l10n.edit,
+            () => _onEditPressed(code),
+            iconWidget: HugeIcon(
+              icon: HugeIcons.strokeRoundedEdit03,
+              size: 21,
+              color: getEnteColorScheme(context).textBase,
+            ),
+          ),
           const SizedBox(width: 10),
-          _buildActionButton(Icons.share_outlined, context.l10n.share, () => _onSharePressed(code)),
+          _buildActionButton(
+            context.l10n.share,
+            () => _onSharePressed(code),
+            iconWidget: HugeIcon(
+              icon: HugeIcons.strokeRoundedNavigation03,
+              size: 21,
+              color: getEnteColorScheme(context).textBase,
+            ),
+          ),
           const SizedBox(width: 10),
-          _buildActionButton(Icons.qr_code, context.l10n.qrCode, () => _onShowQrPressed(code)),
+          _buildActionButton(
+            context.l10n.qrCode,
+            () => _onShowQrPressed(code),
+            iconWidget: HugeIcon(
+              icon: HugeIcons.strokeRoundedQrCode,
+              size: 21,
+              color: getEnteColorScheme(context).textBase,
+            ),
+          ),
         ],
       ),
       const SizedBox(height: 16),
       Container(
         decoration: BoxDecoration(
           color: Theme.of(context).brightness == Brightness.dark
-    ? colorScheme.backgroundElevated2 
-    : const Color(0xFFF7F7F7),
- //color of the bottom button row on single select
+              ? colorScheme.backgroundElevated2
+              : const Color(0xFFF7F7F7),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           children: [
             ValueListenableBuilder<Set<String>>(
-  valueListenable: _codeDisplayStore.selectedCodeIds,
-  builder: (context, selectedIds, child) {
-    if (selectedIds.isEmpty) return const Expanded(child: SizedBox.shrink());
-
-    final selectedCodes = _allCodes?.where((c) => selectedIds.contains(c.secret)).toList() ?? [];
-    if (selectedCodes.isEmpty) return const Expanded(child: SizedBox.shrink());
-
-    final bool allArePinned = selectedCodes.every((code) => code.isPinned);
-    
-    return _buildClearActionButton(
-      allArePinned ? Icons.push_pin : Icons.push_pin_outlined,
-      allArePinned ? context.l10n.unpinText : context.l10n.pinText,
-      _onPinSelectedPressed,
-    );
-  },
-),
-            _buildClearActionButton(Icons.label_outline, context.l10n.addTag, _onAddTagPressed),
-            _buildClearActionButton(Icons.delete_outline, context.l10n.trash, _onTrashSelectedPressed),
+              valueListenable: _codeDisplayStore.selectedCodeIds,
+              builder: (context, selectedIds, child) {
+                if (selectedIds.isEmpty) return const Expanded(child: SizedBox.shrink());
+                final selectedCodes = _allCodes?.where((c) => selectedIds.contains(c.secret)).toList() ?? [];
+                if (selectedCodes.isEmpty) return const Expanded(child: SizedBox.shrink());
+                final bool allArePinned = selectedCodes.every((code) => code.isPinned);
+                
+                return _buildClearActionButton(
+                  allArePinned ? context.l10n.unpinText : context.l10n.pinText,
+                  _onPinSelectedPressed,
+                  iconWidget: HugeIcon(
+                    icon: allArePinned
+                        ? HugeIcons.strokeRoundedPin
+                        : HugeIcons.strokeRoundedPinOff,
+                    size: 21,
+                    color: getEnteColorScheme(context).textBase,
+                  ),
+                );
+              },
+            ),
+            _buildClearActionButton(
+              context.l10n.addTag,
+              _onAddTagPressed,
+              iconWidget: HugeIcon(
+                icon: HugeIcons.strokeRoundedTags, 
+                size: 21,
+                color: getEnteColorScheme(context).textBase,
+              ),
+            ),
+            _buildClearActionButton(
+              context.l10n.trash,
+              _onTrashSelectedPressed,
+              iconWidget: HugeIcon(
+                icon: HugeIcons.strokeRoundedDelete02,
+                size: 21,
+                color: getEnteColorScheme(context).textBase,
+              ),
+            ),
           ],
         ),
       ),
@@ -488,53 +552,82 @@ Widget _buildMultiSelectActions(Set<String> selectedIds) {
         if (selectedCodes.isEmpty) return const SizedBox.shrink();
 
         final bool allArePinned = selectedCodes.every((code) => code.isPinned);
-        final bool allAreUnpinned = selectedCodes.every((code) => !code.isPinned);
-        final bool isMixed = !allArePinned && !allAreUnpinned;
+        final bool isMixed = !allArePinned && !selectedCodes.every((code) => !code.isPinned);
 
         if (isMixed) {
-          //mixed state: when selection contains both pinned and unpinned codes
+          // Mixed state: when selection contains both pinned and unpinned codes
           return Row(
             children: [
               _buildClearActionButton(
-                Icons.push_pin_outlined,
                 context.l10n.pinText,
                 _onPinSelectedPressed,
+                iconWidget: HugeIcon(
+                  icon: HugeIcons.strokeRoundedPinOff,
+                  size: 21,
+                  color: getEnteColorScheme(context).textBase,
+                ),
               ),
               _buildClearActionButton(
-                Icons.push_pin,
                 context.l10n.unpinText,
                 _onUnpinSelectedPressed,
+                iconWidget: HugeIcon(
+                  icon: HugeIcons.strokeRoundedPin,
+                  size: 21,
+                  color: getEnteColorScheme(context).textBase,
+                ),
               ),
               _buildClearActionButton(
-                Icons.label_outline,
                 context.l10n.addTag,
                 _onAddTagPressed,
+                iconWidget: HugeIcon(
+                  icon: HugeIcons.strokeRoundedTags, 
+                  size: 21,
+                  color: getEnteColorScheme(context).textBase,
+                ),
               ),
               _buildClearActionButton(
-                Icons.delete_outline,
                 context.l10n.trash,
                 _onTrashSelectedPressed,
+                iconWidget: HugeIcon(
+                  icon: HugeIcons.strokeRoundedDelete02,
+                  size: 21,
+                  color: getEnteColorScheme(context).textBase,
+                ),
               ),
             ],
           );
         } else {
-          //when selection contains either only pinned OR only unpinned codes
+          // When selection contains either only pinned OR only unpinned codes
           return Row(
             children: [
               _buildClearActionButton(
-                allArePinned ? Icons.push_pin : Icons.push_pin_outlined,
                 allArePinned ? context.l10n.unpinText : context.l10n.pinText,
                 _onPinSelectedPressed,
+                iconWidget: HugeIcon(
+                  icon: allArePinned
+                      ? HugeIcons.strokeRoundedPin
+                      : HugeIcons.strokeRoundedPinOff, 
+                  size: 21,
+                  color: getEnteColorScheme(context).textBase,
+                ),
               ),
               _buildClearActionButton(
-                Icons.label_outline,
                 context.l10n.addTag,
                 _onAddTagPressed,
+                iconWidget: HugeIcon(
+                  icon: HugeIcons.strokeRoundedTags,
+                  size: 21,
+                  color: getEnteColorScheme(context).textBase,
+                ),
               ),
               _buildClearActionButton(
-                Icons.delete_outline,
                 context.l10n.trash,
                 _onTrashSelectedPressed,
+                iconWidget: HugeIcon(
+                  icon: HugeIcons.strokeRoundedDelete02,
+                  size: 21,
+                  color: getEnteColorScheme(context).textBase,
+                ),
               ),
             ],
           );
@@ -544,7 +637,11 @@ Widget _buildMultiSelectActions(Set<String> selectedIds) {
   );
 }
 
-  Widget _buildActionButton(IconData icon, String label, VoidCallback onTap) {
+  Widget _buildActionButton(
+  String label, 
+  VoidCallback onTap, 
+  {IconData? icon, Widget? iconWidget,} 
+) {
   final colorScheme = getEnteColorScheme(context);
   final textTheme = getEnteTextTheme(context);
 
@@ -552,9 +649,8 @@ Widget _buildMultiSelectActions(Set<String> selectedIds) {
     child: Container(
       decoration: BoxDecoration(
         color: Theme.of(context).brightness == Brightness.dark
-    ? colorScheme.backgroundElevated2 
-    : const Color(0xFFF7F7F7),
- 
+            ? colorScheme.backgroundElevated2
+            : const Color(0xFFF7F7F7),
         borderRadius: BorderRadius.circular(12),
       ),
       child: InkWell(
@@ -568,7 +664,7 @@ Widget _buildMultiSelectActions(Set<String> selectedIds) {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, color: colorScheme.textBase, size: 21),    //top row icon props
+              iconWidget ?? Icon(icon!, color: colorScheme.textBase, size: 21),
               const SizedBox(height: 8),
               Text(
                 label,
@@ -604,17 +700,30 @@ Widget _buildActionButtons() {
       } else {
         actionWidget = _buildMultiSelectActions(selectedIds);
       }
-      return AnimatedSwitcher(  //size transition for multi/single select action bar
-        duration: const Duration(milliseconds: 250),
-        transitionBuilder: (Widget child, Animation<double> animation) {
-          return SizeTransition(
-            axisAlignment: 1.0, 
-            sizeFactor: animation,
-            child: child,
-          );
-        },
-        child: actionWidget,
-      );
+      final double containerHeight;
+  if (selectedIds.isEmpty) {
+    containerHeight = 0.0;
+  } else if (selectedIds.length == 1) {
+    containerHeight = 160.0;
+  } else {
+    containerHeight = 80.0;
+  }
+
+  return AnimatedContainer(
+  duration: const Duration(milliseconds: 250),
+  curve: Curves.easeInOut,
+  height: containerHeight,
+  child: SingleChildScrollView(
+    physics: const NeverScrollableScrollPhysics(),
+    child: ConstrainedBox(
+      constraints: BoxConstraints(
+        minHeight: containerHeight,
+        maxHeight: containerHeight,
+      ),
+      child: actionWidget,
+    ),
+  ),
+);
     },
   );
 }
@@ -676,8 +785,8 @@ Widget _buildActionButtons() {
                             Text(context.l10n.selectAll,
                                 style: const TextStyle(fontSize: 11),),
                             const SizedBox(width: 6),
-                            const Icon(
-                              Icons.check_circle_outline_outlined,
+                            const HugeIcon(
+                              icon: HugeIcons.strokeRoundedTickDouble02,
                               color: Colors.grey,
                               size: 15,
                             ),
@@ -1472,14 +1581,14 @@ Widget build(BuildContext context) {
       animationCurve: Curves.elasticInOut,
       children: [
         SpeedDialChild(
-          child: const Icon(Icons.qr_code),
+          child: const HugeIcon(icon: HugeIcons.strokeRoundedQrCode), 
           foregroundColor: Theme.of(context).colorScheme.fabForegroundColor,
           backgroundColor: Theme.of(context).colorScheme.fabBackgroundColor,
           labelWidget: SpeedDialLabelWidget(context.l10n.scanAQrCode),
           onTap: _redirectToScannerPage,
         ),
         SpeedDialChild(
-          child: const Icon(Icons.keyboard),
+          child: const Icon(Icons.keyboard_alt_outlined),
           foregroundColor: Theme.of(context).colorScheme.fabForegroundColor,
           backgroundColor: Theme.of(context).colorScheme.fabBackgroundColor,
           labelWidget: SpeedDialLabelWidget(context.l10n.enterDetailsManually),
@@ -1487,7 +1596,7 @@ Widget build(BuildContext context) {
         ),
         if (PlatformUtil.isMobile())
           SpeedDialChild(
-            child: const Icon(Icons.image),
+            child: const HugeIcon(icon: HugeIcons.strokeRoundedAlbum02), 
             backgroundColor: Theme.of(context).colorScheme.fabBackgroundColor,
             foregroundColor: Theme.of(context).colorScheme.fabForegroundColor,
             labelWidget: SpeedDialLabelWidget(context.l10n.importFromGallery),
