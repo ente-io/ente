@@ -147,15 +147,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
   }
 
   Future<void> _deleteCollection() async {
-    await CollectionActions.deleteCollection(
-      context,
-      _collection,
-      onSuccess: () {
-        if (mounted) {
-          Navigator.of(context).pop();
-        }
-      },
-    );
+    await CollectionActions.deleteCollection(context, _collection);
   }
 
   Future<void> _editCollection() async {
