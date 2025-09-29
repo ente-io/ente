@@ -36,44 +36,39 @@ class _VideoCropPageState extends State<VideoCropPage> {
             Expanded(
               child: Hero(
                 tag: "video-editor-preview",
-                child: widget.quarterTurnsForRotationCorrection != 0
-                    ? () {
-                        // Only swap dimensions for 90° and 270° rotations
-                        final shouldSwap =
-                            widget.quarterTurnsForRotationCorrection.abs() %
-                                    2 ==
-                                1;
-                        final width = shouldSwap
-                            ? (widget.controller.video?.videoInfo?.height
-                                    .toDouble() ??
-                                0)
-                            : (widget.controller.video?.videoInfo?.width
-                                    .toDouble() ??
-                                0);
-                        final height = shouldSwap
-                            ? (widget.controller.video?.videoInfo?.width
-                                    .toDouble() ??
-                                0)
-                            : (widget.controller.video?.videoInfo?.height
-                                    .toDouble() ??
-                                0);
-                        return RotatedBox(
-                          quarterTurns:
-                              widget.quarterTurnsForRotationCorrection,
-                          child: CropGridViewer.edit(
-                            controller: widget.controller,
-                            rotateCropArea: false,
-                            margin: const EdgeInsets.symmetric(horizontal: 20),
-                            overrideWidth: width,
-                            overrideHeight: height,
-                          ),
-                        );
-                      }()
-                    : CropGridViewer.edit(
+                child: Builder(
+                  builder: (context) {
+                    if (widget.quarterTurnsForRotationCorrection == 0) {
+                      return CropGridViewer.edit(
                         controller: widget.controller,
                         rotateCropArea: false,
                         margin: const EdgeInsets.symmetric(horizontal: 20),
+                      );
+                    }
+
+                    // Only swap dimensions for 90° and 270° rotations
+                    final shouldSwap =
+                        widget.quarterTurnsForRotationCorrection.abs() % 2 ==
+                            1;
+                    final width = widget.controller.video?.videoInfo?.width
+                            .toDouble() ??
+                        0;
+                    final height = widget.controller.video?.videoInfo?.height
+                            .toDouble() ??
+                        0;
+
+                    return RotatedBox(
+                      quarterTurns: widget.quarterTurnsForRotationCorrection,
+                      child: CropGridViewer.edit(
+                        controller: widget.controller,
+                        rotateCropArea: false,
+                        margin: const EdgeInsets.symmetric(horizontal: 20),
+                        overrideWidth: shouldSwap ? height : width,
+                        overrideHeight: shouldSwap ? width : height,
                       ),
+                    );
+                  },
+                ),
               ),
             ),
             VideoEditorPlayerControl(

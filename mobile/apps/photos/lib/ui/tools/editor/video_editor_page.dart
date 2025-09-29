@@ -135,41 +135,43 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                               Expanded(
                                 child: Hero(
                                   tag: "video-editor-preview",
-                                  child: _quarterTurnsForRotationCorrection != 0
-                                      ? () {
-                                          // Only swap dimensions for 90° and 270° rotations
-                                          final shouldSwap =
-                                              _quarterTurnsForRotationCorrection!
-                                                          .abs() %
-                                                      2 ==
-                                                  1;
-                                          final width = shouldSwap
-                                              ? (_controller!.video?.videoInfo
-                                                          ?.height.toDouble() ??
-                                                      0)
-                                              : (_controller!.video?.videoInfo
-                                                          ?.width.toDouble() ??
-                                                      0);
-                                          final height = shouldSwap
-                                              ? (_controller!.video?.videoInfo
-                                                          ?.width.toDouble() ??
-                                                      0)
-                                              : (_controller!.video?.videoInfo
-                                                          ?.height.toDouble() ??
-                                                      0);
-                                          return RotatedBox(
-                                            quarterTurns:
-                                                _quarterTurnsForRotationCorrection!,
-                                            child: CropGridViewer.preview(
-                                              controller: _controller!,
-                                              overrideWidth: width,
-                                              overrideHeight: height,
-                                            ),
-                                          );
-                                        }()
-                                      : CropGridViewer.preview(
+                                  child: Builder(
+                                    builder: (context) {
+                                      if (_quarterTurnsForRotationCorrection ==
+                                          0) {
+                                        return CropGridViewer.preview(
                                           controller: _controller!,
+                                        );
+                                      }
+
+                                      // Only swap dimensions for 90° and 270° rotations
+                                      final shouldSwap =
+                                          _quarterTurnsForRotationCorrection!
+                                                      .abs() %
+                                                  2 ==
+                                              1;
+                                      final width = _controller!
+                                              .video?.videoInfo?.width
+                                              .toDouble() ??
+                                          0;
+                                      final height = _controller!
+                                              .video?.videoInfo?.height
+                                              .toDouble() ??
+                                          0;
+
+                                      return RotatedBox(
+                                        quarterTurns:
+                                            _quarterTurnsForRotationCorrection!,
+                                        child: CropGridViewer.preview(
+                                          controller: _controller!,
+                                          overrideWidth:
+                                              shouldSwap ? height : width,
+                                          overrideHeight:
+                                              shouldSwap ? width : height,
                                         ),
+                                      );
+                                    },
+                                  ),
                                 ),
                               ),
                               VideoEditorPlayerControl(

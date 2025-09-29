@@ -31,33 +31,32 @@ class VideoRotatePage extends StatelessWidget {
             Expanded(
               child: Hero(
                 tag: "video-editor-preview",
-                child: quarterTurnsForRotationCorrection != 0
-                    ? () {
-                        // Only swap dimensions for 90° and 270° rotations
-                        final shouldSwap =
-                            quarterTurnsForRotationCorrection.abs() % 2 == 1;
-                        final width = shouldSwap
-                            ? (controller.video?.videoInfo?.height.toDouble() ??
-                                0)
-                            : (controller.video?.videoInfo?.width.toDouble() ??
-                                0);
-                        final height = shouldSwap
-                            ? (controller.video?.videoInfo?.width.toDouble() ??
-                                0)
-                            : (controller.video?.videoInfo?.height.toDouble() ??
-                                0);
-                        return RotatedBox(
-                          quarterTurns: quarterTurnsForRotationCorrection,
-                          child: CropGridViewer.preview(
-                            controller: controller,
-                            overrideWidth: width,
-                            overrideHeight: height,
-                          ),
-                        );
-                      }()
-                    : CropGridViewer.preview(
+                child: Builder(
+                  builder: (context) {
+                    if (quarterTurnsForRotationCorrection == 0) {
+                      return CropGridViewer.preview(
                         controller: controller,
+                      );
+                    }
+
+                    // Only swap dimensions for 90° and 270° rotations
+                    final shouldSwap =
+                        quarterTurnsForRotationCorrection.abs() % 2 == 1;
+                    final width =
+                        controller.video?.videoInfo?.width.toDouble() ?? 0;
+                    final height =
+                        controller.video?.videoInfo?.height.toDouble() ?? 0;
+
+                    return RotatedBox(
+                      quarterTurns: quarterTurnsForRotationCorrection,
+                      child: CropGridViewer.preview(
+                        controller: controller,
+                        overrideWidth: shouldSwap ? height : width,
+                        overrideHeight: shouldSwap ? width : height,
                       ),
+                    );
+                  },
+                ),
               ),
             ),
             VideoEditorPlayerControl(
