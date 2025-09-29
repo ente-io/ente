@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import "package:photos/ente_theme_data.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/ui/tools/editor/video_editor/crop_value.dart";
+import "package:photos/ui/tools/editor/video_editor/rotated_video_preview.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_bottom_action.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_main_actions.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_navigation_options.dart";
@@ -36,38 +37,13 @@ class _VideoCropPageState extends State<VideoCropPage> {
             Expanded(
               child: Hero(
                 tag: "video-editor-preview",
-                child: Builder(
-                  builder: (context) {
-                    if (widget.quarterTurnsForRotationCorrection == 0) {
-                      return CropGridViewer.edit(
-                        controller: widget.controller,
-                        rotateCropArea: false,
-                        margin: const EdgeInsets.symmetric(horizontal: 20),
-                      );
-                    }
-
-                    // Only swap dimensions for 90° and 270° rotations
-                    final shouldSwap =
-                        widget.quarterTurnsForRotationCorrection.abs() % 2 ==
-                            1;
-                    final width = widget.controller.video?.videoInfo?.width
-                            .toDouble() ??
-                        0;
-                    final height = widget.controller.video?.videoInfo?.height
-                            .toDouble() ??
-                        0;
-
-                    return RotatedBox(
-                      quarterTurns: widget.quarterTurnsForRotationCorrection,
-                      child: CropGridViewer.edit(
-                        controller: widget.controller,
-                        rotateCropArea: false,
-                        margin: const EdgeInsets.symmetric(horizontal: 20),
-                        overrideWidth: shouldSwap ? height : width,
-                        overrideHeight: shouldSwap ? width : height,
-                      ),
-                    );
-                  },
+                child: RotatedVideoPreview(
+                  controller: widget.controller,
+                  quarterTurnsForRotationCorrection:
+                      widget.quarterTurnsForRotationCorrection,
+                  isEditMode: true,
+                  rotateCropArea: false,
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
                 ),
               ),
             ),
