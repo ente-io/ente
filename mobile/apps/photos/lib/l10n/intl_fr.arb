@@ -198,6 +198,8 @@
   "@noDeviceLimit": {
     "description": "Text to indicate that there is limit on number of devices"
   },
+  "albumLayout": "Disposition de l'album",
+  "preview": "Aperçu",
   "linkExpiry": "Expiration du lien",
   "linkExpired": "Expiré",
   "linkEnabled": "Activé",

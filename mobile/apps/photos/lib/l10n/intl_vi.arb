@@ -198,6 +198,11 @@
   "@noDeviceLimit": {
     "description": "Text to indicate that there is limit on number of devices"
   },
+  "albumLayout": "Bố cục album",
+  "layoutGrouped": "Đã phân nhóm",
+  "layoutContinuous": "Liên tục",
+  "layoutTrip": "Chuyến đi",
+  "preview": "Xem trước",
   "linkExpiry": "Hết hạn liên kết",
   "linkExpired": "Hết hạn",
   "linkEnabled": "Đã bật",
