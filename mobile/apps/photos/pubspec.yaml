@@ -213,7 +213,7 @@ dependencies:
   video_editor: # edge cases handled in fork, modified for dimension override
     git:
       url: https://github.com/ente-io/video_editor_fork.git
-      ref: dimension-override
+      ref: 053d15955a128bcf878e162493621abb8859262c
   video_player:
     git:
       url: https://github.com/ente-io/packages.git
