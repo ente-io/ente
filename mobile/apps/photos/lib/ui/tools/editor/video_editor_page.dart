@@ -140,10 +140,22 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                               Expanded(
                                 child: Hero(
                                   tag: "video-editor-preview",
-                                  child: NativeVideoPreview(
-                                    controller: _controller!,
-                                    quarterTurnsForRotationCorrection:
-                                        _quarterTurnsForRotationCorrection,
+                                  child: Builder(
+                                    builder: (context) {
+                                      // For videos with metadata rotation, we need to swap dimensions
+                                      final shouldSwap = _quarterTurnsForRotationCorrection! % 2 == 1;
+                                      final width = _controller!.video.value.size.width;
+                                      final height = _controller!.video.value.size.height;
+
+                                      return RotatedBox(
+                                        quarterTurns: _quarterTurnsForRotationCorrection!,
+                                        child: CropGridViewer.preview(
+                                          controller: _controller!,
+                                          overrideWidth: shouldSwap ? height : width,
+                                          overrideHeight: shouldSwap ? width : height,
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ),
                               ),
@@ -253,7 +265,8 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
       );
 
       _logger.fine(
-          'Export: path=$outputPath, trim=${_controller!.isTrimmed}, rotation=${_controller!.rotation}');
+        'Export: path=$outputPath, trim=${_controller!.isTrimmed}, rotation=${_controller!.rotation}',
+      );
 
       // Check feature flag to decide which export method to use
       final File result;
@@ -381,7 +394,8 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         if (rotation != 0) {
           _quarterTurnsForRotationCorrection = (rotation / 90).round();
           _logger.fine(
-              'Applying rotation correction: ${rotation}° → $_quarterTurnsForRotationCorrection quarter turns');
+            'Applying rotation correction: $rotation° → $_quarterTurnsForRotationCorrection quarter turns',
+          );
         } else {
           _quarterTurnsForRotationCorrection = 0;
         }
@@ -394,7 +408,8 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         // Fallback to the original method if native fails
         await getVideoPropsAsync(widget.ioFile).then((props) async {
           _logger.fine(
-              'FFprobe fallback: ${props?.width}x${props?.height}, rotation=${props?.rotation}');
+            'FFprobe fallback: ${props?.width}x${props?.height}, rotation=${props?.rotation}',
+          );
           if (props?.rotation != null) {
             _quarterTurnsForRotationCorrection =
                 (props!.rotation! / 90).round();

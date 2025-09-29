@@ -2850,9 +2850,11 @@ packages:
   video_editor:
     dependency: "direct main"
     description:
-      path: "../../packages/video_editor"
-      relative: true
-    source: path
+      path: "."
+      ref: "053d15955a128bcf878e162493621abb8859262c"
+      resolved-ref: "053d15955a128bcf878e162493621abb8859262c"
+      url: "https://github.com/ente-io/video_editor_fork.git"
+    source: git
     version: "3.0.0"
   video_player:
     dependency: "direct main"

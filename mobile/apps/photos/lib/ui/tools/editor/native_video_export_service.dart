@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:native_video_editor/native_video_editor.dart';
@@ -173,32 +174,98 @@ class NativeVideoExportService {
 
       if (needsCrop) {
         // Calculate crop rectangle from controller's crop values
-        // IMPORTANT: When metadata rotation exists and we're displaying with swapped dimensions,
-        // the crop grid viewer uses those swapped dimensions, so we must too
+        // The controller's crop values are in the displayed/rotated space
         final videoDimension = controller.videoDimension;
         final videoSize = controller.video.value.size;
 
-        // Use swapped dimensions if metadata rotation exists (90 or 270)
-        final cropCalcWidth =
-            (metadataRotation == 90 || metadataRotation == 270)
-                ? videoSize.height
-                : videoSize.width;
-        final cropCalcHeight =
-            (metadataRotation == 90 || metadataRotation == 270)
-                ? videoSize.width
-                : videoSize.height;
+        // Calculate total rotation (metadata + user rotation)
+        final totalRotation = (metadataRotation + controller.rotation) % 360;
+        final totalQuarterTurns = (totalRotation / 90).round();
+        final shouldSwapDimensions = totalQuarterTurns % 2 == 1;
+
+        // IMPORTANT: The controller's crop coordinates are normalized (0-1) values
+        // that apply to the DISPLAYED video after user rotation.
+        // We need to calculate the crop in the displayed space first,
+        // then transform it back to the original video space.
+
+        // For the displayed video dimensions after user rotation:
+        final displayWidth = shouldSwapDimensions ? videoSize.height : videoSize.width;
+        final displayHeight = shouldSwapDimensions ? videoSize.width : videoSize.height;
 
         _logger('=== CROP CALCULATION DEBUG ===');
         _logger(
+          'Original video dimensions: ${videoSize.width} x ${videoSize.height}',
+        );
+        _logger(
           'controller.videoDimension: ${videoDimension.width} x ${videoDimension.height}',
         );
-        _logger(
-          'controller.video.value.size: ${videoSize.width} x ${videoSize.height}',
-        );
         _logger('metadataRotation: $metadataRotation degrees');
+        _logger('userRotation: ${controller.rotation} degrees');
+        _logger('totalRotation: $totalRotation degrees');
+        _logger('totalQuarterTurns: $totalQuarterTurns');
+        _logger('shouldSwapDimensions for export: $shouldSwapDimensions');
         _logger(
-          'cropCalcWidth: $cropCalcWidth, cropCalcHeight: $cropCalcHeight (dimensions used by crop grid)',
+          'Display dimensions (after rotation): $displayWidth x $displayHeight',
         );
+
+        // Calculate what the crop dimensions should be in display space
+        double displayCropWidth = (controller.maxCrop.dx - controller.minCrop.dx) * displayWidth;
+        double displayCropHeight = (controller.maxCrop.dy - controller.minCrop.dy) * displayHeight;
+
+        // Apply preferred aspect ratio constraint if set
+        if (controller.preferredCropAspectRatio != null) {
+          final targetAspectRatio = controller.preferredCropAspectRatio!;
+          final currentAspectRatio = displayCropWidth / displayCropHeight;
+
+          _logger('Raw crop in display space: ${displayCropWidth.toInt()}x${displayCropHeight.toInt()}');
+          _logger('Raw display space aspect ratio: ${currentAspectRatio}');
+          _logger('Target aspect ratio: ${targetAspectRatio}');
+
+          // The controller values don't enforce the aspect ratio, only the UI does
+          // We need to calculate what the actual constrained crop should be
+
+          if (targetAspectRatio == 1.0) {
+            // For square crops, use the maximum square that fits
+            // The UI shows the largest possible square within the video bounds
+            final maxSquareSize = math.min(displayWidth, displayHeight);
+
+            // The crop is centered, so calculate based on that
+            final centerX = (controller.minCrop.dx + controller.maxCrop.dx) / 2;
+            final centerY = (controller.minCrop.dy + controller.maxCrop.dy) / 2;
+
+            // Calculate the actual square size (it's constrained by the smaller of the raw dimensions)
+            final rawWidth = (controller.maxCrop.dx - controller.minCrop.dx) * displayWidth;
+            final rawHeight = (controller.maxCrop.dy - controller.minCrop.dy) * displayHeight;
+            final actualSquareSize = math.min(rawWidth, math.min(rawHeight, maxSquareSize));
+
+            displayCropWidth = actualSquareSize;
+            displayCropHeight = actualSquareSize;
+
+            _logger('Applied 1:1 constraint: ${actualSquareSize.toInt()}x${actualSquareSize.toInt()} square');
+          } else if ((currentAspectRatio - targetAspectRatio).abs() > 0.01) {
+            // For other aspect ratios, constrain based on the target
+            if (targetAspectRatio > currentAspectRatio) {
+              // Need wider crop
+              displayCropWidth = displayCropHeight * targetAspectRatio;
+              if (displayCropWidth > displayWidth) {
+                displayCropWidth = displayWidth;
+                displayCropHeight = displayCropWidth / targetAspectRatio;
+              }
+            } else {
+              // Need taller crop
+              displayCropHeight = displayCropWidth / targetAspectRatio;
+              if (displayCropHeight > displayHeight) {
+                displayCropHeight = displayHeight;
+                displayCropWidth = displayCropHeight * targetAspectRatio;
+              }
+            }
+            _logger('Constrained crop to aspect ratio $targetAspectRatio: ${displayCropWidth.toInt()}x${displayCropHeight.toInt()}');
+          }
+        }
+
+        _logger('Final crop in display space: ${displayCropWidth.toInt()}x${displayCropHeight.toInt()}');
+        _logger('Display space aspect ratio: ${displayCropWidth / displayCropHeight}');
+        _logger('=== CROP PARAMETERS ===');
         _logger(
           'controller.video.value.aspectRatio: ${controller.video.value.aspectRatio}',
         );
@@ -209,37 +276,114 @@ class NativeVideoExportService {
           'controller.preferredCropAspectRatio: ${controller.preferredCropAspectRatio}',
         );
 
-        final minX = controller.minCrop.dx * cropCalcWidth;
-        final minY = controller.minCrop.dy * cropCalcHeight;
-        final maxX = controller.maxCrop.dx * cropCalcWidth;
-        final maxY = controller.maxCrop.dy * cropCalcHeight;
+        // The crop values from the controller are normalized (0-1) in the DISPLAYED space
+        // We need to interpret them correctly based on whether dimensions are swapped
+        double minXNorm = controller.minCrop.dx;
+        double minYNorm = controller.minCrop.dy;
+        double maxXNorm = controller.maxCrop.dx;
+        double maxYNorm = controller.maxCrop.dy;
+
+        _logger('=== CROP RECT CALCULATION ===');
+        _logger('Controller normalized crop (in display space): min=($minXNorm, $minYNorm), max=($maxXNorm, $maxYNorm)');
+        _logger('These coords apply to display dimensions: ${displayWidth}x${displayHeight}');
+
+        // Simple transformation based on rotation
+        final normalizedTurns = ((totalQuarterTurns % 4) + 4) % 4;
+        if (normalizedTurns != 0) {
+          _logger('Video is rotated by ${normalizedTurns * 90} degrees - transforming coordinates');
+          final transformed = _transformNormalizedCropForRotation(
+            minX: minXNorm,
+            maxX: maxXNorm,
+            minY: minYNorm,
+            maxY: maxYNorm,
+            normalizedQuarterTurns: normalizedTurns,
+          );
+          _logger(
+            'Transformed normalized crop: min=(${transformed.minX}, ${transformed.minY}), max=(${transformed.maxX}, ${transformed.maxY})',
+          );
+          minXNorm = transformed.minX;
+          maxXNorm = transformed.maxX;
+          minYNorm = transformed.minY;
+          maxYNorm = transformed.maxY;
+        } else {
+          _logger('Video is not rotated - using normalized crop coordinates as-is');
+        }
+
+        minXNorm = math.min(math.max(minXNorm, 0), 1);
+        maxXNorm = math.min(math.max(maxXNorm, 0), 1);
+        minYNorm = math.min(math.max(minYNorm, 0), 1);
+        maxYNorm = math.min(math.max(maxYNorm, 0), 1);
+
+        if (minXNorm > maxXNorm) {
+          final temp = minXNorm;
+          minXNorm = maxXNorm;
+          maxXNorm = temp;
+        }
+        if (minYNorm > maxYNorm) {
+          final temp = minYNorm;
+          minYNorm = maxYNorm;
+          maxYNorm = temp;
+        }
+
+        _logger('Final normalized coords (for original video): minX=$minXNorm, maxX=$maxXNorm, minY=$minYNorm, maxY=$maxYNorm');
+        _logger('Normalized width: ${maxXNorm - minXNorm}, height: ${maxYNorm - minYNorm}');
+
+        // Apply to original video dimensions
+        double minX = minXNorm * videoSize.width;
+        double maxX = maxXNorm * videoSize.width;
+        double minY = minYNorm * videoSize.height;
+        double maxY = maxYNorm * videoSize.height;
+
+        // When dimensions were swapped in display, we need to apply aspect ratio correction
+        if (shouldSwapDimensions && controller.preferredCropAspectRatio == 1.0) {
+          // The crop in display space was 547x1729, but we need to scale it properly
+          // Display space: 1080x1920 (portrait) -> Original space: 1920x1080 (landscape)
+
+          // Calculate what the square size should be based on the display crop
+          // We take the smaller dimension from display and scale it appropriately
+          final displayCropWidth = (controller.maxCrop.dx - controller.minCrop.dx) * displayWidth;
+          final displayCropHeight = (controller.maxCrop.dy - controller.minCrop.dy) * displayHeight;
+
+          // The correct square size is the minimum dimension scaled to the original aspect ratio
+          // For a 547 width in 1080 display -> 547/1080 * 1920 = 973 in original width
+          // For a 1729 height in 1920 display -> 1729/1920 * 1080 = 973 in original height
+          final scaledWidth = displayCropWidth * (videoSize.width / displayWidth);
+          final scaledHeight = displayCropHeight * (videoSize.height / displayHeight);
+          final squareSize = math.min(scaledWidth, scaledHeight);
+
+          // Center the square crop
+          final centerX = (minX + maxX) / 2;
+          final centerY = (minY + maxY) / 2;
+
+          minX = centerX - squareSize / 2;
+          maxX = centerX + squareSize / 2;
+          minY = centerY - squareSize / 2;
+          maxY = centerY + squareSize / 2;
+
+          _logger('Display crop was ${displayCropWidth.toInt()}x${displayCropHeight.toInt()}');
+          _logger('Scaled dimensions: ${scaledWidth.toInt()}x${scaledHeight.toInt()}');
+          _logger('Applied square constraint: ${squareSize.toInt()}x${squareSize.toInt()}');
+        }
 
         cropRect = Rect.fromLTRB(minX, minY, maxX, maxY);
-        _logger(
-          'Calculated crop rect (display space): left=$minX, top=$minY, right=$maxX, bottom=$maxY',
-        );
-        _logger(
-          'Crop rect dimensions (display space): width=${cropRect.width.toInt()}, height=${cropRect.height.toInt()}',
-        );
-        _logger(
-          'Crop rect position (display space): x=${cropRect.left.toInt()}, y=${cropRect.top.toInt()}',
-        );
 
-        // NOTE: No coordinate transformation needed!
-        // When metadataRotation exists, we already calculated crop using swapped dimensions
-        // (cropCalcWidth/Height), so the coordinates are already in raw file space.
+        // Verify the crop makes sense
+        _logger('Applying to original video (${videoSize.width}x${videoSize.height}):');
+        _logger('  Pixel coords: x=${minX.toInt()}-${maxX.toInt()}, y=${minY.toInt()}-${maxY.toInt()}');
         _logger(
-          'Crop coordinates are already in file space (no transformation needed)',
+          'Calculated crop rect: ${cropRect.width.toInt()}x${cropRect.height.toInt()} at (${cropRect.left.toInt()}, ${cropRect.top.toInt()})',
         );
-
         _logger(
-          'Final crop to send to native: x=${cropRect.left.toInt()}, y=${cropRect.top.toInt()}, width=${cropRect.width.toInt()}, height=${cropRect.height.toInt()}',
+          'Expected aspect ratio: ${controller.preferredCropAspectRatio}',
+        );
+        _logger(
+          'Actual aspect ratio: ${cropRect.width / cropRect.height}',
         );
         _logger('===========================');
 
-        // Validate crop parameters (use the same dimensions we used for calculation)
-        final rawFileWidth = cropCalcWidth;
-        final rawFileHeight = cropCalcHeight;
+        // Validate crop parameters against the original video dimensions
+        final rawFileWidth = videoSize.width;
+        final rawFileHeight = videoSize.height;
 
         if (cropRect.width <= 0 || cropRect.height <= 0) {
           throw Exception(
@@ -306,6 +450,48 @@ class NativeVideoExportService {
       await NativeVideoEditor.cancelProcessing();
     } catch (e) {
       _logger('Error cancelling export: $e');
+    }
+  }
+
+  /// Transform crop rectangle from rotated space to original video space
+  static ({double minX, double maxX, double minY, double maxY})
+      _transformNormalizedCropForRotation({
+    required double minX,
+    required double maxX,
+    required double minY,
+    required double maxY,
+    required int normalizedQuarterTurns,
+  }) {
+    _logger(
+      'Transform normalized crop: turns=$normalizedQuarterTurns, min=($minX, $minY), max=($maxX, $maxY)',
+    );
+
+    switch (normalizedQuarterTurns) {
+      case 0:
+        return (minX: minX, maxX: maxX, minY: minY, maxY: maxY);
+      case 1:
+        return (
+          minX: 1 - maxY,
+          maxX: 1 - minY,
+          minY: minX,
+          maxY: maxX,
+        );
+      case 2:
+        return (
+          minX: 1 - maxX,
+          maxX: 1 - minX,
+          minY: 1 - maxY,
+          maxY: 1 - minY,
+        );
+      case 3:
+        return (
+          minX: minY,
+          maxX: maxY,
+          minY: 1 - maxX,
+          maxY: 1 - minX,
+        );
+      default:
+        return (minX: minX, maxX: maxX, minY: minY, maxY: maxY);
     }
   }
 }

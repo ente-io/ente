@@ -82,24 +82,8 @@ class Media3TransformerProcessor(private val context: Context) {
             // Build effects list
             val videoEffects = mutableListOf<Effect>()
 
-            // Add rotation effect if needed
-            if (rotateDegrees != null && rotateDegrees != 0) {
-                val normalizedDegrees = rotateDegrees % 360
-                logVerbose("Adding rotation effect: $normalizedDegrees degrees")
-
-                // Use ScaleAndRotateTransformation for proper rotation support
-                // Media3 uses positive degrees for clockwise rotation
-                val rotationEffect = ScaleAndRotateTransformation.Builder()
-                    .setRotationDegrees(normalizedDegrees.toFloat())
-                    .build()
-
-                videoEffects.add(rotationEffect)
-                logVerbose("Added ScaleAndRotateTransformation with rotation: $normalizedDegrees degrees (clockwise)")
-
-                hasVideoEffects = true
-            }
-
-            // Add crop effect if needed
+            // Add crop effect if needed BEFORE rotation
+            // This ensures crop coordinates are applied to the correct orientation
             if (cropX != null && cropY != null && cropWidth != null && cropHeight != null) {
                 Log.i(TAG, "=== MEDIA3 CROP PROCESSING ===")
                 Log.i(TAG, "Original video dimensions: ${originalWidth}x$originalHeight")
@@ -130,17 +114,48 @@ class Media3TransformerProcessor(private val context: Context) {
                 )
 
                 videoEffects.add(cropEffect)
+                hasVideoEffects = true
+            }
 
-                // Add Presentation effect to set output dimensions to crop size
-                // Note: Crop effect defines the region, Presentation sets the output resolution
-                // The output should exactly match the cropped region size
+            // Add rotation effect AFTER crop
+            if (rotateDegrees != null && rotateDegrees != 0) {
+                val normalizedDegrees = rotateDegrees % 360
+                logVerbose("Adding rotation effect: $normalizedDegrees degrees")
+
+                // Use ScaleAndRotateTransformation for proper rotation support
+                // Media3 uses positive degrees for clockwise rotation
+                val rotationEffect = ScaleAndRotateTransformation.Builder()
+                    .setRotationDegrees(normalizedDegrees.toFloat())
+                    .build()
+
+                videoEffects.add(rotationEffect)
+                logVerbose("Added ScaleAndRotateTransformation with rotation: $normalizedDegrees degrees (clockwise)")
+
+                hasVideoEffects = true
+            }
+
+            // Add Presentation effect to set output dimensions
+            // For rotated videos, swap dimensions if needed
+            if (cropWidth != null && cropHeight != null) {
+                val outputWidth: Int
+                val outputHeight: Int
+
+                // If video is rotated 90 or 270 degrees, swap the output dimensions
+                if (rotateDegrees != null && (rotateDegrees % 180) != 0) {
+                    outputWidth = cropHeight
+                    outputHeight = cropWidth
+                    Log.i(TAG, "Output dimensions swapped for rotation: ${outputWidth}x$outputHeight")
+                } else {
+                    outputWidth = cropWidth
+                    outputHeight = cropHeight
+                }
+
                 val presentationEffect = Presentation.createForWidthAndHeight(
-                    cropWidth,
-                    cropHeight,
+                    outputWidth,
+                    outputHeight,
                     Presentation.LAYOUT_SCALE_TO_FIT_WITH_CROP
                 )
                 videoEffects.add(presentationEffect)
-                hasVideoEffects = true
             }
 
             // Configure Transformer

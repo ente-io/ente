@@ -21,10 +21,12 @@ class VideoEditorPlayerControl extends StatelessWidget {
         ]),
         builder: (_, __) {
           final duration = controller.trimmedDuration;
-          final pos = Duration(
-            seconds: (controller.videoPosition.inSeconds -
-                controller.startTrim.inSeconds),
-          );
+          Duration pos = controller.videoPosition - controller.startTrim;
+          if (pos.isNegative) {
+            pos = Duration.zero;
+          } else if (pos > duration) {
+            pos = duration;
+          }
           final isPlaying = controller.isPlaying;
 
           return GestureDetector(

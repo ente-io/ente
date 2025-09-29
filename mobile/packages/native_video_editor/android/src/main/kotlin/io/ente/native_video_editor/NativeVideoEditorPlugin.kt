@@ -61,7 +61,7 @@ class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler, EventChannel.S
                             endTimeMs = endTimeMs,
                             onProgress = { progress ->
                                 Log.d(TAG, "Trim progress: ${(progress * 100).toInt()}%")
-                                withContext(Dispatchers.Main) {
+                                scope.launch(Dispatchers.Main) {
                                     progressEventSink?.success(progress)
                                 }
                             }
@@ -101,7 +101,7 @@ class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler, EventChannel.S
                             degrees = degrees,
                             onProgress = { progress ->
                                 Log.d(TAG, "Rotation progress: ${(progress * 100).toInt()}%")
-                                withContext(Dispatchers.Main) {
+                                scope.launch(Dispatchers.Main) {
                                     progressEventSink?.success(progress)
                                 }
                             }
@@ -147,7 +147,7 @@ class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler, EventChannel.S
                             cropHeight = height,
                             onProgress = { progress ->
                                 Log.d(TAG, "Crop progress: ${(progress * 100).toInt()}%")
-                                withContext(Dispatchers.Main) {
+                                scope.launch(Dispatchers.Main) {
                                     progressEventSink?.success(progress)
                                 }
                             }
@@ -982,7 +982,7 @@ class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler, EventChannel.S
                     cropHeight = cropHeight,
                     onProgress = { progress ->
                         Log.d(TAG, "Processing progress: ${(progress * 100).toInt()}%")
-                        withContext(Dispatchers.Main) {
+                        scope.launch(Dispatchers.Main) {
                             progressEventSink?.success(progress)
                         }
                     }

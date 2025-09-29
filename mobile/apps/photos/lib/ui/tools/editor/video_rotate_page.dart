@@ -7,7 +7,7 @@ import "package:photos/ui/tools/editor/video_editor/video_editor_navigation_opti
 import "package:photos/ui/tools/editor/video_editor/video_editor_player_control.dart";
 import 'package:video_editor/video_editor.dart';
 
-class VideoRotatePage extends StatelessWidget {
+class VideoRotatePage extends StatefulWidget {
   final int quarterTurnsForRotationCorrection;
   const VideoRotatePage({
     super.key,
@@ -18,8 +18,13 @@ class VideoRotatePage extends StatelessWidget {
   final VideoEditorController controller;
 
   @override
+  State<VideoRotatePage> createState() => _VideoRotatePageState();
+}
+
+class _VideoRotatePageState extends State<VideoRotatePage> {
+  @override
   Widget build(BuildContext context) {
-    final rotation = controller.rotation;
+    final initialRotation = widget.controller.rotation;
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -31,36 +36,45 @@ class VideoRotatePage extends StatelessWidget {
             Expanded(
               child: Hero(
                 tag: "video-editor-preview",
-                child: quarterTurnsForRotationCorrection != 0
-                    ? RotatedBox(
-                        quarterTurns: quarterTurnsForRotationCorrection,
-                        child: CropGridViewer.preview(
-                          controller: controller,
-                          overrideWidth: controller.video.value.size.height,
-                          overrideHeight: controller.video.value.size.width,
-                        ),
-                      )
-                    : CropGridViewer.preview(
-                        controller: controller,
+                child: Builder(
+                  builder: (context) {
+                    // For videos with metadata rotation, we need to swap dimensions
+                    final shouldSwap = widget.quarterTurnsForRotationCorrection % 2 == 1;
+                    final width = widget.controller.video.value.size.width;
+                    final height = widget.controller.video.value.size.height;
+
+                    return RotatedBox(
+                      quarterTurns: widget.quarterTurnsForRotationCorrection,
+                      child: CropGridViewer.preview(
+                        controller: widget.controller,
+                        overrideWidth: shouldSwap ? height : width,
+                        overrideHeight: shouldSwap ? width : height,
                       ),
+                    );
+                  },
+                ),
               ),
             ),
             VideoEditorPlayerControl(
-              controller: controller,
+              controller: widget.controller,
             ),
             VideoEditorMainActions(
               children: [
                 VideoEditorBottomAction(
                   label: AppLocalizations.of(context).left,
-                  onPressed: () =>
-                      controller.rotate90Degrees(RotateDirection.left),
+                  onPressed: () {
+                    widget.controller.rotate90Degrees(RotateDirection.left);
+                    setState(() {});
+                  },
                   icon: Icons.rotate_left,
                 ),
                 const SizedBox(width: 40),
                 VideoEditorBottomAction(
                   label: AppLocalizations.of(context).right,
-                  onPressed: () =>
-                      controller.rotate90Degrees(RotateDirection.right),
+                  onPressed: () {
+                    widget.controller.rotate90Degrees(RotateDirection.right);
+                    setState(() {});
+                  },
                   icon: Icons.rotate_right,
                 ),
               ],
@@ -70,8 +84,8 @@ class VideoRotatePage extends StatelessWidget {
               color: Theme.of(context).colorScheme.videoPlayerPrimaryColor,
               secondaryText: AppLocalizations.of(context).done,
               onPrimaryPressed: () {
-                while (controller.rotation != rotation) {
-                  controller.rotate90Degrees(RotateDirection.left);
+                while (widget.controller.rotation != initialRotation) {
+                  widget.controller.rotate90Degrees(RotateDirection.left);
                 }
                 Navigator.pop(context);
               },

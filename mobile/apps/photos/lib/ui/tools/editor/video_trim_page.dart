@@ -41,20 +41,23 @@ class _VideoTrimPageState extends State<VideoTrimPage> {
             Expanded(
               child: Hero(
                 tag: "video-editor-preview",
-                child: widget.quarterTurnsForRotationCorrection != 0
-                    ? RotatedBox(
-                        quarterTurns: widget.quarterTurnsForRotationCorrection,
-                        child: CropGridViewer.preview(
-                          controller: widget.controller,
-                          overrideWidth:
-                              widget.controller.video.value.size.height,
-                          overrideHeight:
-                              widget.controller.video.value.size.width,
-                        ),
-                      )
-                    : CropGridViewer.preview(
+                child: Builder(
+                  builder: (context) {
+                    // For videos with metadata rotation, we need to swap dimensions
+                    final shouldSwap = widget.quarterTurnsForRotationCorrection % 2 == 1;
+                    final width = widget.controller.video.value.size.width;
+                    final height = widget.controller.video.value.size.height;
+
+                    return RotatedBox(
+                      quarterTurns: widget.quarterTurnsForRotationCorrection,
+                      child: CropGridViewer.preview(
                         controller: widget.controller,
+                        overrideWidth: shouldSwap ? height : width,
+                        overrideHeight: shouldSwap ? width : height,
                       ),
+                    );
+                  },
+                ),
               ),
             ),
             ..._trimSlider(),

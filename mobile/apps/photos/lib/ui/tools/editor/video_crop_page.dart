@@ -36,24 +36,25 @@ class _VideoCropPageState extends State<VideoCropPage> {
             Expanded(
               child: Hero(
                 tag: "video-editor-preview",
-                child: widget.quarterTurnsForRotationCorrection != 0
-                    ? RotatedBox(
-                        quarterTurns: widget.quarterTurnsForRotationCorrection,
-                        child: CropGridViewer.edit(
-                          controller: widget.controller,
-                          rotateCropArea: false,
-                          margin: const EdgeInsets.symmetric(horizontal: 20),
-                          overrideWidth:
-                              widget.controller.video.value.size.height,
-                          overrideHeight:
-                              widget.controller.video.value.size.width,
-                        ),
-                      )
-                    : CropGridViewer.edit(
+                child: Builder(
+                  builder: (context) {
+                    // For videos with metadata rotation, we need to swap dimensions
+                    final shouldSwap = widget.quarterTurnsForRotationCorrection % 2 == 1;
+                    final width = widget.controller.video.value.size.width;
+                    final height = widget.controller.video.value.size.height;
+
+                    return RotatedBox(
+                      quarterTurns: widget.quarterTurnsForRotationCorrection,
+                      child: CropGridViewer.edit(
                         controller: widget.controller,
                         rotateCropArea: false,
                         margin: const EdgeInsets.symmetric(horizontal: 20),
+                        overrideWidth: shouldSwap ? height : width,
+                        overrideHeight: shouldSwap ? width : height,
                       ),
+                    );
+                  },
+                ),
               ),
             ),
             VideoEditorPlayerControl(
