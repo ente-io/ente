@@ -48,9 +48,13 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper> {
   double _currentScrollSpeed = 0;
   ScrollController? _activeScrollController;
 
-  // Auto-scroll constants
-  static const double _maxScrollSpeed = 30.0; // Maximum speed cap
-  static const double _scrollIntervalMs = 8.33; // ~120fps in milliseconds
+  // Frame rate adaptive fields
+  double _displayRefreshRate = 60.0; // Default fallback to 60fps
+  late double _scrollIntervalMs; // Calculated based on refresh rate
+  late double _maxScrollSpeed; // Scaled based on frame rate
+  late double _speedDenominator; // Pre-calculated for speed formula
+
+  // Auto-scroll constants (non-frame-rate dependent)
   static const double _syntheticEventThreshold =
       10.0; // Pixels before generating event
   static const double _exponentialFactor =
@@ -61,9 +65,36 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper> {
   static const double _edgeBoostMultiplier = 1.5; // Speed multiplier at edges
   static const double _minAvailableSpace =
       50.0; // Minimum space for normalization
-  // Pre-calculated denominator for speed formula: e^(factor * maxDist) - 1
-  static final double _speedDenominator =
-      math.exp(_exponentialFactor * _referenceMaxDistance) - 1;
+  // Baseline values for 120fps (used for scaling)
+  static const double _baselineRefreshRate = 120.0;
+  static const double _baselineMaxScrollSpeed = 30.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeFrameRateConstants();
+  }
+
+  void _initializeFrameRateConstants() {
+    // Detect the display refresh rate
+    final display =
+        WidgetsBinding.instance.platformDispatcher.views.first.display;
+    _displayRefreshRate = display.refreshRate > 0 ? display.refreshRate : 60.0;
+
+    // Calculate frame-rate-dependent constants
+    _scrollIntervalMs = 1000.0 / _displayRefreshRate;
+
+    // Scale max scroll speed based on frame rate
+    // At 60fps: 15 pixels per frame
+    // At 120fps: 30 pixels per frame
+    // At 90fps: 22.5 pixels per frame
+    _maxScrollSpeed =
+        _baselineMaxScrollSpeed * (_displayRefreshRate / _baselineRefreshRate);
+
+    // Pre-calculate denominator for speed formula using actual refresh rate
+    _speedDenominator =
+        math.exp(_exponentialFactor * _referenceMaxDistance) - 1;
+  }
 
   @override
   void didChangeDependencies() {
@@ -272,7 +303,7 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper> {
     _currentScrollSpeed = scrollSpeed;
     _activeScrollController = controller;
 
-    // Start periodic timer for smooth scrolling at 120fps
+    // Start periodic timer for smooth scrolling at display refresh rate
     _autoScrollTimer = Timer.periodic(
       Duration(microseconds: (_scrollIntervalMs * 1000).toInt()),
       (_) {
