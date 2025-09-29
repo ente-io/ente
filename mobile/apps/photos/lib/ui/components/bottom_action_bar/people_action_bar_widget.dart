@@ -35,46 +35,51 @@ class _PeopleActionBarWidgetState extends State<PeopleActionBarWidget> {
   @override
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
-    return SizedBox(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Flexible(
-              flex: 1,
-              child: ValueListenableBuilder(
-                valueListenable: _selectedPeopleNotifier,
-                builder: (context, value, child) {
-                  final count = widget.selectedPeople?.personIds.length ?? 0;
-                  return Text(
-                    S.of(context).selectedPhotos(count),
-                    style: textTheme.miniMuted,
-                  );
-                },
+    final colorScheme = getEnteColorScheme(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+      decoration: BoxDecoration(
+        color: colorScheme.backgroundElevated2,
+        borderRadius: BorderRadius.circular(100),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, -1),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ValueListenableBuilder(
+            valueListenable: _selectedPeopleNotifier,
+            builder: (context, value, child) {
+              final count = widget.selectedPeople?.personIds.length ?? 0;
+              return Text(
+                S.of(context).selectedPhotos(count),
+                style: textTheme.miniMuted,
+              );
+            },
+          ),
+          const SizedBox(width: 4),
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              widget.onCancel?.call();
+            },
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: Icon(
+                Icons.close,
+                size: 16,
+                color: textTheme.mini.color,
               ),
             ),
-            Flexible(
-              flex: 1,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () {
-                    widget.onCancel?.call();
-                  },
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      S.of(context).cancel,
-                      style: textTheme.mini,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

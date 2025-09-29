@@ -10,16 +10,20 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/collection_action_sheet.dart";
 import "package:photos/ui/components/bottom_action_bar/selection_action_button_widget.dart";
+import "package:photos/ui/viewer/gallery/hooks/pick_person_avatar.dart";
 import "package:photos/ui/viewer/people/person_cluster_suggestion.dart";
 import "package:photos/ui/viewer/people/save_or_edit_person.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
+import "package:smooth_page_indicator/smooth_page_indicator.dart";
 
 class PeopleSelectionActionWidget extends StatefulWidget {
   final SelectedPeople selectedPeople;
+  final bool isCollapsed;
 
   const PeopleSelectionActionWidget(
     this.selectedPeople, {
+    this.isCollapsed = false,
     super.key,
   });
 
@@ -32,6 +36,7 @@ class _PeopleSelectionActionWidgetState
     extends State<PeopleSelectionActionWidget> {
   late Future<Map<String, PersonEntity>> personEntitiesMapFuture;
   final _logger = Logger("PeopleSelectionActionWidget");
+  final PageController _pageController = PageController();
 
   @override
   void initState() {
@@ -92,6 +97,14 @@ class _PeopleSelectionActionWidgetState
     );
     items.add(
       SelectionActionButton(
+        labelText: S.of(context).setCover,
+        icon: Icons.image_outlined,
+        onTap: _setCoverPhoto,
+        shouldShow: onlyOnePerson,
+      ),
+    );
+    items.add(
+      SelectionActionButton(
         labelText: S.of(context).review,
         icon: Icons.search_outlined,
         onTap: _onReviewSuggestion,
@@ -136,33 +149,158 @@ class _PeopleSelectionActionWidgetState
       ),
     );
 
-    return MediaQuery(
-      data: MediaQuery.of(context).removePadding(removeBottom: true),
-      child: SafeArea(
-        child: Scrollbar(
-          radius: const Radius.circular(1),
-          thickness: 2,
-          thumbVisibility: true,
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(
-              decelerationRate: ScrollDecelerationRate.fast,
+    final List<SelectionActionButton> visibleItems = items
+        .where((item) => item.shouldShow == null || item.shouldShow == true)
+        .toList();
+
+    final List<SelectionActionButton> firstThreeItems =
+        visibleItems.length > 3 ? visibleItems.take(3).toList() : visibleItems;
+
+    final List<SelectionActionButton> otherItems =
+        visibleItems.length > 3 ? visibleItems.sublist(3) : [];
+
+    final List<List<SelectionActionButton>> groupedOtherItems = [];
+    for (int i = 0; i < otherItems.length; i += 4) {
+      int end = (i + 4 < otherItems.length) ? i + 4 : otherItems.length;
+      groupedOtherItems.add(otherItems.sublist(i, end));
+    }
+
+    if (visibleItems.isNotEmpty) {
+      return MediaQuery(
+        data: MediaQuery.of(context).removePadding(removeBottom: true),
+        child: SafeArea(
+          child: Container(
+            padding: const EdgeInsets.only(
+              bottom: 20.0,
+              left: 20.0,
+              right: 20.0,
             ),
-            scrollDirection: Axis.horizontal,
-            child: Container(
-              padding: const EdgeInsets.only(bottom: 24),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(width: 4),
-                  ...items,
-                  const SizedBox(width: 4),
-                ],
-              ),
+            child: Column(
+              children: [
+                // First Row
+                const SizedBox(
+                  height: 4,
+                ),
+                Row(
+                  children: [
+                    for (int i = 0; i < firstThreeItems.length; i++) ...[
+                      Expanded(
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Container(
+                              height: MediaQuery.of(context).size.height * 0.10,
+                              decoration: BoxDecoration(
+                                color: getEnteColorScheme(context)
+                                    .backgroundElevated2,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                            ),
+                            firstThreeItems[i],
+                          ],
+                        ),
+                      ),
+                      if (i != firstThreeItems.length - 1)
+                        const SizedBox(width: 15),
+                    ],
+                  ],
+                ),
+
+                // Second Row
+                AnimatedOpacity(
+                  opacity: widget.isCollapsed ? 0.0 : 1.0,
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  child: widget.isCollapsed
+                      ? const SizedBox.shrink()
+                      : Column(
+                          children: [
+                            if (groupedOtherItems.isNotEmpty) ...[
+                              const SizedBox(height: 24),
+                              Container(
+                                width: double.infinity,
+                                height: 74,
+                                decoration: BoxDecoration(
+                                  color: getEnteColorScheme(context)
+                                      .backgroundElevated2,
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: PageView.builder(
+                                  controller: _pageController,
+                                  itemCount: groupedOtherItems.length,
+                                  onPageChanged: (index) {
+                                    if (index >= groupedOtherItems.length &&
+                                        groupedOtherItems.isNotEmpty) {
+                                      _pageController.animateToPage(
+                                        groupedOtherItems.length - 1,
+                                        duration:
+                                            const Duration(milliseconds: 100),
+                                        curve: Curves.easeInOut,
+                                      );
+                                    }
+                                  },
+                                  itemBuilder: (context, pageIndex) {
+                                    if (pageIndex >= groupedOtherItems.length) {
+                                      return const SizedBox();
+                                    }
+
+                                    final currentGroup =
+                                        groupedOtherItems[pageIndex];
+
+                                    return Row(
+                                      children: currentGroup.map((item) {
+                                        return Expanded(
+                                          child: AnimatedSwitcher(
+                                            duration: const Duration(
+                                              milliseconds: 100,
+                                            ),
+                                            transitionBuilder: (
+                                              Widget child,
+                                              Animation<double> animation,
+                                            ) {
+                                              return FadeTransition(
+                                                opacity: animation,
+                                                child: child,
+                                              );
+                                            },
+                                            child: item is Widget
+                                                ? KeyedSubtree(
+                                                    key: ValueKey(
+                                                      item.hashCode,
+                                                    ),
+                                                    child: item,
+                                                  )
+                                                : const SizedBox(),
+                                          ),
+                                        );
+                                      }).toList(),
+                                    );
+                                  },
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              if (groupedOtherItems.length > 1)
+                                SmoothPageIndicator(
+                                  controller: _pageController,
+                                  count: groupedOtherItems.length,
+                                  effect: const WormEffect(
+                                    dotHeight: 6,
+                                    dotWidth: 6,
+                                    spacing: 6,
+                                    activeDotColor: Colors.white,
+                                  ),
+                                ),
+                            ],
+                          ],
+                        ),
+                ),
+              ],
             ),
           ),
         ),
-      ),
-    );
+      );
+    }
+    return const SizedBox();
   }
 
   Future<void> _onEditPerson() async {
@@ -232,6 +370,39 @@ class _PeopleSelectionActionWidgetState
         }
       },
     );
+  }
+
+  Future<void> _setCoverPhoto() async {
+    final selectedPersonIds = _getSelectedPersonIds();
+    if (selectedPersonIds.length != 1) return;
+
+    final personID = selectedPersonIds.first;
+    final personMap = await personEntitiesMapFuture;
+    final person = personMap[personID];
+    if (person == null) return;
+
+    final result = await showPersonAvatarPhotoSheet(
+      context,
+      person,
+    );
+
+    if (result != null) {
+      _logger.info('Person avatar updated');
+
+      personEntitiesMapFuture = PersonService.instance.getPersonsMap();
+
+      setState(() {});
+
+      Bus.instance.fire(
+        PeopleChangedEvent(
+          type: PeopleEventType.saveOrEditPerson,
+          source: "_PeopleSelectionActionWidgetState.setCoverPhoto",
+          person: result,
+        ),
+      );
+
+      widget.selectedPeople.clearAll();
+    }
   }
 
   Future<void> _onIgnore() async {
