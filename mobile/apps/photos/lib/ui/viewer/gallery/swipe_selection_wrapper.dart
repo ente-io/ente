@@ -41,10 +41,13 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper> {
   double _currentPointerX = 0;
   int? _activePointer;
   double? _cachedScreenHeight;
+  double _accumulatedScrollDelta = 0;
 
   // Auto-scroll constants
   static const double _maxScrollSpeed = 30.0; // Maximum speed cap
   static const double _scrollIntervalMs = 8.33; // ~120fps in milliseconds
+  static const double _syntheticEventThreshold =
+      10.0; // Pixels before generating event
   static const double _exponentialFactor =
       0.015; // Controls speed increase rate
   static const double _referenceMaxDistance = 200.0; // Distance for max speed
@@ -273,11 +276,17 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper> {
 
         // Use jumpTo for immediate positioning (smoother than animateTo for continuous scroll)
         if (clampedOffset != currentOffset) {
+          final scrollDelta = (clampedOffset - currentOffset).abs();
           controller.jumpTo(clampedOffset);
 
-          // Generate synthetic pointer event to trigger selection updates
-          // This ensures files get selected even when pointer is stationary during auto-scroll
-          if (widget.swipeActiveNotifier.value && _activePointer != null) {
+          // Accumulate scroll delta for synthetic event generation
+          _accumulatedScrollDelta += scrollDelta;
+
+          // Generate synthetic pointer event when threshold is reached
+          // This reduces event frequency while maintaining selection responsiveness
+          if (_accumulatedScrollDelta >= _syntheticEventThreshold &&
+              widget.swipeActiveNotifier.value &&
+              _activePointer != null) {
             final syntheticEvent = PointerMoveEvent(
               position: Offset(_currentPointerX, _currentPointerY),
               pointer: _activePointer!,
@@ -285,6 +294,8 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper> {
                   Duration(milliseconds: DateTime.now().millisecondsSinceEpoch),
             );
             GestureBinding.instance.handlePointerEvent(syntheticEvent);
+            // Reset accumulator after generating event
+            _accumulatedScrollDelta = 0;
           }
         }
       },
@@ -295,6 +306,7 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper> {
   void _stopAutoScroll() {
     _autoScrollTimer?.cancel();
     _autoScrollTimer = null;
+    _accumulatedScrollDelta = 0; // Reset accumulator when stopping
   }
 
   @override
