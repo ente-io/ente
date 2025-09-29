@@ -43,6 +43,11 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper> {
   double? _cachedScreenHeight;
   double _accumulatedScrollDelta = 0;
 
+  // Auto-scroll state tracking to avoid timer recreation
+  int? _currentScrollDirection; // -1 for up, 1 for down, null for not scrolling
+  double _currentScrollSpeed = 0;
+  ScrollController? _activeScrollController;
+
   // Auto-scroll constants
   static const double _maxScrollSpeed = 30.0; // Maximum speed cap
   static const double _scrollIntervalMs = 8.33; // ~120fps in milliseconds
@@ -248,11 +253,24 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper> {
     double boundaryPosition,
     bool scrollingUp,
   ) {
-    // Cancel existing timer if any
-    _stopAutoScroll();
-
     final scrollSpeed =
         _calculateScrollSpeed(distance, boundaryPosition, scrollingUp);
+
+    // Check if we're already scrolling in the same direction
+    // If yes, just update the speed without recreating the timer
+    if (_autoScrollTimer != null &&
+        _currentScrollDirection == direction &&
+        _activeScrollController == controller) {
+      // Just update the scroll speed, timer continues running
+      _currentScrollSpeed = scrollSpeed;
+      return;
+    }
+
+    // Direction changed or starting fresh - recreate timer
+    _stopAutoScroll();
+    _currentScrollDirection = direction;
+    _currentScrollSpeed = scrollSpeed;
+    _activeScrollController = controller;
 
     // Start periodic timer for smooth scrolling at 120fps
     _autoScrollTimer = Timer.periodic(
@@ -263,9 +281,9 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper> {
           return;
         }
 
-        // Calculate new scroll position
+        // Calculate new scroll position using the dynamically updated speed
         final currentOffset = controller.offset;
-        final scrollDelta = scrollSpeed * direction;
+        final scrollDelta = _currentScrollSpeed * _currentScrollDirection!;
         final newOffset = currentOffset + scrollDelta;
 
         // Clamp to scroll bounds
@@ -307,6 +325,9 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper> {
     _autoScrollTimer?.cancel();
     _autoScrollTimer = null;
     _accumulatedScrollDelta = 0; // Reset accumulator when stopping
+    _currentScrollDirection = null;
+    _currentScrollSpeed = 0;
+    _activeScrollController = null;
   }
 
   @override
