@@ -52,6 +52,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
   bool showTrash = false;
   bool showUncategorized = false;
   final _logger = Logger("AllCollectionsPage");
+  StreamSubscription<CollectionsUpdatedEvent>? _collectionsUpdatedSub;
 
   @override
   List<Collection> get allCollections => _allCollections;
@@ -82,7 +83,9 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
   void initState() {
     super.initState();
     _loadCollections();
-    Bus.instance.on<CollectionsUpdatedEvent>().listen((event) async {
+    _collectionsUpdatedSub =
+        Bus.instance.on<CollectionsUpdatedEvent>().listen((event) async {
+      if (!mounted) return;
       await _loadCollections();
     });
     if (widget.viewType == UISectionType.homeCollections) {
@@ -91,11 +94,19 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
     }
   }
 
+  @override
+  void dispose() {
+    _collectionsUpdatedSub?.cancel();
+    super.dispose();
+  }
+
   Future<void> _loadCollections() async {
-    setState(() {
-      _isLoading = true;
-      _error = null;
-    });
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+        _error = null;
+      });
+    }
 
     try {
       List<Collection> collections = [];
@@ -139,15 +150,19 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
           : 0;
       _allFiles = await CollectionService.instance.getAllFiles();
 
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       _logger.severe("Failed to load collections", e);
-      setState(() {
-        _error = 'Failed to load collections: $e';
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _error = 'Failed to load collections: $e';
+          _isLoading = false;
+        });
+      }
     }
   }
 
