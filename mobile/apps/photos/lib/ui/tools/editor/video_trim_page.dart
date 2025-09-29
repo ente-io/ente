@@ -41,12 +41,40 @@ class _VideoTrimPageState extends State<VideoTrimPage> {
             Expanded(
               child: Hero(
                 tag: "video-editor-preview",
-                child: RotatedBox(
-                  quarterTurns: widget.quarterTurnsForRotationCorrection,
-                  child: CropGridViewer.preview(
-                    controller: widget.controller,
-                  ),
-                ),
+                child: widget.quarterTurnsForRotationCorrection != 0
+                    ? () {
+                        // Only swap dimensions for 90° and 270° rotations
+                        final shouldSwap =
+                            widget.quarterTurnsForRotationCorrection.abs() %
+                                    2 ==
+                                1;
+                        final width = shouldSwap
+                            ? (widget.controller.video?.videoInfo?.height
+                                    .toDouble() ??
+                                0)
+                            : (widget.controller.video?.videoInfo?.width
+                                    .toDouble() ??
+                                0);
+                        final height = shouldSwap
+                            ? (widget.controller.video?.videoInfo?.width
+                                    .toDouble() ??
+                                0)
+                            : (widget.controller.video?.videoInfo?.height
+                                    .toDouble() ??
+                                0);
+                        return RotatedBox(
+                          quarterTurns:
+                              widget.quarterTurnsForRotationCorrection,
+                          child: CropGridViewer.preview(
+                            controller: widget.controller,
+                            overrideWidth: width,
+                            overrideHeight: height,
+                          ),
+                        );
+                      }()
+                    : CropGridViewer.preview(
+                        controller: widget.controller,
+                      ),
               ),
             ),
             ..._trimSlider(),

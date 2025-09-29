@@ -135,13 +135,41 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                               Expanded(
                                 child: Hero(
                                   tag: "video-editor-preview",
-                                  child: RotatedBox(
-                                    quarterTurns:
-                                        _quarterTurnsForRotationCorrection!,
-                                    child: CropGridViewer.preview(
-                                      controller: _controller!,
-                                    ),
-                                  ),
+                                  child: _quarterTurnsForRotationCorrection != 0
+                                      ? () {
+                                          // Only swap dimensions for 90° and 270° rotations
+                                          final shouldSwap =
+                                              _quarterTurnsForRotationCorrection!
+                                                          .abs() %
+                                                      2 ==
+                                                  1;
+                                          final width = shouldSwap
+                                              ? (_controller!.video?.videoInfo
+                                                          ?.height.toDouble() ??
+                                                      0)
+                                              : (_controller!.video?.videoInfo
+                                                          ?.width.toDouble() ??
+                                                      0);
+                                          final height = shouldSwap
+                                              ? (_controller!.video?.videoInfo
+                                                          ?.width.toDouble() ??
+                                                      0)
+                                              : (_controller!.video?.videoInfo
+                                                          ?.height.toDouble() ??
+                                                      0);
+                                          return RotatedBox(
+                                            quarterTurns:
+                                                _quarterTurnsForRotationCorrection!,
+                                            child: CropGridViewer.preview(
+                                              controller: _controller!,
+                                              overrideWidth: width,
+                                              overrideHeight: height,
+                                            ),
+                                          );
+                                        }()
+                                      : CropGridViewer.preview(
+                                          controller: _controller!,
+                                        ),
                                 ),
                               ),
                               VideoEditorPlayerControl(
@@ -356,11 +384,12 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
     }
   }
 
-  void _doRotationCorrectionIfAndroid() {
+  Future<void> _doRotationCorrectionIfAndroid() async {
     if (Platform.isAndroid) {
-      getVideoPropsAsync(widget.ioFile).then((props) async {
+      await getVideoPropsAsync(widget.ioFile).then((props) async {
         if (props?.rotation != null) {
-          _quarterTurnsForRotationCorrection = -(props!.rotation! / 90).round();
+          // Changed from negative to positive to match actual rotation
+          _quarterTurnsForRotationCorrection = (props!.rotation! / 90).round();
         } else {
           _quarterTurnsForRotationCorrection = 0;
         }
