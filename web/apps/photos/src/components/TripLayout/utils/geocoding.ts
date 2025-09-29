@@ -47,8 +47,12 @@ export const getLocationName = async (
     lng: number,
 ): Promise<{ place: string; country: string }> => {
     try {
+        // Round coordinates to 1 decimal place for geocoding
+        const roundedLat = Math.round(lat * 10) / 10;
+        const roundedLng = Math.round(lng * 10) / 10;
+
         const response = await fetch(
-            `https://api.stadiamaps.com/geocoding/v1/reverse?point.lat=${lat}&point.lon=${lng}`,
+            `https://api.stadiamaps.com/geocoding/v1/reverse?point.lat=${roundedLat}&point.lon=${roundedLng}`,
         );
 
         if (!response.ok) {
