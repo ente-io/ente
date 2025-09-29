@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart';
@@ -37,6 +38,8 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper> {
   // Auto-scroll related fields
   Timer? _autoScrollTimer;
   double _currentPointerY = 0;
+  double _currentPointerX = 0;
+  int? _activePointer;
   double? _cachedScreenHeight;
 
   // Auto-scroll constants
@@ -81,12 +84,16 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper> {
       swipeActiveNotifier: widget.swipeActiveNotifier,
       child: Listener(
         onPointerDown: (event) {
+          _currentPointerX = event.position.dx;
           _currentPointerY = event.position.dy;
+          _activePointer = event.pointer;
           // Reset initial movement tracking for new gesture
           _initialMovementWasHorizontal = null;
         },
         onPointerMove: (event) {
+          _currentPointerX = event.position.dx;
           _currentPointerY = event.position.dy;
+          _activePointer = event.pointer;
           // Handle case where pointer is dragged after first selection in gallery
           if (widget.selectedFiles != null &&
               widget.selectedFiles!.files.length == 1 &&
@@ -132,6 +139,7 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper> {
           widget.swipeHelper?.endSelection();
           widget.swipeActiveNotifier.value = false;
           _initialMovementWasHorizontal = null;
+          _activePointer = null;
         },
         onPointerCancel: (_) {
           _stopAutoScroll();
@@ -139,6 +147,7 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper> {
           widget.swipeHelper?.endSelection();
           widget.swipeActiveNotifier.value = false;
           _initialMovementWasHorizontal = null;
+          _activePointer = null;
         },
         child: widget.child,
       ),
@@ -265,6 +274,18 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper> {
         // Use jumpTo for immediate positioning (smoother than animateTo for continuous scroll)
         if (clampedOffset != currentOffset) {
           controller.jumpTo(clampedOffset);
+
+          // Generate synthetic pointer event to trigger selection updates
+          // This ensures files get selected even when pointer is stationary during auto-scroll
+          if (widget.swipeActiveNotifier.value && _activePointer != null) {
+            final syntheticEvent = PointerMoveEvent(
+              position: Offset(_currentPointerX, _currentPointerY),
+              pointer: _activePointer!,
+              timeStamp:
+                  Duration(milliseconds: DateTime.now().millisecondsSinceEpoch),
+            );
+            GestureBinding.instance.handlePointerEvent(syntheticEvent);
+          }
         }
       },
     );
