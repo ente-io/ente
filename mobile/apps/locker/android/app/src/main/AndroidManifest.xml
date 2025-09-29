@@ -8,6 +8,8 @@
     <application
         android:label="Ente Locker"
         android:name="${applicationName}"
+        android:allowBackup="false"
+        android:fullBackupContent="false"
         android:icon="@mipmap/icon_blue">
         <activity
             android:name=".MainActivity"
