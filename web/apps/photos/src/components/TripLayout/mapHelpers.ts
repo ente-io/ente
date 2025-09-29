@@ -251,6 +251,13 @@ export const createSuperClusterIcon = (
     const backgroundMarkerPositions =
         generateStackedMarkerPositions(clusterCount);
 
+    // Define progressively darker gray shades (no transparency)
+    const getStackedMarkerColor = (index: number) => {
+        // White for first, then progressively darker grays
+        const grayShades = ["#ffffff", "#d1d5db", "#b8bcc4", "#9ca3af"];
+        return grayShades[Math.min(index, grayShades.length - 1)];
+    };
+
     const icon = leaflet.divIcon({
         html: `
         <div class="super-cluster-container" style="
@@ -260,8 +267,11 @@ export const createSuperClusterIcon = (
           cursor: pointer;
         ">
           ${backgroundMarkerPositions
-              .map(
-                  (pos, index) => `
+              .map((pos, index) => {
+                  // Index 0 is second marker (first background), so add 1
+                  const colorIndex = index + 1;
+                  const markerColor = getStackedMarkerColor(colorIndex);
+                  return `
             <!-- Background marker ${index} -->
             <div style="
               position: absolute;
@@ -270,15 +280,14 @@ export const createSuperClusterIcon = (
               width: ${pinSize}px;
               height: ${pinHeight}px;
               z-index: ${5 - index};
-              opacity: ${0.6 - index * 0.1};
             ">
               <!-- Background pin rounded rectangle -->
               <div style="
                 width: ${pinSize}px;
                 height: ${pinSize}px;
                 border-radius: 16px;
-                background: ${isReached ? "#22c55e" : "white"};
-                border: 2px solid ${isReached ? "#22c55e" : "#ffffff"};
+                background: ${markerColor};
+                border: 2px solid ${markerColor};
                 padding: 4px;
                 position: relative;
                 overflow: hidden;
@@ -288,7 +297,7 @@ export const createSuperClusterIcon = (
                   width: 100%;
                   height: 100%;
                   border-radius: 12px;
-                  background: ${isReached ? "#16a34a" : "#f3f4f6"};
+                  background: ${markerColor};
                 "></div>
               </div>
 
@@ -302,15 +311,15 @@ export const createSuperClusterIcon = (
                 height: 0;
                 border-left: ${triangleHeight}px solid transparent;
                 border-right: ${triangleHeight}px solid transparent;
-                border-top: ${triangleHeight}px solid ${isReached ? "#22c55e" : "white"};
+                border-top: ${triangleHeight}px solid ${markerColor};
               "></div>
             </div>
-          `,
-              )
+          `;
+              })
               .join("")}
 
           <!-- Main pin container -->
-          <div class="photo-pin${isReached ? " reached" : ""}" style="
+          <div class="photo-pin" style="
             width: ${pinSize}px;
             height: ${pinHeight}px;
             position: absolute;
@@ -324,15 +333,15 @@ export const createSuperClusterIcon = (
               width: ${pinSize}px;
               height: ${pinSize}px;
               border-radius: 16px;
-              background: ${isReached ? "#22c55e" : "white"};
-              border: 2px solid ${isReached ? "#22c55e" : "#ffffff"};
+              background: white;
+              border: 2px solid #ffffff;
               padding: 4px;
               position: relative;
               overflow: hidden;
               transition: background-color 0.3s ease, border-color 0.3s ease;
             "
             onmouseover="this.style.background='#22c55e'; this.style.borderColor='#22c55e'; this.nextElementSibling.style.borderTopColor='#22c55e';"
-            onmouseout="this.style.background='${isReached ? "#22c55e" : "white"}'; this.style.borderColor='${isReached ? "#22c55e" : "#ffffff"}'; this.nextElementSibling.style.borderTopColor='${isReached ? "#22c55e" : "white"}';"
+            onmouseout="this.style.background='white'; this.style.borderColor='#ffffff'; this.nextElementSibling.style.borderTopColor='white';"
             >
               ${
                   hasImage
@@ -378,7 +387,7 @@ export const createSuperClusterIcon = (
               height: 0;
               border-left: ${triangleHeight}px solid transparent;
               border-right: ${triangleHeight}px solid transparent;
-              border-top: ${triangleHeight}px solid ${isReached ? "#22c55e" : "white"};
+              border-top: ${triangleHeight}px solid white;
               transition: border-top-color 0.3s ease;
             "></div>
           </div>
