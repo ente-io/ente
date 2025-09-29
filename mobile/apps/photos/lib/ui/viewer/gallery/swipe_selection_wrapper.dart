@@ -77,6 +77,7 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper> {
 
   @override
   Widget build(BuildContext context) {
+    final boundariesProvider = GalleryBoundariesProvider.of(context);
     // If swipe selection is not enabled, just return the child wrapped in GallerySwipeHelper
     if (!widget.isEnabled) {
       return GallerySwipeHelper(
@@ -138,7 +139,7 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper> {
 
           // Check for auto-scroll if swipe is active
           if (widget.swipeActiveNotifier.value) {
-            _checkAndHandleAutoScroll();
+            _checkAndHandleAutoScroll(boundariesProvider);
           }
         },
         onPointerUp: (_) {
@@ -209,8 +210,7 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper> {
   }
 
   /// Check if pointer is outside boundaries and start/stop auto-scroll
-  void _checkAndHandleAutoScroll() {
-    final provider = GalleryBoundariesProvider.of(context);
+  void _checkAndHandleAutoScroll(GalleryBoundariesProvider? provider) {
     if (provider == null) return;
 
     final topBoundary = provider.topBoundaryNotifier.value;
