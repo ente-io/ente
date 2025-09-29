@@ -28,8 +28,8 @@ export const useLocationFetching = ({
     useEffect(() => {
         // Create a stable key for current clusters to prevent duplicate fetches
         const clustersKey = photoClusters
-            .map(cluster => cluster.map(p => p.fileId).join(','))
-            .join('|');
+            .map((cluster) => cluster.map((p) => p.fileId).join(","))
+            .join("|");
 
         // Skip if we already fetched for these exact clusters
         if (clustersKey === lastFetchedClustersRef.current) {
