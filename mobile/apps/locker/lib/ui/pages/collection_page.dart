@@ -361,7 +361,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
             const SizedBox(height: 16),
             Text(
               isSearchActive
-                  ? 'No files found for "$searchQuery"'
+                  ? context.l10n.noFilesFoundForQuery(searchQuery)
                   : context.l10n.noFilesFound,
               style: getEnteTextTheme(context).large.copyWith(
                     color: Colors.grey,
@@ -371,7 +371,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
             if (isSearchActive) ...[
               const SizedBox(height: 8),
               Text(
-                'Try adjusting your search query',
+                context.l10n.tryAdjustingYourSearchQuery,
                 style: getEnteTextTheme(context).body.copyWith(
                       color: Colors.grey[600],
                     ),

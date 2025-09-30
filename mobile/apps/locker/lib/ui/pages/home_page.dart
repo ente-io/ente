@@ -271,7 +271,7 @@ class _HomePageState extends UploaderPageState<HomePage>
       if (mounted) {
         await showErrorDialog(
           context,
-          'Upload Error',
+          context.l10n.uploadError,
           'Failed to process shared files: $e',
         );
       }

@@ -1881,6 +1881,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please authenticate to manage your trusted contacts'**
   String get authToManageLegacy;
+
+  /// No description provided for @uploadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Error'**
+  String get uploadError;
+
+  /// No description provided for @tryAdjustingYourSearchQuery.
+  ///
+  /// In en, this message translates to:
+  /// **'Try adjusting your search query'**
+  String get tryAdjustingYourSearchQuery;
+
+  /// Message when no files match the search query
+  ///
+  /// In en, this message translates to:
+  /// **'No files found for \"{query}\"'**
+  String noFilesFoundForQuery(String query);
+
+  /// No description provided for @deselectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Deselect All'**
+  String get deselectAll;
+
+  /// No description provided for @selectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Select All'**
+  String get selectAll;
+
+  /// No description provided for @unnamedCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Unnamed Collection'**
+  String get unnamedCollection;
+
+  /// No description provided for @enteLocker.
+  ///
+  /// In en, this message translates to:
+  /// **'ente Locker'**
+  String get enteLocker;
+
+  /// Progress message showing uploaded files
+  ///
+  /// In en, this message translates to:
+  /// **'Uploaded {completed}/{total} files...'**
+  String uploadedFilesProgress(int completed, int total);
+
+  /// Progress message showing uploaded files with error
+  ///
+  /// In en, this message translates to:
+  /// **'Uploaded {completed}/{total} files... ({error})'**
+  String uploadedFilesProgressWithError(int completed, int total, String error);
+
+  /// No description provided for @noCollectionsAvailableForSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'No collections available'**
+  String get noCollectionsAvailableForSelection;
+
+  /// No description provided for @createCollectionButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Create collection'**
+  String get createCollectionButton;
+
+  /// No description provided for @collectionButtonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection'**
+  String get collectionButtonLabel;
+
+  /// No description provided for @hideWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide Window'**
+  String get hideWindow;
+
+  /// No description provided for @showWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'Show Window'**
+  String get showWindow;
+
+  /// No description provided for @exitApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit App'**
+  String get exitApp;
+
+  /// No description provided for @lockerLogs.
+  ///
+  /// In en, this message translates to:
+  /// **'Locker logs'**
+  String get lockerLogs;
+
+  /// No description provided for @debugLogsForLockerApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Debug logs for Locker app.\\n\\n'**
+  String get debugLogsForLockerApp;
 }
 
 class _AppLocalizationsDelegate
