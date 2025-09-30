@@ -88,10 +88,13 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
               for (int cIndex = 1;
                   cIndex < uploadResult.selectedCollections.length;
                   cIndex++) {
+                // Don't trigger a sync for each additional collection – do one
+                // sync at the end after all files are processed.
                 futures.add(
                   CollectionService.instance.addToCollection(
                     uploadResult.selectedCollections[cIndex],
                     enteFile,
+                    runSync: false,
                   ),
                 );
               }
@@ -118,8 +121,15 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
       if (futures.isNotEmpty) {
         await progressDialog.show();
         await Future.wait(futures);
-        await CollectionService.instance.sync();
-        onFileUploadComplete();
+
+        // Sync once at the end when files are added to multiple collections
+        final shouldPerformFinalSync = (uploadResult != null &&
+            uploadResult.selectedCollections.length > 1);
+
+        if (shouldPerformFinalSync) {
+          // Final sync triggers UI refresh via CollectionsUpdatedEvent
+          await CollectionService.instance.sync();
+        }
       }
     } catch (e, s) {
       _logger.severe('Failed to upload file', e, s);

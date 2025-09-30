@@ -65,7 +65,11 @@ class _HomePageState extends UploaderPageState<HomePage>
 
   @override
   void onFileUploadComplete() {
-    _loadCollections();
+    // No-op: CollectionService.sync() already fires CollectionsUpdatedEvent
+    // which triggers a single refresh. Avoid calling _loadCollections here to
+    // prevent duplicate reloads / UI blinking when uploading to multiple
+    // collections.
+    return;
   }
 
   @override

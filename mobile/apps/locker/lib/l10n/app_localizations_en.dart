@@ -1116,7 +1116,4 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get lockerLogs => 'Locker logs';
-
-  @override
-  String get debugLogsForLockerApp => 'Debug logs for Locker app.\\n\\n';
 }
