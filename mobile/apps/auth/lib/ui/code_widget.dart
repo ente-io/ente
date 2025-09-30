@@ -68,8 +68,9 @@ class _CodeWidgetState extends State<CodeWidget> {
     isMaskingEnabled = PreferenceService.instance.shouldHideCodes();
 
     _hideCode = isMaskingEnabled;
-    _everySecondTimer =
-        Timer.periodic(const Duration(milliseconds: 500), (Timer t) {
+    _everySecondTimer = Timer.periodic(const Duration(milliseconds: 500), (
+      Timer t,
+    ) {
       int newStep = 0;
       int epochSeconds = DateTime.now().millisecondsSinceEpoch ~/ 1000;
       if (widget.code.type != Type.hotp) {
@@ -118,147 +119,146 @@ class _CodeWidgetState extends State<CodeWidget> {
     }
     final l10n = context.l10n;
 
-  Widget getCardContents(AppLocalizations l10n, {required bool isSelected}) {
-  final colorScheme = getEnteColorScheme(context);
-  return Stack(
-    children: [
-      if (!ignorePin && widget.code.isPinned)
-        Align(
-          alignment: Alignment.topRight,
-          child: CustomPaint(
-            painter: PinBgPainter(
-              color: colorScheme.pinnedBgColor,
-            ),
-            size: widget.isCompactMode
-                ? const Size(24, 24)
-                : const Size(39, 39),
-          ),
-        ),
-      if (widget.code.isTrashed && kDebugMode)
-        Align(
-          alignment: Alignment.topLeft,
-          child: CustomPaint(
-            painter: PinBgPainter(
-              color: colorScheme.warning700,
-            ),
-            size: const Size(39, 39),
-          ),
-        ),
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    Widget getCardContents(AppLocalizations l10n, {required bool isSelected}) {
+      final colorScheme = getEnteColorScheme(context);
+      return Stack(
         children: [
-          if (widget.code.type.isTOTPCompatible &&
-              !CodeDisplayStore.instance.isSelectionModeActive.value)
-            CodeTimerProgress(
-              key: ValueKey('period_${widget.code.period}'),
-              period: widget.code.period,
-              isCompactMode: widget.isCompactMode,
-              timeOffsetInMilliseconds:
-                  PreferenceService.instance.timeOffsetInMilliSeconds(),
-            ),
-          widget.isCompactMode
-              ? const SizedBox(height: 4)
-              : const SizedBox(height: 28),
-          Row(
-            children: [
-              _shouldShowLargeIcon ? _getIcon() : const SizedBox.shrink(),
-              Expanded(
-                child: Column(
-                  children: [
-                    _getTopRow(isSelected: isSelected),
-                    widget.isCompactMode
-                        ? const SizedBox.shrink()
-                        : const SizedBox(height: 4),
-                    _getBottomRow(l10n),
-                  ],
-                ),
+          if (!ignorePin && widget.code.isPinned)
+            Align(
+              alignment: Alignment.topRight,
+              child: CustomPaint(
+                painter: PinBgPainter(color: colorScheme.pinnedBgColor),
+                size: widget.isCompactMode
+                    ? const Size(24, 24)
+                    : const Size(39, 39),
               ),
+            ),
+          if (widget.code.isTrashed && kDebugMode)
+            Align(
+              alignment: Alignment.topLeft,
+              child: CustomPaint(
+                painter: PinBgPainter(color: colorScheme.warning700),
+                size: const Size(39, 39),
+              ),
+            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              if (widget.code.type.isTOTPCompatible &&
+                  !CodeDisplayStore.instance.isSelectionModeActive.value)
+                CodeTimerProgress(
+                  key: ValueKey('period_${widget.code.period}'),
+                  period: widget.code.period,
+                  isCompactMode: widget.isCompactMode,
+                  timeOffsetInMilliseconds: PreferenceService.instance
+                      .timeOffsetInMilliSeconds(),
+                ),
+              widget.isCompactMode
+                  ? const SizedBox(height: 4)
+                  : const SizedBox(height: 28),
+              Row(
+                children: [
+                  _shouldShowLargeIcon ? _getIcon() : const SizedBox.shrink(),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        _getTopRow(isSelected: isSelected),
+                        widget.isCompactMode
+                            ? const SizedBox.shrink()
+                            : const SizedBox(height: 4),
+                        _getBottomRow(l10n),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              widget.isCompactMode
+                  ? const SizedBox(height: 4)
+                  : const SizedBox(height: 32),
             ],
           ),
-          widget.isCompactMode
-              ? const SizedBox(height: 4)
-              : const SizedBox(height: 32),
-        ],
-      ),
-      if (!ignorePin && widget.code.isPinned) ...[
-        Align(
-          alignment: Alignment.topRight,
-          child: Padding(
-            padding: widget.isCompactMode
-                ? const EdgeInsets.only(right: 4, top: 4)
-                : const EdgeInsets.only(right: 6, top: 6),
-            child: SvgPicture.asset(
-              "assets/svg/pin-card.svg",
-              width: widget.isCompactMode ? 8 : null,
-              height: widget.isCompactMode ? 8 : null,
-            ),
-          ),
-        ),
-      ],
-    ],
-  );
-}
-
-Widget clippedCard(AppLocalizations l10n) {
-  final colorScheme = getEnteColorScheme(context);
-
-  return ValueListenableBuilder<Set<String>>(
-    valueListenable: CodeDisplayStore.instance.selectedCodeIds,
-    builder: (context, selectedIds, child) {
-      final isSelected = selectedIds.contains(widget.code.secret);
-
-      return Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          color: isSelected
-    ? colorScheme.primary400.withValues(alpha: 0.10)
-    : Theme.of(context).colorScheme.codeCardBackgroundColor,
-          //add purple overlay when selected
-          border: isSelected
-              ? Border.all(color: colorScheme.primary400, width: 2)
-              : null,
-          boxShadow:
-              (widget.code.isPinned && !isSelected) ? colorScheme.pinnedCardBoxShadow : [],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(6), 
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              customBorder: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+          if (!ignorePin && widget.code.isPinned) ...[
+            Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: widget.isCompactMode
+                    ? const EdgeInsets.only(right: 4, top: 4)
+                    : const EdgeInsets.only(right: 6, top: 6),
+                child: SvgPicture.asset(
+                  "assets/svg/pin-card.svg",
+                  width: widget.isCompactMode ? 8 : null,
+                  height: widget.isCompactMode ? 8 : null,
+                ),
               ),
-              onTap: () {
-                final store = CodeDisplayStore.instance;
-                if (store.isSelectionModeActive.value) {
-                  store.toggleSelection(widget.code.secret);
-                } else {
-                  _copyCurrentOTPToClipboard();
-                }
-              },
-              onDoubleTap: isMaskingEnabled
-                  ? () {
-                      setState(
-                        () {
-                          _hideCode = !_hideCode;
-                        },
-                      );
-                    }
-                  : null,
-              onLongPress: widget.isReordering
-                  ? null
-                  : () {
-                      CodeDisplayStore.instance.toggleSelection(widget.code.secret);
-                    },
-              child: getCardContents(l10n, isSelected: isSelected),
             ),
-          ),
-        ),
+          ],
+        ],
       );
-    },
-  );
-}
+    }
+
+    Widget clippedCard(AppLocalizations l10n) {
+      final colorScheme = getEnteColorScheme(context);
+
+      return ValueListenableBuilder<Set<String>>(
+        valueListenable: CodeDisplayStore.instance.selectedCodeIds,
+        builder: (context, selectedIds, child) {
+          final isSelected = selectedIds.contains(widget.code.secret);
+
+          return Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              color: isSelected
+                  ? colorScheme.primary400.withValues(alpha: 0.10)
+                  : Theme.of(context).colorScheme.codeCardBackgroundColor,
+              boxShadow: (widget.code.isPinned && !isSelected)
+                  ? colorScheme.pinnedCardBoxShadow
+                  : [],
+            ),
+            foregroundDecoration: isSelected
+                ? BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: colorScheme.primary400, width: 2),
+                  )
+                : null,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  customBorder: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  onTap: () {
+                    final store = CodeDisplayStore.instance;
+                    if (store.isSelectionModeActive.value) {
+                      store.toggleSelection(widget.code.secret);
+                    } else {
+                      _copyCurrentOTPToClipboard();
+                    }
+                  },
+                  onDoubleTap: isMaskingEnabled
+                      ? () {
+                          setState(() {
+                            _hideCode = !_hideCode;
+                          });
+                        }
+                      : null,
+                  onLongPress: widget.isReordering
+                      ? null
+                      : () {
+                          CodeDisplayStore.instance.toggleSelection(
+                            widget.code.secret,
+                          );
+                        },
+                  child: getCardContents(l10n, isSelected: isSelected),
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
 
     return Container(
       margin: widget.isCompactMode
@@ -291,8 +291,9 @@ Widget clippedCard(AppLocalizations l10n) {
                     ),
                   if (!widget.code.isTrashed && !ignorePin)
                     MenuItem(
-                      label:
-                          widget.code.isPinned ? l10n.unpinText : l10n.pinText,
+                      label: widget.code.isPinned
+                          ? l10n.unpinText
+                          : l10n.pinText,
                       icon: widget.code.isPinned
                           ? Icons.push_pin
                           : Icons.push_pin_outlined,
@@ -410,86 +411,92 @@ Widget clippedCard(AppLocalizations l10n) {
   }
 
   Widget _getTopRow({required bool isSelected}) {
-  final colorScheme = getEnteColorScheme(context);
-  bool isCompactMode = widget.isCompactMode;
-  return Padding(
-    padding: const EdgeInsets.only(left: 16, right: 16),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (isSelected)
-  Padding(
-    padding: const EdgeInsets.only(right: 4.0),
-    child: Transform.translate(
-      offset: const Offset(0, 2.0),
-      child: SizedBox(
-        width: isCompactMode ? 16 : 20,
-        height: isCompactMode ? 16 : 20,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Icon(
-              Icons.circle,
-              color: colorScheme.primary400,
-              size: isCompactMode ? 16 : 20, //checkbox circle size
-            ),
-            Icon(
-              Icons.check,
-              color: Colors.white, 
-              size: isCompactMode ? 8 : 12, // checkbox tick size
-            ),
-          ],
-        ),
-      ),
-    ),
-  ),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Transform.translate(
-                offset: Offset(isSelected ? 0.0 : 0, 0),  //position of label when selected
-                child: Text(
-                  safeDecode(widget.code.issuer).trim(),
-                  style: isCompactMode
-                      ? Theme.of(context).textTheme.bodyMedium
-                      : Theme.of(context).textTheme.titleLarge,
-                ),
-              ),
-              if (!isCompactMode) const SizedBox(height: 2),
-              Transform.translate(
-                offset: Offset(isSelected ? -21.0 : 0, 0), //position of mail when selected
-                child: Text(
-                  safeDecode(widget.code.account).trim(),
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontSize: isCompactMode ? 12 : 12,
-                        color: Colors.grey,
+    final colorScheme = getEnteColorScheme(context);
+    bool isCompactMode = widget.isCompactMode;
+    return Padding(
+      padding: const EdgeInsets.only(left: 16, right: 16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (isSelected)
+            Padding(
+              padding: const EdgeInsets.only(right: 4.0),
+              child: Transform.translate(
+                offset: const Offset(0, 2.0),
+                child: SizedBox(
+                  width: isCompactMode ? 16 : 20,
+                  height: isCompactMode ? 16 : 20,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Icon(
+                        Icons.circle,
+                        color: colorScheme.primary400,
+                        size: isCompactMode ? 16 : 20, //checkbox circle size
                       ),
+                      Icon(
+                        Icons.check,
+                        color: Colors.white,
+                        size: isCompactMode ? 8 : 12, // checkbox tick size
+                      ),
+                    ],
+                  ),
                 ),
               ),
+            ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Transform.translate(
+                  offset: Offset(
+                    isSelected ? 0.0 : 0,
+                    0,
+                  ), //position of label when selected
+                  child: Text(
+                    safeDecode(widget.code.issuer).trim(),
+                    style: isCompactMode
+                        ? Theme.of(context).textTheme.bodyMedium
+                        : Theme.of(context).textTheme.titleLarge,
+                  ),
+                ),
+                if (!isCompactMode) const SizedBox(height: 2),
+                Transform.translate(
+                  offset: Offset(
+                    isSelected ? -21.0 : 0,
+                    0,
+                  ), //position of mail when selected
+                  child: Text(
+                    safeDecode(widget.code.account).trim(),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontSize: isCompactMode ? 12 : 12,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              (widget.code.hasSynced != null && widget.code.hasSynced!) ||
+                      !hasConfiguredAccount
+                  ? const SizedBox.shrink()
+                  : const Icon(
+                      Icons.sync_disabled,
+                      size: 20,
+                      color: Colors.amber,
+                    ),
+              const SizedBox(width: 12),
+              _shouldShowLargeIcon ? const SizedBox.shrink() : _getIcon(),
             ],
           ),
-        ),
-        const SizedBox(width: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            (widget.code.hasSynced != null && widget.code.hasSynced!) ||
-                    !hasConfiguredAccount
-                ? const SizedBox.shrink()
-                : const Icon(
-                    Icons.sync_disabled,
-                    size: 20,
-                    color: Colors.amber,
-                  ),
-            const SizedBox(width: 12),
-            _shouldShowLargeIcon ? const SizedBox.shrink() : _getIcon(),
-          ],
-        ),
-      ],
-    ),
-  );
-}
+        ],
+      ),
+    );
+  }
 
   Widget _getIcon() {
     final String iconData;
@@ -551,8 +558,8 @@ Widget clippedCard(AppLocalizations l10n) {
     String content, {
     required String confirmationMessage,
   }) async {
-    final shouldMinimizeOnCopy =
-        PreferenceService.instance.shouldMinimizeOnCopy();
+    final shouldMinimizeOnCopy = PreferenceService.instance
+        .shouldMinimizeOnCopy();
 
     await FlutterClipboard.copy(content);
     showToast(context, confirmationMessage);
@@ -600,9 +607,7 @@ Widget clippedCard(AppLocalizations l10n) {
     final Code? code = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
-          return SetupEnterSecretKeyPage(
-            code: widget.code,
-          );
+          return SetupEnterSecretKeyPage(code: widget.code);
         },
       ),
     );
@@ -654,7 +659,9 @@ Widget clippedCard(AppLocalizations l10n) {
       display: display.copyWith(pinned: !currentlyPinned),
     );
     unawaited(
-      CodeStore.instance.addCode(code).then(
+      CodeStore.instance
+          .addCode(code)
+          .then(
             (value) => showToast(
               context,
               !currentlyPinned
@@ -673,11 +680,11 @@ Widget clippedCard(AppLocalizations l10n) {
       showToast(context, 'Code can only be deleted from trash');
       return;
     }
-    bool isAuthSuccessful =
-        await LocalAuthenticationService.instance.requestLocalAuthentication(
-      context,
-      context.l10n.deleteCodeAuthMessage,
-    );
+    bool isAuthSuccessful = await LocalAuthenticationService.instance
+        .requestLocalAuthentication(
+          context,
+          context.l10n.deleteCodeAuthMessage,
+        );
     if (!isAuthSuccessful) {
       return;
     }
@@ -709,11 +716,11 @@ Widget clippedCard(AppLocalizations l10n) {
       showToast(context, 'Code is already trashed');
       return;
     }
-    bool isAuthSuccessful =
-        await LocalAuthenticationService.instance.requestLocalAuthentication(
-      context,
-      context.l10n.deleteCodeAuthMessage,
-    );
+    bool isAuthSuccessful = await LocalAuthenticationService.instance
+        .requestLocalAuthentication(
+          context,
+          context.l10n.deleteCodeAuthMessage,
+        );
     if (!isAuthSuccessful) {
       return;
     }
