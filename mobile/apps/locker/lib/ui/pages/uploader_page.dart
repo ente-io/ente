@@ -51,7 +51,7 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
   Future<void> uploadFiles(List<File> files) async {
     final progressDialog = createProgressDialog(
       context,
-      "Uploaded 0/${files.length} files...",
+      context.l10n.uploadedFilesProgress(0, files.length),
     );
 
     try {
