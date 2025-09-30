@@ -48,11 +48,9 @@ export const throttle = <T extends (...args: unknown[]) => void>(
 };
 
 // Reverse geocoding function using Stadia Maps with caching
-// Works without API key for localhost development
 export const getLocationName = async (
     lat: number,
     lng: number,
-    photoIndex?: number,
 ): Promise<{ place: string; country: string }> => {
     // Round coordinates to 3 decimal places for cache key (~100m precision)
     const roundedLat = Math.round(lat * 1000) / 1000;
@@ -96,12 +94,7 @@ export const getLocationName = async (
             result = { place: locationName, country: country };
         } else {
             // Fallback if no location found
-            result = {
-                place: photoIndex
-                    ? `Location ${photoIndex}`
-                    : `Location ${lat.toFixed(2)}, ${lng.toFixed(2)}`,
-                country: "Unknown",
-            };
+            result = { place: "Unknown", country: "Unknown" };
         }
 
         // Cache the result
@@ -109,10 +102,7 @@ export const getLocationName = async (
         return result;
     } catch {
         // Fallback on error
-        const fallbackResult = {
-            place: photoIndex ? `Location ${photoIndex}` : `Unknown Location`,
-            country: "Unknown",
-        };
+        const fallbackResult = { place: "Unknown", country: "Unknown" };
         // Cache the fallback to avoid repeated failures
         geocodingCache.set(cacheKey, fallbackResult);
         return fallbackResult;

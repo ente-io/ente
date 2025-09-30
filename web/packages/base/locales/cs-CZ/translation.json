@@ -76,7 +76,7 @@
     "download_hidden_items": "Stáhnout skryté položky",
     "audio": "Audio",
     "more": "Víc",
-    "mouse_scroll": "Posunutí myší",
+    "mouse_scroll": "Kolečko myši",
     "pan": "Posouvat",
     "pinch": "Přiblížit",
     "drag": "Přetáhnout",
@@ -100,7 +100,7 @@
     "pause": "Pozastavit",
     "previous": "Předchozí",
     "next": "Další",
-    "video_seek": "Vyhledávání videa",
+    "video_seek": "Posunutí videa",
     "quality": "Kvalita",
     "auto": "Automatická",
     "original": "Původní",
@@ -451,7 +451,7 @@
     "file": "Soubor",
     "folder": "Složka",
     "google_takeout": "Google takeout",
-    "deduplicate_files": "Deduplikovat soubory",
+    "deduplicate_files": "Duplicitní soubory",
     "remove_duplicates": "Odstranit duplikáty",
     "total_size": "Celková velikost",
     "count": "Počet",
@@ -700,5 +700,6 @@
     "num_2": "2",
     "grouped": "",
     "continuous": "",
-    "trip": ""
+    "trip": "",
+    "album_layout": ""
 }

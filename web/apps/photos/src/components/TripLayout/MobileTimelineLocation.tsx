@@ -88,9 +88,9 @@ const MobileLocationContainer = styled(Box)({
     alignItems: "center",
     justifyContent: "center",
     width: "100%",
-    height: "40vh",
+    height: "40svh",
     scrollSnapAlign: "start",
-    padding: "20px",
+    padding: "0",
 });
 
 const CenteredPhotoContainer = styled(Box)({

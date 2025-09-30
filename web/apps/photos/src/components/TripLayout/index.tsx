@@ -1,6 +1,5 @@
-import { Box, styled } from "@mui/material";
+import { Box, styled, useMediaQuery, useTheme } from "@mui/material";
 import { DownloadStatusNotifications } from "components/DownloadStatusNotifications";
-import { useIsTouchscreen } from "ente-base/components/utils/hooks";
 import { useSaveGroups } from "ente-gallery/components/utils/save-groups";
 import { FileViewer } from "ente-gallery/components/viewer/FileViewer";
 import { downloadAndSaveCollectionFiles } from "ente-gallery/services/save";
@@ -55,8 +54,9 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
     // Extract collection info if available
     const collectionTitle = collection?.name || albumTitle || "Trip";
 
-    // Check if mobile screen
-    const isTouchDevice = useIsTouchscreen();
+    // Use media query for mobile/tablet detection (up to 960px)
+    const theme = useTheme();
+    const isTouchDevice = useMediaQuery(theme.breakpoints.down("md")); // 960px breakpoint for mobile and tablet
 
     // Save groups hook for download progress tracking
     const { saveGroups, onAddSaveGroup, onRemoveSaveGroup } = useSaveGroups();
@@ -108,9 +108,23 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
     >(new Map()); // Track location data to prevent resets
     const filesCountRef = useRef<number>(0); // Track files count to detect real changes
     const previousActiveLocationRef = useRef<number>(-1); // Track previous active location for discrete panning
+    const previousSuperClusterStateRef = useRef<{
+        isInSuperCluster: boolean;
+        superClusterIndex: number | null;
+    }>({ isInSuperCluster: false, superClusterIndex: null }); // Track previous super cluster state for zoom logic
 
     const [photoClusters, setPhotoClusters] = useState<JourneyPoint[][]>([]);
     const [optimalZoom, setOptimalZoom] = useState(7);
+    const [superClusterInfo, setSuperClusterInfo] = useState<{
+        superClusters: {
+            lat: number;
+            lng: number;
+            clusterCount: number;
+            clustersInvolved: number[];
+            image: string;
+        }[];
+        clusterToSuperClusterMap: Map<number, number>;
+    }>({ superClusters: [], clusterToSuperClusterMap: new Map() });
     const [TripMapComponent, setTripMapComponent] =
         useState<React.ComponentType<{
             journeyData: JourneyPoint[];
@@ -121,6 +135,16 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
             targetZoom: number | null;
             mapRef: import("leaflet").Map | null;
             scrollProgress: number;
+            superClusterInfo?: {
+                superClusters: {
+                    lat: number;
+                    lng: number;
+                    clusterCount: number;
+                    clustersInvolved: number[];
+                    image: string;
+                }[];
+                clusterToSuperClusterMap: Map<number, number>;
+            };
             setMapRef: (map: import("leaflet").Map | null) => void;
             setCurrentZoom: (zoom: number) => void;
             setTargetZoom: (zoom: number | null) => void;
@@ -142,7 +166,11 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
             // Load mapHelpers and calculate clusters if we have data
             if (journeyData.length > 0) {
                 void import("./mapHelpers").then(
-                    ({ clusterPhotosByProximity, calculateOptimalZoom }) => {
+                    ({
+                        clusterPhotosByProximity,
+                        calculateOptimalZoom,
+                        detectScreenCollisions,
+                    }) => {
                         const clusters = clusterPhotosByProximity(journeyData);
 
                         // Sort clusters by their earliest timestamp to maintain chronological order
@@ -160,13 +188,57 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                             return earliestA - earliestB;
                         });
 
+                        const optimalZoomLevel = calculateOptimalZoom();
+
+                        // Calculate super clusters at optimal zoom level once
+                        const { superClusters } = detectScreenCollisions(
+                            sortedClusters,
+                            optimalZoomLevel,
+                            null,
+                            null,
+                            optimalZoomLevel,
+                            undefined, // No active cluster during initial calculation
+                        );
+
+                        // Create a map of cluster index to super cluster index
+                        const clusterToSuperClusterMap = new Map<
+                            number,
+                            number
+                        >();
+                        superClusters.forEach(
+                            (superCluster, superClusterIndex) => {
+                                superCluster.clustersInvolved.forEach(
+                                    (clusterIndex) => {
+                                        clusterToSuperClusterMap.set(
+                                            clusterIndex,
+                                            superClusterIndex,
+                                        );
+                                    },
+                                );
+                            },
+                        );
+
                         setPhotoClusters(sortedClusters);
-                        setOptimalZoom(calculateOptimalZoom());
+
+                        // Check if first location is in a super cluster and adjust initial zoom
+                        const firstLocationInSuperCluster =
+                            clusterToSuperClusterMap.has(0);
+                        const initialZoom = firstLocationInSuperCluster
+                            ? isTouchDevice
+                                ? 15
+                                : 14 // Super cluster zoom level
+                            : optimalZoomLevel;
+
+                        setOptimalZoom(initialZoom);
+                        setSuperClusterInfo({
+                            superClusters,
+                            clusterToSuperClusterMap,
+                        });
                     },
                 );
             }
         }
-    }, [isClient, journeyData]);
+    }, [isClient, journeyData, isTouchDevice]);
 
     // Update currentZoom when optimalZoom changes and there's no mapRef yet
     useEffect(() => {
@@ -244,6 +316,10 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
             }
         },
         setScrollProgress,
+        setTargetZoom,
+        previousSuperClusterStateRef,
+        superClusterInfo,
+        scrollProgress,
     });
 
     // Only wait for client-side rendering (needed for maps), but show layout immediately
@@ -263,6 +339,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                         onAddPhotos={onAddPhotos}
                         downloadAllFiles={downloadAllFiles}
                         enableDownload={enableDownload}
+                        collectionTitle={collectionTitle}
                     />
                 ) : (
                     <TopNavButtons
@@ -286,6 +363,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                                 targetZoom={targetZoom}
                                 mapRef={mapRef}
                                 scrollProgress={scrollProgress}
+                                superClusterInfo={superClusterInfo}
                                 setMapRef={setMapRef}
                                 setCurrentZoom={setCurrentZoom}
                                 setTargetZoom={setTargetZoom}
@@ -309,30 +387,9 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                     <MobileTimelineContainer ref={timelineRef}>
                         <MobileTimelineContent>
                             {isInitialLoad ? (
-                                <LoadingCoverPlaceholder>
-                                    <LoadingCoverImage>
-                                        <CoverGradientOverlay />
-                                        <CoverPlaceholderContent>
-                                            <PlaceholderTextBox
-                                                sx={{
-                                                    height: "30px",
-                                                    width: "200px",
-                                                    mb: "2px",
-                                                }}
-                                            />
-                                            <PlaceholderTextBox
-                                                sx={{
-                                                    height: "16px",
-                                                    width: "120px",
-                                                    margin: 0,
-                                                }}
-                                            />
-                                        </CoverPlaceholderContent>
-                                    </LoadingCoverImage>
-                                    <LoadingSpinnerContainer>
-                                        <LoadingSpinner />
-                                    </LoadingSpinnerContainer>
-                                </LoadingCoverPlaceholder>
+                                <MobileLoadingContainer>
+                                    <LoadingSpinner />
+                                </MobileLoadingContainer>
                             ) : journeyData.length > 0 ? (
                                 <div>
                                     {isLoadingLocations ? (
@@ -503,6 +560,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                             targetZoom={targetZoom}
                             mapRef={mapRef}
                             scrollProgress={scrollProgress}
+                            superClusterInfo={superClusterInfo}
                             setMapRef={setMapRef}
                             setCurrentZoom={setCurrentZoom}
                             setTargetZoom={setTargetZoom}
@@ -663,18 +721,18 @@ const NoPhotosContainer = styled(Box)(({ theme }) => ({
 const MobileContainer = styled(Box)({
     display: "flex",
     flexDirection: "column",
-    height: "100vh",
+    height: "100svh",
     width: "100%",
 });
 
 const MobileMapContainer = styled(Box)({
-    height: "calc(60% + 20px)",
+    height: "calc(60svh + 20px)",
     position: "relative",
     overflow: "hidden",
 });
 
 const MobileTimelineContainer = styled(Box)(({ theme }) => ({
-    height: "40%",
+    height: "40svh",
     marginTop: "-20px",
     overflow: "auto",
     backgroundColor: theme.palette.background.paper,
@@ -709,10 +767,18 @@ const MobileCoverOverlay = styled(Box, {
 }));
 
 const MobileTimelineContent = styled(Box)({
-    padding: "16px 20px",
+    padding: "0",
     height: "100%",
     display: "flex",
     flexDirection: "column",
+});
+
+const MobileLoadingContainer = styled(Box)({
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    height: "100%",
+    width: "100%",
 });
 
 const MobileTimelineBaseLine = styled(Box, {
@@ -720,8 +786,8 @@ const MobileTimelineBaseLine = styled(Box, {
 })<{ photoClusters: JourneyPoint[][] }>(({ theme, photoClusters }) => ({
     position: "absolute",
     left: "50%",
-    top: "-15vh",
-    height: `${(photoClusters.length - 1) * 40 + 35}vh`,
+    top: "-15svh",
+    height: `${(photoClusters.length - 1) * 40 + 35}svh`,
     width: "3px",
     backgroundColor: theme.palette.grey[300],
     transform: "translateX(-1.5px)",

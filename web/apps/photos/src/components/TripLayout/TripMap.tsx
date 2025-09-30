@@ -34,6 +34,16 @@ interface TripMapProps {
     targetZoom: number | null;
     mapRef: import("leaflet").Map | null;
     scrollProgress: number;
+    superClusterInfo?: {
+        superClusters: {
+            lat: number;
+            lng: number;
+            clusterCount: number;
+            clustersInvolved: number[];
+            image: string;
+        }[];
+        clusterToSuperClusterMap: Map<number, number>;
+    };
     setMapRef: (map: import("leaflet").Map | null) => void;
     setCurrentZoom: (zoom: number) => void;
     setTargetZoom: (zoom: number | null) => void;
@@ -53,6 +63,7 @@ export const TripMap: React.FC<TripMapProps> = ({
     targetZoom,
     mapRef,
     scrollProgress,
+    superClusterInfo,
     setMapRef,
     setCurrentZoom,
     setTargetZoom,
@@ -60,20 +71,44 @@ export const TripMap: React.FC<TripMapProps> = ({
 }) => {
     const isTouchDevice = useIsTouchscreen();
 
-    // Calculate super-clusters based on screen collisions
-    const { superClusters, visibleClusters } = detectScreenCollisions(
-        photoClusters,
-        currentZoom,
-        targetZoom,
-        mapRef,
-        optimalZoom,
-    );
+    // Calculate current active location index based on scroll progress (same logic as in scrollUtils)
+    let currentActiveLocationIndex = -1;
+    if (photoClusters.length > 0) {
+        if (isTouchDevice) {
+            // Mobile: Slower progression - stay on each location longer
+            currentActiveLocationIndex = Math.floor(
+                scrollProgress * (photoClusters.length - 0.5),
+            );
+        } else {
+            // Desktop: Use original logic
+            currentActiveLocationIndex = Math.round(
+                scrollProgress * Math.max(0, photoClusters.length - 1),
+            );
+        }
+    }
+
+    // Calculate super-clusters based on screen collisions, excluding the active cluster
+    const { superClusters, visibleClustersWithIndices } =
+        detectScreenCollisions(
+            photoClusters,
+            currentZoom,
+            targetZoom,
+            mapRef,
+            optimalZoom,
+            currentActiveLocationIndex >= 0
+                ? currentActiveLocationIndex
+                : undefined,
+        );
 
     return (
         <MapContainerWrapper hasPhotoData={hasPhotoData}>
             {hasPhotoData ? (
                 <StyledMapContainer
-                    center={getMapCenter(photoClusters, journeyData)}
+                    center={getMapCenter(
+                        photoClusters,
+                        journeyData,
+                        superClusterInfo,
+                    )}
                     zoom={
                         isTouchDevice
                             ? Math.max(1, optimalZoom - 2)
@@ -97,11 +132,13 @@ export const TripMap: React.FC<TripMapProps> = ({
                         }
                         url="https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg"
                         maxZoom={20}
+                        updateWhenZooming={false}
+                        keepBuffer={1}
                     />
 
                     {/* Draw super-clusters (clickable for zoom and gallery) */}
                     {superClusters.map((superCluster, index) => {
-                        // Show green for all covered locations (up to current position)
+                        // Show green only for active locations
                         let currentLocationIndex;
                         if (isTouchDevice) {
                             // Mobile: Slower progression - stay on each location longer
@@ -115,16 +152,16 @@ export const TripMap: React.FC<TripMapProps> = ({
                                     Math.max(0, photoClusters.length - 1),
                             );
                         }
-                        const isCovered = superCluster.clustersInvolved.some(
-                            (clusterIndex) =>
-                                clusterIndex <= currentLocationIndex,
-                        );
+                        const isActive =
+                            superCluster.clustersInvolved.includes(
+                                currentLocationIndex,
+                            );
 
                         const icon = createSuperClusterIcon(
                             superCluster.image, // Use representative photo (first photo of first cluster)
                             superCluster.clusterCount,
                             isTouchDevice ? 40 : 55,
-                            isCovered,
+                            isActive,
                         );
 
                         return icon ? (
@@ -150,7 +187,8 @@ export const TripMap: React.FC<TripMapProps> = ({
                     })}
 
                     {/* Draw visible regular clusters */}
-                    {visibleClusters.map((cluster, index) => {
+                    {visibleClustersWithIndices.map((item, index) => {
+                        const { cluster, originalIndex } = item;
                         const firstPhoto = cluster[0];
                         if (!firstPhoto) return null;
                         const avgLat =
@@ -160,13 +198,9 @@ export const TripMap: React.FC<TripMapProps> = ({
                             cluster.reduce((sum, p) => sum + p.lng, 0) /
                             cluster.length;
 
-                        // Find the original cluster index
-                        const originalClusterIndex = photoClusters.findIndex(
-                            (originalCluster) =>
-                                originalCluster.length === cluster.length &&
-                                originalCluster[0]?.image === cluster[0]?.image,
-                        );
-                        // Show green for all covered locations (up to current position)
+                        // Use the preserved original index
+                        const originalClusterIndex = originalIndex;
+                        // Show green only for active locations
                         let currentLocationIndex;
                         if (isTouchDevice) {
                             // Mobile: Slower progression - stay on each location longer
@@ -180,15 +214,15 @@ export const TripMap: React.FC<TripMapProps> = ({
                                     Math.max(0, photoClusters.length - 1),
                             );
                         }
-                        const isCovered =
-                            originalClusterIndex <= currentLocationIndex;
+                        const isActive =
+                            originalClusterIndex === currentLocationIndex;
 
                         const icon = createIcon(
                             firstPhoto.image,
                             isTouchDevice ? 40 : 55,
                             "#ffffff",
                             cluster.length,
-                            isCovered,
+                            isActive,
                         );
 
                         return icon ? (

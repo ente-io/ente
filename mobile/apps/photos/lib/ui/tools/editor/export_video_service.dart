@@ -86,9 +86,7 @@ class ExportService {
           final state = await activeSession.getState();
           final statisticsList = await activeSession.getStatistics();
 
-          if (statisticsList != null &&
-              statisticsList.isNotEmpty &&
-              onProgress != null) {
+          if (statisticsList.isNotEmpty && onProgress != null) {
             final statistics = statisticsList.last;
             onProgress(statistics);
           }

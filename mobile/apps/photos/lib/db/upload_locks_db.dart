@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import "package:photos/core/errors.dart";
 import "package:photos/module/upload/model/multipart.dart";
 import 'package:sqflite/sqflite.dart';
 import "package:sqflite_migration/sqflite_migration.dart";
@@ -235,6 +236,7 @@ class UploadLocksDB {
     String localId,
     String fileHash,
     int collectionID,
+    String encryptedFileName,
   ) async {
     final db = await database;
 
@@ -246,9 +248,7 @@ class UploadLocksDB {
       whereArgs: [localId, fileHash, collectionID],
     );
 
-    if (rows.isEmpty) {
-      throw Exception("No cached links found for $localId and $fileHash");
-    }
+    _validateResume(rows, localId, encryptedFileName);
     final row = rows.first;
 
     return (
@@ -285,6 +285,7 @@ class UploadLocksDB {
     String localId,
     String fileHash,
     int collectionID,
+    String encryptedFileName,
   ) async {
     final db = await database;
     final rows = await db.query(
@@ -294,10 +295,9 @@ class UploadLocksDB {
           ' AND ${_trackUploadTable.columnCollectionID} = ?',
       whereArgs: [localId, fileHash, collectionID],
     );
-    if (rows.isEmpty) {
-      throw Exception("No cached links found for $localId and $fileHash");
-    }
+    _validateResume(rows, localId, encryptedFileName);
     final row = rows.first;
+
     final objectKey = row[_trackUploadTable.columnObjectKey] as String;
     final encFileSize = row[_trackUploadTable.columnEncryptedFileSize] as int;
     final partsStatus = await db.query(
@@ -338,6 +338,28 @@ class UploadLocksDB {
       encFileSize: encFileSize,
       partSize: row[_trackUploadTable.columnPartSize] as int,
     );
+  }
+
+// validateResume checks if the cached links are valid for resuming upload
+  void _validateResume(
+    List<Map<String, Object?>> rows,
+    String localId,
+    String encryptedFileName,
+  ) {
+    if (rows.isEmpty) {
+      throw MultiPartUploadError("No cached links found for $localId");
+    }
+    if (rows.length > 1) {
+      throw MultiPartUploadError(
+        "Multiple entries found for localID: $localId",
+      );
+    }
+    if (encryptedFileName !=
+        rows.first[_trackUploadTable.columnEncryptedFileName]) {
+      throw MultiPartUploadError(
+        "Encrypted file name mismatch for localID: $localId",
+      );
+    }
   }
 
   Future<void> appendStreamEntry(
@@ -530,6 +552,16 @@ class UploadLocksDB {
       );
       if (rows.isEmpty) {
         return null;
+      }
+      if (rows.length > 1) {
+        await db.delete(
+          _trackUploadTable.table,
+          where: '${_trackUploadTable.columnLocalID} = ?',
+          whereArgs: [localId],
+        );
+        throw MultiPartUploadError(
+          "Multiple entries found for localID: $localId",
+        );
       }
       final row = rows.first;
       return row[_trackUploadTable.columnEncryptedFileName] as String;

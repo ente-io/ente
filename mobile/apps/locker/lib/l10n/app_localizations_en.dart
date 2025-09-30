@@ -1061,4 +1061,62 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get authToManageLegacy =>
       'Please authenticate to manage your trusted contacts';
+
+  @override
+  String get uploadError => 'Upload Error';
+
+  @override
+  String get tryAdjustingYourSearchQuery => 'Try adjusting your search query';
+
+  @override
+  String noFilesFoundForQuery(String query) {
+    return 'No files found for \"$query\"';
+  }
+
+  @override
+  String get deselectAll => 'Deselect All';
+
+  @override
+  String get selectAll => 'Select All';
+
+  @override
+  String get unnamedCollection => 'Unnamed Collection';
+
+  @override
+  String get enteLocker => 'ente Locker';
+
+  @override
+  String uploadedFilesProgress(int completed, int total) {
+    return 'Uploaded $completed/$total files...';
+  }
+
+  @override
+  String uploadedFilesProgressWithError(
+      int completed, int total, String error) {
+    return 'Uploaded $completed/$total files... ($error)';
+  }
+
+  @override
+  String get noCollectionsAvailableForSelection => 'No collections available';
+
+  @override
+  String get createCollectionButton => 'Create collection';
+
+  @override
+  String get collectionButtonLabel => 'Collection';
+
+  @override
+  String get hideWindow => 'Hide Window';
+
+  @override
+  String get showWindow => 'Show Window';
+
+  @override
+  String get exitApp => 'Exit App';
+
+  @override
+  String get lockerLogs => 'Locker logs';
+
+  @override
+  String get debugLogsForLockerApp => 'Debug logs for Locker app.\\n\\n';
 }

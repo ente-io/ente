@@ -13,21 +13,35 @@ interface MobileNavBarProps {
     onAddPhotos?: () => void;
     downloadAllFiles: () => void;
     enableDownload?: boolean;
+    collectionTitle?: string;
 }
 
 export const MobileNavBar: React.FC<MobileNavBarProps> = ({
     onAddPhotos,
     downloadAllFiles,
     enableDownload,
+    collectionTitle,
 }) => {
     const [showCopiedMessage, setShowCopiedMessage] = useState(false);
     const isTouchscreen = useIsTouchscreen();
 
-    const handleShare = () => {
+    const handleShare = async () => {
         if (typeof window !== "undefined") {
-            void navigator.clipboard.writeText(window.location.href);
-            setShowCopiedMessage(true);
-            setTimeout(() => setShowCopiedMessage(false), 2000);
+            try {
+                await navigator.share({
+                    title: collectionTitle || "Trip",
+                    url: window.location.href,
+                });
+            } catch (error) {
+                if (
+                    !error ||
+                    (error instanceof Error && error.name !== "AbortError")
+                ) {
+                    void navigator.clipboard.writeText(window.location.href);
+                    setShowCopiedMessage(true);
+                    setTimeout(() => setShowCopiedMessage(false), 2000);
+                }
+            }
         }
     };
 

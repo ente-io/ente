@@ -47,8 +47,9 @@ class _CollectionSelectionOverlayBarState
                   builder: (context, child) {
                     final isAllSelected = widget.selectedCollections.count ==
                         widget.collection.length;
-                    final buttonText =
-                        isAllSelected ? 'Deselect All' : 'Select All';
+                    final buttonText = isAllSelected
+                        ? context.l10n.deselectAll
+                        : context.l10n.selectAll;
                     final iconData = isAllSelected
                         ? Icons.remove_circle_outline
                         : Icons.check_circle_outline_outlined;

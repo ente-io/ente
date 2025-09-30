@@ -1,6 +1,6 @@
 import "package:ente_ui/theme/colors.dart";
 import "package:ente_ui/theme/ente_theme.dart";
-import 'package:flutter/material.dart'; 
+import 'package:flutter/material.dart';
 import 'package:tuple/tuple.dart';
 
 enum MoreCountType { small, mini, tiny, extra }
