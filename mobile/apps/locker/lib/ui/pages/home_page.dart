@@ -255,7 +255,7 @@ class _HomePageState extends UploaderPageState<HomePage>
           final file = File(sharedFile.path);
           if (await file.exists()) {
             _logger.info('File exists, uploading: ${sharedFile.path}');
-            await uploadFile(file);
+            await uploadFiles([file]);
           } else {
             _logger.warning('Shared file does not exist: ${sharedFile.path}');
           }
@@ -271,7 +271,7 @@ class _HomePageState extends UploaderPageState<HomePage>
       if (mounted) {
         await showErrorDialog(
           context,
-          'Upload Error',
+          context.l10n.uploadError,
           'Failed to process shared files: $e',
         );
       }
