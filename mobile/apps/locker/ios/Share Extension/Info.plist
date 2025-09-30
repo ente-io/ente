@@ -19,8 +19,6 @@
             <dict>
                 <key>NSExtensionActivationSupportsImageWithMaxCount</key>
                 <integer>100</integer>
-                <key>NSExtensionActivationSupportsMovieWithMaxCount</key>
-                <integer>100</integer>
 				<key>NSExtensionActivationSupportsFileWithMaxCount</key>
 				<integer>100</integer>
             </dict>
