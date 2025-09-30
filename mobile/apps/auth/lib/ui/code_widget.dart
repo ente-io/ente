@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:clipboard/clipboard.dart';
@@ -412,66 +413,87 @@ class _CodeWidgetState extends State<CodeWidget> {
 
   Widget _getTopRow({required bool isSelected}) {
     final colorScheme = getEnteColorScheme(context);
-    bool isCompactMode = widget.isCompactMode;
+    final bool isCompactMode = widget.isCompactMode;
+    final double indicatorSize = isCompactMode ? 16 : 20;
+    final double indicatorGap = isSelected ? 8 : 0;
+    final TextStyle? issuerStyle = isCompactMode
+        ? Theme.of(context).textTheme.bodyMedium
+        : Theme.of(context).textTheme.titleLarge;
+    final double issuerLineHeight =
+        (issuerStyle?.fontSize ?? 16) * (issuerStyle?.height ?? 1.0);
+    final double rowHeight = math.max(issuerLineHeight, indicatorSize);
+    final double accountIndent = isSelected ? indicatorSize + indicatorGap : 0;
+
     return Padding(
       padding: const EdgeInsets.only(left: 16, right: 16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (isSelected)
-            Padding(
-              padding: const EdgeInsets.only(right: 4.0),
-              child: Transform.translate(
-                offset: const Offset(0, 2.0),
-                child: SizedBox(
-                  width: isCompactMode ? 16 : 20,
-                  height: isCompactMode ? 16 : 20,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Icon(
-                        Icons.circle,
-                        color: colorScheme.primary400,
-                        size: isCompactMode ? 16 : 20, //checkbox circle size
-                      ),
-                      Icon(
-                        Icons.check,
-                        color: Colors.white,
-                        size: isCompactMode ? 8 : 12, // checkbox tick size
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Transform.translate(
-                  offset: Offset(
-                    isSelected ? 0.0 : 0,
-                    0,
-                  ), //position of label when selected
-                  child: Text(
-                    safeDecode(widget.code.issuer).trim(),
-                    style: isCompactMode
-                        ? Theme.of(context).textTheme.bodyMedium
-                        : Theme.of(context).textTheme.titleLarge,
+                SizedBox(
+                  height: rowHeight,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 150),
+                        curve: Curves.easeInOut,
+                        width: isSelected ? indicatorSize + indicatorGap : 0,
+                        height: rowHeight,
+                        padding: EdgeInsets.only(
+                          right: isSelected ? indicatorGap : 0,
+                        ),
+                        alignment: Alignment.centerLeft,
+                        child: isSelected
+                            ? SizedBox(
+                                width: indicatorSize,
+                                height: indicatorSize,
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.circle,
+                                      color: colorScheme.primary400,
+                                      size: indicatorSize,
+                                    ),
+                                    Icon(
+                                      Icons.check,
+                                      color: Colors.white,
+                                      size: isCompactMode ? 8 : 12,
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : null,
+                      ),
+                      Expanded(
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            safeDecode(widget.code.issuer).trim(),
+                            style: issuerStyle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 if (!isCompactMode) const SizedBox(height: 2),
-                Transform.translate(
-                  offset: Offset(
-                    isSelected ? -21.0 : 0,
-                    0,
-                  ), //position of mail when selected
+                Padding(
+                  padding: EdgeInsets.only(left: accountIndent),
                   child: Text(
                     safeDecode(widget.code.account).trim(),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       fontSize: isCompactMode ? 12 : 12,
                       color: Colors.grey,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
