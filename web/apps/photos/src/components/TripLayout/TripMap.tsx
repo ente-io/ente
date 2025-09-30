@@ -87,7 +87,7 @@ export const TripMap: React.FC<TripMapProps> = ({
         }
     }
 
-    // Calculate super-clusters based on screen collisions, excluding the active cluster
+    // Calculate super-clusters based on screen collisions
     const { superClusters, visibleClustersWithIndices } =
         detectScreenCollisions(
             photoClusters,
@@ -95,9 +95,6 @@ export const TripMap: React.FC<TripMapProps> = ({
             targetZoom,
             mapRef,
             optimalZoom,
-            currentActiveLocationIndex >= 0
-                ? currentActiveLocationIndex
-                : undefined,
         );
 
     return (

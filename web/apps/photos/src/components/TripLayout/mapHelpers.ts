@@ -319,7 +319,7 @@ export const createSuperClusterIcon = (
               .join("")}
 
           <!-- Main pin container -->
-          <div class="photo-pin" style="
+          <div class="photo-pin${isReached ? " reached" : ""}" style="
             width: ${pinSize}px;
             height: ${pinHeight}px;
             position: absolute;
@@ -333,15 +333,15 @@ export const createSuperClusterIcon = (
               width: ${pinSize}px;
               height: ${pinSize}px;
               border-radius: 16px;
-              background: white;
-              border: 2px solid #ffffff;
+              background: ${isReached ? "#22c55e" : "white"};
+              border: 2px solid ${isReached ? "#22c55e" : "#ffffff"};
               padding: 4px;
               position: relative;
               overflow: hidden;
               transition: background-color 0.3s ease, border-color 0.3s ease;
             "
             onmouseover="this.style.background='#22c55e'; this.style.borderColor='#22c55e'; this.nextElementSibling.style.borderTopColor='#22c55e';"
-            onmouseout="this.style.background='white'; this.style.borderColor='#ffffff'; this.nextElementSibling.style.borderTopColor='white';"
+            onmouseout="this.style.background='${isReached ? "#22c55e" : "white"}'; this.style.borderColor='${isReached ? "#22c55e" : "#ffffff"}'; this.nextElementSibling.style.borderTopColor='${isReached ? "#22c55e" : "white"}';"
             >
               ${
                   hasImage
@@ -387,7 +387,7 @@ export const createSuperClusterIcon = (
               height: 0;
               border-left: ${triangleHeight}px solid transparent;
               border-right: ${triangleHeight}px solid transparent;
-              border-top: ${triangleHeight}px solid white;
+              border-top: ${triangleHeight}px solid ${isReached ? "#22c55e" : "white"};
               transition: border-top-color 0.3s ease;
             "></div>
           </div>
@@ -411,7 +411,6 @@ export const detectScreenCollisions = (
     targetZoom: number | null,
     mapRef: import("leaflet").Map | null,
     optimalZoom: number,
-    activeClusterIndex?: number, // Currently active cluster should not be grouped into super clusters
 ) => {
     // Use target zoom if we're in the middle of a zoom animation, otherwise use optimal zoom
     const effectiveZoom =
@@ -465,12 +464,7 @@ export const detectScreenCollisions = (
         });
 
         // If we found overlapping clusters, create a super-cluster
-        // But only if none of the involved clusters is the currently active cluster
-        const involvesActiveCluster =
-            activeClusterIndex !== undefined &&
-            overlappingClusters.includes(activeClusterIndex);
-
-        if (overlappingClusters.length > 1 && !involvesActiveCluster) {
+        if (overlappingClusters.length > 1) {
             hiddenClusterIndices.add(i); // Hide the original cluster too
 
             // Calculate center position of all overlapping clusters
@@ -500,12 +494,6 @@ export const detectScreenCollisions = (
                 clusterCount: overlappingClusters.length,
                 clustersInvolved: overlappingClusters,
                 image: representativePhoto.image,
-            });
-        } else if (involvesActiveCluster) {
-            // If active cluster is involved, unhide all overlapping clusters
-            // so they remain visible as individual clusters
-            overlappingClusters.forEach((idx) => {
-                hiddenClusterIndices.delete(idx);
             });
         }
     });
