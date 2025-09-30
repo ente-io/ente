@@ -122,23 +122,12 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
         await progressDialog.show();
         await Future.wait(futures);
 
-        // If multiple collections were selected we suppressed per-add syncs
-        // (runSync: false) for the additional collections above. In that
-        // case we must perform one final sync here and then notify the
-        // UI via onFileUploadComplete(). If only a single collection was
-        // selected the primary upload path is expected to have already
-        // performed any necessary syncs and/or emitted the
-        // CollectionsUpdatedEvent, so calling sync() again would be
-        // redundant and can cause duplicate UI refreshes.
+        // Sync once at the end when files are added to multiple collections
         final shouldPerformFinalSync = (uploadResult != null &&
             uploadResult.selectedCollections.length > 1);
 
         if (shouldPerformFinalSync) {
-          // Perform the final sync. The sync itself fires
-          // CollectionsUpdatedEvent which HomePage listens to and will
-          // refresh the UI via _loadCollections(). Do NOT call
-          // onFileUploadComplete() here to avoid triggering an additional
-          // UI refresh that would duplicate the event-driven update.
+          // Final sync triggers UI refresh via CollectionsUpdatedEvent
           await CollectionService.instance.sync();
         }
       }

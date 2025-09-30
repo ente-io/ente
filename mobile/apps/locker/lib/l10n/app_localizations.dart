@@ -1977,12 +1977,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Locker logs'**
   String get lockerLogs;
-
-  /// No description provided for @debugLogsForLockerApp.
-  ///
-  /// In en, this message translates to:
-  /// **'Debug logs for Locker app.\\n\\n'**
-  String get debugLogsForLockerApp;
 }
 
 class _AppLocalizationsDelegate
