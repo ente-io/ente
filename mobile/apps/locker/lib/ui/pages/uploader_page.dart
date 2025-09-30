@@ -86,10 +86,13 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
               for (int cIndex = 1;
                   cIndex < uploadResult.selectedCollections.length;
                   cIndex++) {
+                // Don't trigger a sync for each additional collection – do one
+                // sync at the end after all files are processed.
                 futures.add(
                   CollectionService.instance.addToCollection(
                     uploadResult.selectedCollections[cIndex],
                     enteFile,
+                    runSync: false,
                   ),
                 );
               }
@@ -113,8 +116,26 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
       if (futures.isNotEmpty) {
         await progressDialog.show();
         await Future.wait(futures);
-        await CollectionService.instance.sync();
-        onFileUploadComplete();
+
+        // If multiple collections were selected we suppressed per-add syncs
+        // (runSync: false) for the additional collections above. In that
+        // case we must perform one final sync here and then notify the
+        // UI via onFileUploadComplete(). If only a single collection was
+        // selected the primary upload path is expected to have already
+        // performed any necessary syncs and/or emitted the
+        // CollectionsUpdatedEvent, so calling sync() again would be
+        // redundant and can cause duplicate UI refreshes.
+        final shouldPerformFinalSync = (uploadResult != null &&
+            uploadResult.selectedCollections.length > 1);
+
+        if (shouldPerformFinalSync) {
+          // Perform the final sync. The sync itself fires
+          // CollectionsUpdatedEvent which HomePage listens to and will
+          // refresh the UI via _loadCollections(). Do NOT call
+          // onFileUploadComplete() here to avoid triggering an additional
+          // UI refresh that would duplicate the event-driven update.
+          await CollectionService.instance.sync();
+        }
       }
     } catch (e, s) {
       _logger.severe('Failed to upload file', e, s);
