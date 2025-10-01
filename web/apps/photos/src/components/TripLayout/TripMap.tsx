@@ -136,23 +136,9 @@ export const TripMap: React.FC<TripMapProps> = ({
                     {/* Draw super-clusters (clickable for zoom and gallery) */}
                     {superClusters.map((superCluster, index) => {
                         // Show green only for active locations
-                        let currentLocationIndex;
-                        if (isTouchDevice) {
-                            // Mobile: Slower progression - stay on each location longer
-                            currentLocationIndex = Math.floor(
-                                scrollProgress * (photoClusters.length - 0.5),
-                            );
-                        } else {
-                            // Desktop: Use original logic
-                            currentLocationIndex = Math.round(
-                                scrollProgress *
-                                    Math.max(0, photoClusters.length - 1),
-                            );
-                        }
-                        const isActive =
-                            superCluster.clustersInvolved.includes(
-                                currentLocationIndex,
-                            );
+                        const isActive = superCluster.clustersInvolved.includes(
+                            currentActiveLocationIndex,
+                        );
 
                         const icon = createSuperClusterIcon(
                             superCluster.image, // Use representative photo (first photo of first cluster)
@@ -198,21 +184,8 @@ export const TripMap: React.FC<TripMapProps> = ({
                         // Use the preserved original index
                         const originalClusterIndex = originalIndex;
                         // Show green only for active locations
-                        let currentLocationIndex;
-                        if (isTouchDevice) {
-                            // Mobile: Slower progression - stay on each location longer
-                            currentLocationIndex = Math.floor(
-                                scrollProgress * (photoClusters.length - 0.5),
-                            );
-                        } else {
-                            // Desktop: Use original logic
-                            currentLocationIndex = Math.round(
-                                scrollProgress *
-                                    Math.max(0, photoClusters.length - 1),
-                            );
-                        }
                         const isActive =
-                            originalClusterIndex === currentLocationIndex;
+                            originalClusterIndex === currentActiveLocationIndex;
 
                         const icon = createIcon(
                             firstPhoto.image,
