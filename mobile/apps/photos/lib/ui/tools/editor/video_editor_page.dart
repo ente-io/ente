@@ -62,35 +62,38 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
   void initState() {
     super.initState();
 
-    Future.microtask(() {
-      _controller = VideoEditorController.file(
-        widget.ioFile,
-        minDuration: const Duration(seconds: 1),
-        cropStyle: CropGridStyle(
-          background: Theme.of(context).colorScheme.surface,
-          selectedBoundariesColor:
-              const ColorScheme.dark().videoPlayerPrimaryColor,
-        ),
-        trimStyle: TrimSliderStyle(
-          onTrimmedColor: const ColorScheme.dark().videoPlayerPrimaryColor,
-          onTrimmingColor: const ColorScheme.dark().videoPlayerPrimaryColor,
-          background: Theme.of(context).colorScheme.editorBackgroundColor,
-          positionLineColor: Theme.of(
-            context,
-          ).colorScheme.videoPlayerBorderColor,
-          lineColor: Theme.of(
-            context,
-          ).colorScheme.videoPlayerBorderColor.withValues(alpha: 0.6),
-        ),
-      );
+    Future.microtask(
+      () {
+        _controller = VideoEditorController.file(
+          widget.ioFile,
+          minDuration: const Duration(seconds: 1),
+          cropStyle: CropGridStyle(
+            background: Theme.of(context).colorScheme.surface,
+            selectedBoundariesColor:
+                const ColorScheme.dark().videoPlayerPrimaryColor,
+          ),
+          trimStyle: TrimSliderStyle(
+            onTrimmedColor: const ColorScheme.dark().videoPlayerPrimaryColor,
+            onTrimmingColor: const ColorScheme.dark().videoPlayerPrimaryColor,
+            background: Theme.of(context).colorScheme.editorBackgroundColor,
+            positionLineColor:
+                Theme.of(context).colorScheme.videoPlayerBorderColor,
+            lineColor: Theme.of(context)
+                .colorScheme
+                .videoPlayerBorderColor
+                .withValues(alpha: 0.6),
+          ),
+        );
 
-      _controller!.initialize().then((_) => setState(() {})).catchError((
-        error,
-      ) {
-        // handle minumum duration bigger than video duration error
-        Navigator.pop(context);
-      }, test: (e) => e is VideoMinDurationError);
-    });
+        _controller!.initialize().then((_) => setState(() {})).catchError(
+          (error) {
+            // handle minumum duration bigger than video duration error
+            Navigator.pop(context);
+          },
+          test: (e) => e is VideoMinDurationError,
+        );
+      },
+    );
 
     _doRotationCorrectionIfAndroid();
   }
@@ -184,33 +187,39 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                                 label: AppLocalizations.of(context).trim,
                                 svgPath:
                                     "assets/video-editor/video-editor-trim-action.svg",
-                                onPressed: () => _openSubEditor(VideoTrimPage(
-                                  controller: _controller!,
-                                  quarterTurnsForRotationCorrection:
-                                      _quarterTurnsForRotationCorrection!,
-                                )),
+                                onPressed: () => _openSubEditor(
+                                  VideoTrimPage(
+                                    controller: _controller!,
+                                    quarterTurnsForRotationCorrection:
+                                        _quarterTurnsForRotationCorrection!,
+                                  ),
+                                ),
                               ),
                               const SizedBox(width: 24),
                               VideoEditorBottomAction(
                                 label: AppLocalizations.of(context).crop,
                                 svgPath:
                                     "assets/video-editor/video-editor-crop-action.svg",
-                                onPressed: () => _openSubEditor(VideoCropPage(
-                                  controller: _controller!,
-                                  quarterTurnsForRotationCorrection:
-                                      _quarterTurnsForRotationCorrection!,
-                                )),
+                                onPressed: () => _openSubEditor(
+                                  VideoCropPage(
+                                    controller: _controller!,
+                                    quarterTurnsForRotationCorrection:
+                                        _quarterTurnsForRotationCorrection!,
+                                  ),
+                                ),
                               ),
                               const SizedBox(width: 24),
                               VideoEditorBottomAction(
                                 label: AppLocalizations.of(context).rotate,
                                 svgPath:
                                     "assets/video-editor/video-editor-rotate-action.svg",
-                                onPressed: () => _openSubEditor(VideoRotatePage(
-                                  controller: _controller!,
-                                  quarterTurnsForRotationCorrection:
-                                      _quarterTurnsForRotationCorrection!,
-                                )),
+                                onPressed: () => _openSubEditor(
+                                  VideoRotatePage(
+                                    controller: _controller!,
+                                    quarterTurnsForRotationCorrection:
+                                        _quarterTurnsForRotationCorrection!,
+                                  ),
+                                ),
                               ),
                             ],
                           ),

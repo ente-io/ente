@@ -26,9 +26,9 @@ class VideoEditorBottomAction extends StatelessWidget {
       onTap: onPressed,
       svgPath: svgPath,
       icon: icon,
-      child: child,
       size: 60,
       isSelected: isSelected,
+      child: child,
     );
   }
 }

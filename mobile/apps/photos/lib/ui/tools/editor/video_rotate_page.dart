@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import "package:photos/ente_theme_data.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_app_bar.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_bottom_action.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_main_actions.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_player_control.dart";
-import "package:photos/theme/ente_theme.dart";
 import 'package:video_editor/video_editor.dart';
 
 class VideoRotatePage extends StatelessWidget {
