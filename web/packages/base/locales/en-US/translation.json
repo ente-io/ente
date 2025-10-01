@@ -701,5 +701,6 @@
     "grouped": "Grouped",
     "continuous": "Continuous",
     "trip": "Trip",
-    "album_layout": "Album layout"
+    "album_layout": "Album layout",
+    "maps_privacy_notice": "Approximate coordinates will be sent to privacy conscious third parties like OpenStreetMaps to show the map and location."
 }

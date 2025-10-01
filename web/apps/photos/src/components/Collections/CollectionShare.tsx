@@ -31,6 +31,7 @@ import {
     RowButtonDivider,
     RowButtonEndActivityIndicator,
     RowButtonGroup,
+    RowButtonGroupHint,
     RowButtonGroupTitle,
     RowLabel,
     RowSwitch,
@@ -1897,7 +1898,7 @@ const ManageLayout: React.FC<ManageLayoutProps> = ({
                 onRootClose={onRootClose}
                 title={t("album_layout")}
             >
-                <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
+                <Stack sx={{ py: "20px", px: "8px" }}>
                     <RowButtonGroup>
                         {options.map(({ label, value }, index) => (
                             <React.Fragment key={value}>
@@ -1923,10 +1924,19 @@ const ManageLayout: React.FC<ManageLayoutProps> = ({
                             </React.Fragment>
                         ))}
                     </RowButtonGroup>
+                    {currentLayout === "trip" && !loadingLayout && (
+                        <RowButtonGroupHint>
+                            {t("maps_privacy_notice")}
+                        </RowButtonGroupHint>
+                    )}
                     {errorMessage && (
                         <Typography
                             variant="small"
-                            sx={{ color: "critical.main", textAlign: "center" }}
+                            sx={{
+                                color: "critical.main",
+                                mt: 0.5,
+                                textAlign: "center",
+                            }}
                         >
                             {errorMessage}
                         </Typography>
