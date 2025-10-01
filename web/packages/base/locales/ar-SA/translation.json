@@ -685,5 +685,21 @@
     "person_favorites": "مفضلات {{name}}",
     "shared_favorites": "",
     "added_by_name": "أضيفت بواسطة {{name}}",
-    "unowned_files_not_processed": "لم تتم معالجة الملفات المضافة من قبل مستخدمين آخرين"
+    "unowned_files_not_processed": "لم تتم معالجة الملفات المضافة من قبل مستخدمين آخرين",
+    "custom_domains": "",
+    "custom_domains_desc": "",
+    "link_your_domain": "",
+    "domain": "",
+    "domain_help": "",
+    "invalid_domain": "",
+    "already_linked_domain": "",
+    "add_dns_entry": "",
+    "add_dns_entry_hint": "",
+    "custom_domains_help": "",
+    "num_1": "",
+    "num_2": "",
+    "grouped": "",
+    "continuous": "",
+    "trip": "",
+    "album_layout": ""
 }

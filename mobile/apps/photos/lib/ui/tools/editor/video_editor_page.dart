@@ -59,7 +59,6 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
 
   @override
   void initState() {
-    _logger.info("Initializing video editor page");
     super.initState();
 
     Future.microtask(() {
@@ -74,13 +73,13 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         trimStyle: TrimSliderStyle(
           onTrimmedColor: const ColorScheme.dark().videoPlayerPrimaryColor,
           onTrimmingColor: const ColorScheme.dark().videoPlayerPrimaryColor,
-          background: Theme.of(context).colorScheme.videoPlayerBackgroundColor,
+          background: Theme.of(context).colorScheme.editorBackgroundColor,
           positionLineColor:
               Theme.of(context).colorScheme.videoPlayerBorderColor,
           lineColor: Theme.of(context)
               .colorScheme
               .videoPlayerBorderColor
-              .withOpacity(0.6),
+              .withValues(alpha: 0.6),
         ),
       );
 
@@ -106,7 +105,6 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
 
   @override
   Widget build(BuildContext context) {
-    _logger.info("Building video editor page");
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
@@ -152,7 +150,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                               VideoEditorMainActions(
                                 children: [
                                   VideoEditorBottomAction(
-                                    label: S.of(context).trim,
+                                    label: AppLocalizations.of(context).trim,
                                     svgPath:
                                         "assets/video-editor/video-editor-trim-action.svg",
                                     onPressed: () => Navigator.push(
@@ -168,7 +166,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                                   ),
                                   const SizedBox(width: 40),
                                   VideoEditorBottomAction(
-                                    label: S.of(context).crop,
+                                    label: AppLocalizations.of(context).crop,
                                     svgPath:
                                         "assets/video-editor/video-editor-crop-action.svg",
                                     onPressed: () => Navigator.push(
@@ -184,7 +182,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                                   ),
                                   const SizedBox(width: 40),
                                   VideoEditorBottomAction(
-                                    label: S.of(context).rotate,
+                                    label: AppLocalizations.of(context).rotate,
                                     svgPath:
                                         "assets/video-editor/video-editor-rotate-action.svg",
                                     onPressed: () => Navigator.push(
@@ -205,7 +203,8 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                                 color: Theme.of(context)
                                     .colorScheme
                                     .videoPlayerPrimaryColor,
-                                secondaryText: S.of(context).saveCopy,
+                                secondaryText:
+                                    AppLocalizations.of(context).saveCopy,
                                 onSecondaryPressed: () {
                                   exportVideo();
                                 },
@@ -228,7 +227,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
 
     final dialogKey = GlobalKey<LinearProgressDialogState>();
     final dialog = LinearProgressDialog(
-      S.of(context).savingEdits,
+      AppLocalizations.of(context).savingEdits,
       key: dialogKey,
     );
 
@@ -250,28 +249,37 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
 
         final String startTrimCmd = "-ss ${_controller!.startTrim}";
         final String toTrimCmd = "-t ${_controller!.trimmedDuration}";
-        return '$startTrimCmd -i $videoPath  $toTrimCmd ${config.filtersCmd(filters)} -c:v libx264 -c:a aac $outputPath';
+        final command =
+            '$startTrimCmd -i $videoPath  $toTrimCmd ${config.filtersCmd(filters)} -c:v libx264 -c:a aac $outputPath';
+        return command;
       },
     );
 
     try {
+      final executeConfig = await config.getExecuteConfig();
+
       await ExportService.runFFmpegCommand(
-        await config.getExecuteConfig(),
+        executeConfig,
         onProgress: (stats) {
+          final progress = config.getFFmpegProgress(stats.getTime().toInt());
           if (dialogKey.currentState != null) {
-            dialogKey.currentState!
-                .setProgress(config.getFFmpegProgress(stats.getTime().toInt()));
+            dialogKey.currentState!.setProgress(progress);
           }
         },
-        onError: (e, s) => _logger.severe("Error exporting video", e, s),
+        onError: (e, s) {
+          _logger.severe("Error exporting video", e, s);
+        },
         onCompleted: (result) async {
           _isExporting.value = false;
-          if (!mounted) return;
+          if (!mounted) {
+            return;
+          }
 
           final fileName = path.basenameWithoutExtension(widget.file.title!) +
               "_edited_" +
               DateTime.now().microsecondsSinceEpoch.toString() +
               ".mp4";
+
           //Disabling notifications for assets changing to insert the file into
           //files db before triggering a sync.
           await PhotoManager.stopChangeNotify();
@@ -279,7 +287,9 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
           try {
             final AssetEntity newAsset =
                 await (PhotoManager.editor.saveVideo(result, title: fileName));
+
             result.deleteSync();
+
             final newFile = await EnteFile.fromAsset(
               widget.file.deviceFolder ?? '',
               newAsset,
@@ -299,20 +309,24 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
               }
             }
 
-            newFile.generatedID =
-                await FilesDB.instance.insertAndGetId(newFile);
-            Bus.instance
-                .fire(LocalPhotosUpdatedEvent([newFile], source: "editSave"));
+            newFile.generatedID = await FilesDB.instance.insertAndGetId(
+              newFile,
+            );
+
+            Bus.instance.fire(
+              LocalPhotosUpdatedEvent([newFile], source: "editSave"),
+            );
+
             SyncService.instance.sync().ignore();
-            showShortToast(context, S.of(context).editsSaved);
-            _logger.info("Original file " + widget.file.toString());
-            _logger.info("Saved edits to file " + newFile.toString());
+
+            showShortToast(context, AppLocalizations.of(context).editsSaved);
             final files = widget.detailPageConfig.files;
 
             // the index could be -1 if the files fetched doesn't contain the newly
             // edited files
-            int selectionIndex = files
-                .indexWhere((file) => file.generatedID == newFile.generatedID);
+            int selectionIndex = files.indexWhere(
+              (file) => file.generatedID == newFile.generatedID,
+            );
             if (selectionIndex == -1) {
               files.add(newFile);
               selectionIndex = files.length - 1;
@@ -328,12 +342,14 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                 ),
               ),
             );
-          } catch (_) {
+          } catch (e, s) {
+            _logger.severe("Error in post-processing", e, s);
             Navigator.of(dialogKey.currentContext!).pop('dialog');
           }
         },
       );
-    } catch (_) {
+    } catch (e, s) {
+      _logger.severe("Unexpected error in export process", e, s);
       Navigator.of(dialogKey.currentContext!).pop('dialog');
     } finally {
       await PhotoManager.startChangeNotify();

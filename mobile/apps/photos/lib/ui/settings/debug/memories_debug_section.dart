@@ -186,7 +186,7 @@ class MomentRecommendation extends StatelessWidget {
                   cornerSmoothing: _cornerSmoothing,
                 ),
                 child: Container(
-                  color: Colors.white.withOpacity(0.16),
+                  color: Colors.white.withValues(alpha: 0.16),
                   width: _width + _borderWidth * 2,
                   height: _height + _borderWidth * 2,
                 ),
@@ -195,7 +195,7 @@ class MomentRecommendation extends StatelessWidget {
                 decoration: BoxDecoration(
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 6.25,
                       offset: const Offset(-1.25, 2.5),
                     ),
@@ -232,9 +232,9 @@ class MomentRecommendation extends StatelessWidget {
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                             colors: [
-                              Colors.black.withOpacity(0),
-                              Colors.black.withOpacity(0),
-                              Colors.black.withOpacity(0.5),
+                              Colors.black.withValues(alpha: 0),
+                              Colors.black.withValues(alpha: 0),
+                              Colors.black.withValues(alpha: 0.5),
                             ],
                             stops: const [
                               0,

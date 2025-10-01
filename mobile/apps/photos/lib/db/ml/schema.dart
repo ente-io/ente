@@ -16,6 +16,8 @@ const mlVersionColumn = 'ml_version';
 const personIdColumn = 'person_id';
 const clusterIDColumn = 'cluster_id';
 const personOrClusterIdColumn = 'person_or_cluster_id';
+const textQueryColumn = 'text_query';
+const createdAtColumn = 'created_at';
 
 const createFacesTable = '''CREATE TABLE IF NOT EXISTS $facesTable (
   $fileIDColumn	INTEGER NOT NULL,
@@ -137,3 +139,18 @@ CREATE TABLE IF NOT EXISTS $faceCacheTable (
 ''';
 
 const deleteFaceCacheTable = 'DELETE FROM $faceCacheTable';
+
+// ## TEXT EMBEDDINGS CACHE TABLE
+const textEmbeddingsCacheTable = 'text_embeddings_cache';
+
+const createTextEmbeddingsCacheTable = '''
+CREATE TABLE IF NOT EXISTS $textEmbeddingsCacheTable (
+  $textQueryColumn TEXT NOT NULL,
+  $embeddingColumn BLOB NOT NULL,
+  $mlVersionColumn INTEGER NOT NULL,
+  $createdAtColumn INTEGER NOT NULL,
+  PRIMARY KEY ($textQueryColumn)
+);
+''';
+
+const deleteTextEmbeddingsCacheTable = 'DELETE FROM $textEmbeddingsCacheTable';

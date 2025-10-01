@@ -33,7 +33,7 @@ class UnCategorizedCollections extends StatelessWidget {
         padding: const EdgeInsets.all(0),
         side: BorderSide(
           width: 0.5,
-          color: Theme.of(context).iconTheme.color!.withOpacity(0.24),
+          color: Theme.of(context).iconTheme.color!.withValues(alpha: 0.24),
         ),
       ),
       child: SizedBox(
@@ -62,7 +62,8 @@ class UnCategorizedCollections extends StatelessWidget {
                             style: textStyle,
                             children: [
                               TextSpan(
-                                text: S.of(context).uncategorized,
+                                text:
+                                    AppLocalizations.of(context).uncategorized,
                                 style: Theme.of(context).textTheme.titleMedium,
                               ),
                               const TextSpan(text: "  \u2022  "),
@@ -79,7 +80,8 @@ class UnCategorizedCollections extends StatelessWidget {
                             style: textStyle,
                             children: [
                               TextSpan(
-                                text: S.of(context).uncategorized,
+                                text:
+                                    AppLocalizations.of(context).uncategorized,
                                 style: Theme.of(context).textTheme.titleMedium,
                               ),
                               //need to query in db and bring this value

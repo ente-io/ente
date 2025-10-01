@@ -8,6 +8,9 @@ import "package:flutter/services.dart";
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:photos/core/cache/image_cache.dart';
+import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
+import 'package:photos/core/cache/video_cache_manager.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/error-reporting/super_logging.dart';
 import 'package:photos/core/event_bus.dart';
@@ -23,11 +26,13 @@ import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/api/user/key_attributes.dart';
 import 'package:photos/models/api/user/key_gen_result.dart';
 import 'package:photos/models/api/user/private_key_attributes.dart';
+import 'package:photos/service_locator.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import "package:photos/services/home_widget_service.dart";
 import 'package:photos/services/ignored_files_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import "package:photos/services/machine_learning/similar_images_service.dart";
 import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
 import 'package:photos/utils/file_uploader.dart';
@@ -187,20 +192,55 @@ class Configuration {
         }
       }
     }
+
+    // Clear preferences and secure storage
     await _preferences.clear();
     await _secureStorage.deleteAll();
     _key = null;
     _cachedToken = null;
     _secretKey = null;
+    _volatilePassword = null;
+
+    // Clear all database tables
     await FilesDB.instance.clearTable();
     await CollectionsDB.instance.clearTable();
     await MemoriesDB.instance.clearTable();
     await MLDataDB.instance.clearTable();
-
     await UploadLocksDB.instance.clearTable();
-    await IgnoredFilesService.instance.reset();
     await TrashDB.instance.clearTable();
+
+    // Clear all in-memory caches
+    ThumbnailInMemoryLruCache.clearAll();
+    FileLruCache.clearAll();
+
+    // Clear video cache
+    try {
+      await VideoCacheManager.instance.emptyCache();
+    } catch (e) {
+      _logger.warning("Failed to clear video cache", e);
+    }
+
+    // Clear all service caches
+    await SimilarImagesService.instance.clearCache();
+    await IgnoredFilesService.instance.reset();
     unawaited(HomeWidgetService.instance.clearWidget(autoLogout));
+
+    // Clear additional caches (safe to call even if not initialized)
+    try {
+      await magicCacheService.clearMagicCache();
+    } catch (e) {
+      _logger.info("MagicCacheService not initialized or failed to clear", e);
+    }
+
+    try {
+      await memoriesCacheService.clearMemoriesCache();
+    } catch (e) {
+      _logger.info(
+        "MemoriesCacheService not initialized or failed to clear",
+        e,
+      );
+    }
+
     if (!autoLogout) {
       // Following services won't be initialized if it's the case of autoLogout
       FileUploader.instance.clearCachedUploadURLs();
@@ -208,6 +248,16 @@ class Configuration {
       FavoritesService.instance.clearCache();
       SearchService.instance.clearCache();
       PersonService.instance.clearCache();
+      try {
+        smartAlbumsService.clearCache();
+      } catch (e) {
+        _logger.info("SmartAlbumsService not initialized", e);
+      }
+      try {
+        billingService.clearCache();
+      } catch (e) {
+        _logger.info("BillingService not initialized", e);
+      }
       Bus.instance.fire(UserLoggedOutEvent());
     } else {
       await _preferences.setBool("auto_logout", true);
@@ -243,13 +293,17 @@ class Configuration {
     final loginKey = await CryptoUtil.deriveLoginKey(derivedKeyResult.key);
 
     // Encrypt the key with this derived key
-    final encryptedKeyData =
-        CryptoUtil.encryptSync(masterKey, derivedKeyResult.key);
+    final encryptedKeyData = CryptoUtil.encryptSync(
+      masterKey,
+      derivedKeyResult.key,
+    );
 
     // Generate a public-private keypair and encrypt the latter
     final keyPair = await CryptoUtil.generateKeyPair();
-    final encryptedSecretKeyData =
-        CryptoUtil.encryptSync(keyPair.sk, masterKey);
+    final encryptedSecretKeyData = CryptoUtil.encryptSync(
+      keyPair.sk,
+      masterKey,
+    );
 
     final attributes = KeyAttributes(
       CryptoUtil.bin2base64(kekSalt),
@@ -289,8 +343,10 @@ class Configuration {
     final loginKey = await CryptoUtil.deriveLoginKey(derivedKeyResult.key);
 
     // Encrypt the key with this derived key
-    final encryptedKeyData =
-        CryptoUtil.encryptSync(masterKey!, derivedKeyResult.key);
+    final encryptedKeyData = CryptoUtil.encryptSync(
+      masterKey!,
+      derivedKeyResult.key,
+    );
 
     final existingAttributes = getKeyAttributes();
 
@@ -351,9 +407,7 @@ class Configuration {
       CryptoUtil.base642bin(attributes.publicKey),
       secretKey,
     );
-    await setToken(
-      CryptoUtil.bin2base64(token, urlSafe: true),
-    );
+    await setToken(CryptoUtil.bin2base64(token, urlSafe: true));
     return keyEncryptionKey;
   }
 
@@ -369,14 +423,18 @@ class Configuration {
     final encryptedRecoveryKey = CryptoUtil.encryptSync(recoveryKey, masterKey);
 
     return existingAttributes!.copyWith(
-      masterKeyEncryptedWithRecoveryKey:
-          CryptoUtil.bin2base64(encryptedMasterKey.encryptedData!),
-      masterKeyDecryptionNonce:
-          CryptoUtil.bin2base64(encryptedMasterKey.nonce!),
-      recoveryKeyEncryptedWithMasterKey:
-          CryptoUtil.bin2base64(encryptedRecoveryKey.encryptedData!),
-      recoveryKeyDecryptionNonce:
-          CryptoUtil.bin2base64(encryptedRecoveryKey.nonce!),
+      masterKeyEncryptedWithRecoveryKey: CryptoUtil.bin2base64(
+        encryptedMasterKey.encryptedData!,
+      ),
+      masterKeyDecryptionNonce: CryptoUtil.bin2base64(
+        encryptedMasterKey.nonce!,
+      ),
+      recoveryKeyEncryptedWithMasterKey: CryptoUtil.bin2base64(
+        encryptedRecoveryKey.encryptedData!,
+      ),
+      recoveryKeyDecryptionNonce: CryptoUtil.bin2base64(
+        encryptedRecoveryKey.nonce!,
+      ),
     );
   }
 
@@ -501,14 +559,9 @@ class Configuration {
     _key = key;
     if (key == null) {
       // Used to clear key from secure storage
-      await _secureStorage.delete(
-        key: keyKey,
-      );
+      await _secureStorage.delete(key: keyKey);
     } else {
-      await _secureStorage.write(
-        key: keyKey,
-        value: key,
-      );
+      await _secureStorage.write(key: keyKey, value: key);
     }
   }
 
@@ -516,14 +569,9 @@ class Configuration {
     _secretKey = secretKey;
     if (secretKey == null) {
       // Used to clear secret key from secure storage
-      await _secureStorage.delete(
-        key: secretKeyKey,
-      );
+      await _secureStorage.delete(key: secretKeyKey);
     } else {
-      await _secureStorage.write(
-        key: secretKeyKey,
-        value: secretKey,
-      );
+      await _secureStorage.write(key: secretKeyKey, value: secretKey);
     }
   }
 
@@ -647,18 +695,9 @@ class Configuration {
     final hasMigratedSecureStorage =
         _preferences.getBool(hasMigratedSecureStorageKey) ?? false;
     if (!hasMigratedSecureStorage && _key != null && _secretKey != null) {
-      await _secureStorage.write(
-        key: keyKey,
-        value: _key,
-      );
-      await _secureStorage.write(
-        key: secretKeyKey,
-        value: _secretKey,
-      );
-      await _preferences.setBool(
-        hasMigratedSecureStorageKey,
-        true,
-      );
+      await _secureStorage.write(key: keyKey, value: _key);
+      await _secureStorage.write(key: secretKeyKey, value: _secretKey);
+      await _preferences.setBool(hasMigratedSecureStorageKey, true);
     }
   }
 

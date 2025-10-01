@@ -27,9 +27,12 @@ import workmanager
 
     // Retrieve the link from parameters
     if let url = AppLinks.shared.getLink(launchOptions: launchOptions) {
-      // We have a link, propagate it to your Flutter app or not
-      AppLinks.shared.handleLink(url: url)
-      return true  // Returning true will stop the propagation to other packages
+      // only accept non-homewidget urls for AppLinks
+      if !url.absoluteString.contains("&homeWidget") {
+        AppLinks.shared.handleLink(url: url)
+        // link is handled, stop propagation
+        return true
+      }
     }
 
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)

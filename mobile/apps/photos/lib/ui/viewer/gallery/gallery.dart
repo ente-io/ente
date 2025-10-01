@@ -261,7 +261,11 @@ class GalleryState extends State<Gallery> {
       });
     } else {
       groupHeaderExtent = GalleryGroups.spacing;
-      _updateGalleryGroups();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _updateGalleryGroups();
+        }
+      });
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {

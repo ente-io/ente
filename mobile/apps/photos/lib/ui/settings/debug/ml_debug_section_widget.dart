@@ -1,11 +1,20 @@
 import "dart:async";
+import "dart:math" show Random;
+import "dart:typed_data" show Float32List;
 
+import "package:flutter/foundation.dart" show kDebugMode;
 import 'package:flutter/material.dart';
+import "package:flutter_rust_bridge/flutter_rust_bridge.dart";
 import "package:logging/logging.dart";
+import "package:ml_linalg/linalg.dart";
+import "package:path_provider/path_provider.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
+import "package:photos/db/ml/clip_vector_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/events/people_changed_event.dart";
+import "package:photos/extensions/stop_watch.dart";
+import "package:photos/generated/protos/ente/common/vector.pb.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/service_locator.dart";
@@ -13,8 +22,11 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import 'package:photos/services/machine_learning/ml_service.dart';
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
+import "package:photos/services/machine_learning/similar_images_service.dart";
 import "package:photos/services/notification_service.dart";
 import "package:photos/services/search_service.dart";
+import "package:photos/src/rust/api/simple.dart";
+import "package:photos/src/rust/api/usearch_api.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
@@ -72,6 +84,25 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
     logger.info("Building ML Debug section options");
     return Column(
       children: [
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Clear vectorDB index",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              await ClipVectorDB.instance.deleteIndexFile(undoMigration: true);
+              await SimilarImagesService.instance.clearCache();
+              showShortToast(context, 'Deleted vectorDB index');
+            } catch (e, s) {
+              logger.severe('vectorDB index delete failed ', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
@@ -179,6 +210,382 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               showShortToast(context, 'done');
             } catch (e, s) {
               logger.severe('schedule notification failed ', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Do some basic usearch",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              // randomly generate some vectors and keys
+              final random = Random();
+              final tenEmbeddings = List.generate(
+                10,
+                (index) {
+                  final randomList = List<double>.generate(
+                    192,
+                    (_) => random.nextDouble(), // Values between 0 and 1
+                  );
+                  final randomVector = Vector.fromList(randomList).normalize();
+                  return Float32List.fromList(randomVector.toList());
+                },
+              );
+              final tenKeys = Uint64List.fromList(
+                List.generate(
+                  tenEmbeddings.length,
+                  (index) => BigInt.from(index + 1),
+                ),
+              );
+              final embedDimensions = BigInt.from(tenEmbeddings.first.length);
+              final indexPath = (await getApplicationSupportDirectory()).path +
+                  "/ml/test/vector_db_index.usearch";
+              final rustVectorDB = VectorDb(
+                filePath: indexPath,
+                dimensions: embedDimensions,
+              );
+              await rustVectorDB.resetIndex();
+              final stats = await rustVectorDB.getIndexStats();
+              logger.info("vector_db stats: $stats");
+              await rustVectorDB.bulkAddVectors(
+                keys: tenKeys,
+                vectors: tenEmbeddings,
+              );
+              final statsAgain = await rustVectorDB.getIndexStats();
+              logger.info("vector_db stats again: $statsAgain");
+              final size = statsAgain.$1;
+              final capacity = statsAgain.$2;
+              final dimensions = statsAgain.$3;
+              showShortToast(
+                context,
+                "Size: $size, Capacity: $capacity, Dimensions: $dimensions",
+              );
+              await rustVectorDB.deleteIndex();
+            } catch (e, s) {
+              logger.warning('Rust bridge failed ', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Fill ClipVectorDB",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              final allClip = await MLDataDB.instance.getAllClipVectors();
+              final allClipSmall = allClip.sublist(0, 15000);
+              showShortToast(context, "Got all embeddings");
+              logger.info("Got all embeddings");
+
+              final clipVectorDB = ClipVectorDB.instance;
+              await clipVectorDB.deleteAllEmbeddings();
+              logger.info("Clean vector DB");
+              final stats = await clipVectorDB.getIndexStats();
+              logger.info(stats.toString());
+              showShortToast(context, stats.toString());
+
+              final fileIDs = allClipSmall.map((e) => e.fileID).toList();
+              final embeddings = allClipSmall
+                  .map((e) => Float32List.fromList(e.vector.toList()))
+                  .toList();
+              showShortToast(context, "Reshaped embeddings data");
+              logger.info("Reshaped embeddings data");
+
+              final now = DateTime.now();
+              await clipVectorDB.bulkInsertEmbeddings(
+                fileIDs: fileIDs,
+                embeddings: embeddings,
+              );
+              final duration = DateTime.now().difference(now);
+              logger.info(
+                "ClipVectorDB bulk insert took ${duration.inMilliseconds} ms for ${fileIDs.length} embeddings",
+              );
+              final statsAfter = await clipVectorDB.getIndexStats();
+              logger.info(statsAfter.toString());
+              showShortToast(context, statsAfter.toString());
+            } catch (e, s) {
+              logger.warning('ClipVectorDB migration failed ', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Migrate to ClipVectorDB",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              await MLDataDB.instance.checkMigrateFillClipVectorDB();
+              showShortToast(context, "Migration done!");
+            } catch (e, s) {
+              logger.warning('ClipVectorDB migration failed ', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Show ClipVectorDB stats",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              final clipVectorDB = ClipVectorDB.instance;
+              final stats = await clipVectorDB.getIndexStats();
+              logger.info(stats.toString());
+              showShortToast(context, stats.toString());
+            } catch (e, s) {
+              logger.warning('ClipVectorDB stats failed ', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Delete/Empty ClipVectorDB",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              final clipVectorDB = ClipVectorDB.instance;
+              await clipVectorDB.deleteIndex();
+            } catch (e, s) {
+              logger.warning('ClipVectorDB cleanup failed ', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Benchmark Vector DB Face",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              final w = (kDebugMode ? EnteWatch('MLDebugSectionWidget') : null)
+                ?..start();
+              final persons = await PersonService.instance.getPersons();
+              w?.log('get all persons for ${persons.length} persons');
+              String laurensID = '';
+              for (final person in persons) {
+                if (person.data.name.toLowerCase().contains('laurens')) {
+                  laurensID = person.remoteID;
+                }
+              }
+              if (laurensID.isEmpty) {
+                throw Exception('Laurens not found');
+              }
+              final laurensFaceIDs =
+                  await MLDataDB.instance.getFaceIDsForPerson(laurensID);
+              w?.log(
+                'getting all face ids for laurens (${laurensFaceIDs.length} faces)',
+              );
+              final laurensFaceIdToEmbeddingData = await MLDataDB.instance
+                  .getFaceEmbeddingMapForFaces(laurensFaceIDs);
+
+              // Fill the vector DB with all embeddings
+              final laurensFaceIdToFloat32 = laurensFaceIdToEmbeddingData.map(
+                (key, value) => MapEntry(
+                  key,
+                  Float32List.fromList(EVector.fromBuffer(value).values),
+                ),
+              );
+              final keys = Uint64List.fromList(
+                List.generate(
+                  laurensFaceIdToFloat32.length,
+                  (index) => BigInt.from(index + 1),
+                ),
+              );
+              final vectorDB = VectorDb(
+                filePath: (await getApplicationSupportDirectory()).path +
+                    "/ml/test/vector_db_face_index.usearch",
+                dimensions: BigInt.from(
+                  laurensFaceIdToFloat32.values.first.length,
+                ),
+              );
+              await vectorDB.resetIndex();
+              await vectorDB.bulkAddVectors(
+                keys: keys,
+                vectors: laurensFaceIdToFloat32.values.toList(),
+              );
+
+              // Benchmarking the vector DB
+              final queries = laurensFaceIdToFloat32.values.toList();
+              final count = BigInt.from(10);
+              w?.reset();
+              final (vectorKeys, distances) = await vectorDB.bulkSearchVectors(
+                queries: queries,
+                count: count,
+                exact: false,
+              );
+
+              w?.log(
+                'Done with ${queries.length * queries.length} (${queries.length} x ${queries.length}}) embeddings comparisons in vector DB',
+              );
+              logger.info(
+                'vector db results: ${vectorKeys.length} results, first: ${vectorKeys.first}, hundredth: ${vectorKeys[99]}',
+              );
+
+              // Benchmarking our own vector comparisons
+              final laurensFaceIdToEmbeddingVectors =
+                  laurensFaceIdToEmbeddingData.map(
+                (key, value) => MapEntry(
+                  key,
+                  Vector.fromList(EVector.fromBuffer(value).values),
+                ),
+              );
+              final faceVectors = laurensFaceIdToEmbeddingVectors.values;
+              w?.reset();
+              for (final faceVector in faceVectors) {
+                for (final otherFaceVector in faceVectors) {
+                  final _ = 1 - faceVector.dot(otherFaceVector);
+                }
+              }
+
+              w?.log(
+                'Done with ${faceVectors.length * faceVectors.length} (${faceVectors.length} x ${faceVectors.length}}) embeddings comparisons in own method',
+              );
+              await vectorDB.deleteIndex();
+            } catch (e, s) {
+              logger.warning('vector DB search failed ', e, s);
+
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Benchmark Vector DB CLIP",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              final w = (kDebugMode ? EnteWatch('MLDebugSectionWidget') : null)
+                ?..start();
+              final clipEmbeddings = await mlDataDB.getAllClipVectors();
+              w?.log(
+                'getting all clip embeddings (${clipEmbeddings.length} embeddings)',
+              );
+
+              // Fill the vector DB with all embeddings
+              final clipFloat32 = clipEmbeddings
+                  .map(
+                    (value) => Float32List.fromList(value.vector.toList()),
+                  )
+                  .toList();
+              final keys = Uint64List.fromList(
+                List.generate(
+                  clipFloat32.length,
+                  (index) => BigInt.from(index + 1),
+                ),
+              );
+              final vectorDB = VectorDb(
+                filePath: (await getApplicationSupportDirectory()).path +
+                    "/ml/test/vector_db_clip_index.usearch",
+                dimensions: BigInt.from(
+                  clipFloat32.first.length,
+                ),
+              );
+              await vectorDB.resetIndex();
+              await vectorDB.bulkAddVectors(
+                keys: keys,
+                vectors: clipFloat32,
+              );
+
+              // Benchmarking the vector DB
+              final count = BigInt.from(10);
+              w?.reset();
+              final (vectorKeys, distances) = await vectorDB.bulkSearchVectors(
+                queries: clipFloat32,
+                count: count,
+                exact: false,
+              );
+
+              w?.log(
+                'Done with ${clipFloat32.length * clipFloat32.length} (${clipFloat32.length} x ${clipFloat32.length}}) embeddings comparisons in vector DB',
+              );
+              logger.info(
+                'vector db results: ${vectorKeys.length} results, first: ${vectorKeys.first} with distances ${distances.first}, hundredth: ${vectorKeys[99]} with distances ${distances[99]}',
+              );
+
+              // // Benchmarking our own vector comparisons
+              // final clipVectors = clipEmbeddings
+              //     .map(
+              //       (value) => value.vector,
+              //     )
+              //     .toList();
+              // w?.reset();
+              // int compared = 0;
+              // int ms = DateTime.now().millisecondsSinceEpoch;
+              // for (final faceVector in clipVectors) {
+              //   for (final otherFaceVector in clipVectors) {
+              //     final _ = 1 - faceVector.dot(otherFaceVector);
+              //   }
+              //   compared++;
+              //   if (compared % 100 == 0) {
+              //     final now = DateTime.now().millisecondsSinceEpoch;
+              //     logger.info(
+              //       'Compared next 100 in ${now - ms} ms, progress: ($compared / ${clipVectors.length})',
+              //     );
+              //     ms = now;
+              //   }
+              // }
+              // w?.log(
+              //   'Done with ${clipVectors.length * clipVectors.length} (${clipVectors.length} x ${clipVectors.length}}) embeddings comparisons in own method',
+              // );
+
+              await vectorDB.deleteIndex();
+            } catch (e, s) {
+              logger.warning('vector DB search failed ', e, s);
+
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Test rust bridge (without vectorDB)",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              final String greetings = greet(name: "Tom");
+              const String expected = "Hello, Tom!";
+              assert(greetings == expected);
+              debugPrint("String from rust: $greetings");
+              showShortToast(context, greetings);
+            } catch (e, s) {
+              logger.warning('Rust bridge failed ', e, s);
               await showGenericErrorDialog(context: context, error: e);
             }
           },

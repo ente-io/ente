@@ -111,6 +111,7 @@
   "importAegisGuide": "Verwenden Sie die Option \"Tresor exportieren\" in den Einstellungen von Aegis.\n\nFalls Ihr Tresor verschlüsselt ist, müssen Sie das Passwort für den Tresor eingeben, um ihn zu entschlüsseln.",
   "import2FasGuide": "Verwenden Sie unter \"Einstellungen → Backup\" die Option \"Exportieren\" in 2FAS.\n\nFalls Ihr Backup verschlüsselt ist, müssen Sie das Passwort eingeben, um das Backup zu entschlüsseln.",
   "importLastpassGuide": "Verwenden Sie die Option \"Konten übertragen → Konten in Datei exportieren\" in den Lastpass Authenticator Einstellungen. \nImportieren Sie anschließend die heruntergeladene JSON-Datei.",
+  "importProtonAuthGuide": "Verwenden Sie die Option \"Exportieren\" in den Proton Authenticator Settings um Ihre Codes zu exportieren.",
   "exportCodes": "Codes exportieren",
   "importLabel": "Importieren",
   "importInstruction": "Bitte wählen Sie eine Datei die Codes in folgendem Format beinhaltet",
@@ -519,5 +520,15 @@
   "algorithm": "Algorithmus",
   "type": "Typ",
   "period": "Periode",
-  "digits": "Ziffern"
+  "digits": "Ziffern",
+  "importFromGallery": "Aus Galerie importieren",
+  "errorCouldNotReadImage": "Die ausgewählte Bild-Datei konnte nicht verarbeitet werden.",
+  "errorInvalidQRCode": "Ungültiger QR-Code",
+  "errorInvalidQRCodeBody": "Der gescannte QR-Code ist kein gültiges 2FA-Konto.",
+  "errorNoQRCode": "Kein QR-Code gefunden",
+  "errorGenericTitle": "Ein Fehler ist aufgetreten",
+  "errorGenericBody": "Beim Importieren ist ein unerwarteter Fehler aufgetreten.",
+  "backupSecurityNotice": "Diese verschlüsselte Sicherung enthält Ihre 2FA-Schlüssel. Wenn Sie verloren gehen, können Sie Ihre Konten nicht wiederherstellen. Bewahren Sie sie sicher!",
+  "initialBackupCreated": "Initiale Sicherung erstellt!",
+  "passwordTooShort": "Das Passwort muss mindestens 8 Zeichen lang sein."
 }

@@ -103,7 +103,9 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
             if (snapshot.data!.isEmpty) {
               return Center(
                 child: Text(
-                  S.of(context).noSuggestionsForPerson(widget.person.data.name),
+                  AppLocalizations.of(context).noSuggestionsForPerson(
+                    personName: widget.person.data.name,
+                  ),
                   style: getEnteTextTheme(context).largeMuted,
                 ),
               );
@@ -230,16 +232,14 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                         const SizedBox(height: 4),
                         GestureDetector(
                           behavior: HitTestBehavior.opaque,
-                          onTap: canGiveFeedback
-                              ? () => _saveAsAnotherPerson()
-                              : null,
+                          onTap: () => _saveAsAnotherPerson(),
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
                               vertical: 12,
                               horizontal: 32,
                             ),
                             child: Text(
-                              S.of(context).saveAsAnotherPerson,
+                              AppLocalizations.of(context).saveAsAnotherPerson,
                               style: getEnteTextTheme(context).mini.copyWith(
                                     color:
                                         getEnteColorScheme(context).textMuted,
@@ -457,7 +457,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
           );
         } else if (snapshot.hasError) {
           // log the error
-          return Center(child: Text(S.of(context).error));
+          return Center(child: Text(AppLocalizations.of(context).error));
         } else {
           canGiveFeedback = false;
           return const Center(child: CircularProgressIndicator());
@@ -503,7 +503,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                   ),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.7),
+                      color: Colors.black.withValues(alpha: 0.7),
                     ),
                     child: Center(
                       child: Text(

@@ -1,5 +1,5 @@
 {
-    "intro_slide_1_title": "私人备份<br/>为您的回忆",
+    "intro_slide_1_title": "为您的回忆<br/>私密备份",
     "intro_slide_1": "默认端到端加密",
     "intro_slide_2_title": "安全地存放<br/>在一个掩护所中",
     "intro_slide_2": "经久耐用",
@@ -685,5 +685,21 @@
     "person_favorites": "{{name}}的收藏",
     "shared_favorites": "已共享的收藏",
     "added_by_name": "由{{name}}添加",
-    "unowned_files_not_processed": "由其他用户添加的文件未被处理"
+    "unowned_files_not_processed": "由其他用户添加的文件未被处理",
+    "custom_domains": "自定义域名",
+    "custom_domains_desc": "分享时使用您自己的域名",
+    "link_your_domain": "链接您的域名",
+    "domain": "域名",
+    "domain_help": "您拥有的任何域名或子域名",
+    "invalid_domain": "无效的域名",
+    "already_linked_domain": "域名已被其他用户链接",
+    "add_dns_entry": "添加 DNS 条目",
+    "add_dns_entry_hint": "在您的 DNS 提供商上，将您域中的 CNAME 添加到 <b>{{host}}</b>",
+    "custom_domains_help": "欲了解更多信息，请参阅 <a>help</a>",
+    "num_1": "1",
+    "num_2": "2",
+    "grouped": "",
+    "continuous": "",
+    "trip": "",
+    "album_layout": ""
 }

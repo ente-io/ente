@@ -193,7 +193,7 @@ List<OnlyThemFilter> getOnlyThemFilter(
         faceFilters: [
           searchFilterDataProvider.initialGalleryFilter as FaceFilter,
         ],
-        onlyThemString: S.of(context).onlyThem,
+        onlyThemString: AppLocalizations.of(context).onlyThem,
         occurrence: kMostRelevantFilter,
       ),
     ];
@@ -206,7 +206,7 @@ List<OnlyThemFilter> getOnlyThemFilter(
   } else {
     final onlyThemFilter = OnlyThemFilter(
       faceFilters: appliedFaceFilters,
-      onlyThemString: S.of(context).onlyThem,
+      onlyThemString: AppLocalizations.of(context).onlyThem,
       occurrence: kMostRelevantFilter,
     );
     return [onlyThemFilter];
@@ -274,7 +274,7 @@ List<FileTypeFilter> _curateFileTypeFilters(
     fileTypeFilters.add(
       FileTypeFilter(
         fileType: FileType.image,
-        typeName: S.of(context).photos,
+        typeName: AppLocalizations.of(context).photos,
         occurrence: photosCount,
       ),
     );
@@ -283,7 +283,7 @@ List<FileTypeFilter> _curateFileTypeFilters(
     fileTypeFilters.add(
       FileTypeFilter(
         fileType: FileType.video,
-        typeName: S.of(context).videos,
+        typeName: AppLocalizations.of(context).videos,
         occurrence: videosCount,
       ),
     );
@@ -292,7 +292,7 @@ List<FileTypeFilter> _curateFileTypeFilters(
     fileTypeFilters.add(
       FileTypeFilter(
         fileType: FileType.livePhoto,
-        typeName: S.of(context).livePhotos,
+        typeName: AppLocalizations.of(context).livePhotos,
         occurrence: livePhotosCount,
       ),
     );

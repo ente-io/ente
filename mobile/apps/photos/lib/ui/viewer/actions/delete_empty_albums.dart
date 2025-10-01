@@ -80,7 +80,7 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
                   const Icon(Icons.delete_sweep_outlined, size: 18),
                   const SizedBox(width: 8),
                   Text(
-                    S.of(context).deleteEmptyAlbums,
+                    AppLocalizations.of(context).deleteEmptyAlbums,
                     style: textTheme.smallBold,
                   ),
                 ],
@@ -93,7 +93,7 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
               isDismissible: true,
               buttons: [
                 ButtonWidget(
-                  labelText: S.of(context).yes,
+                  labelText: AppLocalizations.of(context).yes,
                   buttonType: ButtonType.neutral,
                   buttonSize: ButtonSize.large,
                   shouldStickToDarkTheme: true,
@@ -116,7 +116,7 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
                   },
                 ),
                 ButtonWidget(
-                  labelText: S.of(context).cancel,
+                  labelText: AppLocalizations.of(context).cancel,
                   buttonType: ButtonType.secondary,
                   buttonSize: ButtonSize.large,
                   shouldStickToDarkTheme: true,
@@ -126,8 +126,9 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
                   },
                 ),
               ],
-              title: S.of(context).deleteEmptyAlbumsWithQuestionMark,
-              body: S.of(context).deleteAlbumsDialogBody,
+              title: AppLocalizations.of(context)
+                  .deleteEmptyAlbumsWithQuestionMark,
+              body: AppLocalizations.of(context).deleteAlbumsDialogBody,
               actionSheetType: ActionSheetType.defaultActionSheet,
             );
           },
@@ -151,8 +152,10 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
         final String currentlyDeleting = (i + 1)
             .toString()
             .padLeft(collections.length.toString().length, '0');
-        _deleteProgress.value =
-            S.of(context).deleteProgress(currentlyDeleting, collections.length);
+        _deleteProgress.value = AppLocalizations.of(context).deleteProgress(
+          currentlyDeleting: currentlyDeleting,
+          totalCount: collections.length,
+        );
         try {
           await CollectionsService.instance.trashEmptyCollection(
             collections[i],

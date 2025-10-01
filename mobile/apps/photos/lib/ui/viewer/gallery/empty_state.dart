@@ -13,13 +13,13 @@ class EmptyState extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Text(
-          text ?? S.of(context).nothingToSeeHere,
+          text ?? AppLocalizations.of(context).nothingToSeeHere,
           textAlign: TextAlign.center,
           style: TextStyle(
             color: Theme.of(context)
                 .colorScheme
                 .defaultTextColor
-                .withOpacity(0.35),
+                .withValues(alpha: 0.35),
           ),
         ),
       ),

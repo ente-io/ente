@@ -8,22 +8,24 @@ import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/core/exceptions.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/files_updated_event.dart';
-import "package:photos/events/local_photos_updated_event.dart";
-import "package:photos/models/api/collection/user.dart";
-import "package:photos/models/file/extensions/file_props.dart";
+import 'package:photos/events/local_photos_updated_event.dart';
+import 'package:photos/models/api/collection/user.dart';
+import 'package:photos/models/file/extensions/file_props.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
 import 'package:photos/models/file/trash_file.dart';
+import 'package:photos/service_locator.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/ui/viewer/file/file_icons_widget.dart';
-import "package:photos/ui/viewer/gallery/component/group/type.dart";
-import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
+import 'package:photos/ui/viewer/gallery/component/group/type.dart';
+import 'package:photos/ui/viewer/gallery/state/gallery_context_state.dart';
 import 'package:photos/utils/file_util.dart';
-import "package:photos/utils/standalone/task_queue.dart";
+import 'package:photos/utils/standalone/task_queue.dart';
 import 'package:photos/utils/thumbnail_util.dart';
 
 class ThumbnailWidget extends StatefulWidget {
@@ -97,13 +99,20 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       if (!mounted && _localThumbnailQueueTaskId != null) {
         if (widget.thumbnailSize == thumbnailLargeSize) {
           largeLocalThumbnailQueue.removeTask(_localThumbnailQueueTaskId!);
+          _logger.info(
+            "Cancelled large thumbnail task: $_localThumbnailQueueTaskId",
+          );
         } else if (widget.thumbnailSize == thumbnailSmallSize) {
           smallLocalThumbnailQueue.removeTask(_localThumbnailQueueTaskId!);
+          _logger.info(
+            "Cancelled small thumbnail task: $_localThumbnailQueueTaskId",
+          );
         }
       }
       // Cancel request only if the widget has been unmounted
       if (!mounted && widget.file.isRemoteFile && !_hasLoadedThumbnail) {
         removePendingGetThumbnailRequestIfAny(widget.file);
+        _logger.info("Cancelled thumbnail request for " + widget.file.tag);
       }
     });
   }
@@ -116,17 +125,42 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     }
   }
 
-  static final smallLocalThumbnailQueue = TaskQueue<String>(
-    maxConcurrentTasks: 15,
-    taskTimeout: const Duration(minutes: 1),
-    maxQueueSize: 200,
-  );
+  static final TaskQueue<String> smallLocalThumbnailQueue = _initSmallQueue();
+  static final TaskQueue<String> largeLocalThumbnailQueue = _initLargeQueue();
 
-  static final largeLocalThumbnailQueue = TaskQueue<String>(
-    maxConcurrentTasks: 5,
-    taskTimeout: const Duration(minutes: 1),
-    maxQueueSize: 200,
-  );
+  static TaskQueue<String> _initSmallQueue() {
+    final maxConcurrent = localSettings.smallQueueMaxConcurrent;
+    final timeoutSeconds = localSettings.smallQueueTimeoutSeconds;
+    final maxSize = localSettings.smallQueueMaxSize;
+
+    _logger.info(
+      "Initializing Small Local Thumbnail Queue - "
+      "MaxConcurrent: $maxConcurrent, Timeout: ${timeoutSeconds}s, MaxSize: $maxSize",
+    );
+
+    return TaskQueue<String>(
+      maxConcurrentTasks: maxConcurrent,
+      taskTimeout: Duration(seconds: timeoutSeconds),
+      maxQueueSize: maxSize,
+    );
+  }
+
+  static TaskQueue<String> _initLargeQueue() {
+    final maxConcurrent = localSettings.largeQueueMaxConcurrent;
+    final timeoutSeconds = localSettings.largeQueueTimeoutSeconds;
+    final maxSize = localSettings.largeQueueMaxSize;
+
+    _logger.info(
+      "Initializing Large Local Thumbnail Queue - "
+      "MaxConcurrent: $maxConcurrent, Timeout: ${timeoutSeconds}s, MaxSize: $maxSize",
+    );
+
+    return TaskQueue<String>(
+      maxConcurrentTasks: maxConcurrent,
+      taskTimeout: Duration(seconds: timeoutSeconds),
+      maxQueueSize: maxSize,
+    );
+  }
 
   ///Assigned dimension will be the size of a grid item. The size will be
   ///assigned to the side which is smaller in dimension.
@@ -151,13 +185,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     Widget? image;
     if (_imageProvider != null) {
       image = Image(
-        image: optimizedImageHeight != null || optimizedImageWidth != null
-            ? ResizeImage(
-                _imageProvider!,
-                width: optimizedImageWidth,
-                height: optimizedImageHeight,
-              )
-            : _imageProvider!,
+        image: _imageProvider!,
         fit: widget.fit,
       );
     }
@@ -235,6 +263,32 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     if (widget.shouldShowPinIcon) {
       viewChildren.add(const PinOverlayIcon());
     }
+    if (localSettings.showLocalIDOverThumbnails &&
+        widget.file.localID != null) {
+      viewChildren.add(
+        Positioned(
+          bottom: 4,
+          left: 4,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+            decoration: BoxDecoration(
+              color: const Color.fromRGBO(0, 0, 0, 0.8),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: FittedBox(
+              child: Text(
+                "${widget.file.localID}",
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 8,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     return Stack(
       clipBehavior: Clip.none,
@@ -251,18 +305,22 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       final cachedSmallThumbnail =
           ThumbnailInMemoryLruCache.get(widget.file, thumbnailSmallSize);
       if (cachedSmallThumbnail != null) {
-        _imageProvider = Image.memory(cachedSmallThumbnail).image;
-        _hasLoadedThumbnail = true;
+        final imageProvider = Image.memory(
+          cachedSmallThumbnail,
+          cacheHeight: optimizedImageHeight,
+          cacheWidth: optimizedImageWidth,
+        ).image;
+        _cacheAndRender(imageProvider);
+        return;
+      }
+      if (widget.diskLoadDeferDuration != null) {
+        Future.delayed(widget.diskLoadDeferDuration!, () {
+          if (mounted) {
+            _getThumbnailFromDisk();
+          }
+        });
       } else {
-        if (widget.diskLoadDeferDuration != null) {
-          Future.delayed(widget.diskLoadDeferDuration!, () {
-            if (mounted) {
-              _getThumbnailFromDisk();
-            }
-          });
-        } else {
-          _getThumbnailFromDisk();
-        }
+        _getThumbnailFromDisk();
       }
     }
   }
@@ -296,7 +354,11 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       }
 
       if (mounted) {
-        final imageProvider = Image.memory(thumbData).image;
+        final imageProvider = Image.memory(
+          thumbData,
+          cacheHeight: optimizedImageHeight,
+          cacheWidth: optimizedImageWidth,
+        ).image;
         _cacheAndRender(imageProvider);
       }
       ThumbnailInMemoryLruCache.put(
@@ -305,8 +367,18 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         thumbnailSmallSize,
       );
     }).catchError((e) {
-      _logger.warning("Could not load thumbnail from disk: ", e);
       _errorLoadingLocalThumbnail = true;
+      if (e is WidgetUnmountedException) {
+        // Widget was unmounted - this is expected behavior
+        _logger.fine(
+          "Thumbnail loading cancelled: widget unmounted for localID: ${widget.file.localID}",
+        );
+      } else {
+        _logger.warning(
+          "Could not load thumbnail from disk for localID: ${widget.file.localID}",
+          e,
+        );
+      }
     });
   }
 
@@ -324,7 +396,9 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         }
         //Do not retry if the widget is not mounted
         if (!mounted) {
-          return null;
+          throw WidgetUnmountedException(
+            "Thumbnail loading cancelled: widget unmounted",
+          );
         }
 
         retryAttempts++;
@@ -333,7 +407,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         );
         if (retryAttempts <= _maxLocalThumbnailRetries) {
           _logger.warning(
-            "Error getting local thumbnail for ${widget.file.displayName}, retrying (attempt $retryAttempts) in ${backoff.inMilliseconds} ms",
+            "Error getting local thumbnail for ${widget.file.displayName} (localID: ${widget.file.localID}) due to ${e.runtimeType}, retrying (attempt $retryAttempts) in ${backoff.inMilliseconds} ms",
             e,
           );
           await Future.delayed(backoff); // Exponential backoff
@@ -364,11 +438,16 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     }
 
     await relevantTaskQueue.addTask(_localThumbnailQueueTaskId!, () async {
-      final thumbnailBytes = await getThumbnailFromLocal(
-        widget.file,
-        size: widget.thumbnailSize,
-      );
-      completer.complete(thumbnailBytes);
+      late final Uint8List? thumbnailBytes;
+      try {
+        thumbnailBytes = await getThumbnailFromLocal(
+          widget.file,
+          size: widget.thumbnailSize,
+        );
+        completer.complete(thumbnailBytes);
+      } catch (e) {
+        completer.completeError(e);
+      }
     });
 
     return completer.future;
@@ -381,10 +460,15 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       _isLoadingRemoteThumbnail = true;
       final cachedThumbnail = ThumbnailInMemoryLruCache.get(widget.file);
       if (cachedThumbnail != null) {
-        _imageProvider = Image.memory(cachedThumbnail).image;
-        _hasLoadedThumbnail = true;
+        final imageProvider = Image.memory(
+          cachedThumbnail,
+          cacheHeight: optimizedImageHeight,
+          cacheWidth: optimizedImageWidth,
+        ).image;
+        _cacheAndRender(imageProvider);
         return;
       }
+
       if (widget.serverLoadDeferDuration != null) {
         Future.delayed(widget.serverLoadDeferDuration!, () {
           if (mounted) {
@@ -401,7 +485,11 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     try {
       final thumbnail = await getThumbnailFromServer(widget.file);
       if (mounted) {
-        final imageProvider = Image.memory(thumbnail).image;
+        final imageProvider = Image.memory(
+          thumbnail,
+          cacheHeight: optimizedImageHeight,
+          cacheWidth: optimizedImageWidth,
+        ).image;
         _cacheAndRender(imageProvider);
       }
     } catch (e) {
@@ -421,19 +509,14 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   }
 
   void _cacheAndRender(ImageProvider<Object> imageProvider) {
-    if (imageCache.currentSizeBytes > 256 * 1024 * 1024) {
-      _logger.info("Clearing image cache");
-      imageCache.clear();
-      imageCache.clearLiveImages();
+    if (mounted) {
+      setState(() {
+        _imageProvider = imageProvider;
+        _hasLoadedThumbnail = true;
+      });
     }
-    precacheImage(imageProvider, context).then((value) {
-      if (mounted) {
-        setState(() {
-          _imageProvider = imageProvider;
-          _hasLoadedThumbnail = true;
-        });
-      }
-    });
+
+    precacheImage(imageProvider, context);
   }
 
   void _reset() {

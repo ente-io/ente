@@ -71,6 +71,9 @@ class MLService {
     // Listen on ComputeController
     Bus.instance.on<ComputeControlEvent>().listen((event) {
       if (!flagService.hasGrantedMLConsent) {
+        if (event.shouldRun) {
+          VideoPreviewService.instance.queueFiles(duration: Duration.zero);
+        }
         return;
       }
 
@@ -158,7 +161,7 @@ class MLService {
       _logger.severe("runAllML failed", e, s);
       rethrow;
     } finally {
-      _logger.severe("ML finished running");
+      _logger.info("ML finished running");
       _isRunningML = false;
       computeController.releaseCompute(ml: true);
       VideoPreviewService.instance.queueFiles();

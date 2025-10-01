@@ -25,7 +25,10 @@ class _SessionsPageState extends State<SessionsPage> {
   @override
   void initState() {
     _fetchActiveSessions().onError((error, stackTrace) {
-      showToast(context, S.of(context).failedToFetchActiveSessions);
+      showToast(
+        context,
+        AppLocalizations.of(context).failedToFetchActiveSessions,
+      );
     });
     super.initState();
   }
@@ -35,7 +38,7 @@ class _SessionsPageState extends State<SessionsPage> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: Text(S.of(context).activeSessions),
+        title: Text(AppLocalizations.of(context).activeSessions),
       ),
       body: _getBody(),
     );
@@ -83,7 +86,7 @@ class _SessionsPageState extends State<SessionsPage> {
                           color: Theme.of(context)
                               .colorScheme
                               .onSurface
-                              .withOpacity(0.8),
+                              .withValues(alpha: 0.8),
                           fontSize: 14,
                         ),
                       ),
@@ -96,7 +99,7 @@ class _SessionsPageState extends State<SessionsPage> {
                           color: Theme.of(context)
                               .colorScheme
                               .onSurface
-                              .withOpacity(0.8),
+                              .withValues(alpha: 0.8),
                           fontSize: 12,
                         ),
                       ),
@@ -115,7 +118,8 @@ class _SessionsPageState extends State<SessionsPage> {
   }
 
   Future<void> _terminateSession(Session session) async {
-    final dialog = createProgressDialog(context, S.of(context).pleaseWait);
+    final dialog =
+        createProgressDialog(context, AppLocalizations.of(context).pleaseWait);
     await dialog.show();
     try {
       await UserService.instance.terminateSession(session.token);
@@ -127,8 +131,8 @@ class _SessionsPageState extends State<SessionsPage> {
       // ignore: unawaited_futures
       showErrorDialog(
         context,
-        S.of(context).oops,
-        S.of(context).somethingWentWrongPleaseTryAgain,
+        AppLocalizations.of(context).oops,
+        AppLocalizations.of(context).somethingWentWrongPleaseTryAgain,
       );
     }
   }
@@ -154,14 +158,15 @@ class _SessionsPageState extends State<SessionsPage> {
     Widget text;
     if (isLoggingOutFromThisDevice) {
       text = Text(
-        S.of(context).thisWillLogYouOutOfThisDevice,
+        AppLocalizations.of(context).thisWillLogYouOutOfThisDevice,
       );
     } else {
       text = SingleChildScrollView(
         child: Column(
           children: [
             Text(
-              S.of(context).thisWillLogYouOutOfTheFollowingDevice,
+              AppLocalizations.of(context)
+                  .thisWillLogYouOutOfTheFollowingDevice,
             ),
             const Padding(padding: EdgeInsets.all(8)),
             Text(
@@ -173,12 +178,12 @@ class _SessionsPageState extends State<SessionsPage> {
       );
     }
     final AlertDialog alert = AlertDialog(
-      title: Text(S.of(context).terminateSession),
+      title: Text(AppLocalizations.of(context).terminateSession),
       content: text,
       actions: [
         TextButton(
           child: Text(
-            S.of(context).terminate,
+            AppLocalizations.of(context).terminate,
             style: const TextStyle(
               color: Colors.red,
             ),
@@ -194,7 +199,7 @@ class _SessionsPageState extends State<SessionsPage> {
         ),
         TextButton(
           child: Text(
-            S.of(context).cancel,
+            AppLocalizations.of(context).cancel,
             style: TextStyle(
               color: isLoggingOutFromThisDevice
                   ? Theme.of(context).colorScheme.greenAlternative
@@ -220,7 +225,7 @@ class _SessionsPageState extends State<SessionsPage> {
   Widget _getUAWidget(Session session) {
     if (session.token == Configuration.instance.getToken()) {
       return Text(
-        S.of(context).thisDevice,
+        AppLocalizations.of(context).thisDevice,
         style: TextStyle(
           fontWeight: FontWeight.bold,
           color: Theme.of(context).colorScheme.greenAlternative,

@@ -1,7 +1,4 @@
 import "dart:async" show Timer, unawaited;
-import "dart:developer" as dev show log;
-import "dart:math" show min;
-import "dart:ui" show Image;
 
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
@@ -12,6 +9,7 @@ import "package:photos/db/ml/db.dart";
 import 'package:photos/events/embedding_updated_event.dart';
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/clip.dart";
+import "package:photos/models/ml/face/dimension.dart";
 import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
@@ -149,11 +147,13 @@ class SemanticSearchService {
       },
     );
     final queryResults = similarityResults[query]!;
-    // print query for top ten scores
-    for (int i = 0; i < min(10, queryResults.length); i++) {
-      final result = queryResults[i];
-      dev.log("Query: $query, Score: ${result.score}, index $i");
-    }
+    // Uncomment if needed for debugging: print query for top ten scores
+    // if (kDebugMode) {
+    //   for (int i = 0; i < min(10, queryResults.length); i++) {
+    //     final result = queryResults[i];
+    //     dev.log("Query: $query, Score: ${result.score}, index $i");
+    //   }
+    // }
 
     final Map<int, double> fileIDToScoreMap = {};
     for (final result in queryResults) {
@@ -193,15 +193,22 @@ class SemanticSearchService {
     return results;
   }
 
-  Future<Map<String, List<int>>> getMatchingFileIDs(
+  /// Get matching file IDs for common repeated queries like smart memories and magic cache.
+  /// WARNING: Use this method carefully - it uses persistent caching which is only
+  /// beneficial for queries that are repeated across app sessions.
+  /// For regular user searches, use getMatchingFiles instead.
+  Future<Map<String, List<int>>> getMatchingFileIDsForCommonQueries(
     Map<String, double> queryToScore,
   ) async {
     final textEmbeddings = <String, List<double>>{};
     final minimumSimilarityMap = <String, double>{};
+
     for (final entry in queryToScore.entries) {
       final query = entry.key;
       final score = entry.value;
-      final textEmbedding = await _getTextEmbedding(query);
+      // Use cache service instead of _getTextEmbedding
+      final textEmbedding =
+          await textEmbeddingsCacheService.getEmbedding(query);
       textEmbeddings[query] = textEmbedding;
       minimumSimilarityMap[query] = score;
     }
@@ -210,6 +217,7 @@ class SemanticSearchService {
       textEmbeddings,
       minimumSimilarityMap: minimumSimilarityMap,
     );
+
     final result = <String, List<int>>{};
     for (final entry in queryResults.entries) {
       final query = entry.key;
@@ -265,10 +273,19 @@ class SemanticSearchService {
     required Map<String, double> minimumSimilarityMap,
   }) async {
     final startTime = DateTime.now();
+    // Uncomment if needed for debugging: print query embeddings
+    // if (kDebugMode) {
+    //   for (final queryText in textQueryToEmbeddingMap.keys) {
+    //     final embedding = textQueryToEmbeddingMap[queryText]!;
+    //     dev.log("CLIPTEXT Query: $queryText, embedding: $embedding");
+    //   }
+    // }
     await _cacheClipVectors();
-    final Map<String, List<QueryResult>> queryResults = await MLComputer
-        .instance
-        .computeBulkSimilarities(textQueryToEmbeddingMap, minimumSimilarityMap);
+    final Map<String, List<QueryResult>> queryResults =
+        await MLComputer.instance.computeBulkSimilarities(
+      textQueryToEmbeddingMap,
+      minimumSimilarityMap,
+    );
     final endTime = DateTime.now();
     _logger.info(
       "computingSimilarities took for ${textQueryToEmbeddingMap.length} queries " +
@@ -294,12 +311,12 @@ class SemanticSearchService {
 
   static Future<ClipResult> runClipImage(
     int enteFileID,
-    Image image,
+    Dimensions dimensions,
     Uint8List rawRgbaBytes,
     int clipImageAddress,
   ) async {
     final embedding = await ClipImageEncoder.predict(
-      image,
+      dimensions,
       rawRgbaBytes,
       clipImageAddress,
       enteFileID,

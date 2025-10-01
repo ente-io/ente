@@ -58,9 +58,9 @@ class _AlbumActionBarWidgetState extends State<AlbumActionBarWidget> {
             valueListenable: _selectedAlbumNotifier,
             builder: (context, value, child) {
               return Text(
-                S.of(context).selectedAlbums(
-                      widget.selectedAlbums?.albums.length ?? 0,
-                    ),
+                AppLocalizations.of(context).selectedAlbums(
+                  count: widget.selectedAlbums?.albums.length ?? 0,
+                ),
                 style: textTheme.mini,
               );
             },

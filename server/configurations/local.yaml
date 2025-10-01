@@ -71,8 +71,13 @@ log-file: ""
 
 # HTTP connection parameters
 http:
-    # If true, bind to 443 and use TLS.
-    # By default, this is false, and museum will bind to 8080 without TLS.
+    # The port to bind to.
+    # If not specified, defaults to 8080 (HTTP) or 443 (HTTPS with use-tls: true)
+    # port: 8080
+
+    # If true, use TLS for HTTPS connections.
+    # When true and port is not specified, defaults to port 443.
+    # When false and port is not specified, defaults to port 8080.
     # use-tls: true
 
 # Specify the base endpoints for various apps
@@ -95,6 +100,9 @@ apps:
     accounts:
     # Default is https://family.ente.io
     family:
+    custom-domain:
+        # Default is my.ente.io
+        cname:
 
 # Database connection parameters
 db:
@@ -132,12 +140,17 @@ s3:
     #    primary: b2-eu-cen
     #    secondary: wasabi-eu-central-2-v3
     b2-eu-cen:
+        # Uncomment to override top-level bucket configuration for URL addressing and external buckets
+        # are_local_buckets: true
+        # use_path_style_urls: true
         key:
         secret:
         endpoint:
         region:
         bucket:
     wasabi-eu-central-2-v3:
+        # are_local_buckets: true
+        # use_path_style_urls: true
         key:
         secret:
         endpoint:
@@ -149,6 +162,8 @@ s3:
         # Currently this flag is only honoured for the Wasabi v3 bucket.
         compliance: true
     scw-eu-fr-v3:
+        # are_local_buckets: true
+        # use_path_style_urls: true
         key:
         secret:
         endpoint:
@@ -245,6 +260,8 @@ smtp:
     # Optional override for the sender name in the emails. If specified, it will
     # be used for all emails sent by the instance (default is email specific).
     sender-name:
+    # Optional encryption method. If tls or ssl is chosen, encryption is enabled.
+    encryption:
 
 # Zoho Zeptomail config (optional)
 #

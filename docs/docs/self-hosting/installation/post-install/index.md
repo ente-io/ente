@@ -46,7 +46,7 @@ If running Museum without Docker, the code should be visible in the terminal
     # Change the DB name and DB user name if you use different
     # values.
 
-    # If using Docker docker exec -it <postgres-ente-container-name>
+    # If using Docker docker exec -it <postgres-ente-container-name> sh
     psql -U pguser -d ente_db
 
     # Or when using psql directly

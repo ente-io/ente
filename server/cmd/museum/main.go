@@ -31,6 +31,7 @@ import (
 
 	cache2 "github.com/ente-io/museum/ente/cache"
 	"github.com/ente-io/museum/pkg/controller/discord"
+	discountCouponCtrl "github.com/ente-io/museum/pkg/controller/discountcoupon"
 	"github.com/ente-io/museum/pkg/controller/offer"
 	"github.com/ente-io/museum/pkg/controller/usercache"
 
@@ -45,7 +46,6 @@ import (
 	"github.com/ente-io/museum/pkg/controller/email"
 	embeddingCtrl "github.com/ente-io/museum/pkg/controller/embedding"
 	"github.com/ente-io/museum/pkg/controller/family"
-	kexCtrl "github.com/ente-io/museum/pkg/controller/kex"
 	"github.com/ente-io/museum/pkg/controller/lock"
 	remoteStoreCtrl "github.com/ente-io/museum/pkg/controller/remotestore"
 	"github.com/ente-io/museum/pkg/controller/storagebonus"
@@ -56,9 +56,9 @@ import (
 	authenticatorRepo "github.com/ente-io/museum/pkg/repo/authenticator"
 	castRepo "github.com/ente-io/museum/pkg/repo/cast"
 	"github.com/ente-io/museum/pkg/repo/datacleanup"
+	discountCouponRepo "github.com/ente-io/museum/pkg/repo/discountcoupon"
 	"github.com/ente-io/museum/pkg/repo/embedding"
 	fileDataRepo "github.com/ente-io/museum/pkg/repo/filedata"
-	"github.com/ente-io/museum/pkg/repo/kex"
 	"github.com/ente-io/museum/pkg/repo/passkey"
 	"github.com/ente-io/museum/pkg/repo/remotestore"
 	storageBonusRepo "github.com/ente-io/museum/pkg/repo/storagebonus"
@@ -98,6 +98,7 @@ func main() {
 	}
 
 	viper.SetDefault("apps.public-albums", "https://albums.ente.io")
+	viper.SetDefault("apps.custom-domain.cname", "my.ente.io")
 	viper.SetDefault("apps.public-locker", "https://locker.ente.io")
 	viper.SetDefault("apps.accounts", "https://accounts.ente.io")
 	viper.SetDefault("apps.cast", "https://cast.ente.io")
@@ -185,9 +186,7 @@ func main() {
 	collectionRepo := &repo.CollectionRepository{DB: db, FileRepo: fileRepo, CollectionLinkRepo: collectionLinkRepo,
 		TrashRepo: trashRepo, SecretEncryptionKey: secretEncryptionKeyBytes, QueueRepo: queueRepo, LatencyLogger: latencyLogger}
 	pushRepo := &repo.PushTokenRepository{DB: db}
-	kexRepo := &kex.Repository{
-		DB: db,
-	}
+
 	embeddingRepo := &embedding.Repository{DB: db}
 
 	authCache := cache.New(1*time.Minute, 15*time.Minute)
@@ -213,7 +212,6 @@ func main() {
 	commonBillController := commonbilling.NewController(emailNotificationCtrl, storagBonusRepo, userRepo, usageRepo, billingRepo)
 	appStoreController := controller.NewAppStoreController(defaultPlan,
 		billingRepo, fileRepo, userRepo, commonBillController)
-	remoteStoreController := &remoteStoreCtrl.Controller{Repo: remoteStoreRepository}
 	playStoreController := controller.NewPlayStoreController(defaultPlan,
 		billingRepo, fileRepo, userRepo, storagBonusRepo, commonBillController)
 	stripeController := controller.NewStripeController(plans, stripeClients,
@@ -222,6 +220,8 @@ func main() {
 		appStoreController, playStoreController, stripeController,
 		discordController, emailNotificationCtrl,
 		billingRepo, userRepo, usageRepo, storagBonusRepo, commonBillController)
+	remoteStoreController := &remoteStoreCtrl.Controller{Repo: remoteStoreRepository, BillingCtrl: billingController}
+
 	pushController := controller.NewPushController(pushRepo, taskLockingRepo, hostName)
 	mailingListsController := controller.NewMailingListsController()
 
@@ -327,10 +327,6 @@ func main() {
 		TaskRepo:           taskLockingRepo,
 	}
 
-	kexCtrl := &kexCtrl.Controller{
-		Repo: kexRepo,
-	}
-
 	userController := user.NewUserController(
 		userRepo,
 		usageRepo,
@@ -376,6 +372,7 @@ func main() {
 		Cache:                accessTokenCache,
 		BillingCtrl:          billingController,
 		DiscordController:    discordController,
+		RemoteStoreRepo:      remoteStoreRepository,
 	}
 	fileLinkMiddleware := &middleware.FileLinkMiddleware{
 		FileLinkRepo:      fileLinkRepo,
@@ -423,7 +420,7 @@ func main() {
 
 	publicCollectionAPI := server.Group("/public-collection")
 	publicCollectionAPI.Use(rateLimiter.GlobalRateLimiter(), collectionLinkMiddleware.Authenticate(urlSanitizer))
-	fileLinkApi := server.GET("/file-link")
+	fileLinkApi := server.Group("/file-link")
 	fileLinkApi.Use(rateLimiter.GlobalRateLimiter(), fileLinkMiddleware.Authenticate(urlSanitizer))
 
 	healthCheckHandler := &api.HealthCheckHandler{
@@ -475,6 +472,7 @@ func main() {
 	privateAPI.GET("/files/data/preview", fileHandler.GetPreviewURL)
 
 	privateAPI.POST("/files", fileHandler.CreateOrUpdate)
+	privateAPI.POST("/files/meta", fileHandler.CreateMetaFile)
 	privateAPI.POST("/files/copy", fileHandler.CopyFiles)
 	privateAPI.PUT("/files/update", fileHandler.Update)
 	privateAPI.POST("/files/trash", fileHandler.Trash)
@@ -486,12 +484,6 @@ func main() {
 	privateAPI.PUT("/files/magic-metadata", fileHandler.UpdateMagicMetadata)
 	privateAPI.PUT("/files/public-magic-metadata", fileHandler.UpdatePublicMagicMetadata)
 	publicAPI.GET("/files/count", fileHandler.GetTotalFileCount)
-
-	kexHandler := &api.KexHandler{
-		Controller: kexCtrl,
-	}
-	publicAPI.GET("/kex/get", kexHandler.GetKey)
-	publicAPI.PUT("/kex/add", kexHandler.AddKey)
 
 	trashHandler := &api.TrashHandler{
 		Controller: trashController,
@@ -788,8 +780,10 @@ func main() {
 	remoteStoreHandler := &api.RemoteStoreHandler{Controller: remoteStoreController}
 
 	privateAPI.POST("/remote-store/update", remoteStoreHandler.InsertOrUpdate)
+	privateAPI.DELETE("/remote-store/:key", remoteStoreHandler.RemoveKey)
 	privateAPI.GET("/remote-store", remoteStoreHandler.GetKey)
 	privateAPI.GET("/remote-store/feature-flags", remoteStoreHandler.GetFeatureFlags)
+	publicAPI.GET("/custom-domain", remoteStoreHandler.CheckDomain)
 
 	pushHandler := &api.PushHandler{PushController: pushController}
 	privateAPI.POST("/push/token", pushHandler.AddToken)
@@ -799,12 +793,24 @@ func main() {
 	offerHandler := &api.OfferHandler{Controller: offerController}
 	publicAPI.GET("/offers/black-friday", offerHandler.GetBlackFridayOffers)
 
+	discountCouponRepository := &discountCouponRepo.Repository{DB: db}
+	discountCouponController := &discountCouponCtrl.Controller{
+		Repo:                  discountCouponRepository,
+		UserRepo:              userRepo,
+		BillingController:     billingController,
+		EmailNotificationCtrl: emailNotificationCtrl,
+		DiscordController:     discordController,
+	}
+	discountCouponHandler := &api.DiscountCouponHandler{Controller: discountCouponController}
+	publicAPI.POST("/discount/claim", discountCouponHandler.ClaimCoupon)
+	adminAPI.POST("/discount/add-coupons", discountCouponHandler.AddCoupons)
+
 	setKnownAPIs(server.Routes())
 	setupAndStartBackgroundJobs(objectCleanupController, replicationController3, fileDataCtrl)
 	setupAndStartCrons(
 		userAuthRepo, collectionLinkRepo, fileLinkRepo, twoFactorRepo, passkeysRepo, fileController, taskLockingRepo, emailNotificationCtrl,
 		trashController, pushController, objectController, dataCleanupController, storageBonusCtrl, emergencyCtrl,
-		embeddingController, healthCheckHandler, kexCtrl, castDb)
+		embeddingController, healthCheckHandler, castDb)
 
 	// Create a new collector, the name will be used as a label on the metrics
 	collector := sqlstats.NewStatsCollector("prod_db", db)
@@ -839,7 +845,12 @@ func runServer(environment string, server *gin.Engine) {
 
 		log.Fatal(server.RunTLS(":443", certPath, keyPath))
 	} else {
-		server.Run(":8080")
+		port := 8080
+		if viper.IsSet("http.port") {
+			port = viper.GetInt("http.port")
+		}
+		log.Infof("starting server on port %d", port)
+		server.Run(fmt.Sprintf(":%d", port))
 	}
 }
 
@@ -942,7 +953,6 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, collectionLinkRep
 	emergencyCtrl *emergency.Controller,
 	embeddingCtrl *embeddingCtrl.Controller,
 	healthCheckHandler *api.HealthCheckHandler,
-	kexCtrl *kexCtrl.Controller,
 	castDb castRepo.Repository) {
 	shouldSkipCron := viper.GetBool("jobs.cron.skip")
 	if shouldSkipCron {
@@ -976,6 +986,7 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, collectionLinkRep
 	})
 
 	scheduleAndRun(c, "@every 60m", func() {
+		emergencyCtrl.SendRecoveryReminder()
 		err := taskRepo.CleanupExpiredLocks()
 		if err != nil {
 			log.Printf("Error while cleaning up lock table, %s", err)
@@ -1039,11 +1050,6 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, collectionLinkRep
 
 	schedule(c, "@every 24h", func() {
 		pushController.ClearExpiredTokens()
-	})
-
-	scheduleAndRun(c, "@every 60m", func() {
-		emergencyCtrl.SendRecoveryReminder()
-		kexCtrl.DeleteOldKeys()
 	})
 
 	c.Start()

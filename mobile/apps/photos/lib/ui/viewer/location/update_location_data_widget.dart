@@ -51,6 +51,7 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
           options: MapOptions(
             interactionOptions:
                 const InteractionOptions(enableMultiFingerGestureRace: true),
+            backgroundColor: const Color.fromARGB(255, 246, 246, 246),
             initialZoom: 3,
             maxZoom: 18.0,
             minZoom: 2.8,
@@ -76,11 +77,9 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
               }
             },
           ),
-          nonRotatedChildren: const [
-            OSMFranceTileAttributes(),
-          ],
           children: const [
             OSMFranceTileLayer(),
+            OSMFranceTileAttributes(),
           ],
         ),
         Positioned(
@@ -163,7 +162,7 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
                   if (selectedLocation.value == null) {
                     showShortToast(
                       context,
-                      S.of(context).selectALocationFirst,
+                      AppLocalizations.of(context).selectALocationFirst,
                     );
                     return;
                   }
@@ -259,11 +258,11 @@ class _UpdateLocationInfoState extends State<UpdateLocationInfo> {
           ? CrossFadeState.showFirst
           : CrossFadeState.showSecond,
       firstChild: Text(
-        S.of(context).selectALocation,
+        AppLocalizations.of(context).selectALocation,
         style: getEnteTextTheme(context).mini,
       ),
       secondChild: Text(
-        S.of(context).editsToLocationWillOnlyBeSeenWithinEnte,
+        AppLocalizations.of(context).editsToLocationWillOnlyBeSeenWithinEnte,
         style: getEnteTextTheme(context).mini,
       ),
       layoutBuilder: (topChild, topChildKey, bottomChild, bottomChildKey) {

@@ -14,7 +14,7 @@ import 'package:url_launcher/url_launcher_string.dart';
 class UpdateService {
   static const kUpdateAvailableShownTimeKey = "update_available_shown_time_key";
   static const changeLogVersionKey = "update_change_log_key";
-  static const currentChangeLogVersion = 31;
+  static const currentChangeLogVersion = 36;
 
   LatestVersionInfo? _latestVersion;
   final _logger = Logger("UpdateService");
@@ -91,7 +91,7 @@ class UpdateService {
 
   Future<void> showUpdateNotification() async {
     if (await shouldShowUpdateNotification()) {
-      final s = await LanguageService.s;
+      final s = await LanguageService.locals;
       // ignore: unawaited_futures
       NotificationService.instance.showNotification(
         s.updateAvailable,

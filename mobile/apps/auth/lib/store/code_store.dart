@@ -3,12 +3,12 @@ import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:ente_auth/core/configuration.dart';
-import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/events/codes_updated_event.dart';
 import 'package:ente_auth/models/authenticator/entity_result.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
 import 'package:ente_auth/store/offline_authenticator_db.dart';
+import 'package:ente_events/event_bus.dart';
 import 'package:logging/logging.dart';
 
 class CodeStore {
@@ -95,7 +95,6 @@ class CodeStore {
     }
 
     if (sortCodes) {
-      // sort codes by issuer,account
       codes.sort((firstCode, secondCode) {
         if (secondCode.isPinned && !firstCode.isPinned) return 1;
         if (!secondCode.isPinned && firstCode.isPinned) return -1;
@@ -125,8 +124,10 @@ class CodeStore {
     final allCodes = existingAllCodes ?? (await getAllCodes(accountMode: mode));
     bool isExistingCode = false;
     bool hasSameCode = false;
+
     for (final existingCode in allCodes) {
       if (existingCode.hasError) continue;
+
       if (code.generatedID != null &&
           existingCode.generatedID == code.generatedID) {
         isExistingCode = true;
@@ -214,7 +215,6 @@ class CodeStore {
           'importingCode: genID ${eachCode.generatedID} & isAlreadyPresent $alreadyPresent',
         );
         if (!alreadyPresent) {
-          // Avoid conflict with generatedID of online codes
           eachCode.generatedID = null;
           final AddResult result = await CodeStore.instance.addCode(
             eachCode,
@@ -235,6 +235,16 @@ class CodeStore {
     } finally {
       _isOfflineImportRunning = false;
     }
+  }
+
+  Future<String> getCodesForExport() async {
+    final allCodes = await getAllCodes(sortCodes: false);
+    String data = "";
+    for (final code in allCodes) {
+      if (code.hasError) continue;
+      data += "${code.toOTPAuthUrlFormat()}\n";
+    }
+    return data;
   }
 }
 

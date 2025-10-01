@@ -52,6 +52,13 @@ configuration body.
 Use the `s3.hot_storage.primary` option if you'd like to set one of the other
 pre-defined buckets as the primary bucket.
 
+To enable replication after configuring all 3 storage buckets, set `replication.enabled` to `true` in [museum.yaml](https://github.com/ente-io/ente/blob/main/server/configurations/local.yaml):
+
+```yaml
+replication:
+    enabled: true
+```
+
 ### Bucket configuration
 
 The keys `b2-eu-cen` (primary storage), `wasabi-eu-central-2-v3` (secondary
@@ -63,11 +70,20 @@ It has no relation to Backblaze, Wasabi or Scaleway.
 Each bucket's endpoint, region, key and secret should be configured accordingly
 if using an external bucket.
 
-A sample configuration for `b2-eu-cen` is provided, which can be used for other
-2 buckets as well:
+If a bucket has SSL support enabled, set `s3.are_local_buckets` to `false`. Enable path-style URL by setting `s3.use_path_style_urls` to `true`.
+
+::: note
+
+You can configure this for individual buckets over defining top-level configuration if you are using the latest server image (August 2025)
+
+:::
+
+A sample configuration for `b2-eu-cen` is provided, which can be used for other 2 buckets as well:
 
 ```yaml
 b2-eu-cen:
+    are_local_buckets: true
+    use_path_style_urls: true
     key: <key>
     secret: <secret>
     endpoint: localhost:3200

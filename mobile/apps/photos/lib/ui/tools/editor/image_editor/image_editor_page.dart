@@ -1,10 +1,10 @@
 import "dart:async";
 import "dart:io";
 import "dart:math";
-import "dart:typed_data";
 import 'dart:ui' as ui show Image;
 
 import 'package:flutter/material.dart';
+import "package:flutter/services.dart";
 import "package:flutter_image_compress/flutter_image_compress.dart";
 import "package:flutter_svg/svg.dart";
 import "package:logging/logging.dart";
@@ -61,7 +61,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
   Future<void> saveImage(Uint8List? bytes) async {
     if (bytes == null) return;
 
-    final dialog = createProgressDialog(context, S.of(context).saving);
+    final dialog =
+        createProgressDialog(context, AppLocalizations.of(context).saving);
     await dialog.show();
 
     debugPrint("Image saved with size: ${bytes.length} bytes");
@@ -109,7 +110,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       newFile.generatedID = await FilesDB.instance.insertAndGetId(newFile);
       Bus.instance.fire(LocalPhotosUpdatedEvent([newFile], source: "editSave"));
       unawaited(SyncService.instance.sync());
-      showShortToast(context, S.of(context).editsSaved);
+      showShortToast(context, AppLocalizations.of(context).editsSaved);
       _logger.info("Original file " + widget.originalFile.toString());
       _logger.info("Saved edits to file " + newFile.toString());
       final files = widget.detailPageConfig.files;
@@ -134,7 +135,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       );
     } catch (e, s) {
       await dialog.hide();
-      showToast(context, S.of(context).oopsCouldNotSaveEdits);
+      showToast(context, AppLocalizations.of(context).oopsCouldNotSaveEdits);
       _logger.severe(e, s);
     } finally {
       await PhotoManager.startChangeNotify();
@@ -146,7 +147,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       context: context,
       buttons: [
         ButtonWidget(
-          labelText: S.of(context).yesDiscardChanges,
+          labelText: AppLocalizations.of(context).yesDiscardChanges,
           buttonType: ButtonType.critical,
           buttonSize: ButtonSize.large,
           shouldStickToDarkTheme: true,
@@ -154,7 +155,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
           isInAlert: true,
         ),
         ButtonWidget(
-          labelText: S.of(context).no,
+          labelText: AppLocalizations.of(context).no,
           buttonType: ButtonType.secondary,
           buttonSize: ButtonSize.large,
           buttonAction: ButtonAction.second,
@@ -162,7 +163,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
           isInAlert: true,
         ),
       ],
-      body: S.of(context).doYouWantToDiscardTheEditsYouHaveMade,
+      body: AppLocalizations.of(context).doYouWantToDiscardTheEditsYouHaveMade,
       actionSheetType: ActionSheetType.defaultActionSheet,
     );
     if (actionResult?.action != null &&
@@ -176,17 +177,18 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
     final isLightMode = Theme.of(context).brightness == Brightness.light;
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      backgroundColor: colorScheme.backgroundBase,
-      body: PopScope(
-        canPop: false,
-        onPopInvoked: (didPop) {
-          if (didPop) return;
-          editorKey.currentState?.disablePopScope = true;
-          _showExitConfirmationDialog(context);
-        },
-        child: ProImageEditor.file(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        editorKey.currentState?.disablePopScope = true;
+        _showExitConfirmationDialog(context);
+      },
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        resizeToAvoidBottomInset: false,
+        backgroundColor: colorScheme.backgroundBase,
+        body: ProImageEditor.file(
           key: editorKey,
           widget.file,
           callbacks: ProImageEditorCallbacks(
@@ -205,6 +207,14 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
           ),
           configs: ProImageEditorConfigs(
             imageEditorTheme: ImageEditorTheme(
+              uiOverlayStyle: SystemUiOverlayStyle(
+                systemNavigationBarContrastEnforced: true,
+                systemNavigationBarColor: Colors.transparent,
+                statusBarBrightness:
+                    isLightMode ? Brightness.dark : Brightness.light,
+                statusBarIconBrightness:
+                    isLightMode ? Brightness.dark : Brightness.light,
+              ),
               appBarBackgroundColor: colorScheme.backgroundBase,
               background: colorScheme.backgroundBase,
               bottomBarBackgroundColor: colorScheme.backgroundBase,
@@ -212,6 +222,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                 background: colorScheme.backgroundBase,
               ),
               paintingEditor: PaintingEditorTheme(
+                initialColor: const Color(0xFF00FFFF),
                 background: colorScheme.backgroundBase,
               ),
               textEditor: const TextEditorTheme(
@@ -227,6 +238,12 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                 background: colorScheme.backgroundBase,
               ),
               emojiEditor: EmojiEditorTheme(
+                bottomActionBarConfig: BottomActionBarConfig(
+                  showSearchViewButton: true,
+                  buttonColor: colorScheme.backgroundBase,
+                  buttonIconColor: colorScheme.tabIcon,
+                  backgroundColor: colorScheme.backgroundBase,
+                ),
                 backgroundColor: colorScheme.backgroundBase,
               ),
             ),
@@ -329,7 +346,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                 },
               ),
               mainEditor: CustomWidgetsMainEditor(
-                removeLayerArea: (key, rebuildStream) {
+                removeLayerArea: (key, __, rebuildStream) {
                   return ReactiveCustomWidget(
                     key: key,
                     builder: (context) {
@@ -349,7 +366,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                               margin: const EdgeInsets.only(bottom: 24),
                               decoration: BoxDecoration(
                                 color: isHovered
-                                    ? colorScheme.warning400.withOpacity(0.8)
+                                    ? colorScheme.warning400
+                                        .withValues(alpha: 0.8)
                                     : Colors.white,
                                 shape: BoxShape.circle,
                               ),
@@ -361,7 +379,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                                     isHovered
                                         ? Colors.white
                                         : colorScheme.warning400
-                                            .withOpacity(0.8),
+                                            .withValues(alpha: 0.8),
                                     BlendMode.srcIn,
                                   ),
                                 ),

@@ -204,13 +204,13 @@ class _CollectionListPageState extends State<CollectionListPage> {
       String text = key.toString();
       switch (key) {
         case AlbumSortKey.albumName:
-          text = S.of(context).name;
+          text = AppLocalizations.of(context).name;
           break;
         case AlbumSortKey.newestPhoto:
-          text = S.of(context).newest;
+          text = AppLocalizations.of(context).newest;
           break;
         case AlbumSortKey.lastUpdated:
-          text = S.of(context).lastUpdated;
+          text = AppLocalizations.of(context).lastUpdated;
       }
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

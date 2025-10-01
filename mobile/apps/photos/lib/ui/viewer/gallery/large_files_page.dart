@@ -50,6 +50,8 @@ class LargeFilesPagePage extends StatelessWidget {
             }
           }
         }
+        // sort by file size descending
+        filesWithSize.sort((a, b) => b.fileSize!.compareTo(a.fileSize!));
         final FileLoadResult result = FileLoadResult(filesWithSize, false);
         return result;
       },
@@ -67,7 +69,7 @@ class LargeFilesPagePage extends StatelessWidget {
       sortAsyncFn: () => false,
       groupType: GroupType.size,
       initialFiles: null,
-      albumName: S.of(context).viewLargeFiles,
+      albumName: AppLocalizations.of(context).viewLargeFiles,
     );
     return GalleryFilesState(
       child: Scaffold(
@@ -77,7 +79,7 @@ class LargeFilesPagePage extends StatelessWidget {
             elevation: 0,
             centerTitle: false,
             title: Text(
-              S.of(context).viewLargeFiles,
+              AppLocalizations.of(context).viewLargeFiles,
               style: Theme.of(context)
                   .textTheme
                   .headlineSmall!

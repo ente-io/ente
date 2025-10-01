@@ -35,7 +35,6 @@ import "package:photos/services/collections_service.dart";
 import "package:photos/services/language_service.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
-import "package:photos/services/machine_learning/ml_computer.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/search_service.dart";
 
@@ -103,28 +102,33 @@ class SmartMemoriesService {
         'allImageEmbeddings has ${allImageEmbeddings.length} entries $t',
       );
 
-      const String clipPositiveQuery =
-          'Photo of a precious and nostalgic memory radiating warmth, vibrant energy, or quiet beauty — alive with color, light, or emotion';
+      _logger.info('Loading text embeddings via cache service');
       final clipPositiveTextVector = Vector.fromList(
-        await MLComputer.instance.runClipText(clipPositiveQuery),
+        await textEmbeddingsCacheService.getEmbedding(
+          "Photo of a precious and nostalgic memory radiating warmth, vibrant energy, or quiet beauty — alive with color, light, or emotion",
+        ),
       );
-      final Map<PeopleActivity, Vector> clipPeopleActivityVectors = {};
-      for (final peopleActivity in PeopleActivity.values) {
-        clipPeopleActivityVectors[peopleActivity] ??= Vector.fromList(
-          await MLComputer.instance.runClipText(activityQuery(peopleActivity)),
+
+      final clipPeopleActivityVectors = <PeopleActivity, Vector>{};
+      for (final activity in PeopleActivity.values) {
+        final query = activityQuery(activity);
+        clipPeopleActivityVectors[activity] = Vector.fromList(
+          await textEmbeddingsCacheService.getEmbedding(query),
         );
       }
-      final Map<ClipMemoryType, Vector> clipMemoryTypeVectors = {};
-      for (final clipMemoryType in ClipMemoryType.values) {
-        clipMemoryTypeVectors[clipMemoryType] ??= Vector.fromList(
-          await MLComputer.instance.runClipText(clipQuery(clipMemoryType)),
+
+      final clipMemoryTypeVectors = <ClipMemoryType, Vector>{};
+      for (final memoryType in ClipMemoryType.values) {
+        final query = clipQuery(memoryType);
+        clipMemoryTypeVectors[memoryType] = Vector.fromList(
+          await textEmbeddingsCacheService.getEmbedding(query),
         );
       }
-      _logger.info('clipPositiveTextVector and clipPeopleActivityVectors $t');
+      _logger.info('Text embeddings loaded via cache service');
 
       final local = await getLocale();
       final languageCode = local?.languageCode ?? "en";
-      final s = await LanguageService.s;
+      final s = await LanguageService.locals;
 
       _logger.info('get locale and S $t');
 
@@ -357,7 +361,7 @@ class SmartMemoriesService {
 
     final local = await getLocale();
     final languageCode = local?.languageCode ?? "en";
-    final s = await LanguageService.s;
+    final s = await LanguageService.locals;
 
     _logger.info('get locale and S');
     for (final memory in memories) {
@@ -422,6 +426,7 @@ class SmartMemoriesService {
         .map((p) => p.remoteID)
         .toList();
     orderedImportantPersonsID.shuffle(Random());
+    final amountOfPersons = orderedImportantPersonsID.length;
     w?.log('orderedImportantPersonsID setup');
 
     // Check if the user has assignmed "me"
@@ -709,6 +714,14 @@ class SmartMemoriesService {
     w?.log('relevancy setup');
 
     // Loop through the people (and memory types) and add based on rotation
+    final shownPersonTimeout = Duration(
+      days: min(
+        kPersonShowTimeout.inDays,
+        max(1, amountOfPersons) * kMemoriesUpdateFrequencyDays,
+      ),
+    );
+    final shownPersonAndTypeTimeout =
+        Duration(days: shownPersonTimeout.inDays * 2);
     peopleRotationLoop:
     for (final personID in orderedImportantPersonsID) {
       for (final memory in memoryResults) {
@@ -721,11 +734,13 @@ class SmartMemoriesService {
         final shownDate =
             DateTime.fromMicrosecondsSinceEpoch(shownLog.lastTimeShown);
         final bool seenPersonRecently =
-            currentTime.difference(shownDate) < kPersonShowTimeout;
+            currentTime.difference(shownDate) < shownPersonTimeout;
         if (seenPersonRecently) continue peopleRotationLoop;
       }
       if (personToMemories[personID] == null) continue peopleRotationLoop;
       int added = 0;
+      final amountOfMemoryTypesForPerson = personToMemories[personID]!.length;
+      final bool manyMemoryTypes = amountOfMemoryTypesForPerson > 2;
       potentialMemoryLoop:
       for (final memoriesForCategory in personToMemories[personID]!.values) {
         PeopleMemory potentialMemory = memoriesForCategory.first;
@@ -748,8 +763,10 @@ class SmartMemoriesService {
           final shownTypeDate =
               DateTime.fromMicrosecondsSinceEpoch(shownLog.lastTimeShown);
           final bool seenPersonTypeRecently =
-              currentTime.difference(shownTypeDate) < kPersonAndTypeShowTimeout;
-          if (seenPersonTypeRecently) continue potentialMemoryLoop;
+              currentTime.difference(shownTypeDate) < shownPersonAndTypeTimeout;
+          if (manyMemoryTypes && seenPersonTypeRecently) {
+            continue potentialMemoryLoop;
+          }
         }
         memoryResults.add(potentialMemory);
         added++;

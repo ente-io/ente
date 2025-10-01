@@ -1,0 +1,557 @@
+{
+  "onBoardingBody": "Securely backup your documents",
+  "newUser": "New to Ente",
+  "existingUser": "Existing User",
+  "developerSettings": "Developer settings",
+  "yes": "Yes",
+  "developerSettingsWarning": "Are you sure that you want to modify Developer settings?",
+  "serverEndpoint": "Server endpoint",
+  "endpointUpdatedMessage": "Endpoint updated successfully",
+  "invalidEndpoint": "Invalid endpoint",
+  "invalidEndpointMessage": "Sorry, the endpoint you entered is invalid. Please enter a valid endpoint and try again.",
+  "saveAction": "Save",
+  "untitled": "Untitled",
+  "edit": "Edit",
+  "delete": "Delete",
+  "noFilesFound": "No files here",
+  "addFiles": "Add Files",
+  "name": "Name",
+  "date": "Date",
+  "pleaseWait": "Please wait...",
+  "downloading": "Downloading...",
+  "downloadingProgress": "Downloading... {percentage}%",
+  "@downloadingProgress": {
+    "description": "Download progress message",
+    "placeholders": {
+      "percentage": {
+        "type": "int",
+        "example": "75"
+      }
+    }
+  },
+  "downloadFailed": "Download Failed",
+  "failedToDownloadOrDecrypt": "Failed to download or decrypt file",
+  "errorOpeningFile": "Error opening file",
+  "errorOpeningFileMessage": "Error opening file: {error}",
+  "@errorOpeningFileMessage": {
+    "description": "Error message when opening a file fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "File not found"
+      }
+    }
+  },
+  "couldNotOpenFile": "Could not open file: {error}",
+  "@couldNotOpenFile": {
+    "description": "Error message when file cannot be opened",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Permission denied"
+      }
+    }
+  },
+  "minutesAgo": "{minutes}m ago",
+  "@minutesAgo": {
+    "description": "Time format for minutes ago",
+    "placeholders": {
+      "minutes": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "hoursAgo": "{hours}h ago",
+  "@hoursAgo": {
+    "description": "Time format for hours ago",
+    "placeholders": {
+      "hours": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "yesterday": "Yesterday",
+  "daysAgo": "{days}d ago",
+  "@daysAgo": {
+    "description": "Time format for days ago",
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "collectionRenamedSuccessfully": "Collection renamed successfully",
+  "failedToRenameCollection": "Failed to rename collection: {error}",
+  "@failedToRenameCollection": {
+    "description": "Error message when collection rename fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "collectionCannotBeDeleted": "This collection cannot be deleted",
+  "deleteCollection": "Delete collection",
+  "deleteCollectionConfirmation": "Are you sure you want to delete \"{collectionName}\"?",
+  "@deleteCollectionConfirmation": {
+    "description": "Confirmation message for deleting a collection",
+    "placeholders": {
+      "collectionName": {
+        "type": "String",
+        "example": "My Collection"
+      }
+    }
+  },
+  "cancel": "Cancel",
+  "collectionDeletedSuccessfully": "Collection deleted successfully",
+  "failedToDeleteCollection": "Failed to delete collection: {error}",
+  "@failedToDeleteCollection": {
+    "description": "Error message when collection deletion fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "collections": "Collections",
+  "retry": "Retry",
+  "failedToSyncTrash": "Failed to sync trash: {error}",
+  "@failedToSyncTrash": {
+    "description": "Error message when trash sync fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "pleaseSelectAtLeastOneCollection": "Please select at least one collection",
+  "unknownItemType": "Unknown item type",
+  "fileDeletedSuccessfully": "File deleted successfully",
+  "failedToDeleteFile": "Failed to delete file: {error}",
+  "@failedToDeleteFile": {
+    "description": "Error message when file deletion fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "fileUpdatedSuccessfully": "File updated successfully!",
+  "failedToUpdateFile": "Failed to update file: {error}",
+  "@failedToUpdateFile": {
+    "description": "Error message when file update fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "noChangesWereMade": "No changes were made",
+  "noCollectionsAvailableForRestore": "No collections available for restore",
+  "trashClearedSuccessfully": "Trash cleared successfully",
+  "failedToClearTrash": "Failed to clear trash: {error}",
+  "@failedToClearTrash": {
+    "description": "Error message when clearing trash fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "trash": "Trash",
+  "deletedPermanently": "Deleted \"{fileName}\" permanently",
+  "@deletedPermanently": {
+    "description": "Message when file is permanently deleted from trash",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      }
+    }
+  },
+  "failedToRestoreFile": "Failed to restore \"{fileName}\": {error}",
+  "@failedToRestoreFile": {
+    "description": "Error message when file restoration fails",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      },
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "createNewCollection": "Create new collection",
+  "create": "Create",
+  "renameCollection": "Rename collection",
+  "save": "Save",
+  "deleteFile": "Delete File",
+  "deleteFileConfirmation": "Are you sure you want to delete \"{fileName}\"?",
+  "@deleteFileConfirmation": {
+    "description": "Confirmation message for file deletion",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      }
+    }
+  },
+  "noCollectionsFound": "No collections found",
+  "createYourFirstCollection": "Create your first collection to get started",
+  "createCollection": "Create Collection",
+  "nothingYet": "Nothing yet",
+  "uploadYourFirstDocument": "Upload your first document to get started",
+  "uploadDocument": "Upload Document",
+  "items": "{count} items",
+  "@items": {
+    "description": "Number of items in a collection",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "files": "{count, plural, =0{no files} =1{1 file} other{{count} files}}",
+  "@files": {
+    "description": "Number of files in a collection",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "createCollectionTooltip": "Create collection",
+  "uploadDocumentTooltip": "Upload document",
+  "restore": "Restore",
+  "restoreFile": "Restore {fileName}",
+  "@restoreFile": {
+    "description": "Dialog title for restoring a file from trash",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      }
+    }
+  },
+  "noCollectionsAvailable": "No collections available",
+  "emptyTrash": "Empty trash",
+  "emptyTrashTooltip": "Empty trash",
+  "emptyTrashConfirmation": "Are you sure you want to permanently delete all items in trash? This action cannot be undone.",
+  "fileTitle": "File title",
+  "note": "Note",
+  "optionalNote": "Optional note",
+  "upload": "Upload",
+  "documentsHint": "Documents",
+  "searchHint": "Search...",
+  "noCollectionsFoundForQuery": "No collections found for \"{query}\"",
+  "@noCollectionsFoundForQuery": {
+    "description": "Message when no collections match the search query",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "vacation"
+      }
+    }
+  },
+  "uncategorized": "Uncategorized",
+  "syncingTrash": "Syncing trash...",
+  "restoring": "Restoring...",
+  "restoredFileToCollection": "Restored \"{fileName}\" to \"{collectionName}\"",
+  "@restoredFileToCollection": {
+    "description": "Success message when file is restored to a collection",
+    "placeholders": {
+      "fileName": {
+        "type": "String",
+        "example": "photo.jpg"
+      },
+      "collectionName": {
+        "type": "String",
+        "example": "Vacation Photos"
+      }
+    }
+  },
+  "clearingTrash": "Clearing trash...",
+  "trashIsEmpty": "Trash is empty",
+  "share": "Share",
+  "shareLink": "Share link",
+  "creatingShareLink": "Creating link...",
+  "shareThisLink": "Anyone with this link can access your file.",
+  "copyLink": "Copy link",
+  "deleteLink": "Delete link",
+  "close": "Close",
+  "linkCopiedToClipboard": "Link copied to clipboard",
+  "deleteShareLink": "Delete link",
+  "deleteShareLinkDialogTitle": "Delete link?",
+  "deleteShareLinkConfirmation": "People with this link will no longer be able to access the file.",
+  "deletingShareLink": "Deleting link...",
+  "shareLinkDeletedSuccessfully": "Link deleted successfully",
+  "failedToCreateShareLink": "Failed to create link",
+  "failedToDeleteShareLink": "Failed to delete link",
+  "deletingFile": "Deleting file...",
+  "changeEmail": "Change email",
+  "authToChangeYourEmail": "Please authenticate to change your email",
+  "changePasswordTitle": "Change password",
+  "authToChangeYourPassword": "Please authenticate to change your password",
+  "recoveryKey": "Recovery key",
+  "ok": "Ok",
+  "logout": "Logout",
+  "deleteAccount": "Delete account",
+  "areYouSureYouWantToLogout": "Are you sure you want to logout?",
+  "yesLogout": "Yes, logout",
+  "changePassword": "Change password",
+  "authToViewYourRecoveryKey": "Please authenticate to view your recovery key",
+  "account": "Account",
+  "security": "Security",
+  "emailVerificationToggle": "Email verification",
+  "authToChangeEmailVerificationSetting": "Please authenticate to change email verification",
+  "passkey": "Passkey",
+  "authenticateGeneric": "Please authenticate",
+  "somethingWentWrong": "Something went wrong",
+  "appLock": "App lock",
+  "warning": "Warning",
+  "appLockOfflineModeWarning": "You have chosen to proceed without backups. If you forget your applock, you will be locked out from accessing your data.",
+  "authToChangeLockscreenSetting": "Please authenticate to change lockscreen setting",
+  "authToViewPasskey": "Please authenticate to view passkey",
+  "theme": "Theme",
+  "lightTheme": "Light",
+  "darkTheme": "Dark",
+  "systemTheme": "System",
+  "settings": "Settings",
+  "about": "About",
+  "weAreOpenSource": "We are open source!",
+  "privacy": "Privacy",
+  "terms": "Terms",
+  "termsOfServicesTitle": "Terms",
+  "support": "Support",
+  "contactSupport": "Contact support",
+  "help": "Help",
+  "suggestFeatures": "Suggest features",
+  "reportABug": "Report a bug",
+  "reportBug": "Report bug",
+  "social": "Social",
+  "rateUsOnStore": "Rate us on {storeName}",
+  "blog": "Blog",
+  "merchandise": "Merchandise",
+  "twitter": "Twitter",
+  "mastodon": "Mastodon",
+  "matrix": "Matrix",
+  "discord": "Discord",
+  "reddit": "Reddit",
+  "information": "Information",
+  "saveInformation": "Save information",
+  "informationDescription": "Save important information that can be shared and passed down to loved ones.",
+  "personalNote": "Personal note",
+  "personalNoteDescription": "Save important notes or thoughts",
+  "physicalRecords": "Physical records",
+  "physicalRecordsDescription": "Save the real-world locations of important items",
+  "accountCredentials": "Account credentials",
+  "accountCredentialsDescription": "Securely store login details for important accounts",
+  "emergencyContact": "Emergency contact",
+  "emergencyContactDescription": "Save details of people to contact in emergencies",
+  "noteName": "Title",
+  "noteNameHint": "Give your note a meaningful title",
+  "noteContent": "Content",
+  "noteContentHint": "Write down important thoughts, instructions, or memories you want to preserve",
+  "recordName": "Record name",
+  "recordNameHint": "Name of the real-world item",
+  "recordLocation": "Location",
+  "recordLocationHint": "Where can this item be found? (e.g., 'Safety deposit box at First Bank, Box #123')",
+  "recordNotes": "Notes",
+  "recordNotesHint": "Any additional details about accessing or understanding this record",
+  "credentialName": "Account name",
+  "credentialNameHint": "Name of the service or account",
+  "username": "Username",
+  "usernameHint": "Login username or email address",
+  "password": "Password",
+  "passwordHint": "Account password",
+  "credentialNotes": "Additional notes",
+  "credentialNotesHint": "Recovery methods, security questions, or other important details",
+  "contactName": "Contact name",
+  "contactNameHint": "Full name of the emergency contact",
+  "contactDetails": "Contact details",
+  "contactDetailsHint": "Phone number, email, or other contact information",
+  "contactNotes": "Message for contact",
+  "contactNotesHint": "Important information to share with this person when they are contacted",
+  "saveRecord": "Save",
+  "recordSavedSuccessfully": "Record saved successfully",
+  "failedToSaveRecord": "Failed to save record",
+  "pleaseEnterNoteName": "Please enter a title",
+  "pleaseEnterNoteContent": "Please enter content",
+  "pleaseEnterRecordName": "Please enter a record name",
+  "pleaseEnterLocation": "Please enter a location",
+  "pleaseEnterAccountName": "Please enter an account name",
+  "pleaseEnterUsername": "Please enter a username",
+  "pleaseEnterPassword": "Please enter a password",
+  "pleaseEnterContactName": "Please enter a contact name",
+  "pleaseEnterContactDetails": "Please enter contact details",
+  "allowDownloads": "Allow downloads",
+  "sharedByYou": "Shared by you",
+  "sharedWithYou": "Shared with you",
+  "manageLink": "Manage link",
+  "linkExpiry": "Link expiry",
+  "linkNeverExpires": "Never",
+  "linkExpired": "Expired",
+  "linkEnabled": "Enabled",
+  "setAPassword": "Set a password",
+  "lockButtonLabel": "Lock",
+  "enterPassword": "Enter password",
+  "removeLink": "Remove link",
+  "sendLink": "Send link",
+  "setPasswordTitle": "Set password",
+  "resetPasswordTitle": "Reset password",
+  "allowAddingFiles": "Allow adding files",
+  "disableDownloadWarningTitle": "Please note",
+  "disableDownloadWarningBody": "Viewers can still take screenshots or save a copy of your files using external tools.",
+  "allowAddFilesDescription": "Allow people with the link to also add files to the shared collection.",
+  "after1Hour": "After 1 hour",
+  "after1Day": "After 1 day",
+  "after1Week": "After 1 week",
+  "after1Month": "After 1 month",
+  "after1Year": "After 1 year",
+  "never": "Never",
+  "custom": "Custom",
+  "selectTime": "Select time",
+  "selectDate": "Select date",
+  "previous": "Previous",
+  "done": "Done",
+  "next": "Next",
+  "noDeviceLimit": "None",
+  "linkDeviceLimit": "Device limit",
+  "expiredLinkInfo": "This link has expired. Please select a new expiry time or disable link expiry.",
+  "linkExpiresOn": "Link will expire on {expiryTime}",
+  "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Share with specific people} =1 {Shared with 1 person} other {Shared with {numberOfPeople} people}}",
+  "@shareWithPeopleSectionTitle": {
+    "placeholders": {
+      "numberOfPeople": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "linkHasExpired": "Link has expired",
+  "publicLinkEnabled": "Public link enabled",
+  "shareALink": "Share a link",
+  "addViewer": "Add viewer",
+  "addCollaborator": "Add collaborator",
+  "addANewEmail": "Add a new email",
+  "orPickAnExistingOne": "Or pick an existing one",
+  "sharedCollectionSectionDescription": "Create shared and collaborative collections with other Ente users, including users on free plans.",
+  "createPublicLink": "Create public link",
+  "addParticipants": "Add participants",
+  "add": "Add",
+  "collaboratorsCanAddFilesToTheSharedCollection": "Collaborators can add files to the shared collection.",
+  "enterEmail": "Enter email",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {Added 0 viewers} =1 {Added 1 viewer} other {Added {count} viewers}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to a collection."
+  },
+  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Added 0 collaborator} =1 {Added 1 collaborator} other {Added {count} collaborators}}",
+  "@collaboratorsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of collaborators that were successfully added to a collection."
+  },
+  "addViewers": "{count, plural, =0 {Add viewer} =1 {Add viewer} other {Add viewers}}",
+  "addCollaborators": "{count, plural, =0 {Add collaborator} =1 {Add collaborator} other {Add collaborators}}",
+  "longPressAnEmailToVerifyEndToEndEncryption": "Long press an email to verify end to end encryption.",
+  "sharing": "Sharing...",
+  "invalidEmailAddress": "Invalid email address",
+  "enterValidEmail": "Please enter a valid email address.",
+  "oops": "Oops",
+  "youCannotShareWithYourself": "You cannot share with yourself",
+  "inviteToEnte": "Invite to Ente",
+  "sendInvite": "Send invite",
+  "shareTextRecommendUsingEnte": "Download Ente so we can easily share original quality files\n\nhttps://ente.io",
+  "thisIsYourVerificationId": "This is your Verification ID",
+  "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Someone sharing albums with you should see the same ID on their device.",
+  "howToViewShareeVerificationID": "Please ask them to long-press their email address on the settings screen, and verify that the IDs on both devices match.",
+  "thisIsPersonVerificationId": "This is {email}'s Verification ID",
+  "@thisIsPersonVerificationId": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@ente.io"
+      }
+    }
+  },
+  "verificationId": "Verification ID",
+  "verifyEmailID": "Verify {email}",
+  "emailNoEnteAccount": "{email} does not have an Ente account.\n\nSend them an invite to share files.",
+  "shareMyVerificationID": "Here's my verification ID: {verificationID} for ente.io.",
+  "shareTextConfirmOthersVerificationID": "Hey, can you confirm that this is your ente.io verification ID: {verificationID}",
+  "passwordLock": "Password lock",
+  "manage": "Manage",
+  "addedAs": "Added as",
+  "removeParticipant": "Remove participant",
+  "yesConvertToViewer": "Yes, convert to viewer",
+  "changePermissions": "Change permissions",
+  "cannotAddMoreFilesAfterBecomingViewer": "{name} will no longer be able to add files to the collection after becoming a viewer.",
+  "@cannotAddMoreFilesAfterBecomingViewer": {
+    "description": "Warning message when changing a collaborator to viewer",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "John"
+      }
+    }
+  },
+  "removeWithQuestionMark": "Remove?",
+  "removeParticipantBody": "{userEmail} will be removed from this shared collection\n\nAny files added by them will also be removed from the collection",
+  "yesRemove": "Yes, remove",
+  "remove": "Remove",
+  "viewer": "Viewer",
+  "collaborator": "Collaborator",
+  "collaboratorsCanAddFilesToTheSharedAlbum": "Collaborators can add files to the shared collection.",
+  "albumParticipantsCount": "{count, plural, =0 {No Participants} =1 {1 Participant} other {{count} Participants}}",
+  "@albumParticipantsCount": {
+    "description": "The count of participants in an album",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "addMore": "Add more",
+  "you": "You",
+  "albumOwner": "Owner",
+  "typeOfCollectionTypeIsNotSupportedForRename": "Type of collection {collectionType} is not supported for rename",
+  "@typeOfCollectionTypeIsNotSupportedForRename": {
+    "placeholders": {
+      "collectionType": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "leaveCollection": "Leave collection",
+  "filesAddedByYouWillBeRemovedFromTheCollection": "Files added by you will be removed from the collection",
+  "leaveSharedCollection": "Leave shared collection?",
+  "noSystemLockFound": "No system lock found",
+  "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "To enable app lock, please setup device passcode or screen lock in your system settings.",
+  "legacy": "Legacy",
+  "authToManageLegacy": "Please authenticate to manage your trusted contacts"
+}

@@ -151,7 +151,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                   .textTheme
                   .titleMedium!
                   .color!
-                  .withOpacity(0.5),
+                  .withValues(alpha: 0.5),
             );
 
     return Stack(
@@ -189,7 +189,7 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                         context,
                         DeviceFolderVerticalGridView(
                           appTitle: SectionTitle(
-                            title: S.of(context).onDevice,
+                            title: AppLocalizations.of(context).onDevice,
                           ),
                           tag: "OnDeviceAppTitle",
                         ),
@@ -198,7 +198,9 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
                   },
                   Hero(
                     tag: "OnDeviceAppTitle",
-                    child: SectionTitle(title: S.of(context).onDevice),
+                    child: SectionTitle(
+                      title: AppLocalizations.of(context).onDevice,
+                    ),
                   ),
                   trailingWidget: IconButtonWidget(
                     icon: Icons.chevron_right,

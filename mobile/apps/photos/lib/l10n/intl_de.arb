@@ -237,6 +237,7 @@
   "shareWithNonenteUsers": "Mit Nicht-Ente-Benutzern teilen",
   "createPublicLink": "Öffentlichen Link erstellen",
   "sendLink": "Link senden",
+  "sendQrCode": "QR-Code senden",
   "copyLink": "Link kopieren",
   "linkHasExpired": "Link ist abgelaufen",
   "publicLinkEnabled": "Öffentlicher Link aktiviert",
@@ -1776,15 +1777,170 @@
   "same": "Gleich",
   "different": "Verschieden",
   "sameperson": "Dieselbe Person?",
-  "cLTitle1": "Erweiterter Bildbearbeiter",
-  "cLDesc1": "Wir veröffentlichen einen neuen und erweiterten Bildbearbeiter, der mehr Zuschnitt-Rahmen, Filter-Presets für schnelle Bearbeitungen, Feinabstimmungsoptionen einschließlich Sättigung, Kontrast, Helligkeit, Temperatur und vieles mehr hinzufügt. Der neue Editor enthält auch die Möglichkeit, auf deine Fotos zu zeichnen und Emojis als Aufkleber hinzuzufügen.",
-  "cLTitle2": "Intelligente Alben",
-  "cLDesc2": "Du kannst jetzt automatisch Fotos von ausgewählten Personen zu jedem Album hinzufügen. Gehe einfach zum Album und wähle \"Personen automatisch hinzufügen\" aus dem Overflow-Menü. Wenn es zusammen mit einem geteilten Album verwendet wird, kannst du Fotos mit null Klicks teilen.",
-  "cLTitle3": "Verbesserte Galerie",
-  "cLDesc3": "Wir haben die Möglichkeit hinzugefügt, deine Galerie nach Wochen, Monaten und Jahren zu gruppieren. Du kannst deine Galerie jetzt genau so anpassen, wie du sie haben möchtest, mit diesen neuen Gruppierungsoptionen und benutzerdefinierten Rastern.",
-  "cLTitle4": "Schnelleres Scrollen",
-  "cLDesc4": "Zusammen mit einer Reihe von Verbesserungen unter der Haube, um das Galerie-Scroll-Erlebnis zu verbessern, haben wir auch die Scrollleiste neu gestaltet, um Markierungen anzuzeigen, die es dir ermöglichen, schnell durch die Timeline zu springen.",
   "indexingPausedStatusDescription": "Die Indizierung ist pausiert. Sie wird automatisch fortgesetzt, wenn das Gerät bereit ist. Das Gerät wird als bereit angesehen, wenn sich der Akkustand, die Akkugesundheit und der thermische Zustand in einem gesunden Bereich befinden.",
+  "thisWeek": "Diese Woche",
+  "lastWeek": "Letzte Woche",
+  "thisMonth": "Diesen Monat",
+  "thisYear": "Dieses Jahr",
+  "groupBy": "Gruppieren nach",
   "faceThumbnailGenerationFailed": "Vorschaubilder konnten nicht erstellt werden",
-  "fileAnalysisFailed": "Datei konnte nicht analysiert werden"
+  "fileAnalysisFailed": "Datei konnte nicht analysiert werden",
+  "editAutoAddPeople": "Automatisch hinzugefügte Personen bearbeiten",
+  "autoAddPeople": "Personen automatisch hinzufügen",
+  "autoAddToAlbum": "Automatisch zu Album hinzufügen",
+  "shouldRemoveFilesSmartAlbumsDesc": "Sollen die Dateien, die sich auf die Person beziehen, die zuvor in Smart-Alben ausgewählt wurde, entfernt werden?",
+  "addingPhotos": "Füge Fotos hinzu",
+  "gettingReady": "Vorbereitung",
+  "addSomePhotosDesc1": "Fotos hinzufügen oder auswählen ",
+  "addSomePhotosDesc2": "bekannte Gesichter",
+  "addSomePhotosDesc3": "\nzu beginnen",
+  "ignorePerson": "Person ignorieren",
+  "mixedGrouping": "Gemischte Gruppierung?",
+  "analysis": "Analyse",
+  "doesGroupContainMultiplePeople": "Enthält diese Gruppierung mehrere Personen?",
+  "automaticallyAnalyzeAndSplitGrouping": "Wir analysieren die Gruppierung automatisch, um festzustellen, ob mehrere Personen vorhanden sind, und trennen sie erneut. Dies kann ein paar Sekunden dauern.",
+  "layout": "Layout",
+  "day": "Tag",
+  "peopleAutoAddDesc": "Wähle die Personen, die du automatisch zum Album hinzufügen möchtest",
+  "undo": "Rückgängig",
+  "redo": "Wiederherstellen",
+  "filter": "Filter",
+  "adjust": "Anpassen",
+  "draw": "Zeichnen",
+  "sticker": "Sticker",
+  "brushColor": "Pinselfarbe",
+  "font": "Schriftart",
+  "background": "Hintergrund",
+  "align": "Ausrichten",
+  "addedToAlbums": "{count, plural, =1{Erfolgreich zu einem Album hinzugefügt} other{Erfolgreich zu {count} Alben hinzugefügt}}",
+  "@addedToAlbums": {
+    "description": "Message shown when items are added to albums",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "videosProcessed": "Videos verarbeitet",
+  "totalVideos": "Videos insgesamt",
+  "skippedVideos": "Übersprungene Videos",
+  "videoStreamingDescriptionLine1": "Videos sofort auf jedem Gerät abspielen.",
+  "videoStreamingDescriptionLine2": "Aktivieren, um Video-Streams auf diesem Gerät zu verarbeiten.",
+  "videoStreamingNote": "Nur Videos der letzten 60 Tage und unter einer Minute werden auf diesem Gerät verarbeitet. Für ältere/längere Videos aktiviere das Streaming in der Desktop-App.",
+  "createStream": "Stream erzeugen",
+  "recreateStream": "Stream neu erzeugen",
+  "addedToStreamCreationQueue": "Zur Warteschlange für Streamerstellung hinzugefügt",
+  "addedToStreamRecreationQueue": "Zur Warteschlange für Neuerstellung der Streams hinzugefügt",
+  "videoPreviewAlreadyExists": "Videovorschau existiert bereits",
+  "videoAlreadyInQueue": "Videodatei existiert bereits in der Warteschlange",
+  "addedToQueue": "Zur Warteschlange hinzugefügt",
+  "creatingStream": "Stream wird erzeugt",
+  "similarImages": "Ähnliche Bilder",
+  "findSimilarImages": "Ähnliche Bilder finden",
+  "noSimilarImagesFound": "Keine ähnlichen Bilder gefunden",
+  "yourPhotosLookUnique": "Deine Fotos sehen einzigartig aus",
+  "similarGroupsFound": "{count, plural, =1{Eine Gruppe gefunden} other{{count} Gruppen gefunden}}",
+  "@similarGroupsFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewAndRemoveSimilarImages": "Überprüfe und lösche ähnliche Bilder",
+  "deletePhotosWithSize": "Lösche {count} Fotos ({size})",
+  "@deletePhotosWithSize": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "selectionOptions": "Auswahloptionen",
+  "selectExactWithCount": "Exakt gleich ({count})",
+  "@selectExactWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectExact": "Exakte auswählen",
+  "selectSimilarWithCount": "Nahezu gleich ({count})",
+  "@selectSimilarWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectSimilar": "Ähnliche auswählen",
+  "selectAllWithCount": "Alle Ähnlichkeiten ({count})",
+  "@selectAllWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectSimilarImagesTitle": "Ähnliche Bilder auswählen",
+  "chooseSimilarImagesToSelect": "Wähle Bilder anhand ihrer visuellen Ähnlichkeit",
+  "clearSelection": "Auswahl aufheben",
+  "similarImagesCount": "{count} ähnliche Bilder",
+  "@similarImagesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteWithCount": "Löschen ({count})",
+  "@deleteWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteFiles": "Dateien löschen",
+  "areYouSureDeleteFiles": "Bist du sicher, dass du diese Dateien löschen willst?",
+  "greatJob": "Gut gemacht!",
+  "cleanedUpSimilarImages": "Du hast {size} an Speicherplatz freigegeben",
+  "@cleanedUpSimilarImages": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "size": "Größe",
+  "similarity": "Ähnlichkeit",
+  "analyzingPhotosLocally": "Analysiere deine Fotos lokal...",
+  "lookingForVisualSimilarities": "Suche nach visuellen Ähnlichkeiten...",
+  "comparingImageDetails": "Vergleiche Bilddetails...",
+  "findingSimilarImages": "Finde ähnliche Bilder...",
+  "almostDone": "Fast fertig...",
+  "processingLocally": "Lokale Verarbeitung",
+  "useMLToFindSimilarImages": "Überprüfe und entferne Bilder, die sich ähnlich sehen.",
+  "all": "Alle",
+  "similar": "Ähnlich",
+  "identical": "Identisch",
+  "nothingHereTryAnotherFilter": "Nichts zu sehen, probier einen anderen Filter! 👀",
+  "related": "Verwandt",
+  "hoorayyyy": "Hurraaaa!",
+  "nothingToTidyUpHere": "Hier gibt es nichts zu bereinigen",
+  "deletingDash": "Lösche - ",
+  "cLTitle1": "Ähnliche Bilder",
+  "cLDesc1": "Wir führen ein neues ML-basiertes System ein, um ähnliche Bilder zu erkennen, mit dem du deine Bibliothek bereinigen kannst. Verfügbar unter Einstellungen -> Backup -> Speicherplatz freigeben",
+  "cLTitle2": "Verbesserungen für Video-Streaming",
+  "cLDesc2": "Du kannst jetzt die Erstellung von Videos manuell direkt aus der App auslösen. Wir haben auch einen neuen Einstellungsbildschirm für das Video-Streaming hinzugefügt, der dir zeigen wird, welcher Prozentsatz deiner Videos für Streaming verarbeitet wurde",
+  "cLTitle3": "Leistungsverbesserungen",
+  "cLDesc3": "Zahlreiche Verbesserungen unter der Haube, u.a. bessere Nutzung des Cache und ein sanfteres Scroll-Erlebnis",
+  "closeBy": "Ähnlich",
+  "@closeBy": {
+    "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
+  }
 }

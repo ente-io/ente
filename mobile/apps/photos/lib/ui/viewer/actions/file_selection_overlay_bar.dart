@@ -291,7 +291,7 @@ class _SelectAllButtonState extends State<SelectAllButton> {
           borderRadius: BorderRadius.circular(100),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 4,
               offset: const Offset(0, -1),
             ),
@@ -302,7 +302,7 @@ class _SelectAllButtonState extends State<SelectAllButton> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              S.of(context).selectAll,
+              AppLocalizations.of(context).selectAll,
               style: getEnteTextTheme(context).mini,
             ),
             const SizedBox(width: 4),

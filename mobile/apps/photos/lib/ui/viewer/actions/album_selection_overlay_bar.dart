@@ -185,7 +185,7 @@ class _SelectAllAlbumsButtonState extends State<SelectAllAlbumsButton> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              S.of(context).selectAll,
+              AppLocalizations.of(context).selectAll,
               style: getEnteTextTheme(context).mini,
             ),
             const SizedBox(width: 4),

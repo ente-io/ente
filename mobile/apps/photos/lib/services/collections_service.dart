@@ -532,6 +532,65 @@ class CollectionsService {
     return favorites + pinned + rest;
   }
 
+  Future<List<Collection>> getCollectionForWidgetSelection() async {
+    final AlbumSortKey sortKey = localSettings.albumSortKey();
+    final AlbumSortDirection sortDirection = localSettings.albumSortDirection();
+    const bool includeShared = true;
+    final List<Collection> collections = CollectionsService.instance
+        .getCollectionsForUI(includedShared: includeShared);
+    final bool hasFavorites = FavoritesService.instance.hasFavorites();
+    late Map<int, int> collectionIDToNewestPhotoTime;
+    if (sortKey == AlbumSortKey.newestPhoto) {
+      collectionIDToNewestPhotoTime =
+          await CollectionsService.instance.getCollectionIDToNewestFileTime();
+    }
+    collections.sort(
+      (first, second) {
+        int comparison;
+        if (sortKey == AlbumSortKey.albumName) {
+          comparison = compareAsciiLowerCaseNatural(
+            first.displayName,
+            second.displayName,
+          );
+        } else if (sortKey == AlbumSortKey.newestPhoto) {
+          comparison =
+              (collectionIDToNewestPhotoTime[second.id] ?? -1 * intMaxValue)
+                  .compareTo(
+            collectionIDToNewestPhotoTime[first.id] ?? -1 * intMaxValue,
+          );
+        } else {
+          comparison = second.updationTime.compareTo(first.updationTime);
+        }
+        return sortDirection == AlbumSortDirection.ascending
+            ? comparison
+            : -comparison;
+      },
+    );
+    final List<Collection> favorites = [];
+    final List<Collection> pinned = [];
+    final List<Collection> rest = [];
+    for (final collection in collections) {
+      if (collection.type == CollectionType.uncategorized ||
+          collection.isQuickLinkCollection() ||
+          collection.isHidden() ||
+          collection.isArchived()) {
+        continue;
+      }
+      if (collection.type == CollectionType.favorites) {
+        // Hide fav collection if it's empty
+        if (hasFavorites) {
+          favorites.add(collection);
+        }
+      } else if (collection.isPinned) {
+        pinned.add(collection);
+      } else {
+        rest.add(collection);
+      }
+    }
+
+    return favorites + pinned + rest;
+  }
+
   User getFileOwner(int userID, int? collectionID) {
     if (_cachedUserIdToUser.containsKey(userID)) {
       return _cachedUserIdToUser[userID]!;
@@ -751,6 +810,38 @@ class CollectionsService {
           _getAndCacheDecryptedKey(collection, source: "getCollectionKey");
     }
     return _cachedKeys[collectionID]!;
+  }
+
+  String getPublicUrl(Collection c) {
+    final PublicURL url = c.publicURLs.firstOrNull!;
+    Uri publicUrl = Uri.parse(url.url);
+
+    // Replace with custom domain if configured
+    final String customDomain = flagService.customDomain;
+    if (customDomain.isNotEmpty) {
+      publicUrl = publicUrl.replace(
+        host: customDomain,
+        scheme: "https",
+        port: 443,
+      );
+    }
+
+    // Get the collection key for the URL fragment
+    final String collectionKey = Base58Encode(
+      CollectionsService.instance.getCollectionKey(c.id),
+    );
+
+    // Build the final URL
+    String finalUrl = publicUrl.toString();
+
+    // Handle IDN domains - if the host was percent-encoded by Uri.replace,
+    // decode it for user-friendly display
+    if (customDomain.isNotEmpty && publicUrl.host.contains('%')) {
+      final decodedHost = Uri.decodeComponent(publicUrl.host);
+      finalUrl = finalUrl.replaceFirst(publicUrl.host, decodedHost);
+    }
+
+    return "$finalUrl#$collectionKey";
   }
 
   Uint8List _getAndCacheDecryptedKey(
@@ -1162,8 +1253,9 @@ class CollectionsService {
       if (e is DioException && e.response?.statusCode == 410) {
         await showInfoDialog(
           context,
-          title: S.of(context).linkExpired,
-          body: S.of(context).theLinkYouAreTryingToAccessHasExpired,
+          title: AppLocalizations.of(context).linkExpired,
+          body: AppLocalizations.of(context)
+              .theLinkYouAreTryingToAccessHasExpired,
         );
         throw UnauthorizedError();
       }
@@ -1201,8 +1293,8 @@ class CollectionsService {
       _logger.warning("Failed to verify public collection password $e");
       await showErrorDialog(
         context,
-        S.of(context).incorrectPasswordTitle,
-        S.of(context).pleaseTryAgain,
+        AppLocalizations.of(context).incorrectPasswordTitle,
+        AppLocalizations.of(context).pleaseTryAgain,
       );
       return false;
     }

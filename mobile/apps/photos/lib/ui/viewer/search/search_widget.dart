@@ -147,7 +147,7 @@ class SearchWidgetState extends State<SearchWidget> {
                     // Below parameters are to disable auto-suggestion
                     // Above parameters are to disable auto-suggestion
                     decoration: InputDecoration(
-                      hintText: S.of(context).search,
+                      hintText: AppLocalizations.of(context).search,
                       filled: true,
                       fillColor: getEnteColorScheme(context).fillFaint,
                       border: const UnderlineInputBorder(
@@ -252,7 +252,7 @@ class SearchWidgetState extends State<SearchWidget> {
       },
     );
 
-    _searchService.getAllFace(null).then(
+    _searchService.getAllFace(null, minClusterSize: 10).then(
       (faceResult) {
         final List<GenericSearchResult> filteredResults = [];
         for (final result in faceResult) {

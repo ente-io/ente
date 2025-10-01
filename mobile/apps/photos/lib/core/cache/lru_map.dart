@@ -24,12 +24,16 @@ class LRUMap<K, V> {
       final K evictedKey = _map.keys.first;
       final V? evictedValue = _map.remove(evictedKey);
       if (_handler != null) {
-        _handler!(evictedKey, evictedValue);
+        _handler(evictedKey, evictedValue);
       }
     }
   }
 
   void remove(K key) {
     _map.remove(key);
+  }
+
+  void clear() {
+    _map.clear();
   }
 }

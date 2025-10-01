@@ -3,7 +3,7 @@ import "package:flutter_svg/svg.dart";
 import "package:photos/ente_theme_data.dart";
 import "package:photos/theme/ente_theme.dart";
 
-class CircularIconButton extends StatelessWidget { 
+class CircularIconButton extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
   final String? svgPath;
@@ -11,7 +11,7 @@ class CircularIconButton extends StatelessWidget {
   final bool isSelected;
 
   const CircularIconButton({
-    super.key, 
+    super.key,
     required this.label,
     required this.onTap,
     this.svgPath,
@@ -39,13 +39,13 @@ class CircularIconButton extends StatelessWidget {
                     ? Theme.of(context)
                         .colorScheme
                         .imageEditorPrimaryColor
-                        .withOpacity(0.24)
-                    : colorScheme.backgroundElevated2,
+                        .withValues(alpha: 0.24)
+                    : Theme.of(context).colorScheme.editorBackgroundColor,
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: isSelected
                       ? Theme.of(context).colorScheme.imageEditorPrimaryColor
-                      : colorScheme.backgroundElevated2,
+                      : Theme.of(context).colorScheme.editorBackgroundColor,
                   width: 2,
                 ),
               ),

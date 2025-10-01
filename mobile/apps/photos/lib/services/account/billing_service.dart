@@ -168,14 +168,14 @@ class BillingService {
         !userDetails.hasPaidAddon()) {
       await showErrorDialog(
         context,
-        S.of(context).familyPlans,
-        S.of(context).familyPlanOverview,
+        AppLocalizations.of(context).familyPlans,
+        AppLocalizations.of(context).familyPlanOverview,
       );
       return;
     }
     final dialog = createProgressDialog(
       context,
-      S.of(context).pleaseWait,
+      AppLocalizations.of(context).pleaseWait,
       isDismissible: true,
     );
     await dialog.show();
@@ -188,7 +188,10 @@ class BillingService {
       await Navigator.of(context).push(
         MaterialPageRoute(
           builder: (BuildContext context) {
-            return WebPage(S.of(context).familyPlanPortalTitle, url);
+            return WebPage(
+              AppLocalizations.of(context).familyPlanPortalTitle,
+              url,
+            );
           },
         ),
       );

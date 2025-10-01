@@ -33,6 +33,20 @@ func (h *RemoteStoreHandler) InsertOrUpdate(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+func (h *RemoteStoreHandler) RemoveKey(c *gin.Context) {
+	key := c.Param("key")
+	if key == "" {
+		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("key is missing"), ""))
+		return
+	}
+	err := h.Controller.RemoveKey(c, key)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, "failed to update key's value"))
+		return
+	}
+	c.Status(http.StatusOK)
+}
+
 // GetKey handler for fetching a value for particular key
 func (h *RemoteStoreHandler) GetKey(c *gin.Context) {
 	var request ente.GetValueRequest
@@ -58,4 +72,19 @@ func (h *RemoteStoreHandler) GetFeatureFlags(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, resp)
+}
+
+// CheckDomain returns 200 ok if the custom domain is claimed by any ente user
+func (h *RemoteStoreHandler) CheckDomain(c *gin.Context) {
+	domain := c.Query("domain")
+	if domain == "" {
+		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("domain is missing"), ""))
+		return
+	}
+	_, err := h.Controller.DomainOwner(c, domain)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, "failed to get feature flags"))
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{})
 }

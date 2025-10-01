@@ -59,8 +59,8 @@ class _PeopleActionBarWidgetState extends State<PeopleActionBarWidget> {
             builder: (context, value, child) {
               final count = widget.selectedPeople?.personIds.length ?? 0;
               return Text(
-                S.of(context).selectedPhotos(count),
-                style: textTheme.miniMuted,
+                AppLocalizations.of(context).selectedPhotos(count: count),
+                style: textTheme.mini,
               );
             },
           ),

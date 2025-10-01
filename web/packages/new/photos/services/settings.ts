@@ -8,7 +8,11 @@ import log from "ente-base/log";
 import { updateShouldDisableCFUploadProxy } from "ente-gallery/services/upload";
 import { nullToUndefined } from "ente-utils/transform";
 import { z } from "zod/v4";
-import { fetchFeatureFlags, updateRemoteFlag } from "./remote-store";
+import {
+    fetchFeatureFlags,
+    updateRemoteFlag,
+    updateRemoteValue,
+} from "./remote-store";
 
 /**
  * In-memory flags that tracks various settings.
@@ -66,6 +70,24 @@ export interface Settings {
      * Default: "https://cast.ente.io"
      */
     castURL: string;
+
+    /**
+     * Set to the domain (host, e.g. "photos.example.org") that the user wishes
+     * to use for sharing their public albums.
+     *
+     * An empty string is treated as `undefined`.
+     */
+    customDomain?: string;
+
+    /**
+     * The URL we should ask the user to CNAME their {@link customDomain} to
+     * for wiring up their domain to the public albums app.
+     *
+     * See also `apps.custom-domain.cname` in `server/local.yaml`.
+     *
+     * Default: "my.ente.io"
+     */
+    customDomainCNAME: string;
 }
 
 const createDefaultSettings = (): Settings => ({
@@ -73,6 +95,7 @@ const createDefaultSettings = (): Settings => ({
     mapEnabled: false,
     cfUploadProxyDisabled: false,
     castURL: "https://cast.ente.io",
+    customDomainCNAME: "my.ente.io",
 });
 
 /**
@@ -147,6 +170,8 @@ const FeatureFlags = z.object({
     betaUser: z.boolean().nullish().transform(nullToUndefined),
     mapEnabled: z.boolean().nullish().transform(nullToUndefined),
     castUrl: z.string().nullish().transform(nullToUndefined),
+    customDomain: z.string().nullish().transform(nullToUndefined),
+    customDomainCNAME: z.string().nullish().transform(nullToUndefined),
 });
 
 type FeatureFlags = z.infer<typeof FeatureFlags>;
@@ -158,6 +183,9 @@ const syncSettingsSnapshotWithLocalStorage = () => {
     settings.mapEnabled = flags?.mapEnabled || false;
     settings.cfUploadProxyDisabled = savedCFProxyDisabled();
     if (flags?.castUrl) settings.castURL = flags.castUrl;
+    if (flags?.customDomain) settings.customDomain = flags.customDomain;
+    if (flags?.customDomainCNAME)
+        settings.customDomainCNAME = flags.customDomainCNAME;
     setSettingsSnapshot(settings);
 };
 
@@ -197,6 +225,17 @@ export const isDevBuildAndUser = () => isDevBuild && isDevUserViaEmail();
 
 const isDevUserViaEmail = () =>
     !!savedPartialLocalUser()?.email?.endsWith("@ente.io");
+
+/**
+ * Persist the user's custom domain preference both locally and on remote.
+ *
+ * Setting the value to a blank string is equivalent to deleting the custom
+ * domain value altogether.
+ */
+export const updateCustomDomain = async (customDomain: string) => {
+    await updateRemoteValue("customDomain", customDomain);
+    return pullSettings();
+};
 
 /**
  * Persist the user's map enabled preference both locally and on remote.

@@ -20,6 +20,7 @@ import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/viewer/actions/file_selection_overlay_bar.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
+import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
@@ -69,6 +70,20 @@ class _SharedPublicCollectionPageState
     logger.info("Building SharedPublicCollectionPage");
     final List<EnteFile>? initialFiles =
         widget.c.thumbnail != null ? [widget.c.thumbnail!] : null;
+
+    // Determine groupType based on collection layout
+    GroupType groupType;
+    final layout = widget.c.collection.pubMagicMetadata.layout ?? "grouped";
+    switch (layout) {
+      case "continuous":
+        groupType = GroupType.none;
+        break;
+      case "grouped":
+      default:
+        groupType = GroupType.day;
+        break;
+    }
+
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         widget.files!.sort(
@@ -96,6 +111,7 @@ class _SharedPublicCollectionPageState
       selectedFiles: _selectedFiles,
       initialFiles: initialFiles,
       albumName: widget.c.collection.displayName,
+      groupType: groupType,
       header: widget.c.collection.isJoinEnabled &&
               Configuration.instance.isLoggedIn()
           ? Padding(
@@ -160,7 +176,7 @@ class _SharedPublicCollectionPageState
     if (result != null && result.action == ButtonAction.first) {
       final dialog = createProgressDialog(
         context,
-        S.of(context).pleaseWait,
+        AppLocalizations.of(context).pleaseWait,
         isDismissible: true,
       );
       await dialog.show();
@@ -178,7 +194,7 @@ class _SharedPublicCollectionPageState
       } catch (e, s) {
         logger.severe("Failed to join collection", e, s);
         await dialog.hide();
-        showToast(context, S.of(context).somethingWentWrong);
+        showToast(context, AppLocalizations.of(context).somethingWentWrong);
       }
     }
   }

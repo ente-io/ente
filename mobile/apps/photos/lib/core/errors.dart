@@ -58,7 +58,7 @@ bool isHandledSyncError(Object errObj) {
 
 class LockAlreadyAcquiredError extends Error {}
 
-class LockFreedError extends Error{}
+class LockFreedError extends Error {}
 
 class UnauthorizedError extends Error {}
 
@@ -83,3 +83,11 @@ class NoMediaLocationAccessError extends Error {}
 class PassKeySessionNotVerifiedError extends Error {}
 
 class PassKeySessionExpiredError extends Error {}
+
+class MultiPartUploadError implements Exception {
+  final String message;
+  MultiPartUploadError(this.message);
+
+  @override
+  String toString() => "MultiPartUploadError: $message";
+}

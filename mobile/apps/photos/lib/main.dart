@@ -43,6 +43,7 @@ import 'package:photos/services/sync/remote_sync_service.dart';
 import "package:photos/services/sync/sync_service.dart";
 import "package:photos/services/video_preview_service.dart";
 import "package:photos/services/wake_lock_service.dart";
+import "package:photos/src/rust/frb_generated.dart";
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/ui/tools/lock_screen.dart';
 import "package:photos/utils/email_util.dart";
@@ -61,9 +62,11 @@ const kBGTaskTimeout = Duration(seconds: 28);
 const kBGPushTimeout = Duration(seconds: 28);
 const kFGTaskDeathTimeoutInMicroseconds = 5000000;
 bool isProcessBg = true;
+bool _stopHearBeat = false;
 
 void main() async {
   debugRepaintRainbowEnabled = false;
+  await RustLib.init();
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
 
@@ -171,7 +174,6 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
   // Misc Services
   await UserService.instance.init();
   NotificationService.instance.init(prefs);
-  if (Platform.isAndroid) HomeWidgetService.instance.init(prefs);
 
   // Begin Execution
   // only runs for android
@@ -266,8 +268,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     await SyncService.instance.init(preferences);
     _logger.info("SyncService init done $tlog");
 
-    HomeWidgetService.instance.init(preferences);
-
     if (!isBackground) {
       await _scheduleFGHomeWidgetSync();
     }
@@ -280,7 +280,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       }).ignore();
     }
     _logger.info("PushService/HomeWidget done $tlog");
-    VideoPreviewService.instance.init(preferences);
     unawaited(SemanticSearchService.instance.init());
     unawaited(MLService.instance.init());
     await PersonService.init(
@@ -291,6 +290,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     EnteWakeLockService.instance.init(preferences);
     logLocalSettings();
     initComplete = true;
+    _stopHearBeat = true;
     _logger.info("Initialization done $tlog");
   } catch (e, s) {
     _logger.severe("Error in init ", e, s);
@@ -299,25 +299,29 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
 }
 
 void logLocalSettings() {
-  _logger.info("Show memories: ${memoriesCacheService.showAnyMemories}");
-  _logger
-      .info("Smart memories enabled: ${localSettings.isSmartMemoriesEnabled}");
-  _logger.info("Ml is enabled: ${flagService.hasGrantedMLConsent}");
-  _logger.info(
-    "ML local indexing is enabled: ${localSettings.isMLLocalIndexingEnabled}",
-  );
-  _logger.info(
-    "Multipart upload is enabled: ${localSettings.userEnabledMultiplePart}",
-  );
-  _logger.info("Gallery grid size: ${localSettings.getPhotoGridSize()}");
-  _logger.info(
-    "Video streaming is enalbed: ${VideoPreviewService.instance.isVideoStreamingEnabled}",
-  );
+  final settings = {
+    'Show memories': memoriesCacheService.showAnyMemories,
+    'Smart memories enabled': localSettings.isSmartMemoriesEnabled,
+    'ML enabled': flagService.hasGrantedMLConsent,
+    'ML local indexing enabled': localSettings.isMLLocalIndexingEnabled,
+    'Multipart upload enabled': localSettings.userEnabledMultiplePart,
+    'Gallery grid size': localSettings.getPhotoGridSize(),
+    'Video streaming enabled':
+        VideoPreviewService.instance.isVideoStreamingEnabled,
+  };
+
+  final formattedSettings =
+      settings.entries.map((e) => '${e.key}: ${e.value}').join(', ');
+  _logger.info('Local settings - $formattedSettings');
 }
 
 void _heartBeatOnInit(int i) {
-  if (i <= 15) {
+  if (i <= 15 && !_stopHearBeat) {
     Future.delayed(const Duration(seconds: 1), () {
+      if (_stopHearBeat) {
+        _logger.info("Stopping Heartbeat check at $i");
+        return;
+      }
       _logger.info("init Heartbeat $i");
       _heartBeatOnInit(i + 1);
     });

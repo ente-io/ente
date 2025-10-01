@@ -4,6 +4,7 @@ import AddIcon from "@mui/icons-material/Add";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import BlockIcon from "@mui/icons-material/Block";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import CodeIcon from "@mui/icons-material/Code";
 import ContentCopyIcon from "@mui/icons-material/ContentCopyOutlined";
 import DoneIcon from "@mui/icons-material/Done";
 import DownloadSharpIcon from "@mui/icons-material/DownloadSharp";
@@ -30,7 +31,6 @@ import {
     RowButtonDivider,
     RowButtonEndActivityIndicator,
     RowButtonGroup,
-    RowButtonGroupHint,
     RowButtonGroupTitle,
     RowLabel,
     RowSwitch,
@@ -58,12 +58,14 @@ import type {
 import { type CollectionUser } from "ente-media/collection";
 import type { RemotePullOpts } from "ente-new/photos/components/gallery";
 import { PublicLinkCreated } from "ente-new/photos/components/share/PublicLinkCreated";
+import { useSettingsSnapshot } from "ente-new/photos/components/utils/use-snapshot";
 import { avatarTextColor } from "ente-new/photos/services/avatar";
 import {
     createPublicURL,
     deleteShareURL,
     shareCollection,
     unshareCollection,
+    updateCollectionLayout,
     updatePublicURL,
     type CreatePublicURLAttributes,
     type UpdatePublicURLAttributes,
@@ -1105,6 +1107,8 @@ const PublicShare: React.FC<PublicShareProps> = ({
     setBlockingLoad,
     onRemotePull,
 }) => {
+    const { customDomain } = useSettingsSnapshot();
+
     const {
         show: showPublicLinkCreated,
         props: publicLinkCreatedVisibilityProps,
@@ -1126,11 +1130,15 @@ const PublicShare: React.FC<PublicShareProps> = ({
             void appendCollectionKeyToShareURL(
                 publicURL.url,
                 collection.key,
-            ).then((url) => setResolvedURL(url));
+            ).then((url) =>
+                setResolvedURL(
+                    substituteCustomDomainIfNeeded(url, customDomain),
+                ),
+            );
         } else {
             setResolvedURL(undefined);
         }
-    }, [collection.key, publicURL]);
+    }, [collection.key, publicURL, customDomain]);
 
     const handleCopyLink = () => {
         if (resolvedURL) void navigator.clipboard.writeText(resolvedURL);
@@ -1162,6 +1170,16 @@ const PublicShare: React.FC<PublicShareProps> = ({
             />
         </>
     );
+};
+
+const substituteCustomDomainIfNeeded = (
+    url: string,
+    customDomain: string | undefined,
+) => {
+    if (!customDomain) return url;
+    const u = new URL(url);
+    u.host = customDomain;
+    return u.href;
 };
 
 type EnablePublicShareOptionsProps = {
@@ -1355,6 +1373,13 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
 
     const [copied, handleCopyLink] = useClipboardCopy(resolvedURL);
 
+    // For embeddable HTML copy
+    const embedURL = resolvedURL?.replace("albums.ente.io", "embed.ente.io");
+    const iframeHTML = embedURL
+        ? `<iframe src="${embedURL}" width="800" height="600" frameborder="0" allowfullscreen></iframe>`
+        : "";
+    const [embedCopied, handleCopyEmbedLink] = useClipboardCopy(iframeHTML);
+
     const handleRootClose = () => {
         onClose();
         onRootClose();
@@ -1399,6 +1424,16 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
             title={t("share_album")}
         >
             <Stack sx={{ gap: 3, py: "20px", px: "8px" }}>
+                {process.env.NEXT_PUBLIC_LAYOUT_FEATURE_ENABLED && (
+                    <ManageLayout
+                        {...{
+                            collection,
+                            onRootClose,
+                            onRemotePull,
+                            setBlockingLoad,
+                        }}
+                    />
+                )}
                 <ManagePublicCollect
                     {...{ publicURL }}
                     onUpdate={handlePublicURLUpdate}
@@ -1435,6 +1470,25 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
                         onClick={handleCopyLink}
                         label={t("copy_link")}
                     />
+                    {process.env.NEXT_PUBLIC_EMBED_FEATURE_ENABLED ===
+                        "true" && (
+                        <>
+                            <RowButtonDivider />
+                            <RowButton
+                                startIcon={
+                                    embedCopied ? (
+                                        <DoneIcon
+                                            sx={{ color: "accent.main" }}
+                                        />
+                                    ) : (
+                                        <CodeIcon />
+                                    )
+                                }
+                                onClick={handleCopyEmbedLink}
+                                label="Copy embed HTML"
+                            />
+                        </>
+                    )}
                 </RowButtonGroup>
                 <RowButtonGroup>
                     <RowButton
@@ -1491,9 +1545,6 @@ const ManagePublicCollect: React.FC<ManagePublicLinkSettingProps> = ({
                     onClick={handleFileDownloadSetting}
                 />
             </RowButtonGroup>
-            <RowButtonGroupHint>
-                {t("allow_adding_photos_hint")}
-            </RowButtonGroupHint>
         </Stack>
     );
 };
@@ -1789,3 +1840,96 @@ const SetPublicLinkPassword: React.FC<SetPublicLinkPasswordProps> = ({
         </Dialog>
     );
 };
+
+interface ManageLayoutProps {
+    onRootClose: () => void;
+    collection: Collection;
+    onRemotePull: (opts?: RemotePullOpts) => Promise<void>;
+    setBlockingLoad: (value: boolean) => void;
+}
+
+const ManageLayout: React.FC<ManageLayoutProps> = ({
+    onRootClose,
+    collection,
+    onRemotePull,
+    setBlockingLoad,
+}) => {
+    const { show: showLayoutOptions, props: layoutOptionsVisibilityProps } =
+        useModalVisibility();
+    const [errorMessage, setErrorMessage] = useState("");
+
+    const options = useMemo(() => layoutOptions(), []);
+
+    const currentLayout =
+        collection.pubMagicMetadata?.data?.layout || "grouped";
+
+    const changeLayoutValue = (value: string) => async () => {
+        if (value === currentLayout) return;
+
+        setBlockingLoad(true);
+        setErrorMessage("");
+        try {
+            await updateCollectionLayout(collection, value);
+            await onRemotePull({ silent: true });
+            layoutOptionsVisibilityProps.onClose();
+        } catch (e) {
+            log.error("Could not update collection layout", e);
+            setErrorMessage(t("generic_error"));
+        } finally {
+            setBlockingLoad(false);
+        }
+    };
+
+    return (
+        <>
+            <RowButtonGroup>
+                <RowButton
+                    label={t("album_layout")}
+                    caption={t(currentLayout)}
+                    onClick={showLayoutOptions}
+                    endIcon={<ChevronRightIcon />}
+                />
+            </RowButtonGroup>
+            <TitledNestedSidebarDrawer
+                anchor="right"
+                {...layoutOptionsVisibilityProps}
+                onRootClose={onRootClose}
+                title={t("album_layout")}
+            >
+                <Stack sx={{ gap: "32px", py: "20px", px: "8px" }}>
+                    <RowButtonGroup>
+                        {options.map(({ label, value }, index) => (
+                            <React.Fragment key={value}>
+                                <RowButton
+                                    fontWeight="regular"
+                                    onClick={changeLayoutValue(value)}
+                                    label={label}
+                                    endIcon={
+                                        currentLayout === value && <DoneIcon />
+                                    }
+                                />
+                                {index != options.length - 1 && (
+                                    <RowButtonDivider />
+                                )}
+                            </React.Fragment>
+                        ))}
+                    </RowButtonGroup>
+                    {errorMessage && (
+                        <Typography
+                            variant="small"
+                            sx={{ color: "critical.main", textAlign: "center" }}
+                        >
+                            {errorMessage}
+                        </Typography>
+                    )}
+                </Stack>
+            </TitledNestedSidebarDrawer>
+        </>
+    );
+};
+
+const layoutOptions = () => [
+    { label: t("grouped"), value: "grouped" },
+    { label: t("continuous"), value: "continuous" },
+    { label: t("trip"), value: "trip" },
+];

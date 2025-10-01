@@ -6,6 +6,7 @@ import "package:package_info_plus/package_info_plus.dart";
 import "package:photos/gateways/entity_gw.dart";
 import "package:photos/module/download/manager.dart";
 import "package:photos/services/account/billing_service.dart";
+import "package:photos/services/collections_service.dart";
 import "package:photos/services/entity_service.dart";
 import "package:photos/services/filedata/filedata_service.dart";
 import "package:photos/services/location_service.dart";
@@ -18,6 +19,7 @@ import "package:photos/services/smart_albums_service.dart";
 import "package:photos/services/smart_memories_service.dart";
 import "package:photos/services/storage_bonus_service.dart";
 import "package:photos/services/sync/trash_sync_service.dart";
+import "package:photos/services/text_embeddings_cache_service.dart";
 import "package:photos/services/update_service.dart";
 import "package:photos/utils/local_settings.dart";
 import "package:shared_preferences/shared_preferences.dart";
@@ -135,6 +137,12 @@ SmartMemoriesService get smartMemoriesService {
   return _smartMemoriesService!;
 }
 
+TextEmbeddingsCacheService? _textEmbeddingsCacheService;
+TextEmbeddingsCacheService get textEmbeddingsCacheService {
+  _textEmbeddingsCacheService ??= TextEmbeddingsCacheService.instance;
+  return _textEmbeddingsCacheService!;
+}
+
 BillingService? _billingService;
 BillingService get billingService {
   _billingService ??= BillingService(
@@ -182,4 +190,10 @@ SmartAlbumsService? _smartAlbumsService;
 SmartAlbumsService get smartAlbumsService {
   _smartAlbumsService ??= SmartAlbumsService();
   return _smartAlbumsService!;
+}
+
+CollectionsService? _collectionsService;
+CollectionsService get collectionsService {
+  _collectionsService ??= CollectionsService.instance;
+  return _collectionsService!;
 }

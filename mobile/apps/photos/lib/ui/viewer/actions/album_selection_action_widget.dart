@@ -109,7 +109,7 @@ class _AlbumSelectionActionWidgetState
       );
       items.add(
         SelectionActionButton(
-          labelText: S.of(context).share,
+          labelText: AppLocalizations.of(context).share,
           icon: Icons.adaptive.share,
           onTap: _shareCollection,
         ),
@@ -117,14 +117,14 @@ class _AlbumSelectionActionWidgetState
 
       items.add(
         SelectionActionButton(
-          labelText: S.of(context).delete,
+          labelText: AppLocalizations.of(context).delete,
           icon: Icons.delete_outline,
           onTap: _trashCollection,
         ),
       );
       items.add(
         SelectionActionButton(
-          labelText: S.of(context).hide,
+          labelText: AppLocalizations.of(context).hide,
           icon: Icons.visibility_off_outlined,
           onTap: _onHideClick,
         ),
@@ -134,7 +134,7 @@ class _AlbumSelectionActionWidgetState
     if (widget.sectionType == UISectionType.incomingCollections) {
       items.add(
         SelectionActionButton(
-          labelText: S.of(context).leaveAlbum,
+          labelText: AppLocalizations.of(context).leaveAlbum,
           icon: Icons.logout,
           onTap: _leaveAlbum,
         ),
@@ -153,7 +153,7 @@ class _AlbumSelectionActionWidgetState
 
     otherItems.add(
       SelectionActionButton(
-        labelText: S.of(context).archive,
+        labelText: AppLocalizations.of(context).archive,
         icon: Icons.archive_outlined,
         onTap: _archiveClick,
       ),
@@ -167,7 +167,7 @@ class _AlbumSelectionActionWidgetState
         hasAddPhotoPermissions) {
       otherItems.add(
         SelectionActionButton(
-          labelText: S.of(context).addPhotos,
+          labelText: AppLocalizations.of(context).addPhotos,
           icon: Icons.add_photo_alternate_outlined,
           onTap: _showAddPhotoDialog,
         ),
@@ -175,7 +175,7 @@ class _AlbumSelectionActionWidgetState
 
       otherItems.add(
         SelectionActionButton(
-          labelText: S.of(context).autoAddPeople,
+          labelText: AppLocalizations.of(context).autoAddPeople,
           iconWidget: Image.asset(
             'assets/auto-add-people.png',
             width: 24,
@@ -501,9 +501,9 @@ class _AlbumSelectionActionWidgetState
 
         final res = await showChoiceDialog(
           context,
-          title: S.of(context).openAlbumInBrowserTitle,
-          firstButtonLabel: S.of(context).openAlbumInBrowser,
-          secondButtonLabel: S.of(context).cancel,
+          title: AppLocalizations.of(context).openAlbumInBrowserTitle,
+          firstButtonLabel: AppLocalizations.of(context).openAlbumInBrowser,
+          secondButtonLabel: AppLocalizations.of(context).cancel,
           firstButtonType: ButtonType.primary,
         );
 
@@ -549,7 +549,7 @@ class _AlbumSelectionActionWidgetState
           shouldStickToDarkTheme: true,
           buttonAction: ButtonAction.first,
           shouldSurfaceExecutionStates: true,
-          labelText: S.of(context).leaveAlbum,
+          labelText: AppLocalizations.of(context).leaveAlbum,
           onTap: () async {
             for (final collection in widget.selectedAlbums.albums) {
               await CollectionsService.instance.leaveAlbum(collection);
@@ -562,11 +562,12 @@ class _AlbumSelectionActionWidgetState
           buttonAction: ButtonAction.cancel,
           isInAlert: true,
           shouldStickToDarkTheme: true,
-          labelText: S.of(context).cancel,
+          labelText: AppLocalizations.of(context).cancel,
         ),
       ],
-      title: S.of(context).leaveSharedAlbum,
-      body: S.of(context).photosAddedByYouWillBeRemovedFromTheAlbum,
+      title: AppLocalizations.of(context).leaveSharedAlbum,
+      body: AppLocalizations.of(context)
+          .photosAddedByYouWillBeRemovedFromTheAlbum,
     );
     if (actionResult?.action != null && mounted) {
       if (actionResult!.action == ButtonAction.error) {
@@ -591,7 +592,7 @@ class _AlbumSelectionActionWidgetState
   void _showFavToast() {
     showShortToast(
       context,
-      S.of(context).actionNotSupportedOnFavouritesAlbum,
+      AppLocalizations.of(context).actionNotSupportedOnFavouritesAlbum,
     );
   }
 }

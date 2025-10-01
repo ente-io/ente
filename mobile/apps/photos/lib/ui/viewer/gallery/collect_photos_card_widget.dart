@@ -30,8 +30,8 @@ class _CollectPhotosCardWidgetState extends State<CollectPhotosCardWidget> {
             decoration: ShapeDecoration(
               gradient: LinearGradient(
                 colors: [
-                  colorTheme.primary700.withOpacity(0.9),
-                  colorTheme.backdropBase.withOpacity(0.6),
+                  colorTheme.primary700.withValues(alpha: 0.9),
+                  colorTheme.backdropBase.withValues(alpha: 0.6),
                   colorTheme.backdropBase,
                 ],
                 begin: Alignment.bottomLeft,
@@ -55,7 +55,7 @@ class _CollectPhotosCardWidgetState extends State<CollectPhotosCardWidget> {
                 color: colorTheme.backgroundElevated,
                 shadows: [
                   BoxShadow(
-                    color: colorTheme.textBase.withOpacity(0.1),
+                    color: colorTheme.textBase.withValues(alpha: 0.1),
                     blurRadius: 4.0,
                     offset: const Offset(0, 1),
                   ),
@@ -74,14 +74,14 @@ class _CollectPhotosCardWidgetState extends State<CollectPhotosCardWidget> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      S.of(context).collectPhotos,
+                      AppLocalizations.of(context).collectPhotos,
                       style: textTheme.bodyBold,
                     ),
                     const SizedBox(
                       height: 16,
                     ),
                     Text(
-                      S.of(context).collectPhotosDescription,
+                      AppLocalizations.of(context).collectPhotosDescription,
                       style: textTheme.smallMuted,
                     ),
                     const SizedBox(
@@ -93,7 +93,7 @@ class _CollectPhotosCardWidgetState extends State<CollectPhotosCardWidget> {
                         ButtonWidget(
                           buttonType: ButtonType.primary,
                           buttonSize: ButtonSize.small,
-                          labelText: S.of(context).collect,
+                          labelText: AppLocalizations.of(context).collect,
                           icon: Icons.add_photo_alternate_outlined,
                           shouldShowSuccessConfirmation: false,
                           shouldSurfaceExecutionStates: false,
@@ -118,8 +118,8 @@ class _CollectPhotosCardWidgetState extends State<CollectPhotosCardWidget> {
                   const BorderRadius.only(bottomLeft: Radius.circular(10)),
               gradient: LinearGradient(
                 colors: [
-                  colorTheme.primary700.withOpacity(0.4),
-                  colorTheme.backgroundElevated.withOpacity(0.6),
+                  colorTheme.primary700.withValues(alpha: 0.4),
+                  colorTheme.backgroundElevated.withValues(alpha: 0.6),
                   colorTheme.backgroundElevated,
                 ],
                 begin: Alignment.bottomLeft,

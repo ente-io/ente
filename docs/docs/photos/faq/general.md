@@ -24,7 +24,7 @@ unsupported file format and we will do our best to help you out.
 
 ## Is there a file size limit?
 
-Yes, we currently do not support files larger than 4 GB.
+Yes, we currently do not support files larger than 10 GB.
 
 ## Does Ente support videos?
 

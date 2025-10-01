@@ -7,7 +7,11 @@ import { EnteLogo } from "ente-base/components/EnteLogo";
 import { ActivityIndicator } from "ente-base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "ente-base/components/mui/FocusVisibleButton";
 import { useBaseContext } from "ente-base/context";
-import { albumsAppOrigin, customAPIHost } from "ente-base/origins";
+import {
+    albumsAppOrigin,
+    customAPIHost,
+    shouldOnlyServeAlbumsApp,
+} from "ente-base/origins";
 import {
     masterKeyFromSession,
     updateSessionFromElectronSafeStorageIfNeeded,
@@ -41,7 +45,8 @@ const Page: React.FC = () => {
             const albumsURL = new URL(albumsAppOrigin());
             currentURL.pathname = router.pathname;
             if (
-                currentURL.host == albumsURL.host &&
+                (shouldOnlyServeAlbumsApp ||
+                    currentURL.host == albumsURL.host) &&
                 currentURL.pathname != "/shared-albums"
             ) {
                 const end = currentURL.hash.lastIndexOf("&");

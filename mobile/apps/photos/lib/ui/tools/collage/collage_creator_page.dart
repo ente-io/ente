@@ -24,7 +24,7 @@ class CollageCreatorPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: Text(S.of(context).createCollage),
+        title: Text(AppLocalizations.of(context).createCollage),
       ),
       body: _getBody(context),
     );

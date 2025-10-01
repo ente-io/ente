@@ -15,13 +15,13 @@
   "deleteAccountFeedbackPrompt": "Chúng tôi rất tiếc khi thấy bạn rời đi. Vui lòng chia sẻ phản hồi của bạn để giúp chúng tôi cải thiện.",
   "feedback": "Phản hồi",
   "kindlyHelpUsWithThisInformation": "Mong bạn giúp chúng tôi thông tin này",
-  "confirmDeletePrompt": "Có, tôi muốn xóa vĩnh viễn tài khoản này và tất cả dữ liệu của nó.",
+  "confirmDeletePrompt": "Có, tôi muốn xóa vĩnh viễn tài khoản này và tất cả dữ liệu.",
   "confirmAccountDeletion": "Xác nhận xóa tài khoản",
   "deleteAccountPermanentlyButton": "Xóa tài khoản vĩnh viễn",
   "yourAccountHasBeenDeleted": "Tài khoản của bạn đã bị xóa",
   "selectReason": "Chọn lý do",
   "deleteReason1": "Nó thiếu một tính năng quan trọng mà tôi cần",
-  "deleteReason2": "Ứng dụng hoặc một tính năng nhất định không hoạt động như tôi muốn",
+  "deleteReason2": "Ứng dụng hoặc một tính năng không hoạt động như tôi muốn",
   "deleteReason3": "Tôi tìm thấy một dịch vụ khác mà tôi thích hơn",
   "deleteReason4": "Lý do không có trong danh sách",
   "sendEmail": "Gửi email",
@@ -237,11 +237,12 @@
   "shareWithNonenteUsers": "Chia sẻ với người không dùng Ente",
   "createPublicLink": "Tạo liên kết công khai",
   "sendLink": "Gửi liên kết",
+  "sendQrCode": "Gửi mã QR",
   "copyLink": "Sao chép liên kết",
   "linkHasExpired": "Liên kết đã hết hạn",
   "publicLinkEnabled": "Liên kết công khai đã được bật",
   "shareALink": "Chia sẻ một liên kết",
-  "sharedAlbumSectionDescription": "Tạo album chia sẻ và cộng tác với người dùng Ente khác, bao gồm cả người dùng các gói miễn phí.",
+  "sharedAlbumSectionDescription": "Tạo album chia sẻ và cộng tác với người dùng Ente khác, bao gồm người dùng gói miễn phí.",
   "shareWithPeopleSectionTitle": "{numberOfPeople, plural, =0 {Chia sẻ với những người cụ thể} =1 {Chia sẻ với 1 người} other {Chia sẻ với {numberOfPeople} người}}",
   "@shareWithPeopleSectionTitle": {
     "placeholders": {
@@ -293,7 +294,7 @@
   "theyAlsoGetXGb": "Họ cũng nhận được {storageAmountInGB} GB",
   "freeStorageOnReferralSuccess": "{storageAmountInGB} GB mỗi khi ai đó đăng ký gói trả phí và áp dụng mã của bạn",
   "shareTextReferralCode": "Mã giới thiệu Ente: {referralCode} \n\nÁp dụng nó trong Cài đặt → Chung → Giới thiệu để nhận thêm {referralStorageInGB} GB miễn phí sau khi bạn đăng ký gói trả phí\n\nhttps://ente.io",
-  "claimFreeStorage": "Nhận thêm dung lượng miễn phí",
+  "claimFreeStorage": "Nhận thêm dung lượng",
   "inviteYourFriends": "Mời bạn bè của bạn",
   "failedToFetchReferralDetails": "Không thể lấy thông tin giới thiệu. Vui lòng thử lại sau.",
   "referralStep1": "1. Đưa mã này cho bạn bè của bạn",
@@ -562,7 +563,7 @@
   "referrals": "Giới thiệu",
   "notifications": "Thông báo",
   "sharedPhotoNotifications": "Ảnh chia sẻ mới",
-  "sharedPhotoNotificationsExplanation": "Nhận thông báo khi ai đó thêm ảnh vào album chia sẻ mà bạn tham gia",
+  "sharedPhotoNotificationsExplanation": "Nhận thông báo khi ai đó thêm ảnh vào album chia sẻ mà bạn tham gia.",
   "advanced": "Nâng cao",
   "general": "Chung",
   "security": "Bảo mật",
@@ -822,8 +823,8 @@
   "sharedWith": "Chia sẻ với {emailIDs}",
   "sharedWithMe": "Chia sẻ với tôi",
   "sharedByMe": "Chia sẻ bởi tôi",
-  "doubleYourStorage": "Gấp đôi dung lượng lưu trữ của bạn",
-  "referFriendsAnd2xYourPlan": "Giới thiệu bạn bè và ×2 gói của bạn",
+  "doubleYourStorage": "Nhân đôi dung lượng",
+  "referFriendsAnd2xYourPlan": "Giới thiệu bạn bè để được ×2 dung lượng gói của bạn",
   "shareAlbumHint": "Mở album và nhấn nút chia sẻ ở góc trên bên phải để chia sẻ.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Trên các mục là số ngày còn lại trước khi xóa vĩnh viễn",
   "trashDaysLeft": "{count, plural, =0 {Sắp xóa} =1 {1 ngày} other {{count} ngày}}",
@@ -1330,7 +1331,7 @@
   },
   "enable": "Bật",
   "enabled": "Bật",
-  "moreDetails": "Thêm chi tiết",
+  "moreDetails": "Thông tin thêm",
   "enableMLIndexingDesc": "Ente hỗ trợ học máy trên-thiết-bị nhằm nhận diện khuôn mặt, tìm kiếm vi diệu và các tính năng tìm kiếm nâng cao khác",
   "magicSearchHint": "Tìm kiếm vi diệu cho phép tìm ảnh theo nội dung của chúng, ví dụ: 'xe hơi', 'xe hơi đỏ', 'Ferrari'",
   "panorama": "Panorama",
@@ -1752,7 +1753,7 @@
   "addAlbumWidgetPrompt": "Thêm tiện ích album vào màn hình chính và quay lại đây để tùy chỉnh.",
   "addPeopleWidgetPrompt": "Thêm tiện ích người vào màn hình chính và quay lại đây để tùy chỉnh.",
   "birthdayNotifications": "Thông báo sinh nhật",
-  "receiveRemindersOnBirthdays": "Nhắc khi đến sinh nhật của ai đó. Chạm vào thông báo sẽ đưa bạn đến ảnh của người sinh nhật.",
+  "receiveRemindersOnBirthdays": "Nhắc khi đến sinh nhật của ai đó. Nhấn vào thông báo sẽ đưa bạn đến ảnh của người sinh nhật.",
   "happyBirthday": "Chúc mừng sinh nhật! 🥳",
   "birthdays": "Sinh nhật",
   "wishThemAHappyBirthday": "Chúc {name} sinh nhật vui vẻ! 🎉",
@@ -1776,15 +1777,170 @@
   "same": "Chính xác",
   "different": "Khác",
   "sameperson": "Cùng một người?",
-  "cLTitle1": "Trình chỉnh sửa ảnh nâng cao",
-  "cLDesc1": "Chúng tôi phát hành trình chỉnh sửa ảnh mới và nâng cao với nhiều khung cắt, bộ lọc sẵn có để chỉnh sửa nhanh, tùy chọn tinh chỉnh bao gồm độ bão hòa, độ tương phản, độ sáng, nhiệt độ màu và nhiều hơn nữa. Trình chỉnh sửa mới cũng bao gồm khả năng vẽ trên ảnh và thêm emoji làm nhãn dán.",
-  "cLTitle2": "Album thông minh",
-  "cLDesc2": "Giờ đây bạn có thể tự động thêm ảnh của những người đã chọn vào bất kỳ album nào. Chỉ cần vào album và chọn \"tự động thêm người\" từ menu tùy chọn. Nếu sử dụng cùng với album chia sẻ, bạn có thể chia sẻ ảnh mà không cần nhấp chuột.",
-  "cLTitle3": "Cải thiện thư viện",
-  "cLDesc3": "Chúng tôi đã thêm khả năng nhóm thư viện của bạn theo tuần, tháng và năm. Giờ đây bạn có thể tùy chỉnh thư viện để trông chính xác theo cách bạn muốn với các tùy chọn nhóm mới này, cùng với lưới tùy chỉnh.",
-  "cLTitle4": "Cuộn nhanh hơn",
-  "cLDesc4": "Cùng với một loạt cải tiến bên trong để cải thiện trải nghiệm cuộn thư viện, chúng tôi cũng đã thiết kế lại thanh cuộn để hiển thị các điểm đánh dấu, cho phép bạn nhanh chóng nhảy qua dòng thời gian.",
   "indexingPausedStatusDescription": "Lập chỉ mục bị tạm dừng. Nó sẽ tự động tiếp tục khi thiết bị đã sẵn sàng. Thiết bị được coi là sẵn sàng khi mức pin, tình trạng pin và trạng thái nhiệt độ nằm trong phạm vi tốt.",
+  "thisWeek": "Tuần này",
+  "lastWeek": "Tuần trước",
+  "thisMonth": "Tháng này",
+  "thisYear": "Năm nay",
+  "groupBy": "Phân nhóm theo",
   "faceThumbnailGenerationFailed": "Không thể tạo ảnh thu nhỏ khuôn mặt",
-  "fileAnalysisFailed": "Không thể xác định tệp"
+  "fileAnalysisFailed": "Không thể xác định tệp",
+  "editAutoAddPeople": "Sửa tự động thêm người",
+  "autoAddPeople": "Tự động thêm người",
+  "autoAddToAlbum": "Tự động thêm vào album",
+  "shouldRemoveFilesSmartAlbumsDesc": "Bạn có muốn xóa các tệp liên quan đến người đã được chọn trước đó trong album thông minh không?",
+  "addingPhotos": "Đang thêm ảnh",
+  "gettingReady": "Chuẩn bị sẵn sàng",
+  "addSomePhotosDesc1": "Thêm vài ảnh hoặc chọn ",
+  "addSomePhotosDesc2": "những khuôn mặt giống nhau",
+  "addSomePhotosDesc3": "\nđể bắt đầu với",
+  "ignorePerson": "Bỏ qua người",
+  "mixedGrouping": "Nhóm hỗn hợp?",
+  "analysis": "Phân tích",
+  "doesGroupContainMultiplePeople": "Nhóm này có chứa nhiều người?",
+  "automaticallyAnalyzeAndSplitGrouping": "Chúng tôi sẽ tự động phân tích nhóm để xác định xem có nhiều người góp mặt hay không và tách họ ra lần nữa. Việc này có thể mất vài giây.",
+  "layout": "Bố cục",
+  "day": "Ngày",
+  "peopleAutoAddDesc": "Chọn những người bạn muốn tự động thêm vào album",
+  "undo": "Hoàn tác",
+  "redo": "Làm lại",
+  "filter": "Bộ lọc",
+  "adjust": "Điều chỉnh",
+  "draw": "Vẽ",
+  "sticker": "Sticker",
+  "brushColor": "Màu cọ",
+  "font": "Phông chữ",
+  "background": "Nền",
+  "align": "Căn chỉnh",
+  "addedToAlbums": "{count, plural, =1{Đã thêm vào 1 album thành công} other{Đã thêm vào {count} album thành công}}",
+  "@addedToAlbums": {
+    "description": "Message shown when items are added to albums",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "videosProcessed": "Video đã được xử lý",
+  "totalVideos": "Tổng số video",
+  "skippedVideos": "Video bị bỏ qua",
+  "videoStreamingDescriptionLine1": "Phát video trên bất kỳ thiết bị.",
+  "videoStreamingDescriptionLine2": "Bật để xử lý luồng phát video trên thiết bị này.",
+  "videoStreamingNote": "Thiết bị này chỉ xử lý các video từ 60 ngày trở xuống và có thời lượng dưới 1 phút. Đối với các video cũ hơn/dài hơn, hãy bật tính năng phát trực tuyến trong ứng dụng máy tính để bàn.",
+  "createStream": "Tạo phát trực tiếp",
+  "recreateStream": "Tạo lại phát trực tiếp",
+  "addedToStreamCreationQueue": "Đã thêm vào hàng đợi tạo luồng",
+  "addedToStreamRecreationQueue": "Đã thêm vào hàng đợi tạo lại luồng",
+  "videoPreviewAlreadyExists": "Bản xem trước video đã tồn tại",
+  "videoAlreadyInQueue": "Tệp video đã có trong hàng đợi",
+  "addedToQueue": "Đã thêm vào hàng đợi",
+  "creatingStream": "Đang tạo luồng",
+  "similarImages": "Ảnh giống nhau",
+  "findSimilarImages": "Tìm ảnh giống nhau",
+  "noSimilarImagesFound": "Không tìm thấy ảnh giống nhau",
+  "yourPhotosLookUnique": "Ảnh của bạn trông độc đáo",
+  "similarGroupsFound": "{count, plural, =1{{count} nhóm được tìm thấy} other{{count} nhóm được tìm thấy}}",
+  "@similarGroupsFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reviewAndRemoveSimilarImages": "Xem lại và xóa ảnh giống nhau",
+  "deletePhotosWithSize": "Xóa {count} ảnh ({size})",
+  "@deletePhotosWithSize": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "selectionOptions": "Tùy chọn lựa chọn",
+  "selectExactWithCount": "Giống nhau hoàn toàn ({count})",
+  "@selectExactWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectExact": "Chọn chính xác",
+  "selectSimilarWithCount": "Giống nhau một phần ({count})",
+  "@selectSimilarWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectSimilar": "Chọn giống nhau",
+  "selectAllWithCount": "Tất cả giống nhau ({count})",
+  "@selectAllWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectSimilarImagesTitle": "Chọn những ảnh giống nhau",
+  "chooseSimilarImagesToSelect": "Chọn ảnh dựa trên sự tương đồng thị giác",
+  "clearSelection": "Bỏ chọn",
+  "similarImagesCount": "{count} ảnh giống nhau",
+  "@similarImagesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteWithCount": "Xóa ({count})",
+  "@deleteWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deleteFiles": "Xóa các tệp",
+  "areYouSureDeleteFiles": "Bạn có chắc muốn xóa các tệp này?",
+  "greatJob": "Tốt lắm!",
+  "cleanedUpSimilarImages": "Bạn tiết kiệm được {size}",
+  "@cleanedUpSimilarImages": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "size": "Dung lượng",
+  "similarity": "Sự giống nhau",
+  "analyzingPhotosLocally": "Phân tích ảnh của bạn trên thiết bị...",
+  "lookingForVisualSimilarities": "Tìm theo sự tương đồng thị giác...",
+  "comparingImageDetails": "So sánh các đặc điểm ảnh...",
+  "findingSimilarImages": "Tìm các ảnh giống nhau...",
+  "almostDone": "Sắp xong...",
+  "processingLocally": "Đang xử lý cục bộ",
+  "useMLToFindSimilarImages": "Xem lại và xóa những ảnh có vẻ giống nhau.",
+  "all": "Tất cả",
+  "similar": "Giống nhau",
+  "identical": "Giống hệt nhau",
+  "nothingHereTryAnotherFilter": "Không thấy gì, hãy thử thay đổi bộ lọc! 👀",
+  "related": "Có liên quan",
+  "hoorayyyy": "Hoorayyyy!",
+  "nothingToTidyUpHere": "Ở đây đã ngon lành rồi",
+  "deletingDash": "Đang xóa - ",
+  "cLTitle1": "Ảnh giống nhau",
+  "cLDesc1": "Chúng tôi ra mắt một hệ thống dựa trên ML mới để phát hiện các hình ảnh giống nhau, giúp bạn có thể dọn dẹp thư viện của mình. Có sẵn trong Cài đặt->Sao lưu->Giải phóng dung lượng",
+  "cLTitle2": "Nâng cao phát video",
+  "cLDesc2": "Giờ đây, bạn có thể kích hoạt thủ công việc tạo luồng video trực tiếp từ ứng dụng. Chúng tôi cũng đã thêm màn hình cài đặt phát trực tuyến video mới, hiển thị tỷ lệ phần trăm video đã được xử lý để phát trực tuyến",
+  "cLTitle3": "Cải thiện hiệu suất",
+  "cLDesc3": "Nhiều cải tiến bên trong, bao gồm sử dụng bộ nhớ đệm tốt hơn và trải nghiệm cuộn mượt mà hơn",
+  "closeBy": "Gần giống",
+  "@closeBy": {
+    "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
+  }
 }

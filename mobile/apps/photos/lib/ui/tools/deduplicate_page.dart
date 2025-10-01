@@ -4,16 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/ente_theme_data.dart';
+
 import 'package:photos/events/user_details_changed_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/duplicate_files.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/theme/ente_theme.dart";
+import 'package:photos/ui/components/buttons/button_widget.dart';
+import "package:photos/ui/components/models/button_type.dart";
 import 'package:photos/ui/viewer/file/detail_page.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
+
 import 'package:photos/utils/delete_file_util.dart';
 import "package:photos/utils/dialog_util.dart";
 import 'package:photos/utils/navigation_util.dart';
@@ -29,9 +32,8 @@ class DeduplicatePage extends StatefulWidget {
 }
 
 class _DeduplicatePageState extends State<DeduplicatePage> {
-  static const crossAxisCount = 4;
-  static const crossAxisSpacing = 4.0;
-  static const headerRowCount = 3;
+  static const crossAxisCount = 3;
+  static const crossAxisSpacing = 12.0;
 
   final Set<int> selectedGrids = <int>{};
 
@@ -44,6 +46,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
   void initState() {
     _duplicates = widget.duplicates;
     _deleteProgress = ValueNotifier("");
+
     _selectAllGrids();
     super.initState();
   }
@@ -51,6 +54,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
   @override
   void dispose() {
     _deleteProgress.dispose();
+
     super.dispose();
   }
 
@@ -67,48 +71,8 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: Text(S.of(context).deduplicateFiles),
-        actions: <Widget>[
-          PopupMenuButton(
-            constraints: const BoxConstraints(minWidth: 180),
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(
-                Radius.circular(8),
-              ),
-            ),
-            onSelected: (dynamic value) {
-              setState(() {
-                selectedGrids.clear();
-              });
-            },
-            offset: const Offset(0, 50),
-            itemBuilder: (BuildContext context) => [
-              PopupMenuItem(
-                value: true,
-                height: 32,
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.remove_circle_outline,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 12),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 1),
-                      child: Text(
-                        S.of(context).deselectAll,
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleMedium!
-                            .copyWith(fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
+        title: Text(AppLocalizations.of(context).deduplicateFiles),
+        actions: _duplicates.isNotEmpty ? [_getSortMenu()] : null,
       ),
       body: _getBody(),
     );
@@ -133,33 +97,25 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Expanded(
-          child: ListView.builder(
-            itemBuilder: (context, index) {
-              if (index == 0) {
-                return const SizedBox.shrink();
-              } else if (index == 1) {
-                return const SizedBox.shrink();
-              } else if (index == 2) {
-                if (_duplicates.isNotEmpty) {
-                  return _getSortMenu(context);
-                } else {
-                  return const Padding(
-                    padding: EdgeInsets.only(top: 32),
-                    child: EmptyState(),
-                  );
-                }
-              }
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: _getGridView(
-                  _duplicates[index - headerRowCount],
-                  index - headerRowCount,
+          child: _duplicates.isNotEmpty
+              ? ListView.builder(
+                  cacheExtent: 400,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: _getGridView(
+                        _duplicates[index],
+                        index,
+                      ),
+                    );
+                  },
+                  itemCount: _duplicates.length,
+                  shrinkWrap: true,
+                )
+              : const Padding(
+                  padding: EdgeInsets.only(top: 32),
+                  child: EmptyState(),
                 ),
-              );
-            },
-            itemCount: _duplicates.length + headerRowCount,
-            shrinkWrap: true,
-          ),
         ),
         selectedGrids.isEmpty
             ? const SizedBox.shrink()
@@ -189,76 +145,58 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     );
   }
 
-  Widget _getSortMenu(BuildContext context) {
+  Widget _getSortMenu() {
+    final textTheme = getEnteTextTheme(context);
     Text sortOptionText(SortKey key) {
       String text = key.toString();
       switch (key) {
         case SortKey.count:
-          text = S.of(context).count;
+          text = AppLocalizations.of(context).count;
           break;
         case SortKey.size:
-          text = S.of(context).totalSize;
+          text = AppLocalizations.of(context).totalSize;
           break;
       }
       return Text(
         text,
-        style: Theme.of(context).textTheme.titleMedium!.copyWith(
-              fontSize: 14,
-              color: Theme.of(context).iconTheme.color!.withOpacity(0.7),
-            ),
+        style: textTheme.miniBold,
       );
     }
 
-    return Row(
-      // h4ck to align PopupMenuItems to end
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        const SizedBox.shrink(),
-        PopupMenuButton(
-          initialValue: sortKey.index,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 6, 24, 6),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                sortOptionText(sortKey),
-                const Padding(padding: EdgeInsets.only(left: 4)),
-                Icon(
-                  Icons.sort,
-                  color: Theme.of(context).colorScheme.iconColor,
-                  size: 20,
-                ),
-              ],
-            ),
-          ),
-          onSelected: (int index) {
-            setState(() {
-              final newKey = SortKey.values[index];
-              if (newKey == sortKey) {
-                return;
-              } else {
-                sortKey = newKey;
-                if (selectedGrids.length != _duplicates.length) {
-                  selectedGrids.clear();
-                }
-              }
-            });
-          },
-          itemBuilder: (context) {
-            return List.generate(SortKey.values.length, (index) {
-              return PopupMenuItem(
-                value: index,
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: sortOptionText(SortKey.values[index]),
-                ),
-              );
-            });
-          },
+    return PopupMenuButton(
+      initialValue: sortKey.index,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 6, 24, 6),
+        child: Icon(
+          Icons.sort,
+          color: getEnteColorScheme(context).strokeBase,
+          size: 20,
         ),
-      ],
+      ),
+      onSelected: (int index) {
+        setState(() {
+          final newKey = SortKey.values[index];
+          if (newKey == sortKey) {
+            return;
+          } else {
+            sortKey = newKey;
+            if (selectedGrids.length != _duplicates.length) {
+              selectedGrids.clear();
+            }
+          }
+        });
+      },
+      itemBuilder: (context) {
+        return List.generate(SortKey.values.length, (index) {
+          return PopupMenuItem(
+            value: index,
+            child: Text(
+              sortOptionText(SortKey.values[index]).data!,
+              style: textTheme.miniBold,
+            ),
+          );
+        });
+      },
     );
   }
 
@@ -272,55 +210,60 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
         totalSize += toDeleteCount * _duplicates[index].size;
       }
     }
-    final String text = S.of(context).deleteItemCount(fileCount);
-    return SizedBox(
-      width: double.infinity,
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: crossAxisSpacing / 2),
-          child: TextButton(
-            style: OutlinedButton.styleFrom(
-              backgroundColor:
-                  Theme.of(context).colorScheme.inverseBackgroundColor,
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                const Padding(padding: EdgeInsets.all(4)),
-                Text(
-                  text,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: Theme.of(context).colorScheme.inverseTextColor,
-                  ),
-                  textAlign: TextAlign.center,
+    final hasSelectedFiles = fileCount > 0;
+
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 200),
+      switchInCurve: Curves.easeOut,
+      switchOutCurve: Curves.easeIn,
+      child: hasSelectedFiles
+          ? SafeArea(
+              child: Container(
+                key: const ValueKey('bottom_buttons'),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: crossAxisSpacing,
+                  vertical: 8,
                 ),
-                const Padding(padding: EdgeInsets.all(2)),
-                Text(
-                  formatBytes(totalSize),
-                  style: TextStyle(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .inverseTextColor
-                        .withOpacity(0.7),
-                    fontSize: 12,
-                  ),
+                decoration: BoxDecoration(
+                  color: getEnteColorScheme(context).backgroundBase,
                 ),
-                const Padding(padding: EdgeInsets.all(2)),
-              ],
-            ),
-            onPressed: () async {
-              try {
-                await deleteDuplicates(totalSize);
-              } catch (e) {
-                log("Failed to delete duplicates", error: e);
-                showGenericErrorDialog(context: context, error: e).ignore();
-              }
-            },
-          ),
-        ),
-      ),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      child: ButtonWidget(
+                        labelText:
+                            "${AppLocalizations.of(context).deleteItemCount(count: fileCount)} (${formatBytes(totalSize)})",
+                        buttonType: ButtonType.critical,
+                        onTap: () async {
+                          try {
+                            await deleteDuplicates(totalSize);
+                          } catch (e) {
+                            log("Failed to delete duplicates", error: e);
+                            showGenericErrorDialog(context: context, error: e)
+                                .ignore();
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ButtonWidget(
+                        labelText: AppLocalizations.of(context).unselectAll,
+                        buttonType: ButtonType.secondary,
+                        onTap: () async {
+                          setState(() {
+                            selectedGrids.clear();
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : const SizedBox.shrink(key: ValueKey('empty')),
     );
   }
 
@@ -375,7 +318,12 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(2, 4, 2, 12),
+          padding: const EdgeInsets.fromLTRB(
+            crossAxisSpacing,
+            4,
+            crossAxisSpacing,
+            12,
+          ),
           child: GestureDetector(
             onTap: () {
               if (selectedGrids.contains(itemIndex)) {
@@ -389,10 +337,10 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  S.of(context).duplicateItemsGroup(
-                        duplicates.files.length,
-                        formatBytes(duplicates.size),
-                      ),
+                  AppLocalizations.of(context).duplicateItemsGroup(
+                    count: duplicates.files.length,
+                    formattedSize: formatBytes(duplicates.size),
+                  ),
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
                 !selectedGrids.contains(itemIndex)
@@ -410,7 +358,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: crossAxisSpacing / 2),
+          padding: const EdgeInsets.symmetric(horizontal: crossAxisSpacing),
           child: GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -475,7 +423,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
             child: Hero(
               tag: "deduplicate_" + file.tag,
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(8),
                 child: ThumbnailWidget(
                   file,
                   diskLoadDeferDuration: galleryThumbnailDiskLoadDeferDuration,

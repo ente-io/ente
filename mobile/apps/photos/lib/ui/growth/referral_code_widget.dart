@@ -63,10 +63,11 @@ class ReferralCodeWidget extends StatelessWidget {
                                 .email;
                             showInfoDialog(
                               context,
-                              title: S.of(context).error,
-                              body: S
-                                  .of(context)
-                                  .onlyFamilyAdminCanChangeCode(familyAdmin),
+                              title: AppLocalizations.of(context).error,
+                              body: AppLocalizations.of(context)
+                                  .onlyFamilyAdminCanChangeCode(
+                                familyAdminEmail: familyAdmin,
+                              ),
                               icon: Icons.error,
                             );
                           } else {
@@ -91,9 +92,9 @@ class ReferralCodeWidget extends StatelessWidget {
   Future<void> showUpdateReferralCodeDialog(BuildContext context) async {
     final result = await showTextInputDialog(
       context,
-      title: S.of(context).changeYourReferralCode,
-      submitButtonLabel: S.of(context).change,
-      hintText: S.of(context).enterCode,
+      title: AppLocalizations.of(context).changeYourReferralCode,
+      submitButtonLabel: AppLocalizations.of(context).change,
+      hintText: AppLocalizations.of(context).enterCode,
       alwaysShowSuccessState: true,
       initialValue: codeValue,
       textCapitalization: TextCapitalization.characters,
@@ -112,16 +113,16 @@ class ReferralCodeWidget extends StatelessWidget {
             if (e.response?.statusCode == 400) {
               await showInfoDialog(
                 context,
-                title: S.of(context).error,
-                body: S.of(context).unavailableReferralCode,
+                title: AppLocalizations.of(context).error,
+                body: AppLocalizations.of(context).unavailableReferralCode,
                 icon: Icons.error,
               );
               return;
             } else if (e.response?.statusCode == 429) {
               await showInfoDialog(
                 context,
-                title: S.of(context).error,
-                body: S.of(context).codeChangeLimitReached,
+                title: AppLocalizations.of(context).error,
+                body: AppLocalizations.of(context).codeChangeLimitReached,
                 icon: Icons.error,
               );
               return;

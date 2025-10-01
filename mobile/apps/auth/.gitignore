@@ -8,6 +8,7 @@
 .buildlog/
 .history
 .svn/
+android/app/build/
 
 # Editors
 .vscode/
@@ -45,3 +46,4 @@ dist/
 
 # FVM Version Cache
 .fvm/
+lib/l10n/arb/*.dart

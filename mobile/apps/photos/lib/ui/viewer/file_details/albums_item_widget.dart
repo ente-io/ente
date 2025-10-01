@@ -7,7 +7,9 @@ import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/collection/collection_items.dart';
 import 'package:photos/models/file/file.dart';
+import "package:photos/models/selected_files.dart";
 import "package:photos/services/collections_service.dart";
+import "package:photos/ui/collections/collection_action_sheet.dart";
 import "package:photos/ui/components/buttons/chip_button_widget.dart";
 import "package:photos/ui/components/info_item_widget.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
@@ -37,7 +39,7 @@ class AlbumsItemWidget extends StatelessWidget {
     return InfoItemWidget(
       key: const ValueKey("Albums"),
       leadingIcon: Icons.folder_outlined,
-      title: S.of(context).albums,
+      title: AppLocalizations.of(context).albums,
       subtitleSection: fileIsBackedup
           ? _collectionsListOfFile(
               context,
@@ -84,7 +86,7 @@ class AlbumsItemWidget extends StatelessWidget {
         collections.add(c!);
         chipButtons.add(
           ChipButtonWidget(
-            c.isHidden() ? S.of(context).hidden : c.displayName,
+            c.isHidden() ? AppLocalizations.of(context).hidden : c.displayName,
             onTap: () {
               if (c.isHidden()) {
                 return;
@@ -101,6 +103,25 @@ class AlbumsItemWidget extends StatelessWidget {
           ),
         );
       }
+
+      // Add the '+' button if feature flag is enabled
+      chipButtons.add(
+        ChipButtonWidget(
+          null,
+          leadingIcon: Icons.add,
+          iconSize: 15,
+          onTap: () {
+            final selectedFiles = SelectedFiles();
+            selectedFiles.files.add(file);
+            showCollectionActionSheet(
+              context,
+              selectedFiles: selectedFiles,
+              actionType: CollectionActionType.addFiles,
+            );
+          },
+        ),
+      );
+
       return chipButtons;
     } catch (e, s) {
       Logger("AlbumsItemWidget").info(e, s);
