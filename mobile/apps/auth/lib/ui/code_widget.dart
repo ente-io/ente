@@ -122,6 +122,9 @@ class _CodeWidgetState extends State<CodeWidget> {
 
     Widget getCardContents(AppLocalizations l10n, {required bool isSelected}) {
       final colorScheme = getEnteColorScheme(context);
+      final isSelectionActive =
+          CodeDisplayStore.instance.isSelectionModeActive.value;
+
       return Stack(
         children: [
           if (!ignorePin && widget.code.isPinned)
@@ -146,14 +149,27 @@ class _CodeWidgetState extends State<CodeWidget> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              if (widget.code.type.isTOTPCompatible &&
-                  !CodeDisplayStore.instance.isSelectionModeActive.value)
-                CodeTimerProgress(
-                  key: ValueKey('period_${widget.code.period}'),
-                  period: widget.code.period,
-                  isCompactMode: widget.isCompactMode,
-                  timeOffsetInMilliseconds: PreferenceService.instance
-                      .timeOffsetInMilliSeconds(),
+              if (widget.code.type.isTOTPCompatible)
+                SizedBox(
+                  height: widget.isCompactMode ? 1 : 3,
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 180),
+                    switchInCurve: Curves.easeIn,
+                    switchOutCurve: Curves.easeOut,
+                    transitionBuilder: (child, animation) => FadeTransition(
+                      opacity: animation,
+                      child: child,
+                    ),
+                    child: isSelectionActive
+                        ? const SizedBox.shrink()
+                        : CodeTimerProgress(
+                            key: ValueKey('period_${widget.code.period}'),
+                            period: widget.code.period,
+                            isCompactMode: widget.isCompactMode,
+                            timeOffsetInMilliseconds: PreferenceService.instance
+                                .timeOffsetInMilliSeconds(),
+                          ),
+                  ),
                 ),
               widget.isCompactMode
                   ? const SizedBox(height: 4)
@@ -206,56 +222,75 @@ class _CodeWidgetState extends State<CodeWidget> {
         builder: (context, selectedIds, child) {
           final isSelected = selectedIds.contains(widget.code.secret);
 
-          return Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              color: isSelected
-                  ? colorScheme.primary400.withValues(alpha: 0.10)
-                  : Theme.of(context).colorScheme.codeCardBackgroundColor,
-              boxShadow: (widget.code.isPinned && !isSelected)
-                  ? colorScheme.pinnedCardBoxShadow
-                  : [],
-            ),
-            foregroundDecoration: isSelected
-                ? BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: colorScheme.primary400, width: 2),
-                  )
-                : null,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  customBorder: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  onTap: () {
-                    final store = CodeDisplayStore.instance;
-                    if (store.isSelectionModeActive.value) {
-                      store.toggleSelection(widget.code.secret);
-                    } else {
-                      _copyCurrentOTPToClipboard();
-                    }
-                  },
-                  onDoubleTap: isMaskingEnabled
-                      ? () {
-                          setState(() {
-                            _hideCode = !_hideCode;
-                          });
+          return Stack(
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                curve: Curves.easeInOut,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  color: isSelected
+                      ? colorScheme.primary400.withValues(alpha: 0.10)
+                      : Theme.of(context).colorScheme.codeCardBackgroundColor,
+                  boxShadow: (widget.code.isPinned && !isSelected)
+                      ? colorScheme.pinnedCardBoxShadow
+                      : [],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      customBorder: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      onTap: () {
+                        final store = CodeDisplayStore.instance;
+                        if (store.isSelectionModeActive.value) {
+                          store.toggleSelection(widget.code.secret);
+                        } else {
+                          _copyCurrentOTPToClipboard();
                         }
-                      : null,
-                  onLongPress: widget.isReordering
-                      ? null
-                      : () {
-                          CodeDisplayStore.instance.toggleSelection(
-                            widget.code.secret,
-                          );
-                        },
-                  child: getCardContents(l10n, isSelected: isSelected),
+                      },
+                      onDoubleTap: isMaskingEnabled
+                          ? () {
+                              setState(() {
+                                _hideCode = !_hideCode;
+                              });
+                            }
+                          : null,
+                      onLongPress: widget.isReordering
+                          ? null
+                          : () {
+                              CodeDisplayStore.instance.toggleSelection(
+                                widget.code.secret,
+                              );
+                            },
+                      child: getCardContents(l10n, isSelected: isSelected),
+                    ),
+                  ),
                 ),
               ),
-            ),
+              Positioned.fill(
+                child: IgnorePointer(
+                  ignoring: true,
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 180),
+                    curve: Curves.easeInOut,
+                    opacity: isSelected ? 1 : 0,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: colorScheme.primary400,
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           );
         },
       );
@@ -292,9 +327,8 @@ class _CodeWidgetState extends State<CodeWidget> {
                     ),
                   if (!widget.code.isTrashed && !ignorePin)
                     MenuItem(
-                      label: widget.code.isPinned
-                          ? l10n.unpinText
-                          : l10n.pinText,
+                      label:
+                          widget.code.isPinned ? l10n.unpinText : l10n.pinText,
                       icon: widget.code.isPinned
                           ? Icons.push_pin
                           : Icons.push_pin_outlined,
@@ -415,14 +449,15 @@ class _CodeWidgetState extends State<CodeWidget> {
     final colorScheme = getEnteColorScheme(context);
     final bool isCompactMode = widget.isCompactMode;
     final double indicatorSize = isCompactMode ? 16 : 20;
-    final double indicatorGap = isSelected ? 8 : 0;
+    const double indicatorPadding = 4;
+    final double indicatorSlotWidth = indicatorSize + indicatorPadding;
+    const double accountTranslate = 0;
     final TextStyle? issuerStyle = isCompactMode
         ? Theme.of(context).textTheme.bodyMedium
         : Theme.of(context).textTheme.titleLarge;
     final double issuerLineHeight =
         (issuerStyle?.fontSize ?? 16) * (issuerStyle?.height ?? 1.0);
     final double rowHeight = math.max(issuerLineHeight, indicatorSize);
-    final double accountIndent = isSelected ? indicatorSize + indicatorGap : 0;
 
     return Padding(
       padding: const EdgeInsets.only(left: 16, right: 16),
@@ -439,35 +474,51 @@ class _CodeWidgetState extends State<CodeWidget> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       AnimatedContainer(
-                        duration: const Duration(milliseconds: 150),
+                        duration: const Duration(milliseconds: 180),
                         curve: Curves.easeInOut,
-                        width: isSelected ? indicatorSize + indicatorGap : 0,
+                        width: isSelected ? indicatorSlotWidth : 0,
                         height: rowHeight,
-                        padding: EdgeInsets.only(
-                          right: isSelected ? indicatorGap : 0,
-                        ),
                         alignment: Alignment.centerLeft,
-                        child: isSelected
-                            ? SizedBox(
-                                width: indicatorSize,
-                                height: indicatorSize,
-                                child: Stack(
-                                  alignment: Alignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.circle,
-                                      color: colorScheme.primary400,
-                                      size: indicatorSize,
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 180),
+                          switchInCurve: Curves.easeIn,
+                          switchOutCurve: Curves.easeOut,
+                          transitionBuilder: (child, animation) =>
+                              FadeTransition(
+                            opacity: animation,
+                            child:
+                                ScaleTransition(scale: animation, child: child),
+                          ),
+                          child: isSelected
+                              ? Align(
+                                  key: const ValueKey('selected-indicator'),
+                                  alignment: Alignment.centerLeft,
+                                  child: Padding(
+                                    padding: EdgeInsets.only(
+                                        right: indicatorPadding),
+                                    child: SizedBox(
+                                      width: indicatorSize,
+                                      height: indicatorSize,
+                                      child: Stack(
+                                        alignment: Alignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.circle,
+                                            color: colorScheme.primary400,
+                                            size: indicatorSize,
+                                          ),
+                                          Icon(
+                                            Icons.check,
+                                            color: Colors.white,
+                                            size: isCompactMode ? 8 : 12,
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                    Icon(
-                                      Icons.check,
-                                      color: Colors.white,
-                                      size: isCompactMode ? 8 : 12,
-                                    ),
-                                  ],
-                                ),
-                              )
-                            : null,
+                                  ),
+                                )
+                              : const SizedBox.shrink(),
+                        ),
                       ),
                       Expanded(
                         child: Align(
@@ -484,17 +535,14 @@ class _CodeWidgetState extends State<CodeWidget> {
                   ),
                 ),
                 if (!isCompactMode) const SizedBox(height: 2),
-                Padding(
-                  padding: EdgeInsets.only(left: accountIndent),
-                  child: Text(
-                    safeDecode(widget.code.account).trim(),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontSize: isCompactMode ? 12 : 12,
-                      color: Colors.grey,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                Text(
+                  safeDecode(widget.code.account).trim(),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontSize: isCompactMode ? 12 : 12,
+                        color: Colors.grey,
+                      ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -580,8 +628,8 @@ class _CodeWidgetState extends State<CodeWidget> {
     String content, {
     required String confirmationMessage,
   }) async {
-    final shouldMinimizeOnCopy = PreferenceService.instance
-        .shouldMinimizeOnCopy();
+    final shouldMinimizeOnCopy =
+        PreferenceService.instance.shouldMinimizeOnCopy();
 
     await FlutterClipboard.copy(content);
     showToast(context, confirmationMessage);
@@ -681,9 +729,7 @@ class _CodeWidgetState extends State<CodeWidget> {
       display: display.copyWith(pinned: !currentlyPinned),
     );
     unawaited(
-      CodeStore.instance
-          .addCode(code)
-          .then(
+      CodeStore.instance.addCode(code).then(
             (value) => showToast(
               context,
               !currentlyPinned
@@ -702,11 +748,11 @@ class _CodeWidgetState extends State<CodeWidget> {
       showToast(context, 'Code can only be deleted from trash');
       return;
     }
-    bool isAuthSuccessful = await LocalAuthenticationService.instance
-        .requestLocalAuthentication(
-          context,
-          context.l10n.deleteCodeAuthMessage,
-        );
+    bool isAuthSuccessful =
+        await LocalAuthenticationService.instance.requestLocalAuthentication(
+      context,
+      context.l10n.deleteCodeAuthMessage,
+    );
     if (!isAuthSuccessful) {
       return;
     }
@@ -738,11 +784,11 @@ class _CodeWidgetState extends State<CodeWidget> {
       showToast(context, 'Code is already trashed');
       return;
     }
-    bool isAuthSuccessful = await LocalAuthenticationService.instance
-        .requestLocalAuthentication(
-          context,
-          context.l10n.deleteCodeAuthMessage,
-        );
+    bool isAuthSuccessful =
+        await LocalAuthenticationService.instance.requestLocalAuthentication(
+      context,
+      context.l10n.deleteCodeAuthMessage,
+    );
     if (!isAuthSuccessful) {
       return;
     }
