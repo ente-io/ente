@@ -1845,18 +1845,18 @@ interface ManageLayoutProps {
     onRootClose: () => void;
     collection: Collection;
     onRemotePull: (opts?: RemotePullOpts) => Promise<void>;
-    setBlockingLoad: (value: boolean) => void;
 }
 
 const ManageLayout: React.FC<ManageLayoutProps> = ({
     onRootClose,
     collection,
     onRemotePull,
-    setBlockingLoad,
 }) => {
     const { show: showLayoutOptions, props: layoutOptionsVisibilityProps } =
         useModalVisibility();
     const [errorMessage, setErrorMessage] = useState("");
+    const [loadingLayout, setLoadingLayout] = useState<string | null>(null);
+    const [selectedLayout, setSelectedLayout] = useState<string | null>(null);
 
     const options = useMemo(() => layoutOptions(), []);
 
@@ -1866,17 +1866,18 @@ const ManageLayout: React.FC<ManageLayoutProps> = ({
     const changeLayoutValue = (value: string) => async () => {
         if (value === currentLayout) return;
 
-        setBlockingLoad(true);
+        setLoadingLayout(value);
+        setSelectedLayout(value);
         setErrorMessage("");
         try {
             await updateCollectionLayout(collection, value);
             await onRemotePull({ silent: true });
-            layoutOptionsVisibilityProps.onClose();
         } catch (e) {
             log.error("Could not update collection layout", e);
             setErrorMessage(t("generic_error"));
+            setSelectedLayout(null);
         } finally {
-            setBlockingLoad(false);
+            setLoadingLayout(null);
         }
     };
 
@@ -1904,8 +1905,16 @@ const ManageLayout: React.FC<ManageLayoutProps> = ({
                                     fontWeight="regular"
                                     onClick={changeLayoutValue(value)}
                                     label={label}
+                                    disabled={loadingLayout !== null}
                                     endIcon={
-                                        currentLayout === value && <DoneIcon />
+                                        loadingLayout === value ? (
+                                            <RowButtonEndActivityIndicator />
+                                        ) : (selectedLayout === null &&
+                                              currentLayout === value) ||
+                                          (selectedLayout === value &&
+                                              !loadingLayout) ? (
+                                            <DoneIcon />
+                                        ) : undefined
                                     }
                                 />
                                 {index != options.length - 1 && (
