@@ -204,6 +204,7 @@ export default function PublicCollectionGallery() {
 
                             window.location.href = albumsURL.href;
                             redirectingToAlbumsApp = true;
+                            return;
                         }
                     }
 
