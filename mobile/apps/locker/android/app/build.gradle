@@ -48,7 +48,26 @@ android {
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.debug
+            signingConfig = signingConfigs.release
+        }
+    }
+
+    flavorDimensions "default"
+    productFlavors {
+        independent {
+            dimension "default"
+            applicationIdSuffix ".independent"
+        }
+        dev {
+            dimension "default"
+            applicationIdSuffix ".dev"
+        }
+        playstore {
+            dimension "default"
+        }
+        fdroid {
+            dimension "default"
+            applicationIdSuffix ".fdroid"
         }
     }
 }
