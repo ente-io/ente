@@ -178,21 +178,31 @@ export const handleTimelineScroll = ({
 
         const targetZoom = isTouchDevice ? 8 : 10; // Touch device-aware zoom level
 
-        // Use pre-calculated super cluster info instead of recalculating
+        // Get super cluster info for both source and destination
         const currentSuperClusterIndex =
             superClusterInfo.clusterToSuperClusterMap.get(
                 currentActiveLocationIndex,
             ) ?? -1;
         const isInSuperCluster = currentSuperClusterIndex !== -1;
 
-        // Check previous super cluster state
+        // Get the super cluster index of where we're coming FROM (not the stored state)
+        const fromSuperClusterIndex =
+            previousActiveLocationIndex >= 0
+                ? (superClusterInfo.clusterToSuperClusterMap.get(
+                      previousActiveLocationIndex,
+                  ) ?? -1)
+                : -1;
+
+        // Check if we're moving between clusters in the SAME super cluster
+        const isSameSuperCluster =
+            isInSuperCluster &&
+            fromSuperClusterIndex !== -1 &&
+            currentSuperClusterIndex === fromSuperClusterIndex;
+
+        // Check previous super cluster state (for other transition logic)
         const previousState = previousSuperClusterStateRef.current;
         const wasInSuperCluster = previousState.isInSuperCluster;
         const previousSuperClusterIndex = previousState.superClusterIndex;
-        const isSameSuperCluster =
-            isInSuperCluster &&
-            wasInSuperCluster &&
-            currentSuperClusterIndex === previousSuperClusterIndex;
 
         try {
             // Handle super cluster zoom logic - check distant locations first!
@@ -591,7 +601,7 @@ export const handleMarkerClick = ({
                     );
                 previousSuperClusterStateRef.current = {
                     isInSuperCluster: true,
-                    superClusterIndex: targetSuperClusterIndex || null,
+                    superClusterIndex: targetSuperClusterIndex ?? null,
                 };
             } else {
                 // Check if the target cluster is part of a super cluster
