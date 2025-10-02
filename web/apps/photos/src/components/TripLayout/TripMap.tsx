@@ -157,11 +157,28 @@ export const TripMap: React.FC<TripMapProps> = ({
                                         const firstClusterIndex =
                                             superCluster.clustersInvolved[0];
                                         if (firstClusterIndex !== undefined) {
-                                            onMarkerClick(
-                                                firstClusterIndex,
-                                                superCluster.lat,
-                                                superCluster.lng,
-                                            );
+                                            // Get the actual first cluster's coordinates
+                                            const firstCluster =
+                                                photoClusters[
+                                                    firstClusterIndex
+                                                ];
+                                            if (firstCluster) {
+                                                const avgLat =
+                                                    firstCluster.reduce(
+                                                        (sum, p) => sum + p.lat,
+                                                        0,
+                                                    ) / firstCluster.length;
+                                                const avgLng =
+                                                    firstCluster.reduce(
+                                                        (sum, p) => sum + p.lng,
+                                                        0,
+                                                    ) / firstCluster.length;
+                                                onMarkerClick(
+                                                    firstClusterIndex,
+                                                    avgLat,
+                                                    avgLng,
+                                                );
+                                            }
                                         }
                                     },
                                 }}
