@@ -1801,7 +1801,6 @@
   "automaticallyAnalyzeAndSplitGrouping": "Wir analysieren die Gruppierung automatisch, um festzustellen, ob mehrere Personen vorhanden sind, und trennen sie erneut. Dies kann ein paar Sekunden dauern.",
   "layout": "Layout",
   "day": "Tag",
-  "peopleAutoAddDesc": "Wähle die Personen, die du automatisch zum Album hinzufügen möchtest",
   "undo": "Rückgängig",
   "redo": "Wiederherstellen",
   "filter": "Filter",
