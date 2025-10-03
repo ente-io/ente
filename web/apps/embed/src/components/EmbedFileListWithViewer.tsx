@@ -75,7 +75,7 @@ export const EmbedFileListWithViewer: React.FC<
                             display: "flex",
                             flexDirection: "column",
                             alignItems: "flex-end",
-                            marginRight: "16px",
+                            marginRight: "4px",
                             fontSize: "0.8em",
                             "&:hover .powered-text": {
                                 color: "text.base",
