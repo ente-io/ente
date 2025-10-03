@@ -48,6 +48,7 @@ class NotificationSettingsScreen extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             MenuItemWidget(
                               captionedTextWidget: CaptionedTextWidget(
