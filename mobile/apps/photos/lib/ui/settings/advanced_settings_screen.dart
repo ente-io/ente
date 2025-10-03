@@ -95,6 +95,8 @@ class AdvancedSettingsScreen extends StatelessWidget {
                       MenuItemWidget(
                         captionedTextWidget: CaptionedTextWidget(
                           title: AppLocalizations.of(context).maps,
+                          subTitle:
+                              AppLocalizations.of(context).maps_privacy_notice,
                         ),
                         menuItemColor: colorScheme.fillFaint,
                         singleBorderRadius: 8,
