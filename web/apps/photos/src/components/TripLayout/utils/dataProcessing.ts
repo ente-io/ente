@@ -85,8 +85,9 @@ export const fetchLocationNames = async ({
         return { updatedPhotos };
     }
 
-    for (const cluster of photoClusters) {
-        if (cluster.length === 0) continue;
+    // Create all geocoding promises at once for parallel execution
+    const geocodingPromises = photoClusters.map(async (cluster) => {
+        if (cluster.length === 0) return null;
 
         const avgLat =
             cluster.reduce((sum, p) => sum + p.lat, 0) / cluster.length;
@@ -95,21 +96,32 @@ export const fetchLocationNames = async ({
 
         try {
             const locationInfo = await getLocationName(avgLat, avgLng);
-
-            cluster.forEach((photo) => {
-                updatedPhotos.set(photo.fileId, {
-                    name: locationInfo.place,
-                    country: locationInfo.country,
-                });
-                locationDataRef.current.set(photo.fileId, {
-                    name: locationInfo.place,
-                    country: locationInfo.country,
-                });
-            });
+            return { cluster, locationInfo };
         } catch {
-            // Silently ignore processing errors for individual files
+            // Return null on error, will be filtered out
+            return null;
         }
-    }
+    });
+
+    // Execute all geocoding requests in parallel
+    const results = await Promise.all(geocodingPromises);
+
+    // Process results and update maps
+    results.forEach((result) => {
+        if (!result) return; // Skip failed requests
+
+        const { cluster, locationInfo } = result;
+        cluster.forEach((photo) => {
+            updatedPhotos.set(photo.fileId, {
+                name: locationInfo.place,
+                country: locationInfo.country,
+            });
+            locationDataRef.current.set(photo.fileId, {
+                name: locationInfo.place,
+                country: locationInfo.country,
+            });
+        });
+    });
 
     return { updatedPhotos };
 };

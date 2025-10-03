@@ -1,0 +1,106 @@
+---
+title: Embed albums
+description: Embed your Ente Photos albums on your own website
+---
+
+# Embed albums
+
+The embed feature allows you to display your Ente photo albums directly on your own website or blog using an iframe.
+
+For example, if you have a public Ente album that you'd like to showcase on your website, you can embed it just like you would embed a YouTube video. Visitors can browse through your photos without leaving your site.
+
+## Availability
+
+The embed feature works with any public album link. Since creating public albums requires an active Ente subscription for abuse prevention, embedding also requires a subscription.
+
+## How to embed
+
+### Easy method - Using the web app
+
+The simplest way to get the embed code is directly from Ente's web app:
+
+1. Open the album in [web.ente.io](https://web.ente.io)
+2. Go to the album's sharing settings
+3. Create a public link (if you haven't already)
+4. Open the link settings ("Manage link")
+5. Click the "Copy embed HTML" button
+
+This copies ready-to-use iframe code that you can paste directly into your website's HTML.
+
+### Manual method
+
+Alternatively, you can create the embed code manually:
+
+#### Step 1 - Create a public link
+
+First, you need to create a public link for the album you want to embed:
+
+1. Open the album in Ente (web or mobile app)
+2. Go to the album's sharing settings
+3. Create a public link
+4. Copy the link (it will look like `https://albums.ente.io/?t=...#...`)
+
+#### Step 2 - Add iframe to your website
+
+Add an iframe to your HTML with the public link as the source, replacing `albums.ente.io` with `embed.ente.io`:
+
+```html
+<iframe
+    src="https://embed.ente.io/?t=...#..."
+    width="800"
+    height="600"
+    frameborder="0"
+    allowfullscreen
+>
+</iframe>
+```
+
+> [!NOTE]
+>
+> If you're using a custom domain for your public links, then replace your custom domain with `embed.ente.io`. The easy method will automatically do this for you.
+
+### Customizing the embed
+
+You can customize the appearance by adjusting the iframe attributes:
+
+- `width` and `height`: Control the size of the embed
+- `allowfullscreen`: Allows viewers to open photos in fullscreen mode
+- You can use percentage values for responsive sizing: `width="100%"`
+
+#### Example with responsive sizing
+
+```html
+<div
+    style="position: relative; padding-bottom: 75%; height: 0; overflow: hidden;"
+>
+    <iframe
+        src="https://embed.ente.io/?t=...#..."
+        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"
+        frameborder="0"
+        allowfullscreen
+    >
+    </iframe>
+</div>
+```
+
+## Features
+
+The embedded album viewer includes:
+
+- Thumbnail grid view
+- Full-size image viewer with navigation
+- Video playback support
+- Fullscreen mode (when `allowfullscreen` is set)
+- Password protection (if enabled on the album)
+- Automatic updates when you add new photos to the album
+
+## Privacy and security
+
+- The embed uses the same encryption and security as regular Ente albums
+- Only photos in the public album are accessible through the embed
+- If you delete the public link, the embed will stop working
+- Password-protected albums will prompt for the password within the iframe
+
+Note that by putting the embed link in a webpage, you're making it public for anyone who can view the page, including search engines that can index your webpages. This isn't any different from putting the public link in your webpage or sharing it in a public forum, but it is good to call this out.
+
+The album is still end to end encrypted in a manner that Ente does not have access to the key to decrypt the album. If you're curious how this works technically, then you can find [implementation details here](https://ente.io/blog/building-shareable-links/).

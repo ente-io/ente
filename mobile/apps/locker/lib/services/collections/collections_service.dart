@@ -202,12 +202,21 @@ class CollectionService {
     }
   }
 
-  Future<void> addToCollection(Collection collection, EnteFile file) async {
+  /// Adds a file to a collection. By default this triggers a full sync to
+  /// update local state. Set [runSync] to false to delay syncing (useful when
+  /// adding the same file to multiple collections during an upload).
+  Future<void> addToCollection(
+    Collection collection,
+    EnteFile file, {
+    bool runSync = true,
+  }) async {
     try {
       await _apiClient.addToCollection(collection, [file]);
       _logger.info("Added file ${file.title} to collection ${collection.name}");
-      // Let sync update the local state
-      await sync();
+      if (runSync) {
+        // Let sync update the local state
+        await sync();
+      }
     } catch (e) {
       _logger.severe("Failed to add file to collection: $e");
       rethrow;

@@ -553,5 +553,60 @@
   "noSystemLockFound": "No system lock found",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "To enable app lock, please setup device passcode or screen lock in your system settings.",
   "legacy": "Legacy",
-  "authToManageLegacy": "Please authenticate to manage your trusted contacts"
+  "authToManageLegacy": "Please authenticate to manage your trusted contacts",
+  "uploadError": "Upload Error",
+  "tryAdjustingYourSearchQuery": "Try adjusting your search query",
+  "noFilesFoundForQuery": "No files found for \"{query}\"",
+  "@noFilesFoundForQuery": {
+    "description": "Message when no files match the search query",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "vacation"
+      }
+    }
+  },
+  "deselectAll": "Deselect All",
+  "selectAll": "Select All",
+  "unnamedCollection": "Unnamed Collection",
+  "enteLocker": "ente Locker",
+  "uploadedFilesProgress": "Uploaded {completed}/{total} files...",
+  "@uploadedFilesProgress": {
+    "description": "Progress message showing uploaded files",
+    "placeholders": {
+      "completed": {
+        "type": "int",
+        "example": "3"
+      },
+      "total": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "uploadedFilesProgressWithError": "Uploaded {completed}/{total} files... ({error})",
+  "@uploadedFilesProgressWithError": {
+    "description": "Progress message showing uploaded files with error",
+    "placeholders": {
+      "completed": {
+        "type": "int",
+        "example": "3"
+      },
+      "total": {
+        "type": "int",
+        "example": "5"
+      },
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "noCollectionsAvailableForSelection": "No collections available",
+  "createCollectionButton": "Create collection",
+  "collectionButtonLabel": "Collection",
+  "hideWindow": "Hide Window",
+  "showWindow": "Show Window",
+  "exitApp": "Exit App",
+  "lockerLogs": "Locker logs"
 }

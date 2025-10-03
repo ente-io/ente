@@ -276,11 +276,7 @@
     "view_on_map": "Guarda su OpenStreetMap",
     "map": "Mappa",
     "enable_map": "Attivare mappa",
-    "enable_maps_confirm": "Attivare mappa?",
-    "enable_maps_confirm_message": "<p>Questa opzione mostrerà le tue foto sulla mappa del mondo.</p><p>La mappa è ospitata da <a>OpenStreetMap</a>, la posizione esatta delle tue foto non saranno mai condivise.</p><p>Puoi disabilitare questa funzione in qualsiasi momento dalle Impostazioni.</p>",
     "disable_map": "Disattivare mappa",
-    "disable_maps_confirm": "Disattivare mappa?",
-    "disable_maps_confirm_message": "<p>Questo opzione disabiliterà la visualizzazione delle tue foto sulla mappa del mondo.</p><p>Puoi abilitare questa funzione in qualsiasi momento dalle impostazioni.</p>",
     "details": "Dettagli",
     "view_exif": "Mostra tutti i dati EXIF",
     "no_exif": "Nessun dato EXIF",
@@ -701,5 +697,6 @@
     "grouped": "",
     "continuous": "",
     "trip": "",
-    "album_layout": ""
+    "album_layout": "",
+    "maps_privacy_notice": ""
 }

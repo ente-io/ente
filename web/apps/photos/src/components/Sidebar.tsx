@@ -72,10 +72,6 @@ import { DeleteAccount } from "ente-new/photos/components/DeleteAccount";
 import { DropdownInput } from "ente-new/photos/components/DropdownInput";
 import { MLSettings } from "ente-new/photos/components/sidebar/MLSettings";
 import { TwoFactorSettings } from "ente-new/photos/components/sidebar/TwoFactorSettings";
-import {
-    confirmDisableMapsDialogAttributes,
-    confirmEnableMapsDialogAttributes,
-} from "ente-new/photos/components/utils/dialog-attributes";
 import { downloadAppDialogAttributes } from "ente-new/photos/components/utils/download";
 import {
     useHLSGenerationStatusSnapshot,
@@ -1159,23 +1155,15 @@ const MapSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     onClose,
     onRootClose,
 }) => {
-    const { showMiniDialog } = useBaseContext();
-
     const { mapEnabled } = useSettingsSnapshot();
+    const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
-    const confirmToggle = useCallback(
-        () =>
-            showMiniDialog(
-                mapEnabled
-                    ? confirmDisableMapsDialogAttributes(() =>
-                          updateMapEnabled(false),
-                      )
-                    : confirmEnableMapsDialogAttributes(() =>
-                          updateMapEnabled(true),
-                      ),
-            ),
-        [showMiniDialog, mapEnabled],
-    );
+    const handleToggle = useCallback(() => {
+        setErrorMessage(undefined);
+        void updateMapEnabled(!mapEnabled).catch(() => {
+            setErrorMessage(t("generic_error"));
+        });
+    }, [mapEnabled]);
 
     const handleRootClose = () => {
         onClose();
@@ -1193,9 +1181,24 @@ const MapSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                     <RowSwitch
                         label={t("enabled")}
                         checked={mapEnabled}
-                        onClick={confirmToggle}
+                        onClick={handleToggle}
                     />
                 </RowButtonGroup>
+                <RowButtonGroupHint>
+                    {t("maps_privacy_notice")}
+                </RowButtonGroupHint>
+                {errorMessage && (
+                    <Typography
+                        variant="small"
+                        sx={{
+                            color: "critical.main",
+                            mt: 0.5,
+                            textAlign: "center",
+                        }}
+                    >
+                        {errorMessage}
+                    </Typography>
+                )}
             </Stack>
         </TitledNestedSidebarDrawer>
     );

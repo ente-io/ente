@@ -276,11 +276,7 @@
     "view_on_map": "在 OpenStreetMap 上查看",
     "map": "地圖",
     "enable_map": "",
-    "enable_maps_confirm": "",
-    "enable_maps_confirm_message": "",
     "disable_map": "",
-    "disable_maps_confirm": "",
-    "disable_maps_confirm_message": "",
     "details": "詳細資料",
     "view_exif": "查看所有 Exif 數據",
     "no_exif": "無 Exif 數據",
@@ -701,5 +697,6 @@
     "grouped": "",
     "continuous": "",
     "trip": "",
-    "album_layout": ""
+    "album_layout": "",
+    "maps_privacy_notice": ""
 }

@@ -276,11 +276,7 @@
     "view_on_map": "在 OpenStreetMap 上查看",
     "map": "地图",
     "enable_map": "启用地图",
-    "enable_maps_confirm": "要启用地图吗?",
-    "enable_maps_confirm_message": "<p>这将在世界地图上显示您的照片。</p><p>该地图由 <a>OpenStreetMap</a> 托管，并且您照片的确切位置永远不会共享。</p><p>您可以随时从“设置”中禁用此功能。</p>",
     "disable_map": "禁用地图",
-    "disable_maps_confirm": "要禁用地图吗？",
-    "disable_maps_confirm_message": "<p>这将禁止在世界地图上显示您的照片。</p><p>您可以随时从“设置”中启用此功能。</p>",
     "details": "详情",
     "view_exif": "查看所有 Exif 数据",
     "no_exif": "无 Exif 数据",
@@ -698,8 +694,9 @@
     "custom_domains_help": "欲了解更多信息，请参阅 <a>help</a>",
     "num_1": "1",
     "num_2": "2",
-    "grouped": "",
-    "continuous": "",
-    "trip": "",
-    "album_layout": ""
+    "grouped": "已分组",
+    "continuous": "连续",
+    "trip": "旅游",
+    "album_layout": "相册布局",
+    "maps_privacy_notice": ""
 }

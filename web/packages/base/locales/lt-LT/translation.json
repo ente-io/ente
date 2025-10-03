@@ -276,11 +276,7 @@
     "view_on_map": "Peržiūrėti žemėlapyje „OpenStreetMap“",
     "map": "Žemėlapis",
     "enable_map": "Įjungti žemėlapį",
-    "enable_maps_confirm": "Įjungti žemėlapius?",
-    "enable_maps_confirm_message": "<p>Tai parodys jūsų nuotraukas pasaulio žemėlapyje.</p><p>Žemėlapį talpina <a>„OpenStreetMap“</a>, o tiksliomis nuotraukų vietomis niekada nebendrinama.</p><p>Šią funkciją bet kada galite išjungti iš nustatymų.</p>",
     "disable_map": "Išjungti žemėlapį",
-    "disable_maps_confirm": "Išjungti žemėlapius?",
-    "disable_maps_confirm_message": "<p>Tai išjungs jūsų nuotraukų rodymą pasaulio žemėlapyje.</p><p>Šią funkciją bet kada galite įjungti iš nustatymų.</p>",
     "details": "Išsami informacija",
     "view_exif": "Peržiūrėti visus Exif duomenis",
     "no_exif": "Nėra Exif duomenų",
@@ -701,5 +697,6 @@
     "grouped": "",
     "continuous": "",
     "trip": "",
-    "album_layout": ""
+    "album_layout": "",
+    "maps_privacy_notice": ""
 }

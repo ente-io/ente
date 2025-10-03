@@ -8,10 +8,10 @@ import "package:locker/services/collections/models/collection.dart";
 import "package:locker/ui/pages/collection_page.dart";
 
 class CollectionFlexGridViewWidget extends StatefulWidget {
-  final List<Collection> collections; 
+  final List<Collection> collections;
   const CollectionFlexGridViewWidget({
     super.key,
-    required this.collections, 
+    required this.collections,
   });
 
   @override
@@ -21,12 +21,12 @@ class CollectionFlexGridViewWidget extends StatefulWidget {
 
 class _CollectionFlexGridViewWidgetState
     extends State<CollectionFlexGridViewWidget> {
-  late List<Collection> _displayedCollections; 
-  
+  late List<Collection> _displayedCollections;
+
   @override
   void initState() {
     super.initState();
-    _displayedCollections = widget.collections; 
+    _displayedCollections = widget.collections;
   }
 
   @override
@@ -47,7 +47,8 @@ class _CollectionFlexGridViewWidgetState
         itemCount: min(_displayedCollections.length, 4),
         itemBuilder: (context, index) {
           final collection = _displayedCollections[index];
-          final collectionName = collection.name ?? 'Unnamed Collection';
+          final collectionName =
+              collection.name ?? context.l10n.unnamedCollection;
 
           return GestureDetector(
             onTap: () => _navigateToCollection(collection),

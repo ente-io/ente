@@ -276,11 +276,7 @@
     "view_on_map": "Visa på OpenStreetMap",
     "map": "Karta",
     "enable_map": "Aktivera karta",
-    "enable_maps_confirm": "Aktivera kartor?",
-    "enable_maps_confirm_message": "",
     "disable_map": "Inaktivera karta",
-    "disable_maps_confirm": "Inaktivera kartor?",
-    "disable_maps_confirm_message": "",
     "details": "",
     "view_exif": "Visa all Exif-data",
     "no_exif": "Ingen Exif-data",
@@ -701,5 +697,6 @@
     "grouped": "",
     "continuous": "",
     "trip": "",
-    "album_layout": ""
+    "album_layout": "",
+    "maps_privacy_notice": ""
 }

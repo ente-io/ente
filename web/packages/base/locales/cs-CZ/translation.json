@@ -276,11 +276,7 @@
     "view_on_map": "Zobrazit na OpenStreetMap",
     "map": "Mapa",
     "enable_map": "Povolit mapu",
-    "enable_maps_confirm": "Povolit mapu?",
-    "enable_maps_confirm_message": "<p>Zobrazí vaše fotografie na mapě světa.</p><p>Mapa je hostována službou <a>OpenStreetMap</a> a přesné umístění vašich fotografií není nikdy sdíleno.</p><p>Tuto funkci můžete kdykoli deaktivovat v nastavení.</p>",
     "disable_map": "Zakázat mapu",
-    "disable_maps_confirm": "Zakázat mapy?",
-    "disable_maps_confirm_message": "<p>Toto zakáže zobrazení vašich fotografií na mapě světa.</p><p>Tuto funkci můžete kdykoli zapnout v nastavení.</p>",
     "details": "Podrobnosti",
     "view_exif": "Zobrazit všechna Exif data",
     "no_exif": "Žádná Exif data",
@@ -701,5 +697,6 @@
     "grouped": "",
     "continuous": "",
     "trip": "",
-    "album_layout": ""
+    "album_layout": "",
+    "maps_privacy_notice": ""
 }

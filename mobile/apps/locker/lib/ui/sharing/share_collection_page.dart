@@ -15,7 +15,7 @@ import "package:locker/extensions/user_extension.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
-import "package:locker/services/configuration.dart"; 
+import "package:locker/services/configuration.dart";
 import "package:locker/ui/sharing/add_participant_page.dart";
 import "package:locker/ui/sharing/album_participants_page.dart";
 import "package:locker/ui/sharing/album_share_info_widget.dart";
@@ -90,11 +90,11 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
         onTap: () async {
           // ignore: unawaited_futures
           routeToPage(
-          context,
-          AddParticipantPage(
-            [widget.collection],
-            const [ActionTypesToShow.addViewer],
-          ),
+            context,
+            AddParticipantPage(
+              [widget.collection],
+              const [ActionTypesToShow.addViewer],
+            ),
           ).then(
             (value) => {
               if (mounted) {setState(() => {})},

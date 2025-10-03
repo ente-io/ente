@@ -178,21 +178,31 @@ export const handleTimelineScroll = ({
 
         const targetZoom = isTouchDevice ? 8 : 10; // Touch device-aware zoom level
 
-        // Use pre-calculated super cluster info instead of recalculating
+        // Get super cluster info for both source and destination
         const currentSuperClusterIndex =
             superClusterInfo.clusterToSuperClusterMap.get(
                 currentActiveLocationIndex,
             ) ?? -1;
         const isInSuperCluster = currentSuperClusterIndex !== -1;
 
-        // Check previous super cluster state
+        // Get the super cluster index of where we're coming FROM (not the stored state)
+        const fromSuperClusterIndex =
+            previousActiveLocationIndex >= 0
+                ? (superClusterInfo.clusterToSuperClusterMap.get(
+                      previousActiveLocationIndex,
+                  ) ?? -1)
+                : -1;
+
+        // Check if we're moving between clusters in the SAME super cluster
+        const isSameSuperCluster =
+            isInSuperCluster &&
+            fromSuperClusterIndex !== -1 &&
+            currentSuperClusterIndex === fromSuperClusterIndex;
+
+        // Check previous super cluster state (for other transition logic)
         const previousState = previousSuperClusterStateRef.current;
         const wasInSuperCluster = previousState.isInSuperCluster;
         const previousSuperClusterIndex = previousState.superClusterIndex;
-        const isSameSuperCluster =
-            isInSuperCluster &&
-            wasInSuperCluster &&
-            currentSuperClusterIndex === previousSuperClusterIndex;
 
         try {
             // Handle super cluster zoom logic - check distant locations first!
@@ -498,6 +508,12 @@ export interface HandleMarkerClickParams {
         clusterToSuperClusterMap: Map<number, number>;
     };
     scrollProgress: number;
+    setTargetZoom: (zoom: number | null) => void;
+    previousSuperClusterStateRef: React.RefObject<{
+        isInSuperCluster: boolean;
+        superClusterIndex: number | null;
+    }>;
+    previousActiveLocationRef: React.RefObject<number>;
 }
 
 export const handleMarkerClick = ({
@@ -514,6 +530,9 @@ export const handleMarkerClick = ({
     isTouchDevice,
     superClusterInfo,
     scrollProgress,
+    setTargetZoom,
+    previousSuperClusterStateRef,
+    previousActiveLocationRef,
 }: HandleMarkerClickParams) => {
     const targetProgress = clusterIndex / Math.max(1, photoClusters.length - 1);
 
@@ -524,6 +543,9 @@ export const handleMarkerClick = ({
     isClusterClickScrollingRef.current = true;
     setScrollProgress(targetProgress);
     setHasUserScrolled(true);
+
+    // Update the previous active location to the target cluster
+    previousActiveLocationRef.current = clusterIndex;
 
     // Calculate current active location index
     let currentActiveLocationIndex = -1;
@@ -571,18 +593,77 @@ export const handleMarkerClick = ({
                     duration: 0.6,
                     easeLinearity: 0.3,
                 });
+
+                // Update state to maintain super cluster info
+                const targetSuperClusterIndex =
+                    superClusterInfo?.clusterToSuperClusterMap.get(
+                        clusterIndex,
+                    );
+                previousSuperClusterStateRef.current = {
+                    isInSuperCluster: true,
+                    superClusterIndex: targetSuperClusterIndex ?? null,
+                };
             } else {
-                // Normal behavior: fly to with zoom
-                const [positionedLat, positionedLng] = getLocationPosition(
-                    clusterLat,
-                    clusterLng,
-                );
-                const targetZoom = isTouchDevice ? 8 : 10;
-                mapRef.flyTo([positionedLat, positionedLng], targetZoom, {
-                    animate: true,
-                    duration: 1.0,
-                    easeLinearity: 0.3,
-                });
+                // Check if the target cluster is part of a super cluster
+                const targetSuperClusterIndex =
+                    superClusterInfo?.clusterToSuperClusterMap.get(
+                        clusterIndex,
+                    );
+                const isInSuperCluster = targetSuperClusterIndex !== undefined;
+
+                if (isInSuperCluster) {
+                    // Zoom to super cluster level to break it apart
+                    const superClusterZoom = isTouchDevice ? 15 : 14;
+                    const [zoomAwareLat, zoomAwareLng] =
+                        getLocationPositionAtZoom(
+                            clusterLat,
+                            clusterLng,
+                            superClusterZoom,
+                        );
+                    // Set target zoom before animation so clusters separate during zoom
+                    setTargetZoom(superClusterZoom);
+                    mapRef.flyTo(
+                        [zoomAwareLat, zoomAwareLng],
+                        superClusterZoom,
+                        { animate: true, duration: 1.0, easeLinearity: 0.3 },
+                    );
+
+                    // Update super cluster state for proper scroll behavior
+                    previousSuperClusterStateRef.current = {
+                        isInSuperCluster: true,
+                        superClusterIndex: targetSuperClusterIndex,
+                    };
+
+                    // Clear target zoom after animation completes
+                    setTimeout(() => {
+                        setTargetZoom(null);
+                    }, 1100);
+                } else {
+                    // Normal behavior: fly to with standard zoom
+                    const [positionedLat, positionedLng] = getLocationPosition(
+                        clusterLat,
+                        clusterLng,
+                    );
+                    const targetZoomLevel = isTouchDevice ? 8 : 10;
+                    // Set target zoom before animation
+                    setTargetZoom(targetZoomLevel);
+                    mapRef.flyTo(
+                        [positionedLat, positionedLng],
+                        targetZoomLevel,
+                        { animate: true, duration: 1.0, easeLinearity: 0.3 },
+                    );
+
+                    // Update super cluster state
+                    previousSuperClusterStateRef.current = {
+                        isInSuperCluster: false,
+                        superClusterIndex: null,
+                    };
+
+                    // Clear target zoom after animation completes
+                    setTimeout(() => {
+                        setTargetZoom(null);
+                    }, 1100);
+                }
             }
         } catch (error) {
             console.warn("Map operation failed:", error);

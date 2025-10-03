@@ -276,11 +276,7 @@
     "view_on_map": "View on OpenStreetMap",
     "map": "Map",
     "enable_map": "Enable map",
-    "enable_maps_confirm": "Enable maps?",
-    "enable_maps_confirm_message": "<p>This will show your photos on a world map.</p><p>The map is hosted by <a>OpenStreetMap</a>, and the exact locations of your photos are never shared.</p><p>You can disable this feature anytime from Settings.</p>",
     "disable_map": "Disable map",
-    "disable_maps_confirm": "Disable maps?",
-    "disable_maps_confirm_message": "<p>This will disable the display of your photos on a world map.</p><p>You can enable this feature anytime from Settings.</p>",
     "details": "Details",
     "view_exif": "View all Exif data",
     "no_exif": "No Exif data",
@@ -701,5 +697,6 @@
     "grouped": "Grouped",
     "continuous": "Continuous",
     "trip": "Trip",
-    "album_layout": "Album layout"
+    "album_layout": "Album layout",
+    "maps_privacy_notice": "Approximate coordinates will be sent to privacy conscious third parties like OpenStreetMaps to show the map and location."
 }

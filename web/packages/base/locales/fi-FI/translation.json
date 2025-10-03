@@ -276,11 +276,7 @@
     "view_on_map": "Näytä OpenStreetMapissa",
     "map": "Kartta",
     "enable_map": "Ota kartta käyttöön",
-    "enable_maps_confirm": "Otetaanko kartat käyttöön?",
-    "enable_maps_confirm_message": "<p>Tämä näyttää kuvasi maailmankartalla.</p><p>Karttaa isännöi <a>OpenStreetMap</a>ja valokuvien tarkkoja sijainteja ei koskaan jaeta.</p><p>Voit poistaa tämän ominaisuuden käytöstä milloin tahansa Asetuksista.</p>",
     "disable_map": "Poista kartta käytöstä",
-    "disable_maps_confirm": "Poista kartat käytöstä?",
-    "disable_maps_confirm_message": "<p>Tämä poistaa valokuvien näytön käytöstä maailmankartalla.</p><p>Voit ottaa tämän ominaisuuden käyttöön milloin tahansa Asetuksista.</p>",
     "details": "Tiedot",
     "view_exif": "Näytä kaikki Exif -tiedot",
     "no_exif": "Ei Exif -tietoja",
@@ -701,5 +697,6 @@
     "grouped": "",
     "continuous": "",
     "trip": "",
-    "album_layout": ""
+    "album_layout": "",
+    "maps_privacy_notice": ""
 }

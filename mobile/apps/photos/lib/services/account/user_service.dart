@@ -274,11 +274,11 @@ class UserService {
       }
     } catch (e) {
       // Determine if we should silently ignore the error and proceed with logout
-      final bool silentlyIgnoreError = 
+      final bool silentlyIgnoreError =
           // Token is already invalid (401 response)
           (e is DioException && e.response?.statusCode == 401) ||
-          // Custom endpoints where server might be non-existent or unavailable
-          !_config.isEnteProduction();
+              // Custom endpoints where server might be non-existent or unavailable
+              !_config.isEnteProduction();
 
       if (silentlyIgnoreError) {
         if (!_config.isEnteProduction()) {
@@ -288,9 +288,9 @@ class UserService {
         } else {
           _logger.info("Token already invalid, proceeding with local logout");
         }
-        
+
         await Configuration.instance.logout();
-        
+
         // Navigate to first route if context is still mounted
         if (context.mounted) {
           Navigator.of(context).popUntil((route) => route.isFirst);

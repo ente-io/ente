@@ -55,6 +55,7 @@ import {
     type PublicAlbumsCredentials,
 } from "ente-base/http";
 import log from "ente-base/log";
+import { albumsAppOrigin, shouldOnlyServeAlbumsApp } from "ente-base/origins";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import {
     useSaveGroups,
@@ -171,6 +172,7 @@ export default function PublicCollectionGallery() {
          */
         const main = async () => {
             let redirectingToWebsite = false;
+            let redirectingToAlbumsApp = false;
             try {
                 const currentURL = new URL(window.location.href);
                 const t = currentURL.searchParams.get("t");
@@ -187,6 +189,25 @@ export default function PublicCollectionGallery() {
                 const accessToken = t;
                 let accessTokenJWT: string | undefined;
                 if (collection) {
+                    // On custom domains, redirect Trip albums to albums.ente.io/...
+                    // because custom domains do not support the Trip layout fully
+                    if (
+                        collection.pubMagicMetadata?.data.layout === "trip" &&
+                        shouldOnlyServeAlbumsApp
+                    ) {
+                        const currentURL = new URL(window.location.href);
+                        const albumsURL = new URL(albumsAppOrigin());
+
+                        if (currentURL.host !== albumsURL.host) {
+                            albumsURL.search = currentURL.search;
+                            albumsURL.hash = currentURL.hash;
+
+                            window.location.href = albumsURL.href;
+                            redirectingToAlbumsApp = true;
+                            return;
+                        }
+                    }
+
                     setReferralCode(
                         (await savedLastPublicCollectionReferralCode()) ?? "",
                     );
@@ -209,7 +230,7 @@ export default function PublicCollectionGallery() {
                 void updateShouldDisableCFUploadProxy();
                 await publicAlbumsRemotePull();
             } finally {
-                if (!redirectingToWebsite) {
+                if (!redirectingToWebsite && !redirectingToAlbumsApp) {
                     setLoading(false);
                 }
             }

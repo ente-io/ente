@@ -276,11 +276,7 @@
     "view_on_map": "Lihat di OpenStreetMap",
     "map": "Peta",
     "enable_map": "Aktifkan peta",
-    "enable_maps_confirm": "Aktifkan peta?",
-    "enable_maps_confirm_message": "",
     "disable_map": "Nonaktifkan peta",
-    "disable_maps_confirm": "Nonaktifkan peta?",
-    "disable_maps_confirm_message": "",
     "details": "Rincian",
     "view_exif": "Lihat seluruh data Exif",
     "no_exif": "Tidak ada data Exif",
@@ -701,5 +697,6 @@
     "grouped": "",
     "continuous": "",
     "trip": "",
-    "album_layout": ""
+    "album_layout": "",
+    "maps_privacy_notice": ""
 }

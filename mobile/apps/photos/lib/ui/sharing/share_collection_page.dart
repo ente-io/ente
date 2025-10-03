@@ -225,23 +225,23 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
             MenuItemWidget(
               captionedTextWidget: CaptionedTextWidget(
                 title: AppLocalizations.of(context).sendQrCode,
-                  makeTextBold: true,
-                ),
-                leadingIcon: Icons.qr_code_outlined,
-                menuItemColor: getEnteColorScheme(context).fillFaint,
-                onTap: () async {
-                  await showDialog<void>(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return QrCodeDialogWidget(
-                        collection: widget.collection,
-                      );
-                    },
-                  );
-                },
-                isTopBorderRadiusRemoved: true,
-                isBottomBorderRadiusRemoved: true,
+                makeTextBold: true,
               ),
+              leadingIcon: Icons.qr_code_outlined,
+              menuItemColor: getEnteColorScheme(context).fillFaint,
+              onTap: () async {
+                await showDialog<void>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return QrCodeDialogWidget(
+                      collection: widget.collection,
+                    );
+                  },
+                );
+              },
+              isTopBorderRadiusRemoved: true,
+              isBottomBorderRadiusRemoved: true,
+            ),
           ],
         );
       }
