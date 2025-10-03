@@ -1,3 +1,6 @@
+- Ashil: Fix minor UI issues on wigets settings page and notification settings page
+- Ashil: Use better copy on auto-add people selection page
+- Ashil: Add more logs to debug app stuck at splash screen issue
 - Laurens: Change similar images labels copy
 - Laurens: Fix flipped thumbnails issue by removing use of ColorFiltered widget
 - Ashil: Downgrade flutter secure storage back to version used before v1.2.4 release
