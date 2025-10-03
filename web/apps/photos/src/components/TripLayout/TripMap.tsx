@@ -87,7 +87,7 @@ export const TripMap: React.FC<TripMapProps> = ({
         }
     }
 
-    // Calculate super-clusters based on screen collisions, excluding the active cluster
+    // Calculate super-clusters based on screen collisions
     const { superClusters, visibleClustersWithIndices } =
         detectScreenCollisions(
             photoClusters,
@@ -95,9 +95,6 @@ export const TripMap: React.FC<TripMapProps> = ({
             targetZoom,
             mapRef,
             optimalZoom,
-            currentActiveLocationIndex >= 0
-                ? currentActiveLocationIndex
-                : undefined,
         );
 
     return (
@@ -139,23 +136,9 @@ export const TripMap: React.FC<TripMapProps> = ({
                     {/* Draw super-clusters (clickable for zoom and gallery) */}
                     {superClusters.map((superCluster, index) => {
                         // Show green only for active locations
-                        let currentLocationIndex;
-                        if (isTouchDevice) {
-                            // Mobile: Slower progression - stay on each location longer
-                            currentLocationIndex = Math.floor(
-                                scrollProgress * (photoClusters.length - 0.5),
-                            );
-                        } else {
-                            // Desktop: Use original logic
-                            currentLocationIndex = Math.round(
-                                scrollProgress *
-                                    Math.max(0, photoClusters.length - 1),
-                            );
-                        }
-                        const isActive =
-                            superCluster.clustersInvolved.includes(
-                                currentLocationIndex,
-                            );
+                        const isActive = superCluster.clustersInvolved.includes(
+                            currentActiveLocationIndex,
+                        );
 
                         const icon = createSuperClusterIcon(
                             superCluster.image, // Use representative photo (first photo of first cluster)
@@ -174,11 +157,28 @@ export const TripMap: React.FC<TripMapProps> = ({
                                         const firstClusterIndex =
                                             superCluster.clustersInvolved[0];
                                         if (firstClusterIndex !== undefined) {
-                                            onMarkerClick(
-                                                firstClusterIndex,
-                                                superCluster.lat,
-                                                superCluster.lng,
-                                            );
+                                            // Get the actual first cluster's coordinates
+                                            const firstCluster =
+                                                photoClusters[
+                                                    firstClusterIndex
+                                                ];
+                                            if (firstCluster) {
+                                                const avgLat =
+                                                    firstCluster.reduce(
+                                                        (sum, p) => sum + p.lat,
+                                                        0,
+                                                    ) / firstCluster.length;
+                                                const avgLng =
+                                                    firstCluster.reduce(
+                                                        (sum, p) => sum + p.lng,
+                                                        0,
+                                                    ) / firstCluster.length;
+                                                onMarkerClick(
+                                                    firstClusterIndex,
+                                                    avgLat,
+                                                    avgLng,
+                                                );
+                                            }
                                         }
                                     },
                                 }}
@@ -201,21 +201,8 @@ export const TripMap: React.FC<TripMapProps> = ({
                         // Use the preserved original index
                         const originalClusterIndex = originalIndex;
                         // Show green only for active locations
-                        let currentLocationIndex;
-                        if (isTouchDevice) {
-                            // Mobile: Slower progression - stay on each location longer
-                            currentLocationIndex = Math.floor(
-                                scrollProgress * (photoClusters.length - 0.5),
-                            );
-                        } else {
-                            // Desktop: Use original logic
-                            currentLocationIndex = Math.round(
-                                scrollProgress *
-                                    Math.max(0, photoClusters.length - 1),
-                            );
-                        }
                         const isActive =
-                            originalClusterIndex === currentLocationIndex;
+                            originalClusterIndex === currentActiveLocationIndex;
 
                         const icon = createIcon(
                             firstPhoto.image,

@@ -134,6 +134,9 @@ export const useScrollHandling = ({
                 isTouchDevice,
                 superClusterInfo,
                 scrollProgress,
+                setTargetZoom,
+                previousSuperClusterStateRef,
+                previousActiveLocationRef,
             });
         },
         [
@@ -147,6 +150,9 @@ export const useScrollHandling = ({
             isTouchDevice,
             superClusterInfo,
             scrollProgress,
+            setTargetZoom,
+            previousSuperClusterStateRef,
+            previousActiveLocationRef,
         ],
     );
 

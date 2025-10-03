@@ -197,7 +197,6 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                             null,
                             null,
                             optimalZoomLevel,
-                            undefined, // No active cluster during initial calculation
                         );
 
                         // Create a map of cluster index to super cluster index
