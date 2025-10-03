@@ -241,8 +241,18 @@ export const updateCustomDomain = async (customDomain: string) => {
  * Persist the user's map enabled preference both locally and on remote.
  */
 export const updateMapEnabled = async (isEnabled: boolean) => {
-    await updateRemoteFlag("mapEnabled", isEnabled);
-    return pullSettings();
+    const previousSnapshot = _state.settingsSnapshot;
+
+    setSettingsSnapshot({ ...previousSnapshot, mapEnabled: isEnabled });
+
+    try {
+        await updateRemoteFlag("mapEnabled", isEnabled);
+        await pullSettings();
+    } catch (e) {
+        log.error("Failed to update map setting", e);
+        setSettingsSnapshot(previousSnapshot);
+        throw e;
+    }
 };
 
 const cfProxyDisabledKey = "cfProxyDisabled";

@@ -1797,7 +1797,6 @@
   "automaticallyAnalyzeAndSplitGrouping": "We zullen automatisch de groepering analyseren om te bepalen of er meerdere mensen aanwezig zijn en ze opnieuw scheiden. Dit kan een paar seconden duren.",
   "layout": "Layout",
   "day": "Dag",
-  "peopleAutoAddDesc": "Selecteer de personen die je automatisch wilt toevoegen aan het album",
   "undo": "Ongedaan maken",
   "redo": "Herstel ongedaan maken",
   "filter": "Filter",

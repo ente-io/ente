@@ -7,7 +7,7 @@ description: Use your own domain when sharing photos and videos stored in Ente P
 
 Custom domains allow you to serve your public links with your own personalized domain.
 
-For example, if I have an Ente album and wish to share it with my friends, I can go to the album's sharing settings and create a public link. When I copy this link, it will of the form of
+For example, if I have an Ente album and wish to share it with my friends, I can go to the album's sharing settings and create a public link. When I copy this link, it will be of the form of
 
 ```
 https://albums.ente.io/?t=...
@@ -95,6 +95,12 @@ Using is trivial. When you go to an album's sharing options and copy the link to
 > [!WARNING]
 >
 > Currently (Sep 2025) the ability to automatically substitute your custom domain is present in Ente's web and mobile apps, but not in the desktop app (The next desktop version to be released will have that ability too).
+
+### Limitations
+
+#### Trip albums
+
+Public albums that use the Trip layout feature are not yet supported on custom domains. When someone tries to access a Trip album through your custom domain, they will be automatically redirected to the default `albums.ente.io` domain. Regular albums continue to work perfectly on your custom domain.
 
 ## Unsetting
 

@@ -47,8 +47,9 @@ class _CollectionSelectionOverlayBarState
                   builder: (context, child) {
                     final isAllSelected = widget.selectedCollections.count ==
                         widget.collection.length;
-                    final buttonText =
-                        isAllSelected ? 'Deselect All' : 'Select All';
+                    final buttonText = isAllSelected
+                        ? context.l10n.deselectAll
+                        : context.l10n.selectAll;
                     final iconData = isAllSelected
                         ? Icons.remove_circle_outline
                         : Icons.check_circle_outline_outlined;
@@ -82,7 +83,7 @@ class _CollectionSelectionOverlayBarState
                           children: [
                             Text(
                               buttonText,
-                              style: getEnteTextTheme(context).bodyBold,
+                              style: getEnteTextTheme(context).smallBold,
                             ),
                             const SizedBox(width: 6),
                             Icon(
@@ -128,7 +129,7 @@ class _CollectionSelectionOverlayBarState
                           children: [
                             Text(
                               countText,
-                              style: getEnteTextTheme(context).bodyBold,
+                              style: getEnteTextTheme(context).smallBold,
                             ),
                             const SizedBox(width: 6),
                             Icon(
@@ -155,9 +156,9 @@ class _CollectionSelectionOverlayBarState
               ),
             ),
             elevation: 4,
-            surfaceTintColor: isDarkMode
+            color: isDarkMode
                 ? const Color.fromRGBO(18, 18, 18, 1)
-                : colorScheme.backgroundBase,
+                : colorScheme.backgroundElevated,
             child: Padding(
               padding: EdgeInsets.fromLTRB(16, 16, 16, 28 + bottomPadding),
               child: Column(
@@ -192,7 +193,7 @@ class _CollectionSelectionOverlayBarState
           decoration: BoxDecoration(
             color: isDarkMode
                 ? const Color.fromRGBO(255, 255, 255, 0.04)
-                : getEnteColorScheme(context).backgroundElevated2,
+                : const Color.fromRGBO(0, 0, 0, 0.02),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Padding(
