@@ -1175,7 +1175,7 @@
     "description": "Label for the map view"
   },
   "maps": "Maps",
-  "mapsPrivacyNotice": "Approximate coordinates will be sent to privacy conscious third parties like OpenStreetMaps to show the map and location.",
+  "mapsPrivacyNotice": "Approximate coordinates will be sent to privacy conscious third parties like OpenStreetMap to show the map and location.",
   "enableMaps": "Enable Maps",
   "quickLinks": "Quick links",
   "selectItemsToAdd": "Select items to add",
