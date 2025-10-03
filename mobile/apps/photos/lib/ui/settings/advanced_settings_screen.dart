@@ -15,14 +15,8 @@ import "package:photos/ui/settings/ml/machine_learning_settings_page.dart";
 import "package:photos/ui/settings/streaming/video_streaming_settings_page.dart";
 import 'package:photos/utils/navigation_util.dart';
 
-class AdvancedSettingsScreen extends StatefulWidget {
+class AdvancedSettingsScreen extends StatelessWidget {
   const AdvancedSettingsScreen({super.key});
-
-  @override
-  State<AdvancedSettingsScreen> createState() => _AdvancedSettingsScreenState();
-}
-
-class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
@@ -111,13 +105,11 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                           onChanged: () async {
                             final isEnabled = flagService.mapEnabled;
                             await flagService.setMapEnabled(!isEnabled);
-                            setState(() {});
                           },
                         ),
                       ),
                       MenuSectionDescriptionWidget(
-                        content:
-                            AppLocalizations.of(context).mapsPrivacyNotice,
+                        content: AppLocalizations.of(context).mapsPrivacyNotice,
                       ),
                       const SizedBox(height: 24),
                       MenuItemWidget(
