@@ -100,16 +100,6 @@ class VideoRotatePage extends StatelessWidget {
                         controller.rotate90Degrees(RotateDirection.right),
                     icon: Icons.rotate_right,
                   ),
-                  const SizedBox(width: 24),
-                  VideoEditorBottomAction(
-                    label: AppLocalizations.of(context).reset,
-                    onPressed: () {
-                      while (controller.rotation != rotation) {
-                        controller.rotate90Degrees(RotateDirection.left);
-                      }
-                    },
-                    icon: Icons.restart_alt,
-                  ),
                 ],
               ),
             ],
