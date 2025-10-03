@@ -694,8 +694,9 @@
     "custom_domains_help": "欲了解更多信息，请参阅 <a>help</a>",
     "num_1": "1",
     "num_2": "2",
-    "grouped": "",
-    "continuous": "",
-    "trip": "",
-    "album_layout": ""
+    "grouped": "已分组",
+    "continuous": "连续",
+    "trip": "旅游",
+    "album_layout": "相册布局",
+    "maps_privacy_notice": ""
 }
