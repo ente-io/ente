@@ -8,7 +8,7 @@ class ChipButtonWidget extends StatelessWidget {
   final double iconSize;
   final VoidCallback? onTap;
   final bool noChips;
-  
+
   const ChipButtonWidget(
     this.label, {
     this.leadingIcon,
