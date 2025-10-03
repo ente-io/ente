@@ -1806,7 +1806,6 @@
   "automaticallyAnalyzeAndSplitGrouping": "We will automatically analyze the grouping to determine if there are multiple people present, and separate them out again. This may take a few seconds.",
   "layout": "Layout",
   "day": "Day",
-  "peopleAutoAddDesc": "Select the people you want to automatically add to the album",
   "undo": "Undo",
   "redo": "Redo",
   "filter": "Filter",
@@ -1947,5 +1946,9 @@
   "closeBy": "Close",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
+  },
+  "peopleAutoAddDesc": "Automatically add photos of the selected people to this album",
+  "@peopleAutoAddDesc": {
+    "description": "The message the copy should convey is that photos or videos containing the selected people's faces will be automatically added to this album"
   }
 }

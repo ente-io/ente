@@ -1800,7 +1800,6 @@
   "automaticallyAnalyzeAndSplitGrouping": "Determinaremos automaticamente o agrupamento para saber se há várias pessoas presentes, e separá-las novamente. Isso deve levar alguns segundos.",
   "layout": "Layout",
   "day": "Dia",
-  "peopleAutoAddDesc": "Selecione as pessoas que deseja adicionar automaticamente ao álbum",
   "undo": " Desfazer ",
   "redo": "Refazer",
   "filter": "Filtrar",

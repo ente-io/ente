@@ -1800,7 +1800,7 @@
   "automaticallyAnalyzeAndSplitGrouping": "Automatycznie przeanalizujemy grupę, aby ustalić, czy jest wiele osób i oddzielimy ich ponownie. Może to potrwać kilka sekund.",
   "layout": "Układ",
   "day": "Dzień",
-  "peopleAutoAddDesc": "Wybierz osoby, które chcesz automatycznie dodać do albumu",
+
   "undo": "Cofnij",
   "redo": "Ponów",
   "filter": "Filtruj",

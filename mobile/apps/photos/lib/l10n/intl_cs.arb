@@ -1800,7 +1800,6 @@
   "automaticallyAnalyzeAndSplitGrouping": "Automaticky analyzujeme seskupení, abychom zjistili, zda je přítomno více osob, a opět je oddělíme. To může trvat několik sekund.",
   "layout": "Rozvržení",
   "day": "Den",
-  "peopleAutoAddDesc": "Vyberte osoby, které chcete automaticky přidat do alba",
   "undo": "Vrátit zpět",
   "redo": "Opakovat akci",
   "filter": "Filtr",
