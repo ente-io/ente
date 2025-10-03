@@ -96,7 +96,7 @@ Using is trivial. When you go to an album's sharing options and copy the link to
 >
 > Currently (Sep 2025) the ability to automatically substitute your custom domain is present in Ente's web and mobile apps, but not in the desktop app (The next desktop version to be released will have that ability too).
 
-### Limitations
+### Notes
 
 #### Trip albums
 
