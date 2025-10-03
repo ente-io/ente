@@ -828,31 +828,28 @@ class _SimilarImagesPageState extends State<SimilarImagesPage>
                       tag: "similar_images_" + file.tag,
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: isSelected
-                            ? ColorFiltered(
-                                colorFilter: ColorFilter.mode(
-                                  Colors.black.withAlpha((0.4 * 255).toInt()),
-                                  BlendMode.darken,
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            ThumbnailWidget(
+                              file,
+                              diskLoadDeferDuration:
+                                  galleryThumbnailDiskLoadDeferDuration,
+                              serverLoadDeferDuration:
+                                  galleryThumbnailServerLoadDeferDuration,
+                              shouldShowLivePhotoOverlay: true,
+                              key: Key("similar_images_" + file.tag),
+                            ),
+                            if (isSelected)
+                              Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.black
+                                      .withAlpha((0.4 * 255).toInt()),
                                 ),
-                                child: ThumbnailWidget(
-                                  file,
-                                  diskLoadDeferDuration:
-                                      galleryThumbnailDiskLoadDeferDuration,
-                                  serverLoadDeferDuration:
-                                      galleryThumbnailServerLoadDeferDuration,
-                                  shouldShowLivePhotoOverlay: true,
-                                  key: Key("similar_images_" + file.tag),
-                                ),
-                              )
-                            : ThumbnailWidget(
-                                file,
-                                diskLoadDeferDuration:
-                                    galleryThumbnailDiskLoadDeferDuration,
-                                serverLoadDeferDuration:
-                                    galleryThumbnailServerLoadDeferDuration,
-                                shouldShowLivePhotoOverlay: true,
-                                key: Key("similar_images_" + file.tag),
                               ),
+                          ],
+                        ),
                       ),
                     ),
                     Positioned(
