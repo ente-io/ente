@@ -6,6 +6,7 @@ import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
+import 'package:photos/ui/components/menu_section_description_widget.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import "package:photos/ui/components/toggle_switch_widget.dart";
@@ -14,8 +15,14 @@ import "package:photos/ui/settings/ml/machine_learning_settings_page.dart";
 import "package:photos/ui/settings/streaming/video_streaming_settings_page.dart";
 import 'package:photos/utils/navigation_util.dart';
 
-class AdvancedSettingsScreen extends StatelessWidget {
+class AdvancedSettingsScreen extends StatefulWidget {
   const AdvancedSettingsScreen({super.key});
+
+  @override
+  State<AdvancedSettingsScreen> createState() => _AdvancedSettingsScreenState();
+}
+
+class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
@@ -95,8 +102,6 @@ class AdvancedSettingsScreen extends StatelessWidget {
                       MenuItemWidget(
                         captionedTextWidget: CaptionedTextWidget(
                           title: AppLocalizations.of(context).maps,
-                          subTitle:
-                              AppLocalizations.of(context).mapsPrivacyNotice,
                         ),
                         menuItemColor: colorScheme.fillFaint,
                         singleBorderRadius: 8,
@@ -106,8 +111,13 @@ class AdvancedSettingsScreen extends StatelessWidget {
                           onChanged: () async {
                             final isEnabled = flagService.mapEnabled;
                             await flagService.setMapEnabled(!isEnabled);
+                            setState(() {});
                           },
                         ),
+                      ),
+                      MenuSectionDescriptionWidget(
+                        content:
+                            AppLocalizations.of(context).mapsPrivacyNotice,
                       ),
                       const SizedBox(height: 24),
                       MenuItemWidget(
