@@ -276,11 +276,7 @@
     "view_on_map": "Προβολή στο OpenStreetMap",
     "map": "Χάρτης",
     "enable_map": "Ενεργοποίηση χάρτη",
-    "enable_maps_confirm": "Ενεργοποίηση Χαρτών;",
-    "enable_maps_confirm_message": "",
     "disable_map": "Απενεργοποίηση χάρτη",
-    "disable_maps_confirm": "Απενεργοποίηση Χαρτών;",
-    "disable_maps_confirm_message": "",
     "details": "Λεπτομέρειες",
     "view_exif": "Προβολή όλων των δεδομένων Exif",
     "no_exif": "Χωρίς δεδομένα Exif",
@@ -697,5 +693,10 @@
     "add_dns_entry_hint": "",
     "custom_domains_help": "",
     "num_1": "",
-    "num_2": ""
+    "num_2": "",
+    "grouped": "",
+    "continuous": "",
+    "trip": "",
+    "album_layout": "",
+    "maps_privacy_notice": ""
 }

@@ -1,100 +1,150 @@
 import "package:ente_events/event_bus.dart";
+import "package:ente_ui/components/buttons/icon_button_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 import "package:locker/events/collections_updated_event.dart";
 import "package:locker/l10n/l10n.dart";
+import "package:locker/models/selected_collections.dart";
+import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/collections/models/collection_view_type.dart";
 import "package:locker/services/configuration.dart";
 import "package:locker/ui/components/item_list_view.dart";
 import "package:locker/ui/pages/collection_page.dart";
 import "package:locker/utils/collection_actions.dart";
-import "package:locker/utils/date_time_util.dart";
 
 class CollectionRowWidget extends StatelessWidget {
   final Collection collection;
   final List<OverflowMenuAction>? overflowActions;
   final bool isLastItem;
+  final SelectedCollections? selectedCollections;
+  final void Function(Collection)? onTapCallback;
+  final void Function(Collection)? onLongPressCallback;
 
   const CollectionRowWidget({
     super.key,
     required this.collection,
     this.overflowActions,
     this.isLastItem = false,
+    this.selectedCollections,
+    this.onTapCallback,
+    this.onLongPressCallback,
   });
 
   @override
   Widget build(BuildContext context) {
-    final updateTime =
-        DateTime.fromMicrosecondsSinceEpoch(collection.updationTime);
+    final textTheme = getEnteTextTheme(context);
+    final colorScheme = getEnteColorScheme(context);
 
-    return InkWell(
-      onTap: () => _openCollection(context),
-      child: Container(
-        padding: EdgeInsets.fromLTRB(16.0, 2, 16.0, isLastItem ? 8 : 2),
-        decoration: BoxDecoration(
-          border: isLastItem
-              ? null
-              : Border(
-                  bottom: BorderSide(
-                    color: Theme.of(context).dividerColor.withAlpha(30),
-                    width: 0.5,
+    final collectionRowWidget = Flexible(
+      flex: 6,
+      child: Row(
+        children: [
+          SizedBox(
+            height: 60,
+            width: 48,
+            child: Icon(
+              Icons.folder_open,
+              color: collection.type == CollectionType.favorites
+                  ? colorScheme.primary500
+                  : Colors.grey,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  collection.name ?? 'Unnamed Collection',
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+                FutureBuilder<int>(
+                  future: CollectionService.instance.getFileCount(collection),
+                  builder: (context, snapshot) {
+                    final fileCount = snapshot.data ?? 0;
+                    return Text(
+                      context.l10n.items(fileCount),
+                      style: textTheme.small.copyWith(
+                        color: colorScheme.textMuted,
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+
+    return GestureDetector(
+      onTap: () {
+        if (onTapCallback != null) {
+          onTapCallback!(collection);
+        } else {
+          _openCollection(context);
+        }
+      },
+      onLongPress: () {
+        if (onLongPressCallback != null) {
+          onLongPressCallback!(collection);
+        }
+      },
+      behavior: HitTestBehavior.opaque,
+      child: ListenableBuilder(
+        listenable: selectedCollections ?? ValueNotifier(false),
+        builder: (context, _) {
+          final bool isSelected =
+              selectedCollections?.isCollectionSelected(collection) ?? false;
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOut,
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: isSelected
+                    ? colorScheme.strokeMuted
+                    : colorScheme.strokeFainter,
+              ),
+              borderRadius: const BorderRadius.all(Radius.circular(6)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                collectionRowWidget,
+                Flexible(
+                  flex: 1,
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    switchInCurve: Curves.easeOut,
+                    switchOutCurve: Curves.easeIn,
+                    child: isSelected
+                        ? IconButtonWidget(
+                            key: const ValueKey("selected"),
+                            icon: Icons.check_circle_rounded,
+                            iconButtonType: IconButtonType.secondary,
+                            iconColor: colorScheme.blurStrokeBase,
+                          )
+                        : PopupMenuButton<String>(
+                            onSelected: (value) =>
+                                _handleMenuAction(context, value),
+                            icon: const Icon(
+                              Icons.more_vert,
+                              size: 20,
+                            ),
+                            itemBuilder: (BuildContext context) {
+                              return _buildPopupMenuItems(context);
+                            },
+                          ),
                   ),
                 ),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              flex: 2,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.folder_open,
-                        color: collection.type == CollectionType.favorites
-                            ? getEnteColorScheme(context).primary500
-                            : Colors.grey,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 12),
-                      Flexible(
-                        child: Text(
-                          collection.name ?? 'Unnamed Collection',
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                          style: getEnteTextTheme(context).body,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+              ],
             ),
-            Expanded(
-              flex: 1,
-              child: Text(
-                formatDate(context, updateTime),
-                style: getEnteTextTheme(context).small.copyWith(
-                      color: Theme.of(context).textTheme.bodySmall?.color,
-                    ),
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
-              ),
-            ),
-            PopupMenuButton<String>(
-              onSelected: (value) => _handleMenuAction(context, value),
-              icon: const Icon(
-                Icons.more_vert,
-                size: 20,
-              ),
-              itemBuilder: (BuildContext context) {
-                return _buildPopupMenuItems(context);
-              },
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

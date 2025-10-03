@@ -3,10 +3,12 @@ import "dart:async";
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_ui/theme/ente_theme.dart';
 import "package:ente_ui/utils/dialog_util.dart";
+
 import "package:ente_utils/navigation_util.dart";
 import 'package:flutter/material.dart';
 import 'package:locker/events/collections_updated_event.dart';
 import 'package:locker/l10n/l10n.dart';
+import 'package:locker/models/selected_files.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import "package:locker/services/collections/models/collection_view_type.dart";
@@ -20,6 +22,7 @@ import 'package:locker/ui/pages/uploader_page.dart';
 import "package:locker/ui/sharing/album_participants_page.dart";
 import "package:locker/ui/sharing/manage_links_widget.dart";
 import "package:locker/ui/sharing/share_collection_page.dart";
+import "package:locker/ui/viewer/actions/file_selection_overlay_bar.dart";
 import 'package:locker/utils/collection_actions.dart';
 import "package:logging/logging.dart";
 
@@ -47,6 +50,8 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
   late CollectionViewType collectionViewType;
   bool isQuickLink = false;
   bool showFAB = true;
+
+  final _selectedFiles = SelectedFiles();
 
   @override
   void onFileUploadComplete() {
@@ -142,15 +147,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
   }
 
   Future<void> _deleteCollection() async {
-    await CollectionActions.deleteCollection(
-      context,
-      _collection,
-      onSuccess: () {
-        if (mounted) {
-          Navigator.of(context).pop();
-        }
-      },
-    );
+    await CollectionActions.deleteCollection(context, _collection);
   }
 
   Future<void> _editCollection() async {
@@ -215,6 +212,17 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
         body: _buildBody(),
         floatingActionButton:
             isSearchActive ? const SizedBox.shrink() : _buildFAB(),
+        bottomNavigationBar: ListenableBuilder(
+          listenable: _selectedFiles,
+          builder: (context, _) {
+            return _selectedFiles.hasSelections
+                ? FileSelectionOverlayBar(
+                    files: _displayedFiles,
+                    selectedFiles: _selectedFiles,
+                  )
+                : const SizedBox.shrink();
+          },
+        ),
       ),
     );
   }
@@ -314,7 +322,6 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
         collections: const [], // CollectionPage primarily shows files
         files: _filteredFiles,
         searchQuery: searchQuery,
-        enableSorting: true,
         isHomePage: false,
         onSearchEverywhere: _searchEverywhere,
       );
@@ -335,7 +342,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
         : ItemListView(
             key: ValueKey(_displayedFiles.length),
             files: _displayedFiles,
-            enableSorting: true,
+            selectedFiles: _selectedFiles,
           );
   }
 
@@ -354,7 +361,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
             const SizedBox(height: 16),
             Text(
               isSearchActive
-                  ? 'No files found for "$searchQuery"'
+                  ? context.l10n.noFilesFoundForQuery(searchQuery)
                   : context.l10n.noFilesFound,
               style: getEnteTextTheme(context).large.copyWith(
                     color: Colors.grey,
@@ -364,7 +371,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
             if (isSearchActive) ...[
               const SizedBox(height: 8),
               Text(
-                'Try adjusting your search query',
+                context.l10n.tryAdjustingYourSearchQuery,
                 style: getEnteTextTheme(context).body.copyWith(
                       color: Colors.grey[600],
                     ),

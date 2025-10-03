@@ -276,11 +276,7 @@
     "view_on_map": "",
     "map": "",
     "enable_map": "",
-    "enable_maps_confirm": "",
-    "enable_maps_confirm_message": "",
     "disable_map": "",
-    "disable_maps_confirm": "",
-    "disable_maps_confirm_message": "",
     "details": "",
     "view_exif": "",
     "no_exif": "",
@@ -697,5 +693,10 @@
     "add_dns_entry_hint": "",
     "custom_domains_help": "",
     "num_1": "",
-    "num_2": ""
+    "num_2": "",
+    "grouped": "",
+    "continuous": "",
+    "trip": "",
+    "album_layout": "",
+    "maps_privacy_notice": ""
 }

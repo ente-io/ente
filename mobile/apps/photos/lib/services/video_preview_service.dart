@@ -315,7 +315,10 @@ class VideoPreviewService {
         }
       } catch (e, s) {
         if (e is DioException && e.response?.statusCode == 404) {
-          _logger.info("No preview found for $enteFile");
+          // 404 is expected when checking if preview exists
+          _logger.fine(
+            "No preview found for ${enteFile.displayName}, will create one",
+          );
         } else {
           _logger.warning("Failed to get playlist for $enteFile", e, s);
           error = e;
@@ -585,10 +588,22 @@ class VideoPreviewService {
         _removeFile(enteFile);
         _removeFromLocks(enteFile).ignore();
       }
-      if (fileQueue.isNotEmpty) {
+      // Check if we should stop processing due to network errors
+      final bool shouldStopProcessing = _isNetworkError(error);
+
+      if (fileQueue.isNotEmpty && !shouldStopProcessing) {
+        // If there was an error, add a delay before processing next file
+        if (error != null) {
+          _logger.info(
+            "[chunk] Error occurred, waiting before processing next item. Queue size: ${fileQueue.length}",
+          );
+          // Add a small delay before processing next file after an error
+          await Future.delayed(const Duration(seconds: 2));
+        }
+
         // process next file
         _logger.info(
-          "[chunk] Processing ${_items.length} items for streaming, $error",
+          "[chunk] Processing ${_items.length} items for streaming",
         );
         final entry = fileQueue.entries.first;
         final file = entry.value;
@@ -599,11 +614,17 @@ class VideoPreviewService {
           continuation: true,
         );
       } else {
-        _logger.info(
-          "[chunk] Nothing to process releasing compute, $error",
-        );
+        // Release compute when queue is empty or network is unavailable
+        if (shouldStopProcessing) {
+          _logger.warning(
+            "[chunk] Network error detected, stopping queue processing. ${fileQueue.length} items pending",
+          );
+        } else {
+          _logger.info(
+            "[chunk] Nothing to process, releasing compute",
+          );
+        }
         computeController.releaseCompute(stream: true);
-
         uploadingFileId = -1;
       }
     }
@@ -636,8 +657,30 @@ class VideoPreviewService {
     _fireVideoPreviewStateChange(fileId, PreviewItemStatus.uploaded);
   }
 
+  bool _isNetworkError(Object? error) {
+    if (error is DioException) {
+      // Check for any network-related error
+      return error.type == DioExceptionType.connectionError ||
+          error.type == DioExceptionType.connectionTimeout ||
+          error.type == DioExceptionType.unknown ||
+          (error.error != null &&
+              error.error.toString().contains('ERR_NAME_NOT_RESOLVED'));
+    }
+    return false;
+  }
+
   void _retryFile(EnteFile enteFile, Object error) {
-    if (_items[enteFile.uploadedFileID!]!.retryCount < _maxRetryCount) {
+    // Check if it's a network error that should not be retried immediately
+    bool shouldRetry = true;
+    if (_isNetworkError(error)) {
+      _logger.fine(
+        "Network error detected, marking file as failed instead of retrying",
+      );
+      shouldRetry = false;
+    }
+
+    if (shouldRetry &&
+        _items[enteFile.uploadedFileID!]!.retryCount < _maxRetryCount) {
       _items[enteFile.uploadedFileID!] = PreviewItem(
         status: PreviewItemStatus.retry,
         file: enteFile,
@@ -688,7 +731,7 @@ class VideoPreviewService {
     required int? width,
     required int? height,
   }) async {
-    _logger.info("Pushing playlist for ${file.uploadedFileID}");
+    _logger.fine("Pushing playlist for ${file.uploadedFileID}");
     try {
       final encryptionKey = getFileKey(file);
       final playlistContent = playlist.readAsStringSync();
@@ -719,7 +762,7 @@ class VideoPreviewService {
   }
 
   Future<(String, int)> _uploadPreviewVideo(EnteFile file, File preview) async {
-    _logger.info("Pushing preview for $file");
+    _logger.fine("Pushing preview for $file");
     try {
       final response = await serviceLocator.enteDio.get(
         "/files/data/preview-upload-url",
@@ -760,7 +803,7 @@ class VideoPreviewService {
   }
 
   Future<PlaylistData?> _getPlaylist(EnteFile file) async {
-    _logger.info("Getting playlist for $file");
+    _logger.fine("Getting playlist for $file");
     int? width, height, size;
 
     try {
@@ -772,7 +815,7 @@ class VideoPreviewService {
       if (previewInfo == null) {
         shouldAppendPreview = true;
         previewURLResult = await _getPreviewUrl(file);
-        _logger.info("parrsed objectID: ${previewURLResult.$2}");
+        _logger.fine("parsed objectID: ${previewURLResult.$2}");
         objectID = previewURLResult.$2;
       } else {
         objectID = previewInfo.objectId;
@@ -852,7 +895,7 @@ class VideoPreviewService {
           ..write("Details: ${detailsCache != null ? '✓' : '✗'} | ")
           ..write("Playlist: ${playlistCache != null ? '✓' : '✗'}"),
       ).toString();
-      _logger.info("Mapped playlist to ${playlistFile.path}, $log");
+      _logger.fine("Mapped playlist to ${playlistFile.path}, $log");
       final data = PlaylistData(
         preview: playlistFile,
         width: width,
@@ -1152,7 +1195,7 @@ class VideoPreviewService {
 
     final totalFiles = fileQueue.length;
     if (totalFiles == 0) {
-      _logger.info("[init] No preview to cache");
+      _logger.fine("[init] No preview to cache");
       return false;
     }
 

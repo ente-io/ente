@@ -3,7 +3,7 @@ import 'dart:core';
 import "package:ente_sharing/models/user.dart";
 import 'package:flutter/foundation.dart';
 import 'package:locker/services/collections/models/collection_magic.dart';
-import 'package:locker/services/collections/models/public_url.dart'; 
+import 'package:locker/services/collections/models/public_url.dart';
 import 'package:locker/services/files/sync/models/common_keys.dart';
 
 class Collection {

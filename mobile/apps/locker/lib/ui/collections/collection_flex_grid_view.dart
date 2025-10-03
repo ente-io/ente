@@ -3,16 +3,15 @@ import "dart:math";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 import "package:locker/l10n/l10n.dart";
+import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
 import "package:locker/ui/pages/collection_page.dart";
 
 class CollectionFlexGridViewWidget extends StatefulWidget {
   final List<Collection> collections;
-  final Map<int, int> collectionFileCounts;
   const CollectionFlexGridViewWidget({
     super.key,
     required this.collections,
-    required this.collectionFileCounts,
   });
 
   @override
@@ -23,13 +22,11 @@ class CollectionFlexGridViewWidget extends StatefulWidget {
 class _CollectionFlexGridViewWidgetState
     extends State<CollectionFlexGridViewWidget> {
   late List<Collection> _displayedCollections;
-  late Map<int, int> _collectionFileCounts;
 
   @override
   void initState() {
     super.initState();
     _displayedCollections = widget.collections;
-    _collectionFileCounts = widget.collectionFileCounts;
   }
 
   @override
@@ -50,7 +47,8 @@ class _CollectionFlexGridViewWidgetState
         itemCount: min(_displayedCollections.length, 4),
         itemBuilder: (context, index) {
           final collection = _displayedCollections[index];
-          final collectionName = collection.name ?? 'Unnamed Collection';
+          final collectionName =
+              collection.name ?? context.l10n.unnamedCollection;
 
           return GestureDetector(
             onTap: () => _navigateToCollection(collection),
@@ -76,13 +74,19 @@ class _CollectionFlexGridViewWidgetState
                         maxLines: 1,
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        context.l10n
-                            .items(_collectionFileCounts[collection.id] ?? 0),
-                        style: getEnteTextTheme(context).small.copyWith(
-                              color: Colors.grey[600],
-                            ),
-                        textAlign: TextAlign.left,
+                      FutureBuilder<int>(
+                        future:
+                            CollectionService.instance.getFileCount(collection),
+                        builder: (context, snapshot) {
+                          final fileCount = snapshot.data ?? 0;
+                          return Text(
+                            context.l10n.items(fileCount),
+                            style: getEnteTextTheme(context).small.copyWith(
+                                  color: Colors.grey[600],
+                                ),
+                            textAlign: TextAlign.left,
+                          );
+                        },
                       ),
                     ],
                   ),

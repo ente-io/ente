@@ -5,6 +5,7 @@ import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:locker/events/collections_updated_event.dart';
 import 'package:locker/l10n/l10n.dart';
+import 'package:locker/models/selected_collections.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/models/file.dart';
@@ -15,6 +16,7 @@ import 'package:locker/ui/mixins/search_mixin.dart';
 import 'package:locker/ui/pages/collection_page.dart';
 import 'package:locker/ui/pages/home_page.dart';
 import 'package:locker/ui/pages/trash_page.dart';
+import "package:locker/ui/viewer/actions/collection_selection_overlay_bar.dart";
 import 'package:locker/utils/collection_sort_util.dart';
 import 'package:logging/logging.dart';
 
@@ -26,10 +28,12 @@ enum UISectionType {
 
 class AllCollectionsPage extends StatefulWidget {
   final UISectionType viewType;
+  final SelectedCollections? selectedCollections;
 
   const AllCollectionsPage({
     super.key,
     this.viewType = UISectionType.homeCollections,
+    this.selectedCollections,
   });
 
   @override
@@ -48,6 +52,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
   bool showTrash = false;
   bool showUncategorized = false;
   final _logger = Logger("AllCollectionsPage");
+  StreamSubscription<CollectionsUpdatedEvent>? _collectionsUpdatedSub;
 
   @override
   List<Collection> get allCollections => _allCollections;
@@ -78,7 +83,9 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
   void initState() {
     super.initState();
     _loadCollections();
-    Bus.instance.on<CollectionsUpdatedEvent>().listen((event) async {
+    _collectionsUpdatedSub =
+        Bus.instance.on<CollectionsUpdatedEvent>().listen((event) async {
+      if (!mounted) return;
       await _loadCollections();
     });
     if (widget.viewType == UISectionType.homeCollections) {
@@ -87,11 +94,19 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
     }
   }
 
+  @override
+  void dispose() {
+    _collectionsUpdatedSub?.cancel();
+    super.dispose();
+  }
+
   Future<void> _loadCollections() async {
-    setState(() {
-      _isLoading = true;
-      _error = null;
-    });
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+        _error = null;
+      });
+    }
 
     try {
       List<Collection> collections = [];
@@ -135,15 +150,19 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
           : 0;
       _allFiles = await CollectionService.instance.getAllFiles();
 
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       _logger.severe("Failed to load collections", e);
-      setState(() {
-        _error = 'Failed to load collections: $e';
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _error = 'Failed to load collections: $e';
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -165,6 +184,19 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
           ],
         ),
         body: _buildBody(),
+        bottomNavigationBar: widget.selectedCollections != null
+            ? ListenableBuilder(
+                listenable: widget.selectedCollections!,
+                builder: (context, _) {
+                  return widget.selectedCollections!.hasSelections
+                      ? CollectionSelectionOverlayBar(
+                          collection: _sortedCollections,
+                          selectedCollections: widget.selectedCollections!,
+                        )
+                      : const SizedBox.shrink();
+                },
+              )
+            : null,
       ),
     );
   }
@@ -209,7 +241,6 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
           collections: _sortedCollections,
           files: const [],
           searchQuery: searchQuery,
-          enableSorting: true,
           isHomePage: false,
           onSearchEverywhere: _searchEverywhere,
         ),
@@ -267,7 +298,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
           Flexible(
             child: ItemListView(
               collections: _sortedCollections,
-              enableSorting: true,
+              selectedCollections: widget.selectedCollections,
             ),
           ),
           if (!isSearchActive &&

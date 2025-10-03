@@ -47,6 +47,19 @@ class MetadataUpdaterService {
     }
   }
 
+  Future<bool> updateFileMetadata(
+    EnteFile file,
+    Map<String, dynamic> metadata,
+  ) async {
+    try {
+      await _updatePublicMetadataBulk([file], metadata);
+      await CollectionService.instance.sync();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   Future<void> _updatePublicMetadata(
     List<EnteFile> files,
     String key,
@@ -60,7 +73,10 @@ class MetadataUpdaterService {
       await _updatePublicMagicMetadata(files, update);
     } catch (e, s) {
       _logger.severe(
-          "Failed to update public metadata for files: $files", e, s,);
+        "Failed to update public metadata for files: $files",
+        e,
+        s,
+      );
       rethrow;
     }
   }
@@ -76,7 +92,10 @@ class MetadataUpdaterService {
       await _updatePublicMagicMetadata(files, updates);
     } catch (e, s) {
       _logger.severe(
-          "Failed to update public metadata for files: $files", e, s,);
+        "Failed to update public metadata for files: $files",
+        e,
+        s,
+      );
       rethrow;
     }
   }
@@ -124,6 +143,7 @@ class MetadataUpdaterService {
           utf8.encode(jsonEncode(jsonToUpdate)),
           fileKey,
         );
+
         params['metadataList'].add(
           UpdateMagicMetadataRequest(
             id: file.uploadedFileID!,
@@ -140,7 +160,7 @@ class MetadataUpdaterService {
 
       await _enteDio.put("/files/public-magic-metadata", data: params);
     } catch (e, s) {
-      _logger.severe(e, s);
+      _logger.severe("Failed to update public metadata: $e", e, s);
       rethrow;
     }
   }

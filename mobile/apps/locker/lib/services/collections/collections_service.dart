@@ -12,7 +12,7 @@ import "package:locker/services/collections/collections_api_client.dart";
 import "package:locker/services/collections/collections_db.dart";
 import 'package:locker/services/collections/models/collection.dart';
 import "package:locker/services/collections/models/collection_items.dart";
-import "package:locker/services/collections/models/public_url.dart"; 
+import "package:locker/services/collections/models/public_url.dart";
 import 'package:locker/services/configuration.dart';
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/services/trash/models/trash_item_request.dart';
@@ -45,12 +45,11 @@ class CollectionService {
 
   final _collectionIDToCollections = <int, Collection>{};
 
-  CollectionService._privateConstructor() {
-    _db = CollectionDB.instance;
-    _apiClient = CollectionApiClient.instance;
-  }
+  CollectionService._privateConstructor();
 
   Future<void> init() async {
+    _db = CollectionDB.instance;
+    _apiClient = CollectionApiClient.instance;
     if (Configuration.instance.hasConfiguredAccount()) {
       await _init();
     } else {
@@ -176,6 +175,23 @@ class CollectionService {
     }
   }
 
+  Future<int> getFileCount(Collection collection) async {
+    final files = await getFilesInCollection(collection);
+    return files.length;
+  }
+
+  Future<int> getFileSize(EnteFile file) async {
+    int fileSize;
+    if (file.fileSize != null) {
+      fileSize = file.fileSize!;
+    } else {
+      // TODO: Need to write the code to getFile from server
+      // fileSize = await getFile(file).then((f) => f!.length());
+      fileSize = 0;
+    }
+    return fileSize;
+  }
+
   Future<List<EnteFile>> getAllFiles() async {
     try {
       final allFiles = await _db.getAllFiles();
@@ -186,12 +202,21 @@ class CollectionService {
     }
   }
 
-  Future<void> addToCollection(Collection collection, EnteFile file) async {
+  /// Adds a file to a collection. By default this triggers a full sync to
+  /// update local state. Set [runSync] to false to delay syncing (useful when
+  /// adding the same file to multiple collections during an upload).
+  Future<void> addToCollection(
+    Collection collection,
+    EnteFile file, {
+    bool runSync = true,
+  }) async {
     try {
       await _apiClient.addToCollection(collection, [file]);
       _logger.info("Added file ${file.title} to collection ${collection.name}");
-      // Let sync update the local state
-      await sync();
+      if (runSync) {
+        // Let sync update the local state
+        await sync();
+      }
     } catch (e) {
       _logger.severe("Failed to add file to collection: $e");
       rethrow;

@@ -11,7 +11,6 @@ enum CollectionViewType {
   favorite
 }
 
-
 CollectionViewType getCollectionViewType(Collection c, int userID) {
   if (!c.isOwner(userID)) {
     return CollectionViewType.sharedCollection;

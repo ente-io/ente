@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import "package:photos/ente_theme_data.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/tools/editor/video_editor/video_editor_app_bar.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_bottom_action.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_main_actions.dart";
-import "package:photos/ui/tools/editor/video_editor/video_editor_navigation_options.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_player_control.dart";
 import 'package:video_editor/video_editor.dart';
 
-class VideoRotatePage extends StatefulWidget {
+class VideoRotatePage extends StatelessWidget {
   final int quarterTurnsForRotationCorrection;
   const VideoRotatePage({
     super.key,
@@ -18,82 +18,102 @@ class VideoRotatePage extends StatefulWidget {
   final VideoEditorController controller;
 
   @override
-  State<VideoRotatePage> createState() => _VideoRotatePageState();
-}
-
-class _VideoRotatePageState extends State<VideoRotatePage> {
-  @override
   Widget build(BuildContext context) {
-    final initialRotation = widget.controller.rotation;
+    final rotation = controller.rotation;
+    final colorScheme = getEnteColorScheme(context);
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        toolbarHeight: 0,
+      backgroundColor: colorScheme.backgroundBase,
+      appBar: VideoEditorAppBar(
+        onCancel: () {
+          while (controller.rotation != rotation) {
+            controller.rotate90Degrees(RotateDirection.left);
+          }
+          Navigator.pop(context);
+        },
+        primaryActionLabel: AppLocalizations.of(context).done,
+        onPrimaryAction: () {
+          Navigator.pop(context);
+        },
       ),
       body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: Hero(
-                tag: "video-editor-preview",
-                child: Builder(
-                  builder: (context) {
-                    // For videos with metadata rotation, we need to swap dimensions
-                    final shouldSwap = widget.quarterTurnsForRotationCorrection % 2 == 1;
-                    final width = widget.controller.video.value.size.width;
-                    final height = widget.controller.video.value.size.height;
+        top: false,
+        bottom: true,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Positioned.fill(
+                        child: Hero(
+                          tag: "video-editor-preview",
+                          child: Builder(
+                            builder: (context) {
+                              // For videos with metadata rotation, we need to swap dimensions
+                              final shouldSwap =
+                                  quarterTurnsForRotationCorrection % 2 == 1;
+                              final width = controller.video.value.size.width;
+                              final height = controller.video.value.size.height;
 
-                    return RotatedBox(
-                      quarterTurns: widget.quarterTurnsForRotationCorrection,
-                      child: CropGridViewer.preview(
-                        controller: widget.controller,
-                        overrideWidth: shouldSwap ? height : width,
-                        overrideHeight: shouldSwap ? width : height,
+                              return RotatedBox(
+                                quarterTurns: quarterTurnsForRotationCorrection,
+                                child: CropGridViewer.preview(
+                                  controller: controller,
+                                  overrideWidth: shouldSwap ? height : width,
+                                  overrideHeight: shouldSwap ? width : height,
+                                ),
+                              );
+                            },
+                          ),
+                        ),
                       ),
-                    );
-                  },
+                      Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 20),
+                          child: VideoEditorPlayerControl(
+                            controller: controller,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            VideoEditorPlayerControl(
-              controller: widget.controller,
-            ),
-            VideoEditorMainActions(
-              children: [
-                VideoEditorBottomAction(
-                  label: AppLocalizations.of(context).left,
-                  onPressed: () {
-                    widget.controller.rotate90Degrees(RotateDirection.left);
-                    setState(() {});
-                  },
-                  icon: Icons.rotate_left,
-                ),
-                const SizedBox(width: 40),
-                VideoEditorBottomAction(
-                  label: AppLocalizations.of(context).right,
-                  onPressed: () {
-                    widget.controller.rotate90Degrees(RotateDirection.right);
-                    setState(() {});
-                  },
-                  icon: Icons.rotate_right,
-                ),
-              ],
-            ),
-            const SizedBox(height: 40),
-            VideoEditorNavigationOptions(
-              color: Theme.of(context).colorScheme.videoPlayerPrimaryColor,
-              secondaryText: AppLocalizations.of(context).done,
-              onPrimaryPressed: () {
-                while (widget.controller.rotation != initialRotation) {
-                  widget.controller.rotate90Degrees(RotateDirection.left);
-                }
-                Navigator.pop(context);
-              },
-              onSecondaryPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-          ],
+              VideoEditorMainActions(
+                children: [
+                  VideoEditorBottomAction(
+                    label: AppLocalizations.of(context).left,
+                    onPressed: () =>
+                        controller.rotate90Degrees(RotateDirection.left),
+                    icon: Icons.rotate_left,
+                  ),
+                  const SizedBox(width: 24),
+                  VideoEditorBottomAction(
+                    label: AppLocalizations.of(context).right,
+                    onPressed: () =>
+                        controller.rotate90Degrees(RotateDirection.right),
+                    icon: Icons.rotate_right,
+                  ),
+                  const SizedBox(width: 24),
+                  VideoEditorBottomAction(
+                    label: AppLocalizations.of(context).reset,
+                    onPressed: () {
+                      while (controller.rotation != rotation) {
+                        controller.rotate90Degrees(RotateDirection.left);
+                      }
+                    },
+                    icon: Icons.restart_alt,
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

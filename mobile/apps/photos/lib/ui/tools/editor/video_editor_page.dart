@@ -14,21 +14,19 @@ import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/location/location.dart";
-import "package:photos/service_locator.dart";
 import "package:photos/services/sync/sync_service.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/linear_progress_dialog.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/tools/editor/export_video_service.dart";
-import "package:photos/ui/tools/editor/native_video_export_service.dart";
 import 'package:photos/ui/tools/editor/video_crop_page.dart';
+import "package:photos/ui/tools/editor/video_editor/video_editor_app_bar.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_bottom_action.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_main_actions.dart";
-import "package:photos/ui/tools/editor/video_editor/video_editor_navigation_options.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_player_control.dart";
 import "package:photos/ui/tools/editor/video_rotate_page.dart";
 import "package:photos/ui/tools/editor/video_trim_page.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
-import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:video_editor/video_editor.dart";
 
@@ -110,129 +108,147 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) {
-          if (_isExporting.value) {
-            return;
-          } else {
-            replacePage(context, DetailPage(widget.detailPageConfig));
-          }
+        if (didPop) return;
+        if (_isExporting.value) {
+          return;
         }
+        replacePage(context, DetailPage(widget.detailPageConfig));
       },
-      child: Scaffold(
-        appBar: AppBar(
-          elevation: 0,
-          toolbarHeight: 0,
-        ),
-        body: _controller != null &&
-                _controller!.initialized &&
-                _quarterTurnsForRotationCorrection != null
-            ? SafeArea(
-                child: Stack(
-                  children: [
-                    Column(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            children: [
-                              Expanded(
-                                child: Hero(
-                                  tag: "video-editor-preview",
-                                  child: Builder(
-                                    builder: (context) {
-                                      // For videos with metadata rotation, we need to swap dimensions
-                                      final shouldSwap = _quarterTurnsForRotationCorrection! % 2 == 1;
-                                      final width = _controller!.video.value.size.width;
-                                      final height = _controller!.video.value.size.height;
+      child: ValueListenableBuilder<bool>(
+        valueListenable: _isExporting,
+        builder: (context, isExporting, _) {
+          final isReady = _controller != null &&
+              _controller!.initialized &&
+              _quarterTurnsForRotationCorrection != null;
 
-                                      return RotatedBox(
-                                        quarterTurns: _quarterTurnsForRotationCorrection!,
-                                        child: CropGridViewer.preview(
-                                          controller: _controller!,
-                                          overrideWidth: shouldSwap ? height : width,
-                                          overrideHeight: shouldSwap ? width : height,
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ),
-                              VideoEditorPlayerControl(
-                                controller: _controller!,
-                              ),
-                              VideoEditorMainActions(
+          return Scaffold(
+            backgroundColor: colorScheme.backgroundBase,
+            appBar: VideoEditorAppBar(
+              onCancel: () {
+                if (isExporting) return;
+                replacePage(context, DetailPage(widget.detailPageConfig));
+              },
+              primaryActionLabel: AppLocalizations.of(context).saveCopy,
+              onPrimaryAction: exportVideo,
+              isPrimaryEnabled: isReady && !isExporting,
+            ),
+            body: isReady
+                ? SafeArea(
+                    top: false,
+                    bottom: true,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(24),
+                              child: Stack(
+                                fit: StackFit.expand,
                                 children: [
-                                  VideoEditorBottomAction(
-                                    label: AppLocalizations.of(context).trim,
-                                    svgPath:
-                                        "assets/video-editor/video-editor-trim-action.svg",
-                                    onPressed: () => Navigator.push(
-                                      context,
-                                      MaterialPageRoute<void>(
-                                        builder: (context) => VideoTrimPage(
-                                          controller: _controller!,
-                                          quarterTurnsForRotationCorrection:
-                                              _quarterTurnsForRotationCorrection!,
-                                        ),
+                                  Positioned.fill(
+                                    child: Hero(
+                                      tag: "video-editor-preview",
+                                      child: Builder(
+                                        builder: (context) {
+                                          // For videos with metadata rotation, we need to swap dimensions
+                                          final shouldSwap =
+                                              _quarterTurnsForRotationCorrection! %
+                                                      2 ==
+                                                  1;
+                                          final width = _controller!
+                                              .video.value.size.width;
+                                          final height = _controller!
+                                              .video.value.size.height;
+
+                                          return RotatedBox(
+                                            quarterTurns:
+                                                _quarterTurnsForRotationCorrection!,
+                                            child: CropGridViewer.preview(
+                                              controller: _controller!,
+                                              overrideWidth:
+                                                  shouldSwap ? height : width,
+                                              overrideHeight:
+                                                  shouldSwap ? width : height,
+                                            ),
+                                          );
+                                        },
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(width: 40),
-                                  VideoEditorBottomAction(
-                                    label: AppLocalizations.of(context).crop,
-                                    svgPath:
-                                        "assets/video-editor/video-editor-crop-action.svg",
-                                    onPressed: () => Navigator.push(
-                                      context,
-                                      MaterialPageRoute<void>(
-                                        builder: (context) => VideoCropPage(
-                                          controller: _controller!,
-                                          quarterTurnsForRotationCorrection:
-                                              _quarterTurnsForRotationCorrection!,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 40),
-                                  VideoEditorBottomAction(
-                                    label: AppLocalizations.of(context).rotate,
-                                    svgPath:
-                                        "assets/video-editor/video-editor-rotate-action.svg",
-                                    onPressed: () => Navigator.push(
-                                      context,
-                                      MaterialPageRoute<void>(
-                                        builder: (context) => VideoRotatePage(
-                                          controller: _controller!,
-                                          quarterTurnsForRotationCorrection:
-                                              _quarterTurnsForRotationCorrection!,
-                                        ),
+                                  Align(
+                                    alignment: Alignment.bottomCenter,
+                                    child: Padding(
+                                      padding:
+                                          const EdgeInsets.only(bottom: 24),
+                                      child: VideoEditorPlayerControl(
+                                        controller: _controller!,
                                       ),
                                     ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 40),
-                              VideoEditorNavigationOptions(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .videoPlayerPrimaryColor,
-                                secondaryText:
-                                    AppLocalizations.of(context).saveCopy,
-                                onSecondaryPressed: () {
-                                  exportVideo();
-                                },
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          VideoEditorMainActions(
+                            children: [
+                              VideoEditorBottomAction(
+                                label: AppLocalizations.of(context).trim,
+                                svgPath:
+                                    "assets/video-editor/video-editor-trim-action.svg",
+                                onPressed: () => _openSubEditor(
+                                  VideoTrimPage(
+                                    controller: _controller!,
+                                    quarterTurnsForRotationCorrection:
+                                        _quarterTurnsForRotationCorrection!,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 24),
+                              VideoEditorBottomAction(
+                                label: AppLocalizations.of(context).crop,
+                                svgPath:
+                                    "assets/video-editor/video-editor-crop-action.svg",
+                                onPressed: () => _openSubEditor(
+                                  VideoCropPage(
+                                    controller: _controller!,
+                                    quarterTurnsForRotationCorrection:
+                                        _quarterTurnsForRotationCorrection!,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 24),
+                              VideoEditorBottomAction(
+                                label: AppLocalizations.of(context).rotate,
+                                svgPath:
+                                    "assets/video-editor/video-editor-rotate-action.svg",
+                                onPressed: () => _openSubEditor(
+                                  VideoRotatePage(
+                                    controller: _controller!,
+                                    quarterTurnsForRotationCorrection:
+                                        _quarterTurnsForRotationCorrection!,
+                                  ),
+                                ),
                               ),
                             ],
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 12),
+                        ],
+                      ),
                     ),
-                  ],
-                ),
-              )
-            : const Center(child: CircularProgressIndicator()),
+                  )
+                : const Center(child: CircularProgressIndicator()),
+          );
+        },
       ),
     );
   }
@@ -256,127 +272,125 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
       ),
     );
 
+    final config = VideoFFmpegVideoEditorConfig(
+      _controller!,
+      format: VideoExportFormat.mp4,
+      commandBuilder: (config, videoPath, outputPath) {
+        final List<String> filters = config.getExportFilters();
+
+        final String startTrimCmd = "-ss ${_controller!.startTrim}";
+        final String toTrimCmd = "-t ${_controller!.trimmedDuration}";
+        final command =
+            '$startTrimCmd -i $videoPath  $toTrimCmd ${config.filtersCmd(filters)} -c:v libx264 -c:a aac $outputPath';
+        return command;
+      },
+    );
+
     try {
-      // Generate output path for the exported video
-      final tempDir = Directory.systemTemp;
-      final outputPath = path.join(
-        tempDir.path,
-        'exported_${DateTime.now().millisecondsSinceEpoch}.mp4',
-      );
+      final executeConfig = await config.getExecuteConfig();
 
-      _logger.fine(
-        'Export: path=$outputPath, trim=${_controller!.isTrimmed}, rotation=${_controller!.rotation}',
-      );
+      await ExportService.runFFmpegCommand(
+        executeConfig,
+        onProgress: (stats) {
+          final progress = config.getFFmpegProgress(stats.getTime().toInt());
+          if (dialogKey.currentState != null) {
+            dialogKey.currentState!.setProgress(progress);
+          }
+        },
+        onError: (e, s) {
+          _logger.severe("Error exporting video", e, s);
+        },
+        onCompleted: (result) async {
+          _isExporting.value = false;
+          if (!mounted) {
+            return;
+          }
 
-      // Check feature flag to decide which export method to use
-      final File result;
-      if (flagService.useNativeVideoEditor) {
-        // Use native export service for internal users
-        result = await NativeVideoExportService.exportVideo(
-          controller: _controller!,
-          outputPath: outputPath,
-          metadataRotation: _quarterTurnsForRotationCorrection != null
-              ? _quarterTurnsForRotationCorrection! * 90
-              : 0,
-          onProgress: (progress) {
-            if (dialogKey.currentState != null) {
-              dialogKey.currentState!.setProgress(progress);
+          final fileName = path.basenameWithoutExtension(widget.file.title!) +
+              "_edited_" +
+              DateTime.now().microsecondsSinceEpoch.toString() +
+              ".mp4";
+
+          //Disabling notifications for assets changing to insert the file into
+          //files db before triggering a sync.
+          await PhotoManager.stopChangeNotify();
+
+          try {
+            final AssetEntity newAsset = await (PhotoManager.editor.saveVideo(
+              result,
+              title: fileName,
+            ));
+
+            result.deleteSync();
+
+            final newFile = await EnteFile.fromAsset(
+              widget.file.deviceFolder ?? '',
+              newAsset,
+            );
+
+            newFile.creationTime = widget.file.creationTime;
+            newFile.collectionID = widget.file.collectionID;
+            newFile.location = widget.file.location;
+            if (!newFile.hasLocation && widget.file.localID != null) {
+              final assetEntity = await widget.file.getAsset;
+              if (assetEntity != null) {
+                final latLong = await assetEntity.latlngAsync();
+                newFile.location = Location(
+                  latitude: latLong.latitude,
+                  longitude: latLong.longitude,
+                );
+              }
             }
-          },
-          onError: (e, s) => _logger.severe("Error exporting video", e, s),
-        );
-      } else {
-        // Use FFmpeg for regular users
-        result = await ExportService.exportVideo(
-          controller: _controller!,
-          outputPath: outputPath,
-          onProgress: (progress) {
-            if (dialogKey.currentState != null) {
-              dialogKey.currentState!.setProgress(progress);
-            }
-          },
-          onError: (e, s) => _logger.severe("Error exporting video", e, s),
-        );
-      }
 
-      _logger.fine('Export completed: ${result.path}');
-      // Process the exported file
-      await _handleExportedFile(result, dialogKey);
+            newFile.generatedID = await FilesDB.instance.insertAndGetId(
+              newFile,
+            );
+
+            Bus.instance.fire(
+              LocalPhotosUpdatedEvent([newFile], source: "editSave"),
+            );
+
+            SyncService.instance.sync().ignore();
+
+            showShortToast(context, AppLocalizations.of(context).editsSaved);
+            final files = widget.detailPageConfig.files;
+
+            // the index could be -1 if the files fetched doesn't contain the newly
+            // edited files
+            int selectionIndex = files.indexWhere(
+              (file) => file.generatedID == newFile.generatedID,
+            );
+            if (selectionIndex == -1) {
+              files.add(newFile);
+              selectionIndex = files.length - 1;
+            }
+            Navigator.of(dialogKey.currentContext!).pop('dialog');
+
+            replacePage(
+              context,
+              DetailPage(
+                widget.detailPageConfig.copyWith(
+                  files: files,
+                  selectedIndex: min(selectionIndex, files.length - 1),
+                ),
+              ),
+            );
+          } catch (e, s) {
+            _logger.severe("Error in post-processing", e, s);
+            Navigator.of(dialogKey.currentContext!).pop('dialog');
+          }
+        },
+      );
     } catch (e, s) {
-      _logger.severe('Export failed', e, s);
+      _logger.severe("Unexpected error in export process", e, s);
       Navigator.of(dialogKey.currentContext!).pop('dialog');
-      _isExporting.value = false;
     } finally {
       await PhotoManager.startChangeNotify();
     }
   }
 
-  Future<void> _handleExportedFile(
-    File result,
-    GlobalKey<LinearProgressDialogState> dialogKey,
-  ) async {
-    _isExporting.value = false;
-    if (!mounted) return;
-
-    final fileName = path.basenameWithoutExtension(widget.file.title!) +
-        "_edited_" +
-        DateTime.now().microsecondsSinceEpoch.toString() +
-        ".mp4";
-    //Disabling notifications for assets changing to insert the file into
-    //files db before triggering a sync.
-    await PhotoManager.stopChangeNotify();
-
-    try {
-      final AssetEntity newAsset =
-          await (PhotoManager.editor.saveVideo(result, title: fileName));
-      result.deleteSync();
-      final newFile = await EnteFile.fromAsset(
-        widget.file.deviceFolder ?? '',
-        newAsset,
-      );
-
-      newFile.creationTime = widget.file.creationTime;
-      newFile.collectionID = widget.file.collectionID;
-      newFile.location = widget.file.location;
-      if (!newFile.hasLocation && widget.file.localID != null) {
-        final assetEntity = await widget.file.getAsset;
-        if (assetEntity != null) {
-          final latLong = await assetEntity.latlngAsync();
-          newFile.location = Location(
-            latitude: latLong.latitude,
-            longitude: latLong.longitude,
-          );
-        }
-      }
-
-      newFile.generatedID = await FilesDB.instance.insertAndGetId(newFile);
-      Bus.instance.fire(LocalPhotosUpdatedEvent([newFile], source: "editSave"));
-      SyncService.instance.sync().ignore();
-      showShortToast(context, AppLocalizations.of(context).editsSaved);
-      final files = widget.detailPageConfig.files;
-
-      // the index could be -1 if the files fetched doesn't contain the newly
-      // edited files
-      int selectionIndex =
-          files.indexWhere((file) => file.generatedID == newFile.generatedID);
-      if (selectionIndex == -1) {
-        files.add(newFile);
-        selectionIndex = files.length - 1;
-      }
-      Navigator.of(dialogKey.currentContext!).pop('dialog');
-
-      replacePage(
-        context,
-        DetailPage(
-          widget.detailPageConfig.copyWith(
-            files: files,
-            selectedIndex: min(selectionIndex, files.length - 1),
-          ),
-        ),
-      );
-    } catch (_) {
-      Navigator.of(dialogKey.currentContext!).pop('dialog');
-    }
+  Future<void> _openSubEditor(Widget child) {
+    return Navigator.of(context).push(_VideoEditorSubPageRoute(child));
   }
 
   Future<void> _doRotationCorrectionIfAndroid() async {
@@ -401,27 +415,35 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         }
         setState(() {});
       } catch (e) {
-        _logger.warning(
-          'Failed to get native video info, falling back to ffprobe',
-          e,
-        );
-        // Fallback to the original method if native fails
-        await getVideoPropsAsync(widget.ioFile).then((props) async {
-          _logger.fine(
-            'FFprobe fallback: ${props?.width}x${props?.height}, rotation=${props?.rotation}',
-          );
-          if (props?.rotation != null) {
-            _quarterTurnsForRotationCorrection =
-                (props!.rotation! / 90).round();
-          } else {
-            _quarterTurnsForRotationCorrection = 0;
-          }
-          setState(() {});
-        });
+        _logger.warning('Failed to get video info, using fallback', e);
+        _quarterTurnsForRotationCorrection = 0;
+        setState(() {});
       }
     } else {
       _quarterTurnsForRotationCorrection = 0;
       setState(() {});
     }
   }
+}
+
+class _VideoEditorSubPageRoute extends PageRouteBuilder<void> {
+  _VideoEditorSubPageRoute(this.child)
+      : super(
+          fullscreenDialog: true,
+          transitionDuration: const Duration(milliseconds: 220),
+          reverseTransitionDuration: const Duration(milliseconds: 180),
+          pageBuilder: (_, __, ___) => child,
+          transitionsBuilder: (_, animation, __, child) {
+            return FadeTransition(
+              opacity: CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOutCubic,
+                reverseCurve: Curves.easeInCubic,
+              ),
+              child: child,
+            );
+          },
+        );
+
+  final Widget child;
 }

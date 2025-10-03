@@ -1800,7 +1800,6 @@
   "automaticallyAnalyzeAndSplitGrouping": "我们将自动分析分组以确定是否有多人在场，并再次将他们分开。这可能需要几秒钟。",
   "layout": "布局",
   "day": "日",
-  "peopleAutoAddDesc": "选择您想要自动添加到相册的人",
   "undo": "撤销",
   "redo": "重做",
   "filter": "筛选",

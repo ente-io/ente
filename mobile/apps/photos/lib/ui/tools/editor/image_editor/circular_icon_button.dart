@@ -7,6 +7,8 @@ class CircularIconButton extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
   final String? svgPath;
+  final IconData? icon;
+  final Widget? child;
   final double size;
   final bool isSelected;
 
@@ -15,14 +17,34 @@ class CircularIconButton extends StatelessWidget {
     required this.label,
     required this.onTap,
     this.svgPath,
+    this.icon,
+    this.child,
     this.size = 60,
     this.isSelected = false,
-  });
+  }) : assert(
+          svgPath != null || icon != null || child != null,
+          'One of svgPath, icon or child must be provided',
+        );
 
   @override
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
+    final Widget iconContent;
+    if (svgPath != null) {
+      iconContent = SvgPicture.asset(
+        svgPath!,
+        width: 12,
+        height: 12,
+        fit: BoxFit.scaleDown,
+        colorFilter: ColorFilter.mode(colorScheme.tabIcon, BlendMode.srcIn),
+      );
+    } else if (icon != null) {
+      iconContent = Icon(icon, size: size * 0.4, color: colorScheme.tabIcon);
+    } else {
+      iconContent = child!;
+    }
+
     return SizedBox(
       width: 90,
       child: Column(
@@ -49,26 +71,11 @@ class CircularIconButton extends StatelessWidget {
                   width: 2,
                 ),
               ),
-              child: svgPath != null
-                  ? SvgPicture.asset(
-                      svgPath!,
-                      width: 12,
-                      height: 12,
-                      fit: BoxFit.scaleDown,
-                      colorFilter: ColorFilter.mode(
-                        colorScheme.tabIcon,
-                        BlendMode.srcIn,
-                      ),
-                    )
-                  : const SizedBox(),
+              child: iconContent,
             ),
           ),
           const SizedBox(height: 6),
-          Text(
-            label,
-            style: textTheme.small,
-            textAlign: TextAlign.center,
-          ),
+          Text(label, style: textTheme.small, textAlign: TextAlign.center),
         ],
       ),
     );

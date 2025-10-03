@@ -133,15 +133,25 @@ func (repo *UserAuthRepository) AddToken(userID int64, app ente.App, token strin
 	return stacktrace.Propagate(err, "")
 }
 
-// GetUserIDWithToken returns the userID associated with a given token
-func (repo *UserAuthRepository) GetUserIDWithToken(token string, app ente.App) (int64, error) {
-	row := repo.DB.QueryRow(`SELECT user_id FROM tokens WHERE token = $1 AND app = $2 AND is_deleted = false`, token, app)
+// GetUserIDWithToken returns the userID associated with a given token and whether the token is expired
+func (repo *UserAuthRepository) GetUserIDWithToken(token string, app ente.App) (int64, bool, error) {
+	row := repo.DB.QueryRow(`
+		SELECT 
+			user_id,
+			CASE 
+				WHEN last_used_at IS NOT NULL AND last_used_at < (now_utc_micro_seconds() - (365::BIGINT * 24 * 60 * 60 * 1000 * 1000)) 
+				THEN true 
+				ELSE false 
+			END as is_expired
+		FROM tokens 
+		WHERE token = $1 AND app = $2 AND is_deleted = false`, token, app)
 	var id int64
-	err := row.Scan(&id)
+	var isExpired bool
+	err := row.Scan(&id, &isExpired)
 	if err != nil {
-		return -1, stacktrace.Propagate(err, "")
+		return -1, false, stacktrace.Propagate(err, "")
 	}
-	return id, nil
+	return id, isExpired, nil
 }
 
 // RemoveToken marks the specified token (to be used when a user logs out) as deleted
