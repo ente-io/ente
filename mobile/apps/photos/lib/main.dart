@@ -138,61 +138,66 @@ Future<void> runBackgroundTask(
 }
 
 Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
-  final PackageInfo packageInfo = await PackageInfo.fromPlatform();
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  try {
+    final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
 
-  _logger.info("------ Configuration init $tlog");
-  await Configuration.instance.init();
-  _logger.info("------ Configuration done $tlog");
+    _logger.info("------ Configuration init $tlog");
+    await Configuration.instance.init();
+    _logger.info("------ Configuration done $tlog");
 
-  // App LifeCycle
-  AppLifecycleService.instance.init(prefs);
-  AppLifecycleService.instance.onAppInBackground('init via: WorkManager $tlog');
+    // App LifeCycle
+    AppLifecycleService.instance.init(prefs);
+    AppLifecycleService.instance
+        .onAppInBackground('init via: WorkManager $tlog');
 
-  // Crypto rel.
-  await Computer.shared().turnOn(workersCount: 4);
-  CryptoUtil.init();
+    // Crypto rel.
+    await Computer.shared().turnOn(workersCount: 4);
+    CryptoUtil.init();
 
-  // Init Network Utils
-  await NetworkClient.instance.init(packageInfo);
+    // Init Network Utils
+    await NetworkClient.instance.init(packageInfo);
 
-  // Global Services
-  ServiceLocator.instance.init(
-    prefs,
-    NetworkClient.instance.enteDio,
-    NetworkClient.instance.getDio(),
-    packageInfo,
-  );
+    // Global Services
+    ServiceLocator.instance.init(
+      prefs,
+      NetworkClient.instance.enteDio,
+      NetworkClient.instance.getDio(),
+      packageInfo,
+    );
 
-  _logger.info("------ CollectionsService init $tlog");
-  await CollectionsService.instance.init(prefs);
-  _logger.info("------ CollectionsService init done $tlog");
+    _logger.info("------ CollectionsService init $tlog");
+    await CollectionsService.instance.init(prefs);
+    _logger.info("------ CollectionsService init done $tlog");
 
-  // Upload & Sync Related
-  await FileUploader.instance.init(prefs, true);
-  LocalFileUpdateService.instance.init(prefs);
-  await LocalSyncService.instance.init(prefs);
-  RemoteSyncService.instance.init(prefs);
-  await SyncService.instance.init(prefs);
+    // Upload & Sync Related
+    await FileUploader.instance.init(prefs, true);
+    LocalFileUpdateService.instance.init(prefs);
+    await LocalSyncService.instance.init(prefs);
+    RemoteSyncService.instance.init(prefs);
+    await SyncService.instance.init(prefs);
 
-  // Misc Services
-  await UserService.instance.init();
-  NotificationService.instance.init(prefs);
+    // Misc Services
+    await UserService.instance.init();
+    NotificationService.instance.init(prefs);
 
-  // Begin Execution
-  // only runs for android
-  updateService.showUpdateNotification().ignore();
-  await _sync('bgTaskActiveProcess');
+    // Begin Execution
+    // only runs for android
+    updateService.showUpdateNotification().ignore();
+    await _sync('bgTaskActiveProcess');
 
-  final locale = await getLocale();
-  await initializeDateFormatting(locale?.languageCode ?? "en");
-  // only runs for android
-  await _homeWidgetSync(true);
+    final locale = await getLocale();
+    await initializeDateFormatting(locale?.languageCode ?? "en");
+    // only runs for android
+    await _homeWidgetSync(true);
 
-  // await MLService.instance.init();
-  // await PersonService.init(entityService, MLDataDB.instance, prefs);
-  // await MLService.instance.runAllML(force: true);
-  await smartAlbumsService.syncSmartAlbums();
+    // await MLService.instance.init();
+    // await PersonService.init(entityService, MLDataDB.instance, prefs);
+    // await MLService.instance.runAllML(force: true);
+    await smartAlbumsService.syncSmartAlbums();
+  } catch (e) {
+    _logger.severe("Error on init BG task", e);
+  }
 }
 
 Future<void> _init(bool isBackground, {String via = ''}) async {
