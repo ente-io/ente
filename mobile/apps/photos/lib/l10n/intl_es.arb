@@ -1801,7 +1801,6 @@
   "automaticallyAnalyzeAndSplitGrouping": "Analizaremos automáticamente la agrupación para determinar si hay varias personas presentes, y separarlas de nuevo. Esto puede tardar unos segundos.",
   "layout": "Disposición",
   "day": "Día",
-  "peopleAutoAddDesc": "Selecciona las personas que quieres añadir automáticamente al álbum",
   "undo": "Deshacer",
   "redo": "Rehacer",
   "filter": "Filtro",
