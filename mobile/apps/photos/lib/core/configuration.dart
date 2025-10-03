@@ -109,21 +109,21 @@ class Configuration {
       Directory(_sharedDocumentsMediaDirectory).createSync(recursive: true);
       if (!_preferences.containsKey(tokenKey)) {
         _logger
-            .info("------ Token not found, deleting all secure storage data");
+            .info("(for debugging) Token not found, deleting all secure storage data");
         await _secureStorage.deleteAll();
       } else {
-        _logger.info("------ Token found, loading secure storage data");
+        _logger.info("(for debugging) Token found, loading secure storage data");
         _key = await _secureStorage.read(
           key: keyKey,
         );
         _logger.info(
-          "------ Key loaded from secure storage, is null: ${_key == null}",
+          "(for debugging) Key loaded from secure storage, is null: ${_key == null}",
         );
         _secretKey = await _secureStorage.read(
           key: secretKeyKey,
         );
         _logger.info(
-          "------ Secret Key loaded from secure storage, is null: ${_secretKey == null}",
+          "(for debugging) Secret Key loaded from secure storage, is null: ${_secretKey == null}",
         );
         if (_key == null) {
           await logout(autoLogout: true);
@@ -702,16 +702,16 @@ class Configuration {
   }
 
   Future<void> _migrateSecurityStorageToFirstUnlock() async {
-    _logger.info("------ Migrating secure storage to first unlock if needed");
+    _logger.info("(for debugging) Migrating secure storage to first unlock if needed");
     final hasMigratedSecureStorage =
         _preferences.getBool(hasMigratedSecureStorageKey) ?? false;
     if (!hasMigratedSecureStorage && _key != null && _secretKey != null) {
-      _logger.info("------ Migrating secure storage to first unlock");
+      _logger.info("(for debugging) Migrating secure storage to first unlock");
       await _secureStorage.write(key: keyKey, value: _key);
       await _secureStorage.write(key: secretKeyKey, value: _secretKey);
       await _preferences.setBool(hasMigratedSecureStorageKey, true);
     }
-    _logger.info("------ Migration check complete");
+    _logger.info("(for debugging) Migration check complete");
   }
 
   Future<String> _getOrCreateAnonymousUserID() async {

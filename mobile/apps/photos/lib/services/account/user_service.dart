@@ -1279,7 +1279,7 @@ class UserService {
   Future<void> _saveConfiguration(dynamic response) async {
     final responseData = response is Map ? response : response.data as Map?;
     if (responseData == null) {
-      _logger.warning("------ Response data is null");
+      _logger.warning("(for debugging) Response data is null");
       return;
     }
 

@@ -142,9 +142,9 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    _logger.info("------ Configuration init $tlog");
+    _logger.info("(for debugging) Configuration init $tlog");
     await Configuration.instance.init();
-    _logger.info("------ Configuration done $tlog");
+    _logger.info("(for debugging) Configuration done $tlog");
 
     // App LifeCycle
     AppLifecycleService.instance.init(prefs);
@@ -166,9 +166,9 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
       packageInfo,
     );
 
-    _logger.info("------ CollectionsService init $tlog");
+    _logger.info("(for debugging) CollectionsService init $tlog");
     await CollectionsService.instance.init(prefs);
-    _logger.info("------ CollectionsService init done $tlog");
+    _logger.info("(for debugging) CollectionsService init done $tlog");
 
     // Upload & Sync Related
     await FileUploader.instance.init(prefs, true);
