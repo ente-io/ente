@@ -1,3 +1,5 @@
+- Ashil: Use better copy on auto-add people selection page
+- Ashil: Add more logs to debug app stuck at splash screen issue
 - Ashil: Downgrade flutter secure storage back to version used before v1.2.4 release
 - Neeraj: Fix sorting for large files viewer
 - Anand: Option to change public album layout
