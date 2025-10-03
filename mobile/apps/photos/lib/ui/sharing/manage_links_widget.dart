@@ -117,7 +117,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   if (flagService.internalUser &&
                       widget.collection!.pubMagicMetadata.layout == "trip")
                     MenuSectionDescriptionWidget(
-                      content: AppLocalizations.of(context).maps_privacy_notice,
+                      content: AppLocalizations.of(context).mapsPrivacyNotice,
                     ),
                   if (flagService.internalUser) const SizedBox(height: 24),
                   MenuItemWidget(
