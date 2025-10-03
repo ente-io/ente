@@ -1,3 +1,4 @@
+- Laurens: Change similar images labels copy
 - Laurens: Fix flipped thumbnails issue by removing use of ColorFiltered widget
 - Ashil: Downgrade flutter secure storage back to version used before v1.2.4 release
 - Neeraj: Fix sorting for large files viewer
