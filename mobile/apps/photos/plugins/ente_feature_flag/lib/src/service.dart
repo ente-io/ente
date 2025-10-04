@@ -70,7 +70,7 @@ class FlagService {
 
   bool get widgetSharedAlbums => internalUser;
 
-  bool get useNativeVideoEditor => internalUser;
+  bool get useNativeVideoEditor => false;
 
   bool hasSyncedAccountFlags() {
     return _prefs.containsKey("remote_flags");
