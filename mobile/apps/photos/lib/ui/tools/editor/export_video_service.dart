@@ -194,9 +194,18 @@ class ExportService {
           onProgress(progress);
         }
       },
-      onError: onError,
+      onError: (error, stackTrace) {
+        if (onError != null) {
+          onError(error, stackTrace);
+        }
+        if (!completer.isCompleted) {
+          completer.completeError(error, stackTrace);
+        }
+      },
       onCompleted: (File file) {
-        completer.complete(file);
+        if (!completer.isCompleted) {
+          completer.complete(file);
+        }
       },
     );
 
