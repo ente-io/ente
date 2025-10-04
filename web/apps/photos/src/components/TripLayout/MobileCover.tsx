@@ -118,7 +118,8 @@ const ContentContainer = styled(Box)({
 const TripTitle = styled(Typography)({
     fontSize: "28px",
     fontWeight: "bold",
-    marginBottom: "12px",
+    marginBottom: "8px",
+    lineHeight: 1.2,
     component: "h1",
 });
 
