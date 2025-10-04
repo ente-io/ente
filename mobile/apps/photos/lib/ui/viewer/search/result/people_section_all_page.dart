@@ -1,6 +1,7 @@
 import "dart:async";
 
 import 'package:flutter/material.dart';
+import "package:flutter/rendering.dart";
 import "package:photos/events/event.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
@@ -16,6 +17,7 @@ import "package:photos/services/machine_learning/face_ml/face_filtering/face_fil
 import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
+import "package:photos/ui/components/bottom_action_bar/people_action_bar_widget.dart";
 import "package:photos/ui/components/bottom_action_bar/people_bottom_action_bar_widget.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
@@ -28,7 +30,12 @@ import "package:photos/ui/viewer/search_tab/people_section.dart";
 import "package:photos/utils/navigation_util.dart";
 
 class PeopleSectionAllPage extends StatefulWidget {
+  final bool isCollapsed;
+  final VoidCallback? onExpand;
+
   const PeopleSectionAllPage({
+    this.isCollapsed = false,
+    this.onExpand,
     super.key,
   });
 
@@ -38,6 +45,44 @@ class PeopleSectionAllPage extends StatefulWidget {
 
 class _PeopleSectionAllPageState extends State<PeopleSectionAllPage> {
   final _selectedPeople = SelectedPeople();
+
+  bool _isCollapsed = false;
+  bool _hasCollapsedOnce = false;
+  bool _hasPeopleSelected = false;
+  Timer? _selectionTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedPeople.addListener(_onSelectionChanged);
+  }
+
+  void _onSelectionChanged() {
+    final hasSelection = _selectedPeople.personIds.isNotEmpty;
+
+    if (hasSelection && !_hasPeopleSelected) {
+      setState(() {
+        _isCollapsed = false;
+        _hasPeopleSelected = true;
+      });
+
+      _selectionTimer?.cancel();
+      _selectionTimer = Timer(const Duration(milliseconds: 10), () {});
+    } else if (!hasSelection && _hasPeopleSelected) {
+      setState(() {
+        _hasPeopleSelected = false;
+        _isCollapsed = false;
+      });
+      _selectionTimer?.cancel();
+    }
+  }
+
+  @override
+  void dispose() {
+    _selectedPeople.removeListener(_onSelectionChanged);
+    _selectionTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,15 +96,63 @@ class _PeopleSectionAllPageState extends State<PeopleSectionAllPage> {
             title: Text(SectionType.face.sectionTitle(context)),
             centerTitle: false,
           ),
-          body: PeopleSectionAllSelectionWrapper(
-            selectedPeople: _selectedPeople,
+          body: NotificationListener<ScrollNotification>(
+            onNotification: (scrollInfo) {
+              if (scrollInfo is UserScrollNotification && _hasPeopleSelected) {
+                final shouldAllowCollapse =
+                    _selectionTimer == null || !_selectionTimer!.isActive;
+                if (shouldAllowCollapse &&
+                    (!_hasCollapsedOnce || !_isCollapsed) &&
+                    (scrollInfo.direction == ScrollDirection.forward ||
+                        scrollInfo.direction == ScrollDirection.reverse)) {
+                  Future.delayed(const Duration(milliseconds: 10), () {
+                    if (mounted && _hasPeopleSelected) {
+                      setState(() {
+                        _isCollapsed = true;
+                        _hasCollapsedOnce = true;
+                      });
+                    }
+                  });
+                }
+              }
+              return false;
+            },
+            child: PeopleSectionAllSelectionWrapper(
+              selectedPeople: _selectedPeople,
+            ),
           ),
           bottomNavigationBar: hasSelection
-              ? PeopleBottomActionBarWidget(
-                  _selectedPeople,
-                  onCancel: () {
-                    _selectedPeople.clearAll();
-                  },
+              ? Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: PeopleActionBarWidget(
+                        selectedPeople: _selectedPeople,
+                        onCancel: () {
+                          _selectedPeople.clearAll();
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    GestureDetector(
+                      onVerticalDragUpdate: (details) {
+                        if (details.primaryDelta! < -10 && _isCollapsed) {
+                          setState(() {
+                            _isCollapsed = false;
+                          });
+                        }
+                      },
+                      child: PeopleBottomActionBarWidget(
+                        _selectedPeople,
+                        isCollapsed: _isCollapsed,
+                        onCancel: () {
+                          _selectedPeople.clearAll();
+                        },
+                      ),
+                    ),
+                  ],
                 )
               : null,
         );

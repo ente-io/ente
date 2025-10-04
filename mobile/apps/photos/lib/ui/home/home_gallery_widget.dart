@@ -1,6 +1,7 @@
 import "dart:async";
 
 import 'package:flutter/material.dart';
+import "package:flutter/rendering.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
@@ -44,6 +45,11 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
   late final StreamSubscription<HideSharedItemsFromHomeGalleryEvent>
       _hideSharedFilesFromHomeSubscription;
   bool _shouldHideSharedItems = localSettings.hideSharedItemsFromHomeGallery;
+  final ValueNotifier<bool> _isScrolling = ValueNotifier(false);
+  bool _isCollapsed = false;
+  bool _hasCollapsedOnce = false;
+  bool _hasFilesSelected = false;
+  Timer? _selectionTimer;
 
   /// This deboucner is to delay the UI update of the shared items toggle
   /// since it's expensive (a new differnt key is used for the gallery
@@ -65,6 +71,28 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
         });
       });
     });
+
+    widget.selectedFiles.addListener(_onSelectionChanged);
+  }
+
+  void _onSelectionChanged() {
+    final hasSelection = widget.selectedFiles.files.isNotEmpty;
+
+    if (hasSelection && !_hasFilesSelected) {
+      setState(() {
+        _isCollapsed = false;
+        _hasFilesSelected = true;
+      });
+
+      _selectionTimer?.cancel();
+      _selectionTimer = Timer(const Duration(milliseconds: 10), () {});
+    } else if (!hasSelection && _hasFilesSelected) {
+      setState(() {
+        _hasFilesSelected = false;
+        _isCollapsed = false;
+      });
+      _selectionTimer?.cancel();
+    }
   }
 
   @override
@@ -72,68 +100,93 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
     super.dispose();
     _hideSharedFilesFromHomeSubscription.cancel();
     _hideSharedItemsToggleDebouncer.cancelDebounceTimer();
+    widget.selectedFiles.removeListener(_onSelectionChanged);
+    _selectionTimer?.cancel();
   }
 
   @override
   Widget build(BuildContext context) {
-    final gallery = Gallery(
-      key: ValueKey(_shouldHideSharedItems),
-      asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
-        final ownerID = Configuration.instance.getUserID();
-        final hasSelectedAllForBackup =
-            Configuration.instance.hasSelectedAllFoldersForBackup();
-        final collectionsToHide =
-            CollectionsService.instance.archivedOrHiddenCollectionIds();
-        FileLoadResult result;
-        final DBFilterOptions filterOptions = DBFilterOptions(
-          hideIgnoredForUpload: true,
-          dedupeUploadID: true,
-          ignoredCollectionIDs: collectionsToHide,
-          ignoreSavedFiles: true,
-          ignoreSharedItems: _shouldHideSharedItems,
-        );
-        if (hasSelectedAllForBackup) {
-          result = await FilesDB.instance.getAllLocalAndUploadedFiles(
-            creationStartTime,
-            creationEndTime,
-            ownerID!,
-            limit: limit,
-            asc: asc,
-            filterOptions: filterOptions,
-          );
-        } else {
-          result = await FilesDB.instance.getAllPendingOrUploadedFiles(
-            creationStartTime,
-            creationEndTime,
-            ownerID!,
-            limit: limit,
-            asc: asc,
-            filterOptions: filterOptions,
-          );
-        }
+    final gallery = NotificationListener<ScrollNotification>(
+      onNotification: (scrollInfo) {
+        if (scrollInfo is UserScrollNotification && _hasFilesSelected) {
+          final shouldAllowCollapse =
+              _selectionTimer == null || !_selectionTimer!.isActive;
 
-        return result;
+          if (shouldAllowCollapse &&
+              (!_hasCollapsedOnce || !_isCollapsed) &&
+              (scrollInfo.direction == ScrollDirection.forward ||
+                  scrollInfo.direction == ScrollDirection.reverse)) {
+            Future.delayed(const Duration(milliseconds: 10), () {
+              if (mounted && _hasFilesSelected) {
+                setState(() {
+                  _isCollapsed = true;
+                  _hasCollapsedOnce = true;
+                });
+              }
+            });
+          }
+        }
+        return false;
       },
-      reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
-      removalEventTypes: const {
-        EventType.deletedFromRemote,
-        EventType.deletedFromEverywhere,
-        EventType.archived,
-        EventType.hide,
-      },
-      forceReloadEvents: [
-        Bus.instance.on<BackupFoldersUpdatedEvent>(),
-        Bus.instance.on<ForceReloadHomeGalleryEvent>(),
-      ],
-      tagPrefix: "home_gallery",
-      selectedFiles: widget.selectedFiles,
-      header: widget.header,
-      footer: widget.footer,
-      reloadDebounceTime: const Duration(seconds: 2),
-      reloadDebounceExecutionInterval: const Duration(seconds: 5),
-      galleryType: GalleryType.homepage,
-      groupType: widget.groupType,
-      showGallerySettingsCTA: true,
+      child: Gallery(
+        key: ValueKey(_shouldHideSharedItems),
+        asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
+          final ownerID = Configuration.instance.getUserID();
+          final hasSelectedAllForBackup =
+              Configuration.instance.hasSelectedAllFoldersForBackup();
+          final collectionsToHide =
+              CollectionsService.instance.archivedOrHiddenCollectionIds();
+          FileLoadResult result;
+          final DBFilterOptions filterOptions = DBFilterOptions(
+            hideIgnoredForUpload: true,
+            dedupeUploadID: true,
+            ignoredCollectionIDs: collectionsToHide,
+            ignoreSavedFiles: true,
+            ignoreSharedItems: _shouldHideSharedItems,
+          );
+          if (hasSelectedAllForBackup) {
+            result = await FilesDB.instance.getAllLocalAndUploadedFiles(
+              creationStartTime,
+              creationEndTime,
+              ownerID!,
+              limit: limit,
+              asc: asc,
+              filterOptions: filterOptions,
+            );
+          } else {
+            result = await FilesDB.instance.getAllPendingOrUploadedFiles(
+              creationStartTime,
+              creationEndTime,
+              ownerID!,
+              limit: limit,
+              asc: asc,
+              filterOptions: filterOptions,
+            );
+          }
+
+          return result;
+        },
+        reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
+        removalEventTypes: const {
+          EventType.deletedFromRemote,
+          EventType.deletedFromEverywhere,
+          EventType.archived,
+          EventType.hide,
+        },
+        forceReloadEvents: [
+          Bus.instance.on<BackupFoldersUpdatedEvent>(),
+          Bus.instance.on<ForceReloadHomeGalleryEvent>(),
+        ],
+        tagPrefix: "home_gallery",
+        selectedFiles: widget.selectedFiles,
+        header: widget.header,
+        footer: widget.footer,
+        reloadDebounceTime: const Duration(seconds: 2),
+        reloadDebounceExecutionInterval: const Duration(seconds: 5),
+        galleryType: GalleryType.homepage,
+        groupType: widget.groupType,
+        showGallerySettingsCTA: true,
+      ),
     );
     return GalleryFilesState(
       child: SelectionState(
@@ -142,7 +195,21 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
           alignment: Alignment.bottomCenter,
           children: [
             gallery,
-            FileSelectionOverlayBar(GalleryType.homepage, widget.selectedFiles),
+            ValueListenableBuilder<bool>(
+              valueListenable: _isScrolling,
+              builder: (context, isScrolling, _) {
+                return FileSelectionOverlayBar(
+                  GalleryType.homepage,
+                  widget.selectedFiles,
+                  isCollapsed: _isCollapsed,
+                  onExpand: () {
+                    setState(() {
+                      _isCollapsed = false;
+                    });
+                  },
+                );
+              },
+            ),
           ],
         ),
       ),

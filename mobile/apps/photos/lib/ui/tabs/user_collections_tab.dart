@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import "package:flutter/rendering.dart";
 import 'package:logging/logging.dart';
 import "package:photos/core/configuration.dart";
 import 'package:photos/core/event_bus.dart';
@@ -59,10 +60,16 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
     leading: true,
   );
 
+  bool _isCollapsed = false;
+  bool _hasCollapsedOnce = false;
+  bool _hasAlbumsSelected = false;
+  Timer? _selectionTimer;
+
   static const int _kOnEnteItemLimitCount = 12;
   @override
   void initState() {
     super.initState();
+    widget.selectedAlbums?.addListener(_onSelectionChanged);
     _localFilesSubscription =
         Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       _debouncer.run(() async {
@@ -99,6 +106,26 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
     });
   }
 
+  void _onSelectionChanged() {
+    final hasSelection = widget.selectedAlbums?.albums.isNotEmpty ?? false;
+
+    if (hasSelection && !_hasAlbumsSelected) {
+      setState(() {
+        _isCollapsed = false;
+        _hasAlbumsSelected = true;
+      });
+
+      _selectionTimer?.cancel();
+      _selectionTimer = Timer(const Duration(milliseconds: 10), () {});
+    } else if (!hasSelection && _hasAlbumsSelected) {
+      setState(() {
+        _hasAlbumsSelected = false;
+        _isCollapsed = false;
+      });
+      _selectionTimer?.cancel();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -130,107 +157,134 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
     return Stack(
       alignment: Alignment.bottomCenter,
       children: [
-        CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          controller: _scrollController,
-          slivers: [
-            SliverToBoxAdapter(
-              child: SectionOptions(
-                onTap: () {
-                  unawaited(
-                    routeToPage(
-                      context,
-                      DeviceFolderVerticalGridView(
-                        appTitle: SectionTitle(
-                          title: AppLocalizations.of(context).onDevice,
+        NotificationListener<ScrollNotification>(
+          onNotification: (scrollInfo) {
+            if (scrollInfo is UserScrollNotification && _hasAlbumsSelected) {
+              final shouldAllowCollapse =
+                  _selectionTimer == null || !_selectionTimer!.isActive;
+
+              if (shouldAllowCollapse &&
+                  (!_hasCollapsedOnce || !_isCollapsed) &&
+                  (scrollInfo.direction == ScrollDirection.forward ||
+                      scrollInfo.direction == ScrollDirection.reverse)) {
+                if (mounted && _hasAlbumsSelected) {
+                  setState(() {
+                    _isCollapsed = true;
+                    _hasCollapsedOnce = true;
+                  });
+                }
+              }
+            }
+            return false;
+          },
+          child: CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            controller: _scrollController,
+            slivers: [
+              SliverToBoxAdapter(
+                child: SectionOptions(
+                  onTap: () {
+                    unawaited(
+                      routeToPage(
+                        context,
+                        DeviceFolderVerticalGridView(
+                          appTitle: SectionTitle(
+                            title: AppLocalizations.of(context).onDevice,
+                          ),
+                          tag: "OnDeviceAppTitle",
                         ),
-                        tag: "OnDeviceAppTitle",
                       ),
+                    );
+                  },
+                  Hero(
+                    tag: "OnDeviceAppTitle",
+                    child: SectionTitle(
+                      title: AppLocalizations.of(context).onDevice,
                     ),
-                  );
-                },
-                Hero(
-                  tag: "OnDeviceAppTitle",
-                  child: SectionTitle(
-                    title: AppLocalizations.of(context).onDevice,
+                  ),
+                  trailingWidget: IconButtonWidget(
+                    icon: Icons.chevron_right,
+                    iconButtonType: IconButtonType.secondary,
+                    iconColor: getEnteColorScheme(context).blurStrokePressed,
                   ),
                 ),
-                trailingWidget: IconButtonWidget(
-                  icon: Icons.chevron_right,
-                  iconButtonType: IconButtonType.secondary,
-                  iconColor: getEnteColorScheme(context).blurStrokePressed,
-                ),
               ),
-            ),
-            const SliverToBoxAdapter(child: DeviceFoldersGridView()),
-            SliverToBoxAdapter(
-              child: SectionOptions(
-                onTap: () {
-                  unawaited(
-                    routeToPage(
-                      context,
-                      CollectionListPage(
-                        collections,
-                        sectionType: UISectionType.homeCollections,
-                        appTitle: SectionTitle(
-                          titleWithBrand: getOnEnteSection(context),
+              const SliverToBoxAdapter(child: DeviceFoldersGridView()),
+              SliverToBoxAdapter(
+                child: SectionOptions(
+                  onTap: () {
+                    unawaited(
+                      routeToPage(
+                        context,
+                        CollectionListPage(
+                          collections,
+                          sectionType: UISectionType.homeCollections,
+                          appTitle: SectionTitle(
+                            titleWithBrand: getOnEnteSection(context),
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                },
-                SectionTitle(titleWithBrand: getOnEnteSection(context)),
-                trailingWidget: IconButtonWidget(
-                  icon: Icons.chevron_right,
-                  iconButtonType: IconButtonType.secondary,
-                  iconColor: getEnteColorScheme(context).blurStrokePressed,
+                    );
+                  },
+                  SectionTitle(titleWithBrand: getOnEnteSection(context)),
+                  trailingWidget: IconButtonWidget(
+                    icon: Icons.chevron_right,
+                    iconButtonType: IconButtonType.secondary,
+                    iconColor: getEnteColorScheme(context).blurStrokePressed,
+                  ),
                 ),
               ),
-            ),
-            SliverToBoxAdapter(child: DeleteEmptyAlbums(collections)),
-            Configuration.instance.hasConfiguredAccount()
-                ? CollectionsFlexiGridViewWidget(
-                    collections,
-                    displayLimitCount: _kOnEnteItemLimitCount,
-                    selectedAlbums: widget.selectedAlbums,
-                    shrinkWrap: true,
-                    shouldShowCreateAlbum: true,
-                    enableSelectionMode: true,
-                  )
-                : const SliverToBoxAdapter(child: EmptyState()),
-            SliverToBoxAdapter(
-              child: Divider(
-                color: getEnteColorScheme(context).strokeFaint,
-              ),
-            ),
-            const SliverToBoxAdapter(child: SizedBox(height: 12)),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Column(
-                  children: [
-                    UnCategorizedCollections(trashAndHiddenTextStyle),
-                    const SizedBox(height: 12),
-                    ArchivedCollectionsButton(trashAndHiddenTextStyle),
-                    const SizedBox(height: 12),
-                    HiddenCollectionsButtonWidget(trashAndHiddenTextStyle),
-                    const SizedBox(height: 12),
-                    TrashSectionButton(trashAndHiddenTextStyle),
-                  ],
+              SliverToBoxAdapter(child: DeleteEmptyAlbums(collections)),
+              Configuration.instance.hasConfiguredAccount()
+                  ? CollectionsFlexiGridViewWidget(
+                      collections,
+                      displayLimitCount: _kOnEnteItemLimitCount,
+                      selectedAlbums: widget.selectedAlbums,
+                      shrinkWrap: true,
+                      shouldShowCreateAlbum: true,
+                      enableSelectionMode: true,
+                    )
+                  : const SliverToBoxAdapter(child: EmptyState()),
+              SliverToBoxAdapter(
+                child: Divider(
+                  color: getEnteColorScheme(context).strokeFaint,
                 ),
               ),
-            ),
-            SliverToBoxAdapter(
-              child:
-                  SizedBox(height: 64 + MediaQuery.paddingOf(context).bottom),
-            ),
-          ],
+              const SliverToBoxAdapter(child: SizedBox(height: 12)),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Column(
+                    children: [
+                      UnCategorizedCollections(trashAndHiddenTextStyle),
+                      const SizedBox(height: 12),
+                      ArchivedCollectionsButton(trashAndHiddenTextStyle),
+                      const SizedBox(height: 12),
+                      HiddenCollectionsButtonWidget(trashAndHiddenTextStyle),
+                      const SizedBox(height: 12),
+                      TrashSectionButton(trashAndHiddenTextStyle),
+                    ],
+                  ),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child:
+                    SizedBox(height: 64 + MediaQuery.paddingOf(context).bottom),
+              ),
+            ],
+          ),
         ),
         AlbumSelectionOverlayBar(
           widget.selectedAlbums!,
           UISectionType.homeCollections,
           collections,
           showSelectAllButton: false,
+          isCollapsed: _isCollapsed,
+          onExpand: () {
+            setState(() {
+              _isCollapsed = false;
+            });
+          },
         ),
       ],
     );
@@ -245,6 +299,8 @@ class _UserCollectionsTabState extends State<UserCollectionsTab>
     _scrollController.dispose();
     _debouncer.cancelDebounceTimer();
     _albumSortOrderChangeEvent.cancel();
+    widget.selectedAlbums?.removeListener(_onSelectionChanged);
+    _selectionTimer?.cancel();
     super.dispose();
   }
 
