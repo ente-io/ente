@@ -14,6 +14,7 @@ import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/location/location.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/sync/sync_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/linear_progress_dialog.dart";
@@ -61,6 +62,18 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
   @override
   void initState() {
     super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      if (flagService.internalUser && flagService.useNativeVideoEditor) {
+        showShortToast(
+          context,
+          "Using native video editor",
+        );
+      }
+    });
 
     // First determine rotation correction for Android
     _doRotationCorrectionIfAndroid().then((_) {
