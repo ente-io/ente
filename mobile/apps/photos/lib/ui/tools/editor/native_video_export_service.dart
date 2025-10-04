@@ -3,12 +3,16 @@ import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:logging/logging.dart';
 import 'package:native_video_editor/native_video_editor.dart';
+import 'package:photos/ui/tools/editor/export_video_service.dart';
 import 'package:video_editor/video_editor.dart';
 
 /// Service that uses native video editing operations when possible
 /// Falls back to FFmpeg for operations that require re-encoding
 class NativeVideoExportService {
+  static final _logger = Logger('NativeVideoExportService');
+
   /// Export video using native operations when possible
   static Future<File> exportVideo({
     required VideoEditorController controller,
@@ -17,6 +21,7 @@ class NativeVideoExportService {
     void Function(double)? onProgress,
     void Function(Object, StackTrace)? onError,
   }) async {
+    final startTime = DateTime.now();
     try {
       final inputPath = controller.file.path;
 
@@ -57,12 +62,40 @@ class NativeVideoExportService {
 
         return File(result.outputPath);
       }
-    } catch (e, s) {
-      if (onError != null) {
-        onError(e, s);
+    } catch (error, stackTrace) {
+      final elapsed = DateTime.now().difference(startTime);
+      _logger.warning(
+        'Native export failed after ${elapsed.inMilliseconds}ms. '
+        'Falling back to FFmpeg if allowed.',
+        error,
+        stackTrace,
+      );
+
+      if (elapsed < const Duration(seconds: 3)) {
+        onProgress?.call(0.0);
+        try {
+          return await ExportService.exportVideo(
+            controller: controller,
+            outputPath: outputPath,
+            onProgress: onProgress,
+            onError: onError,
+          );
+        } catch (ffmpegError, ffmpegStackTrace) {
+          _logger.severe(
+            'Fallback FFmpeg export also failed.',
+            ffmpegError,
+            ffmpegStackTrace,
+          );
+          if (onError != null) {
+            onError(ffmpegError, ffmpegStackTrace);
+          }
+          rethrow;
+        }
       }
 
-      // Re-throw the error instead of falling back to FFmpeg
+      if (onError != null) {
+        onError(error, stackTrace);
+      }
       rethrow;
     }
   }
