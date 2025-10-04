@@ -1,8 +1,8 @@
-import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart';
 import 'package:photos/ui/viewer/gallery/state/gallery_swipe_helper.dart';
@@ -32,26 +32,27 @@ class SwipeSelectionWrapper extends StatefulWidget {
   State<SwipeSelectionWrapper> createState() => _SwipeSelectionWrapperState();
 }
 
-class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper> {
+class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper>
+    with TickerProviderStateMixin {
   bool? _initialMovementWasHorizontal;
   bool _pointerDownForFirstSelection = false;
 
   // Auto-scroll related fields
-  Timer? _autoScrollTimer;
+  Ticker? _autoScrollTicker;
   double _currentPointerY = 0;
   double _currentPointerX = 0;
   int? _activePointer;
   double? _cachedScreenHeight;
   double _accumulatedScrollDelta = 0;
 
-  // Auto-scroll state tracking to avoid timer recreation
+  // Auto-scroll state tracking to avoid ticker recreation
   int? _currentScrollDirection; // -1 for up, 1 for down, null for not scrolling
   double _currentScrollSpeed = 0;
   ScrollController? _activeScrollController;
+  Duration _lastElapsed = Duration.zero;
 
   // Frame rate adaptive fields
   double _displayRefreshRate = 60.0; // Default fallback to 60fps
-  late double _scrollIntervalMs; // Calculated based on refresh rate
   late double _maxScrollSpeed; // Scaled based on frame rate
   late double _speedDenominator; // Pre-calculated for speed formula
 
@@ -81,9 +82,6 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper> {
     final display =
         WidgetsBinding.instance.platformDispatcher.views.first.display;
     _displayRefreshRate = display.refreshRate > 0 ? display.refreshRate : 60.0;
-
-    // Calculate frame-rate-dependent constants
-    _scrollIntervalMs = 1000.0 / _displayRefreshRate;
 
     // Scale max scroll speed based on frame rate
     // At 60fps: 15 pixels per frame
@@ -295,77 +293,95 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper> {
         _calculateScrollSpeed(distance, boundaryPosition, scrollingUp);
 
     // Check if we're already scrolling in the same direction
-    // If yes, just update the speed without recreating the timer
-    if (_autoScrollTimer != null &&
+    // If yes, just update the speed without recreating the ticker
+    if (_autoScrollTicker != null &&
         _currentScrollDirection == direction &&
         _activeScrollController == controller) {
-      // Just update the scroll speed, timer continues running
+      // Just update the scroll speed, ticker continues running
       _currentScrollSpeed = scrollSpeed;
       return;
     }
 
-    // Direction changed or starting fresh - recreate timer
+    // Direction changed or starting fresh - recreate ticker
     _stopAutoScroll();
     _currentScrollDirection = direction;
     _currentScrollSpeed = scrollSpeed;
     _activeScrollController = controller;
+    _lastElapsed = Duration.zero;
 
-    // Start periodic timer for smooth scrolling at display refresh rate
-    _autoScrollTimer = Timer.periodic(
-      Duration(microseconds: (_scrollIntervalMs * 1000).toInt()),
-      (_) {
-        if (!mounted || !controller.hasClients) {
-          _stopAutoScroll();
-          return;
+    // Create vsync-synchronized ticker for smooth scrolling
+    _autoScrollTicker = createTicker((elapsed) {
+      if (!mounted || !controller.hasClients) {
+        _stopAutoScroll();
+        return;
+      }
+
+      // Calculate delta time since last frame
+      final deltaTime = elapsed - _lastElapsed;
+      _lastElapsed = elapsed;
+
+      // Calculate scroll distance for this frame using delta-time
+      // Convert microseconds to seconds for calculation
+      final deltaSeconds = deltaTime.inMicroseconds / 1000000.0;
+
+      // Formula: pixels_per_frame × direction × actual_frame_time_in_seconds × frames_per_second
+      // _currentScrollSpeed is in "pixels per frame" (e.g., 15 at 60fps)
+      // Multiplying by deltaSeconds gives "pixels per second" rate
+      // Multiplying by _displayRefreshRate converts back to pixels for this specific frame
+      // Example at 60fps: 15px/frame × 1 × 0.0166s × 60fps ≈ 15px for a normal frame
+      final scrollDelta = _currentScrollSpeed *
+          _currentScrollDirection! *
+          deltaSeconds *
+          _displayRefreshRate;
+
+      // Calculate new scroll position
+      final currentOffset = controller.offset;
+      final newOffset = currentOffset + scrollDelta;
+
+      // Clamp to scroll bounds
+      final clampedOffset = newOffset.clamp(
+        controller.position.minScrollExtent,
+        controller.position.maxScrollExtent,
+      );
+
+      // Use jumpTo for immediate positioning
+      if (clampedOffset != currentOffset) {
+        final actualScrollDelta = (clampedOffset - currentOffset).abs();
+        controller.jumpTo(clampedOffset);
+
+        // Accumulate scroll delta for synthetic event generation
+        _accumulatedScrollDelta += actualScrollDelta;
+
+        // Generate synthetic pointer event when threshold is reached
+        if (_accumulatedScrollDelta >= _syntheticEventThreshold &&
+            widget.swipeActiveNotifier.value &&
+            _activePointer != null) {
+          final syntheticEvent = PointerMoveEvent(
+            position: Offset(_currentPointerX, _currentPointerY),
+            pointer: _activePointer!,
+            timeStamp: elapsed,
+          );
+          GestureBinding.instance.handlePointerEvent(syntheticEvent);
+          // Reset accumulator after generating event
+          _accumulatedScrollDelta = 0;
         }
+      }
+    });
 
-        // Calculate new scroll position using the dynamically updated speed
-        final currentOffset = controller.offset;
-        final scrollDelta = _currentScrollSpeed * _currentScrollDirection!;
-        final newOffset = currentOffset + scrollDelta;
-
-        // Clamp to scroll bounds
-        final clampedOffset = newOffset.clamp(
-          controller.position.minScrollExtent,
-          controller.position.maxScrollExtent,
-        );
-
-        // Use jumpTo for immediate positioning (smoother than animateTo for continuous scroll)
-        if (clampedOffset != currentOffset) {
-          final scrollDelta = (clampedOffset - currentOffset).abs();
-          controller.jumpTo(clampedOffset);
-
-          // Accumulate scroll delta for synthetic event generation
-          _accumulatedScrollDelta += scrollDelta;
-
-          // Generate synthetic pointer event when threshold is reached
-          // This reduces event frequency while maintaining selection responsiveness
-          if (_accumulatedScrollDelta >= _syntheticEventThreshold &&
-              widget.swipeActiveNotifier.value &&
-              _activePointer != null) {
-            final syntheticEvent = PointerMoveEvent(
-              position: Offset(_currentPointerX, _currentPointerY),
-              pointer: _activePointer!,
-              timeStamp:
-                  Duration(milliseconds: DateTime.now().millisecondsSinceEpoch),
-            );
-            GestureBinding.instance.handlePointerEvent(syntheticEvent);
-            // Reset accumulator after generating event
-            _accumulatedScrollDelta = 0;
-          }
-        }
-      },
-    );
+    // Start the ticker
+    _autoScrollTicker!.start();
   }
 
   /// Stop auto-scrolling
   void _stopAutoScroll() {
-    _autoScrollTimer?.cancel();
-    _autoScrollTimer = null;
-    _accumulatedScrollDelta = 0; // Reset accumulator when stopping
+    _autoScrollTicker?.stop();
+    _autoScrollTicker?.dispose();
+    _autoScrollTicker = null;
+    _accumulatedScrollDelta = 0;
     _currentScrollDirection = null;
     _currentScrollSpeed = 0;
     _activeScrollController = null;
+    _lastElapsed = Duration.zero;
   }
 
   @override
