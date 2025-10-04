@@ -122,18 +122,24 @@ class _VideoCropPageState extends State<VideoCropPage> {
 
   Widget _buildCropButton(BuildContext context, CropValue value) {
     final f = value.getFraction();
+    // For videos with 90° or 270° rotation, we need to invert the aspect ratio
+    // because the crop is applied to the original (pre-rotation) video dimensions
+    final shouldSwap = widget.quarterTurnsForRotationCorrection % 2 == 1;
+    final aspectRatio = f?.toDouble();
+    final adjustedRatio =
+        (shouldSwap && aspectRatio != null) ? (1.0 / aspectRatio) : aspectRatio;
 
     return VideoEditorBottomAction(
       label: value.displayName,
       isSelected: value != CropValue.original &&
-          widget.controller.preferredCropAspectRatio == f?.toDouble(),
+          widget.controller.preferredCropAspectRatio == adjustedRatio,
       onPressed: () {
         if (value == CropValue.original) {
           widget.controller.updateCrop(Offset.zero, const Offset(1.0, 1.0));
           widget.controller.cropAspectRatio(null);
           setState(() {});
         } else {
-          widget.controller.preferredCropAspectRatio = f?.toDouble();
+          widget.controller.preferredCropAspectRatio = adjustedRatio;
         }
       },
       svgPath: "assets/video-editor/video-crop-${value.name}-action.svg",
