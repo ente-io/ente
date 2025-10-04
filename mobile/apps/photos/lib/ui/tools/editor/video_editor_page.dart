@@ -322,11 +322,35 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
           'export_${DateTime.now().millisecondsSinceEpoch}.mp4',
         );
 
+        // Log all export parameters before calling native editor
+        final videoSize = _controller!.video.value.size;
+        final metadataRotation = _quarterTurnsForRotationCorrection! * 90;
+        _logger.info('=== NATIVE EXPORT PARAMETERS ===');
+        _logger.info(
+          'Video dimensions: ${videoSize.width.toInt()}x${videoSize.height.toInt()}',
+        );
+        _logger.info('Metadata rotation: $metadataRotation°');
+        _logger.info('User rotation: ${_controller!.rotation}°');
+        _logger.info(
+          'Crop bounds: (${_controller!.minCrop.dx}, ${_controller!.minCrop.dy}) to (${_controller!.maxCrop.dx}, ${_controller!.maxCrop.dy})',
+        );
+        _logger.info(
+          'Preferred aspect ratio: ${_controller!.preferredCropAspectRatio}',
+        );
+        _logger.info('Is trimmed: ${_controller!.isTrimmed}');
+        if (_controller!.isTrimmed) {
+          _logger.info(
+            'Trim: ${_controller!.startTrim} to ${_controller!.endTrim} (duration: ${_controller!.trimmedDuration})',
+          );
+        }
+        _logger.info('Output path: $outputPath');
+        _logger.info('================================');
+
         try {
           result = await NativeVideoExportService.exportVideo(
             controller: _controller!,
             outputPath: outputPath,
-            metadataRotation: _quarterTurnsForRotationCorrection! * 90,
+            metadataRotation: metadataRotation,
             onProgress: (progress) {
               if (dialogKey.currentState != null) {
                 dialogKey.currentState!.setProgress(progress);
@@ -354,6 +378,27 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
           }
 
           // Fallback to FFmpeg
+          _logger.info('=== FFMPEG FALLBACK EXPORT PARAMETERS ===');
+          _logger.info(
+            'Video dimensions: ${videoSize.width.toInt()}x${videoSize.height.toInt()}',
+          );
+          _logger.info('Metadata rotation: $metadataRotation°');
+          _logger.info('User rotation: ${_controller!.rotation}°');
+          _logger.info(
+            'Crop bounds: (${_controller!.minCrop.dx}, ${_controller!.minCrop.dy}) to (${_controller!.maxCrop.dx}, ${_controller!.maxCrop.dy})',
+          );
+          _logger.info(
+            'Preferred aspect ratio: ${_controller!.preferredCropAspectRatio}',
+          );
+          _logger.info('Is trimmed: ${_controller!.isTrimmed}');
+          if (_controller!.isTrimmed) {
+            _logger.info(
+              'Trim: ${_controller!.startTrim} to ${_controller!.endTrim} (duration: ${_controller!.trimmedDuration})',
+            );
+          }
+          _logger.info('Output path: $outputPath');
+          _logger.info('=========================================');
+
           try {
             result = await ExportService.exportVideo(
               controller: _controller!,
@@ -379,11 +424,45 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         }
       } else {
         // Use FFmpeg export
+        final videoSize = _controller!.video.value.size;
+        final metadataRotation = _quarterTurnsForRotationCorrection! * 90;
+        _logger.info('=== FFMPEG DIRECT EXPORT PARAMETERS ===');
+        _logger.info(
+          'Video dimensions: ${videoSize.width.toInt()}x${videoSize.height.toInt()}',
+        );
+        _logger.info('Metadata rotation: $metadataRotation°');
+        _logger.info('User rotation: ${_controller!.rotation}°');
+        _logger.info(
+          'Crop bounds: (${_controller!.minCrop.dx}, ${_controller!.minCrop.dy}) to (${_controller!.maxCrop.dx}, ${_controller!.maxCrop.dy})',
+        );
+        _logger.info(
+          'Preferred aspect ratio: ${_controller!.preferredCropAspectRatio}',
+        );
+        _logger.info('Is trimmed: ${_controller!.isTrimmed}');
+        if (_controller!.isTrimmed) {
+          _logger.info(
+            'Trim: ${_controller!.startTrim} to ${_controller!.endTrim} (duration: ${_controller!.trimmedDuration})',
+          );
+        }
+        _logger.info('=======================================');
+
         final config = VideoFFmpegVideoEditorConfig(
           _controller!,
           format: VideoExportFormat.mp4,
           commandBuilder: (config, videoPath, outputPath) {
             List<String> filters = config.getExportFilters();
+
+            // Add -noautorotate for videos with metadata rotation
+            // We don't add transpose because crop is already calculated for original orientation
+            String noAutoRotate = "";
+            if (_quarterTurnsForRotationCorrection != null &&
+                _quarterTurnsForRotationCorrection! != 0) {
+              noAutoRotate = "-noautorotate";
+              final metadataRotation = _quarterTurnsForRotationCorrection! * 90;
+              _logger.info(
+                '[FFmpeg] Adding -noautorotate for $metadataRotation° metadata rotation (no transpose needed)',
+              );
+            }
 
             // For Android with metadata rotation, adjust crop filter
             if (Platform.isAndroid &&
@@ -402,7 +481,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
             final String startTrimCmd = "-ss ${_controller!.startTrim}";
             final String toTrimCmd = "-t ${_controller!.trimmedDuration}";
             final command =
-                '$startTrimCmd -i $videoPath  $toTrimCmd ${config.filtersCmd(filters)} -c:v libx264 -c:a aac $outputPath';
+                '$startTrimCmd $noAutoRotate -i $videoPath  $toTrimCmd ${config.filtersCmd(filters)} -c:v libx264 -c:a aac $outputPath';
             return command;
           },
         );

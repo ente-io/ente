@@ -139,11 +139,12 @@ class NativeVideoExportService {
             '[Native] Android $metadataRotation° rotation - using axis swap',
           );
 
-          // Swap normalized coords first (Display to File coordinate transformation)
-          final double minXNorm = controller.minCrop.dy;
-          final double maxXNorm = controller.maxCrop.dy;
-          final double minYNorm = controller.minCrop.dx;
-          final double maxYNorm = controller.maxCrop.dx;
+          // DON'T swap coords - use display coords directly
+          // File crop dimensions will naturally swap when rotation is applied
+          final double minXNorm = controller.minCrop.dx;
+          final double maxXNorm = controller.maxCrop.dx;
+          final double minYNorm = controller.minCrop.dy;
+          final double maxYNorm = controller.maxCrop.dy;
 
           _logger.info(
             '[Native] Display dims: ${videoSize.width}x${videoSize.height}',
@@ -158,15 +159,14 @@ class NativeVideoExportService {
             '[Native] After swap: ($minXNorm, $minYNorm) to ($maxXNorm, $maxYNorm)',
           );
 
-          // Apply swapped coords to FILE dimensions (1920x1080)
-          // File X comes from swapped Y (vertical in display -> horizontal in file)
-          // File Y comes from swapped X (horizontal in display -> vertical in file)
-          final double minX = (minYNorm * videoSize.height)
-              .roundToDouble(); // File width = 1920
-          final double maxX = (maxYNorm * videoSize.height).roundToDouble();
-          final double minY = (minXNorm * videoSize.width)
-              .roundToDouble(); // File height = 1080
-          final double maxY = (maxXNorm * videoSize.width).roundToDouble();
+          // Apply coords to correct dimensions
+          // Display coords × Display dims, result gets swapped for file
+          final double minX = (minXNorm * videoSize.width)
+              .roundToDouble(); // Display X × display width
+          final double maxX = (maxXNorm * videoSize.width).roundToDouble();
+          final double minY = (minYNorm * videoSize.height)
+              .roundToDouble(); // Display Y × display height
+          final double maxY = (maxYNorm * videoSize.height).roundToDouble();
 
           cropRect = Rect.fromLTRB(minX, minY, maxX, maxY);
 
