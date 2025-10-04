@@ -34,6 +34,7 @@ class SwipeSelectionWrapper extends StatefulWidget {
 
 class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper> {
   bool? _initialMovementWasHorizontal;
+  bool _pointerDownForFirstSelection = false;
 
   // Auto-scroll related fields
   Timer? _autoScrollTimer;
@@ -129,6 +130,10 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper> {
           _activePointer = event.pointer;
           // Reset initial movement tracking for new gesture
           _initialMovementWasHorizontal = null;
+          // Track if pointer down happened when no files were selected
+          // This indicates it's the initial selection gesture (long-press)
+          _pointerDownForFirstSelection =
+              widget.selectedFiles?.files.isEmpty ?? false;
         },
         onPointerMove: (event) {
           _currentPointerX = event.position.dx;
@@ -137,10 +142,12 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper> {
           // Handle case where pointer is dragged after first selection in gallery
           if (widget.selectedFiles != null &&
               widget.selectedFiles!.files.length == 1 &&
-              !widget.swipeActiveNotifier.value) {
+              !widget.swipeActiveNotifier.value &&
+              _pointerDownForFirstSelection) {
             // Activate swipe mode for any significant movement when only one file is selected
             // This handles the case of long-press to select first file, then immediate swipe
             // including vertical movement without initial horizontal movement
+            // Only applies if pointer down was for the initial selection (continuous gesture)
             final dx = event.delta.dx.abs();
             final dy = event.delta.dy.abs();
             if (dx > 0.1 || dy > 0.1) {
