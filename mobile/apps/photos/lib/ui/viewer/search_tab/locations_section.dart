@@ -11,10 +11,10 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
 import "package:photos/models/search/search_types.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/map/enable_map.dart";
 import "package:photos/ui/map/map_screen.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
@@ -379,17 +379,17 @@ class GoToMapWithBG extends StatelessWidget {
       ),
       child: GestureDetector(
         onTap: () async {
-          final bool result = await requestForMapEnable(context);
-          if (result) {
-            // ignore: unawaited_futures
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => MapScreen(
-                  filesFutureFn: SearchService.instance.getAllFilesForSearch,
-                ),
-              ),
-            );
+          if (!flagService.mapEnabled) {
+            await flagService.setMapEnabled(true);
           }
+          // ignore: unawaited_futures
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => MapScreen(
+                filesFutureFn: SearchService.instance.getAllFilesForSearch,
+              ),
+            ),
+          );
         },
         child: Stack(
           alignment: Alignment.center,
