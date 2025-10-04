@@ -52,11 +52,23 @@ class VideoRotatePage extends StatelessWidget {
                       Positioned.fill(
                         child: Hero(
                           tag: "video-editor-preview",
-                          child: RotatedBox(
-                            quarterTurns: quarterTurnsForRotationCorrection,
-                            child: CropGridViewer.preview(
-                              controller: controller,
-                            ),
+                          child: Builder(
+                            builder: (context) {
+                              // For videos with metadata rotation, we need to swap dimensions
+                              final shouldSwap =
+                                  quarterTurnsForRotationCorrection % 2 == 1;
+                              final width = controller.video.value.size.width;
+                              final height = controller.video.value.size.height;
+
+                              return RotatedBox(
+                                quarterTurns: quarterTurnsForRotationCorrection,
+                                child: CropGridViewer.preview(
+                                  controller: controller,
+                                  overrideWidth: shouldSwap ? height : width,
+                                  overrideHeight: shouldSwap ? width : height,
+                                ),
+                              );
+                            },
                           ),
                         ),
                       ),

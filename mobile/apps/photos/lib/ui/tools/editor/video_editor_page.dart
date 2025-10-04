@@ -4,6 +4,7 @@ import "dart:math";
 
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
+import 'package:native_video_editor/native_video_editor.dart';
 import 'package:path/path.dart' as path;
 import "package:photo_manager/photo_manager.dart";
 import "package:photos/core/event_bus.dart";
@@ -13,6 +14,7 @@ import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/location/location.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/sync/sync_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/linear_progress_dialog.dart";
@@ -26,7 +28,6 @@ import "package:photos/ui/tools/editor/video_editor/video_editor_player_control.
 import "package:photos/ui/tools/editor/video_rotate_page.dart";
 import "package:photos/ui/tools/editor/video_trim_page.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
-import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:video_editor/video_editor.dart";
 
@@ -62,40 +63,52 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
   void initState() {
     super.initState();
 
-    Future.microtask(
-      () {
-        _controller = VideoEditorController.file(
-          widget.ioFile,
-          minDuration: const Duration(seconds: 1),
-          cropStyle: CropGridStyle(
-            background: Theme.of(context).colorScheme.surface,
-            selectedBoundariesColor:
-                const ColorScheme.dark().videoPlayerPrimaryColor,
-          ),
-          trimStyle: TrimSliderStyle(
-            onTrimmedColor: const ColorScheme.dark().videoPlayerPrimaryColor,
-            onTrimmingColor: const ColorScheme.dark().videoPlayerPrimaryColor,
-            background: Theme.of(context).colorScheme.editorBackgroundColor,
-            positionLineColor:
-                Theme.of(context).colorScheme.videoPlayerBorderColor,
-            lineColor: Theme.of(context)
-                .colorScheme
-                .videoPlayerBorderColor
-                .withValues(alpha: 0.6),
-          ),
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      if (flagService.internalUser && flagService.useNativeVideoEditor) {
+        showShortToast(
+          context,
+          "Using native video editor",
         );
+      }
+    });
 
-        _controller!.initialize().then((_) => setState(() {})).catchError(
-          (error) {
-            // handle minumum duration bigger than video duration error
-            Navigator.pop(context);
-          },
-          test: (e) => e is VideoMinDurationError,
-        );
-      },
-    );
+    // First determine rotation correction for Android
+    _doRotationCorrectionIfAndroid().then((_) {
+      // Then initialize the controller
+      _controller = VideoEditorController.file(
+        widget.ioFile,
+        minDuration: const Duration(seconds: 1),
+        cropStyle: CropGridStyle(
+          background: Theme.of(context).colorScheme.surface,
+          selectedBoundariesColor:
+              const ColorScheme.dark().videoPlayerPrimaryColor,
+        ),
+        trimStyle: TrimSliderStyle(
+          onTrimmedColor: const ColorScheme.dark().videoPlayerPrimaryColor,
+          onTrimmingColor: const ColorScheme.dark().videoPlayerPrimaryColor,
+          background: Theme.of(context).colorScheme.editorBackgroundColor,
+          positionLineColor:
+              Theme.of(context).colorScheme.videoPlayerBorderColor,
+          lineColor: Theme.of(context)
+              .colorScheme
+              .videoPlayerBorderColor
+              .withValues(alpha: 0.6),
+        ),
+      );
 
-    _doRotationCorrectionIfAndroid();
+      _controller!.initialize().then((_) {
+        setState(() {});
+      }).catchError(
+        (error) {
+          // handle minumum duration bigger than video duration error
+          Navigator.pop(context);
+        },
+        test: (e) => e is VideoMinDurationError,
+      );
+    });
   }
 
   @override
@@ -157,12 +170,30 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                                   Positioned.fill(
                                     child: Hero(
                                       tag: "video-editor-preview",
-                                      child: RotatedBox(
-                                        quarterTurns:
-                                            _quarterTurnsForRotationCorrection!,
-                                        child: CropGridViewer.preview(
-                                          controller: _controller!,
-                                        ),
+                                      child: Builder(
+                                        builder: (context) {
+                                          // For videos with metadata rotation, we need to swap dimensions
+                                          final shouldSwap =
+                                              _quarterTurnsForRotationCorrection! %
+                                                      2 ==
+                                                  1;
+                                          final width = _controller!
+                                              .video.value.size.width;
+                                          final height = _controller!
+                                              .video.value.size.height;
+
+                                          return RotatedBox(
+                                            quarterTurns:
+                                                _quarterTurnsForRotationCorrection!,
+                                            child: CropGridViewer.preview(
+                                              controller: _controller!,
+                                              overrideWidth:
+                                                  shouldSwap ? height : width,
+                                              overrideHeight:
+                                                  shouldSwap ? width : height,
+                                            ),
+                                          );
+                                        },
                                       ),
                                     ),
                                   ),
@@ -375,18 +406,35 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
     return Navigator.of(context).push(_VideoEditorSubPageRoute(child));
   }
 
-  void _doRotationCorrectionIfAndroid() {
+  Future<void> _doRotationCorrectionIfAndroid() async {
     if (Platform.isAndroid) {
-      getVideoPropsAsync(widget.ioFile).then((props) async {
-        if (props?.rotation != null) {
-          _quarterTurnsForRotationCorrection = -(props!.rotation! / 90).round();
+      try {
+        // Use native method to get video info more efficiently
+        final videoInfo =
+            await NativeVideoEditor.getVideoInfo(widget.ioFile.path);
+        final rotation = videoInfo['rotation'] as int? ?? 0;
+        final width = videoInfo['width'] as int? ?? 0;
+        final height = videoInfo['height'] as int? ?? 0;
+
+        _logger.fine('Video info: ${width}x$height, rotation=$rotation');
+
+        if (rotation != 0) {
+          _quarterTurnsForRotationCorrection = (rotation / 90).round();
+          _logger.fine(
+            'Applying rotation correction: $rotation° → $_quarterTurnsForRotationCorrection quarter turns',
+          );
         } else {
           _quarterTurnsForRotationCorrection = 0;
         }
         setState(() {});
-      });
+      } catch (e) {
+        _logger.warning('Failed to get video info, using fallback', e);
+        _quarterTurnsForRotationCorrection = 0;
+        setState(() {});
+      }
     } else {
       _quarterTurnsForRotationCorrection = 0;
+      setState(() {});
     }
   }
 }

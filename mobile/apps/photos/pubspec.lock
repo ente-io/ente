@@ -1760,6 +1760,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
+  native_video_editor:
+    dependency: "direct main"
+    description:
+      path: "../../packages/native_video_editor"
+      relative: true
+    source: path
+    version: "1.0.0"
   native_video_player:
     dependency: "direct main"
     description:
@@ -2853,8 +2860,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: HEAD
-      resolved-ref: "1eeb18e2b1ce36bd8ca70178c0d4b485e9982257"
+      ref: "053d15955a128bcf878e162493621abb8859262c"
+      resolved-ref: "053d15955a128bcf878e162493621abb8859262c"
       url: "https://github.com/ente-io/video_editor_fork.git"
     source: git
     version: "3.0.0"
