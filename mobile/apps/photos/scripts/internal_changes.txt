@@ -1,3 +1,7 @@
+- Prateek: (i) Tag Sentry errors with execution_context for background vs foreground
+- Prateek: (i) Add battery optimization package and method channel for foreground checks
+- Prateek: (i) Improve WorkManager config with battery/storage constraints and exponential backoff
+- Prateek: (i) Add minimal logging to sync and collections services for debugging
 - Prateek: Fix background uploads on Android 15 by skipping permission request in background mode
 - Prateek: Fix CronetException during background sync by disabling NativeAdapter on Android
 - Laurens: Change similar images labels copy
