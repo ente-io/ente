@@ -120,10 +120,16 @@ class CollectionsService {
     final lastCollectionUpdationTime =
         _prefs.getInt(_collectionsSyncTimeKey) ?? 0;
 
+    _logger.info("[COLLECTIONS] Starting sync");
+
     // Might not have synced the collection fully
     final fetchedCollections =
         await _fetchCollections(lastCollectionUpdationTime);
+    _logger.info(
+      "[COLLECTIONS] Fetched ${fetchedCollections.length} collections from API",
+    );
     watch.log("remote fetch collections ${fetchedCollections.length}");
+
     if (fetchedCollections.isEmpty) {
       return;
     }
@@ -151,6 +157,7 @@ class CollectionsService {
           ? collection.updationTime
           : maxUpdationTime;
     }
+
     if (shouldFireDeleteEvent) {
       Bus.instance.fire(
         LocalPhotosUpdatedEvent(
@@ -159,14 +166,19 @@ class CollectionsService {
         ),
       );
     }
+
     await _updateDB(updatedCollections);
     await _prefs.setInt(_collectionsSyncTimeKey, maxUpdationTime);
     watch.logAndReset("till DB insertion ${updatedCollections.length}");
+    _logger.info("[COLLECTIONS] Updated ${updatedCollections.length} in DB");
+
     for (final collection in fetchedCollections) {
       _cacheLocalPathAndCollection(collection);
     }
+
     _logger.info("Collections synced");
     watch.log("${fetchedCollections.length} collection cached refreshed ");
+
     if (fetchedCollections.isNotEmpty) {
       Bus.instance.fire(
         CollectionUpdatedEvent(
