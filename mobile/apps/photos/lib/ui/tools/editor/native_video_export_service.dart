@@ -134,47 +134,26 @@ class NativeVideoExportService {
         if (Platform.isAndroid &&
             metadataRotation != 0 &&
             metadataQuarterTurns % 2 == 1) {
-          // Android with 90°/270° rotation - use simple axis swap approach (matches FFmpeg)
+          // Android with 90°/270° rotation
+          // Use display-space coordinates - plugin handles transformation automatically
           _logger.info(
-            '[Native] Android $metadataRotation° rotation - using axis swap',
+            '[Native] Android $metadataRotation° rotation - using display-space coordinates (plugin transforms)',
           );
 
-          // DON'T swap coords - use display coords directly
-          // File crop dimensions will naturally swap when rotation is applied
-          final double minXNorm = controller.minCrop.dx;
-          final double maxXNorm = controller.maxCrop.dx;
-          final double minYNorm = controller.minCrop.dy;
-          final double maxYNorm = controller.maxCrop.dy;
+          final minX = (controller.minCrop.dx * videoSize.width).round();
+          final minY = (controller.minCrop.dy * videoSize.height).round();
+          final maxX = (controller.maxCrop.dx * videoSize.width).round();
+          final maxY = (controller.maxCrop.dy * videoSize.height).round();
 
           _logger.info(
-            '[Native] Display dims: ${videoSize.width}x${videoSize.height}',
-          );
-          _logger.info(
-            '[Native] File dims (original): ${videoSize.height}x${videoSize.width}',
-          );
-          _logger.info(
-            '[Native] Display crop: (${controller.minCrop.dx}, ${controller.minCrop.dy}) to (${controller.maxCrop.dx}, ${controller.maxCrop.dy})',
-          );
-          _logger.info(
-            '[Native] After swap: ($minXNorm, $minYNorm) to ($maxXNorm, $maxYNorm)',
+            '[Native] Display-space crop: x=$minX, y=$minY, w=${maxX - minX}, h=${maxY - minY}',
           );
 
-          // Apply coords to correct dimensions
-          // Display coords × Display dims, result gets swapped for file
-          final double minX = (minXNorm * videoSize.width)
-              .roundToDouble(); // Display X × display width
-          final double maxX = (maxXNorm * videoSize.width).roundToDouble();
-          final double minY = (minYNorm * videoSize.height)
-              .roundToDouble(); // Display Y × display height
-          final double maxY = (maxYNorm * videoSize.height).roundToDouble();
-
-          cropRect = Rect.fromLTRB(minX, minY, maxX, maxY);
-
-          _logger.info(
-            '[Native] File crop rect: minX=${minX.toInt()}, maxX=${maxX.toInt()}, minY=${minY.toInt()}, maxY=${maxY.toInt()}',
-          );
-          _logger.info(
-            '[Native] File crop: x=${minX.toInt()}, y=${minY.toInt()}, w=${(maxX - minX).toInt()}, h=${(maxY - minY).toInt()}',
+          cropRect = Rect.fromLTRB(
+            minX.toDouble(),
+            minY.toDouble(),
+            maxX.toDouble(),
+            maxY.toDouble(),
           );
         } else {
           // iOS or Android without rotation - use original complex logic
@@ -303,16 +282,9 @@ class NativeVideoExportService {
           cropRect = Rect.fromLTRB(minX, minY, maxX, maxY);
         }
 
-        // Validate crop parameters against original video dimensions
-        // For Android with 90°/270° rotation, the crop is in original file space (swapped dimensions)
-        final validationWidth =
-            Platform.isAndroid && metadataQuarterTurns % 2 == 1
-                ? videoSize.height
-                : videoSize.width;
-        final validationHeight =
-            Platform.isAndroid && metadataQuarterTurns % 2 == 1
-                ? videoSize.width
-                : videoSize.height;
+        // Validate crop parameters against video dimensions (display space)
+        final validationWidth = videoSize.width;
+        final validationHeight = videoSize.height;
 
         if (cropRect.width <= 0 || cropRect.height <= 0) {
           throw Exception(

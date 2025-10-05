@@ -87,22 +87,59 @@ class Media3TransformerProcessor(private val context: Context) {
             if (cropX != null && cropY != null && cropWidth != null && cropHeight != null) {
                 Log.i(TAG, "=== MEDIA3 CROP PROCESSING ===")
                 Log.i(TAG, "Original video dimensions: ${originalWidth}x$originalHeight")
-                Log.i(TAG, "Crop parameters received:")
+                Log.i(TAG, "Original rotation: $originalRotation")
+                Log.i(TAG, "Crop parameters received (display-space):")
                 Log.i(TAG, "  position=($cropX,$cropY)")
                 Log.i(TAG, "  size=${cropWidth}x$cropHeight")
-                Log.i(TAG, "  crop rect: x=$cropX, y=$cropY, w=$cropWidth, h=$cropHeight")
 
-                // Calculate crop as a fraction of the video dimensions
-                val cropLeftFraction = cropX.toFloat() / originalWidth
-                val cropRightFraction = (cropX + cropWidth).toFloat() / originalWidth
-                val cropTopFraction = cropY.toFloat() / originalHeight
-                val cropBottomFraction = (cropY + cropHeight).toFloat() / originalHeight
+                // For videos with 90°/270° rotation, transform crop coordinates to file-space
+                val normalizedRotation = originalRotation % 360
+                val needsCoordinateTransform = normalizedRotation == 90 || normalizedRotation == 270
+
+                val finalCropX: Int
+                val finalCropY: Int
+                val finalCropWidth: Int
+                val finalCropHeight: Int
+                val normalizationWidth: Int
+                val normalizationHeight: Int
+
+                if (needsCoordinateTransform) {
+                    // Transform display-space coordinates to file-space
+                    // Display X → File Y, Display Y → File X
+                    finalCropX = cropY
+                    finalCropY = cropX
+                    finalCropWidth = cropHeight
+                    finalCropHeight = cropWidth
+
+                    // ALWAYS use original file dimensions for normalization
+                    normalizationWidth = originalWidth
+                    normalizationHeight = originalHeight
+
+                    Log.i(TAG, "Transformed to file-space (${normalizedRotation}° rotation):")
+                    Log.i(TAG, "  position=($finalCropX,$finalCropY)")
+                    Log.i(TAG, "  size=${finalCropWidth}x$finalCropHeight")
+                    Log.i(TAG, "  normalization dims: ${normalizationWidth}x$normalizationHeight (original file dims)")
+                } else {
+                    // No transformation needed
+                    finalCropX = cropX
+                    finalCropY = cropY
+                    finalCropWidth = cropWidth
+                    finalCropHeight = cropHeight
+                    normalizationWidth = originalWidth
+                    normalizationHeight = originalHeight
+                }
+
+                // Calculate crop as a fraction of the normalization dimensions
+                val cropLeftFraction = finalCropX.toFloat() / normalizationWidth
+                val cropRightFraction = (finalCropX + finalCropWidth).toFloat() / normalizationWidth
+                val cropTopFraction = finalCropY.toFloat() / normalizationHeight
+                val cropBottomFraction = (finalCropY + finalCropHeight).toFloat() / normalizationHeight
 
                 Log.i(TAG, "Crop fractions calculated:")
-                Log.i(TAG, "  left=$cropLeftFraction (cropX=$cropX / originalWidth=$originalWidth)")
-                Log.i(TAG, "  right=$cropRightFraction ((cropX+cropWidth)=${cropX + cropWidth} / originalWidth=$originalWidth)")
-                Log.i(TAG, "  top=$cropTopFraction (cropY=$cropY / originalHeight=$originalHeight)")
-                Log.i(TAG, "  bottom=$cropBottomFraction ((cropY+cropHeight)=${cropY + cropHeight} / originalHeight=$originalHeight)")
+                Log.i(TAG, "  left=$cropLeftFraction ($finalCropX / $normalizationWidth)")
+                Log.i(TAG, "  right=$cropRightFraction (${finalCropX + finalCropWidth} / $normalizationWidth)")
+                Log.i(TAG, "  top=$cropTopFraction ($finalCropY / $normalizationHeight)")
+                Log.i(TAG, "  bottom=$cropBottomFraction (${finalCropY + finalCropHeight} / $normalizationHeight)")
                 Log.i(TAG, "===============================")
 
                 // Use Crop effect with NDC coordinates (-1 to 1)

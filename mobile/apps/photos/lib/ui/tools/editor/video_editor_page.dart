@@ -22,6 +22,7 @@ import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/tools/editor/export_video_service.dart";
 import "package:photos/ui/tools/editor/native_video_export_service.dart";
 import 'package:photos/ui/tools/editor/video_crop_page.dart';
+import "package:photos/ui/tools/editor/video_crop_util.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_app_bar.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_bottom_action.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_main_actions.dart";
@@ -634,7 +635,6 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
   ) {
     final adjustedFilters = <String>[];
     final controller = _controller!;
-    final videoSize = controller.video.value.size;
 
     final needsCrop = controller.minCrop != Offset.zero ||
         controller.maxCrop != const Offset(1.0, 1.0);
@@ -645,66 +645,22 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
 
     for (final filter in filters) {
       if (filter.startsWith('crop=')) {
-        // Recalculate crop using the same logic as native export
-        final metadataQuarterTurns = (metadataRotation / 90).round();
+        // Use shared crop calculation utility
+        final crop = VideoCropUtil.calculateCropForRotation(
+          controller: controller,
+          metadataRotation: metadataRotation,
+        );
 
-        // For Android: RotatedBox shows corrected orientation, so display dimensions
-        // match the visual orientation (no swap needed)
-        final displayWidth = videoSize.width;
-        final displayHeight = videoSize.height;
-
-        // Get normalized crop coordinates in display space
-        double minXNorm = controller.minCrop.dx;
-        double minYNorm = controller.minCrop.dy;
-        double maxXNorm = controller.maxCrop.dx;
-        double maxYNorm = controller.maxCrop.dy;
-
-        // For 90°/270° rotations: swap axes
-        // Display X maps to Original Y, Display Y maps to Original X
-        if (metadataQuarterTurns % 2 == 1) {
-          final tempMinX = minXNorm;
-          final tempMaxX = maxXNorm;
-          minXNorm = minYNorm;
-          maxXNorm = maxYNorm;
-          minYNorm = tempMinX;
-          maxYNorm = tempMaxX;
-        }
-
-        // Apply to original video dimensions
-        // After axis swap, X coordinates apply to height, Y coordinates apply to width
-        final minX = (minXNorm *
-                (metadataQuarterTurns % 2 == 1
-                    ? videoSize.height
-                    : videoSize.width))
-            .round();
-        final maxX = (maxXNorm *
-                (metadataQuarterTurns % 2 == 1
-                    ? videoSize.height
-                    : videoSize.width))
-            .round();
-        final minY = (minYNorm *
-                (metadataQuarterTurns % 2 == 1
-                    ? videoSize.width
-                    : videoSize.height))
-            .round();
-        final maxY = (maxYNorm *
-                (metadataQuarterTurns % 2 == 1
-                    ? videoSize.width
-                    : videoSize.height))
-            .round();
-
-        final w = maxX - minX;
-        final h = maxY - minY;
-
-        final newFilter = 'crop=$w:$h:$minX:$minY';
+        final newFilter = crop.toFFmpegFilter();
         _logger.info(
           '[FFmpeg] Recalculated crop for Android: $filter -> $newFilter',
         );
-        _logger.info('[FFmpeg]   Display: ${displayWidth}x$displayHeight');
         _logger.info(
           '[FFmpeg]   Controller crop: (${controller.minCrop.dx}, ${controller.minCrop.dy}) to (${controller.maxCrop.dx}, ${controller.maxCrop.dy})',
         );
-        _logger.info('[FFmpeg]   Final crop: x=$minX, y=$minY, w=$w, h=$h');
+        _logger.info(
+          '[FFmpeg]   Final crop: x=${crop.x}, y=${crop.y}, w=${crop.width}, h=${crop.height}',
+        );
         adjustedFilters.add(newFilter);
         continue;
       }
