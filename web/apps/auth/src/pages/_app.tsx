@@ -23,6 +23,8 @@ import { t } from "i18next";
 import type { AppProps } from "next/app";
 import React, { useCallback, useEffect, useMemo } from "react";
 
+import "styles/global.css";
+
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useSetupLogs();
 

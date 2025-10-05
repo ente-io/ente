@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { FilledIconButton } from "ente-base/components/mui";
 import { CollectionsSortOptions } from "ente-new/photos/components/CollectionsSortOptions";
-import { SlideUpTransition } from "ente-new/photos/components/mui/SlideUpTransition";
+import { SlideUpTransition } from "ente-new/base/components/mui/SlideUpTransition";
 import {
     ItemCard,
     LargeTileButton,

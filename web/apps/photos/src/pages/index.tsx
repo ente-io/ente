@@ -18,7 +18,7 @@ import {
 } from "ente-base/session";
 import { savedAuthToken } from "ente-base/token";
 import { canAccessIndexedDB } from "ente-gallery/services/files-db";
-import { DevSettings } from "ente-new/photos/components/DevSettings";
+import { DevSettings } from "ente-new/base/components/DevSettings";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
