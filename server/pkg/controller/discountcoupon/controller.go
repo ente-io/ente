@@ -146,7 +146,7 @@ func (c *Controller) sendCouponEmail(ctx context.Context, user ente.User, coupon
 		subject = "Ente Friends - Kagi trial code"
 		templateName = "discount_coupon_kagi.html"
 	case "Tuta":
-		subject = "Ente Friends - Tuta trial code"
+		subject = "Ente Friends - Tuta discount code"
 		templateName = "discount_coupon_tuta.html"
 	case "Test":
 		subject = "Ente Friends - Test trial code"
