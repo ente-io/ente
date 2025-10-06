@@ -55,7 +55,6 @@ import {
     type PublicAlbumsCredentials,
 } from "ente-base/http";
 import log from "ente-base/log";
-import { albumsAppOrigin, shouldOnlyServeAlbumsApp } from "ente-base/origins";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import {
     useSaveGroups,
@@ -149,6 +148,28 @@ export default function PublicCollectionGallery() {
             cancel: false,
         });
 
+    /**
+     * Check if we need to redirect Trip albums from custom domains to albums.ente.io
+     * Returns true if a redirect was initiated, false otherwise.
+     * Reason: custom domains do not support the Trip layout fully
+     */
+    const checkAndRedirectForTripAlbum = (collection: Collection): boolean => {
+        if (collection.pubMagicMetadata?.data.layout === "trip") {
+            const currentURL = new URL(window.location.href);
+            const albumsURL = new URL("https://albums.ente.io");
+
+            if (currentURL.host !== albumsURL.host) {
+                albumsURL.search = currentURL.search;
+                albumsURL.hash = currentURL.hash;
+
+                setLoading(true);
+                window.location.href = albumsURL.href;
+                return true;
+            }
+        }
+        return false;
+    };
+
     useEffect(() => {
         const currentURL = new URL(window.location.href);
         if (currentURL.pathname != "/") {
@@ -189,23 +210,9 @@ export default function PublicCollectionGallery() {
                 const accessToken = t;
                 let accessTokenJWT: string | undefined;
                 if (collection) {
-                    // On custom domains, redirect Trip albums to albums.ente.io/...
-                    // because custom domains do not support the Trip layout fully
-                    if (
-                        collection.pubMagicMetadata?.data.layout === "trip" &&
-                        shouldOnlyServeAlbumsApp
-                    ) {
-                        const currentURL = new URL(window.location.href);
-                        const albumsURL = new URL(albumsAppOrigin());
-
-                        if (currentURL.host !== albumsURL.host) {
-                            albumsURL.search = currentURL.search;
-                            albumsURL.hash = currentURL.hash;
-
-                            window.location.href = albumsURL.href;
-                            redirectingToAlbumsApp = true;
-                            return;
-                        }
+                    if (checkAndRedirectForTripAlbum(collection)) {
+                        redirectingToAlbumsApp = true;
+                        return;
                     }
 
                     setReferralCode(
@@ -254,6 +261,11 @@ export default function PublicCollectionGallery() {
         try {
             const { collection, referralCode: userReferralCode } =
                 await pullCollection(accessToken, collectionKey.current!);
+
+            if (checkAndRedirectForTripAlbum(collection)) {
+                return;
+            }
+
             setReferralCode(userReferralCode);
 
             setPublicCollection(collection);
