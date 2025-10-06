@@ -9,7 +9,7 @@ The **Passkeys** feature guide has moved to:
 
 ## Passkeys
 
-- [Passkeys feature guide](/photos/features/account/passkeys) - Complete guide to using passkeys for passwordless login
+- [Passkeys feature guide](/photos/features/account/passkeys) - Complete guide to using passkeys as a 2nd authentication for Ente
 
 ## Related topics
 
