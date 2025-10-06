@@ -132,13 +132,52 @@ class SwipeToSelectHelper {
         }
       }
     } else {
-      // Removing mode: remove the range from fromIndex to toIndex
-      final itemsToRemove = getRange(
-        min(fromIndex, toIndex),
-        max(fromIndex, toIndex) + 1,
-      );
-      if (itemsToRemove.isNotEmpty) {
-        selectedFiles.unSelectAll(itemsToRemove);
+      // Removing mode: maintain continuous unselection from fromIndex to toIndex
+      if (toIndex <= fromIndex) {
+        // Moving left of starting point
+        if (toIndex < lastToIndex) {
+          // Extending leftward
+          final itemsToRemove = getRange(toIndex, min(fromIndex, lastToIndex));
+          if (itemsToRemove.isNotEmpty) {
+            selectedFiles.unSelectAll(itemsToRemove);
+          }
+          // Add items back to the right of start if we were previously there
+          if (fromIndex < lastToIndex) {
+            final itemsToAdd = getRange(fromIndex + 1, lastToIndex + 1);
+            if (itemsToAdd.isNotEmpty) {
+              selectedFiles.selectAll(itemsToAdd);
+            }
+          }
+        } else if (lastToIndex < toIndex) {
+          // Contracting from left
+          final itemsToAdd = getRange(lastToIndex, toIndex);
+          if (itemsToAdd.isNotEmpty) {
+            selectedFiles.selectAll(itemsToAdd);
+          }
+        }
+      } else if (fromIndex < toIndex) {
+        // Moving right of starting point
+        if (lastToIndex < toIndex) {
+          // Extending rightward
+          final itemsToRemove =
+              getRange(max(fromIndex, lastToIndex), toIndex + 1);
+          if (itemsToRemove.isNotEmpty) {
+            selectedFiles.unSelectAll(itemsToRemove);
+          }
+          // Add items back to the left of start if we were previously there
+          if (lastToIndex < fromIndex) {
+            final itemsToAdd = getRange(lastToIndex, fromIndex);
+            if (itemsToAdd.isNotEmpty) {
+              selectedFiles.selectAll(itemsToAdd);
+            }
+          }
+        } else if (toIndex < lastToIndex) {
+          // Contracting from right
+          final itemsToAdd = getRange(toIndex + 1, lastToIndex + 1);
+          if (itemsToAdd.isNotEmpty) {
+            selectedFiles.selectAll(itemsToAdd);
+          }
+        }
       }
     }
   }
