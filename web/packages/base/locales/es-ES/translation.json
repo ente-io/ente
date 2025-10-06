@@ -323,6 +323,8 @@
     "thumbnail_generation_failed_hint": "Estos archivos fueron cargados, pero por desgracia no pudimos generar las miniaturas para ellos.",
     "unsupported_files": "Archivos no soportados",
     "unsupported_files_hint": "ente no soporta estos formatos de archivo aún",
+    "zero_size_files": "",
+    "zero_size_files_hint": "",
     "blocked_uploads": "Subidas bloqueadas",
     "blocked_uploads_hint": "Tu navegador o un complemento impide a Ente usar <code>eTags</code> para subir archivos grandes.",
     "large_files": "Archivos grandes",

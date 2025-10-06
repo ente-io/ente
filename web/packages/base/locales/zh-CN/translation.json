@@ -323,6 +323,8 @@
     "thumbnail_generation_failed_hint": "这些文件已上传，但遗憾的是，我们无法为它们生成缩略图。",
     "unsupported_files": "不支持的文件",
     "unsupported_files_hint": "Ente 尚不支持这些文件格式",
+    "zero_size_files": "",
+    "zero_size_files_hint": "",
     "blocked_uploads": "已阻止上传",
     "blocked_uploads_hint": "您的浏览器或插件阻止 Ente 使用 <code>eTags</code> 上传大文件。",
     "large_files": "大文件",

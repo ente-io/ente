@@ -323,6 +323,8 @@
     "thumbnail_generation_failed_hint": "Šie failai buvo įkelti, bet, deja, negalėjome sugeneruoti jų miniatiūrų.",
     "unsupported_files": "Nepalaikomi failai",
     "unsupported_files_hint": "„Ente“ dar nepalaiko šių failų formatų.",
+    "zero_size_files": "",
+    "zero_size_files_hint": "",
     "blocked_uploads": "Užblokuoti įkėlimai",
     "blocked_uploads_hint": "Jūsų naršyklė arba priedas neleidžia „Ente“ naudoti <code>„eTags“</code> dideliems failams įkelti.",
     "large_files": "Dideli failai",

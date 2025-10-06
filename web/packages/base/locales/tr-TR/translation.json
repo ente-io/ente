@@ -323,6 +323,8 @@
     "thumbnail_generation_failed_hint": "Bu dosyalar yüklendi, ancak ne yazık ki küçük resimleri oluşturulamadı.",
     "unsupported_files": "Desteklenmeyen dosyalar",
     "unsupported_files_hint": "Ente bu dosya formatlarını henüz desteklemiyor",
+    "zero_size_files": "",
+    "zero_size_files_hint": "",
     "blocked_uploads": "Engellenen yüklemeler",
     "blocked_uploads_hint": "Tarayıcınız veya bir eklenti, Ente’nin büyük dosyaları yüklemek için <code>eTags</code> kullanmasını engelliyor.",
     "large_files": "Büyük dosyalar",

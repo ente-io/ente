@@ -323,6 +323,8 @@
     "thumbnail_generation_failed_hint": "Te pliki zostały przesłane, ale niestety nie mogliśmy dla nich wygenerować miniatur.",
     "unsupported_files": "Nieobsługiwane pliki",
     "unsupported_files_hint": "Ente nie obsługuje jeszcze tych formatów plików",
+    "zero_size_files": "",
+    "zero_size_files_hint": "",
     "blocked_uploads": "Zablokowane przesłania",
     "blocked_uploads_hint": "Twoja przeglądarka lub dodatek uniemożliwia Ente z używania <code>eTags</code> do przesyłania dużych plików.",
     "large_files": "Duże pliki",

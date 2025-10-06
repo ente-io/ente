@@ -323,6 +323,8 @@
     "thumbnail_generation_failed_hint": "Các tệp này đã được tải lên, nhưng rất tiếc chúng tôi không thể tạo ảnh thu nhỏ cho chúng.",
     "unsupported_files": "Tệp không được hỗ trợ",
     "unsupported_files_hint": "Ente chưa hỗ trợ các định dạng tệp này",
+    "zero_size_files": "",
+    "zero_size_files_hint": "",
     "blocked_uploads": "Tải lên bị chặn",
     "blocked_uploads_hint": "Trình duyệt của bạn hoặc một tiện ích mở rộng đang chặn Ente sử dụng <code>eTags</code> để tải lên các tệp lớn.",
     "large_files": "Tệp lớn",

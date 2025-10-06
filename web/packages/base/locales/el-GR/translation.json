@@ -323,6 +323,8 @@
     "thumbnail_generation_failed_hint": "",
     "unsupported_files": "Μη υποστηριζόμενα αρχεία",
     "unsupported_files_hint": "",
+    "zero_size_files": "",
+    "zero_size_files_hint": "",
     "blocked_uploads": "Αποκλεισμένες μεταφορτώσεις",
     "blocked_uploads_hint": "",
     "large_files": "Μεγάλα αρχεία",

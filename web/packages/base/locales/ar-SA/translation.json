@@ -323,6 +323,8 @@
     "thumbnail_generation_failed_hint": "تم تحميل هذه الملفات، ولكن للأسف لم نتمكن من إنشاء الصور المصغرة لها.",
     "unsupported_files": "ملفات غير مدعومة",
     "unsupported_files_hint": "Ente لا يدعم تنسيقات الملفات هذه بعد",
+    "zero_size_files": "",
+    "zero_size_files_hint": "",
     "blocked_uploads": "التحميلات المحظورة",
     "blocked_uploads_hint": "متصفحك أو إضافة ما تمنع Ente من استخدام <code>eTags</code> لتحميل الملفات الكبيرة.",
     "large_files": "ملفات كبيرة جدًا",

@@ -323,6 +323,8 @@
     "thumbnail_generation_failed_hint": "Tyto soubory byly nahrány, ale bohužel jsme pro ně nemohli vygenerovat miniatury.",
     "unsupported_files": "Nepodporované soubory",
     "unsupported_files_hint": "Ente zatím nepodporuje tyto formáty souborů",
+    "zero_size_files": "",
+    "zero_size_files_hint": "",
     "blocked_uploads": "Zablokované nahrávání",
     "blocked_uploads_hint": "Váš prohlížeč nebo doplněk brání Ente v používání <code>eTags</code> k nahrávání velkých souborů.",
     "large_files": "Velké soubory",
