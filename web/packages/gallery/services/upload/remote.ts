@@ -47,9 +47,7 @@ export const fetchUploadURLs = async (countHint: number) => {
     const count = Math.min(50, countHint * 2);
     const res = await fetch(
         await apiURL("/files/upload-urls", { count, ts: Date.now() }),
-        {
-            headers: await authenticatedRequestHeaders(),
-        },
+        { headers: await authenticatedRequestHeaders() },
     );
     ensureOk(res);
     return ObjectUploadURLResponse.parse(await res.json()).urls;
@@ -64,7 +62,10 @@ export const fetchPublicAlbumsUploadURLs = async (
 ) => {
     const count = Math.min(50, countHint * 2);
     const res = await fetch(
-        await apiURL("/public-collection/upload-urls", { count, ts: Date.now() }),
+        await apiURL("/public-collection/upload-urls", {
+            count,
+            ts: Date.now(),
+        }),
         { headers: authenticatedPublicAlbumsRequestHeaders(credentials) },
     );
     ensureOk(res);
