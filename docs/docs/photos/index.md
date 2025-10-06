@@ -17,3 +17,14 @@ ability and background.
 
 These help docs are divided into four sections. Choose the relevant page from
 the sidebar menu, or use the search at the top.
+
+## Getting Help
+
+If you need assistance with Ente Photos, multiple support channels are available:
+
+1. **Documentation**: Browse the [Getting Started](/photos/getting-started/) guide, explore [Features](/photos/features/backup-and-sync/), check the [FAQ](/photos/faq/account-creation) sections, and review [Troubleshooting](/photos/faq/troubleshooting)
+2. **Discord community**: Join our [Discord server](https://ente.io/discord) for community support and discussions
+3. **Email support**: Contact us at [support@ente.io](mailto:support@ente.io) for personalized help
+4. **GitHub**: Report bugs or request features on [GitHub](https://github.com/ente-io/ente/issues)
+
+For security vulnerabilities, please email [security@ente.io](mailto:security@ente.io) directly.

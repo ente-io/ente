@@ -12,7 +12,7 @@ protection and transparency.
 
 ## Data Encryption and Storage
 
-### Can Ente see my photos and videos?
+### Can Ente see my photos and videos? {#can-ente-see-photos}
 
 No. Your files are encrypted on your device before being uploaded to our
 servers. The encryption keys are derived from your password using advanced key
@@ -20,7 +20,7 @@ derivation functions. Since only you know your password, only you can decrypt
 your files. For technical details, please see our
 [architecture document](https://ente.io/architecture).
 
-### How is my data encrypted?
+### How is my data encrypted? {#data-encryption}
 
 We use the following encryption algorithms:
 
@@ -33,7 +33,7 @@ These algorithms are implemented using
 cryptographic library. Our [architecture document](https://ente.io/architecture)
 provides full technical specifications.
 
-### Where is my data stored?
+### Where is my data stored? {#data-storage-location}
 
 Your encrypted data is stored redundantly across multiple providers in the EU:
 
@@ -49,7 +49,7 @@ information about our storage infrastructure and data replication strategies.
 In short, we store 3 copies of your data, across 3 different providers, in 3
 different countries. One of them is in an underground fall-out shelter in Paris.
 
-### How does Ente's encryption compare to industry standards?
+### How does Ente's encryption compare to industry standards? {#encryption-comparison}
 
 Our encryption model goes beyond industry standards. While many services use
 server-side encryption, we implement end-to-end encryption. This means that even
@@ -72,7 +72,71 @@ end-to-end encrypted architecture.
 If you wish to delete your account in such scenarios, please reach out to
 support@ente.io and we will help you out.
 
-### Can I change my password?
+### What is my recovery key and why is it critical? {#recovery-key-importance}
+
+Your **recovery key is a 24-word phrase** that is the ONLY way to recover your account if you:
+
+- Forget your password AND
+- Are logged out of all devices
+
+**Critical information about recovery keys:**
+
+⚠️ **Ente support CANNOT provide or regenerate your recovery key**. Due to end-to-end encryption, we never have access to your recovery key or your encrypted data.
+
+⚠️ **Without your recovery key, losing your password means permanently losing access** to all your photos if you're logged out everywhere.
+
+⚠️ **Your recovery key is different from verification codes**. Verification codes are temporary 6-digit numbers sent to your email. Your recovery key is a permanent 24-word phrase.
+
+### How do I find my recovery key? {#find-recovery-key}
+
+**If you're still logged in to Ente on any device:**
+
+Open `Settings > Account > Recovery key`, enter your password to view your 24-word recovery key, and **save it immediately** in a secure location.
+
+**If you're logged out of all devices and don't have your recovery key:**
+
+Unfortunately, there is no way to recover your account. This is an inherent property of end-to-end encryption - for your privacy and security, only you have access to your data.
+
+### How should I store my recovery key? {#store-recovery-key}
+
+**Recommended methods:**
+
+1. **Password manager**: Store it in a reputable password manager (1Password, Bitwarden, etc.)
+2. **Physical paper**: Write it down and store it in a safe place (fireproof safe, safety deposit box)
+3. **Encrypted notes**: Save it in an encrypted notes app with a different password
+4. **Multiple locations**: Store copies in 2-3 different secure locations
+
+**DO NOT:**
+
+- Store it in an unencrypted file on your computer
+- Email it to yourself
+- Share it with anyone (not even Ente support)
+- Take a screenshot and leave it in your photos
+- Store it only in one location
+
+**Best practice**: When you first create your Ente account, immediately save your recovery key before uploading any photos.
+
+### How do I use my recovery key to reset my password? {#use-recovery-key}
+
+If you've forgotten your password and are logged out everywhere:
+
+1. Open the login page (on any platform)
+2. Enter your email address
+3. Click "Forgot Password"
+4. Enter your 24-word recovery key
+    - Type each word separated by a single space
+    - All lowercase, no punctuation
+    - Example format: `word1 word2 word3 ... word24`
+5. Create a new password
+6. Log in with your new password
+
+**Common issues:**
+
+- **"Invalid recovery key"**: Check for typos, extra spaces, or missing words
+- **Recovery key not working**: Make sure you're using the recovery key (24 words), not a verification code (6 digits)
+- **Still can't access account**: Contact [support@ente.io](mailto:support@ente.io) - we may be able to help verify account ownership for account deletion, but cannot recover your data
+
+### Can I change my password? {#change-password}
 
 Yes, you can change your password at any time from our apps. Our architecture
 allows password changes without re-encrypting your entire library.
@@ -80,7 +144,7 @@ allows password changes without re-encrypting your entire library.
 The privacy of your account is a function of the strength of your password,
 please choose a strong one.
 
-### Do you support two-factor authentication (2FA)?
+### Do you support two-factor authentication (2FA)? {#two-factor-auth}
 
 Yes, we recommend enabling 2FA for an additional layer of security. We support:
 
@@ -91,7 +155,7 @@ You can set up 2FA in the settings of our mobile or desktop apps.
 
 ## Sharing and Collaboration
 
-### How does sharing work?
+### How does sharing work? {#sharing-encryption}
 
 The information required to decrypt an album is encrypted with the recipient's
 public key such that only they can decrypt them.
@@ -114,9 +178,43 @@ collaboration with Symbolic Software. Cure53 is a prominent German cybersecurity
 firm, while Symbolic Software specializes in applied cryptography. Please find
 the full report here: https://ente.io/blog/cryptography-audit/
 
+## Machine Learning and Privacy {#ml-privacy}
+
+### Is my face data used to train AI models? {#face-data-privacy}
+
+No. All machine learning (face recognition and magic search) happens entirely on your device. Your photos are downloaded to your device, indexed locally, and the indexes are encrypted before being synced across your devices.
+
+Ente's servers never receive:
+
+- Your unencrypted photos
+- Face recognition data
+- Search indexes
+- Any information about what's in your photos
+
+Your photos and ML data are never used to train any AI models, neither by Ente nor by any third parties.
+
+### How does on-device ML maintain privacy? {#ml-privacy-details}
+
+Machine learning in Ente maintains the same end-to-end encryption guarantees as the rest of the app:
+
+- **Local processing**: All face detection, recognition, and magic search analysis happens on your device
+- **Encrypted indexes**: ML-generated indexes are encrypted before syncing to other devices
+- **Zero server knowledge**: Ente's servers cannot see your photos, faces, or search data
+- **No third-party services**: ML models run entirely within the Ente app - no external AI services are used
+
+Your machine learning data receives the same end-to-end encryption as your photos, ensuring complete privacy.
+
+Learn more about [Machine learning features](/photos/features/search-and-discovery/machine-learning).
+
+### Are my location tags encrypted? {#location-tags-encrypted}
+
+Yes! Location tags are stored end-to-end encrypted, just like your photos. When you create a location tag, all the location data (coordinates, radius, and tag name) is encrypted on your device before being synced.
+
+Ente's servers cannot see your location tags or where your photos were taken. All location-based searches happen locally on your device.
+
 ## Account Management
 
-### How can I delete my account?
+### How can I delete my account? {#delete-account}
 
 You can delete your account at any time by using the "Delete account" option in
 the settings. For security reasons, we request you to delete your account on
@@ -128,6 +226,25 @@ and auth use the same underlying account.
 
 To know details of how your data is deleted, including when you delete your
 account, please see https://ente.io/blog/how-ente-deletes-data/.
+
+## Trust and Reliability
+
+### Why should I trust Ente for long-term data storage? {#trust}
+
+**Our mission**: Unlike large tech companies with multiple products, we have one focused mission - to build a safe space where you can easily archive your personal memories for the long term.
+
+**Financial sustainability**: Our pricing model allows us to profitably provide this service without relying on advertising or selling your data. This means we can focus entirely on serving our users.
+
+**Security and transparency**:
+
+- Your data is preserved with end-to-end encryption
+- Our open-source apps have been [externally audited](https://ente.io/blog/cryptography-audit/) by Cure53
+- We store 3 copies of your data across 3 different providers in 3 different EU countries
+- Our [reliability documentation](https://ente.io/reliability) transparently details our data replication and disaster recovery plans
+
+**Long-term commitment**: We love what we do, have no reasons to be distracted by other ventures, and are committed to being as reliable as any service can be.
+
+If you'd like to support this project, please consider [subscribing](https://ente.io/download).
 
 ## Additional Support
 

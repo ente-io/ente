@@ -1,18 +1,24 @@
 ---
-title: Trash
-description: Deleting items and trash
+title: This Page Has Moved
+description: This content has been reorganized
 ---
 
-# Trash
+# This Page Has Moved
 
-Whenever you delete an item from Ente, it is moved to Trash. These items will be
-automatically deleted from Trash after 30 days. You can manually select photos
-to permanently delete or completely empty the trash if you wish.
+The **Trash** feature guide has moved to:
 
-Items in trash are included in your used storage calculation.
+## Trash Feature
 
-## Recovery
+- [Deleting photos guide](/photos/features/albums-and-organization/deleting) - Complete guide to deletion, trash, recovery, and permanent deletion
 
-If you have deleted items accidentally, you can recover them from Trash by
-selecting these items, and clicking the "Restore" button on the action bar that
-pops up.
+## Related topics
+
+- [Trash FAQ](/photos/faq/albums-and-organization#trash) - Common questions about trash and deletion
+
+---
+
+**Can't find what you're looking for?**
+
+- Browse [Albums and Organization features](/photos/features/albums-and-organization/albums)
+- Check [Albums FAQ](/photos/faq/albums-and-organization)
+- Visit the [main Photos documentation](/photos/)
