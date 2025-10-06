@@ -1,22 +1,26 @@
 ---
-title: Backup
-description: Details about how backup works in Ente Photos
+title: This Page Has Moved
+description: This content has been reorganized
 ---
 
-# Backup
+# This Page Has Moved
 
-Ente will automatically backup any albums in your native photos app that you
-select for backup.
+The **Backup** feature guide has moved to:
 
-Ente will run in the background, and any new photos added to these albums (or
-any photos in these albums that were modified) will be automatically synced to
-ente.
+## Backup and Sync
 
-You can choose which albums should be backed up when you sign up for Ente. If
-you change your mind later, or if you create a new album in your native photos
-app that you also want to backup, please use "Settings > Backup > Backed up
-folders" to modify your choices.
+- [Backup feature guide](/photos/features/backup-and-sync/) - Complete guide to automatic backup on mobile and desktop
 
-If a file is deleted on your native photos app, it will still show up in Ente.
-This is because on both iOS and Android, apps are not allowed to automatically
-delete user's photos without a manual confirmation.
+## Related topics
+
+- [How does automatic backup work?](/photos/faq/backup-and-sync#automatic-backup) - Backup FAQ
+- [Select albums to backup](/photos/faq/backup-and-sync#select-albums) - Choosing what to backup
+- [Background sync](/photos/faq/backup-and-sync#background-sync-not-working) - Troubleshooting background sync
+
+---
+
+**Can't find what you're looking for?**
+
+- Browse [Backup and Sync features](/photos/features/backup-and-sync/)
+- Check [Backup FAQ](/photos/faq/backup-and-sync)
+- Visit the [main Photos documentation](/photos/)

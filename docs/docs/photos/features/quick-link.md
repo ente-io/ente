@@ -1,22 +1,24 @@
 ---
-title: Quick link
-description: Share photos with your friends and family without creating albums
+title: This Page Has Moved
+description: This content has been reorganized
 ---
 
-# Quick link
+# This Page Has Moved
 
-Quick links allows you to select single or multiple photos and create a link
-that you can then share. You don't need to create an album first.
+The **Quick Links** content has been reorganized. You can find it in the following locations:
 
-> Behind the scene, Ente creates a special album and put all the selected files
-> in that special album.
+## Public Links
 
-- You can view all quick links created by you in the sharing tab, under Quick
-  links section.
+- [Public links feature guide](/photos/features/sharing-and-collaboration/public-links) - Creating and managing shareable links (includes quick link functionality)
 
-- Quick links can be converted to regular album.
+## Related topics
 
-- Removing a link will not delete the photos that are present in that link.
+- [Public links FAQ](/photos/faq/sharing-and-collaboration#public-links) - Common questions about sharing links
 
-- Similar to a [public-link](./public-link), you can set link expiry, passwords
-  or device limits.
+---
+
+**Can't find what you're looking for?**
+
+- Browse [Sharing and Collaboration features](/photos/features/sharing-and-collaboration/share)
+- Check [Sharing FAQ](/photos/faq/sharing-and-collaboration)
+- Visit the [main Photos documentation](/photos/)

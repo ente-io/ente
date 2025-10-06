@@ -1,27 +1,26 @@
 ---
-title: Public link
-description:
-    Share photos with your friends and family without them needing to install
-    Ente Photos
+title: This Page Has Moved
+description: This content has been reorganized
 ---
 
-# Public link
+# This Page Has Moved
 
-Ente lets you share your photos via links, that can be accessed by anyone,
-without an app or account.
+The **Public Links** feature guide has moved to:
 
-The contents within these links are also end-to-end encrypted.
+## Public Links
 
-> Implementation details have been documented
-> [here](https://ente.io/blog/building-shareable-links/).
+- [Public links feature guide](/photos/features/sharing-and-collaboration/public-links) - Complete guide to creating shareable links with passwords and expiry
 
-You can also use these links to collect photos from your friends after a party
-or event. Everything they add also remains end-to-end encrypted.
+## Related topics
 
-In addition to this, links support the following features:
+- [Public links FAQ](/photos/faq/sharing-and-collaboration#public-links) - Common questions
+- [Custom domains](/photos/features/sharing-and-collaboration/custom-domains/) - Use your own domain for links
+- [Link security](/photos/faq/security-and-privacy#sharing-encryption) - How link encryption works
 
-- Link expiry (so the links go poof after a duration you define)
-- Device limits (in case you don't want someone to forwarding your link)
-- Password lock (to add an additional level of protection to your photos)
-- Prevent downloads (while we can't prevent screenshots, we can disable the
-  option to download your original photos)
+---
+
+**Can't find what you're looking for?**
+
+- Browse [Sharing and Collaboration features](/photos/features/sharing-and-collaboration/share)
+- Check [Sharing FAQ](/photos/faq/sharing-and-collaboration)
+- Visit the [main Photos documentation](/photos/)

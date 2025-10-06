@@ -1,3 +1,7 @@
+- Prateek: Fix background uploads on Android 15 by skipping permission request in background mode
+- Prateek: Fix CronetException during background sync by disabling NativeAdapter on Android
+- Laurens: Change similar images labels copy
+- Laurens: Fix flipped thumbnails issue by removing use of ColorFiltered widget
 - Ashil: Downgrade flutter secure storage back to version used before v1.2.4 release
 - Neeraj: Fix sorting for large files viewer
 - Anand: Option to change public album layout

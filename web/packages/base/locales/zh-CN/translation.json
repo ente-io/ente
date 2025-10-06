@@ -698,5 +698,5 @@
     "continuous": "连续",
     "trip": "旅游",
     "album_layout": "相册布局",
-    "maps_privacy_notice": ""
+    "maps_privacy_notice": "大致坐标将被发送给注重隐私的第三方，如 OpenStreetMaps，以显示地图和位置。"
 }

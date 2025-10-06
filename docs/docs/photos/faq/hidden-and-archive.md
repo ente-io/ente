@@ -1,33 +1,30 @@
 ---
-title: Can I hide photos in ente?
-description: Two related ways of hiding or archiving in Ente Photos
+title: This Page Has Moved
+description: This content has been reorganized
 ---
 
-# Can I hide photos in ente?
+# This Page Has Moved
 
-Yes, you can hide specific photos and videos in Ente using the "Hide" action.
-Open the photo, expand the overflow menu and select Hide (the action with the
-eye icon).
+The content from **Hide vs Archive** has been reorganized. You can find it in the following locations:
 
-Hidden items do not appear anywhere in Ente except within the special "Hidden"
-category. Ente will ask for the device biometric (FaceID / TouchID) or passcode
-to view the contents of the Hidden category.
+## Hidden Photos
 
-You can reach the Hidden category from the bottom of the albums screen.
+- [Hidden photos feature guide](/photos/features/albums-and-organization/hide) - Complete guide to hiding photos with biometric protection
+- [Can I hide shared photos?](/photos/faq/albums-and-organization#hide-shared) - Hiding photos shared with you
 
-Keep in mind that hidden items will still show up in the "On device" albums
-within Ente as long as they are present in your native gallery. But once you
-remove them from your device, they'll stop showing up here.
+## Archive
 
-For more details, see [features/hide](/photos/features/hide).
+- [Archive feature guide](/photos/features/albums-and-organization/archive) - Complete guide to archiving photos
+- [Do archived photos appear in search?](/photos/faq/albums-and-organization#archive-search) - Archive visibility
 
-### Archive
+## Understanding the Difference
 
-There is also a related feature called "Archive". While hidden items do not
-appear anywhere, archived items do not appear in your timeline but can otherwise
-be seen within the album and search results.
+- [Hide vs Archive - what's the difference?](/photos/faq/albums-and-organization#difference) - Key differences explained
 
-This is useful when you're not trying to hide certain photos per se, but just do
-not want some of them (say, some old screenshots) to clutter your home timeline.
+---
 
-For more details, see [features/archive](/photos/features/archive).
+**Can't find what you're looking for?**
+
+- Browse [Albums and Organization FAQ](/photos/faq/albums-and-organization)
+- Check [Organization features](/photos/features/albums-and-organization/albums)
+- Visit the [main Photos documentation](/photos/)
