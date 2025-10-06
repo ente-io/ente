@@ -36,8 +36,8 @@
   "activeSessions": "Aktive Sitzungen",
   "oops": "Hoppla",
   "somethingWentWrongPleaseTryAgain": "Ein Fehler ist aufgetreten, bitte versuche es erneut",
-  "thisWillLogYouOutOfThisDevice": "Dadurch wirst du von diesem Gerät abgemeldet!",
-  "thisWillLogYouOutOfTheFollowingDevice": "Dadurch wirst du von folgendem Gerät abgemeldet:",
+  "thisWillLogYouOutOfThisDevice": "Dadurch werden Sie von Ihrem Gerät abgemeldet!",
+  "thisWillLogYouOutOfTheFollowingDevice": "Dadurch werden Sie von folgendem Gerät abgemeldet:",
   "terminateSession": "Sitzungen beenden?",
   "terminate": "Beenden",
   "thisDevice": "Dieses Gerät",
@@ -47,7 +47,7 @@
   "incorrectRecoveryKeyTitle": "Falscher Wiederherstellungs-Schlüssel",
   "incorrectRecoveryKeyBody": "Der eingegebene Schlüssel ist ungültig",
   "forgotPassword": "Passwort vergessen",
-  "enterYourRecoveryKey": "Gib deinen Wiederherstellungs-Schlüssel ein",
+  "enterYourRecoveryKey": "Geben Ihren Wiederherstellungs-Schlüssel ein",
   "noRecoveryKey": "Kein Wiederherstellungs-Schlüssel?",
   "sorry": "Entschuldigung",
   "noRecoveryKeyNoDecryption": "Aufgrund unseres Ende-zu-Ende-Verschlüsselungsprotokolls können deine Daten nicht ohne dein Passwort oder deinen Wiederherstellungs-Schlüssel entschlüsselt werden",
@@ -198,6 +198,11 @@
   "@noDeviceLimit": {
     "description": "Text to indicate that there is limit on number of devices"
   },
+  "albumLayout": "Album-Layout",
+  "layoutGrouped": "Gruppiert",
+  "layoutContinuous": "Kontinuierlich",
+  "layoutTrip": "Reise",
+  "preview": "Vorschau",
   "linkExpiry": "Ablaufdatum des Links",
   "linkExpired": "Abgelaufen",
   "linkEnabled": "Aktiviert",
@@ -1941,5 +1946,9 @@
   "closeBy": "Ähnlich",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
+  },
+  "peopleAutoAddDesc": "Fotos der ausgewählten Personen automatisch zu diesem Album hinzufügen",
+  "@peopleAutoAddDesc": {
+    "description": "The message the copy should convey is that photos or videos containing the selected people's faces will be automatically added to this album"
   }
 }
