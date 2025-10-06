@@ -1,3 +1,4 @@
+- Neeraj: (i) Copy embed link option
 - Prateek: Fix background uploads on Android 15 by skipping permission request in background mode
 - Prateek: Fix CronetException during background sync by disabling NativeAdapter on Android
 - Laurens: Change similar images labels copy

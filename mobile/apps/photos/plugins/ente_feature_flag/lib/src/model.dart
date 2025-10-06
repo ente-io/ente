@@ -13,6 +13,7 @@ class RemoteFlags {
   final bool betaUser;
   final bool enableMobMultiPart;
   final String castUrl;
+  final String embedUrl;
   final String customDomain;
   final String customDomainCNAME;
 
@@ -26,6 +27,7 @@ class RemoteFlags {
     required this.betaUser,
     required this.enableMobMultiPart,
     required this.castUrl,
+    required this.embedUrl,
     required this.customDomain,
     required this.customDomainCNAME,
   });
@@ -43,6 +45,7 @@ class RemoteFlags {
     String? castUrl,
     String? customDomain,
     String? customDomainCNAME,
+    String? embedUrl,
   }) {
     return RemoteFlags(
       enableStripe: enableStripe ?? this.enableStripe,
@@ -56,6 +59,7 @@ class RemoteFlags {
       castUrl: castUrl ?? this.castUrl,
       customDomain: customDomain ?? this.customDomain,
       customDomainCNAME: customDomainCNAME ?? this.customDomainCNAME,
+      embedUrl: embedUrl ?? this.embedUrl,
     );
   }
 
@@ -70,6 +74,7 @@ class RemoteFlags {
     enableMobMultiPart: false,
     castUrl: "https://cast.ente.io",
     customDomain: "",
+    embedUrl: "https://embed.ente.io",
     customDomainCNAME: "my.ente.io",
   );
 
@@ -85,6 +90,9 @@ class RemoteFlags {
       'betaUser': betaUser,
       'enableMobMultiPart': enableMobMultiPart,
       'castUrl': castUrl,
+      'customDomain': customDomain,
+      'customDomainCNAME': customDomainCNAME,
+      'embedUrl': embedUrl,
     };
   }
 
@@ -105,6 +113,7 @@ class RemoteFlags {
       customDomain: map['customDomain'] ?? defaultValue.customDomain,
       customDomainCNAME:
           map['customDomainCNAME'] ?? defaultValue.customDomainCNAME,
+      embedUrl: map['embedUrl'] ?? defaultValue.embedUrl,
     );
   }
 }
