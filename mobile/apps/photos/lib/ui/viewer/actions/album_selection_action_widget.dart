@@ -141,9 +141,8 @@ class _AlbumSelectionActionWidgetState
       );
     }
 
-    final List<SelectionActionButton> visibleItems = items
-        .where((item) => item.shouldShow == null || item.shouldShow == true)
-        .toList();
+    final List<SelectionActionButton> visibleItems =
+        items.where((item) => item.shouldShow == true).toList();
 
     final List<SelectionActionButton> firstThreeItems =
         visibleItems.length > 3 ? visibleItems.take(3).toList() : visibleItems;
@@ -189,7 +188,7 @@ class _AlbumSelectionActionWidgetState
 
     final List<List<SelectionActionButton>> groupedOtherItems = [];
     for (int i = 0; i < otherItems.length; i += 4) {
-      int end = (i + 4 < otherItems.length) ? i + 4 : otherItems.length;
+      final int end = (i + 4 < otherItems.length) ? i + 4 : otherItems.length;
       groupedOtherItems.add(otherItems.sublist(i, end));
     }
 
@@ -290,14 +289,12 @@ class _AlbumSelectionActionWidgetState
                                                 child: child,
                                               );
                                             },
-                                            child: item is Widget
-                                                ? KeyedSubtree(
-                                                    key: ValueKey(
-                                                      item.hashCode,
-                                                    ),
-                                                    child: item,
-                                                  )
-                                                : const SizedBox(),
+                                            child: KeyedSubtree(
+                                              key: ValueKey(
+                                                item.hashCode,
+                                              ),
+                                              child: item,
+                                            ),
                                           ),
                                         );
                                       }).toList(),
