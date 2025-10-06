@@ -10,12 +10,14 @@ description: Frequently asked questions about photo metadata, EXIF data, and edi
 ### What metadata does Ente preserve during import? {#metadata-preserved}
 
 Ente reads and preserves:
+
 - **EXIF data**: Camera settings, date taken, GPS coordinates
 - **XMP and IPTC**: Additional metadata standards
 - **Google Takeout JSON**: If importing from Google Photos
 - **Filename-based dates**: For files without EXIF (like screenshots)
 
 All this metadata is:
+
 - Encrypted before upload
 - Searchable within Ente
 - Preserved when you export
@@ -45,6 +47,7 @@ If we are unable to decipher the creation time from these 3 sources, we will set
 ### How do I view EXIF data for a photo? {#view-exif}
 
 **On mobile and web:**
+
 1. Open the photo
 2. Tap/click the info button (i)
 3. Scroll down to see basic metadata
@@ -65,10 +68,12 @@ For example, `flower.jpeg` might be in one zip and `flower.json` in another. Thi
 ### Why are my Google Photos dates wrong after import? {#google-photos-dates-wrong}
 
 If the dates appear incorrect after importing from Google Takeout, it's usually because:
+
 - The photo's Exif data has a different date than Google's metadata JSON
 - The JSON file wasn't matched with the photo during import
 
 To fix this:
+
 1. Make sure you unzipped all Google Takeout zips into one folder
 2. Import that single folder (not individual zips)
 3. This ensures Ente can match JSON files with their photos
@@ -80,6 +85,7 @@ To fix this:
 You can add descriptions (captions) to your photos in Ente:
 
 **On mobile and web:**
+
 1. Open the photo
 2. Tap/click the info button (i)
 3. Tap/click "Add description" or the description field
@@ -100,6 +106,7 @@ Yes! You can bulk-edit creation time of photos from the desktop app:
 4. Apply to all selected photos
 
 This is useful for:
+
 - Fixing photos with incorrect timestamps
 - Adjusting timezone differences
 - Correcting dates on scanned photos
@@ -116,6 +123,7 @@ Yes! You can bulk-edit location coordinates from the mobile app:
 4. Apply to all selected photos
 
 This is useful for:
+
 - Adding location to photos without GPS data
 - Correcting wrong GPS coordinates
 - Organizing photos by location after the fact
@@ -125,11 +133,13 @@ This is useful for:
 ### How do I fix incorrect photo dates? {#fix-incorrect-dates}
 
 Photos sometimes have incorrect dates due to:
+
 - Camera settings being wrong
 - Timezone issues
 - Scanned photos without proper metadata
 
 **To fix dates:**
+
 1. Use the bulk date editing feature (see above)
 2. Select photos with incorrect dates
 3. Apply the correct date/time
@@ -141,11 +151,13 @@ Ente will store your corrections and sync them across all your devices.
 Yes! When you edit metadata (dates, locations, descriptions) in Ente, the **original file is never modified**. Your edits are stored separately.
 
 When you export your photos:
+
 - You get the exact original file
 - Edits are saved in a separate JSON file (same format as Google Takeout)
 - This preserves both the original and your modifications
 
 This means:
+
 - You can always access the original metadata
 - Your edits are preserved when exporting
 - Your original files remain untouched
@@ -155,6 +167,7 @@ This means:
 You can rename photos in Ente:
 
 **On mobile and web:**
+
 1. Open the photo
 2. Tap/click the info button (i)
 3. Tap/click on the filename
@@ -168,12 +181,14 @@ The original filename is preserved, and your edit is stored separately (similar 
 Yes! You can manually add location data to any photo:
 
 **On mobile:**
+
 1. Select the photo(s)
 2. Choose "Edit location" from the menu
 3. Select the location on the map
 4. Save
 
 This adds GPS coordinates to the photo's metadata, allowing you to:
+
 - View them on the map
 - Search by location
 - Organize photos by where they were taken
@@ -238,6 +253,7 @@ Ente is a photos app, not a file system backup app. Customers for whom the creat
 No. Ente guarantees that you will get back the _exact_ same original photos and videos that you imported. The modifications (e.g. date changes) you make within Ente will be written into a separate metadata JSON file during export so as to not modify the original.
 
 This ensures:
+
 - You always have access to originals
 - Your edits are preserved separately
 - You can use the metadata JSON with other tools
@@ -249,6 +265,7 @@ This ensures:
 Yes! All metadata edits (dates, locations, descriptions, filenames) are synced across all your devices using end-to-end encryption.
 
 When you edit metadata on one device:
+
 - Changes appear on all other devices
 - The original file remains unchanged everywhere
 - Edits are preserved when exporting from any device
@@ -256,14 +273,17 @@ When you edit metadata on one device:
 ### Can I edit metadata on all platforms? {#platform-support}
 
 **Available on mobile and desktop:**
+
 - Adding descriptions
 - Editing filenames
 - Viewing all EXIF data
 
 **Desktop only:**
+
 - Bulk editing dates ("Fix time" feature)
 
 **Mobile only:**
+
 - Bulk editing locations
 
 We're working on bringing all editing features to all platforms.
@@ -271,6 +291,7 @@ We're working on bringing all editing features to all platforms.
 ### Does Ente modify any file metadata? {#modify-file-metadata}
 
 No. Ente never modifies your original files or their embedded metadata. All edits you make are stored separately in Ente's database and:
+
 - Synced encrypted across your devices
 - Written to separate JSON files during export
 - Kept separate from the original file

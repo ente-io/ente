@@ -29,11 +29,13 @@ You can remove a photo (owned by you) or an album from your **home timeline** by
 ### View Archived Photos and Albums
 
 **On mobile:**
+
 - Go to the Albums tab
 - Scroll to the bottom
 - Tap **Archive**
 
 **On web/desktop:**
+
 - Click the menu icon (three horizontal lines) at top left
 - Select **Archive**
 
@@ -47,6 +49,6 @@ Both Ente and people with whom you share an album or photo have no information a
 
 ## Related FAQs
 
-* [What's the difference between hiding and archiving?](/photos/faq/albums-and-organization#difference)
-* [Do archived photos appear in search results?](/photos/faq/albums-and-organization#archive-search)
-* [How do I archive photos in Ente?](/photos/faq/albums-and-organization#how-to-archive)
+- [What's the difference between hiding and archiving?](/photos/faq/albums-and-organization#difference)
+- [Do archived photos appear in search results?](/photos/faq/albums-and-organization#archive-search)
+- [How do I archive photos in Ente?](/photos/faq/albums-and-organization#how-to-archive)

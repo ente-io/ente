@@ -8,9 +8,11 @@ description: This content has been reorganized
 The **Machine Learning** feature guide has moved to:
 
 ## Machine Learning Features
+
 - [Machine learning feature guide](/photos/features/search-and-discovery/machine-learning) - Complete guide to on-device ML, face recognition, and magic search
 
 ## Related topics
+
 - [Face recognition](/photos/features/search-and-discovery/face-recognition) - Detailed face recognition guide
 - [Magic search](/photos/features/search-and-discovery/magic-search) - Search by scene and objects
 - [ML FAQ](/photos/faq/search-and-discovery#machine-learning) - Common questions
@@ -20,6 +22,7 @@ The **Machine Learning** feature guide has moved to:
 ---
 
 **Can't find what you're looking for?**
+
 - Browse [Search and Discovery features](/photos/features/search-and-discovery/)
 - Check [Search FAQ](/photos/faq/search-and-discovery)
 - See [Security FAQ](/photos/faq/security-and-privacy)

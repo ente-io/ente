@@ -75,6 +75,7 @@ support@ente.io and we will help you out.
 ### What is my recovery key and why is it critical? {#recovery-key-importance}
 
 Your **recovery key is a 24-word phrase** that is the ONLY way to recover your account if you:
+
 - Forget your password AND
 - Are logged out of all devices
 
@@ -106,6 +107,7 @@ Unfortunately, there is no way to recover your account. This is an inherent prop
 4. **Multiple locations**: Store copies in 2-3 different secure locations
 
 **DO NOT:**
+
 - Store it in an unencrypted file on your computer
 - Email it to yourself
 - Share it with anyone (not even Ente support)
@@ -122,13 +124,14 @@ If you've forgotten your password and are logged out everywhere:
 2. Enter your email address
 3. Click "Forgot Password"
 4. Enter your 24-word recovery key
-   - Type each word separated by a single space
-   - All lowercase, no punctuation
-   - Example format: `word1 word2 word3 ... word24`
+    - Type each word separated by a single space
+    - All lowercase, no punctuation
+    - Example format: `word1 word2 word3 ... word24`
 5. Create a new password
 6. Log in with your new password
 
 **Common issues:**
+
 - **"Invalid recovery key"**: Check for typos, extra spaces, or missing words
 - **Recovery key not working**: Make sure you're using the recovery key (24 words), not a verification code (6 digits)
 - **Still can't access account**: Contact [support@ente.io](mailto:support@ente.io) - we may be able to help verify account ownership for account deletion, but cannot recover your data
@@ -182,6 +185,7 @@ the full report here: https://ente.io/blog/cryptography-audit/
 No. All machine learning (face recognition and magic search) happens entirely on your device. Your photos are downloaded to your device, indexed locally, and the indexes are encrypted before being synced across your devices.
 
 Ente's servers never receive:
+
 - Your unencrypted photos
 - Face recognition data
 - Search indexes
@@ -232,6 +236,7 @@ account, please see https://ente.io/blog/how-ente-deletes-data/.
 **Financial sustainability**: Our pricing model allows us to profitably provide this service without relying on advertising or selling your data. This means we can focus entirely on serving our users.
 
 **Security and transparency**:
+
 - Your data is preserved with end-to-end encryption
 - Our open-source apps have been [externally audited](https://ente.io/blog/cryptography-audit/) by Cure53
 - We store 3 copies of your data across 3 different providers in 3 different EU countries

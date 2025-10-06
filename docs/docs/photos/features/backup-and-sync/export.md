@@ -10,6 +10,7 @@ Export allows you to download your entire Ente library or specific albums to loc
 ## Why use export?
 
 Export is useful for:
+
 - **Local backups**: Keep a copy of your photos on your computer or NAS
 - **Data portability**: Export your data in a standard format you can use anywhere
 - **Redundancy**: Have multiple copies of your precious memories
@@ -29,6 +30,7 @@ The desktop and web apps offer continuous export, which automatically exports ne
 4. The app will automatically export new items in the background
 
 **Important notes:**
+
 - The desktop app must be running for continuous export to work
 - Exports happen in the background without interrupting your work
 - Incremental exports only download new or changed files
@@ -36,6 +38,7 @@ The desktop and web apps offer continuous export, which automatically exports ne
 ### CLI export
 
 For advanced users and automation, use the [Ente CLI](/photos/features/utilities/cli) to export via command line. The CLI is particularly useful for:
+
 - Automated exports with cron jobs
 - Server-to-server transfers
 - NAS sync setups
@@ -47,6 +50,7 @@ For advanced users and automation, use the [Ente CLI](/photos/features/utilities
 Your album structure is fully preserved during export. Each album becomes a separate folder with your photos organized exactly as they are in Ente.
 
 **Example structure:**
+
 ```
 export-folder/
 ├── Vacation 2024/
@@ -63,6 +67,7 @@ export-folder/
 Metadata is exported as separate JSON files alongside your photos. The original files are **not modified**.
 
 **Format:**
+
 ```
 photo.jpg
 metadata/photo.jpg.json
@@ -75,6 +80,7 @@ For details about the metadata format, see [Metadata and Editing FAQ](/photos/fa
 ### Files in multiple albums
 
 If a photo exists in multiple albums:
+
 - **In Ente**: Counts as 1 file (storage counted once)
 - **On export**: Appears in each album folder (downloaded multiple times)
 
@@ -87,17 +93,20 @@ This is why your export size may be larger than your Ente storage usage.
 Exports create a **one-way sync** from Ente to your local storage. Changes to exported files do not sync back to Ente.
 
 **Important:** Do **not** export to the same folder that you're watching for uploads. This will cause:
+
 - Duplicate files
 - Export stalling
 - Undefined behavior
 
 **Best practice:** Use separate folders for:
+
 - Upload source (watch folders)
 - Export destination (local backups)
 
 ### Network drives (NAS)
 
 Exporting to network drives generally works better than importing from them:
+
 - File system interaction is simpler for exports
 - Performance is usually acceptable
 
@@ -108,6 +117,7 @@ Learn more in [Troubleshooting NAS issues](/photos/faq/troubleshooting#nas).
 ## Incremental exports
 
 Both desktop continuous export and CLI exports are **incremental**:
+
 - Only new or changed files are downloaded
 - Gracefully handles interruptions
 - Safe to stop and restart without re-downloading everything
@@ -115,14 +125,14 @@ Both desktop continuous export and CLI exports are **incremental**:
 
 ## Related FAQs
 
-* [How can I backup my data locally outside Ente?](/photos/faq/advanced-features#local-backup)
-* [Does export preserve album structure?](/photos/faq/advanced-features#export-album-structure)
-* [Does export preserve metadata?](/photos/faq/advanced-features#export-preserves-metadata)
-* [Can I do 2-way sync with exports?](/photos/faq/advanced-features#export-two-way-sync)
-* [Why is my export size larger than my Ente storage?](/photos/faq/advanced-features#export-size-larger)
-* [Can I export to a network drive (NAS)?](/photos/faq/advanced-features#export-to-nas)
+- [How can I backup my data locally outside Ente?](/photos/faq/advanced-features#local-backup)
+- [Does export preserve album structure?](/photos/faq/advanced-features#export-album-structure)
+- [Does export preserve metadata?](/photos/faq/advanced-features#export-preserves-metadata)
+- [Can I do 2-way sync with exports?](/photos/faq/advanced-features#export-two-way-sync)
+- [Why is my export size larger than my Ente storage?](/photos/faq/advanced-features#export-size-larger)
+- [Can I export to a network drive (NAS)?](/photos/faq/advanced-features#export-to-nas)
 
 ## Related topics
 
-* [CLI](/photos/features/utilities/cli) - Command-line tool for automated exports
-* [Watch folders](/photos/features/backup-and-sync/watch-folders) - Automatic uploads (the counterpart to export)
+- [CLI](/photos/features/utilities/cli) - Command-line tool for automated exports
+- [Watch folders](/photos/features/backup-and-sync/watch-folders) - Automatic uploads (the counterpart to export)

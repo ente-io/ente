@@ -14,6 +14,7 @@ Ente offers three main ways to share photos, each designed for different use cas
 **1. Shared albums (with Ente users)**
 
 Share directly with specific people who have Ente accounts:
+
 - Invite by email address
 - Recipients need an Ente account
 - Choose Viewer or Collaborator permissions
@@ -25,6 +26,7 @@ Learn more: [Collaboration guide](/photos/features/sharing-and-collaboration/col
 **2. Public links (for anyone)**
 
 Share via links that anyone can access without an account:
+
 - **Regular public links**: View-only access to an album
 - **Quick links**: Select photos → create link (Ente creates hidden album automatically)
 - **Collect links**: Enable "Allow adding photos" so anyone can contribute
@@ -36,6 +38,7 @@ Learn more: [Public links guide](/photos/features/sharing-and-collaboration/publ
 **3. Collaborative albums (Ente users working together)**
 
 Multiple Ente users can add photos to the same album:
+
 - All collaborators can contribute photos
 - Each person's uploads count towards their own storage
 - Owner controls permissions and membership
@@ -50,10 +53,12 @@ For a complete overview, see [Sharing documentation](/photos/features/sharing-an
 Quick links ARE public links - just with a different creation method:
 
 **Public links:**
+
 - Create from an existing album
 - Share the entire album via link
 
 **Quick links:**
+
 - Select specific photos anywhere in Ente
 - Ente creates a hidden album automatically
 - Share via link (works exactly like a public link)
@@ -68,21 +73,25 @@ Learn more: [Public links guide](/photos/features/sharing-and-collaboration/publ
 Yes! Ente's custom domains feature lets you serve your public album links using your own personalized domain instead of `albums.ente.io`.
 
 For example, instead of:
+
 ```
 https://albums.ente.io/?t=...
 ```
 
 You can use:
+
 ```
 https://pics.example.org/?t=...
 ```
 
 **Requirements:**
+
 - Active Ente subscription (required for public sharing)
 - Your own domain or subdomain
 - Ability to add a CNAME DNS record
 
 **Setup:**
+
 1. Link your domain in `Settings > Preferences > Custom domains` (currently web only)
 2. Add a CNAME DNS record pointing your domain to `my.ente.io`
 3. Wait for DNS changes to propagate (usually a few minutes)
@@ -99,7 +108,6 @@ Regular albums continue to work perfectly on your custom domain - only the Trip 
 
 Learn more in the [Custom domains guide](/photos/features/sharing-and-collaboration/custom-domains/).
 
-
 ## Collaboration
 
 ### How do I share an album with other Ente users? {#share-with-users}
@@ -115,11 +123,13 @@ The recipient will receive a notification and can access the shared album from t
 ### Who pays for storage in collaborative albums? {#collab-storage}
 
 In collaborative albums (shared with other Ente users):
+
 - Each photo's storage is counted towards **the person who uploaded it**
 - Since collaborators usually already have the photo in their account, they effectively don't pay extra
 - The album owner does not pay for photos uploaded by collaborators
 
 In collect links (public links with upload enabled):
+
 - All photos added via the link count towards **the album owner's storage**
 - The owner has full control to remove photos at any time
 - People adding photos via the link don't need Ente accounts and don't pay anything
@@ -131,16 +141,19 @@ Learn more: [Collaboration guide](/photos/features/sharing-and-collaboration/col
 Permissions depend on your role:
 
 **Collaborators can:**
+
 - Add photos to the shared album
 - Delete photos they uploaded themselves
 - View all photos in the album
 
 **Collaborators cannot:**
+
 - Delete photos uploaded by others
 - Delete the album itself
 - Change album settings or permissions
 
 **Album owner can:**
+
 - Remove any photos from the album
 - Only permanently delete photos they own
 - Remove or change permissions for collaborators
@@ -149,6 +162,7 @@ Permissions depend on your role:
 ### What happens when I remove a collaborator from an album? {#remove-collaborator}
 
 When a collaborator is removed from a shared album (or when they leave the album voluntarily):
+
 - Any photos they uploaded to the album will also be removed from that album
 - Those photos remain in the collaborator's own account
 - Photos uploaded by other collaborators or the owner remain in the album
@@ -157,10 +171,12 @@ When a collaborator is removed from a shared album (or when they leave the album
 ### Is collaboration available on all platforms? {#collaboration-platforms}
 
 **Collaborative albums** (sharing with other Ente users):
+
 - Fully supported on mobile apps (iOS and Android)
 - View-only mode on web and desktop (we're actively working on adding full support)
 
 **Collaborative links** (collect links):
+
 - Can be created on all platforms (mobile, web, desktop)
 - Anyone with the link can add photos via web browser
 
@@ -173,12 +189,14 @@ Notification limitations on iOS are due to Apple's platform restrictions:
 ⚠️ **Notifications only work when the app is running in the background**, not if you've force-closed it from the app switcher.
 
 **Why this happens:**
+
 - iOS delivers notifications via silent push notifications
 - These "wake up" the app to check for new photos
 - If you force-kill the app, iOS won't deliver these notifications
 - This is an Apple platform limitation, not an Ente bug
 
 **To receive notifications on iOS:**
+
 1. Enable notifications in device `Settings > Ente > Notifications`
 2. Enable Background App Refresh in device `Settings > Ente`
 3. **Don't force-close the Ente app** from the app switcher
@@ -187,17 +205,20 @@ Notification limitations on iOS are due to Apple's platform restrictions:
 **On Android:**
 
 Notifications work more reliably on Android, but can still be affected by:
+
 - Battery optimization settings restricting the app
 - Force-closing the app from recents
 - Notification permissions not granted
 
 **To receive notifications on Android:**
+
 1. Open device `Settings > Ente > Notifications` and ensure all notification categories are enabled
 2. Disable battery optimization for Ente in system settings
 3. Don't force-close the app from recents
 
 **Alternative:**
 If you need real-time updates, keep the app open or check the shared album manually by opening it in the app.
+
 - No platform restrictions for link recipients
 
 ## Public Links
@@ -207,6 +228,7 @@ If you need real-time updates, keep the app open or check the shared album manua
 Collect links let anyone add photos to your album without needing an Ente account - perfect for gathering photos from events, parties, or trips.
 
 **On mobile:**
+
 1. Open the album you want to use for collecting photos
 2. Tap the Share icon in the top right corner
 3. Select "Collect photos"
@@ -214,6 +236,7 @@ Collect links let anyone add photos to your album without needing an Ente accoun
 5. Share the link with anyone you want to collect photos from
 
 **On web/desktop:**
+
 1. Open the album
 2. Click the share album icon
 3. Select "Collect photos"
@@ -235,6 +258,7 @@ To enable this, create a public link and enable the "Allow adding photos" option
 Yes, photos added to your album through a collect link count towards your storage quota as the album owner.
 
 When someone adds a photo via a collect link:
+
 - The photo is stored in your account
 - You have full control to remove these photos at any time
 - The storage counts against your plan's total storage limit
@@ -323,11 +347,13 @@ After leaving, you'll no longer have access to the album. If you were a collabor
 ### How do I see all my shared albums? {#view-shared-albums}
 
 **On mobile:**
+
 - Open the Albums tab
 - Shared albums appear alongside your own albums
 - Look for the "Shared by" indicator under the album name
 
 **On web/desktop:**
+
 - Shared albums appear in your album list
 - They're marked with a sharing icon
 
@@ -340,6 +366,7 @@ You can also view all sharing activity in the Sharing tab/section.
 **Collaborative albums and public links are only available to paid customers.** This limitation helps safeguard against potential platform abuse.
 
 However, receiving shared albums is available to everyone:
+
 - Free users can receive and view albums shared with them
 - Free users can view public links shared with them
 - Anyone (with or without Ente account) can add photos to collect links
@@ -360,6 +387,7 @@ Viewers can only view photos, while Collaborators can both view and add photos.
 ### What happens to shared albums if I cancel my subscription? {#cancel-subscription-impact}
 
 If you're the owner of shared albums and your paid subscription expires:
+
 - Existing shared albums will remain accessible to collaborators
 - You won't be able to create new shares
 - You won't be able to modify existing share settings
@@ -385,6 +413,7 @@ In case of sharable links, the key to decrypt the album is appended by the clien
 ### Can Ente see my shared photos? {#ente-see-shared}
 
 No. Ente has no information about:
+
 - Whether you have shared an album
 - What photos are in shared albums
 - Who you've shared with
@@ -432,6 +461,7 @@ Yes, but you need to use `embed.ente.io` instead of your custom domain in the if
 If you're using the easy method (copy embed HTML button), the app automatically handles this for you - it will use `embed.ente.io` regardless of your custom domain setting.
 
 If you're creating the embed code manually and have a custom domain configured:
+
 - Replace your custom domain with `embed.ente.io` in the iframe src
 - For example: `https://embed.ente.io/?t=...` (not `https://pics.example.org/?t=...`)
 
@@ -442,6 +472,7 @@ The embed will still work perfectly - it's just served from the embed subdomain 
 Yes! Password-protected albums work in embeds. When someone views the embedded album, they'll see a password prompt within the iframe. Once they enter the correct password, they can view the photos.
 
 The embed maintains all the security features of your public link:
+
 - Password protection (if enabled)
 - Same end-to-end encryption
 - Link expiry (if set)
@@ -452,6 +483,7 @@ The embed maintains all the security features of your public link:
 If you delete the public link, the embed will immediately stop working. The embedded album requires an active public link to function.
 
 If you want to stop people from accessing the embedded album:
+
 1. Delete the public link from the album's sharing settings
 2. The embed will show an error or empty state
 3. Remove the embed code from your website
@@ -461,6 +493,7 @@ If you just want to temporarily disable access, consider using the link's passwo
 ### What features are available in embedded albums? {#embed-features}
 
 Embedded albums include:
+
 - Thumbnail grid view
 - Full-size image viewer with navigation
 - Video playback support

@@ -25,6 +25,7 @@ Browse the reorganized FAQ sections:
 ---
 
 **Can't find what you're looking for?**
+
 - Check the [Getting Started guide](/photos/getting-started/)
 - Browse [Features](/photos/features/account/family-plans)
 - Visit the [main Photos documentation](/photos/)

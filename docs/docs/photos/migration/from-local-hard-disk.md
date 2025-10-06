@@ -1,7 +1,6 @@
 ---
 title: Import from local hard disk
-description:
-    Migrating to Ente Photos by importing data from your local hard disk
+description: Migrating to Ente Photos by importing data from your local hard disk
 ---
 
 # Import photos from your local hard disk
@@ -37,6 +36,7 @@ Learn more about [folder structure handling](/photos/features/albums-and-organiz
 ## Alternative: Watch Folders
 
 Instead of a one-time upload, you can use [watch folders](/photos/features/backup-and-sync/watch-folders) to automatically sync folders on an ongoing basis. This is perfect for:
+
 - Photo libraries you actively update
 - Automated backup workflows
 - Keeping Ente in sync with your local photo organization

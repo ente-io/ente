@@ -17,7 +17,6 @@ Once your photos are safely backed up to Ente, you can free up storage space on 
 
 Open `Settings > Backup > Free up space > Free up device space`, review how much space will be freed, and confirm to delete backed-up photos from your device.
 
-
 <div align="center">
 
 ![Free up space screen](free-up-space.png){width=400px}
@@ -29,16 +28,19 @@ The app will delete all photos and videos that have been successfully backed up 
 ### Important notes
 
 **After freeing up space:**
+
 - Your photos remain in Ente and can be viewed anytime
 - Photos are automatically downloaded when you view them in the app
 - You may need to clear your device's trash/recently deleted folder to fully reclaim the space
 
 **What gets deleted:**
+
 - Only photos that are successfully backed up to Ente
 - Local copies on your device's internal storage
 - Photos from your device's camera roll and other backed-up albums
 
 **What stays:**
+
 - Photos not yet backed up (they'll be protected from deletion)
 - All photos remain in Ente's cloud
 - Any photos in albums you haven't selected for backup
@@ -46,6 +48,7 @@ The app will delete all photos and videos that have been successfully backed up 
 ### Re-downloading photos
 
 When you free up space, photos are removed from your device but stay in Ente. To view a photo:
+
 - Simply open it in the Ente app
 - It will be downloaded automatically when you view it
 - Downloaded photos use your device storage again
@@ -57,6 +60,7 @@ If you have an existing library with duplicate photos across different albums, y
 ### How it works
 
 The deduplication tool:
+
 1. Scans your entire Ente library for exact duplicate files (same hash)
 2. Keeps one copy of each unique file
 3. Replaces duplicates with symlinks in all albums
@@ -90,6 +94,7 @@ Ente provides an ML-powered tool to find and remove photos that are similar but 
 ### How it works
 
 The similar images feature:
+
 1. Uses on-device machine learning to find visually similar photos
 2. Groups similar photos together for review
 3. Lets you choose which photos to keep and which to delete
@@ -118,6 +123,7 @@ When removing similar images, Ente intelligently handles your albums:
 ### Prerequisites
 
 The similar images feature requires:
+
 - Machine learning to be enabled (for detecting similar images)
 - Photos to be indexed (happens automatically after enabling ML)
 - Available on mobile and desktop apps
@@ -127,16 +133,19 @@ Learn more about [Machine learning](/photos/features/search-and-discovery/machin
 ## Understanding storage in Ente
 
 **Cloud storage (your Ente quota):**
+
 - This is the storage space in your Ente account
 - Counted against your plan's storage limit (e.g., 100 GB, 1 TB)
 - Use deduplication and similar images tools to optimize
 
 **Device storage (your phone/computer):**
+
 - This is the physical storage on your device
 - Use "Free up space" to reclaim device storage
 - Photos remain in Ente and can be re-downloaded anytime
 
 **Trash:**
+
 - Items in trash count against your cloud storage quota
 - Permanently delete items or empty trash to free up space
 - Items are automatically deleted after 30 days
@@ -145,19 +154,19 @@ Learn more in [Trash](/photos/features/albums-and-organization/trash).
 
 ## Related topics
 
-* [Backup overview](/photos/features/backup-and-sync/)
-* [Duplicate detection during backup](/photos/features/backup-and-sync/duplicate-detection)
-* [Machine learning](/photos/features/search-and-discovery/machine-learning)
-* [Deleting photos](/photos/features/albums-and-organization/deleting)
-* [Storage and Plans FAQ](/photos/faq/storage-and-plans)
+- [Backup overview](/photos/features/backup-and-sync/)
+- [Duplicate detection during backup](/photos/features/backup-and-sync/duplicate-detection)
+- [Machine learning](/photos/features/search-and-discovery/machine-learning)
+- [Deleting photos](/photos/features/albums-and-organization/deleting)
+- [Storage and Plans FAQ](/photos/faq/storage-and-plans)
 
 ## Related FAQs
 
-* [How can I free up space on my device?](/photos/faq/albums-and-organization#free-up-device-space)
-* [Will I lose my photos when freeing up device space?](/photos/faq/albums-and-organization#free-up-space-safe)
-* [Can I choose which photos to delete from my device?](/photos/faq/albums-and-organization#selective-device-deletion)
-* [How much space will I free up?](/photos/faq/albums-and-organization#how-much-space-freed)
-* [Will new photos still backup automatically?](/photos/faq/albums-and-organization#backup-after-free-space)
-* [How can I remove duplicate photos?](/photos/faq/albums-and-organization#remove-duplicates)
-* [What's the difference between duplicates and similar images?](/photos/faq/albums-and-organization#duplicates-vs-similar)
-* [Does removing duplicates affect automatic duplicate detection?](/photos/faq/albums-and-organization#manual-vs-auto-dedup)
+- [How can I free up space on my device?](/photos/faq/albums-and-organization#free-up-device-space)
+- [Will I lose my photos when freeing up device space?](/photos/faq/albums-and-organization#free-up-space-safe)
+- [Can I choose which photos to delete from my device?](/photos/faq/albums-and-organization#selective-device-deletion)
+- [How much space will I free up?](/photos/faq/albums-and-organization#how-much-space-freed)
+- [Will new photos still backup automatically?](/photos/faq/albums-and-organization#backup-after-free-space)
+- [How can I remove duplicate photos?](/photos/faq/albums-and-organization#remove-duplicates)
+- [What's the difference between duplicates and similar images?](/photos/faq/albums-and-organization#duplicates-vs-similar)
+- [Does removing duplicates affect automatic duplicate detection?](/photos/faq/albums-and-organization#manual-vs-auto-dedup)

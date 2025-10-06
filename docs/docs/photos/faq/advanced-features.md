@@ -10,12 +10,14 @@ description: Frequently asked questions about CLI, exports, and advanced feature
 ### What is the Ente CLI? {#what-is-cli}
 
 The Ente CLI is a command-line tool for advanced users that allows you to:
+
 - Export your entire library or specific albums to local storage
 - Set up automated exports with cron jobs
 - Sync data to NAS or other storage systems
 - Perform bulk operations
 
 The CLI is particularly useful for:
+
 - Regular automated backups to local/NAS storage
 - Server-to-server transfers
 - Power users who prefer command-line tools
@@ -58,6 +60,7 @@ The recommended approach is to use the CLI to pull data from Ente to your NAS:
 3. Use the CLI's incremental export feature
 
 Example cron job for daily sync:
+
 ```bash
 0 2 * * * /usr/local/bin/ente export --dir /nas/ente-backup
 ```
@@ -73,6 +76,7 @@ Make sure the CLI binary is in your PATH or use the full path to execute it.
 ### CLI authentication issues {#cli-auth-issues}
 
 If login fails, try:
+
 - Verify your email and password are correct
 - Check your internet connection
 - Ensure you're using the latest CLI version
@@ -84,6 +88,7 @@ The CLI handles interruptions gracefully. Simply run the export command again - 
 ### NAS export issues with CLI {#cli-nas-export}
 
 If exporting to NAS using CLI:
+
 - Ensure the NAS mount is accessible
 - Check write permissions on the destination folder
 - Use a local path if the NAS is mounted on your system
@@ -133,6 +138,7 @@ No, two-way sync is not currently supported. Exports create a one-way sync from 
 Attempting to export data to the same folder that is also being watched by the Ente app (for uploads) will result in undefined behavior (e.g. duplicate files, export stalling etc).
 
 **Use separate folders for:**
+
 - **Upload source** (watch folders)
 - **Export destination** (local backups)
 
@@ -143,6 +149,7 @@ Learn more about [Export limitations](/photos/features/backup-and-sync/export#ex
 One possible reason could be that you have files that are in multiple different albums. Whenever a file is backed-up to Ente in multiple albums it will still count only once towards the total storage in Ente. However, during export that file will be downloaded multiple times to the different folders corresponding to said albums, causing the total export size to be larger.
 
 **Example:**
+
 - Photo `sunset.jpg` is in albums "Vacation" and "Best Photos"
 - In Ente: Counts as 1 file (storage counted once)
 - On export: Appears in both `Vacation/` and `Best Photos/` folders (downloaded twice)
@@ -190,6 +197,7 @@ While video streaming is in beta, streams do not count against your storage quot
 ### Video streaming isn't working correctly, what should I do? {#stream-issues}
 
 Video streaming is still in beta. If something isn't working:
+
 - Create a thread in `#feedback` on [Discord](https://discord.com/channels/948937918347608085/1121126215995113552)
 - Contact [support@ente.io](mailto:support@ente.io)
 
@@ -247,6 +255,7 @@ Large video uploads may fail when streaming is enabled, especially on mobile:
 ### What types of notifications does Ente send? {#notification-types}
 
 Ente can send notifications for:
+
 - New photos added to shared albums
 - "On this day" memories from previous years
 - Birthday reminders for tagged people
@@ -280,6 +289,7 @@ Note that these FAQs are primarily for Ente's cloud service. Self-hosting has ad
 ### How do I report bugs or request features? {#report-bugs}
 
 You can:
+
 1. **GitHub Issues**: Report bugs or request features on [GitHub](https://github.com/ente-io/ente/issues)
 2. **Discord**: Join our [Discord community](https://ente.io/discord) for discussions
 3. **Email**: Contact [support@ente.io](mailto:support@ente.io)

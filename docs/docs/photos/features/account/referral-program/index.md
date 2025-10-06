@@ -35,9 +35,10 @@ Referral codes can be applied within `Settings > General > Referrals > Apply Cod
 </div>
 
 ## Related FAQs
-* [How much storage can I earn through referrals?](/photos/faq/storage-and-plans#referral-storage-limit)
-* [For how long do I have access to referred storage?](/photos/faq/storage-and-plans#referral-duration)
-* [What happens if I refer more people than my plan allows?](/photos/faq/storage-and-plans#referral-overflow)
-* [What counts as abuse of the referral program?](/photos/faq/storage-and-plans#referral-abuse)
+
+- [How much storage can I earn through referrals?](/photos/faq/storage-and-plans#referral-storage-limit)
+- [For how long do I have access to referred storage?](/photos/faq/storage-and-plans#referral-duration)
+- [What happens if I refer more people than my plan allows?](/photos/faq/storage-and-plans#referral-overflow)
+- [What counts as abuse of the referral program?](/photos/faq/storage-and-plans#referral-abuse)
 
 More questions? Drop a mail to [referrals@ente.io](mailto:referrals@ente.io)!

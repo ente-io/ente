@@ -10,9 +10,10 @@ description: Frequently asked questions about installing, setting up, and creati
 ### How do I install Ente Photos on my Android phone? {#install-android}
 
 The easiest way to install Ente Photos for Android is through [PlayStore](https://play.google.com/store/apps/details?id=io.ente.photos). However, you can also download it through other channels, based on your preferences:
-* [F-Droid](https://f-droid.org/packages/io.ente.photos.fdroid/)
-* [GitHub](https://github.com/ente-io/ente/releases?q=photos-v1)
-* [Obtanium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22io.ente.photos.independent%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fente-io%2Fente%22%2C%22author%22%3A%22ente-io%22%2C%22name%22%3A%22Ente%20Photos%22%2C%22preferredApkIndex%22%3A0%2C%22additionalSettings%22%3A%22%7B%5C%22includePrereleases%5C%22%3Afalse%2C%5C%22fallbackToOlderReleases%5C%22%3Atrue%2C%5C%22filterReleaseTitlesByRegEx%5C%22%3A%5C%22%5C%22%2C%5C%22filterReleaseNotesByRegEx%5C%22%3A%5C%22%5C%22%2C%5C%22verifyLatestTag%5C%22%3Afalse%2C%5C%22dontSortReleasesList%5C%22%3Atrue%2C%5C%22useLatestAssetDateAsReleaseDate%5C%22%3Afalse%2C%5C%22releaseTitleAsVersion%5C%22%3Afalse%2C%5C%22trackOnly%5C%22%3Afalse%2C%5C%22versionExtractionRegEx%5C%22%3A%5C%22%5C%22%2C%5C%22matchGroupToUse%5C%22%3A%5C%22%5C%22%2C%5C%22versionDetection%5C%22%3Atrue%2C%5C%22releaseDateAsVersion%5C%22%3Afalse%2C%5C%22useVersionCodeAsOSVersion%5C%22%3Afalse%2C%5C%22apkFilterRegEx%5C%22%3A%5C%22ente-photos*%5C%22%2C%5C%22invertAPKFilter%5C%22%3Afalse%2C%5C%22autoApkFilterByArch%5C%22%3Atrue%2C%5C%22appName%5C%22%3A%5C%22%5C%22%2C%5C%22shizukuPretendToBeGooglePlay%5C%22%3Afalse%2C%5C%22allowInsecure%5C%22%3Afalse%2C%5C%22exemptFromBackgroundUpdates%5C%22%3Afalse%2C%5C%22skipUpdateNotifications%5C%22%3Afalse%2C%5C%22about%5C%22%3A%5C%22%5C%22%7D%22%2C%22overrideSource%22%3Anull%7D)
+
+- [F-Droid](https://f-droid.org/packages/io.ente.photos.fdroid/)
+- [GitHub](https://github.com/ente-io/ente/releases?q=photos-v1)
+- [Obtanium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22io.ente.photos.independent%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fente-io%2Fente%22%2C%22author%22%3A%22ente-io%22%2C%22name%22%3A%22Ente%20Photos%22%2C%22preferredApkIndex%22%3A0%2C%22additionalSettings%22%3A%22%7B%5C%22includePrereleases%5C%22%3Afalse%2C%5C%22fallbackToOlderReleases%5C%22%3Atrue%2C%5C%22filterReleaseTitlesByRegEx%5C%22%3A%5C%22%5C%22%2C%5C%22filterReleaseNotesByRegEx%5C%22%3A%5C%22%5C%22%2C%5C%22verifyLatestTag%5C%22%3Afalse%2C%5C%22dontSortReleasesList%5C%22%3Atrue%2C%5C%22useLatestAssetDateAsReleaseDate%5C%22%3Afalse%2C%5C%22releaseTitleAsVersion%5C%22%3Afalse%2C%5C%22trackOnly%5C%22%3Afalse%2C%5C%22versionExtractionRegEx%5C%22%3A%5C%22%5C%22%2C%5C%22matchGroupToUse%5C%22%3A%5C%22%5C%22%2C%5C%22versionDetection%5C%22%3Atrue%2C%5C%22releaseDateAsVersion%5C%22%3Afalse%2C%5C%22useVersionCodeAsOSVersion%5C%22%3Afalse%2C%5C%22apkFilterRegEx%5C%22%3A%5C%22ente-photos*%5C%22%2C%5C%22invertAPKFilter%5C%22%3Afalse%2C%5C%22autoApkFilterByArch%5C%22%3Atrue%2C%5C%22appName%5C%22%3A%5C%22%5C%22%2C%5C%22shizukuPretendToBeGooglePlay%5C%22%3Afalse%2C%5C%22allowInsecure%5C%22%3Afalse%2C%5C%22exemptFromBackgroundUpdates%5C%22%3Afalse%2C%5C%22skipUpdateNotifications%5C%22%3Afalse%2C%5C%22about%5C%22%3A%5C%22%5C%22%7D%22%2C%22overrideSource%22%3Anull%7D)
 
 ### How do I install Ente Photos on my iPhone or iPad? {#install-ios}
 
@@ -23,6 +24,7 @@ You can install Ente Photos on your iPhone or iPad from the [iOS AppStore](https
 You can install Ente Photos on your desktop by downloading the installer from [our website](https://ente.io/download/desktop).
 
 **Supported platforms:**
+
 - **Windows**: Download and run the installer
 - **macOS**: Download the DMG file
 - **Linux**: Download the installer or AppImage
@@ -30,6 +32,7 @@ You can install Ente Photos on your desktop by downloading the installer from [o
 ### How do I install CLI for Ente Photos? {#install-cli}
 
 Ente's CLI is distributed directly over [GitHub](https://github.com/ente-io/ente/releases?q=tag%3Acli-v0). The CLI is useful for:
+
 - Automated exports to NAS or local storage
 - Bulk operations
 - Server-to-server transfers
@@ -62,6 +65,7 @@ Alternatively, you can follow these manual steps:
 ### How do I update to the latest version? {#update-latest}
 
 **Mobile apps:**
+
 - **PlayStore, AppStore, F-Droid**: The stores handle updates based on your auto-update settings
 - **GitHub/Obtanium**: You'll get a notification to update and can download the latest APK
 
@@ -87,6 +91,7 @@ Learn more in [Creating an account and logging in](/photos/getting-started/signu
 ### Can I use Ente on both mobile and desktop? {#mobile-and-desktop}
 
 Yes! You can use Ente Photos on as many devices as you want:
+
 - Install on multiple phones and tablets
 - Install on multiple computers
 - Use the web app in any browser
@@ -116,12 +121,14 @@ For a detailed walkthrough, see [Creating an account](/photos/getting-started/si
 ### What is the recovery key and why is it important? {#recovery-key}
 
 Your recovery key is the **only way** to recover your account if you:
+
 - Forget your password
 - Are logged out of all devices
 
 Since Ente uses end-to-end encryption, we cannot reset your password without your recovery key.
 
 **How to save it:**
+
 - Write it down on paper and store it safely
 - Save it in a password manager
 - Store it in any secure location you trust
@@ -131,6 +138,7 @@ Since Ente uses end-to-end encryption, we cannot reset your password without you
 ### How do I reset my password if I lost it? {#reset-password}
 
 On the login page:
+
 1. Enter your email
 2. Click "Forgot Password"
 3. Enter your recovery key
@@ -147,6 +155,7 @@ The privacy of your account depends on password strength - choose a strong one.
 ### Does Ente support two-factor authentication (2FA)? {#2fa}
 
 Yes! Ente recommends enabling 2FA for additional security. Supported methods include:
+
 - **TOTP** (Time-based One-Time Passwords)
 - **WebAuthn/FIDO2** for hardware security keys
 - **Passkeys** as an alternative 2FA mechanism
@@ -168,6 +177,7 @@ Learn more in the [Passkeys feature guide](/photos/features/account/passkeys).
 If you lose access to your passkey (for example, if you misplace a hardware security key), you can recover your account using your Ente recovery key.
 
 **To recover:**
+
 1. During login, press cancel on the browser dialog asking for passkey verification
 2. Select "Recover two-factor" in the error message
 3. Enter your Ente recovery key to log in

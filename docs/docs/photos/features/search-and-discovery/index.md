@@ -12,6 +12,7 @@ Ente provides multiple ways to search and discover your photos. From basic date 
 ### Date search
 
 Search for photos by specific dates, months, or years. Simply type a date in the search bar:
+
 - "January 2024" - finds all photos from that month
 - "2023" - finds all photos from that year
 - Specific dates like "July 15, 2024"
@@ -44,6 +45,7 @@ Explore your photos visually on an interactive map. Any photo with GPS location 
 ### Location tags
 
 Create custom location labels to organize and find photos by place. Location tags let you:
+
 - Tag frequent places like "Home", "Office", or "Vacation"
 - Define a center point and radius for each location
 - Find photos within specific areas
@@ -60,6 +62,7 @@ Ente's machine learning features run entirely on your device, providing powerful
 ### Face recognition
 
 Search for photos by the people in them:
+
 - Automatically groups similar faces together
 - Name persons to search by name
 - Find all photos of specific people
@@ -73,6 +76,7 @@ All face recognition happens on your device. Your photos and face data are never
 ### Magic search
 
 Search for photos using natural language descriptions of their content:
+
 - Find photos by objects: "car", "dog", "food"
 - Search by scenes: "beach", "mountain", "sunset"
 - Find by colors: "red flowers", "blue car"
@@ -117,6 +121,7 @@ Explore photos grouped by location clusters, making it easy to browse photos by 
 ### Combining search types
 
 You can combine different search methods to narrow down results:
+
 - Search for a person's name and then filter by date
 - Use magic search within a specific album
 - Search location tags and then browse by date
@@ -148,6 +153,7 @@ Learn more in [Albums and Organization FAQ](/photos/faq/albums-and-organization#
 ## Privacy and Security
 
 All search features in Ente maintain end-to-end encryption:
+
 - Your photos remain encrypted on Ente's servers
 - Location data, location tags, and face data are all encrypted
 - Machine learning runs entirely on your device
@@ -158,16 +164,16 @@ Learn more in [Security and Privacy FAQ](/photos/faq/security-and-privacy).
 
 ## Related FAQs
 
-* [Why doesn't search work for me?](/photos/faq/search-and-discovery#search-not-working)
-* [How do I enable face recognition?](/photos/faq/search-and-discovery#enable-face-recognition)
-* [What is magic search?](/photos/faq/search-and-discovery#what-is-magic-search)
-* [Does machine learning work offline?](/photos/faq/search-and-discovery#ml-offline)
-* [Can I save my searches?](/photos/faq/search-and-discovery#save-searches)
+- [Why doesn't search work for me?](/photos/faq/search-and-discovery#search-not-working)
+- [How do I enable face recognition?](/photos/faq/search-and-discovery#enable-face-recognition)
+- [What is magic search?](/photos/faq/search-and-discovery#what-is-magic-search)
+- [Does machine learning work offline?](/photos/faq/search-and-discovery#ml-offline)
+- [Can I save my searches?](/photos/faq/search-and-discovery#save-searches)
 
 ## Related topics
 
-* [Machine learning overview](/photos/features/search-and-discovery/machine-learning)
-* [Face recognition guide](/photos/features/search-and-discovery/face-recognition)
-* [Magic search guide](/photos/features/search-and-discovery/magic-search)
-* [Map and location features](/photos/features/search-and-discovery/map-and-location)
-* [Search and Discovery FAQ](/photos/faq/search-and-discovery)
+- [Machine learning overview](/photos/features/search-and-discovery/machine-learning)
+- [Face recognition guide](/photos/features/search-and-discovery/face-recognition)
+- [Magic search guide](/photos/features/search-and-discovery/magic-search)
+- [Map and location features](/photos/features/search-and-discovery/map-and-location)
+- [Search and Discovery FAQ](/photos/faq/search-and-discovery)

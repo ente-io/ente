@@ -22,6 +22,7 @@ When you upload a folder with nested subfolders using the desktop app, you'll se
 **Separate albums**: Creates separate albums for each nested folder. Only the leafmost folder name is used for the album name. For example, both `A/B/C/D/x.png` and `1/2/3/D/y.png` will be uploaded into the same Ente album named "D".
 
 Note that in separate album mode:
+
 - Only nested folders with at least one file will create an album
 - Empty folders (or folders containing only other folders) will be ignored
 
@@ -30,6 +31,7 @@ Note that in separate album mode:
 Yes! When you drag and drop a folder with multiple subfolders onto the desktop app, Ente will detect the structure and prompt you to choose between creating a single album or separate albums for each folder.
 
 This works for:
+
 - Drag and drop operations
 - Upload selector
 - [Watch folders](/photos/faq/backup-and-sync#watch-folders) setup
@@ -61,6 +63,7 @@ When you select multiple albums for backup, Ente prioritizes uploading each phot
 Uncategorized is a special system album in Ente where photos are automatically placed when they don't belong to any other album. It acts as a catch-all location to prevent photos from being lost when they're removed from all regular albums.
 
 Photos appear in Uncategorized when:
+
 - You remove a photo from its last remaining album
 - You delete an album but choose to keep the photos
 - You delete a file from a [watched folder](/photos/faq/backup-and-sync#watch-folders) on desktop
@@ -82,6 +85,7 @@ Photos automatically move to Uncategorized in these situations:
 ### How do I clean up Uncategorized items? {#clean-uncategorized}
 
 **On mobile:**
+
 1. Open the Uncategorized album
 2. Tap the three dots (overflow menu)
 3. Select "Clean Uncategorized"
@@ -90,6 +94,7 @@ This will automatically remove all files from Uncategorized that are also presen
 
 **Manual cleanup:**
 You can also manually:
+
 - Add photos from Uncategorized to specific albums
 - Delete photos you don't need from Uncategorized
 - Move photos to appropriate albums by selecting them and choosing "Add to album"
@@ -97,6 +102,7 @@ You can also manually:
 ### Can I delete the Uncategorized album? {#delete-uncategorized}
 
 No, you cannot delete the Uncategorized album itself because it's a system album. However, you can:
+
 - Delete individual photos from Uncategorized
 - Use "Clean Uncategorized" to remove photos that exist in other albums
 - Empty it completely by deleting all photos within it
@@ -110,6 +116,7 @@ Yes, photos in Uncategorized count towards your storage quota just like photos i
 ### Can I organize photos in Uncategorized? {#organize-uncategorized}
 
 Yes! Photos in Uncategorized work just like photos in regular albums. You can:
+
 - View them by date
 - Search for them
 - Add them to other albums (recommended to keep them organized)
@@ -121,6 +128,7 @@ The best practice is to periodically review Uncategorized and add photos to appr
 ### What happens if I add an Uncategorized photo to an album? {#add-from-uncategorized}
 
 When you add a photo from Uncategorized to another album:
+
 - The photo will appear in both the new album AND Uncategorized
 - It will remain in Uncategorized unless you use "Clean Uncategorized"
 - Running "Clean Uncategorized" will remove it from Uncategorized since it now exists in another album
@@ -130,6 +138,7 @@ This behavior ensures photos aren't accidentally lost.
 ### Why do some photos stay in Uncategorized after cleaning? {#photos-stay-uncategorized}
 
 The "Clean Uncategorized" function only removes photos that exist in at least one other album that you own. Photos remain in Uncategorized if:
+
 - They don't exist in any other album yet
 - They only exist in albums shared by others (not albums you own)
 - They were uploaded by others in collaborative albums
@@ -148,11 +157,13 @@ Not directly, but you can minimize it:
 ### How do I view Uncategorized photos? {#view-uncategorized}
 
 **On mobile:**
+
 - Open the Albums tab
 - Scroll to the bottom
 - Tap on "Uncategorized"
 
 **On web/desktop:**
+
 - Click the hamburger menu (three lines) in the top left
 - Select "Uncategorized"
 
@@ -269,11 +280,13 @@ Learn more about [Duplicate detection during backup](/photos/features/backup-and
 When you delete a photo or video in Ente, it's moved to Trash rather than being permanently deleted immediately.
 
 **On mobile:**
+
 - Long press to select the photo(s) you want to delete
 - Tap the trash icon in the action bar
 - Confirm the deletion
 
 **On web/desktop:**
+
 - Select the photo(s) you want to delete
 - Click the trash icon or press the Delete key
 - Confirm the deletion
@@ -287,12 +300,14 @@ Learn more in the [Trash feature guide](/photos/features/albums-and-organization
 If you accidentally deleted photos, you can restore them from Trash within 30 days:
 
 **On mobile:**
+
 - Open the Albums tab
 - Scroll to the bottom and tap "Trash"
 - Select the photos you want to restore
 - Tap the "Restore" button
 
 **On web/desktop:**
+
 - Open the sidebar menu
 - Click on "Trash"
 - Select the items to restore
@@ -305,11 +320,13 @@ Restored photos will be moved back to their original albums.
 To free up storage space immediately, you can permanently delete items from trash:
 
 **To empty all trash:**
+
 - Open Trash
 - Click/tap "Empty trash" or the trash icon
 - Confirm that you want to permanently delete all items
 
 **To delete specific items:**
+
 - Open Trash
 - Select the items you want to permanently delete
 - Choose "Delete permanently" from the menu
@@ -326,6 +343,7 @@ If you need to keep certain files, make sure to restore them from trash before t
 ### Does trash count against my storage? {#trash-storage}
 
 Yes, items in trash are included in your storage quota calculation. To free up storage space, you can:
+
 - Manually empty your trash
 - Permanently delete specific items
 - Wait for automatic deletion after 30 days
@@ -358,6 +376,7 @@ If you want to delete a photo from Ente, you must do it manually within the Ente
 ### What happens to deleted photos in collaborative albums? {#collaborative-deletion}
 
 In collaborative albums:
+
 - **If you're a collaborator**: You can only delete photos that you uploaded. When you delete a photo you uploaded, it goes to your trash.
 - **If you're the album owner**: You can remove any photos from the album, but you can only permanently delete photos you own. Other collaborators' photos will be removed from the album but remain in their accounts.
 
@@ -368,6 +387,7 @@ When a collaborator leaves or is removed from a shared album, any photos they up
 No. When you delete your Ente account, all your data (including photos in trash) is permanently deleted and cannot be recovered. This is an irreversible operation.
 
 Before deleting your account, make sure to:
+
 1. [Export your photos](/photos/faq/advanced-features#export) if you want to keep them
 2. Restore any photos from trash that you want to keep
 3. Save any important albums or shared content
@@ -375,12 +395,14 @@ Before deleting your account, make sure to:
 ### How do I delete multiple photos at once? {#bulk-delete}
 
 **On mobile:**
+
 - Long press on the first photo to enter selection mode
 - Tap additional photos to select them (or tap "Select all")
 - Tap the trash icon in the action bar
 - Confirm deletion
 
 **On web/desktop:**
+
 - Click the first photo
 - Hold Shift and click the last photo to select a range (or Ctrl/Cmd+A for all)
 - Press Delete key or click the trash icon
@@ -391,6 +413,7 @@ All selected photos will be moved to trash together.
 ### Why can't I delete some photos? {#cannot-delete}
 
 You may not be able to delete photos if:
+
 - They are owned by someone else who shared them with you
 - You don't have permission (you're a viewer, not a collaborator or owner)
 - There's a sync issue - try refreshing or restarting the app
@@ -400,12 +423,14 @@ If you still can't delete photos you own, contact [support@ente.io](mailto:suppo
 ### How is Uncategorized different from Trash? {#uncategorized-vs-trash}
 
 **Uncategorized** is for photos that aren't in any regular album but are still active in your library:
+
 - Photos are fully accessible and searchable
 - They count towards storage
 - They won't be automatically deleted
 - You can add them to albums anytime
 
 **Trash** is for photos you've intentionally deleted:
+
 - Photos are scheduled for permanent deletion after 30 days
 - They're hidden from normal views (except Trash folder)
 - They count towards storage until permanently deleted

@@ -12,6 +12,7 @@ description: Frequently asked questions about backing up and syncing photos in E
 Once you select which albums to backup in your mobile app settings, Ente automatically syncs new photos and videos from those albums to the cloud. Backup happens in the background without needing to open the app.
 
 **Key features:**
+
 - Background sync runs automatically
 - Original quality with no compression
 - Smart resumption if interrupted
@@ -40,6 +41,7 @@ Note that backing up over mobile data can consume significant data if you have m
 ### Why is my initial backup taking so long? {#initial-backup-slow}
 
 The initial backup can take time depending on:
+
 - The size of your photo library
 - Your internet connection speed
 - Whether you're using WiFi or mobile data
@@ -48,16 +50,19 @@ The initial backup can take time depending on:
 **Tips to speed up initial backup:**
 
 **On iOS:**
+
 - Keep the app open in foreground for large initial uploads
 - Disable automatic screen lock temporarily (`Settings > Backup > Backup settings > Disable auto lock`)
 - Videos won't backup in background - keep the app open for them
 
 **On Android:**
+
 - Disable battery optimization for Ente in system settings
 - Keep your device connected to power
 - Ensure you haven't force-closed the app from recents
 
 **On desktop:**
+
 - Desktop uploads are generally faster than mobile
 - Consider doing initial upload from desktop if you have a large library
 
@@ -81,11 +86,13 @@ If you want to delete a photo from Ente, you must do it manually within the Ente
 **What this means:**
 
 **Changes in Ente → Your device:**
+
 - ❌ Deleting a photo in Ente does NOT delete it from your device
 - ❌ Moving photos between albums in Ente does NOT affect your device albums
 - ❌ Renaming albums in Ente does NOT rename device albums
 
 **Changes on your device → Ente:**
+
 - ✅ New photos on your device → automatically backed up to Ente
 - ❌ Deleting photos from your device → does NOT delete from Ente
 - ❌ Moving photos between device albums → may not update Ente albums
@@ -104,6 +111,7 @@ If you want to delete a photo from Ente, you must do it manually within the Ente
 ❌ **Two-way sync**: Not supported - changes in Ente don't reflect on your device
 
 **If you want to delete a photo everywhere:**
+
 1. Delete from Ente app
 2. Delete from your device's native Photos app
 3. Both deletions must be done manually
@@ -151,6 +159,7 @@ Ente supports all files with mime types of `image/*` or `video/*`, regardless of
 - RAW formats (limited support currently)
 
 **Limitations:**
+
 - Maximum file size: 10 GB
 - Some video formats cannot be streamed on web browsers and must be downloaded
 
@@ -165,17 +174,20 @@ Your photos are encrypted before upload, but encryption doesn't change the quali
 **On mobile:**
 
 Open `Settings > Backup > Backup status` to see:
+
 - Number of files backed up
 - Files pending upload
 - Any errors or issues
 
 **On desktop:**
+
 - Check the sync status indicator in the bottom right corner
 - Click to expand and see detailed progress
 
 ### Does Ente backup Live Photos from iPhone? {#live-photos-backup}
 
 Yes! Ente backs up both components of Live Photos:
+
 - The photo component
 - The video component
 
@@ -188,11 +200,13 @@ Both are preserved in their original quality.
 Background sync allows Ente to automatically back up your photos without needing to keep the app open. Once you've selected which albums to back up, Ente will monitor those albums and upload new photos in the background.
 
 **On mobile:**
+
 - Works on both iOS and Android
 - Backs up photos over WiFi by default (configurable in settings)
 - Continues even when the app is closed
 
 **On desktop:**
+
 - Use [watch folders](/photos/faq/backup-and-sync#what-are-watch-folders) to automatically sync specific directories
 
 **Important**: On iOS, large videos may not upload in background - they'll sync when you open the app.
@@ -204,12 +218,14 @@ Learn more in the [Background sync feature guide](/photos/features/backup-and-sy
 If photos aren't automatically backing up in the background, try these solutions:
 
 **On Android:**
+
 1. Open device `Settings > Apps > Ente > Battery`
 2. Choose "Unrestricted" or disable "Optimize battery usage"
 3. Grant all required permissions (Photos, Storage)
 4. Ensure you haven't force-closed the app from recents
 
 **On iOS:**
+
 1. Open device `Settings > Ente`
 2. Enable "Background App Refresh"
 3. Grant "Full Access" to Photos
@@ -225,6 +241,7 @@ Learn more in the [Background sync guide](/photos/features/backup-and-sync/#back
 No, background sync is not available when using Ente Photos through a web browser. Web browsers don't allow background processes to run when the tab is closed or inactive.
 
 Background sync is only available on:
+
 - Mobile apps (iOS and Android)
 - Desktop app (via watch folders)
 
@@ -233,6 +250,7 @@ If you're using the web version, you'll need to keep the browser tab open for up
 ### How does background sync work on iOS? {#ios-background-sync}
 
 On iOS, background sync works through silent push notifications:
+
 - Our servers "tickle" your device periodically
 - This wakes up the app and gives it 30 seconds to sync
 - Videos may not upload in background due to size limitations
@@ -246,6 +264,7 @@ For large initial backups, keep the app open in foreground on iOS.
 On Android, the app can run background processes more freely than iOS. However, battery optimization settings can interfere.
 
 **Make sure to**:
+
 - Disable "Optimize battery usage" for Ente
 - Grant all required permissions
 - Don't force-close the app from recents
@@ -259,6 +278,7 @@ On Android, the app can run background processes more freely than iOS. However, 
 Watch folders allow the Ente desktop app to automatically monitor specific directories on your computer and sync any changes to Ente. When you add or modify files in a watched folder, they're automatically uploaded.
 
 **Key features:**
+
 - One-way sync from your computer to Ente
 - Monitors folders in real-time
 - Automatically uploads new files
@@ -270,6 +290,7 @@ Learn more in the [Watch folders feature guide](/photos/features/backup-and-sync
 ### What are watch folders? {#what-are-watch-folders}
 
 Watch folders is a desktop app feature that automatically syncs specific folders on your computer to Ente. Once you add a folder to watch, the app will:
+
 - Immediately upload all existing files in that folder
 - Continuously monitor the folder for changes
 - Automatically upload any new files added to the folder
@@ -283,8 +304,8 @@ This creates a one-way background sync from your computer to Ente, automating yo
 2. Click "Watch folders" in the sidebar
 3. Click "Add folder" and select the folder you want to watch (or drag and drop it)
 4. If the folder has nested subfolders, choose between:
-   - **Single album**: All files go into one Ente album
-   - **Separate albums**: Each subfolder becomes its own album
+    - **Single album**: All files go into one Ente album
+    - **Separate albums**: Each subfolder becomes its own album
 5. The folder will be initially synced and then monitored for changes
 
 The sync happens in the background even when the app is minimized. You can see progress in the bottom right corner.
@@ -292,6 +313,7 @@ The sync happens in the background even when the app is minimized. You can see p
 ### Can I watch multiple folders at once? {#watch-multiple-folders}
 
 Yes! You can add as many watch folders as you need. Each folder can be configured independently:
+
 - Different folders can sync to different albums
 - Each can have its own single/separate album setting
 - All watched folders sync simultaneously in the background
@@ -325,6 +347,7 @@ Check the sync status indicator in the bottom right corner for error details.
 **Not recommended**. The Ente desktop app currently does not officially support NAS (network drives).
 
 While the app may work with network drives in some cases, we've found that network storage products often have:
+
 - Flaky file system emulation
 - Bad performance during uploads
 - Unreliable file change event notifications (critical for watch folders)
@@ -347,12 +370,14 @@ The folder will no longer be monitored, but all files that were already uploaded
 Yes! When you add a folder with nested subfolders, you'll see two options:
 
 **Separate albums mode**:
+
 - Creates a separate Ente album for each nested folder
 - Only the leaf folder name is used (e.g., both `Photos/2024/Summer` and `Backup/Summer` go to an album called "Summer")
 - Empty folders or folders containing only other folders are ignored
 - Albums cannot be nested in Ente (they'll all appear as top-level albums)
 
 **Single album mode**:
+
 - All files from all nested folders go into one Ente album
 - The folder structure is flattened
 - Good for when you don't need to preserve organization
@@ -380,6 +405,7 @@ Ente will detect already-uploaded files and skip them, so you won't end up with 
 ### How does watch folders handle duplicates? {#watch-folder-dedup}
 
 Watch folders use the same automatic duplicate detection as regular uploads:
+
 - If a file already exists in the target album, it will be skipped
 - If uploading to a different album, a symlink (reference) is created instead of re-uploading
 - This saves storage space and upload time
@@ -401,24 +427,27 @@ This ensures smooth operation and prevents conflicts.
 Yes! On desktop, you have two options:
 
 1. **Watch folders**: Automatically sync specific folders (recommended for ongoing backup)
-   - Continuous monitoring and automatic uploads
-   - See watch folders section above
+
+    - Continuous monitoring and automatic uploads
+    - See watch folders section above
 
 2. **Manual upload**: Drag and drop files or folders into the Ente desktop app
-   - Good for one-time uploads
-   - Can upload ZIP files
-   - Preserves folder structure
+    - Good for one-time uploads
+    - Can upload ZIP files
+    - Preserves folder structure
 
 ### Can I pause and resume backups? {#pause-resume-backup}
 
 **On mobile:**
 You can effectively pause backups by:
+
 - Turning off WiFi/mobile data
 - Going to `Settings > Backup` and toggling off specific albums
 
 To resume, simply turn connectivity back on or re-enable the albums.
 
 **On desktop:**
+
 - Watch folder syncing will pause if you close the app
 - You can remove watch folders temporarily and re-add them later
 - Uploads can be paused by closing the desktop app
@@ -439,6 +468,7 @@ For detailed troubleshooting, see [Troubleshooting](/photos/faq/troubleshooting)
 ### Can I use the desktop app and mobile app at the same time? {#use-multiple-devices}
 
 Yes! You can use Ente on as many devices as you want simultaneously. All your devices will stay in sync:
+
 - Photos uploaded from any device appear on all devices
 - Albums, edits, and organization sync across devices
 - Each device can have its own backup/watch folder settings

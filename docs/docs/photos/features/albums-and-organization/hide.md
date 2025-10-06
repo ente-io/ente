@@ -34,12 +34,14 @@ Hiding differs from [Archiving](./archive) in that hidden content won't appear a
 ### View hidden photos and albums
 
 **On mobile:**
+
 - Go to the Albums tab
 - Scroll to the bottom
 - Tap **Hidden**
 - Authenticate with biometrics or passcode
 
 **On web/desktop:**
+
 - Click the menu icon (three horizontal lines) at top left
 - Select **Hidden**
 - Authenticate with your Ente password
@@ -62,7 +64,7 @@ Ente has no information about whether you have hidden a photo or album.
 
 ## Related FAQs
 
-* [What's the difference between hiding and archiving?](/photos/faq/albums-and-organization#difference)
-* [Can I hide photos that are shared with me?](/photos/faq/albums-and-organization#hide-shared)
-* [How do I hide photos in Ente?](/photos/faq/albums-and-organization#how-to-hide)
-* [Do archived photos appear in search results?](/photos/faq/albums-and-organization#archive-search)
+- [What's the difference between hiding and archiving?](/photos/faq/albums-and-organization#difference)
+- [Can I hide photos that are shared with me?](/photos/faq/albums-and-organization#hide-shared)
+- [How do I hide photos in Ente?](/photos/faq/albums-and-organization#how-to-hide)
+- [Do archived photos appear in search results?](/photos/faq/albums-and-organization#archive-search)

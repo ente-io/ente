@@ -107,7 +107,7 @@ The album is still end to end encrypted in a manner that Ente does not have acce
 
 ## Related topics
 
-* [Public links](/photos/features/sharing-and-collaboration/public-links) - Learn about creating public album links
-* [Sharing overview](/photos/features/sharing-and-collaboration/share) - All sharing methods in Ente
-* [Custom domains](/photos/features/sharing-and-collaboration/custom-domains/) - Use your own domain for public links
-* [Sharing and Collaboration FAQ](/photos/faq/sharing-and-collaboration) - Common questions about sharing
+- [Public links](/photos/features/sharing-and-collaboration/public-links) - Learn about creating public album links
+- [Sharing overview](/photos/features/sharing-and-collaboration/share) - All sharing methods in Ente
+- [Custom domains](/photos/features/sharing-and-collaboration/custom-domains/) - Use your own domain for public links
+- [Sharing and Collaboration FAQ](/photos/faq/sharing-and-collaboration) - Common questions about sharing

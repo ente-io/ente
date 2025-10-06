@@ -14,6 +14,7 @@ Ente provides automatic, continuous backup of your photos and videos with end-to
 Ente will automatically backup any albums in your native photos app that you select for backup. The app runs in the background, and any new photos added to these albums (or any photos in these albums that were modified) will be automatically synced to Ente.
 
 **Key features:**
+
 - **Background sync**: New photos are uploaded automatically without needing to open the app
 - **Original quality**: Photos and videos are backed up in their original quality with no compression
 - **Smart resumption**: If backup is interrupted, it automatically resumes from where it left off
@@ -93,20 +94,20 @@ Learn more about how [Duplicate detection](/photos/features/backup-and-sync/dupl
 
 ## Related FAQs
 
-* [How does automatic backup work?](/photos/faq/backup-and-sync#automatic-backup)
-* [How do I select which albums to back up?](/photos/faq/backup-and-sync#select-albums)
-* [Why isn't background sync working?](/photos/faq/backup-and-sync#background-sync-not-working)
-* [Do deleted photos on my device also delete from Ente?](/photos/faq/backup-and-sync#deletion-sync)
-* [Understanding backup vs. sync](/photos/faq/backup-and-sync#backup-vs-sync)
-* [Can I delete photos from my device after backing up?](/photos/faq/backup-and-sync#free-up-space-after-backup)
-* [Will deleted photos be re-uploaded?](/photos/faq/backup-and-sync#delete-reupload)
-* [What file formats can I backup?](/photos/faq/backup-and-sync#backup-file-formats)
-* [Does Ente compress my photos?](/photos/faq/backup-and-sync#does-ente-compress)
-* [Why are some photos not uploading?](/photos/faq/troubleshooting#upload-issues)
-* [Troubleshooting backup and upload issues](/photos/faq/troubleshooting#photos-not-uploading)
+- [How does automatic backup work?](/photos/faq/backup-and-sync#automatic-backup)
+- [How do I select which albums to back up?](/photos/faq/backup-and-sync#select-albums)
+- [Why isn't background sync working?](/photos/faq/backup-and-sync#background-sync-not-working)
+- [Do deleted photos on my device also delete from Ente?](/photos/faq/backup-and-sync#deletion-sync)
+- [Understanding backup vs. sync](/photos/faq/backup-and-sync#backup-vs-sync)
+- [Can I delete photos from my device after backing up?](/photos/faq/backup-and-sync#free-up-space-after-backup)
+- [Will deleted photos be re-uploaded?](/photos/faq/backup-and-sync#delete-reupload)
+- [What file formats can I backup?](/photos/faq/backup-and-sync#backup-file-formats)
+- [Does Ente compress my photos?](/photos/faq/backup-and-sync#does-ente-compress)
+- [Why are some photos not uploading?](/photos/faq/troubleshooting#upload-issues)
+- [Troubleshooting backup and upload issues](/photos/faq/troubleshooting#photos-not-uploading)
 
 ## Related topics
 
-* [Watch folders](/photos/features/backup-and-sync/watch-folders) - Automatic desktop backup
-* [Duplicate detection](/photos/features/backup-and-sync/duplicate-detection) - How automatic duplicate detection works
-* [Storage optimization](/photos/features/albums-and-organization/storage-optimization) - Tools to optimize your storage usage
+- [Watch folders](/photos/features/backup-and-sync/watch-folders) - Automatic desktop backup
+- [Duplicate detection](/photos/features/backup-and-sync/duplicate-detection) - How automatic duplicate detection works
+- [Storage optimization](/photos/features/albums-and-organization/storage-optimization) - Tools to optimize your storage usage

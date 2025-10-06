@@ -22,6 +22,7 @@ This means that the same file appears to take up less "storage" on Ente compared
 Ente automatically detects and handles duplicate files during backup to save storage space:
 
 **During uploads:**
+
 - If you try to upload the same file to the same album, Ente will skip it entirely
 - If you upload the same file to different albums, Ente creates a symlink (reference) instead of storing it again
 - This means storage is only counted once, even if the photo appears in multiple albums
@@ -41,14 +42,17 @@ Learn more in the [Duplicate detection guide](/photos/features/backup-and-sync/d
 Ente provides several tools to help you optimize both your device storage and cloud storage:
 
 **Free up device space:**
+
 - Remove backed-up photos from your phone to reclaim device storage
 - Photos remain in Ente and can be re-downloaded anytime
 
 **Remove exact duplicates:**
+
 - Find and remove duplicate files across your entire library
 - Maintains your album structure while freeing up storage
 
 **Remove similar images:**
+
 - Use ML to find visually similar (but not identical) photos
 - Keep only the best shots and delete the rest
 
@@ -57,6 +61,7 @@ Learn more in the [Storage optimization guide](/photos/features/albums-and-organ
 ### Do items in trash count against my storage? {#trash-storage-count}
 
 Yes, items in trash are included in your storage quota calculation. To free up storage space, you can:
+
 - Manually empty your trash
 - Permanently delete specific items
 - Wait for automatic deletion after 30 days
@@ -72,6 +77,7 @@ Ente will stop backing up your files and you will receive an email alerting you 
 Your backed up files will remain accessible for as long as you have an active subscription.
 
 To continue backing up:
+
 - Upgrade to a higher storage plan, OR
 - Delete files you no longer need and empty trash to free up space
 
@@ -82,6 +88,7 @@ To continue backing up:
 See our [website](https://ente.io#pricing) for the complete list of supported plans and pricing.
 
 We offer:
+
 - **Free plan**: 10 GB storage
 - **Paid plans**: Multiple tiers ranging from 50 GB to multiple TBs
 - **Monthly and annual billing**: Annual plans offer better value
@@ -94,10 +101,12 @@ Yes, we offer 10 GB of storage for free, forever.
 ### What are the limitations of the free plan? {#free-plan-limits}
 
 On the free plan, you cannot:
+
 - Share albums or create public links
 - Set up family plans
 
 All other features work on the free plan, including:
+
 - Unlimited devices
 - End-to-end encryption
 - Map view
@@ -179,6 +188,7 @@ Open `Settings > General > Family plans`, find the member in the list, click the
 **If the issue persists:**
 
 Contact [support@ente.io](mailto:support@ente.io) with:
+
 - Your email address (family plan admin)
 - The family member's email address
 - Screenshot of the "Manage family" screen showing the member's status
@@ -188,25 +198,30 @@ Contact [support@ente.io](mailto:support@ente.io) with:
 Common reasons and solutions:
 
 **Problem 1: "You've reached the maximum number of family members"**
+
 - Family plans allow up to 5 additional members (6 total including you)
 - Remove an existing member before adding a new one
 
 **Problem 2: "This user is already part of another family plan"**
+
 - Each Ente account can only be part of one family plan at a time
 - The person needs to leave their current family plan first
 - Or create a new Ente account with a different email
 
 **Problem 3: "Invalid email address" or invitation fails**
+
 - Make sure the email address is correct
 - The person must have an Ente account already (ask them to sign up first at [ente.io](https://ente.io))
 - Free accounts can be invited to family plans
 
 **Problem 4: Family plan not available**
+
 - Family plans are only available for paid subscriptions
 - Free plan users cannot create family plans
 - Upgrade to any paid plan to access family sharing
 
 **Problem 5: Purchased through App Store**
+
 - Family plans may have limited functionality for App Store purchases
 - Consider managing your subscription through [web.ente.io](https://web.ente.io) instead
 
@@ -215,6 +230,7 @@ Common reasons and solutions:
 Open `Settings > General > Family plans`, find the member you want to remove, click the remove/trash icon next to their name, and confirm the removal.
 
 **What happens when you remove someone:**
+
 - They lose access to the shared family storage
 - Their photos remain in their account but they'll need their own subscription to continue uploading
 - They'll revert to the free 10 GB plan unless they purchase their own subscription
@@ -256,6 +272,7 @@ If you have a discount code (e.g., from partnerships like Kagi Friends 25% off),
 10. Complete your purchase
 
 **Important notes:**
+
 - Discount codes only work for **NEW paying customers** (first-time purchases)
 - Cannot be applied to existing paid subscriptions
 - Cannot be combined with cryptocurrency payments
@@ -264,6 +281,7 @@ If you have a discount code (e.g., from partnerships like Kagi Friends 25% off),
 **If you already purchased without applying a code:**
 
 Unfortunately, we cannot apply discount codes retroactively. However, you can:
+
 1. Cancel your current subscription
 2. Wait for the subscription period to end
 3. Resubscribe using the discount code
@@ -333,6 +351,7 @@ We support **annual** subscriptions over PayPal.
 5. Your account will be upgraded once payment is confirmed
 
 **Important notes:**
+
 - Only annual plans are available via PayPal (monthly plans not supported)
 - You must email from the same email address registered with your Ente account
 - Invoice generation is manual, so expect a response within 1-2 business days
@@ -349,8 +368,8 @@ Yes! We accept the following cryptocurrencies:
 
 1. Email **crypto@ente.io** from your registered Ente email address
 2. In your email, specify:
-   - The [storage plan](https://ente.io#pricing) of your choice
-   - Your preferred cryptocurrency
+    - The [storage plan](https://ente.io#pricing) of your choice
+    - Your preferred cryptocurrency
 3. We will send you an invoice with payment instructions
 4. Complete the payment using your crypto wallet
 5. Your account will be upgraded once the transaction is confirmed
@@ -362,6 +381,7 @@ Yes! We accept the following cryptocurrencies:
 ⚠️ **Privacy note**: Ente does not provide anonymity. What we provide is privacy through end-to-end encryption. [Information we collect](https://ente.io/privacy/#3-what-information-do-we-collect) about you might make your identity deducible. We accept crypto to make Ente more accessible, not to provide anonymity.
 
 **Processing time:**
+
 - Invoice generation: 1-2 business days
 - Payment confirmation: Depends on blockchain confirmation times (varies by cryptocurrency)
 
@@ -386,12 +406,14 @@ When your subscription expires, you enter a **30-day grace period** before your 
 **Timeline after expiration:**
 
 **Day 0 (Expiration day):**
+
 - ✅ Your data remains accessible
 - ✅ You can still view and download your photos
 - ❌ New uploads are blocked
 - 📧 You receive an email notification
 
 **Days 1-30 (Grace period):**
+
 - ✅ Your data remains accessible and downloadable
 - ❌ New uploads are blocked
 - 📧 You receive multiple reminder emails
@@ -399,6 +421,7 @@ When your subscription expires, you enter a **30-day grace period** before your 
 - ✅ You can export your data using the desktop app or CLI
 
 **Day 30+ (After grace period):**
+
 - ❌ All your uploaded data is permanently deleted from our servers
 - ❌ Recovery is not possible after deletion
 - 📧 Final notification email sent
@@ -406,19 +429,21 @@ When your subscription expires, you enter a **30-day grace period** before your 
 **To avoid losing your data:**
 
 1. **Renew your subscription** before the grace period ends:
-   - All your data will be immediately accessible again
-   - Uploads will resume automatically
-   - No data loss
+
+    - All your data will be immediately accessible again
+    - Uploads will resume automatically
+    - No data loss
 
 2. **Export your data** during the grace period:
-   - Use the desktop app's export feature
-   - Or use the [CLI tool](https://github.com/ente-io/ente/tree/main/cli#readme) for automated export
-   - Download all photos to your computer or NAS
-   - Learn more in the [Export guide](/photos/migration/export/)
+    - Use the desktop app's export feature
+    - Or use the [CLI tool](https://github.com/ente-io/ente/tree/main/cli#readme) for automated export
+    - Download all photos to your computer or NAS
+    - Learn more in the [Export guide](/photos/migration/export/)
 
 **Can I get my free plan back after subscription expires?**
 
 Yes! If you had data exceeding the free 10 GB limit and your subscription expired:
+
 - Your data enters the 30-day grace period
 - To restore access to your data on the free plan, contact [support@ente.io](mailto:support@ente.io)
 - We can restore your account to the free plan if you're within the grace period
@@ -427,6 +452,7 @@ Yes! If you had data exceeding the free 10 GB limit and your subscription expire
 **What about subscriptions purchased through App Stores?**
 
 If you purchased through iOS App Store or Google Play Store:
+
 - Manage your subscription through the respective app store
 - Cancellation policies follow the app store's terms
 - The same 30-day grace period applies after expiration
@@ -458,6 +484,7 @@ You're 15 days into a 100 GB monthly plan ($2/month) and upgrade to 500 GB month
 4. **New plan duration**: 1 full month from today
 
 **Key points:**
+
 - ✅ Upgrades take effect immediately
 - ✅ You get credit for unused time on your old plan
 - ✅ Your new renewal date starts from the upgrade date
@@ -494,6 +521,7 @@ You're 10 days into a 500 GB monthly plan ($5/month) and downgrade to 100 GB mon
 6. **Next invoice (in 20 days)**: $2 - $1 = **$1**
 
 **Key points:**
+
 - ✅ Downgrades take effect immediately
 - ✅ You get credit for overpayment
 - ✅ Credit is automatically applied to future renewals
@@ -509,12 +537,14 @@ If you prefer to have your credit refunded to your original payment method inste
 Yes! Switching between monthly and yearly billing works the same as upgrading or downgrading:
 
 **Monthly to yearly:**
+
 - Treated as an upgrade (yearly plans are better value)
 - You get credit for unused days on your monthly plan
 - Pay the yearly price minus your credit
 - New yearly renewal date starts immediately
 
 **Yearly to monthly:**
+
 - Treated as a downgrade
 - You get credit for the price difference
 - Credit applied to future monthly renewals

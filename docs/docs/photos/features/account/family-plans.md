@@ -1,7 +1,6 @@
 ---
 title: Family plans
-description:
-    Share your Ente Photos plan with your family members with no extra cost
+description: Share your Ente Photos plan with your family members with no extra cost
 ---
 
 # Family plans
@@ -42,9 +41,10 @@ In brief,
   on the "Remove Limit" and they can upload photos without any limit.
 
 ## Related FAQs
-* [Does Ente have Family Plans?](/photos/faq/storage-and-plans#family-plans-faq)
-* [How many family members can I add?](/photos/faq/storage-and-plans#family-members-limit)
-* [Can family members see each other's photos?](/photos/faq/storage-and-plans#family-privacy)
-* [Why does my family member show 0 GB storage?](/photos/faq/storage-and-plans#family-member-zero-storage)
-* [Why can't I add a family member?](/photos/faq/storage-and-plans#cannot-add-family-member)
-* [How do I remove someone from my family plan?](/photos/faq/storage-and-plans#remove-family-member)
+
+- [Does Ente have Family Plans?](/photos/faq/storage-and-plans#family-plans-faq)
+- [How many family members can I add?](/photos/faq/storage-and-plans#family-members-limit)
+- [Can family members see each other's photos?](/photos/faq/storage-and-plans#family-privacy)
+- [Why does my family member show 0 GB storage?](/photos/faq/storage-and-plans#family-member-zero-storage)
+- [Why can't I add a family member?](/photos/faq/storage-and-plans#cannot-add-family-member)
+- [How do I remove someone from my family plan?](/photos/faq/storage-and-plans#remove-family-member)

@@ -12,10 +12,12 @@ Ente automatically detects and handles duplicate files during backup to save sto
 When uploading photos and videos, Ente uses a hash-based system to identify duplicate files:
 
 **Same file to same album:**
+
 - If you try to upload an exact duplicate to an album where it already exists, Ente will skip it entirely
 - This allows you to safely resume interrupted uploads or re-upload folders without creating duplicates
 
 **Same file to different albums:**
+
 - If the same file already exists in a different album, Ente creates a symlink (reference) instead of storing it again
 - The file appears in both albums, but storage is only counted once
 - This is the same behavior as using "Add to album" within Ente
@@ -43,14 +45,17 @@ On laptops using the web or desktop app, both the file hash AND filename are use
 ## Benefits
 
 **Saves storage space:**
+
 - Each unique file is only stored once, even if it appears in multiple albums
 - Symlinks count minimal storage compared to full copies
 
 **Saves upload time:**
+
 - Duplicate files are detected immediately and skipped
 - Only new or modified files need to be uploaded
 
 **Enables safe re-uploads:**
+
 - You can safely drag and drop the same folder multiple times
 - Resume interrupted uploads without worrying about duplicates
 - Reinstall the app and re-configure backups without creating duplicates
@@ -58,6 +63,7 @@ On laptops using the web or desktop app, both the file hash AND filename are use
 ## Adding files to albums within Ente
 
 Once a file is backed up to Ente, adding it to another Ente album always creates a symlink. This means:
+
 - You can add photos to as many albums as you want
 - Storage is only counted once
 - Changes or deletions affect the file across all albums
@@ -68,6 +74,6 @@ For manual cleanup of existing duplicates, see [Storage optimization](/photos/fe
 
 ## Related FAQs
 
-* [How does the deduplication feature work on the desktop app?](/photos/faq/backup-and-sync#deduplication-desktop)
-* [Does Ente deduplicate across different albums?](/photos/faq/storage-and-plans#dedup-albums)
-* [How does duplicate detection work in watch folders?](/photos/faq/backup-and-sync#watch-folder-dedup)
+- [How does the deduplication feature work on the desktop app?](/photos/faq/backup-and-sync#deduplication-desktop)
+- [Does Ente deduplicate across different albums?](/photos/faq/storage-and-plans#dedup-albums)
+- [How does duplicate detection work in watch folders?](/photos/faq/backup-and-sync#watch-folder-dedup)

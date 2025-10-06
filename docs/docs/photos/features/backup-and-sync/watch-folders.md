@@ -1,7 +1,6 @@
 ---
 title: Watch folder
-description:
-    Automatic syncing of selected folders using the Ente Photos desktop app
+description: Automatic syncing of selected folders using the Ente Photos desktop app
 ---
 
 # Watch folders
@@ -57,11 +56,11 @@ undefined behaviour (e.g. duplicate files, export stalling etc).
 
 ## Related FAQs
 
-* [What are watch folders?](/photos/faq/backup-and-sync#what-are-watch-folders)
-* [How do I set up watch folders?](/photos/faq/backup-and-sync#set-up-watch-folders)
-* [Can I watch multiple folders at once?](/photos/faq/backup-and-sync#watch-multiple-folders)
-* [What happens if I delete a file from my watched folder?](/photos/faq/backup-and-sync#delete-from-watched-folder)
-* [Why are my watch folders not syncing?](/photos/faq/backup-and-sync#watch-folders-not-syncing)
-* [Can I watch folders on a network drive (NAS)?](/photos/faq/backup-and-sync#watch-nas)
-* [Can watch folders preserve my nested folder structure?](/photos/faq/backup-and-sync#watch-nested-structure)
-* [Can I do a 2-way sync with watch folders?](/photos/faq/advanced-features#export-two-way-sync)
+- [What are watch folders?](/photos/faq/backup-and-sync#what-are-watch-folders)
+- [How do I set up watch folders?](/photos/faq/backup-and-sync#set-up-watch-folders)
+- [Can I watch multiple folders at once?](/photos/faq/backup-and-sync#watch-multiple-folders)
+- [What happens if I delete a file from my watched folder?](/photos/faq/backup-and-sync#delete-from-watched-folder)
+- [Why are my watch folders not syncing?](/photos/faq/backup-and-sync#watch-folders-not-syncing)
+- [Can I watch folders on a network drive (NAS)?](/photos/faq/backup-and-sync#watch-nas)
+- [Can watch folders preserve my nested folder structure?](/photos/faq/backup-and-sync#watch-nested-structure)
+- [Can I do a 2-way sync with watch folders?](/photos/faq/advanced-features#export-two-way-sync)

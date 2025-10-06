@@ -45,6 +45,7 @@ Learn more about [Video Streaming](/photos/features/utilities/video-streaming).
 **Solution 3: Upload from desktop instead of mobile**
 
 Desktop apps handle large video uploads more reliably:
+
 - More memory available
 - Faster, more stable network connections
 - Better handling of large files
@@ -52,6 +53,7 @@ Desktop apps handle large video uploads more reliably:
 **Solution 4: Split large videos**
 
 If a specific video keeps failing:
+
 - The file might be corrupted or too large
 - Try uploading other files first to isolate the problem
 - Consider compressing the video if it's extremely large
@@ -79,6 +81,7 @@ Learn more about [Video Streaming](/photos/features/utilities/video-streaming#tr
 **Why this happens:**
 
 The combination of ML processing and video streaming can exceed available device memory on:
+
 - Older iPhone/iPad models
 - Devices with limited RAM
 - When processing very large libraries
@@ -100,17 +103,20 @@ If you continue experiencing crashes, go to `Settings > Support > Report a Bug` 
 If your photos or videos aren't uploading to Ente, try these troubleshooting steps:
 
 **Check network connectivity:**
+
 - Verify your internet connection is stable and working
 - Try switching between WiFi and mobile data
 - If using a VPN, try disabling it or switching to a different provider
 - Check if your firewall or network security settings are blocking Ente
 
 **Check storage quota:**
+
 - Check your storage quota in the app
 - If you've exceeded your limit, [upgrade your plan](/photos/faq/storage-and-plans#what-plans-does-ente-offer) or delete unwanted photos
 - Items in trash count towards your quota - empty trash to free up space
 
 **Check file compatibility:**
+
 - Ente supports all `image/*` and `video/*` file types
 - RAW format support is currently limited
 - Files larger than 10 GB cannot be uploaded
@@ -141,6 +147,7 @@ If uploads still fail after disabling this option, check your network connectivi
 The desktop/web app tries to detect if a particular file is a video or image. If the detection fails, the app skips the upload.
 
 **Solution:** Contact [support@ente.io](mailto:support@ente.io) if you find that a valid image or video file was not detected and uploaded. Include:
+
 - The file extension (e.g., .jpg, .mp4)
 - The file's MIME type if you know it
 - A sample file if possible
@@ -152,26 +159,29 @@ The desktop/web app tries to detect if a particular file is a video or image. If
 **On Android:**
 
 1. **Disable battery optimization for Ente:**
-   - Open device `Settings > Apps > Ente > Battery`
-   - Select "Unrestricted" or "Don't optimize"
+
+    - Open device `Settings > Apps > Ente > Battery`
+    - Select "Unrestricted" or "Don't optimize"
 
 2. **Check storage permissions:**
-   - Open device `Settings > Apps > Ente > Permissions`
-   - Ensure "Photos and videos" or "Files and media" is allowed
+
+    - Open device `Settings > Apps > Ente > Permissions`
+    - Ensure "Photos and videos" or "Files and media" is allowed
 
 3. **Verify backed up folders:**
-   - Open Ente app, go to `Settings > Backup > Backed up folders`
-   - Ensure the correct albums/folders are selected
+    - Open Ente app, go to `Settings > Backup > Backed up folders`
+    - Ensure the correct albums/folders are selected
 
 **On iOS:**
 
 1. **Check Background App Refresh:**
-   - Open device `Settings > Ente > Background App Refresh`
-   - Ensure it's enabled
+
+    - Open device `Settings > Ente > Background App Refresh`
+    - Ensure it's enabled
 
 2. **Keep app in foreground for initial upload:**
-   - For large libraries, keep Ente open during the first upload
-   - Once initial upload completes, background sync will work automatically
+    - For large libraries, keep Ente open during the first upload
+    - Once initial upload completes, background sync will work automatically
 
 Learn more in [Backup and Sync FAQ](/photos/faq/backup-and-sync#background-sync).
 
@@ -186,6 +196,7 @@ Open device `Settings > Ente > Photos` and select "Full Access" (not "Selected P
 Open device `Settings > Apps > Ente > Permissions`, enable "Photos and videos" or "Files and media", and ensure permission is set to "Allow" (not "Ask every time").
 
 If you've granted permission but Ente still can't access photos, try:
+
 - Restarting the app
 - Revoking and re-granting the permission
 - Reinstalling the app (your backed-up photos are safe in the cloud)
@@ -215,10 +226,12 @@ If thumbnails aren't generating properly, the most common cause is browser secur
 **Firefox users:** If you have "block canvas fingerprinting" enabled (`privacy.resistFingerprinting` set to true in `about:config`), Firefox will prevent the app from generating thumbnails.
 
 **Solution:**
+
 - Disable canvas fingerprinting for Ente's domain, OR
 - Check if you're using browser extensions that block canvas access and whitelist Ente
 
 **Important:** Once thumbnails are incorrectly generated or missing, they cannot be regenerated. You'll need to:
+
 1. Delete the affected files from Ente
 2. Fix the browser settings
 3. Re-upload the files
@@ -230,25 +243,28 @@ Ente will automatically skip files that have already been uploaded, so you can d
 If watch folders aren't uploading new files automatically:
 
 1. **Check the watch folders list:**
-   - Click "Watch folders" in the sidebar
-   - Verify the correct folders are being watched
+
+    - Click "Watch folders" in the sidebar
+    - Verify the correct folders are being watched
 
 2. **Check upload status:**
-   - Look for the sync status indicator in the bottom right
-   - Expand it to see any errors
+
+    - Look for the sync status indicator in the bottom right
+    - Expand it to see any errors
 
 3. **Restart the desktop app**
 
 4. **If the issue persists:**
-   - Remove the watch folder
-   - Re-add it
-   - Ente will skip already uploaded files
+    - Remove the watch folder
+    - Re-add it
+    - Ente will skip already uploaded files
 
 Learn more in [Backup and Sync FAQ](/photos/faq/backup-and-sync#watch-folders).
 
 ### Can I upload from a network drive (NAS)? {#nas}
 
 **Not recommended.** While the desktop app may work with network drives in some cases, network storage often has:
+
 - Flaky file system emulation causing upload issues
 - Poor performance during large uploads
 - Unreliable file change notifications (critical for watch folders)
@@ -268,10 +284,12 @@ Yes! The desktop app supports resumable uploads. You can close the app at any ti
 If you purchased a subscription through the iOS App Store but the app shows "Please wait..." indefinitely or doesn't reflect your upgraded storage, this is a known issue with App Store subscription processing.
 
 **Recommended solution:**
+
 1. Request a refund from Apple for the App Store purchase
 2. Purchase your subscription directly from [web.ente.io](https://web.ente.io) instead
 
 **How to request a refund from Apple:**
+
 1. Go to [reportaproblem.apple.com](https://reportaproblem.apple.com)
 2. Sign in with your Apple ID
 3. Find the Ente subscription purchase
@@ -279,12 +297,14 @@ If you purchased a subscription through the iOS App Store but the app shows "Ple
 5. Choose "It's not working as expected" as the reason
 
 **Alternative workaround to try first:**
+
 1. Force close the Ente app completely
 2. Update to the latest version from the App Store
 3. Reopen the app and wait a few minutes
 4. If still stuck, proceed with the refund and web purchase
 
 **Why purchase from web.ente.io?**
+
 - More reliable payment processing
 - Can apply discount codes (not possible through App Store)
 - Avoid App Store's 30% fee
@@ -301,11 +321,13 @@ If the Ente app freezes at the splash screen for 15+ seconds on Android, try the
 Open device `Settings > Apps > Ente > Storage` and tap "Clear cache" (NOT "Clear data" - this preserves your login), then reopen the app.
 
 **Solution 2: Log out and log back in**
+
 1. If you can access Settings in the app, log out
 2. Log back in with your email and password
 3. This refreshes the app state
 
 **Solution 3: Reinstall the app**
+
 1. Uninstall Ente from your device
 2. Reinstall from your preferred source (Play Store, F-Droid, GitHub)
 3. Log back in
@@ -318,20 +340,23 @@ Open device `Settings > Apps > Ente > Storage` and tap "Clear cache" (NOT "Clear
 You might need to update the icon cache of your Linux desktop environment.
 
 **Solutions:**
+
 1. Restart your computer (or logout and login again)
 2. Refresh the icon cache manually (steps vary by distro):
-   - Example: `xdg-desktop-menu forceupdate`
+    - Example: `xdg-desktop-menu forceupdate`
 
 **AppImage users:** If you're using an AppImage and not seeing the icon, you'll need to enable AppImage desktop integration (see below).
 
 ### How do I enable AppImage desktop integration on Linux? {#appimage-integration}
 
 AppImages are not fully standalone and require additional steps to enable full "desktop integration":
+
 - Showing the app icon
 - Surfacing the app in the list of installed apps
 - Handling redirection after passkey verification
 
 **Solution:**
+
 1. Download [appimaged](https://github.com/probonopd/go-appimage/releases) AppImage
 2. Run the appimaged AppImage
 3. Download the Ente Photos AppImage into your `~/Downloads` folder
@@ -363,15 +388,17 @@ See the [AppImage FUSE documentation](https://docs.appimage.org/user-guide/troub
 ### Why do I get a "SUID sandbox helper" error on Linux? {#suid-sandbox-error}
 
 If you run the AppImage from the command line and see:
+
 > The SUID sandbox helper binary was found, but is not configured correctly.
 
 **Solution:**
 Either:
+
 1. Double-click the AppImage in your file browser instead of running from CLI, OR
 2. Run it with the `--no-sandbox` flag:
-   ```sh
-   ./ente.AppImage --no-sandbox
-   ```
+    ```sh
+    ./ente.AppImage --no-sandbox
+    ```
 
 ### Why won't the Windows desktop app start (JavaScript error)? {#windows-javascript-error}
 
@@ -391,17 +418,19 @@ Mobile browsers cannot handle the computationally intensive password derivation 
 **Solutions:**
 
 1. **Use the native mobile app instead** (recommended):
-   - Install Ente Photos from the [App Store (iOS)](https://apps.apple.com/app/id1542026904) or [Play Store (Android)](https://play.google.com/store/apps/details?id=io.ente.photos)
-   - Mobile apps are optimized for phones and tablets
-   - Full feature support including machine learning
+
+    - Install Ente Photos from the [App Store (iOS)](https://apps.apple.com/app/id1542026904) or [Play Store (Android)](https://play.google.com/store/apps/details?id=io.ente.photos)
+    - Mobile apps are optimized for phones and tablets
+    - Full feature support including machine learning
 
 2. **Use a desktop or laptop computer**:
-   - web.ente.io works on desktop browsers (Chrome, Firefox, Safari, Edge)
-   - Or install the [desktop app](https://ente.io/download/desktop)
+    - web.ente.io works on desktop browsers (Chrome, Firefox, Safari, Edge)
+    - Or install the [desktop app](https://ente.io/download/desktop)
 
 **Feature differences:**
 
 Mobile browsers on web.ente.io are not supported. Use native apps for the best experience:
+
 - ✅ Mobile apps: Full features including ML, search, video streaming
 - ✅ Desktop/laptop web: Most features (no ML)
 - ❌ Mobile web browsers: Not supported
@@ -410,6 +439,7 @@ Mobile browsers on web.ente.io are not supported. Use native apps for the best e
 
 **On desktop:**
 Check the sections within the upload progress bar for:
+
 - "Failed Uploads"
 - "Ignored Uploads"
 - "Unsuccessful Uploads"
@@ -424,26 +454,31 @@ Open `Settings > Backup` to see the backup status and any errors.
 ### Why is the app slow to load my photos? {#app-slow-loading}
 
 **Check your internet connection:**
+
 - Slow loading usually indicates network issues
 - Try switching between WiFi and mobile data
 - VPNs can sometimes slow down loading
 
 **On mobile:**
+
 - Ensure background sync is enabled (see [Background sync troubleshooting](#background-sync-not-working))
 - Check if battery optimization is restricting the app
 
 **On desktop:**
+
 - Large libraries may take time to load initially
 - Once loaded, the app caches data for faster access
 
 ### Why is face recognition or magic search taking so long? {#ml-slow}
 
 Machine learning features (face recognition and magic search) require downloading and indexing your entire library on your device. This can take time depending on:
+
 - Library size
 - Device processing power
 - Network speed
 
 **Tips for faster indexing:**
+
 - Enable ML on desktop first (faster processor)
 - Use WiFi for initial indexing
 - Keep the app open and in the foreground
@@ -468,6 +503,7 @@ Open `Settings > Support > Report a Bug`. This will open your email client with 
 Open `Settings > Support > Help` to view logs location, then go back to `Settings > Support` to open your email client. Attach the logs and describe your issue.
 
 **Desktop log locations:**
+
 - macOS: `~/Library/Logs/ente/ente.log`
 - Linux: `~/.config/ente/logs/ente.log`
 - Windows: `%USERPROFILE%\AppData\Roaming\ente\logs\ente.log`
@@ -478,6 +514,7 @@ Open `Settings > Support > Help` to download logs, then email the downloaded log
 
 **Email manually:**
 If the automatic email doesn't work, send logs directly to [support@ente.io](mailto:support@ente.io) with:
+
 - Your platform (iOS, Android, Desktop, Web)
 - Description of the issue
 - Steps you've already tried

@@ -14,6 +14,7 @@ If you're creating a new account, select "New to Ente".
 > **Note**: If you already have an Ente Auth account and plan to use 2FA for Ente Photos (stored in Ente Auth), we recommend keeping separate accounts for Auth and Photos for security. Otherwise, you can use the same account for both.
 
 Creating a new account on Ente takes a few steps:
+
 1. [Enter and verify an email address](#verify-email)
 2. [Set up a password](#setup-password)
 3. [Save the recovery key](#save-recovery-key)
@@ -23,9 +24,9 @@ Creating a new account on Ente takes a few steps:
 
 You can choose any email address, including aliases, to create an account with Ente Photos. The only requirement is that you have access to the email inbox for verification. However, keep these points in mind:
 
-* **Long-term access**: Ente Photos is designed for use over multiple years and decades. Use an email address you expect to have access to long-term.
-* **Social features**: Your email address is the primary way for friends and family to discover and share photos with you through shared albums and other social features. If you plan to use these features, consider using an email address your contacts recognize.
-* **Student accounts**: You can use your personal email address to create an account. When applying for a student discount, reach out with your student email address and mention the personal email associated with your account.
+- **Long-term access**: Ente Photos is designed for use over multiple years and decades. Use an email address you expect to have access to long-term.
+- **Social features**: Your email address is the primary way for friends and family to discover and share photos with you through shared albums and other social features. If you plan to use these features, consider using an email address your contacts recognize.
+- **Student accounts**: You can use your personal email address to create an account. When applying for a student discount, reach out with your student email address and mention the personal email associated with your account.
 
 In any case, you can always change the email address your account is associated with at a later time as well.
 
@@ -46,9 +47,10 @@ After setting your password, Ente will generate and display your **recovery key*
 Your recovery key is the only way to recover your account if you forget your password and are logged out of all your devices. Since Ente uses end-to-end encryption, we cannot reset your password for you without this key.
 
 **How to save it:**
-* Write it down on paper and store it in a safe place
-* Save it in a password manager
-* Store it in any secure location you trust
+
+- Write it down on paper and store it in a safe place
+- Save it in a password manager
+- Store it in any secure location you trust
 
 Do not skip this step! Without your recovery key, losing your password means permanently losing access to your photos.
 
@@ -79,24 +81,28 @@ On any device where you want to use Ente Photos:
 ## Next steps
 
 Now that you're set up on all your devices:
-* [Migrate photos from other services](/photos/getting-started/migration) if you have existing photos elsewhere
-* [Set up automatic backup for daily use](/photos/getting-started/daily-use) to configure your backup preferences
+
+- [Migrate photos from other services](/photos/getting-started/migration) if you have existing photos elsewhere
+- [Set up automatic backup for daily use](/photos/getting-started/daily-use) to configure your backup preferences
 
 ## Related FAQs
 
 **Account Creation:**
-* [How do I create a new Ente account?](/photos/faq/account-creation#create-account)
-* [I'm not receiving the verification code, what should I do?](/photos/faq/account-creation#verification-code)
-* [How do I log in on multiple devices?](/photos/faq/account-creation#multi-device-login)
+
+- [How do I create a new Ente account?](/photos/faq/account-creation#create-account)
+- [I'm not receiving the verification code, what should I do?](/photos/faq/account-creation#verification-code)
+- [How do I log in on multiple devices?](/photos/faq/account-creation#multi-device-login)
 
 **Security:**
-* [What is the recovery key and why is it important?](/photos/faq/account-creation#recovery-key)
-* [Can I change my password later?](/photos/faq/account-creation#change-password-later)
-* [Does Ente support two-factor authentication (2FA)?](/photos/faq/account-creation#2fa)
-* [Can I use passkeys instead of passwords?](/photos/faq/account-creation#use-passkeys)
-* [How is my data encrypted?](/photos/faq/security-and-privacy#data-encryption)
+
+- [What is the recovery key and why is it important?](/photos/faq/account-creation#recovery-key)
+- [Can I change my password later?](/photos/faq/account-creation#change-password-later)
+- [Does Ente support two-factor authentication (2FA)?](/photos/faq/account-creation#2fa)
+- [Can I use passkeys instead of passwords?](/photos/faq/account-creation#use-passkeys)
+- [How is my data encrypted?](/photos/faq/security-and-privacy#data-encryption)
 
 **Plans:**
-* [What plans does Ente offer?](/photos/faq/storage-and-plans#available-plans)
-* [What are the limitations of the free plan?](/photos/faq/storage-and-plans#free-plan-limits)
-* [Does Ente have Family Plans?](/photos/faq/storage-and-plans#family-plans-faq)
+
+- [What plans does Ente offer?](/photos/faq/storage-and-plans#available-plans)
+- [What are the limitations of the free plan?](/photos/faq/storage-and-plans#free-plan-limits)
+- [Does Ente have Family Plans?](/photos/faq/storage-and-plans#family-plans-faq)

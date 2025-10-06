@@ -64,5 +64,6 @@ If you have lost access to both your passkey and recovery key, please reach out
 to [support@ente.io](mailto:support@ente.io) for help.
 
 ## Related FAQs
-* [Can I use passkeys instead of passwords?](/photos/faq/account-creation#use-passkeys)
-* [What happens if I lose my passkey?](/photos/faq/account-creation#lost-passkey)
+
+- [Can I use passkeys instead of passwords?](/photos/faq/account-creation#use-passkeys)
+- [What happens if I lose my passkey?](/photos/faq/account-creation#lost-passkey)

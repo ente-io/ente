@@ -12,6 +12,7 @@ Video streaming is a beta feature that lets you watch videos without downloading
 ## How it works
 
 When you enable video streaming, Ente generates streamable versions (HLS format) of your videos that support:
+
 - **Instant playback** - Start watching immediately without waiting for downloads
 - **Seeking/scrubbing** - Jump to any point in the video without downloading the whole file
 - **Automatic quality selection** - Optimized playback based on your connection
@@ -19,6 +20,7 @@ When you enable video streaming, Ente generates streamable versions (HLS format)
 ### Technical details
 
 Streams are encrypted HLS files with a `.m3u8` playlist. Currently, Ente converts videos to:
+
 - Resolution: 720p
 - Bitrate: 2mbps
 - Format: H.264
@@ -33,6 +35,7 @@ The generated stream is a single encrypted blob (AES encryption) while the playl
 2. Enable the toggle
 
 **What happens next:**
+
 - Videos captured in the last 30 days will start processing
 - Both local and remote videos will be processed
 - This may consume bandwidth for downloading remote files and uploading generated streams
@@ -44,6 +47,7 @@ The generated stream is a single encrypted blob (AES encryption) while the playl
 2. Enable the toggle
 
 **What happens next:**
+
 - New uploads will automatically generate streams
 - All existing previously uploaded videos will be processed
 - Stream generation is CPU intensive and happens in the background
@@ -68,14 +72,15 @@ The generated stream is a single encrypted blob (AES encryption) while the playl
 **While this feature is in beta**, streams do not count against your storage quota.
 
 This may change in the future. If it does, we will provide an option to choose:
+
 1. Original videos only
 2. Compressed streams only
 3. Both (original + streams)
 
 ## Related FAQs
 
-* [What is video streaming technically?](/photos/faq/advanced-features#what-is-a-stream)
-* [Will streams consume my storage?](/photos/faq/advanced-features#stream-storage)
-* [How do I report issues?](/photos/faq/advanced-features#stream-issues)
-* [App crashes with video streaming enabled](/photos/faq/advanced-features#app-crashes-video-streaming)
-* [Video upload failures with streaming enabled](/photos/faq/advanced-features#video-upload-failures-streaming)
+- [What is video streaming technically?](/photos/faq/advanced-features#what-is-a-stream)
+- [Will streams consume my storage?](/photos/faq/advanced-features#stream-storage)
+- [How do I report issues?](/photos/faq/advanced-features#stream-issues)
+- [App crashes with video streaming enabled](/photos/faq/advanced-features#app-crashes-video-streaming)
+- [Video upload failures with streaming enabled](/photos/faq/advanced-features#video-upload-failures-streaming)

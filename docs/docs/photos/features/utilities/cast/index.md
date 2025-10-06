@@ -1,7 +1,6 @@
 ---
 title: Cast
-description:
-    Casting your photos on to a large screen or a TV or a Chromecast device
+description: Casting your photos on to a large screen or a TV or a Chromecast device
 ---
 
 # Cast
@@ -78,8 +77,8 @@ Chromecast TVs or any other internet-connected large screen devices.
 
 ## Related FAQs
 
-* [How does Cast work?](/photos/faq/advanced-features#how-does-cast-work)
-* [Can I use Cast without Chromecast?](/photos/faq/advanced-features#cast-without-chromecast)
-* [My device isn't showing up in Auto Pair](/photos/faq/advanced-features#cast-auto-pair-not-working)
-* [PIN pairing isn't working](/photos/faq/advanced-features#cast-pin-not-working)
-* [Photos aren't appearing on the TV](/photos/faq/advanced-features#cast-photos-not-appearing)
+- [How does Cast work?](/photos/faq/advanced-features#how-does-cast-work)
+- [Can I use Cast without Chromecast?](/photos/faq/advanced-features#cast-without-chromecast)
+- [My device isn't showing up in Auto Pair](/photos/faq/advanced-features#cast-auto-pair-not-working)
+- [PIN pairing isn't working](/photos/faq/advanced-features#cast-pin-not-working)
+- [Photos aren't appearing on the TV](/photos/faq/advanced-features#cast-photos-not-appearing)

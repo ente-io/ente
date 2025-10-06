@@ -14,6 +14,7 @@ Map view lets you explore your photos on an interactive map based on the GPS loc
 ### How it works
 
 Photos that have GPS coordinates in their metadata will automatically appear on the map. You can:
+
 - See all your photos on a global map
 - Zoom into specific locations
 - View photos from specific albums on the map
@@ -36,11 +37,13 @@ Open `Settings > Preferences > Advanced > Map` and toggle the map settings on or
 ### View photos on the map
 
 **On mobile:**
+
 1. Tap the search icon at the bottom right
 2. Tap the globe icon (Your map) in the location section
 3. Explore your photos on the map
 
 **View a specific album on the map:**
+
 1. Open the album
 2. Tap the three dots in the top right corner
 3. Select **Map**
@@ -52,6 +55,7 @@ Access map view through the search interface or album menus, similar to mobile.
 ### Privacy
 
 Your location data is end-to-end encrypted, just like your photos. When you view photos on the map:
+
 - Map view uses encrypted location coordinates stored with your photos
 - Ente's servers cannot see where your photos were taken
 - All location-based searches happen locally on your device
@@ -65,6 +69,7 @@ Location tags let you create custom location labels to organize and search for p
 ### What are location tags?
 
 Location tags are custom labels you create to organize photos by location. Unlike map view (which relies on GPS data), location tags let you:
+
 - Create tags like "Home", "Office", "Paris Trip"
 - Define a center point and radius for each location
 - Find photos within specific areas
@@ -73,29 +78,34 @@ Location tags are custom labels you create to organize photos by location. Unlik
 ### How location tags differ from map view
 
 **Map view:**
+
 - Shows photos based on GPS coordinates embedded in photo metadata
 - Displays exact locations where photos were taken
 - Only shows photos that have location data
 
 **Location tags:**
+
 - Custom labels you create and manage
 - You define the center point and radius
 - Can include photos without GPS data
 - Useful for organizing photos from frequent places
 
 **When to use each:**
+
 - Use **map view** to explore where your photos were taken geographically
 - Use **location tags** to organize photos by meaningful places (home, work, vacation destinations)
 
 ### Create location tags
 
 **From a photo:**
+
 1. Open a photo
 2. Click **Info** (i)
 3. Select **Add Location**
 4. Enter the location name and define a radius
 
 **From the search tab:**
+
 1. Open the search tab
 2. Click **Add new** in the location tags section
 3. Select a photo as the center point for the location tag
@@ -116,6 +126,7 @@ The app will automatically cluster photos falling within that radius under your 
 ### Why don't all my photos appear on the map?
 
 Photos appear on the map only if they have GPS location data in their metadata. Photos may not appear if:
+
 - Location services were disabled when the photo was taken
 - Location data was stripped during export/transfer
 - The photo is a screenshot or downloaded image
@@ -130,6 +141,7 @@ The map view itself only shows photos with GPS data. However, you can use **loca
 ### Is my location data sent to Ente servers?
 
 No. Your location data is end-to-end encrypted, just like your photos. Ente's servers cannot see:
+
 - Where your photos were taken
 - Your location tags
 - Map view usage
@@ -142,15 +154,15 @@ Yes! By default, the map view shows photos from all your albums. You can also vi
 
 ## Related FAQs
 
-* [Why doesn't the map show all my photos?](/photos/faq/search-and-discovery#missing-photos)
-* [Is my location data sent to Ente servers?](/photos/faq/search-and-discovery#privacy)
-* [Can I view all albums on the map at once?](/photos/faq/search-and-discovery#all-albums)
-* [How are location tags different from map view?](/photos/faq/search-and-discovery#location-tags-vs-map)
-* [Are my location tags encrypted?](/photos/faq/search-and-discovery#location-tags-encryption)
+- [Why doesn't the map show all my photos?](/photos/faq/search-and-discovery#missing-photos)
+- [Is my location data sent to Ente servers?](/photos/faq/search-and-discovery#privacy)
+- [Can I view all albums on the map at once?](/photos/faq/search-and-discovery#all-albums)
+- [How are location tags different from map view?](/photos/faq/search-and-discovery#location-tags-vs-map)
+- [Are my location tags encrypted?](/photos/faq/search-and-discovery#location-tags-encryption)
 
 ## Related topics
 
-* [Search and Discovery overview](/photos/features/search-and-discovery/)
-* [Machine learning](/photos/features/search-and-discovery/machine-learning)
-* [Search and Discovery FAQ](/photos/faq/search-and-discovery)
-* [Security and Privacy FAQ](/photos/faq/security-and-privacy)
+- [Search and Discovery overview](/photos/features/search-and-discovery/)
+- [Machine learning](/photos/features/search-and-discovery/machine-learning)
+- [Search and Discovery FAQ](/photos/faq/search-and-discovery)
+- [Security and Privacy FAQ](/photos/faq/security-and-privacy)

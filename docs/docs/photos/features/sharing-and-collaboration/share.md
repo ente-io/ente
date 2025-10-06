@@ -102,17 +102,17 @@ potential platform abuse.
 
 ## Related topics
 
-* [Collaboration](/photos/features/sharing-and-collaboration/collaboration) - Collaborate with Ente users or collect photos from anyone
-* [Public links](/photos/features/sharing-and-collaboration/public-links) - Share via links (includes quick links and collect mode)
-* [Custom domains](/photos/features/sharing-and-collaboration/custom-domains/) - Use your own domain for public links
+- [Collaboration](/photos/features/sharing-and-collaboration/collaboration) - Collaborate with Ente users or collect photos from anyone
+- [Public links](/photos/features/sharing-and-collaboration/public-links) - Share via links (includes quick links and collect mode)
+- [Custom domains](/photos/features/sharing-and-collaboration/custom-domains/) - Use your own domain for public links
 
 ## Related FAQs
 
-* [What are the different ways to share in Ente?](/photos/faq/sharing-and-collaboration#sharing-methods)
-* [What's the difference between public links and quick links?](/photos/faq/sharing-and-collaboration#link-types)
-* [Can I use my own domain for public links?](/photos/faq/sharing-and-collaboration#custom-domains)
-* [How do I share an album with other Ente users?](/photos/faq/sharing-and-collaboration#share-with-users)
-* [Can people without Ente add photos to my album?](/photos/faq/sharing-and-collaboration#collect-without-account)
-* [Why does adding shared photos count against my storage?](/photos/faq/sharing-and-collaboration#add-shared-photos)
-* [Are public links end-to-end encrypted?](/photos/faq/sharing-and-collaboration#public-link-encryption)
-* [Who can create collaborative albums or public links?](/photos/faq/sharing-and-collaboration#who-can-share)
+- [What are the different ways to share in Ente?](/photos/faq/sharing-and-collaboration#sharing-methods)
+- [What's the difference between public links and quick links?](/photos/faq/sharing-and-collaboration#link-types)
+- [Can I use my own domain for public links?](/photos/faq/sharing-and-collaboration#custom-domains)
+- [How do I share an album with other Ente users?](/photos/faq/sharing-and-collaboration#share-with-users)
+- [Can people without Ente add photos to my album?](/photos/faq/sharing-and-collaboration#collect-without-account)
+- [Why does adding shared photos count against my storage?](/photos/faq/sharing-and-collaboration#add-shared-photos)
+- [Are public links end-to-end encrypted?](/photos/faq/sharing-and-collaboration#public-link-encryption)
+- [Who can create collaborative albums or public links?](/photos/faq/sharing-and-collaboration#who-can-share)

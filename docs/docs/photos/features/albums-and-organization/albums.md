@@ -8,12 +8,14 @@ description: Using albums in Ente Photos
 Albums in Ente are collections that help you organize your photos and videos. Similar to folders on your computer, albums group related photos together - but with some key differences:
 
 **How albums work:**
+
 - Albums are collections of photos and videos
 - Each photo can belong to multiple albums simultaneously
 - When you add a photo to multiple albums, it only counts once toward your storage
 - Albums sync across all your devices automatically
 
 **Key differences from folders:**
+
 - **No nesting**: Unlike folders, albums cannot contain other albums - they're all at the same level
 - **Multiple membership**: A single photo can exist in many albums without using extra storage
 - **Device-independent**: Albums you create in Ente are separate from folders on your device
@@ -98,6 +100,7 @@ When you upload photos and videos from your computer using the desktop app - whe
 ### Single files or flat folders
 
 If you upload individual files or a folder without nested subfolders, the desktop app will ask you to either:
+
 - Upload to an existing Ente album, or
 - Create a new album
 
@@ -108,11 +111,13 @@ The app will intelligently suggest a name for the new album based on the folder 
 If the folder contains nested subfolders and you choose to create a new album, you'll see two options:
 
 **Single album:**
+
 - Creates one Ente album named after the parent folder
 - All files from all nested subfolders go into this single album
 - Example: Folder `Photos` containing `New Year/` and `Summer/` → One album called "Photos" with all files
 
 **Separate albums:**
+
 - Creates a separate Ente album for each nested subfolder
 - Only folders containing at least one file become albums (empty folders are ignored)
 - Only the leaf folder name is used (e.g., both `A/B/C/Photos/x.jpg` and `1/2/3/Photos/y.jpg` go to an album called "Photos")
@@ -124,8 +129,8 @@ Learn more about [watch folders](/photos/features/backup-and-sync/watch-folders)
 
 ## Related FAQs
 
-* [Can Ente albums be nested?](/photos/faq/albums-and-organization#nested-albums)
-* [What happens when I upload a nested folder structure?](/photos/faq/albums-and-organization#nested-folders)
-* [Can I sync a folder with multiple subfolders?](/photos/faq/albums-and-organization#sync-subfolders)
-* [Why don't all photos from a new iOS album appear in the corresponding Ente album?](/photos/faq/albums-and-organization#ios-album-sync)
-* [How does Ente handle photos that are part of multiple iOS albums?](/photos/faq/albums-and-organization#multiple-ios-albums)
+- [Can Ente albums be nested?](/photos/faq/albums-and-organization#nested-albums)
+- [What happens when I upload a nested folder structure?](/photos/faq/albums-and-organization#nested-folders)
+- [Can I sync a folder with multiple subfolders?](/photos/faq/albums-and-organization#sync-subfolders)
+- [Why don't all photos from a new iOS album appear in the corresponding Ente album?](/photos/faq/albums-and-organization#ios-album-sync)
+- [How does Ente handle photos that are part of multiple iOS albums?](/photos/faq/albums-and-organization#multiple-ios-albums)

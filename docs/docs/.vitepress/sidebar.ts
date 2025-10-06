@@ -11,10 +11,19 @@ export const sidebar = [
                 collapsed: true,
                 items: [
                     { text: "Overview", link: "/photos/getting-started/" },
-                    { text: "Installation", link: "/photos/getting-started/installation" },
+                    {
+                        text: "Installation",
+                        link: "/photos/getting-started/installation",
+                    },
                     { text: "Sign up", link: "/photos/getting-started/signup" },
-                    { text: "Migration", link: "/photos/getting-started/migration" },
-                    { text: "Daily use", link: "/photos/getting-started/daily-use" },
+                    {
+                        text: "Migration",
+                        link: "/photos/getting-started/migration",
+                    },
+                    {
+                        text: "Daily use",
+                        link: "/photos/getting-started/daily-use",
+                    },
                 ],
             },
             {
@@ -55,7 +64,10 @@ export const sidebar = [
                         text: "Account",
                         collapsed: true,
                         items: [
-                            { text: "Overview", link: "/photos/features/account/" },
+                            {
+                                text: "Overview",
+                                link: "/photos/features/account/",
+                            },
                             {
                                 text: "Family plans",
                                 link: "/photos/features/account/family-plans",
@@ -78,7 +90,10 @@ export const sidebar = [
                         text: "Backup and Sync",
                         collapsed: true,
                         items: [
-                            { text: "Overview", link: "/photos/features/backup-and-sync/" },
+                            {
+                                text: "Overview",
+                                link: "/photos/features/backup-and-sync/",
+                            },
                             {
                                 text: "Watch folders",
                                 link: "/photos/features/backup-and-sync/watch-folders",
@@ -97,10 +112,22 @@ export const sidebar = [
                         text: "Albums and Organization",
                         collapsed: true,
                         items: [
-                            { text: "Albums", link: "/photos/features/albums-and-organization/albums" },
-                            { text: "Archiving", link: "/photos/features/albums-and-organization/archive" },
-                            { text: "Hidden photos", link: "/photos/features/albums-and-organization/hide" },
-                            { text: "Deleting photos", link: "/photos/features/albums-and-organization/deleting" },
+                            {
+                                text: "Albums",
+                                link: "/photos/features/albums-and-organization/albums",
+                            },
+                            {
+                                text: "Archiving",
+                                link: "/photos/features/albums-and-organization/archive",
+                            },
+                            {
+                                text: "Hidden photos",
+                                link: "/photos/features/albums-and-organization/hide",
+                            },
+                            {
+                                text: "Deleting photos",
+                                link: "/photos/features/albums-and-organization/deleting",
+                            },
                             {
                                 text: "Uncategorized",
                                 link: "/photos/features/albums-and-organization/uncategorized",
@@ -115,7 +142,10 @@ export const sidebar = [
                         text: "Sharing and Collaboration",
                         collapsed: true,
                         items: [
-                            { text: "Sharing", link: "/photos/features/sharing-and-collaboration/share" },
+                            {
+                                text: "Sharing",
+                                link: "/photos/features/sharing-and-collaboration/share",
+                            },
                             {
                                 text: "Collaboration",
                                 link: "/photos/features/sharing-and-collaboration/collaboration",
@@ -138,7 +168,10 @@ export const sidebar = [
                         text: "Search and Discovery",
                         collapsed: true,
                         items: [
-                            { text: "Overview", link: "/photos/features/search-and-discovery/" },
+                            {
+                                text: "Overview",
+                                link: "/photos/features/search-and-discovery/",
+                            },
                             {
                                 text: "Machine learning",
                                 link: "/photos/features/search-and-discovery/machine-learning",
@@ -161,10 +194,22 @@ export const sidebar = [
                         text: "Utilities",
                         collapsed: true,
                         items: [
-                            { text: "Cast", link: "/photos/features/utilities/cast/" },
-                            { text: "CLI", link: "/photos/features/utilities/cli" },
-                            { text: "Notifications", link: "/photos/features/utilities/notifications" },
-                            { text: "Video streaming", link: "/photos/features/utilities/video-streaming" },
+                            {
+                                text: "Cast",
+                                link: "/photos/features/utilities/cast/",
+                            },
+                            {
+                                text: "CLI",
+                                link: "/photos/features/utilities/cli",
+                            },
+                            {
+                                text: "Notifications",
+                                link: "/photos/features/utilities/notifications",
+                            },
+                            {
+                                text: "Video streaming",
+                                link: "/photos/features/utilities/video-streaming",
+                            },
                         ],
                     },
                 ],

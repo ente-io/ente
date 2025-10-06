@@ -14,6 +14,7 @@ Machine learning in Ente powers two main features:
 ### Face recognition
 
 Search for your photos by the people in them. Ente will:
+
 - Detect all faces in your photos
 - Group similar faces together to create clusters of people
 - Let you name persons for easy searching
@@ -24,6 +25,7 @@ Learn more in the [Face recognition guide](/photos/features/search-and-discovery
 ### Magic search
 
 Search for your photos using natural language descriptions. You can search for:
+
 - Objects: "car", "dog", "food"
 - Scenes: "beach", "sunset", "mountain"
 - Colors: "red flowers", "blue sky"
@@ -66,6 +68,7 @@ After enabling machine learning, the app needs to download and index your photos
 ### Monitoring progress
 
 While indexing is in progress:
+
 - **Mobile**: Check `Settings > General > Advanced > Machine learning` for indexing status
 - **Desktop**: Progress shown in the app
 - **Search bar**: May show indexing status when clicked
@@ -121,18 +124,21 @@ This way, you can continue to use ML features without impacting your phone's per
 ## Platform Differences
 
 ### Mobile apps (iOS and Android)
+
 - Full ML support: face recognition and magic search
 - Can modify face groupings (merge, de-merge, ignore)
 - Can name persons and manage face clusters
 - Local indexing can be disabled for low-end devices
 
 ### Desktop apps (Mac, Windows, Linux)
+
 - Full ML support: face recognition and magic search
 - Faster indexing than mobile
 - Cannot currently modify face groupings (view only)
 - Face grouping management must be done on mobile
 
 ### Web (web.ente.io)
+
 - ML features not available
 - Basic search only (date, file name, description, album)
 
@@ -142,20 +148,20 @@ Once your photos have been indexed, both face recognition and magic search work 
 
 ## Related FAQs
 
-* [How do I enable face recognition?](/photos/faq/search-and-discovery#enable-face-recognition)
-* [What is magic search?](/photos/faq/search-and-discovery#magic-search)
-* [Can I merge or de-merge persons?](/photos/faq/search-and-discovery#merge-persons)
-* [Does machine learning work offline?](/photos/faq/search-and-discovery#ml-offline)
-* [Is my data used to train AI models?](/photos/faq/security-and-privacy#ml-privacy)
-* [Why is face recognition faster on desktop?](/photos/faq/search-and-discovery#desktop-faster)
-* [Indexing stuck at 100% but faces don't appear](/photos/faq/search-and-discovery#indexing-stuck-no-faces)
-* [Machine learning features not working](/photos/faq/search-and-discovery#ml-features-not-working)
-* [Performance issues during indexing](/photos/faq/search-and-discovery#ml-performance-issues)
+- [How do I enable face recognition?](/photos/faq/search-and-discovery#enable-face-recognition)
+- [What is magic search?](/photos/faq/search-and-discovery#magic-search)
+- [Can I merge or de-merge persons?](/photos/faq/search-and-discovery#merge-persons)
+- [Does machine learning work offline?](/photos/faq/search-and-discovery#ml-offline)
+- [Is my data used to train AI models?](/photos/faq/security-and-privacy#ml-privacy)
+- [Why is face recognition faster on desktop?](/photos/faq/search-and-discovery#desktop-faster)
+- [Indexing stuck at 100% but faces don't appear](/photos/faq/search-and-discovery#indexing-stuck-no-faces)
+- [Machine learning features not working](/photos/faq/search-and-discovery#ml-features-not-working)
+- [Performance issues during indexing](/photos/faq/search-and-discovery#ml-performance-issues)
 
 ## Related topics
 
-* [Face recognition detailed guide](/photos/features/search-and-discovery/face-recognition)
-* [Magic search detailed guide](/photos/features/search-and-discovery/magic-search)
-* [Search and Discovery overview](/photos/features/search-and-discovery/)
-* [Search and Discovery FAQ](/photos/faq/search-and-discovery)
-* [Security and Privacy FAQ](/photos/faq/security-and-privacy)
+- [Face recognition detailed guide](/photos/features/search-and-discovery/face-recognition)
+- [Magic search detailed guide](/photos/features/search-and-discovery/magic-search)
+- [Search and Discovery overview](/photos/features/search-and-discovery/)
+- [Search and Discovery FAQ](/photos/faq/search-and-discovery)
+- [Security and Privacy FAQ](/photos/faq/security-and-privacy)

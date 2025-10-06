@@ -15,6 +15,7 @@ description: Uncategorized items in Ente Photos
 ## Cleaning up Uncategorized items
 
 In the mobile app:
+
 1. Open the Uncategorized album
 2. Tap the overflow menu (three dots)
 3. Select **Clean Uncategorized**
@@ -23,7 +24,7 @@ All files that are also present in another album you own will be removed from Un
 
 ## Related FAQs
 
-* [What is the Uncategorized album?](/photos/faq/albums-and-organization#uncategorized)
-* [Why are photos appearing in Uncategorized?](/photos/faq/albums-and-organization#why-uncategorized)
-* [How do I clean up Uncategorized items?](/photos/faq/albums-and-organization#clean-uncategorized)
-* [Can I delete the Uncategorized album?](/photos/faq/albums-and-organization#delete-uncategorized)
+- [What is the Uncategorized album?](/photos/faq/albums-and-organization#uncategorized)
+- [Why are photos appearing in Uncategorized?](/photos/faq/albums-and-organization#why-uncategorized)
+- [How do I clean up Uncategorized items?](/photos/faq/albums-and-organization#clean-uncategorized)
+- [Can I delete the Uncategorized album?](/photos/faq/albums-and-organization#delete-uncategorized)

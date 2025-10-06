@@ -25,6 +25,7 @@ you have to select and download photos individually or in batches.
 5. Wait for the download to complete
 
 **Tips for downloading:**
+
 - Download in batches by album or year to keep things organized
 - Create separate folders for different collections on your computer
 - Keep track of what you've downloaded to avoid missing photos
@@ -32,6 +33,7 @@ you have to select and download photos individually or in batches.
 ### Step 2: Organize your downloads (Optional)
 
 Before uploading to Ente, you might want to:
+
 - Organize photos into folders by date, event, or album
 - Remove duplicates if any were created during download
 - Delete unwanted screenshots or photos you no longer need
@@ -47,6 +49,7 @@ This organization will be reflected in Ente if you choose the "Separate albums" 
 5. Let the upload complete
 
 **Upload features:**
+
 - **Resumable**: If uploads get interrupted, drag and drop the same folder again - Ente will skip already uploaded files
 - **Original quality**: Your photos are uploaded in their original quality with no compression
 - **Metadata preserved**: Photo dates and locations are maintained
@@ -66,6 +69,7 @@ Amazon Photos albums won't be automatically preserved. However, if you download 
 ## After Migration
 
 Once your photos are in Ente:
+
 - [Set up automatic backup](/photos/getting-started/daily-use) for new photos on your mobile devices
 - Consider [enabling machine learning](/photos/features/search-and-discovery/machine-learning) for face recognition and smart search
 - Explore [sharing features](/photos/features/sharing-and-collaboration/share) to share albums with family and friends
