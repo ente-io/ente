@@ -323,6 +323,8 @@
     "thumbnail_generation_failed_hint": "Os arquivos foram enviados, porém, não conseguimos gerar miniaturas. (thumbnails)",
     "unsupported_files": "Arquivos incompatíveis",
     "unsupported_files_hint": "Ente não é compatível com estes formatos de arquivo",
+    "zero_size_files": "",
+    "zero_size_files_hint": "",
     "blocked_uploads": "Envios bloqueados",
     "blocked_uploads_hint": "Seu navegador ou uma extensão está bloqueando o Ente de usar <code>eTags</code> para enviar arquivos grandes.",
     "large_files": "Arquivos grandes",

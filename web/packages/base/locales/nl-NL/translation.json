@@ -323,6 +323,8 @@
     "thumbnail_generation_failed_hint": "Deze bestanden zijn geüpload, maar helaas konden we geen thumbnails voor ze genereren.",
     "unsupported_files": "Niet-ondersteunde bestanden",
     "unsupported_files_hint": "Ente ondersteunt deze bestandsformaten nog niet",
+    "zero_size_files": "",
+    "zero_size_files_hint": "",
     "blocked_uploads": "Geblokkeerde uploads",
     "blocked_uploads_hint": "Uw browser of een addon verhindert Ente te gebruiken met <code>eTags</code> om grote bestanden te uploaden.",
     "large_files": "Grote bestanden",

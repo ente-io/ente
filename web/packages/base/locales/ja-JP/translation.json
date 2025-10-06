@@ -323,6 +323,8 @@
     "thumbnail_generation_failed_hint": "これらのファイルはアップロードされましたが、残念ながらサムネイルを生成できませんでした。",
     "unsupported_files": "サポートされないファイル",
     "unsupported_files_hint": "Enteはこれらのファイル形式をサポートしていません",
+    "zero_size_files": "",
+    "zero_size_files_hint": "",
     "blocked_uploads": "アップロードがブロックされました",
     "blocked_uploads_hint": "ブラウザまたはアドオンが <code>eTags</code> を使用して大きなファイルをアップロードすることを妨げています。",
     "large_files": "ファイルサイズが大きい",

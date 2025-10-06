@@ -323,6 +323,8 @@
     "thumbnail_generation_failed_hint": "Ці файли були вивантажені, але, на жаль, ми не змогли створити для них мініатюри.",
     "unsupported_files": "Непідтримувані файли",
     "unsupported_files_hint": "Ente ще не підтримує ці формати файлів",
+    "zero_size_files": "",
+    "zero_size_files_hint": "",
     "blocked_uploads": "Заблоковані вивантаження",
     "blocked_uploads_hint": "Ваш браузер або доповнення не дозволяє Ente використовувати <code>eTags</code> для завантаження великих файлів.",
     "large_files": "Великі файли",

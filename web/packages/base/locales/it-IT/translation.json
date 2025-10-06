@@ -323,6 +323,8 @@
     "thumbnail_generation_failed_hint": "Questi file sono stati caricati, ma purtroppo non siamo riusciti a generare le relative miniature.",
     "unsupported_files": "File non supportati",
     "unsupported_files_hint": "Ente non supporta ancora questi formati di file",
+    "zero_size_files": "",
+    "zero_size_files_hint": "",
     "blocked_uploads": "Upload bloccati",
     "blocked_uploads_hint": "",
     "large_files": "File pesanti",

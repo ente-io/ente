@@ -323,6 +323,8 @@
     "thumbnail_generation_failed_hint": "Diese Dateien wurden hochgeladen, aber leider konnten wir nicht die Thumbnails für sie generieren.",
     "unsupported_files": "Nicht unterstützte Dateien",
     "unsupported_files_hint": "Ente unterstützt diese Dateiformate noch nicht",
+    "zero_size_files": "",
+    "zero_size_files_hint": "",
     "blocked_uploads": "Blockierte Uploads",
     "blocked_uploads_hint": "Ihr Browser oder ein Add-on hindert Ente daran, große Dateien mit <code>eTags</code> hochzuladen.",
     "large_files": "Große Dateien",
