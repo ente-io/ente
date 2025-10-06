@@ -529,8 +529,7 @@ class _FileSelectionActionsWidgetState
                 ),
 
                 // Second Row
-                AnimatedOpacity(
-                  opacity: widget.isCollapsed ? 0.0 : 1.0,
+                AnimatedSize(
                   duration: const Duration(milliseconds: 300),
                   curve: Curves.easeInOut,
                   child: widget.isCollapsed

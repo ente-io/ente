@@ -132,68 +132,71 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOutCubic,
         alignment: Alignment.topCenter,
-        child: ValueListenableBuilder(
-          valueListenable: _hasSelectedFilesNotifier,
-          builder: (context, value, child) {
-            return AnimatedCrossFade(
-              firstCurve: Curves.easeInOutCubic,
-              secondCurve: Curves.easeInOutCubic,
-              sizeCurve: Curves.easeInOutCubic,
-              crossFadeState: _hasSelectedFilesNotifier.value
-                  ? CrossFadeState.showFirst
-                  : CrossFadeState.showSecond,
-              duration: const Duration(milliseconds: 300),
-              firstChild: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 12),
-                        child: SelectAllButton(
-                          backgroundColor: widget.backgroundColor,
+        child: SizedBox(
+          width: double.infinity,
+          child: ValueListenableBuilder(
+            valueListenable: _hasSelectedFilesNotifier,
+            builder: (context, value, child) {
+              return AnimatedCrossFade(
+                firstCurve: Curves.easeInOutCubic,
+                secondCurve: Curves.easeInOutCubic,
+                sizeCurve: Curves.easeInOutCubic,
+                crossFadeState: _hasSelectedFilesNotifier.value
+                    ? CrossFadeState.showFirst
+                    : CrossFadeState.showSecond,
+                duration: const Duration(milliseconds: 300),
+                firstChild: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(left: 12),
+                          child: SelectAllButton(
+                            backgroundColor: widget.backgroundColor,
+                          ),
                         ),
-                      ),
-                      const Spacer(),
-                      Padding(
-                        padding: const EdgeInsets.only(right: 12),
-                        child: ActionBarWidget(
-                          selectedFiles: widget.selectedFiles,
-                          onCancel: () {
-                            if (widget.selectedFiles.files.isNotEmpty) {
-                              widget.selectedFiles.clearAll();
-                            }
-                          },
-                          backgroundColor: widget.backgroundColor,
+                        const Spacer(),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 12),
+                          child: ActionBarWidget(
+                            selectedFiles: widget.selectedFiles,
+                            onCancel: () {
+                              if (widget.selectedFiles.files.isNotEmpty) {
+                                widget.selectedFiles.clearAll();
+                              }
+                            },
+                            backgroundColor: widget.backgroundColor,
+                          ),
                         ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      decoration: BoxDecoration(
+                        boxShadow: shadowFloatFaintLight,
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    decoration: BoxDecoration(
-                      boxShadow: shadowFloatFaintLight,
+                      child: BottomActionBarWidget(
+                        selectedFiles: widget.selectedFiles,
+                        galleryType: _galleryType,
+                        collection: widget.collection,
+                        person: widget.person,
+                        clusterID: widget.clusterID,
+                        isCollapsed: widget.isCollapsed,
+                        onCancel: () {
+                          if (widget.selectedFiles.files.isNotEmpty) {
+                            widget.selectedFiles.clearAll();
+                          }
+                        },
+                      ),
                     ),
-                    child: BottomActionBarWidget(
-                      selectedFiles: widget.selectedFiles,
-                      galleryType: _galleryType,
-                      collection: widget.collection,
-                      person: widget.person,
-                      clusterID: widget.clusterID,
-                      isCollapsed: widget.isCollapsed,
-                      onCancel: () {
-                        if (widget.selectedFiles.files.isNotEmpty) {
-                          widget.selectedFiles.clearAll();
-                        }
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              secondChild: const SizedBox.shrink(),
-            );
-          },
+                  ],
+                ),
+                secondChild: const SizedBox.shrink(),
+              );
+            },
+          ),
         ),
       ),
     );

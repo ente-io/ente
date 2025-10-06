@@ -67,10 +67,8 @@ class _AlbumSelectionOverlayBarState extends State<AlbumSelectionOverlayBar> {
             duration: const Duration(milliseconds: 350),
             curve: Curves.easeInOutCubic,
             alignment: Alignment.topCenter,
-            child: AnimatedOpacity(
-              opacity: _hasSelectedAlbumsNotifier.value ? 1.0 : 0.0,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
+            child: SizedBox(
+              width: double.infinity,
               child: _hasSelectedAlbumsNotifier.value
                   ? Column(
                       mainAxisSize: MainAxisSize.min,
