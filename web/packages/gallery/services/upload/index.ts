@@ -434,6 +434,7 @@ export type UploadPhase =
 
 export type UploadResult =
     | { type: "unsupported" }
+    | { type: "zeroSize" }
     | { type: "tooLarge" }
     | { type: "largerThanAvailableStorage" }
     | { type: "blocked" }
