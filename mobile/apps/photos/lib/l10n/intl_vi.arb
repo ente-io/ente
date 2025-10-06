@@ -1801,7 +1801,6 @@
   "automaticallyAnalyzeAndSplitGrouping": "Chúng tôi sẽ tự động phân tích nhóm để xác định xem có nhiều người góp mặt hay không và tách họ ra lần nữa. Việc này có thể mất vài giây.",
   "layout": "Bố cục",
   "day": "Ngày",
-  "peopleAutoAddDesc": "Chọn những người bạn muốn tự động thêm vào album",
   "undo": "Hoàn tác",
   "redo": "Làm lại",
   "filter": "Bộ lọc",

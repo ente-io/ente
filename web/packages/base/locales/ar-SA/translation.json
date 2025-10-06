@@ -276,11 +276,7 @@
     "view_on_map": "عرض على OpenStreetMap",
     "map": "خريطة",
     "enable_map": "تمكين الخريطة",
-    "enable_maps_confirm": "تمكين الخرائط؟",
-    "enable_maps_confirm_message": "<p>سيؤدي هذا إلى عرض صورك على خريطة العالم.</p><p>تستضيف الخريطة <a>OpenStreetMap</a>، ولا تتم مشاركة المواقع الدقيقة لصورك أبدًا.</p><p>يمكنك تعطيل هذه الميزة في أي وقت من الإعدادات.</p>",
     "disable_map": "تعطيل الخريطة",
-    "disable_maps_confirm": "تعطيل الخرائط؟",
-    "disable_maps_confirm_message": "<p>سيؤدي هذا إلى تعطيل عرض صورك على خريطة العالم.</p><p>يمكنك تمكين هذه الميزة في أي وقت من الإعدادات.</p>",
     "details": "تفاصيل",
     "view_exif": "عرض جميع بيانات Exif",
     "no_exif": "لا توجد بيانات Exif",
@@ -701,5 +697,6 @@
     "grouped": "",
     "continuous": "",
     "trip": "",
-    "album_layout": ""
+    "album_layout": "",
+    "maps_privacy_notice": ""
 }

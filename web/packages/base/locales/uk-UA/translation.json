@@ -276,11 +276,7 @@
     "view_on_map": "Переглянути на OpenStreetMap",
     "map": "Мапа",
     "enable_map": "Увімкнути мапу",
-    "enable_maps_confirm": "Увімкнути мапи?",
-    "enable_maps_confirm_message": "<p>Це покаже ваші фотографії на мапі світу.</p><p>Мапа розміщена на сайті <a>OpenStreetMap</a>, а точне розташування ваших фотографій ніколи не розголошується.</p><p>Ви можете вимкнути цю функцію будь-коли в налаштуваннях.</p>",
     "disable_map": "Вимкнути мапу",
-    "disable_maps_confirm": "Вимкнути мапи?",
-    "disable_maps_confirm_message": "<p>Це вимкне показ ваших фотографій на мапі світу.</p><p>Ви можете увімкнути цю функцію будь-коли в налаштуваннях.</p>",
     "details": "Подробиці",
     "view_exif": "Переглянути всі дані EXIF",
     "no_exif": "Немає даних EXIF",
@@ -701,5 +697,6 @@
     "grouped": "",
     "continuous": "",
     "trip": "",
-    "album_layout": ""
+    "album_layout": "",
+    "maps_privacy_notice": ""
 }

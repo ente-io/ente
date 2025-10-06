@@ -1800,7 +1800,6 @@
   "automaticallyAnalyzeAndSplitGrouping": "Mes automatiškai išanalizuosime grupavimą, kad nustatytume, ar yra keli asmenys, ir vėl juos atskirsime. Tai gali užtrukti keletą sekundžių.",
   "layout": "Išdėstymas",
   "day": "Diena",
-  "peopleAutoAddDesc": "Pasirinkite asmenis, kuriuos norite automatiškai įtraukti į albumą.",
   "undo": "Anuliuoti",
   "redo": "Grąžinti",
   "filter": "Filtruoti",

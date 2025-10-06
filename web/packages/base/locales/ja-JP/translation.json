@@ -276,11 +276,7 @@
     "view_on_map": "OpenStreetMapで表示",
     "map": "マップ",
     "enable_map": "マップを有効にする",
-    "enable_maps_confirm": "マップを有効にしますか？",
-    "enable_maps_confirm_message": "世界地図上にあなたの写真を表示します。\n\n地図はOpenStreetMapを利用しており、あなたの写真の位置情報が外部に共有されることはありません。\n\nこの機能は設定から無効にすることができます",
     "disable_map": "マップを無効にする",
-    "disable_maps_confirm": "マップを無効にしますか？",
-    "disable_maps_confirm_message": "<p>ワールドマップでの写真の表示を無効にします。</p><p>設定からいつでもこの機能を有効にできます。</p>",
     "details": "詳細",
     "view_exif": "すべての Exif データを表示",
     "no_exif": "Exifデータがありません",
@@ -701,5 +697,6 @@
     "grouped": "",
     "continuous": "",
     "trip": "",
-    "album_layout": ""
+    "album_layout": "",
+    "maps_privacy_notice": ""
 }

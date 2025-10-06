@@ -276,11 +276,7 @@
     "view_on_map": "Xem trên OpenStreetMap",
     "map": "Bản đồ",
     "enable_map": "Bật bản đồ",
-    "enable_maps_confirm": "Bật bản đồ?",
-    "enable_maps_confirm_message": "<p>Ảnh của bạn sẽ hiển thị trên bản đồ thế giới.</p><p>Bản đồ được lưu trữ bởi <a>OpenStreetMap</a> và vị trí chính xác ảnh của bạn không bao giờ được chia sẻ.</p><p>Bạn có thể tắt tính năng này bất cứ lúc nào từ Cài đặt.</p>",
     "disable_map": "Tắt bản đồ",
-    "disable_maps_confirm": "Tắt bản đồ?",
-    "disable_maps_confirm_message": "<p>Ảnh của bạn sẽ thôi hiển thị trên bản đồ thế giới.</p><p>Bạn có thể bật tính năng này bất cứ lúc nào từ Cài đặt.</p>",
     "details": "Chi tiết",
     "view_exif": "Xem thông số Exif",
     "no_exif": "Không có Exif",
@@ -701,5 +697,6 @@
     "grouped": "Đã phân nhóm",
     "continuous": "Liên tục",
     "trip": "Chuyến đi",
-    "album_layout": "Bố cục album"
+    "album_layout": "Bố cục album",
+    "maps_privacy_notice": "Tọa độ gần đúng sẽ được gửi đến các bên thứ ba quan tâm đến quyền riêng tư như OpenStreetMaps để hiển thị bản đồ và vị trí."
 }

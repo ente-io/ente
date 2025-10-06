@@ -276,11 +276,7 @@
     "view_on_map": "Bekijk op OpenStreetMap",
     "map": "Kaart",
     "enable_map": "Kaarten inschakelen",
-    "enable_maps_confirm": "Kaarten inschakelen?",
-    "enable_maps_confirm_message": "<p>Dit toont jouw foto's op een wereldkaart.</p><p>Deze kaart wordt gehost door <a>Open Street Map</a>, en de exacte locaties van jouw foto's worden nooit gedeeld.</p><p>Je kunt deze functie op elk gewenst moment uitschakelen via de instellingen.</p>",
     "disable_map": "Kaarten uitzetten",
-    "disable_maps_confirm": "Kaarten uitzetten?",
-    "disable_maps_confirm_message": "<p>Dit schakelt de weergave van je foto's op een wereldkaart uit.</p><p>Je kunt deze functie op elk gewenst moment inschakelen via Instellingen.</p>",
     "details": "Details",
     "view_exif": "Bekijk alle Exif gegevens",
     "no_exif": "Geen Exif gegevens",
@@ -701,5 +697,6 @@
     "grouped": "Gegroepeerd",
     "continuous": "Doorgaands",
     "trip": "Trip",
-    "album_layout": ""
+    "album_layout": "",
+    "maps_privacy_notice": ""
 }

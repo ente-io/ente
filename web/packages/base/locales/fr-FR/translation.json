@@ -276,11 +276,7 @@
     "view_on_map": "Visualiser sur OpenStreetMap",
     "map": "Carte",
     "enable_map": "Activer la carte",
-    "enable_maps_confirm": "Activer la carte?",
-    "enable_maps_confirm_message": "<p>Cette fonction affiche vos photos sur une carte du monde.</p><p>La carte est hébergée par <a>OpenStreetMap</a>, et les emplacements exacts de vos photos ne sont jamais partagés.</p><p>Vous pouvez désactiver cette fonction à tout moment dans des paramètres.</p>",
     "disable_map": "Désactiver la carte",
-    "disable_maps_confirm": "Désactiver la carte?",
-    "disable_maps_confirm_message": "<p>Cette fonction désactive l'affichage de vos photos sur une carte du monde.</p><p>Vous pouvez activer cette fonction à tout moment dans les Paramètres.</p>",
     "details": "Détails",
     "view_exif": "Visualiser toutes les données Exif",
     "no_exif": "Aucune donnée Exif",
@@ -701,5 +697,6 @@
     "grouped": "Groupé",
     "continuous": "",
     "trip": "Voyage",
-    "album_layout": "Disposition de l'album"
+    "album_layout": "Disposition de l'album",
+    "maps_privacy_notice": "Les coordonnées approximatives seront envoyées à des tiers soucieux de la vie privée comme OpenStreetMaps pour afficher la carte et l'emplacement."
 }

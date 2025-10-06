@@ -276,11 +276,7 @@
     "view_on_map": "OpenStreetMap'te görüntüle",
     "map": "Harita",
     "enable_map": "Haritayı aç",
-    "enable_maps_confirm": "Haritalar etkinleştirilsin mi?",
-    "enable_maps_confirm_message": "<p>Bu, fotoğraflarınızı dünya haritası üzerinde gösterecek.</p><p>Harita <a>OpenStreetMap</a>, tarafından barındırılır ve fotoğraflarınızın tam konumları asla paylaşılmaz.</p><p> Bu özelliği istediğiniz zaman Ayarlar'dan devre dışı bırakabilirsiniz.</p>",
     "disable_map": "Haritayı kapat",
-    "disable_maps_confirm": "Haritalar devre dışı bırakılsın mı?",
-    "disable_maps_confirm_message": "<p>Bu işlem, fotoğraflarınızın dünya haritasında görüntülenmesini devre dışı bırakır.</p><p>Bu özelliği Ayarlar'dan dilediğiniz zaman yeniden etkinleştirebilirsiniz.</p>",
     "details": "Ayrıntılar",
     "view_exif": "Tüm Exif verilerini görüntüle",
     "no_exif": "Exif verisi yok",
@@ -701,5 +697,6 @@
     "grouped": "",
     "continuous": "",
     "trip": "",
-    "album_layout": ""
+    "album_layout": "",
+    "maps_privacy_notice": ""
 }

@@ -5,7 +5,7 @@
 When making commits, follow these rules:
 
 - Keep messages CONCISE (no walls of text)
-- Subject line under 72 chars (no body text - only Co-Authored-By line)
+- Subject line under 72 chars as a single sentence (no body text, no bullets, no lists - only Co-Authored-By line)
 - NO emojis
 - NO promotional text or links (except Co-Authored-By line)
 - Use ONLY "Co-Authored-By: Claude <noreply@anthropic.com>" for attribution
