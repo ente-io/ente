@@ -131,6 +131,8 @@ export default function PublicCollectionGallery() {
     const credentials = useRef<PublicAlbumsCredentials | undefined>(undefined);
     const collectionKey = useRef<string | undefined>(undefined);
 
+    const isRedirectingToAlbumsAppRef = useRef<boolean>(false);
+
     const { saveGroups, onAddSaveGroup, onRemoveSaveGroup } = useSaveGroups();
 
     const router = useRouter();
@@ -163,10 +165,11 @@ export default function PublicCollectionGallery() {
             const albumsURL = new URL(albumsAppOrigin());
 
             if (currentURL.host !== albumsURL.host) {
+                isRedirectingToAlbumsAppRef.current = true;
+
                 albumsURL.search = currentURL.search;
                 albumsURL.hash = currentURL.hash;
 
-                setLoading(true);
                 window.location.href = albumsURL.href;
                 return true;
             }
@@ -197,7 +200,6 @@ export default function PublicCollectionGallery() {
          */
         const main = async () => {
             let redirectingToWebsite = false;
-            let redirectingToAlbumsApp = false;
             try {
                 const currentURL = new URL(window.location.href);
                 const t = currentURL.searchParams.get("t");
@@ -215,7 +217,6 @@ export default function PublicCollectionGallery() {
                 let accessTokenJWT: string | undefined;
                 if (collection) {
                     if (checkAndRedirectForTripAlbum(collection)) {
-                        redirectingToAlbumsApp = true;
                         return;
                     }
 
@@ -241,7 +242,10 @@ export default function PublicCollectionGallery() {
                 void updateShouldDisableCFUploadProxy();
                 await publicAlbumsRemotePull();
             } finally {
-                if (!redirectingToWebsite && !redirectingToAlbumsApp) {
+                if (
+                    !redirectingToWebsite &&
+                    !isRedirectingToAlbumsAppRef.current
+                ) {
                     setLoading(false);
                 }
             }
@@ -352,7 +356,9 @@ export default function PublicCollectionGallery() {
             }
         } finally {
             hideLoadingBar();
-            setLoading(false);
+            if (!isRedirectingToAlbumsAppRef.current) {
+                setLoading(false);
+            }
         }
     }, [showLoadingBar, hideLoadingBar, onGenericError]);
 
