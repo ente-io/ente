@@ -192,8 +192,10 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
     // await MLService.instance.runAllML(force: true);
     _logger.info("[BG TASK] smart albums sync");
     await smartAlbumsService.syncSmartAlbums();
-  } finally {
+
     _logger.info("[BG TASK] $taskId completed");
+  } catch (e, s) {
+    _logger.severe("[BG TASK] $taskId error", e, s);
   }
 }
 
@@ -417,13 +419,16 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     }
   } else {
     // App is dead
-    runWithLogs(() async {
-      _logger.info("Background push received");
-      await _init(true, via: 'firebasePush');
-      if (PushService.shouldSync(message)) {
-        await _sync('firebaseBgSyncNoActiveProcess');
-      }
-    }, prefix: "[fbg]").ignore();
+    runWithLogs(
+      () async {
+        _logger.info("Background push received");
+        await _init(true, via: 'firebasePush');
+        if (PushService.shouldSync(message)) {
+          await _sync('firebaseBgSyncNoActiveProcess');
+        }
+      },
+      prefix: "[fbg]",
+    ).ignore();
   }
 }
 
