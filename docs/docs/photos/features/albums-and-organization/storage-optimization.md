@@ -150,7 +150,7 @@ Learn more about [Machine learning](/photos/features/search-and-discovery/machin
 - Permanently delete items or empty trash to free up space
 - Items are automatically deleted after 30 days
 
-Learn more in [Trash](/photos/features/albums-and-organization/trash).
+Learn more in [deletion feature guide](/photos/features/albums-and-organization/deleting).
 
 ## Related topics
 

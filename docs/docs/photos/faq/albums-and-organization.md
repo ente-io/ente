@@ -293,7 +293,7 @@ When you delete a photo or video in Ente, it's moved to Trash rather than being 
 
 Deleted items remain in Trash for 30 days before being permanently deleted automatically.
 
-Learn more in the [Trash feature guide](/photos/features/albums-and-organization/trash).
+Learn more in the [deletion feature guide](/photos/features/albums-and-organization/deleting).
 
 ### How do I restore deleted photos? {#restore-photos}
 
