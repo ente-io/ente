@@ -75,16 +75,10 @@ void main() async {
 
   if (Platform.isAndroid) FlutterDisplayMode.setHighRefreshRate().ignore();
   SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      systemNavigationBarColor: Color(0x00010000),
-    ),
+    const SystemUiOverlayStyle(systemNavigationBarColor: Color(0x00010000)),
   );
 
-  unawaited(
-    SystemChrome.setEnabledSystemUIMode(
-      SystemUiMode.edgeToEdge,
-    ),
-  );
+  unawaited(SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge));
 }
 
 Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
@@ -97,7 +91,8 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
       AppLock(
         builder: (args) => EnteApp(locale, savedThemeMode),
         lockScreen: const LockScreen(),
-        enabled: await Configuration.instance.shouldShowLockScreen() ||
+        enabled:
+            await Configuration.instance.shouldShowLockScreen() ||
             localSettings.isOnGuestView(),
         locale: locale,
         lightTheme: lightThemeData,
@@ -138,57 +133,70 @@ Future<void> runBackgroundTask(
 }
 
 Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
-  final PackageInfo packageInfo = await PackageInfo.fromPlatform();
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  try {
+    final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
 
-  await Configuration.instance.init();
+    await Configuration.instance.init();
 
-  // App LifeCycle
-  AppLifecycleService.instance.init(prefs);
-  AppLifecycleService.instance.onAppInBackground('init via: WorkManager $tlog');
+    // App LifeCycle
+    AppLifecycleService.instance.init(prefs);
+    AppLifecycleService.instance.onAppInBackground(
+      'init via: WorkManager $tlog',
+    );
 
-  // Crypto rel.
-  await Computer.shared().turnOn(workersCount: 4);
-  CryptoUtil.init();
+    // Crypto rel.
+    await Computer.shared().turnOn(workersCount: 4);
+    CryptoUtil.init();
 
-  // Init Network Utils
-  await NetworkClient.instance.init(packageInfo);
+    // Init Network Utils
+    await NetworkClient.instance.init(packageInfo);
 
-  // Global Services
-  ServiceLocator.instance.init(
-    prefs,
-    NetworkClient.instance.enteDio,
-    NetworkClient.instance.getDio(),
-    packageInfo,
-  );
+    // Global Services
+    ServiceLocator.instance.init(
+      prefs,
+      NetworkClient.instance.enteDio,
+      NetworkClient.instance.getDio(),
+      packageInfo,
+    );
 
-  await CollectionsService.instance.init(prefs);
+    await CollectionsService.instance.init(prefs);
 
-  // Upload & Sync Related
-  await FileUploader.instance.init(prefs, true);
-  LocalFileUpdateService.instance.init(prefs);
-  await LocalSyncService.instance.init(prefs);
-  RemoteSyncService.instance.init(prefs);
-  await SyncService.instance.init(prefs);
+    // Upload & Sync Related
+    await FileUploader.instance.init(prefs, true);
+    LocalFileUpdateService.instance.init(prefs);
+    await LocalSyncService.instance.init(prefs);
+    RemoteSyncService.instance.init(prefs);
+    await SyncService.instance.init(prefs);
 
-  // Misc Services
-  await UserService.instance.init();
-  NotificationService.instance.init(prefs);
+    // Misc Services
+    await UserService.instance.init();
+    NotificationService.instance.init(prefs);
 
-  // Begin Execution
-  // only runs for android
-  updateService.showUpdateNotification().ignore();
-  await _sync('bgTaskActiveProcess');
+    // Begin Execution
+    // only runs for android
+    _logger.info("[BG TASK] update notification");
+    updateService.showUpdateNotification().ignore();
+    _logger.info("[BG TASK] sync starting");
+    await _sync('bgTaskActiveProcess');
 
-  final locale = await getLocale();
-  await initializeDateFormatting(locale?.languageCode ?? "en");
-  // only runs for android
-  await _homeWidgetSync(true);
+    _logger.info("[BG TASK] locale fetch");
+    final locale = await getLocale();
+    await initializeDateFormatting(locale?.languageCode ?? "en");
+    // only runs for android
+    _logger.info("[BG TASK] home widget sync");
+    await _homeWidgetSync(true);
 
-  // await MLService.instance.init();
-  // await PersonService.init(entityService, MLDataDB.instance, prefs);
-  // await MLService.instance.runAllML(force: true);
-  await smartAlbumsService.syncSmartAlbums();
+    // await MLService.instance.init();
+    // await PersonService.init(entityService, MLDataDB.instance, prefs);
+    // await MLService.instance.runAllML(force: true);
+    _logger.info("[BG TASK] smart albums sync");
+    await smartAlbumsService.syncSmartAlbums();
+
+    _logger.info("[BG TASK] $taskId completed");
+  } catch (e, s) {
+    _logger.severe("[BG TASK] $taskId error", e, s);
+  }
 }
 
 Future<void> _init(bool isBackground, {String via = ''}) async {
@@ -282,11 +290,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("PushService/HomeWidget done $tlog");
     unawaited(SemanticSearchService.instance.init());
     unawaited(MLService.instance.init());
-    await PersonService.init(
-      entityService,
-      MLDataDB.instance,
-      preferences,
-    );
+    await PersonService.init(entityService, MLDataDB.instance, preferences);
     EnteWakeLockService.instance.init(preferences);
     logLocalSettings();
     initComplete = true;
@@ -310,8 +314,9 @@ void logLocalSettings() {
         VideoPreviewService.instance.isVideoStreamingEnabled,
   };
 
-  final formattedSettings =
-      settings.entries.map((e) => '${e.key}: ${e.value}').join(', ');
+  final formattedSettings = settings.entries
+      .map((e) => '${e.key}: ${e.value}')
+      .join(', ');
   _logger.info('Local settings - $formattedSettings');
 }
 

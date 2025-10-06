@@ -223,7 +223,7 @@ dependencies:
   wakelock_plus: ^1.1.1
   wechat_assets_picker: ^9.5.1
   widgets_to_image: ^1.0.0
-  workmanager: ^0.7.0
+  workmanager: 0.9.0+3
   xml: ^6.3.0
 
 dependency_overrides:
