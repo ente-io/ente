@@ -55,6 +55,7 @@ import {
     type PublicAlbumsCredentials,
 } from "ente-base/http";
 import log from "ente-base/log";
+import { albumsAppOrigin, shouldOnlyServeAlbumsApp } from "ente-base/origins";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import {
     useSaveGroups,
@@ -154,9 +155,12 @@ export default function PublicCollectionGallery() {
      * Reason: custom domains do not support the Trip layout fully
      */
     const checkAndRedirectForTripAlbum = (collection: Collection): boolean => {
-        if (collection.pubMagicMetadata?.data.layout === "trip") {
+        if (
+            collection.pubMagicMetadata?.data.layout === "trip" &&
+            shouldOnlyServeAlbumsApp
+        ) {
             const currentURL = new URL(window.location.href);
-            const albumsURL = new URL("https://albums.ente.io");
+            const albumsURL = new URL(albumsAppOrigin());
 
             if (currentURL.host !== albumsURL.host) {
                 albumsURL.search = currentURL.search;
