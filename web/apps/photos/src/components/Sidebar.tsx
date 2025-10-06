@@ -1105,7 +1105,7 @@ const DomainSettingsContents: React.FC = () => {
                         components={{
                             a: (
                                 <Link
-                                    href="https://help.ente.io/photos/features/custom-domains/"
+                                    href="https://help.ente.io/photos/features/sharing-and-collaboration/custom-domains/"
                                     target="_blank"
                                     rel="noopener"
                                     color="accent"
