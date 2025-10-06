@@ -80,7 +80,6 @@ class BgTaskUtils {
     try {
       await workmanager.Workmanager().initialize(
         callbackDispatcher,
-        isInDebugMode: false,
       );
       await workmanager.Workmanager().registerPeriodicTask(
         backgroundTaskIdentifier,
@@ -95,11 +94,20 @@ class BgTaskUtils {
           requiresStorageNotLow: false,
           requiresDeviceIdle: false,
         ),
-        existingWorkPolicy: workmanager.ExistingWorkPolicy.append,
+        existingWorkPolicy: workmanager.ExistingPeriodicWorkPolicy.update,
         backoffPolicy: workmanager.BackoffPolicy.linear,
         backoffPolicyDelay: const Duration(minutes: 15),
       );
       $.info("WorkManager configured");
+
+      // Check if task is scheduled (Android only)
+      if (Platform.isAndroid) {
+        final isScheduled = await workmanager.Workmanager()
+            .isScheduledByUniqueName(backgroundTaskIdentifier);
+        $.info(
+          "Periodic task scheduled status: $isScheduled for $backgroundTaskIdentifier",
+        );
+      }
     } catch (e) {
       $.warning("Failed to configure WorkManager: $e");
     }
