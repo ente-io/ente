@@ -1,53 +1,25 @@
 ---
-title: Archive
-description: |
-    Archiving photos and albums in Ente Photos to remove them from your home
-    timeline
+title: This Page Has Moved
+description: This content has been reorganized
 ---
 
-# Archive
+# This Page Has Moved
 
-You can remove a photo (owned by you) or an album from your **home timeline** by
-archiving it. Archived photos won't be included in the memories section on the
-mobile app.
+The **Archive** feature guide has moved to:
 
-- All photos within a archived album will be removed from home timeline, even
-  when some of the photos are also present in a non-archived album.
-- You can archive albums that are owned by you or shared with you.
-- Search results will include archived photos. If you want to hide photos from
-  search result, use [Hide](./hide) feature.
+## Archive Feature
 
-## How to
+- [Archive feature guide](/photos/features/albums-and-organization/archive) - Complete guide to archiving photos to declutter your timeline
 
-### Archive Album
+## Related topics
 
-- Open the album
-- Click on the overflow menu
-- Click on Archive album
+- [Archive FAQ](/photos/faq/albums-and-organization#hide-vs-archive) - Common questions about archiving
+- [Hide vs Archive](/photos/faq/albums-and-organization#hide-vs-archive) - Understanding the difference
 
-### Archive Photo
+---
 
-- Long press to select the photo
-- Select Archive option from the bottom menu.
+**Can't find what you're looking for?**
 
-### View Archived Photos and Albums
-
-#### Mobile
-
-- Go to Albums tab
-- Scroll down to bottom
-- Click on Archive button.
-
-#### Web / Desktop
-
-- Click on the topleft hamburger menu
-- Click on Archive
-
-### Metadata Privacy
-
-Both Ente and the person with whom you are sharing an album or photo have no
-information about whether you have:
-
-- Archived a photo
-- Archived an album
-- Archived a shared album
+- Browse [Albums and Organization features](/photos/features/albums-and-organization/albums)
+- Check [Albums FAQ](/photos/faq/albums-and-organization)
+- Visit the [main Photos documentation](/photos/)

@@ -856,6 +856,40 @@ class CollectionsService {
     return "$finalUrl#$collectionKey";
   }
 
+  String getEmbedHtml(Collection c) {
+    final PublicURL url = c.publicURLs.firstOrNull!;
+    Uri publicUrl = Uri.parse(url.url);
+
+    // Replace with embed URL if configured
+    final String embedUrl = flagService.embedUrl;
+    if (embedUrl.isNotEmpty) {
+      final Uri embedUri = Uri.parse(embedUrl);
+      publicUrl = publicUrl.replace(
+        host: embedUri.host,
+        scheme: embedUri.scheme,
+        port: embedUri.hasPort ? embedUri.port : (embedUri.scheme == 'https' ? 443 : 80),
+      );
+    }
+
+    // Get the collection key for the URL fragment
+    final String collectionKey = Base58Encode(
+      CollectionsService.instance.getCollectionKey(c.id),
+    );
+
+    // Build the final URL
+    String finalUrl = publicUrl.toString();
+
+    // Handle IDN domains - if the host was percent-encoded by Uri.replace,
+    // decode it for user-friendly display
+    if (embedUrl.isNotEmpty && publicUrl.host.contains('%')) {
+      final decodedHost = Uri.decodeComponent(publicUrl.host);
+      finalUrl = finalUrl.replaceFirst(publicUrl.host, decodedHost);
+    }
+
+    final String embedHtmlUrl = "$finalUrl#$collectionKey";
+    return '<iframe src="$embedHtmlUrl" width="800" height="600" frameborder="0" allowfullscreen></iframe>';
+  }
+
   Uint8List _getAndCacheDecryptedKey(
     Collection collection, {
     String source = "",

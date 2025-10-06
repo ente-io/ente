@@ -198,6 +198,11 @@
   "@noDeviceLimit": {
     "description": "Text to indicate that there is limit on number of devices"
   },
+  "albumLayout": "相册布局",
+  "layoutGrouped": "已分组",
+  "layoutContinuous": "连续",
+  "layoutTrip": "旅游",
+  "preview": "预览",
   "linkExpiry": "链接过期",
   "linkExpired": "已过期",
   "linkEnabled": "已启用",
@@ -237,6 +242,7 @@
   "shareWithNonenteUsers": "与非 Ente 用户共享",
   "createPublicLink": "创建公开链接",
   "sendLink": "发送链接",
+  "sendQrCode": "发送二维码",
   "copyLink": "复制链接",
   "linkHasExpired": "链接已过期",
   "publicLinkEnabled": "公开链接已启用",
@@ -1936,5 +1942,13 @@
   "cLTitle2": "视频流增强功能",
   "cLDesc2": "您现在可以直接从应用程序手动触发视频流生成。我们还添加了一个新的视频流设置屏幕，它将显示已处理的视频流百分比",
   "cLTitle3": "性能改进",
-  "cLDesc3": "多项底层改进，包括更好的缓存使用和更流畅的滚动体验"
+  "cLDesc3": "多项底层改进，包括更好的缓存使用和更流畅的滚动体验",
+  "closeBy": "关闭",
+  "@closeBy": {
+    "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
+  },
+  "peopleAutoAddDesc": "自动将选定人物的照片添加到此相册",
+  "@peopleAutoAddDesc": {
+    "description": "The message the copy should convey is that photos or videos containing the selected people's faces will be automatically added to this album"
+  }
 }

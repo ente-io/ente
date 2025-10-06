@@ -7,81 +7,22 @@ export const sidebar = [
         items: [
             { text: "Introduction", link: "/photos/" },
             {
-                text: "Features",
+                text: "Getting Started",
                 collapsed: true,
                 items: [
-                    { text: "Albums", link: "/photos/features/albums" },
-                    { text: "Archiving", link: "/photos/features/archive" },
+                    { text: "Overview", link: "/photos/getting-started/" },
                     {
-                        text: "Background sync",
-                        link: "/photos/features/background",
+                        text: "Installation",
+                        link: "/photos/getting-started/installation",
                     },
-                    { text: "Backup", link: "/photos/features/backup" },
-                    { text: "Cast", link: "/photos/features/cast/" },
+                    { text: "Sign up", link: "/photos/getting-started/signup" },
                     {
-                        text: "Collaboration",
-                        link: "/photos/features/collaborate",
+                        text: "Migration",
+                        link: "/photos/getting-started/migration",
                     },
                     {
-                        text: "Collecting photos",
-                        link: "/photos/features/collect",
-                    },
-                    {
-                        text: "Custom domains",
-                        link: "/photos/features/custom-domains/",
-                    },
-                    {
-                        text: "Deduplicate",
-                        link: "/photos/features/deduplicate",
-                    },
-                    {
-                        text: "Family plans",
-                        link: "/photos/features/family-plans",
-                    },
-                    {
-                        text: "Free up space",
-                        link: "/photos/features/free-up-space/",
-                    },
-                    { text: "Hidden photos", link: "/photos/features/hide" },
-                    {
-                        text: "Legacy",
-                        link: "/photos/features/legacy/",
-                    },
-                    {
-                        text: "Location tags",
-                        link: "/photos/features/location-tags",
-                    },
-                    {
-                        text: "Machine learning",
-                        link: "/photos/features/machine-learning",
-                    },
-                    { text: "Map", link: "/photos/features/map" },
-                    {
-                        text: "Notifications",
-                        link: "/photos/features/notifications",
-                    },
-                    {
-                        text: "Passkeys",
-                        link: "/photos/features/passkeys",
-                    },
-                    {
-                        text: "Public link",
-                        link: "/photos/features/public-link",
-                    },
-                    { text: "Quick link", link: "/photos/features/quick-link" },
-                    {
-                        text: "Referral program",
-                        link: "/photos/features/referral-program/",
-                    },
-                    { text: "Sharing", link: "/photos/features/share" },
-                    { text: "Trash", link: "/photos/features/trash" },
-                    {
-                        text: "Uncategorized",
-                        link: "/photos/features/uncategorized",
-                    },
-                    {
-                        text: "Watch folders",
-                        link: "/photos/features/watch-folders",
+                        text: "Daily use",
+                        link: "/photos/getting-started/daily-use",
                     },
                 ],
             },
@@ -93,7 +34,6 @@ export const sidebar = [
                         text: "Introduction",
                         link: "/photos/migration/",
                     },
-
                     {
                         text: "From Google Photos",
                         link: "/photos/migration/from-google-photos/",
@@ -117,70 +57,202 @@ export const sidebar = [
                 ],
             },
             {
-                text: "FAQ",
+                text: "Features",
                 collapsed: true,
                 items: [
-                    { text: "General", link: "/photos/faq/general" },
-                    { text: "Installation", link: "/photos/faq/installing" },
                     {
-                        text: "Export",
-                        link: "/photos/faq/export",
+                        text: "Account",
+                        collapsed: true,
+                        items: [
+                            {
+                                text: "Overview",
+                                link: "/photos/features/account/",
+                            },
+                            {
+                                text: "Family plans",
+                                link: "/photos/features/account/family-plans",
+                            },
+                            {
+                                text: "Passkeys",
+                                link: "/photos/features/account/passkeys",
+                            },
+                            {
+                                text: "Referral program",
+                                link: "/photos/features/account/referral-program/",
+                            },
+                            {
+                                text: "Legacy",
+                                link: "/photos/features/account/legacy/",
+                            },
+                        ],
                     },
                     {
-                        text: "Metadata",
-                        link: "/photos/faq/metadata",
+                        text: "Backup and Sync",
+                        collapsed: true,
+                        items: [
+                            {
+                                text: "Overview",
+                                link: "/photos/features/backup-and-sync/",
+                            },
+                            {
+                                text: "Watch folders",
+                                link: "/photos/features/backup-and-sync/watch-folders",
+                            },
+                            {
+                                text: "Duplicate detection",
+                                link: "/photos/features/backup-and-sync/duplicate-detection",
+                            },
+                            {
+                                text: "Export",
+                                link: "/photos/features/backup-and-sync/export",
+                            },
+                        ],
                     },
                     {
-                        text: "Security and privacy",
-                        link: "/photos/faq/security-and-privacy",
+                        text: "Albums and Organization",
+                        collapsed: true,
+                        items: [
+                            {
+                                text: "Albums",
+                                link: "/photos/features/albums-and-organization/albums",
+                            },
+                            {
+                                text: "Archiving",
+                                link: "/photos/features/albums-and-organization/archive",
+                            },
+                            {
+                                text: "Hidden photos",
+                                link: "/photos/features/albums-and-organization/hide",
+                            },
+                            {
+                                text: "Deleting photos",
+                                link: "/photos/features/albums-and-organization/deleting",
+                            },
+                            {
+                                text: "Uncategorized",
+                                link: "/photos/features/albums-and-organization/uncategorized",
+                            },
+                            {
+                                text: "Storage optimization",
+                                link: "/photos/features/albums-and-organization/storage-optimization",
+                            },
+                        ],
                     },
                     {
-                        text: "Subscription and plans",
-                        link: "/photos/faq/subscription",
+                        text: "Sharing and Collaboration",
+                        collapsed: true,
+                        items: [
+                            {
+                                text: "Sharing",
+                                link: "/photos/features/sharing-and-collaboration/share",
+                            },
+                            {
+                                text: "Collaboration",
+                                link: "/photos/features/sharing-and-collaboration/collaboration",
+                            },
+                            {
+                                text: "Public links",
+                                link: "/photos/features/sharing-and-collaboration/public-links",
+                            },
+                            {
+                                text: "Custom domains",
+                                link: "/photos/features/sharing-and-collaboration/custom-domains/",
+                            },
+                            {
+                                text: "Embed albums",
+                                link: "/photos/features/sharing-and-collaboration/embed",
+                            },
+                        ],
                     },
                     {
-                        text: "Hide vs archive",
-                        link: "/photos/faq/hidden-and-archive",
+                        text: "Search and Discovery",
+                        collapsed: true,
+                        items: [
+                            {
+                                text: "Overview",
+                                link: "/photos/features/search-and-discovery/",
+                            },
+                            {
+                                text: "Machine learning",
+                                link: "/photos/features/search-and-discovery/machine-learning",
+                            },
+                            {
+                                text: "Magic search",
+                                link: "/photos/features/search-and-discovery/magic-search",
+                            },
+                            {
+                                text: "Face recognition",
+                                link: "/photos/features/search-and-discovery/face-recognition",
+                            },
+                            {
+                                text: "Map and location",
+                                link: "/photos/features/search-and-discovery/map-and-location",
+                            },
+                        ],
                     },
                     {
-                        text: "Face recognition",
-                        link: "/photos/faq/face-recognition",
+                        text: "Utilities",
+                        collapsed: true,
+                        items: [
+                            {
+                                text: "Cast",
+                                link: "/photos/features/utilities/cast/",
+                            },
+                            {
+                                text: "CLI",
+                                link: "/photos/features/utilities/cli",
+                            },
+                            {
+                                text: "Notifications",
+                                link: "/photos/features/utilities/notifications",
+                            },
+                            {
+                                text: "Video streaming",
+                                link: "/photos/features/utilities/video-streaming",
+                            },
+                        ],
                     },
-                    {
-                        text: "Video streaming",
-                        link: "/photos/faq/video-streaming",
-                    },
-                    { text: "Desktop", link: "/photos/faq/desktop" },
-                    { text: "Misc", link: "/photos/faq/misc" },
                 ],
             },
             {
-                text: "Troubleshooting",
+                text: "FAQ",
                 collapsed: true,
                 items: [
                     {
-                        text: "Desktop install",
-                        link: "/photos/troubleshooting/desktop-install/",
+                        text: "Account Creation",
+                        link: "/photos/faq/account-creation",
                     },
                     {
-                        text: "Files not uploading",
-                        link: "/photos/troubleshooting/files-not-uploading",
+                        text: "Advanced Features",
+                        link: "/photos/faq/advanced-features",
                     },
                     {
-                        text: "Missing thumbnails",
-                        link: "/photos/troubleshooting/thumbnails",
+                        text: "Albums and Organization",
+                        link: "/photos/faq/albums-and-organization",
                     },
                     {
-                        text: "Large uploads",
-                        link: "/photos/troubleshooting/large-uploads",
+                        text: "Backup and Sync",
+                        link: "/photos/faq/backup-and-sync",
                     },
                     {
-                        text: "Network drives",
-                        link: "/photos/troubleshooting/nas",
+                        text: "Metadata and Editing",
+                        link: "/photos/faq/metadata-and-editing",
                     },
                     {
-                        text: "Sharing debug logs",
-                        link: "/photos/troubleshooting/sharing-logs",
+                        text: "Search and Discovery",
+                        link: "/photos/faq/search-and-discovery",
+                    },
+                    {
+                        text: "Sharing and Collaboration",
+                        link: "/photos/faq/sharing-and-collaboration",
+                    },
+                    {
+                        text: "Storage and Plans",
+                        link: "/photos/faq/storage-and-plans",
+                    },
+                    {
+                        text: "Troubleshooting",
+                        link: "/photos/faq/troubleshooting",
                     },
                 ],
             },
@@ -220,14 +292,6 @@ export const sidebar = [
                         text: "From Steam",
                         link: "/auth/migration/steam/",
                     },
-                    {
-                        text: "From others",
-                        link: "/auth/migration/import",
-                    },
-                    {
-                        text: "Exporting your data",
-                        link: "/auth/migration/export",
-                    },
                 ],
             },
             {
@@ -235,8 +299,8 @@ export const sidebar = [
                 collapsed: true,
                 items: [
                     {
-                        text: "Windows login",
-                        link: "/auth/troubleshooting/windows-login",
+                        text: "Export",
+                        link: "/auth/troubleshooting/export",
                     },
                 ],
             },

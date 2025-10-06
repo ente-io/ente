@@ -338,6 +338,36 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       dividerType: DividerType.menu,
                       bgColor: getEnteColorScheme(context).fillFaint,
                     ),
+                  if (!url.isExpired && flagService.internalUser)
+                    MenuItemWidget(
+                      captionedTextWidget: CaptionedTextWidget(
+                        title:
+                            AppLocalizations.of(context).copyEmbedHtml + " (i)",
+                        makeTextBold: true,
+                      ),
+                      leadingIcon: Icons.code,
+                      menuItemColor: getEnteColorScheme(context).fillFaint,
+                      showOnlyLoadingState: false,
+                      surfaceExecutionStates: false,
+                      onTap: () async {
+                        final embedHtml = CollectionsService.instance
+                            .getEmbedHtml(widget.collection!);
+                        await Clipboard.setData(
+                          ClipboardData(text: embedHtml),
+                        );
+                        showShortToast(
+                          context,
+                          AppLocalizations.of(context).linkCopiedToClipboard,
+                        );
+                      },
+                      isTopBorderRadiusRemoved: true,
+                      isBottomBorderRadiusRemoved: true,
+                    ),
+                  if (!url.isExpired && flagService.internalUser)
+                    DividerWidget(
+                      dividerType: DividerType.menu,
+                      bgColor: getEnteColorScheme(context).fillFaint,
+                    ),
                   if (!url.isExpired)
                     MenuItemWidget(
                       key: sendLinkButtonKey,

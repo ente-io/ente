@@ -198,6 +198,11 @@
   "@noDeviceLimit": {
     "description": "Text to indicate that there is limit on number of devices"
   },
+  "albumLayout": "Bố cục album",
+  "layoutGrouped": "Đã phân nhóm",
+  "layoutContinuous": "Liên tục",
+  "layoutTrip": "Chuyến đi",
+  "preview": "Xem trước",
   "linkExpiry": "Hết hạn liên kết",
   "linkExpired": "Hết hạn",
   "linkEnabled": "Đã bật",
@@ -1941,5 +1946,9 @@
   "closeBy": "Gần giống",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
+  },
+  "peopleAutoAddDesc": "Tự động thêm ảnh của những người đã chọn vào album này",
+  "@peopleAutoAddDesc": {
+    "description": "The message the copy should convey is that photos or videos containing the selected people's faces will be automatically added to this album"
   }
 }
