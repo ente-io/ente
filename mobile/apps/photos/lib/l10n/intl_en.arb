@@ -244,6 +244,7 @@
   "sendLink": "Send link",
   "sendQrCode": "Send QR code",
   "copyLink": "Copy link",
+  "copyEmbedHtml": "Copy embed HTML",
   "linkHasExpired": "Link has expired",
   "publicLinkEnabled": "Public link enabled",
   "shareALink": "Share a link",
