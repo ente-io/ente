@@ -136,25 +136,84 @@ class NativeVideoExportService {
             metadataQuarterTurns % 2 == 1) {
           // Android with 90°/270° rotation
           // Use display-space coordinates - plugin handles transformation automatically
-          _logger.info(
-            '[Native] Android $metadataRotation° rotation - using display-space coordinates (plugin transforms)',
+
+          // For 90°/270° rotation, swap dimensions to get display-space size
+          final displayWidth = videoSize.height;
+          final displayHeight = videoSize.width;
+
+          // Calculate original selection area in display space
+          final originalMinX = controller.minCrop.dx * displayWidth;
+          final originalMaxX = controller.maxCrop.dx * displayWidth;
+          final originalMinY = controller.minCrop.dy * displayHeight;
+          final originalMaxY = controller.maxCrop.dy * displayHeight;
+
+          // Calculate base crop dimensions in display space
+          double cropWidth = originalMaxX - originalMinX;
+          double cropHeight = originalMaxY - originalMinY;
+
+          // Apply aspect ratio constraint if set
+          if (controller.preferredCropAspectRatio != null) {
+            final targetAspectRatio = controller.preferredCropAspectRatio!;
+            final currentAspectRatio = cropWidth / cropHeight;
+
+            if ((currentAspectRatio - targetAspectRatio).abs() > 0.01) {
+              if (targetAspectRatio > currentAspectRatio) {
+                // Need wider crop
+                cropWidth = cropHeight * targetAspectRatio;
+                if (cropWidth > displayWidth) {
+                  cropWidth = displayWidth.toDouble();
+                  cropHeight = cropWidth / targetAspectRatio;
+                }
+              } else {
+                // Need taller crop
+                cropHeight = cropWidth / targetAspectRatio;
+                if (cropHeight > displayHeight) {
+                  cropHeight = displayHeight.toDouble();
+                  cropWidth = cropHeight * targetAspectRatio;
+                }
+              }
+            }
+          }
+
+          // Center the adjusted crop within the original selection area
+          final originalCenterX = (originalMinX + originalMaxX) / 2;
+          final originalCenterY = (originalMinY + originalMaxY) / 2;
+
+          double minX = originalCenterX - cropWidth / 2;
+          double minY = originalCenterY - cropHeight / 2;
+
+          // Clamp to stay within video bounds
+          if (minX < 0) minX = 0;
+          if (minY < 0) minY = 0;
+          if (minX + cropWidth > displayWidth) minX = displayWidth - cropWidth;
+          if (minY + cropHeight > displayHeight) {
+            minY = displayHeight - cropHeight;
+          }
+
+          cropRect = Rect.fromLTWH(
+            minX,
+            minY,
+            cropWidth,
+            cropHeight,
           );
 
-          final minX = (controller.minCrop.dx * videoSize.width).round();
-          final minY = (controller.minCrop.dy * videoSize.height).round();
-          final maxX = (controller.maxCrop.dx * videoSize.width).round();
-          final maxY = (controller.maxCrop.dy * videoSize.height).round();
-
-          _logger.info(
-            '[Native] Display-space crop: x=$minX, y=$minY, w=${maxX - minX}, h=${maxY - minY}',
-          );
-
-          cropRect = Rect.fromLTRB(
-            minX.toDouble(),
-            minY.toDouble(),
-            maxX.toDouble(),
-            maxY.toDouble(),
-          );
+          // Validate against display-space dimensions for Android rotated videos
+          if (cropRect.width <= 0 || cropRect.height <= 0) {
+            throw Exception(
+              'Invalid crop dimensions: width=${cropRect.width.toInt()}, height=${cropRect.height.toInt()}',
+            );
+          }
+          if (cropRect.left < 0 || cropRect.top < 0) {
+            throw Exception(
+              'Invalid crop position: x=${cropRect.left.toInt()}, y=${cropRect.top.toInt()}',
+            );
+          }
+          if (cropRect.right > displayWidth ||
+              cropRect.bottom > displayHeight) {
+            throw Exception(
+              'Crop extends beyond video bounds: right=${cropRect.right.toInt()}, bottom=${cropRect.bottom.toInt()}, videoDim=${displayWidth.toInt()}x${displayHeight.toInt()}',
+            );
+          }
         } else {
           // iOS or Android without rotation - use original complex logic
           final totalRotation = (metadataRotation + controller.rotation) % 360;
@@ -280,27 +339,24 @@ class NativeVideoExportService {
           }
 
           cropRect = Rect.fromLTRB(minX, minY, maxX, maxY);
-        }
 
-        // Validate crop parameters against video dimensions (display space)
-        final validationWidth = videoSize.width;
-        final validationHeight = videoSize.height;
-
-        if (cropRect.width <= 0 || cropRect.height <= 0) {
-          throw Exception(
-            'Invalid crop dimensions: width=${cropRect.width.toInt()}, height=${cropRect.height.toInt()}',
-          );
-        }
-        if (cropRect.left < 0 || cropRect.top < 0) {
-          throw Exception(
-            'Invalid crop position: x=${cropRect.left.toInt()}, y=${cropRect.top.toInt()}',
-          );
-        }
-        if (cropRect.right > validationWidth ||
-            cropRect.bottom > validationHeight) {
-          throw Exception(
-            'Crop extends beyond video bounds: right=${cropRect.right.toInt()}, bottom=${cropRect.bottom.toInt()}, videoDim=${validationWidth.toInt()}x${validationHeight.toInt()}',
-          );
+          // Validate crop parameters against video dimensions (file space)
+          if (cropRect.width <= 0 || cropRect.height <= 0) {
+            throw Exception(
+              'Invalid crop dimensions: width=${cropRect.width.toInt()}, height=${cropRect.height.toInt()}',
+            );
+          }
+          if (cropRect.left < 0 || cropRect.top < 0) {
+            throw Exception(
+              'Invalid crop position: x=${cropRect.left.toInt()}, y=${cropRect.top.toInt()}',
+            );
+          }
+          if (cropRect.right > videoSize.width ||
+              cropRect.bottom > videoSize.height) {
+            throw Exception(
+              'Crop extends beyond video bounds: right=${cropRect.right.toInt()}, bottom=${cropRect.bottom.toInt()}, videoDim=${videoSize.width.toInt()}x${videoSize.height.toInt()}',
+            );
+          }
         }
       }
 

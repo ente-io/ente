@@ -52,7 +52,6 @@ class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler, EventChannel.S
 
                 currentJob = scope.launch {
                     try {
-                        Log.i(TAG, "Starting trim operation: $startTimeMs-$endTimeMs ms")
                         // Use unified Media3 Transformer for optimized trimming
                         val processingResult = media3Processor.trimVideo(
                             inputPath = inputPath,
@@ -60,7 +59,6 @@ class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler, EventChannel.S
                             startTimeMs = startTimeMs,
                             endTimeMs = endTimeMs,
                             onProgress = { progress ->
-                                Log.d(TAG, "Trim progress: ${(progress * 100).toInt()}%")
                                 scope.launch(Dispatchers.Main) {
                                     progressEventSink?.success(progress)
                                 }
@@ -93,14 +91,12 @@ class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler, EventChannel.S
 
                 currentJob = scope.launch {
                     try {
-                        Log.i(TAG, "Starting rotation operation: $degrees degrees")
                         // Use unified Media3 Transformer for rotation with proper effects
                         val processingResult = media3Processor.rotateVideo(
                             inputPath = inputPath,
                             outputPath = outputPath,
                             degrees = degrees,
                             onProgress = { progress ->
-                                Log.d(TAG, "Rotation progress: ${(progress * 100).toInt()}%")
                                 scope.launch(Dispatchers.Main) {
                                     progressEventSink?.success(progress)
                                 }
@@ -136,7 +132,6 @@ class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler, EventChannel.S
 
                 currentJob = scope.launch {
                     try {
-                        Log.i(TAG, "Starting crop operation: [$x,$y ${width}x$height]")
                         // Use unified Media3 Transformer for cropping with proper effects
                         val processingResult = media3Processor.cropVideo(
                             inputPath = inputPath,
@@ -146,7 +141,6 @@ class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler, EventChannel.S
                             cropWidth = width,
                             cropHeight = height,
                             onProgress = { progress ->
-                                Log.d(TAG, "Crop progress: ${(progress * 100).toInt()}%")
                                 scope.launch(Dispatchers.Main) {
                                     progressEventSink?.success(progress)
                                 }
@@ -964,11 +958,6 @@ class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler, EventChannel.S
                 val cropWidth = call.argument<Int>("cropWidth")
                 val cropHeight = call.argument<Int>("cropHeight")
 
-                Log.i(TAG, "Processing video with transformations:")
-                Log.i(TAG, "  Trim: ${if (trimStartMs != null) "$trimStartMs-$trimEndMs ms" else "none"}")
-                Log.i(TAG, "  Rotate: ${rotateDegrees ?: "none"} degrees")
-                Log.i(TAG, "  Crop: ${if (cropX != null) "[$cropX,$cropY ${cropWidth}x$cropHeight]" else "none"}")
-
                 // Process all transformations in a single pass with Media3 Transformer
                 val processingResult = media3Processor.processVideo(
                     inputPath = inputPath,
@@ -981,7 +970,6 @@ class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler, EventChannel.S
                     cropWidth = cropWidth,
                     cropHeight = cropHeight,
                     onProgress = { progress ->
-                        Log.d(TAG, "Processing progress: ${(progress * 100).toInt()}%")
                         scope.launch(Dispatchers.Main) {
                             progressEventSink?.success(progress)
                         }
@@ -992,11 +980,6 @@ class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler, EventChannel.S
                 if (trimStartMs != null) processingSteps.add("Trim")
                 if (rotateDegrees != null && rotateDegrees != 0) processingSteps.add("Rotate")
                 if (cropX != null) processingSteps.add("Crop")
-
-                Log.i(TAG, "Video processing completed:")
-                Log.i(TAG, "  Steps: ${processingSteps.joinToString(", ")}")
-                Log.i(TAG, "  Total time: ${processingResult.processingTimeMs}ms")
-                Log.i(TAG, "  Re-encoded: ${processingResult.isReEncoded}")
 
                 withContext(Dispatchers.Main) {
                     result.success(

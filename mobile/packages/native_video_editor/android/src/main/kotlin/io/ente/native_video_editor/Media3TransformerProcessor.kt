@@ -85,13 +85,6 @@ class Media3TransformerProcessor(private val context: Context) {
             // Add crop effect if needed BEFORE rotation
             // This ensures crop coordinates are applied to the correct orientation
             if (cropX != null && cropY != null && cropWidth != null && cropHeight != null) {
-                Log.i(TAG, "=== MEDIA3 CROP PROCESSING ===")
-                Log.i(TAG, "Original video dimensions: ${originalWidth}x$originalHeight")
-                Log.i(TAG, "Original rotation: $originalRotation")
-                Log.i(TAG, "Crop parameters received (display-space):")
-                Log.i(TAG, "  position=($cropX,$cropY)")
-                Log.i(TAG, "  size=${cropWidth}x$cropHeight")
-
                 // For videos with 90°/270° rotation, transform crop coordinates to file-space
                 val normalizedRotation = originalRotation % 360
                 val needsCoordinateTransform = normalizedRotation == 90 || normalizedRotation == 270
@@ -114,11 +107,6 @@ class Media3TransformerProcessor(private val context: Context) {
                     // ALWAYS use original file dimensions for normalization
                     normalizationWidth = originalWidth
                     normalizationHeight = originalHeight
-
-                    Log.i(TAG, "Transformed to file-space (${normalizedRotation}° rotation):")
-                    Log.i(TAG, "  position=($finalCropX,$finalCropY)")
-                    Log.i(TAG, "  size=${finalCropWidth}x$finalCropHeight")
-                    Log.i(TAG, "  normalization dims: ${normalizationWidth}x$normalizationHeight (original file dims)")
                 } else {
                     // No transformation needed
                     finalCropX = cropX
@@ -134,13 +122,6 @@ class Media3TransformerProcessor(private val context: Context) {
                 val cropRightFraction = (finalCropX + finalCropWidth).toFloat() / normalizationWidth
                 val cropTopFraction = finalCropY.toFloat() / normalizationHeight
                 val cropBottomFraction = (finalCropY + finalCropHeight).toFloat() / normalizationHeight
-
-                Log.i(TAG, "Crop fractions calculated:")
-                Log.i(TAG, "  left=$cropLeftFraction ($finalCropX / $normalizationWidth)")
-                Log.i(TAG, "  right=$cropRightFraction (${finalCropX + finalCropWidth} / $normalizationWidth)")
-                Log.i(TAG, "  top=$cropTopFraction ($finalCropY / $normalizationHeight)")
-                Log.i(TAG, "  bottom=$cropBottomFraction (${finalCropY + finalCropHeight} / $normalizationHeight)")
-                Log.i(TAG, "===============================")
 
                 // Use Crop effect with NDC coordinates (-1 to 1)
                 val cropEffect = Crop(
@@ -172,16 +153,16 @@ class Media3TransformerProcessor(private val context: Context) {
             }
 
             // Add Presentation effect to set output dimensions
-            // For rotated videos, swap dimensions if needed
+            // Swap dimensions if rotation will be applied
             if (cropWidth != null && cropHeight != null) {
                 val outputWidth: Int
                 val outputHeight: Int
 
-                // If video is rotated 90 or 270 degrees, swap the output dimensions
+                // If applying 90/270° rotation, swap output dimensions
+                // because rotation happens after crop
                 if (rotateDegrees != null && (rotateDegrees % 180) != 0) {
                     outputWidth = cropHeight
                     outputHeight = cropWidth
-                    Log.i(TAG, "Output dimensions swapped for rotation: ${outputWidth}x$outputHeight")
                 } else {
                     outputWidth = cropWidth
                     outputHeight = cropHeight
