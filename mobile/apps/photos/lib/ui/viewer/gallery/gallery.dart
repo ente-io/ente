@@ -149,6 +149,7 @@ class GalleryState extends State<Gallery> {
   late GroupType _groupType;
   final scrollbarBottomPaddingNotifier = ValueNotifier<double>(0);
   late GalleryGroups galleryGroups;
+  List<EnteFile> _allFilesWithDummies = [];
   SwipeToSelectHelper? _swipeHelper;
   final _swipeActiveNotifier = ValueNotifier<bool>(false);
 
@@ -201,7 +202,6 @@ class GalleryState extends State<Gallery> {
           }
           if (!hasTriggeredSetState && mounted) {
             _updateGalleryGroups();
-            _updateSwipeHelper();
           }
         });
       });
@@ -335,6 +335,12 @@ class GalleryState extends State<Gallery> {
       showGallerySettingsCTA: widget.showGallerySettingsCTA,
     );
 
+    // Cache the list with dummies
+    _allFilesWithDummies = galleryGroups.allFilesWithDummies;
+
+    // Always update SwipeHelper when cache is updated
+    _updateSwipeHelper();
+
     if (callSetState) {
       setState(() {});
     }
@@ -380,7 +386,6 @@ class GalleryState extends State<Gallery> {
     final hasReloaded = _onFilesLoaded(files);
     if (!hasReloaded && mounted) {
       _updateGalleryGroups();
-      _updateSwipeHelper();
     }
   }
 
@@ -476,7 +481,7 @@ class GalleryState extends State<Gallery> {
 
   void _updateSwipeHelper() {
     if (widget.selectedFiles != null &&
-        _allGalleryFiles.isNotEmpty &&
+        _allFilesWithDummies.isNotEmpty &&
         flagService.internalUser) {
       // Dispose existing helper if present
       _swipeHelper?.dispose();
@@ -484,7 +489,7 @@ class GalleryState extends State<Gallery> {
       // This allows SwipeHelper to track pointer position through dummy
       // placeholders while filtering them from selection operations.
       _swipeHelper = SwipeToSelectHelper(
-        allFiles: galleryGroups.allFilesWithDummies,
+        allFiles: _allFilesWithDummies,
         selectedFiles: widget.selectedFiles!,
       );
     }
