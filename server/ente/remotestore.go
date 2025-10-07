@@ -40,6 +40,7 @@ type FeatureFlagResponse struct {
 	BetaUser            bool    `json:"betaUser"`
 	EnableMobMultiPart  bool    `json:"enableMobMultiPart"`
 	CastUrl             string  `json:"castUrl"`
+	EmbedUrl            string  `json:"embedUrl"`
 	CustomDomain        *string `json:"customDomain,omitempty"`
 	CustomDomainCNAME   string  `json:"customDomainCNAME,omitempty"`
 }
