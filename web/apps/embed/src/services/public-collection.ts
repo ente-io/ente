@@ -179,8 +179,8 @@ export const pullPublicCollectionFiles = async (
 
         savePublicCollectionFiles(credentials.accessToken, newFiles);
 
-        if (files.length > 0) {
-            time = Math.max(...files.map((f) => f.updationTime));
+        if (diff.length > 0) {
+            time = Math.max(...diff.map((f) => f.updationTime));
             savePublicCollectionLastSyncTime(credentials.accessToken, time);
         }
 
