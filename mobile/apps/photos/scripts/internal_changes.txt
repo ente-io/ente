@@ -1,3 +1,4 @@
+- Neeraj: Remove feature flags from manage_links_widget (album layout, allow joining album, copy embed HTML)
 - Ashil: Use better copy on auto-add people selection page
 - Ashil: Add more logs to debug app stuck at splash screen issue
 - Prateek: Tag Sentry errors with execution_context for background vs foreground
