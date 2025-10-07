@@ -6,7 +6,7 @@ import "package:photos/ui/viewer/gallery/component/swipe_selectable_file_widget.
 
 /// A widget that displays a dummy placeholder in the gallery grid.
 /// Participates in swipe gesture tracking but is not selectable.
-class DummyFileWidget extends StatefulWidget {
+class DummyFileWidget extends StatelessWidget {
   final DummyFile file;
   final SelectedFiles? selectedFiles;
   final bool limitSelectionToOne;
@@ -19,23 +19,18 @@ class DummyFileWidget extends StatefulWidget {
   });
 
   @override
-  State<DummyFileWidget> createState() => _DummyFileWidgetState();
-}
-
-class _DummyFileWidgetState extends State<DummyFileWidget> {
-  @override
   Widget build(BuildContext context) {
     // Check if swipe selection should be enabled (same as GalleryFileWidget)
     final shouldEnableSwipeSelection =
-        flagService.internalUser && !widget.limitSelectionToOne;
+        flagService.internalUser && !limitSelectionToOne;
 
-    final Widget dummyContent = _buildDummyContent();
+    const Widget dummyContent = SizedBox.expand();
 
     // Wrap with swipe selection if enabled
     if (shouldEnableSwipeSelection) {
       return SwipeSelectableFileWidget(
-        file: widget.file,
-        selectedFiles: widget.selectedFiles,
+        file: file,
+        selectedFiles: selectedFiles,
         onPointerStateChanged: (pointerId, isInside) {
           // Track pointer state but don't use it since dummies aren't selectable
         },
@@ -44,15 +39,5 @@ class _DummyFileWidgetState extends State<DummyFileWidget> {
     }
 
     return dummyContent;
-  }
-
-  Widget _buildDummyContent() {
-    // Simple grey placeholder that doesn't respond to taps or selections
-    return Container(
-      color: Colors.grey.withValues(alpha: 0.3),
-      child: const Center(
-        child: Icon(Icons.image_outlined, color: Colors.grey),
-      ),
-    );
   }
 }
