@@ -160,6 +160,9 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
         } catch (_) {
           failedCount++;
         }
+        if (!mounted || _isCancelled) {
+          return;
+        }
         final int current = i + 1;
         final String currentlyDeleting =
             current.toString().padLeft(totalDigits, '0');
