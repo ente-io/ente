@@ -198,6 +198,8 @@
   "@noDeviceLimit": {
     "description": "Text to indicate that there is limit on number of devices"
   },
+  "albumLayout": "Disposition de l'album",
+  "preview": "Aperçu",
   "linkExpiry": "Expiration du lien",
   "linkExpired": "Expiré",
   "linkEnabled": "Activé",
@@ -1933,5 +1935,9 @@
   "closeBy": "Similaire",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
+  },
+  "peopleAutoAddDesc": "Ajouter automatiquement les photos des personnes sélectionnées à cet album",
+  "@peopleAutoAddDesc": {
+    "description": "The message the copy should convey is that photos or videos containing the selected people's faces will be automatically added to this album"
   }
 }

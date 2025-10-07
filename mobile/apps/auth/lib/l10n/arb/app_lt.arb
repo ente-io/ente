@@ -527,5 +527,8 @@
   "errorInvalidQRCodeBody": "Nuskenuotas QR kodas nėra tinkama 2FA paskyra.",
   "errorNoQRCode": "QR kodas nerastas.",
   "errorGenericTitle": "Įvyko klaida",
-  "errorGenericBody": "Importuojant įvyko netikėta klaida."
+  "errorGenericBody": "Importuojant įvyko netikėta klaida.",
+  "localBackupSettingsTitle": "Vietinė atsarginė kopija",
+  "localBackupSidebarTitle": "Vietinė atsarginė kopija",
+  "enableAutomaticBackups": "Įjungti automatinį atsarginių kopijų kūrimą"
 }

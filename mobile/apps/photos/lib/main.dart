@@ -75,16 +75,10 @@ void main() async {
 
   if (Platform.isAndroid) FlutterDisplayMode.setHighRefreshRate().ignore();
   SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      systemNavigationBarColor: Color(0x00010000),
-    ),
+    const SystemUiOverlayStyle(systemNavigationBarColor: Color(0x00010000)),
   );
 
-  unawaited(
-    SystemChrome.setEnabledSystemUIMode(
-      SystemUiMode.edgeToEdge,
-    ),
-  );
+  unawaited(SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge));
 }
 
 Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
@@ -138,85 +132,100 @@ Future<void> runBackgroundTask(
 }
 
 Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
-  final PackageInfo packageInfo = await PackageInfo.fromPlatform();
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-
-  await Configuration.instance.init();
-
-  // App LifeCycle
-  AppLifecycleService.instance.init(prefs);
-  AppLifecycleService.instance.onAppInBackground('init via: WorkManager $tlog');
-
-  // Crypto rel.
-  await Computer.shared().turnOn(workersCount: 4);
-  CryptoUtil.init();
-
-  // Init Network Utils
-  await NetworkClient.instance.init(packageInfo);
-
-  // Global Services
-  ServiceLocator.instance.init(
-    prefs,
-    NetworkClient.instance.enteDio,
-    NetworkClient.instance.getDio(),
-    packageInfo,
-  );
-
-  await CollectionsService.instance.init(prefs);
-
-  // Upload & Sync Related
-  await FileUploader.instance.init(prefs, true);
-  LocalFileUpdateService.instance.init(prefs);
-  await LocalSyncService.instance.init(prefs);
-  RemoteSyncService.instance.init(prefs);
-  await SyncService.instance.init(prefs);
-
-  // Misc Services
-  await UserService.instance.init();
-  NotificationService.instance.init(prefs);
-
-  // Begin Execution
-  // only runs for android
-  updateService.showUpdateNotification().ignore();
-
-  // Wrap _sync() with timeout and error handling to prevent indefinite hanging
-  // and allow background tasks to complete even if sync fails
   try {
-    _logger.info("[BG-SYNC] Starting sync with 5-minute timeout...");
-    await _sync('bgTaskActiveProcess').timeout(
-      const Duration(minutes: 5),
-      onTimeout: () {
-        _logger.severe(
-          "[BG-SYNC] Sync timed out after 5 minutes! "
-          "Continuing with home widget and smart albums sync.",
-        );
-        throw TimeoutException(
-          'Background sync exceeded 5-minute timeout',
-          const Duration(minutes: 5),
-        );
-      },
+    final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    _logger.info("(for debugging) Configuration init $tlog");
+    await Configuration.instance.init();
+    _logger.info("(for debugging) Configuration done $tlog");
+
+    // App LifeCycle
+    AppLifecycleService.instance.init(prefs);
+    AppLifecycleService.instance
+        .onAppInBackground('init via: WorkManager $tlog');
+
+    // Crypto rel.
+    await Computer.shared().turnOn(workersCount: 4);
+    CryptoUtil.init();
+
+    // Init Network Utils
+    await NetworkClient.instance.init(packageInfo);
+
+    // Global Services
+    ServiceLocator.instance.init(
+      prefs,
+      NetworkClient.instance.enteDio,
+      NetworkClient.instance.getDio(),
+      packageInfo,
     );
-    _logger.info("[BG-SYNC] Sync completed successfully");
-  } on TimeoutException catch (e) {
-    _logger.severe("[BG-SYNC] Sync timeout caught, continuing...", e);
+
+    _logger.info("(for debugging) CollectionsService init $tlog");
+    await CollectionsService.instance.init(prefs);
+    _logger.info("(for debugging) CollectionsService init done $tlog");
+
+    // Upload & Sync Related
+    await FileUploader.instance.init(prefs, true);
+    LocalFileUpdateService.instance.init(prefs);
+    await LocalSyncService.instance.init(prefs);
+    RemoteSyncService.instance.init(prefs);
+    await SyncService.instance.init(prefs);
+
+    // Misc Services
+    await UserService.instance.init();
+    NotificationService.instance.init(prefs);
+
+    // Begin Execution
+    // only runs for android
+    _logger.info("[BG TASK] update notification");
+    updateService.showUpdateNotification().ignore();
+
+    // Wrap _sync() with timeout and error handling to prevent indefinite hanging
+    // and allow background tasks to complete even if sync fails
+    try {
+      _logger.info("[BG TASK] sync starting with 5-minute timeout");
+      await _sync('bgTaskActiveProcess').timeout(
+        const Duration(minutes: 5),
+        onTimeout: () {
+          _logger.severe(
+            "[BG TASK] Sync timed out after 5 minutes! "
+            "Continuing with home widget and smart albums sync.",
+          );
+          throw TimeoutException(
+            'Background sync exceeded 5-minute timeout',
+            const Duration(minutes: 5),
+          );
+        },
+      );
+      _logger.info("[BG TASK] sync completed successfully");
+    } on TimeoutException catch (e) {
+      _logger.severe("[BG TASK] Sync timeout caught, continuing...", e);
+    } catch (e, s) {
+      _logger.severe(
+        "[BG TASK] Sync failed with error. "
+        "Continuing with home widget and smart albums sync.",
+        e,
+        s,
+      );
+    }
+
+    _logger.info("[BG TASK] locale fetch");
+    final locale = await getLocale();
+    await initializeDateFormatting(locale?.languageCode ?? "en");
+    // only runs for android
+    _logger.info("[BG TASK] home widget sync");
+    await _homeWidgetSync(true);
+
+    // await MLService.instance.init();
+    // await PersonService.init(entityService, MLDataDB.instance, prefs);
+    // await MLService.instance.runAllML(force: true);
+    _logger.info("[BG TASK] smart albums sync");
+    await smartAlbumsService.syncSmartAlbums();
+
+    _logger.info("[BG TASK] $taskId completed");
   } catch (e, s) {
-    _logger.severe(
-      "[BG-SYNC] Sync failed with error. "
-      "Continuing with home widget and smart albums sync.",
-      e,
-      s,
-    );
+    _logger.severe("[BG TASK] $taskId error", e, s);
   }
-
-  final locale = await getLocale();
-  await initializeDateFormatting(locale?.languageCode ?? "en");
-  // only runs for android
-  await _homeWidgetSync(true);
-
-  // await MLService.instance.init();
-  // await PersonService.init(entityService, MLDataDB.instance, prefs);
-  // await MLService.instance.runAllML(force: true);
-  await smartAlbumsService.syncSmartAlbums();
 }
 
 Future<void> _init(bool isBackground, {String via = ''}) async {
@@ -310,11 +319,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("PushService/HomeWidget done $tlog");
     unawaited(SemanticSearchService.instance.init());
     unawaited(MLService.instance.init());
-    await PersonService.init(
-      entityService,
-      MLDataDB.instance,
-      preferences,
-    );
+    await PersonService.init(entityService, MLDataDB.instance, preferences);
     EnteWakeLockService.instance.init(preferences);
     logLocalSettings();
     initComplete = true;

@@ -1371,11 +1371,17 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
     onRemotePull,
 }) => {
     const [errorMessage, setErrorMessage] = useState("");
+    const { embedURL: embedBaseURL } = useSettingsSnapshot();
 
     const [copied, handleCopyLink] = useClipboardCopy(resolvedURL);
 
     // For embeddable HTML copy
-    const embedURL = resolvedURL?.replace("albums.ente.io", "embed.ente.io");
+    const embedURL = resolvedURL
+        ? resolvedURL.replace(
+              new URL(resolvedURL).origin,
+              embedBaseURL || "https://embed.ente.io",
+          )
+        : undefined;
     const iframeHTML = embedURL
         ? `<iframe src="${embedURL}" width="800" height="600" frameborder="0" allowfullscreen></iframe>`
         : "";
@@ -1471,25 +1477,18 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
                         onClick={handleCopyLink}
                         label={t("copy_link")}
                     />
-                    {process.env.NEXT_PUBLIC_EMBED_FEATURE_ENABLED ===
-                        "true" && (
-                        <>
-                            <RowButtonDivider />
-                            <RowButton
-                                startIcon={
-                                    embedCopied ? (
-                                        <DoneIcon
-                                            sx={{ color: "accent.main" }}
-                                        />
-                                    ) : (
-                                        <CodeIcon />
-                                    )
-                                }
-                                onClick={handleCopyEmbedLink}
-                                label="Copy embed HTML"
-                            />
-                        </>
-                    )}
+                    <RowButtonDivider />
+                    <RowButton
+                        startIcon={
+                            embedCopied ? (
+                                <DoneIcon sx={{ color: "accent.main" }} />
+                            ) : (
+                                <CodeIcon />
+                            )
+                        }
+                        onClick={handleCopyEmbedLink}
+                        label={t("copy_embed_html")}
+                    />
                 </RowButtonGroup>
                 <RowButtonGroup>
                     <RowButton

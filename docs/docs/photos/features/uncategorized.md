@@ -1,24 +1,24 @@
 ---
-title: Uncategorized
-description: Uncategorized items in Ente Photos
+title: This Page Has Moved
+description: This content has been reorganized
 ---
 
-# Uncategorized
+# This Page Has Moved
 
-_Uncategorized_ is a special album type where photos are automatically added
-under the following circumstances:
+The **Uncategorized** feature guide has moved to:
 
-- When you remove a photo from the last album, it is relocated to
-  _Uncategorized_ section.
+## Uncategorized Album
 
-- During album deletion, if you choose to keep photos but delete the album, all
-  photos exclusive to the current album are moved to the _Uncategorized_
-  section.
+- [Uncategorized feature guide](/photos/features/albums-and-organization/uncategorized) - Understanding the special Uncategorized album for photos not in any album
 
-Note: This does not include photos uploaded by others.
+## Related topics
 
-### Cleaning up Uncategorized items
+- [Uncategorized FAQ](/photos/faq/albums-and-organization#uncategorized) - Common questions
 
-In the mobile app, you can click on the overflow menu and click _Clean
-Uncategorized_ option. All files that are also present in another album, that is
-owned by the user, will be removed from the _Uncategorized_ section.
+---
+
+**Can't find what you're looking for?**
+
+- Browse [Albums and Organization features](/photos/features/albums-and-organization/albums)
+- Check [Albums FAQ](/photos/faq/albums-and-organization)
+- Visit the [main Photos documentation](/photos/)

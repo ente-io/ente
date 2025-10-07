@@ -1,34 +1,19 @@
 ---
-title: Missing thumbnails
-description:
-    Troubleshooting when thumbnails are not being generated when uploading
-    images in Ente Photos
+title: This Page Has Moved
+description: This content has been reorganized
 ---
 
-# Missing or improper thumbnails
+# This Page Has Moved
 
-Firefox (including its other forks like Librewolf) prevents the app from
-generating thumbnails if the "block canvas fingerprinting" setting in Firefox is
-enabled (i.e. **`privacy.resistFingerprinting`** is set to true in
-`about:config`). The app needs the canvas to generate thumbnails, and that
-Firefox feature blocks access to the canvas. Ideally, Firefox should be
-prompting for a permission, but some users have reported that sometime it
-silently blocks access, and turning off that setting works.
+The content from **Missing Thumbnails** has been reorganized. You can find it in the following locations:
 
-Similar issues may arise if you are using an **extension** that blocks access to
-the canvas, or some other browser that has similar restrictions.
+## Thumbnail Issues
 
-In all these cases, you need to allow Ente access to the canvas for the
-thumbnail to be generated properly.
+- [Why are my photo thumbnails missing or incorrect?](/photos/faq/troubleshooting#thumbnails) - Solutions for Firefox canvas fingerprinting issues and browser extension conflicts
 
-Note that once the thumbnails are missing or have been incorrectly generated,
-they cannot be viewed on any of the other clients (the thumbnails are only
-generated once, during upload, so viewing it in a different place does not
-change the already generated thumbnail).
+---
 
-There is currently no functionality to regenerate thumbnails in the above cases.
-You will need to upload the affected files again.
+**Can't find what you're looking for?**
 
-Ente skips over files that have already been uploaded, so you can drag and drop
-the original folder or zip again after removing the files without thumbnails,
-and it'll only upload the files that are necessary.
+- Browse all [Troubleshooting topics](/photos/faq/troubleshooting)
+- Visit the [main Photos documentation](/photos/)
