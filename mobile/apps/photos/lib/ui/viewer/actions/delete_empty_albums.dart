@@ -152,14 +152,6 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
 
     for (int i = 0; i < totalCount; i++) {
       if (mounted && !_isCancelled) {
-        final int current = i + 1;
-        final String currentlyDeleting =
-            current.toString().padLeft(totalDigits, '0');
-
-        _deleteProgress.value = AppLocalizations.of(context).deleteProgress(
-          currentlyDeleting: currentlyDeleting,
-          totalCount: totalCount,
-        );
         try {
           await CollectionsService.instance.trashEmptyCollection(
             collections[i],
@@ -168,6 +160,14 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
         } catch (_) {
           failedCount++;
         }
+        final int current = i + 1;
+        final String currentlyDeleting =
+            current.toString().padLeft(totalDigits, '0');
+
+        _deleteProgress.value = AppLocalizations.of(context).deleteProgress(
+          currentlyDeleting: currentlyDeleting,
+          totalCount: totalCount,
+        );
       }
     }
     if (failedCount > 0) {
