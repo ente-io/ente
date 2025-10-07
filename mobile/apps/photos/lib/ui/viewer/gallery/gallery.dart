@@ -480,9 +480,11 @@ class GalleryState extends State<Gallery> {
         flagService.internalUser) {
       // Dispose existing helper if present
       _swipeHelper?.dispose();
-      // Always create a new helper with the current file list
+      // Use allFilesWithDummies to match the rendered grid structure.
+      // This allows SwipeHelper to track pointer position through dummy
+      // placeholders while filtering them from selection operations.
       _swipeHelper = SwipeToSelectHelper(
-        allFiles: _allGalleryFiles,
+        allFiles: galleryGroups.allFilesWithDummies,
         selectedFiles: widget.selectedFiles!,
       );
     }
