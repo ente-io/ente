@@ -619,7 +619,7 @@ class FileUploader {
       // that we'll have to re-upload as the nonce is lost
       if (hasExistingMultiPart) {
         if (!encryptedFileExists) {
-          throw MultiPartUploadError(
+          throw MultiPartMissingFileError(
             'multiPartResume: encryptedFile missing',
           );
         }
@@ -627,7 +627,7 @@ class FileUploader {
             multiPartFileEncResult != null &&
             !listEquals(key, multiPartFileEncResult.key);
         if (updateWithDiffKey) {
-          throw MultiPartUploadError(
+          throw MultiPartError(
             'multiPart update resumed with differentKey',
           );
         }
@@ -901,7 +901,7 @@ class FileUploader {
   }
 
   bool isPutOrMultiPartError(Object e) {
-    if (e is MultiPartUploadError) {
+    if (e is MultiPartMissingFileError || e is MultiPartError) {
       return true;
     }
     if (e is DioException) {

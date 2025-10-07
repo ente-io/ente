@@ -123,7 +123,7 @@ Future<EncryptionResult> chachaEncryptFileV2(Map<String, dynamic> args) async {
     bytesRead += bufferBytes.length;
     if (bufferBytes.length != chunkSize) {
       throw Exception(
-        "Expected to read $chunkSize bytes, but got ${bufferBytes.length} bytes",
+        "V2 $kPartialReadErrorTag $chunkSize bytes, but got ${bufferBytes.length} bytes, sourceFileLength: $sourceFileLength",
       );
     }
     // Set final tag only after confirming we've read all expected data
@@ -177,6 +177,11 @@ Future<EncryptionResult> chachaEncryptFile(Map<String, dynamic> args) async {
       tag = Sodium.cryptoSecretstreamXchacha20poly1305TagFinal;
     }
     final buffer = await inputFile.read(chunkSize);
+    if (buffer.length != chunkSize) {
+      throw Exception(
+        "$kPartialReadErrorTag to read $chunkSize bytes, but got ${buffer.length} bytes, sourceFileLength: $sourceFileLength",
+      );
+    }
     bytesRead += chunkSize;
     final encryptedData = Sodium.cryptoSecretstreamXchacha20poly1305Push(
       initPushResult.state,
@@ -398,11 +403,13 @@ class CryptoUtil {
     args["sourceFilePath"] = sourceFilePath;
     args["destinationFilePath"] = destinationFilePath;
     args["key"] = key;
-    return _computer.compute(
-      chachaEncryptFile,
-      param: args,
-      taskName: "encryptFile",
-    );
+    return _computer
+        .compute<Map<String, dynamic>, EncryptionResult>(
+          chachaEncryptFile,
+          param: args,
+          taskName: "encryptFile",
+        )
+        .unwrapExceptionInComputer();
   }
 
   // Encrypts the file at sourceFilePath, with the key (if provided) and a
@@ -440,11 +447,17 @@ class CryptoUtil {
     args["key"] = key;
     return _computer
         .compute(
-          chachaDecryptFile,
-          param: args,
-          taskName: "decryptFile",
-        )
-        .catchError((e) => throw CryptoErr("decryptFile", e));
+      chachaDecryptFile,
+      param: args,
+      taskName: "decryptFile",
+    )
+        .catchError((e) {
+      if (e.toString().contains(kStreamPullError)) {
+        throw StreamPullErr("decryptFile", e);
+      } else {
+        throw e;
+      }
+    });
   }
 
   // Generates and returns a 256-bit key.
