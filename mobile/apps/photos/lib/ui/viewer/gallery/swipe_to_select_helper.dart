@@ -45,8 +45,12 @@ class SwipeToSelectHelper {
 
     // If we're in selecting mode, immediately select the starting file
     // But skip if it's a DummyFile (dummies are not selectable)
-    if (_selecting == true && file is! DummyFile) {
-      selectedFiles.selectAll({file});
+    if (file is! DummyFile) {
+      if (_selecting == true) {
+        selectedFiles.selectAll({file});
+      } else {
+        selectedFiles.unSelectAll({file});
+      }
     }
   }
 
