@@ -431,6 +431,7 @@
         "year": "Dans un an"
     },
     "copy_link": "Copier le lien",
+    "copy_embed_html": "",
     "done": "Terminé",
     "share_link_section_title": "Ou partager un lien",
     "remove_link": "Supprimer le lien",

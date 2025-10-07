@@ -431,6 +431,7 @@
         "year": "一年后"
     },
     "copy_link": "复制链接",
+    "copy_embed_html": "",
     "done": "已完成",
     "share_link_section_title": "或共享一个链接",
     "remove_link": "移除链接",
