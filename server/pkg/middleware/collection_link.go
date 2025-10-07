@@ -194,7 +194,8 @@ func (m *CollectionLinkMiddleware) validateOrigin(c *gin.Context, ownerID int64)
 
 	if origin == "" ||
 		origin == viper.GetString("apps.public-albums") ||
-		strings.HasSuffix(strings.ToLower(origin), "http://localhost:") {
+		origin == viper.GetString("apps.embed-albums") ||
+		strings.HasPrefix(strings.ToLower(origin), "http://localhost:") {
 		return nil
 	}
 	reqId := requestid.Get(c)
