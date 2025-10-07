@@ -56,7 +56,11 @@ import {
     type PublicAlbumsCredentials,
 } from "ente-base/http";
 import log from "ente-base/log";
-import { albumsAppOrigin, shouldOnlyServeAlbumsApp, isCustomAlbumsAppOrigin } from "ente-base/origins";
+import {
+    albumsAppOrigin,
+    isCustomAlbumsAppOrigin,
+    shouldOnlyServeAlbumsApp,
+} from "ente-base/origins";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import {
     useSaveGroups,
@@ -446,18 +450,18 @@ export default function PublicCollectionGallery() {
         () =>
             publicCollection && publicFiles
                 ? {
-                    component: (
-                        <FileListHeader
-                            {...{
-                                publicCollection,
-                                publicFiles,
-                                downloadEnabled,
-                                onAddSaveGroup,
-                            }}
-                        />
-                    ),
-                    height: fileListHeaderHeight,
-                }
+                      component: (
+                          <FileListHeader
+                              {...{
+                                  publicCollection,
+                                  publicFiles,
+                                  downloadEnabled,
+                                  onAddSaveGroup,
+                              }}
+                          />
+                      ),
+                      height: fileListHeaderHeight,
+                  }
                 : undefined,
         [onAddSaveGroup, publicCollection, publicFiles, downloadEnabled],
     );
