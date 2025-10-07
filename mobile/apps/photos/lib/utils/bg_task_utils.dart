@@ -104,9 +104,11 @@ class BgTaskUtils {
       if (Platform.isAndroid) {
         final isScheduled = await workmanager.Workmanager()
             .isScheduledByUniqueName(backgroundTaskIdentifier);
-        $.info(
-          "Periodic task scheduled status: $isScheduled for $backgroundTaskIdentifier",
-        );
+        if (!isScheduled) {
+          $.warning(
+            "Background task is not scheduled: $backgroundTaskIdentifier",
+          );
+        }
       }
     } catch (e) {
       $.warning("Failed to configure WorkManager: $e");
