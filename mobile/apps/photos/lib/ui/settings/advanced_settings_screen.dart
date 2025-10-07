@@ -10,6 +10,7 @@ import 'package:photos/ui/components/menu_section_description_widget.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import "package:photos/ui/components/toggle_switch_widget.dart";
+import 'package:photos/ui/notification/toast.dart';
 import "package:photos/ui/settings/app_icon_selection_screen.dart";
 import "package:photos/ui/settings/ml/machine_learning_settings_page.dart";
 import "package:photos/ui/settings/streaming/video_streaming_settings_page.dart";
@@ -104,7 +105,15 @@ class AdvancedSettingsScreen extends StatelessWidget {
                           value: () => flagService.mapEnabled,
                           onChanged: () async {
                             final isEnabled = flagService.mapEnabled;
-                            await flagService.setMapEnabled(!isEnabled);
+                            try {
+                              await flagService.setMapEnabled(!isEnabled);
+                            } catch (e) {
+                              showShortToast(
+                                context,
+                                AppLocalizations.of(context).somethingWentWrong,
+                              );
+                              rethrow;
+                            }
                           },
                         ),
                       ),

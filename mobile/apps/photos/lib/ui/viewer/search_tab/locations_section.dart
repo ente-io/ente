@@ -16,6 +16,7 @@ import "package:photos/services/search_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/map/map_screen.dart";
+import 'package:photos/ui/notification/toast.dart';
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/search/result/go_to_map_widget.dart";
@@ -380,7 +381,15 @@ class GoToMapWithBG extends StatelessWidget {
       child: GestureDetector(
         onTap: () async {
           if (!flagService.mapEnabled) {
-            await flagService.setMapEnabled(true);
+            try {
+              await flagService.setMapEnabled(true);
+            } catch (e) {
+              showShortToast(
+                context,
+                AppLocalizations.of(context).somethingWentWrong,
+              );
+              return;
+            }
           }
           // ignore: unawaited_futures
           Navigator.of(context).push(

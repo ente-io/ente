@@ -4,6 +4,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/map/map_screen.dart";
+import 'package:photos/ui/notification/toast.dart';
 
 //Used for empty state of location section
 class GoToMap extends StatelessWidget {
@@ -14,7 +15,15 @@ class GoToMap extends StatelessWidget {
     return GestureDetector(
       onTap: () async {
         if (!flagService.mapEnabled) {
-          await flagService.setMapEnabled(true);
+          try {
+            await flagService.setMapEnabled(true);
+          } catch (e) {
+            showShortToast(
+              context,
+              AppLocalizations.of(context).somethingWentWrong,
+            );
+            return;
+          }
         }
         // ignore: unawaited_futures
         Navigator.of(context).push(
