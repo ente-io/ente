@@ -1177,8 +1177,8 @@
     "description": "Label for the map view"
   },
   "maps": "Maps",
+  "mapsPrivacyNotice": "Approximate coordinates will be sent to privacy conscious third parties like OpenStreetMap to show the map and location.",
   "enableMaps": "Enable Maps",
-  "enableMapsDesc": "This will show your photos on a world map.\n\nThis map is hosted by Open Street Map, and the exact locations of your photos are never shared.\n\nYou can disable this feature anytime from Settings.",
   "quickLinks": "Quick links",
   "selectItemsToAdd": "Select items to add",
   "addSelected": "Add selected",
