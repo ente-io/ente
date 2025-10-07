@@ -452,8 +452,8 @@ class CryptoUtil {
       taskName: "decryptFile",
     )
         .catchError((e) {
-      if (e.toString().contains(kLibSodiumErrorTag)) {
-        throw CryptoErr("decryptFile", e);
+      if (e.toString().contains(kStreamPullError)) {
+        throw StreamPullErr("decryptFile", e);
       } else {
         throw e;
       }

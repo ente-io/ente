@@ -2,18 +2,18 @@ class KeyDerivationError extends Error {}
 
 class LoginKeyDerivationError extends Error {}
 
-class CryptoErr implements Exception {
+class StreamPullErr implements Exception {
   final String message;
   final dynamic originalException;
 
-  CryptoErr(this.message, [this.originalException]);
+  StreamPullErr(this.message, [this.originalException]);
 
   @override
   String toString() {
     if (originalException != null) {
-      return 'CryptoErr: $message\nCaused by: $originalException';
+      return 'StreamPullErr: $message\nCaused by: $originalException';
     }
-    return 'CryptoErr: $message';
+    return 'StreamPullErr: $message';
   }
 }
 
@@ -30,7 +30,7 @@ extension FutureErrorHandling<T> on Future<T> {
 }
 
 const kPartialReadErrorTag = 'PartialRead';
-const kLibSodiumErrorTag = 'crypto_secretstream_xchacha20poly1305_pull';
+const kStreamPullError = 'crypto_secretstream_xchacha20poly1305_pull';
 
 // Exception counterpart for upstream handling via catchError chains
 class PartialReadException implements Exception {
