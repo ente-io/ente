@@ -186,6 +186,7 @@
   "@allowAddingPhotos": {
     "description": "Switch button to enable uploading photos to a public link"
   },
+  "allowJoiningAlbum": "Allow joining album",
   "allowAddPhotosDescription": "Allow people with the link to also add photos to the shared album.",
   "passwordLock": "Password lock",
   "canNotOpenTitle": "Cannot open this album",
