@@ -489,51 +489,54 @@ class _FileSelectionActionsWidgetState
     if (visibleItems.isNotEmpty) {
       return MediaQuery(
         data: MediaQuery.of(context).removePadding(removeBottom: true),
-        child: SafeArea(
-          child: Container(
-            padding: const EdgeInsets.only(
-              bottom: 20.0,
-              left: 20.0,
-              right: 20.0,
-            ),
-            child: Column(
-              children: [
-                // First Row
-                const SizedBox(
-                  height: 4,
-                ),
-                Row(
-                  children: [
-                    for (int i = 0; i < firstThreeItems.length; i++) ...[
-                      Expanded(
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            Container(
-                              height: MediaQuery.of(context).size.height * 0.10,
-                              decoration: BoxDecoration(
-                                color: getEnteColorScheme(context)
-                                    .backgroundElevated2,
-                                borderRadius: BorderRadius.circular(20),
-                              ),
+        child: Container(
+          padding: const EdgeInsets.only(
+            bottom: 20.0,
+            left: 20.0,
+            right: 20.0,
+          ),
+          child: Column(
+            children: [
+              // First Row
+              const SizedBox(
+                height: 4,
+              ),
+              Row(
+                children: [
+                  for (int i = 0; i < firstThreeItems.length; i++) ...[
+                    Expanded(
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Container(
+                            height: MediaQuery.of(context).size.height * 0.10,
+                            decoration: BoxDecoration(
+                              color: getEnteColorScheme(context)
+                                  .backgroundElevated2,
+                              borderRadius: BorderRadius.circular(20),
                             ),
-                            firstThreeItems[i],
-                          ],
-                        ),
+                          ),
+                          firstThreeItems[i],
+                        ],
                       ),
-                      if (i != firstThreeItems.length - 1)
-                        const SizedBox(width: 15),
-                    ],
+                    ),
+                    if (i != firstThreeItems.length - 1)
+                      const SizedBox(width: 15),
                   ],
-                ),
+                ],
+              ),
 
-                // Second Row
-                AnimatedSize(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                  child: widget.isCollapsed
-                      ? const SizedBox.shrink()
-                      : Column(
+              // Second Row
+              AnimatedSize(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                alignment: Alignment.topCenter,
+                clipBehavior: Clip.hardEdge,
+                child: widget.isCollapsed
+                    ? const SizedBox.shrink()
+                    : SizedBox(
+                        width: double.infinity,
+                        child: Column(
                           children: [
                             if (groupedOtherItems.isNotEmpty) ...[
                               const SizedBox(height: 24),
@@ -597,23 +600,29 @@ class _FileSelectionActionsWidgetState
                                 ),
                               ),
                               const SizedBox(height: 16),
-                              if (groupedOtherItems.length > 1)
-                                SmoothPageIndicator(
-                                  controller: _pageController,
-                                  count: groupedOtherItems.length,
-                                  effect: const WormEffect(
-                                    dotHeight: 6,
-                                    dotWidth: 6,
-                                    spacing: 6,
-                                    activeDotColor: Colors.white,
-                                  ),
-                                ),
+                              SizedBox(
+                                height: groupedOtherItems.length > 1 ? 22 : 0,
+                                child: groupedOtherItems.length > 1
+                                    ? Center(
+                                        child: SmoothPageIndicator(
+                                          controller: _pageController,
+                                          count: groupedOtherItems.length,
+                                          effect: const WormEffect(
+                                            dotHeight: 6,
+                                            dotWidth: 6,
+                                            spacing: 6,
+                                            activeDotColor: Colors.white,
+                                          ),
+                                        ),
+                                      )
+                                    : null,
+                              ),
                             ],
                           ],
                         ),
-                ),
-              ],
-            ),
+                      ),
+              ),
+            ],
           ),
         ),
       );
