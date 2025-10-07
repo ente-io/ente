@@ -91,8 +91,7 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
       AppLock(
         builder: (args) => EnteApp(locale, savedThemeMode),
         lockScreen: const LockScreen(),
-        enabled:
-            await Configuration.instance.shouldShowLockScreen() ||
+        enabled: await Configuration.instance.shouldShowLockScreen() ||
             localSettings.isOnGuestView(),
         locale: locale,
         lightTheme: lightThemeData,
@@ -137,13 +136,14 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
+    _logger.info("(for debugging) Configuration init $tlog");
     await Configuration.instance.init();
+    _logger.info("(for debugging) Configuration done $tlog");
 
     // App LifeCycle
     AppLifecycleService.instance.init(prefs);
-    AppLifecycleService.instance.onAppInBackground(
-      'init via: WorkManager $tlog',
-    );
+    AppLifecycleService.instance
+        .onAppInBackground('init via: WorkManager $tlog');
 
     // Crypto rel.
     await Computer.shared().turnOn(workersCount: 4);
@@ -160,7 +160,9 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
       packageInfo,
     );
 
+    _logger.info("(for debugging) CollectionsService init $tlog");
     await CollectionsService.instance.init(prefs);
+    _logger.info("(for debugging) CollectionsService init done $tlog");
 
     // Upload & Sync Related
     await FileUploader.instance.init(prefs, true);
@@ -314,9 +316,8 @@ void logLocalSettings() {
         VideoPreviewService.instance.isVideoStreamingEnabled,
   };
 
-  final formattedSettings = settings.entries
-      .map((e) => '${e.key}: ${e.value}')
-      .join(', ');
+  final formattedSettings =
+      settings.entries.map((e) => '${e.key}: ${e.value}').join(', ');
   _logger.info('Local settings - $formattedSettings');
 }
 
