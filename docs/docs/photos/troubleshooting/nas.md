@@ -1,34 +1,25 @@
 ---
-title: Avoiding NAS
-description: Ente Photos and NAS (network drives)
+title: This Page Has Moved
+description: This content has been reorganized
 ---
 
-# Network drives
+# This Page Has Moved
 
-The Ente Photos desktop app currently does not support NAS (network drives).
+The content from **Network Drives (NAS)** has been reorganized. You can find it in the following locations:
 
-The app will actually work, and in some cases it will work fine too, but in
-practice we have found that network storage products sometimes have flaky file
-system emulation that causes bad performance during uploads, or when trying to
-directly stream chunks of Google Takeout zips that are stored on network drives.
+## Network Drive Issues
 
-In particular, the folder watch functionality suffers a lot since the app needs
-access to file system events to detect changes to the users files so that they
-can be uploaded whenever there are changes. Network drives are less reliable in
-providing these file change events correctly.
+- [Can I upload from a network drive (NAS)?](/photos/faq/troubleshooting#nas) - Why NAS is not recommended, workarounds, and export considerations for UNC paths
 
-Since are high chances of the user having a subpar experience, we request
-customers to avoid using the desktop app directly with network attached storage
-and instead temporarily copy the files to their local storage for uploads, and
-avoid watching folders that live on a network drive.
+## Related Topics
 
-## Exporting to UNC paths
+- [Watch folders not syncing](/photos/faq/troubleshooting#watch-folders-not-syncing) - Troubleshooting watch folder issues
+- [Desktop app upload issues](/photos/faq/troubleshooting#large-uploads) - General desktop upload troubleshooting
 
-Generally, exports are likely to work better than imports, since the interaction
-with the file system is relatively simpler (Note that the app still needs to
-scan the folder to find existing files, esp. if the continuous export option is
-enabled).
+---
 
-A special case is when exporting to a UNC path. In this case, the file
-separators will not work as expected and the export will not start. As a
-workaround, you can map your UNC path to a network drive and use that instead.
+**Can't find what you're looking for?**
+
+- Browse all [Troubleshooting topics](/photos/faq/troubleshooting)
+- Check the [Backup and Sync FAQ](/photos/faq/backup-and-sync)
+- Visit the [main Photos documentation](/photos/)

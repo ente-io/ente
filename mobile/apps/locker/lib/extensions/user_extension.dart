@@ -1,4 +1,4 @@
-import "package:ente_sharing/models/user.dart"; 
+import "package:ente_sharing/models/user.dart";
 
 extension UserExtension on User {
   //Some initial users have name in name field.

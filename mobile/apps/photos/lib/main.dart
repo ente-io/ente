@@ -75,16 +75,10 @@ void main() async {
 
   if (Platform.isAndroid) FlutterDisplayMode.setHighRefreshRate().ignore();
   SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      systemNavigationBarColor: Color(0x00010000),
-    ),
+    const SystemUiOverlayStyle(systemNavigationBarColor: Color(0x00010000)),
   );
 
-  unawaited(
-    SystemChrome.setEnabledSystemUIMode(
-      SystemUiMode.edgeToEdge,
-    ),
-  );
+  unawaited(SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge));
 }
 
 Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
@@ -183,20 +177,27 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
 
     // Begin Execution
     // only runs for android
+    _logger.info("[BG TASK] update notification");
     updateService.showUpdateNotification().ignore();
+    _logger.info("[BG TASK] sync starting");
     await _sync('bgTaskActiveProcess');
 
+    _logger.info("[BG TASK] locale fetch");
     final locale = await getLocale();
     await initializeDateFormatting(locale?.languageCode ?? "en");
     // only runs for android
+    _logger.info("[BG TASK] home widget sync");
     await _homeWidgetSync(true);
 
     // await MLService.instance.init();
     // await PersonService.init(entityService, MLDataDB.instance, prefs);
     // await MLService.instance.runAllML(force: true);
+    _logger.info("[BG TASK] smart albums sync");
     await smartAlbumsService.syncSmartAlbums();
+
+    _logger.info("[BG TASK] $taskId completed");
   } catch (e, s) {
-    _logger.severe("Error on init BG task", e, s);
+    _logger.severe("[BG TASK] $taskId error", e, s);
   }
 }
 
@@ -291,11 +292,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("PushService/HomeWidget done $tlog");
     unawaited(SemanticSearchService.instance.init());
     unawaited(MLService.instance.init());
-    await PersonService.init(
-      entityService,
-      MLDataDB.instance,
-      preferences,
-    );
+    await PersonService.init(entityService, MLDataDB.instance, preferences);
     EnteWakeLockService.instance.init(preferences);
     logLocalSettings();
     initComplete = true;

@@ -64,6 +64,8 @@ class FlagService {
 
   String get customDomain => flags.customDomain;
 
+  String get embedUrl => flags.embedUrl;
+
   bool get textDetection => internalUser && Platform.isIOS;
 
   bool get addToAlbumFeature => internalUser;

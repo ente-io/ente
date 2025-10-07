@@ -283,6 +283,10 @@ class SuperLogging {
       if (_shouldSkipSentry(error)) {
         return;
       }
+
+      // Determine execution context from prefix
+      final executionContext = _getExecutionContext();
+
       if (rec != null) {
         await Sentry.captureException(
           error,
@@ -293,18 +297,31 @@ class SuperLogging {
             });
             scope.setTag('logger', rec.loggerName);
             scope.setTag('level', rec.level.name);
+            scope.setTag('execution_context', executionContext);
           },
         );
       } else {
         await Sentry.captureException(
           error,
           stackTrace: stack,
+          withScope: (scope) {
+            scope.setTag('execution_context', executionContext);
+          },
         );
       }
     } catch (e) {
       $.info('Sending report to sentry failed: $e');
       $.info('Original error: $error');
     }
+  }
+
+  /// Determine execution context from prefix
+  static String _getExecutionContext() {
+    final prefix = config.prefix.trim();
+    if (prefix.isEmpty) return 'foreground';
+    if (prefix.contains('[bg]')) return 'background';
+    if (prefix.contains('[fbg]')) return 'firebase_background';
+    return 'unknown';
   }
 
   static String _lastExtraLines = '';

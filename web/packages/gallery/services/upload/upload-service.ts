@@ -692,6 +692,8 @@ export const upload = async (
 
         const { fileTypeInfo, fileSize, lastModifiedMs } = assetDetails;
 
+        if (fileSize === 0) return { type: "zeroSize" };
+
         const maxFileSize = 10 * 1024 * 1024 * 1024; /* 10 GB */
         if (fileSize >= maxFileSize) return { type: "tooLarge" };
 

@@ -1792,7 +1792,6 @@
   "automaticallyAnalyzeAndSplitGrouping": "Analizzeremo automaticamente il raggruppamento per determinare se ci sono più persone presenti, e li separeremo di nuovo. Questo potrebbe richiedere alcuni secondi.",
   "layout": "Disposizione",
   "day": "Giorno",
-  "peopleAutoAddDesc": "Seleziona le persone che vuoi aggiungere automaticamente all'album",
   "undo": "Annulla",
   "redo": "Ripristina",
   "filter": "﻿Filtra",
