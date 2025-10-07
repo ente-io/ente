@@ -85,6 +85,14 @@ class BaseConfiguration {
   }
 
   Future<void> resetSecureStorage() async {
+    // Skip reset if offlineAuthSecretKey is present
+    final offlineKey = await _secureStorage.read(key: offlineAuthSecretKey);
+    if (offlineKey != null) {
+      _logger.info(
+        'Skipping resetSecureStorage because offlineAuthSecretKey is present',
+      );
+      return;
+    }
     try {
       // Delete all keys except preserved ones
       final allKeys = await _secureStorage.readAll();
