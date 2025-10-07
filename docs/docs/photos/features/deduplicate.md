@@ -1,71 +1,25 @@
 ---
-title: Deduplicate
-description: Removing duplicates photos using Ente Photos
+title: This Page Has Moved
+description: This content has been reorganized
 ---
 
-# Deduplicate
+# This Page Has Moved
 
-Ente performs two different duplicate detections: one during uploads, and one
-that can be manually run afterwards to remove duplicates and very similar files across albums.
+The **Deduplication** feature guide has moved to:
 
-## During uploads
+## Duplicate Detection
 
-Ente will automatically deduplicate and ignore duplicate files during uploads.
+- [Duplicate detection feature guide](/photos/features/backup-and-sync/duplicate-detection) - Complete guide to automatic duplicate detection and removal
 
-When uploading, Ente will ignore exact duplicate files. This allows you to
-resume interrupted uploads, or drag and drop the same folder, or reinstall the
-app, and expect Ente to automatically skip duplicates and only add new files.
+## Related topics
 
-The duplicate detection works slightly differently on each platform, to cater to
-the platform's nuances.
+- [How does deduplication work?](/photos/faq/backup-and-sync#deduplication) - FAQ about duplicate handling
+- [Storage optimization](/photos/features/albums-and-organization/storage-optimization) - Other ways to optimize storage
 
-#### Mobile
+---
 
-- On iOS, a hash will be used to detect exact duplicates. If the duplicate is
-  being uploaded to an album where a photo with the same hash already exists,
-  then the duplicate will be skipped. If it is being uploaded to a different
-  album, then a symlink will be created (so no actual data will need to be
-  uploaded, just a symlink will be created to the existing file).
+**Can't find what you're looking for?**
 
-- On Android also, a hash check is used. But unlike iOS, the native Android
-  filesystem behaviour is to keep physical copies if the same photo is in
-  different albums. So Ente does the same: duplicates to same album will be
-  skipped, duplicates when going to separate albums will create copies.
-
-#### Web and desktop
-
-On laptops (i.e. when using the Ente web or desktop app), in addition to a hash
-check, the file name is also used. The assumption is that the user wishes to
-keep two copies if they have the same file but with different names.
-
-Thus a file will be considered a duplicate and skipped during upload if a file
-with the same name and hash already exists in the album.
-
-And if you're trying to upload it to a different album (i.e. the same file with
-the same name already exists in a different album), then a symlink to the
-existing file will be created. This is similar to what happens when you do "Add
-to album", and the actual files are not re-uploaded.
-
-## Manual deduplication
-
-Ente provides a tool for manual de-duplication in _Settings → Backup → Free up space →
-Remove duplicates_. This is useful if you have an existing library with
-duplicates across different albums, but wish to keep only one copy.
-
-During this operation, Ente will discard duplicates across all albums, retain a
-single copy, and add symlinks to this copy within all existing albums. So your
-existing album structure remains unchanged, while the space consumed by the
-duplicate data is freed up.
-
-## Filtering similar images
-
-Ente also provides a tool for manual removal of images that are similar, but not the exact same, using our private ML. This feature can be found in _Settings → Backup → Free up space →
-Similar images_. This is useful if you've taken a lot of similar photos, potentiall even in different albums, and want to keep only the best ones.
-
-During this filtering process you can choose which photos to keep and which to delete for each set of similar images. Ente will then automatically add symlinks for the kept photos to any albums that only had the deleted images. This way you can easily prune similar images, without worrying about accidentally removing the best ones from a certain album.
-
-## Adding to Ente album creates symlinks
-
-Note that once a file is in Ente, adding it to another Ente album will create a
-symlink, so that you can add it to as many albums as you wish but storage will
-only be counted once.
+- Browse [Backup and Sync features](/photos/features/backup-and-sync/)
+- Check [Backup FAQ](/photos/faq/backup-and-sync)
+- Visit the [main Photos documentation](/photos/)

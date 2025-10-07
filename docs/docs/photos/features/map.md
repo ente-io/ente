@@ -1,38 +1,26 @@
 ---
-title: Maps
-description: View and explore your photos on a map within Ente Photos
+title: This Page Has Moved
+description: This content has been reorganized
 ---
 
-# Map
+# This Page Has Moved
 
-_View and explore your photos on the map_
+The **Map** feature guide has moved to:
 
-## How can I view photos on the map on mobile?
+## Map and Location Features
 
-- Find the search icon located at the bottom right corner of your screen.
-- Tap on the globe icon (Your map) withing the location
-- Enter the map view and start exploring your photos from around the world.
+- [Map and location feature guide](/photos/features/search-and-discovery/map-and-location) - Complete guide to viewing photos on a map and creating location tags
 
-## How to enable map on your mobile app?
+## Related topics
 
-- Tap the three horizontal lines located at the top left corner of your home
-  screen or swipe left on the home screen.
-- Select _General_ settings.
-- Enter the _Advanced_ settings.
-- Use the toggle switch to turn the map feature on or off.
+- [Map FAQ](/photos/faq/search-and-discovery#map) - Common questions about map features
+- [Location tags](/photos/faq/search-and-discovery#location-tags) - Creating and managing location tags
+- [Location privacy](/photos/faq/security-and-privacy#location-tags-encrypted) - Location data encryption
 
-## How to view Album photos on the map?
+---
 
-- Open the album containing the photos you want to view
-- Tap on the three horizontal lines located in the top right corner of the
-  screen.
-- Select _Map_ from the options.
-- View and explore your photos on the map.
+**Can't find what you're looking for?**
 
-## How to enable map on desktop?
-
-- Click on the three horizontal lines located in the top left corner of the app.
-- Navigate to _Preferences_ from the menu.
-- Select _Advanced_ in the preferences menu.
-- Click on _Map_ to access map settings.
-- Toggle the map settings on and off based on your preferences.
+- Browse [Search and Discovery features](/photos/features/search-and-discovery/)
+- Check [Search FAQ](/photos/faq/search-and-discovery)
+- Visit the [main Photos documentation](/photos/)

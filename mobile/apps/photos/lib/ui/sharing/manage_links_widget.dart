@@ -73,6 +73,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
     final PublicURL url = widget.collection!.publicURLs.firstOrNull!;
     final String urlValue =
         CollectionsService.instance.getPublicUrl(widget.collection!);
+
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -88,29 +89,32 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  MenuItemWidget(
-                    alignCaptionedTextToLeft: true,
-                    captionedTextWidget: CaptionedTextWidget(
-                      title: AppLocalizations.of(context).albumLayout,
-                      subTitle: _getLayoutDisplayName(
-                        widget.collection!.pubMagicMetadata.layout ?? "grouped",
-                        context,
+                  if (flagService.internalUser)
+                    MenuItemWidget(
+                      alignCaptionedTextToLeft: true,
+                      captionedTextWidget: CaptionedTextWidget(
+                        title: AppLocalizations.of(context).albumLayout,
+                        subTitle: _getLayoutDisplayName(
+                              widget.collection!.pubMagicMetadata.layout ??
+                                  "grouped",
+                              context,
+                            ) +
+                            "(i)",
                       ),
+                      trailingIcon: Icons.chevron_right,
+                      menuItemColor: enteColorScheme.fillFaint,
+                      surfaceExecutionStates: false,
+                      onTap: () async {
+                        // ignore: unawaited_futures
+                        routeToPage(
+                          context,
+                          LayoutPickerPage(widget.collection!),
+                        ).then((value) {
+                          setState(() {});
+                        });
+                      },
                     ),
-                    trailingIcon: Icons.chevron_right,
-                    menuItemColor: enteColorScheme.fillFaint,
-                    surfaceExecutionStates: false,
-                    onTap: () async {
-                      // ignore: unawaited_futures
-                      routeToPage(
-                        context,
-                        LayoutPickerPage(widget.collection!),
-                      ).then((value) {
-                        setState(() {});
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 24),
+                  if (flagService.internalUser) const SizedBox(height: 24),
                   MenuItemWidget(
                     key: ValueKey("Allow collect $isCollectEnabled"),
                     captionedTextWidget: CaptionedTextWidget(
@@ -330,6 +334,36 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       isBottomBorderRadiusRemoved: true,
                     ),
                   if (!url.isExpired)
+                    DividerWidget(
+                      dividerType: DividerType.menu,
+                      bgColor: getEnteColorScheme(context).fillFaint,
+                    ),
+                  if (!url.isExpired && flagService.internalUser)
+                    MenuItemWidget(
+                      captionedTextWidget: CaptionedTextWidget(
+                        title:
+                            AppLocalizations.of(context).copyEmbedHtml + " (i)",
+                        makeTextBold: true,
+                      ),
+                      leadingIcon: Icons.code,
+                      menuItemColor: getEnteColorScheme(context).fillFaint,
+                      showOnlyLoadingState: false,
+                      surfaceExecutionStates: false,
+                      onTap: () async {
+                        final embedHtml = CollectionsService.instance
+                            .getEmbedHtml(widget.collection!);
+                        await Clipboard.setData(
+                          ClipboardData(text: embedHtml),
+                        );
+                        showShortToast(
+                          context,
+                          AppLocalizations.of(context).linkCopiedToClipboard,
+                        );
+                      },
+                      isTopBorderRadiusRemoved: true,
+                      isBottomBorderRadiusRemoved: true,
+                    ),
+                  if (!url.isExpired && flagService.internalUser)
                     DividerWidget(
                       dividerType: DividerType.menu,
                       bgColor: getEnteColorScheme(context).fillFaint,

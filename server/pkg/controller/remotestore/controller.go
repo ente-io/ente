@@ -78,6 +78,7 @@ func (c *Controller) GetFeatureFlags(ctx *gin.Context) (*ente.FeatureFlagRespons
 		// except internal user.rt
 		EnableMobMultiPart: true,
 		CastUrl:            viper.GetString("apps.cast"),
+		EmbedUrl:           viper.GetString("apps.embed-albums"),
 		CustomDomainCNAME:  viper.GetString("apps.custom-domain.cname"),
 	}
 	for key, value := range values {

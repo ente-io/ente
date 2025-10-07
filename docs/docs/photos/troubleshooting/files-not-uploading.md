@@ -1,27 +1,23 @@
 ---
-title: Files not uploading
-description: Troubleshooting when files are not uploading from your Ente Photos app
+title: This Page Has Moved
+description: This content has been reorganized
 ---
 
-# Files not uploading
+# This Page Has Moved
 
-## Network Issue
+The content from **Files Not Uploading** has been reorganized. You can find it in the following locations:
 
-If you are using VPN, please try disabling the VPN or switching your provider.
+## Upload Issues
 
-## Web / Desktop
+- [Why aren't my photos uploading?](/photos/faq/troubleshooting#photos-not-uploading) - General upload troubleshooting including network issues, storage quota, and file compatibility
+- [Upload showing "Waiting to upload"](/photos/faq/troubleshooting#photos-not-uploading) - Network connectivity issues
+- [Desktop/web upload failures (Disable "Faster uploads")](/photos/faq/troubleshooting#faster-uploads) - Cloudflare proxy issues
+- [File type detection issues](/photos/faq/troubleshooting#photos-not-uploading) - When valid files aren't being detected
 
-### Disable "Faster uploads"
+---
 
-We use a Cloudflare proxy to speed up uploads
-([blog post](https://ente.io/blog/tech/making-uploads-faster/)). However, in
-some network configurations (depending on the ISP) this might prevent uploads
-from going through, so if you're having trouble with uploads please try after
-disabling the "Faster uploads" setting in _Preferences > Advanced_.
+**Can't find what you're looking for?**
 
-### Certain file types are not uploading
-
-The desktop/web app tries to detect if a particular file is video or image. If
-the detection fails, then the app skips the upload. Please contact our
-[support](mailto:support@ente.io) if you find that a valid file did not get
-detected and uploaded.
+- Browse all [Troubleshooting topics](/photos/faq/troubleshooting)
+- Check the [Backup and Sync FAQ](/photos/faq/backup-and-sync)
+- Visit the [main Photos documentation](/photos/)

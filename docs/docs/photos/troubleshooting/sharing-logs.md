@@ -1,47 +1,23 @@
 ---
-title: Sharing logs with support
-description: How to report bugs and share the logs from your Ente Photos app
+title: This Page Has Moved
+description: This content has been reorganized
 ---
 
-# Sharing debug logs
+# This Page Has Moved
 
-In some cases when you report an issue, our customer support might request you
-to share debug logs from your app to help our developers find the issue.
+The content from **Sharing Logs** has been reorganized. You can find it in the following locations:
 
-Note that the debug logs contain potentially sensitive information like the file
-names, so please feel free to not share them if you have any hesitation or want
-to keep these private. We will try to diagnose the issue even without the logs,
-the logs just make the process a bit faster and easier.
+## Getting Help
 
-## Mobile
+- [How do I share debug logs with support?](/photos/faq/troubleshooting) - Step-by-step instructions for mobile, desktop, and web, including log file locations
 
-- Open settings (tap on the three horizontal lines button).
-- Tap on _Support_ from the settings.
-- Select for the option to _Report a Bug_.
-- Tap on _Report a bug_.
+## Related Topics
 
-## Desktop and Web
+- [Where can I get help?](/photos/faq/troubleshooting) - Discord, email support, and GitHub for bug reports
 
-- Open settings (click on the three horizontal lines button located at the top
-  left corner of the screen).
-- Click on the _Help_ option towards the bottom of settings.
-- Click on _View logs_. This will show you the location of the logs on your
-  system (desktop), or download them from the browser onto your computer (web).
-- Go back to settings.
-- Click on _Support_. This will open your email client where you can attach the
-  logs in the email and describe the issue.
+---
 
-## Desktop
+**Can't find what you're looking for?**
 
-On the desktop app, you can also directly view the logs on your computer at the
-following locations:
-
-- macOS: `~/Library/Logs/ente/ente.log`
-- Linux: `~/.config/ente/logs/ente.log`
-- Windows: `%USERPROFILE%\AppData\Roaming\ente\logs\ente.log`
-
-## Send email manually
-
-If _Report a bug_ or _Support_ doesn't automatically open your email client, you
-can also directly send a mail to <a
-href="mailto:support@ente.io">support@ente.io</a>.
+- Browse all [Troubleshooting topics](/photos/faq/troubleshooting)
+- Visit the [main Photos documentation](/photos/)

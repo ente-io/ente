@@ -276,11 +276,7 @@
     "view_on_map": "Lihat di OpenStreetMap",
     "map": "Peta",
     "enable_map": "Aktifkan peta",
-    "enable_maps_confirm": "Aktifkan peta?",
-    "enable_maps_confirm_message": "",
     "disable_map": "Nonaktifkan peta",
-    "disable_maps_confirm": "Nonaktifkan peta?",
-    "disable_maps_confirm_message": "",
     "details": "Rincian",
     "view_exif": "Lihat seluruh data Exif",
     "no_exif": "Tidak ada data Exif",
@@ -327,6 +323,8 @@
     "thumbnail_generation_failed_hint": "",
     "unsupported_files": "",
     "unsupported_files_hint": "",
+    "zero_size_files": "",
+    "zero_size_files_hint": "",
     "blocked_uploads": "",
     "blocked_uploads_hint": "",
     "large_files": "",
@@ -433,6 +431,7 @@
         "year": "Setelah satu tahun"
     },
     "copy_link": "Salin link",
+    "copy_embed_html": "",
     "done": "Selesai",
     "share_link_section_title": "Atau bagikan link",
     "remove_link": "Hapus link",
@@ -700,5 +699,7 @@
     "num_2": "",
     "grouped": "",
     "continuous": "",
-    "trip": ""
+    "trip": "",
+    "album_layout": "",
+    "maps_privacy_notice": ""
 }

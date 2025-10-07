@@ -276,11 +276,7 @@
     "view_on_map": "OpenStreetMap'te görüntüle",
     "map": "Harita",
     "enable_map": "Haritayı aç",
-    "enable_maps_confirm": "Haritalar etkinleştirilsin mi?",
-    "enable_maps_confirm_message": "<p>Bu, fotoğraflarınızı dünya haritası üzerinde gösterecek.</p><p>Harita <a>OpenStreetMap</a>, tarafından barındırılır ve fotoğraflarınızın tam konumları asla paylaşılmaz.</p><p> Bu özelliği istediğiniz zaman Ayarlar'dan devre dışı bırakabilirsiniz.</p>",
     "disable_map": "Haritayı kapat",
-    "disable_maps_confirm": "Haritalar devre dışı bırakılsın mı?",
-    "disable_maps_confirm_message": "<p>Bu işlem, fotoğraflarınızın dünya haritasında görüntülenmesini devre dışı bırakır.</p><p>Bu özelliği Ayarlar'dan dilediğiniz zaman yeniden etkinleştirebilirsiniz.</p>",
     "details": "Ayrıntılar",
     "view_exif": "Tüm Exif verilerini görüntüle",
     "no_exif": "Exif verisi yok",
@@ -327,6 +323,8 @@
     "thumbnail_generation_failed_hint": "Bu dosyalar yüklendi, ancak ne yazık ki küçük resimleri oluşturulamadı.",
     "unsupported_files": "Desteklenmeyen dosyalar",
     "unsupported_files_hint": "Ente bu dosya formatlarını henüz desteklemiyor",
+    "zero_size_files": "",
+    "zero_size_files_hint": "",
     "blocked_uploads": "Engellenen yüklemeler",
     "blocked_uploads_hint": "Tarayıcınız veya bir eklenti, Ente’nin büyük dosyaları yüklemek için <code>eTags</code> kullanmasını engelliyor.",
     "large_files": "Büyük dosyalar",
@@ -433,6 +431,7 @@
         "year": "Bir yıl sonra"
     },
     "copy_link": "Bağlantıyı kopyala",
+    "copy_embed_html": "",
     "done": "Tamamlandı",
     "share_link_section_title": "Ya da bir bağlantı paylaş",
     "remove_link": "Bağlantıyı kaldır",
@@ -700,5 +699,7 @@
     "num_2": "",
     "grouped": "",
     "continuous": "",
-    "trip": ""
+    "trip": "",
+    "album_layout": "",
+    "maps_privacy_notice": ""
 }

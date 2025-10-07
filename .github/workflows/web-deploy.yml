@@ -125,3 +125,13 @@ jobs:
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                   command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/locker web/apps/locker/out
+
+            - name: Build embed
+              run: yarn build:embed
+
+            - name: Publish embed
+              uses: cloudflare/wrangler-action@v3
+              with:
+                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                  command: pages deploy --project-name=ente --commit-dirty=true --branch=deploy/embed web/apps/embed/out

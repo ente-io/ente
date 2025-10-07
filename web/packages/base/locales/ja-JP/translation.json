@@ -276,11 +276,7 @@
     "view_on_map": "OpenStreetMapで表示",
     "map": "マップ",
     "enable_map": "マップを有効にする",
-    "enable_maps_confirm": "マップを有効にしますか？",
-    "enable_maps_confirm_message": "世界地図上にあなたの写真を表示します。\n\n地図はOpenStreetMapを利用しており、あなたの写真の位置情報が外部に共有されることはありません。\n\nこの機能は設定から無効にすることができます",
     "disable_map": "マップを無効にする",
-    "disable_maps_confirm": "マップを無効にしますか？",
-    "disable_maps_confirm_message": "<p>ワールドマップでの写真の表示を無効にします。</p><p>設定からいつでもこの機能を有効にできます。</p>",
     "details": "詳細",
     "view_exif": "すべての Exif データを表示",
     "no_exif": "Exifデータがありません",
@@ -327,6 +323,8 @@
     "thumbnail_generation_failed_hint": "これらのファイルはアップロードされましたが、残念ながらサムネイルを生成できませんでした。",
     "unsupported_files": "サポートされないファイル",
     "unsupported_files_hint": "Enteはこれらのファイル形式をサポートしていません",
+    "zero_size_files": "",
+    "zero_size_files_hint": "",
     "blocked_uploads": "アップロードがブロックされました",
     "blocked_uploads_hint": "ブラウザまたはアドオンが <code>eTags</code> を使用して大きなファイルをアップロードすることを妨げています。",
     "large_files": "ファイルサイズが大きい",
@@ -433,6 +431,7 @@
         "year": "1年後"
     },
     "copy_link": "リンクをコピー",
+    "copy_embed_html": "",
     "done": "完了",
     "share_link_section_title": "またはリンクを共有",
     "remove_link": "リンクを削除",
@@ -700,5 +699,7 @@
     "num_2": "",
     "grouped": "",
     "continuous": "",
-    "trip": ""
+    "trip": "",
+    "album_layout": "",
+    "maps_privacy_notice": ""
 }

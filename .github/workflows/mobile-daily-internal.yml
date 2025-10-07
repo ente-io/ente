@@ -82,14 +82,15 @@ jobs:
                   CURRENT_VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
                   VERSION_NAME=$(echo $CURRENT_VERSION | cut -d'+' -f1)
                   CURRENT_BUILD=$(echo $CURRENT_VERSION | cut -d'+' -f2)
-                  NEW_BUILD=$((CURRENT_BUILD + ${{ github.run_number }}))
-                  NEW_VERSION="${VERSION_NAME}+${NEW_BUILD}"
+                  NEW_VERSION_CODE=$((CURRENT_BUILD + ${{ github.run_number }}))
+                  NEW_VERSION="${VERSION_NAME}+${NEW_VERSION_CODE}"
 
                   sed -i "s/^version: .*/version: $NEW_VERSION/" pubspec.yaml
                   echo "Building with version ${NEW_VERSION}"
                   
                   # Store version for later use
                   echo "NEW_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
+                  echo "NEW_VERSION_CODE=${NEW_VERSION_CODE}" >> $GITHUB_ENV
 
             - name: Prepare and validate changelog for Play Store
               run: |
@@ -173,7 +174,7 @@ jobs:
                       **Flutter:** ${{ env.FLUTTER_VERSION }}
                       **Commit:** [${{ github.sha }}](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})
                       **Download:** [Play Store](https://play.google.com/store/apps/details?id=io.ente.photos)
-
+                      **Sentry:** [Exceptions](https://sentry.ente.io/organizations/ente/issues/?environment=production&project=2&query=release.build%3A%3E%3D${{ env.NEW_VERSION_CODE }}&referrer=issue-list&statsPeriod=7d)
                       **Changes:**
                       ${{ env.CHANGELOG_DISCORD }}
                   color: 0x00ff00

@@ -1,18 +1,25 @@
 ---
-title: Free up space
-description: Freeing up your phone's storage space when using Ente Photos
+title: This Page Has Moved
+description: This content has been reorganized
 ---
 
-# Free up your phone's storage space
+# This Page Has Moved
 
-Within the app's settings page, you have an option to free up space by deleting
-all backed up photos and videos from your phone's internal storage.
+The **Free Up Space** feature guide has moved to:
 
-<div align="center">
+## Storage Optimization
 
-![Free up space screen](free-up-space.png){width=400px}
+- [Storage optimization feature guide](/photos/features/albums-and-organization/storage-optimization) - Complete guide to freeing up device space after backup
 
-</div>
+## Related topics
 
-> Note: You might have to clear the device's trash to realize this cleared
-> space.
+- [Can I delete photos after backing up?](/photos/faq/backup-and-sync#free-up-space-after-backup) - FAQ about storage management
+- [Duplicate detection](/photos/features/backup-and-sync/duplicate-detection) - Remove duplicate files
+
+---
+
+**Can't find what you're looking for?**
+
+- Browse [Albums and Organization features](/photos/features/albums-and-organization/albums)
+- Check [Backup FAQ](/photos/faq/backup-and-sync)
+- Visit the [main Photos documentation](/photos/)

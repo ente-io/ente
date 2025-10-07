@@ -692,6 +692,8 @@ export const upload = async (
 
         const { fileTypeInfo, fileSize, lastModifiedMs } = assetDetails;
 
+        if (fileSize === 0) return { type: "zeroSize" };
+
         const maxFileSize = 10 * 1024 * 1024 * 1024; /* 10 GB */
         if (fileSize >= maxFileSize) return { type: "tooLarge" };
 
@@ -1548,9 +1550,16 @@ const encryptFileStream = async (
     const ref = { pullCount: 1 };
     const encryptedFileStream = new ReadableStream({
         async pull(controller) {
-            const { value } = await fileStreamReader.read();
+            const { value, done } = await fileStreamReader.read();
+            if (done) {
+                // TransformStream in readUploadItem guarantees that we'll get
+                // encryption sized `chunkCount` chunks. Below we close the
+                // controller on the last chunk. So we shouldn't be getting a
+                // `done` here.
+                controller.close();
+                throw new Error("Unexpected stream state");
+            }
             const encryptedFileChunk = await worker.encryptStreamChunk(
-                // @ts-ignore
                 value,
                 pushState,
                 ref.pullCount === chunkCount,
