@@ -178,7 +178,35 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
   // Begin Execution
   // only runs for android
   updateService.showUpdateNotification().ignore();
-  await _sync('bgTaskActiveProcess');
+
+  // Wrap _sync() with timeout and error handling to prevent indefinite hanging
+  // and allow background tasks to complete even if sync fails
+  try {
+    _logger.info("[BG-SYNC] Starting sync with 5-minute timeout...");
+    await _sync('bgTaskActiveProcess').timeout(
+      const Duration(minutes: 5),
+      onTimeout: () {
+        _logger.severe(
+          "[BG-SYNC] Sync timed out after 5 minutes! "
+          "Continuing with home widget and smart albums sync.",
+        );
+        throw TimeoutException(
+          'Background sync exceeded 5-minute timeout',
+          const Duration(minutes: 5),
+        );
+      },
+    );
+    _logger.info("[BG-SYNC] Sync completed successfully");
+  } on TimeoutException catch (e) {
+    _logger.severe("[BG-SYNC] Sync timeout caught, continuing...", e);
+  } catch (e, s) {
+    _logger.severe(
+      "[BG-SYNC] Sync failed with error. "
+      "Continuing with home widget and smart albums sync.",
+      e,
+      s,
+    );
+  }
 
   final locale = await getLocale();
   await initializeDateFormatting(locale?.languageCode ?? "en");

@@ -600,6 +600,9 @@ class RemoteSyncService {
     _completedUploads = 0;
     _ignoredUploads = 0;
     final int toBeUploaded = filesToBeUploaded.length + updatedFileIDs.length;
+    // Track if pre-upload checks pass - used to decide whether to queue uploads
+    bool preUploadChecksPassed = false;
+
     if (toBeUploaded > 0) {
       _logger.info(
         "[UPLOAD-DEBUG] Preparing to upload $toBeUploaded files "
@@ -629,73 +632,55 @@ class RemoteSyncService {
       );
       _logger.info("[UPLOAD-DEBUG] Fired preparingForUpload status update");
 
-      // Step 1: Verify media location access permission
-      _logger.info(
-        "[UPLOAD-DEBUG] Step 1/3: Checking media location access permission...",
-      );
+      // Wrap all pre-upload checks in try-catch to handle failures gracefully
+      // This allows sync to complete and background tasks to continue to home widget/smart albums
       try {
+        // Step 1: Verify media location access permission
+        _logger.info(
+          "[UPLOAD-DEBUG] Step 1/3: Checking media location access permission...",
+        );
         await _uploader.verifyMediaLocationAccess();
         _logger
             .info("[UPLOAD-DEBUG] Step 1/3: Media location access verified ✓");
-      } catch (e, s) {
-        _logger.severe(
-          "[UPLOAD-DEBUG] Step 1/3: Media location access check FAILED ✗",
-          e,
-          s,
-        );
-        _logger.severe(
-          "[UPLOAD-DEBUG] Upload cannot proceed - permission error. "
-          "This is likely why background uploads fail.",
-        );
-        rethrow;
-      }
 
-      // Step 2: Check network availability for upload
-      _logger.info(
-        "[UPLOAD-DEBUG] Step 2/3: Checking network availability for upload...",
-      );
-      try {
+        // Step 2: Check network availability for upload
+        _logger.info(
+          "[UPLOAD-DEBUG] Step 2/3: Checking network availability for upload...",
+        );
         await _uploader.checkNetworkForUpload();
         _logger.info("[UPLOAD-DEBUG] Step 2/3: Network check passed ✓");
-      } catch (e, s) {
-        _logger.severe(
-          "[UPLOAD-DEBUG] Step 2/3: Network check FAILED ✗",
-          e,
-          s,
-        );
-        _logger.severe(
-          "[UPLOAD-DEBUG] Upload cannot proceed - network unavailable. "
-          "Requires WiFi or user enabled mobile data upload.",
-        );
-        rethrow;
-      }
 
-      // Step 3: Fetch upload URLs from server
-      _logger.info(
-        "[UPLOAD-DEBUG] Step 3/3: Fetching upload URLs from server for $toBeUploaded files...",
-      );
-      try {
+        // Step 3: Fetch upload URLs from server
+        _logger.info(
+          "[UPLOAD-DEBUG] Step 3/3: Fetching upload URLs from server for $toBeUploaded files...",
+        );
         await _uploader.fetchUploadURLs(toBeUploaded);
         _logger.info(
           "[UPLOAD-DEBUG] Step 3/3: Upload URLs fetched successfully ✓",
         );
+
+        preUploadChecksPassed = true;
+        _logger.info(
+          "[UPLOAD-DEBUG] All pre-upload checks completed successfully! "
+          "Proceeding to queue individual file uploads...",
+        );
       } catch (e, s) {
         _logger.severe(
-          "[UPLOAD-DEBUG] Step 3/3: Fetching upload URLs FAILED ✗",
+          "[UPLOAD-DEBUG] Pre-upload checks FAILED. "
+          "Skipping upload phase but allowing sync to complete gracefully. "
+          "This ensures home widget and smart albums can still sync.",
           e,
           s,
         );
-        _logger.severe(
-          "[UPLOAD-DEBUG] Upload cannot proceed - server error or quota exceeded. "
-          "Check subscription status and storage limits.",
-        );
-        rethrow;
+        // Don't rethrow - allow sync to complete without uploads
       }
 
-      _logger.info(
-        "[UPLOAD-DEBUG] All pre-upload checks completed successfully! "
-        "Proceeding to queue individual file uploads...",
-      );
+      if (!preUploadChecksPassed) {
+        _logger.info(
+          "[UPLOAD-DEBUG] Skipping file upload queue due to failed pre-upload checks. "
+          "Sync will complete without uploading $toBeUploaded files.",
+        );
+      }
     } else {
       _logger.info(
         "[UPLOAD-DEBUG] No files to upload, skipping upload preparation",
@@ -703,183 +688,196 @@ class RemoteSyncService {
     }
     final List<Future> futures = [];
 
-    _logger.info(
-      "[UPLOAD-DEBUG] Starting to queue ${filesToBeUploaded.length} new files for upload...",
-    );
-    int queuedCount = 0;
-    for (final file in filesToBeUploaded) {
-      if (shouldThrottleUpload &&
-          futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
-        _logger.info(
-          "[UPLOAD-DEBUG] Throttle limit reached (${futures.length} files queued). "
-          "Skipping remaining ${filesToBeUploaded.length - queuedCount} files.",
-        );
-        break;
-      }
-      // prefer existing collection ID for manually uploaded files.
-      // See https://github.com/ente-io/photos-app/pull/187
+    // Only proceed with queueing uploads if pre-upload checks passed
+    if (preUploadChecksPassed) {
       _logger.info(
-        "[UPLOAD-DEBUG] Queueing file ${queuedCount + 1}/${filesToBeUploaded.length}: "
-        "${file.title} (localID: ${file.localID}, generatedID: ${file.generatedID})",
+        "[UPLOAD-DEBUG] Starting to queue ${filesToBeUploaded.length} new files for upload...",
       );
-      try {
-        final collectionID = file.collectionID ??
-            (await _collectionsService
-                    .getOrCreateForPath(file.deviceFolder ?? 'Unknown Folder'))
-                .id;
-        _logger.info(
-          "[UPLOAD-DEBUG] Resolved collectionID: $collectionID for file ${file.title}",
-        );
-        _uploadFile(file, collectionID, futures);
-        queuedCount++;
-        _logger.info(
-          "[UPLOAD-DEBUG] Successfully queued file ${file.title} ($queuedCount queued so far)",
-        );
-      } catch (e, s) {
-        _logger.severe(
-          "[UPLOAD-DEBUG] Failed to queue file ${file.title}",
-          e,
-          s,
-        );
-      }
-    }
-    _logger.info(
-      "[UPLOAD-DEBUG] Finished queueing new files. Total queued: $queuedCount/${filesToBeUploaded.length}",
-    );
-
-    _logger.info(
-      "[UPLOAD-DEBUG] Starting to queue ${updatedFileIDs.length} updated files for re-upload...",
-    );
-    int reuploadQueuedCount = 0;
-    for (final uploadedFileID in updatedFileIDs) {
-      if (shouldThrottleUpload &&
-          futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
-        _logger.info(
-          "[UPLOAD-DEBUG] Throttle limit reached for re-uploads (${futures.length} total queued). "
-          "Skipping remaining ${updatedFileIDs.length - reuploadQueuedCount} updated files.",
-        );
-        break;
-      }
-      _logger.info(
-        "[UPLOAD-DEBUG] Processing updated file ${reuploadQueuedCount + 1}/${updatedFileIDs.length} "
-        "(uploadedFileID: $uploadedFileID)",
-      );
-      try {
-        final allFiles = await _db.getFilesInAllCollection(
-          uploadedFileID,
-          ownerID,
-        );
-        if (allFiles.isEmpty) {
-          _logger.warning(
-            "[UPLOAD-DEBUG] No files found for uploadedFileID $uploadedFileID, skipping",
+      int queuedCount = 0;
+      for (final file in filesToBeUploaded) {
+        if (shouldThrottleUpload &&
+            futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
+          _logger.info(
+            "[UPLOAD-DEBUG] Throttle limit reached (${futures.length} files queued). "
+            "Skipping remaining ${filesToBeUploaded.length - queuedCount} files.",
           );
-          continue;
+          break;
+        }
+        // prefer existing collection ID for manually uploaded files.
+        // See https://github.com/ente-io/photos-app/pull/187
+        _logger.info(
+          "[UPLOAD-DEBUG] Queueing file ${queuedCount + 1}/${filesToBeUploaded.length}: "
+          "${file.title} (localID: ${file.localID}, generatedID: ${file.generatedID})",
+        );
+        try {
+          final collectionID = file.collectionID ??
+              (await _collectionsService.getOrCreateForPath(
+                file.deviceFolder ?? 'Unknown Folder',
+              ))
+                  .id;
+          _logger.info(
+            "[UPLOAD-DEBUG] Resolved collectionID: $collectionID for file ${file.title}",
+          );
+          _uploadFile(file, collectionID, futures);
+          queuedCount++;
+          _logger.info(
+            "[UPLOAD-DEBUG] Successfully queued file ${file.title} ($queuedCount queued so far)",
+          );
+        } catch (e, s) {
+          _logger.severe(
+            "[UPLOAD-DEBUG] Failed to queue file ${file.title}",
+            e,
+            s,
+          );
+        }
+      }
+      _logger.info(
+        "[UPLOAD-DEBUG] Finished queueing new files. Total queued: $queuedCount/${filesToBeUploaded.length}",
+      );
+
+      _logger.info(
+        "[UPLOAD-DEBUG] Starting to queue ${updatedFileIDs.length} updated files for re-upload...",
+      );
+      int reuploadQueuedCount = 0;
+      for (final uploadedFileID in updatedFileIDs) {
+        if (shouldThrottleUpload &&
+            futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
+          _logger.info(
+            "[UPLOAD-DEBUG] Throttle limit reached for re-uploads (${futures.length} total queued). "
+            "Skipping remaining ${updatedFileIDs.length - reuploadQueuedCount} updated files.",
+          );
+          break;
         }
         _logger.info(
-          "[UPLOAD-DEBUG] Found ${allFiles.length} file(s) for uploadedFileID $uploadedFileID",
+          "[UPLOAD-DEBUG] Processing updated file ${reuploadQueuedCount + 1}/${updatedFileIDs.length} "
+          "(uploadedFileID: $uploadedFileID)",
         );
-        EnteFile? fileInCollectionOwnedByUser;
-        for (final file in allFiles) {
-          if (file.canReUpload(ownerID)) {
-            fileInCollectionOwnedByUser = file;
-            break;
+        try {
+          final allFiles = await _db.getFilesInAllCollection(
+            uploadedFileID,
+            ownerID,
+          );
+          if (allFiles.isEmpty) {
+            _logger.warning(
+              "[UPLOAD-DEBUG] No files found for uploadedFileID $uploadedFileID, skipping",
+            );
+            continue;
           }
-        }
-        if (fileInCollectionOwnedByUser != null) {
           _logger.info(
-            "[UPLOAD-DEBUG] Queueing re-upload for ${fileInCollectionOwnedByUser.title}",
+            "[UPLOAD-DEBUG] Found ${allFiles.length} file(s) for uploadedFileID $uploadedFileID",
           );
-          _uploadFile(
-            fileInCollectionOwnedByUser,
-            fileInCollectionOwnedByUser.collectionID!,
-            futures,
-          );
-          reuploadQueuedCount++;
-          _logger.info(
-            "[UPLOAD-DEBUG] Successfully queued re-upload ($reuploadQueuedCount re-uploads queued)",
-          );
-        } else {
-          _logger.warning(
-            "[UPLOAD-DEBUG] No re-uploadable file found for uploadedFileID $uploadedFileID",
+          EnteFile? fileInCollectionOwnedByUser;
+          for (final file in allFiles) {
+            if (file.canReUpload(ownerID)) {
+              fileInCollectionOwnedByUser = file;
+              break;
+            }
+          }
+          if (fileInCollectionOwnedByUser != null) {
+            _logger.info(
+              "[UPLOAD-DEBUG] Queueing re-upload for ${fileInCollectionOwnedByUser.title}",
+            );
+            _uploadFile(
+              fileInCollectionOwnedByUser,
+              fileInCollectionOwnedByUser.collectionID!,
+              futures,
+            );
+            reuploadQueuedCount++;
+            _logger.info(
+              "[UPLOAD-DEBUG] Successfully queued re-upload ($reuploadQueuedCount re-uploads queued)",
+            );
+          } else {
+            _logger.warning(
+              "[UPLOAD-DEBUG] No re-uploadable file found for uploadedFileID $uploadedFileID",
+            );
+          }
+        } catch (e, s) {
+          _logger.severe(
+            "[UPLOAD-DEBUG] Failed to queue re-upload for uploadedFileID $uploadedFileID",
+            e,
+            s,
           );
         }
-      } catch (e, s) {
-        _logger.severe(
-          "[UPLOAD-DEBUG] Failed to queue re-upload for uploadedFileID $uploadedFileID",
+      }
+      _logger.info(
+        "[UPLOAD-DEBUG] Finished queueing updated files. Total re-uploads queued: "
+        "$reuploadQueuedCount/${updatedFileIDs.length}",
+      );
+
+      _logger.info(
+        "[UPLOAD-DEBUG] ═══════════════════════════════════════════════════════",
+      );
+      _logger.info(
+        "[UPLOAD-DEBUG] SUMMARY: Total ${futures.length} upload futures queued",
+      );
+      _logger.info(
+        "[UPLOAD-DEBUG] - New files queued: $queuedCount/${filesToBeUploaded.length}",
+      );
+      _logger.info(
+        "[UPLOAD-DEBUG] - Re-uploads queued: $reuploadQueuedCount/${updatedFileIDs.length}",
+      );
+      _logger.info(
+        "[UPLOAD-DEBUG] - Process mode: ${isProcessBg ? 'BACKGROUND' : 'FOREGROUND'}",
+      );
+      _logger.info(
+        "[UPLOAD-DEBUG] Now waiting for all ${futures.length} upload futures to complete...",
+      );
+      _logger.info(
+        "[UPLOAD-DEBUG] ═══════════════════════════════════════════════════════",
+      );
+
+      try {
+        await Future.wait(futures);
+        _logger.info(
+          "[UPLOAD-DEBUG] All upload futures completed successfully! "
+          "Completed: $_completedUploads, Ignored: $_ignoredUploads",
+        );
+      } on InvalidFileError catch (e, s) {
+        _logger.warning(
+          "[UPLOAD-DEBUG] InvalidFileError caught (ignored)",
           e,
           s,
         );
+        // Do nothing
+      } on FileSystemException catch (e, s) {
+        _logger.warning(
+          "[UPLOAD-DEBUG] FileSystemException caught (ignored - likely concurrency issue)",
+          e,
+          s,
+        );
+        // Do nothing since it's caused mostly due to concurrency issues
+        // when the foreground app deletes temporary files, interrupting a background
+        // upload
+      } on LockAlreadyAcquiredError catch (e, s) {
+        _logger.warning(
+          "[UPLOAD-DEBUG] LockAlreadyAcquiredError caught (ignored)",
+          e,
+          s,
+        );
+        // Do nothing
+      } on SilentlyCancelUploadsError catch (e, s) {
+        _logger.warning(
+          "[UPLOAD-DEBUG] SilentlyCancelUploadsError caught (ignored)",
+          e,
+          s,
+        );
+        // Do nothing
+      } on UserCancelledUploadError catch (e, s) {
+        _logger.warning(
+          "[UPLOAD-DEBUG] UserCancelledUploadError caught (ignored)",
+          e,
+          s,
+        );
+        // Do nothing
+      } catch (e, s) {
+        _logger.severe("[UPLOAD-DEBUG] Unexpected error during upload", e, s);
+        rethrow;
       }
-    }
-    _logger.info(
-      "[UPLOAD-DEBUG] Finished queueing updated files. Total re-uploads queued: "
-      "$reuploadQueuedCount/${updatedFileIDs.length}",
-    );
-
-    _logger.info(
-      "[UPLOAD-DEBUG] ═══════════════════════════════════════════════════════",
-    );
-    _logger.info(
-      "[UPLOAD-DEBUG] SUMMARY: Total ${futures.length} upload futures queued",
-    );
-    _logger.info(
-      "[UPLOAD-DEBUG] - New files queued: $queuedCount/${filesToBeUploaded.length}",
-    );
-    _logger.info(
-      "[UPLOAD-DEBUG] - Re-uploads queued: $reuploadQueuedCount/${updatedFileIDs.length}",
-    );
-    _logger.info(
-      "[UPLOAD-DEBUG] - Process mode: ${isProcessBg ? 'BACKGROUND' : 'FOREGROUND'}",
-    );
-    _logger.info(
-      "[UPLOAD-DEBUG] Now waiting for all ${futures.length} upload futures to complete...",
-    );
-    _logger.info(
-      "[UPLOAD-DEBUG] ═══════════════════════════════════════════════════════",
-    );
-
-    try {
-      await Future.wait(futures);
+    } else {
       _logger.info(
-        "[UPLOAD-DEBUG] All upload futures completed successfully! "
-        "Completed: $_completedUploads, Ignored: $_ignoredUploads",
+        "[UPLOAD-DEBUG] Skipped upload queueing because pre-upload checks failed. "
+        "Sync completing without uploads to allow background task to continue.",
       );
-    } on InvalidFileError catch (e, s) {
-      _logger.warning("[UPLOAD-DEBUG] InvalidFileError caught (ignored)", e, s);
-      // Do nothing
-    } on FileSystemException catch (e, s) {
-      _logger.warning(
-        "[UPLOAD-DEBUG] FileSystemException caught (ignored - likely concurrency issue)",
-        e,
-        s,
-      );
-      // Do nothing since it's caused mostly due to concurrency issues
-      // when the foreground app deletes temporary files, interrupting a background
-      // upload
-    } on LockAlreadyAcquiredError catch (e, s) {
-      _logger.warning(
-        "[UPLOAD-DEBUG] LockAlreadyAcquiredError caught (ignored)",
-        e,
-        s,
-      );
-      // Do nothing
-    } on SilentlyCancelUploadsError catch (e, s) {
-      _logger.warning(
-        "[UPLOAD-DEBUG] SilentlyCancelUploadsError caught (ignored)",
-        e,
-        s,
-      );
-      // Do nothing
-    } on UserCancelledUploadError catch (e, s) {
-      _logger.warning(
-        "[UPLOAD-DEBUG] UserCancelledUploadError caught (ignored)",
-        e,
-        s,
-      );
-      // Do nothing
-    } catch (e, s) {
-      _logger.severe("[UPLOAD-DEBUG] Unexpected error during upload", e, s);
-      rethrow;
     }
 
     final hasUploaded = _completedUploads > 0;
