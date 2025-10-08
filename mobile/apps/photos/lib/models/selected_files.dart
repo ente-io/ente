@@ -2,6 +2,7 @@ import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/foundation.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/clear_selections_event.dart';
+import 'package:photos/models/file/dummy_file.dart';
 import 'package:photos/models/file/file.dart';
 
 class SelectedFiles extends ChangeNotifier {
@@ -14,6 +15,10 @@ class SelectedFiles extends ChangeNotifier {
   final lastSelectionOperationFiles = <EnteFile>{};
 
   void toggleSelection(EnteFile fileToToggle) {
+    // Skip dummy files - they should never be selected
+    if (fileToToggle is DummyFile) {
+      return;
+    }
     // To handle the cases, where the file might have changed due to upload
     // or any other update, using file.generatedID to track if this file was already
     // selected or not
@@ -31,24 +36,35 @@ class SelectedFiles extends ChangeNotifier {
   }
 
   void toggleGroupSelection(Set<EnteFile> filesToToggle) {
-    if (files.containsAll(filesToToggle)) {
-      unSelectAll(filesToToggle);
+    // Filter out dummy files before processing
+    final nonDummyFiles =
+        filesToToggle.where((file) => file is! DummyFile).toSet();
+    if (nonDummyFiles.isEmpty) {
+      return;
+    }
+    if (files.containsAll(nonDummyFiles)) {
+      unSelectAll(nonDummyFiles);
     } else {
-      selectAll(filesToToggle);
+      selectAll(nonDummyFiles);
     }
   }
 
   void selectAll(Set<EnteFile> filesToSelect) {
-    files.addAll(filesToSelect);
+    // Filter out dummy files before adding to selection
+    final nonDummyFiles =
+        filesToSelect.where((file) => file is! DummyFile).toSet();
+    files.addAll(nonDummyFiles);
     lastSelectionOperationFiles.clear();
-    lastSelectionOperationFiles.addAll(filesToSelect);
+    lastSelectionOperationFiles.addAll(nonDummyFiles);
     notifyListeners();
   }
 
   void unSelectAll(Set<EnteFile> filesToUnselect, {bool skipNotify = false}) {
     files.removeWhere((file) => filesToUnselect.contains(file));
     lastSelectionOperationFiles.clear();
-    lastSelectionOperationFiles.addAll(filesToUnselect);
+    // Filter out dummy files before adding to lastSelectionOperationFiles
+    lastSelectionOperationFiles
+        .addAll(filesToUnselect.where((file) => file is! DummyFile));
     if (!skipNotify) {
       notifyListeners();
     }
