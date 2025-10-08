@@ -162,10 +162,15 @@ func (m *CollectionLinkMiddleware) isDeviceLimitReached(ctx context.Context,
 	}
 
 	if count >= public2.DeviceLimitWarningThreshold {
-		if !array.Int64InList(sharedID, whitelistedCollectionShareIDs) {
+		alertStepSize := int64(200)
+		shouldAlert := count == public2.DeviceLimitWarningThreshold || 
+			(count > public2.DeviceLimitWarningThreshold && 
+			(count-public2.DeviceLimitWarningThreshold)%alertStepSize == 0)
+		
+		if shouldAlert && !array.Int64InList(sharedID, whitelistedCollectionShareIDs) {
 			m.DiscordController.NotifyPotentialAbuse(
-				fmt.Sprintf("Album exceeds warning threshold: {CollectionID: %d, ShareID: %d}",
-					collectionSummary.CollectionID, collectionSummary.ID))
+				fmt.Sprintf("Album exceeds warning threshold: {CollectionID: %d, ShareID: %d, DeviceCount: %d}",
+					collectionSummary.CollectionID, collectionSummary.ID, count))
 		}
 	}
 
