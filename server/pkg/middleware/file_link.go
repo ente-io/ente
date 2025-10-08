@@ -139,17 +139,10 @@ func (m *FileLinkMiddleware) isDeviceLimitReached(ctx context.Context,
 		deviceLimit = publicCtrl.DeviceLimitThresholdMultiplier * publicCtrl.DeviceLimitThreshold
 	}
 
-	if count >= publicCtrl.DeviceLimitWarningThreshold {
-		alertStepSize := int64(200)
-		shouldAlert := count == publicCtrl.DeviceLimitWarningThreshold || 
-			(count > publicCtrl.DeviceLimitWarningThreshold && 
-			(count-publicCtrl.DeviceLimitWarningThreshold)%alertStepSize == 0)
-		
-		if shouldAlert {
-			m.DiscordController.NotifyPotentialAbuse(
-				fmt.Sprintf("FileLink exceeds warning threshold: {FileID: %d, ShareID: %s, DeviceCount: %d}",
-					collectionSummary.FileID, collectionSummary.LinkID, count))
-		}
+	if count >= publicCtrl.DeviceLimitWarningThreshold && count%200 == 0 {
+		m.DiscordController.NotifyPotentialAbuse(
+			fmt.Sprintf("FileLink exceeds warning threshold: {FileID: %d, ShareID: %s, DeviceCount: %d}",
+				collectionSummary.FileID, collectionSummary.LinkID, count))
 	}
 
 	if deviceLimit > 0 && count >= deviceLimit {
