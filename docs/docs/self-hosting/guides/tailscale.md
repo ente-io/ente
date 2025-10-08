@@ -182,7 +182,7 @@ the following contant:
 # Script used to prepare the minio instance that runs as part of the development
 # Docker compose cluster.
 
-while ! mc config host add h0 http://minio:3200 test testtest #(change me)
+while ! mc alias set h0 http://minio:3200 test testtest #(change me)
 do
    echo "waiting for minio..."
    sleep 0.5
