@@ -61,6 +61,11 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar>
         reportBoundary(BoundaryPosition.bottom);
       }
     });
+
+    // Sync initial state if files are already selected
+    if (widget.selectedFiles.files.isNotEmpty) {
+      _selectedFilesListener();
+    }
   }
 
   @override
