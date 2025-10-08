@@ -5,6 +5,17 @@ import 'package:photos/events/clear_selections_event.dart';
 import 'package:photos/models/file/dummy_file.dart';
 import 'package:photos/models/file/file.dart';
 
+/// Manages the set of currently selected files in the gallery.
+///
+/// This class serves as the single source of truth for file selection state
+/// and automatically filters out [DummyFile] instances from all selection
+/// operations. Dummy files are used for gallery layout purposes and should
+/// never be selected.
+///
+/// **Important:** All selection methods ([toggleSelection], [selectAll],
+/// [unSelectAll], [toggleGroupSelection]) automatically exclude dummy files.
+/// Calling code does not need to check for or filter out dummy files before
+/// calling these methods.
 class SelectedFiles extends ChangeNotifier {
   final files = <EnteFile>{};
 

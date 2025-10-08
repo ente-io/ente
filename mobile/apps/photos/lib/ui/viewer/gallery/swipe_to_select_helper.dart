@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:photos/models/file/dummy_file.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/selected_files.dart';
 
@@ -43,14 +42,11 @@ class SwipeToSelectHelper {
     // Use forced mode if provided, otherwise determine based on initial file's selection state
     _selecting = forceSelecting ?? !selectedFiles.isFileSelected(file);
 
-    // If we're in selecting mode, immediately select the starting file
-    // But skip if it's a DummyFile (dummies are not selectable)
-    if (file is! DummyFile) {
-      if (_selecting == true) {
-        selectedFiles.selectAll({file});
-      } else {
-        selectedFiles.unSelectAll({file});
-      }
+    // Immediately select/deselect the starting file based on mode
+    if (_selecting == true) {
+      selectedFiles.selectAll({file});
+    } else {
+      selectedFiles.unSelectAll({file});
     }
   }
 
@@ -82,13 +78,10 @@ class SwipeToSelectHelper {
     final lastToIndex = _lastToIndex!;
     final selecting = _selecting!;
 
-    // Helper function to get range of files, excluding DummyFiles
+    // Helper function to get range of files
     Set<EnteFile> getRange(int start, int end) {
       if (start < end && start >= 0 && end <= allFiles.length) {
-        return allFiles
-            .getRange(start, end)
-            .where((file) => file is! DummyFile)
-            .toSet();
+        return allFiles.getRange(start, end).toSet();
       }
       return {};
     }
