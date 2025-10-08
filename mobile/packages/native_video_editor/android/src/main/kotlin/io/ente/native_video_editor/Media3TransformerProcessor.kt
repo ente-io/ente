@@ -2,6 +2,7 @@ package io.ente.native_video_editor
 
 import android.content.Context
 import android.util.Log
+import android.net.Uri
 import androidx.media3.common.Effect
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MimeTypes
@@ -74,7 +75,7 @@ class Media3TransformerProcessor(private val context: Context) {
             logVerbose("Original video: ${originalWidth}x$originalHeight, rotation=$originalRotation")
 
             // Build MediaItem with optional clipping
-            val mediaItemBuilder = MediaItem.Builder().setUri(inputPath)
+            val mediaItemBuilder = MediaItem.Builder().setUri(Uri.fromFile(File(inputPath)))
 
             if (trimStartMs != null && trimEndMs != null) {
                 logVerbose("Applying trim: $trimStartMs-$trimEndMs ms")

@@ -2,6 +2,7 @@ import "dart:async";
 import 'dart:io';
 import "dart:math";
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import 'package:native_video_editor/native_video_editor.dart';
@@ -64,6 +65,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
   /// Toggle state for internal users to switch between native and FFmpeg export
   /// Initially set to the flag service value
   late bool _useNativeExport;
+  bool _dryRunMode = false;
 
   @override
   void initState() {
@@ -96,15 +98,12 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         ),
       );
 
-      _controller!
-          .initialize()
-          .then((_) {
-            setState(() {});
-          })
-          .catchError((error) {
-            // handle minumum duration bigger than video duration error
-            Navigator.pop(context);
-          }, test: (e) => e is VideoMinDurationError);
+      _controller!.initialize().then((_) {
+        setState(() {});
+      }).catchError((error) {
+        // handle minumum duration bigger than video duration error
+        Navigator.pop(context);
+      }, test: (e) => e is VideoMinDurationError);
     });
   }
 
@@ -131,8 +130,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
       child: ValueListenableBuilder<bool>(
         valueListenable: _isExporting,
         builder: (context, isExporting, _) {
-          final isReady =
-              _controller != null &&
+          final isReady = _controller != null &&
               _controller!.initialized &&
               _quarterTurnsForRotationCorrection != null;
 
@@ -173,30 +171,22 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                                           // For videos with metadata rotation, we need to swap dimensions
                                           final shouldSwap =
                                               _quarterTurnsForRotationCorrection! %
-                                                  2 ==
-                                              1;
+                                                      2 ==
+                                                  1;
                                           final width = _controller!
-                                              .video
-                                              .value
-                                              .size
-                                              .width;
+                                              .video.value.size.width;
                                           final height = _controller!
-                                              .video
-                                              .value
-                                              .size
-                                              .height;
+                                              .video.value.size.height;
 
                                           return RotatedBox(
                                             quarterTurns:
                                                 _quarterTurnsForRotationCorrection!,
                                             child: CropGridViewer.preview(
                                               controller: _controller!,
-                                              overrideWidth: shouldSwap
-                                                  ? height
-                                                  : width,
-                                              overrideHeight: shouldSwap
-                                                  ? width
-                                                  : height,
+                                              overrideWidth:
+                                                  shouldSwap ? height : width,
+                                              overrideHeight:
+                                                  shouldSwap ? width : height,
                                             ),
                                           );
                                         },
@@ -229,7 +219,8 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                                 children: [
                                   Text(
                                     "Native (i)",
-                                    style: getEnteTextTheme(context).mini
+                                    style: getEnteTextTheme(context)
+                                        .mini
                                         .copyWith(color: colorScheme.textMuted),
                                   ),
                                   const SizedBox(width: 4),
@@ -251,6 +242,53 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                             ),
                           if (flagService.internalUser)
                             const SizedBox(height: 8),
+                          if (kDebugMode)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Expanded(
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          _dryRunMode = !_dryRunMode;
+                                        });
+                                      },
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            'Dry run (debug)',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyMedium,
+                                          ),
+                                          Transform.scale(
+                                            scale: 0.8,
+                                            child: Switch(
+                                              value: _dryRunMode,
+                                              onChanged: (value) {
+                                                setState(() {
+                                                  _dryRunMode = value;
+                                                });
+                                              },
+                                              materialTapTargetSize:
+                                                  MaterialTapTargetSize
+                                                      .shrinkWrap,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           VideoEditorMainActions(
                             children: [
                               VideoEditorBottomAction(
@@ -306,6 +344,20 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
   }
 
   void exportVideo() async {
+    final metadataRotation = _quarterTurnsForRotationCorrection! * 90;
+    final shouldUseNative = flagService.internalUser
+        ? _useNativeExport
+        : flagService.useNativeVideoEditor;
+
+    if (kDebugMode && _dryRunMode) {
+      final debugInfo = await NativeVideoExportService.buildDebugSummary(
+        controller: _controller!,
+        metadataRotation: metadataRotation,
+      );
+      await _showDryRunDialog(debugInfo, shouldUseNative);
+      return;
+    }
+
     _isExporting.value = true;
 
     final dialogKey = GlobalKey<LinearProgressDialogState>();
@@ -325,164 +377,214 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
     );
 
     try {
-      File result;
-
-      // For internal users, use toggle value as source of truth
-      // For non-internal users, use flag service value
-      final shouldUseNative = flagService.internalUser
-          ? _useNativeExport
-          : flagService.useNativeVideoEditor;
-
-      if (shouldUseNative) {
-        // Use native export
-        final tempDir = Directory.systemTemp.createTempSync(
-          'ente_video_export',
-        );
-        final outputPath = path.join(
-          tempDir.path,
-          'export_${DateTime.now().millisecondsSinceEpoch}.mp4',
-        );
-
-        final metadataRotation = _quarterTurnsForRotationCorrection! * 90;
-
-        try {
-          result = await NativeVideoExportService.exportVideo(
-            controller: _controller!,
-            outputPath: outputPath,
-            metadataRotation: metadataRotation,
-            onProgress: (progress) {
-              if (dialogKey.currentState != null) {
-                dialogKey.currentState!.setProgress(progress);
-              }
-            },
-            onError: (e, s) {
-              _logger.severe("Error exporting video with native", e, s);
-              // Don't handle error here, let it propagate
-            },
-          );
-        } catch (nativeError, _) {
-          _logger.warning(
-            "Native export failed, attempting FFmpeg fallback",
-            nativeError,
-          );
-
-          // Show toast for internal users
-          if (flagService.internalUser && mounted) {
-            showShortToast(context, "(i) Switching to FFmpeg fallback");
-          }
-
-          // Reset progress for FFmpeg
-          if (dialogKey.currentState != null) {
-            dialogKey.currentState!.setProgress(0.0);
-          }
-
-          // Fallback to FFmpeg
-          try {
-            result = await ExportService.exportVideo(
-              controller: _controller!,
-              outputPath: outputPath,
-              onProgress: (progress) {
-                if (dialogKey.currentState != null) {
-                  dialogKey.currentState!.setProgress(progress);
-                }
-              },
-              onError: (e, s) {
-                _logger.severe("FFmpeg fallback also failed", e, s);
-                // Don't handle error here, let it propagate
-              },
-            );
-          } catch (ffmpegError, _) {
-            _logger.severe(
-              "Both native and FFmpeg exports failed",
-              ffmpegError,
-            );
-            rethrow; // This will be caught by the outer try-catch
-          }
-        }
-      } else {
-        // Use FFmpeg export
-        final config = VideoFFmpegVideoEditorConfig(
-          _controller!,
-          format: VideoExportFormat.mp4,
-          commandBuilder: (config, videoPath, outputPath) {
-            List<String> filters = config.getExportFilters();
-
-            // Add -noautorotate for videos with metadata rotation
-            // We don't add transpose because crop is already calculated for original orientation
-            String noAutoRotate = "";
-            if (_quarterTurnsForRotationCorrection != null &&
-                _quarterTurnsForRotationCorrection! != 0) {
-              noAutoRotate = "-noautorotate";
-            }
-
-            // For Android with metadata rotation, adjust crop filter
-            if (Platform.isAndroid &&
-                _quarterTurnsForRotationCorrection != null &&
-                _quarterTurnsForRotationCorrection! != 0 &&
-                _quarterTurnsForRotationCorrection! % 2 == 1) {
-              final metadataRotation = _quarterTurnsForRotationCorrection! * 90;
-
-              // Find and replace crop filter with corrected values
-              filters = _adjustCropFilterForAndroid(filters, metadataRotation);
-            }
-
-            final String startTrimCmd = "-ss ${_controller!.startTrim}";
-            final String toTrimCmd = "-t ${_controller!.trimmedDuration}";
-            final command =
-                '$startTrimCmd $noAutoRotate -i $videoPath  $toTrimCmd ${config.filtersCmd(filters)} -c:v libx264 -c:a aac $outputPath';
-            return command;
-          },
-        );
-
-        final executeConfig = await config.getExecuteConfig();
-        final completer = Completer<File>();
-
-        await ExportService.runFFmpegCommand(
-          executeConfig,
-          onProgress: (stats) {
-            final progress = config.getFFmpegProgress(stats.getTime().toInt());
-            if (dialogKey.currentState != null) {
-              dialogKey.currentState!.setProgress(progress);
-            }
-          },
-          onError: (e, s) {
-            _logger.severe("Error exporting video with FFmpeg", e, s);
-            if (!completer.isCompleted) {
-              completer.completeError(e, s);
-            }
-          },
-          onCompleted: (file) {
-            if (!completer.isCompleted) {
-              completer.complete(file);
-            }
-          },
-        );
-
-        result = await completer.future;
-      }
-
-      // Common post-export handling
+      final result = await _performExport(
+        metadataRotation: metadataRotation,
+        shouldUseNative: shouldUseNative,
+        dialogKey: dialogKey,
+      );
       await _handleExportCompletion(result, dialogKey);
     } catch (e, s) {
       _logger.severe("Unexpected error in export process", e, s);
       _isExporting.value = false;
 
-      // Close the progress dialog if it's still showing
-      if (dialogKey.currentContext != null && mounted) {
-        try {
-          Navigator.of(dialogKey.currentContext!, rootNavigator: false).pop();
-        } catch (navError) {
-          _logger.warning("Failed to close dialog", navError);
-        }
+      if (dialogKey.currentState != null && dialogKey.currentState!.mounted) {
+        Navigator.of(dialogKey.currentContext!).pop();
       }
 
-      // Show error to user
-      if (mounted) {
-        showToast(context, AppLocalizations.of(context).oopsCouldNotSaveEdits);
-      }
-    } finally {
-      await PhotoManager.startChangeNotify();
+      showErrorMessage(context, e);
     }
+  }
+
+  Future<File> _performExport({
+    required int metadataRotation,
+    required bool shouldUseNative,
+    required GlobalKey<LinearProgressDialogState> dialogKey,
+  }) async {
+    if (shouldUseNative) {
+      final tempDir = Directory.systemTemp.createTempSync(
+        'ente_video_export',
+      );
+      final outputPath = path.join(
+        tempDir.path,
+        'export_${DateTime.now().millisecondsSinceEpoch}.mp4',
+      );
+
+      try {
+        return await NativeVideoExportService.exportVideo(
+          controller: _controller!,
+          outputPath: outputPath,
+          metadataRotation: metadataRotation,
+          onProgress: (progress) {
+            if (dialogKey.currentState != null) {
+              dialogKey.currentState!.setProgress(progress);
+            }
+          },
+          onError: (e, s) {
+            _logger.severe("Error exporting video with native", e, s);
+          },
+        );
+      } catch (nativeError, _) {
+        _logger.warning(
+          "Native export failed, attempting FFmpeg fallback",
+          nativeError,
+        );
+
+        if (flagService.internalUser && mounted) {
+          showShortToast(context, "(i) Switching to FFmpeg fallback");
+        }
+
+        if (dialogKey.currentState != null) {
+          dialogKey.currentState!.setProgress(0.0);
+        }
+
+        return await _runFfmpegExport(
+          metadataRotation: metadataRotation,
+          dialogKey: dialogKey,
+        );
+      }
+    }
+
+    return await _runFfmpegExport(
+      metadataRotation: metadataRotation,
+      dialogKey: dialogKey,
+    );
+  }
+
+  Future<File> _runFfmpegExport({
+    required int metadataRotation,
+    required GlobalKey<LinearProgressDialogState> dialogKey,
+  }) async {
+    final config = VideoFFmpegVideoEditorConfig(
+      _controller!,
+      format: VideoExportFormat.mp4,
+      commandBuilder: (config, videoPath, outputPath) {
+        List<String> filters = config.getExportFilters();
+
+        String noAutoRotate = '';
+        if (metadataRotation != 0) {
+          noAutoRotate = '-noautorotate';
+        }
+
+        if (Platform.isAndroid && metadataRotation % 180 != 0) {
+          filters = _adjustCropFilterForAndroid(filters, metadataRotation);
+        }
+
+        final String startTrimCmd = "-ss ${_controller!.startTrim}";
+        final String toTrimCmd = "-t ${_controller!.trimmedDuration}";
+        final command =
+            '$startTrimCmd $noAutoRotate -i $videoPath  $toTrimCmd ${config.filtersCmd(filters)} -c:v libx264 -c:a aac $outputPath';
+        return command;
+      },
+    );
+
+    final executeConfig = await config.getExecuteConfig();
+    final completer = Completer<File>();
+
+    await ExportService.runFFmpegCommand(
+      executeConfig,
+      onProgress: (stats) {
+        final progress = config.getFFmpegProgress(stats.getTime().toInt());
+        if (dialogKey.currentState != null) {
+          dialogKey.currentState!.setProgress(progress);
+        }
+      },
+      onError: (e, s) {
+        _logger.severe("Error exporting video with FFmpeg", e, s);
+        if (!completer.isCompleted) {
+          completer.completeError(e, s);
+        }
+      },
+      onCompleted: (file) {
+        if (!completer.isCompleted) {
+          completer.complete(file);
+        }
+      },
+    );
+
+    return completer.future;
+  }
+
+  Future<void> _showDryRunDialog(
+    DebugExportSummary info,
+    bool shouldUseNative,
+  ) async {
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Dry Run (Debug)'),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('Metadata rotation: ${info.metadataRotation}°'),
+                const SizedBox(height: 12),
+                Text(
+                  shouldUseNative
+                      ? 'Native pipeline will be used'
+                      : 'FFmpeg pipeline will be used (native disabled)',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Native export',
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                    'Video size: ${info.videoSize.width.toInt()} x ${info.videoSize.height.toInt()}'),
+                Text('Trim: ${info.trimStart ?? "-"} → ${info.trimEnd ?? "-"}'),
+                Text('Rotate degrees: ${info.nativeRotateDegrees ?? 0}'),
+                Text('Display crop: ${_formatRect(info.nativeDisplayCrop)}'),
+                Text('File crop: ${_formatCrop(info.nativeFileCrop)}'),
+                Text(
+                    'Output dimensions: ${_formatSize(info.nativeOutputSize)}'),
+                const SizedBox(height: 12),
+                Text(
+                  'FFmpeg fallback',
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 6),
+                Text('File crop: ${_formatCrop(info.ffmpegFileCrop)}'),
+                Text('Crop filter: ${info.ffmpegCropFilter ?? '-'}'),
+                Text(
+                    'No autorotate: ${info.ffmpegNoAutoRotate ? 'yes' : 'no'}'),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  String _formatRect(Rect? rect) {
+    if (rect == null) return '-';
+    return '(${rect.left.toStringAsFixed(1)}, ${rect.top.toStringAsFixed(1)}) → '
+        '(${rect.right.toStringAsFixed(1)}, ${rect.bottom.toStringAsFixed(1)}) '
+        '[${rect.width.toStringAsFixed(1)} x ${rect.height.toStringAsFixed(1)}]';
+  }
+
+  String _formatCrop(CropCalculation? crop) {
+    if (crop == null) return '-';
+    return 'x=${crop.x}, y=${crop.y}, w=${crop.width}, h=${crop.height}';
+  }
+
+  String _formatSize(Size? size) {
+    if (size == null) return '-';
+    return '${size.width.toStringAsFixed(1)} x ${size.height.toStringAsFixed(1)}';
   }
 
   Future<void> _handleExportCompletion(
@@ -495,8 +597,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         return;
       }
 
-      final fileName =
-          path.basenameWithoutExtension(widget.file.title!) +
+      final fileName = path.basenameWithoutExtension(widget.file.title!) +
           "_edited_" +
           DateTime.now().microsecondsSinceEpoch.toString() +
           ".mp4";
@@ -582,8 +683,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
     final adjustedFilters = <String>[];
     final controller = _controller!;
 
-    final needsCrop =
-        controller.minCrop != Offset.zero ||
+    final needsCrop = controller.minCrop != Offset.zero ||
         controller.maxCrop != const Offset(1.0, 1.0);
 
     if (!needsCrop) {
@@ -648,22 +748,22 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
 
 class _VideoEditorSubPageRoute extends PageRouteBuilder<void> {
   _VideoEditorSubPageRoute(this.child)
-    : super(
-        fullscreenDialog: true,
-        transitionDuration: const Duration(milliseconds: 220),
-        reverseTransitionDuration: const Duration(milliseconds: 180),
-        pageBuilder: (_, __, ___) => child,
-        transitionsBuilder: (_, animation, __, child) {
-          return FadeTransition(
-            opacity: CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeOutCubic,
-              reverseCurve: Curves.easeInCubic,
-            ),
-            child: child,
-          );
-        },
-      );
+      : super(
+          fullscreenDialog: true,
+          transitionDuration: const Duration(milliseconds: 220),
+          reverseTransitionDuration: const Duration(milliseconds: 180),
+          pageBuilder: (_, __, ___) => child,
+          transitionsBuilder: (_, animation, __, child) {
+            return FadeTransition(
+              opacity: CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOutCubic,
+                reverseCurve: Curves.easeInCubic,
+              ),
+              child: child,
+            );
+          },
+        );
 
   final Widget child;
 }

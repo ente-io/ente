@@ -8,11 +8,115 @@ import 'package:video_editor/video_editor.dart';
 import 'package:photos/ui/tools/editor/export_video_service.dart';
 import 'package:photos/ui/tools/editor/video_crop_util.dart';
 
+class DebugExportSummary {
+  DebugExportSummary({
+    required this.metadataRotation,
+    required this.videoSize,
+    required this.trimStart,
+    required this.trimEnd,
+    required this.nativeRotateDegrees,
+    required this.nativeDisplayCrop,
+    required this.nativeFileCrop,
+    required this.nativeOutputSize,
+    required this.ffmpegFileCrop,
+    required this.ffmpegCropFilter,
+    required this.ffmpegNoAutoRotate,
+  });
+
+  final int metadataRotation;
+  final Size videoSize;
+  final Duration? trimStart;
+  final Duration? trimEnd;
+  final int? nativeRotateDegrees;
+  final Rect? nativeDisplayCrop;
+  final CropCalculation? nativeFileCrop;
+  final Size? nativeOutputSize;
+  final CropCalculation? ffmpegFileCrop;
+  final String? ffmpegCropFilter;
+  final bool ffmpegNoAutoRotate;
+}
+
 /// Service that uses native video editing operations when possible
 /// Falls back to FFmpeg for operations that require re-encoding
 class NativeVideoExportService {
   static final _logger = Logger('NativeVideoExportService');
   static const Duration _nativeFallbackThreshold = Duration(seconds: 3);
+
+  static Future<DebugExportSummary> buildDebugSummary({
+    required VideoEditorController controller,
+    required int metadataRotation,
+  }) async {
+    final videoSize = controller.video.value.size;
+    final Duration? trimStart =
+        controller.isTrimmed ? controller.startTrim : null;
+    final Duration? trimEnd = controller.isTrimmed ? controller.endTrim : null;
+    final int? nativeRotateDegrees =
+        controller.rotation != 0 ? controller.rotation : null;
+
+    Rect? nativeDisplayCrop;
+    CropCalculation? nativeFileCrop;
+    Size? nativeOutputSize;
+    CropCalculation? ffmpegFileCrop;
+
+    final needsCrop = controller.minCrop != Offset.zero ||
+        controller.maxCrop != const Offset(1.0, 1.0);
+
+    if (needsCrop) {
+      nativeDisplayCrop = VideoCropUtil.calculateDisplaySpaceCropRect(
+        controller: controller,
+        metadataRotation: metadataRotation,
+      );
+      try {
+        nativeFileCrop = VideoCropUtil.calculateFileSpaceCrop(
+          controller: controller,
+          metadataRotation: metadataRotation,
+        );
+      } catch (_) {
+        nativeFileCrop = null;
+      }
+
+      if (nativeFileCrop != null) {
+        nativeOutputSize = Size(
+          nativeFileCrop.width.toDouble(),
+          nativeFileCrop.height.toDouble(),
+        );
+        if (nativeRotateDegrees != null && nativeRotateDegrees % 180 != 0) {
+          nativeOutputSize = Size(
+            nativeOutputSize.height,
+            nativeOutputSize.width,
+          );
+        }
+      }
+
+      try {
+        ffmpegFileCrop = VideoCropUtil.calculateFileSpaceCrop(
+          controller: controller,
+          metadataRotation: metadataRotation,
+        );
+      } catch (_) {
+        ffmpegFileCrop = null;
+      }
+    }
+
+    String? ffmpegCropFilter;
+    if (ffmpegFileCrop != null) {
+      ffmpegCropFilter = ffmpegFileCrop.toFFmpegFilter();
+    }
+
+    return DebugExportSummary(
+      metadataRotation: metadataRotation,
+      videoSize: videoSize,
+      trimStart: trimStart,
+      trimEnd: trimEnd,
+      nativeRotateDegrees: nativeRotateDegrees,
+      nativeDisplayCrop: nativeDisplayCrop,
+      nativeFileCrop: nativeFileCrop,
+      nativeOutputSize: nativeOutputSize,
+      ffmpegFileCrop: ffmpegFileCrop,
+      ffmpegCropFilter: ffmpegCropFilter,
+      ffmpegNoAutoRotate: metadataRotation != 0,
+    );
+  }
 
   /// Export video using native operations
   static Future<File> exportVideo({
