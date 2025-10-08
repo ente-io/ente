@@ -67,6 +67,12 @@ Public links support powerful security and control features:
 
 Add a password to your link for an extra layer of security. Recipients must enter the correct password to view photos.
 
+> [!NOTE]
+>
+> Password protection is extra access control, not extra encryption.
+>
+> Password protection adds server-side access control but does not re-encrypt the files. The files remain encrypted with the same key used for the public link. Password protection prevents unauthorized access by requiring authentication before the server grants access to the encrypted content.
+
 **When to use:**
 
 - Sharing sensitive content
