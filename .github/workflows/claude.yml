@@ -38,8 +38,14 @@ jobs:
       id-token: write
       actions: read # Required for Claude to read CI results on PRs
     steps:
+      # Checkout the correct ref based on the event type
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          # For issue_comment on PRs, checkout the PR branch
+          # GitHub provides refs/pull/<number>/head for all PRs (including forks)
+          # For other events, use default behavior (empty string)
+          ref: ${{ github.event_name == 'issue_comment' && github.event.issue.pull_request && format('refs/pull/{0}/head', github.event.issue.number) || '' }}
 
       - name: Run Claude Code
         id: claude
