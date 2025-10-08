@@ -58,7 +58,8 @@ class NativeVideoExportService {
     void Function(double)? onProgress,
   }) async {
     // Use the combined native path only when needed; otherwise do a fast copy
-    final needsCrop = controller.minCrop != Offset.zero ||
+    final needsCrop =
+        controller.minCrop != Offset.zero ||
         controller.maxCrop != const Offset(1.0, 1.0);
     final needsRotate = controller.rotation != 0;
     final needsTrim = controller.isTrimmed;
@@ -88,7 +89,17 @@ class NativeVideoExportService {
         controller: controller,
         metadataRotation: metadataRotation,
       );
+      if (displayCrop.width <= 0 || displayCrop.height <= 0) {
+        throw ArgumentError('Invalid crop rectangle computed: $displayCrop');
+      }
       cropRect = displayCrop;
+    }
+
+    if (cropRect != null) {
+      _logger.fine(
+        'Native export cropRect=$cropRect videoSize=${controller.video.value.size} '
+        'metadataRotation=$metadataRotation',
+      );
     }
 
     final result = await NativeVideoEditor.processVideo(

@@ -86,57 +86,17 @@ class Media3TransformerProcessor(private val context: Context) {
             // This ensures crop coordinates are applied to the correct orientation
             var outDimsFromCrop: Size? = null
             if (cropX != null && cropY != null && cropWidth != null && cropHeight != null) {
-                // For videos with 90°/270° rotation in metadata, the UI provides
-                // crop rect in display-space (dimensions swapped). We must map it
-                // back to file-space (originalWidth x originalHeight) before
-                // applying the crop effect.
-                val normalizedRotation = ((originalRotation % 360) + 360) % 360
-                val needsCoordinateTransform = normalizedRotation == 90 || normalizedRotation == 270
-
-                val finalCropX: Int
-                val finalCropY: Int
-                val finalCropWidth: Int
-                val finalCropHeight: Int
-                val normalizationWidth: Int = originalWidth
-                val normalizationHeight: Int = originalHeight
-
-                if (needsCoordinateTransform) {
-                    // Map display-space (x_d,y_d,w_d,h_d) to file-space (x_f,y_f,w_f,h_f)
-                    // Using standard rotation mappings about the top-left origin.
-                    // For 90° CW display correction:
-                    //   x_f = W - (y_d + h_d)
-                    //   y_f = x_d
-                    //   w_f = h_d
-                    //   h_f = w_d
-                    // For 270° (i.e., 90° CCW) display correction:
-                    //   x_f = y_d
-                    //   y_f = H - (x_d + w_d)
-                    //   w_f = h_d
-                    //   h_f = w_d
-                    if (normalizedRotation == 90) {
-                        finalCropX = (normalizationWidth - (cropY + cropHeight)).coerceIn(0, normalizationWidth)
-                        finalCropY = cropX.coerceIn(0, normalizationHeight)
-                        finalCropWidth = cropHeight.coerceAtMost(normalizationWidth - finalCropX)
-                        finalCropHeight = cropWidth.coerceAtMost(normalizationHeight - finalCropY)
-                    } else { // 270
-                        finalCropX = cropY.coerceIn(0, normalizationWidth)
-                        finalCropY = (normalizationHeight - (cropX + cropWidth)).coerceIn(0, normalizationHeight)
-                        finalCropWidth = cropHeight.coerceAtMost(normalizationWidth - finalCropX)
-                        finalCropHeight = cropWidth.coerceAtMost(normalizationHeight - finalCropY)
-                    }
-                } else {
-                    // No transformation needed; already in file-space
-                    finalCropX = cropX
-                    finalCropY = cropY
-                    finalCropWidth = cropWidth
-                    finalCropHeight = cropHeight
-                }
+                val transformedCrop = transformCropForRotation(
+                    originalRotation,
+                    CropRect(cropX, cropY, cropWidth, cropHeight),
+                    Size(originalWidth, originalHeight)
+                )
 
                 // Calculate crop as a fraction of the file-space dimensions
-                val cropLeftFraction = finalCropX.toFloat() / normalizationWidth
-                val cropRightFraction = (finalCropX + finalCropWidth).toFloat() / normalizationWidth
-                val cropTopFraction = finalCropY.toFloat() / normalizationHeight
-                val cropBottomFraction = (finalCropY + finalCropHeight).toFloat() / normalizationHeight
+                val cropLeftFraction = transformedCrop.x.toFloat() / originalWidth
+                val cropRightFraction = (transformedCrop.x + transformedCrop.width).toFloat() / originalWidth
+                val cropTopFraction = transformedCrop.y.toFloat() / originalHeight
+                val cropBottomFraction = (transformedCrop.y + transformedCrop.height).toFloat() / originalHeight
 
                 // Use Crop effect with NDC coordinates (-1 to 1)
                 val cropEffect = Crop(
@@ -147,7 +107,7 @@ class Media3TransformerProcessor(private val context: Context) {
                 )
 
                 // Preserve output dimensions from the transformed crop; these are in file-space.
-                outDimsFromCrop = Size(finalCropWidth, finalCropHeight)
+                outDimsFromCrop = Size(transformedCrop.width, transformedCrop.height)
 
                 videoEffects.add(cropEffect)
                 hasVideoEffects = true
@@ -392,6 +352,44 @@ class Media3TransformerProcessor(private val context: Context) {
         }
     }
 
+    private fun transformCropForRotation(rotation: Int, crop: CropRect, videoDims: Size): CropRect {
+        val normalizedRotation = ((rotation % 360) + 360) % 360
+        val width = videoDims.width
+        val height = videoDims.height
+
+        val transformed = when (normalizedRotation) {
+            90 -> {
+                val x = (width - (crop.y + crop.height)).coerceIn(0, width)
+                val y = crop.x.coerceIn(0, height)
+                val w = crop.height.coerceAtMost(width - x)
+                val h = crop.width.coerceAtMost(height - y)
+                CropRect(x, y, w, h)
+            }
+            270 -> {
+                val x = crop.y.coerceIn(0, width)
+                val y = (height - (crop.x + crop.width)).coerceIn(0, height)
+                val w = crop.height.coerceAtMost(width - x)
+                val h = crop.width.coerceAtMost(height - y)
+                CropRect(x, y, w, h)
+            }
+            else -> {
+                val x = crop.x.coerceIn(0, width)
+                val y = crop.y.coerceIn(0, height)
+                val w = crop.width.coerceAtMost(width - x)
+                val h = crop.height.coerceAtMost(height - y)
+                CropRect(x, y, w, h)
+            }
+        }
+
+        if (transformed.width <= 0 || transformed.height <= 0) {
+            throw IllegalArgumentException(
+                "Invalid crop dimensions after transform: $crop → $transformed"
+            )
+        }
+
+        return transformed
+    }
+
     // Logging helpers
     private fun logVerbose(message: String) {
         if (LOG_VERBOSE) Log.d(TAG, message)
@@ -411,6 +409,16 @@ class Media3TransformerProcessor(private val context: Context) {
         }
     }
 }
+
+/**
+ * Crop rectangle structure used during coordinate transformations
+ */
+private data class CropRect(
+    val x: Int,
+    val y: Int,
+    val width: Int,
+    val height: Int
+)
 
 /**
  * Video information data class
