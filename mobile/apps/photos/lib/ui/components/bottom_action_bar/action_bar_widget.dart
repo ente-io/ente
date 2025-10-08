@@ -45,47 +45,47 @@ class _ActionBarWidgetState extends State<ActionBarWidget> {
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-      decoration: BoxDecoration(
-        color: widget.backgroundColor ?? colorScheme.backgroundElevated2,
-        borderRadius: BorderRadius.circular(100),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 4,
-            offset: const Offset(0, -1),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ValueListenableBuilder(
-            valueListenable: _selectedFilesNotifier,
-            builder: (context, value, child) {
-              return Text(
-                _selectedOwnedFilesNotifier.value !=
-                        _selectedFilesNotifier.value
-                    ? AppLocalizations.of(context).selectedPhotosWithYours(
-                        count: _selectedFilesNotifier.value,
-                        yourCount: _selectedOwnedFilesNotifier.value,
-                      )
-                    : AppLocalizations.of(context).selectedPhotos(
-                        count: _selectedFilesNotifier.value,
-                      ),
-                style: textTheme.mini,
-              );
-            },
-          ),
-          const SizedBox(width: 4),
-          GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () {
-              widget.onCancel?.call();
-            },
-            child: Align(
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        widget.onCancel?.call();
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+        decoration: BoxDecoration(
+          color: widget.backgroundColor ?? colorScheme.backgroundElevated2,
+          borderRadius: BorderRadius.circular(100),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 4,
+              offset: const Offset(0, -1),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ValueListenableBuilder(
+              valueListenable: _selectedFilesNotifier,
+              builder: (context, value, child) {
+                return Text(
+                  _selectedOwnedFilesNotifier.value !=
+                          _selectedFilesNotifier.value
+                      ? AppLocalizations.of(context).selectedPhotosWithYours(
+                          count: _selectedFilesNotifier.value,
+                          yourCount: _selectedOwnedFilesNotifier.value,
+                        )
+                      : AppLocalizations.of(context).selectedPhotos(
+                          count: _selectedFilesNotifier.value,
+                        ),
+                  style: textTheme.mini,
+                );
+              },
+            ),
+            const SizedBox(width: 4),
+            Align(
               alignment: Alignment.centerRight,
               child: Icon(
                 Icons.close,
@@ -93,8 +93,8 @@ class _ActionBarWidgetState extends State<ActionBarWidget> {
                 color: textTheme.mini.color,
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

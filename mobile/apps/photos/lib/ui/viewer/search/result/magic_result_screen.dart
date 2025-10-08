@@ -1,6 +1,7 @@
 import "dart:async";
 
 import 'package:flutter/material.dart';
+import "package:flutter/rendering.dart";
 import "package:logging/logging.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/files_updated_event.dart';
@@ -56,10 +57,16 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
   late final Map<int, int> fileIDToRelevantPos;
   bool _enableGrouping = false;
   late final SearchFilterDataProvider _searchFilterDataProvider;
+  bool _isCollapsed = false;
+  bool _hasCollapsedOnce = false;
+  bool _hasFilesSelected = false;
+  Timer? _selectionTimer;
 
   @override
   void initState() {
     super.initState();
+    _selectedFiles.addListener(_onSelectionChanged);
+
     files = widget.files;
     _enableGrouping = widget.enableGrouping;
     fileIDToRelevantPos = getFileIDToRelevantPos();
@@ -110,6 +117,26 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
     );
   }
 
+  void _onSelectionChanged() {
+    final hasSelection = _selectedFiles.files.isNotEmpty;
+
+    if (hasSelection && !_hasFilesSelected) {
+      setState(() {
+        _isCollapsed = false;
+        _hasFilesSelected = true;
+      });
+
+      _selectionTimer?.cancel();
+      _selectionTimer = Timer(const Duration(milliseconds: 10), () {});
+    } else if (!hasSelection && _hasFilesSelected) {
+      setState(() {
+        _hasFilesSelected = false;
+        _isCollapsed = false;
+      });
+      _selectionTimer?.cancel();
+    }
+  }
+
   Map<int, int> getFileIDToRelevantPos() {
     if (widget.fileIdToPosMap.isNotEmpty) {
       return widget.fileIdToPosMap;
@@ -134,38 +161,63 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
   void dispose() {
     _filesUpdatedEvent.cancel();
     _magicSortChangeEvent.cancel();
+    _selectedFiles.removeListener(_onSelectionChanged);
+    _selectionTimer?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final gallery = Gallery(
-      key: ValueKey(_enableGrouping),
-      asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
-        final result = files
-            .where(
-              (file) =>
-                  file.creationTime! >= creationStartTime &&
-                  file.creationTime! <= creationEndTime,
-            )
-            .toList();
-        return Future.value(
-          FileLoadResult(
-            result,
-            result.length < files.length,
-          ),
-        );
+    final gallery = NotificationListener<ScrollNotification>(
+      onNotification: (scrollInfo) {
+        if (scrollInfo is UserScrollNotification && _hasFilesSelected) {
+          final shouldAllowCollapse =
+              _selectionTimer == null || !_selectionTimer!.isActive;
+
+          if (shouldAllowCollapse &&
+              (!_hasCollapsedOnce || !_isCollapsed) &&
+              (scrollInfo.direction == ScrollDirection.forward ||
+                  scrollInfo.direction == ScrollDirection.reverse)) {
+            Future.delayed(const Duration(milliseconds: 10), () {
+              if (mounted && _hasFilesSelected) {
+                setState(() {
+                  _isCollapsed = true;
+                  _hasCollapsedOnce = true;
+                });
+              }
+            });
+          }
+        }
+        return false;
       },
-      reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
-      removalEventTypes: const {
-        EventType.deletedFromRemote,
-        EventType.deletedFromEverywhere,
-        EventType.hide,
-      },
-      tagPrefix: widget.heroTag,
-      selectedFiles: _selectedFiles,
-      enableFileGrouping: _enableGrouping,
-      initialFiles: [files.first],
+      child: Gallery(
+        key: ValueKey(_enableGrouping),
+        asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
+          final result = files
+              .where(
+                (file) =>
+                    file.creationTime! >= creationStartTime &&
+                    file.creationTime! <= creationEndTime,
+              )
+              .toList();
+          return Future.value(
+            FileLoadResult(
+              result,
+              result.length < files.length,
+            ),
+          );
+        },
+        reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
+        removalEventTypes: const {
+          EventType.deletedFromRemote,
+          EventType.deletedFromEverywhere,
+          EventType.hide,
+        },
+        tagPrefix: widget.heroTag,
+        selectedFiles: _selectedFiles,
+        enableFileGrouping: _enableGrouping,
+        initialFiles: [files.first],
+      ),
     );
     return GalleryFilesState(
       child: InheritedSearchFilterDataWrapper(
@@ -209,6 +261,12 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
                 FileSelectionOverlayBar(
                   MagicResultScreen.overlayType,
                   _selectedFiles,
+                  isCollapsed: _isCollapsed,
+                  onExpand: () {
+                    setState(() {
+                      _isCollapsed = false;
+                    });
+                  },
                 ),
               ],
             ),

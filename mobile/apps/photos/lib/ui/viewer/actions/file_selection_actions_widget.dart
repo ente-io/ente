@@ -600,23 +600,17 @@ class _FileSelectionActionsWidgetState
                                 ),
                               ),
                               const SizedBox(height: 16),
-                              SizedBox(
-                                height: groupedOtherItems.length > 1 ? 22 : 0,
-                                child: groupedOtherItems.length > 1
-                                    ? Center(
-                                        child: SmoothPageIndicator(
-                                          controller: _pageController,
-                                          count: groupedOtherItems.length,
-                                          effect: const WormEffect(
-                                            dotHeight: 6,
-                                            dotWidth: 6,
-                                            spacing: 6,
-                                            activeDotColor: Colors.white,
-                                          ),
-                                        ),
-                                      )
-                                    : null,
-                              ),
+                              if (groupedOtherItems.length > 1)
+                                SmoothPageIndicator(
+                                  controller: _pageController,
+                                  count: groupedOtherItems.length,
+                                  effect: const WormEffect(
+                                    dotHeight: 6,
+                                    dotWidth: 6,
+                                    spacing: 6,
+                                    activeDotColor: Colors.white,
+                                  ),
+                                ),
                             ],
                           ],
                         ),

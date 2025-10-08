@@ -2,6 +2,7 @@ import "dart:async";
 
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
+import "package:flutter/rendering.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
@@ -44,6 +45,11 @@ class _HiddenPageState extends State<HiddenPage> {
   late StreamSubscription<CollectionUpdatedEvent>
       _collectionUpdatesSubscription;
 
+  bool _isCollapsed = false;
+  bool _hasCollapsedOnce = false;
+  bool _hasFilesSelected = false;
+  Timer? _selectionTimer;
+
   @override
   void initState() {
     super.initState();
@@ -53,7 +59,29 @@ class _HiddenPageState extends State<HiddenPage> {
         getHiddenCollections();
       });
     });
+    _selectedFiles.addListener(_onSelectionChanged);
+
     getHiddenCollections();
+  }
+
+  void _onSelectionChanged() {
+    final hasSelection = _selectedFiles.files.isNotEmpty;
+
+    if (hasSelection && !_hasFilesSelected) {
+      setState(() {
+        _isCollapsed = false;
+        _hasFilesSelected = true;
+      });
+
+      _selectionTimer?.cancel();
+      _selectionTimer = Timer(const Duration(milliseconds: 10), () {});
+    } else if (!hasSelection && _hasFilesSelected) {
+      setState(() {
+        _hasFilesSelected = false;
+        _isCollapsed = false;
+      });
+      _selectionTimer?.cancel();
+    }
   }
 
   getHiddenCollections() {
@@ -77,6 +105,8 @@ class _HiddenPageState extends State<HiddenPage> {
   @override
   void dispose() {
     _collectionUpdatesSubscription.cancel();
+    _selectedFiles.removeListener(_onSelectionChanged);
+    _selectionTimer?.cancel();
     super.dispose();
   }
 
@@ -87,49 +117,72 @@ class _HiddenPageState extends State<HiddenPage> {
     if (_defaultHiddenCollectionId == null) {
       return const EnteLoadingWidget();
     }
-    final gallery = Gallery(
-      asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
-        return FilesDB.instance.getFilesInCollections(
-          [_defaultHiddenCollectionId!],
-          creationStartTime,
-          creationEndTime,
-          Configuration.instance.getUserID()!,
-          limit: limit,
-          asc: asc,
-        );
+    final gallery = NotificationListener<ScrollNotification>(
+      onNotification: (scrollInfo) {
+        if (scrollInfo is UserScrollNotification && _hasFilesSelected) {
+          final shouldAllowCollapse =
+              _selectionTimer == null || !_selectionTimer!.isActive;
+
+          if (shouldAllowCollapse &&
+              (!_hasCollapsedOnce || !_isCollapsed) &&
+              (scrollInfo.direction == ScrollDirection.forward ||
+                  scrollInfo.direction == ScrollDirection.reverse)) {
+            Future.delayed(const Duration(milliseconds: 10), () {
+              if (mounted && _hasFilesSelected) {
+                setState(() {
+                  _isCollapsed = true;
+                  _hasCollapsedOnce = true;
+                });
+              }
+            });
+          }
+        }
+        return false;
       },
-      reloadEvent: Bus.instance.on<FilesUpdatedEvent>().where(
-            (event) =>
-                event.updatedFiles.firstWhereOrNull(
-                  (element) => element.uploadedFileID != null,
-                ) !=
-                null,
-          ),
-      removalEventTypes: const {
-        EventType.unhide,
-        EventType.deletedFromEverywhere,
-        EventType.deletedFromRemote,
-      },
-      forceReloadEvents: [
-        Bus.instance.on<FilesUpdatedEvent>().where(
+      child: Gallery(
+        asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
+          return FilesDB.instance.getFilesInCollections(
+            [_defaultHiddenCollectionId!],
+            creationStartTime,
+            creationEndTime,
+            Configuration.instance.getUserID()!,
+            limit: limit,
+            asc: asc,
+          );
+        },
+        reloadEvent: Bus.instance.on<FilesUpdatedEvent>().where(
               (event) =>
                   event.updatedFiles.firstWhereOrNull(
                     (element) => element.uploadedFileID != null,
                   ) !=
                   null,
             ),
-      ],
-      tagPrefix: widget.tagPrefix,
-      selectedFiles: _selectedFiles,
-      initialFiles: null,
-      emptyState: _hiddenCollectionsExcludingDefault.isEmpty
-          ? const EmptyHiddenWidget()
-          : const SizedBox.shrink(),
-      header: AlbumHorizontalList(
-        () async {
-          return _hiddenCollectionsExcludingDefault;
+        removalEventTypes: const {
+          EventType.unhide,
+          EventType.deletedFromEverywhere,
+          EventType.deletedFromRemote,
         },
-        hasVerifiedLock: true,
+        forceReloadEvents: [
+          Bus.instance.on<FilesUpdatedEvent>().where(
+                (event) =>
+                    event.updatedFiles.firstWhereOrNull(
+                      (element) => element.uploadedFileID != null,
+                    ) !=
+                    null,
+              ),
+        ],
+        tagPrefix: widget.tagPrefix,
+        selectedFiles: _selectedFiles,
+        initialFiles: null,
+        emptyState: _hiddenCollectionsExcludingDefault.isEmpty
+            ? const EmptyHiddenWidget()
+            : const SizedBox.shrink(),
+        header: AlbumHorizontalList(
+          () async {
+            return _hiddenCollectionsExcludingDefault;
+          },
+          hasVerifiedLock: true,
+        ),
       ),
     );
     return GalleryFilesState(
@@ -151,6 +204,12 @@ class _HiddenPageState extends State<HiddenPage> {
               FileSelectionOverlayBar(
                 widget.overlayType,
                 _selectedFiles,
+                isCollapsed: _isCollapsed,
+                onExpand: () {
+                  setState(() {
+                    _isCollapsed = false;
+                  });
+                },
               ),
             ],
           ),

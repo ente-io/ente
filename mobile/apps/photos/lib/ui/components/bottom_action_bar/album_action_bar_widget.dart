@@ -37,41 +37,41 @@ class _AlbumActionBarWidgetState extends State<AlbumActionBarWidget> {
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-      decoration: BoxDecoration(
-        color: colorScheme.backgroundElevated2,
-        borderRadius: BorderRadius.circular(100),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 4,
-            offset: const Offset(0, -1),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ValueListenableBuilder(
-            valueListenable: _selectedAlbumNotifier,
-            builder: (context, value, child) {
-              return Text(
-                AppLocalizations.of(context).selectedAlbums(
-                  count: widget.selectedAlbums?.albums.length ?? 0,
-                ),
-                style: textTheme.mini,
-              );
-            },
-          ),
-          const SizedBox(width: 4),
-          GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () {
-              widget.onCancel?.call();
-            },
-            child: Align(
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        widget.onCancel?.call();
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+        decoration: BoxDecoration(
+          color: colorScheme.backgroundElevated2,
+          borderRadius: BorderRadius.circular(100),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 4,
+              offset: const Offset(0, -1),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ValueListenableBuilder(
+              valueListenable: _selectedAlbumNotifier,
+              builder: (context, value, child) {
+                return Text(
+                  AppLocalizations.of(context).selectedAlbums(
+                    count: widget.selectedAlbums?.albums.length ?? 0,
+                  ),
+                  style: textTheme.mini,
+                );
+              },
+            ),
+            const SizedBox(width: 4),
+            Align(
               alignment: Alignment.centerRight,
               child: Icon(
                 Icons.close,
@@ -79,8 +79,8 @@ class _AlbumActionBarWidgetState extends State<AlbumActionBarWidget> {
                 color: textTheme.mini.color,
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

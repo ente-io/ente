@@ -1,4 +1,7 @@
+import "dart:async";
+
 import 'package:flutter/material.dart';
+import "package:flutter/rendering.dart";
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
@@ -25,38 +28,104 @@ import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 
-class DeviceFolderPage extends StatelessWidget {
+class DeviceFolderPage extends StatefulWidget {
   final DeviceCollection deviceCollection;
-  final _selectedFiles = SelectedFiles();
 
-  DeviceFolderPage(this.deviceCollection, {super.key});
+  const DeviceFolderPage(this.deviceCollection, {super.key});
+
+  @override
+  State<DeviceFolderPage> createState() => _DeviceFolderPageState();
+}
+
+class _DeviceFolderPageState extends State<DeviceFolderPage> {
+  final _selectedFiles = SelectedFiles();
+  bool _isCollapsed = false;
+  bool _hasCollapsedOnce = false;
+  bool _hasFilesSelected = false;
+  Timer? _selectionTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedFiles.addListener(_onSelectionChanged);
+  }
+
+  void _onSelectionChanged() {
+    final hasSelection = _selectedFiles.files.isNotEmpty;
+
+    if (hasSelection && !_hasFilesSelected) {
+      setState(() {
+        _isCollapsed = false;
+        _hasFilesSelected = true;
+      });
+
+      _selectionTimer?.cancel();
+      _selectionTimer = Timer(const Duration(milliseconds: 10), () {});
+    } else if (!hasSelection && _hasFilesSelected) {
+      setState(() {
+        _hasFilesSelected = false;
+        _isCollapsed = false;
+      });
+      _selectionTimer?.cancel();
+    }
+  }
+
+  @override
+  void dispose() {
+    _selectedFiles.removeListener(_onSelectionChanged);
+    _selectionTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(Object context) {
     final int? userID = Configuration.instance.getUserID();
-    final gallery = Gallery(
-      asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
-        return FilesDB.instance.getFilesInDeviceCollection(
-          deviceCollection,
-          userID,
-          creationStartTime,
-          creationEndTime,
-          limit: limit,
-          asc: asc,
-        );
+    final gallery = NotificationListener<ScrollNotification>(
+      onNotification: (scrollInfo) {
+        if (scrollInfo is UserScrollNotification && _hasFilesSelected) {
+          final shouldAllowCollapse =
+              _selectionTimer == null || !_selectionTimer!.isActive;
+
+          if (shouldAllowCollapse &&
+              (!_hasCollapsedOnce || !_isCollapsed) &&
+              (scrollInfo.direction == ScrollDirection.forward ||
+                  scrollInfo.direction == ScrollDirection.reverse)) {
+            Future.delayed(const Duration(milliseconds: 10), () {
+              if (mounted && _hasFilesSelected) {
+                setState(() {
+                  _isCollapsed = true;
+                  _hasCollapsedOnce = true;
+                });
+              }
+            });
+          }
+        }
+        return false;
       },
-      reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
-      removalEventTypes: const {
-        EventType.deletedFromDevice,
-        EventType.deletedFromEverywhere,
-        EventType.hide,
-      },
-      tagPrefix: "device_folder:" + deviceCollection.name,
-      selectedFiles: _selectedFiles,
-      header: Configuration.instance.hasConfiguredAccount()
-          ? BackupHeaderWidget(deviceCollection)
-          : const SizedBox.shrink(),
-      initialFiles: [deviceCollection.thumbnail!],
+      child: Gallery(
+        asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
+          return FilesDB.instance.getFilesInDeviceCollection(
+            widget.deviceCollection,
+            userID,
+            creationStartTime,
+            creationEndTime,
+            limit: limit,
+            asc: asc,
+          );
+        },
+        reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
+        removalEventTypes: const {
+          EventType.deletedFromDevice,
+          EventType.deletedFromEverywhere,
+          EventType.hide,
+        },
+        tagPrefix: "device_folder:" + widget.deviceCollection.name,
+        selectedFiles: _selectedFiles,
+        header: Configuration.instance.hasConfiguredAccount()
+            ? BackupHeaderWidget(widget.deviceCollection)
+            : const SizedBox.shrink(),
+        initialFiles: [widget.deviceCollection.thumbnail!],
+      ),
     );
     return GalleryFilesState(
       child: Scaffold(
@@ -64,9 +133,9 @@ class DeviceFolderPage extends StatelessWidget {
           preferredSize: const Size.fromHeight(50.0),
           child: GalleryAppBarWidget(
             GalleryType.localFolder,
-            deviceCollection.name,
+            widget.deviceCollection.name,
             _selectedFiles,
-            deviceCollection: deviceCollection,
+            deviceCollection: widget.deviceCollection,
           ),
         ),
         body: SelectionState(
@@ -78,6 +147,12 @@ class DeviceFolderPage extends StatelessWidget {
               FileSelectionOverlayBar(
                 GalleryType.localFolder,
                 _selectedFiles,
+                isCollapsed: _isCollapsed,
+                onExpand: () {
+                  setState(() {
+                    _isCollapsed = false;
+                  });
+                },
               ),
             ],
           ),

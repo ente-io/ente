@@ -2,6 +2,7 @@ import "dart:async";
 
 import "package:defer_pointer/defer_pointer.dart";
 import "package:flutter/material.dart";
+import "package:flutter/rendering.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/files_updated_event.dart";
@@ -39,6 +40,43 @@ class MapPullUpGallery extends StatefulWidget {
 
 class _MapPullUpGalleryState extends State<MapPullUpGallery> {
   final _selectedFiles = SelectedFiles();
+  bool _isCollapsed = false;
+  bool _hasCollapsedOnce = false;
+  bool _hasFilesSelected = false;
+  Timer? _selectionTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedFiles.addListener(_onSelectionChanged);
+  }
+
+  void _onSelectionChanged() {
+    final hasSelection = _selectedFiles.files.isNotEmpty;
+
+    if (hasSelection && !_hasFilesSelected) {
+      setState(() {
+        _isCollapsed = false;
+        _hasFilesSelected = true;
+      });
+
+      _selectionTimer?.cancel();
+      _selectionTimer = Timer(const Duration(milliseconds: 10), () {});
+    } else if (!hasSelection && _hasFilesSelected) {
+      setState(() {
+        _hasFilesSelected = false;
+        _isCollapsed = false;
+      });
+      _selectionTimer?.cancel();
+    }
+  }
+
+  @override
+  void dispose() {
+    _selectedFiles.removeListener(_onSelectionChanged);
+    _selectionTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,6 +119,12 @@ class _MapPullUpGalleryState extends State<MapPullUpGallery> {
                     _selectedFiles,
                     backgroundColor:
                         getEnteColorScheme(context).backgroundElevated2,
+                    isCollapsed: _isCollapsed,
+                    onExpand: () {
+                      setState(() {
+                        _isCollapsed = false;
+                      });
+                    },
                   ),
                 ),
               ),
@@ -165,27 +209,54 @@ class _MapPullUpGalleryState extends State<MapPullUpGallery> {
                     duration: const Duration(milliseconds: 200),
                     switchInCurve: Curves.easeInOutExpo,
                     switchOutCurve: Curves.easeInOutExpo,
-                    child: Gallery(
-                      key: ValueKey(images),
-                      asyncLoader: (
-                        creationStartTime,
-                        creationEndTime, {
-                        limit,
-                        asc,
-                      }) async {
-                        FileLoadResult result;
-                        result = FileLoadResult(images, false);
-                        return result;
+                    child: NotificationListener<ScrollNotification>(
+                      onNotification: (scrollInfo) {
+                        if (scrollInfo is UserScrollNotification &&
+                            _hasFilesSelected) {
+                          final shouldAllowCollapse = _selectionTimer == null ||
+                              !_selectionTimer!.isActive;
+
+                          if (shouldAllowCollapse &&
+                              (!_hasCollapsedOnce || !_isCollapsed) &&
+                              (scrollInfo.direction ==
+                                      ScrollDirection.forward ||
+                                  scrollInfo.direction ==
+                                      ScrollDirection.reverse)) {
+                            Future.delayed(const Duration(milliseconds: 10),
+                                () {
+                              if (mounted && _hasFilesSelected) {
+                                setState(() {
+                                  _isCollapsed = true;
+                                  _hasCollapsedOnce = true;
+                                });
+                              }
+                            });
+                          }
+                        }
+                        return false;
                       },
-                      reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
-                      removalEventTypes: const {
-                        EventType.deletedFromRemote,
-                        EventType.deletedFromEverywhere,
-                      },
-                      tagPrefix: "map_gallery",
-                      showSelectAll: true,
-                      selectedFiles: _selectedFiles,
-                      isScrollablePositionedList: false,
+                      child: Gallery(
+                        key: ValueKey(images),
+                        asyncLoader: (
+                          creationStartTime,
+                          creationEndTime, {
+                          limit,
+                          asc,
+                        }) async {
+                          FileLoadResult result;
+                          result = FileLoadResult(images, false);
+                          return result;
+                        },
+                        reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
+                        removalEventTypes: const {
+                          EventType.deletedFromRemote,
+                          EventType.deletedFromEverywhere,
+                        },
+                        tagPrefix: "map_gallery",
+                        showSelectAll: true,
+                        selectedFiles: _selectedFiles,
+                        isScrollablePositionedList: false,
+                      ),
                     ),
                   );
                 },
