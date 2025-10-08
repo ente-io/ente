@@ -30,6 +30,31 @@ class CropCalculation {
 
 /// Calculate crop dimensions for rotated Android videos
 class VideoCropUtil {
+  /// Calculate the crop rectangle in display-space pixels.
+  ///
+  /// - On Android with 90°/270° metadata rotation, display dimensions are swapped
+  ///   (W_display = H_file, H_display = W_file). We return a Rect in this
+  ///   display-space so the native plugins can transform to file-space.
+  /// - On other platforms / rotations, display == oriented video size.
+  static Rect calculateDisplaySpaceCropRect({
+    required VideoEditorController controller,
+    required int metadataRotation,
+  }) {
+    final size = controller.video.value.size;
+    final turns = (metadataRotation / 90).round();
+    final swap = Platform.isAndroid && turns % 2 == 1;
+
+    final displayWidth = swap ? size.height : size.width;
+    final displayHeight = swap ? size.width : size.height;
+
+    final x = controller.minCrop.dx * displayWidth;
+    final y = controller.minCrop.dy * displayHeight;
+    final w = (controller.maxCrop.dx - controller.minCrop.dx) * displayWidth;
+    final h = (controller.maxCrop.dy - controller.minCrop.dy) * displayHeight;
+
+    return Rect.fromLTWH(x, y, w, h);
+  }
+
   /// Calculate crop for Android videos with 90°/270° metadata rotation
   ///
   /// For Android videos with metadata rotation, the video file dimensions don't match
