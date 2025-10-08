@@ -211,3 +211,4 @@ lib/
 
 # Individual Preferences
 - @~/.claude/ente-photos-instructions.md
+- do not prefix commit messages with "[mob][photos]"

@@ -27,8 +27,11 @@ class _ActionBarWidgetState extends State<ActionBarWidget> {
 
   @override
   void initState() {
-    widget.selectedFiles?.addListener(_selectedFilesListener);
     super.initState();
+    widget.selectedFiles?.addListener(_selectedFilesListener);
+    // Sync initial state if files are already selected
+
+    _selectedFilesListener();
   }
 
   @override
@@ -94,7 +97,7 @@ class _ActionBarWidgetState extends State<ActionBarWidget> {
   }
 
   void _selectedFilesListener() {
-    if (widget.selectedFiles!.files.isNotEmpty) {
+    if (widget.selectedFiles?.files.isNotEmpty ?? false) {
       _selectedFilesNotifier.value = widget.selectedFiles!.files.length;
       _selectedOwnedFilesNotifier.value = widget.selectedFiles!.files
           .where((f) => f.ownerID == null || f.ownerID! == currentUserID)
