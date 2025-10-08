@@ -1,5 +1,14 @@
 # Repository Guidelines
 
+## Project Philosophy
+- Protect user privacy and preserve end-to-end encryption integrity in every change.
+- Keep implementations transparent and auditable to sustain user trust.
+- Design with zero-knowledge architecture assumptions so sensitive data never leaves the user’s control.
+
+## Monorepo Context
+- This Photos app lives inside the Ente monorepo alongside Auth, Locker, web, desktop, CLI, and backend code.
+- Shared Flutter packages sit under `mobile/packages/`; Photos-specific Flutter plugins live in `mobile/apps/photos/plugins/`.
+
 ## Project Structure & Module Organization
 `lib/` houses the Flutter client (`core/`, `services/`, `ui/`, `db/`). Tests live in `test/` (unit & widget) and `integration_test/`. Platform shells are `android/` and `ios/`; Rust crates and bridge helpers sit in `rust/` and `rust_builder/`. Assets, fonts, and localization configs are in `assets/`, `fonts/`, `l10n.yaml`, with generated code in `lib/generated/`. Automation scripts include `scripts/`, `run.sh`, `build-apk.sh`, and release tooling under `fastlane/`.
 
@@ -17,3 +26,17 @@ Commits should stay concise and imperative, summarising all substantial code cha
 
 ## Rust & Localization Notes
 Regenerate Dart bindings when Rust APIs change and keep generated code in `lib/src/rust/`. Exercise Rust crates with `cargo test` during such updates. For copy edits, update `lib/l10n/intl_en.arb` then run `flutter gen-l10n` (configured by `l10n.yaml`) to refresh `lib/generated/`, and coordinate Crowdin syncs through `crowdin.yml`.
+
+## Development Setup Requirements
+1. Install Flutter `3.32.8` with a Dart SDK between `>=3.3.0 <4.0.0`.
+2. Install Rust along with `flutter_rust_bridge_codegen` via `cargo install flutter_rust_bridge_codegen`.
+3. Regenerate Rust bindings whenever native APIs shift using `flutter_rust_bridge_codegen generate`.
+4. Initialize and refresh git submodules with `git submodule update --init --recursive`.
+5. Point git hooks at the repository hooks directory: `git config core.hooksPath hooks`.
+
+## Critical Practices
+- `dart format .` must run before you commit so the tree stays uniformly formatted.
+- Follow each edit with `flutter analyze` and resolve every warning or info message introduced by the change.
+- Reuse existing UI and service components; search both `lib/ui/` and `../../packages/` before creating new primitives.
+- Respect the design system—pull colors from `getEnteColorScheme(context)` and text styles from `getEnteTextTheme(context)`, caching the theme at the top of `build`.
+- Keep specs and docs in sync with code updates; when behavior shifts, revise the relevant files under `docs/` or adjacent directories.
