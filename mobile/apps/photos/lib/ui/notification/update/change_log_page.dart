@@ -112,6 +112,16 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
         context.l10n.cLTitle3,
         context.l10n.cLDesc3,
       ),
+      ChangeLogEntry(
+        context.l10n.cLTitle4,
+        context.l10n.cLDesc4,
+        isFeature: false,
+      ),
+      ChangeLogEntry(
+        context.l10n.cLTitle5,
+        context.l10n.cLDesc5,
+        isFeature: false,
+      ),
     ]);
     return Container(
       padding: const EdgeInsets.only(left: 16),
