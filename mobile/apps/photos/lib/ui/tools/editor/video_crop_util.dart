@@ -18,11 +18,11 @@ class CropCalculation {
 
   /// Create Rect from crop calculation
   Rect toRect() => Rect.fromLTWH(
-    x.toDouble(),
-    y.toDouble(),
-    width.toDouble(),
-    height.toDouble(),
-  );
+        x.toDouble(),
+        y.toDouble(),
+        width.toDouble(),
+        height.toDouble(),
+      );
 
   /// FFmpeg crop filter string: crop=w:h:x:y
   String toFFmpegFilter() => 'crop=$width:$height:$x:$y';
@@ -73,6 +73,9 @@ class VideoCropUtil {
     );
   }
 
+  /// Testability helper: bypasses controller and platform checks by accepting
+  /// raw crop data. Only used in unit tests.
+  @visibleForTesting
   static Rect calculateDisplaySpaceCropRectFromData({
     required Offset minCrop,
     required Offset maxCrop,
@@ -139,6 +142,9 @@ class VideoCropUtil {
     );
   }
 
+  /// Testability helper: skips controller/platform usage to make unit tests
+  /// deterministic. Not for production callers.
+  @visibleForTesting
   static CropCalculation calculateFileSpaceCropFromData({
     required Offset minCrop,
     required Offset maxCrop,
@@ -189,16 +195,16 @@ class VideoCropUtil {
 
     if (normalizedRotation == rotation90) {
       xF = (videoSize.width - (yD + hD)).round().clamp(
-        0,
-        videoSize.width.toInt(),
-      );
+            0,
+            videoSize.width.toInt(),
+          );
       yF = xD.round().clamp(0, videoSize.height.toInt());
     } else if (normalizedRotation == rotation270) {
       xF = yD.round().clamp(0, videoSize.width.toInt());
       yF = (videoSize.height - (xD + wD)).round().clamp(
-        0,
-        videoSize.height.toInt(),
-      );
+            0,
+            videoSize.height.toInt(),
+          );
     } else {
       throw VideoCropException(
         'Unsupported rotation $normalizedRotation for Android crop',
@@ -245,6 +251,9 @@ class VideoCropUtil {
     final w = maxX - minX;
     final h = maxY - minY;
 
+    // Note: we round to the nearest pixel before clamping so that symmetric
+    // crops retain parity after multiple transformations. This avoids repeated
+    // floor/ceil adjustments that previously caused ±1px drift.
     if (w <= 0 || h <= 0) {
       throw VideoCropException('Invalid crop dimensions after normalization');
     }
