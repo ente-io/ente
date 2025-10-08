@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import "package:logging/logging.dart";
+import 'package:logging/logging.dart';
+import 'package:mobile_ocr/mobile_ocr.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/notification/toast.dart';
-import 'package:text_detector/text_detector.dart';
 
 class TextDetectionPage extends StatefulWidget {
   final String imagePath;
@@ -28,7 +28,6 @@ class _TextDetectionPageState extends State<TextDetectionPage> {
               autoDetect: true,
               backgroundColor: Colors.black,
               showUnselectedBoundaries: true,
-              singleShotMode: true,
               loadingWidget: const Center(
                 child: EnteLoadingWidget(color: Colors.white, size: 24),
               ),
