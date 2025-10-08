@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'package:logging/logging.dart';
 import 'package:native_video_editor/native_video_editor.dart';
 import 'package:video_editor/video_editor.dart';
+import 'package:photos/ui/tools/editor/export_video_service.dart';
 import 'package:photos/ui/tools/editor/video_crop_util.dart';
 
 /// Service that uses native video editing operations when possible
@@ -45,6 +46,18 @@ class NativeVideoExportService {
       if (onError != null) {
         onError(error, stackTrace);
       }
+
+      // If native export fails quickly, attempt FFmpeg fallback automatically
+      if (elapsed <= const Duration(seconds: 3)) {
+        _logger.info('Falling back to FFmpeg export after native failure');
+        return await ExportService.exportVideo(
+          controller: controller,
+          outputPath: outputPath,
+          onProgress: onProgress,
+          onError: onError,
+        );
+      }
+
       rethrow;
     }
   }
@@ -95,7 +108,7 @@ class NativeVideoExportService {
       cropRect = displayCrop;
     }
 
-    if (cropRect != null) {
+    if (cropRect != null && _logger.isLoggable(Level.FINE)) {
       _logger.fine(
         'Native export cropRect=$cropRect videoSize=${controller.video.value.size} '
         'metadataRotation=$metadataRotation',

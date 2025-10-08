@@ -87,24 +87,24 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
           onTrimmedColor: const ColorScheme.dark().videoPlayerPrimaryColor,
           onTrimmingColor: const ColorScheme.dark().videoPlayerPrimaryColor,
           background: Theme.of(context).colorScheme.editorBackgroundColor,
-          positionLineColor:
-              Theme.of(context).colorScheme.videoPlayerBorderColor,
-          lineColor: Theme.of(context)
-              .colorScheme
-              .videoPlayerBorderColor
-              .withValues(alpha: 0.6),
+          positionLineColor: Theme.of(
+            context,
+          ).colorScheme.videoPlayerBorderColor,
+          lineColor: Theme.of(
+            context,
+          ).colorScheme.videoPlayerBorderColor.withValues(alpha: 0.6),
         ),
       );
 
-      _controller!.initialize().then((_) {
-        setState(() {});
-      }).catchError(
-        (error) {
-          // handle minumum duration bigger than video duration error
-          Navigator.pop(context);
-        },
-        test: (e) => e is VideoMinDurationError,
-      );
+      _controller!
+          .initialize()
+          .then((_) {
+            setState(() {});
+          })
+          .catchError((error) {
+            // handle minumum duration bigger than video duration error
+            Navigator.pop(context);
+          }, test: (e) => e is VideoMinDurationError);
     });
   }
 
@@ -131,7 +131,8 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
       child: ValueListenableBuilder<bool>(
         valueListenable: _isExporting,
         builder: (context, isExporting, _) {
-          final isReady = _controller != null &&
+          final isReady =
+              _controller != null &&
               _controller!.initialized &&
               _quarterTurnsForRotationCorrection != null;
 
@@ -172,22 +173,30 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                                           // For videos with metadata rotation, we need to swap dimensions
                                           final shouldSwap =
                                               _quarterTurnsForRotationCorrection! %
-                                                      2 ==
-                                                  1;
+                                                  2 ==
+                                              1;
                                           final width = _controller!
-                                              .video.value.size.width;
+                                              .video
+                                              .value
+                                              .size
+                                              .width;
                                           final height = _controller!
-                                              .video.value.size.height;
+                                              .video
+                                              .value
+                                              .size
+                                              .height;
 
                                           return RotatedBox(
                                             quarterTurns:
                                                 _quarterTurnsForRotationCorrection!,
                                             child: CropGridViewer.preview(
                                               controller: _controller!,
-                                              overrideWidth:
-                                                  shouldSwap ? height : width,
-                                              overrideHeight:
-                                                  shouldSwap ? width : height,
+                                              overrideWidth: shouldSwap
+                                                  ? height
+                                                  : width,
+                                              overrideHeight: shouldSwap
+                                                  ? width
+                                                  : height,
                                             ),
                                           );
                                         },
@@ -197,8 +206,9 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                                   Align(
                                     alignment: Alignment.bottomCenter,
                                     child: Padding(
-                                      padding:
-                                          const EdgeInsets.only(bottom: 24),
+                                      padding: const EdgeInsets.only(
+                                        bottom: 24,
+                                      ),
                                       child: VideoEditorPlayerControl(
                                         controller: _controller!,
                                       ),
@@ -211,17 +221,16 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                           const SizedBox(height: 12),
                           if (flagService.internalUser)
                             Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                              ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
                                     "Native (i)",
-                                    style:
-                                        getEnteTextTheme(context).mini.copyWith(
-                                              color: colorScheme.textMuted,
-                                            ),
+                                    style: getEnteTextTheme(context).mini
+                                        .copyWith(color: colorScheme.textMuted),
                                   ),
                                   const SizedBox(width: 4),
                                   Transform.scale(
@@ -326,8 +335,9 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
 
       if (shouldUseNative) {
         // Use native export
-        final tempDir =
-            Directory.systemTemp.createTempSync('ente_video_export');
+        final tempDir = Directory.systemTemp.createTempSync(
+          'ente_video_export',
+        );
         final outputPath = path.join(
           tempDir.path,
           'export_${DateTime.now().millisecondsSinceEpoch}.mp4',
@@ -485,7 +495,8 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         return;
       }
 
-      final fileName = path.basenameWithoutExtension(widget.file.title!) +
+      final fileName =
+          path.basenameWithoutExtension(widget.file.title!) +
           "_edited_" +
           DateTime.now().microsecondsSinceEpoch.toString() +
           ".mp4";
@@ -521,9 +532,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
           }
         }
 
-        newFile.generatedID = await FilesDB.instance.insertAndGetId(
-          newFile,
-        );
+        newFile.generatedID = await FilesDB.instance.insertAndGetId(newFile);
 
         Bus.instance.fire(
           LocalPhotosUpdatedEvent([newFile], source: "editSave"),
@@ -573,7 +582,8 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
     final adjustedFilters = <String>[];
     final controller = _controller!;
 
-    final needsCrop = controller.minCrop != Offset.zero ||
+    final needsCrop =
+        controller.minCrop != Offset.zero ||
         controller.maxCrop != const Offset(1.0, 1.0);
 
     if (!needsCrop) {
@@ -583,7 +593,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
     for (final filter in filters) {
       if (filter.startsWith('crop=')) {
         // Use shared crop calculation utility
-        final crop = VideoCropUtil.calculateCropForRotation(
+        final crop = VideoCropUtil.calculateFileSpaceCrop(
           controller: controller,
           metadataRotation: metadataRotation,
         );
@@ -606,8 +616,9 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
     if (Platform.isAndroid) {
       try {
         // Use native method to get video info more efficiently
-        final videoInfo =
-            await NativeVideoEditor.getVideoInfo(widget.ioFile.path);
+        final videoInfo = await NativeVideoEditor.getVideoInfo(
+          widget.ioFile.path,
+        );
         final rotation = videoInfo['rotation'] as int? ?? 0;
         final width = videoInfo['width'] as int? ?? 0;
         final height = videoInfo['height'] as int? ?? 0;
@@ -637,22 +648,22 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
 
 class _VideoEditorSubPageRoute extends PageRouteBuilder<void> {
   _VideoEditorSubPageRoute(this.child)
-      : super(
-          fullscreenDialog: true,
-          transitionDuration: const Duration(milliseconds: 220),
-          reverseTransitionDuration: const Duration(milliseconds: 180),
-          pageBuilder: (_, __, ___) => child,
-          transitionsBuilder: (_, animation, __, child) {
-            return FadeTransition(
-              opacity: CurvedAnimation(
-                parent: animation,
-                curve: Curves.easeOutCubic,
-                reverseCurve: Curves.easeInCubic,
-              ),
-              child: child,
-            );
-          },
-        );
+    : super(
+        fullscreenDialog: true,
+        transitionDuration: const Duration(milliseconds: 220),
+        reverseTransitionDuration: const Duration(milliseconds: 180),
+        pageBuilder: (_, __, ___) => child,
+        transitionsBuilder: (_, animation, __, child) {
+          return FadeTransition(
+            opacity: CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOutCubic,
+              reverseCurve: Curves.easeInCubic,
+            ),
+            child: child,
+          );
+        },
+      );
 
   final Widget child;
 }

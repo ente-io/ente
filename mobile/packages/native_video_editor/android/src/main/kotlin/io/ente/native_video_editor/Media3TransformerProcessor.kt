@@ -25,6 +25,8 @@ class Media3TransformerProcessor(private val context: Context) {
         private const val LOG_VERBOSE = true
         private const val LOG_PROGRESS = true
         private const val LOG_ERRORS = true
+        private const val ROTATION_90 = 90
+        private const val ROTATION_270 = 270
     }
 
     /**
@@ -358,14 +360,14 @@ class Media3TransformerProcessor(private val context: Context) {
         val height = videoDims.height
 
         val transformed = when (normalizedRotation) {
-            90 -> {
+            ROTATION_90 -> {
                 val x = (width - (crop.y + crop.height)).coerceIn(0, width)
                 val y = crop.x.coerceIn(0, height)
                 val w = crop.height.coerceAtMost(width - x)
                 val h = crop.width.coerceAtMost(height - y)
                 CropRect(x, y, w, h)
             }
-            270 -> {
+            ROTATION_270 -> {
                 val x = crop.y.coerceIn(0, width)
                 val y = (height - (crop.x + crop.width)).coerceIn(0, height)
                 val w = crop.height.coerceAtMost(width - x)

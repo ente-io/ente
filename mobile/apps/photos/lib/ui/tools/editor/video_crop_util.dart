@@ -28,7 +28,15 @@ class CropCalculation {
   String toFFmpegFilter() => 'crop=$width:$height:$x:$y';
 }
 
-/// Calculate crop dimensions for rotated Android videos
+class VideoCropException implements Exception {
+  VideoCropException(this.message);
+  final String message;
+
+  @override
+  String toString() => 'VideoCropException: $message';
+}
+
+/// Helpers to derive display- and file-space crop rectangles for native export
 class VideoCropUtil {
   static int _normalizedQuarterTurns(int rotationDegrees) {
     final normalized = ((rotationDegrees % 360) + 360) % 360;
@@ -36,11 +44,13 @@ class VideoCropUtil {
   }
 
   static double _clampNormalized(double value) {
-    return value.clamp(0.0, 1.0) as double;
+    return value.clamp(0.0, 1.0);
   }
 
   static int _clampInt(int value, int min, int max) {
-    return value.clamp(min, max) as int;
+    if (value < min) return min;
+    if (value > max) return max;
+    return value;
   }
 
   /// Calculate the crop rectangle in display-space pixels.
@@ -80,7 +90,7 @@ class VideoCropUtil {
     final heightNormalized = maxY - minY;
 
     if (widthNormalized <= 0 || heightNormalized <= 0) {
-      throw ArgumentError('Invalid crop selection: zero or negative span');
+      throw VideoCropException('Invalid crop selection: zero or negative span');
     }
 
     final x = minX * displayWidth;
@@ -89,18 +99,15 @@ class VideoCropUtil {
     final h = heightNormalized * displayHeight;
 
     if (w <= 0 || h <= 0) {
-      throw ArgumentError('Invalid crop rectangle after scaling');
+      throw VideoCropException('Invalid crop rectangle after scaling');
     }
 
     return Rect.fromLTWH(x, y, w, h);
   }
 
-  /// Calculate crop for Android videos with 90°/270° metadata rotation
-  ///
-  /// For Android videos with metadata rotation, the video file dimensions don't match
-  /// the display dimensions (e.g., file is 1920x1080 but displays as 1080x1920).
-  /// This method calculates the correct crop in file space.
-  static CropCalculation calculateCropForRotation({
+  /// Convert the normalised crop selection into file-space coordinates
+  /// (taking metadata rotation on Android into account).
+  static CropCalculation calculateFileSpaceCrop({
     required VideoEditorController controller,
     required int metadataRotation,
   }) {
@@ -113,68 +120,97 @@ class VideoCropUtil {
 
     // For 90°/270° rotations on Android, we need special handling
     if (Platform.isAndroid && metadataQuarterTurns % 2 == 1) {
-      final normalizedRotation = ((metadataRotation % 360) + 360) % 360;
-
-      final xD = displayCrop.left;
-      final yD = displayCrop.top;
-      final wD = displayCrop.width;
-      final hD = displayCrop.height;
-
-      final int xF, yF, wF, hF;
-      if (normalizedRotation == 90) {
-        xF = (videoSize.width - (yD + hD)).round().clamp(
-          0,
-          videoSize.width.toInt(),
-        );
-        yF = xD.round().clamp(0, videoSize.height.toInt());
-        wF = hD.round().clamp(0, (videoSize.width - xF).toInt());
-        hF = wD.round().clamp(0, (videoSize.height - yF).toInt());
-      } else {
-        xF = yD.round().clamp(0, videoSize.width.toInt());
-        yF = (videoSize.height - (xD + wD)).round().clamp(
-          0,
-          videoSize.height.toInt(),
-        );
-        wF = hD.round().clamp(0, (videoSize.width - xF).toInt());
-        hF = wD.round().clamp(0, (videoSize.height - yF).toInt());
-      }
-
-      if (wF <= 0 || hF <= 0) {
-        throw ArgumentError('Invalid crop dimensions after transform');
-      }
-
-      return CropCalculation(x: xF, y: yF, width: wF, height: hF);
-    } else {
-      // No rotation or iOS - use display coordinates directly (display == file)
-      final minX = _clampInt(
-        displayCrop.left.floor(),
-        0,
-        videoSize.width.toInt(),
+      return _calculateRotatedFileSpaceCrop(
+        videoSize,
+        displayCrop,
+        metadataRotation,
       );
-      final minY = _clampInt(
-        displayCrop.top.floor(),
-        0,
-        videoSize.height.toInt(),
-      );
-      final maxX = _clampInt(
-        displayCrop.right.ceil(),
-        0,
-        videoSize.width.toInt(),
-      );
-      final maxY = _clampInt(
-        displayCrop.bottom.ceil(),
-        0,
-        videoSize.height.toInt(),
-      );
-
-      final w = maxX - minX;
-      final h = maxY - minY;
-
-      if (w <= 0 || h <= 0) {
-        throw ArgumentError('Invalid crop dimensions after normalization');
-      }
-
-      return CropCalculation(x: minX, y: minY, width: w, height: h);
     }
+
+    return _calculateStandardFileSpaceCrop(videoSize, displayCrop);
+  }
+
+  static CropCalculation _calculateRotatedFileSpaceCrop(
+    Size videoSize,
+    Rect displayCrop,
+    int metadataRotation,
+  ) {
+    const int rotation90 = 90;
+    const int rotation270 = 270;
+    final normalizedRotation = ((metadataRotation % 360) + 360) % 360;
+
+    final xD = displayCrop.left;
+    final yD = displayCrop.top;
+    final wD = displayCrop.width;
+    final hD = displayCrop.height;
+
+    int xF;
+    int yF;
+    int wF;
+    int hF;
+
+    if (normalizedRotation == rotation90) {
+      xF = (videoSize.width - (yD + hD)).round().clamp(
+        0,
+        videoSize.width.toInt(),
+      );
+      yF = xD.round().clamp(0, videoSize.height.toInt());
+    } else if (normalizedRotation == rotation270) {
+      xF = yD.round().clamp(0, videoSize.width.toInt());
+      yF = (videoSize.height - (xD + wD)).round().clamp(
+        0,
+        videoSize.height.toInt(),
+      );
+    } else {
+      throw VideoCropException(
+        'Unsupported rotation $normalizedRotation for Android crop',
+      );
+    }
+
+    wF = hD.round().clamp(0, (videoSize.width - xF).toInt());
+    hF = wD.round().clamp(0, (videoSize.height - yF).toInt());
+
+    if (wF <= 0 || hF <= 0) {
+      throw VideoCropException(
+        'Invalid crop dimensions after rotation transform',
+      );
+    }
+
+    return CropCalculation(x: xF, y: yF, width: wF, height: hF);
+  }
+
+  static CropCalculation _calculateStandardFileSpaceCrop(
+    Size videoSize,
+    Rect displayCrop,
+  ) {
+    final minX = _clampInt(
+      displayCrop.left.round(),
+      0,
+      videoSize.width.toInt(),
+    );
+    final minY = _clampInt(
+      displayCrop.top.round(),
+      0,
+      videoSize.height.toInt(),
+    );
+    final maxX = _clampInt(
+      displayCrop.right.round(),
+      0,
+      videoSize.width.toInt(),
+    );
+    final maxY = _clampInt(
+      displayCrop.bottom.round(),
+      0,
+      videoSize.height.toInt(),
+    );
+
+    final w = maxX - minX;
+    final h = maxY - minY;
+
+    if (w <= 0 || h <= 0) {
+      throw VideoCropException('Invalid crop dimensions after normalization');
+    }
+
+    return CropCalculation(x: minX, y: minY, width: w, height: h);
   }
 }
