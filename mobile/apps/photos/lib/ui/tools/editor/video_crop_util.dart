@@ -44,32 +44,38 @@ class VideoCropUtil {
 
     // For 90°/270° rotations on Android, we need special handling
     if (Platform.isAndroid && metadataQuarterTurns % 2 == 1) {
-      // Get normalized crop coordinates in display space
-      double minXNorm = controller.minCrop.dx;
-      double minYNorm = controller.minCrop.dy;
-      double maxXNorm = controller.maxCrop.dx;
-      double maxYNorm = controller.maxCrop.dy;
+      // Get normalized crop coordinates in display space (dimensions swapped)
+      final minXNorm = controller.minCrop.dx;
+      final minYNorm = controller.minCrop.dy;
+      final maxXNorm = controller.maxCrop.dx;
+      final maxYNorm = controller.maxCrop.dy;
 
-      // Swap axes for 90°/270° rotation
-      // Display X → File Y, Display Y → File X
-      final tempMinX = minXNorm;
-      final tempMaxX = maxXNorm;
-      minXNorm = minYNorm;
-      maxXNorm = maxYNorm;
-      minYNorm = tempMinX;
-      maxYNorm = tempMaxX;
+      // Convert to absolute display-space pixels
+      final displayWidth = videoSize.height; // swapped
+      final displayHeight = videoSize.width; // swapped
 
-      // Apply to original video dimensions (after swap)
-      // Display width=1080, height=1920 → File width=1920, height=1080
-      final minX = (minXNorm * videoSize.height).round();
-      final maxX = (maxXNorm * videoSize.height).round();
-      final minY = (minYNorm * videoSize.width).round();
-      final maxY = (maxYNorm * videoSize.width).round();
+      final xD = (minXNorm * displayWidth);
+      final yD = (minYNorm * displayHeight);
+      final wD = ((maxXNorm - minXNorm) * displayWidth);
+      final hD = ((maxYNorm - minYNorm) * displayHeight);
 
-      final w = maxX - minX;
-      final h = maxY - minY;
+      // Map display-space → file-space based on metadata rotation
+      final int xF, yF, wF, hF;
+      if ((metadataRotation % 360 + 360) % 360 == 90) {
+        // 90° CW
+        xF = (videoSize.width - (yD + hD)).round().clamp(0, videoSize.width.toInt());
+        yF = xD.round().clamp(0, videoSize.height.toInt());
+        wF = hD.round().clamp(0, (videoSize.width - xF).toInt());
+        hF = wD.round().clamp(0, (videoSize.height - yF).toInt());
+      } else {
+        // 270° (90° CCW)
+        xF = yD.round().clamp(0, videoSize.width.toInt());
+        yF = (videoSize.height - (xD + wD)).round().clamp(0, videoSize.height.toInt());
+        wF = hD.round().clamp(0, (videoSize.width - xF).toInt());
+        hF = wD.round().clamp(0, (videoSize.height - yF).toInt());
+      }
 
-      return CropCalculation(x: minX, y: minY, width: w, height: h);
+      return CropCalculation(x: xF, y: yF, width: wF, height: hF);
     } else {
       // No rotation or iOS - use display coordinates directly
       final minX = (controller.minCrop.dx * videoSize.width).round();

@@ -84,40 +84,55 @@ class Media3TransformerProcessor(private val context: Context) {
 
             // Add crop effect if needed BEFORE rotation
             // This ensures crop coordinates are applied to the correct orientation
+            var outDimsFromCrop: Size? = null
             if (cropX != null && cropY != null && cropWidth != null && cropHeight != null) {
-                // For videos with 90°/270° rotation, transform crop coordinates to file-space
-                val normalizedRotation = originalRotation % 360
+                // For videos with 90°/270° rotation in metadata, the UI provides
+                // crop rect in display-space (dimensions swapped). We must map it
+                // back to file-space (originalWidth x originalHeight) before
+                // applying the crop effect.
+                val normalizedRotation = ((originalRotation % 360) + 360) % 360
                 val needsCoordinateTransform = normalizedRotation == 90 || normalizedRotation == 270
 
                 val finalCropX: Int
                 val finalCropY: Int
                 val finalCropWidth: Int
                 val finalCropHeight: Int
-                val normalizationWidth: Int
-                val normalizationHeight: Int
+                val normalizationWidth: Int = originalWidth
+                val normalizationHeight: Int = originalHeight
 
                 if (needsCoordinateTransform) {
-                    // Transform display-space coordinates to file-space
-                    // Display X → File Y, Display Y → File X
-                    finalCropX = cropY
-                    finalCropY = cropX
-                    finalCropWidth = cropHeight
-                    finalCropHeight = cropWidth
-
-                    // ALWAYS use original file dimensions for normalization
-                    normalizationWidth = originalWidth
-                    normalizationHeight = originalHeight
+                    // Map display-space (x_d,y_d,w_d,h_d) to file-space (x_f,y_f,w_f,h_f)
+                    // Using standard rotation mappings about the top-left origin.
+                    // For 90° CW display correction:
+                    //   x_f = W - (y_d + h_d)
+                    //   y_f = x_d
+                    //   w_f = h_d
+                    //   h_f = w_d
+                    // For 270° (i.e., 90° CCW) display correction:
+                    //   x_f = y_d
+                    //   y_f = H - (x_d + w_d)
+                    //   w_f = h_d
+                    //   h_f = w_d
+                    if (normalizedRotation == 90) {
+                        finalCropX = (normalizationWidth - (cropY + cropHeight)).coerceIn(0, normalizationWidth)
+                        finalCropY = cropX.coerceIn(0, normalizationHeight)
+                        finalCropWidth = cropHeight.coerceAtMost(normalizationWidth - finalCropX)
+                        finalCropHeight = cropWidth.coerceAtMost(normalizationHeight - finalCropY)
+                    } else { // 270
+                        finalCropX = cropY.coerceIn(0, normalizationWidth)
+                        finalCropY = (normalizationHeight - (cropX + cropWidth)).coerceIn(0, normalizationHeight)
+                        finalCropWidth = cropHeight.coerceAtMost(normalizationWidth - finalCropX)
+                        finalCropHeight = cropWidth.coerceAtMost(normalizationHeight - finalCropY)
+                    }
                 } else {
-                    // No transformation needed
+                    // No transformation needed; already in file-space
                     finalCropX = cropX
                     finalCropY = cropY
                     finalCropWidth = cropWidth
                     finalCropHeight = cropHeight
-                    normalizationWidth = originalWidth
-                    normalizationHeight = originalHeight
                 }
 
-                // Calculate crop as a fraction of the normalization dimensions
+                // Calculate crop as a fraction of the file-space dimensions
                 val cropLeftFraction = finalCropX.toFloat() / normalizationWidth
                 val cropRightFraction = (finalCropX + finalCropWidth).toFloat() / normalizationWidth
                 val cropTopFraction = finalCropY.toFloat() / normalizationHeight
@@ -130,6 +145,9 @@ class Media3TransformerProcessor(private val context: Context) {
                     /* bottom = */ 1f - 2f * cropBottomFraction,
                     /* top = */ 1f - 2f * cropTopFraction
                 )
+
+                // Preserve output dimensions from the transformed crop; these are in file-space.
+                outDimsFromCrop = Size(finalCropWidth, finalCropHeight)
 
                 videoEffects.add(cropEffect)
                 hasVideoEffects = true
@@ -153,19 +171,17 @@ class Media3TransformerProcessor(private val context: Context) {
             }
 
             // Add Presentation effect to set output dimensions
-            // Swap dimensions if rotation will be applied
-            if (cropWidth != null && cropHeight != null) {
-                val outputWidth: Int
-                val outputHeight: Int
+            // Base output on the file-space crop dimensions we actually applied.
+            if (outDimsFromCrop != null) {
+                var outputWidth = outDimsFromCrop!!.width
+                var outputHeight = outDimsFromCrop!!.height
 
-                // If applying 90/270° rotation, swap output dimensions
-                // because rotation happens after crop
+                // If a user-requested rotation (not metadata) is applied after crop,
+                // swap output dimensions for 90/270 degrees.
                 if (rotateDegrees != null && (rotateDegrees % 180) != 0) {
-                    outputWidth = cropHeight
-                    outputHeight = cropWidth
-                } else {
-                    outputWidth = cropWidth
-                    outputHeight = cropHeight
+                    val tmp = outputWidth
+                    outputWidth = outputHeight
+                    outputHeight = tmp
                 }
 
                 val presentationEffect = Presentation.createForWidthAndHeight(
