@@ -126,7 +126,7 @@ class _TrashSectionButtonState extends State<TrashSectionButton> {
           // ignore: unawaited_futures
           routeToPage(
             context,
-            TrashPage(),
+            const TrashPage(),
           );
         }
       },

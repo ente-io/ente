@@ -100,7 +100,7 @@ class ArchivedCollectionsButton extends StatelessWidget {
         // ignore: unawaited_futures
         routeToPage(
           context,
-          ArchivePage(),
+          const ArchivePage(),
         );
       },
     );
