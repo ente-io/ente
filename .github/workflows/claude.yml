@@ -42,11 +42,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # For PR comments, fetch and checkout the PR branch properly
+      # For PR-related events, fetch and checkout the PR branch properly
       - name: Fetch PR branch
-        if: ${{ github.event.issue.pull_request }}
+        if: ${{ github.event.issue.pull_request || github.event.pull_request }}
         run: |
-          gh pr checkout ${{ github.event.issue.number }}
+          # For issue_comment events on PRs
+          if [[ -n "${{ github.event.issue.pull_request }}" ]]; then
+            gh pr checkout ${{ github.event.issue.number }}
+          # For pull_request_review and pull_request_review_comment events
+          elif [[ -n "${{ github.event.pull_request.number }}" ]]; then
+            gh pr checkout ${{ github.event.pull_request.number }}
+          fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
