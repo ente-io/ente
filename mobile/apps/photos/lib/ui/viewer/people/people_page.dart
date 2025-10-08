@@ -251,82 +251,72 @@ class _GalleryState extends State<_Gallery> {
 
   @override
   Widget build(BuildContext context) {
-    // Create boundary notifiers
-    final topBoundaryNotifier = ValueNotifier<double?>(null);
-    final bottomBoundaryNotifier = ValueNotifier<double?>(null);
-    final scrollControllerNotifier = ValueNotifier<ScrollController?>(null);
-
-    return GalleryBoundariesProvider(
-      topBoundaryNotifier: topBoundaryNotifier,
-      bottomBoundaryNotifier: bottomBoundaryNotifier,
-      scrollControllerNotifier: scrollControllerNotifier,
-      child: Gallery(
-        asyncLoader: (
-          creationStartTime,
-          creationEndTime, {
-          limit,
-          asc,
-        }) async {
-          final result = await widget.loadPersonFiles();
-          return Future.value(
-            FileLoadResult(
-              result,
-              false,
-            ),
-          );
-        },
-        reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
-        forceReloadEvents: [Bus.instance.on<PeopleChangedEvent>()],
-        removalEventTypes: const {
-          EventType.deletedFromRemote,
-          EventType.deletedFromEverywhere,
-          EventType.hide,
-        },
-        tagPrefix: widget.tagPrefix + widget.tagPrefix,
-        selectedFiles: widget.selectedFiles,
-        initialFiles:
-            widget.personFiles.isNotEmpty ? [widget.personFiles.first] : [],
-        header: Column(
-          children: [
-            (widget.personEntity.data.email != null &&
-                        widget.personEntity.data.email!.isNotEmpty) ||
-                    widget.personEntity.data.isIgnored
-                ? const SizedBox.shrink()
-                : Padding(
-                    padding: const EdgeInsets.only(top: 12, bottom: 8),
-                    child: EndToEndBanner(
-                      title: context.l10n.linkEmail,
-                      caption: context.l10n.linkEmailToContactBannerCaption,
-                      leadingIcon: Icons.email_outlined,
-                      onTap: () async {
-                        await routeToPage(
-                          context,
-                          LinkEmailScreen(widget.personEntity.remoteID),
-                        );
-                      },
-                    ),
+    return Gallery(
+      asyncLoader: (
+        creationStartTime,
+        creationEndTime, {
+        limit,
+        asc,
+      }) async {
+        final result = await widget.loadPersonFiles();
+        return Future.value(
+          FileLoadResult(
+            result,
+            false,
+          ),
+        );
+      },
+      reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
+      forceReloadEvents: [Bus.instance.on<PeopleChangedEvent>()],
+      removalEventTypes: const {
+        EventType.deletedFromRemote,
+        EventType.deletedFromEverywhere,
+        EventType.hide,
+      },
+      tagPrefix: widget.tagPrefix + widget.tagPrefix,
+      selectedFiles: widget.selectedFiles,
+      initialFiles:
+          widget.personFiles.isNotEmpty ? [widget.personFiles.first] : [],
+      header: Column(
+        children: [
+          (widget.personEntity.data.email != null &&
+                      widget.personEntity.data.email!.isNotEmpty) ||
+                  widget.personEntity.data.isIgnored
+              ? const SizedBox.shrink()
+              : Padding(
+                  padding: const EdgeInsets.only(top: 12, bottom: 8),
+                  child: EndToEndBanner(
+                    title: context.l10n.linkEmail,
+                    caption: context.l10n.linkEmailToContactBannerCaption,
+                    leadingIcon: Icons.email_outlined,
+                    onTap: () async {
+                      await routeToPage(
+                        context,
+                        LinkEmailScreen(widget.personEntity.remoteID),
+                      );
+                    },
                   ),
-            !userDismissedPersonGallerySuggestion
-                ? Dismissible(
-                    key: const Key("personGallerySuggestion"),
-                    direction: DismissDirection.horizontal,
-                    onDismissed: (direction) {
+                ),
+          !userDismissedPersonGallerySuggestion
+              ? Dismissible(
+                  key: const Key("personGallerySuggestion"),
+                  direction: DismissDirection.horizontal,
+                  onDismissed: (direction) {
+                    setState(() {
+                      userDismissedPersonGallerySuggestion = true;
+                    });
+                  },
+                  child: PersonGallerySuggestion(
+                    person: widget.personEntity,
+                    onClose: () {
                       setState(() {
                         userDismissedPersonGallerySuggestion = true;
                       });
                     },
-                    child: PersonGallerySuggestion(
-                      person: widget.personEntity,
-                      onClose: () {
-                        setState(() {
-                          userDismissedPersonGallerySuggestion = true;
-                        });
-                      },
-                    ),
-                  )
-                : const SizedBox.shrink(),
-          ],
-        ),
+                  ),
+                )
+              : const SizedBox.shrink(),
+        ],
       ),
     );
   }
