@@ -32,6 +32,21 @@ void main() {
         throwsA(isA<VideoCropException>()),
       );
     });
+
+    test('handles non-square crop for Android 90° rotation', () {
+      final rect = VideoCropUtil.calculateDisplaySpaceCropRectFromData(
+        minCrop: const Offset(0.1, 0.2),
+        maxCrop: const Offset(0.4, 0.8),
+        videoSize: const Size(1920, 1080),
+        metadataRotation: 90,
+        isAndroidOverride: true,
+      );
+
+      expect(rect.left, closeTo(108, 0.0001));
+      expect(rect.top, closeTo(384, 0.0001));
+      expect(rect.width, closeTo(324, 0.0001));
+      expect(rect.height, closeTo(1152, 0.0001));
+    });
   });
 
   group('VideoCropUtil.calculateFileSpaceCropFromData', () {
@@ -91,6 +106,36 @@ void main() {
         ),
         throwsA(isA<VideoCropException>()),
       );
+    });
+
+    test('handles non-square crop for Android 90° rotation', () {
+      final crop = VideoCropUtil.calculateFileSpaceCropFromData(
+        minCrop: const Offset(0.1, 0.2),
+        maxCrop: const Offset(0.4, 0.8),
+        videoSize: const Size(1920, 1080),
+        metadataRotation: 90,
+        isAndroidOverride: true,
+      );
+
+      expect(crop.x, 384);
+      expect(crop.y, 108);
+      expect(crop.width, 1152);
+      expect(crop.height, 324);
+    });
+
+    test('handles non-square crop for Android 270° rotation', () {
+      final crop = VideoCropUtil.calculateFileSpaceCropFromData(
+        minCrop: const Offset(0.1, 0.2),
+        maxCrop: const Offset(0.4, 0.8),
+        videoSize: const Size(1920, 1080),
+        metadataRotation: 270,
+        isAndroidOverride: true,
+      );
+
+      expect(crop.x, 384);
+      expect(crop.y, 648);
+      expect(crop.width, 1152);
+      expect(crop.height, 324);
     });
   });
 }
