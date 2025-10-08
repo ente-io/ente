@@ -52,24 +52,18 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper>
   Duration _lastElapsed = Duration.zero;
 
   // Frame rate adaptive fields
-  double _displayRefreshRate = 60.0; // Default fallback to 60fps
-  late double _maxScrollSpeed; // Scaled based on frame rate
-  late double _speedDenominator; // Pre-calculated for speed formula
+  late double _maxScrollSpeed; // Max scroll speed in pixels per second
 
-  // Auto-scroll constants (non-frame-rate dependent)
+  // Auto-scroll constants
   static const double _syntheticEventThreshold =
       10.0; // Pixels before generating event
-  static const double _exponentialFactor =
-      0.015; // Controls speed increase rate
-  static const double _referenceMaxDistance = 200.0; // Distance for max speed
-  static const double _edgeThreshold =
-      20.0; // Distance from screen edge for boost
-  static const double _edgeBoostMultiplier = 1.5; // Speed multiplier at edges
   static const double _minAvailableSpace =
-      50.0; // Minimum space for normalization
-  // Baseline values for 120fps (used for scaling)
+      30.0; // Minimum widget height for safety
   static const double _baselineRefreshRate = 120.0;
-  static const double _baselineMaxScrollSpeed = 30.0;
+  static const double _baselineMaxScrollSpeed = 10.0; // px/frame at 120fps
+  static const double _speedExponent = 1.20; // Power curve exponent
+  static const double _edgeBoostZone = 50.0; // Pixels from screen edge
+  static const double _edgeBoostMaxMultiplier = 2.5; // Max boost at edge
 
   @override
   void initState() {
@@ -78,21 +72,11 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper>
   }
 
   void _initializeFrameRateConstants() {
-    // Detect the display refresh rate
-    final display =
-        WidgetsBinding.instance.platformDispatcher.views.first.display;
-    _displayRefreshRate = display.refreshRate > 0 ? display.refreshRate : 60.0;
-
-    // Scale max scroll speed based on frame rate
-    // At 60fps: 15 pixels per frame
-    // At 120fps: 30 pixels per frame
-    // At 90fps: 22.5 pixels per frame
-    _maxScrollSpeed =
-        _baselineMaxScrollSpeed * (_displayRefreshRate / _baselineRefreshRate);
-
-    // Pre-calculate denominator for speed formula using actual refresh rate
-    _speedDenominator =
-        math.exp(_exponentialFactor * _referenceMaxDistance) - 1;
+    // Convert baseline speed from "px/frame at 120fps" to "px/second"
+    // This ensures consistent visual speed across all refresh rates
+    // E.g., baseline 10 px/frame at 120fps = 1200 px/second
+    // All devices (60fps, 90fps, 120fps) will scroll at this same visual speed
+    _maxScrollSpeed = _baselineMaxScrollSpeed * _baselineRefreshRate;
   }
 
   @override
@@ -199,7 +183,7 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper>
     );
   }
 
-  /// Calculate exponential scroll speed with adaptive scaling based on available space
+  /// Calculate scroll speed based on widget penetration percentage with power curve
   double _calculateScrollSpeed(
     double distanceFromBoundary,
     double boundaryPosition,
@@ -211,38 +195,49 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper>
     final screenHeight =
         _cachedScreenHeight ?? MediaQuery.of(context).size.height;
 
-    // Calculate available space from boundary to screen edge
-    final availableSpace = scrollingUp
+    // Calculate available space (widget height) from boundary to screen edge
+    final widgetHeight = scrollingUp
         ? boundaryPosition // Space from top boundary to screen top
         : (screenHeight -
             boundaryPosition); // Space from bottom boundary to screen bottom
 
-    // Normalize distance based on available space (adaptive scaling)
-    // This ensures consistent speed progression regardless of boundary position
-    final normalizedDistance = math.min(
-      1.0,
-      distanceFromBoundary / math.max(_minAvailableSpace, availableSpace),
-    );
+    // Apply safety floor to prevent issues with very small widgets
+    final safeWidgetHeight = math.max(_minAvailableSpace, widgetHeight);
 
-    // Map normalized distance (0-1) to effective distance for speed calculation
-    final effectiveDistance = normalizedDistance * _referenceMaxDistance;
+    // Calculate penetration percentage (0.0 to 1.0)
+    // Clamped to 1.0 to handle cases where pointer goes beyond widget bounds
+    final penetration = math.min(1.0, distanceFromBoundary / safeWidgetHeight);
 
-    // Calculate base speed using exponential formula with normalized distance
-    final numerator = math.exp(_exponentialFactor * effectiveDistance) - 1;
-    double speed = _maxScrollSpeed * (numerator / _speedDenominator);
+    // Apply power curve for slightly exponential feel
+    // speed = maxSpeed × (penetration ^ exponent)
+    // Exponent is configurable in debug settings
+    double speed = _maxScrollSpeed * math.pow(penetration, _speedExponent);
 
-    // Apply edge boost when pointer is very close to screen edges
-    final pointerY = scrollingUp
-        ? (boundaryPosition - distanceFromBoundary)
-        : (boundaryPosition + distanceFromBoundary);
+    // Apply edge boost when pointer is close to screen edges
+    if (_edgeBoostZone > 0) {
+      // Calculate pointer's Y position on screen
+      final pointerY = scrollingUp
+          ? (boundaryPosition - distanceFromBoundary)
+          : (boundaryPosition + distanceFromBoundary);
 
-    if ((scrollingUp && pointerY < _edgeThreshold) ||
-        (!scrollingUp && pointerY > screenHeight - _edgeThreshold)) {
-      // Apply boost multiplier when near screen edges
-      speed = math.min(_maxScrollSpeed, speed * _edgeBoostMultiplier);
+      // Calculate distance from nearest screen edge
+      final distanceFromScreenEdge =
+          scrollingUp ? pointerY : (screenHeight - pointerY);
+
+      // Apply linear boost if within edge boost zone
+      if (distanceFromScreenEdge < _edgeBoostZone) {
+        // Linear boost: 0% at zone boundary, up to max at edge
+        // boostFactor ranges from 1.0 to _edgeBoostMaxMultiplier
+        final boostProgress =
+            (_edgeBoostZone - distanceFromScreenEdge) / _edgeBoostZone;
+        final boostFactor =
+            1.0 + ((_edgeBoostMaxMultiplier - 1.0) * boostProgress);
+        speed *= boostFactor;
+      }
     }
 
-    return math.min(speed, _maxScrollSpeed);
+    // Cap final speed to prevent exceeding maximum with edge boost
+    return math.min(speed, _maxScrollSpeed * _edgeBoostMaxMultiplier);
   }
 
   /// Check if pointer is outside boundaries and start/stop auto-scroll
@@ -324,15 +319,14 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper>
       // Convert microseconds to seconds for calculation
       final deltaSeconds = deltaTime.inMicroseconds / 1000000.0;
 
-      // Formula: pixels_per_frame × direction × actual_frame_time_in_seconds × frames_per_second
-      // _currentScrollSpeed is in "pixels per frame" (e.g., 15 at 60fps)
-      // Multiplying by deltaSeconds gives "pixels per second" rate
-      // Multiplying by _displayRefreshRate converts back to pixels for this specific frame
-      // Example at 60fps: 15px/frame × 1 × 0.0166s × 60fps ≈ 15px for a normal frame
-      final scrollDelta = _currentScrollSpeed *
-          _currentScrollDirection! *
-          deltaSeconds *
-          _displayRefreshRate;
+      // Formula: pixels_per_second × direction × actual_frame_time_in_seconds
+      // _currentScrollSpeed is in "pixels per second" (e.g., 4800 px/s for max speed)
+      // Multiplying by deltaSeconds gives actual pixels to scroll this frame
+      // Example at 60fps: 4800px/s × 0.0166s ≈ 80px per frame
+      // Example at 120fps: 4800px/s × 0.00833s ≈ 40px per frame
+      // Visual speed is the same: both scroll 4800 pixels per second
+      final scrollDelta =
+          _currentScrollSpeed * _currentScrollDirection! * deltaSeconds;
 
       // Calculate new scroll position
       final currentOffset = controller.offset;
