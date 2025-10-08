@@ -25,11 +25,11 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
                   let outputPath = args["outputPath"] as? String,
                   let startTimeMs = args["startTimeMs"] as? Int,
                   let endTimeMs = args["endTimeMs"] as? Int else {
-                result(FlutterError(code: "INVALID_ARGS", message: "Invalid arguments", details: nil))
-                return
-            }
+            result(flutterError("INVALID_ARGS", message: "Invalid arguments"))
+            return
+        }
 
-            trimVideo(inputPath: inputPath, outputPath: outputPath,
+        trimVideo(inputPath: inputPath, outputPath: outputPath,
                      startTimeMs: startTimeMs, endTimeMs: endTimeMs, result: result)
 
         case "rotateVideo":
@@ -37,11 +37,11 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
                   let inputPath = args["inputPath"] as? String,
                   let outputPath = args["outputPath"] as? String,
                   let degrees = args["degrees"] as? Int else {
-                result(FlutterError(code: "INVALID_ARGS", message: "Invalid arguments", details: nil))
-                return
-            }
+            result(flutterError("INVALID_ARGS", message: "Invalid arguments"))
+            return
+        }
 
-            rotateVideo(inputPath: inputPath, outputPath: outputPath,
+        rotateVideo(inputPath: inputPath, outputPath: outputPath,
                        degrees: degrees, result: result)
 
         case "cropVideo":
@@ -52,11 +52,11 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
                   let y = args["y"] as? Int,
                   let width = args["width"] as? Int,
                   let height = args["height"] as? Int else {
-                result(FlutterError(code: "INVALID_ARGS", message: "Invalid arguments", details: nil))
-                return
-            }
+            result(flutterError("INVALID_ARGS", message: "Invalid arguments"))
+            return
+        }
 
-            cropVideo(inputPath: inputPath, outputPath: outputPath,
+        cropVideo(inputPath: inputPath, outputPath: outputPath,
                      x: x, y: y, width: width, height: height, result: result)
 
         case "processVideo":
@@ -65,11 +65,11 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
         case "getVideoInfo":
             guard let args = call.arguments as? [String: Any],
                   let videoPath = args["videoPath"] as? String else {
-                result(FlutterError(code: "INVALID_ARGS", message: "Invalid arguments", details: nil))
-                return
-            }
+            result(flutterError("INVALID_ARGS", message: "Invalid arguments"))
+            return
+        }
 
-            getVideoInfo(videoPath: videoPath, result: result)
+        getVideoInfo(videoPath: videoPath, result: result)
 
         case "cancelProcessing":
             currentExportSession?.cancelExport()
@@ -86,7 +86,7 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
 
         guard let exportSession = AVAssetExportSession(asset: asset,
                                                        presetName: AVAssetExportPresetPassthrough) else {
-            result(FlutterError(code: "EXPORT_ERROR", message: "Failed to create export session", details: nil))
+            result(flutterError("EXPORT_ERROR", message: "Failed to create export session"))
             return
         }
 
@@ -112,13 +112,11 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
                         "isReEncoded": false
                     ])
                 case .failed:
-                    result(FlutterError(code: "TRIM_ERROR",
-                                      message: exportSession.error?.localizedDescription ?? "Unknown error",
-                                      details: nil))
+                    result(flutterError("TRIM_ERROR", message: "Failed to trim video", error: exportSession.error))
                 case .cancelled:
-                    result(FlutterError(code: "CANCELLED", message: "Export cancelled", details: nil))
+                    result(flutterError("CANCELLED", message: "Export cancelled"))
                 default:
-                    result(FlutterError(code: "UNKNOWN", message: "Unknown export status", details: nil))
+                    result(flutterError("UNKNOWN", message: "Unknown export status", error: exportSession.error))
                 }
                 self.currentExportSession = nil
             }
@@ -130,7 +128,7 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
         let asset = AVAsset(url: URL(fileURLWithPath: inputPath))
 
         guard let videoTrack = asset.tracks(withMediaType: .video).first else {
-            result(FlutterError(code: "NO_VIDEO", message: "No video track found", details: nil))
+            result(flutterError("NO_VIDEO", message: "No video track found"))
             return
         }
 
@@ -138,7 +136,7 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
         guard let compositionVideoTrack = composition.addMutableTrack(
             withMediaType: .video,
             preferredTrackID: kCMPersistentTrackID_Invalid) else {
-            result(FlutterError(code: "COMPOSITION_ERROR", message: "Failed to create composition track", details: nil))
+            result(flutterError("COMPOSITION_ERROR", message: "Failed to create composition track"))
             return
         }
 
@@ -163,12 +161,12 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
                     at: .zero)
             }
         } catch {
-            result(FlutterError(code: "INSERT_ERROR", message: error.localizedDescription, details: nil))
+            result(flutterError("INSERT_ERROR", message: "Failed to insert track", error: error))
             return
         }
 
         let videoComposition = AVMutableVideoComposition()
-        videoComposition.frameDuration = CMTime(value: 1, timescale: 30)
+        videoComposition.frameDuration = frameDuration(for: videoTrack)
 
         let naturalSize = videoTrack.naturalSize
         var renderSize = naturalSize
@@ -187,7 +185,7 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
                 .translatedBy(x: -naturalSize.height, y: 0)
             renderSize = CGSize(width: naturalSize.height, height: naturalSize.width)
         default:
-            result(FlutterError(code: "INVALID_DEGREES", message: "Degrees must be 90, 180, or 270", details: nil))
+            result(flutterError("INVALID_DEGREES", message: "Degrees must be 90, 180, or 270"))
             return
         }
 
@@ -205,7 +203,7 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
         guard let exportSession = AVAssetExportSession(
             asset: composition,
             presetName: AVAssetExportPresetHighestQuality) else {
-            result(FlutterError(code: "EXPORT_ERROR", message: "Failed to create export session", details: nil))
+            result(flutterError("EXPORT_ERROR", message: "Failed to create export session"))
             return
         }
 
@@ -227,13 +225,11 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
                         "isReEncoded": true
                     ])
                 case .failed:
-                    result(FlutterError(code: "ROTATE_ERROR",
-                                      message: exportSession.error?.localizedDescription ?? "Unknown error",
-                                      details: nil))
+                    result(flutterError("ROTATE_ERROR", message: "Failed to rotate video", error: exportSession.error))
                 case .cancelled:
-                    result(FlutterError(code: "CANCELLED", message: "Export cancelled", details: nil))
+                    result(flutterError("CANCELLED", message: "Export cancelled"))
                 default:
-                    result(FlutterError(code: "UNKNOWN", message: "Unknown export status", details: nil))
+                    result(flutterError("UNKNOWN", message: "Unknown export status", error: exportSession.error))
                 }
                 self.currentExportSession = nil
             }
@@ -245,7 +241,7 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
         let asset = AVAsset(url: URL(fileURLWithPath: inputPath))
 
         guard let videoTrack = asset.tracks(withMediaType: .video).first else {
-            result(FlutterError(code: "NO_VIDEO", message: "No video track found", details: nil))
+            result(flutterError("NO_VIDEO", message: "No video track found"))
             return
         }
 
@@ -253,7 +249,7 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
         guard let compositionVideoTrack = composition.addMutableTrack(
             withMediaType: .video,
             preferredTrackID: kCMPersistentTrackID_Invalid) else {
-            result(FlutterError(code: "COMPOSITION_ERROR", message: "Failed to create composition track", details: nil))
+            result(flutterError("COMPOSITION_ERROR", message: "Failed to create composition track"))
             return
         }
 
@@ -278,13 +274,13 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
                     at: .zero)
             }
         } catch {
-            result(FlutterError(code: "INSERT_ERROR", message: error.localizedDescription, details: nil))
+            result(flutterError("INSERT_ERROR", message: "Failed to insert track", error: error))
             return
         }
 
         // Create video composition for cropping
         let videoComposition = AVMutableVideoComposition()
-        videoComposition.frameDuration = CMTime(value: 1, timescale: 30)
+        videoComposition.frameDuration = frameDuration(for: videoTrack)
         videoComposition.renderSize = CGSize(width: width, height: height)
 
         // Create layer instruction with crop transform
@@ -306,7 +302,7 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
         guard let exportSession = AVAssetExportSession(
             asset: composition,
             presetName: AVAssetExportPresetHighestQuality) else {
-            result(FlutterError(code: "EXPORT_ERROR", message: "Failed to create export session", details: nil))
+            result(flutterError("EXPORT_ERROR", message: "Failed to create export session"))
             return
         }
 
@@ -328,13 +324,11 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
                         "isReEncoded": true
                     ])
                 case .failed:
-                    result(FlutterError(code: "CROP_ERROR",
-                                      message: exportSession.error?.localizedDescription ?? "Unknown error",
-                                      details: nil))
+                    result(flutterError("CROP_ERROR", message: "Failed to crop video", error: exportSession.error))
                 case .cancelled:
-                    result(FlutterError(code: "CANCELLED", message: "Export cancelled", details: nil))
+                    result(flutterError("CANCELLED", message: "Export cancelled"))
                 default:
-                    result(FlutterError(code: "UNKNOWN", message: "Unknown export status", details: nil))
+                    result(flutterError("UNKNOWN", message: "Unknown export status", error: exportSession.error))
                 }
                 self.currentExportSession = nil
             }
@@ -345,7 +339,7 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
         guard let args = call.arguments as? [String: Any],
               let inputPath = args["inputPath"] as? String,
               let outputPath = args["outputPath"] as? String else {
-            result(FlutterError(code: "INVALID_ARGS", message: "Invalid arguments", details: nil))
+            result(flutterError("INVALID_ARGS", message: "Invalid arguments"))
             return
         }
 
@@ -366,7 +360,7 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
               let compositionVideoTrack = composition.addMutableTrack(
                 withMediaType: .video,
                 preferredTrackID: kCMPersistentTrackID_Invalid) else {
-            result(FlutterError(code: "COMPOSITION_ERROR", message: "Failed to create composition", details: nil))
+            result(flutterError("COMPOSITION_ERROR", message: "Failed to create composition"))
             return
         }
 
@@ -380,7 +374,7 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
                 try compositionAudioTrack.insertTimeRange(timeRange, of: audioTrack, at: .zero)
             }
         } catch {
-            result(FlutterError(code: "INSERT_ERROR", message: error.localizedDescription, details: nil))
+            result(flutterError("INSERT_ERROR", message: "Failed to insert track", error: error))
             return
         }
 
@@ -502,7 +496,7 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
 
         if isReEncoded {
             videoComposition = AVMutableVideoComposition()
-            videoComposition!.frameDuration = CMTime(value: 1, timescale: 30)
+            videoComposition!.frameDuration = frameDuration(for: videoTrack)
             videoComposition!.renderSize = renderSize
 
             let instruction = AVMutableVideoCompositionInstruction()
@@ -518,7 +512,7 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
         // Export
         let presetName = isReEncoded ? AVAssetExportPresetHighestQuality : AVAssetExportPresetPassthrough
         guard let exportSession = AVAssetExportSession(asset: composition, presetName: presetName) else {
-            result(FlutterError(code: "EXPORT_ERROR", message: "Failed to create export session", details: nil))
+            result(flutterError("EXPORT_ERROR", message: "Failed to create export session"))
             return
         }
 
@@ -547,18 +541,40 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
                         "isReEncoded": isReEncoded
                     ])
                 case .failed:
-                    result(FlutterError(code: "PROCESS_ERROR",
-                                      message: exportSession.error?.localizedDescription ?? "Unknown error",
-                                      details: nil))
+                    result(flutterError("PROCESS_ERROR", message: "Failed to process video", error: exportSession.error))
                 case .cancelled:
-                    result(FlutterError(code: "CANCELLED", message: "Export cancelled", details: nil))
+                    result(flutterError("CANCELLED", message: "Export cancelled"))
                 default:
-                    result(FlutterError(code: "UNKNOWN", message: "Unknown export status", details: nil))
+                    result(flutterError("UNKNOWN", message: "Unknown export status", error: exportSession.error))
                 }
                 self.currentExportSession = nil
-            }
         }
     }
+
+    private func frameDuration(for track: AVAssetTrack) -> CMTime {
+        let nominal = track.nominalFrameRate
+        if nominal.isFinite && nominal > 0 {
+            return CMTime(value: 1, timescale: Int32(round(nominal)))
+        }
+        if track.minFrameDuration.isValid && track.minFrameDuration.value != 0 {
+            return track.minFrameDuration
+        }
+        return CMTime(value: 1, timescale: 30)
+    }
+
+    private func flutterError(_ code: String, message: String, error: Error? = nil, details: Any? = nil) -> FlutterError {
+        let resolvedMessage = error?.localizedDescription ?? message
+        let resolvedDetails: Any?
+        if let details = details {
+            resolvedDetails = details
+        } else if let error = error {
+            resolvedDetails = String(describing: error)
+        } else {
+            resolvedDetails = nil
+        }
+        return FlutterError(code: code, message: resolvedMessage, details: resolvedDetails)
+    }
+}
 
     private func getVideoInfo(videoPath: String, result: @escaping FlutterResult) {
         let asset = AVAsset(url: URL(fileURLWithPath: videoPath))

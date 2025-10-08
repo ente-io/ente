@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:ui';
+import 'package:meta/meta.dart';
 import 'package:video_editor/video_editor.dart';
 
 /// Crop calculation result

@@ -92,6 +92,11 @@ class NativeVideoEditor {
   /// Trim video without re-encoding when possible
   /// Returns the output file path
   static Future<VideoEditResult> trimVideo(VideoTrimParams params) async {
+    _ensureInputPathExists(params.inputPath);
+    if (params.startTime >= params.endTime) {
+      throw ArgumentError('startTime must be earlier than endTime');
+    }
+
     try {
       final stopwatch = Stopwatch()..start();
 
@@ -119,6 +124,9 @@ class NativeVideoEditor {
   /// Rotate video using metadata when possible (Android) or transform (iOS)
   /// Avoids re-encoding when possible
   static Future<VideoEditResult> rotateVideo(VideoRotateParams params) async {
+    _ensureInputPathExists(params.inputPath);
+    _validateRotationDegrees(params.degrees);
+
     try {
       final stopwatch = Stopwatch()..start();
 
@@ -145,6 +153,9 @@ class NativeVideoEditor {
 
   /// Crop video - may require re-encoding depending on the format
   static Future<VideoEditResult> cropVideo(VideoCropParams params) async {
+    _ensureInputPathExists(params.inputPath);
+    _validateCropDimensions(params.width, params.height);
+
     try {
       final stopwatch = Stopwatch()..start();
 
@@ -180,6 +191,17 @@ class NativeVideoEditor {
     Rect? cropRect,
     void Function(double progress)? onProgress,
   }) async {
+    _ensureInputPathExists(inputPath);
+    if (trimStart != null && trimEnd != null && trimStart >= trimEnd) {
+      throw ArgumentError('trimStart must be earlier than trimEnd');
+    }
+    if (rotateDegrees != null && rotateDegrees != 0) {
+      _validateRotationDegrees(rotateDegrees);
+    }
+    if (cropRect != null && (cropRect.width <= 0 || cropRect.height <= 0)) {
+      throw ArgumentError('cropRect must have positive width and height');
+    }
+
     try {
       final stopwatch = Stopwatch()..start();
 
@@ -267,6 +289,24 @@ class NativeVideoEditor {
       await _channel.invokeMethod('cancelProcessing');
     } on PlatformException catch (e) {
       throw Exception('Failed to cancel processing: ${e.message}');
+    }
+  }
+
+  static void _ensureInputPathExists(String inputPath) {
+    if (!File(inputPath).existsSync()) {
+      throw ArgumentError('Input file does not exist: $inputPath');
+    }
+  }
+
+  static void _validateRotationDegrees(int degrees) {
+    if (degrees != 90 && degrees != 180 && degrees != 270) {
+      throw ArgumentError('Rotation degrees must be 90, 180, or 270');
+    }
+  }
+
+  static void _validateCropDimensions(int width, int height) {
+    if (width <= 0 || height <= 0) {
+      throw ArgumentError('Crop dimensions must be greater than zero');
     }
   }
 }

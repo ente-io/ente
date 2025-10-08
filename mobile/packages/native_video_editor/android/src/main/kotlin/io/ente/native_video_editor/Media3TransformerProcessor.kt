@@ -8,6 +8,7 @@ import androidx.media3.common.MimeTypes
 import androidx.media3.common.util.Size
 import androidx.media3.effect.*
 import androidx.media3.transformer.*
+import io.ente.native_video_editor.BuildConfig
 import kotlinx.coroutines.*
 import java.io.File
 import java.util.concurrent.CountDownLatch
@@ -21,10 +22,10 @@ class Media3TransformerProcessor(private val context: Context) {
     companion object {
         private const val TAG = "Media3Transformer"
 
-        // Logging levels for debugging
-        private const val LOG_VERBOSE = true
-        private const val LOG_PROGRESS = true
-        private const val LOG_ERRORS = true
+        // Logging levels for debugging (enabled only for debug builds)
+        private val LOG_VERBOSE = BuildConfig.DEBUG
+        private val LOG_PROGRESS = BuildConfig.DEBUG
+        private val LOG_ERRORS = BuildConfig.DEBUG
         private const val ROTATION_90 = 90
         private const val ROTATION_270 = 270
     }

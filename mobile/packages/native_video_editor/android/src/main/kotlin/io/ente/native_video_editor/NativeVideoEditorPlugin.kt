@@ -395,116 +395,14 @@ class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler, EventChannel.S
         }
     }
 
-    /* Broken implementation - causes artifacts, needs proper OpenGL or transform implementation
-    private fun rotateVideoWithReencoding(
-        inputPath: String,
-        outputPath: String,
-        degrees: Int
-    ) {*/
     private fun rotateVideoWithReencodingDisabled(
         inputPath: String,
         outputPath: String,
         degrees: Int
     ) {
-        val extractor = MediaExtractor()
-        val muxer: MediaMuxer
-
-        try {
-            extractor.setDataSource(inputPath)
-            val trackCount = extractor.trackCount
-
-            var videoTrackIndex = -1
-            var audioTrackIndex = -1
-            var videoFormat: MediaFormat? = null
-            var audioFormat: MediaFormat? = null
-
-            // Find video and audio tracks
-            for (i in 0 until trackCount) {
-                val format = extractor.getTrackFormat(i)
-                val mime = format.getString(MediaFormat.KEY_MIME)
-
-                if (mime?.startsWith("video/") == true && videoTrackIndex == -1) {
-                    videoTrackIndex = i
-                    videoFormat = format
-                } else if (mime?.startsWith("audio/") == true && audioTrackIndex == -1) {
-                    audioTrackIndex = i
-                    audioFormat = format
-                }
-            }
-
-            if (videoFormat == null) {
-                throw IllegalArgumentException("No video track found")
-            }
-
-            // Get original dimensions
-            val originalWidth = videoFormat.getInteger(MediaFormat.KEY_WIDTH)
-            val originalHeight = videoFormat.getInteger(MediaFormat.KEY_HEIGHT)
-
-            // Calculate rotated dimensions
-            val (outputWidth, outputHeight) = when (degrees) {
-                90, 270 -> originalHeight to originalWidth
-                else -> originalWidth to originalHeight
-            }
-
-            // Setup decoder
-            val decoder = MediaCodec.createDecoderByType(videoFormat.getString(MediaFormat.KEY_MIME)!!)
-
-            // Setup encoder with rotated dimensions and original frame rate
-            val outputFormat = MediaFormat.createVideoFormat("video/avc", outputWidth, outputHeight).apply {
-                setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
-
-                // Safely get bit rate with fallback
-                val originalBitRate = if (videoFormat.containsKey(MediaFormat.KEY_BIT_RATE)) {
-                    try {
-                        videoFormat.getInteger(MediaFormat.KEY_BIT_RATE)
-                    } catch (e: Exception) {
-                        1000000 // 1Mbps fallback
-                    }
-                } else {
-                    1000000 // 1Mbps fallback
-                }
-                setInteger(MediaFormat.KEY_BIT_RATE, originalBitRate)
-
-                // Safely get frame rate with fallback
-                val originalFrameRate = if (videoFormat.containsKey(MediaFormat.KEY_FRAME_RATE)) {
-                    try {
-                        videoFormat.getInteger(MediaFormat.KEY_FRAME_RATE)
-                    } catch (e: Exception) {
-                        30 // fallback
-                    }
-                } else {
-                    30 // fallback
-                }
-                setInteger(MediaFormat.KEY_FRAME_RATE, originalFrameRate)
-                setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1)
-            }
-
-            val encoder = MediaCodec.createEncoderByType("video/avc")
-            encoder.configure(outputFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
-            val encoderSurface = encoder.createInputSurface()
-            encoder.start()
-
-            decoder.configure(videoFormat, encoderSurface, null, 0)
-            decoder.start()
-
-            muxer = MediaMuxer(outputPath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
-
-            // Process video frames with rotation
-            processRotatedVideo(extractor, decoder, encoder, muxer, videoTrackIndex, audioTrackIndex, audioFormat, degrees, inputPath)
-
-            // Cleanup
-            decoder.stop()
-            decoder.release()
-            encoder.stop()
-            encoder.release()
-            muxer.stop()
-            muxer.release()
-            extractor.release()
-            encoderSurface.release()
-
-        } catch (e: Exception) {
-            throw e
-        }
+        throw UnsupportedOperationException(
+            "Rotation with re-encoding is disabled pending a proper implementation."
+        )
     }
 
     private fun processRotatedVideo(
