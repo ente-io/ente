@@ -62,15 +62,32 @@ class VideoCropUtil {
   static Rect calculateDisplaySpaceCropRect({
     required VideoEditorController controller,
     required int metadataRotation,
+    bool? isAndroidOverride,
   }) {
-    final size = controller.video.value.size;
-    final turns = _normalizedQuarterTurns(metadataRotation);
-    final swap = Platform.isAndroid && turns % 2 == 1;
+    return calculateDisplaySpaceCropRectFromData(
+      minCrop: controller.minCrop,
+      maxCrop: controller.maxCrop,
+      videoSize: controller.video.value.size,
+      metadataRotation: metadataRotation,
+      isAndroidOverride: isAndroidOverride,
+    );
+  }
 
-    double minX = _clampNormalized(controller.minCrop.dx);
-    double maxX = _clampNormalized(controller.maxCrop.dx);
-    double minY = _clampNormalized(controller.minCrop.dy);
-    double maxY = _clampNormalized(controller.maxCrop.dy);
+  static Rect calculateDisplaySpaceCropRectFromData({
+    required Offset minCrop,
+    required Offset maxCrop,
+    required Size videoSize,
+    required int metadataRotation,
+    bool? isAndroidOverride,
+  }) {
+    final turns = _normalizedQuarterTurns(metadataRotation);
+    final isAndroid = isAndroidOverride ?? Platform.isAndroid;
+    final swap = isAndroid && turns % 2 == 1;
+
+    double minX = _clampNormalized(minCrop.dx);
+    double maxX = _clampNormalized(maxCrop.dx);
+    double minY = _clampNormalized(minCrop.dy);
+    double maxY = _clampNormalized(maxCrop.dy);
 
     if (minX > maxX) {
       final temp = minX;
@@ -83,8 +100,8 @@ class VideoCropUtil {
       maxY = temp;
     }
 
-    final displayWidth = swap ? size.height : size.width;
-    final displayHeight = swap ? size.width : size.height;
+    final displayWidth = swap ? videoSize.height : videoSize.width;
+    final displayHeight = swap ? videoSize.width : videoSize.height;
 
     final widthNormalized = maxX - minX;
     final heightNormalized = maxY - minY;
@@ -110,16 +127,37 @@ class VideoCropUtil {
   static CropCalculation calculateFileSpaceCrop({
     required VideoEditorController controller,
     required int metadataRotation,
+    bool? isAndroidOverride,
   }) {
     final videoSize = controller.video.value.size;
-    final metadataQuarterTurns = _normalizedQuarterTurns(metadataRotation);
-    final displayCrop = calculateDisplaySpaceCropRect(
-      controller: controller,
+    return calculateFileSpaceCropFromData(
+      minCrop: controller.minCrop,
+      maxCrop: controller.maxCrop,
+      videoSize: videoSize,
       metadataRotation: metadataRotation,
+      isAndroidOverride: isAndroidOverride,
+    );
+  }
+
+  static CropCalculation calculateFileSpaceCropFromData({
+    required Offset minCrop,
+    required Offset maxCrop,
+    required Size videoSize,
+    required int metadataRotation,
+    bool? isAndroidOverride,
+  }) {
+    final metadataQuarterTurns = _normalizedQuarterTurns(metadataRotation);
+    final isAndroid = isAndroidOverride ?? Platform.isAndroid;
+    final displayCrop = calculateDisplaySpaceCropRectFromData(
+      minCrop: minCrop,
+      maxCrop: maxCrop,
+      videoSize: videoSize,
+      metadataRotation: metadataRotation,
+      isAndroidOverride: isAndroidOverride,
     );
 
     // For 90°/270° rotations on Android, we need special handling
-    if (Platform.isAndroid && metadataQuarterTurns % 2 == 1) {
+    if (isAndroid && metadataQuarterTurns % 2 == 1) {
       return _calculateRotatedFileSpaceCrop(
         videoSize,
         displayCrop,
