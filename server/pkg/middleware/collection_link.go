@@ -32,7 +32,6 @@ import (
 )
 
 var passwordWhiteListedURLs = []string{"/public-collection/info", "/public-collection/report-abuse", "/public-collection/verify-password"}
-var whitelistedCollectionShareIDs = []int64{111, 2275}
 
 // CollectionLinkMiddleware intercepts and authenticates incoming requests
 type CollectionLinkMiddleware struct {
@@ -161,12 +160,10 @@ func (m *CollectionLinkMiddleware) isDeviceLimitReached(ctx context.Context,
 		deviceLimit = public2.DeviceLimitThresholdMultiplier * public2.DeviceLimitThreshold
 	}
 
-	if count >= public2.DeviceLimitWarningThreshold {
-		if !array.Int64InList(sharedID, whitelistedCollectionShareIDs) {
-			m.DiscordController.NotifyPotentialAbuse(
-				fmt.Sprintf("Album exceeds warning threshold: {CollectionID: %d, ShareID: %d}",
-					collectionSummary.CollectionID, collectionSummary.ID))
-		}
+	if count >= public2.DeviceLimitWarningThreshold && count%200 == 0 {
+		m.DiscordController.NotifyPotentialAbuse(
+			fmt.Sprintf("Album exceeds warning threshold: {CollectionID: %d, ShareID: %d, DeviceCount: %d}",
+				collectionSummary.CollectionID, collectionSummary.ID, count))
 	}
 
 	if deviceLimit > 0 && count >= deviceLimit {
