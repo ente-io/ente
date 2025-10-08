@@ -1162,7 +1162,6 @@
   },
   "maps": "Mappe",
   "enableMaps": "Abilita le Mappe",
-  "enableMapsDesc": "Questo mostrerà le tue foto su una mappa del mondo.\n\nQuesta mappa è ospitata da Open Street Map e le posizioni esatte delle tue foto non sono mai condivise.\n\nPuoi disabilitare questa funzionalità in qualsiasi momento, dalle Impostazioni.",
   "quickLinks": "Collegamenti rapidi",
   "selectItemsToAdd": "Seleziona gli elementi da aggiungere",
   "addSelected": "Aggiungi selezionate",
@@ -1854,15 +1853,5 @@
   "identical": "Identici",
   "related": "Correlati",
   "hoorayyyy": "Evviva!",
-  "nothingToTidyUpHere": "Niente da sistemare qui",
-  "cLTitle1": "Vista mappa per i tuoi viaggi",
-  "cLDesc1": "Scegli tra layout raggruppati, continui o per viaggio (basati su mappa) quando condividi album. Ente si occupa dell'hosting!",
-  "cLTitle2": "Incorpora album",
-  "cLDesc2": "Incorpora i tuoi album nel tuo sito web, blog o portfolio fotografico. Ente si occupa dell'hosting!",
-  "cLTitle3": "Album condivisi nei widget",
-  "cLDesc3": "I widget della schermata home ora supportano gli album che sono stati condivisi con te.",
-  "cLTitle4": "Miglioramenti di usabilità",
-  "cLDesc4": "Aggiungi foto agli album dal visualizzatore di file. Opzione di visualizzazione ospite a livello di album.",
-  "cLTitle5": "Miglioramenti alla condivisione",
-  "cLDesc5": "Condividi link pubblici utilizzando un codice QR. Personalizza la possibilità di unirsi agli album dai link che condividi."
+  "nothingToTidyUpHere": "Niente da sistemare qui"
 }

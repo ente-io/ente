@@ -1170,7 +1170,6 @@
   },
   "maps": "Haritalar",
   "enableMaps": "Haritaları Etkinleştir",
-  "enableMapsDesc": "Bu, fotoğraflarınızı bir dünya haritasında gösterecektir.\n\nBu harita Open Street Map tarafından barındırılmaktadır ve fotoğraflarınızın tam konumları hiçbir zaman paylaşılmaz.\n\nBu özelliği istediğiniz zaman Ayarlar'dan devre dışı bırakabilirsiniz.",
   "quickLinks": "Hızlı Erişim",
   "selectItemsToAdd": "Eklenecek eşyaları seçin",
   "addSelected": "Seçileni ekle",

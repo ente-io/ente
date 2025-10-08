@@ -1131,7 +1131,6 @@
   },
   "maps": "地図",
   "enableMaps": "マップを有効にする",
-  "enableMapsDesc": "世界地図上にあなたの写真を表示します。\n\n地図はOpenStreetMapを利用しており、あなたの写真の位置情報が外部に共有されることはありません。\n\nこの機能は設定から無効にすることができます",
   "quickLinks": "クイックリンク",
   "selectItemsToAdd": "追加するアイテムを選んでください",
   "addSelected": "選んだものをアルバムに追加",
