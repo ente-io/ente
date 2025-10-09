@@ -88,10 +88,11 @@ Future<void> showSingleFileDeleteSheet(
         isInAlert: true,
         onTap: () async {
           await deleteFilesOnDeviceOnly(context, [file]);
-          if (isLocalOnly) {
-            if (onFileRemoved != null) {
-              onFileRemoved(file);
-            }
+          // Remove from viewer if:
+          // 1. File is local-only (no remote copy), OR
+          // 2. We're in a local-only context (device folder - file disappears from this view)
+          if (onFileRemoved != null && (isLocalOnly || isLocalOnlyContext)) {
+            onFileRemoved(file);
           }
         },
       ),
