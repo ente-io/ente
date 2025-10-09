@@ -62,10 +62,8 @@ Future<void> showSingleFileDeleteSheet(
         onTap: () async {
           await deleteFilesFromRemoteOnly(context, [file]);
           showShortToast(context, AppLocalizations.of(context).movedToTrash);
-          if (isRemoteOnly) {
-            if (onFileRemoved != null) {
-              onFileRemoved(file);
-            }
+          if (onFileRemoved != null) {
+            onFileRemoved(file);
           }
         },
       ),
