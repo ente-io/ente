@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import "package:ente_base/models/database.dart";
 import "package:ente_sharing/models/user.dart";
+import 'package:locker/models/file_type.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/collections/models/public_url.dart';
 import 'package:locker/services/files/sync/models/file.dart';
@@ -89,7 +90,7 @@ class CollectionDB extends EnteBaseDatabase {
 
     await db.execute('''
       CREATE TABLE $_filesTable (
-        uploaded_file_id INTEGER,
+        uploaded_file_id INTEGER PRIMARY KEY,
         local_path TEXT,
         owner_id INTEGER,
         collection_id INTEGER,
@@ -106,6 +107,7 @@ class CollectionDB extends EnteBaseDatabase {
         thumbnail_decryption_header TEXT,
         metadata_decryption_header TEXT,
         file_size INTEGER,
+        file_type INTEGER,
         m_md_encoded_json TEXT,
         m_md_version INTEGER DEFAULT 0,
         pub_mmd_encoded_json TEXT,
@@ -355,8 +357,19 @@ class CollectionDB extends EnteBaseDatabase {
     ''',
       [collection.id],
     );
+    final Set<int> seenFileIds = {};
+    final List<EnteFile> uniqueFiles = [];
 
-    return result.map((row) => _mapToFile(row)).toList();
+    for (final row in result) {
+      final file = _mapToFile(row);
+
+      if (!seenFileIds.contains(file.uploadedFileID)) {
+        seenFileIds.add(file.uploadedFileID!);
+        uniqueFiles.add(file);
+      }
+    }
+
+    return uniqueFiles;
   }
 
   Future<List<Collection>> getCollectionsForFile(EnteFile file) async {
@@ -483,6 +496,7 @@ class CollectionDB extends EnteBaseDatabase {
       'thumbnail_decryption_header': file.thumbnailDecryptionHeader,
       'metadata_decryption_header': file.metadataDecryptionHeader,
       'file_size': file.fileSize,
+      'file_type': file.fileType?.index,
       'm_md_encoded_json': file.mMdEncodedJson,
       'm_md_version': file.mMdVersion,
       'pub_mmd_encoded_json': file.pubMmdEncodedJson,
@@ -510,6 +524,9 @@ class CollectionDB extends EnteBaseDatabase {
     file.thumbnailDecryptionHeader = map['thumbnail_decryption_header'];
     file.metadataDecryptionHeader = map['metadata_decryption_header'];
     file.fileSize = map['file_size'];
+    if (map['file_type'] != null) {
+      file.fileType = getFileType(map['file_type']);
+    }
     file.mMdEncodedJson = map['m_md_encoded_json'];
     file.mMdVersion = map['m_md_version'] ?? 0;
     file.pubMmdEncodedJson = map['pub_mmd_encoded_json'];

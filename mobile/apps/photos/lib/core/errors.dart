@@ -83,3 +83,19 @@ class NoMediaLocationAccessError extends Error {}
 class PassKeySessionNotVerifiedError extends Error {}
 
 class PassKeySessionExpiredError extends Error {}
+
+class MultiPartMissingFileError implements Exception {
+  final String message;
+  MultiPartMissingFileError(this.message);
+
+  @override
+  String toString() => "MultiPartMissingFileError: $message";
+}
+
+class MultiPartError implements Exception {
+  final String message;
+  MultiPartError(this.message);
+
+  @override
+  String toString() => "MultiPartError: $message";
+}

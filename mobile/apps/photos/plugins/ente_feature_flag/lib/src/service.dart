@@ -64,11 +64,11 @@ class FlagService {
 
   String get customDomain => flags.customDomain;
 
-  bool get albumGuestView => internalUser;
+  String get embedUrl => flags.embedUrl;
+
+  bool get textDetection => internalUser && Platform.isIOS;
 
   bool get addToAlbumFeature => internalUser;
-
-  bool get widgetSharedAlbums => internalUser;
 
   bool hasSyncedAccountFlags() {
     return _prefs.containsKey("remote_flags");

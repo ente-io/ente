@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 1.2.6+1205
+version: 1.2.10+1210
 publish_to: none
 
 environment:
@@ -102,7 +102,7 @@ dependencies:
   # https://github.com/juliansteenbakker/flutter_secure_storage/issues/870#issuecomment-2777447937
   # Let's wait till the issue is resolved by the package maintainer.
   # If not resolved and we need to upgrade, write a migration script.
-  flutter_secure_storage: ^9.2.4
+  flutter_secure_storage: 9.0.0
   flutter_sodium:
   flutter_spinkit: ^5.2.1
   flutter_staggered_grid_view: ^0.7.0
@@ -201,6 +201,9 @@ dependencies:
   syncfusion_flutter_sliders: ^29.1.38
   synchronized: ^3.3.0+3
   system_info_plus: ^0.0.6
+  text_detector:
+    git:
+      url: https://github.com/neeraj-pilot/text_detector.git
   thermal: ^1.1.11
   timezone: ^0.10.0
   tuple: ^2.0.0
@@ -220,7 +223,7 @@ dependencies:
   wakelock_plus: ^1.1.1
   wechat_assets_picker: ^9.5.1
   widgets_to_image: ^1.0.0
-  workmanager: ^0.7.0
+  workmanager: 0.9.0+3
   xml: ^6.3.0
 
 dependency_overrides:

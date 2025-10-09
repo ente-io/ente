@@ -934,6 +934,7 @@ export const getFilePreviewDataUploadURL = async (
     const params = new URLSearchParams({
         fileID: fileID.toString(),
         type: "vid_preview",
+        ts: Date.now().toString(),
     });
     if (partCount > 1) {
         params.set("isMultiPart", "true");

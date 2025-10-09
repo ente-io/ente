@@ -276,11 +276,7 @@
     "view_on_map": "在 OpenStreetMap 上查看",
     "map": "地圖",
     "enable_map": "",
-    "enable_maps_confirm": "",
-    "enable_maps_confirm_message": "",
     "disable_map": "",
-    "disable_maps_confirm": "",
-    "disable_maps_confirm_message": "",
     "details": "詳細資料",
     "view_exif": "查看所有 Exif 數據",
     "no_exif": "無 Exif 數據",
@@ -327,6 +323,8 @@
     "thumbnail_generation_failed_hint": "",
     "unsupported_files": "",
     "unsupported_files_hint": "",
+    "zero_size_files": "",
+    "zero_size_files_hint": "",
     "blocked_uploads": "",
     "blocked_uploads_hint": "",
     "large_files": "",
@@ -433,6 +431,7 @@
         "year": "一年後"
     },
     "copy_link": "複製鏈接",
+    "copy_embed_html": "",
     "done": "完成",
     "share_link_section_title": "或分享連結",
     "remove_link": "移除連結",
@@ -697,5 +696,10 @@
     "add_dns_entry_hint": "",
     "custom_domains_help": "",
     "num_1": "",
-    "num_2": ""
+    "num_2": "",
+    "grouped": "",
+    "continuous": "",
+    "trip": "",
+    "album_layout": "",
+    "maps_privacy_notice": ""
 }

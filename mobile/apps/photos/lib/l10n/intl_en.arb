@@ -186,6 +186,7 @@
   "@allowAddingPhotos": {
     "description": "Switch button to enable uploading photos to a public link"
   },
+  "allowJoiningAlbum": "Allow joining album",
   "allowAddPhotosDescription": "Allow people with the link to also add photos to the shared album.",
   "passwordLock": "Password lock",
   "canNotOpenTitle": "Cannot open this album",
@@ -198,6 +199,11 @@
   "@noDeviceLimit": {
     "description": "Text to indicate that there is limit on number of devices"
   },
+  "albumLayout": "Album layout",
+  "layoutGrouped": "Grouped",
+  "layoutContinuous": "Continuous",
+  "layoutTrip": "Trip",
+  "preview": "Preview",
   "linkExpiry": "Link expiry",
   "linkExpired": "Expired",
   "linkEnabled": "Enabled",
@@ -237,7 +243,9 @@
   "shareWithNonenteUsers": "Share with non-Ente users",
   "createPublicLink": "Create public link",
   "sendLink": "Send link",
+  "sendQrCode": "Send QR code",
   "copyLink": "Copy link",
+  "copyEmbedHtml": "Copy embed HTML",
   "linkHasExpired": "Link has expired",
   "publicLinkEnabled": "Public link enabled",
   "shareALink": "Share a link",
@@ -1169,8 +1177,8 @@
     "description": "Label for the map view"
   },
   "maps": "Maps",
+  "mapsPrivacyNotice": "Approximate coordinates will be sent to privacy conscious third parties like OpenStreetMap to show the map and location.",
   "enableMaps": "Enable Maps",
-  "enableMapsDesc": "This will show your photos on a world map.\n\nThis map is hosted by Open Street Map, and the exact locations of your photos are never shared.\n\nYou can disable this feature anytime from Settings.",
   "quickLinks": "Quick links",
   "selectItemsToAdd": "Select items to add",
   "addSelected": "Add selected",
@@ -1800,7 +1808,6 @@
   "automaticallyAnalyzeAndSplitGrouping": "We will automatically analyze the grouping to determine if there are multiple people present, and separate them out again. This may take a few seconds.",
   "layout": "Layout",
   "day": "Day",
-  "peopleAutoAddDesc": "Select the people you want to automatically add to the album",
   "undo": "Undo",
   "redo": "Redo",
   "filter": "Filter",
@@ -1932,14 +1939,22 @@
   "hoorayyyy": "Hoorayyyy!",
   "nothingToTidyUpHere": "Nothing to tidy up here",
   "deletingDash": "Deleting - ",
-  "cLTitle1": "Similar images",
-  "cLDesc1": "We are introducing a new ML-based system to detect similar images, using which you can cleanup your library. Available in Settings -> Backup -> Free up space",
-  "cLTitle2": "Video streaming enhancements",
-  "cLDesc2": "You can now manually trigger stream generation for videos directly from the app. We have also added a new video streaming settings screen which will show you what percentage of your videos have been processed for streaming",
-  "cLTitle3": "Performance improvements",
-  "cLDesc3": "Multiple under the hood improvements, including better cache usage and a smoother scroll experience",
+  "cLTitle1": "Map view for your trips",
+  "cLDesc1": "Choose between grouped, continuous, or trip (map-based) layouts when sharing albums. Ente takes care of hosting!",
+  "cLTitle2": "Embed albums",
+  "cLDesc2": "Embed your albums in your own website, blog, photography portfolio. Ente takes care of hosting!",
+  "cLTitle3": "Shared albums in widgets",
+  "cLDesc3": "Home screen widgets now supports albums that have been shared with you.",
+  "cLTitle4": "Quality of life wins",
+  "cLDesc4": "Add photos to albums from file viewer. Album level guest view option.",
+  "cLTitle5": "Sharing improvements",
+  "cLDesc5": "Share public links using a QR code. Customize the ability to join albums from links you share.",
   "closeBy": "Close",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"
+  },
+  "peopleAutoAddDesc": "Automatically add photos of the selected people to this album",
+  "@peopleAutoAddDesc": {
+    "description": "The message the copy should convey is that photos or videos containing the selected people's faces will be automatically added to this album"
   }
 }

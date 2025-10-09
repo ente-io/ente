@@ -44,7 +44,6 @@ import "package:photos/ui/common/web_page.dart";
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
-import "package:photos/ui/map/enable_map.dart";
 import "package:photos/ui/map/map_screen.dart";
 import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/ui/sharing/album_participants_page.dart';
@@ -551,6 +550,21 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               ? Icons.visibility_outlined
               : Icons.visibility_off_outlined,
         ),
+      // Gallery Guest View option
+      if (widget.collection != null)
+        EntePopupMenuItem(
+          AppLocalizations.of(context).guestView,
+          value: AlbumPopupAction.galleryGuestView,
+          iconWidget: SvgPicture.asset(
+            "assets/icons/guest_view_icon.svg",
+            width: 20,
+            height: 20,
+            colorFilter: ColorFilter.mode(
+              getEnteColorScheme(context).textBase,
+              BlendMode.srcIn,
+            ),
+          ),
+        ),
       if (widget.collection != null)
         EntePopupMenuItem(
           value: AlbumPopupAction.playOnTv,
@@ -615,21 +629,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           icon: Platform.isAndroid
               ? Icons.download
               : Icons.cloud_download_outlined,
-        ),
-      // Gallery Guest View option - Internal user only
-      if (flagService.albumGuestView && widget.collection != null)
-        EntePopupMenuItem(
-          AppLocalizations.of(context).guestView + " (i)",
-          value: AlbumPopupAction.galleryGuestView,
-          iconWidget: SvgPicture.asset(
-            "assets/icons/guest_view_icon.svg",
-            width: 20,
-            height: 20,
-            colorFilter: ColorFilter.mode(
-              getEnteColorScheme(context).textBase,
-              BlendMode.srcIn,
-            ),
-          ),
         ),
     ];
 
@@ -705,8 +704,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             editLocation();
           } else if (value == AlbumPopupAction.deleteLocation) {
             await deleteLocation();
-          } else if (value == AlbumPopupAction.galleryGuestView &&
-              flagService.albumGuestView) {
+          } else if (value == AlbumPopupAction.galleryGuestView) {
             await _onGalleryGuestViewClick();
           } else {
             showToast(context, AppLocalizations.of(context).somethingWentWrong);
@@ -789,22 +787,28 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   Future<void> showOnMap() async {
-    final bool result = await requestForMapEnable(context);
-    if (result) {
-      unawaited(
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => MapScreen(
-              filesFutureFn: () async {
-                return FilesDB.instance.getAllFilesCollection(
-                  widget.collection!.id,
-                );
-              },
-            ),
+    if (!flagService.mapEnabled) {
+      try {
+        await flagService.setMapEnabled(true);
+      } catch (e) {
+        showShortToast(
+            context, AppLocalizations.of(context).somethingWentWrong,);
+        return;
+      }
+    }
+    unawaited(
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => MapScreen(
+            filesFutureFn: () async {
+              return FilesDB.instance.getAllFilesCollection(
+                widget.collection!.id,
+              );
+            },
           ),
         ),
-      );
-    }
+      ),
+    );
   }
 
   Future<void> _showSortOption(BuildContext bContext) async {
@@ -1115,8 +1119,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   Future<void> _onGalleryGuestViewClick() async {
-    if (!flagService.albumGuestView) return;
-
     if (await LocalAuthentication().isDeviceSupported()) {
       // Get all files from the collection with proper sort order
       late final List<EnteFile> collectionFiles;

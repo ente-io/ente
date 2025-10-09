@@ -10,6 +10,7 @@ import "package:flutter_sodium/flutter_sodium.dart";
 import "package:logging/logging.dart";
 
 const int encryptionChunkSize = 4 * 1024 * 1024;
+// 17 bytes of overhead per chunk
 final int decryptionChunkSize =
     encryptionChunkSize + Sodium.cryptoSecretstreamXchacha20poly1305Abytes;
 const int hashChunkSize = 4 * 1024 * 1024;
@@ -81,10 +82,83 @@ EncryptionResult chachaEncryptData(Map<String, dynamic> args) {
   );
 }
 
+// chachaEncryptFileV2 does chucked encryption similar to chachaEncryptFile.
+// This implementation is refactored to simplify the logic to make it easier to
+// maintain and reason about.
+// Rolling out this version 2 in phases to ensure stability
+Future<EncryptionResult> chachaEncryptFileV2(Map<String, dynamic> args) async {
+  final encryptionStartTime = DateTime.now().millisecondsSinceEpoch;
+  final logger = Logger("chachaEncryptFileV2");
+  final sourceFile = File(args["sourceFilePath"]);
+  final destinationFile = File(args["destinationFilePath"]);
+  if (destinationFile.existsSync() && (destinationFile.lengthSync() > 0)) {
+    logger.warning("Destination file already exists and is not empty");
+    throw Exception("Destination file already exists and is not empty");
+  }
+  final sourceFileLength = await sourceFile.length();
+  logger.info("Encrypting file of size " + sourceFileLength.toString());
+
+  final inputFile = sourceFile.openSync(mode: FileMode.read);
+  final key = args["key"] ?? Sodium.cryptoSecretstreamXchacha20poly1305Keygen();
+  final initPushResult =
+      Sodium.cryptoSecretstreamXchacha20poly1305InitPush(key);
+  var bytesRead = 0;
+  var tag = Sodium.cryptoSecretstreamXchacha20poly1305TagMessage;
+  while (tag != Sodium.cryptoSecretstreamXchacha20poly1305TagFinal) {
+    final bool isLastChunk =
+        bytesRead + encryptionChunkSize >= sourceFileLength;
+    final int chunkSize =
+        isLastChunk ? (sourceFileLength - bytesRead) : encryptionChunkSize;
+
+    // Read until we have the full chunk size (or reach EOF)
+    final buffer = BytesBuilder();
+    while (buffer.length < chunkSize) {
+      final remainingBytes = chunkSize - buffer.length;
+      final readBytes = await inputFile.read(remainingBytes);
+      if (readBytes.isEmpty) break; // EOF reached unexpectedly
+      buffer.add(readBytes);
+    }
+
+    final bufferBytes = buffer.toBytes();
+    bytesRead += bufferBytes.length;
+    if (bufferBytes.length != chunkSize) {
+      throw Exception(
+        "V2 $kPartialReadErrorTag $chunkSize bytes, but got ${bufferBytes.length} bytes, sourceFileLength: $sourceFileLength",
+      );
+    }
+    // Set final tag only after confirming we've read all expected data
+    if (isLastChunk) {
+      if (bytesRead == sourceFileLength) {
+        tag = Sodium.cryptoSecretstreamXchacha20poly1305TagFinal;
+      } else {
+        throw Exception(
+          "Expected $sourceFileLength bytes, but read $bytesRead bytes",
+        );
+      }
+    }
+    final encryptedData = Sodium.cryptoSecretstreamXchacha20poly1305Push(
+      initPushResult.state,
+      bufferBytes,
+      null,
+      tag,
+    );
+    await destinationFile.writeAsBytes(encryptedData, mode: FileMode.append);
+  }
+  await inputFile.close();
+
+  logger.info(
+    "Encryption time: " +
+        (DateTime.now().millisecondsSinceEpoch - encryptionStartTime)
+            .toString(),
+  );
+
+  return EncryptionResult(key: key, header: initPushResult.header);
+}
+
 // Encrypts a given file, in chunks of encryptionChunkSize
 Future<EncryptionResult> chachaEncryptFile(Map<String, dynamic> args) async {
   final encryptionStartTime = DateTime.now().millisecondsSinceEpoch;
-  final logger = Logger("ChaChaEncrypt");
+  final logger = Logger("ChaChaEncryptV1");
   final sourceFile = File(args["sourceFilePath"]);
   final destinationFile = File(args["destinationFilePath"]);
   final sourceFileLength = await sourceFile.length();
@@ -103,6 +177,11 @@ Future<EncryptionResult> chachaEncryptFile(Map<String, dynamic> args) async {
       tag = Sodium.cryptoSecretstreamXchacha20poly1305TagFinal;
     }
     final buffer = await inputFile.read(chunkSize);
+    if (buffer.length != chunkSize) {
+      throw Exception(
+        "$kPartialReadErrorTag to read $chunkSize bytes, but got ${buffer.length} bytes, sourceFileLength: $sourceFileLength",
+      );
+    }
     bytesRead += chunkSize;
     final encryptedData = Sodium.cryptoSecretstreamXchacha20poly1305Push(
       initPushResult.state,
@@ -132,32 +211,43 @@ Future<void> chachaDecryptFile(Map<String, dynamic> args) async {
   logger.info("Decrypting file of size " + sourceFileLength.toString());
 
   final inputFile = sourceFile.openSync(mode: FileMode.read);
-  final pullState = Sodium.cryptoSecretstreamXchacha20poly1305InitPull(
-    args["header"],
-    args["key"],
-  );
+  int chunckIndex = 0;
+  try {
+    final pullState = Sodium.cryptoSecretstreamXchacha20poly1305InitPull(
+      args["header"],
+      args["key"],
+    );
 
-  var bytesRead = 0;
-  var tag = Sodium.cryptoSecretstreamXchacha20poly1305TagMessage;
-  while (tag != Sodium.cryptoSecretstreamXchacha20poly1305TagFinal) {
-    var chunkSize = decryptionChunkSize;
-    if (bytesRead + chunkSize >= sourceFileLength) {
-      chunkSize = sourceFileLength - bytesRead;
+    var bytesRead = 0;
+    var tag = Sodium.cryptoSecretstreamXchacha20poly1305TagMessage;
+    while (tag != Sodium.cryptoSecretstreamXchacha20poly1305TagFinal) {
+      chunckIndex++;
+      var chunkSize = decryptionChunkSize;
+      if (bytesRead + chunkSize >= sourceFileLength) {
+        chunkSize = sourceFileLength - bytesRead;
+      }
+      final buffer = await inputFile.read(chunkSize);
+      bytesRead += chunkSize;
+      final pullResult = Sodium.cryptoSecretstreamXchacha20poly1305Pull(
+        pullState,
+        buffer,
+        null,
+      );
+      await destinationFile.writeAsBytes(pullResult.m, mode: FileMode.append);
+      tag = pullResult.tag;
     }
-    final buffer = await inputFile.read(chunkSize);
-    bytesRead += chunkSize;
-    final pullResult =
-        Sodium.cryptoSecretstreamXchacha20poly1305Pull(pullState, buffer, null);
-    await destinationFile.writeAsBytes(pullResult.m, mode: FileMode.append);
-    tag = pullResult.tag;
-  }
-  inputFile.closeSync();
+    inputFile.closeSync();
 
-  logger.info(
-    "ChaCha20 Decryption time: " +
-        (DateTime.now().millisecondsSinceEpoch - decryptionStartTime)
-            .toString(),
-  );
+    logger.info(
+      "ChaCha20 Decryption time: " +
+          (DateTime.now().millisecondsSinceEpoch - decryptionStartTime)
+              .toString(),
+    );
+  } catch (e) {
+    throw Exception(
+      "at chunk $chunckIndex for $sourceFileLength bytes with err $e",
+    );
+  }
 }
 
 Uint8List chachaDecryptData(Map<String, dynamic> args) {
@@ -313,10 +403,32 @@ class CryptoUtil {
     args["sourceFilePath"] = sourceFilePath;
     args["destinationFilePath"] = destinationFilePath;
     args["key"] = key;
+    return _computer
+        .compute<Map<String, dynamic>, EncryptionResult>(
+          chachaEncryptFile,
+          param: args,
+          taskName: "encryptFile",
+        )
+        .unwrapExceptionInComputer();
+  }
+
+  // Encrypts the file at sourceFilePath, with the key (if provided) and a
+  // randomly generated nonce using XChaCha20 (w Poly1305 MAC), and writes it
+  // to the destinationFilePath.
+  // If a key is not provided, one is generated and returned.
+  static Future<EncryptionResult> encryptFileV2(
+    String sourceFilePath,
+    String destinationFilePath, {
+    Uint8List? key,
+  }) {
+    final args = <String, dynamic>{};
+    args["sourceFilePath"] = sourceFilePath;
+    args["destinationFilePath"] = destinationFilePath;
+    args["key"] = key;
     return _computer.compute(
-      chachaEncryptFile,
+      chachaEncryptFileV2,
       param: args,
-      taskName: "encryptFile",
+      taskName: "encryptFileV2",
     );
   }
 
@@ -333,11 +445,19 @@ class CryptoUtil {
     args["destinationFilePath"] = destinationFilePath;
     args["header"] = header;
     args["key"] = key;
-    return _computer.compute(
+    return _computer
+        .compute(
       chachaDecryptFile,
       param: args,
       taskName: "decryptFile",
-    );
+    )
+        .catchError((e) {
+      if (e.toString().contains(kStreamPullError)) {
+        throw StreamPullErr("decryptFile", e);
+      } else {
+        throw e;
+      }
+    });
   }
 
   // Generates and returns a 256-bit key.

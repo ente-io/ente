@@ -46,7 +46,6 @@ import (
 	"github.com/ente-io/museum/pkg/controller/email"
 	embeddingCtrl "github.com/ente-io/museum/pkg/controller/embedding"
 	"github.com/ente-io/museum/pkg/controller/family"
-	kexCtrl "github.com/ente-io/museum/pkg/controller/kex"
 	"github.com/ente-io/museum/pkg/controller/lock"
 	remoteStoreCtrl "github.com/ente-io/museum/pkg/controller/remotestore"
 	"github.com/ente-io/museum/pkg/controller/storagebonus"
@@ -60,7 +59,6 @@ import (
 	discountCouponRepo "github.com/ente-io/museum/pkg/repo/discountcoupon"
 	"github.com/ente-io/museum/pkg/repo/embedding"
 	fileDataRepo "github.com/ente-io/museum/pkg/repo/filedata"
-	"github.com/ente-io/museum/pkg/repo/kex"
 	"github.com/ente-io/museum/pkg/repo/passkey"
 	"github.com/ente-io/museum/pkg/repo/remotestore"
 	storageBonusRepo "github.com/ente-io/museum/pkg/repo/storagebonus"
@@ -100,6 +98,7 @@ func main() {
 	}
 
 	viper.SetDefault("apps.public-albums", "https://albums.ente.io")
+	viper.SetDefault("apps.embed-albums", "https://embed.ente.io")
 	viper.SetDefault("apps.custom-domain.cname", "my.ente.io")
 	viper.SetDefault("apps.public-locker", "https://locker.ente.io")
 	viper.SetDefault("apps.accounts", "https://accounts.ente.io")
@@ -188,9 +187,7 @@ func main() {
 	collectionRepo := &repo.CollectionRepository{DB: db, FileRepo: fileRepo, CollectionLinkRepo: collectionLinkRepo,
 		TrashRepo: trashRepo, SecretEncryptionKey: secretEncryptionKeyBytes, QueueRepo: queueRepo, LatencyLogger: latencyLogger}
 	pushRepo := &repo.PushTokenRepository{DB: db}
-	kexRepo := &kex.Repository{
-		DB: db,
-	}
+
 	embeddingRepo := &embedding.Repository{DB: db}
 
 	authCache := cache.New(1*time.Minute, 15*time.Minute)
@@ -329,10 +326,6 @@ func main() {
 		BillingCtrl:        billingController,
 		QueueRepo:          queueRepo,
 		TaskRepo:           taskLockingRepo,
-	}
-
-	kexCtrl := &kexCtrl.Controller{
-		Repo: kexRepo,
 	}
 
 	userController := user.NewUserController(
@@ -480,6 +473,7 @@ func main() {
 	privateAPI.GET("/files/data/preview", fileHandler.GetPreviewURL)
 
 	privateAPI.POST("/files", fileHandler.CreateOrUpdate)
+	privateAPI.POST("/files/meta", fileHandler.CreateMetaFile)
 	privateAPI.POST("/files/copy", fileHandler.CopyFiles)
 	privateAPI.PUT("/files/update", fileHandler.Update)
 	privateAPI.POST("/files/trash", fileHandler.Trash)
@@ -491,12 +485,6 @@ func main() {
 	privateAPI.PUT("/files/magic-metadata", fileHandler.UpdateMagicMetadata)
 	privateAPI.PUT("/files/public-magic-metadata", fileHandler.UpdatePublicMagicMetadata)
 	publicAPI.GET("/files/count", fileHandler.GetTotalFileCount)
-
-	kexHandler := &api.KexHandler{
-		Controller: kexCtrl,
-	}
-	publicAPI.GET("/kex/get", kexHandler.GetKey)
-	publicAPI.PUT("/kex/add", kexHandler.AddKey)
 
 	trashHandler := &api.TrashHandler{
 		Controller: trashController,
@@ -823,7 +811,7 @@ func main() {
 	setupAndStartCrons(
 		userAuthRepo, collectionLinkRepo, fileLinkRepo, twoFactorRepo, passkeysRepo, fileController, taskLockingRepo, emailNotificationCtrl,
 		trashController, pushController, objectController, dataCleanupController, storageBonusCtrl, emergencyCtrl,
-		embeddingController, healthCheckHandler, kexCtrl, castDb)
+		embeddingController, healthCheckHandler, castDb)
 
 	// Create a new collector, the name will be used as a label on the metrics
 	collector := sqlstats.NewStatsCollector("prod_db", db)
@@ -966,7 +954,6 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, collectionLinkRep
 	emergencyCtrl *emergency.Controller,
 	embeddingCtrl *embeddingCtrl.Controller,
 	healthCheckHandler *api.HealthCheckHandler,
-	kexCtrl *kexCtrl.Controller,
 	castDb castRepo.Repository) {
 	shouldSkipCron := viper.GetBool("jobs.cron.skip")
 	if shouldSkipCron {
@@ -1000,6 +987,7 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, collectionLinkRep
 	})
 
 	scheduleAndRun(c, "@every 60m", func() {
+		emergencyCtrl.SendRecoveryReminder()
 		err := taskRepo.CleanupExpiredLocks()
 		if err != nil {
 			log.Printf("Error while cleaning up lock table, %s", err)
@@ -1063,11 +1051,6 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, collectionLinkRep
 
 	schedule(c, "@every 24h", func() {
 		pushController.ClearExpiredTokens()
-	})
-
-	scheduleAndRun(c, "@every 60m", func() {
-		emergencyCtrl.SendRecoveryReminder()
-		kexCtrl.DeleteOldKeys()
 	})
 
 	c.Start()

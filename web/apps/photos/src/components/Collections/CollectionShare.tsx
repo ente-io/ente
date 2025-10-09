@@ -4,6 +4,7 @@ import AddIcon from "@mui/icons-material/Add";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import BlockIcon from "@mui/icons-material/Block";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import CodeIcon from "@mui/icons-material/Code";
 import ContentCopyIcon from "@mui/icons-material/ContentCopyOutlined";
 import DoneIcon from "@mui/icons-material/Done";
 import DownloadSharpIcon from "@mui/icons-material/DownloadSharp";
@@ -65,6 +66,7 @@ import {
     deleteShareURL,
     shareCollection,
     unshareCollection,
+    updateCollectionLayout,
     updatePublicURL,
     type CreatePublicURLAttributes,
     type UpdatePublicURLAttributes,
@@ -1369,8 +1371,21 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
     onRemotePull,
 }) => {
     const [errorMessage, setErrorMessage] = useState("");
+    const { embedURL: embedBaseURL } = useSettingsSnapshot();
 
     const [copied, handleCopyLink] = useClipboardCopy(resolvedURL);
+
+    // For embeddable HTML copy
+    const embedURL = resolvedURL
+        ? resolvedURL.replace(
+              new URL(resolvedURL).origin,
+              embedBaseURL || "https://embed.ente.io",
+          )
+        : undefined;
+    const iframeHTML = embedURL
+        ? `<iframe src="${embedURL}" width="800" height="600" frameborder="0" allowfullscreen></iframe>`
+        : "";
+    const [embedCopied, handleCopyEmbedLink] = useClipboardCopy(iframeHTML);
 
     const handleRootClose = () => {
         onClose();
@@ -1416,6 +1431,14 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
             title={t("share_album")}
         >
             <Stack sx={{ gap: 3, py: "20px", px: "8px" }}>
+                <ManageLayout
+                    {...{
+                        collection,
+                        onRootClose,
+                        onRemotePull,
+                        setBlockingLoad,
+                    }}
+                />
                 <ManagePublicCollect
                     {...{ publicURL }}
                     onUpdate={handlePublicURLUpdate}
@@ -1451,6 +1474,18 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
                         }
                         onClick={handleCopyLink}
                         label={t("copy_link")}
+                    />
+                    <RowButtonDivider />
+                    <RowButton
+                        startIcon={
+                            embedCopied ? (
+                                <DoneIcon sx={{ color: "accent.main" }} />
+                            ) : (
+                                <CodeIcon />
+                            )
+                        }
+                        onClick={handleCopyEmbedLink}
+                        label={t("copy_embed_html")}
                     />
                 </RowButtonGroup>
                 <RowButtonGroup>
@@ -1508,9 +1543,6 @@ const ManagePublicCollect: React.FC<ManagePublicLinkSettingProps> = ({
                     onClick={handleFileDownloadSetting}
                 />
             </RowButtonGroup>
-            <RowButtonGroupHint>
-                {t("allow_adding_photos_hint")}
-            </RowButtonGroupHint>
         </Stack>
     );
 };
@@ -1806,3 +1838,114 @@ const SetPublicLinkPassword: React.FC<SetPublicLinkPasswordProps> = ({
         </Dialog>
     );
 };
+
+interface ManageLayoutProps {
+    onRootClose: () => void;
+    collection: Collection;
+    onRemotePull: (opts?: RemotePullOpts) => Promise<void>;
+}
+
+const ManageLayout: React.FC<ManageLayoutProps> = ({
+    onRootClose,
+    collection,
+    onRemotePull,
+}) => {
+    const { show: showLayoutOptions, props: layoutOptionsVisibilityProps } =
+        useModalVisibility();
+    const [errorMessage, setErrorMessage] = useState("");
+    const [loadingLayout, setLoadingLayout] = useState<string | null>(null);
+    const [selectedLayout, setSelectedLayout] = useState<string | null>(null);
+
+    const options = useMemo(() => layoutOptions(), []);
+
+    const currentLayout =
+        collection.pubMagicMetadata?.data?.layout || "grouped";
+
+    const changeLayoutValue = (value: string) => async () => {
+        if (value === currentLayout) return;
+
+        setLoadingLayout(value);
+        setSelectedLayout(value);
+        setErrorMessage("");
+        try {
+            await updateCollectionLayout(collection, value);
+            await onRemotePull({ silent: true });
+        } catch (e) {
+            log.error("Could not update collection layout", e);
+            setErrorMessage(t("generic_error"));
+            setSelectedLayout(null);
+        } finally {
+            setLoadingLayout(null);
+        }
+    };
+
+    return (
+        <>
+            <RowButtonGroup>
+                <RowButton
+                    label={t("album_layout")}
+                    caption={t(currentLayout)}
+                    onClick={showLayoutOptions}
+                    endIcon={<ChevronRightIcon />}
+                />
+            </RowButtonGroup>
+            <TitledNestedSidebarDrawer
+                anchor="right"
+                {...layoutOptionsVisibilityProps}
+                onRootClose={onRootClose}
+                title={t("album_layout")}
+            >
+                <Stack sx={{ py: "20px", px: "8px" }}>
+                    <RowButtonGroup>
+                        {options.map(({ label, value }, index) => (
+                            <React.Fragment key={value}>
+                                <RowButton
+                                    fontWeight="regular"
+                                    onClick={changeLayoutValue(value)}
+                                    label={label}
+                                    disabled={loadingLayout !== null}
+                                    endIcon={
+                                        loadingLayout === value ? (
+                                            <RowButtonEndActivityIndicator />
+                                        ) : (selectedLayout === null &&
+                                              currentLayout === value) ||
+                                          (selectedLayout === value &&
+                                              !loadingLayout) ? (
+                                            <DoneIcon />
+                                        ) : undefined
+                                    }
+                                />
+                                {index != options.length - 1 && (
+                                    <RowButtonDivider />
+                                )}
+                            </React.Fragment>
+                        ))}
+                    </RowButtonGroup>
+                    {currentLayout === "trip" && !loadingLayout && (
+                        <RowButtonGroupHint>
+                            {t("maps_privacy_notice")}
+                        </RowButtonGroupHint>
+                    )}
+                    {errorMessage && (
+                        <Typography
+                            variant="small"
+                            sx={{
+                                color: "critical.main",
+                                mt: 0.5,
+                                textAlign: "center",
+                            }}
+                        >
+                            {errorMessage}
+                        </Typography>
+                    )}
+                </Stack>
+            </TitledNestedSidebarDrawer>
+        </>
+    );
+};
+
+const layoutOptions = () => [
+    { label: t("grouped"), value: "grouped" },
+    { label: t("continuous"), value: "continuous" },
+    { label: t("trip"), value: "trip" },
+];

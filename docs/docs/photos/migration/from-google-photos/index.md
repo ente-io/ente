@@ -46,14 +46,14 @@ it with Ente.
 > While the app supports uploading multiple ZIPs too, we recommend unzipping
 > them all into a single folder and uploading that folder instead so that your
 > photo dates are imported properly
-> ([details](/photos/faq/metadata#importing-from-google-takeout)).
+> ([details](/photos/faq/metadata-and-editing#importing-from-google-takeout)).
 >
 > <br />
 >
 > Note that you can still preserve your albums even when uploading a single
 > folder - select the create new album option and the app will ask you if you
 > want to put each leaf folder into a separate album
-> ([details](/photos/features/albums#uploading-a-nested-folder)).
+> ([details](/photos/features/albums-and-organization/albums#uploading-a-nested-folder)).
 
 ![Importing Google Takeout into Ente](google-takeout.png){width=400px}
 
@@ -73,6 +73,6 @@ If you run into any issues during this migration, please reach out to
 >
 > In case you wish to use face recognition and other advanced search features
 > provided by Ente, we recommend that you enable
-> [machine learning](/photos/features/machine-learning) before importing your
+> [machine learning](/photos/features/search-and-discovery/machine-learning) before importing your
 > photos so that the Ente app can directly index files as they are getting
 > uploaded.

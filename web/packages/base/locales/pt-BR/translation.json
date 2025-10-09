@@ -276,11 +276,7 @@
     "view_on_map": "Ver no OpenStreetMap",
     "map": "Mapa",
     "enable_map": "Ativar mapa",
-    "enable_maps_confirm": "Ativar mapa?",
-    "enable_maps_confirm_message": "<p>Isso exibirá suas fotos num mapa mundial.</p><p>Este mapa é hospedado por <a>OpenStreetMap</a>, e as localizações exatas das fotos nunca são compartilhadas.</p><p>Você pode desativar este recurso quando quiser.</p>",
     "disable_map": "Desativar mapa",
-    "disable_maps_confirm": "Desativar mapa?",
-    "disable_maps_confirm_message": "<p>Isso desativará a exibição de suas fotos no mapa mundial.</p><p>Você pode ativar este recurso a qualquer hora nas Opções.</p>",
     "details": "Detalhes",
     "view_exif": "Visualizar todos os dados Exif",
     "no_exif": "Sem dados Exif",
@@ -327,6 +323,8 @@
     "thumbnail_generation_failed_hint": "Os arquivos foram enviados, porém, não conseguimos gerar miniaturas. (thumbnails)",
     "unsupported_files": "Arquivos incompatíveis",
     "unsupported_files_hint": "Ente não é compatível com estes formatos de arquivo",
+    "zero_size_files": "",
+    "zero_size_files_hint": "",
     "blocked_uploads": "Envios bloqueados",
     "blocked_uploads_hint": "Seu navegador ou uma extensão está bloqueando o Ente de usar <code>eTags</code> para enviar arquivos grandes.",
     "large_files": "Arquivos grandes",
@@ -433,6 +431,7 @@
         "year": "Após um ano"
     },
     "copy_link": "Copiar link",
+    "copy_embed_html": "",
     "done": "Concluído",
     "share_link_section_title": "Ou compartilhar link",
     "remove_link": "Remover link",
@@ -697,5 +696,10 @@
     "add_dns_entry_hint": "",
     "custom_domains_help": "",
     "num_1": "",
-    "num_2": ""
+    "num_2": "",
+    "grouped": "",
+    "continuous": "",
+    "trip": "",
+    "album_layout": "",
+    "maps_privacy_notice": ""
 }

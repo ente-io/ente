@@ -276,11 +276,7 @@
     "view_on_map": "Visa på OpenStreetMap",
     "map": "Karta",
     "enable_map": "Aktivera karta",
-    "enable_maps_confirm": "Aktivera kartor?",
-    "enable_maps_confirm_message": "",
     "disable_map": "Inaktivera karta",
-    "disable_maps_confirm": "Inaktivera kartor?",
-    "disable_maps_confirm_message": "",
     "details": "",
     "view_exif": "Visa all Exif-data",
     "no_exif": "Ingen Exif-data",
@@ -327,6 +323,8 @@
     "thumbnail_generation_failed_hint": "",
     "unsupported_files": "",
     "unsupported_files_hint": "",
+    "zero_size_files": "",
+    "zero_size_files_hint": "",
     "blocked_uploads": "",
     "blocked_uploads_hint": "",
     "large_files": "",
@@ -433,6 +431,7 @@
         "year": ""
     },
     "copy_link": "Kopiera länk",
+    "copy_embed_html": "",
     "done": "Klar",
     "share_link_section_title": "Eller dela en länk",
     "remove_link": "",
@@ -697,5 +696,10 @@
     "add_dns_entry_hint": "",
     "custom_domains_help": "",
     "num_1": "",
-    "num_2": ""
+    "num_2": "",
+    "grouped": "",
+    "continuous": "",
+    "trip": "",
+    "album_layout": "",
+    "maps_privacy_notice": ""
 }

@@ -1,8 +1,6 @@
 package crypto
 
 import (
-	"github.com/ente-io/stacktrace"
-
 	"encoding/base64"
 
 	"github.com/GoKillers/libsodium-go/cryptobox"
@@ -10,13 +8,29 @@ import (
 	cryptosecretbox "github.com/GoKillers/libsodium-go/cryptosecretbox"
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/utils/auth"
+	"github.com/ente-io/stacktrace"
+)
+
+// Exported constants matching libsodium
+const (
+	SecretBoxKeyBytes   = 32 // crypto_secretbox_KEYBYTES in libsodium
+	SecretBoxNonceBytes = 24 // crypto_secretbox_NONCEBYTES in libsodium
+	GenericHashBytes    = 32 // crypto_generichash_BYTES in libsodium (BLAKE2b-256)
+	BoxPublicKeyBytes   = 32 // crypto_box_publickeybytes in lib-sodium
 )
 
 func Encrypt(data string, encryptionKey []byte) (ente.EncryptionResult, error) {
-	nonce, err := auth.GenerateRandomBytes(cryptosecretbox.CryptoSecretBoxNonceBytes())
+	if SecretBoxNonceBytes != cryptosecretbox.CryptoSecretBoxNonceBytes() {
+		return ente.EncryptionResult{}, stacktrace.NewError("SecretBoxNonceBytes constant does not match the actual nonce size")
+	}
+	nonce, err := auth.GenerateRandomBytes(SecretBoxNonceBytes)
 	if err != nil {
 		return ente.EncryptionResult{}, stacktrace.Propagate(err, "")
 	}
+	return encryptWithNonce(data, encryptionKey, nonce)
+}
+
+func encryptWithNonce(data string, encryptionKey []byte, nonce []byte) (ente.EncryptionResult, error) {
 	encryptedEmailBytes, errCode := cryptosecretbox.CryptoSecretBoxEasy([]byte(data), nonce, encryptionKey)
 	if errCode != 0 {
 		return ente.EncryptionResult{}, stacktrace.NewError("encryption failed")
@@ -33,7 +47,10 @@ func Decrypt(cipher []byte, key []byte, nonce []byte) (string, error) {
 }
 
 func GetHash(data string, hashKey []byte) (string, error) {
-	dataHashBytes, err := generichash.CryptoGenericHash(generichash.CryptoGenericHashBytes(), []byte(data), hashKey)
+	if GenericHashBytes != generichash.CryptoGenericHashBytes() {
+		return "", stacktrace.NewError("GenericHashBytes constant does not match the actual hash size")
+	}
+	dataHashBytes, err := generichash.CryptoGenericHash(GenericHashBytes, []byte(data), hashKey)
 	if err != 0 {
 		return "", stacktrace.NewError("email hash failed")
 	}
