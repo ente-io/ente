@@ -93,10 +93,6 @@ class _ContactResultPageState extends State<ContactResultPage> {
 
   @override
   Widget build(BuildContext context) {
-    final topBoundaryNotifier = ValueNotifier<double?>(null);
-    final bottomBoundaryNotifier = ValueNotifier<double?>(null);
-    final scrollControllerNotifier = ValueNotifier<ScrollController?>(null);
-
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         final result = files
@@ -156,9 +152,6 @@ class _ContactResultPageState extends State<ContactResultPage> {
     );
 
     return GalleryBoundariesProvider(
-      topBoundaryNotifier: topBoundaryNotifier,
-      bottomBoundaryNotifier: bottomBoundaryNotifier,
-      scrollControllerNotifier: scrollControllerNotifier,
       child: GalleryFilesState(
         child: InheritedSearchFilterDataWrapper(
           searchFilterDataProvider: _searchFilterDataProvider,

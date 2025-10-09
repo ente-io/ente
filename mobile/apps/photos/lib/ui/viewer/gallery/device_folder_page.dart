@@ -34,10 +34,6 @@ class DeviceFolderPage extends StatelessWidget {
 
   @override
   Widget build(Object context) {
-    final topBoundaryNotifier = ValueNotifier<double?>(null);
-    final bottomBoundaryNotifier = ValueNotifier<double?>(null);
-    final scrollControllerNotifier = ValueNotifier<ScrollController?>(null);
-
     final int? userID = Configuration.instance.getUserID();
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
@@ -64,9 +60,6 @@ class DeviceFolderPage extends StatelessWidget {
       initialFiles: [deviceCollection.thumbnail!],
     );
     return GalleryBoundariesProvider(
-      topBoundaryNotifier: topBoundaryNotifier,
-      bottomBoundaryNotifier: bottomBoundaryNotifier,
-      scrollControllerNotifier: scrollControllerNotifier,
       child: GalleryFilesState(
         child: Scaffold(
           appBar: PreferredSize(

@@ -130,14 +130,8 @@ class _PeoplePageState extends State<PeoplePage> {
   @override
   Widget build(BuildContext context) {
     _logger.info("Building for ${_person.data.name}");
-    final topBoundaryNotifier = ValueNotifier<double?>(null);
-    final bottomBoundaryNotifier = ValueNotifier<double?>(null);
-    final scrollControllerNotifier = ValueNotifier<ScrollController?>(null);
 
     return GalleryBoundariesProvider(
-      topBoundaryNotifier: topBoundaryNotifier,
-      bottomBoundaryNotifier: bottomBoundaryNotifier,
-      scrollControllerNotifier: scrollControllerNotifier,
       child: GalleryFilesState(
         child: InheritedSearchFilterDataWrapper(
           searchFilterDataProvider: _searchFilterDataProvider,

@@ -1,25 +1,51 @@
 import 'package:flutter/material.dart';
 
-/// InheritedWidget to share gallery boundaries and scroll controller
-/// between Gallery and its surrounding widgets for auto-scroll functionality
-class GalleryBoundariesProvider extends InheritedWidget {
-  /// Bottom edge position of the top fixed widget (e.g., AppBar)
-  final ValueNotifier<double?> topBoundaryNotifier;
-
-  /// Top edge position of the bottom fixed widget (e.g., FileSelectionOverlayBar)
-  final ValueNotifier<double?> bottomBoundaryNotifier;
-
-  /// Reference to Gallery's ScrollController
-  /// Using ValueNotifier to maintain immutability
-  final ValueNotifier<ScrollController?> scrollControllerNotifier;
+/// StatefulWidget that manages gallery boundaries and scroll controller lifecycle
+class GalleryBoundariesProvider extends StatefulWidget {
+  final Widget child;
 
   const GalleryBoundariesProvider({
     super.key,
-    required super.child,
-    required this.topBoundaryNotifier,
-    required this.bottomBoundaryNotifier,
-    required this.scrollControllerNotifier,
+    required this.child,
   });
+
+  @override
+  State<GalleryBoundariesProvider> createState() =>
+      GalleryBoundariesProviderState();
+
+  static InheritedGalleryBoundaries? of(BuildContext context) {
+    return context
+        .dependOnInheritedWidgetOfExactType<InheritedGalleryBoundaries>();
+  }
+}
+
+/// State class that manages the lifecycle of boundary notifiers
+class GalleryBoundariesProviderState extends State<GalleryBoundariesProvider> {
+  /// Bottom edge position of the top fixed widget (e.g., AppBar)
+  late final ValueNotifier<double?> topBoundaryNotifier;
+
+  /// Top edge position of the bottom fixed widget (e.g., FileSelectionOverlayBar)
+  late final ValueNotifier<double?> bottomBoundaryNotifier;
+
+  /// Reference to Gallery's ScrollController
+  /// Using ValueNotifier to maintain immutability
+  late final ValueNotifier<ScrollController?> scrollControllerNotifier;
+
+  @override
+  void initState() {
+    super.initState();
+    topBoundaryNotifier = ValueNotifier<double?>(null);
+    bottomBoundaryNotifier = ValueNotifier<double?>(null);
+    scrollControllerNotifier = ValueNotifier<ScrollController?>(null);
+  }
+
+  @override
+  void dispose() {
+    topBoundaryNotifier.dispose();
+    bottomBoundaryNotifier.dispose();
+    scrollControllerNotifier.dispose();
+    super.dispose();
+  }
 
   /// Set the scroll controller from Gallery widget
   void setScrollController(ScrollController? controller) {
@@ -36,21 +62,54 @@ class GalleryBoundariesProvider extends InheritedWidget {
     bottomBoundaryNotifier.value = boundary;
   }
 
-  static GalleryBoundariesProvider? of(BuildContext context) {
-    return context
-        .dependOnInheritedWidgetOfExactType<GalleryBoundariesProvider>();
+  @override
+  Widget build(BuildContext context) {
+    return InheritedGalleryBoundaries(
+      state: this,
+      child: widget.child,
+    );
+  }
+}
+
+/// Public InheritedWidget to share gallery boundaries and scroll controller
+/// between Gallery and its surrounding widgets for auto-scroll functionality
+class InheritedGalleryBoundaries extends InheritedWidget {
+  final GalleryBoundariesProviderState state;
+
+  const InheritedGalleryBoundaries({
+    super.key,
+    required this.state,
+    required super.child,
+  });
+
+  /// Bottom edge position of the top fixed widget (e.g., AppBar)
+  ValueNotifier<double?> get topBoundaryNotifier => state.topBoundaryNotifier;
+
+  /// Top edge position of the bottom fixed widget (e.g., FileSelectionOverlayBar)
+  ValueNotifier<double?> get bottomBoundaryNotifier =>
+      state.bottomBoundaryNotifier;
+
+  /// Reference to Gallery's ScrollController
+  ValueNotifier<ScrollController?> get scrollControllerNotifier =>
+      state.scrollControllerNotifier;
+
+  /// Set the scroll controller from Gallery widget
+  void setScrollController(ScrollController? controller) {
+    state.setScrollController(controller);
+  }
+
+  /// Set the top boundary position
+  void setTopBoundary(double? boundary) {
+    state.setTopBoundary(boundary);
+  }
+
+  /// Set the bottom boundary position
+  void setBottomBoundary(double? boundary) {
+    state.setBottomBoundary(boundary);
   }
 
   @override
-  bool updateShouldNotify(GalleryBoundariesProvider oldWidget) {
-    return scrollControllerNotifier != oldWidget.scrollControllerNotifier ||
-        topBoundaryNotifier != oldWidget.topBoundaryNotifier ||
-        bottomBoundaryNotifier != oldWidget.bottomBoundaryNotifier;
-  }
-
-  void dispose() {
-    topBoundaryNotifier.dispose();
-    bottomBoundaryNotifier.dispose();
-    scrollControllerNotifier.dispose();
+  bool updateShouldNotify(InheritedGalleryBoundaries oldWidget) {
+    return false;
   }
 }

@@ -34,10 +34,6 @@ class ArchivePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final topBoundaryNotifier = ValueNotifier<double?>(null);
-    final bottomBoundaryNotifier = ValueNotifier<double?>(null);
-    final scrollControllerNotifier = ValueNotifier<ScrollController?>(null);
-
     final Set<int> hiddenCollectionIDs =
         CollectionsService.instance.getHiddenCollectionIds();
     final gallery = Gallery(
@@ -85,9 +81,6 @@ class ArchivePage extends StatelessWidget {
       ),
     );
     return GalleryBoundariesProvider(
-      topBoundaryNotifier: topBoundaryNotifier,
-      bottomBoundaryNotifier: bottomBoundaryNotifier,
-      scrollControllerNotifier: scrollControllerNotifier,
       child: GalleryFilesState(
         child: Scaffold(
           appBar: PreferredSize(

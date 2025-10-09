@@ -141,10 +141,6 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final topBoundaryNotifier = ValueNotifier<double?>(null);
-    final bottomBoundaryNotifier = ValueNotifier<double?>(null);
-    final scrollControllerNotifier = ValueNotifier<ScrollController?>(null);
-
     final gallery = Gallery(
       key: ValueKey(_enableGrouping),
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
@@ -174,9 +170,6 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
       initialFiles: [files.first],
     );
     return GalleryBoundariesProvider(
-      topBoundaryNotifier: topBoundaryNotifier,
-      bottomBoundaryNotifier: bottomBoundaryNotifier,
-      scrollControllerNotifier: scrollControllerNotifier,
       child: GalleryFilesState(
         child: InheritedSearchFilterDataWrapper(
           searchFilterDataProvider: _searchFilterDataProvider,

@@ -88,10 +88,6 @@ class _HiddenPageState extends State<HiddenPage> {
     if (_defaultHiddenCollectionId == null) {
       return const EnteLoadingWidget();
     }
-    final topBoundaryNotifier = ValueNotifier<double?>(null);
-    final bottomBoundaryNotifier = ValueNotifier<double?>(null);
-    final scrollControllerNotifier = ValueNotifier<ScrollController?>(null);
-
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         return FilesDB.instance.getFilesInCollections(
@@ -138,9 +134,6 @@ class _HiddenPageState extends State<HiddenPage> {
       ),
     );
     return GalleryBoundariesProvider(
-      topBoundaryNotifier: topBoundaryNotifier,
-      bottomBoundaryNotifier: bottomBoundaryNotifier,
-      scrollControllerNotifier: scrollControllerNotifier,
       child: GalleryFilesState(
         child: Scaffold(
           appBar: PreferredSize(

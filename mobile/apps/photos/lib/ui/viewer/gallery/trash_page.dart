@@ -32,10 +32,6 @@ class TrashPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final topBoundaryNotifier = ValueNotifier<double?>(null);
-    final bottomBoundaryNotifier = ValueNotifier<double?>(null);
-    final scrollControllerNotifier = ValueNotifier<ScrollController?>(null);
-
     final bool filesAreSelected = _selectedFiles.files.isNotEmpty;
 
     final gallery = Gallery(
@@ -64,9 +60,6 @@ class TrashPage extends StatelessWidget {
     );
 
     return GalleryBoundariesProvider(
-      topBoundaryNotifier: topBoundaryNotifier,
-      bottomBoundaryNotifier: bottomBoundaryNotifier,
-      scrollControllerNotifier: scrollControllerNotifier,
       child: GalleryFilesState(
         child: Scaffold(
           appBar: PreferredSize(

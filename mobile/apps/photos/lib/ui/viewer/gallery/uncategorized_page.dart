@@ -39,10 +39,6 @@ class UnCategorizedPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final topBoundaryNotifier = ValueNotifier<double?>(null);
-    final bottomBoundaryNotifier = ValueNotifier<double?>(null);
-    final scrollControllerNotifier = ValueNotifier<ScrollController?>(null);
-
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         final FileLoadResult result =
@@ -85,9 +81,6 @@ class UnCategorizedPage extends StatelessWidget {
       albumName: AppLocalizations.of(context).uncategorized,
     );
     return GalleryBoundariesProvider(
-      topBoundaryNotifier: topBoundaryNotifier,
-      bottomBoundaryNotifier: bottomBoundaryNotifier,
-      scrollControllerNotifier: scrollControllerNotifier,
       child: GalleryFilesState(
         child: InheritedSearchFilterDataWrapper(
           searchFilterDataProvider: SearchFilterDataProvider(

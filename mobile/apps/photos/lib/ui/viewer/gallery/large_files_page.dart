@@ -39,9 +39,6 @@ class LargeFilesPagePage extends StatefulWidget {
 class _LargeFilesPagePageState extends State<LargeFilesPagePage> {
   @override
   Widget build(BuildContext context) {
-    final topBoundaryNotifier = ValueNotifier<double?>(null);
-    final bottomBoundaryNotifier = ValueNotifier<double?>(null);
-    final scrollControllerNotifier = ValueNotifier<ScrollController?>(null);
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         final List<EnteFile> allFiles =
@@ -82,9 +79,6 @@ class _LargeFilesPagePageState extends State<LargeFilesPagePage> {
       albumName: AppLocalizations.of(context).viewLargeFiles,
     );
     return GalleryBoundariesProvider(
-      topBoundaryNotifier: topBoundaryNotifier,
-      bottomBoundaryNotifier: bottomBoundaryNotifier,
-      scrollControllerNotifier: scrollControllerNotifier,
       child: GalleryFilesState(
         child: Scaffold(
           appBar: const PreferredSize(

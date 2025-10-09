@@ -241,7 +241,7 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper>
   }
 
   /// Check if pointer is outside boundaries and start/stop auto-scroll
-  void _checkAndHandleAutoScroll(GalleryBoundariesProvider? provider) {
+  void _checkAndHandleAutoScroll(InheritedGalleryBoundaries? provider) {
     if (provider == null) return;
 
     final topBoundary = provider.topBoundaryNotifier.value;

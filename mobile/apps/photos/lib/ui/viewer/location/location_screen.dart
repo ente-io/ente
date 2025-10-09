@@ -47,14 +47,7 @@ class _LocationScreenState extends State<LocationScreen> {
     final locationTag =
         InheritedLocationScreenState.of(context).locationTagEntity.item;
 
-    final topBoundaryNotifier = ValueNotifier<double?>(null);
-    final bottomBoundaryNotifier = ValueNotifier<double?>(null);
-    final scrollControllerNotifier = ValueNotifier<ScrollController?>(null);
-
     return GalleryBoundariesProvider(
-      topBoundaryNotifier: topBoundaryNotifier,
-      bottomBoundaryNotifier: bottomBoundaryNotifier,
-      scrollControllerNotifier: scrollControllerNotifier,
       child: GalleryFilesState(
         child: InheritedSearchFilterDataWrapper(
           searchFilterDataProvider: SearchFilterDataProvider(

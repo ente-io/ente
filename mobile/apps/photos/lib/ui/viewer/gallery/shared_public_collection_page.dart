@@ -69,10 +69,6 @@ class _SharedPublicCollectionPageState
   @override
   Widget build(BuildContext context) {
     logger.info("Building SharedPublicCollectionPage");
-    final topBoundaryNotifier = ValueNotifier<double?>(null);
-    final bottomBoundaryNotifier = ValueNotifier<double?>(null);
-    final scrollControllerNotifier = ValueNotifier<ScrollController?>(null);
-
     final List<EnteFile>? initialFiles =
         widget.c.thumbnail != null ? [widget.c.thumbnail!] : null;
 
@@ -142,9 +138,6 @@ class _SharedPublicCollectionPageState
     );
 
     return GalleryBoundariesProvider(
-      topBoundaryNotifier: topBoundaryNotifier,
-      bottomBoundaryNotifier: bottomBoundaryNotifier,
-      scrollControllerNotifier: scrollControllerNotifier,
       child: GalleryFilesState(
         child: Scaffold(
           appBar: PreferredSize(

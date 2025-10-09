@@ -116,10 +116,6 @@ class CollectionPage extends StatelessWidget {
           : const SizedBox(height: 212),
     );
 
-    final topBoundaryNotifier = ValueNotifier<double?>(null);
-    final bottomBoundaryNotifier = ValueNotifier<double?>(null);
-    final scrollControllerNotifier = ValueNotifier<ScrollController?>(null);
-
     return GalleryFilesState(
       child: InheritedSearchFilterDataWrapper(
         searchFilterDataProvider: SearchFilterDataProvider(
@@ -130,9 +126,6 @@ class CollectionPage extends StatelessWidget {
           ),
         ),
         child: GalleryBoundariesProvider(
-          topBoundaryNotifier: topBoundaryNotifier,
-          bottomBoundaryNotifier: bottomBoundaryNotifier,
-          scrollControllerNotifier: scrollControllerNotifier,
           child: Scaffold(
             appBar: PreferredSize(
               preferredSize: const Size.fromHeight(90.0),

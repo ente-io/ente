@@ -48,17 +48,10 @@ class _MapPullUpGalleryState extends State<MapPullUpGallery> {
     final unsafeAreaProportion = widget.bottomUnsafeArea / screenHeight;
     final double initialChildSize = 0.25 + unsafeAreaProportion;
 
-    final topBoundaryNotifier = ValueNotifier<double?>(null);
-    final bottomBoundaryNotifier = ValueNotifier<double?>(null);
-    final scrollControllerNotifier = ValueNotifier<ScrollController?>(null);
-
     Widget? cachedScrollableContent;
 
     return DeferredPointerHandler(
       child: GalleryBoundariesProvider(
-        topBoundaryNotifier: topBoundaryNotifier,
-        bottomBoundaryNotifier: bottomBoundaryNotifier,
-        scrollControllerNotifier: scrollControllerNotifier,
         child: GalleryFilesState(
           child: SelectionState(
             selectedFiles: _selectedFiles,
