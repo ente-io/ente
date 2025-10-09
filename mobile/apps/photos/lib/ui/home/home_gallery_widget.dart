@@ -77,7 +77,6 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
 
   @override
   Widget build(BuildContext context) {
-    // Create boundary notifiers
     final topBoundaryNotifier = ValueNotifier<double?>(null);
     final bottomBoundaryNotifier = ValueNotifier<double?>(null);
     final scrollControllerNotifier = ValueNotifier<ScrollController?>(null);

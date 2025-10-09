@@ -12,7 +12,7 @@ import 'package:photos/models/file/file.dart';
 /// operations. Dummy files are used for gallery layout purposes and should
 /// never be selected.
 ///
-/// **Important:** All selection methods ([toggleSelection], [selectAll],
+/// All selection methods ([toggleSelection], [selectAll],
 /// [unSelectAll], [toggleGroupSelection]) automatically exclude dummy files.
 /// Calling code does not need to check for or filter out dummy files before
 /// calling these methods.

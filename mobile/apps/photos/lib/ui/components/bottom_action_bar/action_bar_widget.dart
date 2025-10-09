@@ -29,8 +29,6 @@ class _ActionBarWidgetState extends State<ActionBarWidget> {
   void initState() {
     super.initState();
     widget.selectedFiles?.addListener(_selectedFilesListener);
-    // Sync initial state if files are already selected
-
     _selectedFilesListener();
   }
 
