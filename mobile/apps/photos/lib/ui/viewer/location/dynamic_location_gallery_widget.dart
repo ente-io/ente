@@ -12,7 +12,6 @@ import "package:photos/services/filter/db_filters.dart";
 import "package:photos/services/location_service.dart";
 import 'package:photos/states/location_state.dart';
 import "package:photos/ui/viewer/gallery/gallery.dart";
-import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 
 ///This gallery will get rebuilt with the updated radius when
@@ -94,12 +93,6 @@ class _DynamicLocationGalleryWidgetState
         if (snapshot.hasData) {
           return LayoutBuilder(
             builder: (context, constrains) {
-              // Create boundary notifiers
-              final topBoundaryNotifier = ValueNotifier<double?>(null);
-              final bottomBoundaryNotifier = ValueNotifier<double?>(null);
-              final scrollControllerNotifier =
-                  ValueNotifier<ScrollController?>(null);
-
               return SizedBox(
                 height: _galleryHeight(
                   min(
@@ -108,26 +101,21 @@ class _DynamicLocationGalleryWidgetState
                   ),
                   constrains.maxWidth,
                 ),
-                child: GalleryBoundariesProvider(
-                  topBoundaryNotifier: topBoundaryNotifier,
-                  bottomBoundaryNotifier: bottomBoundaryNotifier,
-                  scrollControllerNotifier: scrollControllerNotifier,
-                  child: GalleryFilesState(
-                    child: Gallery(
-                      loadingWidget: const SizedBox.shrink(),
-                      disableScroll: true,
-                      asyncLoader: (
-                        creationStartTime,
-                        creationEndTime, {
-                        limit,
-                        asc,
-                      }) async {
-                        return snapshot.data as FileLoadResult;
-                      },
-                      tagPrefix: widget.tagPrefix,
-                      enableFileGrouping: false,
-                      showSelectAll: false,
-                    ),
+                child: GalleryFilesState(
+                  child: Gallery(
+                    loadingWidget: const SizedBox.shrink(),
+                    disableScroll: true,
+                    asyncLoader: (
+                      creationStartTime,
+                      creationEndTime, {
+                      limit,
+                      asc,
+                    }) async {
+                      return snapshot.data as FileLoadResult;
+                    },
+                    tagPrefix: widget.tagPrefix,
+                    enableFileGrouping: false,
+                    showSelectAll: false,
                   ),
                 ),
               );
