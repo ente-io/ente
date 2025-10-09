@@ -61,7 +61,7 @@ class GalleryGroups {
 
   late final int crossAxisCount;
   late final List<FixedExtentSectionLayout> _groupLayouts;
-  late final List<EnteFile> _allFilesWithDummies;
+  final List<EnteFile> _allFilesWithDummies = [];
 
   final List<String> _groupIds = [];
   final Map<String, List<EnteFile>> _groupIdToFilesMap = {};
@@ -88,7 +88,7 @@ class GalleryGroups {
       _scrollbarDivisions;
 
   /// Returns allFiles with dummy entries added at appropriate positions to fill
-  /// incomplete rows in each group. Computed once during initialization.
+  /// incomplete rows in each group.
   List<EnteFile> get allFilesWithDummies => _allFilesWithDummies;
 
   double? getOffsetOfFile(EnteFile file) {
@@ -158,17 +158,6 @@ class GalleryGroups {
   void init() {
     crossAxisCount = localSettings.getPhotoGridSize();
     _buildGroups();
-
-    // Build allFilesWithDummies only if swipe-to-select feature is enabled
-    if (flagService.internalUser && !limitSelectionToOne) {
-      // Flatten groups with dummies for swipe-to-select gesture tracking
-      _allFilesWithDummies = _groupIds
-          .expand((groupId) => _groupIdToFilesMap[groupId]!)
-          .toList(growable: false);
-    } else {
-      // Empty list when feature is disabled - SwipeHelper won't be created anyway
-      _allFilesWithDummies = [];
-    }
 
     _groupLayouts = _computeGroupLayouts();
 
@@ -403,6 +392,11 @@ class GalleryGroups {
       startCreationTime: firstFile.creationTime!,
       endCreationTime: lastFile.creationTime!
     );
+
+    if (_allFilesWithDummies.isNotEmpty ||
+        (flagService.internalUser && !limitSelectionToOne)) {
+      _allFilesWithDummies.addAll(groupFiles);
+    }
 
     // For scrollbar divisions
     if (groupType.timeGrouping()) {
