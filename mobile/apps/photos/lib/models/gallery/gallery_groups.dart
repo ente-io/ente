@@ -159,11 +159,16 @@ class GalleryGroups {
     crossAxisCount = localSettings.getPhotoGridSize();
     _buildGroups();
 
-    // Build allFilesWithDummies by flattening groups in order
-    // This is computed once here for O(1) access via the getter
-    _allFilesWithDummies = _groupIds
-        .expand((groupId) => _groupIdToFilesMap[groupId]!)
-        .toList(growable: false);
+    // Build allFilesWithDummies only if swipe-to-select feature is enabled
+    if (flagService.internalUser && !limitSelectionToOne) {
+      // Flatten groups with dummies for swipe-to-select gesture tracking
+      _allFilesWithDummies = _groupIds
+          .expand((groupId) => _groupIdToFilesMap[groupId]!)
+          .toList(growable: false);
+    } else {
+      // Empty list when feature is disabled - SwipeHelper won't be created anyway
+      _allFilesWithDummies = [];
+    }
 
     _groupLayouts = _computeGroupLayouts();
 
@@ -371,20 +376,24 @@ class GalleryGroups {
     final firstFile = groupFiles.first;
     final lastFile = groupFiles.last;
 
-    // Add dummy files to fill the last row if needed
-    final filesInLastRow = groupFiles.length % crossAxisCount;
-    if (filesInLastRow != 0) {
-      final dummiesNeeded = crossAxisCount - filesInLastRow;
-      final filesWithDummies = List<EnteFile>.from(groupFiles);
-      for (int i = 0; i < dummiesNeeded; i++) {
-        filesWithDummies.add(
-          DummyFile(
-            groupID: uuid,
-            index: i,
-          ),
-        );
+    // Only add dummy files if swipe-to-select feature is enabled
+    // Dummy files are used for gesture tracking in swipe-to-select
+    if (flagService.internalUser && !limitSelectionToOne) {
+      // Add dummy files to fill the last row if needed
+      final filesInLastRow = groupFiles.length % crossAxisCount;
+      if (filesInLastRow != 0) {
+        final dummiesNeeded = crossAxisCount - filesInLastRow;
+        final filesWithDummies = List<EnteFile>.from(groupFiles);
+        for (int i = 0; i < dummiesNeeded; i++) {
+          filesWithDummies.add(
+            DummyFile(
+              groupID: uuid,
+              index: i,
+            ),
+          );
+        }
+        groupFiles = filesWithDummies;
       }
-      groupFiles = filesWithDummies;
     }
 
     _groupIds.add(uuid);
