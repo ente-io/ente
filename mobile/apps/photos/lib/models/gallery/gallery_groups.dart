@@ -361,8 +361,7 @@ class GalleryGroups {
   ) {
     final uuid = _uuid.v1();
 
-    // Save original first and last files before adding dummies
-    final firstFile = groupFiles.first;
+    // Save original last file before adding dummies to the end
     final lastFile = groupFiles.last;
 
     // Only add dummy files if swipe-to-select feature is enabled
@@ -389,7 +388,7 @@ class GalleryGroups {
     _groupIdToFilesMap[uuid] = groupFiles;
     _groupIdToGroupDataMap[uuid] = (
       groupType: groupType,
-      startCreationTime: firstFile.creationTime!,
+      startCreationTime: groupFiles.first.creationTime!,
       endCreationTime: lastFile.creationTime!
     );
 
