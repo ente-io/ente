@@ -129,8 +129,8 @@ export const TripMap: React.FC<TripMapProps> = ({
                         }
                         url="https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg"
                         maxZoom={20}
-                        updateWhenZooming={false}
-                        keepBuffer={1}
+                        updateWhenZooming={isTouchDevice ? true : false}
+                        keepBuffer={isTouchDevice ? 3 : 1}
                     />
 
                     {/* Draw super-clusters (clickable for zoom and gallery) */}
