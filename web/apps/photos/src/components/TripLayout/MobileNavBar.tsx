@@ -4,7 +4,6 @@ import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import ShareIcon from "@mui/icons-material/Share";
 import { Box, Button, IconButton, styled } from "@mui/material";
 import { EnteLogo } from "ente-base/components/EnteLogo";
-import { useIsTouchscreen } from "ente-base/components/utils/hooks";
 import { Notification } from "ente-new/photos/components/Notification";
 import { t } from "i18next";
 import { useState } from "react";
@@ -23,7 +22,6 @@ export const MobileNavBar: React.FC<MobileNavBarProps> = ({
     collectionTitle,
 }) => {
     const [showCopiedMessage, setShowCopiedMessage] = useState(false);
-    const isTouchscreen = useIsTouchscreen();
 
     const handleShare = async () => {
         if (typeof window !== "undefined") {
@@ -81,7 +79,7 @@ export const MobileNavBar: React.FC<MobileNavBarProps> = ({
                     )}
 
                     <MobileSignUpButton onClick={handleSignUp}>
-                        {isTouchscreen ? t("install") : t("sign_up")}
+                        {t("install")}
                     </MobileSignUpButton>
                 </ButtonGroup>
             </MobileNavContainer>
