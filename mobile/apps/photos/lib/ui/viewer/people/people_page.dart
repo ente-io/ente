@@ -130,7 +130,6 @@ class _PeoplePageState extends State<PeoplePage> {
   @override
   Widget build(BuildContext context) {
     _logger.info("Building for ${_person.data.name}");
-    // Create boundary notifiers
     final topBoundaryNotifier = ValueNotifier<double?>(null);
     final bottomBoundaryNotifier = ValueNotifier<double?>(null);
     final scrollControllerNotifier = ValueNotifier<ScrollController?>(null);

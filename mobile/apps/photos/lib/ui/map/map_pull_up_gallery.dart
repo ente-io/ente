@@ -48,7 +48,6 @@ class _MapPullUpGalleryState extends State<MapPullUpGallery> {
     final unsafeAreaProportion = widget.bottomUnsafeArea / screenHeight;
     final double initialChildSize = 0.25 + unsafeAreaProportion;
 
-    // Create boundary notifiers
     final topBoundaryNotifier = ValueNotifier<double?>(null);
     final bottomBoundaryNotifier = ValueNotifier<double?>(null);
     final scrollControllerNotifier = ValueNotifier<ScrollController?>(null);

@@ -69,7 +69,6 @@ class _SharedPublicCollectionPageState
   @override
   Widget build(BuildContext context) {
     logger.info("Building SharedPublicCollectionPage");
-    // Create boundary notifiers
     final topBoundaryNotifier = ValueNotifier<double?>(null);
     final bottomBoundaryNotifier = ValueNotifier<double?>(null);
     final scrollControllerNotifier = ValueNotifier<ScrollController?>(null);

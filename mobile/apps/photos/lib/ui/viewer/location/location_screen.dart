@@ -47,7 +47,6 @@ class _LocationScreenState extends State<LocationScreen> {
     final locationTag =
         InheritedLocationScreenState.of(context).locationTagEntity.item;
 
-    // Create boundary notifiers
     final topBoundaryNotifier = ValueNotifier<double?>(null);
     final bottomBoundaryNotifier = ValueNotifier<double?>(null);
     final scrollControllerNotifier = ValueNotifier<ScrollController?>(null);

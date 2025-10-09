@@ -39,7 +39,6 @@ class LargeFilesPagePage extends StatefulWidget {
 class _LargeFilesPagePageState extends State<LargeFilesPagePage> {
   @override
   Widget build(BuildContext context) {
-    // Create boundary notifiers
     final topBoundaryNotifier = ValueNotifier<double?>(null);
     final bottomBoundaryNotifier = ValueNotifier<double?>(null);
     final scrollControllerNotifier = ValueNotifier<ScrollController?>(null);

@@ -141,7 +141,6 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Create boundary notifiers
     final topBoundaryNotifier = ValueNotifier<double?>(null);
     final bottomBoundaryNotifier = ValueNotifier<double?>(null);
     final scrollControllerNotifier = ValueNotifier<ScrollController?>(null);

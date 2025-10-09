@@ -88,7 +88,6 @@ class _HiddenPageState extends State<HiddenPage> {
     if (_defaultHiddenCollectionId == null) {
       return const EnteLoadingWidget();
     }
-    // Create boundary notifiers
     final topBoundaryNotifier = ValueNotifier<double?>(null);
     final bottomBoundaryNotifier = ValueNotifier<double?>(null);
     final scrollControllerNotifier = ValueNotifier<ScrollController?>(null);

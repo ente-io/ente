@@ -116,7 +116,6 @@ class CollectionPage extends StatelessWidget {
           : const SizedBox(height: 212),
     );
 
-    // Create boundary notifiers
     final topBoundaryNotifier = ValueNotifier<double?>(null);
     final bottomBoundaryNotifier = ValueNotifier<double?>(null);
     final scrollControllerNotifier = ValueNotifier<ScrollController?>(null);
