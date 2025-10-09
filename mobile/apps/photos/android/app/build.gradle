@@ -133,7 +133,7 @@ flutter {
     source = "../.."
 }
 
-dependencies {  
+dependencies {
     implementation 'io.sentry:sentry-android:2.0.0'
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.21'
     implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0'

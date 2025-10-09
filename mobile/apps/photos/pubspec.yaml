@@ -346,6 +346,7 @@ flutter_native_splash:
 
 # The following section is specific to Flutter.
 flutter:
+  default-flavor: independent
   assets:
     - assets/
     - assets/video-editor/
