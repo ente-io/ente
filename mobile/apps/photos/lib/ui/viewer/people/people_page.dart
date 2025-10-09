@@ -1,6 +1,7 @@
 import "dart:async";
 
 import 'package:flutter/material.dart';
+import "package:flutter/rendering.dart";
 import "package:logging/logging.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/files_updated_event.dart';
@@ -55,6 +56,10 @@ class _PeoplePageState extends State<PeoplePage> {
   List<EnteFile>? files;
   Future<List<EnteFile>> filesFuture = Future.value([]);
   late PersonEntity _person;
+  bool _isCollapsed = false;
+  bool _hasCollapsedOnce = false;
+  bool _hasFilesSelected = false;
+  Timer? _selectionTimer;
 
   bool userDismissedPersonGallerySuggestion = false;
 
@@ -65,6 +70,8 @@ class _PeoplePageState extends State<PeoplePage> {
   @override
   void initState() {
     super.initState();
+    _selectedFiles.addListener(_onSelectionChanged);
+
     _person = widget.person;
     ClusterFeedbackService.resetLastViewedClusterID();
     _peopleChangedEvent = Bus.instance.on<PeopleChangedEvent>().listen((event) {
@@ -100,6 +107,26 @@ class _PeoplePageState extends State<PeoplePage> {
         : null;
   }
 
+  void _onSelectionChanged() {
+    final hasSelection = _selectedFiles.files.isNotEmpty;
+
+    if (hasSelection && !_hasFilesSelected) {
+      setState(() {
+        _isCollapsed = false;
+        _hasFilesSelected = true;
+      });
+
+      _selectionTimer?.cancel();
+      _selectionTimer = Timer(const Duration(milliseconds: 10), () {});
+    } else if (!hasSelection && _hasFilesSelected) {
+      setState(() {
+        _hasFilesSelected = false;
+        _isCollapsed = false;
+      });
+      _selectionTimer?.cancel();
+    }
+  }
+
   Future<List<EnteFile>> loadPersonFiles() async {
     final result = await SearchService.instance
         .getClusterFilesForPersonID(_person.remoteID);
@@ -123,6 +150,8 @@ class _PeoplePageState extends State<PeoplePage> {
   void dispose() {
     _filesUpdatedEvent.cancel();
     _peopleChangedEvent.cancel();
+    _selectedFiles.removeListener(_onSelectionChanged);
+    _selectionTimer?.cancel();
     super.dispose();
   }
 
@@ -158,41 +187,76 @@ class _PeoplePageState extends State<PeoplePage> {
                   child: Stack(
                     alignment: Alignment.bottomCenter,
                     children: [
-                      inheritedSearchFilterData.isHierarchicalSearchable
-                          ? ValueListenableBuilder(
-                              valueListenable: inheritedSearchFilterData
-                                  .searchFilterDataProvider!
-                                  .isSearchingNotifier,
-                              builder: (
-                                context,
-                                value,
-                                _,
-                              ) {
-                                return value
-                                    ? HierarchicalSearchGallery(
-                                        tagPrefix: widget.tagPrefix,
-                                        selectedFiles: _selectedFiles,
-                                      )
-                                    : _Gallery(
-                                        tagPrefix: widget.tagPrefix,
-                                        selectedFiles: _selectedFiles,
-                                        personFiles: personFiles,
-                                        loadPersonFiles: loadPersonFiles,
-                                        personEntity: _person,
-                                      );
-                              },
-                            )
-                          : _Gallery(
-                              tagPrefix: widget.tagPrefix,
-                              selectedFiles: _selectedFiles,
-                              personFiles: personFiles,
-                              loadPersonFiles: loadPersonFiles,
-                              personEntity: _person,
-                            ),
+                      NotificationListener<ScrollNotification>(
+                        onNotification: (scrollInfo) {
+                          if (scrollInfo is UserScrollNotification &&
+                              _hasFilesSelected) {
+                            final shouldAllowCollapse =
+                                _selectionTimer == null ||
+                                    !_selectionTimer!.isActive;
+
+                            if (shouldAllowCollapse &&
+                                (!_hasCollapsedOnce || !_isCollapsed) &&
+                                (scrollInfo.direction ==
+                                        ScrollDirection.forward ||
+                                    scrollInfo.direction ==
+                                        ScrollDirection.reverse)) {
+                              Future.delayed(const Duration(milliseconds: 10),
+                                  () {
+                                if (mounted && _hasFilesSelected) {
+                                  setState(() {
+                                    _isCollapsed = true;
+                                    _hasCollapsedOnce = true;
+                                  });
+                                }
+                              });
+                            }
+                          }
+                          return false;
+                        },
+                        child:
+                            inheritedSearchFilterData.isHierarchicalSearchable
+                                ? ValueListenableBuilder(
+                                    valueListenable: inheritedSearchFilterData
+                                        .searchFilterDataProvider!
+                                        .isSearchingNotifier,
+                                    builder: (
+                                      context,
+                                      value,
+                                      _,
+                                    ) {
+                                      return value
+                                          ? HierarchicalSearchGallery(
+                                              tagPrefix: widget.tagPrefix,
+                                              selectedFiles: _selectedFiles,
+                                            )
+                                          : _Gallery(
+                                              tagPrefix: widget.tagPrefix,
+                                              selectedFiles: _selectedFiles,
+                                              personFiles: personFiles,
+                                              loadPersonFiles: loadPersonFiles,
+                                              personEntity: _person,
+                                            );
+                                    },
+                                  )
+                                : _Gallery(
+                                    tagPrefix: widget.tagPrefix,
+                                    selectedFiles: _selectedFiles,
+                                    personFiles: personFiles,
+                                    loadPersonFiles: loadPersonFiles,
+                                    personEntity: _person,
+                                  ),
+                      ),
                       FileSelectionOverlayBar(
                         PeoplePage.overlayType,
                         _selectedFiles,
                         person: _person,
+                        isCollapsed: _isCollapsed,
+                        onExpand: () {
+                          setState(() {
+                            _isCollapsed = false;
+                          });
+                        },
                       ),
                     ],
                   ),

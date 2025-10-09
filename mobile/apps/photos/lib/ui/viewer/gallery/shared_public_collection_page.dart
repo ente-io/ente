@@ -1,4 +1,7 @@
+import "dart:async";
+
 import "package:flutter/material.dart";
+import "package:flutter/rendering.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
@@ -51,16 +54,44 @@ class SharedPublicCollectionPage extends StatefulWidget {
 class _SharedPublicCollectionPageState
     extends State<SharedPublicCollectionPage> {
   final _selectedFiles = SelectedFiles();
+  bool _isCollapsed = false;
+  bool _hasCollapsedOnce = false;
+  bool _hasFilesSelected = false;
+  Timer? _selectionTimer;
   final galleryType = GalleryType.sharedPublicCollection;
   final logger = Logger("SharedPublicCollectionPage");
   @override
   void initState() {
     super.initState();
+    _selectedFiles.addListener(_onSelectionChanged);
+
     logger.info("Init SharedPublicCollectionPage");
+  }
+
+  void _onSelectionChanged() {
+    final hasSelection = _selectedFiles.files.isNotEmpty;
+
+    if (hasSelection && !_hasFilesSelected) {
+      setState(() {
+        _isCollapsed = false;
+        _hasFilesSelected = true;
+      });
+
+      _selectionTimer?.cancel();
+      _selectionTimer = Timer(const Duration(milliseconds: 10), () {});
+    } else if (!hasSelection && _hasFilesSelected) {
+      setState(() {
+        _hasFilesSelected = false;
+        _isCollapsed = false;
+      });
+      _selectionTimer?.cancel();
+    }
   }
 
   @override
   void dispose() {
+    _selectedFiles.removeListener(_onSelectionChanged);
+    _selectionTimer?.cancel();
     _selectedFiles.dispose();
     super.dispose();
   }
@@ -84,56 +115,79 @@ class _SharedPublicCollectionPageState
         break;
     }
 
-    final gallery = Gallery(
-      asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
-        widget.files!.sort(
-          (a, b) => b.creationTime!.compareTo(a.creationTime!),
-        );
+    final gallery = NotificationListener<ScrollNotification>(
+      onNotification: (scrollInfo) {
+        if (scrollInfo is UserScrollNotification && _hasFilesSelected) {
+          final shouldAllowCollapse =
+              _selectionTimer == null || !_selectionTimer!.isActive;
 
-        return FileLoadResult(widget.files!, false);
+          if (shouldAllowCollapse &&
+              (!_hasCollapsedOnce || !_isCollapsed) &&
+              (scrollInfo.direction == ScrollDirection.forward ||
+                  scrollInfo.direction == ScrollDirection.reverse)) {
+            Future.delayed(const Duration(milliseconds: 10), () {
+              if (mounted && _hasFilesSelected) {
+                setState(() {
+                  _isCollapsed = true;
+                  _hasCollapsedOnce = true;
+                });
+              }
+            });
+          }
+        }
+        return false;
       },
-      reloadEvent: Bus.instance
-          .on<CollectionUpdatedEvent>()
-          .where((event) => event.collectionID == widget.c.collection.id),
-      forceReloadEvents: [
-        Bus.instance.on<CollectionMetaEvent>().where(
-              (event) =>
-                  event.id == widget.c.collection.id &&
-                  event.type == CollectionMetaEventType.sortChanged,
-            ),
-      ],
-      removalEventTypes: const {
-        EventType.deletedFromRemote,
-        EventType.deletedFromEverywhere,
-        EventType.hide,
-      },
-      tagPrefix: widget.tagPrefix,
-      selectedFiles: _selectedFiles,
-      initialFiles: initialFiles,
-      albumName: widget.c.collection.displayName,
-      groupType: groupType,
-      header: widget.c.collection.isJoinEnabled &&
-              Configuration.instance.isLoggedIn()
-          ? Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: EndToEndBanner(
-                leadingIcon: Icons.people_outlined,
-                title: context.l10n.joinAlbum,
-                caption: widget.c.collection.isCollectEnabledForPublicLink()
-                    ? context.l10n.joinAlbumSubtext
-                    : context.l10n.joinAlbumSubtextViewer,
-                trailingWidget: ButtonWidget(
-                  buttonType: ButtonType.primary,
-                  buttonSize: ButtonSize.small,
-                  icon: null,
-                  labelText: context.l10n.join,
-                  shouldSurfaceExecutionStates: false,
-                  onTap: _joinAlbum,
-                ),
+      child: Gallery(
+        asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
+          widget.files!.sort(
+            (a, b) => b.creationTime!.compareTo(a.creationTime!),
+          );
+
+          return FileLoadResult(widget.files!, false);
+        },
+        reloadEvent: Bus.instance
+            .on<CollectionUpdatedEvent>()
+            .where((event) => event.collectionID == widget.c.collection.id),
+        forceReloadEvents: [
+          Bus.instance.on<CollectionMetaEvent>().where(
+                (event) =>
+                    event.id == widget.c.collection.id &&
+                    event.type == CollectionMetaEventType.sortChanged,
               ),
-            )
-          : null,
-      sortAsyncFn: () => widget.c.collection.pubMagicMetadata.asc ?? false,
+        ],
+        removalEventTypes: const {
+          EventType.deletedFromRemote,
+          EventType.deletedFromEverywhere,
+          EventType.hide,
+        },
+        tagPrefix: widget.tagPrefix,
+        selectedFiles: _selectedFiles,
+        initialFiles: initialFiles,
+        albumName: widget.c.collection.displayName,
+        groupType: groupType,
+        header: widget.c.collection.isJoinEnabled &&
+                Configuration.instance.isLoggedIn()
+            ? Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: EndToEndBanner(
+                  leadingIcon: Icons.people_outlined,
+                  title: context.l10n.joinAlbum,
+                  caption: widget.c.collection.isCollectEnabledForPublicLink()
+                      ? context.l10n.joinAlbumSubtext
+                      : context.l10n.joinAlbumSubtextViewer,
+                  trailingWidget: ButtonWidget(
+                    buttonType: ButtonType.primary,
+                    buttonSize: ButtonSize.small,
+                    icon: null,
+                    labelText: context.l10n.join,
+                    shouldSurfaceExecutionStates: false,
+                    onTap: _joinAlbum,
+                  ),
+                ),
+              )
+            : null,
+        sortAsyncFn: () => widget.c.collection.pubMagicMetadata.asc ?? false,
+      ),
     );
 
     return GalleryFilesState(
@@ -158,6 +212,12 @@ class _SharedPublicCollectionPageState
                 galleryType,
                 _selectedFiles,
                 collection: widget.c.collection,
+                isCollapsed: _isCollapsed,
+                onExpand: () {
+                  setState(() {
+                    _isCollapsed = false;
+                  });
+                },
               ),
             ],
           ),

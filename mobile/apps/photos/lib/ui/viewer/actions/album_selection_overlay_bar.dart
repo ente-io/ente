@@ -5,6 +5,7 @@ import "package:photos/models/selected_albums.dart";
 import "package:photos/theme/effects.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/collection_list_page.dart";
+import "package:photos/ui/components/bottom_action_bar/album_action_bar_widget.dart";
 import "package:photos/ui/components/bottom_action_bar/album_bottom_action_bar_widget.dart";
 
 class AlbumSelectionOverlayBar extends StatefulWidget {
@@ -14,6 +15,9 @@ class AlbumSelectionOverlayBar extends StatefulWidget {
   final Color? backgroundColor;
   final UISectionType sectionType;
   final bool showSelectAllButton;
+  final VoidCallback? onCancel;
+  final bool isCollapsed;
+  final VoidCallback? onExpand;
 
   const AlbumSelectionOverlayBar(
     this.selectedAlbums,
@@ -21,8 +25,11 @@ class AlbumSelectionOverlayBar extends StatefulWidget {
     this.collections, {
     super.key,
     this.onClose,
+    this.onCancel,
     this.backgroundColor,
+    this.isCollapsed = false,
     this.showSelectAllButton = false,
+    this.onExpand,
   });
 
   @override
@@ -47,49 +54,74 @@ class _AlbumSelectionOverlayBarState extends State<AlbumSelectionOverlayBar> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: _hasSelectedAlbumsNotifier,
-      builder: (context, value, child) {
-        return AnimatedCrossFade(
-          firstCurve: Curves.easeInOutExpo,
-          secondCurve: Curves.easeInOutExpo,
-          sizeCurve: Curves.easeInOutExpo,
-          crossFadeState: _hasSelectedAlbumsNotifier.value
-              ? CrossFadeState.showFirst
-              : CrossFadeState.showSecond,
-          duration: const Duration(milliseconds: 400),
-          firstChild: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              if (widget.showSelectAllButton)
-                Padding(
-                  padding: const EdgeInsets.only(right: 4),
-                  child: SelectAllAlbumsButton(
-                    widget.selectedAlbums,
-                    widget.collections,
-                    backgroundColor: widget.backgroundColor,
-                  ),
-                ),
-              const SizedBox(height: 8),
-              Container(
-                decoration: BoxDecoration(boxShadow: shadowFloatFaintLight),
-                child: AlbumBottomActionBarWidget(
-                  widget.selectedAlbums,
-                  widget.sectionType,
-                  onCancel: () {
-                    if (widget.selectedAlbums.albums.isNotEmpty) {
-                      widget.selectedAlbums.clearAll();
-                    }
-                  },
-                  backgroundColor: widget.backgroundColor,
-                ),
-              ),
-            ],
-          ),
-          secondChild: const SizedBox(width: double.infinity),
-        );
+    return GestureDetector(
+      onVerticalDragUpdate: (details) {
+        if (details.primaryDelta! < -10) {
+          widget.onExpand?.call();
+        }
       },
+      child: ValueListenableBuilder(
+        valueListenable: _hasSelectedAlbumsNotifier,
+        builder: (context, value, child) {
+          return AnimatedSize(
+            duration: const Duration(milliseconds: 350),
+            curve: Curves.easeInOutCubic,
+            alignment: Alignment.topCenter,
+            child: SizedBox(
+              width: double.infinity,
+              child: _hasSelectedAlbumsNotifier.value
+                  ? Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Row(
+                          children: [
+                            if (widget.showSelectAllButton)
+                              Padding(
+                                padding: const EdgeInsets.only(left: 12),
+                                child: SelectAllAlbumsButton(
+                                  widget.selectedAlbums,
+                                  widget.collections,
+                                  backgroundColor: widget.backgroundColor,
+                                ),
+                              ),
+                            const Spacer(),
+                            Padding(
+                              padding: const EdgeInsets.only(right: 12.0),
+                              child: AlbumActionBarWidget(
+                                selectedAlbums: widget.selectedAlbums,
+                                onCancel: () {
+                                  if (widget.selectedAlbums.albums.isNotEmpty) {
+                                    widget.selectedAlbums.clearAll();
+                                  }
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          decoration:
+                              BoxDecoration(boxShadow: shadowFloatFaintLight),
+                          child: AlbumBottomActionBarWidget(
+                            widget.selectedAlbums,
+                            widget.sectionType,
+                            isCollapsed: widget.isCollapsed,
+                            onCancel: () {
+                              if (widget.selectedAlbums.albums.isNotEmpty) {
+                                widget.selectedAlbums.clearAll();
+                              }
+                            },
+                            backgroundColor: widget.backgroundColor,
+                          ),
+                        ),
+                      ],
+                    )
+                  : const SizedBox.shrink(),
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -133,50 +165,47 @@ class _SelectAllAlbumsButtonState extends State<SelectAllAlbumsButton> {
           _allSelected = !_allSelected;
         });
       },
-      child: Padding(
-        padding: const EdgeInsets.only(top: 8),
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: widget.backgroundColor ?? colorScheme.backgroundElevated2,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 4,
-                offset: const Offset(0, -1),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                AppLocalizations.of(context).selectAllShort,
-                style: getEnteTextTheme(context).miniMuted,
-              ),
-              const SizedBox(width: 4),
-              ListenableBuilder(
-                listenable: widget.selectedAlbums,
-                builder: (context, _) {
-                  if (widget.selectedAlbums.albums.length ==
-                      widget.collections.length) {
-                    _allSelected = true;
-                  } else {
-                    _allSelected = false;
-                  }
-                  return Icon(
-                    _allSelected
-                        ? Icons.check_circle
-                        : Icons.check_circle_outline,
-                    color: _allSelected ? null : colorScheme.strokeMuted,
-                    size: 18,
-                  );
-                },
-              ),
-            ],
-          ),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+        decoration: BoxDecoration(
+          color: widget.backgroundColor ?? colorScheme.backgroundElevated2,
+          borderRadius: BorderRadius.circular(100),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 4,
+              offset: const Offset(0, -1),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              AppLocalizations.of(context).selectAll,
+              style: getEnteTextTheme(context).mini,
+            ),
+            const SizedBox(width: 4),
+            ListenableBuilder(
+              listenable: widget.selectedAlbums,
+              builder: (context, _) {
+                if (widget.selectedAlbums.albums.length ==
+                    widget.collections.length) {
+                  _allSelected = true;
+                } else {
+                  _allSelected = false;
+                }
+                return Icon(
+                  _allSelected
+                      ? Icons.check_circle
+                      : Icons.check_circle_outline,
+                  color: _allSelected ? null : colorScheme.strokeBase,
+                  size: 16,
+                );
+              },
+            ),
+          ],
         ),
       ),
     );

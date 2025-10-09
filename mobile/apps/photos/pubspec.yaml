@@ -25,6 +25,7 @@ dependencies:
   app_links: ^6.4.0
   archive: ^4.0.7
   async: ^2.11.0
+  auto_size_text: ^3.0.0
   battery_info: # replace with battery_plus
     git:
       url: https://github.com/ente-io/battery_info
@@ -191,6 +192,7 @@ dependencies:
   sentry_flutter: ^8.14.1
   share_plus: ^11.0.0
   shared_preferences: ^2.0.5
+  smooth_page_indicator: ^1.2.1
   sqflite: ^2.4.2
   sqflite_migration: ^0.3.0
   sqlite3_flutter_libs: ^0.5.20

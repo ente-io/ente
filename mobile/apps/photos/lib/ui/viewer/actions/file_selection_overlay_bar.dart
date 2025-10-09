@@ -11,6 +11,7 @@ import "package:photos/models/search/hierarchical/only_them_filter.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/theme/effects.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/components/bottom_action_bar/action_bar_widget.dart";
 import 'package:photos/ui/components/bottom_action_bar/bottom_action_bar_widget.dart';
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
@@ -19,12 +20,16 @@ import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 
 class FileSelectionOverlayBar extends StatefulWidget {
   static double roughHeight = Platform.isIOS ? 240.0 : 232.0;
+  static double collapsedHeight = (Platform.isIOS ? 240.0 : 232.0) / 1.3;
   final GalleryType galleryType;
   final SelectedFiles selectedFiles;
   final Collection? collection;
   final Color? backgroundColor;
   final PersonEntity? person;
   final String? clusterID;
+  final VoidCallback? onCancel;
+  final bool isCollapsed;
+  final VoidCallback? onExpand;
 
   const FileSelectionOverlayBar(
     this.galleryType,
@@ -33,6 +38,9 @@ class FileSelectionOverlayBar extends StatefulWidget {
     this.backgroundColor,
     this.person,
     this.clusterID,
+    this.onCancel,
+    this.isCollapsed = false,
+    this.onExpand,
     super.key,
   });
 
@@ -114,51 +122,83 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   }
 
   Widget _body() {
-    return ValueListenableBuilder(
-      valueListenable: _hasSelectedFilesNotifier,
-      builder: (context, value, child) {
-        return AnimatedCrossFade(
-          firstCurve: Curves.easeInOutExpo,
-          secondCurve: Curves.easeInOutExpo,
-          sizeCurve: Curves.easeInOutExpo,
-          crossFadeState: _hasSelectedFilesNotifier.value
-              ? CrossFadeState.showFirst
-              : CrossFadeState.showSecond,
-          duration: const Duration(milliseconds: 400),
-          firstChild: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(right: 4),
-                child: SelectAllButton(
-                  backgroundColor: widget.backgroundColor,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                decoration: BoxDecoration(
-                  boxShadow: shadowFloatFaintLight,
-                ),
-                child: BottomActionBarWidget(
-                  selectedFiles: widget.selectedFiles,
-                  galleryType: _galleryType,
-                  collection: widget.collection,
-                  person: widget.person,
-                  clusterID: widget.clusterID,
-                  onCancel: () {
-                    if (widget.selectedFiles.files.isNotEmpty) {
-                      widget.selectedFiles.clearAll();
-                    }
-                  },
-                  backgroundColor: widget.backgroundColor,
-                ),
-              ),
-            ],
-          ),
-          secondChild: const SizedBox(width: double.infinity),
-        );
+    return GestureDetector(
+      onVerticalDragUpdate: (details) {
+        if (details.primaryDelta! < -10) {
+          widget.onExpand?.call();
+        }
       },
+      child: AnimatedSize(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOutCubic,
+        alignment: Alignment.topCenter,
+        child: SizedBox(
+          width: double.infinity,
+          child: ValueListenableBuilder(
+            valueListenable: _hasSelectedFilesNotifier,
+            builder: (context, value, child) {
+              return AnimatedCrossFade(
+                firstCurve: Curves.easeInOutCubic,
+                secondCurve: Curves.easeInOutCubic,
+                sizeCurve: Curves.easeInOutCubic,
+                crossFadeState: _hasSelectedFilesNotifier.value
+                    ? CrossFadeState.showFirst
+                    : CrossFadeState.showSecond,
+                duration: const Duration(milliseconds: 300),
+                firstChild: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(left: 12),
+                          child: SelectAllButton(
+                            backgroundColor: widget.backgroundColor,
+                          ),
+                        ),
+                        const Spacer(),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 12),
+                          child: ActionBarWidget(
+                            selectedFiles: widget.selectedFiles,
+                            onCancel: () {
+                              if (widget.selectedFiles.files.isNotEmpty) {
+                                widget.selectedFiles.clearAll();
+                              }
+                            },
+                            backgroundColor: widget.backgroundColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      decoration: BoxDecoration(
+                        boxShadow: shadowFloatFaintLight,
+                      ),
+                      child: BottomActionBarWidget(
+                        selectedFiles: widget.selectedFiles,
+                        galleryType: _galleryType,
+                        collection: widget.collection,
+                        person: widget.person,
+                        clusterID: widget.clusterID,
+                        isCollapsed: widget.isCollapsed,
+                        onCancel: () {
+                          if (widget.selectedFiles.files.isNotEmpty) {
+                            widget.selectedFiles.clearAll();
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                secondChild: const SizedBox.shrink(),
+              );
+            },
+          ),
+        ),
+      ),
     );
   }
 
@@ -247,50 +287,47 @@ class _SelectAllButtonState extends State<SelectAllButton> {
           _allSelected = !_allSelected;
         });
       },
-      child: Padding(
-        padding: const EdgeInsets.only(top: 8),
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: widget.backgroundColor ?? colorScheme.backgroundElevated2,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 4,
-                offset: const Offset(0, -1),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                AppLocalizations.of(context).selectAllShort,
-                style: getEnteTextTheme(context).miniMuted,
-              ),
-              const SizedBox(width: 4),
-              ListenableBuilder(
-                listenable: selectionState!.selectedFiles,
-                builder: (context, _) {
-                  if (selectionState.selectedFiles.files.length ==
-                      allGalleryFiles.length) {
-                    _allSelected = true;
-                  } else {
-                    _allSelected = false;
-                  }
-                  return Icon(
-                    _allSelected
-                        ? Icons.check_circle
-                        : Icons.check_circle_outline,
-                    color: _allSelected ? null : colorScheme.strokeMuted,
-                    size: 18,
-                  );
-                },
-              ),
-            ],
-          ),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+        decoration: BoxDecoration(
+          color: widget.backgroundColor ?? colorScheme.backgroundElevated2,
+          borderRadius: BorderRadius.circular(100),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 4,
+              offset: const Offset(0, -1),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              AppLocalizations.of(context).selectAll,
+              style: getEnteTextTheme(context).mini,
+            ),
+            const SizedBox(width: 4),
+            ListenableBuilder(
+              listenable: selectionState!.selectedFiles,
+              builder: (context, _) {
+                if (selectionState.selectedFiles.files.length ==
+                    allGalleryFiles.length) {
+                  _allSelected = true;
+                } else {
+                  _allSelected = false;
+                }
+                return Icon(
+                  _allSelected
+                      ? Icons.check_circle
+                      : Icons.check_circle_outline,
+                  color: _allSelected ? null : colorScheme.strokeBase,
+                  size: 16,
+                );
+              },
+            ),
+          ],
         ),
       ),
     );

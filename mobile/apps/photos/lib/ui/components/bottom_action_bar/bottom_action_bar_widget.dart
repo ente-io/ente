@@ -5,8 +5,6 @@ import "package:photos/models/gallery_type.dart";
 import "package:photos/models/ml/face/person.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/theme/ente_theme.dart';
-import 'package:photos/ui/components/bottom_action_bar/action_bar_widget.dart';
-import "package:photos/ui/components/divider_widget.dart";
 import "package:photos/ui/viewer/actions/file_selection_actions_widget.dart";
 
 class BottomActionBarWidget extends StatelessWidget {
@@ -16,7 +14,7 @@ class BottomActionBarWidget extends StatelessWidget {
   final String? clusterID;
   final SelectedFiles selectedFiles;
   final VoidCallback? onCancel;
-  final Color? backgroundColor;
+  final bool isCollapsed;
 
   const BottomActionBarWidget({
     required this.galleryType,
@@ -25,7 +23,7 @@ class BottomActionBarWidget extends StatelessWidget {
     this.person,
     this.clusterID,
     this.onCancel,
-    this.backgroundColor,
+    this.isCollapsed = false,
     super.key,
   });
 
@@ -39,10 +37,10 @@ class BottomActionBarWidget extends StatelessWidget {
         : 0;
     return Container(
       decoration: BoxDecoration(
-        color: backgroundColor ?? colorScheme.backgroundElevated2,
+        color: colorScheme.backgroundElevated,
         borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(8),
-          topRight: Radius.circular(8),
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
         ),
       ),
       padding: EdgeInsets.only(
@@ -61,13 +59,9 @@ class BottomActionBarWidget extends StatelessWidget {
             collection: collection,
             person: person,
             clusterID: clusterID,
+            isCollapsed: isCollapsed,
           ),
-          const DividerWidget(dividerType: DividerType.bottomBar),
-          ActionBarWidget(
-            selectedFiles: selectedFiles,
-            onCancel: onCancel,
-          ),
-          // const SizedBox(height: 2)
+          const SizedBox(height: 2),
         ],
       ),
     );

@@ -1,7 +1,9 @@
+import "dart:async";
 import 'dart:ui';
 
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
+import "package:flutter/rendering.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/files_updated_event.dart';
@@ -17,12 +19,12 @@ import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.da
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 import 'package:photos/utils/delete_file_util.dart';
 
-class TrashPage extends StatelessWidget {
+class TrashPage extends StatefulWidget {
   final String tagPrefix;
   final GalleryType appBarType;
   final GalleryType overlayType;
-  final _selectedFiles = SelectedFiles();
-  TrashPage({
+
+  const TrashPage({
     this.tagPrefix = "trash_page",
     this.appBarType = GalleryType.trash,
     this.overlayType = GalleryType.trash,
@@ -30,32 +32,99 @@ class TrashPage extends StatelessWidget {
   });
 
   @override
+  State<TrashPage> createState() => _TrashPageState();
+}
+
+class _TrashPageState extends State<TrashPage> {
+  final _selectedFiles = SelectedFiles();
+  bool _isCollapsed = false;
+  bool _hasCollapsedOnce = false;
+  bool _hasFilesSelected = false;
+  Timer? _selectionTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedFiles.addListener(_onSelectionChanged);
+  }
+
+  void _onSelectionChanged() {
+    final hasSelection = _selectedFiles.files.isNotEmpty;
+
+    if (hasSelection && !_hasFilesSelected) {
+      setState(() {
+        _isCollapsed = false;
+        _hasFilesSelected = true;
+      });
+
+      _selectionTimer?.cancel();
+      _selectionTimer = Timer(const Duration(milliseconds: 10), () {});
+    } else if (!hasSelection && _hasFilesSelected) {
+      setState(() {
+        _hasFilesSelected = false;
+        _isCollapsed = false;
+      });
+      _selectionTimer?.cancel();
+    }
+  }
+
+  @override
+  void dispose() {
+    _selectedFiles.removeListener(_onSelectionChanged);
+    _selectionTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final bool filesAreSelected = _selectedFiles.files.isNotEmpty;
 
-    final gallery = Gallery(
-      asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
-        return TrashDB.instance.getTrashedFiles(
-          creationStartTime,
-          creationEndTime,
-          limit: limit,
-          asc: asc,
-        );
+    final gallery = NotificationListener<ScrollNotification>(
+      onNotification: (scrollInfo) {
+        if (scrollInfo is UserScrollNotification && _hasFilesSelected) {
+          final shouldAllowCollapse =
+              _selectionTimer == null || !_selectionTimer!.isActive;
+
+          if (shouldAllowCollapse &&
+              (!_hasCollapsedOnce || !_isCollapsed) &&
+              (scrollInfo.direction == ScrollDirection.forward ||
+                  scrollInfo.direction == ScrollDirection.reverse)) {
+            Future.delayed(const Duration(milliseconds: 10), () {
+              if (mounted && _hasFilesSelected) {
+                setState(() {
+                  _isCollapsed = true;
+                  _hasCollapsedOnce = true;
+                });
+              }
+            });
+          }
+        }
+        return false;
       },
-      reloadEvent: Bus.instance.on<FilesUpdatedEvent>().where(
-            (event) =>
-                event.updatedFiles.firstWhereOrNull(
-                  (element) => element.uploadedFileID != null,
-                ) !=
-                null,
-          ),
-      forceReloadEvents: [
-        Bus.instance.on<ForceReloadTrashPageEvent>(),
-      ],
-      tagPrefix: tagPrefix,
-      selectedFiles: _selectedFiles,
-      header: _headerWidget(),
-      initialFiles: null,
+      child: Gallery(
+        asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
+          return TrashDB.instance.getTrashedFiles(
+            creationStartTime,
+            creationEndTime,
+            limit: limit,
+            asc: asc,
+          );
+        },
+        reloadEvent: Bus.instance.on<FilesUpdatedEvent>().where(
+              (event) =>
+                  event.updatedFiles.firstWhereOrNull(
+                    (element) => element.uploadedFileID != null,
+                  ) !=
+                  null,
+            ),
+        forceReloadEvents: [
+          Bus.instance.on<ForceReloadTrashPageEvent>(),
+        ],
+        tagPrefix: widget.tagPrefix,
+        selectedFiles: _selectedFiles,
+        header: _headerWidget(),
+        initialFiles: null,
+      ),
     );
 
     return GalleryFilesState(
@@ -63,7 +132,7 @@ class TrashPage extends StatelessWidget {
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(50.0),
           child: GalleryAppBarWidget(
-            appBarType,
+            widget.appBarType,
             AppLocalizations.of(context).trash,
             _selectedFiles,
           ),
@@ -94,7 +163,16 @@ class TrashPage extends StatelessWidget {
                   ),
                 ),
               ),
-              FileSelectionOverlayBar(GalleryType.trash, _selectedFiles),
+              FileSelectionOverlayBar(
+                GalleryType.trash,
+                _selectedFiles,
+                isCollapsed: _isCollapsed,
+                onExpand: () {
+                  setState(() {
+                    _isCollapsed = false;
+                  });
+                },
+              ),
             ],
           ),
         ),

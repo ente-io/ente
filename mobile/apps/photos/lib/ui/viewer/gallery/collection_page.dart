@@ -1,4 +1,7 @@
+import "dart:async";
+
 import 'package:flutter/material.dart';
+import "package:flutter/rendering.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
@@ -26,13 +29,13 @@ import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 
-class CollectionPage extends StatelessWidget {
+class CollectionPage extends StatefulWidget {
   final CollectionWithThumbnail c;
   final String tagPrefix;
   final bool? hasVerifiedLock;
   final bool isFromCollectPhotos;
 
-  CollectionPage(
+  const CollectionPage(
     this.c, {
     this.tagPrefix = "collection",
     this.hasVerifiedLock = false,
@@ -40,87 +43,153 @@ class CollectionPage extends StatelessWidget {
     super.key,
   });
 
+  @override
+  State<CollectionPage> createState() => _CollectionPageState();
+}
+
+class _CollectionPageState extends State<CollectionPage> {
   final _selectedFiles = SelectedFiles();
+  bool _isCollapsed = false;
+  bool _hasCollapsedOnce = false;
+  bool _hasFilesSelected = false;
+  Timer? _selectionTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedFiles.addListener(_onSelectionChanged);
+  }
+
+  void _onSelectionChanged() {
+    final hasSelection = _selectedFiles.files.isNotEmpty;
+
+    if (hasSelection && !_hasFilesSelected) {
+      setState(() {
+        _isCollapsed = false;
+        _hasFilesSelected = true;
+      });
+
+      _selectionTimer?.cancel();
+      _selectionTimer = Timer(const Duration(milliseconds: 10), () {});
+    } else if (!hasSelection && _hasFilesSelected) {
+      setState(() {
+        _hasFilesSelected = false;
+        _isCollapsed = false;
+      });
+      _selectionTimer?.cancel();
+    }
+  }
+
+  @override
+  void dispose() {
+    _selectedFiles.removeListener(_onSelectionChanged);
+    _selectionTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (hasVerifiedLock == false && c.collection.isHidden()) {
+    if (widget.hasVerifiedLock == false && widget.c.collection.isHidden()) {
       return const EmptyState();
     }
 
     final galleryType = getGalleryType(
-      c.collection,
+      widget.c.collection,
       Configuration.instance.getUserID()!,
     );
     final List<EnteFile>? initialFiles =
-        c.thumbnail != null ? [c.thumbnail!] : null;
-    final gallery = Gallery(
-      asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
-        final FileLoadResult result =
-            await FilesDB.instance.getFilesInCollection(
-          c.collection.id,
-          creationStartTime,
-          creationEndTime,
-          limit: limit,
-          asc: asc,
-        );
-        // hide ignored files from home page UI
-        final ignoredIDs =
-            await IgnoredFilesService.instance.idToIgnoreReasonMap;
-        result.files.removeWhere(
-          (f) =>
-              f.uploadedFileID == null &&
-              IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, f),
-        );
-        return result;
+        widget.c.thumbnail != null ? [widget.c.thumbnail!] : null;
+
+    final gallery = NotificationListener<ScrollNotification>(
+      onNotification: (scrollInfo) {
+        if (scrollInfo is UserScrollNotification && _hasFilesSelected) {
+          final shouldAllowCollapse =
+              _selectionTimer == null || !_selectionTimer!.isActive;
+
+          if (shouldAllowCollapse &&
+              (!_hasCollapsedOnce || !_isCollapsed) &&
+              (scrollInfo.direction == ScrollDirection.forward ||
+                  scrollInfo.direction == ScrollDirection.reverse)) {
+            Future.delayed(const Duration(milliseconds: 10), () {
+              if (mounted && _hasFilesSelected) {
+                setState(() {
+                  _isCollapsed = true;
+                  _hasCollapsedOnce = true;
+                });
+              }
+            });
+          }
+        }
+        return false;
       },
-      reloadEvent: Bus.instance
-          .on<CollectionUpdatedEvent>()
-          .where((event) => event.collectionID == c.collection.id),
-      forceReloadEvents: [
-        Bus.instance.on<CollectionMetaEvent>().where(
-              (event) =>
-                  event.id == c.collection.id &&
-                  event.type == CollectionMetaEventType.sortChanged,
-            ),
-      ],
-      removalEventTypes: const {
-        EventType.deletedFromRemote,
-        EventType.deletedFromEverywhere,
-        EventType.hide,
-      },
-      tagPrefix: tagPrefix,
-      selectedFiles: _selectedFiles,
-      initialFiles: initialFiles,
-      albumName: c.collection.displayName,
-      sortAsyncFn: () => c.collection.pubMagicMetadata.asc ?? false,
-      addHeaderOrFooterEmptyState: false,
-      showSelectAll: galleryType != GalleryType.sharedCollection,
-      emptyState: galleryType == GalleryType.ownedCollection
-          ? EmptyAlbumState(
-              c.collection,
-              isFromCollectPhotos: isFromCollectPhotos,
-              onAddPhotos: () {
-                Bus.instance.fire(
-                  CollectionMetaEvent(
-                    c.collection.id,
-                    CollectionMetaEventType.autoAddPeople,
-                  ),
-                );
-              },
-            )
-          : const EmptyState(),
-      footer: isFromCollectPhotos
-          ? const SizedBox(height: 20)
-          : const SizedBox(height: 212),
+      child: Gallery(
+        asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
+          final FileLoadResult result =
+              await FilesDB.instance.getFilesInCollection(
+            widget.c.collection.id,
+            creationStartTime,
+            creationEndTime,
+            limit: limit,
+            asc: asc,
+          );
+          // hide ignored files from home page UI
+          final ignoredIDs =
+              await IgnoredFilesService.instance.idToIgnoreReasonMap;
+          result.files.removeWhere(
+            (f) =>
+                f.uploadedFileID == null &&
+                IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, f),
+          );
+          return result;
+        },
+        reloadEvent: Bus.instance
+            .on<CollectionUpdatedEvent>()
+            .where((event) => event.collectionID == widget.c.collection.id),
+        forceReloadEvents: [
+          Bus.instance.on<CollectionMetaEvent>().where(
+                (event) =>
+                    event.id == widget.c.collection.id &&
+                    event.type == CollectionMetaEventType.sortChanged,
+              ),
+        ],
+        removalEventTypes: const {
+          EventType.deletedFromRemote,
+          EventType.deletedFromEverywhere,
+          EventType.hide,
+        },
+        tagPrefix: widget.tagPrefix,
+        selectedFiles: _selectedFiles,
+        initialFiles: initialFiles,
+        albumName: widget.c.collection.displayName,
+        sortAsyncFn: () => widget.c.collection.pubMagicMetadata.asc ?? false,
+        addHeaderOrFooterEmptyState: false,
+        showSelectAll: galleryType != GalleryType.sharedCollection,
+        emptyState: galleryType == GalleryType.ownedCollection
+            ? EmptyAlbumState(
+                widget.c.collection,
+                isFromCollectPhotos: widget.isFromCollectPhotos,
+                onAddPhotos: () {
+                  Bus.instance.fire(
+                    CollectionMetaEvent(
+                      widget.c.collection.id,
+                      CollectionMetaEventType.autoAddPeople,
+                    ),
+                  );
+                },
+              )
+            : const EmptyState(),
+        footer: widget.isFromCollectPhotos
+            ? const SizedBox(height: 20)
+            : const SizedBox(height: 212),
+      ),
     );
 
     return GalleryFilesState(
       child: InheritedSearchFilterDataWrapper(
         searchFilterDataProvider: SearchFilterDataProvider(
           initialGalleryFilter: AlbumFilter(
-            collectionID: c.collection.id,
-            albumName: c.collection.displayName,
+            collectionID: widget.c.collection.id,
+            albumName: widget.c.collection.displayName,
             occurrence: kMostRelevantFilter,
           ),
         ),
@@ -129,15 +198,15 @@ class CollectionPage extends StatelessWidget {
             preferredSize: const Size.fromHeight(90.0),
             child: GalleryAppBarWidget(
               galleryType,
-              c.collection.displayName,
+              widget.c.collection.displayName,
               _selectedFiles,
-              collection: c.collection,
-              isFromCollectPhotos: isFromCollectPhotos,
+              collection: widget.c.collection,
+              isFromCollectPhotos: widget.isFromCollectPhotos,
             ),
           ),
-          bottomNavigationBar: isFromCollectPhotos
+          bottomNavigationBar: widget.isFromCollectPhotos
               ? CollectPhotosBottomButtons(
-                  c.collection,
+                  widget.c.collection,
                   selectedFiles: _selectedFiles,
                 )
               : null,
@@ -155,7 +224,7 @@ class CollectionPage extends StatelessWidget {
                       builder: (context, value, _) {
                         return value
                             ? HierarchicalSearchGallery(
-                                tagPrefix: tagPrefix,
+                                tagPrefix: widget.tagPrefix,
                                 selectedFiles: _selectedFiles,
                               )
                             : gallery;
@@ -164,12 +233,18 @@ class CollectionPage extends StatelessWidget {
                   },
                 ),
                 SmartAlbumsStatusWidget(
-                  collection: c.collection,
+                  collection: widget.c.collection,
                 ),
                 FileSelectionOverlayBar(
                   galleryType,
                   _selectedFiles,
-                  collection: c.collection,
+                  collection: widget.c.collection,
+                  isCollapsed: _isCollapsed,
+                  onExpand: () {
+                    setState(() {
+                      _isCollapsed = false;
+                    });
+                  },
                 ),
               ],
             ),

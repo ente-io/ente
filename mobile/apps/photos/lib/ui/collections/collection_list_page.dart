@@ -1,6 +1,7 @@
 import "dart:async";
 
 import 'package:flutter/material.dart';
+import "package:flutter/rendering.dart";
 import "package:flutter_svg/flutter_svg.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/album_sort_order_change_event.dart";
@@ -55,6 +56,11 @@ class _CollectionListPageState extends State<CollectionListPage> {
   final _selectedAlbum = SelectedAlbums();
   late final ScrollController _scrollController;
 
+  bool _isCollapsed = false;
+  bool _hasCollapsedOnce = false;
+  bool _hasAlbumsSelected = false;
+  Timer? _selectionTimer;
+
   @override
   void initState() {
     super.initState();
@@ -69,12 +75,35 @@ class _CollectionListPageState extends State<CollectionListPage> {
     _scrollController = ScrollController(
       initialScrollOffset: widget.initialScrollOffset ?? 0,
     );
+    _selectedAlbum.addListener(_onSelectionChanged);
+  }
+
+  void _onSelectionChanged() {
+    final hasSelection = _selectedAlbum.albums.isNotEmpty;
+
+    if (hasSelection && !_hasAlbumsSelected) {
+      setState(() {
+        _isCollapsed = false;
+        _hasAlbumsSelected = true;
+      });
+
+      _selectionTimer?.cancel();
+      _selectionTimer = Timer(const Duration(milliseconds: 10), () {});
+    } else if (!hasSelection && _hasAlbumsSelected) {
+      setState(() {
+        _hasAlbumsSelected = false;
+        _isCollapsed = false;
+      });
+      _selectionTimer?.cancel();
+    }
   }
 
   @override
   void dispose() {
     _collectionUpdatesSubscription.cancel();
     _scrollController.dispose();
+    _selectedAlbum.removeListener(_onSelectionChanged);
+    _selectionTimer?.cancel();
     super.dispose();
   }
 
@@ -91,41 +120,63 @@ class _CollectionListPageState extends State<CollectionListPage> {
         child: Stack(
           alignment: Alignment.bottomCenter,
           children: [
-            Scrollbar(
-              interactive: true,
-              controller: _scrollController,
-              child: CustomScrollView(
-                physics: const BouncingScrollPhysics(),
+            NotificationListener<ScrollNotification>(
+              onNotification: (scrollInfo) {
+                if (scrollInfo is UserScrollNotification &&
+                    _hasAlbumsSelected) {
+                  final shouldAllowCollapse =
+                      _selectionTimer == null || !_selectionTimer!.isActive;
+
+                  if (shouldAllowCollapse &&
+                      (!_hasCollapsedOnce || !_isCollapsed) &&
+                      (scrollInfo.direction == ScrollDirection.forward ||
+                          scrollInfo.direction == ScrollDirection.reverse)) {
+                    if (mounted && _hasAlbumsSelected) {
+                      setState(() {
+                        _isCollapsed = true;
+                        _hasCollapsedOnce = true;
+                      });
+                    }
+                  }
+                }
+                return false;
+              },
+              child: Scrollbar(
+                interactive: true,
                 controller: _scrollController,
-                slivers: [
-                  SearchableAppBar(
-                    title: widget.appTitle ?? const SizedBox.shrink(),
-                    heroTag: widget.tag,
-                    onSearch: (value) {
-                      setState(() {
-                        _searchQuery = value;
-                      });
-                      refreshCollections();
-                    },
-                    onSearchClosed: () {
-                      setState(() {
-                        _searchQuery = '';
-                      });
-                      refreshCollections();
-                    },
-                    actions: [
-                      _sortMenu(collections!),
-                    ],
-                  ),
-                  CollectionsFlexiGridViewWidget(
-                    collections,
-                    displayLimitCount: displayLimitCount,
-                    tag: widget.tag,
-                    enableSelectionMode: enableSelectionMode,
-                    albumViewType: albumViewType ?? AlbumViewType.grid,
-                    selectedAlbums: _selectedAlbum,
-                  ),
-                ],
+                child: CustomScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  controller: _scrollController,
+                  slivers: [
+                    SearchableAppBar(
+                      title: widget.appTitle ?? const SizedBox.shrink(),
+                      heroTag: widget.tag,
+                      onSearch: (value) {
+                        setState(() {
+                          _searchQuery = value;
+                        });
+                        refreshCollections();
+                      },
+                      onSearchClosed: () {
+                        setState(() {
+                          _searchQuery = '';
+                        });
+                        refreshCollections();
+                      },
+                      actions: [
+                        _sortMenu(collections!),
+                      ],
+                    ),
+                    CollectionsFlexiGridViewWidget(
+                      collections,
+                      displayLimitCount: displayLimitCount,
+                      tag: widget.tag,
+                      enableSelectionMode: enableSelectionMode,
+                      albumViewType: albumViewType ?? AlbumViewType.grid,
+                      selectedAlbums: _selectedAlbum,
+                    ),
+                  ],
+                ),
               ),
             ),
             AlbumSelectionOverlayBar(
@@ -133,6 +184,12 @@ class _CollectionListPageState extends State<CollectionListPage> {
               widget.sectionType,
               collections!,
               showSelectAllButton: true,
+              isCollapsed: _isCollapsed,
+              onExpand: () {
+                setState(() {
+                  _isCollapsed = false;
+                });
+              },
             ),
           ],
         ),

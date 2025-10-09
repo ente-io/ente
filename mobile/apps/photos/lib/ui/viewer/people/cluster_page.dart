@@ -2,6 +2,7 @@ import "dart:async";
 
 import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
+import "package:flutter/rendering.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
@@ -59,10 +60,15 @@ class _ClusterPageState extends State<ClusterPage> {
   late final List<EnteFile> files;
   late final StreamSubscription<LocalPhotosUpdatedEvent> _filesUpdatedEvent;
   late final StreamSubscription<PeopleChangedEvent> _peopleChangedEvent;
+  bool _isCollapsed = false;
+  bool _hasCollapsedOnce = false;
+  bool _hasFilesSelected = false;
+  Timer? _selectionTimer;
 
   @override
   void initState() {
     super.initState();
+    _selectedFiles.addListener(_onSelectionChanged);
     ClusterFeedbackService.setLastViewedClusterID(widget.clusterID);
     files = widget.searchResult;
     _filesUpdatedEvent =
@@ -101,6 +107,26 @@ class _ClusterPageState extends State<ClusterPage> {
         : null;
   }
 
+  void _onSelectionChanged() {
+    final hasSelection = _selectedFiles.files.isNotEmpty;
+
+    if (hasSelection && !_hasFilesSelected) {
+      setState(() {
+        _isCollapsed = false;
+        _hasFilesSelected = true;
+      });
+
+      _selectionTimer?.cancel();
+      _selectionTimer = Timer(const Duration(milliseconds: 10), () {});
+    } else if (!hasSelection && _hasFilesSelected) {
+      setState(() {
+        _hasFilesSelected = false;
+        _isCollapsed = false;
+      });
+      _selectionTimer?.cancel();
+    }
+  }
+
   @override
   void dispose() {
     _filesUpdatedEvent.cancel();
@@ -108,73 +134,99 @@ class _ClusterPageState extends State<ClusterPage> {
     if (ClusterFeedbackService.lastViewedClusterID == widget.clusterID) {
       ClusterFeedbackService.resetLastViewedClusterID();
     }
+    _selectedFiles.removeListener(_onSelectionChanged);
+    _selectionTimer?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final gallery = Gallery(
-      asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
-        final result = files
-            .where(
-              (file) =>
-                  file.creationTime! >= creationStartTime &&
-                  file.creationTime! <= creationEndTime,
-            )
-            .toList();
-        return Future.value(
-          FileLoadResult(
-            result,
-            result.length < files.length,
-          ),
-        );
+    final gallery = NotificationListener<ScrollNotification>(
+      onNotification: (scrollInfo) {
+        if (scrollInfo is UserScrollNotification && _hasFilesSelected) {
+          final shouldAllowCollapse =
+              _selectionTimer == null || !_selectionTimer!.isActive;
+
+          if (shouldAllowCollapse &&
+              (!_hasCollapsedOnce || !_isCollapsed) &&
+              (scrollInfo.direction == ScrollDirection.forward ||
+                  scrollInfo.direction == ScrollDirection.reverse)) {
+            Future.delayed(const Duration(milliseconds: 10), () {
+              if (mounted && _hasFilesSelected) {
+                setState(() {
+                  _isCollapsed = true;
+                  _hasCollapsedOnce = true;
+                });
+              }
+            });
+          }
+        }
+        return false;
       },
-      reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
-      forceReloadEvents: [Bus.instance.on<PeopleChangedEvent>()],
-      removalEventTypes: const {
-        EventType.deletedFromRemote,
-        EventType.deletedFromEverywhere,
-        EventType.hide,
-        EventType.peopleClusterChanged,
-      },
-      tagPrefix: widget.tagPrefix + widget.tagPrefix,
-      selectedFiles: _selectedFiles,
-      enableFileGrouping: widget.enableGrouping,
-      initialFiles: widget.searchResult,
-      header: widget.showNamingBanner && files.isNotEmpty
-          ? PeopleBanner(
-              type: PeopleBannerType.addName,
-              faceWidget: PersonFaceWidget(
-                clusterID: widget.clusterID,
-              ),
-              actionIcon: Icons.add_outlined,
-              text: AppLocalizations.of(context).savePerson,
-              subText: AppLocalizations.of(context).findThemQuickly,
-              onTap: () async {
-                if (widget.personID == null) {
-                  final result = await showAssignPersonAction(
-                    context,
-                    clusterID: widget.clusterID,
-                    file: files.isEmpty ? null : files.first,
-                  );
-                  if (result != null) {
-                    Navigator.pop(context);
-                    final person =
-                        result is (PersonEntity, EnteFile) ? result.$1 : result;
-                    routeToPage(
+      child: Gallery(
+        asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
+          final result = files
+              .where(
+                (file) =>
+                    file.creationTime! >= creationStartTime &&
+                    file.creationTime! <= creationEndTime,
+              )
+              .toList();
+          return Future.value(
+            FileLoadResult(
+              result,
+              result.length < files.length,
+            ),
+          );
+        },
+        reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
+        forceReloadEvents: [Bus.instance.on<PeopleChangedEvent>()],
+        removalEventTypes: const {
+          EventType.deletedFromRemote,
+          EventType.deletedFromEverywhere,
+          EventType.hide,
+          EventType.peopleClusterChanged,
+        },
+        tagPrefix: widget.tagPrefix + widget.tagPrefix,
+        selectedFiles: _selectedFiles,
+        enableFileGrouping: widget.enableGrouping,
+        initialFiles: widget.searchResult,
+        header: widget.showNamingBanner && files.isNotEmpty
+            ? PeopleBanner(
+                type: PeopleBannerType.addName,
+                faceWidget: PersonFaceWidget(
+                  clusterID: widget.clusterID,
+                ),
+                actionIcon: Icons.add_outlined,
+                text: AppLocalizations.of(context).savePerson,
+                subText: AppLocalizations.of(context).findThemQuickly,
+                onTap: () async {
+                  if (widget.personID == null) {
+                    final result = await showAssignPersonAction(
                       context,
-                      PeoplePage(
-                        person: person,
-                        searchResult: null,
-                      ),
-                    ).ignore();
+                      clusterID: widget.clusterID,
+                      file: files.isEmpty ? null : files.first,
+                    );
+                    if (result != null) {
+                      Navigator.pop(context);
+                      final person = result is (PersonEntity, EnteFile)
+                          ? result.$1
+                          : result;
+                      routeToPage(
+                        context,
+                        PeoplePage(
+                          person: person,
+                          searchResult: null,
+                        ),
+                      ).ignore();
+                    }
+                  } else {
+                    showShortToast(context, "No personID or clusterID");
                   }
-                } else {
-                  showShortToast(context, "No personID or clusterID");
-                }
-              },
-            )
-          : null,
+                },
+              )
+            : null,
+      ),
     );
     return GalleryFilesState(
       child: Scaffold(
@@ -198,6 +250,12 @@ class _ClusterPageState extends State<ClusterPage> {
                 ClusterPage.overlayType,
                 _selectedFiles,
                 clusterID: widget.clusterID,
+                isCollapsed: _isCollapsed,
+                onExpand: () {
+                  setState(() {
+                    _isCollapsed = false;
+                  });
+                },
               ),
             ],
           ),

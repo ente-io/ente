@@ -7,25 +7,32 @@ import "package:photos/models/collection/collection.dart";
 import "package:photos/models/metadata/common_keys.dart";
 import "package:photos/models/selected_albums.dart";
 import "package:photos/services/collections_service.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/actions/collection/collection_sharing_actions.dart";
+import "package:photos/ui/collections/album/smart_album_people.dart";
 import "package:photos/ui/collections/collection_list_page.dart";
+import "package:photos/ui/common/web_page.dart";
 import "package:photos/ui/components/action_sheet_widget.dart";
 import "package:photos/ui/components/bottom_action_bar/selection_action_button_widget.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/sharing/add_participant_page.dart";
+import "package:photos/ui/viewer/gallery/hooks/add_photos_sheet.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/magic_util.dart";
 import "package:photos/utils/navigation_util.dart";
+import "package:smooth_page_indicator/smooth_page_indicator.dart";
 
 class AlbumSelectionActionWidget extends StatefulWidget {
   final SelectedAlbums selectedAlbums;
   final UISectionType sectionType;
+  final bool isCollapsed;
 
   const AlbumSelectionActionWidget(
     this.selectedAlbums,
     this.sectionType, {
+    this.isCollapsed = false,
     super.key,
   });
 
@@ -39,6 +46,7 @@ class _AlbumSelectionActionWidgetState
   final _logger = Logger("AlbumSelectionActionWidgetState");
   late CollectionActions collectionActions;
   bool hasFavorites = false;
+  final PageController _pageController = PageController();
 
   @override
   initState() {
@@ -64,15 +72,25 @@ class _AlbumSelectionActionWidgetState
     final hasUnpinnedAlbum =
         widget.selectedAlbums.albums.any((album) => !album.isPinned);
 
+    final bool isOnlyOneAlbumSelected =
+        widget.selectedAlbums.albums.length == 1;
+
+    bool hasAddPhotoPermissions = false;
+    if (isOnlyOneAlbumSelected) {
+      final currentUserID = CollectionsService.instance.config.getUserID();
+      final selectedAlbum = widget.selectedAlbums.albums.first;
+
+      // Skip favorites album and check permissions
+      if (selectedAlbum.type != CollectionType.favorites &&
+          currentUserID != null) {
+        hasAddPhotoPermissions = selectedAlbum.isOwner(currentUserID) ||
+            (selectedAlbum.getRole(currentUserID) ==
+                CollectionParticipantRole.collaborator);
+      }
+    }
+
     if (widget.sectionType == UISectionType.homeCollections ||
         widget.sectionType == UISectionType.outgoingCollections) {
-      items.add(
-        SelectionActionButton(
-          labelText: AppLocalizations.of(context).share,
-          icon: Icons.adaptive.share,
-          onTap: _shareCollection,
-        ),
-      );
       items.add(
         SelectionActionButton(
           labelText: "Pin",
@@ -81,13 +99,19 @@ class _AlbumSelectionActionWidgetState
           shouldShow: hasUnpinnedAlbum,
         ),
       );
-
       items.add(
         SelectionActionButton(
           labelText: "Unpin",
           icon: CupertinoIcons.pin_slash,
           onTap: _onUnpinClick,
           shouldShow: hasPinnedAlbum,
+        ),
+      );
+      items.add(
+        SelectionActionButton(
+          labelText: AppLocalizations.of(context).share,
+          icon: Icons.adaptive.share,
+          onTap: _shareCollection,
         ),
       );
 
@@ -107,14 +131,6 @@ class _AlbumSelectionActionWidgetState
       );
     }
 
-    items.add(
-      SelectionActionButton(
-        labelText: AppLocalizations.of(context).archive,
-        icon: Icons.archive_outlined,
-        onTap: _archiveClick,
-      ),
-    );
-
     if (widget.sectionType == UISectionType.incomingCollections) {
       items.add(
         SelectionActionButton(
@@ -125,36 +141,189 @@ class _AlbumSelectionActionWidgetState
       );
     }
 
-    final scrollController = ScrollController();
+    final List<SelectionActionButton> visibleItems =
+        items.where((item) => item.shouldShow == true).toList();
 
-    return MediaQuery(
-      data: MediaQuery.of(context).removePadding(removeBottom: true),
-      child: SafeArea(
-        child: Scrollbar(
-          radius: const Radius.circular(1),
-          thickness: 2,
-          controller: scrollController,
-          thumbVisibility: true,
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(
-              decelerationRate: ScrollDecelerationRate.fast,
-            ),
-            scrollDirection: Axis.horizontal,
-            child: Container(
-              padding: const EdgeInsets.only(bottom: 24),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(width: 4),
-                  ...items,
-                  const SizedBox(width: 4),
-                ],
-              ),
-            ),
-          ),
-        ),
+    final List<SelectionActionButton> firstThreeItems =
+        visibleItems.length > 3 ? visibleItems.take(3).toList() : visibleItems;
+
+    final List<SelectionActionButton> otherItems =
+        visibleItems.length > 3 ? visibleItems.sublist(3) : [];
+
+    otherItems.add(
+      SelectionActionButton(
+        labelText: AppLocalizations.of(context).archive,
+        icon: Icons.archive_outlined,
+        onTap: _archiveClick,
       ),
     );
+    final isLightMode = Theme.of(context).brightness == Brightness.light;
+
+    if ((widget.sectionType == UISectionType.incomingCollections ||
+            widget.sectionType == UISectionType.homeCollections ||
+            widget.sectionType == UISectionType.outgoingCollections) &&
+        isOnlyOneAlbumSelected &&
+        hasAddPhotoPermissions) {
+      otherItems.add(
+        SelectionActionButton(
+          labelText: AppLocalizations.of(context).addPhotos,
+          icon: Icons.add_photo_alternate_outlined,
+          onTap: _showAddPhotoDialog,
+        ),
+      );
+
+      otherItems.add(
+        SelectionActionButton(
+          labelText: AppLocalizations.of(context).autoAddPeople,
+          iconWidget: Image.asset(
+            'assets/auto-add-people.png',
+            width: 24,
+            height: 24,
+            color: isLightMode ? Colors.black : Colors.white,
+          ),
+          onTap: _showAutoAddPhotoDialog,
+        ),
+      );
+    }
+
+    final List<List<SelectionActionButton>> groupedOtherItems = [];
+    for (int i = 0; i < otherItems.length; i += 4) {
+      final int end = (i + 4 < otherItems.length) ? i + 4 : otherItems.length;
+      groupedOtherItems.add(otherItems.sublist(i, end));
+    }
+
+    if (visibleItems.isNotEmpty) {
+      return MediaQuery(
+        data: MediaQuery.of(context).removePadding(removeBottom: true),
+        child: Container(
+          padding: const EdgeInsets.only(
+            bottom: 20.0,
+            left: 20.0,
+            right: 20.0,
+          ),
+          child: Column(
+            children: [
+              // First Row
+              const SizedBox(
+                height: 4,
+              ),
+              Row(
+                children: [
+                  for (int i = 0; i < firstThreeItems.length; i++) ...[
+                    Expanded(
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Container(
+                            height: MediaQuery.of(context).size.height * 0.10,
+                            decoration: BoxDecoration(
+                              color: getEnteColorScheme(context)
+                                  .backgroundElevated2,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          firstThreeItems[i],
+                        ],
+                      ),
+                    ),
+                    if (i != firstThreeItems.length - 1)
+                      const SizedBox(width: 15),
+                  ],
+                ],
+              ),
+
+              // Second Row
+              AnimatedSize(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                child: widget.isCollapsed
+                    ? const SizedBox.shrink()
+                    : Column(
+                        children: [
+                          if (groupedOtherItems.isNotEmpty) ...[
+                            const SizedBox(height: 24),
+                            Container(
+                              width: double.infinity,
+                              height: 74,
+                              decoration: BoxDecoration(
+                                color: getEnteColorScheme(context)
+                                    .backgroundElevated2,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: PageView.builder(
+                                controller: _pageController,
+                                itemCount: groupedOtherItems.length,
+                                onPageChanged: (index) {
+                                  if (index >= groupedOtherItems.length &&
+                                      groupedOtherItems.isNotEmpty) {
+                                    _pageController.animateToPage(
+                                      groupedOtherItems.length - 1,
+                                      duration:
+                                          const Duration(milliseconds: 100),
+                                      curve: Curves.easeInOut,
+                                    );
+                                  }
+                                },
+                                itemBuilder: (context, pageIndex) {
+                                  if (pageIndex >= groupedOtherItems.length) {
+                                    return const SizedBox();
+                                  }
+
+                                  final currentGroup =
+                                      groupedOtherItems[pageIndex];
+
+                                  return Row(
+                                    children: currentGroup.map((item) {
+                                      return Expanded(
+                                        child: AnimatedSwitcher(
+                                          duration: const Duration(
+                                            milliseconds: 100,
+                                          ),
+                                          transitionBuilder: (
+                                            Widget child,
+                                            Animation<double> animation,
+                                          ) {
+                                            return FadeTransition(
+                                              opacity: animation,
+                                              child: child,
+                                            );
+                                          },
+                                          child: KeyedSubtree(
+                                            key: ValueKey(
+                                              item.hashCode,
+                                            ),
+                                            child: item,
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  );
+                                },
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            if (groupedOtherItems.length > 1)
+                              SmoothPageIndicator(
+                                controller: _pageController,
+                                count: groupedOtherItems.length,
+                                effect: const WormEffect(
+                                  dotHeight: 6,
+                                  dotWidth: 6,
+                                  spacing: 6,
+                                  activeDotColor: Colors.white,
+                                ),
+                              ),
+                          ],
+                        ],
+                      ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return const SizedBox.shrink();
   }
 
   Future<void> _shareCollection() async {
@@ -311,6 +480,57 @@ class _AlbumSelectionActionWidgetState
       }
     }
     widget.selectedAlbums.clearAll();
+  }
+
+  Future<void> _showAddPhotoDialog() async {
+    final selectedAlbum = widget.selectedAlbums.albums.first;
+    widget.selectedAlbums.clearAll();
+
+    try {
+      if (selectedAlbum.isCollectEnabledForPublicLink()) {
+        final authToken = CollectionsService.instance
+            .getSharedPublicAlbumToken(selectedAlbum.id);
+        final albumKey = CollectionsService.instance
+            .getSharedPublicAlbumKey(selectedAlbum.id);
+
+        final res = await showChoiceDialog(
+          context,
+          title: AppLocalizations.of(context).openAlbumInBrowserTitle,
+          firstButtonLabel: AppLocalizations.of(context).openAlbumInBrowser,
+          secondButtonLabel: AppLocalizations.of(context).cancel,
+          firstButtonType: ButtonType.primary,
+        );
+
+        if (res != null && res.action == ButtonAction.first) {
+          await Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => WebPage(
+                selectedAlbum.name ?? "",
+                "https://albums.ente.io/?t=$authToken#$albumKey",
+              ),
+            ),
+          );
+        }
+      } else {
+        await showAddPhotosSheet(context, selectedAlbum);
+      }
+    } catch (e, s) {
+      _logger.severe(e, s);
+      await showGenericErrorDialog(context: context, error: e);
+    }
+  }
+
+  Future<void> _showAutoAddPhotoDialog() async {
+    final selectedAlbum = widget.selectedAlbums.albums.first;
+
+    widget.selectedAlbums.clearAll();
+
+    await routeToPage(
+      context,
+      SmartAlbumPeople(
+        collectionId: selectedAlbum.id,
+      ),
+    );
   }
 
   Future<void> _leaveAlbum() async {

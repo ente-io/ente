@@ -247,7 +247,7 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                                   onTap: () async {
                                     await routeToPage(
                                       context,
-                                      LargeFilesPagePage(),
+                                      const LargeFilesPagePage(),
                                     );
                                   },
                                 ),

@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import "package:auto_size_text/auto_size_text.dart";
 import "package:flutter/material.dart";
 import "package:flutter_svg/svg.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -106,7 +107,7 @@ class __BodyState extends State<_Body> {
               children: [
                 if (widget.icon == Icons.navigation_rounded)
                   Transform.rotate(
-                    angle: math.pi / 2,
+                    angle: math.pi * 2,
                     child: Icon(
                       widget.icon,
                       size: 24,
@@ -137,7 +138,7 @@ class __BodyState extends State<_Body> {
                   SvgPicture.asset(
                     widget.svgAssetPath!,
                     colorFilter: ColorFilter.mode(
-                      getEnteColorScheme(context).textMuted,
+                      getEnteColorScheme(context).textBase,
                       BlendMode.srcIn,
                     ),
                     width: 24,
@@ -149,14 +150,16 @@ class __BodyState extends State<_Body> {
                   Icon(
                     widget.icon,
                     size: 24,
-                    color: getEnteColorScheme(context).textMuted,
+                    color: getEnteColorScheme(context).textBase,
                   ),
                 const SizedBox(height: 4),
-                Text(
-                  widget.labelText,
-                  textAlign: TextAlign.center,
-                  //textTheme in [getWidthOfLongestWord] should be same as this
-                  style: getEnteTextTheme(context).miniMuted,
+                Flexible(
+                  child: AutoSizeText(
+                    widget.labelText,
+                    textAlign: TextAlign.center,
+                    //textTheme in [getWidthOfLongestWord] should be same as this
+                    style: getEnteTextTheme(context).mini,
+                  ),
                 ),
               ],
             ),
@@ -180,8 +183,7 @@ class __BodyState extends State<_Body> {
 
     double maxWidth = 0.0;
     for (String word in words) {
-      final width =
-          computeWidthOfWord(word, getEnteTextTheme(context).miniMuted);
+      final width = computeWidthOfWord(word, getEnteTextTheme(context).mini);
       if (width > maxWidth) {
         maxWidth = width;
       }

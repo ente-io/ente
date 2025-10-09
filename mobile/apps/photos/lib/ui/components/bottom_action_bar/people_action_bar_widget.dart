@@ -35,42 +35,47 @@ class _PeopleActionBarWidgetState extends State<PeopleActionBarWidget> {
   @override
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
-    return SizedBox(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Flexible(
-              flex: 1,
-              child: ValueListenableBuilder(
-                valueListenable: _selectedPeopleNotifier,
-                builder: (context, value, child) {
-                  final count = widget.selectedPeople?.personIds.length ?? 0;
-                  return Text(
-                    AppLocalizations.of(context).selectedPhotos(count: count),
-                    style: textTheme.miniMuted,
-                  );
-                },
-              ),
+    final colorScheme = getEnteColorScheme(context);
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        widget.onCancel?.call();
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+        decoration: BoxDecoration(
+          color: colorScheme.backgroundElevated2,
+          borderRadius: BorderRadius.circular(100),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 4,
+              offset: const Offset(0, -1),
             ),
-            Flexible(
-              flex: 1,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () {
-                    widget.onCancel?.call();
-                  },
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      AppLocalizations.of(context).cancel,
-                      style: textTheme.mini,
-                    ),
-                  ),
-                ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ValueListenableBuilder(
+              valueListenable: _selectedPeopleNotifier,
+              builder: (context, value, child) {
+                final count = widget.selectedPeople?.personIds.length ?? 0;
+                return Text(
+                  AppLocalizations.of(context).selectedPhotos(count: count),
+                  style: textTheme.mini,
+                );
+              },
+            ),
+            const SizedBox(width: 4),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Icon(
+                Icons.close,
+                size: 16,
+                color: textTheme.mini.color,
               ),
             ),
           ],
