@@ -267,11 +267,7 @@ class PersonService {
     required String personID,
     required String clusterID,
   }) async {
-    final person = await getPerson(personID);
-    if (person == null) {
-      logger.severe("Person $personID not found in removeClusterToPerson");
-      throw Exception("Person $personID not found");
-    }
+    final person = (await getPerson(personID))!;
     final personData = person.data;
     final clusterInfo = personData.assigned.firstWhere(
       (element) => element.id == clusterID,
@@ -488,10 +484,6 @@ class PersonService {
   }
 
   Future<PersonEntity> updateAvatar(PersonEntity p, EnteFile file) async {
-    if (file.uploadedFileID == null) {
-      logger.severe("File has no uploadedFileID in updateAvatar");
-      throw Exception("File has no uploadedFileID");
-    }
     final Face? face = await faceMLDataDB.getCoverFaceForPerson(
       recentFileID: file.uploadedFileID!,
       personID: p.remoteID,
@@ -502,11 +494,7 @@ class PersonService {
       );
     }
 
-    final person = await getPerson(p.remoteID);
-    if (person == null) {
-      logger.severe("Person ${p.remoteID} not found in updateAvatar");
-      throw Exception("Person ${p.remoteID} not found");
-    }
+    final person = (await getPerson(p.remoteID))!;
     final updatedPerson = person.copyWith(
       data: person.data.copyWith(avatarFaceId: face.faceID),
     );
@@ -524,11 +512,7 @@ class PersonService {
     String? birthDate,
     String? email,
   }) async {
-    final person = await getPerson(id);
-    if (person == null) {
-      logger.severe("Person $id not found in updateAttributes");
-      throw Exception("Person $id not found");
-    }
+    final person = (await getPerson(id))!;
     final updatedPerson = person.copyWith(
       data: person.data.copyWith(
         name: name,
