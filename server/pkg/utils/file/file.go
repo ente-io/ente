@@ -61,7 +61,7 @@ func EnsureSufficientSpace(size int64) error {
 	
 	need := uint64(size) + bufferSpace
 	if free < need {
-		return fmt.Errorf("insufficient space on disk (need %d bytes, free %d bytes)", size, free)
+		return fmt.Errorf("insufficient space on disk (need %d bytes, free %d bytes)", need, free)
 	}
 
 	return nil
