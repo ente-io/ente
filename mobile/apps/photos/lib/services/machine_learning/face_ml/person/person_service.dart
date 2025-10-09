@@ -313,7 +313,7 @@ class PersonService {
     // Safety check to make sure we haven't created an empty cluster now, if so delete it
     for (final emptyClusterID in emptiedClusters) {
       personData.assigned
-          .removeWhere((element) => element.id != emptyClusterID);
+          .removeWhere((element) => element.id == emptyClusterID);
       await faceMLDataDB.removeClusterToPerson(
         personID: person.remoteID,
         clusterID: emptyClusterID,
