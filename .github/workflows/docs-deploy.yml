@@ -42,7 +42,7 @@ jobs:
             - name: Prepare deployment with help subdirectory
               run: |
                   mkdir -p deploy
-                  mv docs/.vitepress/dist docs/deploy/help
+                  mv docs/.vitepress/dist deploy/help
 
             - name: Publish
               uses: cloudflare/wrangler-action@v3
