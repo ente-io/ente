@@ -38,9 +38,9 @@ require (
 	github.com/ua-parser/uap-go v0.0.0-20211112212520-00c877edfe0f
 	github.com/ulule/limiter/v3 v3.8.0
 	github.com/zsais/go-gin-prometheus v0.1.0
-	golang.org/x/crypto v0.36.0
-	golang.org/x/sync v0.12.0
-	golang.org/x/text v0.23.0
+	golang.org/x/crypto v0.41.0
+	golang.org/x/sync v0.16.0
+	golang.org/x/text v0.28.0
 	google.golang.org/api v0.114.0
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 )
@@ -111,9 +111,9 @@ require (
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/ugorji/go/codec v1.2.11 // indirect
 	go.opencensus.io v0.24.0 // indirect
-	golang.org/x/net v0.38.0
+	golang.org/x/net v0.43.0
 	golang.org/x/oauth2 v0.27.0 // indirect
-	golang.org/x/sys v0.31.0 // indirect
+	golang.org/x/sys v0.35.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1 // indirect
