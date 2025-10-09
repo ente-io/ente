@@ -251,6 +251,13 @@ export const createSuperClusterIcon = (
     const backgroundMarkerPositions =
         generateStackedMarkerPositions(clusterCount);
 
+    // Define progressively darker gray shades (no transparency)
+    const getStackedMarkerColor = (index: number) => {
+        // White for first, then progressively darker grays
+        const grayShades = ["#ffffff", "#d1d5db", "#b8bcc4", "#9ca3af"];
+        return grayShades[Math.min(index, grayShades.length - 1)];
+    };
+
     const icon = leaflet.divIcon({
         html: `
         <div class="super-cluster-container" style="
@@ -260,8 +267,11 @@ export const createSuperClusterIcon = (
           cursor: pointer;
         ">
           ${backgroundMarkerPositions
-              .map(
-                  (pos, index) => `
+              .map((pos, index) => {
+                  // Index 0 is second marker (first background), so add 1
+                  const colorIndex = index + 1;
+                  const markerColor = getStackedMarkerColor(colorIndex);
+                  return `
             <!-- Background marker ${index} -->
             <div style="
               position: absolute;
@@ -270,15 +280,14 @@ export const createSuperClusterIcon = (
               width: ${pinSize}px;
               height: ${pinHeight}px;
               z-index: ${5 - index};
-              opacity: ${0.6 - index * 0.1};
             ">
               <!-- Background pin rounded rectangle -->
               <div style="
                 width: ${pinSize}px;
                 height: ${pinSize}px;
                 border-radius: 16px;
-                background: ${isReached ? "#22c55e" : "white"};
-                border: 2px solid ${isReached ? "#22c55e" : "#ffffff"};
+                background: ${markerColor};
+                border: 2px solid ${markerColor};
                 padding: 4px;
                 position: relative;
                 overflow: hidden;
@@ -288,7 +297,7 @@ export const createSuperClusterIcon = (
                   width: 100%;
                   height: 100%;
                   border-radius: 12px;
-                  background: ${isReached ? "#16a34a" : "#f3f4f6"};
+                  background: ${markerColor};
                 "></div>
               </div>
 
@@ -302,11 +311,11 @@ export const createSuperClusterIcon = (
                 height: 0;
                 border-left: ${triangleHeight}px solid transparent;
                 border-right: ${triangleHeight}px solid transparent;
-                border-top: ${triangleHeight}px solid ${isReached ? "#22c55e" : "white"};
+                border-top: ${triangleHeight}px solid ${markerColor};
               "></div>
             </div>
-          `,
-              )
+          `;
+              })
               .join("")}
 
           <!-- Main pin container -->
@@ -402,7 +411,6 @@ export const detectScreenCollisions = (
     targetZoom: number | null,
     mapRef: import("leaflet").Map | null,
     optimalZoom: number,
-    activeClusterIndex?: number, // Currently active cluster should not be grouped into super clusters
 ) => {
     // Use target zoom if we're in the middle of a zoom animation, otherwise use optimal zoom
     const effectiveZoom =
@@ -456,12 +464,7 @@ export const detectScreenCollisions = (
         });
 
         // If we found overlapping clusters, create a super-cluster
-        // But only if none of the involved clusters is the currently active cluster
-        const involvesActiveCluster =
-            activeClusterIndex !== undefined &&
-            overlappingClusters.includes(activeClusterIndex);
-
-        if (overlappingClusters.length > 1 && !involvesActiveCluster) {
+        if (overlappingClusters.length > 1) {
             hiddenClusterIndices.add(i); // Hide the original cluster too
 
             // Calculate center position of all overlapping clusters
@@ -491,12 +494,6 @@ export const detectScreenCollisions = (
                 clusterCount: overlappingClusters.length,
                 clustersInvolved: overlappingClusters,
                 image: representativePhoto.image,
-            });
-        } else if (involvesActiveCluster) {
-            // If active cluster is involved, unhide all overlapping clusters
-            // so they remain visible as individual clusters
-            overlappingClusters.forEach((idx) => {
-                hiddenClusterIndices.delete(idx);
             });
         }
     });

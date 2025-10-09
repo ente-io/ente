@@ -45,9 +45,10 @@ const ObjectUploadURLResponse = z.object({ urls: ObjectUploadURL.array() });
  */
 export const fetchUploadURLs = async (countHint: number) => {
     const count = Math.min(50, countHint * 2);
-    const res = await fetch(await apiURL("/files/upload-urls", { count }), {
-        headers: await authenticatedRequestHeaders(),
-    });
+    const res = await fetch(
+        await apiURL("/files/upload-urls", { count, ts: Date.now() }),
+        { headers: await authenticatedRequestHeaders() },
+    );
     ensureOk(res);
     return ObjectUploadURLResponse.parse(await res.json()).urls;
 };
@@ -61,7 +62,10 @@ export const fetchPublicAlbumsUploadURLs = async (
 ) => {
     const count = Math.min(50, countHint * 2);
     const res = await fetch(
-        await apiURL("/public-collection/upload-urls", { count }),
+        await apiURL("/public-collection/upload-urls", {
+            count,
+            ts: Date.now(),
+        }),
         { headers: authenticatedPublicAlbumsRequestHeaders(credentials) },
     );
     ensureOk(res);
@@ -113,7 +117,7 @@ const MultipartUploadURLsResponse = z.object({ urls: MultipartUploadURLs });
 export const fetchMultipartUploadURLs = async (uploadPartCount: number) => {
     const count = uploadPartCount;
     const res = await fetch(
-        await apiURL("/files/multipart-upload-urls", { count }),
+        await apiURL("/files/multipart-upload-urls", { count, ts: Date.now() }),
         { headers: await authenticatedRequestHeaders() },
     );
     ensureOk(res);
@@ -129,7 +133,10 @@ export const fetchPublicAlbumsMultipartUploadURLs = async (
 ) => {
     const count = uploadPartCount;
     const res = await fetch(
-        await apiURL("/public-collection/multipart-upload-urls", { count }),
+        await apiURL("/public-collection/multipart-upload-urls", {
+            count,
+            ts: Date.now(),
+        }),
         { headers: authenticatedPublicAlbumsRequestHeaders(credentials) },
     );
     ensureOk(res);

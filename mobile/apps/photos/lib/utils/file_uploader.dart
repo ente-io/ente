@@ -23,7 +23,7 @@ import "package:photos/events/file_uploaded_event.dart";
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
-import "package:photos/main.dart";
+import "package:photos/main.dart" show isProcessBg, kLastBGTaskHeartBeatTime;
 import "package:photos/models/api/metadata.dart";
 import "package:photos/models/backup/backup_item.dart";
 import "package:photos/models/backup/backup_item_status.dart";
@@ -434,6 +434,15 @@ class FileUploader {
     if (Platform.isAndroid) {
       final bool hasPermission = await Permission.accessMediaLocation.isGranted;
       if (!hasPermission) {
+        // In background isolate, we can't request permissions (no UI available)
+        // Throw an error to properly handle this scenario
+        if (isProcessBg) {
+          _logger.severe(
+            "Media location access not granted in background isolate - cannot request permission",
+          );
+          throw NoMediaLocationAccessError();
+        }
+        // Only request permission in foreground
         final permissionStatus = await Permission.accessMediaLocation.request();
         if (!permissionStatus.isGranted) {
           _logger.severe(
@@ -610,7 +619,7 @@ class FileUploader {
       // that we'll have to re-upload as the nonce is lost
       if (hasExistingMultiPart) {
         if (!encryptedFileExists) {
-          throw MultiPartUploadError(
+          throw MultiPartMissingFileError(
             'multiPartResume: encryptedFile missing',
           );
         }
@@ -618,7 +627,7 @@ class FileUploader {
             multiPartFileEncResult != null &&
             !listEquals(key, multiPartFileEncResult.key);
         if (updateWithDiffKey) {
-          throw MultiPartUploadError(
+          throw MultiPartError(
             'multiPart update resumed with differentKey',
           );
         }
@@ -892,7 +901,7 @@ class FileUploader {
   }
 
   bool isPutOrMultiPartError(Object e) {
-    if (e is MultiPartUploadError) {
+    if (e is MultiPartMissingFileError || e is MultiPartError) {
       return true;
     }
     if (e is DioException) {

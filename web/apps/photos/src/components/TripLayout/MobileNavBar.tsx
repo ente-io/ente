@@ -27,17 +27,18 @@ export const MobileNavBar: React.FC<MobileNavBarProps> = ({
 
     const handleShare = async () => {
         if (typeof window !== "undefined") {
+            const albumName = collectionTitle || "Trip";
+            const shareUrl = window.location.href;
+            const shareText = `${albumName}\n${shareUrl}`;
+
             try {
-                await navigator.share({
-                    title: collectionTitle || "Trip",
-                    url: window.location.href,
-                });
+                await navigator.share({ text: shareText });
             } catch (error) {
                 if (
                     !error ||
                     (error instanceof Error && error.name !== "AbortError")
                 ) {
-                    void navigator.clipboard.writeText(window.location.href);
+                    void navigator.clipboard.writeText(shareText);
                     setShowCopiedMessage(true);
                     setTimeout(() => setShowCopiedMessage(false), 2000);
                 }

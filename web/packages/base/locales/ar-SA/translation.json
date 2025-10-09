@@ -276,11 +276,7 @@
     "view_on_map": "عرض على OpenStreetMap",
     "map": "خريطة",
     "enable_map": "تمكين الخريطة",
-    "enable_maps_confirm": "تمكين الخرائط؟",
-    "enable_maps_confirm_message": "<p>سيؤدي هذا إلى عرض صورك على خريطة العالم.</p><p>تستضيف الخريطة <a>OpenStreetMap</a>، ولا تتم مشاركة المواقع الدقيقة لصورك أبدًا.</p><p>يمكنك تعطيل هذه الميزة في أي وقت من الإعدادات.</p>",
     "disable_map": "تعطيل الخريطة",
-    "disable_maps_confirm": "تعطيل الخرائط؟",
-    "disable_maps_confirm_message": "<p>سيؤدي هذا إلى تعطيل عرض صورك على خريطة العالم.</p><p>يمكنك تمكين هذه الميزة في أي وقت من الإعدادات.</p>",
     "details": "تفاصيل",
     "view_exif": "عرض جميع بيانات Exif",
     "no_exif": "لا توجد بيانات Exif",
@@ -327,6 +323,8 @@
     "thumbnail_generation_failed_hint": "تم تحميل هذه الملفات، ولكن للأسف لم نتمكن من إنشاء الصور المصغرة لها.",
     "unsupported_files": "ملفات غير مدعومة",
     "unsupported_files_hint": "Ente لا يدعم تنسيقات الملفات هذه بعد",
+    "zero_size_files": "",
+    "zero_size_files_hint": "",
     "blocked_uploads": "التحميلات المحظورة",
     "blocked_uploads_hint": "متصفحك أو إضافة ما تمنع Ente من استخدام <code>eTags</code> لتحميل الملفات الكبيرة.",
     "large_files": "ملفات كبيرة جدًا",
@@ -433,6 +431,7 @@
         "year": "بعد سنة"
     },
     "copy_link": "نسخ الرابط",
+    "copy_embed_html": "",
     "done": "تم",
     "share_link_section_title": "أو مشاركة رابط",
     "remove_link": "إزالة الرابط",
@@ -701,5 +700,6 @@
     "grouped": "",
     "continuous": "",
     "trip": "",
-    "album_layout": ""
+    "album_layout": "",
+    "maps_privacy_notice": ""
 }

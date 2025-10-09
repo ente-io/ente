@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import "package:photos/ente_theme_data.dart";
 import "package:photos/generated/l10n.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/tools/editor/video_editor/crop_value.dart";
+import "package:photos/ui/tools/editor/video_editor/video_editor_app_bar.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_bottom_action.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_main_actions.dart";
-import "package:photos/ui/tools/editor/video_editor/video_editor_navigation_options.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_player_control.dart";
 import 'package:video_editor/video_editor.dart';
 
@@ -25,87 +25,80 @@ class VideoCropPage extends StatefulWidget {
 class _VideoCropPageState extends State<VideoCropPage> {
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        toolbarHeight: 0,
+      backgroundColor: colorScheme.backgroundBase,
+      appBar: VideoEditorAppBar(
+        onCancel: () => Navigator.pop(context),
+        primaryActionLabel: AppLocalizations.of(context).done,
+        onPrimaryAction: () {
+          widget.controller.applyCacheCrop();
+          Navigator.pop(context);
+        },
       ),
       body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: Hero(
-                tag: "video-editor-preview",
-                child: RotatedBox(
-                  quarterTurns: widget.quarterTurnsForRotationCorrection,
-                  child: CropGridViewer.edit(
-                    controller: widget.controller,
-                    rotateCropArea: false,
-                    margin: const EdgeInsets.symmetric(horizontal: 20),
+        top: false,
+        bottom: true,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Positioned.fill(
+                        child: Hero(
+                          tag: "video-editor-preview",
+                          child: RotatedBox(
+                            quarterTurns:
+                                widget.quarterTurnsForRotationCorrection,
+                            child: CropGridViewer.edit(
+                              controller: widget.controller,
+                              rotateCropArea: false,
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 20),
+                          child: VideoEditorPlayerControl(
+                            controller: widget.controller,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-            ),
-            VideoEditorPlayerControl(
-              controller: widget.controller,
-            ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Expanded(
-                  flex: 4,
-                  child: AnimatedBuilder(
-                    animation: widget.controller,
-                    builder: (_, __) => Column(
-                      children: [
-                        VideoEditorMainActions(
-                          children: [
-                            // _buildCropButton(context, CropValue.original),
-                            // const SizedBox(width: 40),
-                            _buildCropButton(context, CropValue.free),
-                            const SizedBox(width: 40),
-                            _buildCropButton(context, CropValue.ratio_1_1),
-                            const SizedBox(width: 40),
-                            _buildCropButton(
-                              context,
-                              CropValue.ratio_9_16,
-                            ),
-                            const SizedBox(width: 40),
-                            _buildCropButton(
-                              context,
-                              CropValue.ratio_16_9,
-                            ),
-                            const SizedBox(width: 40),
-                            _buildCropButton(
-                              context,
-                              CropValue.ratio_3_4,
-                            ),
-                            const SizedBox(width: 40),
-                            _buildCropButton(
-                              context,
-                              CropValue.ratio_4_3,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
+              AnimatedBuilder(
+                animation: widget.controller,
+                builder: (_, __) => VideoEditorMainActions(
+                  children: [
+                    _buildCropButton(context, CropValue.free),
+                    const SizedBox(width: 24),
+                    _buildCropButton(context, CropValue.ratio_1_1),
+                    const SizedBox(width: 24),
+                    _buildCropButton(context, CropValue.ratio_9_16),
+                    const SizedBox(width: 24),
+                    _buildCropButton(context, CropValue.ratio_16_9),
+                    const SizedBox(width: 24),
+                    _buildCropButton(context, CropValue.ratio_3_4),
+                    const SizedBox(width: 24),
+                    _buildCropButton(context, CropValue.ratio_4_3),
+                  ],
                 ),
-              ],
-            ),
-            const SizedBox(height: 40),
-            VideoEditorNavigationOptions(
-              color: Theme.of(context).colorScheme.videoPlayerPrimaryColor,
-              secondaryText: AppLocalizations.of(context).done,
-              onSecondaryPressed: () {
-                // WAY 1: validate crop parameters set in the crop view
-                widget.controller.applyCacheCrop();
-                // WAY 2: update manually with Offset values
-                // controller.updateCrop(const Offset(0.2, 0.2), const Offset(0.8, 0.8));
-                Navigator.pop(context);
-              },
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );
