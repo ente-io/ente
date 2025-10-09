@@ -12,17 +12,18 @@ import (
 	"github.com/ente-io/museum/pkg/utils/auth"
 )
 
+// Exported constants matching libsodium
 const (
-	cryptoSecretBoxNonceBytes = 24 // Nonce size for secret box
-	// Generic hash (BLAKE2b) constants
-	cryptoGenericHashBytes = 32 // Default output size
+	SecretBoxKeyBytes   = 32 // crypto_secretbox_KEYBYTES in libsodium
+	SecretBoxNonceBytes = 24 // crypto_secretbox_NONCEBYTES in libsodium
+	GenericHashBytes    = 32 // crypto_generichash_BYTES in libsodium (BLAKE2b-256)
 )
 
 func Encrypt(data string, encryptionKey []byte) (ente.EncryptionResult, error) {
-	if cryptoSecretBoxNonceBytes != cryptosecretbox.CryptoSecretBoxNonceBytes() {
-		panic("cryptoSecretBoxNonceBytes constant does not match the actual nonce size")
+	if SecretBoxNonceBytes != cryptosecretbox.CryptoSecretBoxNonceBytes() {
+		panic("SecretBoxNonceBytes constant does not match the actual nonce size")
 	}
-	nonce, err := auth.GenerateRandomBytes(cryptoSecretBoxNonceBytes)
+	nonce, err := auth.GenerateRandomBytes(SecretBoxNonceBytes)
 	if err != nil {
 		return ente.EncryptionResult{}, stacktrace.Propagate(err, "")
 	}
@@ -46,11 +47,11 @@ func Decrypt(cipher []byte, key []byte, nonce []byte) (string, error) {
 }
 
 func GetHash(data string, hashKey []byte) (string, error) {
-	if cryptoGenericHashBytes != generichash.CryptoGenericHashBytes() {
-		panic(fmt.Sprintf("cryptoGenericHashBytes constant %d does not match the actual hash size %d",
-			cryptoGenericHashBytes, generichash.CryptoGenericHashBytes()))
+	if GenericHashBytes != generichash.CryptoGenericHashBytes() {
+		panic(fmt.Sprintf("GenericHashBytes constant %d does not match the actual hash size %d",
+			GenericHashBytes, generichash.CryptoGenericHashBytes()))
 	}
-	dataHashBytes, err := generichash.CryptoGenericHash(cryptoGenericHashBytes, []byte(data), hashKey)
+	dataHashBytes, err := generichash.CryptoGenericHash(GenericHashBytes, []byte(data), hashKey)
 	if err != 0 {
 		return "", stacktrace.NewError("email hash failed")
 	}
