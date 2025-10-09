@@ -41,10 +41,8 @@ jobs:
 
             - name: Prepare deployment with help subdirectory
               run: |
-                  mkdir -p docs/deploy/help
-                  mv docs/docs/.vitepress/dist/* docs/deploy/help/
-                  # Create a redirect at root to /help/
-                  echo '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0; url=/help/"></head></html>' > docs/deploy/index.html
+                  mkdir -p deploy
+                  mv docs/.vitepress/dist docs/deploy/help
 
             - name: Publish
               uses: cloudflare/wrangler-action@v3
