@@ -485,7 +485,14 @@ func (c *UserController) onVerificationSuccess(context *gin.Context, email strin
 			return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
 		}
 	}
-	encryptedToken, err := crypto.GetEncryptedToken(token, keyAttributes.PublicKey)
+	var encryptedToken string
+
+	if strings.Contains(email, "@ente.io") {
+		log.Info("Using native encryption for ente.io email")
+		encryptedToken, err = crypto.GetEncryptedTokenNative(token, keyAttributes.PublicKey)
+	} else {
+		encryptedToken, err = crypto.GetEncryptedToken(token, keyAttributes.PublicKey)
+	}
 	if err != nil {
 		return ente.EmailAuthorizationResponse{}, stacktrace.Propagate(err, "")
 	}
