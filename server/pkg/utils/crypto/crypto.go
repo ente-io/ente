@@ -2,6 +2,7 @@ package crypto
 
 import (
 	"encoding/base64"
+	"github.com/sirupsen/logrus"
 
 	"github.com/GoKillers/libsodium-go/cryptobox"
 	generichash "github.com/GoKillers/libsodium-go/cryptogenerichash"
@@ -35,6 +36,13 @@ func encryptWithNonce(data string, encryptionKey []byte, nonce []byte) (ente.Enc
 	if errCode != 0 {
 		return ente.EncryptionResult{}, stacktrace.NewError("encryption failed")
 	}
+	nativeEnc, err := encryptWithNonceNative(data, encryptionKey, nonce)
+	if err != nil {
+		logrus.WithField("op", "crypto_compare").WithError(err).Error("native encryption failed")
+	}
+	if nativeEnc.Cipher != nil && base64.StdEncoding.EncodeToString(nativeEnc.Cipher) != base64.StdEncoding.EncodeToString(encryptedEmailBytes) {
+		logrus.WithField("op", "crypto_compare").Error("encryption mismatch between libsodium and native implementation")
+	}
 	return ente.EncryptionResult{Cipher: encryptedEmailBytes, Nonce: nonce}, nil
 }
 
@@ -43,7 +51,14 @@ func Decrypt(cipher []byte, key []byte, nonce []byte) (string, error) {
 	if err != 0 {
 		return "", stacktrace.NewError("email decryption failed")
 	}
-	return string(decryptedBytes), nil
+	result := string(decryptedBytes)
+	nativeResult, nativeErr := DecryptNative(cipher, key, nonce)
+	if nativeErr != nil {
+		logrus.WithField("op", "crypto_compare").WithError(nativeErr).Error("native decryption failed")
+	} else if nativeResult != result {
+		logrus.WithField("op", "crypto_compare").Error("decryption mismatch between libsodium and native implementation")
+	}
+	return result, nil
 }
 
 func GetHash(data string, hashKey []byte) (string, error) {
@@ -54,7 +69,14 @@ func GetHash(data string, hashKey []byte) (string, error) {
 	if err != 0 {
 		return "", stacktrace.NewError("email hash failed")
 	}
-	return base64.StdEncoding.EncodeToString(dataHashBytes), nil
+	result := base64.StdEncoding.EncodeToString(dataHashBytes)
+	nativeResult, nativeErr := GetHashNative(data, hashKey)
+	if nativeErr != nil {
+		logrus.WithField("op", "crypto_compare").WithError(nativeErr).Error("native hash failed")
+	} else if nativeResult != result {
+		logrus.WithField("op", "crypto_compare").Error("hash mismatch between libsodium and native implementation")
+	}
+	return result, nil
 }
 
 func GetEncryptedToken(token string, publicKey string) (string, error) {
