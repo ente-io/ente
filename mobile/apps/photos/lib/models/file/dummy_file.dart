@@ -21,9 +21,4 @@ class DummyFile extends EnteFile {
   String get tag {
     return "dummy_${groupID}_$index";
   }
-
-  @override
-  String cacheKey() {
-    return "dummy_${groupID}_$index";
-  }
 }
