@@ -117,8 +117,13 @@ class SmartMemoriesService {
         );
       }
 
+      final includeExpandedClipMemories = flagService.internalUser;
+      final clipMemoryTypes = availableClipMemoryTypes(
+        includeExpandedSet: includeExpandedClipMemories,
+      );
+
       final clipMemoryTypeVectors = <ClipMemoryType, Vector>{};
-      for (final memoryType in ClipMemoryType.values) {
+      for (final memoryType in clipMemoryTypes) {
         final query = clipQuery(memoryType);
         clipMemoryTypeVectors[memoryType] = Vector.fromList(
           await textEmbeddingsCacheService.getEmbedding(query),
@@ -151,6 +156,7 @@ class SmartMemoriesService {
           "clipPositiveTextVector": clipPositiveTextVector,
           "clipPeopleActivityVectors": clipPeopleActivityVectors,
           "clipMemoryTypeVectors": clipMemoryTypeVectors,
+          "clipMemoryTypes": clipMemoryTypes,
         },
       ) as MemoriesResult;
       _logger.info(
@@ -223,6 +229,7 @@ class SmartMemoriesService {
           args["clipPeopleActivityVectors"];
       final Map<ClipMemoryType, Vector> clipMemoryTypeVectors =
           args["clipMemoryTypeVectors"];
+      final List<ClipMemoryType> clipMemoryTypes = args["clipMemoryTypes"];
       dev.log('All arguments (direct data) unwrapped $t');
 
       final Map<String, String> faceIDsToPersonID = {};
@@ -300,6 +307,7 @@ class SmartMemoriesService {
         seenTimes: seenTimes,
         fileIDToImageEmbedding: fileIDToImageEmbedding,
         clipMemoryTypeVectors: clipMemoryTypeVectors,
+        clipMemoryTypes: clipMemoryTypes,
       );
       _deductUsedMemories(allFiles, clipMemories);
       memories.addAll(clipMemories);
@@ -787,6 +795,7 @@ class SmartMemoriesService {
     required Map<int, int> seenTimes,
     required Map<int, EmbeddingVector> fileIDToImageEmbedding,
     required Map<ClipMemoryType, Vector> clipMemoryTypeVectors,
+    required List<ClipMemoryType> clipMemoryTypes,
   }) async {
     final w = (kDebugMode ? EnteWatch('getClipResults') : null)?..start();
     final List<ClipMemory> clipResults = [];
@@ -799,7 +808,7 @@ class SmartMemoriesService {
 
     // Loop through the clip types and find all memories
     final clipFiles = <EnteFile>[];
-    for (final clipMemoryType in ClipMemoryType.values) {
+    for (final clipMemoryType in clipMemoryTypes) {
       clipFiles.clear();
       final Vector? activityVector = clipMemoryTypeVectors[clipMemoryType];
       if (activityVector == null) {
@@ -837,7 +846,7 @@ class SmartMemoriesService {
 
     // Surface everything just for debug checking
     if (surfaceAll) {
-      for (final clipMemoryType in ClipMemoryType.values) {
+      for (final clipMemoryType in clipMemoryTypes) {
         final clipMemory = clipTypeToMemory[clipMemoryType];
         if (clipMemory != null) clipResults.add(clipMemory);
       }
@@ -846,7 +855,7 @@ class SmartMemoriesService {
 
     // Loop through the clip types and add based on rotation
     clipMemoriesLoop:
-    for (final clipMemoryType in [...ClipMemoryType.values]..shuffle()) {
+    for (final clipMemoryType in [...clipMemoryTypes]..shuffle()) {
       final clipMemory = clipTypeToMemory[clipMemoryType];
       if (clipMemory == null) continue;
       for (final shownLog in shownClip) {

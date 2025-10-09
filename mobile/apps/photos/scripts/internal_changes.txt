@@ -8,3 +8,4 @@
 - Prateek: Fix CronetException during background sync by disabling NativeAdapter on Android
 - Laurens: Change similar images labels copy
 - Laurens: Fix flipped thumbnails issue by removing use of ColorFiltered widget
+- Codex: Gate expanded Clip memories behind internal user feature flag for testing

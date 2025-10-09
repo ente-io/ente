@@ -43,6 +43,27 @@ enum ClipMemoryType {
   coastalCliffs
 }
 
+const List<ClipMemoryType> legacyClipMemoryTypes = <ClipMemoryType>[
+  ClipMemoryType.sunrise,
+  ClipMemoryType.mountains,
+  ClipMemoryType.greenery,
+  ClipMemoryType.beach,
+  ClipMemoryType.city,
+  ClipMemoryType.moon,
+  ClipMemoryType.onTheRoad,
+  ClipMemoryType.food,
+  ClipMemoryType.pets,
+];
+
+List<ClipMemoryType> availableClipMemoryTypes({
+  required bool includeExpandedSet,
+}) {
+  if (includeExpandedSet) {
+    return ClipMemoryType.values;
+  }
+  return legacyClipMemoryTypes;
+}
+
 ClipMemoryType clipMemoryTypeFromString(String type) {
   switch (type) {
     case "sunrise":
