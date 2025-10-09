@@ -212,11 +212,15 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
 
   void _routeToDetailPage(EnteFile file, BuildContext context) {
     final galleryFiles = GalleryFilesState.of(context).galleryFiles;
+    // Device folders are local-only contexts where files should remain visible
+    // even after deleting from Ente (remote)
+    final isLocalOnlyContext = widget.tag.startsWith("device_folder:");
     final page = DetailPage(
       DetailPageConfiguration(
         galleryFiles,
         galleryFiles.indexOf(file),
         widget.tag,
+        isLocalOnlyContext: isLocalOnlyContext,
       ),
     );
     routeToPage(context, page, forceCustomPageRoute: true);

@@ -22,6 +22,7 @@ Future<void> showSingleFileDeleteSheet(
   BuildContext context,
   EnteFile file, {
   Function(EnteFile)? onFileRemoved,
+  bool isLocalOnlyContext = false,
 }) async {
   final List<ButtonWidget> buttons = [];
   final String fileType = file.fileType == FileType.video
@@ -62,7 +63,10 @@ Future<void> showSingleFileDeleteSheet(
         onTap: () async {
           await deleteFilesFromRemoteOnly(context, [file]);
           showShortToast(context, AppLocalizations.of(context).movedToTrash);
-          if (onFileRemoved != null) {
+          // Remove from viewer if:
+          // 1. File is remote-only (no local copy), OR
+          // 2. File has both copies but we're not in a local-only context
+          if (onFileRemoved != null && (isRemoteOnly || !isLocalOnlyContext)) {
             onFileRemoved(file);
           }
         },
