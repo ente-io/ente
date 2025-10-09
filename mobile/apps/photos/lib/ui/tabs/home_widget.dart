@@ -506,6 +506,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       _publicAlbumLinkSubscription.cancel();
     }
     _homepageSwipeToSelectInProgressEventSubscription.cancel();
+    _swipeToSelectInProgressNotifier.dispose();
     super.dispose();
   }
 

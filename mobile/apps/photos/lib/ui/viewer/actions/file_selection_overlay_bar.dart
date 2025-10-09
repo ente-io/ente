@@ -62,7 +62,6 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar>
       }
     });
 
-    // Sync initial state if files are already selected
     if (widget.selectedFiles.files.isNotEmpty) {
       _selectedFilesListener();
     }

@@ -101,7 +101,6 @@ class _FileSelectionActionsWidgetState
     collectionActions = CollectionActions(CollectionsService.instance);
     isCollectionOwner =
         widget.collection != null && widget.collection!.isOwner(currentUserID);
-    // Sync initial state if files are already selected
     if (widget.selectedFiles.files.isNotEmpty) {
       _selectFileChangeListener();
     }

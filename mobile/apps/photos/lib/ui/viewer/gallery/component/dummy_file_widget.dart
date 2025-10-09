@@ -20,20 +20,15 @@ class DummyFileWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Check if swipe selection should be enabled (same as GalleryFileWidget)
     final shouldEnableSwipeSelection =
         flagService.internalUser && !limitSelectionToOne;
 
     const Widget dummyContent = SizedBox.expand();
 
-    // Wrap with swipe selection if enabled
     if (shouldEnableSwipeSelection) {
       return SwipeSelectableFileWidget(
         file: file,
         selectedFiles: selectedFiles,
-        onPointerStateChanged: (pointerId, isInside) {
-          // Track pointer state but don't use it since dummies aren't selectable
-        },
         child: dummyContent,
       );
     }
