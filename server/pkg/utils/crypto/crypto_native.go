@@ -3,9 +3,9 @@ package crypto
 import (
 	"crypto/rand"
 	"encoding/base64"
-	"github.com/ente-io/museum/pkg/utils/auth"
 
 	"github.com/ente-io/museum/ente"
+	"github.com/ente-io/museum/pkg/utils/auth"
 	"github.com/ente-io/stacktrace"
 	"golang.org/x/crypto/blake2b"
 	"golang.org/x/crypto/nacl/box"
@@ -26,7 +26,7 @@ func encryptWithNonceNative(data string, encryptionKey []byte, nonce []byte) (en
 	if len(encryptionKey) != SecretBoxKeyBytes {
 		return ente.EncryptionResult{}, stacktrace.NewError("invalid key length")
 	}
-	var key [32]byte
+	var key [SecretBoxKeyBytes]byte
 	copy(key[:], encryptionKey)
 
 	// Convert nonce to array
@@ -50,7 +50,7 @@ func DecryptNative(cipher []byte, encryptionKey []byte, nonce []byte) (string, e
 	if len(encryptionKey) != SecretBoxKeyBytes {
 		return "", stacktrace.NewError("invalid key length")
 	}
-	var key [32]byte
+	var key [SecretBoxKeyBytes]byte
 	copy(key[:], encryptionKey)
 
 	// Convert nonce to array
@@ -82,12 +82,15 @@ func GetHashNative(data string, hashKey []byte) (string, error) {
 	return base64.StdEncoding.EncodeToString(hashBytes), nil
 }
 
+// GetEncryptedTokenNative encrypts the given token using the recipient's public key.
+// Format matches lib-sodium: https://libsodium.gitbook.io/doc/public-key_cryptography/sealed_boxes#algorithm-details
+// ephemeral_pk ‖ box(m, recipient_pk, ephemeral_sk, nonce=blake2b(ephemeral_pk ‖ recipient_pk))
 func GetEncryptedTokenNative(token string, publicKey string) (string, error) {
 	publicKeyBytes, err := base64.StdEncoding.DecodeString(publicKey)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "")
 	}
-	if len(publicKeyBytes) != 32 {
+	if len(publicKeyBytes) != BoxPublicKeyBytes {
 		return "", stacktrace.NewError("invalid public key length")
 	}
 
@@ -97,7 +100,7 @@ func GetEncryptedTokenNative(token string, publicKey string) (string, error) {
 	}
 
 	// Convert slice to array for nacl/box
-	var recipientPublicKey [32]byte
+	var recipientPublicKey [BoxPublicKeyBytes]byte
 	copy(recipientPublicKey[:], publicKeyBytes)
 
 	// Generate ephemeral keypair
@@ -121,11 +124,8 @@ func GetEncryptedTokenNative(token string, publicKey string) (string, error) {
 	copy(nonce[:], hash.Sum(nil))
 
 	// Encrypt the message (ephemeral public key + ciphertext)
-	// Format matches libsodium: ephemeral_pk || box(m, nonce, recipient_pk, ephemeral_sk)
-	out := make([]byte, 32) // just ephemeral public key
+	out := make([]byte, BoxPublicKeyBytes) // just ephemeral public key
 	copy(out, ephemeralPublicKey[:])
-
 	encrypted := box.Seal(out, tokenBytes, &nonce, &recipientPublicKey, ephemeralPrivateKey)
-
 	return base64.StdEncoding.EncodeToString(encrypted), nil
 }

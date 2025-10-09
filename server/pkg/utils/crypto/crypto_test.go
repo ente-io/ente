@@ -1,11 +1,13 @@
 package crypto
 
 import (
+	"crypto/rand"
 	"encoding/base64"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/crypto/nacl/box"
 )
 
 func init() {
@@ -283,17 +285,13 @@ func generateTestKey() []byte {
 }
 
 func generateTestKeyPair() ([32]byte, [32]byte) {
-	// Generate a deterministic test keypair for testing
-	var publicKey, privateKey [32]byte
-	// Use a fixed seed for deterministic testing
-	seed := make([]byte, 32)
-	for i := range seed {
-		seed[i] = byte(i * 2)
+	// Generate a valid test keypair using nacl/box
+	// For tests that need actual crypto operations
+	publicKey, privateKey, err := box.GenerateKey(rand.Reader)
+	if err != nil {
+		panic(err)
 	}
-	copy(privateKey[:], seed)
-	// This is a simplified test keypair - in real usage use box.GenerateKey
-	copy(publicKey[:], append([]byte("public"), seed[:26]...))
-	return publicKey, privateKey
+	return *publicKey, *privateKey
 }
 
 func generateLargeText(size int) string {

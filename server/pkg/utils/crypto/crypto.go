@@ -2,14 +2,13 @@ package crypto
 
 import (
 	"encoding/base64"
-	"fmt"
-	"github.com/ente-io/stacktrace"
 
 	"github.com/GoKillers/libsodium-go/cryptobox"
 	generichash "github.com/GoKillers/libsodium-go/cryptogenerichash"
 	cryptosecretbox "github.com/GoKillers/libsodium-go/cryptosecretbox"
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/pkg/utils/auth"
+	"github.com/ente-io/stacktrace"
 )
 
 // Exported constants matching libsodium
@@ -17,11 +16,12 @@ const (
 	SecretBoxKeyBytes   = 32 // crypto_secretbox_KEYBYTES in libsodium
 	SecretBoxNonceBytes = 24 // crypto_secretbox_NONCEBYTES in libsodium
 	GenericHashBytes    = 32 // crypto_generichash_BYTES in libsodium (BLAKE2b-256)
+	BoxPublicKeyBytes   = 32 // crypto_box_publickeybytes in lib-sodium
 )
 
 func Encrypt(data string, encryptionKey []byte) (ente.EncryptionResult, error) {
 	if SecretBoxNonceBytes != cryptosecretbox.CryptoSecretBoxNonceBytes() {
-		panic("SecretBoxNonceBytes constant does not match the actual nonce size")
+		return ente.EncryptionResult{}, stacktrace.NewError("SecretBoxNonceBytes constant does not match the actual nonce size")
 	}
 	nonce, err := auth.GenerateRandomBytes(SecretBoxNonceBytes)
 	if err != nil {
@@ -48,8 +48,7 @@ func Decrypt(cipher []byte, key []byte, nonce []byte) (string, error) {
 
 func GetHash(data string, hashKey []byte) (string, error) {
 	if GenericHashBytes != generichash.CryptoGenericHashBytes() {
-		panic(fmt.Sprintf("GenericHashBytes constant %d does not match the actual hash size %d",
-			GenericHashBytes, generichash.CryptoGenericHashBytes()))
+		return "", stacktrace.NewError("GenericHashBytes constant does not match the actual hash size")
 	}
 	dataHashBytes, err := generichash.CryptoGenericHash(GenericHashBytes, []byte(data), hashKey)
 	if err != 0 {
