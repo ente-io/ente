@@ -19,6 +19,14 @@ mixin BoundaryReporter<T extends StatefulWidget> on State<T> {
     _boundaryUpdateTimer = Timer(const Duration(milliseconds: 100), () {
       if (!mounted) return;
 
+      final provider = GalleryBoundariesProvider.of(context);
+      assert(
+        provider != null,
+        'GalleryBoundariesProvider not found in context. '
+        'Ensure BoundaryReporter is used within a GalleryBoundariesProvider.',
+      );
+      if (provider == null) return;
+
       final renderBox =
           _boundaryKey.currentContext?.findRenderObject() as RenderBox?;
       if (renderBox != null && renderBox.hasSize) {
@@ -27,13 +35,17 @@ mixin BoundaryReporter<T extends StatefulWidget> on State<T> {
             ? offset.dy + renderBox.size.height // Bottom edge of top widget
             : offset.dy; // Top edge of bottom widget
 
-        final provider = GalleryBoundariesProvider.of(context);
-        if (provider != null) {
-          if (position == BoundaryPosition.top) {
-            provider.setTopBoundary(boundary);
-          } else {
-            provider.setBottomBoundary(boundary);
-          }
+        if (position == BoundaryPosition.top) {
+          provider.setTopBoundary(boundary);
+        } else {
+          provider.setBottomBoundary(boundary);
+        }
+      } else {
+        // RenderBox not available (widget hidden/removed) - clear boundary
+        if (position == BoundaryPosition.top) {
+          provider.setTopBoundary(null);
+        } else {
+          provider.setBottomBoundary(null);
         }
       }
     });

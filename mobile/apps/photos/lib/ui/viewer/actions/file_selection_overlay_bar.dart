@@ -48,19 +48,15 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar>
   late GalleryType _galleryType;
   SearchFilterDataProvider? _searchFilterDataProvider;
   bool? _galleryInitialFilterStillApplied;
+  bool _wasEmpty = true;
 
   @override
   void initState() {
     super.initState();
     _galleryType = widget.galleryType;
+    _wasEmpty = widget.selectedFiles.files.isEmpty;
     widget.selectedFiles.addListener(_selectedFilesListener);
-
-    // Report boundary when selection changes
-    widget.selectedFiles.addListener(() {
-      if (widget.selectedFiles.files.isNotEmpty) {
-        reportBoundary(BoundaryPosition.bottom);
-      }
-    });
+    widget.selectedFiles.addListener(_boundaryUpdateListener);
 
     if (widget.selectedFiles.files.isNotEmpty) {
       _selectedFilesListener();
@@ -71,6 +67,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar>
   void dispose() {
     _hasSelectedFilesNotifier.dispose();
     widget.selectedFiles.removeListener(_selectedFilesListener);
+    widget.selectedFiles.removeListener(_boundaryUpdateListener);
     _searchFilterDataProvider?.removeListener(
       listener: _filterAppliedListener,
       fromApplied: true,
@@ -185,6 +182,17 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar>
 
   _selectedFilesListener() {
     _hasSelectedFilesNotifier.value = widget.selectedFiles.files.isNotEmpty;
+  }
+
+  void _boundaryUpdateListener() {
+    final isEmpty = widget.selectedFiles.files.isEmpty;
+
+    // Only report boundary on empty ↔ non-empty transitions
+    if (_wasEmpty != isEmpty) {
+      // Report boundary - will set to null if widget is not visible
+      reportBoundary(BoundaryPosition.bottom);
+      _wasEmpty = isEmpty;
+    }
   }
 
   void _filterAppliedListener() {
