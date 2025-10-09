@@ -45,7 +45,7 @@ export interface HandleTimelineScrollParams {
     setHasUserScrolled: (scrolled: boolean) => void;
     setScrollProgress: (progress: number) => void;
     previousActiveLocationRef: React.RefObject<number>;
-    isTouchDevice: boolean;
+    isMobileOrTablet: boolean;
     setTargetZoom: (zoom: number | null) => void;
     previousSuperClusterStateRef: React.RefObject<{
         isInSuperCluster: boolean;
@@ -72,7 +72,7 @@ export const handleTimelineScroll = ({
     setHasUserScrolled,
     setScrollProgress,
     previousActiveLocationRef,
-    isTouchDevice,
+    isMobileOrTablet,
     setTargetZoom,
     previousSuperClusterStateRef,
     superClusterInfo,
@@ -116,7 +116,7 @@ export const handleTimelineScroll = ({
     // Calculate current active location index based on scroll progress
     let currentActiveLocationIndex = -1; // Start with no location selected
     if (photoClusters.length > 0) {
-        if (isTouchDevice) {
+        if (isMobileOrTablet) {
             // Mobile: Slower progression - stay on each location longer
             currentActiveLocationIndex = Math.floor(
                 clampedProgress * (photoClusters.length - 0.5),
@@ -176,7 +176,7 @@ export const handleTimelineScroll = ({
             }
         }
 
-        const targetZoom = isTouchDevice ? 8 : 10; // Touch device-aware zoom level
+        const targetZoom = isMobileOrTablet ? 8 : 10; // Touch device-aware zoom level
 
         // Get super cluster info for both source and destination
         const currentSuperClusterIndex =
@@ -208,7 +208,7 @@ export const handleTimelineScroll = ({
             // Handle super cluster zoom logic - check distant locations first!
             if (isInSuperCluster && !wasInSuperCluster && isFirstLocationEver) {
                 // First location ever and it's in a super cluster - directly zoom to super cluster level
-                const superClusterZoom = isTouchDevice ? 15 : 14; // Higher zoom on mobile to break apart clusters
+                const superClusterZoom = isMobileOrTablet ? 15 : 14; // Higher zoom on mobile to break apart clusters
                 const [zoomAwareLat, zoomAwareLng] = getLocationPositionAtZoom(
                     targetCluster.lat,
                     targetCluster.lng,
@@ -222,8 +222,8 @@ export const handleTimelineScroll = ({
                 isDistantLocation
             ) {
                 // Entering super cluster from distant location - full zoom out → pan → zoom in
-                const superClusterZoom = isTouchDevice ? 15 : 14; // Higher zoom on mobile to break apart clusters
-                const intermediateZoom = isTouchDevice ? 2 : 4; // Extreme zoom out for distant locations
+                const superClusterZoom = isMobileOrTablet ? 15 : 14; // Higher zoom on mobile to break apart clusters
+                const intermediateZoom = isMobileOrTablet ? 2 : 4; // Extreme zoom out for distant locations
                 const [zoomAwareLat, zoomAwareLng] = getLocationPositionAtZoom(
                     targetCluster.lat,
                     targetCluster.lng,
@@ -248,7 +248,7 @@ export const handleTimelineScroll = ({
                 }, 1600);
             } else if (isInSuperCluster && !wasInSuperCluster) {
                 // Entering super cluster from nearby location - direct zoom in
-                const superClusterZoom = isTouchDevice ? 15 : 14; // Higher zoom on mobile to break apart clusters
+                const superClusterZoom = isMobileOrTablet ? 15 : 14; // Higher zoom on mobile to break apart clusters
                 const [zoomAwareLat, zoomAwareLng] = getLocationPositionAtZoom(
                     targetCluster.lat,
                     targetCluster.lng,
@@ -264,7 +264,7 @@ export const handleTimelineScroll = ({
                 // Leaving super cluster - check if distant location
                 if (isDistantLocation) {
                     // Distant location: full zoom out → pan → zoom in
-                    const intermediateZoom = isTouchDevice ? 2 : 4;
+                    const intermediateZoom = isMobileOrTablet ? 2 : 4;
                     mapRef.flyTo(
                         [positionedLat, positionedLng],
                         intermediateZoom,
@@ -315,8 +315,8 @@ export const handleTimelineScroll = ({
                 if (isDistantLocation) {
                     // Distant location from super cluster: full zoom out → pan → zoom in
                     // Since we're in the isInSuperCluster block, destination is always a super cluster
-                    const finalZoom = isTouchDevice ? 15 : 14; // Higher zoom on mobile to break apart clusters
-                    const intermediateZoom = isTouchDevice ? 2 : 4; // Extreme zoom out for distant locations
+                    const finalZoom = isMobileOrTablet ? 15 : 14; // Higher zoom on mobile to break apart clusters
+                    const intermediateZoom = isMobileOrTablet ? 2 : 4; // Extreme zoom out for distant locations
                     const [zoomAwareLat, zoomAwareLng] =
                         getLocationPositionAtZoom(
                             targetCluster.lat,
@@ -342,8 +342,8 @@ export const handleTimelineScroll = ({
                     }, 1600);
                 } else if (isDifferentSuperCluster) {
                     // Different super cluster (not distant): moderate zoom out → pan → zoom in
-                    const superClusterZoom = isTouchDevice ? 15 : 14; // Higher zoom on mobile to break apart clusters
-                    const intermediateZoom = isTouchDevice ? 8 : 10; // Moderate zoom out for nearby super clusters
+                    const superClusterZoom = isMobileOrTablet ? 15 : 14; // Higher zoom on mobile to break apart clusters
+                    const intermediateZoom = isMobileOrTablet ? 8 : 10; // Moderate zoom out for nearby super clusters
                     const [zoomAwareLat, zoomAwareLng] =
                         getLocationPositionAtZoom(
                             targetCluster.lat,
@@ -388,7 +388,7 @@ export const handleTimelineScroll = ({
                 }
             } else if (isDistantLocation) {
                 // For distant locations not in super cluster: zoom out → pan → zoom in
-                const intermediateZoom = isTouchDevice ? 2 : 4;
+                const intermediateZoom = isMobileOrTablet ? 2 : 4;
                 mapRef.flyTo([positionedLat, positionedLng], intermediateZoom, {
                     animate: true,
                     duration: 1.5,
@@ -436,6 +436,7 @@ export interface ScrollTimelineToLocationParams {
     locationIndex: number;
     photoClusters: JourneyPoint[][];
     locationPositions: PositionInfo[];
+    isMobileOrTablet: boolean;
 }
 
 export const scrollTimelineToLocation = ({
@@ -443,6 +444,7 @@ export const scrollTimelineToLocation = ({
     locationIndex,
     photoClusters,
     locationPositions,
+    isMobileOrTablet,
 }: ScrollTimelineToLocationParams) => {
     if (
         !timelineRef.current ||
@@ -457,14 +459,9 @@ export const scrollTimelineToLocation = ({
     const clientHeight = timelineContainer.clientHeight;
     const maxScrollableDistance = scrollHeight - clientHeight;
 
-    // Check if we're on a touch device
-    const isTouchDevice =
-        typeof window !== "undefined" &&
-        ("ontouchstart" in window || navigator.maxTouchPoints > 0);
-
     // Calculate target progress using the same formula as scroll progress calculation
     let targetProgress;
-    if (isTouchDevice) {
+    if (isMobileOrTablet) {
         // Mobile: Use inverse of the slower progression formula
         // If active index = Math.floor(progress * (length - 0.5))
         // Then progress = (index + 0.5) / (length - 0.5) for accurate inverse
@@ -496,7 +493,7 @@ export interface HandleMarkerClickParams {
     setScrollProgress: (progress: number) => void;
     setHasUserScrolled: (scrolled: boolean) => void;
     scrollTimelineToLocation: (locationIndex: number) => void;
-    isTouchDevice: boolean;
+    isMobileOrTablet: boolean;
     superClusterInfo?: {
         superClusters: {
             lat: number;
@@ -527,7 +524,7 @@ export const handleMarkerClick = ({
     setScrollProgress,
     setHasUserScrolled,
     scrollTimelineToLocation,
-    isTouchDevice,
+    isMobileOrTablet,
     superClusterInfo,
     scrollProgress,
     setTargetZoom,
@@ -550,7 +547,7 @@ export const handleMarkerClick = ({
     // Calculate current active location index
     let currentActiveLocationIndex = -1;
     if (photoClusters.length > 0) {
-        if (isTouchDevice) {
+        if (isMobileOrTablet) {
             currentActiveLocationIndex = Math.floor(
                 scrollProgress * (photoClusters.length - 0.5),
             );
@@ -613,7 +610,7 @@ export const handleMarkerClick = ({
 
                 if (isInSuperCluster) {
                     // Zoom to super cluster level to break it apart
-                    const superClusterZoom = isTouchDevice ? 15 : 14;
+                    const superClusterZoom = isMobileOrTablet ? 15 : 14;
                     const [zoomAwareLat, zoomAwareLng] =
                         getLocationPositionAtZoom(
                             clusterLat,
@@ -644,7 +641,7 @@ export const handleMarkerClick = ({
                         clusterLat,
                         clusterLng,
                     );
-                    const targetZoomLevel = isTouchDevice ? 8 : 10;
+                    const targetZoomLevel = isMobileOrTablet ? 8 : 10;
                     // Set target zoom before animation
                     setTargetZoom(targetZoomLevel);
                     mapRef.flyTo(

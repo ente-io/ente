@@ -56,7 +56,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
 
     // Use media query for mobile/tablet detection (up to 960px)
     const theme = useTheme();
-    const isTouchDevice = useMediaQuery(theme.breakpoints.down("md")); // 960px breakpoint for mobile and tablet
+    const isMobileOrTablet = useMediaQuery(theme.breakpoints.down("md")); // 960px breakpoint for mobile and tablet
 
     // Save groups hook for download progress tracking
     const { saveGroups, onAddSaveGroup, onRemoveSaveGroup } = useSaveGroups();
@@ -223,7 +223,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                         const firstLocationInSuperCluster =
                             clusterToSuperClusterMap.has(0);
                         const initialZoom = firstLocationInSuperCluster
-                            ? isTouchDevice
+                            ? isMobileOrTablet
                                 ? 15
                                 : 14 // Super cluster zoom level
                             : optimalZoomLevel;
@@ -237,7 +237,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                 );
             }
         }
-    }, [isClient, journeyData, isTouchDevice]);
+    }, [isClient, journeyData, isMobileOrTablet]);
 
     // Update currentZoom when optimalZoom changes and there's no mapRef yet
     useEffect(() => {
@@ -292,10 +292,11 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
         clusterClickTimeoutRef,
         previousActiveLocationRef,
         setLocationPositions,
+        isMobileOrTablet,
         setHasUserScrolled: (scrolled: boolean) => {
             setHasUserScrolled(scrolled);
             if (
-                isTouchDevice &&
+                isMobileOrTablet &&
                 tripStartedRef.current &&
                 timelineRef.current
             ) {
@@ -333,7 +334,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
     return (
         <TripLayoutContainer>
             {!openFileViewer &&
-                (isTouchDevice ? (
+                (isMobileOrTablet ? (
                     <MobileNavBar
                         onAddPhotos={onAddPhotos}
                         downloadAllFiles={downloadAllFiles}
@@ -348,7 +349,7 @@ export const TripLayout: React.FC<TripLayoutProps> = ({
                     />
                 ))}
             {/* Mobile Layout */}
-            {isTouchDevice ? (
+            {isMobileOrTablet ? (
                 <MobileContainer>
                     {/* Map takes 60% of height */}
                     <MobileMapContainer>
