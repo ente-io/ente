@@ -1,6 +1,7 @@
 import "package:photos/models/file/file.dart";
 
-/// A dummy file used to fill empty spaces in gallery grid rows.
+/// A dummy file used to fill empty spaces in gallery grid rows to help with
+/// swipe-to-select.
 /// Can be uniquely identified by groupID and index within the group.
 class DummyFile extends EnteFile {
   final String groupID;
