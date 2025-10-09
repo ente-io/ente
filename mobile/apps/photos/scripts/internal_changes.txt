@@ -1,3 +1,4 @@
+- Laurens: Add more Clip memories (behind internal feature flag for now)
 - Neeraj: Remove feature flags from manage_links_widget (album layout, allow joining album, copy embed HTML)
 - Ashil: Use better copy on auto-add people selection page
 - Ashil: Add more logs to debug app stuck at splash screen issue
@@ -8,4 +9,3 @@
 - Prateek: Fix CronetException during background sync by disabling NativeAdapter on Android
 - Laurens: Change similar images labels copy
 - Laurens: Fix flipped thumbnails issue by removing use of ColorFiltered widget
-- Codex: Gate expanded Clip memories behind internal user feature flag for testing
