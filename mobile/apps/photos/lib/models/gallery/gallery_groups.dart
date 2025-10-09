@@ -369,9 +369,9 @@ class GalleryGroups {
     // Dummy files are used for gesture tracking in swipe-to-select
     if (flagService.internalUser && !limitSelectionToOne) {
       // Add dummy files to fill the last row if needed
-      final filesInLastRow = groupFiles.length % crossAxisCount;
-      if (filesInLastRow != 0) {
-        final dummiesNeeded = crossAxisCount - filesInLastRow;
+      final incompleteRowCount = groupFiles.length % crossAxisCount;
+      if (incompleteRowCount != 0) {
+        final dummiesNeeded = crossAxisCount - incompleteRowCount;
         final filesWithDummies = List<EnteFile>.from(groupFiles);
         for (int i = 0; i < dummiesNeeded; i++) {
           filesWithDummies.add(
