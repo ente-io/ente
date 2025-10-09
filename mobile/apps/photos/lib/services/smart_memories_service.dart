@@ -117,7 +117,8 @@ class SmartMemoriesService {
         );
       }
 
-      final includeExpandedClipMemories = flagService.internalUser;
+      final includeExpandedClipMemories =
+          flagService.internalUser; // TODO: lau: remove feature flag
       final clipMemoryTypes = availableClipMemoryTypes(
         includeExpandedSet: includeExpandedClipMemories,
       );
