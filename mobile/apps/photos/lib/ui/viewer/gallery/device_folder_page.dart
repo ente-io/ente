@@ -52,6 +52,7 @@ class DeviceFolderPage extends StatelessWidget {
         EventType.hide,
       },
       tagPrefix: "device_folder:" + deviceCollection.name,
+      galleryType: GalleryType.localFolder,
       selectedFiles: _selectedFiles,
       header: Configuration.instance.hasConfiguredAccount()
           ? BackupHeaderWidget(deviceCollection)

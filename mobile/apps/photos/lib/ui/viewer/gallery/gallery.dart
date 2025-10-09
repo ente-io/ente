@@ -560,6 +560,7 @@ class GalleryState extends State<Gallery> {
       sortOrderAsc: _sortOrderAsc,
       inSelectionMode: widget.inSelectionMode,
       type: _groupType,
+      galleryType: widget.galleryType,
       child: _allGalleryFiles.isEmpty
           ? Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
