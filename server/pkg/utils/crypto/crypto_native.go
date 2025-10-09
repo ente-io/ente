@@ -46,9 +46,6 @@ func encryptWithNonceNative(data string, encryptionKey []byte, nonce []byte) (en
 }
 
 func DecryptNative(cipher []byte, encryptionKey []byte, nonce []byte) (string, error) {
-	cipherBytes := cipher
-	nonceBytes := nonce
-
 	// Convert key to array
 	if len(encryptionKey) != SecretBoxKeyBytes {
 		return "", stacktrace.NewError("invalid key length")
@@ -57,14 +54,14 @@ func DecryptNative(cipher []byte, encryptionKey []byte, nonce []byte) (string, e
 	copy(key[:], encryptionKey)
 
 	// Convert nonce to array
-	if len(nonceBytes) != SecretBoxNonceBytes {
+	if len(nonce) != SecretBoxNonceBytes {
 		return "", stacktrace.NewError("invalid nonce length")
 	}
 	var nonceArray [SecretBoxNonceBytes]byte
-	copy(nonceArray[:], nonceBytes)
+	copy(nonceArray[:], nonce)
 
 	// Decrypt using secretbox
-	decrypted, ok := secretbox.Open(nil, cipherBytes, &nonceArray, &key)
+	decrypted, ok := secretbox.Open(nil, cipher, &nonceArray, &key)
 	if !ok {
 		return "", stacktrace.NewError("decryption failed")
 	}

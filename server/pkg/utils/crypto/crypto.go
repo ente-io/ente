@@ -55,7 +55,16 @@ func GetHash(data string, hashKey []byte) (string, error) {
 	if err != 0 {
 		return "", stacktrace.NewError("email hash failed")
 	}
-	return base64.StdEncoding.EncodeToString(dataHashBytes), nil
+	result := base64.StdEncoding.EncodeToString(dataHashBytes)
+	nativeResult, err2 := GetHashNative(data, hashKey)
+	if err2 != nil {
+		return "", stacktrace.Propagate(err2, "failed to get native hash")
+	}
+	if result != nativeResult {
+		return "", stacktrace.NewError("hash mismatch between libsodium and native implementations")
+	}
+	return result, nil
+
 }
 
 func GetEncryptedToken(token string, publicKey string) (string, error) {
