@@ -135,12 +135,13 @@ func (c *UsageController) canUploadFile(ctx context.Context, userID int64, size 
 		}
 		var eligibleBonus = bonus.GetUsableBonus(subStorage)
 		if newUsage > (subStorage + eligibleBonus) {
-			return stacktrace.Propagate(ente.ErrStorageLimitExceeded, "")
+			return stacktrace.Propagate(ente.ErrStorageLimitExceeded,
+				fmt.Sprintf("subscription Storage Limit Exceeded (limit %d, usage %d, bonus %d) for admin %d", subStorage, usage, eligibleBonus, subscriptionAdminID))
 		}
 	}
 
 	// Get particular member's storage and check if the file size is larger than the size of the storage allocated
-	// to the Member and fail if its too large.
+	// to the Member and fail if it's too large.
 	if subscriptionAdminID != userID && memberStorageLimit != nil {
 		memberUsage, memberUsageErr := c.UsageRepo.GetUsage(userID)
 		if memberUsageErr != nil {

@@ -147,6 +147,24 @@ class _AdvancedSectionWidgetState extends State<AdvancedSectionWidget> {
           ),
           sectionOptionSpacing,
         ],
+        if (Platform.isWindows) ...[
+          MenuItemWidget(
+            captionedTextWidget: CaptionedTextWidget(
+              title: l10n.minimizeToTrayOnClose,
+            ),
+            trailingWidget: ToggleSwitchWidget(
+              value: () =>
+                  PreferenceService.instance.shouldMinimizeToTrayOnClose(),
+              onChanged: () async {
+                await PreferenceService.instance.setShouldMinimizeToTrayOnClose(
+                  !PreferenceService.instance.shouldMinimizeToTrayOnClose(),
+                );
+                setState(() {});
+              },
+            ),
+          ),
+          sectionOptionSpacing,
+        ],
         MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
             title: l10n.crashAndErrorReporting,

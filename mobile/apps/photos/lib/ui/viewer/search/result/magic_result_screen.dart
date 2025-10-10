@@ -167,7 +167,7 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
       tagPrefix: widget.heroTag,
       selectedFiles: _selectedFiles,
       enableFileGrouping: _enableGrouping,
-      initialFiles: [files.first],
+      initialFiles: files.isNotEmpty ? [files.first] : const [],
     );
     return GalleryBoundariesProvider(
       child: GalleryFilesState(

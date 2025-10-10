@@ -167,10 +167,9 @@ class PersonService {
         logger.severe("Person $personID not found");
         continue;
       }
-      final personData = person.data;
       final Map<String, Set<String>> dbPersonCluster =
           dbPersonClusterInfo[personID]!;
-      if (_shouldUpdateRemotePerson(personData, dbPersonCluster)) {
+      if (_shouldUpdateRemotePerson(person.data, dbPersonCluster)) {
         final personData = person.data;
         personData.assigned = dbPersonCluster.entries
             .map(
@@ -313,7 +312,7 @@ class PersonService {
     // Safety check to make sure we haven't created an empty cluster now, if so delete it
     for (final emptyClusterID in emptiedClusters) {
       personData.assigned
-          .removeWhere((element) => element.id != emptyClusterID);
+          .removeWhere((element) => element.id == emptyClusterID);
       await faceMLDataDB.removeClusterToPerson(
         personID: person.remoteID,
         clusterID: emptyClusterID,

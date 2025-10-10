@@ -1,5 +1,4 @@
-import { Box, styled } from "@mui/material";
-import { useIsTouchscreen } from "ente-base/components/utils/hooks";
+import { Box, styled, useMediaQuery, useTheme } from "@mui/material";
 import dynamic from "next/dynamic";
 
 import { MapEvents } from "./MapEvents";
@@ -69,12 +68,13 @@ export const TripMap: React.FC<TripMapProps> = ({
     setTargetZoom,
     onMarkerClick,
 }) => {
-    const isTouchDevice = useIsTouchscreen();
+    const theme = useTheme();
+    const isMobileOrTablet = useMediaQuery(theme.breakpoints.down("md")); // 960px breakpoint for mobile and tablet
 
     // Calculate current active location index based on scroll progress (same logic as in scrollUtils)
     let currentActiveLocationIndex = -1;
     if (photoClusters.length > 0) {
-        if (isTouchDevice) {
+        if (isMobileOrTablet) {
             // Mobile: Slower progression - stay on each location longer
             currentActiveLocationIndex = Math.floor(
                 scrollProgress * (photoClusters.length - 0.5),
@@ -107,13 +107,13 @@ export const TripMap: React.FC<TripMapProps> = ({
                         superClusterInfo,
                     )}
                     zoom={
-                        isTouchDevice
+                        isMobileOrTablet
                             ? Math.max(1, optimalZoom - 2)
                             : optimalZoom
                     }
                     scrollWheelZoom={true}
                     zoomControl={false}
-                    attributionControl={!isTouchDevice}
+                    attributionControl={!isMobileOrTablet}
                 >
                     <MapEvents
                         setMapRef={setMapRef}
@@ -123,14 +123,14 @@ export const TripMap: React.FC<TripMapProps> = ({
                     {/* Stadia Alidade Satellite - includes both imagery and labels */}
                     <TileLayer
                         attribution={
-                            isTouchDevice
+                            isMobileOrTablet
                                 ? ""
                                 : '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
                         }
                         url="https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg"
                         maxZoom={20}
-                        updateWhenZooming={false}
-                        keepBuffer={1}
+                        updateWhenZooming={isMobileOrTablet ? true : false}
+                        keepBuffer={isMobileOrTablet ? 3 : 1}
                     />
 
                     {/* Draw super-clusters (clickable for zoom and gallery) */}
@@ -143,7 +143,7 @@ export const TripMap: React.FC<TripMapProps> = ({
                         const icon = createSuperClusterIcon(
                             superCluster.image, // Use representative photo (first photo of first cluster)
                             superCluster.clusterCount,
-                            isTouchDevice ? 40 : 55,
+                            isMobileOrTablet ? 40 : 55,
                             isActive,
                         );
 
@@ -206,7 +206,7 @@ export const TripMap: React.FC<TripMapProps> = ({
 
                         const icon = createIcon(
                             firstPhoto.image,
-                            isTouchDevice ? 40 : 55,
+                            isMobileOrTablet ? 40 : 55,
                             "#ffffff",
                             cluster.length,
                             isActive,
