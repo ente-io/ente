@@ -1989,6 +1989,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Clear'**
   String get clear;
+
+  /// No description provided for @uploadAFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload a File'**
+  String get uploadAFile;
+
+  /// No description provided for @clickHereToUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Click here to upload'**
+  String get clickHereToUpload;
+
+  /// No description provided for @saveDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Save document'**
+  String get saveDocument;
 }
 
 class _AppLocalizationsDelegate

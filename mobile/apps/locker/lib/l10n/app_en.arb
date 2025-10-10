@@ -610,5 +610,8 @@
   "exitApp": "Exit App",
   "lockerLogs": "Locker logs",
   "recents": "Recents",
-  "clear": "Clear"
+  "clear": "Clear",
+  "uploadAFile": "Upload a File",
+  "clickHereToUpload": "Click here to upload",
+  "saveDocument": "Save document"
 }

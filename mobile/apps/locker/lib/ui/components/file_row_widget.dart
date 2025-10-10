@@ -108,8 +108,9 @@ class FileRowWidget extends StatelessWidget {
             decoration: BoxDecoration(
               border: Border.all(
                 color: isSelected
-                    ? colorScheme.strokeMuted
+                    ? colorScheme.primary700
                     : colorScheme.backdropBase,
+                width: 1.5,
               ),
               color: colorScheme.backdropBase,
               borderRadius: const BorderRadius.all(Radius.circular(20)),
@@ -129,14 +130,17 @@ class FileRowWidget extends StatelessWidget {
                             key: const ValueKey("selected"),
                             icon: Icons.check_circle_rounded,
                             iconButtonType: IconButtonType.secondary,
-                            iconColor: colorScheme.blurStrokeBase,
+                            iconColor: colorScheme.primary700,
                           )
                         : PopupMenuButton<String>(
                             onSelected: (value) =>
                                 _handleMenuAction(context, value),
-                            icon: const HugeIcon(
-                              icon: HugeIcons.strokeRoundedMoreVertical,
-                              size: 20,
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: HugeIcon(
+                                icon: HugeIcons.strokeRoundedMoreVertical,
+                                color: getEnteColorScheme(context).iconColor,
+                              ),
                             ),
                             itemBuilder: (BuildContext context) {
                               return _buildPopupMenuItems(context);
@@ -422,7 +426,7 @@ class FileRowWidget extends StatelessWidget {
       try {
         final infoItem = InfoFileService.instance.extractInfoFromFile(file);
         if (infoItem != null) {
-          return InfoItemUtils.getInfoIcon(infoItem.type); 
+          return InfoItemUtils.getInfoIcon(infoItem.type);
         }
       } catch (e) {
         // Fallback to default icon if extraction fails

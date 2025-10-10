@@ -32,7 +32,6 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   Widget build(BuildContext context) {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
     final colorScheme = getEnteColorScheme(context);
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return ConstrainedBox(
       constraints: BoxConstraints(
@@ -42,115 +41,8 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: Row(
-              children: [
-                ListenableBuilder(
-                  listenable: widget.selectedFiles,
-                  builder: (context, child) {
-                    final isAllSelected =
-                        widget.selectedFiles.count == widget.files.length;
-                    final buttonText = isAllSelected
-                        ? context.l10n.deselectAll
-                        : context.l10n.selectAll;
-                    final iconData = isAllSelected
-                        ? Icons.remove_circle_outline
-                        : Icons.check_circle_outline_outlined;
-
-                    return InkWell(
-                      onTap: () {
-                        if (isAllSelected) {
-                          widget.selectedFiles.clearAll();
-                        } else {
-                          widget.selectedFiles.selectAll(widget.files.toSet());
-                        }
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: colorScheme.strokeMuted,
-                            width: 0.5,
-                          ),
-                          borderRadius: BorderRadius.circular(50),
-                          color: isDarkMode
-                              ? const Color.fromRGBO(27, 27, 27, 1)
-                              : colorScheme.backgroundElevated2,
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12.0,
-                          vertical: 8.0,
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              buttonText,
-                              style: getEnteTextTheme(context).bodyBold,
-                            ),
-                            const SizedBox(width: 6),
-                            Icon(
-                              iconData,
-                              color: Colors.grey,
-                              size: 16,
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                const Spacer(),
-                ListenableBuilder(
-                  listenable: widget.selectedFiles,
-                  builder: (context, child) {
-                    final count = widget.selectedFiles.count;
-                    final countText =
-                        count == 1 ? '1 selected' : '$count selected';
-
-                    return InkWell(
-                      onTap: () {
-                        widget.selectedFiles.clearAll();
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: colorScheme.strokeMuted,
-                            width: 0.5,
-                          ),
-                          borderRadius: BorderRadius.circular(50),
-                          color: isDarkMode
-                              ? const Color.fromRGBO(27, 27, 27, 1)
-                              : colorScheme.backgroundElevated2,
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12.0,
-                          vertical: 8.0,
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              countText,
-                              style: getEnteTextTheme(context).bodyBold,
-                            ),
-                            const SizedBox(width: 6),
-                            const Icon(
-                              Icons.close,
-                              color: Colors.grey,
-                              size: 16,
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
           Card(
+            borderOnForeground: true,
             margin: EdgeInsets.zero,
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.only(
@@ -159,14 +51,106 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
               ),
             ),
             elevation: 4,
-            surfaceTintColor: isDarkMode
-                ? const Color.fromRGBO(18, 18, 18, 1)
-                : colorScheme.backgroundBase,
+            surfaceTintColor: colorScheme.backdropBase,
             child: Padding(
               padding: EdgeInsets.fromLTRB(16, 16, 16, 28 + bottomPadding),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  Row(
+                    children: [
+                      ListenableBuilder(
+                        listenable: widget.selectedFiles,
+                        builder: (context, child) {
+                          final isAllSelected =
+                              widget.selectedFiles.count == widget.files.length;
+                          final buttonText = isAllSelected
+                              ? context.l10n.deselectAll
+                              : context.l10n.selectAll;
+                          final iconData = isAllSelected
+                              ? Icons.remove_circle_outline
+                              : Icons.check_circle_outline_outlined;
+
+                          return InkWell(
+                            onTap: () {
+                              if (isAllSelected) {
+                                widget.selectedFiles.clearAll();
+                              } else {
+                                widget.selectedFiles
+                                    .selectAll(widget.files.toSet());
+                              }
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: colorScheme.backgroundBase,
+                                borderRadius: BorderRadius.circular(50),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12.0,
+                                vertical: 8.0,
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    buttonText,
+                                    style: getEnteTextTheme(context).small,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Icon(
+                                    iconData,
+                                    color: Colors.grey,
+                                    size: 16,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      const Spacer(),
+                      ListenableBuilder(
+                        listenable: widget.selectedFiles,
+                        builder: (context, child) {
+                          final count = widget.selectedFiles.count;
+                          final countText =
+                              count == 1 ? '1 selected' : '$count selected';
+
+                          return InkWell(
+                            onTap: () {
+                              widget.selectedFiles.clearAll();
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: colorScheme.backgroundBase,
+                                borderRadius: BorderRadius.circular(50),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12.0,
+                                vertical: 8.0,
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    countText,
+                                    style: getEnteTextTheme(context).small,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  const Icon(
+                                    Icons.close,
+                                    color: Colors.grey,
+                                    size: 16,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
                   _buildActionButtons(),
                 ],
               ),
@@ -178,8 +162,6 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   }
 
   Widget _buildActionButtons() {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
     return ListenableBuilder(
       listenable: widget.selectedFiles,
       builder: (context, child) {
@@ -194,17 +176,12 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeInOut,
           decoration: BoxDecoration(
-            color: isDarkMode
-                ? const Color.fromRGBO(255, 255, 255, 0.04)
-                : getEnteColorScheme(context).backgroundElevated2,
+            color: getEnteColorScheme(context).backgroundBase,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: actions,
-            ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: actions,
           ),
         );
       },

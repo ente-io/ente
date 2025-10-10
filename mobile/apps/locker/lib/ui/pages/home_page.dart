@@ -9,6 +9,7 @@ import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:ente_utils/email_util.dart';
 import 'package:flutter/material.dart';
+import "package:hugeicons/hugeicons.dart";
 import 'package:listen_sharing_intent/listen_sharing_intent.dart';
 import 'package:locker/events/collections_updated_event.dart';
 import 'package:locker/l10n/l10n.dart';
@@ -614,6 +615,9 @@ class _HomePageState extends UploaderPageState<HomePage>
     return ValueListenableBuilder<bool>(
       valueListenable: _isFabOpen,
       builder: (context, isFabOpen, child) {
+        final colorScheme = getEnteColorScheme(context);
+        final textTheme = getEnteTextTheme(context);
+
         return Stack(
           children: [
             if (isFabOpen)
@@ -626,120 +630,149 @@ class _HomePageState extends UploaderPageState<HomePage>
                 ),
               ),
             Positioned(
-              right: 0,
-              bottom: 0,
+              right: 64,
+              bottom: 64,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  if (isFabOpen) ...[
-                    ScaleTransition(
-                      scale: _animation,
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 16),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                _toggleFab();
-                                _showInformationDialog();
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: getEnteColorScheme(context).fillBase,
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: Text(
-                                  context.l10n.saveInformation,
-                                  style:
-                                      getEnteTextTheme(context).small.copyWith(
-                                            color: getEnteColorScheme(context)
-                                                .backgroundBase,
-                                          ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            FloatingActionButton(
-                              heroTag: "information",
-                              mini: true,
-                              onPressed: () {
-                                _toggleFab();
-                                _showInformationDialog();
-                              },
-                              backgroundColor:
-                                  getEnteColorScheme(context).fillBase,
-                              child: const Icon(Icons.edit_document),
-                            ),
-                          ],
+                  if (isFabOpen)
+                    SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(0, 1),
+                        end: Offset.zero,
+                      ).animate(
+                        CurvedAnimation(
+                          parent: _animationController,
+                          curve: Curves.easeOutCubic,
                         ),
                       ),
-                    ),
-                    if (_collections.isNotEmpty)
-                      ScaleTransition(
-                        scale: _animation,
+                      child: FadeTransition(
+                        opacity: _animation,
                         child: Container(
-                          margin: const EdgeInsets.only(bottom: 8),
-                          child: Row(
+                          width: 200,
+                          decoration: BoxDecoration(
+                            color: colorScheme.backgroundElevated,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: colorScheme.strokeFaint),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.08),
+                                blurRadius: 15,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              GestureDetector(
-                                onTap: () {
-                                  _toggleFab();
-                                  addFile();
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 6,
+                              Material(
+                                color: Colors.transparent,
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(15),
+                                  topRight: Radius.circular(15),
+                                ),
+                                child: InkWell(
+                                  onTap: () {
+                                    _toggleFab();
+                                    _showInformationDialog();
+                                  },
+                                  borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(15),
+                                    topRight: Radius.circular(15),
                                   ),
-                                  decoration: BoxDecoration(
-                                    color: getEnteColorScheme(context).fillBase,
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Text(
-                                    context.l10n.uploadDocumentTooltip,
-                                    style: getEnteTextTheme(context)
-                                        .small
-                                        .copyWith(
-                                          color: getEnteColorScheme(context)
-                                              .backgroundBase,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 16,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        HugeIcon(
+                                          icon: HugeIcons.strokeRoundedFile01,
+                                          color: colorScheme.primary700,
+                                          size: 20,
                                         ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Text(
+                                            context.l10n.saveInformation,
+                                            style: textTheme.body,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 8),
-                              FloatingActionButton(
-                                heroTag: "addFile",
-                                mini: true,
-                                onPressed: () {
-                                  _toggleFab();
-                                  addFile();
-                                },
-                                backgroundColor:
-                                    getEnteColorScheme(context).fillBase,
-                                child: const Icon(Icons.file_upload),
+                              Divider(
+                                height: 1,
+                                thickness: 1,
+                                color: colorScheme.strokeFaint,
+                              ),
+                              Material(
+                                color: Colors.transparent,
+                                borderRadius: const BorderRadius.only(
+                                  bottomLeft: Radius.circular(15),
+                                  bottomRight: Radius.circular(15),
+                                ),
+                                child: InkWell(
+                                  onTap: () {
+                                    _toggleFab();
+                                    addFile();
+                                  },
+                                  borderRadius: const BorderRadius.only(
+                                    bottomLeft: Radius.circular(15),
+                                    bottomRight: Radius.circular(15),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 16,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        HugeIcon(
+                                          icon:
+                                              HugeIcons.strokeRoundedFileUpload,
+                                          color: colorScheme.primary700,
+                                          size: 20,
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Text(
+                                            context.l10n.saveDocument,
+                                            style: textTheme.body,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
                               ),
                             ],
                           ),
                         ),
                       ),
-                  ],
-                  FloatingActionButton(
-                    onPressed: _toggleFab,
-                    backgroundColor: getEnteColorScheme(context).primary700,
-                    child: AnimatedRotation(
-                      turns: isFabOpen ? 0.125 : 0.0, // 45 degrees when open
-                      duration: const Duration(milliseconds: 300),
-                      child: const Icon(Icons.add),
                     ),
-                  ),
                 ],
+              ),
+            ),
+            Positioned(
+              right: 16,
+              bottom: 16,
+              child: FloatingActionButton(
+                onPressed: _toggleFab,
+                shape: const CircleBorder(),
+                backgroundColor: colorScheme.primary700,
+                child: AnimatedRotation(
+                  turns: isFabOpen ? 0.125 : 0.0, // 45 degrees when open
+                  duration: const Duration(milliseconds: 300),
+                  child: const HugeIcon(
+                    icon: HugeIcons.strokeRoundedPlusSign,
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ),
           ],

@@ -1122,4 +1122,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get clear => 'Clear';
+
+  @override
+  String get uploadAFile => 'Upload a File';
+
+  @override
+  String get clickHereToUpload => 'Click here to upload';
+
+  @override
+  String get saveDocument => 'Save document';
 }
