@@ -1119,4 +1119,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recents => 'Recents';
+
+  @override
+  String get clear => 'Clear';
 }

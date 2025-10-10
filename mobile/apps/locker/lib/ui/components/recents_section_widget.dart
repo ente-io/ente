@@ -611,7 +611,7 @@ class _FilterChipsRow extends StatelessWidget {
     final textTheme = getEnteTextTheme(context);
 
     return SizedBox(
-      height: 40,
+      height: 48,
       child: Row(
         children: [
           Expanded(
@@ -701,15 +701,12 @@ class _FilterChip extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          margin: const EdgeInsets.symmetric(vertical: 4),
+          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
           decoration: BoxDecoration(
-            color: isSelected ? colorScheme.fillMuted : null,
-            border: Border.all(
-              color:
-                  isSelected ? colorScheme.strokeBase : colorScheme.fillFaint,
-              width: 1,
-            ),
-            borderRadius: const BorderRadius.all(Radius.circular(20.0)),
+            color:
+                isSelected ? colorScheme.primary700 : colorScheme.backdropBase,
+            borderRadius: const BorderRadius.all(Radius.circular(24.0)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -739,30 +736,6 @@ class _FilterChip extends StatelessWidget {
                     ),
                   );
                 },
-                child: isSelected
-                    ? Row(
-                        key: const ValueKey('selected_chip'),
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const SizedBox(width: 8),
-                          GestureDetector(
-                            onTap: onTap,
-                            child: Container(
-                              padding: const EdgeInsets.all(1),
-                              decoration: BoxDecoration(
-                                color: colorScheme.strokeBase,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.close,
-                                size: 10,
-                                color: colorScheme.backdropBase,
-                              ),
-                            ),
-                          ),
-                        ],
-                      )
-                    : const SizedBox.shrink(key: ValueKey('unselected_chip')),
               ),
             ],
           ),
@@ -788,14 +761,15 @@ class _FilterClearButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
         decoration: BoxDecoration(
           color: colorScheme.fillFaint,
           border: Border.all(
             color: colorScheme.strokeMuted,
             width: 1,
           ),
-          borderRadius: const BorderRadius.all(Radius.circular(16.0)),
+          borderRadius: const BorderRadius.all(Radius.circular(24.0)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -807,7 +781,7 @@ class _FilterClearButton extends StatelessWidget {
             ),
             const SizedBox(width: 4),
             Text(
-              'Clear',
+              context.l10n.clear,
               style: textTheme.miniMuted,
             ),
           ],

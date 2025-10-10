@@ -609,5 +609,6 @@
   "showWindow": "Show Window",
   "exitApp": "Exit App",
   "lockerLogs": "Locker logs",
-  "recents": "Recents"
+  "recents": "Recents",
+  "clear": "Clear"
 }

@@ -2,6 +2,7 @@ import "dart:math";
 
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
@@ -69,16 +70,17 @@ class _CollectionFlexGridViewWidgetState
                       color: getEnteColorScheme(context).backgroundBase,
                       borderRadius: BorderRadius.circular(16),
                     ),
+                    padding: const EdgeInsets.all(12),
                     child: collection.type == CollectionType.favorites
-                        ? Icon(
-                            Icons.star,
-                            color: getEnteColorScheme(context).primary500,
-                            size: 22,
+                        ? HugeIcon(
+                            icon: HugeIcons.strokeRoundedStar,
+                            color: getEnteColorScheme(context).primary700,
+                            size: 16,
                           )
-                        : Icon(
-                            Icons.folder,
-                            size: 22,
-                            color: getEnteColorScheme(context).primary500,
+                        : HugeIcon(
+                            icon: HugeIcons.strokeRoundedWallet05,
+                            size: 16,
+                            color: getEnteColorScheme(context).iconColor,
                           ),
                   ),
                   const SizedBox(height: 12),

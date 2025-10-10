@@ -1983,6 +1983,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Recents'**
   String get recents;
+
+  /// No description provided for @clear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clear;
 }
 
 class _AppLocalizationsDelegate
