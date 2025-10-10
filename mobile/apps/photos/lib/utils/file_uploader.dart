@@ -619,7 +619,7 @@ class FileUploader {
       // that we'll have to re-upload as the nonce is lost
       if (hasExistingMultiPart) {
         if (!encryptedFileExists) {
-          throw MultiPartMissingFileError(
+          throw MultiPartFileMissingError(
             'multiPartResume: encryptedFile missing',
           );
         }
@@ -902,7 +902,7 @@ class FileUploader {
   }
 
   bool isPutOrMultiPartError(Object e) {
-    if (e is MultiPartMissingFileError || e is MultiPartError) {
+    if (e is MultiPartFileMissingError || e is MultiPartError) {
       return true;
     }
     if (e is DioException) {
