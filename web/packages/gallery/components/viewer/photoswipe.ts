@@ -90,7 +90,10 @@ export interface FileViewerPhotoSwipeDelegate {
     ) => void;
 }
 
-type FileViewerPhotoSwipeOptions = Pick<FileViewerProps, "initialIndex" | "showFullscreenButton"> & {
+type FileViewerPhotoSwipeOptions = Pick<
+    FileViewerProps,
+    "initialIndex" | "showFullscreenButton"
+> & {
     /**
      * `true` if we're running in the context of a logged in user, and so
      * various actions that modify the file should be shown.
@@ -1263,18 +1266,31 @@ export class FileViewerPhotoSwipe {
                     onInit: (buttonElement, pswp) => {
                         const updateIcon = () => {
                             const isFullscreen = !!document.fullscreenElement;
-                            const fullscreenIcon = buttonElement.querySelector("#pswp__icn-fullscreen");
-                            const exitIcon = buttonElement.querySelector("#pswp__icn-fullscreen-exit");
+                            const fullscreenIcon = buttonElement.querySelector(
+                                "#pswp__icn-fullscreen",
+                            );
+                            const exitIcon = buttonElement.querySelector(
+                                "#pswp__icn-fullscreen-exit",
+                            );
                             if (fullscreenIcon && exitIcon) {
-                                showIf(fullscreenIcon as HTMLElement, !isFullscreen);
+                                showIf(
+                                    fullscreenIcon as HTMLElement,
+                                    !isFullscreen,
+                                );
                                 showIf(exitIcon as HTMLElement, isFullscreen);
                             }
                         };
 
                         // Update icon on fullscreen changes
-                        document.addEventListener("fullscreenchange", updateIcon);
+                        document.addEventListener(
+                            "fullscreenchange",
+                            updateIcon,
+                        );
                         pswp.on("destroy", () => {
-                            document.removeEventListener("fullscreenchange", updateIcon);
+                            document.removeEventListener(
+                                "fullscreenchange",
+                                updateIcon,
+                            );
                         });
 
                         // Initialize icon state
