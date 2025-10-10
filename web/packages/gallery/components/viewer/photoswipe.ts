@@ -90,7 +90,7 @@ export interface FileViewerPhotoSwipeDelegate {
     ) => void;
 }
 
-type FileViewerPhotoSwipeOptions = Pick<FileViewerProps, "initialIndex"> & {
+type FileViewerPhotoSwipeOptions = Pick<FileViewerProps, "initialIndex" | "showFullscreenButton"> & {
     /**
      * `true` if we're running in the context of a logged in user, and so
      * various actions that modify the file should be shown.
@@ -189,6 +189,7 @@ export class FileViewerPhotoSwipe {
     constructor({
         initialIndex,
         haveUser,
+        showFullscreenButton,
         delegate,
         onClose,
         onAnnotate,
@@ -1242,6 +1243,38 @@ export class FileViewerPhotoSwipe {
                     onMore(buttonElement);
                 },
             });
+
+            // Add fullscreen button as a primary action for embed app
+            if (showFullscreenButton) {
+                ui.registerElement({
+                    name: "fullscreen",
+                    title: t("toggle_fullscreen"),
+                    order: 18,
+                    isButton: true,
+                    html: createPSRegisterElementIconHTML("fullscreen"),
+                    onInit: (buttonElement, pswp) => {
+                        const updateIcon = () => {
+                            const isFullscreen = !!document.fullscreenElement;
+                            const fullscreenIcon = buttonElement.querySelector("#pswp__icn-fullscreen");
+                            const exitIcon = buttonElement.querySelector("#pswp__icn-fullscreen-exit");
+                            if (fullscreenIcon && exitIcon) {
+                                showIf(fullscreenIcon as HTMLElement, !isFullscreen);
+                                showIf(exitIcon as HTMLElement, isFullscreen);
+                            }
+                        };
+
+                        // Update icon on fullscreen changes
+                        document.addEventListener("fullscreenchange", updateIcon);
+                        pswp.on("destroy", () => {
+                            document.removeEventListener("fullscreenchange", updateIcon);
+                        });
+
+                        // Initialize icon state
+                        updateIcon();
+                    },
+                    onClick: handleToggleFullscreen,
+                });
+            }
 
             ui.registerElement({
                 name: "media-controls",

@@ -161,6 +161,11 @@ export type FileViewerProps = ModalVisibilityProps & {
      */
     disableDownload?: boolean;
     /**
+     * If true then the fullscreen button is shown as a primary action button
+     * in the toolbar instead of being hidden in the more menu.
+     */
+    showFullscreenButton?: boolean;
+    /**
      * `true` when we are viewing files in an album that the user does not own.
      */
     isInIncomingSharedCollection?: boolean;
@@ -290,6 +295,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
     files,
     initialIndex,
     disableDownload,
+    showFullscreenButton,
     isInIncomingSharedCollection,
     isInTrashSection,
     isInHiddenSection,
@@ -813,6 +819,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
             const pswp = new FileViewerPhotoSwipe({
                 initialIndex,
                 haveUser,
+                showFullscreenButton,
                 delegate: delegateRef.current!,
                 onClose: () => {
                     if (psRef.current) handleClose();
@@ -843,6 +850,7 @@ export const FileViewer: React.FC<FileViewerProps> = ({
         user,
         initialIndex,
         disableDownload,
+        showFullscreenButton,
         haveUser,
         handleClose,
         handleAnnotate,
