@@ -94,20 +94,27 @@ class Media3TransformerProcessor(private val context: Context) {
             val videoEffects = mutableListOf<Effect>()
 
             // Add crop effect if needed BEFORE rotation
-            // With rotationCorrection set on VideoPlayerValue, the video editor provides
-            // crop coordinates that match the display orientation. These coordinates are
-            // already correct for the file and match what iOS sends - use them directly.
+            // Flutter sends crop coordinates in display space.
+            // Like FFmpeg and iOS, we'll use these coordinates directly without transformation.
             var outDimsFromCrop: Size? = null
             if (cropX != null && cropY != null && cropWidth != null && cropHeight != null) {
                 logVerbose("Crop input: x=$cropX, y=$cropY, w=$cropWidth, h=$cropHeight")
-                logVerbose("Video dims: ${originalWidth}x$originalHeight")
+                logVerbose("Video dims: ${originalWidth}x$originalHeight, rotation=$originalRotation")
 
-                // Use crop coordinates directly - they're already in the correct space
+                // Use crop coordinates as-is, just like FFmpeg does
+                // No special treatment for metadata rotation
+                val fileX = cropX
+                val fileY = cropY
+                val fileW = cropWidth
+                val fileH = cropHeight
+
+                logVerbose("Using crop coordinates as-is: x=$fileX, y=$fileY, w=$fileW, h=$fileH")
+
                 // Calculate crop as a fraction of the video dimensions
-                val cropLeftFraction = cropX.toFloat() / originalWidth
-                val cropRightFraction = (cropX + cropWidth).toFloat() / originalWidth
-                val cropTopFraction = cropY.toFloat() / originalHeight
-                val cropBottomFraction = (cropY + cropHeight).toFloat() / originalHeight
+                val cropLeftFraction = fileX.toFloat() / originalWidth
+                val cropRightFraction = (fileX + fileW).toFloat() / originalWidth
+                val cropTopFraction = fileY.toFloat() / originalHeight
+                val cropBottomFraction = (fileY + fileH).toFloat() / originalHeight
 
                 logVerbose("Crop fractions: L=$cropLeftFraction, R=$cropRightFraction, T=$cropTopFraction, B=$cropBottomFraction")
 
