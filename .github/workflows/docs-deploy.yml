@@ -39,9 +39,14 @@ jobs:
               # Will create docs/.vitepress/dist
               run: yarn build
 
+            - name: Prepare deployment with help subdirectory
+              run: |
+                  mkdir -p deploy
+                  mv docs/.vitepress/dist deploy/help
+
             - name: Publish
               uses: cloudflare/wrangler-action@v3
               with:
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-                  command: pages deploy --project-name=ente --commit-dirty=true --branch=help-content docs/docs/.vitepress/dist
+                  command: pages deploy --project-name=ente --commit-dirty=true --branch=help-content docs/deploy
