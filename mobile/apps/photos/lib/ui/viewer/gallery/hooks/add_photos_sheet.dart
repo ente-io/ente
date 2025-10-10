@@ -88,7 +88,7 @@ class AddPhotosPhotoWidget extends StatelessWidget {
                   Expanded(
                     child: Column(
                       children: [
-                        _TitleWithBoundary(
+                        _AppBarWithBoundary(
                           child: BottomOfTitleBarWidget(
                             title: TitleBarTitleWidget(
                               title: AppLocalizations.of(context).addMore,
@@ -330,16 +330,16 @@ class _DelayedGalleryState extends State<DelayedGallery> {
   }
 }
 
-class _TitleWithBoundary extends StatefulWidget {
+class _AppBarWithBoundary extends StatefulWidget {
   final Widget child;
 
-  const _TitleWithBoundary({required this.child});
+  const _AppBarWithBoundary({required this.child});
 
   @override
-  State<_TitleWithBoundary> createState() => _TitleWithBoundaryState();
+  State<_AppBarWithBoundary> createState() => _AppBarWithBoundaryState();
 }
 
-class _TitleWithBoundaryState extends State<_TitleWithBoundary>
+class _AppBarWithBoundaryState extends State<_AppBarWithBoundary>
     with BoundaryReporter {
   @override
   void initState() {
