@@ -61,7 +61,21 @@ Create a shareable link without creating an album first:
 
 ## Link features
 
-Public links support powerful security and control features:
+Public links support powerful customization, security, and control features:
+
+### Album layout
+
+Choose how recipients view your public links with these layout options:
+
+**Grouped** (default): Photos are organized by date, making it easy to browse chronologically.
+
+**Continuous**: Photos appear in a single continuous stream.
+
+**Trip**: Photos appear on an interactive map and timeline, perfect for travel and location-based albums.
+
+> [!NOTE]
+>
+> Trip layout public links are not supported on custom domains yet. When someone tries to access such a link, they will be redirected to the Trip layout public link on the default `albums.ente.io` domain. Other layouts will work perfectly on your custom domain.
 
 ### Password protection
 

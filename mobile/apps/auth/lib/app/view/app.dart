@@ -9,6 +9,7 @@ import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/locale.dart';
 import "package:ente_auth/onboarding/view/onboarding_page.dart";
 import 'package:ente_auth/services/authenticator_service.dart';
+import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/services/update_service.dart';
 import 'package:ente_auth/services/window_listener_service.dart';
 import 'package:ente_auth/ui/home_page.dart';
@@ -211,6 +212,19 @@ class _AppState extends State<App>
       case 'exit_app':
         windowManager.destroy();
         break;
+    }
+  }
+
+  @override
+  void onWindowClose() {
+    final shouldMinimizeToTray =
+        PreferenceService.instance.shouldMinimizeToTrayOnClose();
+    if (shouldMinimizeToTray) {
+      windowManager.hide();
+      windowManager.setSkipTaskbar(true);
+    } else {
+      windowManager.setPreventClose(false);
+      windowManager.destroy();
     }
   }
 }
