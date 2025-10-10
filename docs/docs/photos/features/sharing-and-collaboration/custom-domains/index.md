@@ -96,12 +96,6 @@ Using is trivial. When you open an album's sharing options and copy the link to 
 >
 > Currently (Sep 2025) the ability to automatically substitute your custom domain is present in Ente's web and mobile apps, but not in the desktop app (The next desktop version to be released will have that ability too).
 
-### Notes
-
-#### Trip albums
-
-Public albums that use the Trip layout feature are not yet supported on custom domains. When someone tries to access a Trip album through your custom domain, they will be automatically redirected to the default `albums.ente.io` domain. Regular albums continue to work perfectly on your custom domain.
-
 ## Unsetting
 
 To stop using your custom domain, we need to undo the two steps we did during setup.
