@@ -31,9 +31,9 @@ class Media3TransformerProcessor(private val context: Context) {
             false
         }
 
-        private val LOG_VERBOSE = IS_DEBUG_BUILD
+        private val LOG_VERBOSE = true  // Temporarily always enabled for debugging
         private val LOG_PROGRESS = IS_DEBUG_BUILD
-        private val LOG_ERRORS = IS_DEBUG_BUILD
+        private val LOG_ERRORS = true  // Temporarily always enabled for debugging
         private const val ROTATION_90 = 90
         private const val ROTATION_270 = 270
     }
@@ -112,11 +112,19 @@ class Media3TransformerProcessor(private val context: Context) {
                 logVerbose("Crop fractions: L=$cropLeftFraction, R=$cropRightFraction, T=$cropTopFraction, B=$cropBottomFraction")
 
                 // Use Crop effect with NDC coordinates (-1 to 1)
+                val ndcLeft = -1f + 2f * cropLeftFraction
+                val ndcRight = -1f + 2f * cropRightFraction
+                val ndcBottom = 1f - 2f * cropBottomFraction
+                val ndcTop = 1f - 2f * cropTopFraction
+
+                logVerbose("NDC coordinates: left=$ndcLeft, right=$ndcRight, bottom=$ndcBottom, top=$ndcTop")
+                logVerbose("Expected crop output: ${cropWidth}x$cropHeight pixels")
+
                 val cropEffect = Crop(
-                    /* left = */ -1f + 2f * cropLeftFraction,
-                    /* right = */ -1f + 2f * cropRightFraction,
-                    /* bottom = */ 1f - 2f * cropBottomFraction,
-                    /* top = */ 1f - 2f * cropTopFraction
+                    /* left = */ ndcLeft,
+                    /* right = */ ndcRight,
+                    /* bottom = */ ndcBottom,
+                    /* top = */ ndcTop
                 )
 
                 // Preserve output dimensions from the crop

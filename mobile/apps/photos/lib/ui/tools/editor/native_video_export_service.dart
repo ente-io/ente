@@ -229,9 +229,21 @@ class NativeVideoExportService {
       cropRect = displayCrop;
     }
 
-    if (cropRect != null && _logger.isLoggable(Level.FINE)) {
-      _logger.fine(
-        'Native export cropRect=$cropRect videoSize=${controller.video.value.size}',
+    if (cropRect != null) {
+      _logger.info(
+        'Native export cropRect: left=${cropRect.left.toInt()}, top=${cropRect.top.toInt()}, '
+        'width=${cropRect.width.toInt()}, height=${cropRect.height.toInt()}, '
+        'videoSize=${controller.video.value.size.width.toInt()}x${controller.video.value.size.height.toInt()}',
+      );
+
+      // Calculate what FFmpeg would use for comparison
+      final minCropX = controller.minCrop.dx;
+      final minCropY = controller.minCrop.dy;
+      final maxCropX = controller.maxCrop.dx;
+      final maxCropY = controller.maxCrop.dy;
+      _logger.info(
+        'Controller crop values: minCrop=(${minCropX.toStringAsFixed(3)}, ${minCropY.toStringAsFixed(3)}), '
+        'maxCrop=(${maxCropX.toStringAsFixed(3)}, ${maxCropY.toStringAsFixed(3)})',
       );
     }
 
