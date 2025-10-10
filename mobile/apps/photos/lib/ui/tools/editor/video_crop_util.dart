@@ -1,5 +1,5 @@
-import 'dart:io';
 import 'dart:ui';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:video_editor/video_editor.dart';
 
 /// Crop calculation result
@@ -28,59 +28,153 @@ class CropCalculation {
   String toFFmpegFilter() => 'crop=$width:$height:$x:$y';
 }
 
-/// Calculate crop dimensions for rotated Android videos
+class VideoCropException implements Exception {
+  VideoCropException(this.message);
+  final String message;
+
+  @override
+  String toString() => 'VideoCropException: $message';
+}
+
+/// Helpers to derive display- and file-space crop rectangles for native export
 class VideoCropUtil {
-  /// Calculate crop for Android videos with 90°/270° metadata rotation
+  static double _clampNormalized(double value) {
+    return value.clamp(0.0, 1.0);
+  }
+
+  static int _clampInt(int value, int min, int max) {
+    if (value < min) return min;
+    if (value > max) return max;
+    return value;
+  }
+
+  /// Calculate the crop rectangle in display-space pixels.
   ///
-  /// For Android videos with metadata rotation, the video file dimensions don't match
-  /// the display dimensions (e.g., file is 1920x1080 but displays as 1080x1920).
-  /// This method calculates the correct crop in file space.
-  static CropCalculation calculateCropForRotation({
+  /// Returns a Rect in display-space so the native plugins can transform to file-space.
+  static Rect calculateDisplaySpaceCropRect({
     required VideoEditorController controller,
-    required int metadataRotation,
+  }) {
+    return calculateDisplaySpaceCropRectFromData(
+      minCrop: controller.minCrop,
+      maxCrop: controller.maxCrop,
+      videoSize: controller.video.value.size,
+    );
+  }
+
+  /// Testability helper: bypasses controller and platform checks by accepting
+  /// raw crop data. Only used in unit tests.
+  @visibleForTesting
+  static Rect calculateDisplaySpaceCropRectFromData({
+    required Offset minCrop,
+    required Offset maxCrop,
+    required Size videoSize,
+  }) {
+    // Both platforms use same path - no rotation-specific logic
+    double minX = _clampNormalized(minCrop.dx);
+    double maxX = _clampNormalized(maxCrop.dx);
+    double minY = _clampNormalized(minCrop.dy);
+    double maxY = _clampNormalized(maxCrop.dy);
+
+    if (minX > maxX) {
+      final temp = minX;
+      minX = maxX;
+      maxX = temp;
+    }
+    if (minY > maxY) {
+      final temp = minY;
+      minY = maxY;
+      maxY = temp;
+    }
+
+    // Use raw video dimensions - no special handling for rotation
+    final displayWidth = videoSize.width;
+    final displayHeight = videoSize.height;
+
+    final widthNormalized = maxX - minX;
+    final heightNormalized = maxY - minY;
+
+    if (widthNormalized <= 0 || heightNormalized <= 0) {
+      throw VideoCropException('Invalid crop selection: zero or negative span');
+    }
+
+    final x = minX * displayWidth;
+    final y = minY * displayHeight;
+    final w = widthNormalized * displayWidth;
+    final h = heightNormalized * displayHeight;
+
+    if (w <= 0 || h <= 0) {
+      throw VideoCropException('Invalid crop rectangle after scaling');
+    }
+
+    return Rect.fromLTWH(x, y, w, h);
+  }
+
+  /// Convert the normalised crop selection into file-space coordinates.
+  static CropCalculation calculateFileSpaceCrop({
+    required VideoEditorController controller,
   }) {
     final videoSize = controller.video.value.size;
-    final metadataQuarterTurns = (metadataRotation / 90).round();
+    return calculateFileSpaceCropFromData(
+      minCrop: controller.minCrop,
+      maxCrop: controller.maxCrop,
+      videoSize: videoSize,
+    );
+  }
 
-    // For 90°/270° rotations on Android, we need special handling
-    if (Platform.isAndroid && metadataQuarterTurns % 2 == 1) {
-      // Get normalized crop coordinates in display space
-      double minXNorm = controller.minCrop.dx;
-      double minYNorm = controller.minCrop.dy;
-      double maxXNorm = controller.maxCrop.dx;
-      double maxYNorm = controller.maxCrop.dy;
+  /// Testability helper: skips controller/platform usage to make unit tests
+  /// deterministic. Not for production callers.
+  @visibleForTesting
+  static CropCalculation calculateFileSpaceCropFromData({
+    required Offset minCrop,
+    required Offset maxCrop,
+    required Size videoSize,
+  }) {
+    final displayCrop = calculateDisplaySpaceCropRectFromData(
+      minCrop: minCrop,
+      maxCrop: maxCrop,
+      videoSize: videoSize,
+    );
 
-      // Swap axes for 90°/270° rotation
-      // Display X → File Y, Display Y → File X
-      final tempMinX = minXNorm;
-      final tempMaxX = maxXNorm;
-      minXNorm = minYNorm;
-      maxXNorm = maxYNorm;
-      minYNorm = tempMinX;
-      maxYNorm = tempMaxX;
+    // Both iOS and Android produce displayCrop in raw file dimensions,
+    // so we use standard file-space crop for both
+    return _calculateStandardFileSpaceCrop(videoSize, displayCrop);
+  }
 
-      // Apply to original video dimensions (after swap)
-      // Display width=1080, height=1920 → File width=1920, height=1080
-      final minX = (minXNorm * videoSize.height).round();
-      final maxX = (maxXNorm * videoSize.height).round();
-      final minY = (minYNorm * videoSize.width).round();
-      final maxY = (maxYNorm * videoSize.width).round();
+  static CropCalculation _calculateStandardFileSpaceCrop(
+    Size videoSize,
+    Rect displayCrop,
+  ) {
+    final minX = _clampInt(
+      displayCrop.left.round(),
+      0,
+      videoSize.width.toInt(),
+    );
+    final minY = _clampInt(
+      displayCrop.top.round(),
+      0,
+      videoSize.height.toInt(),
+    );
+    final maxX = _clampInt(
+      displayCrop.right.round(),
+      0,
+      videoSize.width.toInt(),
+    );
+    final maxY = _clampInt(
+      displayCrop.bottom.round(),
+      0,
+      videoSize.height.toInt(),
+    );
 
-      final w = maxX - minX;
-      final h = maxY - minY;
+    final w = maxX - minX;
+    final h = maxY - minY;
 
-      return CropCalculation(x: minX, y: minY, width: w, height: h);
-    } else {
-      // No rotation or iOS - use display coordinates directly
-      final minX = (controller.minCrop.dx * videoSize.width).round();
-      final maxX = (controller.maxCrop.dx * videoSize.width).round();
-      final minY = (controller.minCrop.dy * videoSize.height).round();
-      final maxY = (controller.maxCrop.dy * videoSize.height).round();
-
-      final w = maxX - minX;
-      final h = maxY - minY;
-
-      return CropCalculation(x: minX, y: minY, width: w, height: h);
+    // Note: we round to the nearest pixel before clamping so that symmetric
+    // crops retain parity after multiple transformations. This avoids repeated
+    // floor/ceil adjustments that previously caused ±1px drift.
+    if (w <= 0 || h <= 0) {
+      throw VideoCropException('Invalid crop dimensions after normalization');
     }
+
+    return CropCalculation(x: minX, y: minY, width: w, height: h);
   }
 }

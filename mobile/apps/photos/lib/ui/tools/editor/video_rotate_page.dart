@@ -8,11 +8,9 @@ import "package:photos/ui/tools/editor/video_editor/video_editor_player_control.
 import 'package:video_editor/video_editor.dart';
 
 class VideoRotatePage extends StatelessWidget {
-  final int quarterTurnsForRotationCorrection;
   const VideoRotatePage({
     super.key,
     required this.controller,
-    required this.quarterTurnsForRotationCorrection,
   });
 
   final VideoEditorController controller;
@@ -52,23 +50,8 @@ class VideoRotatePage extends StatelessWidget {
                       Positioned.fill(
                         child: Hero(
                           tag: "video-editor-preview",
-                          child: Builder(
-                            builder: (context) {
-                              // For videos with metadata rotation, we need to swap dimensions
-                              final shouldSwap =
-                                  quarterTurnsForRotationCorrection % 2 == 1;
-                              final width = controller.video.value.size.width;
-                              final height = controller.video.value.size.height;
-
-                              return RotatedBox(
-                                quarterTurns: quarterTurnsForRotationCorrection,
-                                child: CropGridViewer.preview(
-                                  controller: controller,
-                                  overrideWidth: shouldSwap ? height : width,
-                                  overrideHeight: shouldSwap ? width : height,
-                                ),
-                              );
-                            },
+                          child: CropGridViewer.preview(
+                            controller: controller,
                           ),
                         ),
                       ),
