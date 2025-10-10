@@ -98,6 +98,7 @@ func main() {
 	}
 
 	viper.SetDefault("apps.public-albums", "https://albums.ente.io")
+	viper.SetDefault("apps.embed-albums", "https://embed.ente.io")
 	viper.SetDefault("apps.custom-domain.cname", "my.ente.io")
 	viper.SetDefault("apps.public-locker", "https://locker.ente.io")
 	viper.SetDefault("apps.accounts", "https://accounts.ente.io")

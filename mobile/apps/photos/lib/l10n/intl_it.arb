@@ -1855,9 +1855,14 @@
   "related": "Correlati",
   "hoorayyyy": "Evviva!",
   "nothingToTidyUpHere": "Niente da sistemare qui",
-  "cLTitle1": "Immagini simili",
-  "cLDesc1": "Stiamo introducendo un nuovo sistema basato su ML per rilevare immagini simili e poter ripulire la tua libreria. Disponibile in Impostazioni -> Backup -> Libera spazio",
-  "cLTitle2": "Miglioramenti dello streaming video",
-  "cLDesc2": "Ora puoi attivare manualmente la generazione di stream per i video direttamente dall'app. Abbiamo anche aggiunto una nuova schermata delle impostazioni che ti mostrerà quale percentuale dei tuoi video sono stati elaborati per lo streaming",
-  "cLTitle3": "Miglioramento delle performance"
+  "cLTitle1": "Vista mappa per i tuoi viaggi",
+  "cLDesc1": "Scegli tra layout raggruppati, continui o per viaggio (basati su mappa) quando condividi album. Ente si occupa dell'hosting!",
+  "cLTitle2": "Incorpora album",
+  "cLDesc2": "Incorpora i tuoi album nel tuo sito web, blog o portfolio fotografico. Ente si occupa dell'hosting!",
+  "cLTitle3": "Album condivisi nei widget",
+  "cLDesc3": "I widget della schermata home ora supportano gli album che sono stati condivisi con te.",
+  "cLTitle4": "Miglioramenti di usabilità",
+  "cLDesc4": "Aggiungi foto agli album dal visualizzatore di file. Opzione di visualizzazione ospite a livello di album.",
+  "cLTitle5": "Miglioramenti alla condivisione",
+  "cLDesc5": "Condividi link pubblici utilizzando un codice QR. Personalizza la possibilità di unirsi agli album dai link che condividi."
 }

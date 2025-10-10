@@ -1,43 +1,25 @@
 ---
-title: Location tags
-description: Search and organize your photos by location in Ente Photos
+title: This Page Has Moved
+description: This content has been reorganized
 ---
 
-# Location Tags
+# This Page Has Moved
 
-_Search and organize your photos by their location_
+The **Location Tags** content has been reorganized. You can find it in the following locations:
 
-Location Tags allow you to search and organize your photos based on their
-geographical location. Instead of sending your queries to our servers, we've
-implemented a privacy-friendly solution that runs searches locally on your
-device.
+## Location Features
 
-## How to use Location Tags
+- [Map and location feature guide](/photos/features/search-and-discovery/map-and-location) - Complete guide including location tags, map view, and location-based search
 
-### Method 1: Adding Location Tags from a Photo
+## Related topics
 
-1. Open a photo
-2. Click on _Info_
-3. Select _Add Location_"
-4. Enter the location name and define a radius
+- [Location tags FAQ](/photos/faq/search-and-discovery#location-tags) - Creating and managing location tags
+- [Location privacy](/photos/faq/security-and-privacy#location-tags-encrypted) - How location data is encrypted
 
-### Method 2: Adding Location Tags from the Search Tab
+---
 
-1. Go to the search tab
-2. Click on _Add new_ at the end of the location tags section
-3. Select a photo as the center point for the location tag
-4. Enter the location name and define a radius
+**Can't find what you're looking for?**
 
-## Tips
-
-- The app will automatically cluster photos falling within a radius under a
-  specified location.
-
-- Location Tags provide a seamless way to filter photos without compromising
-  your privacy.
-
-- Location tags are stored end-to-end encrypted, ensuring the security of your
-  data.
-
-- Enjoy a more organized photo library by tagging important places like home,
-  office, and vacation spots.
+- Browse [Search and Discovery features](/photos/features/search-and-discovery/)
+- Check [Search FAQ](/photos/faq/search-and-discovery)
+- Visit the [main Photos documentation](/photos/)

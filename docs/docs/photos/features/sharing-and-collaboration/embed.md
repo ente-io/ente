@@ -20,7 +20,7 @@ The embed feature works with any public album link. Since creating public albums
 The simplest way to get the embed code is directly from Ente's web app:
 
 1. Open the album in [web.ente.io](https://web.ente.io)
-2. Go to the album's sharing settings
+2. Open the album's sharing settings
 3. Create a public link (if you haven't already)
 4. Open the link settings ("Manage link")
 5. Click the "Copy embed HTML" button
@@ -36,7 +36,7 @@ Alternatively, you can create the embed code manually:
 First, you need to create a public link for the album you want to embed:
 
 1. Open the album in Ente (web or mobile app)
-2. Go to the album's sharing settings
+2. Open the album's sharing settings
 3. Create a public link
 4. Copy the link (it will look like `https://albums.ente.io/?t=...#...`)
 
@@ -101,6 +101,19 @@ The embedded album viewer includes:
 - If you delete the public link, the embed will stop working
 - Password-protected albums will prompt for the password within the iframe
 
+> [!NOTE]
+>
+> Password protection is extra access control, not extra encryption.
+>
+> Password protection adds server-side access control but does not re-encrypt the files. The files remain encrypted with the same key used for the public link. Password protection prevents unauthorized access by requiring authentication before the server grants access to the encrypted content.
+
 Note that by putting the embed link in a webpage, you're making it public for anyone who can view the page, including search engines that can index your webpages. This isn't any different from putting the public link in your webpage or sharing it in a public forum, but it is good to call this out.
 
 The album is still end to end encrypted in a manner that Ente does not have access to the key to decrypt the album. If you're curious how this works technically, then you can find [implementation details here](https://ente.io/blog/building-shareable-links/).
+
+## Related topics
+
+- [Public links](/photos/features/sharing-and-collaboration/public-links) - Learn about creating public album links
+- [Sharing overview](/photos/features/sharing-and-collaboration/share) - All sharing methods in Ente
+- [Custom domains](/photos/features/sharing-and-collaboration/custom-domains/) - Use your own domain for public links
+- [Sharing and Collaboration FAQ](/photos/faq/sharing-and-collaboration) - Common questions about sharing

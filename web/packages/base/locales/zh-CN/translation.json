@@ -323,6 +323,8 @@
     "thumbnail_generation_failed_hint": "这些文件已上传，但遗憾的是，我们无法为它们生成缩略图。",
     "unsupported_files": "不支持的文件",
     "unsupported_files_hint": "Ente 尚不支持这些文件格式",
+    "zero_size_files": "",
+    "zero_size_files_hint": "",
     "blocked_uploads": "已阻止上传",
     "blocked_uploads_hint": "您的浏览器或插件阻止 Ente 使用 <code>eTags</code> 上传大文件。",
     "large_files": "大文件",
@@ -429,6 +431,7 @@
         "year": "一年后"
     },
     "copy_link": "复制链接",
+    "copy_embed_html": "",
     "done": "已完成",
     "share_link_section_title": "或共享一个链接",
     "remove_link": "移除链接",
@@ -698,5 +701,5 @@
     "continuous": "连续",
     "trip": "旅游",
     "album_layout": "相册布局",
-    "maps_privacy_notice": ""
+    "maps_privacy_notice": "大致坐标将被发送给注重隐私的第三方，如 OpenStreetMap，以显示地图和位置。"
 }

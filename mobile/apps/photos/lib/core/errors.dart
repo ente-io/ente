@@ -84,10 +84,18 @@ class PassKeySessionNotVerifiedError extends Error {}
 
 class PassKeySessionExpiredError extends Error {}
 
-class MultiPartUploadError implements Exception {
+class MultiPartFileMissingError implements Exception {
   final String message;
-  MultiPartUploadError(this.message);
+  MultiPartFileMissingError(this.message);
 
   @override
-  String toString() => "MultiPartUploadError: $message";
+  String toString() => "MultiPartFileMissingError: $message";
+}
+
+class MultiPartError implements Exception {
+  final String message;
+  MultiPartError(this.message);
+
+  @override
+  String toString() => "MultiPartError: $message";
 }

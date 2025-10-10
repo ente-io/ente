@@ -111,6 +111,7 @@
   "importAegisGuide": "Aegis의 설정에서 \"보관함 내보내기\"를 이용하세요.\n\n보관함이 암호화된 경우, 보관함의 복호화를 위해 보관함 비밀번호를 입력해야 할 수도 있습니다.",
   "import2FasGuide": "2FAS의 옵션에서 \"설정 -> 백업 -> 내보내기\"를 이용하세요.\n\n백업이 암호화되었다면, 백업의 복호화를 위해 암호를 입력해야 할 수도 있습니다.",
   "importLastpassGuide": "Lastpass Authenticator의 설정에서 \"계정 이전하기\" 옵션 중 \"파일로 계정 내보내기\"를 이용하세요. 다운로드 된 JSON 파일을 불러오세요.",
+  "importProtonAuthGuide": "Proton Authenticator 설정에서 \"내보내기\" 옵션을 사용하여 코드를 내보내세요.",
   "exportCodes": "코드 내보내기",
   "importLabel": "불러오기",
   "importInstruction": "다음의 포맷에 맞춰 여러분의 코드가 들어있는 파일을 선택해주세요",
@@ -173,6 +174,7 @@
   "invalidQRCode": "맞지 않는 QR 코드",
   "noRecoveryKeyTitle": "복구 키가 없으세요?",
   "enterEmailHint": "이메일 주소 입력",
+  "enterNewEmailHint": "새 이메일 주소를 입력하세요",
   "invalidEmailTitle": "잘못 된 이메일 주소",
   "invalidEmailMessage": "유효한 이메일 주소를 입력해주세요",
   "deleteAccount": "계정 삭제하기",
@@ -503,5 +505,6 @@
   "deselectAll": "모두 선택 해제",
   "selectAll": "모두 선택",
   "deleteDuplicates": "중복 제거",
-  "plainHTML": "일반 HTML"
+  "plainHTML": "일반 HTML",
+  "freeStorageOfferDescription": ""
 }

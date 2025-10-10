@@ -164,7 +164,9 @@ export const pullPublicCollectionFiles = async (
         );
 
         const files = await Promise.all(
-            diff.map((f) => decryptRemoteFile(f, collection.key)),
+            diff
+                .filter((f) => !f.isDeleted)
+                .map((f) => decryptRemoteFile(f, collection.key)),
         );
 
         const existingFiles = savedPublicCollectionFiles(
@@ -177,8 +179,8 @@ export const pullPublicCollectionFiles = async (
 
         savePublicCollectionFiles(credentials.accessToken, newFiles);
 
-        if (files.length > 0) {
-            time = Math.max(...files.map((f) => f.updationTime));
+        if (diff.length > 0) {
+            time = Math.max(...diff.map((f) => f.updationTime));
             savePublicCollectionLastSyncTime(credentials.accessToken, time);
         }
 

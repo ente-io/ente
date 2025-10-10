@@ -44,7 +44,6 @@ import "package:photos/ui/common/web_page.dart";
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
-import "package:photos/ui/map/enable_map.dart";
 import "package:photos/ui/map/map_screen.dart";
 import 'package:photos/ui/notification/toast.dart';
 import 'package:photos/ui/sharing/album_participants_page.dart';
@@ -788,22 +787,28 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   Future<void> showOnMap() async {
-    final bool result = await requestForMapEnable(context);
-    if (result) {
-      unawaited(
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => MapScreen(
-              filesFutureFn: () async {
-                return FilesDB.instance.getAllFilesCollection(
-                  widget.collection!.id,
-                );
-              },
-            ),
+    if (!flagService.mapEnabled) {
+      try {
+        await flagService.setMapEnabled(true);
+      } catch (e) {
+        showShortToast(
+            context, AppLocalizations.of(context).somethingWentWrong,);
+        return;
+      }
+    }
+    unawaited(
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => MapScreen(
+            filesFutureFn: () async {
+              return FilesDB.instance.getAllFilesCollection(
+                widget.collection!.id,
+              );
+            },
           ),
         ),
-      );
-    }
+      ),
+    );
   }
 
   Future<void> _showSortOption(BuildContext bContext) async {

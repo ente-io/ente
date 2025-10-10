@@ -323,6 +323,8 @@
     "thumbnail_generation_failed_hint": "These files were uploaded, but unfortunately we could not generate the thumbnails for them.",
     "unsupported_files": "Unsupported files",
     "unsupported_files_hint": "Ente does not support these file formats yet",
+    "zero_size_files": "Empty files",
+    "zero_size_files_hint": "These files were not uploaded as they have zero bytes",
     "blocked_uploads": "Blocked uploads",
     "blocked_uploads_hint": "Your browser or an addon is preventing Ente from using <code>eTags</code> to upload large files.",
     "large_files": "Large files",
@@ -429,6 +431,7 @@
         "year": "After a year"
     },
     "copy_link": "Copy link",
+    "copy_embed_html": "Copy embed HTML",
     "done": "Done",
     "share_link_section_title": "Or share a link",
     "remove_link": "Remove link",
@@ -698,5 +701,5 @@
     "continuous": "Continuous",
     "trip": "Trip",
     "album_layout": "Album layout",
-    "maps_privacy_notice": "Approximate coordinates will be sent to privacy conscious third parties like OpenStreetMaps to show the map and location."
+    "maps_privacy_notice": "Approximate coordinates will be sent to privacy conscious third parties like OpenStreetMap to show the map and location."
 }

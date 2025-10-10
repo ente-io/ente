@@ -15,7 +15,9 @@ your iCloud library and import.
 >
 > For large libraries, this process may take a bit of time, so you can speed it
 > up by keeping the app running in the foreground while the initial import is in
-> progress (Note: this is only needed during the initial import, subsequently
+> progress. You can do this by going to `Settings > Backup > Backup settings` and
+> turning on "Disable auto lock"
+> (Note: this is only needed during the initial import, subsequently
 > the app will automatically backup photos in the background as you take them).
 
 ## Desktop

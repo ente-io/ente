@@ -1278,7 +1278,10 @@ class UserService {
 
   Future<void> _saveConfiguration(dynamic response) async {
     final responseData = response is Map ? response : response.data as Map?;
-    if (responseData == null) return;
+    if (responseData == null) {
+      _logger.warning("(for debugging) Response data is null");
+      return;
+    }
 
     await Configuration.instance.setUserID(responseData["id"]);
     if (responseData["encryptedToken"] != null) {
