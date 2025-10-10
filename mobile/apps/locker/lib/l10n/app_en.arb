@@ -608,5 +608,6 @@
   "hideWindow": "Hide Window",
   "showWindow": "Show Window",
   "exitApp": "Exit App",
-  "lockerLogs": "Locker logs"
+  "lockerLogs": "Locker logs",
+  "recents": "Recents"
 }

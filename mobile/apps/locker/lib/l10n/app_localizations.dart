@@ -1977,6 +1977,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Locker logs'**
   String get lockerLogs;
+
+  /// No description provided for @recents.
+  ///
+  /// In en, this message translates to:
+  /// **'Recents'**
+  String get recents;
 }
 
 class _AppLocalizationsDelegate

@@ -1116,4 +1116,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get lockerLogs => 'Locker logs';
+
+  @override
+  String get recents => 'Recents';
 }

@@ -6,6 +6,7 @@ import "package:ente_ui/components/buttons/models/button_type.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/models/info/info_item.dart";
 import "package:locker/models/selected_files.dart";
@@ -26,6 +27,7 @@ import "package:locker/ui/pages/emergency_contact_page.dart";
 import "package:locker/ui/pages/personal_note_page.dart";
 import "package:locker/ui/pages/physical_records_page.dart";
 import "package:locker/utils/file_icon_utils.dart";
+import "package:locker/utils/info_item_utils.dart";
 import "package:locker/utils/snack_bar_utils.dart";
 import "package:open_file/open_file.dart";
 
@@ -59,7 +61,7 @@ class FileRowWidget extends StatelessWidget {
         children: [
           SizedBox(
             height: 60,
-            width: 48,
+            width: 60,
             child: _buildFileIcon(),
           ),
           const SizedBox(width: 12),
@@ -107,9 +109,10 @@ class FileRowWidget extends StatelessWidget {
               border: Border.all(
                 color: isSelected
                     ? colorScheme.strokeMuted
-                    : colorScheme.strokeFainter,
+                    : colorScheme.backdropBase,
               ),
-              borderRadius: const BorderRadius.all(Radius.circular(6)),
+              color: colorScheme.backdropBase,
+              borderRadius: const BorderRadius.all(Radius.circular(20)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -131,8 +134,8 @@ class FileRowWidget extends StatelessWidget {
                         : PopupMenuButton<String>(
                             onSelected: (value) =>
                                 _handleMenuAction(context, value),
-                            icon: const Icon(
-                              Icons.more_vert,
+                            icon: const HugeIcon(
+                              icon: HugeIcons.strokeRoundedMoreVertical,
                               size: 20,
                             ),
                             itemBuilder: (BuildContext context) {
@@ -157,7 +160,10 @@ class FileRowWidget extends StatelessWidget {
               value: action.id,
               child: Row(
                 children: [
-                  Icon(action.icon, size: 16),
+                  const HugeIcon(
+                    icon: HugeIcons.strokeRoundedFile02,
+                    size: 16,
+                  ),
                   const SizedBox(width: 8),
                   Text(action.label),
                 ],
@@ -171,7 +177,10 @@ class FileRowWidget extends StatelessWidget {
           value: 'edit',
           child: Row(
             children: [
-              const Icon(Icons.edit, size: 16),
+              const HugeIcon(
+                icon: HugeIcons.strokeRoundedEdit02,
+                size: 16,
+              ),
               const SizedBox(width: 8),
               Text(context.l10n.edit),
             ],
@@ -181,7 +190,10 @@ class FileRowWidget extends StatelessWidget {
           value: 'share_link',
           child: Row(
             children: [
-              const Icon(Icons.share, size: 16),
+              const HugeIcon(
+                icon: HugeIcons.strokeRoundedShare03,
+                size: 16,
+              ),
               const SizedBox(width: 8),
               Text(context.l10n.share),
             ],
@@ -191,7 +203,10 @@ class FileRowWidget extends StatelessWidget {
           value: 'delete',
           child: Row(
             children: [
-              const Icon(Icons.delete, size: 16),
+              const HugeIcon(
+                icon: HugeIcons.strokeRoundedDelete01,
+                size: 16,
+              ),
               const SizedBox(width: 8),
               Text(context.l10n.delete),
             ],
@@ -407,11 +422,7 @@ class FileRowWidget extends StatelessWidget {
       try {
         final infoItem = InfoFileService.instance.extractInfoFromFile(file);
         if (infoItem != null) {
-          return Icon(
-            _getInfoTypeIcon(infoItem.type),
-            color: _getInfoTypeColor(infoItem.type),
-            size: 20,
-          );
+          return InfoItemUtils.getInfoIcon(infoItem.type); 
         }
       } catch (e) {
         // Fallback to default icon if extraction fails
@@ -419,37 +430,7 @@ class FileRowWidget extends StatelessWidget {
     }
 
     // For non-info files or if extraction fails, use the original logic
-    return Icon(
-      FileIconUtils.getFileIcon(file.displayName),
-      color: FileIconUtils.getFileIconColor(file.displayName),
-      size: 20,
-    );
-  }
-
-  IconData _getInfoTypeIcon(InfoType type) {
-    switch (type) {
-      case InfoType.note:
-        return Icons.note;
-      case InfoType.accountCredential:
-        return Icons.key;
-      case InfoType.physicalRecord:
-        return Icons.inventory;
-      case InfoType.emergencyContact:
-        return Icons.emergency;
-    }
-  }
-
-  Color _getInfoTypeColor(InfoType type) {
-    switch (type) {
-      case InfoType.note:
-        return Colors.blue;
-      case InfoType.accountCredential:
-        return Colors.orange;
-      case InfoType.physicalRecord:
-        return Colors.green;
-      case InfoType.emergencyContact:
-        return Colors.red;
-    }
+    return FileIconUtils.getFileIcon(file.displayName, showBackground: true);
   }
 
   Future<void> _openFile(BuildContext context) async {

@@ -367,6 +367,7 @@ class _HomePageState extends UploaderPageState<HomePage>
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     return PopScope(
       onPopInvokedWithResult: (_, result) async {
         if (_isSettingsOpen) {
@@ -382,13 +383,16 @@ class _HomePageState extends UploaderPageState<HomePage>
         onKeyEvent: handleKeyEvent,
         child: Scaffold(
           key: scaffoldKey,
+          backgroundColor: colorScheme.backgroundBase,
           drawer: Drawer(
             width: 428,
+            backgroundColor: colorScheme.backgroundBase,
             child: _settingsPage,
           ),
           drawerEnableOpenDragGesture: !Platform.isAndroid,
           onDrawerChanged: (isOpened) => _isSettingsOpen = isOpened,
           appBar: AppBar(
+            surfaceTintColor: Colors.transparent,
             leading: buildSearchLeading(),
             title: GestureDetector(
               onLongPress: () {
@@ -405,8 +409,7 @@ class _HomePageState extends UploaderPageState<HomePage>
               ),
             ),
             elevation: 0,
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
+            backgroundColor: colorScheme.backgroundBase,
             actions: [
               buildSearchAction(),
               ...buildSearchActions(),
@@ -771,11 +774,12 @@ class _HomePageState extends UploaderPageState<HomePage>
             ),
           );
         },
+        body: context.l10n.items(collections.length),
         SectionTitle(title: title),
         trailingWidget: IconButtonWidget(
           icon: Icons.chevron_right,
           iconButtonType: IconButtonType.secondary,
-          iconColor: getEnteColorScheme(context).blurStrokePressed,
+          iconColor: getEnteColorScheme(context).textBase,
         ),
       ),
       const SizedBox(height: 24),

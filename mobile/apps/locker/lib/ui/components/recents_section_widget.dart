@@ -9,6 +9,7 @@ import 'package:locker/models/info/info_item.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/models/file.dart';
+import "package:locker/ui/collections/section_title.dart";
 import 'package:locker/ui/components/item_list_view.dart';
 
 class RecentsSectionWidget extends StatefulWidget {
@@ -88,9 +89,21 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
   }
 
   Widget _buildRecentsHeader() {
-    return Text(
-      'Recents',
-      style: getEnteTextTheme(context).h3Bold,
+    return SectionOptions(
+      onTap: () {},
+      body: context.l10n.items(_displayedFiles.length),
+      SectionTitle(title: context.l10n.recents),
+      trailingWidget: Container(
+        height: 48,
+        width: 48,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: getEnteColorScheme(context).backdropBase,
+        ),
+        child: const Icon(
+          Icons.grid_view_outlined,
+        ),
+      ),
     );
   }
 

@@ -42,7 +42,7 @@ class _CollectionFlexGridViewWidgetState
           crossAxisCount: 2,
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
-          childAspectRatio: 2.2,
+          childAspectRatio: 1.5,
         ),
         itemCount: min(_displayedCollections.length, 4),
         itemBuilder: (context, index) {
@@ -54,52 +54,55 @@ class _CollectionFlexGridViewWidgetState
             onTap: () => _navigateToCollection(collection),
             child: Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                color: getEnteColorScheme(context).fillFaint,
+                borderRadius: BorderRadius.circular(20),
+                color: getEnteColorScheme(context).backdropBase,
               ),
               padding: const EdgeInsets.all(12),
-              child: Stack(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        collectionName,
-                        style: getEnteTextTheme(context).body.copyWith(
-                              fontWeight: FontWeight.w500,
+                  Container(
+                    height: 48,
+                    width: 48,
+                    decoration: BoxDecoration(
+                      color: getEnteColorScheme(context).backgroundBase,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: collection.type == CollectionType.favorites
+                        ? Icon(
+                            Icons.star,
+                            color: getEnteColorScheme(context).primary500,
+                            size: 22,
+                          )
+                        : Icon(
+                            Icons.folder,
+                            size: 22,
+                            color: getEnteColorScheme(context).primary500,
+                          ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    collectionName,
+                    style: getEnteTextTheme(context).bodyBold,
+                    textAlign: TextAlign.left,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                  const SizedBox(height: 4),
+                  FutureBuilder<int>(
+                    future: CollectionService.instance.getFileCount(collection),
+                    builder: (context, snapshot) {
+                      final fileCount = snapshot.data ?? 0;
+                      return Text(
+                        context.l10n.items(fileCount),
+                        style: getEnteTextTheme(context).small.copyWith(
+                              color: Colors.grey[600],
                             ),
                         textAlign: TextAlign.left,
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
-                      const SizedBox(height: 4),
-                      FutureBuilder<int>(
-                        future:
-                            CollectionService.instance.getFileCount(collection),
-                        builder: (context, snapshot) {
-                          final fileCount = snapshot.data ?? 0;
-                          return Text(
-                            context.l10n.items(fileCount),
-                            style: getEnteTextTheme(context).small.copyWith(
-                                  color: Colors.grey[600],
-                                ),
-                            textAlign: TextAlign.left,
-                          );
-                        },
-                      ),
-                    ],
+                      );
+                    },
                   ),
-                  if (collection.type == CollectionType.favorites)
-                    Positioned(
-                      top: 0,
-                      right: 0,
-                      child: Icon(
-                        Icons.star,
-                        color: getEnteColorScheme(context).primary500,
-                        size: 18,
-                      ),
-                    ),
                 ],
               ),
             ),

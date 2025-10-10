@@ -620,7 +620,7 @@ const EnteColorScheme darkScheme = EnteColorScheme(
 );
 
 // Background Colors
-const Color backgroundBaseLight = Color.fromRGBO(255, 255, 255, 1);
+const Color backgroundBaseLight = Color.fromRGBO(250, 250, 250, 1);
 const Color backgroundElevatedLight = Color.fromRGBO(255, 255, 255, 1);
 const Color backgroundElevated2Light = Color.fromRGBO(251, 251, 251, 1);
 
@@ -782,9 +782,9 @@ const Color _defaultSearchResultsBackgroundColor =
 // Default Code Card Background Color
 const Color _defaultCodeCardBackgroundColor = Color.fromRGBO(246, 246, 246, 1);
 
-
 const Color _golden700 = Color(0xFFFDB816);
 const Color _golden500 = Color(0xFFFFC336);
+
 /// Utility class to help apps create custom color schemes with their brand colors.
 ///
 /// This class provides convenient methods to generate complete color schemes
