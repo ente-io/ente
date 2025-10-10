@@ -127,7 +127,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar>
     return ValueListenableBuilder(
       valueListenable: _hasSelectedFilesNotifier,
       builder: (context, value, child) {
-        final crossFade = AnimatedCrossFade(
+        return AnimatedCrossFade(
           firstCurve: Curves.easeInOutExpo,
           secondCurve: Curves.easeInOutExpo,
           sizeCurve: Curves.easeInOutExpo,
@@ -135,47 +135,42 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar>
               ? CrossFadeState.showFirst
               : CrossFadeState.showSecond,
           duration: const Duration(milliseconds: 400),
-          firstChild: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(right: 4),
-                child: SelectAllButton(
-                  backgroundColor: widget.backgroundColor,
+          firstChild: boundaryWidget(
+            position: BoundaryPosition.bottom,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 4),
+                  child: SelectAllButton(
+                    backgroundColor: widget.backgroundColor,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                decoration: BoxDecoration(
-                  boxShadow: shadowFloatFaintLight,
+                const SizedBox(height: 8),
+                Container(
+                  decoration: BoxDecoration(
+                    boxShadow: shadowFloatFaintLight,
+                  ),
+                  child: BottomActionBarWidget(
+                    selectedFiles: widget.selectedFiles,
+                    galleryType: _galleryType,
+                    collection: widget.collection,
+                    person: widget.person,
+                    clusterID: widget.clusterID,
+                    onCancel: () {
+                      if (widget.selectedFiles.files.isNotEmpty) {
+                        widget.selectedFiles.clearAll();
+                      }
+                    },
+                    backgroundColor: widget.backgroundColor,
+                  ),
                 ),
-                child: BottomActionBarWidget(
-                  selectedFiles: widget.selectedFiles,
-                  galleryType: _galleryType,
-                  collection: widget.collection,
-                  person: widget.person,
-                  clusterID: widget.clusterID,
-                  onCancel: () {
-                    if (widget.selectedFiles.files.isNotEmpty) {
-                      widget.selectedFiles.clearAll();
-                    }
-                  },
-                  backgroundColor: widget.backgroundColor,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
           secondChild: const SizedBox(width: double.infinity),
         );
-
-        // Only wrap with boundary widget when there are selected files
-        return _hasSelectedFilesNotifier.value
-            ? boundaryWidget(
-                position: BoundaryPosition.bottom,
-                child: crossFade,
-              )
-            : crossFade;
       },
     );
   }
