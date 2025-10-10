@@ -12,7 +12,9 @@ mixin BoundaryReporter<T extends StatefulWidget> on State<T> {
   Timer? _boundaryUpdateTimer;
 
   /// Report this widget's boundary to the provider
-  /// Call this in initState, didUpdateWidget, and when size might change
+  /// Call this when the widget is first built and when its size or position changes.
+  /// Note: If using boundaryWidget() wrapper, boundaries are reported automatically
+  /// after each build - manual calls are only needed for dynamic updates (e.g., visibility changes).
   void reportBoundary(BoundaryPosition position) {
     // Debounce updates to avoid excessive recalculation
     _boundaryUpdateTimer?.cancel();

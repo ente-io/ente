@@ -762,10 +762,6 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader>
       _scrollControllerListenerForZeroScrollNotifier,
     );
     widget.headerHeightNotifier.addListener(_headerHeightNotifierListener);
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      reportBoundary(BoundaryPosition.top);
-    });
   }
 
   @override

@@ -175,15 +175,6 @@ class _AppBarWithBoundary extends StatefulWidget {
 class _AppBarWithBoundaryState extends State<_AppBarWithBoundary>
     with BoundaryReporter {
   @override
-  void initState() {
-    super.initState();
-    // Report boundary after the first frame
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      reportBoundary(BoundaryPosition.top);
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     return boundaryWidget(
       position: BoundaryPosition.top,
