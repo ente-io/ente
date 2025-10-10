@@ -13,6 +13,7 @@ import 'package:ente_auth/ui/components/toggle_switch_widget.dart';
 import 'package:ente_auth/ui/settings/common_settings.dart';
 import 'package:ente_auth/ui/settings/language_picker.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
+import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_logging/logging.dart';
@@ -147,7 +148,7 @@ class _AdvancedSectionWidgetState extends State<AdvancedSectionWidget> {
           ),
           sectionOptionSpacing,
         ],
-        if (Platform.isWindows) ...[
+        if (PlatformUtil.isDesktop()) ...[
           MenuItemWidget(
             captionedTextWidget: CaptionedTextWidget(
               title: l10n.minimizeToTrayOnClose,
