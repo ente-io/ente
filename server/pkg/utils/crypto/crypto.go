@@ -41,7 +41,11 @@ func encryptWithNonce(data string, encryptionKey []byte, nonce []byte) (ente.Enc
 		logrus.WithField("op", "crypto_compare").WithError(err).Error("native encryption failed")
 		return ente.EncryptionResult{}, stacktrace.Propagate(err, "native encryption failed")
 	}
-	if nativeEnc.Cipher != nil && base64.StdEncoding.EncodeToString(nativeEnc.Cipher) != base64.StdEncoding.EncodeToString(encryptedEmailBytes) {
+	if nativeEnc.Cipher == nil {
+		return ente.EncryptionResult{}, stacktrace.NewError("native encryption returned nil cipher")
+	}
+	if base64.StdEncoding.EncodeToString(nativeEnc.Cipher) != base64.StdEncoding.EncodeToString(encryptedEmailBytes) ||
+		base64.StdEncoding.EncodeToString(nativeEnc.Nonce) != base64.StdEncoding.EncodeToString(nonce) {
 		logrus.WithField("op", "crypto_compare").Error("encryption mismatch between libsodium and native implementation")
 		return ente.EncryptionResult{}, stacktrace.Propagate(err, "encryption mismatch")
 	}
