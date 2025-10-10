@@ -8,11 +8,8 @@ import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/ml/face/person.dart";
-import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/typedefs.dart";
-import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
-import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
@@ -44,46 +41,17 @@ class _LinkContactToPersonSelectionPageState
   void initState() {
     super.initState();
 
-    _personEntities = _loadSelectablePersons();
-  }
-
-  Future<List<PersonEntity>> _loadSelectablePersons() async {
-    final faces = await SearchService.instance
-        .getAllFace(null, minClusterSize: kMinimumClusterSizeAllFaces);
-    final seenPersonIds = <String>{};
-    final orderedPersonIds = <String>[];
-
-    for (final face in faces) {
-      final personID = face.params[kPersonParamID] as String?;
-      if (personID == null) {
-        continue;
+    _personEntities = PersonService.instance.getPersons().then((persons) async {
+      final List<PersonEntity> result = [];
+      for (final person in persons) {
+        if ((person.data.email != null && person.data.email!.isNotEmpty) ||
+            (person.data.isIgnored)) {
+          continue;
+        }
+        result.add(person);
       }
-      if (seenPersonIds.add(personID)) {
-        orderedPersonIds.add(personID);
-      }
-    }
-
-    if (orderedPersonIds.isEmpty) {
-      return const [];
-    }
-
-    final personsMap = await PersonService.instance.getPersonsMap();
-    final List<PersonEntity> result = [];
-    for (final personID in orderedPersonIds) {
-      final person = personsMap[personID];
-      if (person == null) {
-        _logger
-            .warning("Person $personID missing from cache while loading faces");
-        continue;
-      }
-      if ((person.data.email != null && person.data.email!.isNotEmpty) ||
-          person.data.isIgnored) {
-        continue;
-      }
-      result.add(person);
-    }
-
-    return result;
+      return result;
+    });
   }
 
   @override
