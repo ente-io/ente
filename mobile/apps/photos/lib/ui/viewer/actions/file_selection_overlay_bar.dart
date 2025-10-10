@@ -49,6 +49,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar>
   SearchFilterDataProvider? _searchFilterDataProvider;
   bool? _galleryInitialFilterStillApplied;
   bool _wasEmpty = true;
+  static const Duration animationDuration = Duration(milliseconds: 400);
 
   @override
   void initState() {
@@ -134,7 +135,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar>
           crossFadeState: _hasSelectedFilesNotifier.value
               ? CrossFadeState.showFirst
               : CrossFadeState.showSecond,
-          duration: const Duration(milliseconds: 400),
+          duration: _FileSelectionOverlayBarState.animationDuration,
           firstChild: boundaryWidget(
             position: BoundaryPosition.bottom,
             child: Column(
@@ -180,14 +181,17 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar>
   }
 
   void _boundaryUpdateListener() {
-    final isEmpty = widget.selectedFiles.files.isEmpty;
+    // Update boundary after animation completes
+    Future.delayed(_FileSelectionOverlayBarState.animationDuration, () {
+      final isEmpty = widget.selectedFiles.files.isEmpty;
 
-    // Only report boundary on empty ↔ non-empty transitions
-    if (_wasEmpty != isEmpty) {
-      // Report boundary - will set to null if widget is not visible
-      reportBoundary(BoundaryPosition.bottom);
-      _wasEmpty = isEmpty;
-    }
+      // Only report boundary on empty ↔ non-empty transitions
+      if (_wasEmpty != isEmpty) {
+        // Report boundary - will set to null if widget is not visible
+        reportBoundary(BoundaryPosition.bottom);
+        _wasEmpty = isEmpty;
+      }
+    });
   }
 
   void _filterAppliedListener() {
