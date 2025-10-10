@@ -763,7 +763,6 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader>
     );
     widget.headerHeightNotifier.addListener(_headerHeightNotifierListener);
 
-    // Report boundary after initial build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       reportBoundary(BoundaryPosition.top);
     });

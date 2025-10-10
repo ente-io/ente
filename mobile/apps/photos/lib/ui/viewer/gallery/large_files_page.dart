@@ -116,7 +116,6 @@ class _LargeFilesAppBarState extends State<_LargeFilesAppBar>
   @override
   void initState() {
     super.initState();
-    // Report boundary after initial build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       reportBoundary(BoundaryPosition.top);
     });
