@@ -129,9 +129,9 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   static final TaskQueue<String> largeLocalThumbnailQueue = _initLargeQueue();
 
   static TaskQueue<String> _initSmallQueue() {
-    final maxConcurrent = localSettings.smallQueueMaxConcurrent;
-    final timeoutSeconds = localSettings.smallQueueTimeoutSeconds;
-    final maxSize = localSettings.smallQueueMaxSize;
+    const maxConcurrent = 45;
+    const timeoutSeconds = 60;
+    const maxSize = 200;
 
     _logger.info(
       "Initializing Small Local Thumbnail Queue - "
@@ -146,9 +146,9 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   }
 
   static TaskQueue<String> _initLargeQueue() {
-    final maxConcurrent = localSettings.largeQueueMaxConcurrent;
-    final timeoutSeconds = localSettings.largeQueueTimeoutSeconds;
-    final maxSize = localSettings.largeQueueMaxSize;
+    const maxConcurrent = 15;
+    const timeoutSeconds = 60;
+    const maxSize = 200;
 
     _logger.info(
       "Initializing Large Local Thumbnail Queue - "
