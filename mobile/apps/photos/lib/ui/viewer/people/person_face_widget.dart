@@ -1,6 +1,6 @@
 import "dart:typed_data";
 
-import 'package:flutter/widgets.dart';
+import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
@@ -45,6 +45,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
     with AutomaticKeepAliveClientMixin {
   Future<Uint8List?>? faceCropFuture;
   EnteFile? fileForFaceCrop;
+  String? _personName;
 
   bool get isPerson => widget.personId != null;
 
@@ -77,7 +78,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
     return FutureBuilder<Uint8List?>(
       future: faceCropFuture,
       builder: (context, snapshot) {
-        if (snapshot.hasData) {
+        if (snapshot.hasData && snapshot.data != null) {
           final ImageProvider imageProvider = MemoryImage(snapshot.data!);
           return Stack(
             fit: StackFit.expand,
@@ -88,18 +89,25 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
               ),
             ],
           );
-        } else {
-          if (snapshot.hasError) {
-            _logger.severe(
-              "Error getting cover face for person",
-              snapshot.error,
-              snapshot.stackTrace,
-            );
-          }
+        }
+        if (snapshot.connectionState == ConnectionState.waiting ||
+            snapshot.connectionState == ConnectionState.active) {
           return EnteLoadingWidget(
             color: getEnteColorScheme(context).fillMuted,
           );
         }
+        if (snapshot.hasError) {
+          _logger.severe(
+            "Error getting cover face for person",
+            snapshot.error,
+            snapshot.stackTrace,
+          );
+        } else {
+          _logger.severe("faceCropFuture is null, no cover face found for person or cluster.");
+        }
+        return _EmptyPersonThumbnail(
+          initial: isPerson ? _personName : null,
+        );
       },
     );
   }
@@ -120,6 +128,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
           );
           return null;
         }
+        _personName = personEntity.data.name;
         fixedFaceID = personEntity.data.avatarFaceID;
       }
       fixedFaceID ??=
@@ -201,6 +210,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
         personOrClusterID: personOrClusterId,
         useTempCache: false,
       );
+      this.fileForFaceCrop = fileForFaceCrop;
       final result = cropMap?[face.faceID];
       if (result == null) {
         _logger.severe(
@@ -217,5 +227,55 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
       widget.onErrorCallback?.call();
       return null;
     }
+  }
+}
+
+class _EmptyPersonThumbnail extends StatelessWidget {
+  final String? initial;
+
+  const _EmptyPersonThumbnail({
+    this.initial,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    final trimmed = initial?.trim();
+    final hasInitial = trimmed != null && trimmed.isNotEmpty;
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.fillFaint,
+        border: Border.all(
+          color: colorScheme.strokeFaint,
+          width: 1,
+        ),
+      ),
+      child: Center(
+        child: hasInitial
+            ? LayoutBuilder(
+                builder: (context, constraints) {
+                  final shortestSide = constraints.biggest.shortestSide.isFinite
+                      ? constraints.biggest.shortestSide
+                      : 0;
+                  final fontSize = shortestSide > 0
+                      ? shortestSide * 0.42
+                      : textTheme.h2.fontSize ?? 24;
+                  return Text(
+                    trimmed.substring(0, 1).toUpperCase(),
+                    style: textTheme.h2Bold.copyWith(
+                      color: colorScheme.textMuted,
+                      fontSize: fontSize,
+                      height: 1,
+                    ),
+                  );
+                },
+              )
+            : Icon(
+                Icons.person_outline,
+                color: colorScheme.strokeMuted,
+              ),
+      ),
+    );
   }
 }
