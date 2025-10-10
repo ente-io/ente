@@ -110,11 +110,24 @@ class Media3TransformerProcessor(private val context: Context) {
 
                 logVerbose("Using crop coordinates as-is: x=$fileX, y=$fileY, w=$fileW, h=$fileH")
 
-                // Calculate crop as a fraction of the video dimensions
-                val cropLeftFraction = fileX.toFloat() / originalWidth
-                val cropRightFraction = (fileX + fileW).toFloat() / originalWidth
-                val cropTopFraction = fileY.toFloat() / originalHeight
-                val cropBottomFraction = (fileY + fileH).toFloat() / originalHeight
+                // When video has rotation metadata, swap dimensions for crop fraction calculation
+                // This is because Flutter sends display-space coordinates (after rotation)
+                val effectiveWidth: Int
+                val effectiveHeight: Int
+                if (originalRotation == 90 || originalRotation == 270) {
+                    effectiveWidth = originalHeight
+                    effectiveHeight = originalWidth
+                    logVerbose("Video has 90/270 rotation, swapping dimensions for crop calculation: ${effectiveWidth}x$effectiveHeight")
+                } else {
+                    effectiveWidth = originalWidth
+                    effectiveHeight = originalHeight
+                }
+
+                // Calculate crop as a fraction of the effective video dimensions
+                val cropLeftFraction = fileX.toFloat() / effectiveWidth
+                val cropRightFraction = (fileX + fileW).toFloat() / effectiveWidth
+                val cropTopFraction = fileY.toFloat() / effectiveHeight
+                val cropBottomFraction = (fileY + fileH).toFloat() / effectiveHeight
 
                 logVerbose("Crop fractions: L=$cropLeftFraction, R=$cropRightFraction, T=$cropTopFraction, B=$cropBottomFraction")
 
