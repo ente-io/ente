@@ -57,7 +57,9 @@ class DeviceFolderPage extends StatelessWidget {
       header: Configuration.instance.hasConfiguredAccount()
           ? BackupHeaderWidget(deviceCollection)
           : const SizedBox.shrink(),
-      initialFiles: [deviceCollection.thumbnail!],
+      initialFiles: deviceCollection.thumbnail != null
+          ? [deviceCollection.thumbnail!]
+          : const <EnteFile>[],
     );
     return GalleryFilesState(
       child: Scaffold(
