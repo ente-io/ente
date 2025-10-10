@@ -94,20 +94,22 @@ class Media3TransformerProcessor(private val context: Context) {
             val videoEffects = mutableListOf<Effect>()
 
             // Add crop effect if needed BEFORE rotation
-            // This ensures crop coordinates are applied to the correct orientation
+            // With rotationCorrection set on VideoPlayerValue, the video editor provides
+            // crop coordinates that match the display orientation. These coordinates are
+            // already correct for the file and match what iOS sends - use them directly.
             var outDimsFromCrop: Size? = null
             if (cropX != null && cropY != null && cropWidth != null && cropHeight != null) {
-                val transformedCrop = transformCropForRotation(
-                    originalRotation,
-                    CropRect(cropX, cropY, cropWidth, cropHeight),
-                    Size(originalWidth, originalHeight)
-                )
+                logVerbose("Crop input: x=$cropX, y=$cropY, w=$cropWidth, h=$cropHeight")
+                logVerbose("Video dims: ${originalWidth}x$originalHeight")
 
-                // Calculate crop as a fraction of the file-space dimensions
-                val cropLeftFraction = transformedCrop.x.toFloat() / originalWidth
-                val cropRightFraction = (transformedCrop.x + transformedCrop.width).toFloat() / originalWidth
-                val cropTopFraction = transformedCrop.y.toFloat() / originalHeight
-                val cropBottomFraction = (transformedCrop.y + transformedCrop.height).toFloat() / originalHeight
+                // Use crop coordinates directly - they're already in the correct space
+                // Calculate crop as a fraction of the video dimensions
+                val cropLeftFraction = cropX.toFloat() / originalWidth
+                val cropRightFraction = (cropX + cropWidth).toFloat() / originalWidth
+                val cropTopFraction = cropY.toFloat() / originalHeight
+                val cropBottomFraction = (cropY + cropHeight).toFloat() / originalHeight
+
+                logVerbose("Crop fractions: L=$cropLeftFraction, R=$cropRightFraction, T=$cropTopFraction, B=$cropBottomFraction")
 
                 // Use Crop effect with NDC coordinates (-1 to 1)
                 val cropEffect = Crop(
@@ -117,8 +119,8 @@ class Media3TransformerProcessor(private val context: Context) {
                     /* top = */ 1f - 2f * cropTopFraction
                 )
 
-                // Preserve output dimensions from the transformed crop; these are in file-space.
-                outDimsFromCrop = Size(transformedCrop.width, transformedCrop.height)
+                // Preserve output dimensions from the crop
+                outDimsFromCrop = Size(cropWidth, cropHeight)
 
                 videoEffects.add(cropEffect)
                 hasVideoEffects = true

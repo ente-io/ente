@@ -2,7 +2,6 @@ import "dart:async";
 import 'dart:io';
 import "dart:math";
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import 'package:native_video_editor/native_video_editor.dart';
@@ -99,11 +98,25 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
       );
 
       _controller!.initialize().then((_) {
+        // Apply metadata rotation to the video player
+        if (_quarterTurnsForRotationCorrection != null &&
+            _quarterTurnsForRotationCorrection! != 0) {
+          final rotationDegrees = _quarterTurnsForRotationCorrection! * 90;
+          _controller!.video.value = _controller!.video.value.copyWith(
+            rotationCorrection: rotationDegrees,
+          );
+          _logger.fine(
+            'Applied rotation correction: $rotationDegrees degrees to video player',
+          );
+        }
         setState(() {});
-      }).catchError((error) {
-        // handle minumum duration bigger than video duration error
-        Navigator.pop(context);
-      }, test: (e) => e is VideoMinDurationError);
+      }).catchError(
+        (error) {
+          // handle minumum duration bigger than video duration error
+          Navigator.pop(context);
+        },
+        test: (e) => e is VideoMinDurationError,
+      );
     });
   }
 
@@ -166,30 +179,8 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                                   Positioned.fill(
                                     child: Hero(
                                       tag: "video-editor-preview",
-                                      child: Builder(
-                                        builder: (context) {
-                                          // For videos with metadata rotation, we need to swap dimensions
-                                          final shouldSwap =
-                                              _quarterTurnsForRotationCorrection! %
-                                                      2 ==
-                                                  1;
-                                          final width = _controller!
-                                              .video.value.size.width;
-                                          final height = _controller!
-                                              .video.value.size.height;
-
-                                          return RotatedBox(
-                                            quarterTurns:
-                                                _quarterTurnsForRotationCorrection!,
-                                            child: CropGridViewer.preview(
-                                              controller: _controller!,
-                                              overrideWidth:
-                                                  shouldSwap ? height : width,
-                                              overrideHeight:
-                                                  shouldSwap ? width : height,
-                                            ),
-                                          );
-                                        },
+                                      child: CropGridViewer.preview(
+                                        controller: _controller!,
                                       ),
                                     ),
                                   ),
@@ -242,53 +233,52 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                             ),
                           if (flagService.internalUser)
                             const SizedBox(height: 8),
-                          if (kDebugMode)
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Expanded(
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          _dryRunMode = !_dryRunMode;
-                                        });
-                                      },
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            'Dry run (debug)',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodyMedium,
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        _dryRunMode = !_dryRunMode;
+                                      });
+                                    },
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          'Dry run (debug)',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium,
+                                        ),
+                                        Transform.scale(
+                                          scale: 0.8,
+                                          child: Switch(
+                                            value: _dryRunMode,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                _dryRunMode = value;
+                                              });
+                                            },
+                                            materialTapTargetSize:
+                                                MaterialTapTargetSize
+                                                    .shrinkWrap,
                                           ),
-                                          Transform.scale(
-                                            scale: 0.8,
-                                            child: Switch(
-                                              value: _dryRunMode,
-                                              onChanged: (value) {
-                                                setState(() {
-                                                  _dryRunMode = value;
-                                                });
-                                              },
-                                              materialTapTargetSize:
-                                                  MaterialTapTargetSize
-                                                      .shrinkWrap,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
+                          ),
                           VideoEditorMainActions(
                             children: [
                               VideoEditorBottomAction(
@@ -298,8 +288,6 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                                 onPressed: () => _openSubEditor(
                                   VideoTrimPage(
                                     controller: _controller!,
-                                    quarterTurnsForRotationCorrection:
-                                        _quarterTurnsForRotationCorrection!,
                                   ),
                                 ),
                               ),
@@ -311,8 +299,6 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                                 onPressed: () => _openSubEditor(
                                   VideoCropPage(
                                     controller: _controller!,
-                                    quarterTurnsForRotationCorrection:
-                                        _quarterTurnsForRotationCorrection!,
                                   ),
                                 ),
                               ),
@@ -324,8 +310,6 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                                 onPressed: () => _openSubEditor(
                                   VideoRotatePage(
                                     controller: _controller!,
-                                    quarterTurnsForRotationCorrection:
-                                        _quarterTurnsForRotationCorrection!,
                                   ),
                                 ),
                               ),
@@ -344,16 +328,19 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
   }
 
   void exportVideo() async {
-    final metadataRotation = _quarterTurnsForRotationCorrection! * 90;
     final shouldUseNative = flagService.internalUser
         ? _useNativeExport
         : flagService.useNativeVideoEditor;
 
-    if (kDebugMode && _dryRunMode) {
-      final debugInfo = await NativeVideoExportService.buildDebugSummary(
-        controller: _controller!,
-        metadataRotation: metadataRotation,
-      );
+    // Always log dry run info for debugging, regardless of toggle
+    final debugInfo = await NativeVideoExportService.buildDebugSummary(
+      controller: _controller!,
+    );
+    _logger.info(
+      'DRY_RUN pipeline=${shouldUseNative ? "native" : "ffmpeg"} videoSize=${debugInfo.videoSize.width.toInt()}x${debugInfo.videoSize.height.toInt()} trimStart=${debugInfo.trimStart} trimEnd=${debugInfo.trimEnd} nativeRotate=${debugInfo.nativeRotateDegrees ?? 0} nativeDisplayCrop=${_formatRect(debugInfo.nativeDisplayCrop)} nativeFileCrop=${_formatCrop(debugInfo.nativeFileCrop)} nativeOutputSize=${_formatSize(debugInfo.nativeOutputSize)} ffmpegFileCrop=${_formatCrop(debugInfo.ffmpegFileCrop)} ffmpegCropFilter=${debugInfo.ffmpegCropFilter ?? "-"}',
+    );
+
+    if (_dryRunMode) {
       await _showDryRunDialog(debugInfo, shouldUseNative);
       return;
     }
@@ -378,7 +365,6 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
 
     try {
       final result = await _performExport(
-        metadataRotation: metadataRotation,
         shouldUseNative: shouldUseNative,
         dialogKey: dialogKey,
       );
@@ -391,12 +377,11 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         Navigator.of(dialogKey.currentContext!).pop();
       }
 
-      showErrorMessage(context, e);
+      showShortToast(context, AppLocalizations.of(context).somethingWentWrong);
     }
   }
 
   Future<File> _performExport({
-    required int metadataRotation,
     required bool shouldUseNative,
     required GlobalKey<LinearProgressDialogState> dialogKey,
   }) async {
@@ -413,7 +398,6 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         return await NativeVideoExportService.exportVideo(
           controller: _controller!,
           outputPath: outputPath,
-          metadataRotation: metadataRotation,
           onProgress: (progress) {
             if (dialogKey.currentState != null) {
               dialogKey.currentState!.setProgress(progress);
@@ -438,41 +422,29 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         }
 
         return await _runFfmpegExport(
-          metadataRotation: metadataRotation,
           dialogKey: dialogKey,
         );
       }
     }
 
     return await _runFfmpegExport(
-      metadataRotation: metadataRotation,
       dialogKey: dialogKey,
     );
   }
 
   Future<File> _runFfmpegExport({
-    required int metadataRotation,
     required GlobalKey<LinearProgressDialogState> dialogKey,
   }) async {
     final config = VideoFFmpegVideoEditorConfig(
       _controller!,
       format: VideoExportFormat.mp4,
       commandBuilder: (config, videoPath, outputPath) {
-        List<String> filters = config.getExportFilters();
-
-        String noAutoRotate = '';
-        if (metadataRotation != 0) {
-          noAutoRotate = '-noautorotate';
-        }
-
-        if (Platform.isAndroid && metadataRotation % 180 != 0) {
-          filters = _adjustCropFilterForAndroid(filters, metadataRotation);
-        }
+        final List<String> filters = config.getExportFilters();
 
         final String startTrimCmd = "-ss ${_controller!.startTrim}";
         final String toTrimCmd = "-t ${_controller!.trimmedDuration}";
         final command =
-            '$startTrimCmd $noAutoRotate -i $videoPath  $toTrimCmd ${config.filtersCmd(filters)} -c:v libx264 -c:a aac $outputPath';
+            '$startTrimCmd -i $videoPath  $toTrimCmd ${config.filtersCmd(filters)} -c:v libx264 -c:a aac $outputPath';
         return command;
       },
     );
@@ -518,8 +490,6 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('Metadata rotation: ${info.metadataRotation}°'),
-                const SizedBox(height: 12),
                 Text(
                   shouldUseNative
                       ? 'Native pipeline will be used'
@@ -536,13 +506,15 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                    'Video size: ${info.videoSize.width.toInt()} x ${info.videoSize.height.toInt()}'),
+                  'Video size: ${info.videoSize.width.toInt()} x ${info.videoSize.height.toInt()}',
+                ),
                 Text('Trim: ${info.trimStart ?? "-"} → ${info.trimEnd ?? "-"}'),
                 Text('Rotate degrees: ${info.nativeRotateDegrees ?? 0}'),
                 Text('Display crop: ${_formatRect(info.nativeDisplayCrop)}'),
                 Text('File crop: ${_formatCrop(info.nativeFileCrop)}'),
                 Text(
-                    'Output dimensions: ${_formatSize(info.nativeOutputSize)}'),
+                  'Output dimensions: ${_formatSize(info.nativeOutputSize)}',
+                ),
                 const SizedBox(height: 12),
                 Text(
                   'FFmpeg fallback',
@@ -554,8 +526,23 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                 const SizedBox(height: 6),
                 Text('File crop: ${_formatCrop(info.ffmpegFileCrop)}'),
                 Text('Crop filter: ${info.ffmpegCropFilter ?? '-'}'),
-                Text(
-                    'No autorotate: ${info.ffmpegNoAutoRotate ? 'yes' : 'no'}'),
+                if (info.ffmpegCommand != null) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    'Command:',
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall
+                        ?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 2),
+                  SelectableText(
+                    info.ffmpegCommand!,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontFamily: 'monospace',
+                        ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -671,41 +658,6 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
     } finally {
       await PhotoManager.startChangeNotify();
     }
-  }
-
-  /// Adjust crop filter for Android with metadata rotation
-  /// On Android, RotatedBox shows the video in corrected orientation, but FFmpeg
-  /// doesn't know about this, so we need to recalculate crop for 90°/270° rotations
-  List<String> _adjustCropFilterForAndroid(
-    List<String> filters,
-    int metadataRotation,
-  ) {
-    final adjustedFilters = <String>[];
-    final controller = _controller!;
-
-    final needsCrop = controller.minCrop != Offset.zero ||
-        controller.maxCrop != const Offset(1.0, 1.0);
-
-    if (!needsCrop) {
-      return filters; // No crop needed, return original filters
-    }
-
-    for (final filter in filters) {
-      if (filter.startsWith('crop=')) {
-        // Use shared crop calculation utility
-        final crop = VideoCropUtil.calculateFileSpaceCrop(
-          controller: controller,
-          metadataRotation: metadataRotation,
-        );
-
-        final newFilter = crop.toFFmpegFilter();
-        adjustedFilters.add(newFilter);
-        continue;
-      }
-      adjustedFilters.add(filter);
-    }
-
-    return adjustedFilters;
   }
 
   Future<void> _openSubEditor(Widget child) {

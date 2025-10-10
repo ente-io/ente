@@ -25,24 +25,24 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
                   let outputPath = args["outputPath"] as? String,
                   let startTimeMs = args["startTimeMs"] as? Int,
                   let endTimeMs = args["endTimeMs"] as? Int else {
-            result(flutterError("INVALID_ARGS", message: "Invalid arguments"))
-            return
-        }
+                result(flutterError("INVALID_ARGS", message: "Invalid arguments"))
+                return
+            }
 
-        trimVideo(inputPath: inputPath, outputPath: outputPath,
-                     startTimeMs: startTimeMs, endTimeMs: endTimeMs, result: result)
+            trimVideo(inputPath: inputPath, outputPath: outputPath,
+                      startTimeMs: startTimeMs, endTimeMs: endTimeMs, result: result)
 
         case "rotateVideo":
             guard let args = call.arguments as? [String: Any],
                   let inputPath = args["inputPath"] as? String,
                   let outputPath = args["outputPath"] as? String,
                   let degrees = args["degrees"] as? Int else {
-            result(flutterError("INVALID_ARGS", message: "Invalid arguments"))
-            return
-        }
+                result(flutterError("INVALID_ARGS", message: "Invalid arguments"))
+                return
+            }
 
-        rotateVideo(inputPath: inputPath, outputPath: outputPath,
-                       degrees: degrees, result: result)
+            rotateVideo(inputPath: inputPath, outputPath: outputPath,
+                        degrees: degrees, result: result)
 
         case "cropVideo":
             guard let args = call.arguments as? [String: Any],
@@ -52,12 +52,12 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
                   let y = args["y"] as? Int,
                   let width = args["width"] as? Int,
                   let height = args["height"] as? Int else {
-            result(flutterError("INVALID_ARGS", message: "Invalid arguments"))
-            return
-        }
+                result(flutterError("INVALID_ARGS", message: "Invalid arguments"))
+                return
+            }
 
-        cropVideo(inputPath: inputPath, outputPath: outputPath,
-                     x: x, y: y, width: width, height: height, result: result)
+            cropVideo(inputPath: inputPath, outputPath: outputPath,
+                      x: x, y: y, width: width, height: height, result: result)
 
         case "processVideo":
             handleProcessVideo(call: call, result: result)
@@ -112,11 +112,11 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
                         "isReEncoded": false
                     ])
                 case .failed:
-                    result(flutterError("TRIM_ERROR", message: "Failed to trim video", error: exportSession.error))
+                    result(self.flutterError("TRIM_ERROR", message: "Failed to trim video", error: exportSession.error))
                 case .cancelled:
-                    result(flutterError("CANCELLED", message: "Export cancelled"))
+                    result(self.flutterError("CANCELLED", message: "Export cancelled"))
                 default:
-                    result(flutterError("UNKNOWN", message: "Unknown export status", error: exportSession.error))
+                    result(self.flutterError("UNKNOWN", message: "Unknown export status", error: exportSession.error))
                 }
                 self.currentExportSession = nil
             }
@@ -225,11 +225,11 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
                         "isReEncoded": true
                     ])
                 case .failed:
-                    result(flutterError("ROTATE_ERROR", message: "Failed to rotate video", error: exportSession.error))
+                    result(self.flutterError("ROTATE_ERROR", message: "Failed to rotate video", error: exportSession.error))
                 case .cancelled:
-                    result(flutterError("CANCELLED", message: "Export cancelled"))
+                    result(self.flutterError("CANCELLED", message: "Export cancelled"))
                 default:
-                    result(flutterError("UNKNOWN", message: "Unknown export status", error: exportSession.error))
+                    result(self.flutterError("UNKNOWN", message: "Unknown export status", error: exportSession.error))
                 }
                 self.currentExportSession = nil
             }
@@ -324,11 +324,11 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
                         "isReEncoded": true
                     ])
                 case .failed:
-                    result(flutterError("CROP_ERROR", message: "Failed to crop video", error: exportSession.error))
+                    result(self.flutterError("CROP_ERROR", message: "Failed to crop video", error: exportSession.error))
                 case .cancelled:
-                    result(flutterError("CANCELLED", message: "Export cancelled"))
+                    result(self.flutterError("CANCELLED", message: "Export cancelled"))
                 default:
-                    result(flutterError("UNKNOWN", message: "Unknown export status", error: exportSession.error))
+                    result(self.flutterError("UNKNOWN", message: "Unknown export status", error: exportSession.error))
                 }
                 self.currentExportSession = nil
             }
@@ -541,13 +541,14 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
                         "isReEncoded": isReEncoded
                     ])
                 case .failed:
-                    result(flutterError("PROCESS_ERROR", message: "Failed to process video", error: exportSession.error))
+                    result(self.flutterError("PROCESS_ERROR", message: "Failed to process video", error: exportSession.error))
                 case .cancelled:
-                    result(flutterError("CANCELLED", message: "Export cancelled"))
+                    result(self.flutterError("CANCELLED", message: "Export cancelled"))
                 default:
-                    result(flutterError("UNKNOWN", message: "Unknown export status", error: exportSession.error))
+                    result(self.flutterError("UNKNOWN", message: "Unknown export status", error: exportSession.error))
                 }
                 self.currentExportSession = nil
+            }
         }
     }
 

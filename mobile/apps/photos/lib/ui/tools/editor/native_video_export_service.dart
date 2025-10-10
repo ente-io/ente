@@ -4,13 +4,12 @@ import 'dart:ui';
 
 import 'package:logging/logging.dart';
 import 'package:native_video_editor/native_video_editor.dart';
-import 'package:video_editor/video_editor.dart';
 import 'package:photos/ui/tools/editor/export_video_service.dart';
 import 'package:photos/ui/tools/editor/video_crop_util.dart';
+import 'package:video_editor/video_editor.dart';
 
 class DebugExportSummary {
   DebugExportSummary({
-    required this.metadataRotation,
     required this.videoSize,
     required this.trimStart,
     required this.trimEnd,
@@ -20,10 +19,9 @@ class DebugExportSummary {
     required this.nativeOutputSize,
     required this.ffmpegFileCrop,
     required this.ffmpegCropFilter,
-    required this.ffmpegNoAutoRotate,
+    required this.ffmpegCommand,
   });
 
-  final int metadataRotation;
   final Size videoSize;
   final Duration? trimStart;
   final Duration? trimEnd;
@@ -33,7 +31,7 @@ class DebugExportSummary {
   final Size? nativeOutputSize;
   final CropCalculation? ffmpegFileCrop;
   final String? ffmpegCropFilter;
-  final bool ffmpegNoAutoRotate;
+  final String? ffmpegCommand;
 }
 
 /// Service that uses native video editing operations when possible
@@ -44,7 +42,6 @@ class NativeVideoExportService {
 
   static Future<DebugExportSummary> buildDebugSummary({
     required VideoEditorController controller,
-    required int metadataRotation,
   }) async {
     final videoSize = controller.video.value.size;
     final Duration? trimStart =
@@ -64,12 +61,10 @@ class NativeVideoExportService {
     if (needsCrop) {
       nativeDisplayCrop = VideoCropUtil.calculateDisplaySpaceCropRect(
         controller: controller,
-        metadataRotation: metadataRotation,
       );
       try {
         nativeFileCrop = VideoCropUtil.calculateFileSpaceCrop(
           controller: controller,
-          metadataRotation: metadataRotation,
         );
       } catch (_) {
         nativeFileCrop = null;
@@ -91,7 +86,6 @@ class NativeVideoExportService {
       try {
         ffmpegFileCrop = VideoCropUtil.calculateFileSpaceCrop(
           controller: controller,
-          metadataRotation: metadataRotation,
         );
       } catch (_) {
         ffmpegFileCrop = null;
@@ -103,8 +97,31 @@ class NativeVideoExportService {
       ffmpegCropFilter = ffmpegFileCrop.toFFmpegFilter();
     }
 
+    // Build approximate FFmpeg command for debugging
+    String? ffmpegCommand;
+    if (ffmpegCropFilter != null || trimStart != null || trimEnd != null) {
+      final List<String> cmdParts = ['ffmpeg -i input.mp4'];
+
+      if (trimStart != null || trimEnd != null) {
+        final ss = trimStart?.inMilliseconds ?? 0;
+        final to =
+            trimEnd?.inMilliseconds ?? controller.videoDuration.inMilliseconds;
+        cmdParts.add('-ss ${ss}ms -to ${to}ms');
+      }
+
+      final vfFilters = <String>[];
+      if (ffmpegCropFilter != null) {
+        vfFilters.add(ffmpegCropFilter);
+      }
+      vfFilters.add('setpts=PTS-STARTPTS');
+
+      cmdParts.add('-vf "${vfFilters.join(',')}"');
+      cmdParts.add('-c:v libx264 -preset ultrafast -c:a copy output.mp4');
+
+      ffmpegCommand = cmdParts.join(' ');
+    }
+
     return DebugExportSummary(
-      metadataRotation: metadataRotation,
       videoSize: videoSize,
       trimStart: trimStart,
       trimEnd: trimEnd,
@@ -114,7 +131,7 @@ class NativeVideoExportService {
       nativeOutputSize: nativeOutputSize,
       ffmpegFileCrop: ffmpegFileCrop,
       ffmpegCropFilter: ffmpegCropFilter,
-      ffmpegNoAutoRotate: metadataRotation != 0,
+      ffmpegCommand: ffmpegCommand,
     );
   }
 
@@ -122,7 +139,6 @@ class NativeVideoExportService {
   static Future<File> exportVideo({
     required VideoEditorController controller,
     required String outputPath,
-    int metadataRotation = 0,
     void Function(double)? onProgress,
     void Function(Object, StackTrace)? onError,
   }) async {
@@ -135,7 +151,6 @@ class NativeVideoExportService {
         inputPath: inputPath,
         outputPath: outputPath,
         controller: controller,
-        metadataRotation: metadataRotation,
         onProgress: onProgress,
       );
 
@@ -174,7 +189,6 @@ class NativeVideoExportService {
     required String inputPath,
     required String outputPath,
     required VideoEditorController controller,
-    int metadataRotation = 0,
     void Function(double)? onProgress,
   }) async {
     // Use the combined native path only when needed; otherwise do a fast copy.
@@ -208,7 +222,6 @@ class NativeVideoExportService {
       // take display coordinates and do the right transform internally.
       final displayCrop = VideoCropUtil.calculateDisplaySpaceCropRect(
         controller: controller,
-        metadataRotation: metadataRotation,
       );
       if (displayCrop.width <= 0 || displayCrop.height <= 0) {
         throw ArgumentError('Invalid crop rectangle computed: $displayCrop');
@@ -218,8 +231,7 @@ class NativeVideoExportService {
 
     if (cropRect != null && _logger.isLoggable(Level.FINE)) {
       _logger.fine(
-        'Native export cropRect=$cropRect videoSize=${controller.video.value.size} '
-        'metadataRotation=$metadataRotation',
+        'Native export cropRect=$cropRect videoSize=${controller.video.value.size}',
       );
     }
 

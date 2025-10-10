@@ -15,7 +15,7 @@ dependencies:
   video_editor:
     git:
       url: https://github.com/ente-io/video_editor_fork.git
-      ref: 053d15955a128bcf878e162493621abb8859262c
+      ref: master
 
 dev_dependencies:
   flutter_test:

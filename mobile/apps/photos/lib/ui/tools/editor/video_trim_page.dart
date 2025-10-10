@@ -6,11 +6,9 @@ import "package:photos/ui/tools/editor/video_editor/video_editor_player_control.
 import 'package:video_editor/video_editor.dart';
 
 class VideoTrimPage extends StatefulWidget {
-  final int quarterTurnsForRotationCorrection;
   const VideoTrimPage({
     super.key,
     required this.controller,
-    required this.quarterTurnsForRotationCorrection,
   });
 
   final VideoEditorController controller;
@@ -58,28 +56,8 @@ class _VideoTrimPageState extends State<VideoTrimPage> {
                       Positioned.fill(
                         child: Hero(
                           tag: "video-editor-preview",
-                          child: Builder(
-                            builder: (context) {
-                              // For videos with metadata rotation, we need to swap dimensions
-                              final shouldSwap =
-                                  widget.quarterTurnsForRotationCorrection %
-                                          2 ==
-                                      1;
-                              final width =
-                                  widget.controller.video.value.size.width;
-                              final height =
-                                  widget.controller.video.value.size.height;
-
-                              return RotatedBox(
-                                quarterTurns:
-                                    widget.quarterTurnsForRotationCorrection,
-                                child: CropGridViewer.preview(
-                                  controller: widget.controller,
-                                  overrideWidth: shouldSwap ? height : width,
-                                  overrideHeight: shouldSwap ? width : height,
-                                ),
-                              );
-                            },
+                          child: CropGridViewer.preview(
+                            controller: widget.controller,
                           ),
                         ),
                       ),

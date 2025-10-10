@@ -1,6 +1,5 @@
-import 'dart:io';
 import 'dart:ui';
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:video_editor/video_editor.dart';
 
 /// Crop calculation result
@@ -39,11 +38,6 @@ class VideoCropException implements Exception {
 
 /// Helpers to derive display- and file-space crop rectangles for native export
 class VideoCropUtil {
-  static int _normalizedQuarterTurns(int rotationDegrees) {
-    final normalized = ((rotationDegrees % 360) + 360) % 360;
-    return normalized ~/ 90;
-  }
-
   static double _clampNormalized(double value) {
     return value.clamp(0.0, 1.0);
   }
@@ -56,21 +50,14 @@ class VideoCropUtil {
 
   /// Calculate the crop rectangle in display-space pixels.
   ///
-  /// - On Android with 90°/270° metadata rotation, display dimensions are swapped
-  ///   (W_display = H_file, H_display = W_file). We return a Rect in this
-  ///   display-space so the native plugins can transform to file-space.
-  /// - On other platforms / rotations, display == oriented video size.
+  /// Returns a Rect in display-space so the native plugins can transform to file-space.
   static Rect calculateDisplaySpaceCropRect({
     required VideoEditorController controller,
-    required int metadataRotation,
-    bool? isAndroidOverride,
   }) {
     return calculateDisplaySpaceCropRectFromData(
       minCrop: controller.minCrop,
       maxCrop: controller.maxCrop,
       videoSize: controller.video.value.size,
-      metadataRotation: metadataRotation,
-      isAndroidOverride: isAndroidOverride,
     );
   }
 
@@ -81,13 +68,8 @@ class VideoCropUtil {
     required Offset minCrop,
     required Offset maxCrop,
     required Size videoSize,
-    required int metadataRotation,
-    bool? isAndroidOverride,
   }) {
-    final turns = _normalizedQuarterTurns(metadataRotation);
-    final isAndroid = isAndroidOverride ?? Platform.isAndroid;
-    final swap = isAndroid && turns % 2 == 1;
-
+    // Both platforms use same path - no rotation-specific logic
     double minX = _clampNormalized(minCrop.dx);
     double maxX = _clampNormalized(maxCrop.dx);
     double minY = _clampNormalized(minCrop.dy);
@@ -104,8 +86,9 @@ class VideoCropUtil {
       maxY = temp;
     }
 
-    final displayWidth = swap ? videoSize.height : videoSize.width;
-    final displayHeight = swap ? videoSize.width : videoSize.height;
+    // Use raw video dimensions - no special handling for rotation
+    final displayWidth = videoSize.width;
+    final displayHeight = videoSize.height;
 
     final widthNormalized = maxX - minX;
     final heightNormalized = maxY - minY;
@@ -126,20 +109,15 @@ class VideoCropUtil {
     return Rect.fromLTWH(x, y, w, h);
   }
 
-  /// Convert the normalised crop selection into file-space coordinates
-  /// (taking metadata rotation on Android into account).
+  /// Convert the normalised crop selection into file-space coordinates.
   static CropCalculation calculateFileSpaceCrop({
     required VideoEditorController controller,
-    required int metadataRotation,
-    bool? isAndroidOverride,
   }) {
     final videoSize = controller.video.value.size;
     return calculateFileSpaceCropFromData(
       minCrop: controller.minCrop,
       maxCrop: controller.maxCrop,
       videoSize: videoSize,
-      metadataRotation: metadataRotation,
-      isAndroidOverride: isAndroidOverride,
     );
   }
 
@@ -150,78 +128,16 @@ class VideoCropUtil {
     required Offset minCrop,
     required Offset maxCrop,
     required Size videoSize,
-    required int metadataRotation,
-    bool? isAndroidOverride,
   }) {
-    final metadataQuarterTurns = _normalizedQuarterTurns(metadataRotation);
-    final isAndroid = isAndroidOverride ?? Platform.isAndroid;
     final displayCrop = calculateDisplaySpaceCropRectFromData(
       minCrop: minCrop,
       maxCrop: maxCrop,
       videoSize: videoSize,
-      metadataRotation: metadataRotation,
-      isAndroidOverride: isAndroidOverride,
     );
 
-    // For 90°/270° rotations on Android, we need special handling
-    if (isAndroid && metadataQuarterTurns % 2 == 1) {
-      return _calculateRotatedFileSpaceCrop(
-        videoSize,
-        displayCrop,
-        metadataRotation,
-      );
-    }
-
+    // Both iOS and Android produce displayCrop in raw file dimensions,
+    // so we use standard file-space crop for both
     return _calculateStandardFileSpaceCrop(videoSize, displayCrop);
-  }
-
-  static CropCalculation _calculateRotatedFileSpaceCrop(
-    Size videoSize,
-    Rect displayCrop,
-    int metadataRotation,
-  ) {
-    const int rotation90 = 90;
-    const int rotation270 = 270;
-    final normalizedRotation = ((metadataRotation % 360) + 360) % 360;
-
-    final xD = displayCrop.left;
-    final yD = displayCrop.top;
-    final wD = displayCrop.width;
-    final hD = displayCrop.height;
-
-    int xF;
-    int yF;
-    int wF;
-    int hF;
-
-    if (normalizedRotation == rotation90) {
-      xF = (videoSize.width - (yD + hD)).round().clamp(
-            0,
-            videoSize.width.toInt(),
-          );
-      yF = xD.round().clamp(0, videoSize.height.toInt());
-    } else if (normalizedRotation == rotation270) {
-      xF = yD.round().clamp(0, videoSize.width.toInt());
-      yF = (videoSize.height - (xD + wD)).round().clamp(
-            0,
-            videoSize.height.toInt(),
-          );
-    } else {
-      throw VideoCropException(
-        'Unsupported rotation $normalizedRotation for Android crop',
-      );
-    }
-
-    wF = hD.round().clamp(0, (videoSize.width - xF).toInt());
-    hF = wD.round().clamp(0, (videoSize.height - yF).toInt());
-
-    if (wF <= 0 || hF <= 0) {
-      throw VideoCropException(
-        'Invalid crop dimensions after rotation transform',
-      );
-    }
-
-    return CropCalculation(x: xF, y: yF, width: wF, height: hF);
   }
 
   static CropCalculation _calculateStandardFileSpaceCrop(

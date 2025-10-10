@@ -9,11 +9,9 @@ import "package:photos/ui/tools/editor/video_editor/video_editor_player_control.
 import 'package:video_editor/video_editor.dart';
 
 class VideoCropPage extends StatefulWidget {
-  final int quarterTurnsForRotationCorrection;
   const VideoCropPage({
     super.key,
     required this.controller,
-    required this.quarterTurnsForRotationCorrection,
   });
 
   final VideoEditorController controller;
@@ -53,32 +51,12 @@ class _VideoCropPageState extends State<VideoCropPage> {
                       Positioned.fill(
                         child: Hero(
                           tag: "video-editor-preview",
-                          child: Builder(
-                            builder: (context) {
-                              // For videos with metadata rotation, we need to swap dimensions
-                              final shouldSwap =
-                                  widget.quarterTurnsForRotationCorrection %
-                                          2 ==
-                                      1;
-                              final width =
-                                  widget.controller.video.value.size.width;
-                              final height =
-                                  widget.controller.video.value.size.height;
-
-                              return RotatedBox(
-                                quarterTurns:
-                                    widget.quarterTurnsForRotationCorrection,
-                                child: CropGridViewer.edit(
-                                  controller: widget.controller,
-                                  rotateCropArea: false,
-                                  margin: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                  ),
-                                  overrideWidth: shouldSwap ? height : width,
-                                  overrideHeight: shouldSwap ? width : height,
-                                ),
-                              );
-                            },
+                          child: CropGridViewer.edit(
+                            controller: widget.controller,
+                            rotateCropArea: false,
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                            ),
                           ),
                         ),
                       ),
@@ -121,25 +99,19 @@ class _VideoCropPageState extends State<VideoCropPage> {
   }
 
   Widget _buildCropButton(BuildContext context, CropValue value) {
-    final f = value.getFraction();
-    // For videos with 90° or 270° rotation, we need to invert the aspect ratio
-    // because the crop is applied to the original (pre-rotation) video dimensions
-    final shouldSwap = widget.quarterTurnsForRotationCorrection % 2 == 1;
-    final aspectRatio = f?.toDouble();
-    final adjustedRatio =
-        (shouldSwap && aspectRatio != null) ? (1.0 / aspectRatio) : aspectRatio;
+    final aspectRatio = value.getFraction()?.toDouble();
 
     return VideoEditorBottomAction(
       label: value.displayName,
       isSelected: value != CropValue.original &&
-          widget.controller.preferredCropAspectRatio == adjustedRatio,
+          widget.controller.preferredCropAspectRatio == aspectRatio,
       onPressed: () {
         if (value == CropValue.original) {
           widget.controller.updateCrop(Offset.zero, const Offset(1.0, 1.0));
           widget.controller.cropAspectRatio(null);
           setState(() {});
         } else {
-          widget.controller.preferredCropAspectRatio = adjustedRatio;
+          widget.controller.preferredCropAspectRatio = aspectRatio;
         }
       },
       svgPath: "assets/video-editor/video-crop-${value.name}-action.svg",
