@@ -176,13 +176,14 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
           leading: buildSearchLeading(),
           title: Text(_getTitle(context)),
           centerTitle: false,
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
+          backgroundColor: getEnteColorScheme(context).backgroundBase,
+          surfaceTintColor: Colors.transparent,
           actions: [
             buildSearchAction(),
             ...buildSearchActions(),
           ],
         ),
+        backgroundColor: getEnteColorScheme(context).backgroundBase,
         body: _buildBody(),
         bottomNavigationBar: widget.selectedCollections != null
             ? ListenableBuilder(

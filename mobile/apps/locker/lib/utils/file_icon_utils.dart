@@ -88,10 +88,8 @@ class FileIconUtils {
     }
 
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(10.0),
       child: Container(
-        height: 48,
-        width: 48,
         decoration: BoxDecoration(
           color: config.backgroundColor,
           borderRadius: BorderRadius.circular(12),

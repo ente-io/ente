@@ -3,6 +3,7 @@ import 'package:ente_ui/theme/ente_theme.dart';
 import "package:ente_ui/theme/text_style.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import "package:hugeicons/hugeicons.dart";
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/models/file_type.dart';
 import 'package:locker/models/info/info_item.dart';
@@ -100,8 +101,10 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
           borderRadius: BorderRadius.circular(12),
           color: getEnteColorScheme(context).backdropBase,
         ),
-        child: const Icon(
-          Icons.grid_view_outlined,
+        padding: const EdgeInsets.all(12),
+        child: HugeIcon(
+          icon: HugeIcons.strokeRoundedGridView,
+          color: getEnteColorScheme(context).iconColor,
         ),
       ),
     );

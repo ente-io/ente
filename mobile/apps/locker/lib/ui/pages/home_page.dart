@@ -732,6 +732,7 @@ class _HomePageState extends UploaderPageState<HomePage>
                   ],
                   FloatingActionButton(
                     onPressed: _toggleFab,
+                    backgroundColor: getEnteColorScheme(context).primary700,
                     child: AnimatedRotation(
                       turns: isFabOpen ? 0.125 : 0.0, // 45 degrees when open
                       duration: const Duration(milliseconds: 300),

@@ -2,6 +2,7 @@ import "package:ente_events/event_bus.dart";
 import "package:ente_ui/components/buttons/icon_button_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
+import "package:hugeicons/hugeicons.dart";
 import "package:locker/events/collections_updated_event.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/models/selected_collections.dart";
@@ -42,13 +43,27 @@ class CollectionRowWidget extends StatelessWidget {
         children: [
           SizedBox(
             height: 60,
-            width: 48,
-            child: Icon(
-              Icons.folder_open,
-              color: collection.type == CollectionType.favorites
-                  ? colorScheme.primary500
-                  : Colors.grey,
-              size: 22,
+            width: 60,
+            child: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: colorScheme.backgroundBase,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: collection.type == CollectionType.favorites
+                      ? HugeIcon(
+                          icon: HugeIcons.strokeRoundedStar,
+                          color: getEnteColorScheme(context).primary700,
+                        )
+                      : HugeIcon(
+                          icon: HugeIcons.strokeRoundedWallet05,
+                          color: getEnteColorScheme(context).iconColor,
+                        ),
+                ),
+              ),
             ),
           ),
           const SizedBox(width: 12),
@@ -106,10 +121,12 @@ class CollectionRowWidget extends StatelessWidget {
             decoration: BoxDecoration(
               border: Border.all(
                 color: isSelected
-                    ? colorScheme.strokeMuted
-                    : colorScheme.strokeFainter,
+                    ? colorScheme.primary700
+                    : colorScheme.backdropBase,
+                width: 1.5,
               ),
-              borderRadius: const BorderRadius.all(Radius.circular(6)),
+              color: colorScheme.backdropBase,
+              borderRadius: const BorderRadius.all(Radius.circular(20)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -126,14 +143,17 @@ class CollectionRowWidget extends StatelessWidget {
                             key: const ValueKey("selected"),
                             icon: Icons.check_circle_rounded,
                             iconButtonType: IconButtonType.secondary,
-                            iconColor: colorScheme.blurStrokeBase,
+                            iconColor: colorScheme.primary700,
                           )
                         : PopupMenuButton<String>(
                             onSelected: (value) =>
                                 _handleMenuAction(context, value),
-                            icon: const Icon(
-                              Icons.more_vert,
-                              size: 20,
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: HugeIcon(
+                                icon: HugeIcons.strokeRoundedMoreVertical,
+                                color: getEnteColorScheme(context).iconColor,
+                              ),
                             ),
                             itemBuilder: (BuildContext context) {
                               return _buildPopupMenuItems(context);

@@ -64,22 +64,20 @@ class _CollectionFlexGridViewWidgetState
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    height: 48,
-                    width: 48,
+                    height: 40,
+                    width: 40,
                     decoration: BoxDecoration(
                       color: getEnteColorScheme(context).backgroundBase,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(8.0),
                     child: collection.type == CollectionType.favorites
                         ? HugeIcon(
                             icon: HugeIcons.strokeRoundedStar,
                             color: getEnteColorScheme(context).primary700,
-                            size: 16,
                           )
                         : HugeIcon(
                             icon: HugeIcons.strokeRoundedWallet05,
-                            size: 16,
                             color: getEnteColorScheme(context).iconColor,
                           ),
                   ),
