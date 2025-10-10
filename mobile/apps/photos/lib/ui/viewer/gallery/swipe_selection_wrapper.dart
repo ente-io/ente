@@ -9,7 +9,7 @@ import 'package:photos/ui/viewer/gallery/state/gallery_swipe_helper.dart';
 import 'package:photos/ui/viewer/gallery/swipe_to_select_helper.dart';
 
 /// A wrapper widget that handles swipe-to-select gesture detection and state management
-/// for the Gallery widget. This reduces the complexity in the main Gallery build method.
+/// for the Gallery widget.
 class SwipeSelectionWrapper extends StatefulWidget {
   final Widget child;
   final SwipeToSelectHelper? swipeHelper;
@@ -92,13 +92,9 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper>
   @override
   Widget build(BuildContext context) {
     final boundariesProvider = GalleryBoundariesProvider.of(context);
-    // If swipe selection is not enabled, just return the child wrapped in GallerySwipeHelper
+    // If swipe selection is not enabled, just return the child without wrapper
     if (!widget.isEnabled) {
-      return GallerySwipeHelper(
-        helper: null,
-        swipeActiveNotifier: widget.swipeActiveNotifier,
-        child: widget.child,
-      );
+      return widget.child;
     }
 
     // Wrap with GallerySwipeHelper and Listener for swipe detection
@@ -191,7 +187,6 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper>
   ) {
     if (distanceFromBoundary <= 0) return 0;
 
-    // Use cached screen height for better performance
     final screenHeight =
         _cachedScreenHeight ?? MediaQuery.of(context).size.height;
 
@@ -240,7 +235,7 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper>
     return math.min(speed, _maxScrollSpeed * _edgeBoostMaxMultiplier);
   }
 
-  /// Check if pointer is outside boundaries and start/stop auto-scroll
+  /// Check if pointer is inside/outside boundaries and start/stop auto-scroll
   void _checkAndHandleAutoScroll(InheritedGalleryBoundaries? provider) {
     if (provider == null) return;
 
@@ -368,7 +363,6 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper>
 
   /// Stop auto-scrolling
   void _stopAutoScroll() {
-    _autoScrollTicker?.stop();
     _autoScrollTicker?.dispose();
     _autoScrollTicker = null;
     _accumulatedScrollDelta = 0;
