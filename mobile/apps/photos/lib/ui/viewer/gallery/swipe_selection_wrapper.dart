@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import "package:logging/logging.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart';
 import 'package:photos/ui/viewer/gallery/state/gallery_swipe_helper.dart';
@@ -36,6 +37,7 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper>
     with TickerProviderStateMixin {
   bool? _initialMovementWasHorizontal;
   bool _pointerDownForFirstSelection = false;
+  final _logger = Logger('SwipeSelectionWrapper');
 
   // Auto-scroll related fields
   Ticker? _autoScrollTicker;
@@ -250,10 +252,11 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper>
         bottomBoundary != null &&
         topBoundary >= bottomBoundary) {
       _stopAutoScroll();
-      throw Exception(
+      _logger.severe(
         'Invalid boundaries: top boundary ($topBoundary) >= bottom boundary ($bottomBoundary). '
         'Viewport is too small for auto-scroll.',
       );
+      return;
     }
 
     // Determine if we need to scroll and in which direction
