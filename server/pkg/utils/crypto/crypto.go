@@ -39,11 +39,13 @@ func encryptWithNonce(data string, encryptionKey []byte, nonce []byte) (ente.Enc
 	nativeEnc, err := encryptWithNonceNative(data, encryptionKey, nonce)
 	if err != nil {
 		logrus.WithField("op", "crypto_compare").WithError(err).Error("native encryption failed")
+		return ente.EncryptionResult{}, stacktrace.Propagate(err, "native encryption failed")
 	}
 	if nativeEnc.Cipher != nil && base64.StdEncoding.EncodeToString(nativeEnc.Cipher) != base64.StdEncoding.EncodeToString(encryptedEmailBytes) {
 		logrus.WithField("op", "crypto_compare").Error("encryption mismatch between libsodium and native implementation")
+		return ente.EncryptionResult{}, stacktrace.Propagate(err, "encryption mismatch")
 	}
-	return ente.EncryptionResult{Cipher: encryptedEmailBytes, Nonce: nonce}, nil
+	return nativeEnc, nil
 }
 
 func Decrypt(cipher []byte, key []byte, nonce []byte) (string, error) {
@@ -55,10 +57,12 @@ func Decrypt(cipher []byte, key []byte, nonce []byte) (string, error) {
 	nativeResult, nativeErr := DecryptNative(cipher, key, nonce)
 	if nativeErr != nil {
 		logrus.WithField("op", "crypto_compare").WithError(nativeErr).Error("native decryption failed")
+		return "", stacktrace.Propagate(nativeErr, "native decryption failed")
 	} else if nativeResult != result {
 		logrus.WithField("op", "crypto_compare").Error("decryption mismatch between libsodium and native implementation")
+		return "", stacktrace.NewError("decryption mismatch")
 	}
-	return result, nil
+	return nativeResult, nil
 }
 
 func GetHash(data string, hashKey []byte) (string, error) {
@@ -73,10 +77,12 @@ func GetHash(data string, hashKey []byte) (string, error) {
 	nativeResult, nativeErr := GetHashNative(data, hashKey)
 	if nativeErr != nil {
 		logrus.WithField("op", "crypto_compare").WithError(nativeErr).Error("native hash failed")
+		return "", stacktrace.Propagate(nativeErr, "native hash failed")
 	} else if nativeResult != result {
 		logrus.WithField("op", "crypto_compare").Error("hash mismatch between libsodium and native implementation")
+		return "", stacktrace.NewError("hash mismatch")
 	}
-	return result, nil
+	return nativeResult, nil
 }
 
 func GetEncryptedToken(token string, publicKey string) (string, error) {
