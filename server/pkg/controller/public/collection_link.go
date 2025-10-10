@@ -25,7 +25,7 @@ var AllowedReasons = map[string]string{
 }
 
 const (
-	AccessTokenLength = 8
+	AccessTokenLength = 10
 	// AutoDisableAbuseThreshold indicates minimum number of abuse reports post which the access token is
 	// automatically disabled
 	AutoDisableAbuseThreshold = 3
