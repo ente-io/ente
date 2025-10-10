@@ -392,8 +392,7 @@ class GalleryGroups {
       endCreationTime: lastFile.creationTime!
     );
 
-    if (_allFilesWithDummies.isNotEmpty ||
-        (flagService.internalUser && !limitSelectionToOne)) {
+    if (flagService.internalUser && !limitSelectionToOne) {
       _allFilesWithDummies.addAll(groupFiles);
     }
 
