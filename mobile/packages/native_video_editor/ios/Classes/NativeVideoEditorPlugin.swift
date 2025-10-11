@@ -294,6 +294,8 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
         let finalTransform = originalTransform.concatenating(cropTransform)
 
         layerInstruction.setTransform(finalTransform, at: .zero)
+        // Note: setCropRectangle is deprecated in iOS 15.0+, but we continue to use it for backward compatibility
+        // TODO: Migrate to using CIFilter-based cropping when minimum iOS version allows
         layerInstruction.setCropRectangle(CGRect(x: 0, y: 0, width: CGFloat(width), height: CGFloat(height)), at: .zero)
 
         instruction.layerInstructions = [layerInstruction]
