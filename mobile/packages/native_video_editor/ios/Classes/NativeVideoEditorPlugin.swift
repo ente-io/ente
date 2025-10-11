@@ -582,7 +582,6 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
         }
         return FlutterError(code: code, message: resolvedMessage, details: resolvedDetails)
     }
-}
 
     private func getVideoInfo(videoPath: String, result: @escaping FlutterResult) {
         let asset = AVAsset(url: URL(fileURLWithPath: videoPath))
