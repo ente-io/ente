@@ -109,7 +109,8 @@ class Configuration {
       Directory(_sharedDocumentsMediaDirectory).createSync(recursive: true);
       if (!_preferences.containsKey(tokenKey)) {
         _logger.info(
-            "(for debugging) Token not found, deleting all secure storage data");
+          "(for debugging) Token not found, deleting all secure storage data",
+        );
         await _secureStorage.deleteAll();
       } else {
         _logger
@@ -704,7 +705,8 @@ class Configuration {
 
   Future<void> _migrateSecurityStorageToFirstUnlock() async {
     _logger.info(
-        "(for debugging) Migrating secure storage to first unlock if needed");
+      "(for debugging) Migrating secure storage to first unlock if needed",
+    );
     final hasMigratedSecureStorage =
         _preferences.getBool(hasMigratedSecureStorageKey) ?? false;
     if (!hasMigratedSecureStorage && _key != null && _secretKey != null) {
