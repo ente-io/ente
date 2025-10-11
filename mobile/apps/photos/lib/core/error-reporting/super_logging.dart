@@ -240,6 +240,15 @@ class SuperLogging {
             options.transport =
                 TunneledTransport(Uri.parse(appConfig.tunnel!), options);
           }
+          // Filter out errors that should not be sent to Sentry
+          options.beforeSend = (SentryEvent event, Hint hint) async {
+            // Check if the error should be skipped
+            final dynamic error = event.throwable;
+            if (error != null && _shouldSkipSentry(error)) {
+              return null; // Returning null drops the event
+            }
+            return event;
+          };
         },
         appRunner: () => appConfig!.body!(),
       );
