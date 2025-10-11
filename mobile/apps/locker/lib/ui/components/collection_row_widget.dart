@@ -1,18 +1,11 @@
-import "package:ente_events/event_bus.dart";
-import "package:ente_ui/components/buttons/icon_button_widget.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
-import "package:locker/events/collections_updated_event.dart";
 import "package:locker/l10n/l10n.dart";
 import "package:locker/models/selected_collections.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
-import "package:locker/services/collections/models/collection_view_type.dart";
-import "package:locker/services/configuration.dart";
 import "package:locker/ui/components/item_list_view.dart";
-import "package:locker/ui/pages/collection_page.dart";
-import "package:locker/utils/collection_actions.dart";
 
 class CollectionRowWidget extends StatelessWidget {
   final Collection collection;
@@ -34,74 +27,14 @@ class CollectionRowWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
-
-    final collectionRowWidget = Flexible(
-      flex: 6,
-      child: Row(
-        children: [
-          SizedBox(
-            height: 60,
-            width: 60,
-            child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: colorScheme.backgroundBase,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: collection.type == CollectionType.favorites
-                      ? HugeIcon(
-                          icon: HugeIcons.strokeRoundedStar,
-                          color: getEnteColorScheme(context).primary700,
-                        )
-                      : HugeIcon(
-                          icon: HugeIcons.strokeRoundedWallet05,
-                          color: getEnteColorScheme(context).iconColor,
-                        ),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Flexible(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  collection.name ?? 'Unnamed Collection',
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                ),
-                FutureBuilder<int>(
-                  future: CollectionService.instance.getFileCount(collection),
-                  builder: (context, snapshot) {
-                    final fileCount = snapshot.data ?? 0;
-                    return Text(
-                      context.l10n.items(fileCount),
-                      style: textTheme.small.copyWith(
-                        color: colorScheme.textMuted,
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+    final textTheme = getEnteTextTheme(context);
+    final collectionName = collection.name ?? context.l10n.unnamedCollection;
 
     return GestureDetector(
       onTap: () {
         if (onTapCallback != null) {
           onTapCallback!(collection);
-        } else {
-          _openCollection(context);
         }
       },
       onLongPress: () {
@@ -109,7 +42,6 @@ class CollectionRowWidget extends StatelessWidget {
           onLongPressCallback!(collection);
         }
       },
-      behavior: HitTestBehavior.opaque,
       child: ListenableBuilder(
         listenable: selectedCollections ?? ValueNotifier(false),
         builder: (context, _) {
@@ -125,156 +57,59 @@ class CollectionRowWidget extends StatelessWidget {
                     : colorScheme.backdropBase,
                 width: 1.5,
               ),
+              borderRadius: BorderRadius.circular(20),
               color: colorScheme.backdropBase,
-              borderRadius: const BorderRadius.all(Radius.circular(20)),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                collectionRowWidget,
-                Flexible(
-                  flex: 1,
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 200),
-                    switchInCurve: Curves.easeOut,
-                    switchOutCurve: Curves.easeIn,
-                    child: isSelected
-                        ? IconButtonWidget(
-                            key: const ValueKey("selected"),
-                            icon: Icons.check_circle_rounded,
-                            iconButtonType: IconButtonType.secondary,
-                            iconColor: colorScheme.primary700,
-                          )
-                        : PopupMenuButton<String>(
-                            onSelected: (value) =>
-                                _handleMenuAction(context, value),
-                            child: Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: HugeIcon(
-                                icon: HugeIcons.strokeRoundedMoreVertical,
-                                color: getEnteColorScheme(context).iconColor,
-                              ),
-                            ),
-                            itemBuilder: (BuildContext context) {
-                              return _buildPopupMenuItems(context);
-                            },
-                          ),
+                Container(
+                  height: 40,
+                  width: 40,
+                  decoration: BoxDecoration(
+                    color: colorScheme.backgroundBase,
+                    borderRadius: BorderRadius.circular(12),
                   ),
+                  padding: const EdgeInsets.all(8.0),
+                  child: collection.type == CollectionType.favorites
+                      ? HugeIcon(
+                          icon: HugeIcons.strokeRoundedStar,
+                          color: colorScheme.primary700,
+                        )
+                      : HugeIcon(
+                          icon: HugeIcons.strokeRoundedWallet05,
+                          color: colorScheme.iconColor,
+                        ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  collectionName,
+                  style: textTheme.bodyBold,
+                  textAlign: TextAlign.left,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+                const SizedBox(height: 4),
+                FutureBuilder<int>(
+                  future: CollectionService.instance.getFileCount(collection),
+                  builder: (context, snapshot) {
+                    final fileCount = snapshot.data ?? 0;
+                    return Text(
+                      context.l10n.items(fileCount),
+                      style: textTheme.small.copyWith(
+                        color: colorScheme.textMuted,
+                      ),
+                      textAlign: TextAlign.left,
+                    );
+                  },
                 ),
               ],
             ),
           );
         },
       ),
-    );
-  }
-
-  List<PopupMenuItem<String>> _buildPopupMenuItems(BuildContext context) {
-    final collectionViewType =
-        getCollectionViewType(collection, Configuration.instance.getUserID()!);
-    if (overflowActions != null && overflowActions!.isNotEmpty) {
-      return overflowActions!
-          .map(
-            (action) => PopupMenuItem<String>(
-              value: action.id,
-              child: Row(
-                children: [
-                  Icon(action.icon, size: 16),
-                  const SizedBox(width: 8),
-                  Text(action.label),
-                ],
-              ),
-            ),
-          )
-          .toList();
-    } else {
-      return [
-        if (collectionViewType == CollectionViewType.ownedCollection ||
-            collectionViewType == CollectionViewType.hiddenOwnedCollection ||
-            collectionViewType == CollectionViewType.quickLink)
-          PopupMenuItem<String>(
-            value: 'edit',
-            child: Row(
-              children: [
-                const Icon(Icons.edit, size: 16),
-                const SizedBox(width: 8),
-                Text(context.l10n.edit),
-              ],
-            ),
-          ),
-        if (collectionViewType == CollectionViewType.ownedCollection ||
-            collectionViewType == CollectionViewType.hiddenOwnedCollection ||
-            collectionViewType == CollectionViewType.quickLink)
-          PopupMenuItem<String>(
-            value: 'delete',
-            child: Row(
-              children: [
-                const Icon(Icons.delete, size: 16),
-                const SizedBox(width: 8),
-                Text(context.l10n.delete),
-              ],
-            ),
-          ),
-        if (collectionViewType == CollectionViewType.sharedCollection)
-          PopupMenuItem<String>(
-            value: 'leave_collection',
-            child: Row(
-              children: [
-                const Icon(Icons.logout),
-                const SizedBox(width: 12),
-                Text(context.l10n.leaveCollection),
-              ],
-            ),
-          ),
-      ];
-    }
-  }
-
-  void _handleMenuAction(BuildContext context, String action) {
-    if (overflowActions != null && overflowActions!.isNotEmpty) {
-      final customAction = overflowActions!.firstWhere(
-        (a) => a.id == action,
-        orElse: () => throw StateError('Action not found'),
-      );
-      customAction.onTap(context, null, collection);
-    } else {
-      switch (action) {
-        case 'edit':
-          _editCollection(context);
-          break;
-        case 'delete':
-          _deleteCollection(context);
-          break;
-        case 'leave_collection':
-          _leaveCollection(context);
-          break;
-      }
-    }
-  }
-
-  void _editCollection(BuildContext context) {
-    CollectionActions.editCollection(context, collection);
-  }
-
-  void _deleteCollection(BuildContext context) {
-    CollectionActions.deleteCollection(context, collection);
-  }
-
-  void _openCollection(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => CollectionPage(collection: collection),
-      ),
-    );
-  }
-
-  Future<void> _leaveCollection(BuildContext context) async {
-    await CollectionActions.leaveCollection(
-      context,
-      collection,
-      onSuccess: () {
-        Bus.instance.fire(CollectionsUpdatedEvent());
-      },
     );
   }
 }

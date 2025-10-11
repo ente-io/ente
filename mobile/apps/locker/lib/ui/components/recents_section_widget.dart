@@ -40,6 +40,7 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
   final Map<int, List<Collection>> _fileCollectionsCache = {};
   final Map<int, Future<List<Collection>>> _fileCollectionsRequests = {};
   final Map<int, InfoType?> _fileInfoTypeCache = {};
+  ItemViewType _viewType = ItemViewType.listView;
 
   @override
   void initState() {
@@ -90,21 +91,34 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
   }
 
   Widget _buildRecentsHeader() {
+    final colorScheme = getEnteColorScheme(context);
     return SectionOptions(
       onTap: () {},
       body: context.l10n.items(_displayedFiles.length),
       SectionTitle(title: context.l10n.recents),
-      trailingWidget: Container(
-        height: 48,
-        width: 48,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          color: getEnteColorScheme(context).backdropBase,
-        ),
-        padding: const EdgeInsets.all(12),
-        child: HugeIcon(
-          icon: HugeIcons.strokeRoundedGridView,
-          color: getEnteColorScheme(context).iconColor,
+      trailingWidget: GestureDetector(
+        onTap: () {
+          HapticFeedback.lightImpact();
+          setState(() {
+            _viewType = _viewType == ItemViewType.listView
+                ? ItemViewType.gridView
+                : ItemViewType.listView;
+          });
+        },
+        child: Container(
+          height: 48,
+          width: 48,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: colorScheme.backdropBase,
+          ),
+          padding: const EdgeInsets.all(12),
+          child: HugeIcon(
+            icon: _viewType == ItemViewType.listView
+                ? HugeIcons.strokeRoundedGridView
+                : HugeIcons.strokeRoundedMenu01,
+            color: colorScheme.iconColor,
+          ),
         ),
       ),
     );
@@ -168,6 +182,7 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
 
     return ItemListView(
       files: _displayedFiles,
+      viewType: _viewType,
     );
   }
 
