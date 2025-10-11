@@ -43,34 +43,31 @@ class _VideoCropPageState extends State<VideoCropPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(24),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      Positioned.fill(
-                        child: Hero(
-                          tag: "video-editor-preview",
-                          child: CropGridViewer.edit(
-                            controller: widget.controller,
-                            rotateCropArea: false,
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                            ),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Positioned.fill(
+                      child: Hero(
+                        tag: "video-editor-preview",
+                        child: CropGridViewer.edit(
+                          controller: widget.controller,
+                          rotateCropArea: true,
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 12,
                           ),
                         ),
                       ),
-                      Align(
-                        alignment: Alignment.bottomCenter,
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 20),
-                          child: VideoEditorPlayerControl(
-                            controller: widget.controller,
-                          ),
+                    ),
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 20),
+                        child: VideoEditorPlayerControl(
+                          controller: widget.controller,
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
               AnimatedBuilder(

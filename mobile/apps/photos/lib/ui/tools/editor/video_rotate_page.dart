@@ -42,30 +42,27 @@ class VideoRotatePage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(24),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      Positioned.fill(
-                        child: Hero(
-                          tag: "video-editor-preview",
-                          child: CropGridViewer.preview(
-                            controller: controller,
-                          ),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Positioned.fill(
+                      child: Hero(
+                        tag: "video-editor-preview",
+                        child: CropGridViewer.preview(
+                          controller: controller,
                         ),
                       ),
-                      Align(
-                        alignment: Alignment.bottomCenter,
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 20),
-                          child: VideoEditorPlayerControl(
-                            controller: controller,
-                          ),
+                    ),
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 20),
+                        child: VideoEditorPlayerControl(
+                          controller: controller,
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
               VideoEditorMainActions(
