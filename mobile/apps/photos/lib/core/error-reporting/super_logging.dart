@@ -16,6 +16,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/error-reporting/tunneled_transport.dart';
 import "package:photos/core/errors.dart";
 import 'package:photos/models/typedefs.dart';
+import "package:photos/services/machine_learning/ml_exceptions.dart";
 import "package:photos/utils/device_info.dart";
 import "package:photos/utils/ram_check_util.dart";
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -265,7 +266,8 @@ class SuperLogging {
     final bool result = error is StorageLimitExceededError ||
         error is WiFiUnavailableError ||
         error is InvalidFileError ||
-        error is NoActiveSubscriptionError;
+        error is NoActiveSubscriptionError ||
+        error is CouldNotRetrieveAnyFileData;
     if (kDebugMode && result) {
       $.info('Not sending error to sentry: $error');
     }
