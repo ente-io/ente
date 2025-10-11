@@ -1855,10 +1855,14 @@
   "hoorayyyy": "Puiiiiku!",
   "nothingToTidyUpHere": "Čia nėra ko tvarkyti.",
   "deletingDash": "Ištrinama - ",
-  "cLTitle1": "Panašūs vaizdai",
-  "cLDesc1": "Pristatome naują MM sistemą, skirtą aptikti panašius vaizdus, kurią naudojant galite išvalyti savo biblioteką. Pasiekiama Nustatymuose -> Atsarginė kopija -> Atlaisvinti vietą.",
-  "cLTitle2": "Vaizdo įrašų srautinio perdavimo patobulinimai",
-  "cLDesc2": "Dabar galite rankiniu būdu paleisti vaizdo įrašų srauto perdavimo generavimą tiesiai iš programos. Taip pat pridėjome naują vaizdo įrašų srauto perdavimo nustatymų ekraną, kuriame bus rodomas procentinis vaizdo įrašų skaičius, apdorotų srauto perdavimui.",
-  "cLTitle3": "Našumo patobulinimai",
-  "cLDesc3": "Daugybė patobulinimų, įskaitant geresnį podėlio naudojimą ir sklandesnį slinkimo patirtį."
+  "cLTitle1": "Žemėlapio peržiūra jūsų kelionėms",
+  "cLDesc1": "Bendrindami albumus pasirinkite grupuotą, nuoseklų arba kelionės (žemėlapio) išdėstymą. Ente pasirūpina talpinimu!",
+  "cLTitle2": "Įterpiami albumai",
+  "cLDesc2": "Įterpkite savo albumus į savo svetainę, tinklaraštį ar fotografijų portfelį. Ente pasirūpina talpinimu!",
+  "cLTitle3": "Bendrinami albumai valdikliuose",
+  "cLDesc3": "Pagrindinio ekrano valdikliai dabar palaiko albumus, kuriais su jumis pasidalinta.",
+  "cLTitle4": "Patogumo patobulinimai",
+  "cLDesc4": "Pridėkite nuotraukas į albumus iš failų peržiūros. Albumo lygio svečio peržiūros parinktis.",
+  "cLTitle5": "Bendrinimo patobulinimai",
+  "cLDesc5": "Bendrinkite viešas nuorodas naudodami QR kodą. Pritaikykite galimybę prisijungti prie albumų iš jūsų bendrinamų nuorodų."
 }

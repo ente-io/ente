@@ -133,6 +133,7 @@ func sendMailWithEncryption(host, port string, auth smtp.Auth, from string, to [
 		// For TLS/SSL, establish a secure connection directly
 		tlsConfig := &tls.Config{
 			ServerName: host,
+			MinVersion: tls.VersionTLS12,
 		}
 		conn, err := tls.Dial("tcp", addr, tlsConfig)
 		if err != nil {

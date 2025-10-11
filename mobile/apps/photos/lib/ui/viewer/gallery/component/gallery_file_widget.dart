@@ -4,6 +4,7 @@ import "package:media_extension/media_extension.dart";
 import "package:media_extension/media_extension_action_types.dart";
 import "package:photos/core/constants.dart";
 import 'package:photos/models/file/file.dart';
+import "package:photos/models/gallery_type.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/services/app_lifecycle_service.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -212,11 +213,16 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
 
   void _routeToDetailPage(EnteFile file, BuildContext context) {
     final galleryFiles = GalleryFilesState.of(context).galleryFiles;
+    // Device folders (local-only contexts) should keep files visible
+    // even after deleting from Ente (remote) since they still exist locally
+    final galleryType = GalleryContextState.of(context)?.galleryType;
+    final isLocalOnlyContext = galleryType == GalleryType.localFolder;
     final page = DetailPage(
       DetailPageConfiguration(
         galleryFiles,
         galleryFiles.indexOf(file),
         widget.tag,
+        isLocalOnlyContext: isLocalOnlyContext,
       ),
     );
     routeToPage(context, page, forceCustomPageRoute: true);

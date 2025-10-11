@@ -101,6 +101,12 @@ The embedded album viewer includes:
 - If you delete the public link, the embed will stop working
 - Password-protected albums will prompt for the password within the iframe
 
+> [!NOTE]
+>
+> Password protection is extra access control, not extra encryption.
+>
+> Password protection adds server-side access control but does not re-encrypt the files. The files remain encrypted with the same key used for the public link. Password protection prevents unauthorized access by requiring authentication before the server grants access to the encrypted content.
+
 Note that by putting the embed link in a webpage, you're making it public for anyone who can view the page, including search engines that can index your webpages. This isn't any different from putting the public link in your webpage or sharing it in a public forum, but it is good to call this out.
 
 The album is still end to end encrypted in a manner that Ente does not have access to the key to decrypt the album. If you're curious how this works technically, then you can find [implementation details here](https://ente.io/blog/building-shareable-links/).

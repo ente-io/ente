@@ -1848,8 +1848,14 @@
   "hoorayyyy": "Huuraaaa!",
   "nothingToTidyUpHere": "Nie ma nic do uporządkowania",
   "deletingDash": "Usuwanie - ",
-  "cLTitle1": "Podobne zdjęcia",
-  "cLDesc1": "Wprowadzamy nowy system ML, aby wykrywać podobne obrazy, za pomocą którego można oczyścić bibliotekę. Dostępne w Ustawieniach -> Kopia zapasowa -> Zwolnij miejsce",
-  "cLTitle3": "Ulepszenia wydajności",
-  "cLDesc3": "Wiele usprawnień pod maską, w tym lepsze wykorzystanie pamięci podręcznej i płynniejsze przewijanie"
+  "cLTitle1": "Widok mapy dla Twoich podróży",
+  "cLDesc1": "Wybieraj między zgrupowanymi, ciągłymi lub podróżnymi (opartymi na mapie) układami podczas udostępniania albumów. Ente dba o hosting!",
+  "cLTitle2": "Osadź albumy",
+  "cLDesc2": "Osadź swoje albumy na własnej stronie internetowej, blogu, portfolio fotograficznym. Ente dba o hosting!",
+  "cLTitle3": "Udostępnione albumy w widżetach",
+  "cLDesc3": "Widżety ekranu głównego obsługują teraz albumy, które zostały Ci udostępnione.",
+  "cLTitle4": "Usprawnienia jakości życia",
+  "cLDesc4": "Dodawaj zdjęcia do albumów z przeglądarki plików. Opcja widoku gościa na poziomie albumu.",
+  "cLTitle5": "Ulepszenia udostępniania",
+  "cLDesc5": "Udostępniaj publiczne linki za pomocą kodu QR. Dostosuj możliwość dołączania do albumów z linków, które udostępniasz."
 }
