@@ -36,6 +36,8 @@ type S3Config struct {
 	s3Configs map[string]*aws.Config
 	// A map from data centers to pre-created S3 clients
 	s3Clients map[string]s3.S3
+	// Optional per-bucket CDN URL
+	cdns map[string]string
 	// Indicates if compliance is enabled for the Wasabi DC.
 	isWasabiComplianceEnabled bool
 	// Indicates if local minio buckets are being used. Enables various
@@ -123,6 +125,7 @@ func (config *S3Config) initialize() {
 	config.buckets = make(map[string]string)
 	config.s3Configs = make(map[string]*aws.Config)
 	config.s3Clients = make(map[string]s3.S3)
+	config.cdns = make(map[string]string)
 
 	usePathStyleURLs := viper.GetBool("s3.use_path_style_urls")
 	areLocalBuckets := viper.GetBool("s3.are_local_buckets")
@@ -149,6 +152,7 @@ func (config *S3Config) initialize() {
 		s3Client := *s3.New(s3Session)
 		config.s3Configs[dc] = &s3Config
 		config.s3Clients[dc] = s3Client
+		config.cdns[dc] = viper.GetString("s3." + dc + ".cdn")
 		if dc == dcWasabiEuropeCentral_v3 {
 			config.isWasabiComplianceEnabled = viper.GetBool("s3." + dc + ".compliance")
 		}
@@ -164,6 +168,11 @@ func (config *S3Config) initialize() {
 func (config *S3Config) GetBucket(dcOrBucketID string) *string {
 	bucket := config.buckets[dcOrBucketID]
 	return &bucket
+}
+
+func (config *S3Config) GetCDN(dcOrBucketID string) *string {
+	cdn := config.cdns[dcOrBucketID]
+	return &cdn
 }
 
 // GetBucketID returns the bucket ID for the given object type. Note: existing dc are renamed as bucketID
