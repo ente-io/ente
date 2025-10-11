@@ -10,6 +10,7 @@ import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/metadata_updater_service.dart';
 import 'package:locker/services/files/upload/file_upload_service.dart';
 import 'package:locker/ui/components/file_upload_dialog.dart';
+import 'package:locker/ui/pages/file_upload_screen.dart';
 import 'package:logging/logging.dart';
 
 /// Abstract base class that provides file upload functionality.
@@ -63,12 +64,16 @@ abstract class UploaderPageState<T extends UploaderPage> extends State<T> {
           .where((c) => c.type != CollectionType.uncategorized)
           .toList();
 
-      // Show upload dialog for the first file to get collection selection
-      final uploadResult = await showFileUploadDialog(
-        context,
-        file: files.first,
-        collections: collectionsWithoutUncategorized,
-        selectedCollection: selectedCollection,
+      // Navigate to upload screen to get collection selection
+      final uploadResult =
+          await Navigator.of(context).push<FileUploadDialogResult>(
+        MaterialPageRoute(
+          builder: (context) => FileUploadScreen(
+            files: files,
+            collections: collectionsWithoutUncategorized,
+            selectedCollection: selectedCollection,
+          ),
+        ),
       );
 
       if (uploadResult != null && uploadResult.selectedCollections.isNotEmpty) {
