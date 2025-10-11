@@ -292,12 +292,6 @@ export const sidebar = [
                         text: "From Steam",
                         link: "/auth/migration/steam/",
                     },
-                ],
-            },
-            {
-                text: "Troubleshooting",
-                collapsed: true,
-                items: [
                     {
                         text: "Export",
                         link: "/auth/migration/export",
