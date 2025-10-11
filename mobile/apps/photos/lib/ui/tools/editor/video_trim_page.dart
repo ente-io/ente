@@ -6,11 +6,9 @@ import "package:photos/ui/tools/editor/video_editor/video_editor_player_control.
 import 'package:video_editor/video_editor.dart';
 
 class VideoTrimPage extends StatefulWidget {
-  final int quarterTurnsForRotationCorrection;
   const VideoTrimPage({
     super.key,
     required this.controller,
-    required this.quarterTurnsForRotationCorrection,
   });
 
   final VideoEditorController controller;
@@ -37,7 +35,6 @@ class _VideoTrimPageState extends State<VideoTrimPage> {
         },
         primaryActionLabel: AppLocalizations.of(context).done,
         onPrimaryAction: () {
-          widget.controller.applyCacheCrop();
           Navigator.pop(context);
         },
       ),
@@ -50,34 +47,27 @@ class _VideoTrimPageState extends State<VideoTrimPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(24),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      Positioned.fill(
-                        child: Hero(
-                          tag: "video-editor-preview",
-                          child: RotatedBox(
-                            quarterTurns:
-                                widget.quarterTurnsForRotationCorrection,
-                            child: CropGridViewer.preview(
-                              controller: widget.controller,
-                            ),
-                          ),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Positioned.fill(
+                      child: Hero(
+                        tag: "video-editor-preview",
+                        child: CropGridViewer.preview(
+                          controller: widget.controller,
                         ),
                       ),
-                      Align(
-                        alignment: Alignment.bottomCenter,
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 20),
-                          child: VideoEditorPlayerControl(
-                            controller: widget.controller,
-                          ),
+                    ),
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 20),
+                        child: VideoEditorPlayerControl(
+                          controller: widget.controller,
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
               _buildTrimSlider(context),

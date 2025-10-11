@@ -34,11 +34,7 @@ dependency_overrides:
       url: https://github.com/media-kit/media-kit
       path: media_kit_video
   protobuf: ^3.1.0
-  video_player:
-    git:
-      url: https://github.com/ente-io/packages.git
-      ref: android_video_roation_fix
-      path: packages/video_player/video_player/
+  video_player: ^2.10.0
   watcher: ^1.1.0
   win32: 5.10.1
   log_viewer:
