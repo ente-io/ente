@@ -1,12 +1,12 @@
+import { Paper, Stack, styled } from "@mui/material";
 import { LoginContents } from "ente-accounts/components/LoginContents";
 import { savedPartialLocalUser } from "ente-accounts/services/accounts-db";
-import { LoadingIndicator } from "ente-base/components/loaders";
 import { CenteredFill } from "ente-base/components/containers";
 import { EnteLogo } from "ente-base/components/EnteLogo";
+import { LoadingIndicator } from "ente-base/components/loaders";
 import { NavbarBase } from "ente-base/components/Navbar";
 import { customAPIHost } from "ente-base/origins";
 import { DevSettings } from "ente-new/photos/components/DevSettings";
-import { Paper, Stack, styled } from "@mui/material";
 import { useRouter } from "next/router";
 import React, { useCallback, useEffect, useState } from "react";
 
