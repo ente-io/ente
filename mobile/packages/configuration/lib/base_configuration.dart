@@ -85,11 +85,25 @@ class BaseConfiguration {
   }
 
   Future<void> resetSecureStorage() async {
-    // Delete all keys except preserved ones
-    final allKeys = await _secureStorage.readAll();
-    for (final key in allKeys.keys) {
-      if (!preservedKeys.contains(key)) {
-        await _secureStorage.delete(key: key);
+    // Skip reset if offlineAuthSecretKey is present
+    final offlineKey = await _secureStorage.read(key: offlineAuthSecretKey);
+    try {
+      // Delete all keys except preserved ones
+      final allKeys = await _secureStorage.readAll();
+      for (final key in allKeys.keys) {
+        if (!preservedKeys.contains(key)) {
+          await _secureStorage.delete(key: key);
+        }
+      }
+    } catch (e) {
+      // On error, clear all keys
+      _logger.warning('Error resetting secure storage: $e');
+      await _secureStorage.deleteAll();
+      if (offlineKey != null) {
+        await _secureStorage.write(
+          key: offlineAuthSecretKey,
+          value: offlineKey,
+        );
       }
     }
   }
