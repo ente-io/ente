@@ -1,9 +1,9 @@
-import 'dart:io';
-
 import 'package:ente_ui/components/buttons/gradient_button.dart';
+import "package:ente_ui/components/title_bar_title_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import "package:hugeicons/hugeicons.dart";
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/models/info/info_item.dart';
 import 'package:locker/services/collections/collections_service.dart';
@@ -296,8 +296,11 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (label.isNotEmpty) ...[
-          Text(label), // Use default style to match FormTextInputWidget
-          const SizedBox(height: 4),
+          Text(
+            label,
+            style: textTheme.body,
+          ), // Use default style to match FormTextInputWidget
+          const SizedBox(height: 12),
         ],
         ClipRRect(
           borderRadius: const BorderRadius.all(Radius.circular(8)),
@@ -347,7 +350,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   Widget build(BuildContext context) {
     final isViewMode = _currentMode == InfoPageMode.view;
     final isEditMode = _currentMode == InfoPageMode.edit;
-
+    final colorScheme = getEnteColorScheme(context);
     return PopScope(
       canPop: isViewMode,
       onPopInvokedWithResult: (didPop, result) {
@@ -358,18 +361,21 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(pageTitle),
+          backgroundColor: colorScheme.backgroundBase,
+          surfaceTintColor: Colors.transparent,
+          toolbarHeight: 48,
+          leadingWidth: 48,
           leading: isEditMode && currentData != null
               ? IconButton(
-                  icon: Icon(
-                    Platform.isIOS ? Icons.arrow_back_ios : Icons.arrow_back,
+                  icon: const Icon(
+                    Icons.arrow_back_outlined,
                   ),
                   onPressed: _toggleMode,
                   tooltip: 'Back to view',
                 )
               : IconButton(
-                  icon: Icon(
-                    Platform.isIOS ? Icons.arrow_back_ios : Icons.arrow_back,
+                  icon: const Icon(
+                    Icons.arrow_back_outlined,
                   ),
                   onPressed: () => Navigator.of(context).pop(),
                   tooltip: 'Back',
@@ -384,16 +390,24 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
               ),
           ],
         ),
+        backgroundColor: colorScheme.backgroundBase,
         body: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Form(
             key: _formKey,
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4.0),
+                  child: TitleBarTitleWidget(
+                    title: pageTitle,
+                  ),
+                ),
                 Expanded(
                   child: SingleChildScrollView(
                     child: Padding(
-                      padding: const EdgeInsets.only(top: 20),
+                      padding: const EdgeInsets.symmetric(vertical: 20),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -422,13 +436,19 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
                 // Save button only in edit mode
                 if (isEditMode) ...[
                   const SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    child: GradientButton(
-                      onTap: _isLoading ? null : _saveRecord,
-                      text: _isLoading
-                          ? context.l10n.pleaseWait
-                          : submitButtonText,
+                  SafeArea(
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: GradientButton(
+                        hugeIcon: HugeIcon(
+                          icon: HugeIcons.strokeRoundedAddCircleHalfDot,
+                          color: colorScheme.iconColor,
+                        ),
+                        onTap: _isLoading ? null : _saveRecord,
+                        text: _isLoading
+                            ? context.l10n.pleaseWait
+                            : submitButtonText,
+                      ),
                     ),
                   ),
                 ],

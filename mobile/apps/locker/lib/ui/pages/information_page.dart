@@ -1,5 +1,7 @@
+import "package:ente_ui/components/title_bar_title_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/ui/pages/account_credentials_page.dart';
 import 'package:locker/ui/pages/emergency_contact_page.dart';
@@ -18,73 +20,100 @@ class InformationPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          context.l10n.saveInformation,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+        backgroundColor: colorScheme.backgroundBase,
+        surfaceTintColor: Colors.transparent,
+        toolbarHeight: 48,
+        leadingWidth: 48,
+        leading: GestureDetector(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: const Icon(
+            Icons.arrow_back_outlined,
+          ),
         ),
-        elevation: 0,
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              context.l10n.informationDescription,
-              style: getEnteTextTheme(context).body.copyWith(
-                    color: Colors.grey[600],
+      backgroundColor: colorScheme.backgroundBase,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+            child: TitleBarTitleWidget(
+              title: "Save Information",
+            ),
+          ),
+          SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+            child: Column(
+              children: [
+                _buildInformationOption(
+                  context,
+                  icon: HugeIcon(
+                    icon: HugeIcons.strokeRoundedPencilEdit02,
+                    size: 24,
+                    color: colorScheme.primary700,
                   ),
+                  title: context.l10n.personalNote,
+                  description: context.l10n.personalNoteDescription,
+                  type: InformationType.note,
+                ),
+                const SizedBox(height: 16),
+                _buildInformationOption(
+                  context,
+                  icon: HugeIcon(
+                    icon: HugeIcons.strokeRoundedFolder02,
+                    size: 24,
+                    color: colorScheme.primary700,
+                  ),
+                  title: context.l10n.physicalRecords,
+                  description: context.l10n.physicalRecordsDescription,
+                  type: InformationType.physicalRecord,
+                ),
+                const SizedBox(height: 16),
+                _buildInformationOption(
+                  context,
+                  icon: HugeIcon(
+                    icon: HugeIcons.strokeRoundedUserEdit01,
+                    size: 24,
+                    color: colorScheme.primary700,
+                  ),
+                  title: context.l10n.accountCredentials,
+                  description: context.l10n.accountCredentialsDescription,
+                  type: InformationType.credentials,
+                ),
+                const SizedBox(height: 16),
+                _buildInformationOption(
+                  context,
+                  icon: HugeIcon(
+                    icon: HugeIcons.strokeRoundedContactBook,
+                    size: 24,
+                    color: colorScheme.primary700,
+                  ),
+                  title: context.l10n.emergencyContact,
+                  description: context.l10n.emergencyContactDescription,
+                  type: InformationType.emergencyContact,
+                ),
+                const SizedBox(height: 32),
+              ],
             ),
-            const SizedBox(height: 32),
-            _buildInformationOption(
-              context,
-              icon: Icons.notes,
-              title: context.l10n.personalNote,
-              description: context.l10n.personalNoteDescription,
-              type: InformationType.note,
-            ),
-            const SizedBox(height: 16),
-            _buildInformationOption(
-              context,
-              icon: Icons.folder_outlined,
-              title: context.l10n.physicalRecords,
-              description: context.l10n.physicalRecordsDescription,
-              type: InformationType.physicalRecord,
-            ),
-            const SizedBox(height: 16),
-            _buildInformationOption(
-              context,
-              icon: Icons.lock,
-              title: context.l10n.accountCredentials,
-              description: context.l10n.accountCredentialsDescription,
-              type: InformationType.credentials,
-            ),
-            const SizedBox(height: 16),
-            _buildInformationOption(
-              context,
-              icon: Icons.contact_phone,
-              title: context.l10n.emergencyContact,
-              description: context.l10n.emergencyContactDescription,
-              type: InformationType.emergencyContact,
-            ),
-            const SizedBox(height: 32),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildInformationOption(
     BuildContext context, {
-    required IconData icon,
+    required HugeIcon icon,
     required String title,
     required String description,
     required InformationType type,
   }) {
+    final colorScheme = getEnteColorScheme(context);
     return GestureDetector(
       onTap: () {
         _showInformationForm(context, type);
@@ -92,16 +121,12 @@ class InformationPage extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          color: getEnteColorScheme(context).fillFaint,
+          borderRadius: BorderRadius.circular(20),
+          color: getEnteColorScheme(context).backdropBase,
         ),
         child: Row(
           children: [
-            Icon(
-              icon,
-              size: 24,
-              color: getEnteColorScheme(context).primary500,
-            ),
+            icon,
             const SizedBox(width: 16),
             Expanded(
               child: Column(
@@ -109,23 +134,19 @@ class InformationPage extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: getEnteTextTheme(context).body.copyWith(
-                          fontWeight: FontWeight.w500,
-                        ),
+                    style: getEnteTextTheme(context).bodyBold,
                   ),
                   const SizedBox(height: 4),
                   Text(
                     description,
-                    style: getEnteTextTheme(context).small.copyWith(
-                          color: Colors.grey[600],
-                        ),
+                    style: getEnteTextTheme(context).smallMuted,
                   ),
                 ],
               ),
             ),
             Icon(
               Icons.chevron_right,
-              color: Colors.grey[400],
+              color: colorScheme.textBase,
             ),
           ],
         ),

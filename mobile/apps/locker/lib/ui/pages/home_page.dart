@@ -509,7 +509,9 @@ class _HomePageState extends UploaderPageState<HomePage>
                   child: GradientButton(
                     onTap: _createCollection,
                     text: context.l10n.createCollection,
-                    iconData: Icons.add,
+                    hugeIcon: const HugeIcon(
+                      icon: HugeIcons.strokeRoundedPlusSign,
+                    ),
                     paddingValue: 8.0,
                   ),
                 ),
@@ -588,7 +590,11 @@ class _HomePageState extends UploaderPageState<HomePage>
               GradientButton(
                 onTap: addFile,
                 text: context.l10n.uploadDocument,
-                iconData: Icons.file_upload,
+                hugeIcon: HugeIcon(
+                  icon: HugeIcons.strokeRoundedFile01,
+                  color: getEnteColorScheme(context).primary700,
+                  size: 20,
+                ),
                 paddingValue: 8.0,
               ),
             ],

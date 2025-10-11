@@ -84,6 +84,7 @@ class _EmergencyContactPageState
         labelText: context.l10n.contactName,
         hintText: context.l10n.contactNameHint,
         controller: _nameController,
+        shouldUseTextInputWidget: false,
         validator: (value) {
           if (value == null || value.trim().isEmpty) {
             return context.l10n.pleaseEnterContactName;
@@ -96,6 +97,7 @@ class _EmergencyContactPageState
         labelText: context.l10n.contactDetails,
         hintText: context.l10n.contactDetailsHint,
         controller: _contactDetailsController,
+        shouldUseTextInputWidget: false,
         validator: (value) {
           if (value == null || value.trim().isEmpty) {
             return context.l10n.pleaseEnterContactDetails;
@@ -108,6 +110,7 @@ class _EmergencyContactPageState
         labelText: context.l10n.contactNotes,
         hintText: context.l10n.contactNotesHint,
         controller: _notesController,
+        shouldUseTextInputWidget: false,
         maxLines: 3,
       ),
       const SizedBox(height: 24),

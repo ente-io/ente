@@ -77,6 +77,7 @@ class _PersonalNotePageState
         labelText: context.l10n.noteName,
         hintText: context.l10n.noteNameHint,
         controller: _nameController,
+        shouldUseTextInputWidget: false,
         validator: (value) {
           if (value == null || value.trim().isEmpty) {
             return context.l10n.pleaseEnterNoteName;
