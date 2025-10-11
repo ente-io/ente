@@ -172,17 +172,22 @@ public class NativeVideoEditorPlugin: NSObject, FlutterPlugin {
         var renderSize = naturalSize
         var transform = CGAffineTransform.identity
 
+        // iOS CGAffineTransform rotates counter-clockwise for positive angles
+        // To match Android behavior (positive = clockwise), we negate the radians
         switch degrees {
         case 90:
-            transform = CGAffineTransform(rotationAngle: .pi / 2)
-                .translatedBy(x: 0, y: -naturalSize.width)
+            // Clockwise 90 degrees rotation (negate angle)
+            transform = CGAffineTransform(rotationAngle: -.pi / 2)
+                .translatedBy(x: -naturalSize.height, y: 0)
             renderSize = CGSize(width: naturalSize.height, height: naturalSize.width)
         case 180:
+            // 180 degree rotation (same in both directions)
             transform = CGAffineTransform(rotationAngle: .pi)
                 .translatedBy(x: -naturalSize.width, y: -naturalSize.height)
         case 270:
-            transform = CGAffineTransform(rotationAngle: -.pi / 2)
-                .translatedBy(x: -naturalSize.height, y: 0)
+            // Clockwise 270 degrees rotation (negate angle, which becomes positive)
+            transform = CGAffineTransform(rotationAngle: .pi / 2)
+                .translatedBy(x: 0, y: -naturalSize.width)
             renderSize = CGSize(width: naturalSize.height, height: naturalSize.width)
         default:
             result(flutterError("INVALID_DEGREES", message: "Degrees must be 90, 180, or 270"))
