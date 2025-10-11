@@ -794,8 +794,8 @@ class _PinnedGroupHeaderState extends State<PinnedGroupHeader> {
                     PinnedGroupHeader.kTrailingIconsFadeInDurationMs +
                     100,
               ), () {
+            if (!mounted) return;
             setState(() {
-              if (!mounted) return;
               fadeInTrailingIcons = false;
             });
           });

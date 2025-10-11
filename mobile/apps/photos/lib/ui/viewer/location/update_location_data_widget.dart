@@ -241,6 +241,9 @@ class _UpdateLocationInfoState extends State<UpdateLocationInfo> {
   initState() {
     super.initState();
     Future.delayed(const Duration(seconds: 3), () {
+      if (!mounted) {
+        return;
+      }
       setState(() {
         showSelectLocationText = true;
       });
