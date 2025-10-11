@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:logging/logging.dart';
 import 'package:native_video_editor/native_video_editor.dart';
 import 'package:photos/ui/tools/editor/export_video_service.dart';
 import 'package:photos/ui/tools/editor/video_crop_util.dart';
@@ -37,7 +36,6 @@ class DebugExportSummary {
 /// Service that uses native video editing operations when possible
 /// Falls back to FFmpeg for operations that require re-encoding
 class NativeVideoExportService {
-  static final _logger = Logger('NativeVideoExportService');
   static const Duration _nativeFallbackThreshold = Duration(seconds: 3);
 
   static Future<DebugExportSummary> buildDebugSummary({
@@ -157,11 +155,6 @@ class NativeVideoExportService {
       return File(result.outputPath);
     } catch (error, stackTrace) {
       final elapsed = DateTime.now().difference(startTime);
-      _logger.warning(
-        'Native export failed after ${elapsed.inMilliseconds}ms.',
-        error,
-        stackTrace,
-      );
 
       if (onError != null) {
         onError(error, stackTrace);
@@ -169,9 +162,6 @@ class NativeVideoExportService {
 
       // If native export fails quickly, attempt FFmpeg fallback automatically
       if (elapsed <= _nativeFallbackThreshold) {
-        _logger.warning(
-          'Native export failed within ${elapsed.inMilliseconds}ms; falling back to FFmpeg.',
-        );
         return await ExportService.exportVideo(
           controller: controller,
           outputPath: outputPath,
@@ -227,24 +217,6 @@ class NativeVideoExportService {
         throw ArgumentError('Invalid crop rectangle computed: $displayCrop');
       }
       cropRect = displayCrop;
-    }
-
-    if (cropRect != null) {
-      _logger.info(
-        'Native export cropRect: left=${cropRect.left.toInt()}, top=${cropRect.top.toInt()}, '
-        'width=${cropRect.width.toInt()}, height=${cropRect.height.toInt()}, '
-        'videoSize=${controller.video.value.size.width.toInt()}x${controller.video.value.size.height.toInt()}',
-      );
-
-      // Calculate what FFmpeg would use for comparison
-      final minCropX = controller.minCrop.dx;
-      final minCropY = controller.minCrop.dy;
-      final maxCropX = controller.maxCrop.dx;
-      final maxCropY = controller.maxCrop.dy;
-      _logger.info(
-        'Controller crop values: minCrop=(${minCropX.toStringAsFixed(3)}, ${minCropY.toStringAsFixed(3)}), '
-        'maxCrop=(${maxCropX.toStringAsFixed(3)}, ${maxCropY.toStringAsFixed(3)})',
-      );
     }
 
     final result = await NativeVideoEditor.processVideo(

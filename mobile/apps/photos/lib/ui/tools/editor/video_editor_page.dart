@@ -22,7 +22,6 @@ import "package:photos/ui/notification/toast.dart";
 import "package:photos/ui/tools/editor/export_video_service.dart";
 import "package:photos/ui/tools/editor/native_video_export_service.dart";
 import 'package:photos/ui/tools/editor/video_crop_page.dart';
-import "package:photos/ui/tools/editor/video_crop_util.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_app_bar.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_bottom_action.dart";
 import "package:photos/ui/tools/editor/video_editor/video_editor_main_actions.dart";
@@ -54,7 +53,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
   final _logger = Logger("VideoEditor");
 
   /// Some videos have a non-zero 'rotation' property in exif which causes the
-  /// video to appear rotated in the video editor preview on Andoird.
+  /// video to appear rotated in the video editor preview on Android.
   /// This variable is used as a workaround to rotate the video back to its
   /// expected orientation in the viewer.
   int? _quarterTurnsForRotationCorrection;
@@ -64,7 +63,6 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
   /// Toggle state for internal users to switch between native and FFmpeg export
   /// Initially set to the flag service value
   late bool _useNativeExport;
-  bool _dryRunMode = false;
 
   @override
   void initState() {
@@ -104,9 +102,6 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
           final rotationDegrees = _quarterTurnsForRotationCorrection! * 90;
           _controller!.video.value = _controller!.video.value.copyWith(
             rotationCorrection: rotationDegrees,
-          );
-          _logger.fine(
-            'Applied rotation correction: $rotationDegrees degrees to video player',
           );
         }
         setState(() {});
@@ -233,52 +228,6 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
                             ),
                           if (flagService.internalUser)
                             const SizedBox(height: 8),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Expanded(
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      setState(() {
-                                        _dryRunMode = !_dryRunMode;
-                                      });
-                                    },
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          'Dry run (debug)',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyMedium,
-                                        ),
-                                        Transform.scale(
-                                          scale: 0.8,
-                                          child: Switch(
-                                            value: _dryRunMode,
-                                            onChanged: (value) {
-                                              setState(() {
-                                                _dryRunMode = value;
-                                              });
-                                            },
-                                            materialTapTargetSize:
-                                                MaterialTapTargetSize
-                                                    .shrinkWrap,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
                           VideoEditorMainActions(
                             children: [
                               VideoEditorBottomAction(
@@ -331,19 +280,6 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
     final shouldUseNative = flagService.internalUser
         ? _useNativeExport
         : flagService.useNativeVideoEditor;
-
-    // Always log dry run info for debugging, regardless of toggle
-    final debugInfo = await NativeVideoExportService.buildDebugSummary(
-      controller: _controller!,
-    );
-    _logger.info(
-      'DRY_RUN pipeline=${shouldUseNative ? "native" : "ffmpeg"} videoSize=${debugInfo.videoSize.width.toInt()}x${debugInfo.videoSize.height.toInt()} trimStart=${debugInfo.trimStart} trimEnd=${debugInfo.trimEnd} nativeRotate=${debugInfo.nativeRotateDegrees ?? 0} nativeDisplayCrop=${_formatRect(debugInfo.nativeDisplayCrop)} nativeFileCrop=${_formatCrop(debugInfo.nativeFileCrop)} nativeOutputSize=${_formatSize(debugInfo.nativeOutputSize)} ffmpegFileCrop=${_formatCrop(debugInfo.ffmpegFileCrop)} ffmpegCropFilter=${debugInfo.ffmpegCropFilter ?? "-"}',
-    );
-
-    if (_dryRunMode) {
-      await _showDryRunDialog(debugInfo, shouldUseNative);
-      return;
-    }
 
     _isExporting.value = true;
 
@@ -476,104 +412,6 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
     return completer.future;
   }
 
-  Future<void> _showDryRunDialog(
-    DebugExportSummary info,
-    bool shouldUseNative,
-  ) async {
-    await showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Dry Run (Debug)'),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  shouldUseNative
-                      ? 'Native pipeline will be used'
-                      : 'FFmpeg pipeline will be used (native disabled)',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Native export',
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium
-                      ?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Video size: ${info.videoSize.width.toInt()} x ${info.videoSize.height.toInt()}',
-                ),
-                Text('Trim: ${info.trimStart ?? "-"} → ${info.trimEnd ?? "-"}'),
-                Text('Rotate degrees: ${info.nativeRotateDegrees ?? 0}'),
-                Text('Display crop: ${_formatRect(info.nativeDisplayCrop)}'),
-                Text('File crop: ${_formatCrop(info.nativeFileCrop)}'),
-                Text(
-                  'Output dimensions: ${_formatSize(info.nativeOutputSize)}',
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'FFmpeg fallback',
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium
-                      ?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 6),
-                Text('File crop: ${_formatCrop(info.ffmpegFileCrop)}'),
-                Text('Crop filter: ${info.ffmpegCropFilter ?? '-'}'),
-                if (info.ffmpegCommand != null) ...[
-                  const SizedBox(height: 6),
-                  Text(
-                    'Command:',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 2),
-                  SelectableText(
-                    info.ffmpegCommand!,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontFamily: 'monospace',
-                        ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Close'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  String _formatRect(Rect? rect) {
-    if (rect == null) return '-';
-    return '(${rect.left.toStringAsFixed(1)}, ${rect.top.toStringAsFixed(1)}) → '
-        '(${rect.right.toStringAsFixed(1)}, ${rect.bottom.toStringAsFixed(1)}) '
-        '[${rect.width.toStringAsFixed(1)} x ${rect.height.toStringAsFixed(1)}]';
-  }
-
-  String _formatCrop(CropCalculation? crop) {
-    if (crop == null) return '-';
-    return 'x=${crop.x}, y=${crop.y}, w=${crop.width}, h=${crop.height}';
-  }
-
-  String _formatSize(Size? size) {
-    if (size == null) return '-';
-    return '${size.width.toStringAsFixed(1)} x ${size.height.toStringAsFixed(1)}';
-  }
-
   Future<void> _handleExportCompletion(
     File result,
     GlobalKey<LinearProgressDialogState> dialogKey,
@@ -672,16 +510,9 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
           widget.ioFile.path,
         );
         final rotation = videoInfo['rotation'] as int? ?? 0;
-        final width = videoInfo['width'] as int? ?? 0;
-        final height = videoInfo['height'] as int? ?? 0;
-
-        _logger.fine('Video info: ${width}x$height, rotation=$rotation');
 
         if (rotation != 0) {
           _quarterTurnsForRotationCorrection = (rotation / 90).round();
-          _logger.fine(
-            'Applying rotation correction: $rotation° → $_quarterTurnsForRotationCorrection quarter turns',
-          );
         } else {
           _quarterTurnsForRotationCorrection = 0;
         }

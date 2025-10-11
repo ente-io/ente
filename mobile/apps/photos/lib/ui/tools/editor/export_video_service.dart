@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
@@ -14,11 +13,8 @@ class ExportService {
   static final _logger = Logger('ExportService');
 
   static Future<void> dispose() async {
-    _logger.info('[FFmpeg] Disposing export service');
     final executions = await FFmpegKit.listSessions();
-    _logger.info('[FFmpeg] Found ${executions.length} active sessions');
     if (executions.isNotEmpty) {
-      _logger.info('[FFmpeg] Cancelling all sessions');
       await FFmpegKit.cancel();
     }
   }
@@ -29,8 +25,6 @@ class ExportService {
     void Function(Object, StackTrace)? onError,
     void Function(Statistics)? onProgress,
   }) async {
-    log('FFmpeg start process with command = ${execute.command}');
-
     final completer = Completer<void>();
     FFmpegSession? activeSession;
 
