@@ -419,16 +419,6 @@ class Media3TransformerProcessor(private val context: Context) {
 }
 
 /**
- * Crop rectangle structure used during coordinate transformations
- */
-private data class CropRect(
-    val x: Int,
-    val y: Int,
-    val width: Int,
-    val height: Int
-)
-
-/**
  * Video information data class
  */
 private data class VideoInfo(
