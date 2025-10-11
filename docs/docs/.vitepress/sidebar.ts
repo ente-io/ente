@@ -300,7 +300,7 @@ export const sidebar = [
                 items: [
                     {
                         text: "Export",
-                        link: "/auth/troubleshooting/export",
+                        link: "/auth/migration/export",
                     },
                 ],
             },
