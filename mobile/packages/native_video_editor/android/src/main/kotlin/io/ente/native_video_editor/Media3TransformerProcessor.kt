@@ -31,9 +31,9 @@ class Media3TransformerProcessor(private val context: Context) {
             false
         }
 
-        private val LOG_VERBOSE = true  // Temporarily always enabled for debugging
+        private val LOG_VERBOSE = IS_DEBUG_BUILD
         private val LOG_PROGRESS = IS_DEBUG_BUILD
-        private val LOG_ERRORS = true  // Temporarily always enabled for debugging
+        private val LOG_ERRORS = true  // Keep error logging enabled
         private const val ROTATION_90 = 90
         private const val ROTATION_270 = 270
     }
@@ -158,6 +158,11 @@ class Media3TransformerProcessor(private val context: Context) {
             if (rotateDegrees != null && rotateDegrees != 0) {
                 val normalizedDegrees = rotateDegrees % 360
                 logVerbose("Adding rotation effect: $normalizedDegrees degrees")
+
+                // Validate rotation degrees
+                if (normalizedDegrees !in listOf(0, 90, 180, 270)) {
+                    throw IllegalArgumentException("Rotation degrees must be 0, 90, 180, or 270")
+                }
 
                 // Use ScaleAndRotateTransformation for proper rotation support
                 // Media3 uses positive degrees for clockwise rotation
@@ -391,44 +396,6 @@ class Media3TransformerProcessor(private val context: Context) {
         } finally {
             retriever.release()
         }
-    }
-
-    private fun transformCropForRotation(rotation: Int, crop: CropRect, videoDims: Size): CropRect {
-        val normalizedRotation = ((rotation % 360) + 360) % 360
-        val width = videoDims.width
-        val height = videoDims.height
-
-        val transformed = when (normalizedRotation) {
-            ROTATION_90 -> {
-                val x = (width - (crop.y + crop.height)).coerceIn(0, width)
-                val y = crop.x.coerceIn(0, height)
-                val w = crop.height.coerceAtMost(width - x)
-                val h = crop.width.coerceAtMost(height - y)
-                CropRect(x, y, w, h)
-            }
-            ROTATION_270 -> {
-                val x = crop.y.coerceIn(0, width)
-                val y = (height - (crop.x + crop.width)).coerceIn(0, height)
-                val w = crop.height.coerceAtMost(width - x)
-                val h = crop.width.coerceAtMost(height - y)
-                CropRect(x, y, w, h)
-            }
-            else -> {
-                val x = crop.x.coerceIn(0, width)
-                val y = crop.y.coerceIn(0, height)
-                val w = crop.width.coerceAtMost(width - x)
-                val h = crop.height.coerceAtMost(height - y)
-                CropRect(x, y, w, h)
-            }
-        }
-
-        if (transformed.width <= 0 || transformed.height <= 0) {
-            throw IllegalArgumentException(
-                "Invalid crop dimensions after transform: $crop → $transformed"
-            )
-        }
-
-        return transformed
     }
 
     // Logging helpers
