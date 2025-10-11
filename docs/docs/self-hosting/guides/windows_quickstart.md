@@ -183,7 +183,7 @@ services:
       ENTE_API_ORIGIN: http://localhost:8080
       # ENTE_API_ORIGIN: http://192.168.1.42:8080
       # ENTE_API_ORIGIN: https://api.mydomain.com
-      ENTE_API_ORIGIN: http://localhost:3002
+      ENTE_ALBUMS_ORIGIN: http://localhost:3002
       # ENTE_ALBUMS_ORIGIN: http://192.168.1.42:3002
       # ENTE_ALBUMS_ORIGIN: https://albums.mydomain.com
     healthcheck:
