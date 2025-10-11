@@ -1,6 +1,7 @@
 ---
 title: This Page Has Moved
 description: This content has been reorganized
+search: false
 ---
 
 # This Page Has Moved
