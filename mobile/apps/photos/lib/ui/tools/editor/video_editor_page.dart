@@ -512,9 +512,7 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
         final rotation = videoInfo['rotation'] as int? ?? 0;
 
         if (rotation != 0) {
-          // Negate the rotation to undo the metadata rotation
-          // MediaMetadataRetriever returns clockwise rotation that must be undone
-          _quarterTurnsForRotationCorrection = -(rotation / 90).round();
+          _quarterTurnsForRotationCorrection = (rotation / 90).round();
         } else {
           _quarterTurnsForRotationCorrection = 0;
         }
