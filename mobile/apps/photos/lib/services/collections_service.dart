@@ -867,7 +867,9 @@ class CollectionsService {
       publicUrl = publicUrl.replace(
         host: embedUri.host,
         scheme: embedUri.scheme,
-        port: embedUri.hasPort ? embedUri.port : (embedUri.scheme == 'https' ? 443 : 80),
+        port: embedUri.hasPort
+            ? embedUri.port
+            : (embedUri.scheme == 'https' ? 443 : 80),
       );
     }
 

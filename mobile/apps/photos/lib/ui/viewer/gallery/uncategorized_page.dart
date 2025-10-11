@@ -16,6 +16,7 @@ import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
 import "package:photos/ui/viewer/gallery/hierarchical_search_gallery.dart";
+import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
@@ -79,52 +80,54 @@ class UnCategorizedPage extends StatelessWidget {
       initialFiles: null,
       albumName: AppLocalizations.of(context).uncategorized,
     );
-    return GalleryFilesState(
-      child: InheritedSearchFilterDataWrapper(
-        searchFilterDataProvider: SearchFilterDataProvider(
-          initialGalleryFilter: AlbumFilter(
-            collectionID: collection.id,
-            albumName: collection.displayName,
-            occurrence: kMostRelevantFilter,
-          ),
-        ),
-        child: Scaffold(
-          appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(90.0),
-            child: GalleryAppBarWidget(
-              appBarType,
-              AppLocalizations.of(context).uncategorized,
-              _selectedFiles,
-              collection: collection,
+    return GalleryBoundariesProvider(
+      child: GalleryFilesState(
+        child: InheritedSearchFilterDataWrapper(
+          searchFilterDataProvider: SearchFilterDataProvider(
+            initialGalleryFilter: AlbumFilter(
+              collectionID: collection.id,
+              albumName: collection.displayName,
+              occurrence: kMostRelevantFilter,
             ),
           ),
-          body: SelectionState(
-            selectedFiles: _selectedFiles,
-            child: Stack(
-              alignment: Alignment.bottomCenter,
-              children: [
-                Builder(
-                  builder: (context) {
-                    return ValueListenableBuilder(
-                      valueListenable: InheritedSearchFilterData.of(context)
-                          .searchFilterDataProvider!
-                          .isSearchingNotifier,
-                      builder: (context, isSearching, _) {
-                        return isSearching
-                            ? HierarchicalSearchGallery(
-                                tagPrefix: tagPrefix,
-                                selectedFiles: _selectedFiles,
-                              )
-                            : gallery;
-                      },
-                    );
-                  },
-                ),
-                FileSelectionOverlayBar(
-                  overlayType,
-                  _selectedFiles,
-                ),
-              ],
+          child: Scaffold(
+            appBar: PreferredSize(
+              preferredSize: const Size.fromHeight(90.0),
+              child: GalleryAppBarWidget(
+                appBarType,
+                AppLocalizations.of(context).uncategorized,
+                _selectedFiles,
+                collection: collection,
+              ),
+            ),
+            body: SelectionState(
+              selectedFiles: _selectedFiles,
+              child: Stack(
+                alignment: Alignment.bottomCenter,
+                children: [
+                  Builder(
+                    builder: (context) {
+                      return ValueListenableBuilder(
+                        valueListenable: InheritedSearchFilterData.of(context)
+                            .searchFilterDataProvider!
+                            .isSearchingNotifier,
+                        builder: (context, isSearching, _) {
+                          return isSearching
+                              ? HierarchicalSearchGallery(
+                                  tagPrefix: tagPrefix,
+                                  selectedFiles: _selectedFiles,
+                                )
+                              : gallery;
+                        },
+                      );
+                    },
+                  ),
+                  FileSelectionOverlayBar(
+                    overlayType,
+                    _selectedFiles,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
