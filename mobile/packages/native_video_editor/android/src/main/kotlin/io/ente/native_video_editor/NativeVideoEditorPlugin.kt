@@ -74,14 +74,14 @@ class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler, EventChannel.S
                                     "method" to processingResult.method
                                 )
                             )
-                            currentJob = null
                         }
                     } catch (e: Exception) {
                         // Log.e(TAG, "Trim failed", e)
                         withContext(Dispatchers.Main) {
                             result.error("TRIM_ERROR", e.message, null)
-                            currentJob = null
                         }
+                    } finally {
+                        currentJob = null
                     }
                 }
             }
@@ -114,14 +114,14 @@ class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler, EventChannel.S
                                     "method" to processingResult.method
                                 )
                             )
-                            currentJob = null
                         }
                     } catch (e: Exception) {
                         // Log.e(TAG, "Rotation failed", e)
                         withContext(Dispatchers.Main) {
                             result.error("ROTATE_ERROR", e.message, null)
-                            currentJob = null
                         }
+                    } finally {
+                        currentJob = null
                     }
                 }
             }
@@ -160,14 +160,14 @@ class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler, EventChannel.S
                                     "method" to processingResult.method
                                 )
                             )
-                            currentJob = null
                         }
                     } catch (e: Exception) {
                         // Log.e(TAG, "Crop failed", e)
                         withContext(Dispatchers.Main) {
                             result.error("CROP_ERROR", e.message, null)
-                            currentJob = null
                         }
+                    } finally {
+                        currentJob = null
                     }
                 }
             }
@@ -183,13 +183,13 @@ class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler, EventChannel.S
                         val info = getVideoInfo(videoPath)
                         withContext(Dispatchers.Main) {
                             result.success(info)
-                            currentJob = null
                         }
                     } catch (e: Exception) {
                         withContext(Dispatchers.Main) {
                             result.error("INFO_ERROR", e.message, null)
-                            currentJob = null
                         }
+                    } finally {
+                        currentJob = null
                     }
                 }
             }
@@ -210,28 +210,46 @@ class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler, EventChannel.S
 
             val duration = retriever.extractMetadata(
                 MediaMetadataRetriever.METADATA_KEY_DURATION
-            )?.toLongOrNull() ?: 0L
+            )?.toLongOrNull() ?: run {
+                Log.w(TAG, "Failed to extract duration metadata from video: $videoPath")
+                0L
+            }
 
             val width = retriever.extractMetadata(
                 MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH
-            )?.toIntOrNull() ?: 0
+            )?.toIntOrNull() ?: run {
+                Log.w(TAG, "Failed to extract width metadata from video: $videoPath")
+                0
+            }
 
             val height = retriever.extractMetadata(
                 MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT
-            )?.toIntOrNull() ?: 0
+            )?.toIntOrNull() ?: run {
+                Log.w(TAG, "Failed to extract height metadata from video: $videoPath")
+                0
+            }
 
             val rotation = retriever.extractMetadata(
                 MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION
-            )?.toIntOrNull() ?: 0
+            )?.toIntOrNull() ?: run {
+                Log.w(TAG, "Failed to extract rotation metadata from video: $videoPath")
+                0
+            }
 
             val bitrate = retriever.extractMetadata(
                 MediaMetadataRetriever.METADATA_KEY_BITRATE
-            )?.toLongOrNull() ?: 0L
+            )?.toLongOrNull() ?: run {
+                Log.w(TAG, "Failed to extract bitrate metadata from video: $videoPath")
+                0L
+            }
 
             val frameRate = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 retriever.extractMetadata(
                     MediaMetadataRetriever.METADATA_KEY_CAPTURE_FRAMERATE
-                )?.toFloatOrNull() ?: 0f
+                )?.toFloatOrNull() ?: run {
+                    Log.w(TAG, "Failed to extract frame rate metadata from video: $videoPath")
+                    0f
+                }
             } else {
                 0f
             }
@@ -296,14 +314,14 @@ class NativeVideoEditorPlugin : FlutterPlugin, MethodCallHandler, EventChannel.S
                             "processingSteps" to processingSteps
                         )
                     )
-                    currentJob = null
                 }
             } catch (e: Exception) {
                 // Log.e(TAG, "Process video failed", e)
                 withContext(Dispatchers.Main) {
                     result.error("PROCESS_ERROR", e.message, null)
-                    currentJob = null
                 }
+            } finally {
+                currentJob = null
             }
         }
     }
