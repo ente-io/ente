@@ -26,18 +26,25 @@ You will need Docker Desktop or Docker Engine. Follow the installation instructi
 
 To troubleshoot, you'll need an understanding of the components at play. Start by memorizing the diagram here (there will be a quiz): https://github.com/ente-io/ente/tree/main/server/README.md
 
-We have three primary components and one optional:
+We have four primary components:
 
-1. museum (ente API)
-2. postgres (database for users and indexing your photos/videos)
-3. minio (object store for photos/videos)
-4. web-ui (optional web interface can be accessed without using the desktop or mobile ente app, also provides support for shared albums and casting)
+1. museum
+    - Ente service API
+    - Exposes port `8080`, which you will use for connecting your desktop and mobile ente app
+2. postgres
+    - Database for users and indexing your photos
+    - Does not expose any ports
+    - Museum calls it directly via the `postgres` host, which will be resolved by the container DNS
+3. minio
+    - Object store for photos
+    - Minio exposes ports `9000` (API port) and `9001` (web UI)
+    - The UI is optional, but useful for verifying the contents of your bucket during initial setup
+4. web-ui
+    - Web app can be accessed without using the ente app
+    - Additionally provides support for shared albums and casting
+    - Optional
 
-Postgres does not expose any ports. Museum calls it directly via the `postgres` host, which will be resolved by the container DNS.
-
-Minio exposes ports `9000` (API port) and `9001` (web UI). The UI is optional, but useful for verifying the contents of your bucket during initial setup.
-
-When you upload files, museum gives your client (app or browser) the credentials to upload directly to object store. This is a good design because it means your object store can live in s3, while your museum is hosted on your local machine, and your museum will not be a bottleneck for large file uploads. The caveat is that the minio endpoint is only specified once (in `museum.yaml`), but used by both the museum **and** your client for uploads. This means that if you specify `localhost:9000`, it must be reachable by both the museum and your browser. However, museum is running in a container, so `localhost` is local to the container, not your Windows machine. We will tell museum to translate `localhost` to the Windows host using the following directive:
+When you upload files, museum gives your client (app or browser) the credentials to upload directly to object store. This is a good design because it means your object store can live in s3, while your museum is hosted on your local machine, and your local machine will not be a bottleneck for large file uploads. The caveat is that the minio endpoint is only specified once (in `museum.yaml`), but used by both the museum **and** your client for uploads. This means that if you specify `localhost:9000`, it must be reachable by both the museum and your browser. However, museum is running in a container, so `localhost` is local to the container, not your Windows machine. We will tell museum to translate `localhost` to the Windows host using the following directive:
 
 ```
 extra_hosts:
@@ -74,7 +81,7 @@ For each key, store it as a docker secret:
 
 ## Configuration
 
-Postgres and MinIO require dedicated folders on your Windows machine that will be mounted inside their respective containers. These folders can live anywhere in your file system. My tree looks like this:
+Postgres and minio require dedicated folders on your Windows machine that will be mounted inside their respective containers. These folders can live anywhere in your file system. My tree looks like this:
 
 ```
 D:\
@@ -231,7 +238,7 @@ Modify the volume mappings for museum, postgres, and minio to target the corresp
 From the directory containing `docker-compose.yaml` run:
 
 ```
-docker stack deploy -c docker-compose.yaml ente
+docker stack deploy -d -c docker-compose.yaml ente
 ```
 
 Use docker CLI or Docker Desktop UI to monitor container health and logs during startup. Containers may be recreated on startup while waiting for dependencies. This lack of dependency management is a limitation of docker swarm. Eventually, all containers should start up.
@@ -243,7 +250,8 @@ Follow https://help.ente.io/self-hosting/installation/post-install and enjoy the
 - You can use the desktop app to register a new account. Click the login screen lock image 7 times and override the endpoint to `http://localhost:8080`.
 - Your user email can be anything. No actual emails will be sent. The one-time code can be found in the museum container logs.
 - I recommend using Docker Desktop UI to view logs and run container commands.
-- MinIO **will not** auto-create the bucket. I feel like museum should be doing this, but at the time of testing, this was not handled automatically. Additionally, if you don't allowlist CORS, your uploads will not complete. Run the following commands to fix both issues:
+- On shutdown (`docker stack rm ente`), docker will wait for postgres to terminate before deleting the default network. The startup command (`docker stack deploy -d -c docker-compose.yaml ente`) will fail until all resources are deleted.
+- Minio **will not** auto-create the bucket. I feel like museum should be doing this, but at the time of testing, this was not handled automatically. Additionally, if you don't allowlist CORS, your uploads will not complete. Run the following commands to fix both issues:
   1. In Docker Desktop, open the `ente_minio` container Exec tab, or run the following powershell command:
       ```
       docker exec -it $(docker ps -q -f name=ente_minio) sh
@@ -254,18 +262,8 @@ Follow https://help.ente.io/self-hosting/installation/post-install and enjoy the
       mc mb -p admin/b2-eu-cen
       mc admin config set admin api cors\_allow\_origin="\*"
       ```
+  3. Restart your minio container and you should be ready to upload!
 - In case you missed it, use the ente CLI to increase your storage limits: https://help.ente.io/self-hosting/administration/cli#step-4-increase-storage-and-account-validity
-
-### Reinitialize MinIO
-
-After following the post-installation steps and reconfiguring your MinIO CORS policy, restart your containers and you should be ready to upload!
-
-```
-docker stack rm ente
-
-# Wait for postgres to finish terminating, then:
-docker stack deploy -c docker-compose.yaml ente
-```
 
 
 ## Next steps
