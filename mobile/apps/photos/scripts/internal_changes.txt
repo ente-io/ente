@@ -1,3 +1,5 @@
+
+- Laurens: Add OCR capability for Android devices (behind feature flag)
 - Neeraj: Add auth.ente.io to iOS associated domains for password AutoFill
 - Neeraj: Fix storage viewer not refreshing after clearing cache
 - Neeraj: Remove feature flags from manage_links_widget (album layout, allow joining album, copy embed HTML)

@@ -136,6 +136,10 @@ dependencies:
   media_kit_libs_video:
   media_kit_video:
   ml_linalg: ^13.11.31
+  mobile_ocr:
+    git:
+      url: https://github.com/laurenspriem/mobile_ocr
+      ref: dcb1015c510717c7a184013d3c91a4a21bdbba84
   modal_bottom_sheet: ^3.0.0
   motion_photos:
     git: "https://github.com/ente-io/motion_photo.git"
@@ -201,9 +205,6 @@ dependencies:
   syncfusion_flutter_sliders: ^29.1.38
   synchronized: ^3.3.0+3
   system_info_plus: ^0.0.6
-  text_detector:
-    git:
-      url: https://github.com/neeraj-pilot/text_detector.git
   thermal: ^1.1.11
   timezone: ^0.10.0
   tuple: ^2.0.0

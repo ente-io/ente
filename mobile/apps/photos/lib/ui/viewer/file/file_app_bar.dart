@@ -281,7 +281,7 @@ class FileAppBarState extends State<FileAppBar> {
       ),
     );
 
-    // Text detection for internal iOS users (images and live photos, but not videos)
+    // Text detection for internal mobile users (images and live photos, but not videos)
     if (flagService.textDetection && widget.file.fileType != FileType.video) {
       items.add(
         EntePopupMenuItem(
