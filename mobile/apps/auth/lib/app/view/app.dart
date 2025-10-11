@@ -216,7 +216,8 @@ class _AppState extends State<App>
           TerminateProcess(hProcess, 0);
         }
         windowManager.setPreventClose(false);
-        windowManager.close();
+        windowManager.destroy();
+        break;
     }
   }
 
@@ -233,7 +234,7 @@ class _AppState extends State<App>
         TerminateProcess(hProcess, 0);
       }
       windowManager.setPreventClose(false);
-      windowManager.close();
+      windowManager.destroy();
     }
   }
 }
