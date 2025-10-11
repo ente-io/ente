@@ -154,7 +154,7 @@ class _FileEditDialogState extends State<FileEditDialog> {
             ),
             const SizedBox(height: 20),
             Text(
-              'Title',
+              context.l10n.title,
               style: textTheme.small.copyWith(
                 color: colorScheme.textBase,
               ),

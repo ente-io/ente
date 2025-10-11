@@ -159,7 +159,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
       _logger.severe("Failed to load collections", e);
       if (mounted) {
         setState(() {
-          _error = 'Failed to load collections: $e';
+          _error = context.l10n.failedToLoadCollections(e.toString());
           _isLoading = false;
         });
       }
@@ -290,7 +290,8 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
               padding: const EdgeInsets.only(bottom: 16.0),
               alignment: Alignment.centerLeft,
               child: Text(
-                '${_sortedCollections.length} result${_sortedCollections.length == 1 ? '' : 's'} for "$searchQuery"',
+                context.l10n
+                    .searchResultsCount(_sortedCollections.length, searchQuery),
                 style: getEnteTextTheme(context).small.copyWith(
                       color: Theme.of(context).textTheme.bodySmall?.color,
                     ),

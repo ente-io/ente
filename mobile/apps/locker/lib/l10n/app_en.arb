@@ -613,5 +613,69 @@
   "clear": "Clear",
   "uploadAFile": "Upload a File",
   "clickHereToUpload": "Click here to upload",
-  "saveDocument": "Save document"
+  "saveDocument": "Save document",
+  "uploadFiles": "Upload Files",
+  "filesSelected": "{count, plural, =0{No files selected} =1{1 file selected} other{{count} files selected}}",
+  "@filesSelected": {
+    "description": "Number of files selected for upload",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "addToCollection": "Add to collection",
+  "newCollection": "New collection",
+  "title": "Title",
+  "backToView": "Back to view",
+  "back": "Back",
+  "failedToLoadCollections": "Failed to load collections: {error}",
+  "@failedToLoadCollections": {
+    "description": "Error message when loading collections fails",
+    "placeholders": {
+      "error": {
+        "type": "String",
+        "example": "Network error"
+      }
+    }
+  },
+  "informationCollectionName": "Information",
+  "recordSavedToMultipleCollections": "Record saved to {count, plural, =1{1 collection} other{{count} collections}} successfully",
+  "@recordSavedToMultipleCollections": {
+    "description": "Success message when record is saved to multiple collections",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "copiedToClipboard": "{fieldName} copied to clipboard",
+  "@copiedToClipboard": {
+    "description": "Message when a field is copied to clipboard",
+    "placeholders": {
+      "fieldName": {
+        "type": "String",
+        "example": "Password"
+      }
+    }
+  },
+  "searchResultsCount": "{count, plural, =1{1 result} other{{count} results}} for \"{query}\"",
+  "@searchResultsCount": {
+    "description": "Search results count message",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      },
+      "query": {
+        "type": "String",
+        "example": "vacation"
+      }
+    }
+  },
+  "locker": "Locker",
+  "unnamed": "Unnamed",
+  "collectionLabel": "Collection"
 }

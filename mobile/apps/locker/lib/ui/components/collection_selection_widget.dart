@@ -1,5 +1,6 @@
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:locker/l10n/l10n.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/utils/collection_actions.dart';
 
@@ -62,7 +63,7 @@ class _CollectionSelectionWidgetState extends State<CollectionSelectionWidget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Add to collection',
+          context.l10n.addToCollection,
           style: textTheme.h3.copyWith(
             color: colorScheme.textBase,
           ),
@@ -94,7 +95,7 @@ class _CollectionSelectionWidgetState extends State<CollectionSelectionWidget> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        'New collection',
+                        context.l10n.newCollection,
                         style: textTheme.small.copyWith(
                           color: colorScheme.textMuted,
                           fontWeight: FontWeight.w500,
@@ -136,7 +137,7 @@ class _CollectionSelectionWidgetState extends State<CollectionSelectionWidget> {
     required colorScheme,
     required textTheme,
   }) {
-    final collectionName = collection.name ?? 'Unnamed Collection';
+    final collectionName = collection.name ?? context.l10n.unnamedCollection;
 
     return InkWell(
       onTap: onTap,
@@ -196,7 +197,7 @@ class _CollectionSelectionWidgetState extends State<CollectionSelectionWidget> {
             ),
             const SizedBox(width: 4),
             Text(
-              'New collection',
+              context.l10n.newCollection,
               style: textTheme.small.copyWith(
                 color: colorScheme.textMuted,
                 fontWeight: FontWeight.w500,

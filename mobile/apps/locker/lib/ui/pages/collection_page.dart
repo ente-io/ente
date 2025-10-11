@@ -1,11 +1,13 @@
 import "dart:async";
 
 import 'package:ente_events/event_bus.dart';
+import "package:ente_ui/components/title_bar_title_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import "package:ente_ui/utils/dialog_util.dart";
 
 import "package:ente_utils/navigation_util.dart";
 import 'package:flutter/material.dart';
+import "package:hugeicons/hugeicons.dart";
 import 'package:locker/events/collections_updated_event.dart';
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/models/selected_files.dart';
@@ -208,7 +210,21 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
       focusNode: FocusNode(),
       onKeyEvent: handleKeyEvent,
       child: Scaffold(
-        appBar: _buildAppBar(),
+        appBar: AppBar(
+          backgroundColor: getEnteColorScheme(context).backgroundBase,
+          surfaceTintColor: Colors.transparent,
+          toolbarHeight: 48,
+          leadingWidth: 48,
+          leading: GestureDetector(
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: const Icon(
+              Icons.arrow_back_outlined,
+            ),
+          ),
+        ),
+        backgroundColor: getEnteColorScheme(context).backgroundBase,
         body: _buildBody(),
         floatingActionButton:
             isSearchActive ? const SizedBox.shrink() : _buildFAB(),
@@ -327,23 +343,68 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
       );
     }
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.only(left: 16, right: 16),
-      child: _buildFilesList(),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TitleBarTitleWidget(
+                title: _collection.name ?? context.l10n.untitled,
+                trailingWidgets: [
+                  Container(
+                    height: 48,
+                    width: 48,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: getEnteColorScheme(context).backdropBase,
+                    ),
+                    padding: const EdgeInsets.all(12),
+                    child: HugeIcon(
+                      icon: HugeIcons.strokeRoundedShare08,
+                      color: getEnteColorScheme(context).iconColor,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    height: 48,
+                    width: 48,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: getEnteColorScheme(context).backdropBase,
+                    ),
+                    padding: const EdgeInsets.all(12),
+                    child: HugeIcon(
+                      icon: HugeIcons.strokeRoundedMoreVertical,
+                      color: getEnteColorScheme(context).iconColor,
+                    ),
+                  ),
+                ],
+              ),
+              Text(
+                _displayedFiles.length.toString(),
+                style: getEnteTextTheme(context).smallMuted,
+              ),
+            ],
+          ),
+        ),
+        SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+          child: _displayedFiles.isEmpty
+              ? SizedBox(
+                  height: 400,
+                  child: _buildEmptyState(),
+                )
+              : ItemListView(
+                  key: ValueKey(_displayedFiles.length),
+                  files: _displayedFiles,
+                  selectedFiles: _selectedFiles,
+                ),
+        ),
+      ],
     );
-  }
-
-  Widget _buildFilesList() {
-    return _displayedFiles.isEmpty
-        ? SizedBox(
-            height: 400,
-            child: _buildEmptyState(),
-          )
-        : ItemListView(
-            key: ValueKey(_displayedFiles.length),
-            files: _displayedFiles,
-            selectedFiles: _selectedFiles,
-          );
   }
 
   Widget _buildEmptyState() {

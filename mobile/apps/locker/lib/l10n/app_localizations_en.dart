@@ -1131,4 +1131,78 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get saveDocument => 'Save document';
+
+  @override
+  String get uploadFiles => 'Upload Files';
+
+  @override
+  String filesSelected(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count files selected',
+      one: '1 file selected',
+      zero: 'No files selected',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get addToCollection => 'Add to collection';
+
+  @override
+  String get newCollection => 'New collection';
+
+  @override
+  String get title => 'Title';
+
+  @override
+  String get backToView => 'Back to view';
+
+  @override
+  String get back => 'Back';
+
+  @override
+  String failedToLoadCollections(String error) {
+    return 'Failed to load collections: $error';
+  }
+
+  @override
+  String get informationCollectionName => 'Information';
+
+  @override
+  String recordSavedToMultipleCollections(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count collections',
+      one: '1 collection',
+    );
+    return 'Record saved to $_temp0 successfully';
+  }
+
+  @override
+  String copiedToClipboard(String fieldName) {
+    return '$fieldName copied to clipboard';
+  }
+
+  @override
+  String searchResultsCount(int count, String query) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count results',
+      one: '1 result',
+    );
+    return '$_temp0 for \"$query\"';
+  }
+
+  @override
+  String get locker => 'Locker';
+
+  @override
+  String get unnamed => 'Unnamed';
+
+  @override
+  String get collectionLabel => 'Collection';
 }

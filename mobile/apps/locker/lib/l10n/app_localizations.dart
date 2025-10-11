@@ -2007,6 +2007,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save document'**
   String get saveDocument;
+
+  /// No description provided for @uploadFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Files'**
+  String get uploadFiles;
+
+  /// Number of files selected for upload
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No files selected} =1{1 file selected} other{{count} files selected}}'**
+  String filesSelected(int count);
+
+  /// No description provided for @addToCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to collection'**
+  String get addToCollection;
+
+  /// No description provided for @newCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'New collection'**
+  String get newCollection;
+
+  /// No description provided for @title.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get title;
+
+  /// No description provided for @backToView.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to view'**
+  String get backToView;
+
+  /// No description provided for @back.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get back;
+
+  /// Error message when loading collections fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load collections: {error}'**
+  String failedToLoadCollections(String error);
+
+  /// No description provided for @informationCollectionName.
+  ///
+  /// In en, this message translates to:
+  /// **'Information'**
+  String get informationCollectionName;
+
+  /// Success message when record is saved to multiple collections
+  ///
+  /// In en, this message translates to:
+  /// **'Record saved to {count, plural, =1{1 collection} other{{count} collections}} successfully'**
+  String recordSavedToMultipleCollections(int count);
+
+  /// Message when a field is copied to clipboard
+  ///
+  /// In en, this message translates to:
+  /// **'{fieldName} copied to clipboard'**
+  String copiedToClipboard(String fieldName);
+
+  /// Search results count message
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 result} other{{count} results}} for \"{query}\"'**
+  String searchResultsCount(int count, String query);
+
+  /// No description provided for @locker.
+  ///
+  /// In en, this message translates to:
+  /// **'Locker'**
+  String get locker;
+
+  /// No description provided for @unnamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unnamed'**
+  String get unnamed;
+
+  /// No description provided for @collectionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Collection'**
+  String get collectionLabel;
 }
 
 class _AppLocalizationsDelegate

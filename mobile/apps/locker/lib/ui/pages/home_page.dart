@@ -91,12 +91,12 @@ class CustomLockerAppBar extends StatelessWidget
                       sendLogs(
                         context,
                         'vishnu@ente.io',
-                        subject: 'Locker logs',
+                        subject: context.l10n.lockerLogs,
                         body: 'Debug logs for Locker app.\n\n',
                       );
                     },
                     child: Text(
-                      'Locker',
+                      context.l10n.locker,
                       style: textTheme.h3Bold.copyWith(
                         color: colorScheme.backdropBase,
                       ),

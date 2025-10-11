@@ -90,7 +90,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
         // Pre-select a default collection if available
         if (collections.isNotEmpty) {
           final defaultCollection = collections.firstWhere(
-            (c) => c.name == 'Information',
+            (c) => c.name == context.l10n.informationCollectionName,
             orElse: () => collections.first,
           );
           _selectedCollectionIds = {defaultCollection.id};
@@ -215,8 +215,8 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
   Future<void> _createNewFile(InfoItem infoItem) async {
     if (_selectedCollectionIds.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select at least one collection'),
+        SnackBar(
+          content: Text(context.l10n.pleaseSelectAtLeastOneCollection),
           backgroundColor: Colors.red,
         ),
       );
@@ -243,7 +243,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
     final collectionCount = selectedCollections.length;
     final message = collectionCount == 1
         ? context.l10n.recordSavedSuccessfully
-        : 'Record saved to $collectionCount collections successfully';
+        : context.l10n.recordSavedToMultipleCollections(collectionCount);
 
     // Navigate to home page and clear all previous routes
     await Navigator.of(context).pushAndRemoveUntil(
@@ -276,7 +276,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
     Clipboard.setData(ClipboardData(text: text));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('$fieldName copied to clipboard'),
+        content: Text(context.l10n.copiedToClipboard(fieldName)),
         duration: const Duration(seconds: 2),
         backgroundColor: Colors.green,
       ),
@@ -371,14 +371,14 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
                     Icons.arrow_back_outlined,
                   ),
                   onPressed: _toggleMode,
-                  tooltip: 'Back to view',
+                  tooltip: context.l10n.backToView,
                 )
               : IconButton(
                   icon: const Icon(
                     Icons.arrow_back_outlined,
                   ),
                   onPressed: () => Navigator.of(context).pop(),
-                  tooltip: 'Back',
+                  tooltip: context.l10n.back,
                 ),
           automaticallyImplyLeading: false,
           actions: [
@@ -386,7 +386,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
               IconButton(
                 icon: const Icon(Icons.edit),
                 onPressed: _toggleMode,
-                tooltip: 'Edit',
+                tooltip: context.l10n.edit,
               ),
           ],
         ),
