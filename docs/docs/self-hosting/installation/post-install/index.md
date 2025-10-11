@@ -120,13 +120,14 @@ more information.
 If you do not wish to make it accessible via Internet, we recommend you to use
 [Tailscale](/self-hosting/guides/tailscale) for convenience. Alternately, you
 can use your IP address for accessing the application in your local network,
-though this poses [challenges with respect to object storage](#understanding-ip-address-challenges-with-object-storage).
+though this poses challenges with respect to object storage (details below).
 
 ### Understanding IP address challenges with object storage
 
 When accessing Ente using an IP address instead of a domain name, you may encounter issues with file uploads and downloads due to **CORS (Cross-Origin Resource Sharing)** browser security policies.
 
 **The issue:** Your browser treats requests between different ports on the same IP as cross-origin requests. For example:
+
 - Ente web app runs on `http://192.168.1.100:3000`
 - MinIO object storage runs on `http://192.168.1.100:3200`
 
