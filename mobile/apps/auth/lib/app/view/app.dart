@@ -22,6 +22,7 @@ import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:tray_manager/tray_manager.dart';
+import 'package:win32/win32.dart';
 import 'package:window_manager/window_manager.dart';
 
 class App extends StatefulWidget {
@@ -210,8 +211,12 @@ class _AppState extends State<App>
         windowManager.setSkipTaskbar(false);
         break;
       case 'exit_app':
-        windowManager.destroy();
-        break;
+        if (Platform.isWindows) {
+          final int hProcess = GetCurrentProcess();
+          TerminateProcess(hProcess, 0);
+        }
+        windowManager.setPreventClose(false);
+        windowManager.close();
     }
   }
 
@@ -223,8 +228,12 @@ class _AppState extends State<App>
       windowManager.hide();
       windowManager.setSkipTaskbar(true);
     } else {
+      if (Platform.isWindows) {
+        final int hProcess = GetCurrentProcess();
+        TerminateProcess(hProcess, 0);
+      }
       windowManager.setPreventClose(false);
-      windowManager.destroy();
+      windowManager.close();
     }
   }
 }
