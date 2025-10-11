@@ -9,6 +9,7 @@ import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:ente_utils/email_util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import "package:hugeicons/hugeicons.dart";
 import 'package:listen_sharing_intent/listen_sharing_intent.dart';
 import 'package:locker/events/collections_updated_event.dart';
@@ -31,6 +32,157 @@ import 'package:locker/utils/collection_actions.dart';
 import 'package:locker/utils/collection_sort_util.dart';
 import 'package:logging/logging.dart';
 
+class CustomLockerAppBar extends StatelessWidget
+    implements PreferredSizeWidget {
+  final GlobalKey<ScaffoldState> scaffoldKey;
+  final bool isSearchActive;
+  final TextEditingController searchController;
+  final FocusNode searchFocusNode;
+  final VoidCallback onSearchFocused;
+  final VoidCallback onClearSearch;
+  final ValueChanged<String>? onSearchChanged;
+
+  const CustomLockerAppBar({
+    super.key,
+    required this.scaffoldKey,
+    required this.isSearchActive,
+    required this.searchController,
+    required this.searchFocusNode,
+    required this.onSearchFocused,
+    required this.onClearSearch,
+    this.onSearchChanged,
+  });
+
+  @override
+  Size get preferredSize => const Size.fromHeight(156);
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.primary700,
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(20),
+          bottomRight: Radius.circular(20),
+        ),
+      ),
+      child: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      scaffoldKey.currentState!.openDrawer();
+                    },
+                    child: HugeIcon(
+                      icon: HugeIcons.strokeRoundedMenu01,
+                      color: colorScheme.backdropBase,
+                    ),
+                  ),
+                  GestureDetector(
+                    onLongPress: () {
+                      sendLogs(
+                        context,
+                        'vishnu@ente.io',
+                        subject: 'Locker logs',
+                        body: 'Debug logs for Locker app.\n\n',
+                      );
+                    },
+                    child: Text(
+                      'Locker',
+                      style: textTheme.h3Bold.copyWith(
+                        color: colorScheme.backdropBase,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 48),
+                ],
+              ),
+            ),
+            // Search bar
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: colorScheme.backgroundBase,
+                  borderRadius: BorderRadius.circular(100),
+                ),
+                child: TextField(
+                  autocorrect: false,
+                  enableSuggestions: false,
+                  controller: searchController,
+                  focusNode: searchFocusNode,
+                  onTap: onSearchFocused,
+                  onChanged: onSearchChanged,
+                  textAlignVertical: TextAlignVertical.center,
+                  decoration: InputDecoration(
+                    hintText: context.l10n.searchHint,
+                    hintStyle: TextStyle(
+                      color: colorScheme.primary700,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                    border: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                    prefixIcon: Padding(
+                      padding: const EdgeInsets.only(left: 16, right: 8),
+                      child: HugeIcon(
+                        icon: HugeIcons.strokeRoundedSearch01,
+                        color: colorScheme.primary700,
+                        size: 20,
+                      ),
+                    ),
+                    prefixIconConstraints: const BoxConstraints(
+                      minWidth: 44,
+                      minHeight: 24,
+                    ),
+                    suffixIcon:
+                        (isSearchActive || searchController.text.isNotEmpty)
+                            ? GestureDetector(
+                                onTap: onClearSearch,
+                                child: Padding(
+                                  padding:
+                                      const EdgeInsets.only(right: 16, left: 8),
+                                  child: HugeIcon(
+                                    icon: HugeIcons.strokeRoundedCancel01,
+                                    color: colorScheme.iconColor,
+                                    size: 20,
+                                  ),
+                                ),
+                              )
+                            : null,
+                    suffixIconConstraints: const BoxConstraints(
+                      minWidth: 44,
+                      minHeight: 24,
+                    ),
+                  ),
+                  style: TextStyle(
+                    color: colorScheme.primary700,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class HomePage extends UploaderPage {
   final String? initialSearchQuery;
 
@@ -47,6 +199,7 @@ class _HomePageState extends UploaderPageState<HomePage>
     scaffoldKey: scaffoldKey,
   );
   final scaffoldKey = GlobalKey<ScaffoldState>();
+  final _searchFocusNode = FocusNode();
   bool _isLoading = true;
   bool _isSettingsOpen = false;
 
@@ -189,6 +342,7 @@ class _HomePageState extends UploaderPageState<HomePage>
   void dispose() {
     _animationController.dispose();
     _isFabOpen.dispose();
+    _searchFocusNode.dispose();
     disposeSharing();
     super.dispose();
   }
@@ -366,6 +520,32 @@ class _HomePageState extends UploaderPageState<HomePage>
     );
   }
 
+  void _handleSearchChange(String query) {
+    // Trigger search by activating search with the current query
+    activateSearchWithQuery(query);
+  }
+
+  void _handleSearchFocused() {
+    // Activate search when TextField is tapped/focused
+    if (!isSearchActive) {
+      activateSearchWithQuery('');
+    }
+  }
+
+  void _handleClearSearch() {
+    // Clear text and unfocus to properly dismiss search
+    searchController.clear();
+    _searchFocusNode.unfocus();
+    // Simulate ESC key to deactivate search state
+    // ignore: prefer_const_constructors
+    final escapeEvent = KeyDownEvent(
+      physicalKey: PhysicalKeyboardKey.escape,
+      logicalKey: LogicalKeyboardKey.escape,
+      timeStamp: const Duration(seconds: 0),
+    );
+    handleKeyEvent(escapeEvent);
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
@@ -392,29 +572,14 @@ class _HomePageState extends UploaderPageState<HomePage>
           ),
           drawerEnableOpenDragGesture: !Platform.isAndroid,
           onDrawerChanged: (isOpened) => _isSettingsOpen = isOpened,
-          appBar: AppBar(
-            surfaceTintColor: Colors.transparent,
-            leading: buildSearchLeading(),
-            title: GestureDetector(
-              onLongPress: () {
-                sendLogs(
-                  context,
-                  'vishnu@ente.io',
-                  subject: 'Locker logs',
-                  body: 'Debug logs for Locker app.\n\n',
-                );
-              },
-              child: const Text(
-                'Locker',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-            elevation: 0,
-            backgroundColor: colorScheme.backgroundBase,
-            actions: [
-              buildSearchAction(),
-              ...buildSearchActions(),
-            ],
+          appBar: CustomLockerAppBar(
+            scaffoldKey: scaffoldKey,
+            isSearchActive: isSearchActive,
+            searchController: searchController,
+            searchFocusNode: _searchFocusNode,
+            onSearchFocused: _handleSearchFocused,
+            onClearSearch: _handleClearSearch,
+            onSearchChanged: _handleSearchChange,
           ),
           body: _buildBody(),
           floatingActionButton:
