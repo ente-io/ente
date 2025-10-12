@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import "package:flutter/services.dart";
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/models/file_type.dart';
+import 'package:locker/models/item_view_type.dart';
 import 'package:locker/models/selected_collections.dart';
 import 'package:locker/models/selected_files.dart';
 import 'package:locker/services/collections/models/collection.dart';
@@ -32,11 +33,6 @@ class OverflowMenuAction {
     required this.icon,
     required this.onTap,
   });
-}
-
-enum ItemViewType {
-  listView,
-  gridView,
 }
 
 class ItemListView extends StatefulWidget {
@@ -117,107 +113,27 @@ class _ItemListViewState extends State<ItemListView> {
       return _buildDefaultEmptyState(context);
     }
 
-    if (widget.viewType == ItemViewType.gridView) {
-      return _buildGridView(context);
-    }
-
-    return _buildListView(context);
+    return widget.viewType == ItemViewType.gridView
+        ? _buildGridView()
+        : _buildListView();
   }
 
-  Widget _buildListView(BuildContext context) {
+  Widget _buildListView() {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         ListView.separated(
-          separatorBuilder: (context, index) {
-            return const SizedBox(height: 8);
-          },
+          separatorBuilder: (context, index) => const SizedBox(height: 8),
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: _sortedItems.length,
-          itemBuilder: (context, index) {
-            final item = _sortedItems[index];
-            final isLastItem = index == _sortedItems.length - 1;
-
-            final hasCollectionSelection = widget.selectedCollections != null;
-            final hasFileSelection = widget.selectedFiles != null;
-
-            if (hasCollectionSelection && item.isCollection) {
-              return ListenableBuilder(
-                listenable: widget.selectedCollections!,
-                builder: (context, child) {
-                  final isAnyCollectionSelected =
-                      widget.selectedCollections?.hasSelections ?? false;
-
-                  return ListItemWidget(
-                    item: item,
-                    collections: widget.collections,
-                    fileOverflowActions: widget.fileOverflowActions,
-                    collectionOverflowActions: widget.collectionOverflowActions,
-                    isLastItem: isLastItem,
-                    selectedCollections: widget.selectedCollections,
-                    selectedFiles: widget.selectedFiles,
-                    viewType: widget.viewType,
-                    onCollectionTap: (c) {
-                      isAnyCollectionSelected
-                          ? _toggleCollectionSelection(c)
-                          : _navigateToCollectionPage(c);
-                    },
-                    onCollectionLongPress: (c) {
-                      isAnyCollectionSelected
-                          ? _navigateToCollectionPage(c)
-                          : _toggleCollectionSelection(c);
-                    },
-                  );
-                },
-              );
-            } else if (hasFileSelection && !item.isCollection) {
-              return ListenableBuilder(
-                listenable: widget.selectedFiles!,
-                builder: (context, child) {
-                  final isAnyFileSelected =
-                      widget.selectedFiles?.hasSelections ?? false;
-                  return ListItemWidget(
-                    item: item,
-                    collections: widget.collections,
-                    fileOverflowActions: widget.fileOverflowActions,
-                    collectionOverflowActions: widget.collectionOverflowActions,
-                    isLastItem: isLastItem,
-                    selectedCollections: widget.selectedCollections,
-                    selectedFiles: widget.selectedFiles,
-                    viewType: widget.viewType,
-                    onFileTap: isAnyFileSelected
-                        ? (file) {
-                            _toggleFileSelection(file);
-                          }
-                        : null,
-                    onFileLongPress: isAnyFileSelected
-                        ? null
-                        : (file) {
-                            _toggleFileSelection(file);
-                          },
-                  );
-                },
-              );
-            } else {
-              return ListItemWidget(
-                item: item,
-                collections: widget.collections,
-                fileOverflowActions: widget.fileOverflowActions,
-                collectionOverflowActions: widget.collectionOverflowActions,
-                isLastItem: isLastItem,
-                selectedCollections: widget.selectedCollections,
-                selectedFiles: widget.selectedFiles,
-                viewType: widget.viewType,
-              );
-            }
-          },
+          itemBuilder: (context, index) => _buildItem(index),
         ),
       ],
     );
   }
 
-  Widget _buildGridView(BuildContext context) {
+  Widget _buildGridView() {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -228,84 +144,126 @@ class _ItemListViewState extends State<ItemListView> {
         childAspectRatio: 1.3,
       ),
       itemCount: _sortedItems.length,
-      itemBuilder: (context, index) {
-        final item = _sortedItems[index];
-        final isLastItem = index == _sortedItems.length - 1;
-
-        final hasCollectionSelection = widget.selectedCollections != null;
-        final hasFileSelection = widget.selectedFiles != null;
-
-        if (hasCollectionSelection && item.isCollection) {
-          return ListenableBuilder(
-            listenable: widget.selectedCollections!,
-            builder: (context, child) {
-              final isAnyCollectionSelected =
-                  widget.selectedCollections?.hasSelections ?? false;
-
-              return ListItemWidget(
-                item: item,
-                collections: widget.collections,
-                fileOverflowActions: widget.fileOverflowActions,
-                collectionOverflowActions: widget.collectionOverflowActions,
-                isLastItem: isLastItem,
-                selectedCollections: widget.selectedCollections,
-                selectedFiles: widget.selectedFiles,
-                viewType: widget.viewType,
-                onCollectionTap: (c) {
-                  isAnyCollectionSelected
-                      ? _toggleCollectionSelection(c)
-                      : _navigateToCollectionPage(c);
-                },
-                onCollectionLongPress: (c) {
-                  isAnyCollectionSelected
-                      ? _navigateToCollectionPage(c)
-                      : _toggleCollectionSelection(c);
-                },
-              );
-            },
-          );
-        } else if (hasFileSelection && !item.isCollection) {
-          return ListenableBuilder(
-            listenable: widget.selectedFiles!,
-            builder: (context, child) {
-              final isAnyFileSelected =
-                  widget.selectedFiles?.hasSelections ?? false;
-              return ListItemWidget(
-                item: item,
-                collections: widget.collections,
-                fileOverflowActions: widget.fileOverflowActions,
-                collectionOverflowActions: widget.collectionOverflowActions,
-                isLastItem: isLastItem,
-                selectedCollections: widget.selectedCollections,
-                selectedFiles: widget.selectedFiles,
-                viewType: widget.viewType,
-                onFileTap: isAnyFileSelected
-                    ? (file) {
-                        _toggleFileSelection(file);
-                      }
-                    : null,
-                onFileLongPress: isAnyFileSelected
-                    ? null
-                    : (file) {
-                        _toggleFileSelection(file);
-                      },
-              );
-            },
-          );
-        } else {
-          return ListItemWidget(
-            item: item,
-            collections: widget.collections,
-            fileOverflowActions: widget.fileOverflowActions,
-            collectionOverflowActions: widget.collectionOverflowActions,
-            isLastItem: isLastItem,
-            selectedCollections: widget.selectedCollections,
-            selectedFiles: widget.selectedFiles,
-            viewType: widget.viewType,
-          );
-        }
-      },
+      itemBuilder: (context, index) => _buildItem(index),
     );
+  }
+
+  Widget _buildItem(int index) {
+    final item = _sortedItems[index];
+    final isLastItem = index == _sortedItems.length - 1;
+
+    if (item.isCollection) {
+      return _buildCollectionItem(item.collection!, isLastItem);
+    } else {
+      return _buildFileItem(item.file!, isLastItem);
+    }
+  }
+
+  Widget _buildCollectionItem(Collection collection, bool isLastItem) {
+    final hasSelection = widget.selectedCollections != null;
+
+    if (hasSelection) {
+      return ListenableBuilder(
+        listenable: widget.selectedCollections!,
+        builder: (context, child) {
+          final isAnySelected = widget.selectedCollections!.hasSelections;
+          return _createCollectionWidget(
+            collection: collection,
+            isLastItem: isLastItem,
+            onTap: (c) => isAnySelected
+                ? _toggleCollectionSelection(c)
+                : _navigateToCollectionPage(c),
+            onLongPress: (c) => isAnySelected
+                ? _navigateToCollectionPage(c)
+                : _toggleCollectionSelection(c),
+          );
+        },
+      );
+    }
+
+    return _createCollectionWidget(
+      collection: collection,
+      isLastItem: isLastItem,
+    );
+  }
+
+  Widget _buildFileItem(EnteFile file, bool isLastItem) {
+    final hasSelection = widget.selectedFiles != null;
+
+    if (hasSelection) {
+      return ListenableBuilder(
+        listenable: widget.selectedFiles!,
+        builder: (context, child) {
+          final isAnySelected = widget.selectedFiles!.hasSelections;
+          return _createFileWidget(
+            file: file,
+            isLastItem: isLastItem,
+            onTap: isAnySelected ? (f) => _toggleFileSelection(f) : null,
+            onLongPress: isAnySelected ? null : (f) => _toggleFileSelection(f),
+          );
+        },
+      );
+    }
+
+    return _createFileWidget(
+      file: file,
+      isLastItem: isLastItem,
+    );
+  }
+
+  Widget _createCollectionWidget({
+    required Collection collection,
+    required bool isLastItem,
+    Function(Collection)? onTap,
+    Function(Collection)? onLongPress,
+  }) {
+    if (widget.viewType == ItemViewType.gridView) {
+      return CollectionRowWidget(
+        collection: collection,
+        overflowActions: widget.collectionOverflowActions,
+        isLastItem: isLastItem,
+        selectedCollections: widget.selectedCollections,
+        onTapCallback: onTap,
+        onLongPressCallback: onLongPress,
+      );
+    } else {
+      return CollectionListWidget(
+        collection: collection,
+        overflowActions: widget.collectionOverflowActions,
+        isLastItem: isLastItem,
+        selectedCollections: widget.selectedCollections,
+        onTapCallback: onTap,
+        onLongPressCallback: onLongPress,
+      );
+    }
+  }
+
+  Widget _createFileWidget({
+    required EnteFile file,
+    required bool isLastItem,
+    Function(EnteFile)? onTap,
+    Function(EnteFile)? onLongPress,
+  }) {
+    if (widget.viewType == ItemViewType.gridView) {
+      return FileRowWidget(
+        file: file,
+        overflowActions: widget.fileOverflowActions,
+        isLastItem: isLastItem,
+        selectedFiles: widget.selectedFiles,
+        onTapCallback: onTap,
+        onLongPressCallback: onLongPress,
+      );
+    } else {
+      return FileListWidget(
+        file: file,
+        collections: widget.collections,
+        overflowActions: widget.fileOverflowActions,
+        isLastItem: isLastItem,
+        selectedFiles: widget.selectedFiles,
+        onTapCallback: onTap,
+        onLongPressCallback: onLongPress,
+      );
+    }
   }
 
   Widget _buildDefaultEmptyState(BuildContext context) {
@@ -341,7 +299,6 @@ abstract class _ListItem {
   bool get isCollection;
 
   Collection? get collection => null;
-
   EnteFile? get file => null;
 }
 
@@ -401,91 +358,6 @@ class _FileListItem extends _ListItem {
 
   @override
   EnteFile get file => _file;
-}
-
-class ListItemWidget extends StatelessWidget {
-  // ignore: library_private_types_in_public_api
-  final _ListItem item;
-  final List<Collection> collections;
-  final List<OverflowMenuAction>? fileOverflowActions;
-  final List<OverflowMenuAction>? collectionOverflowActions;
-  final bool isLastItem;
-  final SelectedCollections? selectedCollections;
-  final SelectedFiles? selectedFiles;
-  final Function(Collection)? onCollectionTap;
-  final Function(Collection)? onCollectionLongPress;
-  final Function(EnteFile)? onFileTap;
-  final Function(EnteFile)? onFileLongPress;
-  final ItemViewType viewType;
-
-  const ListItemWidget({
-    super.key,
-    // ignore: library_private_types_in_public_api
-    required this.item,
-    required this.collections,
-    this.fileOverflowActions,
-    this.collectionOverflowActions,
-    this.isLastItem = false,
-    this.selectedCollections,
-    this.selectedFiles,
-    this.onCollectionTap,
-    this.onCollectionLongPress,
-    this.onFileTap,
-    this.onFileLongPress,
-    this.viewType = ItemViewType.listView,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    if (item.isCollection && item.collection != null) {
-      final collection = item.collection!;
-      if (viewType == ItemViewType.gridView) {
-        return CollectionRowWidget(
-          collection: collection,
-          overflowActions: collectionOverflowActions,
-          isLastItem: isLastItem,
-          selectedCollections: selectedCollections,
-          onTapCallback: onCollectionTap,
-          onLongPressCallback: onCollectionLongPress,
-        );
-      } else {
-        return CollectionListWidget(
-          collection: collection,
-          overflowActions: collectionOverflowActions,
-          isLastItem: isLastItem,
-          selectedCollections: selectedCollections,
-          onTapCallback: onCollectionTap,
-          onLongPressCallback: onCollectionLongPress,
-        );
-      }
-    } else if (!item.isCollection && item.file != null) {
-      if (viewType == ItemViewType.gridView) {
-        return FileRowWidget(
-          file: item.file!,
-          overflowActions: fileOverflowActions,
-          isLastItem: isLastItem,
-          selectedFiles: selectedFiles,
-          onTapCallback: onFileTap,
-          onLongPressCallback: onFileLongPress,
-        );
-      } else {
-        return FileListWidget(
-          file: item.file!,
-          collections: collections,
-          overflowActions: fileOverflowActions,
-          isLastItem: isLastItem,
-          selectedFiles: selectedFiles,
-          onTapCallback: onFileTap,
-          onLongPressCallback: onFileLongPress,
-        );
-      }
-    } else {
-      return Container(
-        padding: const EdgeInsets.all(16),
-        child: Text(context.l10n.unknownItemType),
-      );
-    }
-  }
 }
 
 class FileListViewHelpers {

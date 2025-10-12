@@ -7,6 +7,7 @@ import "package:hugeicons/hugeicons.dart";
 import 'package:locker/l10n/l10n.dart';
 import 'package:locker/models/file_type.dart';
 import 'package:locker/models/info/info_item.dart';
+import 'package:locker/models/item_view_type.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import 'package:locker/services/files/sync/models/file.dart';
