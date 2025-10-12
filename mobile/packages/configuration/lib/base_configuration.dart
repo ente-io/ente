@@ -85,9 +85,10 @@ class BaseConfiguration {
   }
 
   Future<void> resetSecureStorage() async {
-    // Skip reset if offlineAuthSecretKey is present
-    final offlineKey = await _secureStorage.read(key: offlineAuthSecretKey);
+    String? offlineKey;
     try {
+      // Read offline key first (can throw BadPaddingException on Android)
+      offlineKey = await _secureStorage.read(key: offlineAuthSecretKey);
       // Delete all keys except preserved ones
       final allKeys = await _secureStorage.readAll();
       for (final key in allKeys.keys) {
@@ -436,6 +437,8 @@ class BaseConfiguration {
           await logout(autoLogout: true);
           return;
         }
+        // If it's a PlatformException but not a BadPaddingException, rethrow
+        rethrow;
       } else {
         rethrow;
       }
