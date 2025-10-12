@@ -85,11 +85,17 @@ class BaseConfiguration {
   }
 
   Future<void> resetSecureStorage() async {
+    // Try to preserve offline key if it exists
     String? offlineKey;
     try {
-      // Read offline key first (can throw BadPaddingException on Android)
       offlineKey = await _secureStorage.read(key: offlineAuthSecretKey);
-      // Delete all keys except preserved ones
+    } catch (e) {
+      _logger.warning('Failed to read offline key: $e');
+      // Continue with reset even if we can't read the offline key
+    }
+
+    try {
+      // Try selective deletion first (preserving specified keys)
       final allKeys = await _secureStorage.readAll();
       for (final key in allKeys.keys) {
         if (!preservedKeys.contains(key)) {
@@ -97,14 +103,32 @@ class BaseConfiguration {
         }
       }
     } catch (e) {
-      // On error, clear all keys
-      _logger.warning('Error resetting secure storage: $e');
-      await _secureStorage.deleteAll();
-      if (offlineKey != null) {
-        await _secureStorage.write(
-          key: offlineAuthSecretKey,
-          value: offlineKey,
+      // If readAll or delete operations fail (e.g., BadPaddingException),
+      // fall back to deleting everything
+      _logger.warning(
+        'Error during selective deletion, falling back to deleteAll: $e',
+      );
+      try {
+        await _secureStorage.deleteAll();
+        // Try to restore the offline key if we had it
+        if (offlineKey != null) {
+          try {
+            await _secureStorage.write(
+              key: offlineAuthSecretKey,
+              value: offlineKey,
+            );
+          } catch (writeError) {
+            _logger.warning(
+              'Failed to restore offline key after deleteAll: $writeError',
+            );
+            // We tried our best, continue without the offline key
+          }
+        }
+      } catch (deleteAllError) {
+        _logger.severe(
+          'Failed to delete all from secure storage: $deleteAllError',
         );
+        // Even deleteAll failed, but we should continue to prevent app crash
       }
     }
   }
