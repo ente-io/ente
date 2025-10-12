@@ -151,6 +151,8 @@ PODS:
     - nanopb/encode (= 3.30910.0)
   - nanopb/decode (3.30910.0)
   - nanopb/encode (3.30910.0)
+  - native_video_editor (0.0.1):
+    - Flutter
   - native_video_player (4.0.0):
     - Flutter
   - objective_c (0.0.1):
@@ -285,6 +287,7 @@ DEPENDENCIES:
   - motion_sensors (from `.symlinks/plugins/motion_sensors/ios`)
   - motionphoto (from `.symlinks/plugins/motionphoto/ios`)
   - move_to_background (from `.symlinks/plugins/move_to_background/ios`)
+  - native_video_editor (from `.symlinks/plugins/native_video_editor/ios`)
   - native_video_player (from `.symlinks/plugins/native_video_player/ios`)
   - objective_c (from `.symlinks/plugins/objective_c/ios`)
   - onnxruntime (from `.symlinks/plugins/onnxruntime/ios`)
@@ -315,7 +318,7 @@ DEPENDENCIES:
   - workmanager_apple (from `.symlinks/plugins/workmanager_apple/ios`)
 
 SPEC REPOS:
-  https://github.com/ente-io/ffmpeg-kit-custom-repo-ios.git:
+  https://github.com/ente-io/ffmpeg-kit-custom-repo-ios:
     - ffmpeg_kit_custom
   trunk:
     - Firebase
@@ -404,6 +407,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/motionphoto/ios"
   move_to_background:
     :path: ".symlinks/plugins/move_to_background/ios"
+  native_video_editor:
+    :path: ".symlinks/plugins/native_video_editor/ios"
   native_video_player:
     :path: ".symlinks/plugins/native_video_player/ios"
   objective_c:
@@ -506,6 +511,7 @@ SPEC CHECKSUMS:
   motionphoto: 23e2aeb5c6380112f69468d71f970fa7438e5ed1
   move_to_background: 7e3467dd2a1d1013e98c9c1cb93fd53cd7ef9d84
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
+  native_video_editor: bb979c7b6feb7013006099c8abaf0055c116aaa0
   native_video_player: 6809dec117e8997161dbfb42a6f90d6df71a504d
   objective_c: 89e720c30d716b036faf9c9684022048eee1eee2
   onnxruntime: f9b296392c96c42882be020a59dbeac6310d81b2
