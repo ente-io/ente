@@ -4,7 +4,6 @@ import 'package:logging/logging.dart';
 import 'package:mobile_ocr/mobile_ocr.dart';
 import 'package:photos/l10n/l10n.dart';
 import 'package:photos/ui/common/loading_widget.dart';
-import 'package:photos/ui/notification/toast.dart';
 
 class TextDetectionPage extends StatefulWidget {
   final String imagePath;
@@ -47,7 +46,6 @@ class _TextDetectionPageState extends State<TextDetectionPage> {
               ),
               onTextCopied: (text) {
                 HapticFeedback.lightImpact();
-                showShortToast(context, l10n.textCopiedToClipboard);
               },
             ),
             // Back button on top left

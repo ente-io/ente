@@ -44,7 +44,6 @@
   "ocrImageNotFoundError": "Image file not found",
   "ocrImageDecodeFailedError": "Could not read image file",
   "ocrGenericDetectError": "Could not detect text in image",
-  "textCopiedToClipboard": "Text copied to clipboard",
   "oops": "Oops",
   "somethingWentWrongPleaseTryAgain": "Something went wrong, please try again",
   "thisWillLogYouOutOfThisDevice": "This will log you out of this device!",
