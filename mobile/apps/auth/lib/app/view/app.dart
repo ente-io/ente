@@ -214,9 +214,10 @@ class _AppState extends State<App>
         if (Platform.isWindows) {
           final int hProcess = GetCurrentProcess();
           TerminateProcess(hProcess, 0);
+        } else {
+          windowManager.setPreventClose(false);
+          windowManager.destroy();
         }
-        windowManager.setPreventClose(false);
-        windowManager.destroy();
         break;
     }
   }
@@ -232,9 +233,10 @@ class _AppState extends State<App>
       if (Platform.isWindows) {
         final int hProcess = GetCurrentProcess();
         TerminateProcess(hProcess, 0);
+      } else {
+        windowManager.setPreventClose(false);
+        windowManager.destroy();
       }
-      windowManager.setPreventClose(false);
-      windowManager.destroy();
     }
   }
 }
