@@ -377,7 +377,6 @@
   "focusOnSearchBar": "Foco na busca ao iniciar o app",
   "confirmUpdatingkey": "Deseja mesmo atualizar a sua chave secreta?",
   "minimizeAppOnCopy": "Minimizar app ao copiar",
-  "minimizeToTrayOnClose": "Minimizar para a bandeja ao fechar",
   "editCodeAuthMessage": "Autenticar para editar o código",
   "deleteCodeAuthMessage": "Autenticar para excluir o código",
   "showQRAuthMessage": "Autenticar para mostrar o QR code",

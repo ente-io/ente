@@ -376,6 +376,7 @@
   "shouldHideCode": "Схаваць коды",
   "doubleTapToViewHiddenCode": "Можна двойчы націснуць на запіс, каб паглядзець код",
   "focusOnSearchBar": "Сфакусіравацца на пошуку пры запуску праграмы",
+  "minimizeToTrayOnClose": "Згарнуць у латок пры закрыцці",
   "confirmUpdatingkey": "Вы сапраўды хочаце абнавіць сакрэтны ключ?",
   "minimizeAppOnCopy": "Згортваць праграму пры капіяванні",
   "editCodeAuthMessage": "Прайдзіце аўтэнтыфікацыю, каб рэдагаваць код",

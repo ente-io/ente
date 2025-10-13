@@ -376,6 +376,7 @@
   "shouldHideCode": "Ukryj kody",
   "doubleTapToViewHiddenCode": "Możesz kliknąć dwukrotnie na wpis, aby wyświetlić kod",
   "focusOnSearchBar": "Uaktywnij wyszukiwanie przy uruchamianiu aplikacji",
+  "minimizeToTrayOnClose": "Minimalizuj do zasobnika przy zamknięciu",
   "confirmUpdatingkey": "Czy na pewno chcesz zaktualizować tajny klucz?",
   "minimizeAppOnCopy": "Minimalizuj aplikację przy kopiowaniu",
   "editCodeAuthMessage": "Uwierzytelnij się, aby edytować kod",
