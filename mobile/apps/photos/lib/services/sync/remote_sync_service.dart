@@ -610,27 +610,6 @@ class RemoteSyncService {
         );
       }
 
-      // Add random delay to detect if OS is killing background tasks
-      final randomDelaySeconds = 3 + Random().nextInt(6); // 3-8 seconds
-      if (flagService.internalUser) {
-        _logger.info(
-          "[UPLOAD-DEBUG] Adding random delay of $randomDelaySeconds seconds "
-          "before preparingForUpload to detect potential OS kills...",
-        );
-      }
-      final delayStartTime = DateTime.now();
-      await Future.delayed(Duration(seconds: randomDelaySeconds));
-      final delayEndTime = DateTime.now();
-      final actualDelayMs =
-          delayEndTime.difference(delayStartTime).inMilliseconds;
-      if (flagService.internalUser) {
-        _logger.info(
-          "[UPLOAD-DEBUG] Random delay completed successfully! "
-          "Expected: ${randomDelaySeconds}s, Actual: ${actualDelayMs}ms. "
-          "Task was NOT killed by OS during delay.",
-        );
-      }
-
       Bus.instance.fire(
         SyncStatusUpdate(SyncStatus.preparingForUpload, total: toBeUploaded),
       );
