@@ -1,3 +1,4 @@
+- Laurens: (i) OCR UX improvements based on feedback
 - Ashil: (i) Swipe to select
 - Laurens: Improve clip memories
 - Laurens: Add OCR capability for Android devices (behind feature flag)
