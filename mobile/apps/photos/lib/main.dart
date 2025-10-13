@@ -23,7 +23,6 @@ import 'package:photos/core/errors.dart';
 import 'package:photos/core/network/network.dart';
 import "package:photos/db/ml/db.dart";
 import 'package:photos/ente_theme_data.dart';
-import "package:photos/extensions/logger_extension.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
@@ -178,28 +177,28 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
 
     // Begin Execution
     // only runs for android
-    _logger.internalInfo("[BG TASK] update notification");
+    _logger.info("[BG TASK] update notification");
     updateService.showUpdateNotification().ignore();
-    _logger.internalInfo("[BG TASK] sync starting");
+    _logger.info("[BG TASK] sync starting");
     await _sync('bgTaskActiveProcess');
-    _logger.internalInfo("[BG TASK] sync completed");
+    _logger.info("[BG TASK] sync completed");
 
-    _logger.internalInfo("[BG TASK] locale fetch");
+    _logger.info("[BG TASK] locale fetch");
     final locale = await getLocale();
     await initializeDateFormatting(locale?.languageCode ?? "en");
     // only runs for android
-    _logger.internalInfo("[BG TASK] home widget sync");
+    _logger.info("[BG TASK] home widget sync");
     await _homeWidgetSync(true);
 
     // await MLService.instance.init();
     // await PersonService.init(entityService, MLDataDB.instance, prefs);
     // await MLService.instance.runAllML(force: true);
-    _logger.internalInfo("[BG TASK] smart albums sync");
+    _logger.info("[BG TASK] smart albums sync");
     await smartAlbumsService.syncSmartAlbums();
 
-    _logger.internalInfo("[BG TASK] $taskId completed");
+    _logger.info("[BG TASK] $taskId completed");
   } catch (e, s) {
-    _logger.internalSevere("[BG TASK] $taskId error", e, s);
+    _logger.severe("[BG TASK] $taskId error", e, s);
   }
 }
 

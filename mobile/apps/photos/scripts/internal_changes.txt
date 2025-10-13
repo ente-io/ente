@@ -13,4 +13,5 @@
 - Prateek: Fix CronetException during background sync by disabling NativeAdapter on Android
 - Laurens: Change similar images labels copy
 - Laurens: Fix flipped thumbnails issue by removing use of ColorFiltered widget
-- Prateek: (i) Add detailed debug logging for background task execution, upload preparation, pre-upload checks, file queueing, and upload progress tracking
+- Prateek: Add logging for background task execution
+- Prateek: (i) Add detailed debug logging for upload preparation, pre-upload checks, file queueing, and upload progress tracking
