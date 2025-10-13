@@ -794,40 +794,39 @@ class SmartMemoriesService {
     final nowInMicroseconds = currentTime.microsecondsSinceEpoch;
     final windowEnd =
         currentTime.add(kMemoriesUpdateFrequency).microsecondsSinceEpoch;
-    final Map<ClipMemoryType, ClipMemory> clipTypeToMemory = {};
     w?.log('allFiles setup');
 
-    // Loop through the clip types and find all memories
-    final clipFiles = <EnteFile>[];
-    for (final clipMemoryType in ClipMemoryType.values) {
-      clipFiles.clear();
+    ClipMemory? buildClipMemory(ClipMemoryType clipMemoryType) {
       final Vector? activityVector = clipMemoryTypeVectors[clipMemoryType];
       if (activityVector == null) {
         dev.log("No vector for clipMemoryType $clipMemoryType");
-        continue;
+        return null;
       }
       final Map<int, double> similarities = {};
-      for (final fileID in fileIDToImageEmbedding.keys) {
-        similarities[fileID] =
-            fileIDToImageEmbedding[fileID]!.vector.dot(activityVector);
+      for (final entry in fileIDToImageEmbedding.entries) {
+        similarities[entry.key] = entry.value.vector.dot(activityVector);
       }
       w?.log(
         'comparing embeddings for clipMemoryType $clipMemoryType',
       );
+      final List<EnteFile> clipFiles = [];
       for (final file in allFiles) {
-        final similarity = similarities[file.uploadedFileID!];
+        final uploadedFileID = file.uploadedFileID;
+        if (uploadedFileID == null) continue;
+        final similarity = similarities[uploadedFileID];
         if (similarity == null) continue;
         if (similarity > _clipMemoryTypeQueryThreshold) {
           clipFiles.add(file);
         }
       }
-      if (clipFiles.length < 10) continue;
+      if (clipFiles.length < 10) return null;
       // sort based on highest similarity first
       clipFiles.sort((a, b) {
-        return similarities[b.uploadedFileID!]!
-            .compareTo(similarities[a.uploadedFileID!]!);
+        final int bFileID = b.uploadedFileID!;
+        final int aFileID = a.uploadedFileID!;
+        return similarities[bFileID]!.compareTo(similarities[aFileID]!);
       });
-      clipTypeToMemory[clipMemoryType] = ClipMemory(
+      return ClipMemory(
         clipFiles.take(10).map((f) => Memory.fromFile(f, seenTimes)).toList(),
         nowInMicroseconds,
         windowEnd,
@@ -838,17 +837,18 @@ class SmartMemoriesService {
     // Surface everything just for debug checking
     if (surfaceAll) {
       for (final clipMemoryType in ClipMemoryType.values) {
-        final clipMemory = clipTypeToMemory[clipMemoryType];
+        final clipMemory = buildClipMemory(clipMemoryType);
         if (clipMemory != null) clipResults.add(clipMemory);
       }
       return clipResults;
     }
 
-    // Loop through the clip types and add based on rotation
+    final List<ClipMemoryType> rotationOrder = [...ClipMemoryType.values]
+      ..shuffle();
+    final List<ClipMemoryType> eligibleClipTypes = [];
+
     clipMemoriesLoop:
-    for (final clipMemoryType in [...ClipMemoryType.values]..shuffle()) {
-      final clipMemory = clipTypeToMemory[clipMemoryType];
-      if (clipMemory == null) continue;
+    for (final clipMemoryType in rotationOrder) {
       for (final shownLog in shownClip) {
         if (shownLog.clipMemoryType != clipMemoryType) continue;
         final shownDate =
@@ -857,6 +857,12 @@ class SmartMemoriesService {
             currentTime.difference(shownDate) < kClipShowTimeout;
         if (seenRecently) continue clipMemoriesLoop;
       }
+      eligibleClipTypes.add(clipMemoryType);
+    }
+
+    for (final clipMemoryType in eligibleClipTypes) {
+      final clipMemory = buildClipMemory(clipMemoryType);
+      if (clipMemory == null) continue;
       clipResults.add(clipMemory);
       break;
     }
