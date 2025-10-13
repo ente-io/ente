@@ -1676,6 +1676,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "13.12.6"
+  mobile_ocr:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: dcb1015c510717c7a184013d3c91a4a21bdbba84
+      resolved-ref: dcb1015c510717c7a184013d3c91a4a21bdbba84
+      url: "https://github.com/laurenspriem/mobile_ocr"
+    source: git
+    version: "1.0.0"
   mockito:
     dependency: "direct dev"
     description:
@@ -2632,15 +2641,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.8"
-  text_detector:
-    dependency: "direct main"
-    description:
-      path: "."
-      ref: HEAD
-      resolved-ref: a2d2b2e0ae5705009f8d3a5e9645caf1c5ef5ace
-      url: "https://github.com/neeraj-pilot/text_detector.git"
-    source: git
-    version: "1.0.0"
   thermal:
     dependency: "direct main"
     description:

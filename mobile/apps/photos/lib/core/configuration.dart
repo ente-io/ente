@@ -113,8 +113,9 @@ class Configuration {
         );
         await _secureStorage.deleteAll();
       } else {
-        _logger
-            .info("(for debugging) Token found, loading secure storage data");
+        _logger.info(
+          "(for debugging) Token found, loading secure storage data",
+        );
         _key = await _secureStorage.read(
           key: keyKey,
         );

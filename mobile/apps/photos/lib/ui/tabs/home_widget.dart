@@ -901,10 +901,10 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   void _getCredentials(BuildContext context, Uri? link) {
-    if (Configuration.instance.hasConfiguredAccount()) {
+    if (Configuration.instance.hasConfiguredAccount() || link == null) {
       return;
     }
-    final ott = link!.queryParameters["ott"]!;
+    final ott = link.queryParameters["ott"]!;
     UserService.instance.verifyEmail(context, ott);
   }
 
