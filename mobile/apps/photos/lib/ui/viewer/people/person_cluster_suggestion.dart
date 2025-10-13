@@ -55,7 +55,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
 
   // Declare a variable for the future
   late Future<List<ClusterSuggestion>> futureClusterSuggestions;
-  late StreamSubscription<PeopleChangedEvent> _peopleChangedEvent;
+  StreamSubscription<PeopleChangedEvent>? _peopleChangedEvent;
 
   @override
   void initState() {
@@ -66,7 +66,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
 
   @override
   void dispose() {
-    _peopleChangedEvent.cancel();
+  _peopleChangedEvent?.cancel();
     super.dispose();
   }
 
@@ -101,6 +101,8 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             if (snapshot.data!.isEmpty) {
+              _peopleChangedEvent?.cancel();
+              _peopleChangedEvent = null;
               return Center(
                 child: Text(
                   AppLocalizations.of(context).noSuggestionsForPerson(
@@ -125,6 +127,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
               clusterID,
             );
 
+            _peopleChangedEvent?.cancel();
             _peopleChangedEvent =
                 Bus.instance.on<PeopleChangedEvent>().listen((event) {
               if (event.source == clusterID.toString()) {
