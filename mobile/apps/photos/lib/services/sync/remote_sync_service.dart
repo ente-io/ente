@@ -17,6 +17,7 @@ import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
+import "package:photos/extensions/logger_extension.dart";
 import "package:photos/main.dart" show isProcessBg;
 import 'package:photos/models/device_collection.dart';
 import "package:photos/models/file/extensions/file_props.dart";
@@ -602,173 +603,131 @@ class RemoteSyncService {
     final int toBeUploaded = filesToBeUploaded.length + updatedFileIDs.length;
 
     if (toBeUploaded > 0) {
-      if (flagService.internalUser) {
-        _logger.info(
-          "[UPLOAD-DEBUG] Preparing to upload $toBeUploaded files "
-          "(${filesToBeUploaded.length} new, ${updatedFileIDs.length} updated) "
-          "in ${isProcessBg ? 'BACKGROUND' : 'FOREGROUND'} mode",
-        );
-      }
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] Preparing to upload $toBeUploaded files "
+        "(${filesToBeUploaded.length} new, ${updatedFileIDs.length} updated) "
+        "in ${isProcessBg ? 'BACKGROUND' : 'FOREGROUND'} mode",
+      );
 
       Bus.instance.fire(
         SyncStatusUpdate(SyncStatus.preparingForUpload, total: toBeUploaded),
       );
-      if (flagService.internalUser) {
-        _logger.info("[UPLOAD-DEBUG] Fired preparingForUpload status update");
-      }
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] Fired preparingForUpload status update",
+      );
 
       // Step 1: Verify media location access permission
-      if (flagService.internalUser) {
-        _logger.info(
-          "[UPLOAD-DEBUG] Step 1/3: Checking media location access permission...",
-        );
-      }
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] Step 1/3: Checking media location access permission...",
+      );
       await _uploader.verifyMediaLocationAccess();
-      if (flagService.internalUser) {
-        _logger.info(
-          "[UPLOAD-DEBUG] Step 1/3: Media location access verified ✓",
-        );
-      }
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] Step 1/3: Media location access verified ✓",
+      );
 
       // Step 2: Check network availability for upload
-      if (flagService.internalUser) {
-        _logger.info(
-          "[UPLOAD-DEBUG] Step 2/3: Checking network availability for upload...",
-        );
-      }
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] Step 2/3: Checking network availability for upload...",
+      );
       await _uploader.checkNetworkForUpload();
-      if (flagService.internalUser) {
-        _logger.info("[UPLOAD-DEBUG] Step 2/3: Network check passed ✓");
-      }
+      _logger.internalInfo("[UPLOAD-DEBUG] Step 2/3: Network check passed ✓");
 
       // Step 3: Fetch upload URLs from server
-      if (flagService.internalUser) {
-        _logger.info(
-          "[UPLOAD-DEBUG] Step 3/3: Fetching upload URLs from server for $toBeUploaded files...",
-        );
-      }
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] Step 3/3: Fetching upload URLs from server for $toBeUploaded files...",
+      );
       await _uploader.fetchUploadURLs(toBeUploaded);
-      if (flagService.internalUser) {
-        _logger.info(
-          "[UPLOAD-DEBUG] Step 3/3: Upload URLs fetched successfully ✓",
-        );
-      }
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] Step 3/3: Upload URLs fetched successfully ✓",
+      );
 
-      if (flagService.internalUser) {
-        _logger.info(
-          "[UPLOAD-DEBUG] All pre-upload checks completed successfully! "
-          "Proceeding to queue individual file uploads...",
-        );
-      }
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] All pre-upload checks completed successfully! "
+        "Proceeding to queue individual file uploads...",
+      );
     } else {
-      if (flagService.internalUser) {
-        _logger.info(
-          "[UPLOAD-DEBUG] No files to upload, skipping upload preparation",
-        );
-      }
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] No files to upload, skipping upload preparation",
+      );
     }
     final List<Future> futures = [];
 
-    if (flagService.internalUser) {
-      _logger.info(
-        "[UPLOAD-DEBUG] Starting to queue ${filesToBeUploaded.length} new files for upload...",
-      );
-    }
+    _logger.internalInfo(
+      "[UPLOAD-DEBUG] Starting to queue ${filesToBeUploaded.length} new files for upload...",
+    );
     int queuedCount = 0;
     for (final file in filesToBeUploaded) {
       if (shouldThrottleUpload &&
           futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
-        if (flagService.internalUser) {
-          _logger.info(
-            "[UPLOAD-DEBUG] Throttle limit reached (${futures.length} files queued). "
-            "Skipping remaining ${filesToBeUploaded.length - queuedCount} files.",
-          );
-        }
+        _logger.internalInfo(
+          "[UPLOAD-DEBUG] Throttle limit reached (${futures.length} files queued). "
+          "Skipping remaining ${filesToBeUploaded.length - queuedCount} files.",
+        );
         break;
       }
       // prefer existing collection ID for manually uploaded files.
       // See https://github.com/ente-io/photos-app/pull/187
-      if (flagService.internalUser) {
-        _logger.info(
-          "[UPLOAD-DEBUG] Queueing file ${queuedCount + 1}/${filesToBeUploaded.length}: "
-          "${file.title} (localID: ${file.localID}, generatedID: ${file.generatedID})",
-        );
-      }
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] Queueing file ${queuedCount + 1}/${filesToBeUploaded.length}: "
+        "${file.title} (localID: ${file.localID}, generatedID: ${file.generatedID})",
+      );
       try {
         final collectionID = file.collectionID ??
             (await _collectionsService.getOrCreateForPath(
               file.deviceFolder ?? 'Unknown Folder',
             ))
                 .id;
-        if (flagService.internalUser) {
-          _logger.info(
-            "[UPLOAD-DEBUG] Resolved collectionID: $collectionID for file ${file.title}",
-          );
-        }
+        _logger.internalInfo(
+          "[UPLOAD-DEBUG] Resolved collectionID: $collectionID for file ${file.title}",
+        );
         _uploadFile(file, collectionID, futures);
         queuedCount++;
-        if (flagService.internalUser) {
-          _logger.info(
-            "[UPLOAD-DEBUG] Successfully queued file ${file.title} ($queuedCount queued so far)",
-          );
-        }
+        _logger.internalInfo(
+          "[UPLOAD-DEBUG] Successfully queued file ${file.title} ($queuedCount queued so far)",
+        );
       } catch (e, s) {
-        if (flagService.internalUser) {
-          _logger.severe(
-            "[UPLOAD-DEBUG] Failed to queue file ${file.title}",
-            e,
-            s,
-          );
-        }
+        _logger.internalSevere(
+          "[UPLOAD-DEBUG] Failed to queue file ${file.title}",
+          e,
+          s,
+        );
       }
     }
-    if (flagService.internalUser) {
-      _logger.info(
-        "[UPLOAD-DEBUG] Finished queueing new files. Total queued: $queuedCount/${filesToBeUploaded.length}",
-      );
-    }
+    _logger.internalInfo(
+      "[UPLOAD-DEBUG] Finished queueing new files. Total queued: $queuedCount/${filesToBeUploaded.length}",
+    );
 
-    if (flagService.internalUser) {
-      _logger.info(
-        "[UPLOAD-DEBUG] Starting to queue ${updatedFileIDs.length} updated files for re-upload...",
-      );
-    }
+    _logger.internalInfo(
+      "[UPLOAD-DEBUG] Starting to queue ${updatedFileIDs.length} updated files for re-upload...",
+    );
     int reuploadQueuedCount = 0;
     for (final uploadedFileID in updatedFileIDs) {
       if (shouldThrottleUpload &&
           futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
-        if (flagService.internalUser) {
-          _logger.info(
-            "[UPLOAD-DEBUG] Throttle limit reached for re-uploads (${futures.length} total queued). "
-            "Skipping remaining ${updatedFileIDs.length - reuploadQueuedCount} updated files.",
-          );
-        }
+        _logger.internalInfo(
+          "[UPLOAD-DEBUG] Throttle limit reached for re-uploads (${futures.length} total queued). "
+          "Skipping remaining ${updatedFileIDs.length - reuploadQueuedCount} updated files.",
+        );
         break;
       }
-      if (flagService.internalUser) {
-        _logger.info(
-          "[UPLOAD-DEBUG] Processing updated file ${reuploadQueuedCount + 1}/${updatedFileIDs.length} "
-          "(uploadedFileID: $uploadedFileID)",
-        );
-      }
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] Processing updated file ${reuploadQueuedCount + 1}/${updatedFileIDs.length} "
+        "(uploadedFileID: $uploadedFileID)",
+      );
       try {
         final allFiles = await _db.getFilesInAllCollection(
           uploadedFileID,
           ownerID,
         );
         if (allFiles.isEmpty) {
-          if (flagService.internalUser) {
-            _logger.warning(
-              "[UPLOAD-DEBUG] No files found for uploadedFileID $uploadedFileID, skipping",
-            );
-          }
+          _logger.internalWarning(
+            "[UPLOAD-DEBUG] No files found for uploadedFileID $uploadedFileID, skipping",
+          );
           continue;
         }
-        if (flagService.internalUser) {
-          _logger.info(
-            "[UPLOAD-DEBUG] Found ${allFiles.length} file(s) for uploadedFileID $uploadedFileID",
-          );
-        }
+        _logger.internalInfo(
+          "[UPLOAD-DEBUG] Found ${allFiles.length} file(s) for uploadedFileID $uploadedFileID",
+        );
         EnteFile? fileInCollectionOwnedByUser;
         for (final file in allFiles) {
           if (file.canReUpload(ownerID)) {
@@ -777,174 +736,142 @@ class RemoteSyncService {
           }
         }
         if (fileInCollectionOwnedByUser != null) {
-          if (flagService.internalUser) {
-            _logger.info(
-              "[UPLOAD-DEBUG] Queueing re-upload for ${fileInCollectionOwnedByUser.title}",
-            );
-          }
+          _logger.internalInfo(
+            "[UPLOAD-DEBUG] Queueing re-upload for ${fileInCollectionOwnedByUser.title}",
+          );
           _uploadFile(
             fileInCollectionOwnedByUser,
             fileInCollectionOwnedByUser.collectionID!,
             futures,
           );
           reuploadQueuedCount++;
-          if (flagService.internalUser) {
-            _logger.info(
-              "[UPLOAD-DEBUG] Successfully queued re-upload ($reuploadQueuedCount re-uploads queued)",
-            );
-          }
+          _logger.internalInfo(
+            "[UPLOAD-DEBUG] Successfully queued re-upload ($reuploadQueuedCount re-uploads queued)",
+          );
         } else {
-          if (flagService.internalUser) {
-            _logger.warning(
-              "[UPLOAD-DEBUG] No re-uploadable file found for uploadedFileID $uploadedFileID",
-            );
-          }
-        }
-      } catch (e, s) {
-        if (flagService.internalUser) {
-          _logger.severe(
-            "[UPLOAD-DEBUG] Failed to queue re-upload for uploadedFileID $uploadedFileID",
-            e,
-            s,
+          _logger.internalWarning(
+            "[UPLOAD-DEBUG] No re-uploadable file found for uploadedFileID $uploadedFileID",
           );
         }
+      } catch (e, s) {
+        _logger.internalSevere(
+          "[UPLOAD-DEBUG] Failed to queue re-upload for uploadedFileID $uploadedFileID",
+          e,
+          s,
+        );
       }
     }
-    if (flagService.internalUser) {
-      _logger.info(
-        "[UPLOAD-DEBUG] Finished queueing updated files. Total re-uploads queued: "
-        "$reuploadQueuedCount/${updatedFileIDs.length}",
-      );
-    }
+    _logger.internalInfo(
+      "[UPLOAD-DEBUG] Finished queueing updated files. Total re-uploads queued: "
+      "$reuploadQueuedCount/${updatedFileIDs.length}",
+    );
 
-    if (flagService.internalUser) {
-      _logger.info(
-        "[UPLOAD-DEBUG] ═══════════════════════════════════════════════════════",
-      );
-      _logger.info(
-        "[UPLOAD-DEBUG] SUMMARY: Total ${futures.length} upload futures queued",
-      );
-      _logger.info(
-        "[UPLOAD-DEBUG] - New files queued: $queuedCount/${filesToBeUploaded.length}",
-      );
-      _logger.info(
-        "[UPLOAD-DEBUG] - Re-uploads queued: $reuploadQueuedCount/${updatedFileIDs.length}",
-      );
-      _logger.info(
-        "[UPLOAD-DEBUG] - Process mode: ${isProcessBg ? 'BACKGROUND' : 'FOREGROUND'}",
-      );
-      _logger.info(
-        "[UPLOAD-DEBUG] Now waiting for all ${futures.length} upload futures to complete...",
-      );
-      _logger.info(
-        "[UPLOAD-DEBUG] ═══════════════════════════════════════════════════════",
-      );
-    }
+    _logger.internalInfo(
+      "[UPLOAD-DEBUG] ═══════════════════════════════════════════════════════",
+    );
+    _logger.internalInfo(
+      "[UPLOAD-DEBUG] SUMMARY: Total ${futures.length} upload futures queued",
+    );
+    _logger.internalInfo(
+      "[UPLOAD-DEBUG] - New files queued: $queuedCount/${filesToBeUploaded.length}",
+    );
+    _logger.internalInfo(
+      "[UPLOAD-DEBUG] - Re-uploads queued: $reuploadQueuedCount/${updatedFileIDs.length}",
+    );
+    _logger.internalInfo(
+      "[UPLOAD-DEBUG] - Process mode: ${isProcessBg ? 'BACKGROUND' : 'FOREGROUND'}",
+    );
+    _logger.internalInfo(
+      "[UPLOAD-DEBUG] Now waiting for all ${futures.length} upload futures to complete...",
+    );
+    _logger.internalInfo(
+      "[UPLOAD-DEBUG] ═══════════════════════════════════════════════════════",
+    );
 
     try {
       await Future.wait(futures);
-      if (flagService.internalUser) {
-        _logger.info(
-          "[UPLOAD-DEBUG] All upload futures completed successfully! "
-          "Completed: $_completedUploads, Ignored: $_ignoredUploads",
-        );
-      }
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] All upload futures completed successfully! "
+        "Completed: $_completedUploads, Ignored: $_ignoredUploads",
+      );
     } on InvalidFileError catch (e, s) {
-      if (flagService.internalUser) {
-        _logger.warning(
-          "[UPLOAD-DEBUG] InvalidFileError caught (ignored)",
-          e,
-          s,
-        );
-      }
+      _logger.internalWarning(
+        "[UPLOAD-DEBUG] InvalidFileError caught (ignored)",
+        e,
+        s,
+      );
       // Do nothing
     } on FileSystemException catch (e, s) {
-      if (flagService.internalUser) {
-        _logger.warning(
-          "[UPLOAD-DEBUG] FileSystemException caught (ignored - likely concurrency issue)",
-          e,
-          s,
-        );
-      }
+      _logger.internalWarning(
+        "[UPLOAD-DEBUG] FileSystemException caught (ignored - likely concurrency issue)",
+        e,
+        s,
+      );
       // Do nothing since it's caused mostly due to concurrency issues
       // when the foreground app deletes temporary files, interrupting a background
       // upload
     } on LockAlreadyAcquiredError catch (e, s) {
-      if (flagService.internalUser) {
-        _logger.warning(
-          "[UPLOAD-DEBUG] LockAlreadyAcquiredError caught (ignored)",
-          e,
-          s,
-        );
-      }
+      _logger.internalWarning(
+        "[UPLOAD-DEBUG] LockAlreadyAcquiredError caught (ignored)",
+        e,
+        s,
+      );
       // Do nothing
     } on SilentlyCancelUploadsError catch (e, s) {
-      if (flagService.internalUser) {
-        _logger.warning(
-          "[UPLOAD-DEBUG] SilentlyCancelUploadsError caught (ignored)",
-          e,
-          s,
-        );
-      }
+      _logger.internalWarning(
+        "[UPLOAD-DEBUG] SilentlyCancelUploadsError caught (ignored)",
+        e,
+        s,
+      );
       // Do nothing
     } on UserCancelledUploadError catch (e, s) {
-      if (flagService.internalUser) {
-        _logger.warning(
-          "[UPLOAD-DEBUG] UserCancelledUploadError caught (ignored)",
-          e,
-          s,
-        );
-      }
+      _logger.internalWarning(
+        "[UPLOAD-DEBUG] UserCancelledUploadError caught (ignored)",
+        e,
+        s,
+      );
       // Do nothing
     } catch (e, s) {
-      if (flagService.internalUser) {
-        _logger.severe("[UPLOAD-DEBUG] Unexpected error during upload", e, s);
-      }
+      _logger.internalSevere(
+        "[UPLOAD-DEBUG] Unexpected error during upload",
+        e,
+        s,
+      );
       rethrow;
     }
 
     final hasUploaded = _completedUploads > 0;
-    if (flagService.internalUser) {
-      _logger.info(
-        "[UPLOAD-DEBUG] Upload process finished. Returning hasUploaded=$hasUploaded "
-        "(completedUploads: $_completedUploads)",
-      );
-    }
+    _logger.internalInfo(
+      "[UPLOAD-DEBUG] Upload process finished. Returning hasUploaded=$hasUploaded "
+      "(completedUploads: $_completedUploads)",
+    );
     return hasUploaded;
   }
 
   void _uploadFile(EnteFile file, int collectionID, List<Future> futures) {
-    if (flagService.internalUser) {
-      _logger.info(
-        "[UPLOAD-DEBUG] _uploadFile() called for ${file.title} "
-        "(localID: ${file.localID}, collectionID: $collectionID). "
-        "Calling FileUploader.upload()...",
-      );
-    }
+    _logger.internalInfo(
+      "[UPLOAD-DEBUG] _uploadFile() called for ${file.title} "
+      "(localID: ${file.localID}, collectionID: $collectionID). "
+      "Calling FileUploader.upload()...",
+    );
     final future = _uploader.upload(file, collectionID).then((uploadedFile) {
-      if (flagService.internalUser) {
-        _logger.info(
-          "[UPLOAD-DEBUG] Upload completed successfully for ${uploadedFile.title}",
-        );
-      }
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] Upload completed successfully for ${uploadedFile.title}",
+      );
       return _onFileUploaded(uploadedFile);
     }).onError((error, stackTrace) {
-      if (flagService.internalUser) {
-        _logger.severe(
-          "[UPLOAD-DEBUG] Upload failed for ${file.title}",
-          error,
-          stackTrace,
-        );
-      }
+      _logger.internalSevere(
+        "[UPLOAD-DEBUG] Upload failed for ${file.title}",
+        error,
+        stackTrace,
+      );
       return _onFileUploadError(error, stackTrace, file);
     });
     futures.add(future);
-    if (flagService.internalUser) {
-      _logger.info(
-        "[UPLOAD-DEBUG] Upload future added to futures list for ${file.title} "
-        "(futures count: ${futures.length})",
-      );
-    }
+    _logger.internalInfo(
+      "[UPLOAD-DEBUG] Upload future added to futures list for ${file.title} "
+      "(futures count: ${futures.length})",
+    );
   }
 
   Future<void> _onFileUploaded(EnteFile file) async {
