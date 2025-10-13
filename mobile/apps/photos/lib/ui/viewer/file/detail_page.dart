@@ -215,6 +215,10 @@ class _BodyState extends State<_Body> {
                         InheritedDetailPageState.of(context)
                             .enableFullScreenNotifier,
                     isGuestView: isGuestView,
+                    showOnlyInfoButton:
+                        widget.config.mode == DetailPageMode.minimalistic &&
+                            !isGuestView,
+                    userID: Configuration.instance.getUserID(),
                   );
                 },
               ),

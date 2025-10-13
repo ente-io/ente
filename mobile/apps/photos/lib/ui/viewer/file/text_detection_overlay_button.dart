@@ -7,6 +7,7 @@ import "package:logging/logging.dart";
 import "package:mobile_ocr/mobile_ocr.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
+import "package:photos/models/file/trash_file.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/ui/viewer/file/text_detection_page.dart";
 import "package:photos/utils/dialog_util.dart";
@@ -17,11 +18,15 @@ class TextDetectionOverlayButton extends StatefulWidget {
   final EnteFile file;
   final ValueListenable<bool> enableFullScreenNotifier;
   final bool isGuestView;
+  final bool showOnlyInfoButton;
+  final int? userID;
 
   const TextDetectionOverlayButton({
     required this.file,
     required this.enableFullScreenNotifier,
     required this.isGuestView,
+    required this.showOnlyInfoButton,
+    required this.userID,
     super.key,
   });
 
@@ -32,6 +37,8 @@ class TextDetectionOverlayButton extends StatefulWidget {
 
 class _TextDetectionOverlayButtonState
     extends State<TextDetectionOverlayButton> {
+  static const double _buttonSize = 32.0;
+  static const double _barSlotExtent = 48.0;
   static final Map<String, _DetectionResult> _cache = {};
   final Logger _logger = Logger("TextDetectionOverlayButton");
   final MobileOcr _mobileOcr = MobileOcr();
@@ -186,13 +193,47 @@ class _TextDetectionOverlayButtonState
         if (shouldHide) {
           return const SizedBox.shrink();
         }
+        if (!_hasShareSlot()) {
+          return const SizedBox.shrink();
+        }
         final double bottomOffset = MediaQuery.paddingOf(context).bottom + 96.0;
+        final int slotCount = _bottomBarSlotCount();
+        if (slotCount <= 0) {
+          return const SizedBox.shrink();
+        }
+        final List<Widget> rowChildren = List<Widget>.generate(
+          slotCount,
+          (int index) => _buildPlaceholderSlot(
+            context: context,
+            isShareSlot: index == slotCount - 1,
+          ),
+        );
         return Positioned(
           bottom: bottomOffset,
-          right: 16,
-          child: _buildButton(context),
+          left: 0,
+          right: 0,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: rowChildren,
+          ),
         );
       },
+    );
+  }
+
+  Widget _buildPlaceholderSlot({
+    required BuildContext context,
+    required bool isShareSlot,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: SizedBox(
+        width: _barSlotExtent,
+        height: _barSlotExtent,
+        child: isShareSlot
+            ? Center(child: _buildButton(context))
+            : const SizedBox.shrink(),
+      ),
     );
   }
 
@@ -202,13 +243,16 @@ class _TextDetectionOverlayButtonState
       message: detectTextLabel,
       child: IconButton(
         tooltip: detectTextLabel,
-        constraints: const BoxConstraints.tightFor(width: 32, height: 32),
+        constraints: const BoxConstraints.tightFor(
+          width: _buttonSize,
+          height: _buttonSize,
+        ),
         padding: EdgeInsets.zero,
         onPressed: _onPressed,
         icon: SvgPicture.asset(
           "assets/detect_text.svg",
-          width: 32,
-          height: 32,
+          width: _buttonSize,
+          height: _buttonSize,
           semanticsLabel: detectTextLabel,
         ),
       ),
@@ -242,6 +286,48 @@ class _TextDetectionOverlayButtonState
       return null;
     }
     return localFile.path;
+  }
+
+  bool _hasShareSlot() {
+    if (widget.showOnlyInfoButton) {
+      return false;
+    }
+    if (widget.file is TrashFile) {
+      return false;
+    }
+    return true;
+  }
+
+  int _bottomBarSlotCount() {
+    if (!_hasShareSlot()) {
+      return 0;
+    }
+    int count = 1; // Info button
+    if (_supportsEdit(widget.file)) {
+      count++;
+    }
+    if (_isOwnedByUser()) {
+      count++;
+    }
+    return count + 1; // Share slot
+  }
+
+  bool _isOwnedByUser() {
+    final int? ownerID = widget.file.ownerID;
+    if (ownerID == null) {
+      return true;
+    }
+    final int? userID = widget.userID;
+    if (userID == null) {
+      return false;
+    }
+    return ownerID == userID;
+  }
+
+  bool _supportsEdit(EnteFile file) {
+    return file.fileType == FileType.image ||
+        file.fileType == FileType.livePhoto ||
+        file.fileType == FileType.video;
   }
 }
 
