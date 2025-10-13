@@ -177,54 +177,76 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
 
     // Begin Execution
     // only runs for android
-    _logger.info("[BG TASK] update notification");
+    if (flagService.internalUser) {
+      _logger.info("[BG TASK] update notification");
+    }
     updateService.showUpdateNotification().ignore();
 
     // Wrap _sync() with timeout and error handling to prevent indefinite hanging
     // and allow background tasks to complete even if sync fails
     try {
-      _logger.info("[BG TASK] sync starting with 5-minute timeout");
+      if (flagService.internalUser) {
+        _logger.info("[BG TASK] sync starting with 5-minute timeout");
+      }
       await _sync('bgTaskActiveProcess').timeout(
         const Duration(minutes: 5),
         onTimeout: () {
-          _logger.severe(
-            "[BG TASK] Sync timed out after 5 minutes! "
-            "Continuing with home widget and smart albums sync.",
-          );
+          if (flagService.internalUser) {
+            _logger.severe(
+              "[BG TASK] Sync timed out after 5 minutes! "
+              "Continuing with home widget and smart albums sync.",
+            );
+          }
           throw TimeoutException(
             'Background sync exceeded 5-minute timeout',
             const Duration(minutes: 5),
           );
         },
       );
-      _logger.info("[BG TASK] sync completed successfully");
+      if (flagService.internalUser) {
+        _logger.info("[BG TASK] sync completed successfully");
+      }
     } on TimeoutException catch (e) {
-      _logger.severe("[BG TASK] Sync timeout caught, continuing...", e);
+      if (flagService.internalUser) {
+        _logger.severe("[BG TASK] Sync timeout caught, continuing...", e);
+      }
     } catch (e, s) {
-      _logger.severe(
-        "[BG TASK] Sync failed with error. "
-        "Continuing with home widget and smart albums sync.",
-        e,
-        s,
-      );
+      if (flagService.internalUser) {
+        _logger.severe(
+          "[BG TASK] Sync failed with error. "
+          "Continuing with home widget and smart albums sync.",
+          e,
+          s,
+        );
+      }
     }
 
-    _logger.info("[BG TASK] locale fetch");
+    if (flagService.internalUser) {
+      _logger.info("[BG TASK] locale fetch");
+    }
     final locale = await getLocale();
     await initializeDateFormatting(locale?.languageCode ?? "en");
     // only runs for android
-    _logger.info("[BG TASK] home widget sync");
+    if (flagService.internalUser) {
+      _logger.info("[BG TASK] home widget sync");
+    }
     await _homeWidgetSync(true);
 
     // await MLService.instance.init();
     // await PersonService.init(entityService, MLDataDB.instance, prefs);
     // await MLService.instance.runAllML(force: true);
-    _logger.info("[BG TASK] smart albums sync");
+    if (flagService.internalUser) {
+      _logger.info("[BG TASK] smart albums sync");
+    }
     await smartAlbumsService.syncSmartAlbums();
 
-    _logger.info("[BG TASK] $taskId completed");
+    if (flagService.internalUser) {
+      _logger.info("[BG TASK] $taskId completed");
+    }
   } catch (e, s) {
-    _logger.severe("[BG TASK] $taskId error", e, s);
+    if (flagService.internalUser) {
+      _logger.severe("[BG TASK] $taskId error", e, s);
+    }
   }
 }
 

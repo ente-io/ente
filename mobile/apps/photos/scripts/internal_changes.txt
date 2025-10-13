@@ -8,3 +8,4 @@
 - Laurens: Change similar images labels copy
 - Laurens: Fix flipped thumbnails issue by removing use of ColorFiltered widget
 - Prateek: Add comprehensive debug logging and timeout/error handling to track and fix background sync issues
+- Prateek: Add detailed logging to upload URL fetching and file upload phases to identify background task hang point
