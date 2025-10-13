@@ -21,6 +21,46 @@ class VideoCropPage extends StatefulWidget {
 }
 
 class _VideoCropPageState extends State<VideoCropPage> {
+  CropValue? _selectedCropValue;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeSelectedValue();
+  }
+
+  void _initializeSelectedValue() {
+    final currentRatio = widget.controller.preferredCropAspectRatio;
+    if (currentRatio == null) {
+      _selectedCropValue = null;
+      return;
+    }
+
+    // Check if we need to account for rotation
+    final rotation = widget.controller.rotation;
+    final isRotated = rotation % 180 != 0;
+
+    // Find which crop value matches the current ratio
+    for (final value in CropValue.values) {
+      if (value == CropValue.original || value == CropValue.free) continue;
+
+      final valueRatio = value.getFraction()?.toDouble();
+      if (valueRatio == null) continue;
+
+      // For rotated videos, check both the normal and swapped ratios
+      if (isRotated && value != CropValue.ratio_1_1) {
+        final swappedRatio = 1.0 / valueRatio;
+        if ((currentRatio - swappedRatio).abs() < 0.01) {
+          _selectedCropValue = value;
+          return;
+        }
+      } else if ((currentRatio - valueRatio).abs() < 0.01) {
+        _selectedCropValue = value;
+        return;
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
@@ -98,17 +138,34 @@ class _VideoCropPageState extends State<VideoCropPage> {
   Widget _buildCropButton(BuildContext context, CropValue value) {
     final aspectRatio = value.getFraction()?.toDouble();
 
+    // Check if this button is selected
+    final isSelected = _selectedCropValue == value;
+
     return VideoEditorBottomAction(
       label: value.displayName,
-      isSelected: value != CropValue.original &&
-          widget.controller.preferredCropAspectRatio == aspectRatio,
+      isSelected: isSelected,
       onPressed: () {
         if (value == CropValue.original) {
           widget.controller.updateCrop(Offset.zero, const Offset(1.0, 1.0));
           widget.controller.cropAspectRatio(null);
+          _selectedCropValue = null;
           setState(() {});
-        } else {
-          widget.controller.preferredCropAspectRatio = aspectRatio;
+        } else if (value == CropValue.free) {
+          widget.controller.preferredCropAspectRatio = null;
+          _selectedCropValue = value;
+          setState(() {});
+        } else if (aspectRatio != null) {
+          _selectedCropValue = value;
+
+          // Store the visual aspect ratio, accounting for rotation
+          final rotation = widget.controller.rotation;
+          final isRotated = rotation % 180 != 0;
+          final ratioToStore = (isRotated && value != CropValue.ratio_1_1)
+              ? 1.0 / aspectRatio
+              : aspectRatio;
+
+          widget.controller.preferredCropAspectRatio = ratioToStore;
+          setState(() {});
         }
       },
       svgPath: "assets/video-editor/video-crop-${value.name}-action.svg",
