@@ -98,7 +98,9 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       final isYearlyPlan = plan.period == 'year';
       return isYearlyPlan == _showYearlyPlan;
     }).toList();
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   FutureOr onWebPaymentGoBack(dynamic value) async {
