@@ -480,7 +480,9 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
         break;
       case PlaybackPositionChangedEvent():
         position = event.positionInMilliseconds;
-        setState(() {});
+        if (mounted) {
+          setState(() {});
+        }
         break;
       case PlaybackEndedEvent():
         _onPlaybackEnded();
