@@ -394,6 +394,10 @@ export const sidebar = [
                         text: "Running Ente using systemd",
                         link: "/self-hosting/guides/systemd",
                     },
+                    {
+                        text: "Ente on Windows",
+                        link: "/self-hosting/guides/windows",
+                    },
                 ],
             },
             {
