@@ -826,8 +826,17 @@ class SmartMemoriesService {
         final int aFileID = a.uploadedFileID!;
         return similarities[bFileID]!.compareTo(similarities[aFileID]!);
       });
+      final int limit = min(clipFiles.length, 50);
+      final List<EnteFile> topCandidates = clipFiles.take(limit).toList();
+      topCandidates.shuffle(Random());
+      final List<EnteFile> selected = topCandidates.take(10).toList();
+      selected.sort((a, b) {
+        final int bFileID = b.uploadedFileID!;
+        final int aFileID = a.uploadedFileID!;
+        return similarities[bFileID]!.compareTo(similarities[aFileID]!);
+      });
       return ClipMemory(
-        clipFiles.take(10).map((f) => Memory.fromFile(f, seenTimes)).toList(),
+        selected.map((f) => Memory.fromFile(f, seenTimes)).toList(),
         nowInMicroseconds,
         windowEnd,
         clipMemoryType,
