@@ -2,6 +2,7 @@ import "dart:io";
 
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
+import "package:flutter_svg/flutter_svg.dart";
 import "package:logging/logging.dart";
 import "package:mobile_ocr/mobile_ocr.dart";
 import "package:photos/models/file/file.dart";
@@ -199,20 +200,16 @@ class _TextDetectionOverlayButtonState
     const String detectTextLabel = "Detect Text";
     return Tooltip(
       message: detectTextLabel,
-      child: Material(
-        color: Colors.black.withValues(alpha: 0.45),
-        shape: const CircleBorder(),
-        child: IconButton(
-          tooltip: detectTextLabel,
-          iconSize: 20,
-          constraints: const BoxConstraints.tightFor(width: 44, height: 44),
-          padding: EdgeInsets.zero,
-          onPressed: _onPressed,
-          icon: const Icon(
-            Icons.text_fields,
-            color: Colors.white,
-            size: 20,
-          ),
+      child: IconButton(
+        tooltip: detectTextLabel,
+        constraints: const BoxConstraints.tightFor(width: 32, height: 32),
+        padding: EdgeInsets.zero,
+        onPressed: _onPressed,
+        icon: SvgPicture.asset(
+          "assets/detect_text.svg",
+          width: 32,
+          height: 32,
+          semanticsLabel: detectTextLabel,
         ),
       ),
     );
