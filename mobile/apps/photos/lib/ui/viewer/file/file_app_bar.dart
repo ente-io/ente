@@ -338,6 +338,7 @@ class FileAppBarState extends State<FileAppBar> {
     if (items.isNotEmpty) {
       _actions.add(
         PopupMenuButton(
+          tooltip: MaterialLocalizations.of(context).moreButtonTooltip,
           itemBuilder: (context) {
             return items;
           },
