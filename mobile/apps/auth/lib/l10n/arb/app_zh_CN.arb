@@ -376,6 +376,7 @@
   "shouldHideCode": "隐藏代码",
   "doubleTapToViewHiddenCode": "您可以双击条目来查看代码",
   "focusOnSearchBar": "应用启动后聚焦搜索",
+  "minimizeToTrayOnClose": "关闭时最小化到托盘",
   "confirmUpdatingkey": "您确定要更新此密钥吗？",
   "minimizeAppOnCopy": "复制时最小化应用",
   "editCodeAuthMessage": "编辑代码需要身份验证",
