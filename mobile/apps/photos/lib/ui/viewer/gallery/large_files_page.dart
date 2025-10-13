@@ -13,10 +13,12 @@ import "package:photos/services/search_service.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import 'package:photos/ui/viewer/gallery/gallery.dart';
+import "package:photos/ui/viewer/gallery/state/boundary_reporter_mixin.dart";
+import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 
-class LargeFilesPagePage extends StatelessWidget {
+class LargeFilesPagePage extends StatefulWidget {
   final String tagPrefix;
   final GalleryType appBarType;
   final GalleryType overlayType;
@@ -31,6 +33,11 @@ class LargeFilesPagePage extends StatelessWidget {
   });
 
   @override
+  State<LargeFilesPagePage> createState() => _LargeFilesPagePageState();
+}
+
+class _LargeFilesPagePageState extends State<LargeFilesPagePage> {
+  @override
   Widget build(BuildContext context) {
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
@@ -43,7 +50,7 @@ class LargeFilesPagePage extends StatelessWidget {
           if (file.isOwner &&
               file.isUploaded &&
               file.fileSize != null &&
-              file.fileSize! > minLargeFileSize) {
+              file.fileSize! > LargeFilesPagePage.minLargeFileSize) {
             if (!alreadyTracked.contains(file.uploadedFileID!)) {
               filesWithSize.add(file);
               alreadyTracked.add(file.uploadedFileID!);
@@ -64,43 +71,61 @@ class LargeFilesPagePage extends StatelessWidget {
       forceReloadEvents: [
         Bus.instance.on<CollectionMetaEvent>(),
       ],
-      tagPrefix: tagPrefix,
-      selectedFiles: _selectedFiles,
+      tagPrefix: widget.tagPrefix,
+      selectedFiles: widget._selectedFiles,
       sortAsyncFn: () => false,
       groupType: GroupType.size,
       initialFiles: null,
       albumName: AppLocalizations.of(context).viewLargeFiles,
     );
-    return GalleryFilesState(
-      child: Scaffold(
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(50.0),
-          child: AppBar(
-            elevation: 0,
-            centerTitle: false,
-            title: Text(
-              AppLocalizations.of(context).viewLargeFiles,
-              style: Theme.of(context)
-                  .textTheme
-                  .headlineSmall!
-                  .copyWith(fontSize: 16),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+    return GalleryBoundariesProvider(
+      child: GalleryFilesState(
+        child: Scaffold(
+          appBar: const PreferredSize(
+            preferredSize: Size.fromHeight(50.0),
+            child: _LargeFilesAppBar(),
+          ),
+          body: SelectionState(
+            selectedFiles: widget._selectedFiles,
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                gallery,
+                FileSelectionOverlayBar(
+                  widget.overlayType,
+                  widget._selectedFiles,
+                ),
+              ],
             ),
           ),
         ),
-        body: SelectionState(
-          selectedFiles: _selectedFiles,
-          child: Stack(
-            alignment: Alignment.bottomCenter,
-            children: [
-              gallery,
-              FileSelectionOverlayBar(
-                overlayType,
-                _selectedFiles,
-              ),
-            ],
-          ),
+      ),
+    );
+  }
+}
+
+class _LargeFilesAppBar extends StatefulWidget {
+  const _LargeFilesAppBar();
+
+  @override
+  State<_LargeFilesAppBar> createState() => _LargeFilesAppBarState();
+}
+
+class _LargeFilesAppBarState extends State<_LargeFilesAppBar>
+    with BoundaryReporter {
+  @override
+  Widget build(BuildContext context) {
+    return boundaryWidget(
+      position: BoundaryPosition.top,
+      child: AppBar(
+        elevation: 0,
+        centerTitle: false,
+        title: Text(
+          AppLocalizations.of(context).viewLargeFiles,
+          style:
+              Theme.of(context).textTheme.headlineSmall!.copyWith(fontSize: 16),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
         ),
       ),
     );
