@@ -442,8 +442,16 @@ class SmartMemoriesService {
     if (isMeAssigned) meFileIDs = personIdToFileIDs[meID]!;
 
     // Loop through the people and find all memories
-    final Map<String, Map<PeopleMemoryType, List<PeopleMemory>>>
-        personToMemories = {};
+    Future<List<Memory>> selectPeopleMemories(List<Memory> memories) {
+      return _bestSelectionPeople(
+        memories,
+        fileIDToImageEmbedding: fileIDToImageEmbedding,
+        clipPositiveTextVector: clipPositiveTextVector,
+      );
+    }
+
+    final Map<String, Map<PeopleMemoryType, List<PeopleMemoryCandidate>>>
+        personToCandidates = {};
     for (final personID in orderedImportantPersonsID) {
       final personFileIDs = personIdToFileIDs[personID]!;
       final personName = personIdToPerson[personID]!.data.name;
@@ -461,22 +469,25 @@ class SmartMemoriesService {
         }
       }
       if (spotlightFiles.length > minimumMemoryLength) {
-        final selectSpotlightMemories = await _bestSelectionPeople(
-          spotlightFiles.map((f) => Memory.fromFile(f, seenTimes)).toList(),
-          fileIDToImageEmbedding: fileIDToImageEmbedding,
-          clipPositiveTextVector: clipPositiveTextVector,
+        final spotlightMemories = spotlightFiles
+            .map((f) => Memory.fromFile(f, seenTimes))
+            .toList(growable: false);
+        final spotlightList =
+            personToCandidates.putIfAbsent(personID, () => {}).putIfAbsent(
+                  PeopleMemoryType.spotlight,
+                  () => <PeopleMemoryCandidate>[],
+                );
+        spotlightList.add(
+          PeopleMemoryCandidate(
+            personID: personID,
+            personName: (isMeAssigned && meID == personID) ? null : personName,
+            type: PeopleMemoryType.spotlight,
+            rawMemories: spotlightMemories,
+            firstDateToShow: nowInMicroseconds,
+            lastDateToShow: windowEnd,
+            selectionBuilder: selectPeopleMemories,
+          ),
         );
-        final spotlightMemory = PeopleMemory(
-          selectSpotlightMemories,
-          nowInMicroseconds,
-          windowEnd,
-          PeopleMemoryType.spotlight,
-          personID,
-          (isMeAssigned && meID == personID) ? null : personName,
-        );
-        personToMemories
-            .putIfAbsent(personID, () => {})
-            .putIfAbsent(PeopleMemoryType.spotlight, () => [spotlightMemory]);
       }
       w?.log('spotlight setup');
 
@@ -493,24 +504,25 @@ class SmartMemoriesService {
           }
         }
         if (youAndThemFiles.length > minimumMemoryLength) {
-          // final String title = "You and $personName";
-          final selectYouAndThemMemories = await _bestSelectionPeople(
-            youAndThemFiles.map((f) => Memory.fromFile(f, seenTimes)).toList(),
-            fileIDToImageEmbedding: fileIDToImageEmbedding,
-            clipPositiveTextVector: clipPositiveTextVector,
+          final youAndThemMemories = youAndThemFiles
+              .map((f) => Memory.fromFile(f, seenTimes))
+              .toList(growable: false);
+          final youAndThemList =
+              personToCandidates.putIfAbsent(personID, () => {}).putIfAbsent(
+                    PeopleMemoryType.youAndThem,
+                    () => <PeopleMemoryCandidate>[],
+                  );
+          youAndThemList.add(
+            PeopleMemoryCandidate(
+              personID: personID,
+              personName: personName,
+              type: PeopleMemoryType.youAndThem,
+              rawMemories: youAndThemMemories,
+              firstDateToShow: nowInMicroseconds,
+              lastDateToShow: windowEnd,
+              selectionBuilder: selectPeopleMemories,
+            ),
           );
-          final youAndThemMemory = PeopleMemory(
-            selectYouAndThemMemories,
-            nowInMicroseconds,
-            windowEnd,
-            PeopleMemoryType.youAndThem,
-            personID,
-            personName,
-          );
-          personToMemories.putIfAbsent(personID, () => {}).putIfAbsent(
-                PeopleMemoryType.youAndThem,
-                () => [youAndThemMemory],
-              );
         }
         w?.log('youAndThem setup');
       }
@@ -549,27 +561,26 @@ class SmartMemoriesService {
             }
           }
           if (activityFiles.length > minimumMemoryLength) {
-            final selectActivityMemories = await _bestSelectionPeople(
-              activityFiles.map((f) => Memory.fromFile(f, seenTimes)).toList(),
-              fileIDToImageEmbedding: fileIDToImageEmbedding,
-              clipPositiveTextVector: clipPositiveTextVector,
+            final activityMemories = activityFiles
+                .map((f) => Memory.fromFile(f, seenTimes))
+                .toList(growable: false);
+            final activityList =
+                personToCandidates.putIfAbsent(personID, () => {}).putIfAbsent(
+                      PeopleMemoryType.doingSomethingTogether,
+                      () => <PeopleMemoryCandidate>[],
+                    );
+            activityList.add(
+              PeopleMemoryCandidate(
+                personID: personID,
+                personName: personName,
+                type: PeopleMemoryType.doingSomethingTogether,
+                rawMemories: activityMemories,
+                firstDateToShow: nowInMicroseconds,
+                lastDateToShow: windowEnd,
+                activity: activity,
+                selectionBuilder: selectPeopleMemories,
+              ),
             );
-            final activityMemory = PeopleMemory(
-              selectActivityMemories,
-              nowInMicroseconds,
-              windowEnd,
-              PeopleMemoryType.doingSomethingTogether,
-              personID,
-              personName,
-              activity: activity,
-            );
-            personToMemories
-                .putIfAbsent(personID, () => {})
-                .putIfAbsent(
-                  PeopleMemoryType.doingSomethingTogether,
-                  () => [],
-                )
-                .add(activityMemory);
           }
         }
 
@@ -604,31 +615,40 @@ class SmartMemoriesService {
         }
       }
       if (longAgo && lastTimeYouSawThemFiles.length >= 2 && meID != personID) {
-        final lastTimeMemory = PeopleMemory(
-          lastTimeYouSawThemFiles
-              .map((f) => Memory.fromFile(f, seenTimes))
-              .toList(),
-          nowInMicroseconds,
-          windowEnd,
-          PeopleMemoryType.lastTimeYouSawThem,
-          personID,
-          personName,
-          lastCreationTime: lastCreationTime,
+        final lastTimeMemories = lastTimeYouSawThemFiles
+            .map((f) => Memory.fromFile(f, seenTimes))
+            .toList(growable: false);
+        final lastTimeList =
+            personToCandidates.putIfAbsent(personID, () => {}).putIfAbsent(
+                  PeopleMemoryType.lastTimeYouSawThem,
+                  () => <PeopleMemoryCandidate>[],
+                );
+        lastTimeList.add(
+          PeopleMemoryCandidate(
+            personID: personID,
+            personName: personName,
+            type: PeopleMemoryType.lastTimeYouSawThem,
+            rawMemories: lastTimeMemories,
+            firstDateToShow: nowInMicroseconds,
+            lastDateToShow: windowEnd,
+            lastCreationTime: lastCreationTime,
+            requiresSelection: false,
+          ),
         );
-        personToMemories.putIfAbsent(personID, () => {}).putIfAbsent(
-              PeopleMemoryType.lastTimeYouSawThem,
-              () => [lastTimeMemory],
-            );
       }
       w?.log('lastTimeYouSawThem setup');
     }
 
     // Surface everything just for debug checking
     if (surfaceAll) {
-      for (final personID in personToMemories.keys) {
-        final personMemories = personToMemories[personID]!;
-        for (final memoryType in personMemories.keys) {
-          memoryResults.addAll(personMemories[memoryType]!);
+      for (final personCandidates in personToCandidates.values) {
+        for (final candidateList in personCandidates.values) {
+          for (final candidate in candidateList) {
+            final memory = await candidate.realize();
+            if (memory != null) {
+              memoryResults.add(memory);
+            }
+          }
         }
       }
       return memoryResults;
@@ -636,20 +656,24 @@ class SmartMemoriesService {
 
     // Loop through the people and check if we should surface anything based on relevancy (bday, last met)
     for (final personID in orderedImportantPersonsID) {
-      final personMemories = personToMemories[personID];
-      if (personMemories == null) continue;
+      final personCandidates = personToCandidates[personID];
+      if (personCandidates == null) continue;
       final person = personIdToPerson[personID]!;
 
       // Check if we should surface memory based on last met
-      final lastMetMemory =
-          personMemories[PeopleMemoryType.lastTimeYouSawThem]?.first;
-      if (lastMetMemory != null) {
+      final lastMetCandidate =
+          personCandidates[PeopleMemoryType.lastTimeYouSawThem]?.first;
+      if (lastMetCandidate != null &&
+          lastMetCandidate.lastCreationTime != null) {
         final lastMetTime = DateTime.fromMicrosecondsSinceEpoch(
-          lastMetMemory.lastCreationTime!,
+          lastMetCandidate.lastCreationTime!,
         ).copyWith(year: currentTime.year);
         final daysSinceLastMet = lastMetTime.difference(currentTime).inDays;
         if (daysSinceLastMet < 7 && daysSinceLastMet >= 0) {
-          memoryResults.add(lastMetMemory);
+          final lastMetMemory = await lastMetCandidate.realize();
+          if (lastMetMemory != null) {
+            memoryResults.add(lastMetMemory);
+          }
         }
       }
 
@@ -661,52 +685,59 @@ class SmartMemoriesService {
         final daysTillBirthday = thisBirthday.difference(currentTime).inDays;
         if (daysTillBirthday < 6 && daysTillBirthday >= 0) {
           final int newAge = currentTime.year - birthdate.year;
-          final spotlightMem =
-              personMemories[PeopleMemoryType.spotlight]?.first;
-          if (spotlightMem != null && spotlightMem.personName != null) {
-            final thisBirthday = birthdate.copyWith(year: currentTime.year);
-            memoryResults.add(
-              spotlightMem.copyWith(
-                isBirthday: false,
-                newAge: newAge,
-                firstDateToShow: thisBirthday
-                    .subtract(const Duration(days: 5))
-                    .microsecondsSinceEpoch,
-                lastDateToShow: thisBirthday.microsecondsSinceEpoch,
-              ),
-            );
-            memoryResults.add(
-              spotlightMem.copyWith(
-                isBirthday: true,
-                newAge: newAge,
-                firstDateToShow: thisBirthday.microsecondsSinceEpoch,
-                lastDateToShow:
-                    thisBirthday.add(kDayItself).microsecondsSinceEpoch,
-              ),
-            );
+          final spotlightCandidate =
+              personCandidates[PeopleMemoryType.spotlight]?.first;
+          if (spotlightCandidate != null &&
+              spotlightCandidate.personName != null) {
+            final spotlightMem = await spotlightCandidate.realize();
+            if (spotlightMem != null) {
+              final thisBirthday = birthdate.copyWith(year: currentTime.year);
+              memoryResults.add(
+                spotlightMem.copyWith(
+                  isBirthday: false,
+                  newAge: newAge,
+                  firstDateToShow: thisBirthday
+                      .subtract(const Duration(days: 5))
+                      .microsecondsSinceEpoch,
+                  lastDateToShow: thisBirthday.microsecondsSinceEpoch,
+                ),
+              );
+              memoryResults.add(
+                spotlightMem.copyWith(
+                  isBirthday: true,
+                  newAge: newAge,
+                  firstDateToShow: thisBirthday.microsecondsSinceEpoch,
+                  lastDateToShow:
+                      thisBirthday.add(kDayItself).microsecondsSinceEpoch,
+                ),
+              );
+            }
           }
-          final youAndThemMem =
-              personMemories[PeopleMemoryType.youAndThem]?.first;
-          if (youAndThemMem != null) {
-            memoryResults.add(
-              youAndThemMem.copyWith(
-                isBirthday: false,
-                newAge: newAge,
-                firstDateToShow: thisBirthday
-                    .subtract(const Duration(days: 5))
-                    .microsecondsSinceEpoch,
-                lastDateToShow: thisBirthday.microsecondsSinceEpoch,
-              ),
-            );
-            memoryResults.add(
-              youAndThemMem.copyWith(
-                isBirthday: true,
-                newAge: newAge,
-                firstDateToShow: thisBirthday.microsecondsSinceEpoch,
-                lastDateToShow:
-                    thisBirthday.add(kDayItself).microsecondsSinceEpoch,
-              ),
-            );
+          final youAndThemCandidate =
+              personCandidates[PeopleMemoryType.youAndThem]?.first;
+          if (youAndThemCandidate != null) {
+            final youAndThemMem = await youAndThemCandidate.realize();
+            if (youAndThemMem != null) {
+              memoryResults.add(
+                youAndThemMem.copyWith(
+                  isBirthday: false,
+                  newAge: newAge,
+                  firstDateToShow: thisBirthday
+                      .subtract(const Duration(days: 5))
+                      .microsecondsSinceEpoch,
+                  lastDateToShow: thisBirthday.microsecondsSinceEpoch,
+                ),
+              );
+              memoryResults.add(
+                youAndThemMem.copyWith(
+                  isBirthday: true,
+                  newAge: newAge,
+                  firstDateToShow: thisBirthday.microsecondsSinceEpoch,
+                  lastDateToShow:
+                      thisBirthday.add(kDayItself).microsecondsSinceEpoch,
+                ),
+              );
+            }
           }
         }
       }
@@ -737,27 +768,29 @@ class SmartMemoriesService {
             currentTime.difference(shownDate) < shownPersonTimeout;
         if (seenPersonRecently) continue peopleRotationLoop;
       }
-      if (personToMemories[personID] == null) continue peopleRotationLoop;
+      final personCandidates = personToCandidates[personID];
+      if (personCandidates == null) continue peopleRotationLoop;
       int added = 0;
-      final amountOfMemoryTypesForPerson = personToMemories[personID]!.length;
+      final amountOfMemoryTypesForPerson = personCandidates.length;
       final bool manyMemoryTypes = amountOfMemoryTypesForPerson > 2;
       potentialMemoryLoop:
-      for (final memoriesForCategory in personToMemories[personID]!.values) {
-        PeopleMemory potentialMemory = memoriesForCategory.first;
-        if (memoriesForCategory.length > 1) {
-          if (potentialMemory.peopleMemoryType !=
+      for (final candidatesForCategory in personCandidates.values) {
+        if (candidatesForCategory.isEmpty) continue;
+        PeopleMemoryCandidate potentialCandidate = candidatesForCategory.first;
+        if (candidatesForCategory.length > 1) {
+          if (potentialCandidate.type !=
               PeopleMemoryType.doingSomethingTogether) {
             dev.log(
-              'Something is going wrong, ${potentialMemory.peopleMemoryType} has multiple memories for same person',
+              'Something is going wrong, ${potentialCandidate.type} has multiple memories for same person',
             );
           } else {
-            final randIdx = Random().nextInt(memoriesForCategory.length);
-            potentialMemory = memoriesForCategory[randIdx];
+            final randIdx = Random().nextInt(candidatesForCategory.length);
+            potentialCandidate = candidatesForCategory[randIdx];
           }
         }
         for (final shownLog in shownPeople) {
           if (shownLog.personID != personID) continue;
-          if (shownLog.peopleMemoryType != potentialMemory.peopleMemoryType) {
+          if (shownLog.peopleMemoryType != potentialCandidate.type) {
             continue;
           }
           final shownTypeDate =
@@ -768,6 +801,8 @@ class SmartMemoriesService {
             continue potentialMemoryLoop;
           }
         }
+        final potentialMemory = await potentialCandidate.realize();
+        if (potentialMemory == null) continue;
         memoryResults.add(potentialMemory);
         added++;
         if (added >= 2) break peopleRotationLoop;
@@ -794,41 +829,49 @@ class SmartMemoriesService {
     final nowInMicroseconds = currentTime.microsecondsSinceEpoch;
     final windowEnd =
         currentTime.add(kMemoriesUpdateFrequency).microsecondsSinceEpoch;
-    final Map<ClipMemoryType, ClipMemory> clipTypeToMemory = {};
     w?.log('allFiles setup');
 
-    // Loop through the clip types and find all memories
-    final clipFiles = <EnteFile>[];
-    for (final clipMemoryType in ClipMemoryType.values) {
-      clipFiles.clear();
+    ClipMemory? buildClipMemory(ClipMemoryType clipMemoryType) {
       final Vector? activityVector = clipMemoryTypeVectors[clipMemoryType];
       if (activityVector == null) {
         dev.log("No vector for clipMemoryType $clipMemoryType");
-        continue;
+        return null;
       }
       final Map<int, double> similarities = {};
-      for (final fileID in fileIDToImageEmbedding.keys) {
-        similarities[fileID] =
-            fileIDToImageEmbedding[fileID]!.vector.dot(activityVector);
+      for (final entry in fileIDToImageEmbedding.entries) {
+        similarities[entry.key] = entry.value.vector.dot(activityVector);
       }
       w?.log(
         'comparing embeddings for clipMemoryType $clipMemoryType',
       );
+      final List<EnteFile> clipFiles = [];
       for (final file in allFiles) {
-        final similarity = similarities[file.uploadedFileID!];
+        final uploadedFileID = file.uploadedFileID;
+        if (uploadedFileID == null) continue;
+        final similarity = similarities[uploadedFileID];
         if (similarity == null) continue;
         if (similarity > _clipMemoryTypeQueryThreshold) {
           clipFiles.add(file);
         }
       }
-      if (clipFiles.length < 10) continue;
+      if (clipFiles.length < 10) return null;
       // sort based on highest similarity first
       clipFiles.sort((a, b) {
-        return similarities[b.uploadedFileID!]!
-            .compareTo(similarities[a.uploadedFileID!]!);
+        final int bFileID = b.uploadedFileID!;
+        final int aFileID = a.uploadedFileID!;
+        return similarities[bFileID]!.compareTo(similarities[aFileID]!);
       });
-      clipTypeToMemory[clipMemoryType] = ClipMemory(
-        clipFiles.take(10).map((f) => Memory.fromFile(f, seenTimes)).toList(),
+      final int limit = min(clipFiles.length, 50);
+      final List<EnteFile> topCandidates = clipFiles.take(limit).toList();
+      topCandidates.shuffle(Random());
+      final List<EnteFile> selected = topCandidates.take(10).toList();
+      selected.sort((a, b) {
+        final int bFileID = b.uploadedFileID!;
+        final int aFileID = a.uploadedFileID!;
+        return similarities[bFileID]!.compareTo(similarities[aFileID]!);
+      });
+      return ClipMemory(
+        selected.map((f) => Memory.fromFile(f, seenTimes)).toList(),
         nowInMicroseconds,
         windowEnd,
         clipMemoryType,
@@ -838,17 +881,18 @@ class SmartMemoriesService {
     // Surface everything just for debug checking
     if (surfaceAll) {
       for (final clipMemoryType in ClipMemoryType.values) {
-        final clipMemory = clipTypeToMemory[clipMemoryType];
+        final clipMemory = buildClipMemory(clipMemoryType);
         if (clipMemory != null) clipResults.add(clipMemory);
       }
       return clipResults;
     }
 
-    // Loop through the clip types and add based on rotation
+    final List<ClipMemoryType> rotationOrder = [...ClipMemoryType.values]
+      ..shuffle();
+    final List<ClipMemoryType> eligibleClipTypes = [];
+
     clipMemoriesLoop:
-    for (final clipMemoryType in [...ClipMemoryType.values]..shuffle()) {
-      final clipMemory = clipTypeToMemory[clipMemoryType];
-      if (clipMemory == null) continue;
+    for (final clipMemoryType in rotationOrder) {
       for (final shownLog in shownClip) {
         if (shownLog.clipMemoryType != clipMemoryType) continue;
         final shownDate =
@@ -857,6 +901,12 @@ class SmartMemoriesService {
             currentTime.difference(shownDate) < kClipShowTimeout;
         if (seenRecently) continue clipMemoriesLoop;
       }
+      eligibleClipTypes.add(clipMemoryType);
+    }
+
+    for (final clipMemoryType in eligibleClipTypes) {
+      final clipMemory = buildClipMemory(clipMemoryType);
+      if (clipMemory == null) continue;
       clipResults.add(clipMemory);
       break;
     }

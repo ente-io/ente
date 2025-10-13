@@ -1,4 +1,5 @@
 - Ashil: (i) Swipe to select
+- Laurens: Improve clip memories
 - Laurens: Add OCR capability for Android devices (behind feature flag)
 - Neeraj: Add auth.ente.io to iOS associated domains for password AutoFill
 - Neeraj: Fix storage viewer not refreshing after clearing cache
