@@ -7,7 +7,6 @@ import "package:flutter/services.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/collection/public_url.dart";
 import 'package:photos/models/collection/collection.dart';
-import 'package:photos/service_locator.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -37,8 +36,9 @@ class ManageSharedLinkWidget extends StatefulWidget {
 }
 
 class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
-  final CollectionActions sharingActions =
-      CollectionActions(CollectionsService.instance);
+  final CollectionActions sharingActions = CollectionActions(
+    CollectionsService.instance,
+  );
   final GlobalKey sendLinkButtonKey = GlobalKey();
 
   @override
@@ -71,15 +71,14 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
         widget.collection!.publicURLs.firstOrNull?.enableJoin ?? true;
     final enteColorScheme = getEnteColorScheme(context);
     final PublicURL url = widget.collection!.publicURLs.firstOrNull!;
-    final String urlValue =
-        CollectionsService.instance.getPublicUrl(widget.collection!);
+    final String urlValue = CollectionsService.instance.getPublicUrl(
+      widget.collection!,
+    );
 
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: Text(
-          AppLocalizations.of(context).manageLink,
-        ),
+        title: Text(AppLocalizations.of(context).manageLink),
       ),
       body: SingleChildScrollView(
         child: ListBody(
@@ -89,32 +88,29 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (flagService.internalUser)
-                    MenuItemWidget(
-                      alignCaptionedTextToLeft: true,
-                      captionedTextWidget: CaptionedTextWidget(
-                        title: AppLocalizations.of(context).albumLayout,
-                        subTitle: _getLayoutDisplayName(
-                              widget.collection!.pubMagicMetadata.layout ??
-                                  "grouped",
-                              context,
-                            ) +
-                            "(i)",
+                  MenuItemWidget(
+                    alignCaptionedTextToLeft: true,
+                    captionedTextWidget: CaptionedTextWidget(
+                      title: AppLocalizations.of(context).albumLayout,
+                      subTitle: _getLayoutDisplayName(
+                        widget.collection!.pubMagicMetadata.layout ?? "grouped",
+                        context,
                       ),
-                      trailingIcon: Icons.chevron_right,
-                      menuItemColor: enteColorScheme.fillFaint,
-                      surfaceExecutionStates: false,
-                      onTap: () async {
-                        // ignore: unawaited_futures
-                        routeToPage(
-                          context,
-                          LayoutPickerPage(widget.collection!),
-                        ).then((value) {
-                          setState(() {});
-                        });
-                      },
                     ),
-                  if (flagService.internalUser) const SizedBox(height: 24),
+                    trailingIcon: Icons.chevron_right,
+                    menuItemColor: enteColorScheme.fillFaint,
+                    surfaceExecutionStates: false,
+                    onTap: () async {
+                      // ignore: unawaited_futures
+                      routeToPage(
+                        context,
+                        LayoutPickerPage(widget.collection!),
+                      ).then((value) {
+                        setState(() {});
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 24),
                   MenuItemWidget(
                     key: ValueKey("Allow collect $isCollectEnabled"),
                     captionedTextWidget: CaptionedTextWidget(
@@ -125,39 +121,13 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     trailingWidget: ToggleSwitchWidget(
                       value: () => isCollectEnabled,
                       onChanged: () async {
-                        await _updateUrlSettings(
-                          context,
-                          {'enableCollect': !isCollectEnabled},
-                        );
+                        await _updateUrlSettings(context, {
+                          'enableCollect': !isCollectEnabled,
+                        });
                       },
                     ),
                   ),
                   const SizedBox(height: 24),
-                  if (flagService.internalUser)
-                    MenuItemWidget(
-                      key: ValueKey("Allow join $isJoinEnabled"),
-                      captionedTextWidget: const CaptionedTextWidget(
-                        title: "Allow joining album (i)",
-                      ),
-                      alignCaptionedTextToLeft: true,
-                      menuItemColor: getEnteColorScheme(context).fillFaint,
-                      trailingWidget: ToggleSwitchWidget(
-                        value: () => isJoinEnabled,
-                        onChanged: () async {
-                          await _updateUrlSettings(
-                            context,
-                            {'enableJoin': !isJoinEnabled},
-                          );
-                        },
-                      ),
-                    ),
-                  if (flagService.internalUser)
-                    MenuSectionDescriptionWidget(
-                      content: isCollectEnabled
-                          ? "Allow people with link to join your album as Collaborator"
-                          : "Allow people with link to join your album as Viewer",
-                    ),
-                  if (flagService.internalUser) const SizedBox(height: 24),
                   MenuItemWidget(
                     alignCaptionedTextToLeft: true,
                     captionedTextWidget: CaptionedTextWidget(
@@ -235,20 +205,43 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     trailingWidget: ToggleSwitchWidget(
                       value: () => isDownloadEnabled,
                       onChanged: () async {
-                        await _updateUrlSettings(
-                          context,
-                          {'enableDownload': !isDownloadEnabled},
-                        );
+                        await _updateUrlSettings(context, {
+                          'enableDownload': !isDownloadEnabled,
+                        });
                         if (isDownloadEnabled) {
                           // ignore: unawaited_futures
                           showErrorDialog(
                             context,
-                            AppLocalizations.of(context)
-                                .disableDownloadWarningTitle,
-                            AppLocalizations.of(context)
-                                .disableDownloadWarningBody,
+                            AppLocalizations.of(
+                              context,
+                            ).disableDownloadWarningTitle,
+                            AppLocalizations.of(
+                              context,
+                            ).disableDownloadWarningBody,
                           );
                         }
+                      },
+                    ),
+                  ),
+                  DividerWidget(
+                    dividerType: DividerType.menuNoIcon,
+                    bgColor: getEnteColorScheme(context).fillFaint,
+                  ),
+                  MenuItemWidget(
+                    key: ValueKey("Allow join $isJoinEnabled"),
+                    captionedTextWidget: CaptionedTextWidget(
+                      title: AppLocalizations.of(context).allowJoiningAlbum,
+                    ),
+                    alignCaptionedTextToLeft: true,
+                    isBottomBorderRadiusRemoved: true,
+                    isTopBorderRadiusRemoved: true,
+                    menuItemColor: getEnteColorScheme(context).fillFaint,
+                    trailingWidget: ToggleSwitchWidget(
+                      value: () => isJoinEnabled,
+                      onChanged: () async {
+                        await _updateUrlSettings(context, {
+                          'enableJoin': !isJoinEnabled,
+                        });
                       },
                     ),
                   ),
@@ -272,18 +265,18 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                           showTextInputDialog(
                             context,
                             title: AppLocalizations.of(context).setAPassword,
-                            submitButtonLabel:
-                                AppLocalizations.of(context).lockButtonLabel,
-                            hintText:
-                                AppLocalizations.of(context).enterPassword,
+                            submitButtonLabel: AppLocalizations.of(
+                              context,
+                            ).lockButtonLabel,
+                            hintText: AppLocalizations.of(
+                              context,
+                            ).enterPassword,
                             isPasswordInput: true,
                             alwaysShowSuccessState: true,
                             onSubmit: (String password) async {
                               if (password.trim().isNotEmpty) {
                                 final propToUpdate =
-                                    await _getEncryptedPassword(
-                                  password,
-                                );
+                                    await _getEncryptedPassword(password);
                                 await _updateUrlSettings(
                                   context,
                                   propToUpdate,
@@ -293,17 +286,14 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                             },
                           );
                         } else {
-                          await _updateUrlSettings(
-                            context,
-                            {'disablePassword': true},
-                          );
+                          await _updateUrlSettings(context, {
+                            'disablePassword': true,
+                          });
                         }
                       },
                     ),
                   ),
-                  const SizedBox(
-                    height: 24,
-                  ),
+                  const SizedBox(height: 24),
                   if (url.isExpired)
                     MenuItemWidget(
                       captionedTextWidget: CaptionedTextWidget(
@@ -338,11 +328,10 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       dividerType: DividerType.menu,
                       bgColor: getEnteColorScheme(context).fillFaint,
                     ),
-                  if (!url.isExpired && flagService.internalUser)
+                  if (!url.isExpired)
                     MenuItemWidget(
                       captionedTextWidget: CaptionedTextWidget(
-                        title:
-                            AppLocalizations.of(context).copyEmbedHtml + " (i)",
+                        title: AppLocalizations.of(context).copyEmbedHtml,
                         makeTextBold: true,
                       ),
                       leadingIcon: Icons.code,
@@ -352,9 +341,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       onTap: () async {
                         final embedHtml = CollectionsService.instance
                             .getEmbedHtml(widget.collection!);
-                        await Clipboard.setData(
-                          ClipboardData(text: embedHtml),
-                        );
+                        await Clipboard.setData(ClipboardData(text: embedHtml));
                         showShortToast(
                           context,
                           AppLocalizations.of(context).linkCopiedToClipboard,
@@ -363,7 +350,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       isTopBorderRadiusRemoved: true,
                       isBottomBorderRadiusRemoved: true,
                     ),
-                  if (!url.isExpired && flagService.internalUser)
+                  if (!url.isExpired)
                     DividerWidget(
                       dividerType: DividerType.menu,
                       bgColor: getEnteColorScheme(context).fillFaint,
@@ -414,9 +401,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       },
                       isTopBorderRadiusRemoved: true,
                     ),
-                  const SizedBox(
-                    height: 24,
-                  ),
+                  const SizedBox(height: 24),
                   MenuItemWidget(
                     captionedTextWidget: CaptionedTextWidget(
                       title: AppLocalizations.of(context).removeLink,
@@ -474,8 +459,10 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
         : null;
     await dialog?.show();
     try {
-      await CollectionsService.instance
-          .updateShareUrl(widget.collection!, prop);
+      await CollectionsService.instance.updateShareUrl(
+        widget.collection!,
+        prop,
+      );
       await dialog?.hide();
       showShortToast(context, AppLocalizations.of(context).albumUpdated);
       if (mounted) {

@@ -13,10 +13,23 @@ on:
 jobs:
   claude:
     if: |
-      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
-      (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude') &&
+        (github.event.comment.author_association == 'OWNER' ||
+         github.event.comment.author_association == 'MEMBER' ||
+         github.event.comment.author_association == 'COLLABORATOR')) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude') &&
+        (github.event.comment.author_association == 'OWNER' ||
+         github.event.comment.author_association == 'MEMBER' ||
+         github.event.comment.author_association == 'COLLABORATOR')) ||
+      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude') &&
+        (github.event.review.author_association == 'OWNER' ||
+         github.event.review.author_association == 'MEMBER' ||
+         github.event.review.author_association == 'COLLABORATOR')) ||
+      (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')) &&
+        (github.event.issue.user.type == 'User' &&
+         (github.event.issue.author_association == 'OWNER' ||
+          github.event.issue.author_association == 'MEMBER' ||
+          github.event.issue.author_association == 'COLLABORATOR')))
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -25,10 +38,23 @@ jobs:
       id-token: write
       actions: read # Required for Claude to read CI results on PRs
     steps:
+      # Checkout base repository first
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+
+      # For PR-related events, fetch and checkout the PR branch properly
+      - name: Fetch PR branch
+        if: ${{ github.event.issue.pull_request || github.event.pull_request }}
+        run: |
+          # For issue_comment events on PRs
+          if [[ -n "${{ github.event.issue.pull_request }}" ]]; then
+            gh pr checkout ${{ github.event.issue.number }}
+          # For pull_request_review and pull_request_review_comment events
+          elif [[ -n "${{ github.event.pull_request.number }}" ]]; then
+            gh pr checkout ${{ github.event.pull_request.number }}
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run Claude Code
         id: claude

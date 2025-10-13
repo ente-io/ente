@@ -765,7 +765,7 @@ class FileUploader {
       // that we'll have to re-upload as the nonce is lost
       if (hasExistingMultiPart) {
         if (!encryptedFileExists) {
-          throw MultiPartUploadError(
+          throw MultiPartFileMissingError(
             'multiPartResume: encryptedFile missing',
           );
         }
@@ -773,7 +773,7 @@ class FileUploader {
             multiPartFileEncResult != null &&
             !listEquals(key, multiPartFileEncResult.key);
         if (updateWithDiffKey) {
-          throw MultiPartUploadError(
+          throw MultiPartError(
             'multiPart update resumed with differentKey',
           );
         }
@@ -1025,7 +1025,8 @@ class FileUploader {
         // file upload can not be retried in such cases without user intervention
         uploadHardFailure = true;
       }
-      if (isMultipartUpload && isPutOrMultiPartError(e)) {
+      if ((isMultipartUpload || hasExistingMultiPart) &&
+          isPutOrMultiPartError(e)) {
         await UploadLocksDB.instance.deleteMultipartTrack(lockKey);
       }
       rethrow;
@@ -1072,7 +1073,7 @@ class FileUploader {
   }
 
   bool isPutOrMultiPartError(Object e) {
-    if (e is MultiPartUploadError) {
+    if (e is MultiPartFileMissingError || e is MultiPartError) {
       return true;
     }
     if (e is DioException) {

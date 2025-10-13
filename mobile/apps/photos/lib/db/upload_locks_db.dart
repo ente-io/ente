@@ -347,16 +347,16 @@ class UploadLocksDB {
     String encryptedFileName,
   ) {
     if (rows.isEmpty) {
-      throw MultiPartUploadError("No cached links found for $localId");
+      throw MultiPartError("No cached links found for $localId");
     }
     if (rows.length > 1) {
-      throw MultiPartUploadError(
+      throw MultiPartError(
         "Multiple entries found for localID: $localId",
       );
     }
     if (encryptedFileName !=
         rows.first[_trackUploadTable.columnEncryptedFileName]) {
-      throw MultiPartUploadError(
+      throw MultiPartError(
         "Encrypted file name mismatch for localID: $localId",
       );
     }
@@ -559,7 +559,7 @@ class UploadLocksDB {
           where: '${_trackUploadTable.columnLocalID} = ?',
           whereArgs: [localId],
         );
-        throw MultiPartUploadError(
+        throw MultiPartError(
           "Multiple entries found for localID: $localId",
         );
       }

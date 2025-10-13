@@ -4,6 +4,7 @@ import AddPhotoAlternateOutlinedIcon from "@mui/icons-material/AddPhotoAlternate
 import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from "@mui/icons-material/Download";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+
 import {
     Box,
     Button,
@@ -55,7 +56,11 @@ import {
     type PublicAlbumsCredentials,
 } from "ente-base/http";
 import log from "ente-base/log";
-import { albumsAppOrigin, shouldOnlyServeAlbumsApp } from "ente-base/origins";
+import {
+    albumsAppOrigin,
+    isCustomAlbumsAppOrigin,
+    shouldOnlyServeAlbumsApp,
+} from "ente-base/origins";
 import { FullScreenDropZone } from "ente-gallery/components/FullScreenDropZone";
 import {
     useSaveGroups,
@@ -205,8 +210,11 @@ export default function PublicCollectionGallery() {
                 const t = currentURL.searchParams.get("t");
                 const ck = await extractCollectionKeyFromShareURL(currentURL);
                 if (!t && !ck) {
-                    window.location.href = "https://ente.io";
-                    redirectingToWebsite = true;
+                    // Only redirect to ente.io if this is NOT a custom/self-hosted instance
+                    if (!isCustomAlbumsAppOrigin) {
+                        window.location.href = "https://ente.io";
+                        redirectingToWebsite = true;
+                    }
                 }
                 if (!t || !ck) {
                     return;

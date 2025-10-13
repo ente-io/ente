@@ -11,6 +11,14 @@ When making commits, follow these rules:
 - Use ONLY "Co-Authored-By: Claude <noreply@anthropic.com>" for attribution
 - ONLY run pre-commit checks (format, lint, typecheck, build) when explicitly creating a commit
 
+Example:
+
+```
+Format markdown files with Prettier for consistent styling
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
+
 ## Commands
 
 ### Development

@@ -431,7 +431,7 @@
         "year": "Sau một năm"
     },
     "copy_link": "Sao chép liên kết",
-    "copy_embed_html": "",
+    "copy_embed_html": "Sao chép mã nhúng HTML",
     "done": "Xong",
     "share_link_section_title": "Hoặc chia sẻ một liên kết",
     "remove_link": "Xóa liên kết",
@@ -701,5 +701,5 @@
     "continuous": "Liên tục",
     "trip": "Chuyến đi",
     "album_layout": "Bố cục album",
-    "maps_privacy_notice": "Tọa độ gần đúng sẽ được gửi đến các bên thứ ba quan tâm đến quyền riêng tư như OpenStreetMaps để hiển thị bản đồ và vị trí."
+    "maps_privacy_notice": "Tọa độ gần đúng sẽ được gửi đến các bên thứ ba quan tâm đến quyền riêng tư như OpenStreetMap để hiển thị bản đồ và vị trí."
 }

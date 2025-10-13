@@ -212,7 +212,7 @@ class MLIndexingIsolate extends SuperIsolate {
       final modelName = modelInstance.modelName;
       final modelPath = await modelInstance.downloadModelSafe();
       if (modelPath == null) {
-        _logger.severe("Could not download model, no wifi");
+        _logger.warning("Could not download model '$modelName': WiFi unavailable");
         return;
       }
       final address = await runInIsolate(IsolateOperation.loadModel, {

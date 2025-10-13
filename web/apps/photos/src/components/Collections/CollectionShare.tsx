@@ -1431,16 +1431,14 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
             title={t("share_album")}
         >
             <Stack sx={{ gap: 3, py: "20px", px: "8px" }}>
-                {process.env.NEXT_PUBLIC_LAYOUT_FEATURE_ENABLED && (
-                    <ManageLayout
-                        {...{
-                            collection,
-                            onRootClose,
-                            onRemotePull,
-                            setBlockingLoad,
-                        }}
-                    />
-                )}
+                <ManageLayout
+                    {...{
+                        collection,
+                        onRootClose,
+                        onRemotePull,
+                        setBlockingLoad,
+                    }}
+                />
                 <ManagePublicCollect
                     {...{ publicURL }}
                     onUpdate={handlePublicURLUpdate}

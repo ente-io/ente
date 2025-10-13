@@ -41,12 +41,14 @@ class DetailPageConfiguration {
   final int selectedIndex;
   final String tagPrefix;
   final DetailPageMode mode;
+  final bool isLocalOnlyContext;
 
   DetailPageConfiguration(
     this.files,
     this.selectedIndex,
     this.tagPrefix, {
     this.mode = DetailPageMode.full,
+    this.isLocalOnlyContext = false,
   });
 
   DetailPageConfiguration copyWith({
@@ -54,11 +56,13 @@ class DetailPageConfiguration {
     GalleryLoader? asyncLoader,
     int? selectedIndex,
     String? tagPrefix,
+    bool? isLocalOnlyContext,
   }) {
     return DetailPageConfiguration(
       files ?? this.files,
       selectedIndex ?? this.selectedIndex,
       tagPrefix ?? this.tagPrefix,
+      isLocalOnlyContext: isLocalOnlyContext ?? this.isLocalOnlyContext,
     );
   }
 }
@@ -196,6 +200,7 @@ class _BodyState extends State<_Body> {
                     enableFullScreenNotifier:
                         InheritedDetailPageState.of(context)
                             .enableFullScreenNotifier,
+                    isLocalOnlyContext: widget.config.isLocalOnlyContext,
                   );
                 },
                 valueListenable: _selectedIndexNotifier,
