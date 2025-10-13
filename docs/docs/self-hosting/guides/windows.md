@@ -1,9 +1,9 @@
 ---
-title: Windows quickstart - Self-hosting
-description: Self-hosting ente on Windows
+title: Self-hosting Ente on Windows
+description: A community guide with a Windows specific workflow for running the self-hosted version on Ente
 ---
 
-# Self-hosting ente on Window
+# Self-hosting Ente on Windows
 
 While this setup was tested on Windows, the concepts are not OS-specific and will apply to any containerized deployment, including Linux and MacOS. If you are struggling with self-hosting, I recommend you read this guide.
 
@@ -11,8 +11,6 @@ The key differences are:
 - Docker Desktop/Engine installation
 - File path formatting for container volume mounts
 - Startup service automation
-
-# Ente self-hosting guide
 
 ## Prerequisites
 
