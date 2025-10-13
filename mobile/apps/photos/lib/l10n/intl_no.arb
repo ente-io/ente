@@ -1170,7 +1170,6 @@
   },
   "maps": "Kart",
   "enableMaps": "Aktiver kart",
-  "enableMapsDesc": "Dette viser dine bilder på et verdenskart.\n\nDette kartet er hostet av Open Street Map, og de nøyaktige stedene for dine bilder blir aldri delt.\n\nDu kan deaktivere denne funksjonen når som helst fra Innstillinger.",
   "quickLinks": "Hurtiglenker",
   "selectItemsToAdd": "Velg produkter å legge til",
   "addSelected": "Legg til valgte",
