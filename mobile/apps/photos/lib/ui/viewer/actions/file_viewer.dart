@@ -8,6 +8,7 @@ import "package:logging/logging.dart";
 import "package:media_extension/media_extension_action_types.dart";
 import "package:photo_view/photo_view.dart";
 import "package:photos/services/app_lifecycle_service.dart";
+import "package:photos/utils/exif_util.dart";
 import "package:receive_sharing_intent/receive_sharing_intent.dart";
 import "package:video_player/video_player.dart";
 
@@ -26,6 +27,7 @@ class FileViewerState extends State<FileViewer> {
   ChewieController? controller;
   VideoPlayerController? videoController;
   final Logger _logger = Logger("FileViewer");
+  double? aspectRatio;
 
   @override
   void initState() {
@@ -33,7 +35,48 @@ class FileViewerState extends State<FileViewer> {
     super.initState();
     if (action.type == MediaType.video ||
         widget.sharedMediaFile?.type == SharedMediaType.video) {
-      initController();
+      _initializeVideoController();
+    }
+  }
+
+  Future<void> _initializeVideoController() async {
+    await _fetchAspectRatio();
+    initController();
+  }
+
+  Future<void> _fetchAspectRatio() async {
+    try {
+      final videoPath = widget.sharedMediaFile?.path ?? action.data;
+      if (videoPath == null) {
+        _logger.warning("Video path is null, using default aspect ratio");
+        aspectRatio = 16 / 9;
+        return;
+      }
+
+      final videoFile = File(videoPath);
+      if (!await videoFile.exists()) {
+        _logger
+            .warning("Video file does not exist, using default aspect ratio");
+        aspectRatio = 16 / 9;
+        return;
+      }
+
+      final videoProps = await getVideoPropsAsync(videoFile);
+      if (videoProps != null &&
+          videoProps.width != null &&
+          videoProps.height != null &&
+          videoProps.height != 0) {
+        aspectRatio = videoProps.width! / videoProps.height!;
+        _logger.info("Fetched video aspect ratio: $aspectRatio");
+      } else {
+        _logger.warning(
+          "Could not get video dimensions, using default aspect ratio",
+        );
+        aspectRatio = 16 / 9;
+      }
+    } catch (e) {
+      _logger.severe("Error fetching video aspect ratio: $e");
+      aspectRatio = 16 / 9;
     }
   }
 
@@ -53,7 +96,7 @@ class FileViewerState extends State<FileViewer> {
     controller = ChewieController(
       videoPlayerController: videoController!,
       autoInitialize: true,
-      aspectRatio: 16 / 9,
+      aspectRatio: aspectRatio ?? 16 / 9,
       autoPlay: true,
       looping: true,
       showOptions: false,
@@ -70,6 +113,9 @@ class FileViewerState extends State<FileViewer> {
         );
       }
     });
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
