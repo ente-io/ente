@@ -87,17 +87,14 @@ class FileIconUtils {
       return icon;
     }
 
-    return Padding(
-      padding: const EdgeInsets.all(10.0),
-      child: Container(
-        decoration: BoxDecoration(
-          color: config.backgroundColor,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: icon,
-        ),
+    return Container(
+      decoration: BoxDecoration(
+        color: config.backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: icon,
       ),
     );
   }

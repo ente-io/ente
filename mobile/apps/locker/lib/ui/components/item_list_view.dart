@@ -141,7 +141,7 @@ class _ItemListViewState extends State<ItemListView> {
         crossAxisCount: 2,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
-        childAspectRatio: 1.3,
+        childAspectRatio: 1.6,
       ),
       itemCount: _sortedItems.length,
       itemBuilder: (context, index) => _buildItem(index),

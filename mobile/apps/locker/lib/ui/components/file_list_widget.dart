@@ -19,6 +19,7 @@ import "package:locker/services/files/sync/metadata_updater_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/services/info_file_service.dart";
 import "package:locker/ui/components/file_edit_dialog.dart";
+import "package:locker/ui/components/file_popup_menu_builder.dart";
 import "package:locker/ui/components/item_list_view.dart";
 import "package:locker/ui/components/share_link_dialog.dart";
 import "package:locker/ui/pages/account_credentials_page.dart";
@@ -60,8 +61,8 @@ class FileListWidget extends StatelessWidget {
       child: Row(
         children: [
           SizedBox(
-            height: 60,
-            width: 60,
+            height: 40,
+            width: 40,
             child: _buildFileIcon(),
           ),
           const SizedBox(width: 12),
@@ -143,7 +144,10 @@ class FileListWidget extends StatelessWidget {
                               ),
                             ),
                             itemBuilder: (BuildContext context) {
-                              return _buildPopupMenuItems(context);
+                              return FilePopupMenuBuilder.buildPopupMenuItems(
+                                context,
+                                overflowActions,
+                              );
                             },
                           ),
                   ),
@@ -154,70 +158,6 @@ class FileListWidget extends StatelessWidget {
         },
       ),
     );
-  }
-
-  List<PopupMenuItem<String>> _buildPopupMenuItems(BuildContext context) {
-    if (overflowActions != null && overflowActions!.isNotEmpty) {
-      return overflowActions!
-          .map(
-            (action) => PopupMenuItem<String>(
-              value: action.id,
-              child: Row(
-                children: [
-                  const HugeIcon(
-                    icon: HugeIcons.strokeRoundedFile02,
-                    size: 16,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(action.label),
-                ],
-              ),
-            ),
-          )
-          .toList();
-    } else {
-      return [
-        PopupMenuItem<String>(
-          value: 'edit',
-          child: Row(
-            children: [
-              const HugeIcon(
-                icon: HugeIcons.strokeRoundedEdit02,
-                size: 16,
-              ),
-              const SizedBox(width: 8),
-              Text(context.l10n.edit),
-            ],
-          ),
-        ),
-        PopupMenuItem<String>(
-          value: 'share_link',
-          child: Row(
-            children: [
-              const HugeIcon(
-                icon: HugeIcons.strokeRoundedShare03,
-                size: 16,
-              ),
-              const SizedBox(width: 8),
-              Text(context.l10n.share),
-            ],
-          ),
-        ),
-        PopupMenuItem<String>(
-          value: 'delete',
-          child: Row(
-            children: [
-              const HugeIcon(
-                icon: HugeIcons.strokeRoundedDelete01,
-                size: 16,
-              ),
-              const SizedBox(width: 8),
-              Text(context.l10n.delete),
-            ],
-          ),
-        ),
-      ];
-    }
   }
 
   void _handleMenuAction(BuildContext context, String action) {

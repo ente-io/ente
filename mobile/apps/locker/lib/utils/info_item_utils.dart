@@ -60,19 +60,14 @@ class InfoItemUtils {
       return icon;
     }
 
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Container(
-        height: 48,
-        width: 48,
-        decoration: BoxDecoration(
-          color: config.backgroundColor,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: icon,
-        ),
+    return Container(
+      decoration: BoxDecoration(
+        color: config.backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: icon,
       ),
     );
   }

@@ -720,7 +720,6 @@ class _FilterChip extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          margin: const EdgeInsets.symmetric(vertical: 4),
           padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
           decoration: BoxDecoration(
             color:
@@ -732,7 +731,7 @@ class _FilterChip extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: textTheme.mini,
+                style: textTheme.small,
               ),
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300),
