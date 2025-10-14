@@ -1170,7 +1170,6 @@
   },
   "maps": "Mapas",
   "enableMaps": "Ativar mapas",
-  "enableMapsDesc": "Esta opção mostra as suas fotografias num mapa do mundo.\n\n\nEste mapa é alojado pelo Open Street Map e as localizações exactas das suas fotografias nunca são partilhadas.\n\n\nPode desativar esta funcionalidade em qualquer altura nas Definições.",
   "quickLinks": "Links rápidos",
   "selectItemsToAdd": "Selecionar itens para adicionar",
   "addSelected": "Adicionar selecionados",
@@ -1818,15 +1817,5 @@
         "type": "int"
       }
     }
-  },
-  "cLTitle1": "Vista de mapa para as suas viagens",
-  "cLDesc1": "Escolha entre layouts agrupados, contínuos ou de viagem (baseados em mapa) ao partilhar álbuns. O Ente cuida do alojamento!",
-  "cLTitle2": "Incorporar álbuns",
-  "cLDesc2": "Incorpore os seus álbuns no seu próprio website, blogue ou portfólio de fotografia. O Ente cuida do alojamento!",
-  "cLTitle3": "Álbuns partilhados em widgets",
-  "cLDesc3": "Os widgets do ecrã inicial agora suportam álbuns que foram partilhados consigo.",
-  "cLTitle4": "Melhorias na qualidade de vida",
-  "cLDesc4": "Adicione fotos a álbuns a partir do visualizador de ficheiros. Opção de visualização de convidado ao nível do álbum.",
-  "cLTitle5": "Melhorias na partilha",
-  "cLDesc5": "Partilhe links públicos usando um código QR. Personalize a capacidade de aderir a álbuns a partir de links que partilha."
+  }
 }
