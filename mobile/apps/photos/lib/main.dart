@@ -181,6 +181,7 @@ Future<void> _runMinimally(String taskId, TimeLogger tlog) async {
     updateService.showUpdateNotification().ignore();
     _logger.info("[BG TASK] sync starting");
     await _sync('bgTaskActiveProcess');
+    _logger.info("[BG TASK] sync completed");
 
     _logger.info("[BG TASK] locale fetch");
     final locale = await getLocale();
