@@ -23,6 +23,7 @@ import "package:photos/events/file_uploaded_event.dart";
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
+import "package:photos/extensions/logger_extension.dart";
 import "package:photos/main.dart" show isProcessBg, kLastBGTaskHeartBeatTime;
 import "package:photos/models/api/metadata.dart";
 import "package:photos/models/backup/backup_item.dart";
@@ -164,13 +165,26 @@ class FileUploader {
   // upload future will return null as File when the file entry is deleted
   // locally because it's already present in the destination collection.
   Future<EnteFile> upload(EnteFile file, int collectionID) {
+    _logger.internalInfo(
+      "[UPLOAD-DEBUG] FileUploader.upload() called for ${file.title} "
+      "(localID: ${file.localID}, collectionID: $collectionID, "
+      "isProcessBg: $isProcessBg)",
+    );
+
     if (file.localID == null || file.localID!.isEmpty) {
+      _logger.internalSevere(
+        "[UPLOAD-DEBUG] Upload rejected - file's localID is null or empty for ${file.title}",
+      );
       return Future.error(Exception("file's localID can not be null or empty"));
     }
     // If the file hasn't been queued yet, queue it for upload
     _totalCountInUploadSession++;
     final String localID = file.localID!;
     if (!_queue.containsKey(localID)) {
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] File ${file.title} not in queue. Adding to upload queue... "
+        "(queue size before: ${_queue.length})",
+      );
       final completer = Completer<EnteFile>();
       _queue[localID] = FileUploadItem(file, collectionID, completer);
       _allBackups[localID] = BackupItem(
@@ -180,16 +194,33 @@ class FileUploader {
         completer: completer,
       );
       Bus.instance.fire(BackupUpdatedEvent(_allBackups));
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] File ${file.title} added to queue (queue size: ${_queue.length}). "
+        "Calling _pollQueue()...",
+      );
       _pollQueue();
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] _pollQueue() called for ${file.title}. Returning completer.future",
+      );
       return completer.future;
     }
     // If the file exists in the queue for a matching collectionID,
     // return the existing future
+    _logger.internalInfo(
+      "[UPLOAD-DEBUG] File ${file.title} already in queue with localID $localID",
+    );
     final FileUploadItem item = _queue[localID]!;
     if (item.collectionID == collectionID) {
       _totalCountInUploadSession--;
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] Same collectionID ($collectionID) - returning existing future",
+      );
       return item.completer.future;
     }
+    _logger.internalInfo(
+      "[UPLOAD-DEBUG] Different collectionID (existing: ${item.collectionID}, new: $collectionID) "
+      "- waiting for existing upload to complete",
+    );
     debugPrint(
       "Wait on another upload on same local ID to finish before "
       "adding it to new collection",
@@ -261,24 +292,55 @@ class FileUploader {
   }
 
   void _pollQueue() {
+    _logger.internalInfo(
+      "[UPLOAD-DEBUG] _pollQueue() called. Queue size: ${_queue.length}, "
+      "uploadCounter: $_uploadCounter/$kMaximumConcurrentUploads, "
+      "isProcessBg: $isProcessBg",
+    );
+
     if (SyncService.instance.shouldStopSync()) {
+      _logger.internalWarning(
+        "[UPLOAD-DEBUG] Sync stop requested - clearing queue",
+      );
       clearQueue(SyncStopRequestedError());
+      return;
     }
     if (_queue.isEmpty) {
       // Upload session completed
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] Queue is empty - upload session completed. "
+        "Resetting totalCountInUploadSession",
+      );
       _totalCountInUploadSession = 0;
       return;
     }
     if (_uploadCounter < kMaximumConcurrentUploads) {
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] Upload capacity available ($_uploadCounter < $kMaximumConcurrentUploads). "
+        "Searching for pending entry...",
+      );
       var pendingEntry = _queue.entries
           .firstWhereOrNull(
             (entry) => entry.value.status == UploadStatus.notStarted,
           )
           ?.value;
 
+      if (pendingEntry != null) {
+        _logger.internalInfo(
+          "[UPLOAD-DEBUG] Found pending entry: ${pendingEntry.file.title} "
+          "(fileType: ${pendingEntry.file.fileType})",
+        );
+      } else {
+        _logger.internalInfo("[UPLOAD-DEBUG] No pending entry found in queue");
+      }
+
       if (pendingEntry != null &&
           pendingEntry.file.fileType == FileType.video &&
           _videoUploadCounter >= kMaximumConcurrentVideoUploads) {
+        _logger.internalInfo(
+          "[UPLOAD-DEBUG] Video upload limit reached ($_videoUploadCounter >= $kMaximumConcurrentVideoUploads). "
+          "Looking for non-video entry...",
+        );
         // check if there's any non-video entry which can be queued for upload
         pendingEntry = _queue.entries
             .firstWhereOrNull(
@@ -287,8 +349,19 @@ class FileUploader {
                   entry.value.file.fileType != FileType.video,
             )
             ?.value;
+        if (pendingEntry != null) {
+          _logger.internalInfo(
+            "[UPLOAD-DEBUG] Found non-video entry: ${pendingEntry.file.title}",
+          );
+        } else {
+          _logger.internalInfo("[UPLOAD-DEBUG] No non-video entry available");
+        }
       }
       if (pendingEntry != null) {
+        _logger.internalInfo(
+          "[UPLOAD-DEBUG] Starting upload for ${pendingEntry.file.title}. "
+          "Marking as inProgress and calling _encryptAndUploadFileToCollection()...",
+        );
         pendingEntry.status = UploadStatus.inProgress;
         _allBackups[pendingEntry.file.localID!] =
             _allBackups[pendingEntry.file.localID]!
@@ -298,7 +371,20 @@ class FileUploader {
           pendingEntry.file,
           pendingEntry.collectionID,
         );
+        _logger.internalInfo(
+          "[UPLOAD-DEBUG] _encryptAndUploadFileToCollection() initiated for ${pendingEntry.file.title}",
+        );
+      } else {
+        _logger.internalInfo(
+          "[UPLOAD-DEBUG] No pending entry to process at this time "
+          "(either all uploads in progress or video limit reached)",
+        );
       }
+    } else {
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] Upload capacity full ($_uploadCounter >= $kMaximumConcurrentUploads). "
+        "Waiting for uploads to complete...",
+      );
     }
   }
 
@@ -307,20 +393,35 @@ class FileUploader {
     int collectionID, {
     bool forcedUpload = false,
   }) async {
+    _logger.internalInfo(
+      "[UPLOAD-DEBUG] _encryptAndUploadFileToCollection() started for ${file.title} "
+      "(collectionID: $collectionID, forcedUpload: $forcedUpload, "
+      "isProcessBg: $isProcessBg)",
+    );
     _uploadCounter++;
     if (file.fileType == FileType.video) {
       _videoUploadCounter++;
     }
+    _logger.internalInfo(
+      "[UPLOAD-DEBUG] Upload counters updated: uploadCounter=$_uploadCounter, "
+      "videoUploadCounter=$_videoUploadCounter",
+    );
     final localID = file.localID!;
     try {
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] Calling _tryToUpload() for ${file.title} with ${kFileUploadTimeout.inSeconds}s timeout...",
+      );
       final uploadedFile =
           await _tryToUpload(file, collectionID, forcedUpload).timeout(
         kFileUploadTimeout,
         onTimeout: () {
           final message = "Upload timed out for file " + file.toString();
-          _logger.warning(message);
+          _logger.internalWarning("[UPLOAD-DEBUG] $message");
           throw TimeoutException(message);
         },
+      );
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] _tryToUpload() completed successfully for ${file.title}",
       );
       _queue.remove(localID)!.completer.complete(uploadedFile);
       _allBackups[localID] =
@@ -681,15 +782,30 @@ class FileUploader {
       late String thumbnailObjectKey;
 
       if (count <= 1) {
+        _logger.internalInfo(
+          "[UPLOAD-DEBUG] Non-multipart upload: Getting thumbnail upload URL...",
+        );
         final thumbnailUploadURL = await _getUploadURL();
+        _logger.internalInfo(
+          "[UPLOAD-DEBUG] Thumbnail URL obtained, uploading thumbnail (size: ${formatBytes(encThumbSize)})...",
+        );
         thumbnailObjectKey = await _putFile(
           thumbnailUploadURL,
           encryptedThumbnailFile,
           encThumbSize,
         );
+        _logger.internalInfo(
+          "[UPLOAD-DEBUG] Thumbnail uploaded successfully! Now getting file upload URL...",
+        );
         final fileUploadURL = await _getUploadURL();
+        _logger.internalInfo(
+          "[UPLOAD-DEBUG] File URL obtained, uploading actual file (size: ${formatBytes(encFileSize)})...",
+        );
         fileObjectKey =
             await _putFile(fileUploadURL, encryptedFile, encFileSize);
+        _logger.internalInfo(
+          "[UPLOAD-DEBUG] Actual file uploaded successfully!",
+        );
       } else {
         isMultipartUpload = true;
         _logger.info(
@@ -1307,13 +1423,26 @@ class FileUploader {
   }
 
   Future<UploadURL> _getUploadURL() async {
+    _logger.internalInfo(
+      "[UPLOAD-DEBUG] _getUploadURL() called. URL queue size: ${_uploadURLs.length}, Upload queue size: ${_queue.length}",
+    );
     if (_uploadURLs.isEmpty) {
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] URL queue is empty, fetching new upload URLs from server...",
+      );
       // the queue is empty, fetch at least for one file to handle force uploads
       // that are not in the queue. This is to also avoid
       await fetchUploadURLs(math.max(_queue.length, 1));
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] Successfully fetched upload URLs. New queue size: ${_uploadURLs.length}",
+      );
     }
     try {
-      return _uploadURLs.removeFirst();
+      final url = _uploadURLs.removeFirst();
+      _logger.internalInfo(
+        "[UPLOAD-DEBUG] Returning upload URL. Remaining URLs in queue: ${_uploadURLs.length}",
+      );
+      return url;
     } catch (e) {
       if (e is StateError && e.message == 'No element' && _queue.isEmpty) {
         _logger.warning("Oops, uploadUrls has no element now, fetching again");
@@ -1329,16 +1458,26 @@ class FileUploader {
   Future<void> fetchUploadURLs(int fileCount) async {
     _uploadURLFetchInProgress ??= Future<void>(() async {
       try {
+        final requestCount = math.min(42, fileCount * 2);
+        _logger.internalInfo(
+          "[UPLOAD-DEBUG] fetchUploadURLs() starting HTTP GET to /files/upload-urls with count=$requestCount",
+        );
         final response = await _enteDio.get(
           "/files/upload-urls",
           queryParameters: {
-            "count": math.min(42, fileCount * 2), // m4gic number
+            "count": requestCount, // m4gic number
           },
+        );
+        _logger.internalInfo(
+          "[UPLOAD-DEBUG] HTTP GET completed, parsing ${(response.data["urls"] as List).length} URLs...",
         );
         final urls = (response.data["urls"] as List)
             .map((e) => UploadURL.fromMap(e))
             .toList();
         _uploadURLs.addAll(urls);
+        _logger.internalInfo(
+          "[UPLOAD-DEBUG] fetchUploadURLs() completed. Added ${urls.length} URLs to queue.",
+        );
       } on DioException catch (e, s) {
         if (e.response != null) {
           if (e.response!.statusCode == 402) {

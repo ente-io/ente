@@ -1170,7 +1170,6 @@
   },
   "maps": "Mapy",
   "enableMaps": "Włącz mapy",
-  "enableMapsDesc": "To pokaże Twoje zdjęcia na mapie świata.\n\nTa mapa jest hostowana przez Open Street Map, a dokładne lokalizacje Twoich zdjęć nigdy nie są udostępniane.\n\nMożesz wyłączyć tę funkcję w każdej chwili w ustawieniach.",
   "quickLinks": "Szybkie linki",
   "selectItemsToAdd": "Wybierz elementy do dodania",
   "addSelected": "Dodaj zaznaczone",
@@ -1847,15 +1846,5 @@
   "related": "Powiązane",
   "hoorayyyy": "Huuraaaa!",
   "nothingToTidyUpHere": "Nie ma nic do uporządkowania",
-  "deletingDash": "Usuwanie - ",
-  "cLTitle1": "Widok mapy dla Twoich podróży",
-  "cLDesc1": "Wybieraj między zgrupowanymi, ciągłymi lub podróżnymi (opartymi na mapie) układami podczas udostępniania albumów. Ente dba o hosting!",
-  "cLTitle2": "Osadź albumy",
-  "cLDesc2": "Osadź swoje albumy na własnej stronie internetowej, blogu, portfolio fotograficznym. Ente dba o hosting!",
-  "cLTitle3": "Udostępnione albumy w widżetach",
-  "cLDesc3": "Widżety ekranu głównego obsługują teraz albumy, które zostały Ci udostępnione.",
-  "cLTitle4": "Usprawnienia jakości życia",
-  "cLDesc4": "Dodawaj zdjęcia do albumów z przeglądarki plików. Opcja widoku gościa na poziomie albumu.",
-  "cLTitle5": "Ulepszenia udostępniania",
-  "cLDesc5": "Udostępniaj publiczne linki za pomocą kodu QR. Dostosuj możliwość dołączania do albumów z linków, które udostępniasz."
+  "deletingDash": "Usuwanie - "
 }

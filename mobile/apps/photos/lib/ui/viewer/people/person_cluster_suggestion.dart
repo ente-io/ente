@@ -66,7 +66,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
 
   @override
   void dispose() {
-  _peopleChangedEvent?.cancel();
+    _peopleChangedEvent?.cancel();
     super.dispose();
   }
 
