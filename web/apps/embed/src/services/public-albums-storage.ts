@@ -15,7 +15,7 @@ import {
 import { type Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import { nullToUndefined } from "ente-utils/transform";
-import { z } from "zod/v4";
+import { z } from "zod";
 import { inMemoryStorage } from "./in-memory-storage";
 
 /**

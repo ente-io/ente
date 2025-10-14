@@ -18,7 +18,7 @@ import log from "ente-base/log";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
-import { z } from "zod/v4";
+import { z } from "zod";
 import { SlideUpTransition } from "./mui/SlideUpTransition";
 
 interface DevSettingsProps {

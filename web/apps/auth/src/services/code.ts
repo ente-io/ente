@@ -1,7 +1,7 @@
 import log from "ente-base/log";
 import { nullToUndefined } from "ente-utils/transform";
 import { HOTP, TOTP } from "otpauth";
-import { z } from "zod/v4";
+import { z } from "zod";
 import { Steam } from "./steam";
 /**
  * A parsed representation of an *OTP code URI.
