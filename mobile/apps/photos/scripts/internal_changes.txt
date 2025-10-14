@@ -1,3 +1,4 @@
+- Neeraj: Fix video aspect ratio when shared from external apps
 - Laurens: (i) OCR UX improvements based on feedback
 - Ashil: (i) Swipe to select
 - Laurens: Improve clip memories
