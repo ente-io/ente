@@ -10,7 +10,7 @@ import {
     nullishToZero,
     nullToUndefined,
 } from "ente-utils/transform";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 /**
  * Validity of the plan.

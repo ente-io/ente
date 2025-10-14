@@ -14,7 +14,7 @@ import { useFormik } from "formik";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useCallback } from "react";
-import { z } from "zod/v4";
+import { z } from "zod";
 import { AccountsPageTitleWithCaption } from "./LoginComponents";
 
 interface LoginContentsProps {

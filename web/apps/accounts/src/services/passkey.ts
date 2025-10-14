@@ -8,7 +8,7 @@ import { isDevBuild } from "ente-base/env";
 import { ensureOk, HTTPError, publicRequestHeaders } from "ente-base/http";
 import { apiURL } from "ente-base/origins";
 import { nullToUndefined } from "ente-utils/transform";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 /** Return true if the user's browser supports WebAuthn (Passkeys). */
 export const isWebAuthnSupported = () => !!navigator.credentials;

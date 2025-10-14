@@ -6,7 +6,7 @@ import { exportMetadataDirectoryName } from "ente-gallery/export-dirs";
 import type { Collection } from "ente-media/collection";
 import type { EnteFile } from "ente-media/file";
 import { nullToUndefined } from "ente-utils/transform";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 /**
  * Internal in-memory state shared by the functions in this module.

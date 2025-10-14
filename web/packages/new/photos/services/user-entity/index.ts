@@ -5,7 +5,7 @@ import {
     generateBlobOrStreamKey,
 } from "ente-base/crypto";
 import { nullishToEmpty, nullToUndefined } from "ente-utils/transform";
-import { z } from "zod/v4";
+import { z } from "zod";
 import { gunzip, gzip } from "../../utils/gzip";
 import type { CGroupUserEntityData } from "../ml/people";
 import {
