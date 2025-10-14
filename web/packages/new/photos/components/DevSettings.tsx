@@ -151,7 +151,7 @@ const Form: React.FC<FormProps> = ({ initialAPIOrigin, onClose }) => {
                             endAdornment: (
                                 <InputAdornment position="end">
                                     <Link
-                                        href="https://help.ente.io/self-hosting/guides/custom-server/"
+                                        href="https://ente.io/help/self-hosting/guides/custom-server/"
                                         target="_blank"
                                         rel="noopener"
                                     >

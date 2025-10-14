@@ -243,7 +243,7 @@ Use docker CLI or Docker Desktop UI to monitor container health and logs during 
 
 ### Post-installation
 
-Follow https://help.ente.io/self-hosting/installation/post-install and enjoy the following tips:
+Follow https://ente.io/help/self-hosting/installation/post-install and enjoy the following tips:
 
 - You can use the desktop app to register a new account. Click the login screen lock image 7 times and override the endpoint to `http://localhost:8080`.
 - Your user email can be anything. No actual emails will be sent. The one-time code can be found in the museum container logs.
@@ -261,7 +261,7 @@ Follow https://help.ente.io/self-hosting/installation/post-install and enjoy the
       mc admin config set admin api cors\_allow\_origin="\*"
       ```
   3. Restart your minio container and you should be ready to upload!
-- In case you missed it, use the ente CLI to increase your storage limits: https://help.ente.io/self-hosting/administration/cli#step-4-increase-storage-and-account-validity
+- In case you missed it, use the ente CLI to increase your storage limits: https://ente.io/help/self-hosting/administration/cli#step-4-increase-storage-and-account-validity
 
 
 ## Next steps
