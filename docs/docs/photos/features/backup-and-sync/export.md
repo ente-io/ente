@@ -64,13 +64,20 @@ export-folder/
 
 ### Metadata preservation
 
-Metadata is exported as separate JSON files alongside your photos. The original files are **not modified**.
+Metadata is exported as separate JSON files alongside your photos. The original files are not modified. The metadata folder name differs depending on whether you export using Ente Desktop or the Ente CLI.
 
-**Format:**
+**Ente Desktop Format:**
 
 ```
 photo.jpg
 metadata/photo.jpg.json
+```
+
+**Ente CLI Format:**
+
+```
+photo.jpg
+.meta/photo.jpg.json
 ```
 
 The JSON format matches Google Takeout format, so tools that support Google Takeout imports can read Ente's exported metadata.
