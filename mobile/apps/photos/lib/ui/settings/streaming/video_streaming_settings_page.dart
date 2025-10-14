@@ -19,7 +19,7 @@ import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
 
-const helpUrl = "https://help.ente.io/photos/faq/video-streaming";
+const helpUrl = "https://ente.io/help/photos/faq/video-streaming";
 
 class VideoStreamingSettingsPage extends StatefulWidget {
   const VideoStreamingSettingsPage({super.key});

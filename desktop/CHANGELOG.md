@@ -15,7 +15,7 @@
 - Generate streams for videos (beta)
 
     > Streamable videos can be enabled in Preferences. For more details, see the
-    > [video streaming FAQ](https://help.ente.io/photos/faq/video-streaming).
+    > [video streaming FAQ](https://ente.io/help/photos/faq/video-streaming).
 
 - Support Turkish translations.
 
