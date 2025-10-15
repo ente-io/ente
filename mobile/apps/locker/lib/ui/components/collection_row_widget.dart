@@ -5,6 +5,7 @@ import "package:locker/l10n/l10n.dart";
 import "package:locker/models/selected_collections.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
+import "package:locker/ui/components/collection_popup_menu_builder.dart";
 import "package:locker/ui/components/item_list_view.dart";
 
 class CollectionRowWidget extends StatelessWidget {
@@ -83,28 +84,72 @@ class CollectionRowWidget extends StatelessWidget {
                           color: colorScheme.iconColor,
                         ),
                 ),
-                const SizedBox(height: 12),
-                Text(
-                  collectionName,
-                  style: textTheme.bodyBold,
-                  textAlign: TextAlign.left,
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
+                const Spacer(),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            collectionName,
+                            style: textTheme.bodyBold,
+                            textAlign: TextAlign.left,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                          const SizedBox(height: 4),
+                          FutureBuilder<int>(
+                            future: CollectionService.instance
+                                .getFileCount(collection),
+                            builder: (context, snapshot) {
+                              final fileCount = snapshot.data ?? 0;
+                              return Text(
+                                context.l10n.items(fileCount),
+                                style: textTheme.small.copyWith(
+                                  color: colorScheme.textMuted,
+                                ),
+                                textAlign: TextAlign.left,
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      switchInCurve: Curves.easeOut,
+                      switchOutCurve: Curves.easeIn,
+                      child: isSelected
+                          ? const SizedBox.shrink()
+                          : PopupMenuButton<String>(
+                              onSelected: (value) =>
+                                  CollectionPopupMenuBuilder.handleMenuAction(
+                                context,
+                                value,
+                                collection,
+                                overflowActions,
+                              ),
+                              child: HugeIcon(
+                                icon: HugeIcons.strokeRoundedMoreVertical,
+                                color: colorScheme.iconColor,
+                              ),
+                              itemBuilder: (BuildContext context) {
+                                return CollectionPopupMenuBuilder
+                                    .buildPopupMenuItems(
+                                  context,
+                                  collection,
+                                  overflowActions,
+                                );
+                              },
+                            ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 4),
-                FutureBuilder<int>(
-                  future: CollectionService.instance.getFileCount(collection),
-                  builder: (context, snapshot) {
-                    final fileCount = snapshot.data ?? 0;
-                    return Text(
-                      context.l10n.items(fileCount),
-                      style: textTheme.small.copyWith(
-                        color: colorScheme.textMuted,
-                      ),
-                      textAlign: TextAlign.left,
-                    );
-                  },
-                ),
               ],
             ),
           );

@@ -256,7 +256,6 @@ class _ItemListViewState extends State<ItemListView> {
     } else {
       return FileListWidget(
         file: file,
-        collections: widget.collections,
         overflowActions: widget.fileOverflowActions,
         isLastItem: isLastItem,
         selectedFiles: widget.selectedFiles,

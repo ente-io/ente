@@ -1,10 +1,9 @@
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
-import "package:hugeicons/hugeicons.dart";
 import "package:locker/models/selected_files.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/services/info_file_service.dart";
-import "package:locker/ui/components/file_popup_menu_builder.dart";
+import "package:locker/ui/components/file_popup_menu_widget.dart";
 import "package:locker/ui/components/item_list_view.dart";
 import "package:locker/utils/file_icon_utils.dart";
 import "package:locker/utils/info_item_utils.dart";
@@ -85,19 +84,9 @@ class FileRowWidget extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 4),
-                    PopupMenuButton<String>(
-                      // onSelected: (value) =>
-                      //     _handleMenuAction(context, value),
-                      child: HugeIcon(
-                        icon: HugeIcons.strokeRoundedMoreVertical,
-                        color: getEnteColorScheme(context).iconColor,
-                      ),
-                      itemBuilder: (BuildContext context) {
-                        return FilePopupMenuBuilder.buildPopupMenuItems(
-                          context,
-                          overflowActions,
-                        );
-                      },
+                    FilePopupMenuWidget(
+                      file: file,
+                      overflowActions: overflowActions,
                     ),
                   ],
                 ),
