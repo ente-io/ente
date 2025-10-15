@@ -12,6 +12,7 @@ import "package:locker/services/files/sync/metadata_updater_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
 import "package:locker/ui/components/file_edit_dialog.dart";
 import "package:locker/ui/components/item_list_view.dart";
+import "package:locker/ui/components/menu_item_widget.dart";
 import "package:locker/ui/components/share_link_dialog.dart";
 import "package:locker/utils/snack_bar_utils.dart";
 
@@ -29,12 +30,21 @@ class FilePopupMenuWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+
     return PopupMenuButton<String>(
       onSelected: (value) => _handleMenuAction(context, value),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: colorScheme.strokeFaint),
+      ),
+      color: colorScheme.backgroundElevated,
+      elevation: 15,
+      shadowColor: Colors.black.withValues(alpha: 0.08),
       child: child ??
           HugeIcon(
             icon: HugeIcons.strokeRoundedMoreVertical,
-            color: getEnteColorScheme(context).iconColor,
+            color: colorScheme.iconColor,
           ),
       itemBuilder: (BuildContext context) {
         return _buildPopupMenuItems(context);
@@ -43,64 +53,74 @@ class FilePopupMenuWidget extends StatelessWidget {
   }
 
   List<PopupMenuItem<String>> _buildPopupMenuItems(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+
     if (overflowActions != null && overflowActions!.isNotEmpty) {
-      return overflowActions!
-          .map(
-            (action) => PopupMenuItem<String>(
-              value: action.id,
-              child: Row(
-                children: [
-                  Icon(
-                    action.icon,
-                    size: 16,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(action.label),
-                ],
+      final items = <PopupMenuItem<String>>[];
+      for (int i = 0; i < overflowActions!.length; i++) {
+        final action = overflowActions![i];
+        items.add(
+          PopupMenuItem<String>(
+            value: action.id,
+            padding: EdgeInsets.zero,
+            child: MenuItemWidget(
+              icon: Icon(
+                action.icon,
+                color: colorScheme.iconColor,
+                size: 20,
               ),
+              label: action.label,
+              isFirst: i == 0,
+              isLast: i == overflowActions!.length - 1,
             ),
-          )
-          .toList();
+          ),
+        );
+      }
+      return items;
     }
 
     return [
       PopupMenuItem<String>(
         value: 'edit',
-        child: Row(
-          children: [
-            const HugeIcon(
-              icon: HugeIcons.strokeRoundedEdit02,
-              size: 16,
-            ),
-            const SizedBox(width: 8),
-            Text(context.l10n.edit),
-          ],
+        padding: EdgeInsets.zero,
+        child: MenuItemWidget(
+          icon: HugeIcon(
+            icon: HugeIcons.strokeRoundedPencilEdit02,
+            color: colorScheme.iconColor,
+            size: 20,
+          ),
+          label: context.l10n.edit,
+          isFirst: true,
+          isLast: false,
         ),
       ),
       PopupMenuItem<String>(
         value: 'share_link',
-        child: Row(
-          children: [
-            const HugeIcon(
-              icon: HugeIcons.strokeRoundedShare03,
-              size: 16,
-            ),
-            const SizedBox(width: 8),
-            Text(context.l10n.share),
-          ],
+        padding: EdgeInsets.zero,
+        child: MenuItemWidget(
+          icon: HugeIcon(
+            icon: HugeIcons.strokeRoundedShare08,
+            color: colorScheme.iconColor,
+            size: 20,
+          ),
+          label: context.l10n.share,
+          isFirst: false,
+          isLast: false,
         ),
       ),
       PopupMenuItem<String>(
         value: 'delete',
-        child: Row(
-          children: [
-            const HugeIcon(
-              icon: HugeIcons.strokeRoundedDelete01,
-              size: 16,
-            ),
-            const SizedBox(width: 8),
-            Text(context.l10n.delete),
-          ],
+        padding: EdgeInsets.zero,
+        child: MenuItemWidget(
+          icon: HugeIcon(
+            icon: HugeIcons.strokeRoundedDelete02,
+            color: colorScheme.warning500,
+            size: 20,
+          ),
+          label: context.l10n.delete,
+          isFirst: false,
+          isLast: true,
+          isDelete: true,
         ),
       ),
     ];

@@ -17,6 +17,7 @@ import "package:locker/services/collections/models/collection_view_type.dart";
 import "package:locker/services/configuration.dart";
 import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/ui/components/item_list_view.dart';
+import "package:locker/ui/components/menu_item_widget.dart";
 import 'package:locker/ui/components/search_result_view.dart';
 import 'package:locker/ui/mixins/search_mixin.dart';
 import 'package:locker/ui/pages/home_page.dart';
@@ -51,7 +52,6 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
   List<EnteFile> _filteredFiles = [];
   late CollectionViewType collectionViewType;
   bool isQuickLink = false;
-  bool showFAB = true;
 
   final _selectedFiles = SelectedFiles();
 
@@ -135,10 +135,6 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
       _collection,
       Configuration.instance.getUserID()!,
     );
-
-    showFAB = collectionViewType == CollectionViewType.ownedCollection ||
-        collectionViewType == CollectionViewType.hiddenOwnedCollection ||
-        collectionViewType == CollectionViewType.quickLink;
   }
 
   Future<void> _initializeData(Collection collection) async {
@@ -226,8 +222,6 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
         ),
         backgroundColor: getEnteColorScheme(context).backgroundBase,
         body: _buildBody(),
-        floatingActionButton:
-            isSearchActive ? const SizedBox.shrink() : _buildFAB(),
         bottomNavigationBar: ListenableBuilder(
           listenable: _selectedFiles,
           builder: (context, _) {
@@ -270,8 +264,29 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
   }
 
   Widget _buildMenuButton() {
+    final colorScheme = getEnteColorScheme(context);
+
     return PopupMenuButton<String>(
-      icon: const Icon(Icons.more_vert),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: colorScheme.strokeFaint),
+      ),
+      color: colorScheme.backgroundElevated,
+      elevation: 15,
+      shadowColor: Colors.black.withValues(alpha: 0.08),
+      child: Container(
+        height: 48,
+        width: 48,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: colorScheme.backdropBase,
+        ),
+        padding: const EdgeInsets.all(12),
+        child: HugeIcon(
+          icon: HugeIcons.strokeRoundedMoreVertical,
+          color: colorScheme.iconColor,
+        ),
+      ),
       onSelected: (value) {
         switch (value) {
           case 'edit':
@@ -286,48 +301,78 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
         }
       },
       itemBuilder: (BuildContext context) {
-        return [
-          if (collectionViewType == CollectionViewType.ownedCollection ||
-              collectionViewType == CollectionViewType.hiddenOwnedCollection ||
-              collectionViewType == CollectionViewType.quickLink)
+        final items = <PopupMenuItem<String>>[];
+        var itemIndex = 0;
+        var totalItems = 0;
+
+        if (collectionViewType == CollectionViewType.ownedCollection ||
+            collectionViewType == CollectionViewType.hiddenOwnedCollection ||
+            collectionViewType == CollectionViewType.quickLink) {
+          totalItems = 2;
+        } else if (collectionViewType == CollectionViewType.sharedCollection) {
+          totalItems = 1;
+        }
+
+        if (collectionViewType == CollectionViewType.ownedCollection ||
+            collectionViewType == CollectionViewType.hiddenOwnedCollection ||
+            collectionViewType == CollectionViewType.quickLink) {
+          items.add(
             PopupMenuItem<String>(
-              value: 'edit',
-              child: Row(
-                children: [
-                  const Icon(Icons.edit),
-                  const SizedBox(width: 12),
-                  Text(context.l10n.edit),
-                ],
+              value: 'rename',
+              padding: EdgeInsets.zero,
+              child: MenuItemWidget(
+                icon: HugeIcon(
+                  icon: HugeIcons.strokeRoundedPencilEdit02,
+                  color: colorScheme.iconColor,
+                  size: 20,
+                ),
+                label: context.l10n.edit,
+                isFirst: itemIndex == 0,
+                isLast: itemIndex == totalItems - 1,
               ),
             ),
-          if (collectionViewType == CollectionViewType.ownedCollection ||
-              collectionViewType == CollectionViewType.hiddenOwnedCollection ||
-              collectionViewType == CollectionViewType.quickLink)
+          );
+          itemIndex++;
+
+          items.add(
             PopupMenuItem<String>(
               value: 'delete',
-              child: Row(
-                children: [
-                  const Icon(Icons.delete, color: Colors.red),
-                  const SizedBox(width: 12),
-                  Text(
-                    context.l10n.delete,
-                    style: const TextStyle(color: Colors.red),
-                  ),
-                ],
+              padding: EdgeInsets.zero,
+              child: MenuItemWidget(
+                icon: HugeIcon(
+                  icon: HugeIcons.strokeRoundedDelete02,
+                  color: colorScheme.warning500,
+                  size: 20,
+                ),
+                isDelete: true,
+                label: context.l10n.delete,
+                isFirst: itemIndex == 0,
+                isLast: itemIndex == totalItems - 1,
               ),
             ),
-          if (collectionViewType == CollectionViewType.sharedCollection)
+          );
+        }
+
+        if (collectionViewType == CollectionViewType.sharedCollection) {
+          items.add(
             PopupMenuItem<String>(
               value: 'leave_collection',
-              child: Row(
-                children: [
-                  const Icon(Icons.logout),
-                  const SizedBox(width: 12),
-                  Text(context.l10n.leaveCollection),
-                ],
+              padding: EdgeInsets.zero,
+              child: MenuItemWidget(
+                icon: HugeIcon(
+                  icon: HugeIcons.strokeRoundedDelete02,
+                  color: colorScheme.iconColor,
+                  size: 20,
+                ),
+                label: context.l10n.leaveCollection,
+                isFirst: true,
+                isLast: true,
               ),
             ),
-        ];
+          );
+        }
+
+        return items;
       },
     );
   }
@@ -354,33 +399,26 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
               TitleBarTitleWidget(
                 title: _collection.name ?? context.l10n.untitled,
                 trailingWidgets: [
-                  Container(
-                    height: 48,
-                    width: 48,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      color: getEnteColorScheme(context).backdropBase,
-                    ),
-                    padding: const EdgeInsets.all(12),
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedShare08,
-                      color: getEnteColorScheme(context).iconColor,
+                  GestureDetector(
+                    onTap: () async {
+                      await _shareCollection();
+                    },
+                    child: Container(
+                      height: 48,
+                      width: 48,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        color: getEnteColorScheme(context).backdropBase,
+                      ),
+                      padding: const EdgeInsets.all(12),
+                      child: HugeIcon(
+                        icon: HugeIcons.strokeRoundedShare08,
+                        color: getEnteColorScheme(context).iconColor,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Container(
-                    height: 48,
-                    width: 48,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      color: getEnteColorScheme(context).backdropBase,
-                    ),
-                    padding: const EdgeInsets.all(12),
-                    child: HugeIcon(
-                      icon: HugeIcons.strokeRoundedMoreVertical,
-                      color: getEnteColorScheme(context).iconColor,
-                    ),
-                  ),
+                  _buildMenuButton(),
                 ],
               ),
               Text(
@@ -452,15 +490,5 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
       ),
       (route) => false,
     );
-  }
-
-  Widget _buildFAB() {
-    return showFAB
-        ? FloatingActionButton(
-            onPressed: addFile,
-            tooltip: context.l10n.addFiles,
-            child: const Icon(Icons.add),
-          )
-        : const SizedBox.shrink();
   }
 }
