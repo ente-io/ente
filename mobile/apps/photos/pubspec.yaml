@@ -139,7 +139,7 @@ dependencies:
   mobile_ocr:
     git:
       url: https://github.com/laurenspriem/mobile_ocr
-      ref: 486ec54a352cdd5c176424488d7fde5c84f21978
+      ref: 58bc326c5c9fabddd4c51b1624b43cda9c6644e7
   modal_bottom_sheet: ^3.0.0
   motion_photos:
     git: "https://github.com/ente-io/motion_photo.git"

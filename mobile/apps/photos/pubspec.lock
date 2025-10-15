@@ -1680,8 +1680,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "486ec54a352cdd5c176424488d7fde5c84f21978"
-      resolved-ref: "486ec54a352cdd5c176424488d7fde5c84f21978"
+      ref: "58bc326c5c9fabddd4c51b1624b43cda9c6644e7"
+      resolved-ref: "58bc326c5c9fabddd4c51b1624b43cda9c6644e7"
       url: "https://github.com/laurenspriem/mobile_ocr"
     source: git
     version: "1.0.0"
