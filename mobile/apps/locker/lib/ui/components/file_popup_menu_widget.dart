@@ -1,5 +1,4 @@
 import "package:ente_ui/components/buttons/button_widget.dart";
-import "package:ente_ui/components/buttons/models/button_type.dart";
 import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:flutter/material.dart";
@@ -10,6 +9,7 @@ import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/files/links/links_service.dart";
 import "package:locker/services/files/sync/metadata_updater_service.dart";
 import "package:locker/services/files/sync/models/file.dart";
+import "package:locker/ui/components/delete_confirmation_dialog.dart";
 import "package:locker/ui/components/file_edit_dialog.dart";
 import "package:locker/ui/components/item_list_view.dart";
 import "package:locker/ui/components/menu_item_widget.dart";
@@ -184,14 +184,12 @@ class FilePopupMenuWidget extends StatelessWidget {
   }
 
   Future<void> _showDeleteConfirmationDialog(BuildContext context) async {
-    final result = await showChoiceDialog(
+    final result = await showDeleteConfirmationDialog(
       context,
       title: context.l10n.deleteFile,
       body: context.l10n.deleteFileConfirmation(file.displayName),
-      firstButtonLabel: context.l10n.delete,
-      secondButtonLabel: context.l10n.cancel,
-      firstButtonType: ButtonType.critical,
-      isCritical: true,
+      deleteButtonLabel: context.l10n.delete,
+      fileCount: 1,
     );
 
     if (result?.action == ButtonAction.first && context.mounted) {
