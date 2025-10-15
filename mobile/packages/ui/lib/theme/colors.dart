@@ -45,7 +45,7 @@ class EnteColorScheme extends ThemeExtension<EnteColorScheme> {
           primary700: const Color.fromRGBO(16, 113, 255, 1),
           primary400: const Color.fromARGB(255, 52, 152, 255),
           primary500: const Color.fromARGB(255, 102, 178, 255),
-          primary300: const Color.fromARGB(255, 153, 204, 255),
+          primary300: const Color.fromARGB(255, 236, 242, 250),
           gradientButtonBgColor: const Color.fromRGBO(0, 122, 255, 1),
           gradientButtonBgColors: const [
             Color.fromRGBO(0, 122, 255, 1),
