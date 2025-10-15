@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
 
+import "package:ente_accounts/services/user_service.dart";
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_events/models/signed_in_event.dart';
 import "package:ente_sharing/models/user.dart";
@@ -470,6 +471,19 @@ class CollectionService {
         }
       }
     }
+
+    // Add user's family members
+    final cachedUserDetails = UserService.instance.getCachedUserDetails();
+    if (cachedUserDetails?.familyData?.members?.isNotEmpty ?? false) {
+      for (final member in cachedUserDetails!.familyData!.members!) {
+        if (!existingEmails.contains(member.email)) {
+          relevantUsers.add(User(email: member.email));
+          existingEmails.add(member.email);
+        }
+      }
+    }
+
+    // TODO: Add contacts linked to people ?
 
     return relevantUsers;
   }
