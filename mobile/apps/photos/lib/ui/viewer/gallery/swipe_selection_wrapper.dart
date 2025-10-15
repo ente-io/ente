@@ -62,8 +62,7 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper>
   static const double _minAvailableSpace =
       30.0; // Minimum widget height for safety
   static const double _baselineRefreshRate = 120.0;
-  static const double _baselineMaxScrollSpeed =
-      11.6667; // ~1400 px/s (11.6667 * 120fps)
+  static const double _baselineMaxScrollSpeed = 12.0; // 1440 px/s (12 * 120fps)
   static const double _speedExponent = 1.20; // Power curve exponent
 
   @override
