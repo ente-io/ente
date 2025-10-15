@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:flutter_animate/flutter_animate.dart";
 import 'package:photos/core/constants.dart';
 import "package:photos/generated/l10n.dart";
@@ -163,6 +164,7 @@ class _GroupHeaderWidgetState extends State<GroupHeaderWidget> {
                         ),
                       ),
                       onTap: () {
+                        HapticFeedback.selectionClick();
                         widget.selectedFiles?.toggleGroupSelection(
                           widget.filesInGroup.toSet(),
                         );

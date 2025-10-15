@@ -193,6 +193,7 @@ class _GalleryFileWidgetState extends State<GalleryFileWidget> {
   }
 
   void _toggleFileSelection(EnteFile file) {
+    HapticFeedback.selectionClick();
     widget.selectedFiles!.toggleSelection(file);
   }
 
