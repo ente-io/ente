@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
@@ -47,4 +48,15 @@ Future<ui.Image> convertImageToFlutterUi(img.Image image) async {
   final ui.Image uiImage = fi.image;
 
   return uiImage;
+}
+
+/// Returns decoded width/height for image bytes, or null if decoding fails.
+({int width, int height})? decodeImageDimensions(Uint8List bytes) {
+  try {
+    final decoded = img.decodeImage(bytes);
+    if (decoded == null) return null;
+    return (width: decoded.width, height: decoded.height);
+  } catch (_) {
+    return null;
+  }
 }

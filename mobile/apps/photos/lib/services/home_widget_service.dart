@@ -17,6 +17,7 @@ import 'package:photos/services/memory_home_widget_service.dart';
 import 'package:photos/services/people_home_widget_service.dart';
 import 'package:photos/services/smart_memories_service.dart';
 import 'package:photos/utils/file_util.dart';
+import 'package:photos/utils/image_util.dart' as image_util;
 import 'package:photos/utils/thumbnail_util.dart';
 import "package:synchronized/synchronized.dart";
 import 'package:image/image.dart' as img;
@@ -109,13 +110,22 @@ class HomeWidgetService {
     String title,
     String? mainKey,
   ) async {
-    final result = await _captureFile(file, key, title, mainKey);
-    if (!result) {
+    final cacheKey = _cacheKeyForFile(file);
+    if (cacheKey == null) {
+      _logger.warning(
+        'Skipping widget render for ${file.displayName} due to missing uploadedFileID',
+      );
+      return null;
+    }
+
+    final Size? capturedSize =
+        await _captureFile(file, key, title, mainKey, cacheKey);
+    if (capturedSize == null) {
       _logger.warning("Failed to capture file ${file.displayName}");
       return null;
     }
 
-    return const Size(WIDGET_IMAGE_SIZE, WIDGET_IMAGE_SIZE);
+    return capturedSize;
   }
 
   Future<int> countHomeWidgets(
@@ -138,11 +148,12 @@ class HomeWidgetService {
     return await hw.HomeWidget.getInstalledWidgets();
   }
 
-  Future<bool> _captureFile(
+  Future<Size?> _captureFile(
     EnteFile file,
     String key,
     String title,
     String? mainKey,
+    String cacheKey,
   ) async {
     try {
       // Resolve directories
@@ -151,28 +162,34 @@ class HomeWidgetService {
       final String cacheDir = '$baseDir/$WIDGET_CACHE_DIR';
       await Directory(cacheDir).create(recursive: true);
 
-      final cacheKey = _cacheKeyForFile(file);
-      if (cacheKey == null) {
-        _logger.warning(
-          'Skipping widget render for ${file.displayName} due to missing uploadedFileID',
-        );
-        return false;
-      }
-
       // Use a stable cache key derived from uploadedFileID and content version
       final String cachedPath = '$cacheDir/$cacheKey.jpg';
       final File cachedFile = File(cachedPath);
 
+      Size? imageSize;
       if (!await cachedFile.exists()) {
-        final Uint8List? bytes = await _getWidgetImageBytes(file);
-        if (bytes == null) {
+        final ({Uint8List bytes, int width, int height})? imageData =
+            await _getWidgetImageBytes(file);
+        if (imageData == null) {
           _logger.warning(
               "Failed to get image for widget for ${file.displayName}");
-          return false;
+          return null;
         }
-        await cachedFile.writeAsBytes(bytes, flush: true);
+        await cachedFile.writeAsBytes(imageData.bytes, flush: true);
+        imageSize = Size(
+          imageData.width.toDouble(),
+          imageData.height.toDouble(),
+        );
         // Enforce cache budget after adding a new item
         unawaited(_enforceCacheBudget(cacheDir));
+      } else {
+        final ({int width, int height})? dims = await _readDimensions(cachedFile);
+        if (dims != null) {
+          imageSize = Size(
+            dims.width.toDouble(),
+            dims.height.toDouble(),
+          );
+        }
       }
 
       // Point the widget data for this slot key to the cached image path
@@ -194,20 +211,29 @@ class HomeWidgetService {
       // Save metadata in platform-specific format
       await _saveWidgetMetadata(key, metadata);
 
-      return true;
+      return imageSize ?? const Size(WIDGET_IMAGE_SIZE, WIDGET_IMAGE_SIZE);
     } catch (error, stackTrace) {
       _logger.severe("Failed to save the thumbnail", error, stackTrace);
-      return false;
+      return null;
     }
   }
 
-  /// Returns bytes for a widget image preferring ~1280px max dimension.
+  /// Returns bytes and dimensions for a widget image preferring ~1280px max dimension.
   /// Falls back to existing 512px thumbnail if a higher-res source is not available
   /// without extra network I/O (e.g., remote and not cached locally).
-  Future<Uint8List?> _getWidgetImageBytes(EnteFile file) async {
+  Future<({Uint8List bytes, int width, int height})?> _getWidgetImageBytes(
+    EnteFile file,
+  ) async {
     // For videos, stick to existing thumbnail path
     if (file.fileType == FileType.video) {
-      return getThumbnail(file);
+      final thumb = await getThumbnail(file);
+      if (thumb == null) return null;
+      final dims = image_util.decodeImageDimensions(thumb);
+      return (
+        bytes: thumb,
+        width: dims?.width ?? thumbnailLargeSize,
+        height: dims?.height ?? thumbnailLargeSize,
+      );
     }
 
     File? source;
@@ -233,18 +259,38 @@ class HomeWidgetService {
             final scale = WIDGET_IMAGE_SIZE / maxDim;
             final int tw = (w * scale).round();
             final int th = (h * scale).round();
-            out = img.copyResize(decoded, width: tw, height: th, interpolation: img.Interpolation.linear);
+            out = img.copyResize(
+              decoded,
+              width: tw,
+              height: th,
+              interpolation: img.Interpolation.linear,
+            );
           }
           final jpg = img.encodeJpg(out, quality: 80);
-          return Uint8List.fromList(jpg);
+          return (
+            bytes: Uint8List.fromList(jpg),
+            width: out.width,
+            height: out.height,
+          );
         }
       } catch (e, s) {
-        _logger.warning("Widget image resize/encode failed, fallback to thumbnail", e, s);
+        _logger.warning(
+          "Widget image resize/encode failed, fallback to thumbnail",
+          e,
+          s,
+        );
       }
     }
 
     // Fallback to existing 512px thumbnail
-    return getThumbnail(file);
+    final thumb = await getThumbnail(file);
+    if (thumb == null) return null;
+    final dims = image_util.decodeImageDimensions(thumb);
+    return (
+      bytes: thumb,
+      width: dims?.width ?? thumbnailLargeSize,
+      height: dims?.height ?? thumbnailLargeSize,
+    );
   }
 
   String? _cacheKeyForFile(EnteFile file) {
@@ -256,6 +302,18 @@ class HomeWidgetService {
         : (file.modificationTime ?? file.updationTime ?? 0).toString();
     final contentSig = _sanitizeFilename(rawSig);
     return 'u_${uploadedId}_$contentSig';
+  }
+
+  Future<({int width, int height})?> _readDimensions(File file) async {
+    try {
+      final bytes = await file.readAsBytes();
+      final dims = image_util.decodeImageDimensions(bytes);
+      if (dims == null) return null;
+      return (width: dims.width, height: dims.height);
+    } catch (e, s) {
+      _logger.warning('Failed to read widget image dimensions', e, s);
+      return null;
+    }
   }
 
   String _sanitizeFilename(String input) {
@@ -270,12 +328,10 @@ class HomeWidgetService {
       final entries = await dir.list().where((e) => e is File).toList();
       if (entries.isEmpty) return;
 
-      int totalBytes = 0;
       final files = <File>[];
       for (final e in entries) {
         final f = e as File;
         files.add(f);
-        totalBytes += await f.length();
       }
 
       if (files.length <= WIDGET_CACHE_MAX_FILES) {
