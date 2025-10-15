@@ -42,8 +42,7 @@ class HomeWidgetService {
   static const double WIDGET_IMAGE_SIZE = 1280.0;
   static const String WIDGET_DIRECTORY = 'home_widget';
   static const String WIDGET_CACHE_DIR = 'cache';
-  static const int WIDGET_CACHE_MAX_BYTES = 80 * 1024 * 1024; // ~80MB
-  static const int WIDGET_CACHE_MAX_FILES = 300;
+  static const int WIDGET_CACHE_MAX_FILES = 150;
 
   // URI schemes for different widget types
   static const String MEMORY_WIDGET_SCHEME = 'memorywidget';
@@ -152,8 +151,16 @@ class HomeWidgetService {
       final String cacheDir = '$baseDir/$WIDGET_CACHE_DIR';
       await Directory(cacheDir).create(recursive: true);
 
-      // Use a stable cache key that avoids generatedId and reflects content version
-      final String cachedPath = '$cacheDir/${_cacheKeyForFile(file)}.jpg';
+      final cacheKey = _cacheKeyForFile(file);
+      if (cacheKey == null) {
+        _logger.warning(
+          'Skipping widget render for ${file.displayName} due to missing uploadedFileID',
+        );
+        return false;
+      }
+
+      // Use a stable cache key derived from uploadedFileID and content version
+      final String cachedPath = '$cacheDir/$cacheKey.jpg';
       final File cachedFile = File(cachedPath);
 
       if (!await cachedFile.exists()) {
@@ -240,23 +247,15 @@ class HomeWidgetService {
     return getThumbnail(file);
   }
 
-  String _cacheKeyForFile(EnteFile file) {
-    // Remote/uploaded files: prefer uploadedFileID + content hash; fallback to modification time
-    if (file.uploadedFileID != null) {
-      final id = file.uploadedFileID.toString();
-      final rawSig = (file.hash != null && file.hash!.isNotEmpty)
-          ? file.hash!
-          : (file.modificationTime ?? file.updationTime ?? 0).toString();
-      final contentSig = _sanitizeFilename(rawSig);
-      return 'u_${id}_$contentSig';
-    }
-    // Local-only files: use localID + modification time
-    if (file.localID != null) {
-      final mt = (file.modificationTime ?? 0).toString();
-      return 'l_${_sanitizeFilename(file.localID!)}_$mt';
-    }
-    // Last resort: derive from title + creation time (very rare)
-    return 'f_${_sanitizeFilename(file.title ?? "untitled")}_${file.creationTime ?? 0}';
+  String? _cacheKeyForFile(EnteFile file) {
+    final uploadedId = file.uploadedFileID;
+    if (uploadedId == null) return null;
+
+    final rawSig = (file.hash != null && file.hash!.isNotEmpty)
+        ? file.hash!
+        : (file.modificationTime ?? file.updationTime ?? 0).toString();
+    final contentSig = _sanitizeFilename(rawSig);
+    return 'u_${uploadedId}_$contentSig';
   }
 
   String _sanitizeFilename(String input) {
@@ -279,20 +278,17 @@ class HomeWidgetService {
         totalBytes += await f.length();
       }
 
-      if (totalBytes <= WIDGET_CACHE_MAX_BYTES && files.length <= WIDGET_CACHE_MAX_FILES) {
+      if (files.length <= WIDGET_CACHE_MAX_FILES) {
         return;
       }
 
       // Sort by last modified ascending (oldest first)
       files.sort((a, b) => a.statSync().modified.compareTo(b.statSync().modified));
 
-      var idx = 0;
-      while ((totalBytes > WIDGET_CACHE_MAX_BYTES || files.length - idx > WIDGET_CACHE_MAX_FILES) && idx < files.length) {
-        final f = files[idx++];
-        try {
-          totalBytes -= await f.length();
-        } catch (_) {}
-        await f.delete().catchError((_) {});
+      final int filesToDelete = files.length - WIDGET_CACHE_MAX_FILES;
+      for (var i = 0; i < filesToDelete; i++) {
+        final file = files[i];
+        await file.delete().catchError((_) {});
       }
     } catch (e, s) {
       _logger.warning('Failed to enforce widget cache budget', e, s);
