@@ -323,8 +323,8 @@
     "thumbnail_generation_failed_hint": "Эти файлы были загружены, но, к сожалению, мы не смогли сгенерировать для них миниатюры.",
     "unsupported_files": "Неподдерживаемые файлы",
     "unsupported_files_hint": "Ente пока не поддерживает эти форматы файлов",
-    "zero_size_files": "",
-    "zero_size_files_hint": "",
+    "zero_size_files": "Пустые файлы",
+    "zero_size_files_hint": "Эти файлы не были загружены, поскольку их размер ноль байтов",
     "blocked_uploads": "Заблокированные загрузки",
     "blocked_uploads_hint": "Ваш браузер или расширение не позволяет Ente использовать <code>eTags</code> для загрузки больших файлов.",
     "large_files": "Большие файлы",
@@ -431,7 +431,7 @@
         "year": "Через год"
     },
     "copy_link": "Скопировать ссылку",
-    "copy_embed_html": "",
+    "copy_embed_html": "Скопируйте HTML-код для вставки",
     "done": "Сделано",
     "share_link_section_title": "Или поделитесь ссылкой",
     "remove_link": "Удалить ссылку",
@@ -697,9 +697,9 @@
     "custom_domains_help": "Для получения дополнительной информации см. <a>помощь</a>",
     "num_1": "1",
     "num_2": "2",
-    "grouped": "",
-    "continuous": "",
-    "trip": "",
-    "album_layout": "",
-    "maps_privacy_notice": ""
+    "grouped": "Сгруппированные",
+    "continuous": "Непрерывный",
+    "trip": "Путешествие",
+    "album_layout": "Макет альбома",
+    "maps_privacy_notice": "Приблизительные координаты будут отправлены заботящимся о конфиденциальности третьим сторонам, таким как OpenStreetMap, для отображения карты и местоположения."
 }

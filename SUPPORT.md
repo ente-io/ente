@@ -7,7 +7,7 @@ details as possible about whatever it is that you need help with, and we will
 get back to you as soon as possible.
 
 In some cases, your query might already have been answered in our help
-documentation at [help.ente.io](https://help.ente.io).
+documentation at [ente.io/help](https://ente.io/help).
 
 Other ways to get in touch are:
 

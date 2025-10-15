@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 1.2.11+1211
+version: 1.2.12-beta+1211
 publish_to: none
 
 environment:
@@ -136,6 +136,10 @@ dependencies:
   media_kit_libs_video:
   media_kit_video:
   ml_linalg: ^13.11.31
+  mobile_ocr:
+    git:
+      url: https://github.com/laurenspriem/mobile_ocr
+      ref: 486ec54a352cdd5c176424488d7fde5c84f21978
   modal_bottom_sheet: ^3.0.0
   motion_photos:
     git: "https://github.com/ente-io/motion_photo.git"
@@ -203,9 +207,6 @@ dependencies:
   syncfusion_flutter_sliders: ^29.1.38
   synchronized: ^3.3.0+3
   system_info_plus: ^0.0.6
-  text_detector:
-    git:
-      url: https://github.com/neeraj-pilot/text_detector.git
   thermal: ^1.1.11
   timezone: ^0.10.0
   tuple: ^2.0.0

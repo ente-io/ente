@@ -376,6 +376,7 @@
   "shouldHideCode": "Kódok elrejtése",
   "doubleTapToViewHiddenCode": "A kód megtekintéséhez koppints duplán egy bejegyzésre",
   "focusOnSearchBar": "A keresésre fókuszálás az alkalmazás indításakor",
+  "minimizeToTrayOnClose": "Bezárásra minimalizálás a tálcára",
   "confirmUpdatingkey": "Biztosan frissíteni szeretnéd a titkos kulcsot?",
   "minimizeAppOnCopy": "Alkalmazás kicsinyítése másoláskor",
   "editCodeAuthMessage": "Hitelesítés a kód szerkesztéséhez",

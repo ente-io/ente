@@ -1170,7 +1170,6 @@
   },
   "maps": "Mapy",
   "enableMaps": "Povolit mapy",
-  "enableMapsDesc": "Tímto se vaše fotografie zobrazí na mapě světa.\n\nTato mapa je hostována službou Open Street Map a přesné umístění vašich fotografií není nikdy sdíleno.\n\nTuto funkci můžete kdykoli deaktivovat v nastavení.",
   "quickLinks": "Rychlé odkazy",
   "selectItemsToAdd": "Vyberte položky, které chcete přidat",
   "addSelected": "Přidat vybrané",

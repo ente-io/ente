@@ -12,7 +12,7 @@ import {
     fileLocation,
 } from "ente-media/file-metadata";
 import { nullToUndefined } from "ente-utils/transform";
-import { z } from "zod/v4";
+import { z } from "zod";
 import type { NamedPerson } from "../ml/people";
 import {
     pullUserEntities,

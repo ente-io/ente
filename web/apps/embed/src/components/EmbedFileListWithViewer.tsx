@@ -45,6 +45,7 @@ export const EmbedFileListWithViewer: React.FC<
             setCurrentIndex(index);
             setOpenFileViewer(true);
         },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         [files.length],
     );
 

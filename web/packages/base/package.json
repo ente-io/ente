@@ -5,28 +5,28 @@
     "dependencies": {
         "@emotion/react": "^11.14.0",
         "@emotion/styled": "^11.14.1",
-        "@fontsource-variable/inter": "^5.2.6",
-        "@mui/icons-material": "^7.2.0",
-        "@mui/material": "^7.2.0",
+        "@fontsource-variable/inter": "^5.2.8",
+        "@mui/icons-material": "^7.3.4",
+        "@mui/material": "^7.3.4",
         "comlink": "^4.4.2",
         "ente-utils": "*",
         "formik": "^2.4.6",
         "get-user-locale": "^3.0.0",
-        "i18next": "^25.3.0",
+        "i18next": "^25.6.0",
         "i18next-resources-to-backend": "^1.2.1",
         "idb": "^8.0.3",
         "libsodium-wrappers-sumo": "^0.7.15",
-        "nanoid": "^5.1.5",
-        "next": "^15.3.4",
-        "react": "^19.1.0",
-        "react-dom": "^19.1.0",
-        "react-i18next": "^15.5.3",
-        "zod": "^3.25.67"
+        "nanoid": "^5.1.6",
+        "next": "^15.5.5",
+        "react": "^19.2.0",
+        "react-dom": "^19.2.0",
+        "react-i18next": "^16.0.1",
+        "zod": "^4.1.12"
     },
     "devDependencies": {
         "@types/libsodium-wrappers-sumo": "^0.7.8",
-        "@types/react": "^19.1.8",
-        "@types/react-dom": "^19.1.6",
+        "@types/react": "^19.2.2",
+        "@types/react-dom": "^19.2.2",
         "ente-build-config": "*"
     }
 }
