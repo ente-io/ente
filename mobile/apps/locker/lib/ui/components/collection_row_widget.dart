@@ -5,8 +5,9 @@ import "package:locker/l10n/l10n.dart";
 import "package:locker/models/selected_collections.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
-import "package:locker/ui/components/collection_popup_menu_builder.dart";
+import "package:locker/ui/components/collection_popup_menu_widget.dart";
 import "package:locker/ui/components/item_list_view.dart";
+import "package:locker/ui/pages/collection_page.dart";
 
 class CollectionRowWidget extends StatelessWidget {
   final Collection collection;
@@ -36,6 +37,8 @@ class CollectionRowWidget extends StatelessWidget {
       onTap: () {
         if (onTapCallback != null) {
           onTapCallback!(collection);
+        } else {
+          _openCollection(context);
         }
       },
       onLongPress: () {
@@ -125,26 +128,9 @@ class CollectionRowWidget extends StatelessWidget {
                       switchOutCurve: Curves.easeIn,
                       child: isSelected
                           ? const SizedBox.shrink()
-                          : PopupMenuButton<String>(
-                              onSelected: (value) =>
-                                  CollectionPopupMenuBuilder.handleMenuAction(
-                                context,
-                                value,
-                                collection,
-                                overflowActions,
-                              ),
-                              child: HugeIcon(
-                                icon: HugeIcons.strokeRoundedMoreVertical,
-                                color: colorScheme.iconColor,
-                              ),
-                              itemBuilder: (BuildContext context) {
-                                return CollectionPopupMenuBuilder
-                                    .buildPopupMenuItems(
-                                  context,
-                                  collection,
-                                  overflowActions,
-                                );
-                              },
+                          : CollectionPopupMenuWidget(
+                              collection: collection,
+                              overflowActions: overflowActions,
                             ),
                     ),
                   ],
@@ -154,6 +140,14 @@ class CollectionRowWidget extends StatelessWidget {
             ),
           );
         },
+      ),
+    );
+  }
+
+  void _openCollection(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => CollectionPage(collection: collection),
       ),
     );
   }

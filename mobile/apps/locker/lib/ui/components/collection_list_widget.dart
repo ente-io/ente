@@ -6,8 +6,9 @@ import "package:locker/l10n/l10n.dart";
 import "package:locker/models/selected_collections.dart";
 import "package:locker/services/collections/collections_service.dart";
 import "package:locker/services/collections/models/collection.dart";
-import "package:locker/ui/components/collection_popup_menu_builder.dart";
+import "package:locker/ui/components/collection_popup_menu_widget.dart";
 import "package:locker/ui/components/item_list_view.dart";
+import "package:locker/ui/pages/collection_page.dart";
 
 class CollectionListWidget extends StatelessWidget {
   final Collection collection;
@@ -96,7 +97,7 @@ class CollectionListWidget extends StatelessWidget {
         if (onTapCallback != null) {
           onTapCallback!(collection);
         } else {
-          CollectionPopupMenuBuilder.openCollection(context, collection);
+          _openCollection(context);
         }
       },
       onLongPress: () {
@@ -140,14 +141,9 @@ class CollectionListWidget extends StatelessWidget {
                             iconButtonType: IconButtonType.secondary,
                             iconColor: colorScheme.primary700,
                           )
-                        : PopupMenuButton<String>(
-                            onSelected: (value) =>
-                                CollectionPopupMenuBuilder.handleMenuAction(
-                              context,
-                              value,
-                              collection,
-                              overflowActions,
-                            ),
+                        : CollectionPopupMenuWidget(
+                            collection: collection,
+                            overflowActions: overflowActions,
                             child: Padding(
                               padding: const EdgeInsets.all(12.0),
                               child: HugeIcon(
@@ -155,14 +151,6 @@ class CollectionListWidget extends StatelessWidget {
                                 color: getEnteColorScheme(context).iconColor,
                               ),
                             ),
-                            itemBuilder: (BuildContext context) {
-                              return CollectionPopupMenuBuilder
-                                  .buildPopupMenuItems(
-                                context,
-                                collection,
-                                overflowActions,
-                              );
-                            },
                           ),
                   ),
                 ),
@@ -170,6 +158,14 @@ class CollectionListWidget extends StatelessWidget {
             ),
           );
         },
+      ),
+    );
+  }
+
+  void _openCollection(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => CollectionPage(collection: collection),
       ),
     );
   }

@@ -8,6 +8,7 @@ import "package:locker/services/info_file_service.dart";
 import "package:locker/ui/components/file_popup_menu_widget.dart";
 import "package:locker/ui/components/item_list_view.dart";
 import "package:locker/utils/file_icon_utils.dart";
+import "package:locker/utils/file_util.dart";
 import "package:locker/utils/info_item_utils.dart";
 
 class FileListWidget extends StatelessWidget {
@@ -36,9 +37,10 @@ class FileListWidget extends StatelessWidget {
       flex: 6,
       child: Row(
         children: [
-          SizedBox(
-            height: 40,
-            width: 40,
+          Container(
+            padding: const EdgeInsets.all(10.0),
+            height: 60,
+            width: 60,
             child: _buildFileIcon(),
           ),
           const SizedBox(width: 12),
@@ -64,14 +66,12 @@ class FileListWidget extends StatelessWidget {
         if (onTapCallback != null) {
           onTapCallback!(file);
         } else {
-          FilePopupMenuWidget.openFile(context, file);
+          FileUtil.openFile(context, file);
         }
       },
       onLongPress: () {
         if (onLongPressCallback != null) {
           onLongPressCallback!(file);
-        } else {
-          FilePopupMenuWidget.openFile(context, file);
         }
       },
       behavior: HitTestBehavior.opaque,

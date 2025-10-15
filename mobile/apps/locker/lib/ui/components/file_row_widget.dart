@@ -6,6 +6,7 @@ import "package:locker/services/info_file_service.dart";
 import "package:locker/ui/components/file_popup_menu_widget.dart";
 import "package:locker/ui/components/item_list_view.dart";
 import "package:locker/utils/file_icon_utils.dart";
+import "package:locker/utils/file_util.dart";
 import "package:locker/utils/info_item_utils.dart";
 
 class FileRowWidget extends StatelessWidget {
@@ -35,11 +36,15 @@ class FileRowWidget extends StatelessWidget {
       onTap: () {
         if (onTapCallback != null) {
           onTapCallback!(file);
+        } else {
+          FileUtil.openFile(context, file);
         }
       },
       onLongPress: () {
         if (onLongPressCallback != null) {
           onLongPressCallback!(file);
+        } else {
+          FileUtil.openFile(context, file);
         }
       },
       child: ListenableBuilder(

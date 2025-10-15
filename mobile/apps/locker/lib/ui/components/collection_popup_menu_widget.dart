@@ -1,4 +1,5 @@
 import "package:ente_events/event_bus.dart";
+import "package:ente_ui/theme/ente_theme.dart";
 import "package:flutter/material.dart";
 import "package:hugeicons/hugeicons.dart";
 import "package:locker/events/collections_updated_event.dart";
@@ -7,24 +8,38 @@ import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/collections/models/collection_view_type.dart";
 import "package:locker/services/configuration.dart";
 import "package:locker/ui/components/item_list_view.dart";
-import "package:locker/ui/pages/collection_page.dart";
 import "package:locker/utils/collection_actions.dart";
 
-/// Centralized builder for collection popup menus and actions
-///
-/// This class provides:
-/// - Menu item building for collection popup menus
-/// - Centralized action handling for edit, delete, and leave collection
-/// - Navigation helper for opening collection pages
-class CollectionPopupMenuBuilder {
-  /// Builds popup menu items based on collection view type and overflow actions
-  static List<PopupMenuItem<String>> buildPopupMenuItems(
-    BuildContext context,
-    Collection collection,
-    List<OverflowMenuAction>? overflowActions,
-  ) {
-    if (overflowActions != null && overflowActions.isNotEmpty) {
-      return overflowActions
+class CollectionPopupMenuWidget extends StatelessWidget {
+  final Collection collection;
+  final List<OverflowMenuAction>? overflowActions;
+  final Widget? child;
+
+  const CollectionPopupMenuWidget({
+    super.key,
+    required this.collection,
+    this.overflowActions,
+    this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<String>(
+      onSelected: (value) => _handleMenuAction(context, value),
+      child: child ??
+          HugeIcon(
+            icon: HugeIcons.strokeRoundedMoreVertical,
+            color: getEnteColorScheme(context).iconColor,
+          ),
+      itemBuilder: (BuildContext context) {
+        return _buildPopupMenuItems(context);
+      },
+    );
+  }
+
+  List<PopupMenuItem<String>> _buildPopupMenuItems(BuildContext context) {
+    if (overflowActions != null && overflowActions!.isNotEmpty) {
+      return overflowActions!
           .map(
             (action) => PopupMenuItem<String>(
               value: action.id,
@@ -43,8 +58,10 @@ class CollectionPopupMenuBuilder {
           .toList();
     }
 
-    final collectionViewType =
-        getCollectionViewType(collection, Configuration.instance.getUserID()!);
+    final collectionViewType = getCollectionViewType(
+      collection,
+      Configuration.instance.getUserID()!,
+    );
 
     return [
       if (collectionViewType == CollectionViewType.ownedCollection ||
@@ -96,26 +113,9 @@ class CollectionPopupMenuBuilder {
     ];
   }
 
-  /// Handles popup menu actions for collections
-  ///
-  /// This method centralizes all collection action handling:
-  /// - Custom overflow actions
-  /// - Edit collection (rename)
-  /// - Delete collection
-  /// - Leave shared collection
-  ///
-  /// Optional callbacks can be provided to override default behavior
-  static void handleMenuAction(
-    BuildContext context,
-    String action,
-    Collection collection,
-    List<OverflowMenuAction>? overflowActions, {
-    VoidCallback? onEditCallback,
-    VoidCallback? onDeleteCallback,
-    VoidCallback? onLeaveCollectionCallback,
-  }) {
-    if (overflowActions != null && overflowActions.isNotEmpty) {
-      final customAction = overflowActions.firstWhere(
+  void _handleMenuAction(BuildContext context, String action) {
+    if (overflowActions != null && overflowActions!.isNotEmpty) {
+      final customAction = overflowActions!.firstWhere(
         (a) => a.id == action,
         orElse: () => throw StateError('Action not found'),
       );
@@ -125,49 +125,18 @@ class CollectionPopupMenuBuilder {
 
     switch (action) {
       case 'edit':
-        if (onEditCallback != null) {
-          onEditCallback();
-        } else {
-          editCollection(context, collection);
-        }
+        _editCollection(context);
         break;
       case 'delete':
-        if (onDeleteCallback != null) {
-          onDeleteCallback();
-        } else {
-          deleteCollection(context, collection);
-        }
+        _deleteCollection(context);
         break;
       case 'leave_collection':
-        if (onLeaveCollectionCallback != null) {
-          onLeaveCollectionCallback();
-        } else {
-          leaveCollection(context, collection);
-        }
+        _leaveCollection(context);
         break;
     }
   }
 
-  /// Opens the collection page
-  ///
-  /// This is a centralized navigation helper that can be used by both
-  /// CollectionRowWidget and CollectionListWidget
-  static void openCollection(BuildContext context, Collection collection) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => CollectionPage(collection: collection),
-      ),
-    );
-  }
-
-  /// Shows a dialog to edit/rename a collection
-  ///
-  /// This method wraps CollectionActions.editCollection and ensures
-  /// the UI is updated after a successful rename
-  static Future<void> editCollection(
-    BuildContext context,
-    Collection collection,
-  ) async {
+  Future<void> _editCollection(BuildContext context) async {
     await CollectionActions.editCollection(
       context,
       collection,
@@ -177,14 +146,7 @@ class CollectionPopupMenuBuilder {
     );
   }
 
-  /// Shows a confirmation dialog and deletes a collection
-  ///
-  /// This method wraps CollectionActions.deleteCollection and ensures
-  /// the UI is updated after a successful deletion
-  static Future<void> deleteCollection(
-    BuildContext context,
-    Collection collection,
-  ) async {
+  Future<void> _deleteCollection(BuildContext context) async {
     await CollectionActions.deleteCollection(
       context,
       collection,
@@ -194,14 +156,7 @@ class CollectionPopupMenuBuilder {
     );
   }
 
-  /// Shows a confirmation dialog and leaves a shared collection
-  ///
-  /// This method wraps CollectionActions.leaveCollection and ensures
-  /// the UI is updated after successfully leaving
-  static Future<void> leaveCollection(
-    BuildContext context,
-    Collection collection,
-  ) async {
+  Future<void> _leaveCollection(BuildContext context) async {
     await CollectionActions.leaveCollection(
       context,
       collection,
