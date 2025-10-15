@@ -1,4 +1,4 @@
-- Laurens: Show hidden persons and fallback for face thumbnail issues
+- Laurens: Show empty persons and fallback for face thumbnail issues
 - Prateek: (i) Add native video editor to boost performance
 - Neeraj: Remove feature flags from manage_links_widget (album layout, allow joining album, copy embed HTML)
 - Ashil: Use better copy on auto-add people selection page
