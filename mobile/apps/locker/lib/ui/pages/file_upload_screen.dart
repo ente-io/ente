@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import "package:dotted_border/dotted_border.dart";
 import "package:ente_ui/components/buttons/gradient_button.dart";
 import "package:ente_ui/components/title_bar_title_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
@@ -30,7 +31,7 @@ class FileUploadScreen extends StatefulWidget {
 
 class _FileUploadScreenState extends State<FileUploadScreen> {
   late List<File> _files;
-  final List<Collection> _selectedCollections = [];
+  final Set<Collection> _selectedCollections = {};
 
   @override
   void initState() {
@@ -143,7 +144,6 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
                       title: context.l10n.addToCollection,
                     ),
                     const SizedBox(height: 24),
-                    // Collection chips
                     Wrap(
                       spacing: 8,
                       runSpacing: 12,
@@ -152,12 +152,7 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
                           context,
                           context.l10n.uncategorized,
                           _selectedCollections.isEmpty,
-                          () {
-                            setState(() {
-                              _selectedCollections.clear();
-                            });
-                          },
-                          isPrimary: true,
+                          _onUncategorizedSelected,
                         ),
                         ...widget.collections.map((collection) {
                           final isSelected =
@@ -166,15 +161,7 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
                             context,
                             collection.name ?? context.l10n.unnamed,
                             isSelected,
-                            () {
-                              setState(() {
-                                if (isSelected) {
-                                  _selectedCollections.remove(collection);
-                                } else {
-                                  _selectedCollections.add(collection);
-                                }
-                              });
-                            },
+                            () => _onCollectionSelected(collection),
                           );
                         }),
                         _buildNewCollectionChip(context),
@@ -196,9 +183,7 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
                   onTap: () async {
                     final result = FileUploadDialogResult(
                       note: '',
-                      selectedCollections: _selectedCollections.isNotEmpty
-                          ? _selectedCollections
-                          : [],
+                      selectedCollections: _selectedCollections.toList(),
                     );
                     Navigator.of(context).pop(result);
                   },
@@ -218,19 +203,23 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
     final fileName = path.basename(file.path);
 
     final widget = Flexible(
+      flex: 6,
       child: Row(
         children: [
-          SizedBox(
+          Container(
+            padding: const EdgeInsets.all(10.0),
             width: 60,
             height: 60,
             child: _buildFileIcon(fileName),
           ),
           const SizedBox(width: 12),
-          Text(
-            fileName,
-            overflow: TextOverflow.ellipsis,
-            maxLines: 1,
-            style: textTheme.body,
+          Flexible(
+            child: Text(
+              fileName,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              style: textTheme.body,
+            ),
           ),
         ],
       ),
@@ -282,13 +271,28 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
     return FileIconUtils.getFileIcon(fileName, showBackground: true);
   }
 
+  void _onUncategorizedSelected() {
+    setState(() {
+      _selectedCollections.clear();
+    });
+  }
+
+  void _onCollectionSelected(Collection collection) {
+    setState(() {
+      if (_selectedCollections.contains(collection)) {
+        _selectedCollections.remove(collection);
+      } else {
+        _selectedCollections.add(collection);
+      }
+    });
+  }
+
   Widget _buildCollectionChip(
     BuildContext context,
     String name,
     bool isSelected,
-    VoidCallback onTap, {
-    bool isPrimary = false,
-  }) {
+    VoidCallback onTap,
+  ) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
 
@@ -296,28 +300,19 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         decoration: BoxDecoration(
-          color: isSelected
-              ? (isPrimary
-                  ? colorScheme.primary700.withValues(alpha: 0.12)
-                  : colorScheme.fillFaint)
-              : colorScheme.backgroundElevated,
-          borderRadius: BorderRadius.circular(24),
+          color: isSelected ? colorScheme.primary300 : colorScheme.fillFaint,
+          borderRadius: const BorderRadius.all(Radius.circular(24.0)),
           border: Border.all(
-            color: isSelected
-                ? (isPrimary ? colorScheme.primary700 : colorScheme.strokeMuted)
-                : colorScheme.strokeFaint,
-            width: isSelected ? 1.5 : 1,
+            color: isSelected ? colorScheme.primary700 : Colors.transparent,
+            width: 1,
           ),
         ),
         child: Text(
           name,
-          style: textTheme.body.copyWith(
-            color: isSelected
-                ? (isPrimary ? colorScheme.primary700 : colorScheme.textBase)
-                : colorScheme.textMuted,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+          style: textTheme.small.copyWith(
+            color: isSelected ? colorScheme.primary700 : colorScheme.textBase,
           ),
         ),
       ),
@@ -338,15 +333,13 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
           });
         }
       },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        decoration: BoxDecoration(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: colorScheme.strokeFaint.withValues(alpha: 0.6),
-            width: 1.5,
-          ),
+      child: DottedBorder(
+        options: const RoundedRectDottedBorderOptions(
+          padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          strokeWidth: 1,
+          color: Color(0xFF6B6B6B),
+          dashPattern: [5, 5],
+          radius: Radius.circular(24),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
