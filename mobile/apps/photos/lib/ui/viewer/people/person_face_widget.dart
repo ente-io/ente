@@ -1,5 +1,6 @@
 import "dart:typed_data";
 
+import "package:flutter/foundation.dart" show kDebugMode;
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/db/files_db.dart";
@@ -46,6 +47,8 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
   Future<Uint8List?>? faceCropFuture;
   EnteFile? fileForFaceCrop;
   String? _personName;
+  bool _showingFallback = false;
+  bool _fallbackEverUsed = false;
 
   bool get isPerson => widget.personId != null;
 
@@ -55,18 +58,24 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
   @override
   void initState() {
     super.initState();
-    faceCropFuture = _getFaceCrop();
+    faceCropFuture = _loadFaceCrop();
   }
 
   @override
   void dispose() {
-    super.dispose();
     if (fileForFaceCrop != null) {
       checkStopTryingToGenerateFaceThumbnails(
         fileForFaceCrop!.uploadedFileID!,
         useFullFile: widget.useFullFile,
       );
+      if (_fallbackEverUsed) {
+        checkStopTryingToGenerateFaceThumbnails(
+          fileForFaceCrop!.uploadedFileID!,
+          useFullFile: false,
+        );
+      }
     }
+    super.dispose();
   }
 
   @override
@@ -87,6 +96,29 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
                 image: imageProvider,
                 fit: BoxFit.cover,
               ),
+              if (kDebugMode && _showingFallback)
+                Positioned(
+                  top: 4,
+                  right: 4,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.6),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: const Text(
+                      "(T)",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
             ],
           );
         }
@@ -103,7 +135,9 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
             snapshot.stackTrace,
           );
         } else {
-          _logger.severe("faceCropFuture is null, no cover face found for person or cluster.");
+          _logger.severe(
+            "faceCropFuture is null, no cover face found for person or cluster.",
+          );
         }
         return _EmptyPersonThumbnail(
           initial: isPerson ? _personName : null,
@@ -112,7 +146,43 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
     );
   }
 
-  Future<Uint8List?> _getFaceCrop() async {
+  Future<Uint8List?> _loadFaceCrop() async {
+    if (!widget.useFullFile) {
+      final Uint8List? thumbnailCrop =
+          await _getFaceCrop(useFullFile: widget.useFullFile);
+      if (thumbnailCrop != null) {
+        _fallbackEverUsed = true;
+      }
+      _showingFallback = false;
+      return thumbnailCrop;
+    }
+
+    final Uint8List? fullCrop =
+        await _getFaceCrop(useFullFile: widget.useFullFile);
+    if (fullCrop != null) {
+      _showingFallback = false;
+      return fullCrop;
+    }
+
+    final String personOrClusterId = widget.personId ?? widget.clusterID!;
+    _logger.warning(
+      "Full face crop unavailable for $personOrClusterId, attempting thumbnail fallback.",
+    );
+
+    final Uint8List? fallbackCrop = await _getFaceCrop(useFullFile: false);
+    if (fallbackCrop != null) {
+      _showingFallback = true;
+      _fallbackEverUsed = true;
+      return fallbackCrop;
+    }
+
+    _logger.warning(
+      "Thumbnail fallback also unavailable for $personOrClusterId.",
+    );
+    return null;
+  }
+
+  Future<Uint8List?> _getFaceCrop({required bool useFullFile}) async {
     try {
       final String personOrClusterId = widget.personId ?? widget.clusterID!;
       final tryInMemoryCachedCrop =
@@ -206,7 +276,7 @@ class _PersonFaceWidgetState extends State<PersonFaceWidget>
       final cropMap = await getCachedFaceCrops(
         fileForFaceCrop,
         [face],
-        useFullFile: widget.useFullFile,
+        useFullFile: useFullFile,
         personOrClusterID: personOrClusterId,
         useTempCache: false,
       );
