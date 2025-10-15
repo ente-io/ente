@@ -1,7 +1,9 @@
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:flutter_animate/flutter_animate.dart";
 import 'package:photos/core/constants.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/file/dummy_file.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -163,6 +165,7 @@ class _GroupHeaderWidgetState extends State<GroupHeaderWidget> {
                         ),
                       ),
                       onTap: () {
+                        HapticFeedback.selectionClick();
                         widget.selectedFiles?.toggleGroupSelection(
                           widget.filesInGroup.toSet(),
                         );
@@ -213,14 +216,20 @@ class _GroupHeaderWidgetState extends State<GroupHeaderWidget> {
 
   void _selectedFilesListener() {
     if (widget.selectedFiles == null) return;
+    // Filter out dummy files before checking selection state
+    final nonDummyFiles =
+        widget.filesInGroup.where((file) => file is! DummyFile).toSet();
     _areAllFromGroupSelectedNotifier.value =
-        widget.selectedFiles!.files.containsAll(widget.filesInGroup.toSet());
+        widget.selectedFiles!.files.containsAll(nonDummyFiles);
   }
 
   bool _areAllFromGroupSelected() {
+    // Filter out dummy files before checking selection state
+    final nonDummyFiles =
+        widget.filesInGroup.where((file) => file is! DummyFile).toSet();
     if (widget.selectedFiles != null &&
-        widget.selectedFiles!.files.length >= widget.filesInGroup.length) {
-      return widget.selectedFiles!.files.containsAll(widget.filesInGroup);
+        widget.selectedFiles!.files.length >= nonDummyFiles.length) {
+      return widget.selectedFiles!.files.containsAll(nonDummyFiles);
     } else {
       return false;
     }

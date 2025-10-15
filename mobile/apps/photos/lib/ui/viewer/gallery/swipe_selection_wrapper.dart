@@ -62,10 +62,8 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper>
   static const double _minAvailableSpace =
       30.0; // Minimum widget height for safety
   static const double _baselineRefreshRate = 120.0;
-  static const double _baselineMaxScrollSpeed = 10.0; // px/frame at 120fps
+  static const double _baselineMaxScrollSpeed = 12.0; // 1440 px/s (12 * 120fps)
   static const double _speedExponent = 1.20; // Power curve exponent
-  static const double _edgeBoostZone = 50.0; // Pixels from screen edge
-  static const double _edgeBoostMaxMultiplier = 2.5; // Max boost at edge
 
   @override
   void initState() {
@@ -198,8 +196,11 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper>
         : (screenHeight -
             boundaryPosition); // Space from bottom boundary to screen bottom
 
-    // Apply safety floor to prevent issues with very small widgets
-    final safeWidgetHeight = math.max(_minAvailableSpace, widgetHeight);
+    // Apply safety floor and cap at 150px
+    // Small widgets (< 150px): Speed ramps up over their full height
+    // Large widgets (>= 150px): Speed maxes out at 150px from boundary
+    final safeWidgetHeight =
+        math.max(_minAvailableSpace, math.min(150.0, widgetHeight));
 
     // Calculate penetration percentage (0.0 to 1.0)
     // Clamped to 1.0 to handle cases where pointer goes beyond widget bounds
@@ -207,34 +208,9 @@ class _SwipeSelectionWrapperState extends State<SwipeSelectionWrapper>
 
     // Apply power curve for slightly exponential feel
     // speed = maxSpeed × (penetration ^ exponent)
-    // Exponent is configurable in debug settings
-    double speed = _maxScrollSpeed * math.pow(penetration, _speedExponent);
+    final speed = _maxScrollSpeed * math.pow(penetration, _speedExponent);
 
-    // Apply edge boost when pointer is close to screen edges
-    if (_edgeBoostZone > 0) {
-      // Calculate pointer's Y position on screen
-      final pointerY = scrollingUp
-          ? (boundaryPosition - distanceFromBoundary)
-          : (boundaryPosition + distanceFromBoundary);
-
-      // Calculate distance from nearest screen edge
-      final distanceFromScreenEdge =
-          scrollingUp ? pointerY : (screenHeight - pointerY);
-
-      // Apply linear boost if within edge boost zone
-      if (distanceFromScreenEdge < _edgeBoostZone) {
-        // Linear boost: 0% at zone boundary, up to max at edge
-        // boostFactor ranges from 1.0 to _edgeBoostMaxMultiplier
-        final boostProgress =
-            (_edgeBoostZone - distanceFromScreenEdge) / _edgeBoostZone;
-        final boostFactor =
-            1.0 + ((_edgeBoostMaxMultiplier - 1.0) * boostProgress);
-        speed *= boostFactor;
-      }
-    }
-
-    // Cap final speed to prevent exceeding maximum with edge boost
-    return math.min(speed, _maxScrollSpeed * _edgeBoostMaxMultiplier);
+    return speed;
   }
 
   /// Check if pointer is inside/outside boundaries and start/stop auto-scroll
