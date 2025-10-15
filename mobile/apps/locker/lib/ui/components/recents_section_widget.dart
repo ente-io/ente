@@ -731,7 +731,11 @@ class _FilterChip extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: textTheme.small,
+                style: textTheme.small.copyWith(
+                  color: isSelected
+                      ? colorScheme.backgroundBase
+                      : colorScheme.textBase,
+                ),
               ),
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300),

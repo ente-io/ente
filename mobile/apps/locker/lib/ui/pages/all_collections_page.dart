@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:ente_events/event_bus.dart';
+import "package:ente_ui/components/title_bar_title_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:locker/events/collections_updated_event.dart';
@@ -8,13 +9,9 @@ import 'package:locker/l10n/l10n.dart';
 import 'package:locker/models/selected_collections.dart';
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
-import 'package:locker/services/files/sync/models/file.dart';
 import 'package:locker/services/trash/trash_service.dart';
 import 'package:locker/ui/components/item_list_view.dart';
-import 'package:locker/ui/components/search_result_view.dart';
-import 'package:locker/ui/mixins/search_mixin.dart';
 import 'package:locker/ui/pages/collection_page.dart';
-import 'package:locker/ui/pages/home_page.dart';
 import 'package:locker/ui/pages/trash_page.dart';
 import "package:locker/ui/viewer/actions/collection_selection_overlay_bar.dart";
 import 'package:locker/utils/collection_sort_util.dart';
@@ -40,44 +37,17 @@ class AllCollectionsPage extends StatefulWidget {
   State<AllCollectionsPage> createState() => _AllCollectionsPageState();
 }
 
-class _AllCollectionsPageState extends State<AllCollectionsPage>
-    with SearchMixin {
+class _AllCollectionsPageState extends State<AllCollectionsPage> {
   List<Collection> _sortedCollections = [];
   List<Collection> _allCollections = [];
   Collection? _uncategorizedCollection;
   int? _uncategorizedFileCount;
-  List<EnteFile> _allFiles = [];
   bool _isLoading = true;
   String? _error;
   bool showTrash = false;
   bool showUncategorized = false;
   final _logger = Logger("AllCollectionsPage");
   StreamSubscription<CollectionsUpdatedEvent>? _collectionsUpdatedSub;
-
-  @override
-  List<Collection> get allCollections => _allCollections;
-
-  @override
-  List<EnteFile> get allFiles => _allFiles;
-
-  @override
-  void onSearchResultsChanged(
-    List<Collection> collections,
-    List<EnteFile> files,
-  ) {
-    setState(() {
-      if (searchQuery.isEmpty) {
-        final regularCollections = collections
-            .where((c) => c.type != CollectionType.uncategorized)
-            .toList();
-        _sortedCollections =
-            CollectionSortUtil.getSortedCollections(regularCollections);
-      } else {
-        _sortedCollections =
-            CollectionSortUtil.getSortedCollections(collections);
-      }
-    });
-  }
 
   @override
   void initState() {
@@ -148,7 +118,6 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
                   .getFilesInCollection(uncategorized))
               .length
           : 0;
-      _allFiles = await CollectionService.instance.getAllFiles();
 
       if (mounted) {
         setState(() {
@@ -168,37 +137,36 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
 
   @override
   Widget build(BuildContext context) {
-    return KeyboardListener(
-      focusNode: FocusNode(),
-      onKeyEvent: handleKeyEvent,
-      child: Scaffold(
-        appBar: AppBar(
-          leading: buildSearchLeading(),
-          title: Text(_getTitle(context)),
-          centerTitle: false,
-          backgroundColor: getEnteColorScheme(context).backgroundBase,
-          surfaceTintColor: Colors.transparent,
-          actions: [
-            buildSearchAction(),
-            ...buildSearchActions(),
-          ],
-        ),
+    return Scaffold(
+      backgroundColor: getEnteColorScheme(context).backgroundBase,
+      appBar: AppBar(
         backgroundColor: getEnteColorScheme(context).backgroundBase,
-        body: _buildBody(),
-        bottomNavigationBar: widget.selectedCollections != null
-            ? ListenableBuilder(
-                listenable: widget.selectedCollections!,
-                builder: (context, _) {
-                  return widget.selectedCollections!.hasSelections
-                      ? CollectionSelectionOverlayBar(
-                          collection: _sortedCollections,
-                          selectedCollections: widget.selectedCollections!,
-                        )
-                      : const SizedBox.shrink();
-                },
-              )
-            : null,
+        surfaceTintColor: Colors.transparent,
+        toolbarHeight: 48,
+        leadingWidth: 48,
+        leading: GestureDetector(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: const Icon(
+            Icons.arrow_back_outlined,
+          ),
+        ),
       ),
+      body: _buildBody(),
+      bottomNavigationBar: widget.selectedCollections != null
+          ? ListenableBuilder(
+              listenable: widget.selectedCollections!,
+              builder: (context, _) {
+                return widget.selectedCollections!.hasSelections
+                    ? CollectionSelectionOverlayBar(
+                        collection: _sortedCollections,
+                        selectedCollections: widget.selectedCollections!,
+                      )
+                    : const SizedBox.shrink();
+              },
+            )
+          : null,
     );
   }
 
@@ -235,77 +203,51 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
       );
     }
 
-    if (isSearchActive) {
-      return Padding(
-        padding: const EdgeInsets.only(top: 16),
-        child: SearchResultView(
-          collections: _sortedCollections,
-          files: const [],
-          searchQuery: searchQuery,
-          isHomePage: false,
-          onSearchEverywhere: _searchEverywhere,
+    if (_sortedCollections.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.folder_open,
+                size: 64,
+                color: Colors.grey,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                context.l10n.noCollectionsFound,
+                style: getEnteTextTheme(context).large.copyWith(
+                      color: Colors.grey,
+                    ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       );
-    }
-
-    if (_sortedCollections.isEmpty) {
-      if (searchQuery.isNotEmpty) {
-        return FileListViewHelpers.createSearchEmptyState(
-          searchQuery: searchQuery,
-          message: context.l10n.noCollectionsFoundForQuery(searchQuery),
-        );
-      } else {
-        return Center(
-          child: Padding(
-            padding: const EdgeInsets.all(32.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.folder_open,
-                  size: 64,
-                  color: Colors.grey,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  context.l10n.noCollectionsFound,
-                  style: getEnteTextTheme(context).large.copyWith(
-                        color: Colors.grey,
-                      ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-        );
-      }
     }
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (searchQuery.isNotEmpty)
-            Container(
-              padding: const EdgeInsets.only(bottom: 16.0),
-              alignment: Alignment.centerLeft,
-              child: Text(
-                context.l10n
-                    .searchResultsCount(_sortedCollections.length, searchQuery),
-                style: getEnteTextTheme(context).small.copyWith(
-                      color: Theme.of(context).textTheme.bodySmall?.color,
-                    ),
-              ),
-            ),
+          TitleBarTitleWidget(
+            title: _getTitle(context),
+          ),
+          Text(
+            _allCollections.length.toString() + " items",
+            style: getEnteTextTheme(context).smallMuted,
+          ),
           Flexible(
             child: ItemListView(
               collections: _sortedCollections,
               selectedCollections: widget.selectedCollections,
             ),
           ),
-          if (!isSearchActive &&
-              _uncategorizedCollection != null &&
-              showUncategorized)
+          if (_uncategorizedCollection != null && showUncategorized)
             _buildUncategorizedHook(),
           if (showTrash) _buildTrashHook(),
         ],
@@ -368,15 +310,6 @@ class _AllCollectionsPageState extends State<AllCollectionsPage>
       MaterialPageRoute(
         builder: (context) => TrashPage(trashFiles: trashFiles),
       ),
-    );
-  }
-
-  void _searchEverywhere() {
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(
-        builder: (context) => HomePage(initialSearchQuery: searchQuery),
-      ),
-      (route) => false,
     );
   }
 

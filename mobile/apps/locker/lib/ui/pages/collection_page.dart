@@ -237,32 +237,6 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
     );
   }
 
-  PreferredSizeWidget _buildAppBar() {
-    return AppBar(
-      leading: buildSearchLeading(),
-      title: Text(
-        _collection.name ?? context.l10n.untitled,
-        style: const TextStyle(fontWeight: FontWeight.bold),
-      ),
-      elevation: 0,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
-      actions: [
-        buildSearchAction(),
-        ...buildSearchActions(),
-        IconButton(
-          icon: Icon(
-            Icons.adaptive.share,
-          ),
-          onPressed: () async {
-            await _shareCollection();
-          },
-        ),
-        _buildMenuButton(),
-      ],
-    );
-  }
-
   Widget _buildMenuButton() {
     final colorScheme = getEnteColorScheme(context);
 
