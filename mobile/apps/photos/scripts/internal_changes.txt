@@ -1,3 +1,4 @@
+- Neeraj: [CustomerIssue] Handle corrupt asset timestamps with detailed error reporting
 - Neeraj: Fix video aspect ratio when shared from external apps
 - Prateek: Add logging for background task execution
 - Prateek: (i) Add detailed debug logging for upload preparation, pre-upload checks, file queueing, and upload progress tracking
