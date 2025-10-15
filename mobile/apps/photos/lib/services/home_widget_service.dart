@@ -155,44 +155,20 @@ class HomeWidgetService {
     String cacheKey,
   ) async {
     try {
-      // Resolve directories
       final String widgetDirectory = await _getWidgetStorageDirectory();
       final String baseDir = '$widgetDirectory/$WIDGET_DIRECTORY';
       final String cacheDir = '$baseDir/$WIDGET_CACHE_DIR';
       await Directory(cacheDir).create(recursive: true);
 
-      // Use a stable cache key derived from uploadedFileID and content version
-      final String cachedPath = '$cacheDir/$cacheKey.jpg';
-      final File cachedFile = File(cachedPath);
-
-      Size? imageSize;
-      if (!await cachedFile.exists()) {
-        final ({Uint8List bytes, int width, int height})? imageData =
-            await _getWidgetImageBytes(file);
-        if (imageData == null) {
-          _logger.warning(
-              "Failed to get image for widget for ${file.displayName}");
-          return null;
-        }
-        await cachedFile.writeAsBytes(imageData.bytes, flush: true);
-        imageSize = Size(
-          imageData.width.toDouble(),
-          imageData.height.toDouble(),
-        );
-        // Enforce cache budget after adding a new item
-        unawaited(_enforceCacheBudget(cacheDir));
-      } else {
-        final ({int width, int height})? dims = await _readDimensions(cachedFile);
-        if (dims != null) {
-          imageSize = Size(
-            dims.width.toDouble(),
-            dims.height.toDouble(),
-          );
-        }
+      final imageInfo =
+          await _ensureCachedWidgetImage(file, cacheDir, cacheKey);
+      if (imageInfo == null) {
+        _logger
+            .warning("Failed to get image for widget for ${file.displayName}");
+        return null;
       }
 
-      // Point the widget data for this slot key to the cached image path
-      await setData(key, cachedPath);
+      await setData(key, imageInfo.path);
 
       // Format date for display
       final subText = await SmartMemoriesService.getDateFormattedLocale(
@@ -210,7 +186,7 @@ class HomeWidgetService {
       // Save metadata in platform-specific format
       await _saveWidgetMetadata(key, metadata);
 
-      return imageSize ?? const Size(WIDGET_IMAGE_SIZE, WIDGET_IMAGE_SIZE);
+      return imageInfo.size;
     } catch (error, stackTrace) {
       _logger.severe("Failed to save the thumbnail", error, stackTrace);
       return null;
@@ -223,17 +199,7 @@ class HomeWidgetService {
   Future<({Uint8List bytes, int width, int height})?> _getWidgetImageBytes(
     EnteFile file,
   ) async {
-    File? source;
-    if (file.fileType != FileType.video) {
-      // Prefer a local/cached full-res source to avoid network fetches
-      if (!file.isRemoteFile) {
-        source = await getFile(file);
-      } else {
-        if (await isFileCached(file)) {
-          source = await getFile(file);
-        }
-      }
-    }
+    final File? source = await _resolveWidgetSource(file);
 
     if (source != null) {
       try {
@@ -288,6 +254,16 @@ class HomeWidgetService {
     }
   }
 
+  Future<File?> _resolveWidgetSource(EnteFile file) async {
+    if (file.fileType == FileType.video) {
+      return null;
+    }
+    if (file.isRemoteFile) {
+      return await isFileCached(file) ? getFile(file) : null;
+    }
+    return getFile(file);
+  }
+
   String _sanitizeFilename(String input) {
     // Allow only alnum, dot, underscore, dash; replace others (including '/') with '_'
     return input.replaceAll(RegExp(r'[^A-Za-z0-9._-]'), '_');
@@ -307,7 +283,8 @@ class HomeWidgetService {
       }
 
       // Sort by last modified ascending (oldest first)
-      files.sort((a, b) => a.statSync().modified.compareTo(b.statSync().modified));
+      files.sort(
+          (a, b) => a.statSync().modified.compareTo(b.statSync().modified));
 
       final int filesToDelete = files.length - WIDGET_CACHE_MAX_FILES;
       for (var i = 0; i < filesToDelete; i++) {
@@ -317,6 +294,38 @@ class HomeWidgetService {
     } catch (e, s) {
       _logger.warning('Failed to enforce widget cache budget', e, s);
     }
+  }
+
+  Future<({String path, Size size})?> _ensureCachedWidgetImage(
+    EnteFile file,
+    String cacheDir,
+    String cacheKey,
+  ) async {
+    final String cachedPath = '$cacheDir/$cacheKey.jpg';
+    final File cachedFile = File(cachedPath);
+
+    if (await cachedFile.exists()) {
+      final ({int width, int height})? dims = await _readDimensions(cachedFile);
+      final size = dims != null
+          ? Size(dims.width.toDouble(), dims.height.toDouble())
+          : const Size(WIDGET_IMAGE_SIZE, WIDGET_IMAGE_SIZE);
+      return (path: cachedPath, size: size);
+    }
+
+    final ({Uint8List bytes, int width, int height})? imageData =
+        await _getWidgetImageBytes(file);
+    if (imageData == null) {
+      return null;
+    }
+
+    await cachedFile.writeAsBytes(imageData.bytes, flush: true);
+    unawaited(_enforceCacheBudget(cacheDir));
+
+    final size = Size(
+      imageData.width.toDouble(),
+      imageData.height.toDouble(),
+    );
+    return (path: cachedPath, size: size);
   }
 
   Future<void> _saveWidgetMetadata(

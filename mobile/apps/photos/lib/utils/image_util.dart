@@ -75,9 +75,8 @@ Future<ui.Image> convertImageToFlutterUi(img.Image image) async {
     }
 
     img.Image output = decoded;
-    final int maxDim = decoded.width > decoded.height
-        ? decoded.width
-        : decoded.height;
+    final int maxDim =
+        decoded.width > decoded.height ? decoded.width : decoded.height;
     if (maxDim > maxDimension) {
       final double scale = maxDimension / maxDim;
       final int targetWidth = (decoded.width * scale).round();
