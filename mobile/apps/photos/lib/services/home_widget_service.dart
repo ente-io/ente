@@ -223,25 +223,15 @@ class HomeWidgetService {
   Future<({Uint8List bytes, int width, int height})?> _getWidgetImageBytes(
     EnteFile file,
   ) async {
-    // For videos, stick to existing thumbnail path
-    if (file.fileType == FileType.video) {
-      final thumb = await getThumbnail(file);
-      if (thumb == null) return null;
-      final dims = image_util.decodeImageDimensions(thumb);
-      return (
-        bytes: thumb,
-        width: dims?.width ?? thumbnailLargeSize,
-        height: dims?.height ?? thumbnailLargeSize,
-      );
-    }
-
     File? source;
-    // Prefer a local/cached full-res source to avoid network fetches
-    if (!file.isRemoteFile) {
-      source = await getFile(file);
-    } else {
-      if (await isFileCached(file)) {
+    if (file.fileType != FileType.video) {
+      // Prefer a local/cached full-res source to avoid network fetches
+      if (!file.isRemoteFile) {
         source = await getFile(file);
+      } else {
+        if (await isFileCached(file)) {
+          source = await getFile(file);
+        }
       }
     }
 
@@ -265,14 +255,13 @@ class HomeWidgetService {
       }
     }
 
-    // Fallback to existing 512px thumbnail
+    // Fallback to existing 512px thumbnail (used for videos and failed resizes)
     final thumb = await getThumbnail(file);
     if (thumb == null) return null;
-    final dims = image_util.decodeImageDimensions(thumb);
     return (
       bytes: thumb,
-      width: dims?.width ?? thumbnailLargeSize,
-      height: dims?.height ?? thumbnailLargeSize,
+      width: thumbnailLargeSize,
+      height: thumbnailLargeSize,
     );
   }
 
