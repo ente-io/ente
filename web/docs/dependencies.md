@@ -229,6 +229,9 @@ via [@fontsource-variable/inter](https://fontsource.org/fonts/inter/install).
   web code (Live photos are zip files under the hood). Note that the desktop app
   uses also has a ZIP parser (that one supports streaming).
 
+- [file-type](https://github.com/sindresorhus/file-type) is used for MIME type
+  detection.
+
 - [heic-convert](https://github.com/catdad-experiments/heic-convert) is used for
   converting HEIC files (which browsers don't natively support) into JPEG. For
   (much more) details, see [heic.md](heic.md).
