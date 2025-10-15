@@ -20,7 +20,6 @@ import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/image_util.dart' as image_util;
 import 'package:photos/utils/thumbnail_util.dart';
 import "package:synchronized/synchronized.dart";
-import 'package:image/image.dart' as img;
 
 enum WidgetStatus {
   // notSynced means the widget is not initialized or has no data
@@ -248,30 +247,14 @@ class HomeWidgetService {
 
     if (source != null) {
       try {
-        final srcBytes = await source.readAsBytes();
-        final decoded = img.decodeImage(srcBytes);
-        if (decoded != null) {
-          final int w = decoded.width;
-          final int h = decoded.height;
-          final int maxDim = (w > h) ? w : h;
-          img.Image out = decoded;
-          if (maxDim > WIDGET_IMAGE_SIZE) {
-            final scale = WIDGET_IMAGE_SIZE / maxDim;
-            final int tw = (w * scale).round();
-            final int th = (h * scale).round();
-            out = img.copyResize(
-              decoded,
-              width: tw,
-              height: th,
-              interpolation: img.Interpolation.linear,
-            );
-          }
-          final jpg = img.encodeJpg(out, quality: 80);
-          return (
-            bytes: Uint8List.fromList(jpg),
-            width: out.width,
-            height: out.height,
-          );
+        final rawBytes = await source.readAsBytes();
+        final resized = image_util.resizeImageToJpeg(
+          srcBytes: rawBytes,
+          maxDimension: WIDGET_IMAGE_SIZE,
+          quality: 80,
+        );
+        if (resized != null) {
+          return resized;
         }
       } catch (e, s) {
         _logger.warning(
@@ -325,14 +308,10 @@ class HomeWidgetService {
     try {
       final dir = Directory(cacheDirPath);
       if (!await dir.exists()) return;
-      final entries = await dir.list().where((e) => e is File).toList();
+      final entries = await dir.list().whereType<File>().toList();
       if (entries.isEmpty) return;
 
-      final files = <File>[];
-      for (final e in entries) {
-        final f = e as File;
-        files.add(f);
-      }
+      final files = entries;
 
       if (files.length <= WIDGET_CACHE_MAX_FILES) {
         return;

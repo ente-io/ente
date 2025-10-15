@@ -60,3 +60,42 @@ Future<ui.Image> convertImageToFlutterUi(img.Image image) async {
     return null;
   }
 }
+
+/// Resizes [srcBytes] so that the longer dimension is at most [maxDimension],
+/// encoding the result as JPEG with [quality]. If decoding fails, returns null.
+({Uint8List bytes, int width, int height})? resizeImageToJpeg({
+  required Uint8List srcBytes,
+  required double maxDimension,
+  int quality = 80,
+}) {
+  try {
+    final decoded = img.decodeImage(srcBytes);
+    if (decoded == null) {
+      return null;
+    }
+
+    img.Image output = decoded;
+    final int maxDim = decoded.width > decoded.height
+        ? decoded.width
+        : decoded.height;
+    if (maxDim > maxDimension) {
+      final double scale = maxDimension / maxDim;
+      final int targetWidth = (decoded.width * scale).round();
+      final int targetHeight = (decoded.height * scale).round();
+      output = img.copyResize(
+        decoded,
+        width: targetWidth,
+        height: targetHeight,
+        interpolation: img.Interpolation.linear,
+      );
+    }
+
+    final Uint8List encoded = Uint8List.fromList(
+      img.encodeJpg(output, quality: quality),
+    );
+
+    return (bytes: encoded, width: output.width, height: output.height);
+  } catch (_) {
+    return null;
+  }
+}
