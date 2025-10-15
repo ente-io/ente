@@ -6,7 +6,9 @@ export default defineConfig({
     base: "/help/", // Serve under /help path
     title: "Ente Help",
     description: "Documentation and help for Ente's products",
-    head: [["link", { rel: "icon", type: "image/png", href: "/favicon.png" }]],
+    head: [
+        ["link", { rel: "icon", type: "image/png", href: "/help/favicon.png" }],
+    ],
     cleanUrls: true,
     ignoreDeadLinks: "localhostLinks",
     themeConfig: {

@@ -84,12 +84,12 @@ class PassKeySessionNotVerifiedError extends Error {}
 
 class PassKeySessionExpiredError extends Error {}
 
-class MultiPartMissingFileError implements Exception {
+class MultiPartFileMissingError implements Exception {
   final String message;
-  MultiPartMissingFileError(this.message);
+  MultiPartFileMissingError(this.message);
 
   @override
-  String toString() => "MultiPartMissingFileError: $message";
+  String toString() => "MultiPartFileMissingError: $message";
 }
 
 class MultiPartError implements Exception {
@@ -98,4 +98,24 @@ class MultiPartError implements Exception {
 
   @override
   String toString() => "MultiPartError: $message";
+}
+
+class InvalidDateTimeError implements Exception {
+  final String assetId;
+  final String? assetTitle;
+  final String field;
+  final String originalError;
+
+  InvalidDateTimeError({
+    required this.assetId,
+    this.assetTitle,
+    required this.field,
+    required this.originalError,
+  });
+
+  @override
+  String toString() {
+    return 'InvalidDateTimeError: $field is invalid for asset '
+        '(id: $assetId, title: ${assetTitle ?? "unknown"}) - $originalError';
+  }
 }

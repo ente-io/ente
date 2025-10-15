@@ -271,7 +271,7 @@ Future<void> _saveLivePhotoOnDroid(
   AssetEntity? savedAsset = await (PhotoManager.editor
           .saveImageWithPath(image.path, title: enteFile.title!))
       .catchError((err) {
-    throw Exception("Failed to save image of live photo");
+    throw Exception("Failed to save image of live photo: $err");
   });
   IgnoredFile ignoreVideoFile = IgnoredFile(
     savedAsset.id,
@@ -285,7 +285,12 @@ Future<void> _saveLivePhotoOnDroid(
   savedAsset = (await (PhotoManager.editor.saveVideo(
     video,
     title: videoTitle,
-  )).catchError((_) => throw Exception("Failed to save video of live photo")));
+  )).catchError(
+    (err) {
+      _logger.warning('Failed to save video $videoTitle of live photo');
+      throw Exception("Failed to save video of live photo: $err");
+    },
+  ));
 
   ignoreVideoFile = IgnoredFile(
     savedAsset.id,

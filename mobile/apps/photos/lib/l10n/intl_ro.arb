@@ -1130,7 +1130,6 @@
   },
   "maps": "Hărţi",
   "enableMaps": "Activare hărți",
-  "enableMapsDesc": "Se va afișa fotografiile dvs. pe o hartă a lumii.\n\nAceastă hartă este găzduită de Open Street Map, iar locațiile exacte ale fotografiilor dvs. nu sunt niciodată partajate.\n\nPuteți dezactiva această funcție oricând din Setări.",
   "quickLinks": "Link-uri rapide",
   "selectItemsToAdd": "Selectați elementele de adăugat",
   "addSelected": "Adăugați selectate",

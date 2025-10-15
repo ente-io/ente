@@ -1,3 +1,5 @@
+import "dart:async";
+
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/memories/memory.dart";
 import "package:photos/models/memories/smart_memory.dart";
@@ -174,5 +176,66 @@ class PeopleMemory extends SmartMemory {
       case PeopleMemoryType.lastTimeYouSawThem:
         return locals.lastTimeWithThem(name: personName!);
     }
+  }
+}
+
+typedef PeopleSelectionBuilder = Future<List<Memory>> Function(
+  List<Memory> memories,
+);
+
+class PeopleMemoryCandidate {
+  PeopleMemoryCandidate({
+    required this.personID,
+    required this.personName,
+    required this.type,
+    required this.rawMemories,
+    required this.firstDateToShow,
+    required this.lastDateToShow,
+    this.activity,
+    this.lastCreationTime,
+    this.selectionBuilder,
+    this.requiresSelection = true,
+  }) : assert(!requiresSelection || selectionBuilder != null);
+
+  final String personID;
+  final String? personName;
+  final PeopleMemoryType type;
+  final PeopleActivity? activity;
+  final List<Memory> rawMemories;
+  final int firstDateToShow;
+  final int lastDateToShow;
+  final int? lastCreationTime;
+  final bool requiresSelection;
+  final PeopleSelectionBuilder? selectionBuilder;
+
+  PeopleMemory? _resolvedMemory;
+  Future<PeopleMemory?>? _pendingBuild;
+
+  Future<PeopleMemory?> realize() {
+    if (_resolvedMemory != null) return Future.value(_resolvedMemory);
+    _pendingBuild ??= _build();
+    return _pendingBuild!;
+  }
+
+  Future<PeopleMemory?> _build() async {
+    List<Memory> memories = rawMemories;
+    if (requiresSelection) {
+      final builder = selectionBuilder;
+      if (builder == null) return null;
+      final selection = await builder(rawMemories);
+      if (selection.isEmpty) return null;
+      memories = selection;
+    }
+    _resolvedMemory = PeopleMemory(
+      memories,
+      firstDateToShow,
+      lastDateToShow,
+      type,
+      personID,
+      personName,
+      lastCreationTime: lastCreationTime,
+      activity: activity,
+    );
+    return _resolvedMemory;
   }
 }

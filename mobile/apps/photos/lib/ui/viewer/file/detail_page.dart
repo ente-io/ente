@@ -25,6 +25,7 @@ import "package:photos/ui/viewer/file/file_app_bar.dart";
 import "package:photos/ui/viewer/file/file_bottom_bar.dart";
 import 'package:photos/ui/viewer/file/file_widget.dart';
 import "package:photos/ui/viewer/file/panorama_viewer_screen.dart";
+import "package:photos/ui/viewer/file/text_detection_overlay_button.dart";
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
@@ -204,6 +205,22 @@ class _BodyState extends State<_Body> {
                   );
                 },
                 valueListenable: _selectedIndexNotifier,
+              ),
+              ValueListenableBuilder(
+                valueListenable: _selectedIndexNotifier,
+                builder: (BuildContext context, int selectedIndex, _) {
+                  return TextDetectionOverlayButton(
+                    file: _files![selectedIndex],
+                    enableFullScreenNotifier:
+                        InheritedDetailPageState.of(context)
+                            .enableFullScreenNotifier,
+                    isGuestView: isGuestView,
+                    showOnlyInfoButton:
+                        widget.config.mode == DetailPageMode.minimalistic &&
+                            !isGuestView,
+                    userID: Configuration.instance.getUserID(),
+                  );
+                },
               ),
               ValueListenableBuilder(
                 valueListenable: _selectedIndexNotifier,

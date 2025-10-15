@@ -20,6 +20,7 @@ import "package:photos/ui/components/end_to_end_banner.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import "package:photos/ui/viewer/gallery/hierarchical_search_gallery.dart";
+import "package:photos/ui/viewer/gallery/state/gallery_boundaries_provider.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
@@ -129,85 +130,89 @@ class _PeoplePageState extends State<PeoplePage> {
   @override
   Widget build(BuildContext context) {
     _logger.info("Building for ${_person.data.name}");
-    return GalleryFilesState(
-      child: InheritedSearchFilterDataWrapper(
-        searchFilterDataProvider: _searchFilterDataProvider,
-        child: Scaffold(
-          appBar: PreferredSize(
-            preferredSize:
-                Size.fromHeight(widget.searchResult != null ? 90.0 : 50.0),
-            child: PeopleAppBar(
-              GalleryType.peopleTag,
-              _person.data.isIgnored
-                  ? AppLocalizations.of(context).ignored
-                  : _person.data.name,
-              _selectedFiles,
-              _person,
+
+    return GalleryBoundariesProvider(
+      child: GalleryFilesState(
+        child: InheritedSearchFilterDataWrapper(
+          searchFilterDataProvider: _searchFilterDataProvider,
+          child: Scaffold(
+            appBar: PreferredSize(
+              preferredSize:
+                  Size.fromHeight(widget.searchResult != null ? 90.0 : 50.0),
+              child: PeopleAppBar(
+                GalleryType.peopleTag,
+                _person.data.isIgnored
+                    ? AppLocalizations.of(context).ignored
+                    : _person.data.name,
+                _selectedFiles,
+                _person,
+              ),
             ),
-          ),
-          body: FutureBuilder<List<EnteFile>>(
-            future: filesFuture,
-            builder: (context, snapshot) {
-              final inheritedSearchFilterData = InheritedSearchFilterData.of(
-                context,
-              );
-              if (snapshot.hasData) {
-                final personFiles = snapshot.data as List<EnteFile>;
-                return SelectionState(
-                  selectedFiles: _selectedFiles,
-                  child: Stack(
-                    alignment: Alignment.bottomCenter,
-                    children: [
-                      inheritedSearchFilterData.isHierarchicalSearchable
-                          ? ValueListenableBuilder(
-                              valueListenable: inheritedSearchFilterData
-                                  .searchFilterDataProvider!
-                                  .isSearchingNotifier,
-                              builder: (
-                                context,
-                                value,
-                                _,
-                              ) {
-                                return value
-                                    ? HierarchicalSearchGallery(
-                                        tagPrefix: widget.tagPrefix,
-                                        selectedFiles: _selectedFiles,
-                                      )
-                                    : _Gallery(
-                                        tagPrefix: widget.tagPrefix,
-                                        selectedFiles: _selectedFiles,
-                                        personFiles: personFiles,
-                                        loadPersonFiles: loadPersonFiles,
-                                        personEntity: _person,
-                                      );
-                              },
-                            )
-                          : _Gallery(
-                              tagPrefix: widget.tagPrefix,
-                              selectedFiles: _selectedFiles,
-                              personFiles: personFiles,
-                              loadPersonFiles: loadPersonFiles,
-                              personEntity: _person,
-                            ),
-                      FileSelectionOverlayBar(
-                        PeoplePage.overlayType,
-                        _selectedFiles,
-                        person: _person,
-                      ),
-                    ],
-                  ),
+            body: FutureBuilder<List<EnteFile>>(
+              future: filesFuture,
+              builder: (context, snapshot) {
+                final inheritedSearchFilterData = InheritedSearchFilterData.of(
+                  context,
                 );
-              } else if (snapshot.hasError) {
-                _logger
-                    .severe("Error: ${snapshot.error} ${snapshot.stackTrace}}");
-                //Need to show an error on the UI here
-                return const SizedBox.shrink();
-              } else {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-            },
+                if (snapshot.hasData) {
+                  final personFiles = snapshot.data as List<EnteFile>;
+                  return SelectionState(
+                    selectedFiles: _selectedFiles,
+                    child: Stack(
+                      alignment: Alignment.bottomCenter,
+                      children: [
+                        inheritedSearchFilterData.isHierarchicalSearchable
+                            ? ValueListenableBuilder(
+                                valueListenable: inheritedSearchFilterData
+                                    .searchFilterDataProvider!
+                                    .isSearchingNotifier,
+                                builder: (
+                                  context,
+                                  value,
+                                  _,
+                                ) {
+                                  return value
+                                      ? HierarchicalSearchGallery(
+                                          tagPrefix: widget.tagPrefix,
+                                          selectedFiles: _selectedFiles,
+                                        )
+                                      : _Gallery(
+                                          tagPrefix: widget.tagPrefix,
+                                          selectedFiles: _selectedFiles,
+                                          personFiles: personFiles,
+                                          loadPersonFiles: loadPersonFiles,
+                                          personEntity: _person,
+                                        );
+                                },
+                              )
+                            : _Gallery(
+                                tagPrefix: widget.tagPrefix,
+                                selectedFiles: _selectedFiles,
+                                personFiles: personFiles,
+                                loadPersonFiles: loadPersonFiles,
+                                personEntity: _person,
+                              ),
+                        FileSelectionOverlayBar(
+                          PeoplePage.overlayType,
+                          _selectedFiles,
+                          person: _person,
+                        ),
+                      ],
+                    ),
+                  );
+                } else if (snapshot.hasError) {
+                  _logger.severe(
+                    "Error: ${snapshot.error} ${snapshot.stackTrace}}",
+                  );
+                  //Need to show an error on the UI here
+                  return const SizedBox.shrink();
+                } else {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+              },
+            ),
           ),
         ),
       ),

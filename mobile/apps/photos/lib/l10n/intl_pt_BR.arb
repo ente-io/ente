@@ -1170,7 +1170,6 @@
   },
   "maps": "Mapas",
   "enableMaps": "Ativar mapas",
-  "enableMapsDesc": "Isso exibirá suas fotos em um mapa mundial.\n\nEste mapa é hospedado por Open Street Map, e as exatas localizações das fotos nunca serão compartilhadas.\n\nVocê pode desativar esta função a qualquer momento em Opções.",
   "quickLinks": "Links rápidos",
   "selectItemsToAdd": "Selecionar itens para adicionar",
   "addSelected": "Adicionar selecionado",

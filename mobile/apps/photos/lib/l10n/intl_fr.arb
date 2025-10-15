@@ -186,6 +186,7 @@
   "@allowAddingPhotos": {
     "description": "Switch button to enable uploading photos to a public link"
   },
+  "allowJoiningAlbum": "Autoriser l'adhésion à l'album",
   "allowAddPhotosDescription": "Autorisez les personnes ayant le lien à ajouter des photos dans l'album partagé.",
   "passwordLock": "Verrouillage par mot de passe",
   "canNotOpenTitle": "Impossible d'ouvrir cet album",
@@ -199,6 +200,9 @@
     "description": "Text to indicate that there is limit on number of devices"
   },
   "albumLayout": "Disposition de l'album",
+  "layoutGrouped": "Groupé",
+  "layoutContinuous": "En continu",
+  "layoutTrip": "Excursion",
   "preview": "Aperçu",
   "linkExpiry": "Expiration du lien",
   "linkExpired": "Expiré",
@@ -241,6 +245,7 @@
   "sendLink": "Envoyer le lien",
   "sendQrCode": "Envoyer le QR code",
   "copyLink": "Copier le lien",
+  "copyEmbedHtml": "Copier le code HTML intégré",
   "linkHasExpired": "Le lien a expiré",
   "publicLinkEnabled": "Lien public activé",
   "shareALink": "Partager le lien",
@@ -1172,8 +1177,8 @@
     "description": "Label for the map view"
   },
   "maps": "Carte",
+  "mapsPrivacyNotice": "Les coordonnées approximatives seront envoyées à des tiers soucieux de la vie privée comme OpenStreetMap pour afficher la carte et l'emplacement.",
   "enableMaps": "Activer la carte",
-  "enableMapsDesc": "Vos photos seront affichées sur une carte du monde.\n\nCette carte est hébergée par Open Street Map, et les emplacements exacts de vos photos ne sont jamais partagés.\n\nVous pouvez désactiver cette fonction à tout moment dans les Paramètres.",
   "quickLinks": "Liens rapides",
   "selectItemsToAdd": "Sélectionner les éléments à ajouter",
   "addSelected": "Ajouter la sélection",
@@ -1840,6 +1845,14 @@
   "findSimilarImages": "Rechercher des images similaires",
   "noSimilarImagesFound": "Aucune image similaire trouvée",
   "yourPhotosLookUnique": "Vos photos semblent uniques",
+  "similarGroupsFound": "{count, plural, one {}=1{{count} groupe trouvé} other{{count} groupes trouvés}}",
+  "@similarGroupsFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "reviewAndRemoveSimilarImages": "Examiner et supprimer les images similaires",
   "deletePhotosWithSize": "Supprimer {count} photos ({size})",
   "@deletePhotosWithSize": {
@@ -1926,16 +1939,16 @@
   "hoorayyyy": "Houraaa !",
   "nothingToTidyUpHere": "Rien à nettoyer ici",
   "deletingDash": "Suppression - ",
-  "cLTitle1": "Vue cartographique de vos voyages",
-  "cLDesc1": "Choisissez entre les mises en page groupées, continues ou voyage (basées sur une carte) lors du partage d'albums. Ente s'occupe de l'hébergement !",
-  "cLTitle2": "Intégrer des albums",
-  "cLDesc2": "Intégrez vos albums dans votre propre site web, blog ou portfolio photographique. Ente s'occupe de l'hébergement !",
+  "cLTitle1": "Vue de la carte de vos voyages",
+  "cLDesc1": "Choisissez entre des mises en page groupées, continues ou en voyage (basées sur la carte) lors du partage d'albums. Ente s'occupe de l'hébergement !",
+  "cLTitle2": "Intégrer les albums",
+  "cLDesc2": "Intégrez vos albums dans votre propre site web, blog, portfolio de photographies. Ente prend soin de l'hébergement !",
   "cLTitle3": "Albums partagés dans les widgets",
-  "cLDesc3": "Les widgets d'écran d'accueil prennent désormais en charge les albums qui ont été partagés avec vous.",
-  "cLTitle4": "Améliorations du confort d'utilisation",
-  "cLDesc4": "Ajoutez des photos aux albums depuis la visionneuse de fichiers. Option de vue invité au niveau de l'album.",
-  "cLTitle5": "Améliorations du partage",
-  "cLDesc5": "Partagez des liens publics à l'aide d'un code QR. Personnalisez la possibilité de rejoindre des albums à partir des liens que vous partagez.",
+  "cLDesc3": "Les widgets de l'écran d'accueil prennent maintenant en charge les albums qui ont été partagés avec vous.",
+  "cLTitle4": "Gain en qualité de vie",
+  "cLDesc4": "Ajouter des photos aux albums depuis la visionneuse de fichiers. Option de vue invité au niveau de l'album.",
+  "cLTitle5": "Améliorations des partages",
+  "cLDesc5": "Partagez des liens publics en utilisant un code QR. Personnalisez la possibilité de rejoindre des albums à partir des liens que vous partagez.",
   "closeBy": "Similaire",
   "@closeBy": {
     "description": "Appears in the similar images page, to indicate that the images are close in terms of appearance"

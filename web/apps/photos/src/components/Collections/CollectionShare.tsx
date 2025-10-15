@@ -78,7 +78,7 @@ import { useFormik } from "formik";
 import { t } from "i18next";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Trans } from "react-i18next";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 export type CollectionShareProps = ModalVisibilityProps & {
     /**

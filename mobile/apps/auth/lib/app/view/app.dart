@@ -9,6 +9,7 @@ import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/locale.dart';
 import "package:ente_auth/onboarding/view/onboarding_page.dart";
 import 'package:ente_auth/services/authenticator_service.dart';
+import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/services/update_service.dart';
 import 'package:ente_auth/services/window_listener_service.dart';
 import 'package:ente_auth/ui/home_page.dart';
@@ -21,6 +22,7 @@ import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:tray_manager/tray_manager.dart';
+import 'package:win32/win32.dart';
 import 'package:window_manager/window_manager.dart';
 
 class App extends StatefulWidget {
@@ -209,8 +211,32 @@ class _AppState extends State<App>
         windowManager.setSkipTaskbar(false);
         break;
       case 'exit_app':
-        windowManager.destroy();
+        if (Platform.isWindows) {
+          final int hProcess = GetCurrentProcess();
+          TerminateProcess(hProcess, 0);
+        } else {
+          windowManager.setPreventClose(false);
+          windowManager.destroy();
+        }
         break;
+    }
+  }
+
+  @override
+  void onWindowClose() {
+    final shouldMinimizeToTray =
+        PreferenceService.instance.shouldMinimizeToTrayOnClose();
+    if (shouldMinimizeToTray) {
+      windowManager.hide();
+      windowManager.setSkipTaskbar(true);
+    } else {
+      if (Platform.isWindows) {
+        final int hProcess = GetCurrentProcess();
+        TerminateProcess(hProcess, 0);
+      } else {
+        windowManager.setPreventClose(false);
+        windowManager.destroy();
+      }
     }
   }
 }

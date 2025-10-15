@@ -23,6 +23,8 @@ class PreferenceService {
   static const kShouldHideCodesKey = "should_hide_codes";
   static const kShouldAutoFocusOnSearchBar = "should_auto_focus_on_search_bar";
   static const kShouldMinimizeOnCopy = "should_minimize_on_copy";
+  static const kShouldMinimizeToTrayOnClose =
+      "should_minimize_to_tray_on_close";
   static const kCompactMode = "vi.compactMode";
   static const kAppInstallTime = "appInstallTime";
 
@@ -106,6 +108,18 @@ class PreferenceService {
     await _prefs.setBool(kShouldMinimizeOnCopy, value);
   }
 
+  bool shouldMinimizeToTrayOnClose() {
+    if (_prefs.containsKey(kShouldMinimizeToTrayOnClose)) {
+      return _prefs.getBool(kShouldMinimizeToTrayOnClose)!;
+    } else {
+      return false;
+    }
+  }
+
+  Future<void> setShouldMinimizeToTrayOnClose(bool value) async {
+    await _prefs.setBool(kShouldMinimizeToTrayOnClose, value);
+  }
+
   int getAppInstalledTime() {
     if (_prefs.containsKey(kAppInstallTime)) {
       return _prefs.getInt(kAppInstallTime)!;
@@ -122,9 +136,7 @@ class PreferenceService {
     return _prefs.getInt(kLocalTimeOffsetKey) ?? 0;
   }
 
-  void computeAndStoreTimeOffset(
-    int? epochTimeInMicroseconds,
-  ) {
+  void computeAndStoreTimeOffset(int? epochTimeInMicroseconds) {
     if (epochTimeInMicroseconds == null) {
       _prefs.remove(kLocalTimeOffsetKey);
       return;

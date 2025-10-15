@@ -15,15 +15,25 @@ The embed feature works with any public album link. Since creating public albums
 
 ## How to embed
 
-### Easy method - Using the web app
+### Easy method - Using the app
 
-The simplest way to get the embed code is directly from Ente's web app:
+The simplest way to get the embed code is directly from Ente, whether you're on web or mobile:
+
+**On web:**
 
 1. Open the album in [web.ente.io](https://web.ente.io)
 2. Open the album's sharing settings
 3. Create a public link (if you haven't already)
 4. Open the link settings ("Manage link")
 5. Click the "Copy embed HTML" button
+
+**On mobile:**
+
+1. Open the album in the Ente app
+2. Tap the share icon
+3. Create a public link (if you haven't already)
+4. Tap "Manage link"
+5. Tap "Copy embed HTML"
 
 This copies ready-to-use iframe code that you can paste directly into your website's HTML.
 

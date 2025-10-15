@@ -792,7 +792,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         await flagService.setMapEnabled(true);
       } catch (e) {
         showShortToast(
-            context, AppLocalizations.of(context).somethingWentWrong,);
+          context,
+          AppLocalizations.of(context).somethingWentWrong,
+        );
         return;
       }
     }
