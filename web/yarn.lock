@@ -1199,10 +1199,10 @@
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.15.tgz#596a1747233694d50f6ad8a7869fcb6f56cf5841"
   integrity sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==
 
-"@types/leaflet@^1.9.19":
-  version "1.9.19"
-  resolved "https://registry.yarnpkg.com/@types/leaflet/-/leaflet-1.9.19.tgz#432d3c52c52abb3521e5dfcb3e6cfe9653807a6e"
-  integrity sha512-pB+n2daHcZPF2FDaWa+6B0a0mSDf4dPU35y5iTXsx7x/PzzshiX5atYiS1jlBn43X7XvM8AP+AB26lnSk0J4GA==
+"@types/leaflet@^1.9.21":
+  version "1.9.21"
+  resolved "https://registry.yarnpkg.com/@types/leaflet/-/leaflet-1.9.21.tgz#542e8f91250bc444f8a1416d472f5b518d83e979"
+  integrity sha512-TbAd9DaPGSnzp6QvtYngntMZgcRk+igFELwR2N99XZn7RXUdKgsXMR+28bUO0rPsWp8MIu/f47luLIQuSLYv/w==
   dependencies:
     "@types/geojson" "*"
 
@@ -1360,11 +1360,6 @@
   dependencies:
     "@typescript-eslint/types" "8.35.1"
     eslint-visitor-keys "^4.2.1"
-
-"@vercel/edge@^1.2.1":
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/@vercel/edge/-/edge-1.2.1.tgz#d74298f01912ea2940546f4b7639dc8619f4c89e"
-  integrity sha512-1++yncEyIAi68D3UEOlytYb1IUcIulMWdoSzX2h9LuSeeyR7JtaIgR8DcTQ6+DmYOQn+5MCh6LY+UmK6QBByNA==
 
 "@vitejs/plugin-react@^4.6.0":
   version "4.6.0"
@@ -2176,10 +2171,10 @@ esutils@^2.0.2:
   resolved "https://registry.yarnpkg.com/esutils/-/esutils-2.0.3.tgz#74d2eb4de0b8da1293711910d50775b9b710ef64"
   integrity sha512-kVscqXk4OCp68SZ0dkgEKVi6/8ij300KBWTJq32P/dYeWTSwK41WyTxalN1eRmA5Z9UU/LX9D7FWSmV9SAYx6g==
 
-exifreader@^4.31.1:
-  version "4.31.1"
-  resolved "https://registry.yarnpkg.com/exifreader/-/exifreader-4.31.1.tgz#94a5c2e61a84f56566b42c2951bbd68013e58d8f"
-  integrity sha512-rkSg/NejDN9D+8GuRWZ2Y4G8KSrj0hdaeMoew8d0J5cF5oS0p6DVar2PSQ0fP3assu6s1PYh6M1lhtS7Kigk6Q==
+exifreader@^4.32.0:
+  version "4.32.0"
+  resolved "https://registry.yarnpkg.com/exifreader/-/exifreader-4.32.0.tgz#48955aff7c7a611a30c3ccec9b5b68b92ebd7785"
+  integrity sha512-sj1PzjpaPwSE/2MeUqoAYcfc2u7AZOGSby0FzmAkB4jjeCXgDryxzVgMwV+tJKGIkGdWkkWiUWoLSJoPHJ6V5Q==
   optionalDependencies:
     "@xmldom/xmldom" "^0.9.4"
 
@@ -2497,10 +2492,10 @@ heic-decode@^2.0.0:
   dependencies:
     libheif-js "^1.17.1"
 
-hls-video-element@^1.5.5:
-  version "1.5.5"
-  resolved "https://registry.yarnpkg.com/hls-video-element/-/hls-video-element-1.5.5.tgz#f375c371fcb87d5b70cd47cf53c3ae3f34049b3e"
-  integrity sha512-7HYIf+jeeCtazcBVVmj16qfTDRKvxd92TMdscocNWPoAePmovPPnii1aBdRsinsiw4rt90B8FgYoHzMhLi1qYQ==
+hls-video-element@^1.5.8:
+  version "1.5.8"
+  resolved "https://registry.yarnpkg.com/hls-video-element/-/hls-video-element-1.5.8.tgz#9b3ad1371d603a04b6d129a8aac5e3add7a41ede"
+  integrity sha512-DdeX5NzhM2Bj+ls5aaRrzSSnriK+r6lCrDa0YyfviNO4zb10JyAnJHZM214lXBWQghCm+fKmlWW1qpzdNoSAvQ==
   dependencies:
     custom-media-element "^1.4.5"
     hls.js "^1.6.5"
@@ -2995,12 +2990,11 @@ math-intrinsics@^1.1.0:
   resolved "https://registry.yarnpkg.com/math-intrinsics/-/math-intrinsics-1.1.0.tgz#a0dd74be81e2aa5c2f27e65ce283605ee4e2b7f9"
   integrity sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==
 
-media-chrome@^4.11.1:
-  version "4.11.1"
-  resolved "https://registry.yarnpkg.com/media-chrome/-/media-chrome-4.11.1.tgz#daefd1786e4b7d0ddfdd2782c44c1057add86578"
-  integrity sha512-+2niDc4qOwlpFAjwxg1OaizK/zKV6y7QqGm4nBFEVlSaG0ZBgOmfc4IXAPiirZqAlZGaFFUaMqCl1SpGU0/naA==
+media-chrome@^4.14.0:
+  version "4.14.0"
+  resolved "https://registry.yarnpkg.com/media-chrome/-/media-chrome-4.14.0.tgz#81dd63ede1b98eba5767e8f4f2824a48d4cca0fc"
+  integrity sha512-IEdFb4blyF15vLvQzLIn6USJBv7Kf2ne+TfLQKBYI5Z0f9VEBVZz5MKy4Uhi0iA9lStl2S9ENIujJRuJIa5OiA==
   dependencies:
-    "@vercel/edge" "^1.2.1"
     ce-la-react "^0.3.0"
 
 media-tracks@^0.3.3:
