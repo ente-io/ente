@@ -1,11 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 
-// import "package:dotted_border/dotted_border.dart";
 import "package:dotted_border/dotted_border.dart";
 import "package:ente_accounts/services/user_service.dart";
 import 'package:ente_events/event_bus.dart';
-import 'package:ente_ui/components/buttons/gradient_button.dart';
 import "package:ente_ui/components/buttons/icon_button_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
@@ -645,6 +643,7 @@ class _HomePageState extends UploaderPageState<HomePage>
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(24),
+                color: colorScheme.backdropBase,
               ),
               child: DottedBorder(
                 options: RoundedRectDottedBorderOptions(
@@ -668,9 +667,12 @@ class _HomePageState extends UploaderPageState<HomePage>
                         style: textTheme.h3Bold,
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        'Click here to upload',
-                        style: textTheme.small,
+                      GestureDetector(
+                        onTap: addFile,
+                        child: Text(
+                          'Click here to upload',
+                          style: textTheme.small,
+                        ),
                       ),
                     ],
                   ),
@@ -721,43 +723,54 @@ class _HomePageState extends UploaderPageState<HomePage>
   }
 
   Widget _buildRecentsSection() {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+
     if (_recentFiles.isEmpty) {
       return Container(
         padding: const EdgeInsets.symmetric(vertical: 40),
         child: Center(
-          child: Column(
-            children: [
-              Icon(
-                Icons.description_outlined,
-                size: 48,
-                color: Colors.grey[400],
+          child: SizedBox(
+            width: double.infinity,
+            child: Container(
+              decoration: BoxDecoration(
+                color: colorScheme.backdropBase,
+                borderRadius: BorderRadius.circular(24),
               ),
-              const SizedBox(height: 16),
-              Text(
-                context.l10n.nothingYet,
-                style: getEnteTextTheme(context).body.copyWith(
-                      color: Colors.grey[600],
-                    ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                context.l10n.uploadYourFirstDocument,
-                style: getEnteTextTheme(context).small.copyWith(
-                      color: Colors.grey[500],
-                    ),
-              ),
-              const SizedBox(height: 24),
-              GradientButton(
-                onTap: addFile,
-                text: context.l10n.uploadDocument,
-                hugeIcon: HugeIcon(
-                  icon: HugeIcons.strokeRoundedFile01,
-                  color: getEnteColorScheme(context).primary700,
-                  size: 20,
+              child: DottedBorder(
+                options: RoundedRectDottedBorderOptions(
+                  strokeWidth: 2,
+                  color: colorScheme.fillMuted,
+                  dashPattern: const [6, 6],
+                  radius: const Radius.circular(24),
+                  padding: const EdgeInsets.all(48),
                 ),
-                paddingValue: 8.0,
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        'assets/empty_state.png',
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Upload a File',
+                        style: textTheme.h3Bold,
+                      ),
+                      const SizedBox(height: 4),
+                      GestureDetector(
+                        onTap: addFile,
+                        child: Text(
+                          'Click here to upload',
+                          style: textTheme.small,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ],
+            ),
           ),
         ),
       );
