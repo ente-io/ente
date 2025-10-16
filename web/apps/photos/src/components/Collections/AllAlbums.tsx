@@ -346,13 +346,17 @@ const AllAlbumsContent: React.FC<AllAlbumsContentProps> = ({
     // Show "no results" message if there's a search query but no results
     if (hasSearchQuery && collectionSummaries.length === 0) {
         return (
-            <DialogContent>
+            <DialogContent
+                sx={{
+                    height: "80svh",
+                }}
+            >
                 <Box
                     sx={{
                         display: "flex",
                         justifyContent: "center",
                         alignItems: "center",
-                        minHeight: `${CollectionRowItemSize}px`,
+                        height: "100%",
                     }}
                 >
                     <Typography color="text.muted">
