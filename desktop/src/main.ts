@@ -564,9 +564,7 @@ const allowExternalLinks = (webContents: WebContents) =>
                 // https://github.com/electron/electron/issues/31485
                 void shell.openExternal(url);
             } else {
-                log.warn(
-                    `Blocked external open for disallowed scheme: ${url}`,
-                );
+                log.warn(`Blocked external open for disallowed scheme: ${url}`);
             }
             return { action: "deny" };
         } else {
