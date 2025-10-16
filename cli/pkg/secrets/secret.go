@@ -38,7 +38,7 @@ func GetOrCreateClISecret() []byte {
 				return GetSecretFromSecretText(fmt.Sprintf("%s.secret.txt", constants.CliDataPath))
 			} else {
 				log.Fatal(fmt.Errorf(`error getting password from keyring: %w
-          Refer to https://ente.io/help/self-hosting/troubleshooting/keyring
+          Refer to https://ente.io/help/self-hosting/troubleshooting/cli
           `, err))
 			}
 		}
