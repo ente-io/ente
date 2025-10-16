@@ -1,5 +1,5 @@
 import { Box, styled, useMediaQuery, useTheme } from "@mui/material";
-import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
 
 import { MapEvents } from "./MapEvents";
 import {
@@ -10,19 +10,11 @@ import {
 } from "./mapHelpers";
 import type { JourneyPoint } from "./types";
 
-// Dynamically import react-leaflet components to prevent SSR issues
-const MapContainer = dynamic(
-    () => import("react-leaflet").then((mod) => mod.MapContainer),
-    { ssr: false },
-);
-const TileLayer = dynamic(
-    () => import("react-leaflet").then((mod) => mod.TileLayer),
-    { ssr: false },
-);
-const Marker = dynamic(
-    () => import("react-leaflet").then((mod) => mod.Marker),
-    { ssr: false },
-);
+interface MapComponentsType {
+    MapContainer: typeof import("react-leaflet").MapContainer;
+    TileLayer: typeof import("react-leaflet").TileLayer;
+    Marker: typeof import("react-leaflet").Marker;
+}
 
 interface TripMapProps {
     journeyData: JourneyPoint[];
@@ -71,6 +63,24 @@ export const TripMap: React.FC<TripMapProps> = ({
     const theme = useTheme();
     const isMobileOrTablet = useMediaQuery(theme.breakpoints.down("md")); // 960px breakpoint for mobile and tablet
 
+    // Load react-leaflet components client-side only to prevent SSR issues
+    const [mapComponents, setMapComponents] =
+        useState<MapComponentsType | null>(null);
+
+    useEffect(() => {
+        void import("react-leaflet")
+            .then((mod) => {
+                setMapComponents({
+                    MapContainer: mod.MapContainer,
+                    TileLayer: mod.TileLayer,
+                    Marker: mod.Marker,
+                });
+            })
+            .catch((error: unknown) => {
+                console.error("Failed to load react-leaflet:", error);
+            });
+    }, []);
+
     // Calculate current active location index based on scroll progress (same logic as in scrollUtils)
     let currentActiveLocationIndex = -1;
     if (photoClusters.length > 0) {
@@ -97,10 +107,17 @@ export const TripMap: React.FC<TripMapProps> = ({
             optimalZoom,
         );
 
+    // Return loading state if map components haven't loaded yet
+    if (!mapComponents) {
+        return <MapContainerWrapper hasPhotoData={false} />;
+    }
+
+    const { MapContainer, TileLayer, Marker } = mapComponents;
+
     return (
         <MapContainerWrapper hasPhotoData={hasPhotoData}>
             {hasPhotoData ? (
-                <StyledMapContainer
+                <MapContainer
                     center={getMapCenter(
                         photoClusters,
                         journeyData,
@@ -114,6 +131,7 @@ export const TripMap: React.FC<TripMapProps> = ({
                     scrollWheelZoom={true}
                     zoomControl={false}
                     attributionControl={!isMobileOrTablet}
+                    style={{ width: "100%", height: "100%" }}
                 >
                     <MapEvents
                         setMapRef={setMapRef}
@@ -240,7 +258,7 @@ export const TripMap: React.FC<TripMapProps> = ({
                             />
                         ) : null;
                     })}
-                </StyledMapContainer>
+                </MapContainer>
             ) : null}
         </MapContainerWrapper>
     );
@@ -254,8 +272,3 @@ const MapContainerWrapper = styled(Box, {
     height: "100%",
     backgroundColor: hasPhotoData ? "transparent" : "#000000",
 }));
-
-const StyledMapContainer = styled(MapContainer)({
-    width: "100%",
-    height: "100%",
-});

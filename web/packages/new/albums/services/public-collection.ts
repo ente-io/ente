@@ -165,14 +165,18 @@ const getPublicCollectionInfo = async (accessToken: string) => {
  * files if the collection has not changed on remote (any updates to the files
  * will also increase the updation time of the collection that contains them).
  *
- * @param onSetFiles A callback that is invoked each time a new batch of updates
- * to the collection's files is fetched and processed. The callback is called
- * the consolidated list of files after applying the updates received so far.
+ * @param onSetFiles A callback that is invoked with the consolidated list of
+ * files after processing each batch of updates.
  *
  * The provided files are in an arbitrary order, and must be sorted before use.
  *
- * This callback can get called multiple times during the pull. The callback can
- * also never get called if no changes were pulled (or needed to be pulled).
+ * When called:
+ * - At least once if there are remote changes to fetch (may be called multiple
+ *   times if changes span multiple pages)
+ * - Once with cached files if the diff is empty on first iteration (handles
+ *   empty albums on initial load)
+ * - Not called if collection is already synced and no updates are needed
+ *   (updationTime equals last sync time)
  */
 export const pullPublicCollectionFiles = async (
     credentials: PublicAlbumsCredentials,
@@ -191,13 +195,21 @@ export const pullPublicCollectionFiles = async (
 
     const files = await savedPublicCollectionFiles(accessToken);
     const filesByID = new Map(files.map((f) => [f.id, f]));
+    let callbackInvoked = false;
 
     while (true) {
         const { diff, hasMore } = await getPublicCollectionDiff(
             credentials,
             sinceTime,
         );
-        if (!diff.length) break;
+        if (!diff.length) {
+            // If the diff is empty on the first iteration, ensure we still
+            // notify the caller with the cached state (e.g., empty albums)
+            if (!callbackInvoked) {
+                onSetFiles(files);
+            }
+            break;
+        }
         for (const change of diff) {
             sinceTime = Math.max(sinceTime, change.updationTime);
             if (change.isDeleted) {
@@ -210,10 +222,11 @@ export const pullPublicCollectionFiles = async (
             }
         }
 
-        const files = [...filesByID.values()];
-        await savePublicCollectionFiles(accessToken, files);
+        const updatedFiles = [...filesByID.values()];
+        await savePublicCollectionFiles(accessToken, updatedFiles);
         await savePublicCollectionLastSyncTime(accessToken, sinceTime);
-        onSetFiles(files);
+        onSetFiles(updatedFiles);
+        callbackInvoked = true;
 
         if (!hasMore) break;
     }

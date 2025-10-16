@@ -5,13 +5,12 @@ import type { JourneyPoint } from "./types";
 
 interface TripCoverProps {
     journeyData: JourneyPoint[];
-    photoClusters: JourneyPoint[][];
     albumTitle?: string;
     coverImageUrl?: string | null;
 }
 
 export const TripCover = memo<TripCoverProps>(
-    ({ journeyData, photoClusters, albumTitle, coverImageUrl }) => {
+    ({ journeyData, albumTitle, coverImageUrl }) => {
         const sortedData = [...journeyData].sort(
             (a, b) =>
                 new Date(a.timestamp).getTime() -
@@ -30,6 +29,14 @@ export const TripCover = memo<TripCoverProps>(
             month: "long",
             year: "numeric",
         });
+
+        // Count unique locations based on unique name+country combinations
+        const uniqueLocations = new Set(
+            journeyData
+                .filter((point) => point.name && point.country)
+                .map((point) => `${point.name}, ${point.country}`),
+        );
+        const locationCount = uniqueLocations.size;
 
         return (
             <CoverContainer>
@@ -68,7 +75,7 @@ export const TripCover = memo<TripCoverProps>(
                                 <TripTitle>{albumTitle || "Trip"}</TripTitle>
                                 <TripSubtitle>
                                     {monthYear} • {diffDays} days •{" "}
-                                    {photoClusters.length} locations
+                                    {locationCount} locations
                                 </TripSubtitle>
                             </>
                         ) : (
