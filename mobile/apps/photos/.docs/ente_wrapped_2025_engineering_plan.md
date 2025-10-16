@@ -328,8 +328,15 @@ Open Decisions
 - Use `FullScreenMemory` vs custom viewer — create separate custom viewer for control, borrowing many elements from `FullScreenMemory` as a starting point. 
 
 Milestones & Checklist
-- [ ] Create `lib/services/wrapped/wrapped_engine.dart` with isolate compute stub
-- [ ] Implement candidate builders (stats, people, places, aesthetics, curation, narrative)
+- [x] Create `lib/services/wrapped/wrapped_engine.dart` with isolate compute stub
+- [x] Implement candidate builders (stats, people, places, aesthetics, curation, narrative)
+- [ ] Flesh out candidate builder implementations
+  - [ ] StatsCandidateBuilder
+  - [ ] PeopleCandidateBuilder
+  - [ ] PlacesCandidateBuilder
+  - [ ] AestheticsCandidateBuilder
+  - [ ] CurationCandidateBuilder
+  - [ ] NarrativeCandidateBuilder
 - [ ] Add selection/diversity + badge logic
 - [ ] Add `WrappedCacheService` (file-based JSON) + invalidation hooks
 - [ ] Add LocalSettings extension for resume/complete
