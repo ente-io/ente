@@ -179,8 +179,10 @@ class HomeWidgetService {
           await SmartMemoriesService.getDateFormattedLocale(
         creationTime: file.creationTime!,
       );
+      final int widthPx = imageInfo.size.width.round();
+      final int heightPx = imageInfo.size.height.round();
       final String subText = flagService.internalUser
-          ? '$baseSubText, ${imageInfo.size.longestSide.round()}px'
+          ? '$baseSubText, ${widthPx}x${heightPx}px'
           : baseSubText;
 
       // Create metadata
@@ -217,7 +219,13 @@ class HomeWidgetService {
       return null;
     }
     if (file.isRemoteFile) {
-      return await isFileCached(file) ? getFile(file) : null;
+      final File? remoteFile = await getFile(file);
+      if (remoteFile == null) {
+        _logger.warning(
+          'Failed to fetch full-resolution file for widget ${file.displayName}',
+        );
+      }
+      return remoteFile;
     }
     return getFile(file);
   }
@@ -286,7 +294,7 @@ class HomeWidgetService {
           await WidgetImageIsolate.instance.generateWidgetImage(
         sourcePath: source.path,
         cachePath: cachedPath,
-        maxDimension: WIDGET_IMAGE_SIZE,
+        targetShortSide: WIDGET_IMAGE_SIZE,
         quality: 80,
       );
       if (dims != null) {

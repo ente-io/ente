@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -83,6 +84,46 @@ Future<ui.Image> convertImageToFlutterUi(img.Image image) async {
       final int targetHeight = (decoded.height * scale).round();
       output = img.copyResize(
         decoded,
+        width: targetWidth,
+        height: targetHeight,
+        interpolation: img.Interpolation.linear,
+      );
+    }
+
+    final Uint8List encoded = Uint8List.fromList(
+      img.encodeJpg(output, quality: quality),
+    );
+
+    return (bytes: encoded, width: output.width, height: output.height);
+  } catch (_) {
+    return null;
+  }
+}
+
+/// Resizes [srcBytes] so that the shorter dimension is at most [minShortSide].
+/// The longer side is scaled proportionally. If the shorter side is already
+/// below [minShortSide], the image is returned unchanged (apart from baked EXIF
+/// orientation) encoded as JPEG at [quality].
+({Uint8List bytes, int width, int height})? resizeImageToFitShortSide({
+  required Uint8List srcBytes,
+  required double minShortSide,
+  int quality = 80,
+}) {
+  try {
+    final decoded = img.decodeImage(srcBytes);
+    if (decoded == null) {
+      return null;
+    }
+
+    img.Image output = img.bakeOrientation(decoded);
+    final int shortSide = math.min(output.width, output.height);
+
+    if (shortSide > minShortSide) {
+      final double scale = minShortSide / shortSide;
+      final int targetWidth = (output.width * scale).round();
+      final int targetHeight = (output.height * scale).round();
+      output = img.copyResize(
+        output,
         width: targetWidth,
         height: targetHeight,
         interpolation: img.Interpolation.linear,

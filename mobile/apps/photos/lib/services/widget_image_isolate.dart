@@ -26,7 +26,7 @@ class WidgetImageIsolate extends SuperIsolate {
   Future<({int width, int height})?> generateWidgetImage({
     required String sourcePath,
     required String cachePath,
-    required double maxDimension,
+    required double targetShortSide,
     required int quality,
   }) async {
     try {
@@ -35,7 +35,7 @@ class WidgetImageIsolate extends SuperIsolate {
         {
           'sourcePath': sourcePath,
           'cachePath': cachePath,
-          'maxDimension': maxDimension,
+          'targetShortSide': targetShortSide,
           'quality': quality,
         },
       );

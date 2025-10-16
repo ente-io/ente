@@ -206,7 +206,7 @@ Future<dynamic> isolateFunction(
     case IsolateOperation.generateWidgetImage:
       final sourcePath = args['sourcePath'] as String?;
       final cachePath = args['cachePath'] as String;
-      final maxDimension = args['maxDimension'] as double;
+      final targetShortSide = args['targetShortSide'] as double;
       final quality = args['quality'] as int;
       if (sourcePath == null) return null;
 
@@ -215,9 +215,9 @@ Future<dynamic> isolateFunction(
 
       try {
         final rawBytes = await sourceFile.readAsBytes();
-        final resized = image_util.resizeImageToJpeg(
+        final resized = image_util.resizeImageToFitShortSide(
           srcBytes: rawBytes,
-          maxDimension: maxDimension,
+          minShortSide: targetShortSide,
           quality: quality,
         );
         if (resized == null) {
