@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
+// import "package:dotted_border/dotted_border.dart";
+import "package:dotted_border/dotted_border.dart";
 import "package:ente_accounts/services/user_service.dart";
 import 'package:ente_events/event_bus.dart';
 import 'package:ente_ui/components/buttons/gradient_button.dart';
@@ -24,11 +26,9 @@ import 'package:locker/ui/components/recents_section_widget.dart';
 import 'package:locker/ui/components/search_result_view.dart';
 import 'package:locker/ui/mixins/search_mixin.dart';
 import 'package:locker/ui/pages/all_collections_page.dart';
-import 'package:locker/ui/pages/collection_page.dart';
 import 'package:locker/ui/pages/information_page.dart';
 import "package:locker/ui/pages/settings_page.dart";
 import 'package:locker/ui/pages/uploader_page.dart';
-import 'package:locker/utils/collection_actions.dart';
 import 'package:locker/utils/collection_sort_util.dart';
 import 'package:logging/logging.dart';
 
@@ -512,14 +512,6 @@ class _HomePageState extends UploaderPageState<HomePage>
     _recentFiles = uniqueFiles;
   }
 
-  void _navigateToCollection(Collection collection) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => CollectionPage(collection: collection),
-      ),
-    );
-  }
-
   void _handleSearchChange(String query) {
     // Trigger search by activating search with the current query
     activateSearchWithQuery(query);
@@ -641,46 +633,49 @@ class _HomePageState extends UploaderPageState<HomePage>
     }
 
     if (_displayedCollections.isEmpty) {
-      return SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: SizedBox(
-          height: MediaQuery.of(context).size.height - 200,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.folder_outlined,
-                  size: 64,
-                  color: Colors.grey,
+      final colorScheme = getEnteColorScheme(context);
+      final textTheme = getEnteTextTheme(context);
+
+      return Center(
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: SizedBox(
+            width: double.infinity,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: DottedBorder(
+                options: RoundedRectDottedBorderOptions(
+                  strokeWidth: 2,
+                  color: colorScheme.fillMuted,
+                  dashPattern: const [6, 6],
+                  radius: const Radius.circular(24),
+                  padding: const EdgeInsets.all(48),
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  context.l10n.noCollectionsFound,
-                  style: getEnteTextTheme(context).large.copyWith(
-                        color: Colors.grey,
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        'assets/empty_state.png',
                       ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  context.l10n.createYourFirstCollection,
-                  style: getEnteTextTheme(context).body.copyWith(
-                        color: Colors.grey,
+                      const SizedBox(height: 16),
+                      Text(
+                        'Upload a File',
+                        style: textTheme.h3Bold,
                       ),
-                ),
-                const SizedBox(height: 24),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 40),
-                  child: GradientButton(
-                    onTap: _createCollection,
-                    text: context.l10n.createCollection,
-                    hugeIcon: const HugeIcon(
-                      icon: HugeIcons.strokeRoundedPlusSign,
-                    ),
-                    paddingValue: 8.0,
+                      const SizedBox(height: 4),
+                      Text(
+                        'Click here to upload',
+                        style: textTheme.small,
+                      ),
+                    ],
                   ),
                 ),
-              ],
+              ),
             ),
           ),
         ),
@@ -771,15 +766,6 @@ class _HomePageState extends UploaderPageState<HomePage>
       collections: _filterOutUncategorized(_collections),
       recentFiles: _recentFiles,
     );
-  }
-
-  Future<void> _createCollection() async {
-    final createdCollection = await CollectionActions.createCollection(context);
-
-    if (createdCollection != null) {
-      await _loadCollections();
-      _navigateToCollection(createdCollection);
-    }
   }
 
   Widget _buildMultiOptionFab() {

@@ -8,6 +8,7 @@ import "package:locker/services/collections/models/collection.dart";
 import "package:locker/services/collections/models/collection_view_type.dart";
 import "package:locker/services/configuration.dart";
 import "package:locker/ui/components/item_list_view.dart";
+import "package:locker/ui/components/menu_item_widget.dart";
 import "package:locker/utils/collection_actions.dart";
 
 class CollectionPopupMenuWidget extends StatelessWidget {
@@ -24,12 +25,21 @@ class CollectionPopupMenuWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+
     return PopupMenuButton<String>(
       onSelected: (value) => _handleMenuAction(context, value),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: colorScheme.strokeFaint),
+      ),
+      color: colorScheme.backgroundElevated,
+      elevation: 15,
+      shadowColor: Colors.black.withValues(alpha: 0.08),
       child: child ??
           HugeIcon(
             icon: HugeIcons.strokeRoundedMoreVertical,
-            color: getEnteColorScheme(context).iconColor,
+            color: colorScheme.iconColor,
           ),
       itemBuilder: (BuildContext context) {
         return _buildPopupMenuItems(context);
@@ -38,24 +48,30 @@ class CollectionPopupMenuWidget extends StatelessWidget {
   }
 
   List<PopupMenuItem<String>> _buildPopupMenuItems(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+
     if (overflowActions != null && overflowActions!.isNotEmpty) {
-      return overflowActions!
-          .map(
-            (action) => PopupMenuItem<String>(
-              value: action.id,
-              child: Row(
-                children: [
-                  Icon(
-                    action.icon,
-                    size: 16,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(action.label),
-                ],
+      final items = <PopupMenuItem<String>>[];
+      for (int i = 0; i < overflowActions!.length; i++) {
+        final action = overflowActions![i];
+        items.add(
+          PopupMenuItem<String>(
+            value: action.id,
+            padding: EdgeInsets.zero,
+            child: MenuItemWidget(
+              icon: Icon(
+                action.icon,
+                color: colorScheme.iconColor,
+                size: 20,
               ),
+              label: action.label,
+              isFirst: i == 0,
+              isLast: i == overflowActions!.length - 1,
             ),
-          )
-          .toList();
+          ),
+        );
+      }
+      return items;
     }
 
     final collectionViewType = getCollectionViewType(
@@ -63,54 +79,68 @@ class CollectionPopupMenuWidget extends StatelessWidget {
       Configuration.instance.getUserID()!,
     );
 
-    return [
-      if (collectionViewType == CollectionViewType.ownedCollection ||
-          collectionViewType == CollectionViewType.hiddenOwnedCollection ||
-          collectionViewType == CollectionViewType.quickLink)
+    final items = <PopupMenuItem<String>>[];
+
+    if (collectionViewType == CollectionViewType.ownedCollection ||
+        collectionViewType == CollectionViewType.hiddenOwnedCollection ||
+        collectionViewType == CollectionViewType.quickLink) {
+      items.add(
         PopupMenuItem<String>(
           value: 'edit',
-          child: Row(
-            children: [
-              const HugeIcon(
-                icon: HugeIcons.strokeRoundedEdit02,
-                size: 16,
-              ),
-              const SizedBox(width: 8),
-              Text(context.l10n.edit),
-            ],
+          padding: EdgeInsets.zero,
+          child: MenuItemWidget(
+            icon: HugeIcon(
+              icon: HugeIcons.strokeRoundedEdit02,
+              color: colorScheme.iconColor,
+              size: 20,
+            ),
+            label: context.l10n.edit,
+            isFirst: true,
+            isLast: false,
           ),
         ),
-      if (collectionViewType == CollectionViewType.ownedCollection ||
-          collectionViewType == CollectionViewType.hiddenOwnedCollection ||
-          collectionViewType == CollectionViewType.quickLink)
+      );
+
+      items.add(
         PopupMenuItem<String>(
           value: 'delete',
-          child: Row(
-            children: [
-              const HugeIcon(
-                icon: HugeIcons.strokeRoundedDelete01,
-                size: 16,
-              ),
-              const SizedBox(width: 8),
-              Text(context.l10n.delete),
-            ],
+          padding: EdgeInsets.zero,
+          child: MenuItemWidget(
+            icon: HugeIcon(
+              icon: HugeIcons.strokeRoundedDelete01,
+              color: colorScheme.warning500,
+              size: 20,
+            ),
+            label: context.l10n.delete,
+            isFirst: false,
+            isLast: true,
+            isDelete: true,
           ),
         ),
-      if (collectionViewType == CollectionViewType.sharedCollection)
+      );
+    }
+
+    if (collectionViewType == CollectionViewType.sharedCollection) {
+      items.add(
         PopupMenuItem<String>(
           value: 'leave_collection',
-          child: Row(
-            children: [
-              const HugeIcon(
-                icon: HugeIcons.strokeRoundedLogout02,
-                size: 16,
-              ),
-              const SizedBox(width: 8),
-              Text(context.l10n.leaveCollection),
-            ],
+          padding: EdgeInsets.zero,
+          child: MenuItemWidget(
+            icon: HugeIcon(
+              icon: HugeIcons.strokeRoundedLogout02,
+              color: colorScheme.warning500,
+              size: 20,
+            ),
+            label: context.l10n.leaveCollection,
+            isFirst: true,
+            isLast: true,
+            isDelete: true,
           ),
         ),
-    ];
+      );
+    }
+
+    return items;
   }
 
   void _handleMenuAction(BuildContext context, String action) {

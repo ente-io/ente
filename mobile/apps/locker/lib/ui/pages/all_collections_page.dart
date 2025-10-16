@@ -241,6 +241,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
             _allCollections.length.toString() + " items",
             style: getEnteTextTheme(context).smallMuted,
           ),
+          const SizedBox(height: 20),
           Flexible(
             child: ItemListView(
               collections: _sortedCollections,
