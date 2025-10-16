@@ -115,10 +115,7 @@ const Column3To2Breakpoint = 559;
 const AllAlbumsDialog = styled(Dialog)(({ theme }) => ({
     "& .MuiDialog-container": { justifyContent: "flex-end" },
     "& .MuiPaper-root": { maxWidth: "494px" },
-    "& .MuiDialogTitle-root": {
-        padding: theme.spacing(2),
-        paddingRight: theme.spacing(1),
-    },
+    "& .MuiDialogTitle-root": { padding: theme.spacing(2) },
     "& .MuiDialogContent-root": { padding: theme.spacing(2) },
     [theme.breakpoints.down(Column3To2Breakpoint)]: {
         "& .MuiPaper-root": { width: "324px" },
