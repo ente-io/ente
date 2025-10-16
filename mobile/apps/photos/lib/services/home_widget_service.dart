@@ -44,6 +44,7 @@ class HomeWidgetService {
   static const String WIDGET_DIRECTORY = 'home_widget';
   static const String WIDGET_CACHE_DIR = 'cache';
   static const int WIDGET_CACHE_MAX_FILES = 150;
+  static const Duration _cacheMaintenanceInterval = Duration(minutes: 10);
 
   // URI schemes for different widget types
   static const String MEMORY_WIDGET_SCHEME = 'memorywidget';
@@ -64,6 +65,8 @@ class HomeWidgetService {
   final Logger _logger = Logger((HomeWidgetService).toString());
   final computeLock = Lock();
   bool _isAppGroupSet = false;
+  DateTime? _lastCacheMaintenance;
+  Future<void>? _cacheMaintenanceFuture;
 
   Future<void> setAppGroup({String id = iOSGroupIDMemory}) async {
     if (!Platform.isIOS || _isAppGroupSet) return;
@@ -291,7 +294,7 @@ class HomeWidgetService {
           dims.width.toDouble(),
           dims.height.toDouble(),
         );
-        unawaited(_enforceCacheBudget(cacheDir));
+        _scheduleCacheMaintenance(cacheDir);
         return (path: cachedPath, size: size);
       }
     }
@@ -302,10 +305,25 @@ class HomeWidgetService {
     }
 
     await cachedFile.writeAsBytes(fallback, flush: true);
-    unawaited(_enforceCacheBudget(cacheDir));
+    _scheduleCacheMaintenance(cacheDir);
 
     final Size fallbackSize = Size.square(thumbnailLargeSize.toDouble());
     return (path: cachedPath, size: fallbackSize);
+  }
+
+  void _scheduleCacheMaintenance(String cacheDir) {
+    if (_cacheMaintenanceFuture != null) {
+      return;
+    }
+    final now = DateTime.now();
+    if (_lastCacheMaintenance != null &&
+        now.difference(_lastCacheMaintenance!) < _cacheMaintenanceInterval) {
+      return;
+    }
+    _cacheMaintenanceFuture = _enforceCacheBudget(cacheDir).whenComplete(() {
+      _lastCacheMaintenance = DateTime.now();
+      _cacheMaintenanceFuture = null;
+    });
   }
 
   Future<void> _saveWidgetMetadata(
