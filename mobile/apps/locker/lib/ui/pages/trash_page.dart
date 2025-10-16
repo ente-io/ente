@@ -1,7 +1,9 @@
 import 'package:ente_ui/components/buttons/button_widget.dart';
 import 'package:ente_ui/components/buttons/models/button_type.dart';
 import "package:ente_ui/components/title_bar_title_widget.dart";
+import "package:ente_ui/theme/colors.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
+import "package:ente_ui/theme/text_style.dart";
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:flutter/material.dart';
 import 'package:locker/l10n/l10n.dart';
@@ -202,10 +204,13 @@ class _TrashPageState extends State<TrashPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+
     return Scaffold(
-      backgroundColor: getEnteColorScheme(context).backgroundBase,
+      backgroundColor: colorScheme.backgroundBase,
       appBar: AppBar(
-        backgroundColor: getEnteColorScheme(context).backgroundBase,
+        backgroundColor: colorScheme.backgroundBase,
         surfaceTintColor: Colors.transparent,
         toolbarHeight: 48,
         leadingWidth: 48,
@@ -218,11 +223,11 @@ class _TrashPageState extends State<TrashPage> {
           ),
         ),
       ),
-      body: _buildBody(),
+      body: _buildBody(colorScheme, textTheme),
     );
   }
 
-  Widget _buildBody() {
+  Widget _buildBody(EnteColorScheme colorScheme, EnteTextTheme textTheme) {
     if (_sortedTrashFiles.isEmpty) {
       return Center(
         child: Padding(
@@ -238,9 +243,9 @@ class _TrashPageState extends State<TrashPage> {
               const SizedBox(height: 16),
               Text(
                 context.l10n.trashIsEmpty,
-                style: getEnteTextTheme(context).large.copyWith(
-                      color: Colors.grey,
-                    ),
+                style: textTheme.large.copyWith(
+                  color: Colors.grey,
+                ),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -265,12 +270,12 @@ class _TrashPageState extends State<TrashPage> {
                   width: 48,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
-                    color: getEnteColorScheme(context).backdropBase,
+                    color: colorScheme.backdropBase,
                   ),
                   padding: const EdgeInsets.all(12),
                   child: Icon(
                     Icons.delete_outline,
-                    color: getEnteColorScheme(context).iconColor,
+                    color: colorScheme.iconColor,
                   ),
                 ),
               ),

@@ -2,7 +2,9 @@ import "dart:async";
 
 import 'package:ente_events/event_bus.dart';
 import "package:ente_ui/components/title_bar_title_widget.dart";
+import "package:ente_ui/theme/colors.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
+import "package:ente_ui/theme/text_style.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 
 import "package:ente_utils/navigation_util.dart";
@@ -204,12 +206,15 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+
     return KeyboardListener(
       focusNode: FocusNode(),
       onKeyEvent: handleKeyEvent,
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: getEnteColorScheme(context).backgroundBase,
+          backgroundColor: colorScheme.backgroundBase,
           surfaceTintColor: Colors.transparent,
           toolbarHeight: 48,
           leadingWidth: 48,
@@ -222,8 +227,8 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
             ),
           ),
         ),
-        backgroundColor: getEnteColorScheme(context).backgroundBase,
-        body: _buildBody(),
+        backgroundColor: colorScheme.backgroundBase,
+        body: _buildBody(colorScheme, textTheme),
         bottomNavigationBar: ListenableBuilder(
           listenable: _selectedFiles,
           builder: (context, _) {
@@ -239,9 +244,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
     );
   }
 
-  Widget _buildMenuButton() {
-    final colorScheme = getEnteColorScheme(context);
-
+  Widget _buildMenuButton(EnteColorScheme colorScheme) {
     return PopupMenuButton<String>(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
@@ -353,7 +356,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
     );
   }
 
-  Widget _buildBody() {
+  Widget _buildBody(EnteColorScheme colorScheme, EnteTextTheme textTheme) {
     if (isSearchActive) {
       return SearchResultView(
         collections: const [], // CollectionPage primarily shows files
@@ -386,22 +389,22 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
                             width: 48,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
-                              color: getEnteColorScheme(context).backdropBase,
+                              color: colorScheme.backdropBase,
                             ),
                             padding: const EdgeInsets.all(12),
                             child: HugeIcon(
                               icon: HugeIcons.strokeRoundedShare08,
-                              color: getEnteColorScheme(context).iconColor,
+                              color: colorScheme.iconColor,
                             ),
                           ),
                         ),
                         const SizedBox(width: 8),
-                        _buildMenuButton(),
+                        _buildMenuButton(colorScheme),
                       ],
               ),
               Text(
                 _displayedFiles.length.toString(),
-                style: getEnteTextTheme(context).smallMuted,
+                style: textTheme.smallMuted,
               ),
             ],
           ),
@@ -411,7 +414,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
           child: _displayedFiles.isEmpty
               ? SizedBox(
                   height: 400,
-                  child: _buildEmptyState(),
+                  child: _buildEmptyState(textTheme),
                 )
               : ItemListView(
                   key: ValueKey(_displayedFiles.length),
@@ -423,7 +426,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(EnteTextTheme textTheme) {
     return Padding(
       padding: const EdgeInsets.all(32.0),
       child: Center(
@@ -440,18 +443,18 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
               isSearchActive
                   ? context.l10n.noFilesFoundForQuery(searchQuery)
                   : context.l10n.noFilesFound,
-              style: getEnteTextTheme(context).large.copyWith(
-                    color: Colors.grey,
-                  ),
+              style: textTheme.large.copyWith(
+                color: Colors.grey,
+              ),
               textAlign: TextAlign.center,
             ),
             if (isSearchActive) ...[
               const SizedBox(height: 8),
               Text(
                 context.l10n.tryAdjustingYourSearchQuery,
-                style: getEnteTextTheme(context).body.copyWith(
-                      color: Colors.grey[600],
-                    ),
+                style: textTheme.body.copyWith(
+                  color: Colors.grey[600],
+                ),
                 textAlign: TextAlign.center,
               ),
             ],

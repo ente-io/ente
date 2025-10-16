@@ -52,11 +52,11 @@ class CollectionListWidget extends StatelessWidget {
                   child: collection.type == CollectionType.favorites
                       ? HugeIcon(
                           icon: HugeIcons.strokeRoundedStar,
-                          color: getEnteColorScheme(context).primary700,
+                          color: colorScheme.primary700,
                         )
                       : HugeIcon(
                           icon: HugeIcons.strokeRoundedWallet05,
-                          color: getEnteColorScheme(context).iconColor,
+                          color: colorScheme.iconColor,
                         ),
                 ),
               ),
@@ -148,7 +148,7 @@ class CollectionListWidget extends StatelessWidget {
                               padding: const EdgeInsets.all(12.0),
                               child: HugeIcon(
                                 icon: HugeIcons.strokeRoundedMoreVertical,
-                                color: getEnteColorScheme(context).iconColor,
+                                color: colorScheme.iconColor,
                               ),
                             ),
                           ),

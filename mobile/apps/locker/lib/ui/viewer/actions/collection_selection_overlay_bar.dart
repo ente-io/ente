@@ -28,6 +28,7 @@ class _CollectionSelectionOverlayBarState
   Widget build(BuildContext context) {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
     final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
 
     return ConstrainedBox(
       constraints: BoxConstraints(
@@ -46,7 +47,7 @@ class _CollectionSelectionOverlayBarState
               ),
             ),
             elevation: 4,
-            surfaceTintColor: getEnteColorScheme(context).backdropBase,
+            surfaceTintColor: colorScheme.backdropBase,
             child: Padding(
               padding: EdgeInsets.fromLTRB(16, 16, 16, 28 + bottomPadding),
               child: Column(
@@ -79,8 +80,7 @@ class _CollectionSelectionOverlayBarState
                             child: Container(
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(50),
-                                color:
-                                    getEnteColorScheme(context).backgroundBase,
+                                color: colorScheme.backgroundBase,
                               ),
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 12.0,
@@ -91,7 +91,7 @@ class _CollectionSelectionOverlayBarState
                                 children: [
                                   Text(
                                     buttonText,
-                                    style: getEnteTextTheme(context).small,
+                                    style: textTheme.small,
                                   ),
                                   const SizedBox(width: 6),
                                   Icon(
@@ -120,8 +120,7 @@ class _CollectionSelectionOverlayBarState
                             child: Container(
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(50),
-                                color:
-                                    getEnteColorScheme(context).backgroundBase,
+                                color: colorScheme.backgroundBase,
                               ),
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 12.0,
@@ -132,7 +131,7 @@ class _CollectionSelectionOverlayBarState
                                 children: [
                                   Text(
                                     countText,
-                                    style: getEnteTextTheme(context).small,
+                                    style: textTheme.small,
                                   ),
                                   const SizedBox(width: 6),
                                   Icon(
@@ -160,6 +159,7 @@ class _CollectionSelectionOverlayBarState
   }
 
   Widget _buildActionButtons() {
+    final colorScheme = getEnteColorScheme(context);
     return ListenableBuilder(
       listenable: widget.selectedCollections,
       builder: (context, child) {
@@ -174,7 +174,7 @@ class _CollectionSelectionOverlayBarState
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeInOut,
           decoration: BoxDecoration(
-            color: getEnteColorScheme(context).backgroundBase,
+            color: colorScheme.backgroundBase,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(

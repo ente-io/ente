@@ -32,6 +32,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   Widget build(BuildContext context) {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
     final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
 
     return ConstrainedBox(
       constraints: BoxConstraints(
@@ -94,7 +95,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                                 children: [
                                   Text(
                                     buttonText,
-                                    style: getEnteTextTheme(context).small,
+                                    style: textTheme.small,
                                   ),
                                   const SizedBox(width: 6),
                                   Icon(
@@ -134,7 +135,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                                 children: [
                                   Text(
                                     countText,
-                                    style: getEnteTextTheme(context).small,
+                                    style: textTheme.small,
                                   ),
                                   const SizedBox(width: 6),
                                   const Icon(
@@ -162,6 +163,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   }
 
   Widget _buildActionButtons() {
+    final colorScheme = getEnteColorScheme(context);
     return ListenableBuilder(
       listenable: widget.selectedFiles,
       builder: (context, child) {
@@ -176,7 +178,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeInOut,
           decoration: BoxDecoration(
-            color: getEnteColorScheme(context).backgroundBase,
+            color: colorScheme.backgroundBase,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(

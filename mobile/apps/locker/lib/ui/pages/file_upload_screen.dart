@@ -3,7 +3,9 @@ import 'dart:io';
 import "package:dotted_border/dotted_border.dart";
 import "package:ente_ui/components/buttons/gradient_button.dart";
 import "package:ente_ui/components/title_bar_title_widget.dart";
+import "package:ente_ui/theme/colors.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
+import "package:ente_ui/theme/text_style.dart";
 import 'package:flutter/material.dart';
 import "package:hugeicons/hugeicons.dart";
 import 'package:locker/l10n/l10n.dart';
@@ -55,7 +57,7 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: getEnteColorScheme(context).backgroundBase,
+        backgroundColor: colorScheme.backgroundBase,
         surfaceTintColor: Colors.transparent,
         automaticallyImplyLeading: false,
         toolbarHeight: 0,
@@ -133,7 +135,11 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
                             separatorBuilder: (context, index) =>
                                 const SizedBox(height: 8),
                             itemBuilder: (context, index) {
-                              return _buildFileItem(_files[index]);
+                              return _buildFileItem(
+                                _files[index],
+                                colorScheme,
+                                textTheme,
+                              );
                             },
                           ),
                         ),
@@ -149,22 +155,24 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
                       runSpacing: 12,
                       children: [
                         _buildCollectionChip(
-                          context,
                           context.l10n.uncategorized,
                           _selectedCollections.isEmpty,
                           _onUncategorizedSelected,
+                          colorScheme,
+                          textTheme,
                         ),
                         ...widget.collections.map((collection) {
                           final isSelected =
                               _selectedCollections.contains(collection);
                           return _buildCollectionChip(
-                            context,
                             collection.name ?? context.l10n.unnamed,
                             isSelected,
                             () => _onCollectionSelected(collection),
+                            colorScheme,
+                            textTheme,
                           );
                         }),
-                        _buildNewCollectionChip(context),
+                        _buildNewCollectionChip(colorScheme, textTheme),
                       ],
                     ),
                   ],
@@ -197,9 +205,11 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
     );
   }
 
-  Widget _buildFileItem(File file) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
+  Widget _buildFileItem(
+    File file,
+    EnteColorScheme colorScheme,
+    EnteTextTheme textTheme,
+  ) {
     final fileName = path.basename(file.path);
 
     final widget = Flexible(
@@ -288,14 +298,12 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
   }
 
   Widget _buildCollectionChip(
-    BuildContext context,
     String name,
     bool isSelected,
     VoidCallback onTap,
+    EnteColorScheme colorScheme,
+    EnteTextTheme textTheme,
   ) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -319,10 +327,10 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
     );
   }
 
-  Widget _buildNewCollectionChip(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-
+  Widget _buildNewCollectionChip(
+    EnteColorScheme colorScheme,
+    EnteTextTheme textTheme,
+  ) {
     return GestureDetector(
       onTap: () async {
         final newCollection = await CollectionActions.createCollection(context);

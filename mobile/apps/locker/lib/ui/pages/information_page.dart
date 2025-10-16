@@ -1,5 +1,7 @@
 import "package:ente_ui/components/title_bar_title_widget.dart";
+import "package:ente_ui/theme/colors.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
+import "package:ente_ui/theme/text_style.dart";
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:locker/l10n/l10n.dart';
@@ -21,6 +23,8 @@ class InformationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: colorScheme.backgroundBase,
@@ -60,6 +64,8 @@ class InformationPage extends StatelessWidget {
                   title: context.l10n.personalNote,
                   description: context.l10n.personalNoteDescription,
                   type: InformationType.note,
+                  colorScheme: colorScheme,
+                  textTheme: textTheme,
                 ),
                 const SizedBox(height: 16),
                 _buildInformationOption(
@@ -72,6 +78,8 @@ class InformationPage extends StatelessWidget {
                   title: context.l10n.physicalRecords,
                   description: context.l10n.physicalRecordsDescription,
                   type: InformationType.physicalRecord,
+                  colorScheme: colorScheme,
+                  textTheme: textTheme,
                 ),
                 const SizedBox(height: 16),
                 _buildInformationOption(
@@ -84,6 +92,8 @@ class InformationPage extends StatelessWidget {
                   title: context.l10n.accountCredentials,
                   description: context.l10n.accountCredentialsDescription,
                   type: InformationType.credentials,
+                  colorScheme: colorScheme,
+                  textTheme: textTheme,
                 ),
                 const SizedBox(height: 16),
                 _buildInformationOption(
@@ -96,6 +106,8 @@ class InformationPage extends StatelessWidget {
                   title: context.l10n.emergencyContact,
                   description: context.l10n.emergencyContactDescription,
                   type: InformationType.emergencyContact,
+                  colorScheme: colorScheme,
+                  textTheme: textTheme,
                 ),
                 const SizedBox(height: 32),
               ],
@@ -112,8 +124,9 @@ class InformationPage extends StatelessWidget {
     required String title,
     required String description,
     required InformationType type,
+    required EnteColorScheme colorScheme,
+    required EnteTextTheme textTheme,
   }) {
-    final colorScheme = getEnteColorScheme(context);
     return GestureDetector(
       onTap: () {
         _showInformationForm(context, type);
@@ -122,7 +135,7 @@ class InformationPage extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          color: getEnteColorScheme(context).backdropBase,
+          color: colorScheme.backdropBase,
         ),
         child: Row(
           children: [
@@ -134,12 +147,12 @@ class InformationPage extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: getEnteTextTheme(context).bodyBold,
+                    style: textTheme.bodyBold,
                   ),
                   const SizedBox(height: 4),
                   Text(
                     description,
-                    style: getEnteTextTheme(context).smallMuted,
+                    style: textTheme.smallMuted,
                   ),
                 ],
               ),
