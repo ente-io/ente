@@ -549,34 +549,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get personalNote => 'Personal note';
 
   @override
-  String get personalNoteDescription => 'Save important notes or thoughts';
+  String get personalNoteDescription =>
+      'Store essential notes or reflections securely.';
 
   @override
-  String get physicalRecords => 'Physical records';
+  String get physicalRecords => 'Physical Record';
 
   @override
   String get physicalRecordsDescription =>
-      'Save the real-world locations of important items';
+      'Document real-world locations of key items.';
 
   @override
   String get accountCredentials => 'Account credentials';
 
   @override
   String get accountCredentialsDescription =>
-      'Securely store login details for important accounts';
+      'Safely save login details for vital accounts.';
 
   @override
   String get emergencyContact => 'Emergency contact';
 
   @override
   String get emergencyContactDescription =>
-      'Save details of people to contact in emergencies';
+      'Keep contact info for key people in crises.';
 
   @override
   String get noteName => 'Title';
 
   @override
-  String get noteNameHint => 'Give your note a meaningful title';
+  String get noteNameHint =>
+      'Write down important thoughts, instructions, or memories you want to preserve';
 
   @override
   String get noteContent => 'Content';
@@ -595,15 +597,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recordLocation => 'Location';
 
   @override
-  String get recordLocationHint =>
-      'Where can this item be found? (e.g., \'Safety deposit box at First Bank, Box #123\')';
+  String get recordLocationHint => 'Where can this item be found?';
 
   @override
   String get recordNotes => 'Notes';
 
   @override
-  String get recordNotesHint =>
-      'Any additional details about accessing or understanding this record';
+  String get recordNotesHint => 'Any additional information about the item?';
 
   @override
   String get credentialName => 'Account name';

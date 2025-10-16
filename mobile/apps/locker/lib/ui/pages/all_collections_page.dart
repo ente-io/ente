@@ -137,10 +137,12 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+
     return Scaffold(
-      backgroundColor: getEnteColorScheme(context).backgroundBase,
+      backgroundColor: colorScheme.backgroundBase,
       appBar: AppBar(
-        backgroundColor: getEnteColorScheme(context).backgroundBase,
+        backgroundColor: colorScheme.backgroundBase,
         surfaceTintColor: Colors.transparent,
         toolbarHeight: 48,
         leadingWidth: 48,
@@ -171,6 +173,8 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
   }
 
   Widget _buildBody() {
+    final textTheme = getEnteTextTheme(context);
+
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(),
@@ -218,9 +222,9 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
               const SizedBox(height: 16),
               Text(
                 context.l10n.noCollectionsFound,
-                style: getEnteTextTheme(context).large.copyWith(
-                      color: Colors.grey,
-                    ),
+                style: textTheme.large.copyWith(
+                  color: Colors.grey,
+                ),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -239,7 +243,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
           ),
           Text(
             _allCollections.length.toString() + " items",
-            style: getEnteTextTheme(context).smallMuted,
+            style: textTheme.smallMuted,
           ),
           const SizedBox(height: 20),
           Flexible(
@@ -257,6 +261,8 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
   }
 
   Widget _buildTrashHook() {
+    final textTheme = getEnteTextTheme(context);
+
     return Container(
       margin: const EdgeInsets.only(top: 8.0, bottom: 16.0),
       child: InkWell(
@@ -284,9 +290,9 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
               Expanded(
                 child: Text(
                   context.l10n.trash,
-                  style: getEnteTextTheme(context).large.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
+                  style: textTheme.large.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
               Icon(
@@ -317,6 +323,8 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
   Widget _buildUncategorizedHook() {
     if (_uncategorizedCollection == null) return const SizedBox.shrink();
 
+    final textTheme = getEnteTextTheme(context);
+
     return Container(
       margin: const EdgeInsets.only(top: 16.0, bottom: 8.0),
       child: InkWell(
@@ -346,32 +354,32 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
                   children: [
                     Text(
                       context.l10n.uncategorized,
-                      style: getEnteTextTheme(context).large.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
+                      style: textTheme.large.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                     if (_uncategorizedFileCount! > 0) ...[
                       const SizedBox(width: 8),
                       Text(
                         '•',
-                        style: getEnteTextTheme(context).small.copyWith(
-                              color: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.color
-                                  ?.withAlpha(50),
-                            ),
+                        style: textTheme.small.copyWith(
+                          color: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.color
+                              ?.withAlpha(50),
+                        ),
                       ),
                       const SizedBox(width: 8),
                       Text(
                         '${_uncategorizedFileCount!}',
-                        style: getEnteTextTheme(context).small.copyWith(
-                              color: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.color
-                                  ?.withAlpha(70),
-                            ),
+                        style: textTheme.small.copyWith(
+                          color: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.color
+                              ?.withAlpha(70),
+                        ),
                       ),
                     ],
                   ],

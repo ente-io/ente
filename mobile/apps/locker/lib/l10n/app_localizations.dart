@@ -1045,19 +1045,19 @@ abstract class AppLocalizations {
   /// No description provided for @personalNoteDescription.
   ///
   /// In en, this message translates to:
-  /// **'Save important notes or thoughts'**
+  /// **'Store essential notes or reflections securely.'**
   String get personalNoteDescription;
 
   /// No description provided for @physicalRecords.
   ///
   /// In en, this message translates to:
-  /// **'Physical records'**
+  /// **'Physical Record'**
   String get physicalRecords;
 
   /// No description provided for @physicalRecordsDescription.
   ///
   /// In en, this message translates to:
-  /// **'Save the real-world locations of important items'**
+  /// **'Document real-world locations of key items.'**
   String get physicalRecordsDescription;
 
   /// No description provided for @accountCredentials.
@@ -1069,7 +1069,7 @@ abstract class AppLocalizations {
   /// No description provided for @accountCredentialsDescription.
   ///
   /// In en, this message translates to:
-  /// **'Securely store login details for important accounts'**
+  /// **'Safely save login details for vital accounts.'**
   String get accountCredentialsDescription;
 
   /// No description provided for @emergencyContact.
@@ -1081,7 +1081,7 @@ abstract class AppLocalizations {
   /// No description provided for @emergencyContactDescription.
   ///
   /// In en, this message translates to:
-  /// **'Save details of people to contact in emergencies'**
+  /// **'Keep contact info for key people in crises.'**
   String get emergencyContactDescription;
 
   /// No description provided for @noteName.
@@ -1093,7 +1093,7 @@ abstract class AppLocalizations {
   /// No description provided for @noteNameHint.
   ///
   /// In en, this message translates to:
-  /// **'Give your note a meaningful title'**
+  /// **'Write down important thoughts, instructions, or memories you want to preserve'**
   String get noteNameHint;
 
   /// No description provided for @noteContent.
@@ -1129,7 +1129,7 @@ abstract class AppLocalizations {
   /// No description provided for @recordLocationHint.
   ///
   /// In en, this message translates to:
-  /// **'Where can this item be found? (e.g., \'Safety deposit box at First Bank, Box #123\')'**
+  /// **'Where can this item be found?'**
   String get recordLocationHint;
 
   /// No description provided for @recordNotes.
@@ -1141,7 +1141,7 @@ abstract class AppLocalizations {
   /// No description provided for @recordNotesHint.
   ///
   /// In en, this message translates to:
-  /// **'Any additional details about accessing or understanding this record'**
+  /// **'Any additional information about the item?'**
   String get recordNotesHint;
 
   /// No description provided for @credentialName.
