@@ -104,8 +104,7 @@ more images are appropriate then we can add more. But the basic card is one imag
 
 ## Algorithms & Computation
 
-All heavy work runs on isolates (reuse the Computer pool) and caches results.
-Use the `SmartMemoriesService` as reference for how to do it.
+All heavy work runs on isolates and caches results. Perform all calculations in one single isolate call to minimize main‑isolate overhead and memory churn. Use `SmartMemoriesService` as a reference for the structure and args passing.
 
 General selection framework
 
@@ -217,20 +216,42 @@ Badge card shows badge name, short line of copy, and 1–4 representative thumbn
 
 ## Engineering Plan
 
-Phase 0 — Infra harness (reuse where possible)
+Phase 0 — UI skeleton & flags
 
-- Add a `WrappedEngine` that builds candidate cards from the year’s files, using:
-  - CLIP embeddings via `MLDataDB` + `ClipVectorDB`
-  - Face clusters via `MLDataDB` + `PersonService`
-  - Time/event clustering via `SmartMemoriesService`
-  - Location clustering via `LocationService`
-- Cache: persist per‑year results; recalc on ML index updates.
+- Feature flag gating
+  - Gate all entry points and the viewer behind a flag `flagService.wrappedFlag` that points to `flagService.internalUser`.
+  - Hide Wrapped UI completely for non‑internal users.
+- Home gallery banner
+  - Shows when eligibility + compute complete; tap opens Wrapped viewer at resume index.
+  - Dismiss behavior: auto‑hide after full watch; or after partial watch 3 times.
+- Discovery tab entry
+  - Add a “Wrapped 2025” section below Locations. Visible after banner disappears, till January 15th 2026.
+  - Same gating and tap behavior as banner.
+- Local notifications (optional for MVP)
+  - Local only (no remote). Tap navigates to viewer at resume index.
+  - Gated by `internalUser` and user notification permission.
+- Basic card structure & flow
+  - Card model `WrappedCard { type, title, subtitle, mediaRefs, shareLayout }`.
+  - Viewer: autoplay story, progress bar, tap left/right to nav, pause on touch.
+  - Share action per card: export a designed PNG (portrait 1080×1920; square optional later).
+- Resume state
+  - Persist last viewed card index in `LocalSettings` (e.g., key `wrapped_2025_resume_index`).
+  - Viewer reads this on open, updates it on page change; clear on completion.
+  - Ignore i18n for MVP: copy is EN‑only.
 
-Phase 1 — MVP (ship‑ready)
+Phase 1 — Engine, cache, single isolate compute
 
-- Chapters: Stats, People, Places, Top 9 wow, Favorites, Best‑of 25, Badge.
-- Share cards for each; for the story viewer use `FullScreenMemory` mechanic for reference.
-- Gating + fallbacks.
+- WrappedEngine (compute + selection)
+  - Single isolate call that performs the entire pipeline (eligibility → candidate generation → scoring/diversity → final card list) similar to `SmartMemoriesService.calcSmartMemories`.
+  - Input: year, now, ML availability, caches, thresholds.
+  - Output: ordered `List<WrappedCard>` + badge + lightweight stats for UI.
+- Data sources
+  - CLIP vectors (`MLDataDB` + `ClipVectorDB`), faces/persons (`PersonService` + `MLDataDB`), time/event clusters (`SmartMemoriesService` patterns), EXIF/GPS (`exif_util` + `location_service`).
+- Caching
+  - Persist per‑year results (e.g., simple serialized snapshot). Invalidate on ML updates or when user adds new 2025 media.
+  - Store a lightweight hash of inputs to detect staleness.
+- Eligibility & fallbacks
+  - Enforce thresholds; degrade to minimal set (Stats + Top9 + Favorites + Badge) if sparse.
 
 Phase 2 — Depth & polish
 
