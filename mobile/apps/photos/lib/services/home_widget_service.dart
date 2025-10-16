@@ -363,6 +363,8 @@ class HomeWidgetService {
       await setAppGroup();
     }
 
+    await clearWidgetCache();
+
     await Future.wait([
       AlbumHomeWidgetService.instance.clearWidget(),
       PeopleHomeWidgetService.instance.clearWidget(),
@@ -378,6 +380,32 @@ class HomeWidgetService {
       _logger.info("Widget directory cleared successfully");
     } catch (e) {
       _logger.severe("Failed to clear widget directory", e);
+    }
+  }
+
+  Future<void> clearWidgetCache() async {
+    final Future<void>? pendingCleanup = _cacheMaintenanceFuture;
+    if (pendingCleanup != null) {
+      try {
+        await pendingCleanup;
+      } catch (_) {
+        // ignore cleanup errors; we are about to delete the cache anyway
+      }
+    }
+    _cacheMaintenanceFuture = null;
+    _lastCacheMaintenance = null;
+
+    try {
+      final String widgetParent = await _getWidgetStorageDirectory();
+      final String cachePath =
+          '$widgetParent/$WIDGET_DIRECTORY/$WIDGET_CACHE_DIR';
+      final Directory cacheDir = Directory(cachePath);
+      if (await cacheDir.exists()) {
+        await cacheDir.delete(recursive: true);
+        _logger.info("Widget cache cleared successfully");
+      }
+    } catch (e, s) {
+      _logger.warning("Failed to clear widget cache directory", e, s);
     }
   }
 
