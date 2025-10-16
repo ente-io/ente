@@ -396,8 +396,10 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
   Future<void> _openUncategorized() async {
     await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) =>
-            CollectionPage(collection: _uncategorizedCollection!),
+        builder: (context) => CollectionPage(
+          collection: _uncategorizedCollection!,
+          isUncategorized: true,
+        ),
       ),
     );
   }

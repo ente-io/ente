@@ -31,10 +31,12 @@ import "package:logging/logging.dart";
 
 class CollectionPage extends UploaderPage {
   final Collection collection;
+  final bool isUncategorized;
 
   const CollectionPage({
     super.key,
     required this.collection,
+    this.isUncategorized = false,
   });
 
   @override
@@ -372,28 +374,30 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
             children: [
               TitleBarTitleWidget(
                 title: _collection.name ?? context.l10n.untitled,
-                trailingWidgets: [
-                  GestureDetector(
-                    onTap: () async {
-                      await _shareCollection();
-                    },
-                    child: Container(
-                      height: 48,
-                      width: 48,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        color: getEnteColorScheme(context).backdropBase,
-                      ),
-                      padding: const EdgeInsets.all(12),
-                      child: HugeIcon(
-                        icon: HugeIcons.strokeRoundedShare08,
-                        color: getEnteColorScheme(context).iconColor,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  _buildMenuButton(),
-                ],
+                trailingWidgets: widget.isUncategorized
+                    ? const []
+                    : [
+                        GestureDetector(
+                          onTap: () async {
+                            await _shareCollection();
+                          },
+                          child: Container(
+                            height: 48,
+                            width: 48,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              color: getEnteColorScheme(context).backdropBase,
+                            ),
+                            padding: const EdgeInsets.all(12),
+                            child: HugeIcon(
+                              icon: HugeIcons.strokeRoundedShare08,
+                              color: getEnteColorScheme(context).iconColor,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        _buildMenuButton(),
+                      ],
               ),
               Text(
                 _displayedFiles.length.toString(),

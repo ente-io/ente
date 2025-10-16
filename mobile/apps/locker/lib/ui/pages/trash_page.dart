@@ -1,5 +1,6 @@
 import 'package:ente_ui/components/buttons/button_widget.dart';
 import 'package:ente_ui/components/buttons/models/button_type.dart';
+import "package:ente_ui/components/title_bar_title_widget.dart";
 import 'package:ente_ui/theme/ente_theme.dart';
 import 'package:ente_ui/utils/dialog_util.dart';
 import 'package:flutter/material.dart';
@@ -202,18 +203,20 @@ class _TrashPageState extends State<TrashPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: getEnteColorScheme(context).backgroundBase,
       appBar: AppBar(
-        title: Text(context.l10n.trash),
-        centerTitle: false,
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.delete_sweep),
-            onPressed: _emptyTrash,
-            tooltip: context.l10n.emptyTrashTooltip,
+        backgroundColor: getEnteColorScheme(context).backgroundBase,
+        surfaceTintColor: Colors.transparent,
+        toolbarHeight: 48,
+        leadingWidth: 48,
+        leading: GestureDetector(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: const Icon(
+            Icons.arrow_back_outlined,
           ),
-        ],
+        ),
       ),
       body: _buildBody(),
     );
@@ -248,9 +251,37 @@ class _TrashPageState extends State<TrashPage> {
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: ItemListView(
-        files: _sortedTrashFiles.cast<EnteFile>(),
-        fileOverflowActions: _getFileOverflowActions(),
+      child: Column(
+        children: [
+          TitleBarTitleWidget(
+            title: context.l10n.trash,
+            trailingWidgets: [
+              GestureDetector(
+                onTap: () async {
+                  await _emptyTrash();
+                },
+                child: Container(
+                  height: 48,
+                  width: 48,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: getEnteColorScheme(context).backdropBase,
+                  ),
+                  padding: const EdgeInsets.all(12),
+                  child: Icon(
+                    Icons.delete_outline,
+                    color: getEnteColorScheme(context).iconColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          ItemListView(
+            files: _sortedTrashFiles.cast<EnteFile>(),
+            fileOverflowActions: _getFileOverflowActions(),
+          ),
+        ],
       ),
     );
   }
