@@ -12,12 +12,13 @@ import 'package:path_provider_foundation/path_provider_foundation.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file/file_type.dart';
+import 'package:photos/service_locator.dart';
 import 'package:photos/services/album_home_widget_service.dart';
 import 'package:photos/services/memory_home_widget_service.dart';
 import 'package:photos/services/people_home_widget_service.dart';
 import 'package:photos/services/smart_memories_service.dart';
+import 'package:photos/services/widget_image_isolate.dart';
 import 'package:photos/utils/file_util.dart';
-import 'package:photos/utils/image_util.dart' as image_util;
 import 'package:photos/utils/thumbnail_util.dart';
 import "package:synchronized/synchronized.dart";
 
@@ -171,9 +172,13 @@ class HomeWidgetService {
       await setData(key, imageInfo.path);
 
       // Format date for display
-      final subText = await SmartMemoriesService.getDateFormattedLocale(
+      final String baseSubText =
+          await SmartMemoriesService.getDateFormattedLocale(
         creationTime: file.creationTime!,
       );
+      final String subText = flagService.internalUser
+          ? '$baseSubText, ${imageInfo.size.longestSide.round()}px'
+          : baseSubText;
 
       // Create metadata
       final Map<String, dynamic> metadata = {
@@ -193,44 +198,6 @@ class HomeWidgetService {
     }
   }
 
-  /// Returns bytes and dimensions for a widget image preferring ~1280px max dimension.
-  /// Falls back to existing 512px thumbnail if a higher-res source is not available
-  /// without extra network I/O (e.g., remote and not cached locally).
-  Future<({Uint8List bytes, int width, int height})?> _getWidgetImageBytes(
-    EnteFile file,
-  ) async {
-    final File? source = await _resolveWidgetSource(file);
-
-    if (source != null) {
-      try {
-        final rawBytes = await source.readAsBytes();
-        final resized = image_util.resizeImageToJpeg(
-          srcBytes: rawBytes,
-          maxDimension: WIDGET_IMAGE_SIZE,
-          quality: 80,
-        );
-        if (resized != null) {
-          return resized;
-        }
-      } catch (e, s) {
-        _logger.warning(
-          "Widget image resize/encode failed, fallback to thumbnail",
-          e,
-          s,
-        );
-      }
-    }
-
-    // Fallback to existing 512px thumbnail (used for videos and failed resizes)
-    final thumb = await getThumbnail(file);
-    if (thumb == null) return null;
-    return (
-      bytes: thumb,
-      width: thumbnailLargeSize,
-      height: thumbnailLargeSize,
-    );
-  }
-
   String? _cacheKeyForFile(EnteFile file) {
     final uploadedId = file.uploadedFileID;
     if (uploadedId == null) return null;
@@ -240,18 +207,6 @@ class HomeWidgetService {
         : (file.modificationTime ?? file.updationTime ?? 0).toString();
     final contentSig = _sanitizeFilename(rawSig);
     return 'u_${uploadedId}_$contentSig';
-  }
-
-  Future<({int width, int height})?> _readDimensions(File file) async {
-    try {
-      final bytes = await file.readAsBytes();
-      final dims = image_util.decodeImageDimensions(bytes);
-      if (dims == null) return null;
-      return (width: dims.width, height: dims.height);
-    } catch (e, s) {
-      _logger.warning('Failed to read widget image dimensions', e, s);
-      return null;
-    }
   }
 
   Future<File?> _resolveWidgetSource(EnteFile file) async {
@@ -273,7 +228,11 @@ class HomeWidgetService {
     try {
       final dir = Directory(cacheDirPath);
       if (!await dir.exists()) return;
-      final entries = await dir.list().whereType<File>().toList();
+      final entries = await dir
+          .list()
+          .where((entity) => entity is File)
+          .cast<File>()
+          .toList();
       if (entries.isEmpty) return;
 
       final files = entries;
@@ -284,12 +243,17 @@ class HomeWidgetService {
 
       // Sort by last modified ascending (oldest first)
       files.sort(
-          (a, b) => a.statSync().modified.compareTo(b.statSync().modified));
+        (a, b) => a.statSync().modified.compareTo(b.statSync().modified),
+      );
 
       final int filesToDelete = files.length - WIDGET_CACHE_MAX_FILES;
       for (var i = 0; i < filesToDelete; i++) {
         final file = files[i];
-        await file.delete().catchError((_) {});
+        try {
+          await file.delete();
+        } catch (_) {
+          // Best-effort deletion; ignore failures.
+        }
       }
     } catch (e, s) {
       _logger.warning('Failed to enforce widget cache budget', e, s);
@@ -305,27 +269,43 @@ class HomeWidgetService {
     final File cachedFile = File(cachedPath);
 
     if (await cachedFile.exists()) {
-      final ({int width, int height})? dims = await _readDimensions(cachedFile);
+      final ({int width, int height})? dims =
+          await WidgetImageIsolate.instance.readImageDimensions(cachedPath);
       final size = dims != null
           ? Size(dims.width.toDouble(), dims.height.toDouble())
-          : const Size(WIDGET_IMAGE_SIZE, WIDGET_IMAGE_SIZE);
+          : const Size.square(WIDGET_IMAGE_SIZE);
       return (path: cachedPath, size: size);
     }
 
-    final ({Uint8List bytes, int width, int height})? imageData =
-        await _getWidgetImageBytes(file);
-    if (imageData == null) {
+    final File? source = await _resolveWidgetSource(file);
+    if (source != null) {
+      final ({int width, int height})? dims =
+          await WidgetImageIsolate.instance.generateWidgetImage(
+        sourcePath: source.path,
+        cachePath: cachedPath,
+        maxDimension: WIDGET_IMAGE_SIZE,
+        quality: 80,
+      );
+      if (dims != null) {
+        final size = Size(
+          dims.width.toDouble(),
+          dims.height.toDouble(),
+        );
+        unawaited(_enforceCacheBudget(cacheDir));
+        return (path: cachedPath, size: size);
+      }
+    }
+
+    final Uint8List? fallback = await getThumbnail(file);
+    if (fallback == null) {
       return null;
     }
 
-    await cachedFile.writeAsBytes(imageData.bytes, flush: true);
+    await cachedFile.writeAsBytes(fallback, flush: true);
     unawaited(_enforceCacheBudget(cacheDir));
 
-    final size = Size(
-      imageData.width.toDouble(),
-      imageData.height.toDouble(),
-    );
-    return (path: cachedPath, size: size);
+    final Size fallbackSize = Size.square(thumbnailLargeSize.toDouble());
+    return (path: cachedPath, size: fallbackSize);
   }
 
   Future<void> _saveWidgetMetadata(
