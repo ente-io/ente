@@ -219,7 +219,7 @@ Badge card shows badge name, short line of copy, and 1–4 representative thumbn
 Phase 0 — UI skeleton & flags
 
 - Feature flag gating
-  - Gate all entry points and the viewer behind a flag `flagService.wrappedFlag` that points to `flagService.internalUser`.
+  - Gate all entry points and the viewer behind a flag `flagService.enteWrapped` that points to `flagService.internalUser`.
   - Hide Wrapped UI completely for non‑internal users.
 - Home gallery banner
   - Shows when eligibility + compute complete; tap opens Wrapped viewer at resume index.
