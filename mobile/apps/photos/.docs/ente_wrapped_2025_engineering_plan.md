@@ -331,7 +331,7 @@ Milestones & Checklist
 - [x] Create `lib/services/wrapped/wrapped_engine.dart` with isolate compute stub
 - [x] Implement candidate builders (stats, people, places, aesthetics, curation, narrative)
 - [ ] Flesh out candidate builder implementations
-  - [ ] StatsCandidateBuilder
+  - [x] StatsCandidateBuilder
   - [ ] PeopleCandidateBuilder
   - [ ] PlacesCandidateBuilder
   - [ ] AestheticsCandidateBuilder

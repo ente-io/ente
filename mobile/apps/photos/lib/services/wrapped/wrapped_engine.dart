@@ -1,8 +1,9 @@
 import "package:computer/computer.dart";
 import "package:logging/logging.dart";
-
-import "candidate_builders.dart";
-import "models.dart";
+import "package:photos/models/file/file.dart";
+import "package:photos/services/search_service.dart";
+import "package:photos/services/wrapped/candidate_builders.dart";
+import "package:photos/services/wrapped/models.dart";
 
 final Logger _engineLogger = Logger("WrappedEngine");
 final Logger _computeLogger = Logger("WrappedEngineIsolate");
@@ -16,14 +17,51 @@ class WrappedEngine {
     final DateTime now = DateTime.now();
     _engineLogger.fine("Scheduling Wrapped compute for $year at $now");
 
+    final List<EnteFile> yearFiles = await _collectFilesForYear(year);
+    _engineLogger.fine(
+      "Collected ${yearFiles.length} media items for Wrapped $year compute",
+    );
+
     return await Computer.shared().compute(
       _wrappedComputeIsolate,
       param: <String, Object?>{
         "year": year,
         "now": now,
+        "files": yearFiles,
       },
       taskName: "wrapped_compute_$year",
     ) as WrappedResult;
+  }
+
+  static Future<List<EnteFile>> _collectFilesForYear(int year) async {
+    final List<EnteFile> allFiles =
+        await SearchService.instance.getAllFilesForSearch();
+    final List<EnteFile> filtered = <EnteFile>[];
+    for (final EnteFile file in allFiles) {
+      final int? creationTime = file.creationTime;
+      if (creationTime == null) {
+        continue;
+      }
+      final DateTime captured =
+          DateTime.fromMicrosecondsSinceEpoch(creationTime);
+      if (captured.year != year) {
+        continue;
+      }
+      filtered.add(file);
+    }
+
+    filtered.sort(
+      (EnteFile a, EnteFile b) {
+        final int aTime = a.creationTime ?? 0;
+        final int bTime = b.creationTime ?? 0;
+        if (aTime != bTime) return aTime.compareTo(bTime);
+        final int aId = a.uploadedFileID ?? a.generatedID ?? 0;
+        final int bId = b.uploadedFileID ?? b.generatedID ?? 0;
+        return aId.compareTo(bId);
+      },
+    );
+
+    return filtered;
   }
 }
 
@@ -32,10 +70,19 @@ Future<WrappedResult> _wrappedComputeIsolate(
 ) async {
   final int year = args["year"] as int;
   final DateTime now = args["now"] as DateTime;
+  final List<EnteFile> files =
+      (args["files"] as List<dynamic>? ?? const <dynamic>[])
+          .cast<EnteFile>();
 
-  _computeLogger.fine("Wrapped compute isolate running for $year");
+  _computeLogger.fine(
+    "Wrapped compute isolate running for $year with ${files.length} media items",
+  );
 
-  final WrappedEngineContext context = WrappedEngineContext(year: year, now: now);
+  final WrappedEngineContext context = WrappedEngineContext(
+    year: year,
+    now: now,
+    files: files,
+  );
   final List<WrappedCard> cards = <WrappedCard>[];
   for (final WrappedCandidateBuilder builder in wrappedCandidateBuilders) {
     _computeLogger.finer("Running candidate builder ${builder.debugLabel}");
