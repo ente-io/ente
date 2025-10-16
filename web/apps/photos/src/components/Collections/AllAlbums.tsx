@@ -306,10 +306,6 @@ const AllAlbumsContent: React.FC<AllAlbumsContentProps> = ({
     >([]);
 
     const columns = isTwoColumn ? 2 : 3;
-    const maxListContentHeight =
-        Math.ceil(collectionSummaries.length / columns) *
-            CollectionRowItemSize +
-        32; /* padding above first and below last row */
 
     useEffect(() => {
         const main = () => {
@@ -371,13 +367,8 @@ const AllAlbumsContent: React.FC<AllAlbumsContentProps> = ({
         <DialogContent
             sx={{
                 "&&": { padding: 0 },
-                height: "min(80svh, var(--et-max-list-content-height))",
+                height: "80svh",
             }}
-            style={
-                {
-                    "--et-max-list-content-height": `${maxListContentHeight}px`,
-                } as React.CSSProperties
-            }
         >
             <AutoSizer>
                 {({ width, height }) => (
