@@ -142,20 +142,10 @@ class _WrappedViewerPageState extends State<WrappedViewerPage> {
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  LinearProgressIndicator(
-                    value: (_currentIndex + 1) / cardCount,
-                    backgroundColor: enteColorScheme.fillFaint,
-                    color: enteColorScheme.primary500,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    "Card ${_currentIndex + 1} of $cardCount",
-                    style: textTheme.smallMuted,
-                  ),
-                ],
+              child: LinearProgressIndicator(
+                value: (_currentIndex + 1) / cardCount,
+                backgroundColor: enteColorScheme.fillFaint,
+                color: enteColorScheme.primary500,
               ),
             ),
             Expanded(
@@ -258,11 +248,6 @@ class _StatsCard extends StatelessWidget {
                   children: mediaBadges,
                 ),
               ],
-              const Spacer(),
-              Text(
-                "Generated on-device • Privacy first",
-                style: textTheme.tinyMuted,
-              ),
             ],
           ),
         ),

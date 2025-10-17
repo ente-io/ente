@@ -34,11 +34,6 @@ class WrappedHomeBanner extends StatelessWidget {
       subtitle = "Tap to see your 2025 highlights.";
     }
 
-    final int cardCount = state.result?.cards.length ?? 0;
-    final String detail = cardCount > 0
-        ? "$cardCount card${cardCount == 1 ? '' : 's'}"
-        : "Preview";
-
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
       child: Material(
@@ -81,12 +76,9 @@ class WrappedHomeBanner extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(width: 12),
-                Text(
-                  detail,
-                  style: textTheme.smallMuted.copyWith(
-                    color: enteColorScheme.textMuted,
-                  ),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: enteColorScheme.textMuted,
                 ),
               ],
             ),
