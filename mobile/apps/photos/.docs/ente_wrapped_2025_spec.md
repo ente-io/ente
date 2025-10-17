@@ -233,7 +233,9 @@ Phase 0 — UI skeleton & flags
 - Basic card structure & flow
   - Card model `WrappedCard { type, title, subtitle, mediaRefs, shareLayout }`.
   - Viewer: autoplay story, progress bar, tap left/right to nav, pause on touch.
-  - Share action per card: export a designed PNG (portrait 1080×1920; square optional later).
+  - Viewer implementation: prefer a `PageView`-style carousel with timer-driven autoplay (or equivalent) that updates the resume index on every page change and clears state once the run completes.
+  - There should be basic animations for moving the text and images to make it more interesting
+  - Share action per card: export a designed PNG (portrait 1080×1920; square optional later) 
 - Resume state
   - Persist last viewed card index in `LocalSettings` (e.g., key `wrapped_2025_resume_index`).
   - Viewer reads this on open, updates it on page change; clear on completion.
@@ -248,8 +250,7 @@ Phase 1 — Engine, cache, single isolate compute
 - Data sources
   - CLIP vectors (`MLDataDB` + `ClipVectorDB`), faces/persons (`PersonService` + `MLDataDB`), time/event clusters (`SmartMemoriesService` patterns), EXIF/GPS (`exif_util` + `location_service`).
 - Caching
-  - Persist per‑year results (e.g., simple serialized snapshot). Invalidate on ML updates or when user adds new 2025 media.
-  - Store a lightweight hash of inputs to detect staleness.
+  - A `WrappedCacheService` persists each year’s snapshot as a JSON payload (e.g., `wrapped/2025.json`, optionally gzipped) alongside metadata such as `updatedAt` and an input hash.
 - Eligibility & fallbacks
   - Enforce thresholds; degrade to minimal set (Stats + Top9 + Favorites + Badge) if sparse.
 
@@ -277,7 +278,12 @@ Phase 3 — Advanced
 - Music or sound? Likely no for MVP.
 - Opt‑in for showing person names on share cards? No, sharing itself is already opt-in, so not needed. Just always show names.
 - Should we let users edit badge if they disagree? No. we can offer “See more badges you earned” as fun alternative. But let's not add that in the MVP. The idea should be that any badge is nice, so the user will never disagree. It's a fine balance, but possible.
-- Do we surface cross‑year comparisons (“+X% vs 2024”) broadly or only in stats? Only in stats, if at all.
+- Do we surface cross-year comparisons (“+X% vs 2024”) broadly or only in stats? Only in stats, if at all.
+
+## Open Decisions
+
+- Cache store format: start with JSON snapshots, revisit SQLite only if size becomes an issue.
+- Viewer foundation: build a bespoke viewer that borrows interaction patterns from `FullScreenMemory` instead of reusing it verbatim.
 
 ## Risks & Mitigations
 
@@ -303,6 +309,29 @@ Phase 3 — Advanced
 - Story experience with 12–18 cards per eligible user.
 - Exportable share cards (portrait + square) for each shown item.
 - Badge system and finale.
+
+## Milestones & Progress
+
+- [x] Create `lib/services/wrapped/wrapped_engine.dart` with isolate compute stub
+- [x] Implement candidate builders (stats, people, places, aesthetics, curation, narrative)
+- [x] Wire feature flag getter (`flagService.enteWrapped`)
+- [x] Introduce `WrappedStateService` for entry gating
+- [ ] Flesh out candidate builder implementations
+  - [x] StatsCandidateBuilder
+  - [ ] PeopleCandidateBuilder
+  - [ ] PlacesCandidateBuilder
+  - [ ] AestheticsCandidateBuilder
+  - [ ] CurationCandidateBuilder
+  - [ ] NarrativeCandidateBuilder
+- [ ] Add selection/diversity + badge logic
+- [ ] Add `WrappedCacheService` (file-based JSON) + invalidation hooks
+- [x] Add LocalSettings extension for resume/complete
+- [ ] Add Home Banner widget + wiring in gallery (gated)
+- [ ] Add Discovery entry + gating + expiry window
+- [ ] Implement `WrappedViewerPage` (autoplay, progress, resume)
+- [ ] Implement share exporter (RepaintBoundary → PNG) + “Save all cards” flow
+- [ ] Optional: local notification trigger + deep link
+- [ ] QA: sparse vs rich libraries, performance, correctness
 
 —
 This spec is grounded in existing code paths for CLIP, faces, locations, and memories. It prioritizes on‑device computation, small‑copy visuals, and share‑first moments while keeping overlap low via candidate scoring and diversity constraints.
