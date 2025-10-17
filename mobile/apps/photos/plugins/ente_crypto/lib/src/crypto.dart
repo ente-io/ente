@@ -6,6 +6,7 @@ import "package:computer/computer.dart";
 import "package:ente_crypto/src/models/derived_key_result.dart";
 import "package:ente_crypto/src/models/encryption_result.dart";
 import "package:ente_crypto/src/models/errors.dart";
+import "package:flutter/foundation.dart";
 import "package:flutter_sodium/flutter_sodium.dart";
 import "package:logging/logging.dart";
 
@@ -67,6 +68,55 @@ Future<Uint8List> cryptoGenericHash(Map<String, dynamic> args) async {
   return Sodium.cryptoGenerichashFinal(state, Sodium.cryptoGenerichashBytesMax);
 }
 
+// Verifies that encrypted data can be successfully decrypted and matches the original
+// This is used to catch encryption errors immediately rather than during decryption
+void _verifyChachaEncryption({
+  required Uint8List encryptedData,
+  required Uint8List originalData,
+  required Uint8List header,
+  required Uint8List key,
+  required int expectedTag,
+  String? contextInfo,
+}) {
+  // Initialize verification state for immediate decryption
+  final verifyPullState = Sodium.cryptoSecretstreamXchacha20poly1305InitPull(
+    header,
+    key,
+  );
+
+  try {
+    final pullResult = Sodium.cryptoSecretstreamXchacha20poly1305Pull(
+      verifyPullState,
+      encryptedData,
+      null,
+    );
+
+    // Verify decrypted data matches original
+    if (!listEquals(pullResult.m, originalData)) {
+      final context = contextInfo != null ? " ($contextInfo)" : "";
+      throw Exception(
+        "$kVerificationErrorTag decrypted data doesn't match original$context",
+      );
+    }
+
+    // Verify tag matches expected
+    if (pullResult.tag != expectedTag) {
+      final context = contextInfo != null ? " ($contextInfo)" : "";
+      throw Exception(
+        "$kVerificationErrorTag tag mismatch$context, expected $expectedTag but got ${pullResult.tag}",
+      );
+    }
+  } catch (e) {
+    if (e.toString().contains(kVerificationErrorTag)) {
+      rethrow;
+    }
+    final context = contextInfo != null ? " ($contextInfo)" : "";
+    throw Exception(
+      "$kVerificationErrorTag$context: $e",
+    );
+  }
+}
+
 EncryptionResult chachaEncryptData(Map<String, dynamic> args) {
   final initPushResult =
       Sodium.cryptoSecretstreamXchacha20poly1305InitPush(args["key"]);
@@ -76,6 +126,17 @@ EncryptionResult chachaEncryptData(Map<String, dynamic> args) {
     null,
     Sodium.cryptoSecretstreamXchacha20poly1305TagFinal,
   );
+
+  // Verify the encryption immediately
+  _verifyChachaEncryption(
+    encryptedData: encryptedData,
+    originalData: args["source"],
+    header: initPushResult.header,
+    key: args["key"],
+    expectedTag: Sodium.cryptoSecretstreamXchacha20poly1305TagFinal,
+    contextInfo: "chachaEncryptData",
+  );
+
   return EncryptionResult(
     encryptedData: encryptedData,
     header: initPushResult.header,
@@ -168,9 +229,17 @@ Future<EncryptionResult> chachaEncryptFile(Map<String, dynamic> args) async {
   final key = args["key"] ?? Sodium.cryptoSecretstreamXchacha20poly1305Keygen();
   final initPushResult =
       Sodium.cryptoSecretstreamXchacha20poly1305InitPush(key);
+  // Initialize verification state for immediate decryption
+  final verifyPullState = Sodium.cryptoSecretstreamXchacha20poly1305InitPull(
+    initPushResult.header,
+    key,
+  );
+
   var bytesRead = 0;
+  var chunkIndex = 0;
   var tag = Sodium.cryptoSecretstreamXchacha20poly1305TagMessage;
   while (tag != Sodium.cryptoSecretstreamXchacha20poly1305TagFinal) {
+    chunkIndex++;
     var chunkSize = encryptionChunkSize;
     if (bytesRead + chunkSize >= sourceFileLength) {
       chunkSize = sourceFileLength - bytesRead;
@@ -189,6 +258,32 @@ Future<EncryptionResult> chachaEncryptFile(Map<String, dynamic> args) async {
       null,
       tag,
     );
+    // Immediately verify the encrypted chunk
+    try {
+      final pullResult = Sodium.cryptoSecretstreamXchacha20poly1305Pull(
+        verifyPullState,
+        encryptedData,
+        null,
+      );
+      // Verify decrypted data matches original
+      if (!listEquals(pullResult.m, buffer)) {
+        throw Exception(
+          "$kVerificationErrorTag decrypted chunk doesn't match original at chunk $chunkIndex",
+        );
+      }
+
+      if (pullResult.tag != tag) {
+        throw Exception(
+          "$kVerificationErrorTag tag mismatch at chunk $chunkIndex",
+        );
+      }
+    } catch (e) {
+      await inputFile.close();
+      await destinationFile.delete(); // Clean up partial file
+      throw Exception(
+        "$kVerificationErrorTag at chunk $chunkIndex: $e",
+      );
+    }
     await destinationFile.writeAsBytes(encryptedData, mode: FileMode.append);
   }
   await inputFile.close();
@@ -364,11 +459,13 @@ class CryptoUtil {
     final args = <String, dynamic>{};
     args["source"] = source;
     args["key"] = key;
-    return _computer.compute(
-      chachaEncryptData,
-      param: args,
-      taskName: "encryptChaCha",
-    );
+    return _computer
+        .compute<Map<String, dynamic>, EncryptionResult>(
+          chachaEncryptData,
+          param: args,
+          taskName: "encryptChaCha",
+        )
+        .unwrapExceptionInComputer();
   }
 
   // Decrypts the given source, with the given key and header using XChaCha20

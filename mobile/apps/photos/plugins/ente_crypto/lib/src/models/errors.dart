@@ -23,6 +23,10 @@ extension FutureErrorHandling<T> on Future<T> {
       final msg = e.toString();
       if (msg.contains(kPartialReadErrorTag)) {
         throw PartialReadException(msg);
+      } else if (msg.contains(kVerificationErrorTag)) {
+        throw DecryptVerificationError(msg);
+      } else if (msg.contains(kStreamPullError)) {
+        throw StreamPullErr(msg, e);
       }
       throw e;
     });
@@ -30,6 +34,7 @@ extension FutureErrorHandling<T> on Future<T> {
 }
 
 const kPartialReadErrorTag = 'PartialRead';
+const kVerificationErrorTag = 'Verification failed';
 const kStreamPullError = 'crypto_secretstream_xchacha20poly1305_pull';
 
 // Exception counterpart for upstream handling via catchError chains
@@ -39,4 +44,12 @@ class PartialReadException implements Exception {
 
   @override
   String toString() => 'PartialReadException: $message';
+}
+
+class DecryptVerificationError extends Error {
+  final String message;
+  DecryptVerificationError(this.message);
+
+  @override
+  String toString() => 'DecryptVerificationError: $message';
 }
