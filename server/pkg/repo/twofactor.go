@@ -124,3 +124,25 @@ func (repo *TwoFactorRepository) RemoveExpiredTempTwoFactorSecrets() error {
 		time.Microseconds())
 	return stacktrace.Propagate(err, "")
 }
+
+// GetWrongAttempts returns the wrong attempt count for the given two factor session
+func (repo *TwoFactorRepository) GetWrongAttempts(sessionID string) (int, error) {
+	row := repo.DB.QueryRow(`SELECT wrong_attempt FROM two_factor_sessions WHERE session_id = $1`,
+		sessionID)
+	var wrongAttempt int
+	if err := row.Scan(&wrongAttempt); err != nil {
+		return 0, stacktrace.Propagate(err, "Failed to scan row")
+	}
+	return wrongAttempt, nil
+}
+
+// RecordWrongAttempt increases the wrong_attempt count for the given two factor session.
+// This is used to track and prevent brute-force attacks on two-factor verification
+func (repo *TwoFactorRepository) RecordWrongAttempt(sessionID string) error {
+	_, err := repo.DB.Exec(`UPDATE two_factor_sessions SET wrong_attempt = wrong_attempt + 1
+			WHERE session_id = $1`, sessionID)
+	if err != nil {
+		return stacktrace.Propagate(err, "Failed to update wrong attempt count")
+	}
+	return nil
+}

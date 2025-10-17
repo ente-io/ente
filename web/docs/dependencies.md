@@ -230,9 +230,7 @@ via [@fontsource-variable/inter](https://fontsource.org/fonts/inter/install).
   uses also has a ZIP parser (that one supports streaming).
 
 - [file-type](https://github.com/sindresorhus/file-type) is used for MIME type
-  detection. We are at an old version 16.5.4 because v17 onwards the package
-  became ESM only - for our limited use case, the custom Webpack configuration
-  that it'd entail is not worth the upgrade.
+  detection.
 
 - [heic-convert](https://github.com/catdad-experiments/heic-convert) is used for
   converting HEIC files (which browsers don't natively support) into JPEG. For
@@ -301,5 +299,3 @@ via [@fontsource-variable/inter](https://fontsource.org/fonts/inter/install).
 - `@stripe/stripe-js` is pinned to the latest 1.x (it works as it is currently,
   migrating to newer major versions requires headspace since it _might_ also
   require museum changes).
-
-- `file-type` is pinned to 16.5.4 since subsequent versions are ESM only.

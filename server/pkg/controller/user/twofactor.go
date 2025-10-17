@@ -3,6 +3,7 @@ package user
 import (
 	"bytes"
 	"encoding/base64"
+	"fmt"
 	"image/png"
 
 	"github.com/ente-io/museum/pkg/utils/network"
@@ -14,6 +15,7 @@ import (
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
 	"github.com/pquerna/otp/totp"
+	log "github.com/sirupsen/logrus"
 )
 
 // SetupTwoFactor generates a two factor secret and sends it to user to setup his authenticator app with
@@ -101,6 +103,17 @@ func (c *UserController) VerifyTwoFactor(context *gin.Context, sessionID string,
 	if err != nil {
 		return ente.TwoFactorAuthorizationResponse{}, stacktrace.Propagate(err, "")
 	}
+	wrongAttempt, err := c.TwoFactorRepo.GetWrongAttempts(sessionID)
+	if err != nil {
+		return ente.TwoFactorAuthorizationResponse{}, stacktrace.Propagate(err, "")
+	}
+
+	if wrongAttempt >= 10 {
+		msg := fmt.Sprintf("Too many wrong two-factor verification attempts for userID: %d", userID)
+		go c.DiscordController.NotifyPotentialAbuse(msg)
+		return ente.TwoFactorAuthorizationResponse{}, stacktrace.Propagate(ente.ErrTooManyBadRequest, "Too many wrong attempts, please request a new verification session")
+	}
+
 	isTwoFactorEnabled, err := c.UserRepo.IsTwoFactorEnabled(userID)
 	if err != nil {
 		return ente.TwoFactorAuthorizationResponse{}, stacktrace.Propagate(err, "")
@@ -114,6 +127,9 @@ func (c *UserController) VerifyTwoFactor(context *gin.Context, sessionID string,
 	}
 	valid := totp.Validate(otp, secret)
 	if !valid {
+		if err = c.TwoFactorRepo.RecordWrongAttempt(sessionID); err != nil {
+			log.WithError(err).Warn("Failed to track wrong attempt for two-factor session")
+		}
 		return ente.TwoFactorAuthorizationResponse{}, stacktrace.Propagate(ente.ErrIncorrectTOTP, "")
 	}
 	response, err := c.GetKeyAttributeAndToken(context, userID)

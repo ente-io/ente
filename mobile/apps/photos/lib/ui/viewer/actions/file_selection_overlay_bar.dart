@@ -1,6 +1,7 @@
 import "dart:io";
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/gallery_type.dart';
@@ -256,7 +257,10 @@ class _SelectAllButtonState extends State<SelectAllButton> {
   @override
   Widget build(BuildContext context) {
     final selectionState = SelectionState.of(context);
-    final allGalleryFiles = GalleryFilesState.of(context).galleryFiles;
+    final allGalleryFiles = GalleryFilesState.of(context).galleryFilesOrNull;
+    if (allGalleryFiles == null) {
+      return const SizedBox.shrink();
+    }
     assert(
       selectionState != null,
       "SelectionState not found in context, SelectionState should be an ancestor of FileSelectionOverlayBar",
@@ -264,6 +268,7 @@ class _SelectAllButtonState extends State<SelectAllButton> {
     final colorScheme = getEnteColorScheme(context);
     return GestureDetector(
       onTap: () {
+        HapticFeedback.selectionClick();
         setState(() {
           if (_allSelected) {
             selectionState.selectedFiles.clearAll();

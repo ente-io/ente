@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flutter/services.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/selected_files.dart';
 
@@ -95,6 +96,7 @@ class SwipeToSelectHelper {
           final itemsToAdd = getRange(toIndex, min(fromIndex, lastToIndex));
           if (itemsToAdd.isNotEmpty) {
             selectedFiles.selectAll(itemsToAdd);
+            HapticFeedback.selectionClick();
           }
           // Remove items to the right of start if we were previously there
           if (fromIndex < lastToIndex) {
@@ -117,6 +119,7 @@ class SwipeToSelectHelper {
           final itemsToAdd = getRange(max(fromIndex, lastToIndex), toIndex + 1);
           if (itemsToAdd.isNotEmpty) {
             selectedFiles.selectAll(itemsToAdd);
+            HapticFeedback.selectionClick();
           }
           // Remove items to the left of start if we were previously there
           if (lastToIndex < fromIndex) {
@@ -142,6 +145,7 @@ class SwipeToSelectHelper {
           final itemsToRemove = getRange(toIndex, min(fromIndex, lastToIndex));
           if (itemsToRemove.isNotEmpty) {
             selectedFiles.unSelectAll(itemsToRemove);
+            HapticFeedback.selectionClick();
           }
           // Add items back to the right of start if we were previously there
           if (fromIndex < lastToIndex) {
@@ -165,6 +169,7 @@ class SwipeToSelectHelper {
               getRange(max(fromIndex, lastToIndex), toIndex + 1);
           if (itemsToRemove.isNotEmpty) {
             selectedFiles.unSelectAll(itemsToRemove);
+            HapticFeedback.selectionClick();
           }
           // Add items back to the left of start if we were previously there
           if (lastToIndex < fromIndex) {
