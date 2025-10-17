@@ -69,6 +69,7 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,13 +93,13 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(50),
-                      color: colorScheme.backdropBase,
+                      color: colorScheme.fillFaint,
                     ),
                     padding: const EdgeInsets.all(8),
                     child: Icon(
                       Icons.close,
                       size: 24,
-                      color: colorScheme.iconColor,
+                      color: colorScheme.textBase,
                     ),
                   ),
                 ),
@@ -265,7 +266,7 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
                   padding: const EdgeInsets.all(8),
                   child: HugeIcon(
                     icon: HugeIcons.strokeRoundedCancel01,
-                    color: colorScheme.iconColor,
+                    color: colorScheme.textBase,
                     size: 20,
                   ),
                 ),
@@ -283,8 +284,6 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
 
   void _onUncategorizedSelected() {
     setState(() {
-      // Clear all collections - empty set represents "uncategorized"
-      // This will be interpreted as uploading to uncategorized collection
       _selectedCollections.clear();
     });
   }

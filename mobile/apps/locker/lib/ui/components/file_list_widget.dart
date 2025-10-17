@@ -116,7 +116,7 @@ class FileListWidget extends StatelessWidget {
                               padding: const EdgeInsets.all(12.0),
                               child: HugeIcon(
                                 icon: HugeIcons.strokeRoundedMoreVertical,
-                                color: getEnteColorScheme(context).iconColor,
+                                color: getEnteColorScheme(context).textBase,
                               ),
                             ),
                           ),

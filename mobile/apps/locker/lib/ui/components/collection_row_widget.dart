@@ -84,7 +84,7 @@ class CollectionRowWidget extends StatelessWidget {
                         )
                       : HugeIcon(
                           icon: HugeIcons.strokeRoundedWallet05,
-                          color: colorScheme.iconColor,
+                          color: colorScheme.textBase,
                         ),
                 ),
                 const Spacer(),

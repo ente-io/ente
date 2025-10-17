@@ -74,7 +74,7 @@ class _DeleteConfirmationBottomSheet extends StatelessWidget {
                       child: Icon(
                         Icons.close,
                         size: 24,
-                        color: colorScheme.iconColor,
+                        color: colorScheme.textBase,
                       ),
                     ),
                   ),

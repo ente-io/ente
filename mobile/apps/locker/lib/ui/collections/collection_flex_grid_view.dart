@@ -32,6 +32,9 @@ class _CollectionFlexGridViewWidgetState
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+
     return MediaQuery.removePadding(
       context: context,
       removeBottom: true,
@@ -56,7 +59,7 @@ class _CollectionFlexGridViewWidgetState
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
-                color: getEnteColorScheme(context).backdropBase,
+                color: colorScheme.backdropBase,
               ),
               padding: const EdgeInsets.all(12),
               child: Column(
@@ -67,24 +70,24 @@ class _CollectionFlexGridViewWidgetState
                     height: 40,
                     width: 40,
                     decoration: BoxDecoration(
-                      color: getEnteColorScheme(context).backgroundBase,
+                      color: colorScheme.backgroundElevated,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     padding: const EdgeInsets.all(8.0),
                     child: collection.type == CollectionType.favorites
                         ? HugeIcon(
                             icon: HugeIcons.strokeRoundedStar,
-                            color: getEnteColorScheme(context).primary700,
+                            color: colorScheme.primary700,
                           )
                         : HugeIcon(
                             icon: HugeIcons.strokeRoundedWallet05,
-                            color: getEnteColorScheme(context).iconColor,
+                            color: colorScheme.textBase,
                           ),
                   ),
                   const SizedBox(height: 12),
                   Text(
                     collectionName,
-                    style: getEnteTextTheme(context).bodyBold,
+                    style: textTheme.bodyBold,
                     textAlign: TextAlign.left,
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
@@ -96,9 +99,9 @@ class _CollectionFlexGridViewWidgetState
                       final fileCount = snapshot.data ?? 0;
                       return Text(
                         context.l10n.items(fileCount),
-                        style: getEnteTextTheme(context).small.copyWith(
-                              color: Colors.grey[600],
-                            ),
+                        style: textTheme.small.copyWith(
+                          color: colorScheme.textMuted,
+                        ),
                         textAlign: TextAlign.left,
                       );
                     },

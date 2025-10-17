@@ -44,7 +44,7 @@ class CollectionListWidget extends StatelessWidget {
               padding: const EdgeInsets.all(10.0),
               child: Container(
                 decoration: BoxDecoration(
-                  color: colorScheme.backgroundBase,
+                  color: colorScheme.backgroundElevated,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Padding(
@@ -56,7 +56,7 @@ class CollectionListWidget extends StatelessWidget {
                         )
                       : HugeIcon(
                           icon: HugeIcons.strokeRoundedWallet05,
-                          color: colorScheme.iconColor,
+                          color: colorScheme.textBase,
                         ),
                 ),
               ),
@@ -148,7 +148,7 @@ class CollectionListWidget extends StatelessWidget {
                               padding: const EdgeInsets.all(12.0),
                               child: HugeIcon(
                                 icon: HugeIcons.strokeRoundedMoreVertical,
-                                color: colorScheme.iconColor,
+                                color: colorScheme.textBase,
                               ),
                             ),
                           ),

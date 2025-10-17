@@ -118,7 +118,7 @@ class _RecentsSectionWidgetState extends State<RecentsSectionWidget> {
             icon: _viewType == ItemViewType.listView
                 ? HugeIcons.strokeRoundedGridView
                 : HugeIcons.strokeRoundedMenu01,
-            color: colorScheme.iconColor,
+            color: colorScheme.textBase,
           ),
         ),
       ),

@@ -79,9 +79,9 @@ class CustomLockerAppBar extends StatelessWidget
                     onTap: () {
                       scaffoldKey.currentState!.openDrawer();
                     },
-                    child: HugeIcon(
+                    child: const HugeIcon(
                       icon: HugeIcons.strokeRoundedMenu01,
-                      color: colorScheme.backdropBase,
+                      color: Colors.white,
                     ),
                   ),
                   GestureDetector(
@@ -96,7 +96,7 @@ class CustomLockerAppBar extends StatelessWidget
                     child: Text(
                       context.l10n.locker,
                       style: textTheme.h3Bold.copyWith(
-                        color: colorScheme.backdropBase,
+                        color: Colors.white,
                       ),
                     ),
                   ),
@@ -109,7 +109,7 @@ class CustomLockerAppBar extends StatelessWidget
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
               child: Container(
                 decoration: BoxDecoration(
-                  color: colorScheme.backgroundBase,
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(100),
                 ),
                 child: TextField(
@@ -155,7 +155,7 @@ class CustomLockerAppBar extends StatelessWidget
                                       const EdgeInsets.only(right: 16, left: 8),
                                   child: HugeIcon(
                                     icon: HugeIcons.strokeRoundedCancel01,
-                                    color: colorScheme.iconColor,
+                                    color: colorScheme.textBase,
                                     size: 20,
                                   ),
                                 ),

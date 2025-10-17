@@ -44,7 +44,7 @@ class FilePopupMenuWidget extends StatelessWidget {
       child: child ??
           HugeIcon(
             icon: HugeIcons.strokeRoundedMoreVertical,
-            color: colorScheme.iconColor,
+            color: colorScheme.textBase,
           ),
       itemBuilder: (BuildContext context) {
         return _buildPopupMenuItems(context);
@@ -66,7 +66,7 @@ class FilePopupMenuWidget extends StatelessWidget {
             child: MenuItemWidget(
               icon: Icon(
                 action.icon,
-                color: colorScheme.iconColor,
+                color: colorScheme.textBase,
                 size: 20,
               ),
               label: action.label,
@@ -86,7 +86,7 @@ class FilePopupMenuWidget extends StatelessWidget {
         child: MenuItemWidget(
           icon: HugeIcon(
             icon: HugeIcons.strokeRoundedPencilEdit02,
-            color: colorScheme.iconColor,
+            color: colorScheme.textBase,
             size: 20,
           ),
           label: context.l10n.edit,
@@ -100,7 +100,7 @@ class FilePopupMenuWidget extends StatelessWidget {
         child: MenuItemWidget(
           icon: HugeIcon(
             icon: HugeIcons.strokeRoundedShare08,
-            color: colorScheme.iconColor,
+            color: colorScheme.textBase,
             size: 20,
           ),
           label: context.l10n.share,

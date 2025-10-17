@@ -442,7 +442,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
                       child: GradientButton(
                         hugeIcon: HugeIcon(
                           icon: HugeIcons.strokeRoundedAddCircleHalfDot,
-                          color: colorScheme.iconColor,
+                          color: colorScheme.textBase,
                         ),
                         onTap: _isLoading ? null : _saveRecord,
                         text: _isLoading

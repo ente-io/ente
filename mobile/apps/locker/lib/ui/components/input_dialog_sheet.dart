@@ -102,7 +102,7 @@ class _InputDialogSheetState extends State<InputDialogSheet> {
                   padding: const EdgeInsets.all(4),
                   child: Icon(
                     Icons.close,
-                    color: colorScheme.iconColor,
+                    color: colorScheme.textBase,
                     size: 24,
                   ),
                 ),

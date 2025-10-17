@@ -275,7 +275,7 @@ class _TrashPageState extends State<TrashPage> {
                   padding: const EdgeInsets.all(12),
                   child: Icon(
                     Icons.delete_outline,
-                    color: colorScheme.iconColor,
+                    color: colorScheme.textBase,
                   ),
                 ),
               ),

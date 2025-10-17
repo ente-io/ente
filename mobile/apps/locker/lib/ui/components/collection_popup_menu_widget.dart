@@ -39,7 +39,7 @@ class CollectionPopupMenuWidget extends StatelessWidget {
       child: child ??
           HugeIcon(
             icon: HugeIcons.strokeRoundedMoreVertical,
-            color: colorScheme.iconColor,
+            color: colorScheme.textBase,
           ),
       itemBuilder: (BuildContext context) {
         return _buildPopupMenuItems(context);
@@ -61,7 +61,7 @@ class CollectionPopupMenuWidget extends StatelessWidget {
             child: MenuItemWidget(
               icon: Icon(
                 action.icon,
-                color: colorScheme.iconColor,
+                color: colorScheme.textBase,
                 size: 20,
               ),
               label: action.label,
@@ -91,7 +91,7 @@ class CollectionPopupMenuWidget extends StatelessWidget {
           child: MenuItemWidget(
             icon: HugeIcon(
               icon: HugeIcons.strokeRoundedEdit02,
-              color: colorScheme.iconColor,
+              color: colorScheme.textBase,
               size: 20,
             ),
             label: context.l10n.edit,
