@@ -72,6 +72,9 @@ class FileUploader {
   final kBGTaskDeathTimeout = const Duration(seconds: 5).inMicroseconds;
   final _uploadURLs = Queue<UploadURL>();
 
+  // Track used upload URLs to detect race conditions
+  final Map<String, DateTime> _usedUploadURLs = {};
+
   LinkedHashMap<String, BackupItem> get allBackups => _allBackups;
 
   // Maintains the count of files in the current upload session.
@@ -265,6 +268,8 @@ class FileUploader {
 
   void clearCachedUploadURLs() {
     _uploadURLs.clear();
+    _usedUploadURLs.clear();
+    _logger.info("Cleared upload URL cache and usage tracking");
   }
 
   void removeFromQueueWhere(
@@ -1438,11 +1443,50 @@ class FileUploader {
       );
     }
     try {
-      final url = _uploadURLs.removeFirst();
+      final uploadURL = _uploadURLs.removeFirst();
       _logger.internalInfo(
         "[UPLOAD-DEBUG] Returning upload URL. Remaining URLs in queue: ${_uploadURLs.length}",
       );
-      return url;
+
+      // Atomic check-and-set to prevent race conditions in parallel uploads
+      final now = DateTime.now();
+      final existingTimestamp =
+          _usedUploadURLs.putIfAbsent(uploadURL.url, () => now);
+
+      if (existingTimestamp != now) {
+        _logger.severe(
+          "CRITICAL: Duplicate upload URL detected! "
+          "First used: $existingTimestamp, Duplicate attempt: $now",
+        );
+        throw DuplicateUploadURLError(
+          firstUsedAt: existingTimestamp,
+          duplicateUsedAt: now,
+        );
+      }
+
+      // Clean up old entries to prevent memory growth (only when > 5000 entries)
+      if (_usedUploadURLs.length > 5000) {
+        final oneHourAgo = now.subtract(const Duration(hours: 1));
+        _usedUploadURLs.removeWhere((key, value) => value.isBefore(oneHourAgo));
+
+        // Size-based fallback if time-based cleanup didn't reduce size enough
+        if (_usedUploadURLs.length > 5000) {
+          final entries = _usedUploadURLs.entries.toList()
+            ..sort((a, b) => a.value.compareTo(b.value));
+          final toRemove = entries.take(_usedUploadURLs.length - 4000);
+          for (final entry in toRemove) {
+            _usedUploadURLs.remove(entry.key);
+          }
+          _logger.warning(
+            "Forcibly removed ${toRemove.length} oldest upload URLs to prevent unbounded growth",
+          );
+        }
+        _logger.info(
+          "Cleaned up used upload URLs, remaining: ${_usedUploadURLs.length}",
+        );
+      }
+
+      return uploadURL;
     } catch (e) {
       if (e is StateError && e.message == 'No element' && _queue.isEmpty) {
         _logger.warning("Oops, uploadUrls has no element now, fetching again");
