@@ -1,7 +1,10 @@
 import "package:flutter/material.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/wrapped/models.dart";
 import "package:photos/services/wrapped/wrapped_service.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/notification/toast.dart";
+import "package:photos/ui/wrapped/wrapped_viewer_page.dart";
 
 class WrappedHomeBanner extends StatelessWidget {
   const WrappedHomeBanner({
@@ -94,14 +97,17 @@ class WrappedHomeBanner extends StatelessWidget {
   }
 
   void _handleTap(BuildContext context) {
-    if (!wrappedService.shouldShowHomeBanner &&
-        !wrappedService.shouldShowDiscoveryEntry) {
+    final WrappedEntryState currentState = wrappedService.state;
+    final WrappedResult? result = currentState.result;
+    if (result == null || result.cards.isEmpty) {
+      showShortToast(context, "Wrapped isn’t ready yet");
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Wrapped viewer coming soon."),
-        duration: Duration(seconds: 2),
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) => WrappedViewerPage(
+          initialState: currentState,
+        ),
       ),
     );
   }
