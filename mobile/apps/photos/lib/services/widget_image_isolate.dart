@@ -39,12 +39,8 @@ class WidgetImageIsolate extends SuperIsolate {
           'quality': quality,
         },
       );
-      if (result is Map<String, dynamic>) {
-        final width = result['width'] as int?;
-        final height = result['height'] as int?;
-        if (width != null && height != null) {
-          return (width: width, height: height);
-        }
+      if (result case {'width': final int width, 'height': final int height}) {
+        return (width: width, height: height);
       }
     } catch (e, s) {
       _logger.warning(
@@ -64,12 +60,8 @@ class WidgetImageIsolate extends SuperIsolate {
         IsolateOperation.readImageDimensions,
         {'path': path},
       );
-      if (result is Map<String, dynamic>) {
-        final width = result['width'] as int?;
-        final height = result['height'] as int?;
-        if (width != null && height != null) {
-          return (width: width, height: height);
-        }
+      if (result case {'width': final int width, 'height': final int height}) {
+        return (width: width, height: height);
       }
     } catch (e, s) {
       _logger.warning(
