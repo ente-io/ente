@@ -328,9 +328,9 @@ Phase 3 — Advanced
 - [x] Add `WrappedCacheService` (file-based JSON) + invalidation hooks
 - [x] Add startup orchestration in wrapped service + debug recompute hook
 - [x] Add LocalSettings extension for resume/complete
-- [ ] Add Home Banner widget + wiring in gallery (gated)
-- [ ] Add Discovery entry + gating + expiry window
-- [ ] Implement `WrappedViewerPage` (autoplay, progress, resume)
+- [x] Add Home Banner widget + wiring in gallery (gated)
+- [x] Add Discovery entry + gating + expiry window
+- [x] Implement `WrappedViewerPage` (progress/resume; autoplay pending)
 - [ ] Implement share exporter (RepaintBoundary → PNG) + “Save all cards” flow
 - [ ] Optional: local notification trigger + deep link
 - [ ] QA: sparse vs rich libraries, performance, correctness
