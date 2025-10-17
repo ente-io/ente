@@ -1,15 +1,7 @@
+- Neeraj: Asserts for url reuse and plain vs enc size mismatch
 - Ashil: (i) Swipe to select improvements (changes in auto scroll speed calcuation, added haptics and bug that I caught)
 - Laurens: Show empty persons and fallback for face thumbnail issues
 - Prateek: (i) Add native video editor to boost performance
-- Neeraj: Remove feature flags from manage_links_widget (album layout, allow joining album, copy embed HTML)
-- Ashil: Use better copy on auto-add people selection page
-- Ashil: Add more logs to debug app stuck at splash screen issue
-- Prateek: Tag Sentry errors with execution_context for background vs foreground
-- Prateek: Upgrade WorkManager to 0.9.0 and ExistingWorkPolicy to update
-- Neeraj: (i) Copy embed link option
-- Prateek: Fix background uploads on Android 15 by skipping permission request in background mode
-- Prateek: Fix CronetException during background sync by disabling NativeAdapter on Android
-- Laurens: Change similar images labels copy
 - Laurens: Fix flipped thumbnails issue by removing use of ColorFiltered widget
 - Neeraj: [CustomerIssue] Handle corrupt asset timestamps with detailed error reporting
 - Neeraj: Fix video aspect ratio when shared from external apps
