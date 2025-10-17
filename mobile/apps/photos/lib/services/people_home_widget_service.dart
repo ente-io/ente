@@ -26,7 +26,7 @@ class PeopleHomeWidgetService {
   static const String PEOPLE_STATUS_KEY = "peopleStatusKey.widget";
   static const String PEOPLE_CHANGED_KEY = "peopleChanged.widget";
   static const String TOTAL_PEOPLE_KEY = "totalPeople";
-  static const int MAX_PEOPLE_LIMIT = 50;
+  static const int MAX_PEOPLE_LIMIT = 20;
 
   // Singleton pattern
   static final PeopleHomeWidgetService instance =

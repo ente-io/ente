@@ -30,7 +30,7 @@ class AlbumHomeWidgetService {
   static const String ALBUMS_CHANGED_KEY = "albumsChanged.widget";
   static const String ALBUMS_STATUS_KEY = "albumsStatusKey.widget";
   static const String TOTAL_ALBUMS_KEY = "totalAlbums";
-  static const int MAX_ALBUMS_LIMIT = 50;
+  static const int MAX_ALBUMS_LIMIT = 20;
 
   // Singleton pattern
   static final AlbumHomeWidgetService instance =

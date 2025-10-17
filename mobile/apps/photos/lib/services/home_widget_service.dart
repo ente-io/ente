@@ -43,7 +43,7 @@ class HomeWidgetService {
   static const double WIDGET_IMAGE_SIZE = 1280.0;
   static const String WIDGET_DIRECTORY = 'home_widget';
   static const String WIDGET_CACHE_DIR = 'cache';
-  static const int WIDGET_CACHE_MAX_FILES = 150;
+  static const int WIDGET_CACHE_MAX_FILES = 60;
   static const Duration _cacheMaintenanceInterval = Duration(minutes: 10);
 
   // URI schemes for different widget types
@@ -276,47 +276,79 @@ class HomeWidgetService {
     String cacheDir,
     String cacheKey,
   ) async {
-    final String cachedPath = '$cacheDir/$cacheKey.jpg';
-    final File cachedFile = File(cachedPath);
+    final String highResPath = '$cacheDir/$cacheKey.jpg';
+    final String fallbackPath = '$cacheDir/${cacheKey}_thumb.jpg';
+    final File highResFile = File(highResPath);
+    final File thumbnailFile = File(fallbackPath);
 
-    if (await cachedFile.exists()) {
+    if (await highResFile.exists()) {
       final ({int width, int height})? dims =
-          await WidgetImageIsolate.instance.readImageDimensions(cachedPath);
+          await WidgetImageIsolate.instance.readImageDimensions(highResPath);
       final size = dims != null
           ? Size(dims.width.toDouble(), dims.height.toDouble())
           : const Size.square(WIDGET_IMAGE_SIZE);
-      return (path: cachedPath, size: size);
+      return (path: highResPath, size: size);
     }
 
-    final File? source = await _resolveWidgetSource(file);
-    if (source != null) {
-      final ({int width, int height})? dims =
-          await WidgetImageIsolate.instance.generateWidgetImage(
+    ({int width, int height})? dims;
+    for (int attempt = 0; attempt < 3; attempt++) {
+      final File? source = await _resolveWidgetSource(file);
+      if (source == null) {
+        await Future.delayed(const Duration(milliseconds: 200));
+        continue;
+      }
+
+      dims = await WidgetImageIsolate.instance.generateWidgetImage(
         sourcePath: source.path,
-        cachePath: cachedPath,
+        cachePath: highResPath,
         targetShortSide: WIDGET_IMAGE_SIZE,
         quality: 80,
       );
+
       if (dims != null) {
+        if (await thumbnailFile.exists()) {
+          try {
+            await thumbnailFile.delete();
+          } catch (_) {
+            // Ignore cleanup errors.
+          }
+        }
+        _scheduleCacheMaintenance(cacheDir);
         final size = Size(
           dims.width.toDouble(),
           dims.height.toDouble(),
         );
-        _scheduleCacheMaintenance(cacheDir);
-        return (path: cachedPath, size: size);
+        return (path: highResPath, size: size);
       }
+
+      await Future.delayed(const Duration(milliseconds: 200));
     }
 
-    final Uint8List? fallback = await getThumbnail(file);
-    if (fallback == null) {
-      return null;
+    ({int width, int height})? fallbackDims;
+    if (await thumbnailFile.exists()) {
+      fallbackDims =
+          await WidgetImageIsolate.instance.readImageDimensions(fallbackPath);
+    } else {
+      final Uint8List? fallbackBytes = await getThumbnail(file);
+      if (fallbackBytes == null) {
+        return null;
+      }
+      await thumbnailFile.writeAsBytes(fallbackBytes, flush: true);
+      fallbackDims = (
+        width: thumbnailLargeSize,
+        height: thumbnailLargeSize,
+      );
     }
 
-    await cachedFile.writeAsBytes(fallback, flush: true);
     _scheduleCacheMaintenance(cacheDir);
 
-    final Size fallbackSize = Size.square(thumbnailLargeSize.toDouble());
-    return (path: cachedPath, size: fallbackSize);
+    final Size fallbackSize = fallbackDims != null
+        ? Size(
+            fallbackDims.width.toDouble(),
+            fallbackDims.height.toDouble(),
+          )
+        : Size.square(thumbnailLargeSize.toDouble());
+    return (path: fallbackPath, size: fallbackSize);
   }
 
   void _scheduleCacheMaintenance(String cacheDir) {
