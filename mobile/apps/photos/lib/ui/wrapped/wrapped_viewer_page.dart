@@ -1,6 +1,10 @@
 import "dart:async";
+import "dart:typed_data";
+import "dart:ui" as ui;
 
 import "package:flutter/material.dart";
+import "package:flutter/rendering.dart";
+import "package:logging/logging.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/wrapped/models.dart";
 import "package:photos/services/wrapped/wrapped_service.dart";
@@ -8,6 +12,8 @@ import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/theme/text_style.dart";
 import "package:photos/ui/notification/toast.dart";
+import "package:photos/utils/share_util.dart";
+import "package:share_plus/share_plus.dart";
 
 /// Basic viewer for the stats-only Ente Wrapped experience.
 class WrappedViewerPage extends StatefulWidget {
@@ -22,19 +28,35 @@ class WrappedViewerPage extends StatefulWidget {
   State<WrappedViewerPage> createState() => _WrappedViewerPageState();
 }
 
-class _WrappedViewerPageState extends State<WrappedViewerPage> {
+class _WrappedViewerPageState extends State<WrappedViewerPage>
+    with TickerProviderStateMixin {
   late PageController _pageController;
+  late AnimationController _progressController;
   late WrappedEntryState _state;
+  late List<WrappedCard> _cards;
   late int _currentIndex;
+  bool _isPaused = false;
   VoidCallback? _stateListener;
+  final GlobalKey _shareButtonKey = GlobalKey();
+  final GlobalKey _cardBoundaryKey = GlobalKey();
+  final Logger _logger = Logger("WrappedViewerPage");
+  bool _pendingRestart = false;
 
   @override
   void initState() {
     super.initState();
     _state = widget.initialState;
+    _cards = _state.result?.cards ?? const <WrappedCard>[];
     final int initialPage = _initialPageForState(_state);
     _currentIndex = initialPage;
     _pageController = PageController(initialPage: initialPage);
+    _progressController = AnimationController(
+      vsync: this,
+      duration: _durationForCard(_currentIndex),
+    )..addStatusListener(_handleProgressStatus);
+    if (_cards.isNotEmpty) {
+      _progressController.forward();
+    }
     _stateListener = () => _handleServiceUpdate(wrappedService.state);
     wrappedService.stateListenable.addListener(_stateListener!);
   }
@@ -44,6 +66,8 @@ class _WrappedViewerPageState extends State<WrappedViewerPage> {
     if (_stateListener != null) {
       wrappedService.stateListenable.removeListener(_stateListener!);
     }
+    _progressController.removeStatusListener(_handleProgressStatus);
+    _progressController.dispose();
     _pageController.dispose();
     super.dispose();
   }
@@ -62,6 +86,7 @@ class _WrappedViewerPageState extends State<WrappedViewerPage> {
     }
     setState(() {
       _state = next;
+      _cards = next.result?.cards ?? const <WrappedCard>[];
     });
     final int newCardCount = next.result?.cards.length ?? 0;
     if (newCardCount == 0) {
@@ -69,33 +94,137 @@ class _WrappedViewerPageState extends State<WrappedViewerPage> {
       return;
     }
     if (_currentIndex >= newCardCount) {
-      _jumpToPage(newCardCount - 1);
+      unawaited(
+        _goToIndex(
+          newCardCount - 1,
+          restartProgress: false,
+          animate: false,
+        ),
+      );
+    } else {
+      _configureForCurrentCard(restartProgress: false);
     }
   }
 
-  Future<void> _jumpToPage(int page) async {
-    if (!_pageController.hasClients) {
-      _currentIndex = page;
+  void _handleProgressStatus(AnimationStatus status) {
+    if (status != AnimationStatus.completed) {
       return;
     }
-    _currentIndex = page;
-    await _pageController.animateToPage(
-      page,
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.easeInOut,
-    );
+    if (_currentIndex >= _cards.length - 1) {
+      wrappedService.markComplete();
+      _pauseAutoplay();
+      return;
+    }
+    unawaited(_goToIndex(_currentIndex + 1));
+  }
+
+  Duration _durationForCard(int index) {
+    if (_cards.isEmpty || index < 0 || index >= _cards.length) {
+      return const Duration(seconds: 5);
+    }
+    final WrappedCard card = _cards[index];
+    final Object? durationMeta = card.meta["displayDurationMillis"];
+    final int durationMillis =
+        durationMeta is num ? durationMeta.clamp(1500, 20000).toInt() : 6000;
+    return Duration(milliseconds: durationMillis);
+  }
+
+  void _configureForCurrentCard({required bool restartProgress}) {
+    _progressController.duration = _durationForCard(_currentIndex);
+    if (restartProgress) {
+      _progressController
+        ..stop()
+        ..reset();
+      if (!_isPaused) {
+        _progressController.forward();
+      }
+    }
+  }
+
+  Future<void> _goToIndex(
+    int index, {
+    bool restartProgress = true,
+    bool animate = true,
+  }) async {
+    if (index < 0 || index >= _cards.length) {
+      return;
+    }
+    _pendingRestart = restartProgress;
+    if (!_pageController.hasClients) {
+      _pendingRestart = false;
+      _updateCurrentIndex(index, restartProgress: restartProgress);
+      return;
+    }
+    if (animate) {
+      await _pageController.animateToPage(
+        index,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+      );
+    } else {
+      _pageController.jumpToPage(index);
+    }
+    if (!_pendingRestart) {
+      // If no restart requested, ensure service sync still happens.
+      _updateCurrentIndex(index, restartProgress: false);
+    }
   }
 
   void _handlePageChanged(int index) {
+    final bool restart = _pendingRestart;
+    _pendingRestart = false;
+    _updateCurrentIndex(index, restartProgress: restart);
+  }
+
+  void _updateCurrentIndex(int index, {required bool restartProgress}) {
+    if (!mounted) return;
     setState(() {
       _currentIndex = index;
     });
     wrappedService.updateResumeIndex(index);
-    final int lastIndex = (_state.result?.cards.length ?? 1) - 1;
+    final int lastIndex = _cards.length - 1;
     if (index == lastIndex) {
-      wrappedService.markComplete(true);
-    } else if (_state.isComplete) {
-      wrappedService.markComplete(false);
+      wrappedService.markComplete();
+    }
+    _configureForCurrentCard(restartProgress: restartProgress);
+  }
+
+  void _pauseAutoplay() {
+    if (_isPaused) return;
+    _isPaused = true;
+    _progressController.stop();
+  }
+
+  void _resumeAutoplay() {
+    if (!_isPaused) return;
+    _isPaused = false;
+    _progressController.forward();
+  }
+
+  void _togglePause() {
+    if (_isPaused) {
+      _resumeAutoplay();
+    } else {
+      _pauseAutoplay();
+    }
+  }
+
+  void _handleTapDown(TapDownDetails details, BoxConstraints constraints) {
+    final double dx = details.localPosition.dx;
+    final double width = constraints.maxWidth;
+    final double leftZone = width / 3;
+    final double rightZone = width * 2 / 3;
+    if (dx < leftZone) {
+      if (_progressController.value > 0.1) {
+        _configureForCurrentCard(restartProgress: true);
+      } else {
+        unawaited(_goToIndex(_currentIndex - 1));
+      }
+    } else if (dx > rightZone) {
+      unawaited(_goToIndex(_currentIndex + 1));
+    } else {
+      _togglePause();
+      setState(() {});
     }
   }
 
@@ -123,9 +252,6 @@ class _WrappedViewerPageState extends State<WrappedViewerPage> {
           return;
         }
         wrappedService.updateResumeIndex(_currentIndex);
-        if (_currentIndex != cardCount - 1) {
-          wrappedService.markComplete(false);
-        }
       },
       child: Scaffold(
         backgroundColor: enteColorScheme.backgroundBase,
@@ -138,29 +264,78 @@ class _WrappedViewerPageState extends State<WrappedViewerPage> {
           foregroundColor: enteColorScheme.textBase,
           elevation: 0,
         ),
-        body: Column(
+        body: Stack(
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: LinearProgressIndicator(
-                value: (_currentIndex + 1) / cardCount,
-                backgroundColor: enteColorScheme.fillFaint,
-                color: enteColorScheme.primary500,
-              ),
+            Column(
+              children: [
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: AnimatedBuilder(
+                    animation: _progressController,
+                    builder: (BuildContext context, _) {
+                      final List<double> segments =
+                          List<double>.generate(cardCount, (int index) {
+                        if (index < _currentIndex) return 1.0;
+                        if (index > _currentIndex) return 0.0;
+                        return _progressController.value.clamp(0.0, 1.0);
+                      });
+                      return _StoryProgressBar(
+                        progressValues: segments,
+                        colorScheme: enteColorScheme,
+                      );
+                    },
+                  ),
+                ),
+                Expanded(
+                  child: LayoutBuilder(
+                    builder:
+                        (BuildContext context, BoxConstraints constraints) {
+                      return GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTapDown: (TapDownDetails details) =>
+                            _handleTapDown(details, constraints),
+                        child: RepaintBoundary(
+                          key: _cardBoundaryKey,
+                          child: PageView.builder(
+                            physics: const NeverScrollableScrollPhysics(),
+                            controller: _pageController,
+                            onPageChanged: _handlePageChanged,
+                            itemCount: cardCount,
+                            itemBuilder: (BuildContext context, int index) {
+                              final WrappedCard card = result.cards[index];
+                              return _StoryCard(
+                                card: card,
+                                colorScheme: enteColorScheme,
+                                textTheme: textTheme,
+                                isActive: index == _currentIndex,
+                              );
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
-            Expanded(
-              child: PageView.builder(
-                controller: _pageController,
-                onPageChanged: _handlePageChanged,
-                itemCount: cardCount,
-                itemBuilder: (BuildContext context, int index) {
-                  final WrappedCard card = result.cards[index];
-                  return _StatsCard(
-                    card: card,
-                    colorScheme: enteColorScheme,
-                    textTheme: textTheme,
-                  );
-                },
+            Positioned(
+              right: 20,
+              bottom: 24,
+              child: GestureDetector(
+                key: _shareButtonKey,
+                behavior: HitTestBehavior.translucent,
+                onTap: _handleShare,
+                child: Container(
+                  width: 56,
+                  height: 56,
+                  alignment: Alignment.center,
+                  child: Icon(
+                    Icons.share,
+                    size: 28,
+                    color: enteColorScheme.textMuted.withValues(alpha: 0.7),
+                  ),
+                ),
               ),
             ),
           ],
@@ -168,87 +343,107 @@ class _WrappedViewerPageState extends State<WrappedViewerPage> {
       ),
     );
   }
+
+  Future<void> _handleShare() async {
+    if (_cards.isEmpty) {
+      showShortToast(context, "Nothing to share yet");
+      return;
+    }
+    final bool wasPaused = _isPaused;
+    _pauseAutoplay();
+    try {
+      final Uint8List? bytes = await _captureCurrentCard();
+      if (bytes == null) {
+        showShortToast(context, "Unable to prepare share");
+        return;
+      }
+      await SharePlus.instance.share(
+        ShareParams(
+          files: <XFile>[
+            XFile.fromData(
+              bytes,
+              name: "ente_wrapped_${_currentIndex + 1}.png",
+              mimeType: "image/png",
+            ),
+          ],
+          sharePositionOrigin: shareButtonRect(context, _shareButtonKey),
+        ),
+      );
+    } catch (error, stackTrace) {
+      _logger.severe("Failed to share Wrapped card", error, stackTrace);
+      if (mounted) {
+        showShortToast(context, "Share failed");
+      }
+    } finally {
+      if (!wasPaused) {
+        _resumeAutoplay();
+      }
+    }
+  }
+
+  Future<Uint8List?> _captureCurrentCard() async {
+    await Future<void>.delayed(Duration.zero);
+    final RenderRepaintBoundary? boundary = _cardBoundaryKey.currentContext
+        ?.findRenderObject() as RenderRepaintBoundary?;
+    if (boundary == null) {
+      return null;
+    }
+    final double width = boundary.size.width;
+    if (width <= 0) {
+      return null;
+    }
+    final double pixelRatio = (1080 / width).clamp(1.0, 6.0);
+    final ui.Image image =
+        await boundary.toImage(pixelRatio: pixelRatio.toDouble());
+    final ByteData? byteData =
+        await image.toByteData(format: ui.ImageByteFormat.png);
+    return byteData?.buffer.asUint8List();
+  }
 }
 
-class _StatsCard extends StatelessWidget {
-  const _StatsCard({
+class _StoryCard extends StatelessWidget {
+  const _StoryCard({
     required this.card,
     required this.colorScheme,
     required this.textTheme,
+    required this.isActive,
   });
 
   final WrappedCard card;
   final EnteColorScheme colorScheme;
   final EnteTextTheme textTheme;
+  final bool isActive;
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> mediaBadges = card.media.isEmpty
-        ? const <Widget>[]
-        : card.media
-            .take(4)
-            .map(
-              (MediaRef ref) => Container(
-                width: 56,
-                height: 56,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: colorScheme.primary400.withValues(alpha: 0.16),
-                  borderRadius: BorderRadius.circular(12),
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 200),
+      opacity: isActive ? 1.0 : 0.6,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+        child: Material(
+          color: colorScheme.backgroundElevated,
+          borderRadius: BorderRadius.circular(24),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 28, 24, 32),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _CardHeader(
+                  label: _labelForCardType(card.type),
+                  colorScheme: colorScheme,
+                  textTheme: textTheme,
                 ),
-                child: Text(
-                  "#${ref.uploadedFileID}",
-                  style: textTheme.tinyMuted,
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            )
-            .toList();
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-      child: Material(
-        color: colorScheme.backgroundElevated,
-        borderRadius: BorderRadius.circular(24),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 28, 24, 32),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: colorScheme.fillFaint,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  _labelForCardType(card.type),
-                  style: textTheme.tinyMuted,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                card.title,
-                style: textTheme.h2Bold,
-              ),
-              if (card.subtitle != null && card.subtitle!.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: Text(
-                    card.subtitle!,
-                    style: textTheme.bodyMuted,
+                const SizedBox(height: 16),
+                Expanded(
+                  child: _StoryCardBody(
+                    card: card,
+                    colorScheme: colorScheme,
+                    textTheme: textTheme,
                   ),
                 ),
-              if (mediaBadges.isNotEmpty) ...[
-                const SizedBox(height: 24),
-                Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
-                  children: mediaBadges,
-                ),
               ],
-            ],
+            ),
           ),
         ),
       ),
@@ -270,5 +465,170 @@ class _StatsCard extends StatelessWidget {
       default:
         return "Stats";
     }
+  }
+}
+
+class _CardHeader extends StatelessWidget {
+  const _CardHeader({
+    required this.label,
+    required this.colorScheme,
+    required this.textTheme,
+  });
+
+  final String label;
+  final EnteColorScheme colorScheme;
+  final EnteTextTheme textTheme;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: colorScheme.fillFaint,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        label,
+        style: textTheme.tinyMuted,
+      ),
+    );
+  }
+}
+
+class _StoryCardBody extends StatelessWidget {
+  const _StoryCardBody({
+    required this.card,
+    required this.colorScheme,
+    required this.textTheme,
+  });
+
+  final WrappedCard card;
+  final EnteColorScheme colorScheme;
+  final EnteTextTheme textTheme;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          card.title,
+          style: textTheme.h2Bold,
+        ),
+        if (card.subtitle != null && card.subtitle!.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: Text(
+              card.subtitle!,
+              style: textTheme.bodyMuted,
+            ),
+          ),
+        const SizedBox(height: 24),
+        _StoryMediaStrip(
+          card: card,
+          colorScheme: colorScheme,
+          textTheme: textTheme,
+        ),
+      ],
+    );
+  }
+}
+
+class _StoryMediaStrip extends StatelessWidget {
+  const _StoryMediaStrip({
+    required this.card,
+    required this.colorScheme,
+    required this.textTheme,
+  });
+
+  final WrappedCard card;
+  final EnteColorScheme colorScheme;
+  final EnteTextTheme textTheme;
+
+  @override
+  Widget build(BuildContext context) {
+    if (card.media.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      children: card.media.take(6).map((MediaRef ref) {
+        return Container(
+          width: 64,
+          height: 64,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: colorScheme.primary400.withValues(alpha: 0.16),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Text(
+            "#${ref.uploadedFileID}",
+            style: textTheme.tinyMuted,
+            textAlign: TextAlign.center,
+          ),
+        );
+      }).toList(),
+    );
+  }
+}
+
+class _StoryProgressBar extends StatelessWidget {
+  const _StoryProgressBar({
+    required this.progressValues,
+    required this.colorScheme,
+  });
+
+  final List<double> progressValues;
+  final EnteColorScheme colorScheme;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        for (final (int index, double value)
+            in progressValues.indexed) ...<Widget>[
+          Expanded(
+            child: _ProgressSegment(
+              progress: value,
+              colorScheme: colorScheme,
+            ),
+          ),
+          if (index != progressValues.length - 1) const SizedBox(width: 6),
+        ],
+      ],
+    );
+  }
+}
+
+class _ProgressSegment extends StatelessWidget {
+  const _ProgressSegment({
+    required this.progress,
+    required this.colorScheme,
+  });
+
+  final double progress;
+  final EnteColorScheme colorScheme;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(6),
+      child: Stack(
+        children: [
+          Container(
+            height: 4,
+            color: colorScheme.fillFaint,
+          ),
+          FractionallySizedBox(
+            widthFactor: progress.clamp(0.0, 1.0),
+            child: Container(
+              height: 4,
+              color: colorScheme.primary500,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
