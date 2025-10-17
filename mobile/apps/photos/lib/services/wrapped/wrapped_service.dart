@@ -1,8 +1,12 @@
 import "dart:async";
 
 import "package:flutter/foundation.dart";
+import "package:logging/logging.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/wrapped/models.dart";
+import "package:photos/services/wrapped/wrapped_cache_service.dart";
+import "package:photos/services/wrapped/wrapped_engine.dart";
+import "package:synchronized/synchronized.dart";
 
 @immutable
 class WrappedEntryState {
@@ -31,9 +35,12 @@ class WrappedEntryState {
   int get hashCode => Object.hash(result, resumeIndex, isComplete);
 }
 
-class WrappedStateService {
-  WrappedStateService._()
-      : _state = ValueNotifier<WrappedEntryState>(
+class WrappedService {
+  WrappedService._()
+      : _logger = Logger("WrappedService"),
+        _cacheService = WrappedCacheService.instance,
+        _computeLock = Lock(),
+        _state = ValueNotifier<WrappedEntryState>(
           WrappedEntryState(
             result: null,
             resumeIndex: 0,
@@ -41,9 +48,16 @@ class WrappedStateService {
           ),
         );
 
-  static final WrappedStateService instance = WrappedStateService._();
+  static final WrappedService instance = WrappedService._();
 
+  static const Duration _kInitialDelay = Duration(seconds: 5);
+  static const int _kWrappedYear = 2025;
+
+  final Logger _logger;
+  final WrappedCacheService _cacheService;
+  final Lock _computeLock;
   final ValueNotifier<WrappedEntryState> _state;
+  bool _initialLoadScheduled = false;
 
   ValueListenable<WrappedEntryState> get stateListenable => _state;
 
@@ -61,6 +75,85 @@ class WrappedStateService {
       DateTime.now().millisecondsSinceEpoch <
           DateTime(state.result!.year + 1, 01, 15, 23, 59, 59)
               .millisecondsSinceEpoch;
+
+  void scheduleInitialLoad() {
+    if (_initialLoadScheduled) {
+      return;
+    }
+    _initialLoadScheduled = true;
+    _logger.info("Scheduling Wrapped initial load after $_kInitialDelay");
+    unawaited(Future<void>.delayed(_kInitialDelay, _bootstrap));
+  }
+
+  Future<void> _bootstrap() async {
+    try {
+      final WrappedResult? cached =
+          await _cacheService.read(year: _kWrappedYear);
+      if (cached != null) {
+        _logger.info(
+          "Loaded Wrapped cache for $_kWrappedYear with "
+          "${cached.cards.length} cards",
+        );
+        updateResult(cached);
+        return;
+      }
+    } catch (error, stackTrace) {
+      _logger.severe("Failed to load Wrapped cache", error, stackTrace);
+    }
+
+    if (!isEnabled) {
+      _logger.info(
+        "Wrapped flag disabled; skipping initial compute for $_kWrappedYear",
+      );
+      return;
+    }
+
+    await _runCompute(reason: "initial", bypassFlag: false);
+  }
+
+  Future<void> forceRecompute() async {
+    _logger.warning("Force recompute requested for $_kWrappedYear");
+    await _computeLock.synchronized(() async {
+      await _cacheService.clear(year: _kWrappedYear);
+      updateResult(null);
+      await _computeAndPersist(reason: "forced", bypassFlag: true);
+    });
+  }
+
+  Future<void> _runCompute({
+    required String reason,
+    required bool bypassFlag,
+  }) async {
+    await _computeLock.synchronized(
+      () async => _computeAndPersist(
+        reason: reason,
+        bypassFlag: bypassFlag,
+      ),
+    );
+  }
+
+  Future<void> _computeAndPersist({
+    required String reason,
+    required bool bypassFlag,
+  }) async {
+    if (!bypassFlag && !isEnabled) {
+      _logger.info(
+        "Wrapped flag disabled; skipping compute for $_kWrappedYear ($reason)",
+      );
+      return;
+    }
+
+    _logger.info("Starting Wrapped compute ($reason) for $_kWrappedYear");
+    try {
+      final WrappedResult result =
+          await WrappedEngine.compute(year: _kWrappedYear);
+      await _cacheService.write(result: result);
+      updateResult(result);
+      _logger.info("Wrapped compute completed ($reason)");
+    } catch (error, stackTrace) {
+      _logger.severe("Wrapped compute failed ($reason)", error, stackTrace);
+    }
+  }
 
   void updateResult(WrappedResult? result) {
     if (result == null || result.cards.isEmpty) {

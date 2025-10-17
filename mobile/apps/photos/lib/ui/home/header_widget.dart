@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/service_locator.dart';
-import "package:photos/services/wrapped/wrapped_state_service.dart";
+import "package:photos/services/wrapped/wrapped_service.dart";
 import "package:photos/ui/home/memories/memories_widget.dart";
 import 'package:photos/ui/home/status_bar_widget.dart';
 import "package:photos/ui/wrapped/wrapped_home_banner.dart";
@@ -22,18 +22,18 @@ class _HeaderWidgetState extends State<HeaderWidget> {
   @override
   void initState() {
     super.initState();
-    _wrappedState = wrappedStateService.state;
-    wrappedStateService.stateListenable.addListener(_onWrappedStateChanged);
+    _wrappedState = wrappedService.state;
+    wrappedService.stateListenable.addListener(_onWrappedStateChanged);
   }
 
   @override
   void dispose() {
-    wrappedStateService.stateListenable.removeListener(_onWrappedStateChanged);
+    wrappedService.stateListenable.removeListener(_onWrappedStateChanged);
     super.dispose();
   }
 
   void _onWrappedStateChanged() {
-    final WrappedEntryState next = wrappedStateService.state;
+    final WrappedEntryState next = wrappedService.state;
     if (!mounted) {
       return;
     }
@@ -48,7 +48,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
   @override
   Widget build(BuildContext context) {
     _logger.info("Building header widget");
-    final bool showWrappedBanner = wrappedStateService.shouldShowHomeBanner;
+    final bool showWrappedBanner = wrappedService.shouldShowHomeBanner;
     final List<Widget> children = <Widget>[
       const StatusBarWidget(),
       const MemoriesWidget(),

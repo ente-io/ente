@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/services/wrapped/wrapped_state_service.dart";
+import "package:photos/services/wrapped/wrapped_service.dart";
 import "package:photos/theme/ente_theme.dart";
 
 class WrappedDiscoverySection extends StatelessWidget {
@@ -16,8 +16,8 @@ class WrappedDiscoverySection extends StatelessWidget {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
 
-    final bool hasProgress =
-        state.resumeIndex > 0 && state.resumeIndex < (state.result?.cards.length ?? 0);
+    final bool hasProgress = state.resumeIndex > 0 &&
+        state.resumeIndex < (state.result?.cards.length ?? 0);
     final String subtitle = state.isComplete
         ? "Replay the full story."
         : hasProgress
@@ -87,8 +87,8 @@ class WrappedDiscoverySection extends StatelessWidget {
   }
 
   void _handleTap(BuildContext context) {
-    if (!wrappedStateService.shouldShowDiscoveryEntry &&
-        !wrappedStateService.shouldShowHomeBanner) {
+    if (!wrappedService.shouldShowDiscoveryEntry &&
+        !wrappedService.shouldShowHomeBanner) {
       return;
     }
 

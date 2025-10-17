@@ -10,7 +10,7 @@ import "package:photos/models/search/index_of_indexed_stack.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/services/wrapped/wrapped_state_service.dart";
+import "package:photos/services/wrapped/wrapped_service.dart";
 import "package:photos/states/all_sections_examples_state.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/search/result/no_result_widget.dart";
@@ -86,14 +86,14 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
   @override
   void initState() {
     super.initState();
-    _wrappedState = wrappedStateService.state;
-    _showWrappedDiscovery = wrappedStateService.shouldShowDiscoveryEntry;
-    wrappedStateService.stateListenable.addListener(_onWrappedStateChanged);
+    _wrappedState = wrappedService.state;
+    _showWrappedDiscovery = wrappedService.shouldShowDiscoveryEntry;
+    wrappedService.stateListenable.addListener(_onWrappedStateChanged);
   }
 
   @override
   void dispose() {
-    wrappedStateService.stateListenable.removeListener(_onWrappedStateChanged);
+    wrappedService.stateListenable.removeListener(_onWrappedStateChanged);
     super.dispose();
   }
 
@@ -101,9 +101,8 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
     if (!mounted) {
       return;
     }
-    final WrappedEntryState nextState = wrappedStateService.state;
-    final bool nextShowDiscovery =
-        wrappedStateService.shouldShowDiscoveryEntry;
+    final WrappedEntryState nextState = wrappedService.state;
+    final bool nextShowDiscovery = wrappedService.shouldShowDiscoveryEntry;
     if (_wrappedState == nextState &&
         _showWrappedDiscovery == nextShowDiscovery) {
       return;
@@ -113,6 +112,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
       _showWrappedDiscovery = nextShowDiscovery;
     });
   }
+
   @override
   Widget build(BuildContext context) {
     final searchTypes = SectionType.values.toList(growable: true);

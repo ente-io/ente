@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/services/wrapped/wrapped_state_service.dart";
+import "package:photos/services/wrapped/wrapped_service.dart";
 import "package:photos/theme/ente_theme.dart";
 
 class WrappedHomeBanner extends StatelessWidget {
@@ -15,8 +15,8 @@ class WrappedHomeBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final enteColorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final bool hasProgress =
-        state.resumeIndex > 0 && state.resumeIndex < (state.result?.cards.length ?? 0);
+    final bool hasProgress = state.resumeIndex > 0 &&
+        state.resumeIndex < (state.result?.cards.length ?? 0);
 
     final String title;
     final String subtitle;
@@ -32,8 +32,9 @@ class WrappedHomeBanner extends StatelessWidget {
     }
 
     final int cardCount = state.result?.cards.length ?? 0;
-    final String detail =
-        cardCount > 0 ? "$cardCount card${cardCount == 1 ? '' : 's'}" : "Preview";
+    final String detail = cardCount > 0
+        ? "$cardCount card${cardCount == 1 ? '' : 's'}"
+        : "Preview";
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
@@ -93,8 +94,8 @@ class WrappedHomeBanner extends StatelessWidget {
   }
 
   void _handleTap(BuildContext context) {
-    if (!wrappedStateService.shouldShowHomeBanner &&
-        !wrappedStateService.shouldShowDiscoveryEntry) {
+    if (!wrappedService.shouldShowHomeBanner &&
+        !wrappedService.shouldShowDiscoveryEntry) {
       return;
     }
     ScaffoldMessenger.of(context).showSnackBar(

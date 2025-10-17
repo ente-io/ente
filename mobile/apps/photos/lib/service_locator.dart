@@ -21,7 +21,8 @@ import "package:photos/services/storage_bonus_service.dart";
 import "package:photos/services/sync/trash_sync_service.dart";
 import "package:photos/services/text_embeddings_cache_service.dart";
 import "package:photos/services/update_service.dart";
-import "package:photos/services/wrapped/wrapped_state_service.dart";
+import "package:photos/services/wrapped/wrapped_cache_service.dart";
+import "package:photos/services/wrapped/wrapped_service.dart";
 import "package:photos/utils/local_settings.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -199,8 +200,14 @@ CollectionsService get collectionsService {
   return _collectionsService!;
 }
 
-WrappedStateService? _wrappedStateService;
-WrappedStateService get wrappedStateService {
-  _wrappedStateService ??= WrappedStateService.instance;
-  return _wrappedStateService!;
+WrappedService? _wrappedService;
+WrappedService get wrappedService {
+  _wrappedService ??= WrappedService.instance;
+  return _wrappedService!;
+}
+
+WrappedCacheService? _wrappedCacheService;
+WrappedCacheService get wrappedCacheService {
+  _wrappedCacheService ??= WrappedCacheService.instance;
+  return _wrappedCacheService!;
 }
