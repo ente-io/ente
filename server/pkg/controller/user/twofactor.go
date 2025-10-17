@@ -2,7 +2,9 @@ package user
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/base64"
+	"encoding/hex"
 	"fmt"
 	"image/png"
 
@@ -121,6 +123,27 @@ func (c *UserController) VerifyTwoFactor(context *gin.Context, sessionID string,
 	if !isTwoFactorEnabled {
 		return ente.TwoFactorAuthorizationResponse{}, stacktrace.Propagate(ente.ErrBadRequest, "")
 	}
+
+	// Check for OTP replay attack
+	hashData := fmt.Sprintf("%d:%s", userID, otp)
+	hash := sha256.Sum256([]byte(hashData))
+	otpHash := hex.EncodeToString(hash[:])
+
+	isUsed, err := c.TwoFactorRepo.IsOTPCodeUsed(userID, otpHash)
+	if err != nil {
+		return ente.TwoFactorAuthorizationResponse{}, stacktrace.Propagate(err, "Failed to check OTP usage")
+	}
+	if isUsed {
+		msg := fmt.Sprintf("Potential replay attack detected for userID: %d - OTP code reused", userID)
+		log.Warn(msg)
+		go c.DiscordController.NotifyPotentialAbuse(msg)
+
+		if err = c.TwoFactorRepo.RecordWrongAttempt(sessionID); err != nil {
+			log.WithError(err).Warn("Failed to track wrong attempt for two-factor session")
+		}
+		return ente.TwoFactorAuthorizationResponse{}, stacktrace.Propagate(ente.ErrIncorrectTOTP, "OTP code has already been used")
+	}
+
 	secret, err := c.TwoFactorRepo.GetTwoFactorSecret(userID)
 	if err != nil {
 		return ente.TwoFactorAuthorizationResponse{}, stacktrace.Propagate(err, "")
@@ -132,6 +155,12 @@ func (c *UserController) VerifyTwoFactor(context *gin.Context, sessionID string,
 		}
 		return ente.TwoFactorAuthorizationResponse{}, stacktrace.Propagate(ente.ErrIncorrectTOTP, "")
 	}
+
+	// Record OTP as used
+	if err = c.TwoFactorRepo.RecordUsedOTPCode(userID, otpHash); err != nil {
+		log.WithError(err).Error("Failed to record used OTP code")
+	}
+
 	response, err := c.GetKeyAttributeAndToken(context, userID)
 	if err != nil {
 		return ente.TwoFactorAuthorizationResponse{}, stacktrace.Propagate(err, "")
