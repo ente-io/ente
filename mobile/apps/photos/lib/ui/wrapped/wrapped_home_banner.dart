@@ -21,18 +21,10 @@ class WrappedHomeBanner extends StatelessWidget {
     final bool hasProgress = state.resumeIndex > 0 &&
         state.resumeIndex < (state.result?.cards.length ?? 0);
 
-    final String title;
-    final String subtitle;
-    if (state.isComplete) {
-      title = "Replay your 2025 Wrapped";
-      subtitle = "Enjoy the full story again.";
-    } else if (hasProgress) {
-      title = "Continue your 2025 Wrapped";
-      subtitle = "Jump back to where you left off.";
-    } else {
-      title = "Your 2025 Wrapped is ready";
-      subtitle = "Tap to see your 2025 highlights.";
-    }
+    const String title = "Your 2025 Wrapped";
+    final String subtitle = hasProgress && !state.isComplete
+        ? "Resume where you left off"
+        : "See your 2025 highlights";
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
