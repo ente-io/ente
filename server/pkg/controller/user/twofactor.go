@@ -124,26 +124,6 @@ func (c *UserController) VerifyTwoFactor(context *gin.Context, sessionID string,
 		return ente.TwoFactorAuthorizationResponse{}, stacktrace.Propagate(ente.ErrBadRequest, "")
 	}
 
-	// Check for OTP replay attack
-	hashData := fmt.Sprintf("%d:%s", userID, otp)
-	hash := sha256.Sum256([]byte(hashData))
-	otpHash := hex.EncodeToString(hash[:])
-
-	isUsed, err := c.TwoFactorRepo.IsOTPCodeUsed(userID, otpHash)
-	if err != nil {
-		return ente.TwoFactorAuthorizationResponse{}, stacktrace.Propagate(err, "Failed to check OTP usage")
-	}
-	if isUsed {
-		msg := fmt.Sprintf("Potential replay attack detected for userID: %d - OTP code reused", userID)
-		log.Warn(msg)
-		go c.DiscordController.NotifyPotentialAbuse(msg)
-
-		if err = c.TwoFactorRepo.RecordWrongAttempt(sessionID); err != nil {
-			log.WithError(err).Warn("Failed to track wrong attempt for two-factor session")
-		}
-		return ente.TwoFactorAuthorizationResponse{}, stacktrace.Propagate(ente.ErrIncorrectTOTP, "OTP code has already been used")
-	}
-
 	secret, err := c.TwoFactorRepo.GetTwoFactorSecret(userID)
 	if err != nil {
 		return ente.TwoFactorAuthorizationResponse{}, stacktrace.Propagate(err, "")
@@ -156,9 +136,25 @@ func (c *UserController) VerifyTwoFactor(context *gin.Context, sessionID string,
 		return ente.TwoFactorAuthorizationResponse{}, stacktrace.Propagate(ente.ErrIncorrectTOTP, "")
 	}
 
-	// Record OTP as used
-	if err = c.TwoFactorRepo.RecordUsedOTPCode(userID, otpHash); err != nil {
+	// Try to record OTP atomically - this will fail if already used
+	hashData := fmt.Sprintf("%d:%s", userID, otp)
+	hash := sha256.Sum256([]byte(hashData))
+	otpHash := hex.EncodeToString(hash[:])
+
+	wasNew, err := c.TwoFactorRepo.TryRecordUsedOTPCode(userID, otpHash)
+	if err != nil {
 		log.WithError(err).Error("Failed to record used OTP code")
+		// Continue anyway to not break authentication
+	} else if !wasNew {
+		// Code was already used - replay attack
+		msg := fmt.Sprintf("Replay attack detected for userID: %d - OTP code reused", userID)
+		log.Warn(msg)
+		go c.DiscordController.NotifyPotentialAbuse(msg)
+
+		if err = c.TwoFactorRepo.RecordWrongAttempt(sessionID); err != nil {
+			log.WithError(err).Warn("Failed to track wrong attempt for two-factor session")
+		}
+		return ente.TwoFactorAuthorizationResponse{}, stacktrace.Propagate(ente.ErrIncorrectTOTP, "OTP code has already been used")
 	}
 
 	response, err := c.GetKeyAttributeAndToken(context, userID)

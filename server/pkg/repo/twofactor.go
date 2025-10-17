@@ -147,29 +147,22 @@ func (repo *TwoFactorRepository) RecordWrongAttempt(sessionID string) error {
 	return nil
 }
 
-// IsOTPCodeUsed checks if an OTP code has already been used
-func (repo *TwoFactorRepository) IsOTPCodeUsed(userID int64, codeHash string) (bool, error) {
-	var exists bool
-	row := repo.DB.QueryRow(`SELECT EXISTS(
-		SELECT 1 FROM two_factor_used_codes
-		WHERE user_id = $1 AND code_hash = $2
-	)`, userID, codeHash)
-	err := row.Scan(&exists)
-	if err != nil {
-		return false, stacktrace.Propagate(err, "Failed to check if OTP code is used")
-	}
-	return exists, nil
-}
-
-// RecordUsedOTPCode records that an OTP code has been used
-func (repo *TwoFactorRepository) RecordUsedOTPCode(userID int64, codeHash string) error {
-	_, err := repo.DB.Exec(`INSERT INTO two_factor_used_codes(user_id, code_hash, used_at)
+// TryRecordUsedOTPCode atomically tries to record an OTP code as used
+// Returns true if the code was newly recorded, false if it already existed (replay attack)
+func (repo *TwoFactorRepository) TryRecordUsedOTPCode(userID int64, codeHash string) (bool, error) {
+	result, err := repo.DB.Exec(`INSERT INTO two_factor_used_codes(user_id, code_hash, used_at)
 		VALUES($1, $2, $3) ON CONFLICT (user_id, code_hash) DO NOTHING`,
 		userID, codeHash, time.Microseconds())
 	if err != nil {
-		return stacktrace.Propagate(err, "Failed to record used OTP code")
+		return false, stacktrace.Propagate(err, "Failed to record used OTP code")
 	}
-	return nil
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return false, stacktrace.Propagate(err, "Failed to get rows affected")
+	}
+
+	return rowsAffected > 0, nil
 }
 
 // RemoveExpiredUsedOTPCodes removes OTP codes older than the specified duration
