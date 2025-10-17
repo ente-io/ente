@@ -212,7 +212,7 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
             onClose={handleClose}
             fullWidth
             fullScreen={isFullScreen}
-            slotProps={{ paper: { sx: { maxWidth: "490px" } } }}
+            slotProps={{ paper: { sx: { maxWidth: "500px" } } }}
         >
             <DialogTitle>
                 <Stack sx={{ gap: 1.5 }}>
@@ -245,40 +245,28 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
                 </Stack>
             </DialogTitle>
             <Divider />
-            <DialogContent_>
-                {searchFilteredCollections.length === 0 && !showCreateButton ? (
-                    <Box
-                        sx={{
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            minHeight: "154px",
-                            width: "100%",
-                        }}
-                    >
-                        <Typography color="text.muted">
-                            {t("no_results")}
-                        </Typography>
-                    </Box>
-                ) : (
-                    <>
-                        {showCreateButton && (
-                            <LargeTileCreateNewButton
-                                onClick={onCreateCollection}
-                            >
-                                {t("create_albums")}
-                            </LargeTileCreateNewButton>
-                        )}
-                        {searchFilteredCollections.map((collectionSummary) => (
-                            <CollectionSummaryButton
-                                key={collectionSummary.id}
-                                collectionSummary={collectionSummary}
-                                onClick={handleCollectionSummaryClick}
-                            />
-                        ))}
-                    </>
-                )}
-            </DialogContent_>
+            {searchFilteredCollections.length === 0 && !showCreateButton ? (
+                <NoResultsContent>
+                    <Typography color="text.muted">
+                        {t("no_results")}
+                    </Typography>
+                </NoResultsContent>
+            ) : (
+                <DialogContent_>
+                    {showCreateButton && (
+                        <LargeTileCreateNewButton onClick={onCreateCollection}>
+                            {t("create_albums")}
+                        </LargeTileCreateNewButton>
+                    )}
+                    {searchFilteredCollections.map((collectionSummary) => (
+                        <CollectionSummaryButton
+                            key={collectionSummary.id}
+                            collectionSummary={collectionSummary}
+                            onClick={handleCollectionSummaryClick}
+                        />
+                    ))}
+                </DialogContent_>
+            )}
         </StyledDialog>
     );
 };
@@ -289,9 +277,21 @@ const StyledDialog = styled(Dialog)(({ theme }) => ({
 }));
 
 const DialogContent_ = styled(DialogContent)`
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 150px);
     gap: 4px;
+    align-content: start;
+
+    @media (min-width: 491px) {
+        justify-content: center;
+    }
+`;
+
+const NoResultsContent = styled(DialogContent)`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 154px;
 `;
 
 const titleForAction = (action: CollectionSelectorAction) => {
