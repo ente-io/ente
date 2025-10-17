@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'dart:typed_data' show Uint8List, Float32List;
 
+import "package:flutter_image_compress/flutter_image_compress.dart";
 import "package:flutter_rust_bridge/flutter_rust_bridge.dart" show Uint64List;
 import "package:ml_linalg/linalg.dart";
+import "package:path/path.dart" as p;
 import "package:photos/db/ml/clip_vector_db.dart";
 import "package:photos/models/ml/face/box.dart";
 import "package:photos/models/ml/vector.dart";
@@ -210,7 +212,29 @@ Future<dynamic> isolateFunction(
       final quality = args['quality'] as int;
       if (sourcePath == null) return null;
 
-      final sourceFile = File(sourcePath);
+      String workingPath = sourcePath;
+      String? tempConvertedPath;
+      final ext = p.extension(sourcePath).toLowerCase();
+      if (ext == '.heic' || ext == '.heif' || ext == '.heics') {
+        try {
+          final String tempOutputPath = '$cachePath.heic_tmp.jpg';
+          final XFile? converted =
+              await FlutterImageCompress.compressAndGetFile(
+            sourcePath,
+            tempOutputPath,
+            format: CompressFormat.jpeg,
+            keepExif: true,
+          );
+          if (converted != null) {
+            workingPath = converted.path;
+            tempConvertedPath = converted.path;
+          }
+        } catch (_) {
+          // fall through; we'll attempt to decode original bytes below.
+        }
+      }
+
+      final sourceFile = File(workingPath);
       if (!await sourceFile.exists()) return null;
 
       try {
@@ -227,11 +251,22 @@ Future<dynamic> isolateFunction(
         final cacheFile = File(cachePath);
         await cacheFile.writeAsBytes(resized.bytes, flush: true);
 
+        if (tempConvertedPath != null) {
+          try {
+            await File(tempConvertedPath).delete();
+          } catch (_) {}
+        }
+
         return {
           'width': resized.width,
           'height': resized.height,
         };
       } catch (_) {
+        if (tempConvertedPath != null) {
+          try {
+            await File(tempConvertedPath).delete();
+          } catch (_) {}
+        }
         return null;
       }
 
