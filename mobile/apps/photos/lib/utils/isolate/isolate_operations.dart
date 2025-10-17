@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'dart:typed_data' show Uint8List, Float32List;
 
+import "package:flutter_image_compress/flutter_image_compress.dart";
 import "package:flutter_rust_bridge/flutter_rust_bridge.dart" show Uint64List;
 import "package:ml_linalg/linalg.dart";
+import "package:path/path.dart" as p;
 import "package:photos/db/ml/clip_vector_db.dart";
 import "package:photos/models/ml/face/box.dart";
 import "package:photos/models/ml/vector.dart";
@@ -14,6 +17,7 @@ import "package:photos/services/machine_learning/semantic_search/clip/clip_text_
 import "package:photos/services/machine_learning/semantic_search/query_result.dart";
 import "package:photos/src/rust/frb_generated.dart" show RustLib;
 import "package:photos/utils/image_ml_util.dart";
+import "package:photos/utils/image_util.dart" as image_util;
 import "package:photos/utils/ml_util.dart";
 
 final Map<String, dynamic> _isolateCache = {};
@@ -51,6 +55,12 @@ enum IsolateOperation {
 
   /// [FaceClusteringService]
   linearIncrementalClustering,
+
+  /// [WidgetImageIsolate]
+  generateWidgetImage,
+
+  /// [WidgetImageIsolate]
+  readImageDimensions,
 
   /// Cache operations
   setIsolateCache,
@@ -193,6 +203,89 @@ Future<dynamic> isolateFunction(
     case IsolateOperation.linearIncrementalClustering:
       final ClusteringResult result = runLinearClustering(args);
       return result;
+
+    /// WidgetImageIsolate
+    case IsolateOperation.generateWidgetImage:
+      final sourcePath = args['sourcePath'] as String?;
+      final cachePath = args['cachePath'] as String;
+      final targetShortSide = args['targetShortSide'] as double;
+      final quality = args['quality'] as int;
+      if (sourcePath == null) return null;
+
+      String workingPath = sourcePath;
+      String? tempConvertedPath;
+      final ext = p.extension(sourcePath).toLowerCase();
+      if (ext == '.heic' || ext == '.heif' || ext == '.heics') {
+        try {
+          final String tempOutputPath = '$cachePath.heic_tmp.jpg';
+          final XFile? converted =
+              await FlutterImageCompress.compressAndGetFile(
+            sourcePath,
+            tempOutputPath,
+            format: CompressFormat.jpeg,
+            keepExif: true,
+          );
+          if (converted != null) {
+            workingPath = converted.path;
+            tempConvertedPath = converted.path;
+          }
+        } catch (_) {
+          // fall through; we'll attempt to decode original bytes below.
+        }
+      }
+
+      final sourceFile = File(workingPath);
+      if (!await sourceFile.exists()) return null;
+
+      try {
+        final rawBytes = await sourceFile.readAsBytes();
+        final resized = image_util.resizeImageToFitShortSide(
+          srcBytes: rawBytes,
+          minShortSide: targetShortSide,
+          quality: quality,
+        );
+        if (resized == null) {
+          return null;
+        }
+
+        final cacheFile = File(cachePath);
+        await cacheFile.writeAsBytes(resized.bytes, flush: true);
+
+        if (tempConvertedPath != null) {
+          try {
+            await File(tempConvertedPath).delete();
+          } catch (_) {}
+        }
+
+        return {
+          'width': resized.width,
+          'height': resized.height,
+        };
+      } catch (_) {
+        if (tempConvertedPath != null) {
+          try {
+            await File(tempConvertedPath).delete();
+          } catch (_) {}
+        }
+        return null;
+      }
+
+    /// WidgetImageIsolate
+    case IsolateOperation.readImageDimensions:
+      final path = args['path'] as String;
+      final file = File(path);
+      if (!await file.exists()) return null;
+      try {
+        final bytes = await file.readAsBytes();
+        final dims = image_util.decodeImageDimensions(bytes);
+        if (dims == null) return null;
+        return {
+          'width': dims.width,
+          'height': dims.height,
+        };
+      } catch (_) {
+        return null;
+      }
 
     /// Cases for FaceClusteringService end here
 

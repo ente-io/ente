@@ -1,7 +1,8 @@
 import 'package:ente_crypto/ente_crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
-import "package:photos/service_locator.dart";
+import 'package:photos/service_locator.dart';
+import 'package:photos/services/home_widget_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/sync/local_sync_service.dart';
 import 'package:photos/services/sync/sync_service.dart';
@@ -116,6 +117,20 @@ class _DebugSectionWidgetState extends State<DebugSectionWidget> {
             showShortToast(context, "Done");
           },
         ),
+        if (flagService.internalUser) sectionOptionSpacing,
+        if (flagService.internalUser)
+          MenuItemWidget(
+            captionedTextWidget: const CaptionedTextWidget(
+              title: "Clear widget cache",
+            ),
+            pressedColor: getEnteColorScheme(context).fillFaint,
+            trailingIcon: Icons.chevron_right_outlined,
+            trailingIconIsMuted: true,
+            onTap: () async {
+              await HomeWidgetService.instance.clearWidgetCache();
+              showShortToast(context, "Widget cache cleared");
+            },
+          ),
       ],
     );
   }
