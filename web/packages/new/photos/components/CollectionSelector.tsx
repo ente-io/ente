@@ -212,7 +212,14 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
             onClose={handleClose}
             fullWidth
             fullScreen={isFullScreen}
-            slotProps={{ paper: { sx: { maxWidth: "500px" } } }}
+            slotProps={{
+                paper: {
+                    sx: {
+                        maxWidth: "500px",
+                        "@media (min-width: 491px)": { height: "100%" },
+                    },
+                },
+            }}
         >
             <DialogTitle>
                 <Stack sx={{ gap: 1.5 }}>
