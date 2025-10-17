@@ -1,5 +1,6 @@
 import "package:computer/computer.dart";
 import "package:logging/logging.dart";
+import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/services/wrapped/candidate_builders.dart";
@@ -38,6 +39,9 @@ class WrappedEngine {
         await SearchService.instance.getAllFilesForSearch();
     final List<EnteFile> filtered = <EnteFile>[];
     for (final EnteFile file in allFiles) {
+      if (!file.isOwner) {
+        continue;
+      }
       final int? creationTime = file.creationTime;
       if (creationTime == null) {
         continue;
