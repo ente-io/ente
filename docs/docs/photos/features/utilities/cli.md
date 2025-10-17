@@ -179,5 +179,5 @@ You can review, contribute to, or extend the CLI for your specific needs.
 
 ## Related topics
 
-- [Export](/photos/features/backup-and-sync/export) - Desktop/web export feature
+- [Export](/photos/features/backup-and-sync/export) - Desktop export feature
 - [Watch folders](/photos/features/backup-and-sync/watch-folders) - Automatic uploads
