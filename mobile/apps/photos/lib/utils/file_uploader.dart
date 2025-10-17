@@ -662,6 +662,7 @@ class FileUploader {
                 collectionID,
               )
             : null;
+    final sourceLength = await mediaUploadData.sourceFile!.length();
     final bool hasExistingMultiPart = existingMultipartEncFileName != null;
     final tempDirectory = Configuration.instance.getTempDirectory();
     final String uniqueID =
@@ -766,6 +767,12 @@ class FileUploader {
         thumbnailData = mediaUploadData.thumbnail;
       }
       encFileSize = await encryptedFile.length();
+      if (!CryptoUtil.validateStreamEncryptionSizes(
+        sourceLength,
+        encFileSize,
+      )) {
+        throw EncSizeMismatchError("source $sourceLength, enc $encFileSize");
+      }
 
       final EncryptionResult encryptedThumbnailData =
           await CryptoUtil.encryptChaCha(

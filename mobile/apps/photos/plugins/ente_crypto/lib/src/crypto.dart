@@ -620,4 +620,28 @@ class CryptoUtil {
       taskName: "fileHash",
     );
   }
+
+  /// Validates that the plaintext and ciphertext sizes match for streaming encryption.
+  /// Returns true if the sizes are valid for chunked ChaCha20-Poly1305 encryption.
+  ///
+  /// Each chunk adds 17 bytes (Sodium.cryptoSecretstreamXchacha20poly1305Abytes) overhead.
+  /// For a 4MB chunk size, the encrypted size is 4MB + 17 bytes per chunk.
+  static bool validateStreamEncryptionSizes(int plainTextSize, int cipherTextSize) {
+    if (plainTextSize <= 0 || cipherTextSize <= 0) {
+      return false;
+    }
+
+    final int chunkOverhead = Sodium.cryptoSecretstreamXchacha20poly1305Abytes;
+
+    // Calculate expected ciphertext size
+    final int fullChunks = plainTextSize ~/ encryptionChunkSize;
+    final int lastChunkSize = plainTextSize % encryptionChunkSize;
+
+    int expectedCipherTextSize = fullChunks * (encryptionChunkSize + chunkOverhead);
+    if (lastChunkSize > 0) {
+      expectedCipherTextSize += lastChunkSize + chunkOverhead;
+    }
+
+    return expectedCipherTextSize == cipherTextSize;
+  }
 }

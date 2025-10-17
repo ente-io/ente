@@ -114,3 +114,11 @@ class DuplicateUploadURLError extends Error {
       "First used at: $firstUsedAt, Duplicate attempt at: $duplicateUsedAt. "
       "This indicates a race condition in parallel uploads.";
 }
+
+class EncSizeMismatchError implements Exception {
+  final String message;
+  EncSizeMismatchError(this.message);
+
+  @override
+  String toString() => "EncSizeMismatchError: $message";
+}
