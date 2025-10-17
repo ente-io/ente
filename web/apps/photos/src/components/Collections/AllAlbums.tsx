@@ -1,13 +1,16 @@
 // TODO: Audit this file.
 import CloseIcon from "@mui/icons-material/Close";
+import SearchIcon from "@mui/icons-material/Search";
 import {
     Box,
     Dialog,
     DialogContent,
     DialogTitle,
     Divider,
+    InputAdornment,
     Stack,
     styled,
+    TextField,
     Typography,
     useMediaQuery,
 } from "@mui/material";
@@ -25,7 +28,7 @@ import type {
 } from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
 import memoize from "memoize-one";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import {
     areEqual,
@@ -56,11 +59,28 @@ export const AllAlbums: React.FC<AllAlbums> = ({
     isInHiddenSection,
 }) => {
     const fullScreen = useMediaQuery("(max-width: 428px)");
+    const [searchTerm, setSearchTerm] = useState("");
+
+    useEffect(() => {
+        if (!open) {
+            setSearchTerm("");
+        }
+    }, [open]);
 
     const onCollectionClick = (collectionID: number) => {
         onSelectCollectionID(collectionID);
         onClose();
     };
+
+    const filteredCollectionSummaries = useMemo(() => {
+        if (!searchTerm.trim()) {
+            return collectionSummaries;
+        }
+        const searchLower = searchTerm.toLowerCase();
+        return collectionSummaries.filter((cs) =>
+            cs.name.toLowerCase().includes(searchLower),
+        );
+    }, [collectionSummaries, searchTerm]);
 
     return (
         <AllAlbumsDialog
@@ -75,12 +95,16 @@ export const AllAlbums: React.FC<AllAlbums> = ({
                     collectionsSortBy,
                     onChangeCollectionsSortBy,
                 }}
-                collectionCount={collectionSummaries.length}
+                collectionCount={filteredCollectionSummaries.length}
+                totalCount={collectionSummaries.length}
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
             />
             <Divider />
             <AllAlbumsContent
-                collectionSummaries={collectionSummaries}
+                collectionSummaries={filteredCollectionSummaries}
                 onCollectionClick={onCollectionClick}
+                hasSearchQuery={!!searchTerm.trim()}
             />
         </AllAlbumsDialog>
     );
@@ -91,10 +115,7 @@ const Column3To2Breakpoint = 559;
 const AllAlbumsDialog = styled(Dialog)(({ theme }) => ({
     "& .MuiDialog-container": { justifyContent: "flex-end" },
     "& .MuiPaper-root": { maxWidth: "494px" },
-    "& .MuiDialogTitle-root": {
-        padding: theme.spacing(2),
-        paddingRight: theme.spacing(1),
-    },
+    "& .MuiDialogTitle-root": { padding: theme.spacing(2) },
     "& .MuiDialogContent-root": { padding: theme.spacing(2) },
     [theme.breakpoints.down(Column3To2Breakpoint)]: {
         "& .MuiPaper-root": { width: "324px" },
@@ -102,7 +123,12 @@ const AllAlbumsDialog = styled(Dialog)(({ theme }) => ({
     },
 }));
 
-type TitleProps = { collectionCount: number } & Pick<
+type TitleProps = {
+    collectionCount: number;
+    totalCount: number;
+    searchTerm: string;
+    onSearchChange: (value: string) => void;
+} & Pick<
     AllAlbums,
     | "onClose"
     | "collectionsSortBy"
@@ -113,42 +139,125 @@ type TitleProps = { collectionCount: number } & Pick<
 const Title: React.FC<TitleProps> = ({
     onClose,
     collectionCount,
+    totalCount,
+    searchTerm,
+    onSearchChange,
     collectionsSortBy,
     onChangeCollectionsSortBy,
     isInHiddenSection,
 }) => (
     <DialogTitle>
-        <Stack direction="row" sx={{ gap: 1.5 }}>
-            <Stack sx={{ flex: 1 }}>
-                <Box>
-                    <Typography variant="h5">
-                        {isInHiddenSection
-                            ? t("all_hidden_albums")
-                            : t("all_albums")}
-                    </Typography>
-                    <Typography
-                        variant="small"
-                        sx={{
-                            color: "text.muted",
-                            // Undo the effects of DialogTitle.
-                            fontWeight: "regular",
-                        }}
-                    >
-                        {t("albums_count", { count: collectionCount })}
-                    </Typography>
-                </Box>
+        <Stack sx={{ gap: 1.5 }}>
+            <Stack direction="row" sx={{ gap: 1.5 }}>
+                <Stack sx={{ flex: 1 }}>
+                    <Box>
+                        <Typography variant="h5">
+                            {isInHiddenSection
+                                ? t("all_hidden_albums")
+                                : t("all_albums")}
+                        </Typography>
+                        <Typography
+                            variant="small"
+                            sx={{ color: "text.muted", fontWeight: "regular" }}
+                        >
+                            {searchTerm
+                                ? `${collectionCount} / ${totalCount} ${t("albums")}`
+                                : t("albums_count", { count: collectionCount })}
+                        </Typography>
+                    </Box>
+                </Stack>
+                <CollectionsSortOptions
+                    activeSortBy={collectionsSortBy}
+                    onChangeSortBy={onChangeCollectionsSortBy}
+                    nestedInDialog
+                />
+                <FilledIconButton onClick={onClose}>
+                    <CloseIcon />
+                </FilledIconButton>
             </Stack>
-            <CollectionsSortOptions
-                activeSortBy={collectionsSortBy}
-                onChangeSortBy={onChangeCollectionsSortBy}
-                nestedInDialog
-            />
-            <FilledIconButton onClick={onClose}>
-                <CloseIcon />
-            </FilledIconButton>
+            <SearchField value={searchTerm} onChange={onSearchChange} />
         </Stack>
     </DialogTitle>
 );
+
+interface SearchFieldProps {
+    value: string;
+    onChange: (value: string) => void;
+}
+
+const SearchField: React.FC<SearchFieldProps> = ({ value, onChange }) => {
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    const handleClear = () => {
+        onChange("");
+        inputRef.current?.focus();
+    };
+
+    return (
+        <TextField
+            inputRef={inputRef}
+            fullWidth
+            size="small"
+            placeholder={t("albums_search_hint")}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            autoFocus
+            slotProps={{
+                input: {
+                    startAdornment: (
+                        <InputAdornment position="start">
+                            <SearchIcon />
+                        </InputAdornment>
+                    ),
+                    endAdornment: value && (
+                        <InputAdornment
+                            position="end"
+                            sx={{ marginRight: "0 !important" }}
+                        >
+                            <CloseIcon
+                                fontSize="small"
+                                onClick={handleClear}
+                                sx={{
+                                    color: "stroke.muted",
+                                    cursor: "pointer",
+                                    "&:hover": { color: "text.base" },
+                                }}
+                            />
+                        </InputAdornment>
+                    ),
+                },
+            }}
+            sx={{
+                "& .MuiOutlinedInput-root": {
+                    backgroundColor: "background.searchInput",
+                    borderColor: "transparent",
+                    "&:hover": { borderColor: "accent.light" },
+                    "&.Mui-focused": {
+                        borderColor: "accent.main",
+                        boxShadow: "none",
+                    },
+                },
+                "& .MuiInputBase-input": {
+                    color: "text.base",
+                    paddingTop: "8.5px !important",
+                    paddingBottom: "8.5px !important",
+                },
+                "& .MuiInputAdornment-root": {
+                    color: "stroke.muted",
+                    marginTop: "0 !important",
+                    marginRight: "8px",
+                },
+                "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "transparent",
+                },
+                "& .MuiInputBase-input::placeholder": {
+                    color: "text.muted",
+                    opacity: 1,
+                },
+            }}
+        />
+    );
+};
 
 const CollectionRowItemSize = 154;
 
@@ -204,11 +313,13 @@ const AlbumsRow = React.memo(
 interface AllAlbumsContentProps {
     collectionSummaries: CollectionSummary[];
     onCollectionClick: (id: number) => void;
+    hasSearchQuery: boolean;
 }
 
 const AllAlbumsContent: React.FC<AllAlbumsContentProps> = ({
     collectionSummaries,
     onCollectionClick,
+    hasSearchQuery,
 }) => {
     const isTwoColumn = useMediaQuery(`(width < ${Column3To2Breakpoint}px)`);
 
@@ -220,10 +331,6 @@ const AllAlbumsContent: React.FC<AllAlbumsContentProps> = ({
     >([]);
 
     const columns = isTwoColumn ? 2 : 3;
-    const maxListContentHeight =
-        Math.ceil(collectionSummaries.length / columns) *
-            CollectionRowItemSize +
-        32; /* padding above first and below last row */
 
     useEffect(() => {
         const main = () => {
@@ -261,18 +368,28 @@ const AllAlbumsContent: React.FC<AllAlbumsContentProps> = ({
     // Memoize this data to avoid bypassing shouldComponentUpdate().
     const itemData = createItemData(collectionRowList, onCollectionClick);
 
+    // Show "no results" message if there's a search query but no results
+    if (hasSearchQuery && collectionSummaries.length === 0) {
+        return (
+            <DialogContent sx={{ height: "80svh" }}>
+                <Box
+                    sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        height: "100%",
+                    }}
+                >
+                    <Typography color="text.muted">
+                        {t("no_results")}
+                    </Typography>
+                </Box>
+            </DialogContent>
+        );
+    }
+
     return (
-        <DialogContent
-            sx={{
-                "&&": { padding: 0 },
-                height: "min(80svh, var(--et-max-list-content-height))",
-            }}
-            style={
-                {
-                    "--et-max-list-content-height": `${maxListContentHeight}px`,
-                } as React.CSSProperties
-            }
-        >
+        <DialogContent sx={{ "&&": { padding: 0 }, height: "80svh" }}>
             <AutoSizer>
                 {({ width, height }) => (
                     <FixedSizeList

@@ -1,12 +1,18 @@
+import CloseIcon from "@mui/icons-material/Close";
+import SearchIcon from "@mui/icons-material/Search";
 import {
+    Box,
     Dialog,
     DialogContent,
     DialogTitle,
+    Divider,
+    InputAdornment,
+    Stack,
     styled,
+    TextField,
     Typography,
     useMediaQuery,
 } from "@mui/material";
-import { SpacedRow } from "ente-base/components/containers";
 import { DialogCloseIconButton } from "ente-base/components/mui/DialogCloseIconButton";
 import type { ModalVisibilityProps } from "ente-base/components/utils/modal";
 import type { Collection } from "ente-media/collection";
@@ -23,7 +29,7 @@ import {
     type CollectionSummary,
 } from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 export type CollectionSelectorAction =
     | "upload"
@@ -114,9 +120,17 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
     // Make the dialog fullscreen if the screen is <= the dialog's max width.
     const isFullScreen = useMediaQuery("(max-width: 490px)");
 
+    const [searchTerm, setSearchTerm] = useState("");
+
     const [filteredCollections, setFilteredCollections] = useState<
         CollectionSummary[]
     >([]);
+
+    useEffect(() => {
+        if (!open) {
+            setSearchTerm("");
+        }
+    }, [open]);
 
     useEffect(() => {
         if (!attributes || !open) {
@@ -152,6 +166,25 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
         setFilteredCollections(collections);
     }, [collectionSummaries, attributes, open, onClose]);
 
+    const searchFilteredCollections = useMemo(() => {
+        if (!searchTerm.trim()) {
+            return filteredCollections;
+        }
+        const searchLower = searchTerm.toLowerCase();
+        return filteredCollections.filter((cs) =>
+            cs.name.toLowerCase().includes(searchLower),
+        );
+    }, [filteredCollections, searchTerm]);
+
+    const showCreateButton = useMemo(() => {
+        if (!searchTerm.trim()) {
+            return true;
+        }
+        const searchLower = searchTerm.toLowerCase();
+        const createText = t("create_albums").toLowerCase();
+        return createText.includes(searchLower);
+    }, [searchTerm]);
+
     if (!filteredCollections.length) {
         return <></>;
     }
@@ -174,38 +207,98 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
     };
 
     return (
-        <Dialog
+        <StyledDialog
             open={open}
             onClose={handleClose}
             fullWidth
             fullScreen={isFullScreen}
-            slotProps={{ paper: { sx: { maxWidth: "490px" } } }}
+            slotProps={{
+                paper: {
+                    sx: {
+                        maxWidth: "500px",
+                        "@media (min-width: 491px)": { height: "100%" },
+                    },
+                },
+            }}
         >
-            <SpacedRow sx={{ padding: "10px 8px 6px 0" }}>
-                <DialogTitle variant="h3">{titleForAction(action)}</DialogTitle>
-                <DialogCloseIconButton onClose={handleClose} />
-            </SpacedRow>
-
-            <DialogContent_>
-                <LargeTileCreateNewButton onClick={onCreateCollection}>
-                    {t("create_albums")}
-                </LargeTileCreateNewButton>
-                {filteredCollections.map((collectionSummary) => (
-                    <CollectionSummaryButton
-                        key={collectionSummary.id}
-                        collectionSummary={collectionSummary}
-                        onClick={handleCollectionSummaryClick}
-                    />
-                ))}
-            </DialogContent_>
-        </Dialog>
+            <DialogTitle>
+                <Stack sx={{ gap: 1.5 }}>
+                    <Stack direction="row" sx={{ gap: 1.5 }}>
+                        <Stack sx={{ flex: 1 }}>
+                            <Box>
+                                <Typography variant="h5">
+                                    {titleForAction(action)}
+                                </Typography>
+                                <Typography
+                                    variant="small"
+                                    sx={{
+                                        color: "text.muted",
+                                        fontWeight: "regular",
+                                    }}
+                                >
+                                    {searchTerm
+                                        ? `${searchFilteredCollections.length} / ${filteredCollections.length} ${t("albums")}`
+                                        : t("albums_count", {
+                                              count: filteredCollections.length,
+                                          })}
+                                </Typography>
+                            </Box>
+                        </Stack>
+                        <Box sx={{ margin: "-10px" }}>
+                            <DialogCloseIconButton onClose={handleClose} />
+                        </Box>
+                    </Stack>
+                    <SearchField value={searchTerm} onChange={setSearchTerm} />
+                </Stack>
+            </DialogTitle>
+            <Divider />
+            {searchFilteredCollections.length === 0 && !showCreateButton ? (
+                <NoResultsContent>
+                    <Typography color="text.muted">
+                        {t("no_results")}
+                    </Typography>
+                </NoResultsContent>
+            ) : (
+                <DialogContent_>
+                    {showCreateButton && (
+                        <LargeTileCreateNewButton onClick={onCreateCollection}>
+                            {t("create_albums")}
+                        </LargeTileCreateNewButton>
+                    )}
+                    {searchFilteredCollections.map((collectionSummary) => (
+                        <CollectionSummaryButton
+                            key={collectionSummary.id}
+                            collectionSummary={collectionSummary}
+                            onClick={handleCollectionSummaryClick}
+                        />
+                    ))}
+                </DialogContent_>
+            )}
+        </StyledDialog>
     );
 };
 
+const StyledDialog = styled(Dialog)(({ theme }) => ({
+    "& .MuiDialogTitle-root": { padding: theme.spacing(2) },
+    "& .MuiDialogContent-root": { padding: theme.spacing(2) },
+}));
+
 const DialogContent_ = styled(DialogContent)`
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 150px);
     gap: 4px;
+    align-content: start;
+
+    @media (min-width: 491px) {
+        justify-content: center;
+    }
+`;
+
+const NoResultsContent = styled(DialogContent)`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 154px;
 `;
 
 const titleForAction = (action: CollectionSelectorAction) => {
@@ -242,3 +335,82 @@ const CollectionSummaryButton: React.FC<CollectionSummaryButtonProps> = ({
         </LargeTileTextOverlay>
     </ItemCard>
 );
+
+interface SearchFieldProps {
+    value: string;
+    onChange: (value: string) => void;
+}
+
+const SearchField: React.FC<SearchFieldProps> = ({ value, onChange }) => {
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    const handleClear = () => {
+        onChange("");
+        inputRef.current?.focus();
+    };
+
+    return (
+        <TextField
+            inputRef={inputRef}
+            fullWidth
+            size="small"
+            placeholder={t("albums_search_hint")}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            autoFocus
+            slotProps={{
+                input: {
+                    startAdornment: (
+                        <InputAdornment position="start">
+                            <SearchIcon />
+                        </InputAdornment>
+                    ),
+                    endAdornment: value && (
+                        <InputAdornment
+                            position="end"
+                            sx={{ marginRight: "0 !important" }}
+                        >
+                            <CloseIcon
+                                fontSize="small"
+                                onClick={handleClear}
+                                sx={{
+                                    color: "stroke.muted",
+                                    cursor: "pointer",
+                                    "&:hover": { color: "text.base" },
+                                }}
+                            />
+                        </InputAdornment>
+                    ),
+                },
+            }}
+            sx={{
+                "& .MuiOutlinedInput-root": {
+                    backgroundColor: "background.searchInput",
+                    borderColor: "transparent",
+                    "&:hover": { borderColor: "accent.light" },
+                    "&.Mui-focused": {
+                        borderColor: "accent.main",
+                        boxShadow: "none",
+                    },
+                },
+                "& .MuiInputBase-input": {
+                    color: "text.base",
+                    paddingTop: "8.5px !important",
+                    paddingBottom: "8.5px !important",
+                },
+                "& .MuiInputAdornment-root": {
+                    color: "stroke.muted",
+                    marginTop: "0 !important",
+                    marginRight: "8px",
+                },
+                "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "transparent",
+                },
+                "& .MuiInputBase-input::placeholder": {
+                    color: "text.muted",
+                    opacity: 1,
+                },
+            }}
+        />
+    );
+};
