@@ -192,11 +192,28 @@ const SearchField: React.FC<SearchFieldProps> = ({ value, onChange }) => (
         placeholder={t("albums_search_hint")}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        autoFocus
         slotProps={{
             input: {
                 startAdornment: (
                     <InputAdornment position="start">
                         <SearchIcon />
+                    </InputAdornment>
+                ),
+                endAdornment: value && (
+                    <InputAdornment
+                        position="end"
+                        sx={{ marginRight: "0 !important" }}
+                    >
+                        <CloseIcon
+                            fontSize="small"
+                            onClick={() => onChange("")}
+                            sx={{
+                                color: "stroke.muted",
+                                cursor: "pointer",
+                                "&:hover": { color: "text.base" },
+                            }}
+                        />
                     </InputAdornment>
                 ),
             },
@@ -215,8 +232,6 @@ const SearchField: React.FC<SearchFieldProps> = ({ value, onChange }) => (
                 color: "text.base",
                 paddingTop: "8.5px !important",
                 paddingBottom: "8.5px !important",
-                paddingLeft: "0 !important",
-                paddingRight: "14px !important",
             },
             "& .MuiInputAdornment-root": {
                 color: "stroke.muted",
@@ -346,11 +361,7 @@ const AllAlbumsContent: React.FC<AllAlbumsContentProps> = ({
     // Show "no results" message if there's a search query but no results
     if (hasSearchQuery && collectionSummaries.length === 0) {
         return (
-            <DialogContent
-                sx={{
-                    height: "80svh",
-                }}
-            >
+            <DialogContent sx={{ height: "80svh" }}>
                 <Box
                     sx={{
                         display: "flex",
@@ -368,12 +379,7 @@ const AllAlbumsContent: React.FC<AllAlbumsContentProps> = ({
     }
 
     return (
-        <DialogContent
-            sx={{
-                "&&": { padding: 0 },
-                height: "80svh",
-            }}
-        >
+        <DialogContent sx={{ "&&": { padding: 0 }, height: "80svh" }}>
             <AutoSizer>
                 {({ width, height }) => (
                     <FixedSizeList
