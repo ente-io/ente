@@ -227,9 +227,6 @@ Phase 0 — UI skeleton & flags
 - Discovery tab entry
   - Add a “Wrapped 2025” section below Locations. Visible after banner disappears, till January 15th 2026.
   - Same gating and tap behavior as banner.
-- Local notifications (optional for MVP)
-  - Local only (no remote). Tap navigates to viewer at resume index.
-  - Gated by `internalUser` and user notification permission.
 - Basic card structure & flow
   - Card model `WrappedCard { type, title, subtitle, mediaRefs, shareLayout }`.
   - Viewer: autoplay story, progress bar, tap left/right to nav, pause on touch.
@@ -263,6 +260,9 @@ Phase 2 — Depth & polish
 Phase 3 — Advanced
 
 - Optional video export for “Best of 25”.
+- Optional: Local notifications (optional for MVP)
+  - Local only (no remote). Tap navigates to viewer at resume index.
+  - Gated by `internalUser` and user notification permission.
 
 ## Technical Notes
 
