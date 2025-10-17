@@ -227,6 +227,10 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
                 ),
                 textAlign: TextAlign.center,
               ),
+              const SizedBox(height: 20),
+              if (_uncategorizedCollection != null && showUncategorized)
+                _buildUncategorizedHook(),
+              if (showTrash) _buildTrashHook(),
             ],
           ),
         ),
