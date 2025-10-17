@@ -158,11 +158,11 @@ class WrappedService {
   void updateResult(WrappedResult? result) {
     if (result == null || result.cards.isEmpty) {
       unawaited(localSettings.setWrapped2025ResumeIndex(0));
-      unawaited(localSettings.setWrapped2025Complete(false));
-      _state.value = const WrappedEntryState(
+      final bool isComplete = localSettings.wrapped2025Complete();
+      _state.value = WrappedEntryState(
         result: null,
         resumeIndex: 0,
-        isComplete: false,
+        isComplete: isComplete,
       );
       return;
     }
@@ -206,22 +206,24 @@ class WrappedService {
     );
   }
 
-  void markComplete(bool isComplete) {
-    if (!state.hasResult && !isComplete) {
+  void markComplete() {
+    if (!state.hasResult) {
       return;
     }
 
     final bool wasComplete = localSettings.wrapped2025Complete();
-    if (!isComplete && wasComplete) {
-      // Preserve completion once it has been reached so discovery entry persists.
-      return;
+    if (!state.isComplete) {
+      if (!wasComplete) {
+        unawaited(localSettings.setWrapped2025Complete());
+      }
+      _state.value = WrappedEntryState(
+        result: state.result,
+        resumeIndex: state.resumeIndex,
+        isComplete: true,
+      );
+    } else if (!wasComplete) {
+      // Keep storage in sync if state already reflects completion.
+      unawaited(localSettings.setWrapped2025Complete());
     }
-
-    unawaited(localSettings.setWrapped2025Complete(isComplete));
-    _state.value = WrappedEntryState(
-      result: state.result,
-      resumeIndex: state.resumeIndex,
-      isComplete: isComplete,
-    );
   }
 }

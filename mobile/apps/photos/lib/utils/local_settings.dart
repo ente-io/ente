@@ -250,7 +250,7 @@ class LocalSettings {
     return _prefs.getBool(_kWrapped2025Complete) ?? false;
   }
 
-  Future<void> setWrapped2025Complete(bool isComplete) async {
-    await _prefs.setBool(_kWrapped2025Complete, isComplete);
+  Future<void> setWrapped2025Complete() async {
+    await _prefs.setBool(_kWrapped2025Complete, true);
   }
 }
