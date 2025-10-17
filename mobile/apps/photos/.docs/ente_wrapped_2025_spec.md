@@ -53,6 +53,7 @@ Wrapped assembles a diverse subset of the following, tuned per user:
 - GitHub like contribution-graph based on photo capture dates
 - Velocity: avg/day; busiest month; contribution heatmap (compact).
 - Busiest day; longest streak; longest gap.
+- All of this should not include shared files, only files owned by the user. 
 
 2. People
 
