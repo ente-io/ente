@@ -235,6 +235,7 @@
     "search_results": "نتایج جستجو",
     "no_results": "هیچ نتیجه‌ای پیدا نشد",
     "search_hint": "جستجو برای آلبوم‌ها، تاریخ‌ها، توضیحات و...",
+    "albums_search_hint": "",
     "album": "آلبوم",
     "date": "تاریخ",
     "description": "توضیحات",

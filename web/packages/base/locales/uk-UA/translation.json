@@ -235,6 +235,7 @@
     "search_results": "Результати пошуку",
     "no_results": "Нічого не знайдено",
     "search_hint": "Пошук альбомів, дат, описів, ...",
+    "albums_search_hint": "",
     "album": "Альбом",
     "date": "Дата",
     "description": "Опис",

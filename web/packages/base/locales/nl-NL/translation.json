@@ -235,11 +235,12 @@
     "search_results": "Zoekresultaten",
     "no_results": "Geen resultaten gevonden",
     "search_hint": "Zoeken naar albums, datums ...",
+    "albums_search_hint": "",
     "album": "Album",
     "date": "Datum",
     "description": "Omschrijving",
     "file_type": "Bestandstype",
-    "magic": "Magische",
+    "magic": "Magisch",
     "photos_count_zero": "Geen herinneringen",
     "photos_count_one": "1 herinnering",
     "photos_count": "{{count, number}} herinneringen",
@@ -323,8 +324,8 @@
     "thumbnail_generation_failed_hint": "Deze bestanden zijn geüpload, maar helaas konden we geen thumbnails voor ze genereren.",
     "unsupported_files": "Niet-ondersteunde bestanden",
     "unsupported_files_hint": "Ente ondersteunt deze bestandsformaten nog niet",
-    "zero_size_files": "",
-    "zero_size_files_hint": "",
+    "zero_size_files": "Lege bestanden",
+    "zero_size_files_hint": "Deze bestanden zijn niet geüpload omdat ze nul bytes hebben",
     "blocked_uploads": "Geblokkeerde uploads",
     "blocked_uploads_hint": "Uw browser of een addon verhindert Ente te gebruiken met <code>eTags</code> om grote bestanden te uploaden.",
     "large_files": "Grote bestanden",
@@ -431,7 +432,7 @@
         "year": "Na één jaar"
     },
     "copy_link": "Link kopiëren",
-    "copy_embed_html": "",
+    "copy_embed_html": "Kopieer embed HTML",
     "done": "Voltooid",
     "share_link_section_title": "Of deel een link",
     "remove_link": "Link verwijderen",
@@ -700,6 +701,6 @@
     "grouped": "Gegroepeerd",
     "continuous": "Doorgaands",
     "trip": "Trip",
-    "album_layout": "",
-    "maps_privacy_notice": ""
+    "album_layout": "Album opmaak",
+    "maps_privacy_notice": "Benaderende coördinaten worden naar privacybewuste derden zoals OpenStreetMap gestuurd om de kaart en locatie weer te geven."
 }

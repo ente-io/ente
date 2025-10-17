@@ -235,6 +235,7 @@
     "search_results": "検索結果",
     "no_results": "一致する結果が見つかりませんでした",
     "search_hint": "アルバム、日付、概要などから検索",
+    "albums_search_hint": "",
     "album": "アルバム",
     "date": "日付",
     "description": "説明",
