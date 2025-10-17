@@ -330,6 +330,7 @@ Open Decisions
 Milestones & Checklist
 - [x] Create `lib/services/wrapped/wrapped_engine.dart` with isolate compute stub
 - [x] Implement candidate builders (stats, people, places, aesthetics, curation, narrative)
+- [x] Wire feature flag getter (`flagService.enteWrapped`)
 - [ ] Flesh out candidate builder implementations
   - [x] StatsCandidateBuilder
   - [ ] PeopleCandidateBuilder
@@ -339,7 +340,7 @@ Milestones & Checklist
   - [ ] NarrativeCandidateBuilder
 - [ ] Add selection/diversity + badge logic
 - [ ] Add `WrappedCacheService` (file-based JSON) + invalidation hooks
-- [ ] Add LocalSettings extension for resume/complete
+- [x] Add LocalSettings extension for resume/complete
 - [ ] Add Home Banner widget + wiring in gallery (gated)
 - [ ] Add Discovery entry + gating + expiry window
 - [ ] Implement `WrappedViewerPage` (autoplay, progress, resume)
