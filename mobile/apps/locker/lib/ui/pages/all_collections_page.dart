@@ -39,7 +39,6 @@ class AllCollectionsPage extends StatefulWidget {
 
 class _AllCollectionsPageState extends State<AllCollectionsPage> {
   List<Collection> _sortedCollections = [];
-  List<Collection> _allCollections = [];
   Collection? _uncategorizedCollection;
   int? _uncategorizedFileCount;
   bool _isLoading = true;
@@ -106,7 +105,6 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
 
       CollectionSortUtil.sortCollections(regularCollections);
 
-      _allCollections = List.from(collections);
       _sortedCollections = List.from(regularCollections);
       _uncategorizedCollection =
           widget.viewType == UISectionType.homeCollections
@@ -246,7 +244,7 @@ class _AllCollectionsPageState extends State<AllCollectionsPage> {
             title: _getTitle(context),
           ),
           Text(
-            _allCollections.length.toString() + " items",
+            _sortedCollections.length.toString() + " items",
             style: textTheme.smallMuted,
           ),
           const SizedBox(height: 20),

@@ -55,10 +55,7 @@ class _DeleteConfirmationBottomSheet extends StatelessWidget {
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.only(
-            left: 16,
-            right: 16,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -93,7 +90,7 @@ class _DeleteConfirmationBottomSheet extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Text(
-                "This action is immediate and cannot be undone.\n$fileCount files will be deleted permanently.",
+                "This action is immediate and cannot be undone.\n $fileCount files will be deleted permanently.",
                 style: textTheme.body.copyWith(
                   color: colorScheme.textMuted,
                 ),
