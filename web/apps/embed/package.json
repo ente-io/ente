@@ -10,14 +10,12 @@
         "memoize-one": "^6.0.0",
         "react": "^19.2.0",
         "react-dom": "^19.2.0",
-        "react-virtualized-auto-sizer": "^1.0.26",
-        "react-window": "^1.8.11"
+        "react-virtualized-auto-sizer": "^1.0.26"
     },
     "devDependencies": {
         "@types/node": "^22.15.32",
         "@types/react": "^19.2.2",
         "@types/react-dom": "^19.2.2",
-        "@types/react-window": "^1.8.8",
         "ente-build-config": "*"
     }
 }

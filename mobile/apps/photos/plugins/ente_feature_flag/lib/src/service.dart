@@ -71,6 +71,10 @@ class FlagService {
 
   bool get addToAlbumFeature => internalUser;
 
+  bool get widgetSharedAlbums => internalUser;
+
+  bool get useNativeVideoEditor => internalUser && Platform.isAndroid;
+
   bool hasSyncedAccountFlags() {
     return _prefs.containsKey("remote_flags");
   }

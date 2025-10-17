@@ -191,7 +191,7 @@ const advertiseCode = (cast: Cast) => {
         namespace,
         // We need to cast, the `senderId` is present in the message we get but
         // not present in the TypeScript type.
-        incomingMessageListener as unknown as SystemEventHandler,
+        incomingMessageListener as unknown as CustomMessageHandler,
     );
 
     // Close the (chromecast) tab if the sender disconnects.
@@ -199,7 +199,7 @@ const advertiseCode = (cast: Cast) => {
     // Chromecast does a "shutdown" of our cast app when we call `context.stop`.
     // This translates into it closing the tab where it is showing our app.
     context.addEventListener(
-        cast.framework.system.EventType.SENDER_DISCONNECTED,
+        "senderdisconnected" as Parameters<typeof context.addEventListener>[0],
         () => context.stop(),
     );
 

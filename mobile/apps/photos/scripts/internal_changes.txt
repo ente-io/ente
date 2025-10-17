@@ -1,4 +1,9 @@
 - Neeraj: Asserts for url reuse and plain vs enc size mismatch
+- Ashil: (i) Swipe to select improvements (changes in auto scroll speed calcuation, added haptics and bug that I caught)
+- Laurens: Show empty persons and fallback for face thumbnail issues
+- Prateek: (i) Add native video editor to boost performance
+- Laurens: Fix flipped thumbnails issue by removing use of ColorFiltered widget
+- Neeraj: [CustomerIssue] Handle corrupt asset timestamps with detailed error reporting
 - Neeraj: Fix video aspect ratio when shared from external apps
 - Prateek: Add logging for background task execution
 - Prateek: (i) Add detailed debug logging for upload preparation, pre-upload checks, file queueing, and upload progress tracking

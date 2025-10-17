@@ -770,9 +770,6 @@ class SearchService {
         );
       for (final personID in sortedPersonIds) {
         final files = personIdToFiles[personID]!;
-        if (files.isEmpty) {
-          continue;
-        }
         final PersonEntity p = personIdToPerson[personID]!;
         if (p.data.isIgnored) continue;
         facesResult.add(

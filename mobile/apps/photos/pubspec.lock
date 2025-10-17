@@ -1680,8 +1680,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "486ec54a352cdd5c176424488d7fde5c84f21978"
-      resolved-ref: "486ec54a352cdd5c176424488d7fde5c84f21978"
+      ref: "58bc326c5c9fabddd4c51b1624b43cda9c6644e7"
+      resolved-ref: "58bc326c5c9fabddd4c51b1624b43cda9c6644e7"
       url: "https://github.com/laurenspriem/mobile_ocr"
     source: git
     version: "1.0.0"
@@ -1769,6 +1769,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
+  native_video_editor:
+    dependency: "direct main"
+    description:
+      path: "../../packages/native_video_editor"
+      relative: true
+    source: path
+    version: "1.0.0"
   native_video_player:
     dependency: "direct main"
     description:
@@ -2853,7 +2860,7 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: HEAD
+      ref: master
       resolved-ref: "1eeb18e2b1ce36bd8ca70178c0d4b485e9982257"
       url: "https://github.com/ente-io/video_editor_fork.git"
     source: git
@@ -2861,12 +2868,11 @@ packages:
   video_player:
     dependency: "direct main"
     description:
-      path: "packages/video_player/video_player"
-      ref: android_video_roation_fix
-      resolved-ref: "0acef25ca43206e02a0758b51d5fd176e3d8c6b8"
-      url: "https://github.com/ente-io/packages.git"
-    source: git
-    version: "2.7.0"
+      name: video_player
+      sha256: "0d55b1f1a31e5ad4c4967bfaa8ade0240b07d20ee4af1dfef5f531056512961a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.10.0"
   video_player_android:
     dependency: transitive
     description:
