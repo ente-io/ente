@@ -235,6 +235,7 @@
     "search_results": "Buscar resultados",
     "no_results": "No se han encontrado resultados",
     "search_hint": "Buscar álbumes, fechas...",
+    "albums_search_hint": "",
     "album": "Álbum",
     "date": "Fecha",
     "description": "Descripción",

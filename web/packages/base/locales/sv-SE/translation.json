@@ -235,6 +235,7 @@
     "search_results": "Sökresultat",
     "no_results": "Inga resultat hittades",
     "search_hint": "Sök efter album, datum, beskrivningar, ...",
+    "albums_search_hint": "",
     "album": "Album",
     "date": "Datum",
     "description": "Beskrivning",
