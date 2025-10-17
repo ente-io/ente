@@ -31,7 +31,7 @@ Success signals (local, privacy‑friendly)
 - Entry points
   - Home banner on top of home gallery: “Your 2025 Wrapped is ready” (if eligibility met and calculations done).
     - Disappears after the user has seen the wrapped completely, or partially multiple times
-  - After the home banner disappears, the Wrapped is added as a separate section to the discovery tab, right below locations.
+  - After the home banner disappears, the Wrapped is added as a separate section to the discovery tab, right above the locations section.
     - It stays there for another month.
   - Notifications (local): “We made you a 2025 recap.”
   - Put all entry points initially behind a feature flag that points to `internalUsers`

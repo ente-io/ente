@@ -10,16 +10,18 @@ import "package:photos/models/search/index_of_indexed_stack.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/wrapped/wrapped_state_service.dart";
 import "package:photos/states/all_sections_examples_state.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/search/result/no_result_widget.dart";
 import "package:photos/ui/viewer/search/search_suggestions.dart";
 import "package:photos/ui/viewer/search/tab_empty_state.dart";
-import 'package:photos/ui/viewer/search_tab/albums_section.dart';
+import "package:photos/ui/viewer/search_tab/albums_section.dart";
 import "package:photos/ui/viewer/search_tab/file_type_section.dart";
 import "package:photos/ui/viewer/search_tab/locations_section.dart";
 import "package:photos/ui/viewer/search_tab/magic_section.dart";
 import "package:photos/ui/viewer/search_tab/people_section.dart";
+import "package:photos/ui/wrapped/wrapped_discovery_section.dart";
 
 class SearchTab extends StatefulWidget {
   const SearchTab({super.key});
@@ -78,6 +80,39 @@ class AllSearchSections extends StatefulWidget {
 
 class _AllSearchSectionsState extends State<AllSearchSections> {
   final Logger _logger = Logger('_AllSearchSectionsState');
+  late WrappedEntryState _wrappedState;
+  late bool _showWrappedDiscovery;
+
+  @override
+  void initState() {
+    super.initState();
+    _wrappedState = wrappedStateService.state;
+    _showWrappedDiscovery = wrappedStateService.shouldShowDiscoveryEntry;
+    wrappedStateService.stateListenable.addListener(_onWrappedStateChanged);
+  }
+
+  @override
+  void dispose() {
+    wrappedStateService.stateListenable.removeListener(_onWrappedStateChanged);
+    super.dispose();
+  }
+
+  void _onWrappedStateChanged() {
+    if (!mounted) {
+      return;
+    }
+    final WrappedEntryState nextState = wrappedStateService.state;
+    final bool nextShowDiscovery =
+        wrappedStateService.shouldShowDiscoveryEntry;
+    if (_wrappedState == nextState &&
+        _showWrappedDiscovery == nextShowDiscovery) {
+      return;
+    }
+    setState(() {
+      _wrappedState = nextState;
+      _showWrappedDiscovery = nextShowDiscovery;
+    });
+  }
   @override
   Widget build(BuildContext context) {
     final searchTypes = SectionType.values.toList(growable: true);
@@ -128,6 +163,11 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                           snapshot.data!.elementAt(index)
                               as List<AlbumSearchResult>,
                         );
+                      case SectionType.wrapped:
+                        if (!_showWrappedDiscovery) {
+                          return const SizedBox.shrink();
+                        }
+                        return WrappedDiscoverySection(state: _wrappedState);
                       case SectionType.location:
                         return LocationsSection(
                           snapshot.data!.elementAt(index)
@@ -176,8 +216,6 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                     ),
                   );
                 }
-                //Errors are handled and this else if condition will be false always
-                //is the understanding.
                 return const Padding(
                   padding: EdgeInsets.only(bottom: 72),
                   child: EnteLoadingWidget(),

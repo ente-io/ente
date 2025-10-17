@@ -271,10 +271,12 @@ if (flagService.enteWrapped && wrappedResult != null && !localSettings.wrapped20
   )
 ]
 ```
+  - Status: scaffolding present via `WrappedStateService`; replace the placeholder tap handler once the viewer is ready.
 
 - Discovery Entry
   - Add “Wrapped 2025” section below Locations when banner hidden, for ~1 month.
   - Tap → same navigation as banner.
+  - Status: dedicated `SectionType.wrapped` drives the discovery card (rendered when results exist); navigation still points to placeholder.
 
 - Viewer (autoplay, resume)
   - Use a simple `PageView` + timer driving autoplay or repurpose `FullScreenMemory` mechanics.
@@ -331,6 +333,7 @@ Milestones & Checklist
 - [x] Create `lib/services/wrapped/wrapped_engine.dart` with isolate compute stub
 - [x] Implement candidate builders (stats, people, places, aesthetics, curation, narrative)
 - [x] Wire feature flag getter (`flagService.enteWrapped`)
+- [x] Introduce `WrappedStateService` for entry gating
 - [ ] Flesh out candidate builder implementations
   - [x] StatsCandidateBuilder
   - [ ] PeopleCandidateBuilder
