@@ -975,10 +975,13 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, collectionLinkRep
 
 	schedule(c, "@every 1m", func() {
 		_ = twoFactorRepo.RemoveExpiredTwoFactorSessions()
+		// Clean up used OTP codes older than 90 seconds
+		_ = twoFactorRepo.RemoveExpiredUsedOTPCodes(90 * 1000 * 1000) // 90 seconds in microseconds
 	})
 	schedule(c, "@every 1m", func() {
 		_ = twoFactorRepo.RemoveExpiredTempTwoFactorSecrets()
 	})
+
 	schedule(c, "@every 1m", func() {
 		_ = passkeysRepo.RemoveExpiredPasskeySessions()
 	})
