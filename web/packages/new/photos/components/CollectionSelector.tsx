@@ -1,3 +1,4 @@
+import CloseIcon from "@mui/icons-material/Close";
 import SearchIcon from "@mui/icons-material/Search";
 import {
     Box,
@@ -28,7 +29,7 @@ import {
     type CollectionSummary,
 } from "ente-new/photos/services/collection-summary";
 import { t } from "i18next";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 export type CollectionSelectorAction =
     | "upload"
@@ -333,51 +334,76 @@ interface SearchFieldProps {
     onChange: (value: string) => void;
 }
 
-const SearchField: React.FC<SearchFieldProps> = ({ value, onChange }) => (
-    <TextField
-        fullWidth
-        size="small"
-        placeholder={t("albums_search_hint")}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        slotProps={{
-            input: {
-                startAdornment: (
-                    <InputAdornment position="start">
-                        <SearchIcon />
-                    </InputAdornment>
-                ),
-            },
-        }}
-        sx={{
-            "& .MuiOutlinedInput-root": {
-                backgroundColor: "background.searchInput",
-                borderColor: "transparent",
-                "&:hover": { borderColor: "accent.light" },
-                "&.Mui-focused": {
-                    borderColor: "accent.main",
-                    boxShadow: "none",
+const SearchField: React.FC<SearchFieldProps> = ({ value, onChange }) => {
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    const handleClear = () => {
+        onChange("");
+        inputRef.current?.focus();
+    };
+
+    return (
+        <TextField
+            inputRef={inputRef}
+            fullWidth
+            size="small"
+            placeholder={t("albums_search_hint")}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            autoFocus
+            slotProps={{
+                input: {
+                    startAdornment: (
+                        <InputAdornment position="start">
+                            <SearchIcon />
+                        </InputAdornment>
+                    ),
+                    endAdornment: value && (
+                        <InputAdornment
+                            position="end"
+                            sx={{ marginRight: "0 !important" }}
+                        >
+                            <CloseIcon
+                                fontSize="small"
+                                onClick={handleClear}
+                                sx={{
+                                    color: "stroke.muted",
+                                    cursor: "pointer",
+                                    "&:hover": { color: "text.base" },
+                                }}
+                            />
+                        </InputAdornment>
+                    ),
                 },
-            },
-            "& .MuiInputBase-input": {
-                color: "text.base",
-                paddingTop: "8.5px !important",
-                paddingBottom: "8.5px !important",
-                paddingLeft: "0 !important",
-                paddingRight: "14px !important",
-            },
-            "& .MuiInputAdornment-root": {
-                color: "stroke.muted",
-                marginTop: "0 !important",
-                marginRight: "8px",
-            },
-            "& .MuiOutlinedInput-notchedOutline": {
-                borderColor: "transparent",
-            },
-            "& .MuiInputBase-input::placeholder": {
-                color: "text.muted",
-                opacity: 1,
-            },
-        }}
-    />
-);
+            }}
+            sx={{
+                "& .MuiOutlinedInput-root": {
+                    backgroundColor: "background.searchInput",
+                    borderColor: "transparent",
+                    "&:hover": { borderColor: "accent.light" },
+                    "&.Mui-focused": {
+                        borderColor: "accent.main",
+                        boxShadow: "none",
+                    },
+                },
+                "& .MuiInputBase-input": {
+                    color: "text.base",
+                    paddingTop: "8.5px !important",
+                    paddingBottom: "8.5px !important",
+                },
+                "& .MuiInputAdornment-root": {
+                    color: "stroke.muted",
+                    marginTop: "0 !important",
+                    marginRight: "8px",
+                },
+                "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "transparent",
+                },
+                "& .MuiInputBase-input::placeholder": {
+                    color: "text.muted",
+                    opacity: 1,
+                },
+            }}
+        />
+    );
+};
