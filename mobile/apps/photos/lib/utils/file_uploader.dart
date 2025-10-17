@@ -1461,33 +1461,15 @@ class FileUploader {
           _usedUploadURLs.putIfAbsent(uploadURL.url, () => now);
 
       if (existingTimestamp != now) {
-        _logger.severe(
-          "CRITICAL: Duplicate upload URL detected! "
-          "First used: $existingTimestamp, Duplicate attempt: $now",
-        );
         throw DuplicateUploadURLError(
           firstUsedAt: existingTimestamp,
           duplicateUsedAt: now,
         );
       }
-
       // Clean up old entries to prevent memory growth (only when > 5000 entries)
       if (_usedUploadURLs.length > 5000) {
         final oneHourAgo = now.subtract(const Duration(hours: 1));
         _usedUploadURLs.removeWhere((key, value) => value.isBefore(oneHourAgo));
-
-        // Size-based fallback if time-based cleanup didn't reduce size enough
-        if (_usedUploadURLs.length > 5000) {
-          final entries = _usedUploadURLs.entries.toList()
-            ..sort((a, b) => a.value.compareTo(b.value));
-          final toRemove = entries.take(_usedUploadURLs.length - 4000);
-          for (final entry in toRemove) {
-            _usedUploadURLs.remove(entry.key);
-          }
-          _logger.warning(
-            "Forcibly removed ${toRemove.length} oldest upload URLs to prevent unbounded growth",
-          );
-        }
         _logger.info(
           "Cleaned up used upload URLs, remaining: ${_usedUploadURLs.length}",
         );
