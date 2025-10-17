@@ -21,6 +21,7 @@ win:
         codeSigningAccountName: EnteTechnologiesInc
 nsis:
     deleteAppDataOnUninstall: true
+    include: build/nsis/uninstall-fix.nsh
 linux:
     target:
         - target: AppImage
