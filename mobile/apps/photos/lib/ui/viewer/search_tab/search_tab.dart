@@ -80,38 +80,6 @@ class AllSearchSections extends StatefulWidget {
 
 class _AllSearchSectionsState extends State<AllSearchSections> {
   final Logger _logger = Logger('_AllSearchSectionsState');
-  late WrappedEntryState _wrappedState;
-  late bool _showWrappedDiscovery;
-
-  @override
-  void initState() {
-    super.initState();
-    _wrappedState = wrappedService.state;
-    _showWrappedDiscovery = wrappedService.shouldShowDiscoveryEntry;
-    wrappedService.stateListenable.addListener(_onWrappedStateChanged);
-  }
-
-  @override
-  void dispose() {
-    wrappedService.stateListenable.removeListener(_onWrappedStateChanged);
-    super.dispose();
-  }
-
-  void _onWrappedStateChanged() {
-    if (!mounted) {
-      return;
-    }
-    final WrappedEntryState nextState = wrappedService.state;
-    final bool nextShowDiscovery = wrappedService.shouldShowDiscoveryEntry;
-    if (_wrappedState == nextState &&
-        _showWrappedDiscovery == nextShowDiscovery) {
-      return;
-    }
-    setState(() {
-      _wrappedState = nextState;
-      _showWrappedDiscovery = nextShowDiscovery;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -164,10 +132,20 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                               as List<AlbumSearchResult>,
                         );
                       case SectionType.wrapped:
-                        if (!_showWrappedDiscovery) {
-                          return const SizedBox.shrink();
-                        }
-                        return WrappedDiscoverySection(state: _wrappedState);
+                        return ValueListenableBuilder<WrappedEntryState>(
+                          valueListenable:
+                              wrappedService.stateListenable,
+                          builder: (
+                            BuildContext context,
+                            WrappedEntryState state,
+                            Widget? child,
+                          ) {
+                            if (!wrappedService.shouldShowDiscoveryEntry) {
+                              return const SizedBox.shrink();
+                            }
+                            return WrappedDiscoverySection(state: state);
+                          },
+                        );
                       case SectionType.location:
                         return LocationsSection(
                           snapshot.data!.elementAt(index)
