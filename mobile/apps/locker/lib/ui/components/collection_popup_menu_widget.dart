@@ -33,7 +33,6 @@ class CollectionPopupMenuWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(color: colorScheme.strokeFaint),
       ),
-      color: colorScheme.backgroundElevated,
       elevation: 15,
       shadowColor: Colors.black.withValues(alpha: 0.08),
       child: child ??

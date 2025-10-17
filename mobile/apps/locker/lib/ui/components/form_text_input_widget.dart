@@ -111,7 +111,7 @@ class _FormTextInputWidgetState extends State<FormTextInputWidget> {
               widget.labelText,
               style: textTheme.body,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 8),
           ],
           ClipRRect(
             borderRadius: const BorderRadius.all(Radius.circular(8)),

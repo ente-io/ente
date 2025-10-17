@@ -185,9 +185,9 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
               child: SizedBox(
                 width: double.infinity,
                 child: GradientButton(
-                  hugeIcon: HugeIcon(
+                  hugeIcon: const HugeIcon(
                     icon: HugeIcons.strokeRoundedFileUpload,
-                    color: colorScheme.backdropBase,
+                    color: Colors.white,
                   ),
                   onTap: () async {
                     final result = FileUploadDialogResult(

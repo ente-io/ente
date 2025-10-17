@@ -577,8 +577,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noteName => 'Title';
 
   @override
-  String get noteNameHint =>
-      'Write down important thoughts, instructions, or memories you want to preserve';
+  String get noteNameHint => 'Hint text';
 
   @override
   String get noteContent => 'Content';

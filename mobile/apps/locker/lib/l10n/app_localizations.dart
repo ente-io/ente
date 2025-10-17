@@ -1093,7 +1093,7 @@ abstract class AppLocalizations {
   /// No description provided for @noteNameHint.
   ///
   /// In en, this message translates to:
-  /// **'Write down important thoughts, instructions, or memories you want to preserve'**
+  /// **'Hint text'**
   String get noteNameHint;
 
   /// No description provided for @noteContent.

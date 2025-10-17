@@ -92,7 +92,7 @@ class _EmergencyContactPageState
           return null;
         },
       ),
-      const SizedBox(height: 16),
+      const SizedBox(height: 24),
       FormTextInputWidget(
         labelText: context.l10n.contactDetails,
         hintText: context.l10n.contactDetailsHint,
@@ -105,7 +105,7 @@ class _EmergencyContactPageState
           return null;
         },
       ),
-      const SizedBox(height: 16),
+      const SizedBox(height: 24),
       FormTextInputWidget(
         labelText: context.l10n.contactNotes,
         hintText: context.l10n.contactNotesHint,
@@ -124,13 +124,13 @@ class _EmergencyContactPageState
         label: context.l10n.contactName,
         value: _nameController.text,
       ),
-      const SizedBox(height: 16),
+      const SizedBox(height: 24),
       buildViewField(
         label: context.l10n.contactDetails,
         value: _contactDetailsController.text,
       ),
       if (_notesController.text.isNotEmpty) ...[
-        const SizedBox(height: 16),
+        const SizedBox(height: 24),
         buildViewField(
           label: context.l10n.contactNotes,
           value: _notesController.text,

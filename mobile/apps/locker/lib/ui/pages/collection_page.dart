@@ -250,7 +250,6 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(color: colorScheme.strokeFaint),
       ),
-      color: colorScheme.backgroundElevated,
       elevation: 15,
       shadowColor: Colors.black.withValues(alpha: 0.08),
       child: Container(
@@ -263,7 +262,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
         padding: const EdgeInsets.all(12),
         child: HugeIcon(
           icon: HugeIcons.strokeRoundedMoreVertical,
-          color: colorScheme.textBase,
+          color: colorScheme.iconColor,
         ),
       ),
       onSelected: (value) {
@@ -302,7 +301,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
               child: MenuItemWidget(
                 icon: HugeIcon(
                   icon: HugeIcons.strokeRoundedPencilEdit02,
-                  color: colorScheme.textBase,
+                  color: colorScheme.iconColor,
                   size: 20,
                 ),
                 label: context.l10n.edit,
@@ -340,7 +339,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
               child: MenuItemWidget(
                 icon: HugeIcon(
                   icon: HugeIcons.strokeRoundedDelete02,
-                  color: colorScheme.textBase,
+                  color: colorScheme.iconColor,
                   size: 20,
                 ),
                 label: context.l10n.leaveCollection,
@@ -394,7 +393,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
                             padding: const EdgeInsets.all(12),
                             child: HugeIcon(
                               icon: HugeIcons.strokeRoundedShare08,
-                              color: colorScheme.textBase,
+                              color: colorScheme.iconColor,
                             ),
                           ),
                         ),

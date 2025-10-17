@@ -171,7 +171,6 @@ Future<dynamic> showInputDialogSheet(
   final result = await showDialog<dynamic>(
     context: context,
     builder: (context) => Dialog(
-      backgroundColor: Colors.transparent,
       child: InputDialogSheet(
         title: title,
         hintText: hintText,

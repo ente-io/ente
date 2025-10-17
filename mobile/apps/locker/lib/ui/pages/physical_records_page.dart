@@ -91,7 +91,7 @@ class _PhysicalRecordsPageState
           return null;
         },
       ),
-      const SizedBox(height: 16),
+      const SizedBox(height: 24),
       FormTextInputWidget(
         labelText: context.l10n.recordLocation,
         hintText: context.l10n.recordLocationHint,
@@ -104,7 +104,7 @@ class _PhysicalRecordsPageState
           return null;
         },
       ),
-      const SizedBox(height: 16),
+      const SizedBox(height: 24),
       FormTextInputWidget(
         labelText: context.l10n.recordNotes,
         hintText: context.l10n.recordNotesHint,
@@ -123,13 +123,13 @@ class _PhysicalRecordsPageState
         label: context.l10n.recordName,
         value: _nameController.text,
       ),
-      const SizedBox(height: 16),
+      const SizedBox(height: 24),
       buildViewField(
         label: context.l10n.recordLocation,
         value: _locationController.text,
       ),
       if (_notesController.text.isNotEmpty) ...[
-        const SizedBox(height: 16),
+        const SizedBox(height: 24),
         buildViewField(
           label: context.l10n.recordNotes,
           value: _notesController.text,

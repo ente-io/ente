@@ -441,7 +441,7 @@ abstract class BaseInfoPageState<T extends InfoData, W extends BaseInfoPage<T>>
                       width: double.infinity,
                       child: GradientButton(
                         hugeIcon: HugeIcon(
-                          icon: HugeIcons.strokeRoundedAddCircleHalfDot,
+                          icon: HugeIcons.strokeRoundedFileUpload,
                           color: colorScheme.textBase,
                         ),
                         onTap: _isLoading ? null : _saveRecord,

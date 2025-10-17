@@ -766,7 +766,6 @@ class _HomePageState extends UploaderPageState<HomePage>
                         child: Container(
                           width: 200,
                           decoration: BoxDecoration(
-                            color: colorScheme.backgroundElevated,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(color: colorScheme.strokeFaint),
                             boxShadow: [
@@ -781,7 +780,6 @@ class _HomePageState extends UploaderPageState<HomePage>
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Material(
-                                color: Colors.transparent,
                                 borderRadius: const BorderRadius.only(
                                   topLeft: Radius.circular(15),
                                   topRight: Radius.circular(15),
@@ -825,7 +823,6 @@ class _HomePageState extends UploaderPageState<HomePage>
                                 color: colorScheme.strokeFaint,
                               ),
                               Material(
-                                color: Colors.transparent,
                                 borderRadius: const BorderRadius.only(
                                   bottomLeft: Radius.circular(15),
                                   bottomRight: Radius.circular(15),
