@@ -217,11 +217,7 @@ class _HomePageState extends UploaderPageState<HomePage>
 
   @override
   void onFileUploadComplete() {
-    // No-op: CollectionService.sync() already fires CollectionsUpdatedEvent
-    // which triggers a single refresh. Avoid calling _loadCollections here to
-    // prevent duplicate reloads / UI blinking when uploading to multiple
-    // collections.
-    return;
+    _loadCollections();
   }
 
   @override
@@ -630,20 +626,20 @@ class _HomePageState extends UploaderPageState<HomePage>
       );
     }
 
-    if (_displayedCollections.isEmpty) {
+    // Show empty state only if both collections and recent files are empty
+    if (_displayedCollections.isEmpty && _recentFiles.isEmpty) {
       final colorScheme = getEnteColorScheme(context);
       final textTheme = getEnteTextTheme(context);
 
-      return Center(
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+      return Container(
+        padding: const EdgeInsets.symmetric(vertical: 40),
+        child: Center(
           child: SizedBox(
             width: double.infinity,
             child: Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
                 color: colorScheme.backdropBase,
+                borderRadius: BorderRadius.circular(24),
               ),
               child: DottedBorder(
                 options: RoundedRectDottedBorderOptions(
@@ -723,58 +719,6 @@ class _HomePageState extends UploaderPageState<HomePage>
   }
 
   Widget _buildRecentsSection() {
-    final colorScheme = getEnteColorScheme(context);
-    final textTheme = getEnteTextTheme(context);
-
-    if (_recentFiles.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.symmetric(vertical: 40),
-        child: Center(
-          child: SizedBox(
-            width: double.infinity,
-            child: Container(
-              decoration: BoxDecoration(
-                color: colorScheme.backdropBase,
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: DottedBorder(
-                options: RoundedRectDottedBorderOptions(
-                  strokeWidth: 2,
-                  color: colorScheme.fillMuted,
-                  dashPattern: const [6, 6],
-                  radius: const Radius.circular(24),
-                  padding: const EdgeInsets.all(48),
-                ),
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        'assets/empty_state.png',
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Upload a File',
-                        style: textTheme.h3Bold,
-                      ),
-                      const SizedBox(height: 4),
-                      GestureDetector(
-                        onTap: addFile,
-                        child: Text(
-                          'Click here to upload',
-                          style: textTheme.small,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
     return RecentsSectionWidget(
       collections: _filterOutUncategorized(_collections),
       recentFiles: _recentFiles,
@@ -966,6 +910,7 @@ class _HomePageState extends UploaderPageState<HomePage>
     required List<Collection> collections,
     required UISectionType viewType,
   }) {
+    final colorScheme = getEnteColorScheme(context);
     return [
       SectionOptions(
         onTap: () {
@@ -983,7 +928,7 @@ class _HomePageState extends UploaderPageState<HomePage>
         trailingWidget: IconButtonWidget(
           icon: Icons.chevron_right,
           iconButtonType: IconButtonType.secondary,
-          iconColor: getEnteColorScheme(context).textBase,
+          iconColor: colorScheme.textBase,
         ),
       ),
       const SizedBox(height: 24),

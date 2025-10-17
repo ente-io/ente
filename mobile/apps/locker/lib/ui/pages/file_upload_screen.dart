@@ -283,6 +283,8 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
 
   void _onUncategorizedSelected() {
     setState(() {
+      // Clear all collections - empty set represents "uncategorized"
+      // This will be interpreted as uploading to uncategorized collection
       _selectedCollections.clear();
     });
   }

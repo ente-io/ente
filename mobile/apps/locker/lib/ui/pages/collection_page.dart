@@ -131,7 +131,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
           }
         }
       } catch (e) {
-        _logger.severe('Error updating collection: $e');
+        _logger.severe('Error updating collection', e);
       }
     });
 
