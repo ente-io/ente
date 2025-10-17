@@ -90,17 +90,23 @@ class WrappedDiscoverySection extends StatelessWidget {
   }
 
   void _handleTap(BuildContext context) {
-    final WrappedEntryState currentState = wrappedService.state;
+    WrappedEntryState currentState = wrappedService.state;
     final WrappedResult? result = currentState.result;
     if (result == null || result.cards.isEmpty) {
       showShortToast(context, "Wrapped isn’t ready yet");
       return;
     }
+    final int cardCount = result.cards.length;
+    if (cardCount > 1 &&
+        currentState.resumeIndex >= cardCount - 1 &&
+        currentState.resumeIndex != 0) {
+      wrappedService.updateResumeIndex(0);
+      currentState = wrappedService.state;
+    }
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (BuildContext context) => WrappedViewerPage(
-          initialState: currentState,
-        ),
+        builder: (BuildContext context) =>
+            WrappedViewerPage(initialState: currentState),
       ),
     );
   }

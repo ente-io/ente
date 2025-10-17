@@ -211,6 +211,12 @@ class WrappedService {
       return;
     }
 
+    final bool wasComplete = localSettings.wrapped2025Complete();
+    if (!isComplete && wasComplete) {
+      // Preserve completion once it has been reached so discovery entry persists.
+      return;
+    }
+
     unawaited(localSettings.setWrapped2025Complete(isComplete));
     _state.value = WrappedEntryState(
       result: state.result,
