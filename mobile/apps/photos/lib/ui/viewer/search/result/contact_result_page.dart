@@ -239,12 +239,6 @@ class _ContactResultPageState extends State<ContactResultPage> {
                 FileSelectionOverlayBar(
                   ContactResultPage.overlayType,
                   _selectedFiles,
-                  isCollapsed: _isCollapsed,
-                  onExpand: () {
-                    setState(() {
-                      _isCollapsed = false;
-                    });
-                  },
                 ),
               ],
             ),

@@ -167,12 +167,6 @@ class _LargeFilesPagePageState extends State<LargeFilesPagePage> {
               FileSelectionOverlayBar(
                 widget.overlayType,
                 _selectedFiles,
-                isCollapsed: _isCollapsed,
-                onExpand: () {
-                  setState(() {
-                    _isCollapsed = false;
-                  });
-                },
               ),
             ],
           ),

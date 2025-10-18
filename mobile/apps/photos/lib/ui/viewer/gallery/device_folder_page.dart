@@ -147,12 +147,6 @@ class _DeviceFolderPageState extends State<DeviceFolderPage> {
               FileSelectionOverlayBar(
                 GalleryType.localFolder,
                 _selectedFiles,
-                isCollapsed: _isCollapsed,
-                onExpand: () {
-                  setState(() {
-                    _isCollapsed = false;
-                  });
-                },
               ),
             ],
           ),

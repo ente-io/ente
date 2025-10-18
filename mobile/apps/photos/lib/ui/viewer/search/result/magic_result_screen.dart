@@ -261,12 +261,6 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
                 FileSelectionOverlayBar(
                   MagicResultScreen.overlayType,
                   _selectedFiles,
-                  isCollapsed: _isCollapsed,
-                  onExpand: () {
-                    setState(() {
-                      _isCollapsed = false;
-                    });
-                  },
                 ),
               ],
             ),

@@ -204,12 +204,6 @@ class _HiddenPageState extends State<HiddenPage> {
               FileSelectionOverlayBar(
                 widget.overlayType,
                 _selectedFiles,
-                isCollapsed: _isCollapsed,
-                onExpand: () {
-                  setState(() {
-                    _isCollapsed = false;
-                  });
-                },
               ),
             ],
           ),

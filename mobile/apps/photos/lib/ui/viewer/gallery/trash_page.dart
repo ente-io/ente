@@ -166,12 +166,6 @@ class _TrashPageState extends State<TrashPage> {
               FileSelectionOverlayBar(
                 GalleryType.trash,
                 _selectedFiles,
-                isCollapsed: _isCollapsed,
-                onExpand: () {
-                  setState(() {
-                    _isCollapsed = false;
-                  });
-                },
               ),
             ],
           ),

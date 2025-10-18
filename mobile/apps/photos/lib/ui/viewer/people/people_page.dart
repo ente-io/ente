@@ -251,12 +251,6 @@ class _PeoplePageState extends State<PeoplePage> {
                         PeoplePage.overlayType,
                         _selectedFiles,
                         person: _person,
-                        isCollapsed: _isCollapsed,
-                        onExpand: () {
-                          setState(() {
-                            _isCollapsed = false;
-                          });
-                        },
                       ),
                     ],
                   ),

@@ -250,12 +250,6 @@ class _ClusterPageState extends State<ClusterPage> {
                 ClusterPage.overlayType,
                 _selectedFiles,
                 clusterID: widget.clusterID,
-                isCollapsed: _isCollapsed,
-                onExpand: () {
-                  setState(() {
-                    _isCollapsed = false;
-                  });
-                },
               ),
             ],
           ),

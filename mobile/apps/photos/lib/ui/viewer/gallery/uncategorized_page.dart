@@ -192,12 +192,6 @@ class _UnCategorizedPageState extends State<UnCategorizedPage> {
                 FileSelectionOverlayBar(
                   widget.overlayType,
                   _selectedFiles,
-                  isCollapsed: _isCollapsed,
-                  onExpand: () {
-                    setState(() {
-                      _isCollapsed = false;
-                    });
-                  },
                 ),
               ],
             ),

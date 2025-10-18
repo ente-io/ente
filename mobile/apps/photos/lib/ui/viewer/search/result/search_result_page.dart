@@ -190,12 +190,6 @@ class _SearchResultPageState extends State<SearchResultPage> {
                 FileSelectionOverlayBar(
                   SearchResultPage.overlayType,
                   _selectedFiles,
-                  isCollapsed: _isCollapsed,
-                  onExpand: () {
-                    setState(() {
-                      _isCollapsed = false;
-                    });
-                  },
                 ),
               ],
             ),
