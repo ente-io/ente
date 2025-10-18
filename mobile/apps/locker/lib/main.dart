@@ -16,6 +16,7 @@ import "package:ente_ui/theme/theme_config.dart";
 import 'package:ente_ui/utils/window_listener_service.dart';
 import 'package:ente_utils/platform_util.dart';
 import "package:flutter/material.dart";
+import 'package:flutter/services.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:locker/app.dart';
 import 'package:locker/core/locale.dart';
@@ -58,6 +59,13 @@ void main() async {
   await _runInForeground();
   if (Platform.isAndroid) {
     FlutterDisplayMode.setHighRefreshRate().ignore();
+    // Make the navigation bar transparent so the app theme can take over
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        systemNavigationBarColor: Color(0x00000000),
+        systemNavigationBarContrastEnforced: false,
+      ),
+    );
   }
 }
 
