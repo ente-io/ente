@@ -251,6 +251,8 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
         side: BorderSide(color: colorScheme.strokeFaint),
       ),
       elevation: 15,
+      padding: const EdgeInsetsGeometry.all(0),
+      menuPadding: const EdgeInsets.all(0),
       shadowColor: Colors.black.withValues(alpha: 0.08),
       child: Container(
         height: 48,
@@ -262,7 +264,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
         padding: const EdgeInsets.all(12),
         child: HugeIcon(
           icon: HugeIcons.strokeRoundedMoreVertical,
-          color: colorScheme.iconColor,
+          color: colorScheme.textBase,
         ),
       ),
       onSelected: (value) {
@@ -297,11 +299,12 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
           items.add(
             PopupMenuItem<String>(
               value: 'rename',
+              height: 0,
               padding: EdgeInsets.zero,
               child: MenuItemWidget(
                 icon: HugeIcon(
                   icon: HugeIcons.strokeRoundedPencilEdit02,
-                  color: colorScheme.iconColor,
+                  color: colorScheme.textBase,
                   size: 20,
                 ),
                 label: context.l10n.edit,
@@ -316,6 +319,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
             PopupMenuItem<String>(
               value: 'delete',
               padding: EdgeInsets.zero,
+              height: 0,
               child: MenuItemWidget(
                 icon: HugeIcon(
                   icon: HugeIcons.strokeRoundedDelete02,
@@ -336,10 +340,11 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
             PopupMenuItem<String>(
               value: 'leave_collection',
               padding: EdgeInsets.zero,
+              height: 0,
               child: MenuItemWidget(
                 icon: HugeIcon(
                   icon: HugeIcons.strokeRoundedDelete02,
-                  color: colorScheme.iconColor,
+                  color: colorScheme.textBase,
                   size: 20,
                 ),
                 label: context.l10n.leaveCollection,
@@ -393,7 +398,7 @@ class _CollectionPageState extends UploaderPageState<CollectionPage>
                             padding: const EdgeInsets.all(12),
                             child: HugeIcon(
                               icon: HugeIcons.strokeRoundedShare08,
-                              color: colorScheme.iconColor,
+                              color: colorScheme.textBase,
                             ),
                           ),
                         ),

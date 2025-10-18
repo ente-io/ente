@@ -193,10 +193,9 @@ class FilePopupMenuWidget extends StatelessWidget {
   Future<void> _showDeleteConfirmationDialog(BuildContext context) async {
     final result = await showDeleteConfirmationDialog(
       context,
-      title: context.l10n.deleteFile,
-      body: context.l10n.deleteFileConfirmation(file.displayName),
-      deleteButtonLabel: context.l10n.delete,
-      fileCount: 1,
+      title: context.l10n.areYouSure,
+      body: context.l10n.deleteMultipleCollectionsDialogBody(1),
+      deleteButtonLabel: context.l10n.yesDeleteFiles(1),
     );
 
     if (result?.action == ButtonAction.first && context.mounted) {

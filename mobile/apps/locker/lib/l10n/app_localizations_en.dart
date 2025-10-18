@@ -1204,4 +1204,62 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get collectionLabel => 'Collection';
+
+  @override
+  String get areYouSure => 'Are you sure?';
+
+  @override
+  String get yesDeleteCollection => 'Yes, delete collection';
+
+  @override
+  String get yesDeleteFile => 'Yes, delete file';
+
+  @override
+  String deleteCollectionDialogBody(String collectionName) {
+    return 'This action is immediate and cannot be undone.\nThe $collectionName will be deleted permanently.';
+  }
+
+  @override
+  String deleteMultipleCollectionsDialogBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count collections',
+      one: '1 collection',
+    );
+    return 'This action is immediate and cannot be undone.\n$_temp0 will be deleted permanently.';
+  }
+
+  @override
+  String deleteMultipleFilesDialogBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count files',
+      one: '1 file',
+    );
+    return 'This action is immediate and cannot be undone.\n$_temp0 will be deleted permanently.';
+  }
+
+  @override
+  String yesDeleteCollections(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'collections',
+      one: 'collection',
+    );
+    return 'Yes, delete $_temp0';
+  }
+
+  @override
+  String yesDeleteFiles(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'files',
+      one: 'file',
+    );
+    return 'Yes, delete $_temp0';
+  }
 }

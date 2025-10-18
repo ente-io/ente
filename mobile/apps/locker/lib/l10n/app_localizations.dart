@@ -2097,6 +2097,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Collection'**
   String get collectionLabel;
+
+  /// No description provided for @areYouSure.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure?'**
+  String get areYouSure;
+
+  /// No description provided for @yesDeleteCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, delete collection'**
+  String get yesDeleteCollection;
+
+  /// No description provided for @yesDeleteFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, delete file'**
+  String get yesDeleteFile;
+
+  /// Confirmation message body for deleting a single collection
+  ///
+  /// In en, this message translates to:
+  /// **'This action is immediate and cannot be undone.\nThe {collectionName} will be deleted permanently.'**
+  String deleteCollectionDialogBody(String collectionName);
+
+  /// Confirmation message body for deleting multiple collections
+  ///
+  /// In en, this message translates to:
+  /// **'This action is immediate and cannot be undone.\n{count, plural, =1{1 collection} other{{count} collections}} will be deleted permanently.'**
+  String deleteMultipleCollectionsDialogBody(int count);
+
+  /// Confirmation message body for deleting multiple files
+  ///
+  /// In en, this message translates to:
+  /// **'This action is immediate and cannot be undone.\n{count, plural, =1{1 file} other{{count} files}} will be deleted permanently.'**
+  String deleteMultipleFilesDialogBody(int count);
+
+  /// Button label for confirming deletion of one or more collections
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, delete {count, plural, =1{collection} other{collections}}'**
+  String yesDeleteCollections(int count);
+
+  /// Button label for confirming deletion of one or more files
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, delete {count, plural, =1{file} other{files}}'**
+  String yesDeleteFiles(int count);
 }
 
 class _AppLocalizationsDelegate

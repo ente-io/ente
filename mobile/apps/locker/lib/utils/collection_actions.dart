@@ -20,6 +20,7 @@ import "package:locker/services/collections/collections_api_client.dart";
 import 'package:locker/services/collections/collections_service.dart';
 import 'package:locker/services/collections/models/collection.dart';
 import "package:locker/services/configuration.dart";
+import "package:locker/ui/components/delete_confirmation_dialog.dart";
 import "package:locker/ui/components/input_dialog_sheet.dart";
 import 'package:locker/utils/snack_bar_utils.dart';
 import 'package:logging/logging.dart';
@@ -124,9 +125,10 @@ class CollectionActions {
 
     final dialogChoice = await showChoiceDialog(
       context,
-      title: "Delete collections",
-      body: "Delete ${collections.length} collections?",
-      firstButtonLabel: context.l10n.delete,
+      title: context.l10n.areYouSure,
+      body:
+          context.l10n.deleteMultipleCollectionsDialogBody(collections.length),
+      firstButtonLabel: context.l10n.yesDeleteCollections(collections.length),
       secondButtonLabel: context.l10n.cancel,
       firstButtonType: ButtonType.critical,
       isCritical: true,
@@ -191,17 +193,16 @@ class CollectionActions {
 
     final collectionName = collection.name ?? 'this collection';
 
-    final dialogChoice = await showChoiceDialog(
+    final result = await showDeleteConfirmationDialog(
       context,
-      title: context.l10n.deleteCollection,
-      body: context.l10n.deleteCollectionConfirmation(collectionName),
-      firstButtonLabel: context.l10n.delete,
-      secondButtonLabel: context.l10n.cancel,
-      firstButtonType: ButtonType.critical,
-      isCritical: true,
+      title: context.l10n.areYouSure,
+      body: context.l10n.deleteCollectionDialogBody(collectionName),
+      deleteButtonLabel: context.l10n.yesDeleteCollections(1),
     );
 
-    if (dialogChoice?.action != ButtonAction.first) return;
+    if (result?.action != ButtonAction.first && context.mounted) {
+      return;
+    }
 
     final progressDialog =
         createProgressDialog(context, context.l10n.pleaseWait);

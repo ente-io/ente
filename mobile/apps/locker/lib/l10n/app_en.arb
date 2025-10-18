@@ -677,5 +677,58 @@
   },
   "locker": "Locker",
   "unnamed": "Unnamed",
-  "collectionLabel": "Collection"
+  "collectionLabel": "Collection",
+  "areYouSure": "Are you sure?",
+  "yesDeleteCollection": "Yes, delete collection",
+  "yesDeleteFile": "Yes, delete file",
+  "deleteCollectionDialogBody": "This action is immediate and cannot be undone.\nThe {collectionName} will be deleted permanently.",
+  "@deleteCollectionDialogBody": {
+    "description": "Confirmation message body for deleting a single collection",
+    "placeholders": {
+      "collectionName": {
+        "type": "String",
+        "example": "My Documents"
+      }
+    }
+  },
+  "deleteMultipleCollectionsDialogBody": "This action is immediate and cannot be undone.\n{count, plural, =1{1 collection} other{{count} collections}} will be deleted permanently.",
+  "@deleteMultipleCollectionsDialogBody": {
+    "description": "Confirmation message body for deleting multiple collections",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "deleteMultipleFilesDialogBody": "This action is immediate and cannot be undone.\n{count, plural, =1{1 file} other{{count} files}} will be deleted permanently.",
+  "@deleteMultipleFilesDialogBody": {
+    "description": "Confirmation message body for deleting multiple files",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "yesDeleteCollections": "Yes, delete {count, plural, =1{collection} other{collections}}",
+  "@yesDeleteCollections": {
+    "description": "Button label for confirming deletion of one or more collections",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "yesDeleteFiles": "Yes, delete {count, plural, =1{file} other{files}}",
+  "@yesDeleteFiles": {
+    "description": "Button label for confirming deletion of one or more files",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  }
 }

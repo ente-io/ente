@@ -9,7 +9,6 @@ Future<ButtonResult?> showDeleteConfirmationDialog(
   required String title,
   required String body,
   required String deleteButtonLabel,
-  required int fileCount,
 }) {
   return showModalBottomSheet<ButtonResult>(
     context: context,
@@ -20,7 +19,6 @@ Future<ButtonResult?> showDeleteConfirmationDialog(
         title: title,
         body: body,
         deleteButtonLabel: deleteButtonLabel,
-        fileCount: fileCount,
       );
     },
   );
@@ -30,13 +28,11 @@ class _DeleteConfirmationBottomSheet extends StatelessWidget {
   final String title;
   final String body;
   final String deleteButtonLabel;
-  final int fileCount;
 
   const _DeleteConfirmationBottomSheet({
     required this.title,
     required this.body,
     required this.deleteButtonLabel,
-    required this.fileCount,
   });
 
   @override
@@ -84,13 +80,13 @@ class _DeleteConfirmationBottomSheet extends StatelessWidget {
               Image.asset('assets/delete_icon.png'),
               const SizedBox(height: 24),
               Text(
-                "Are you sure?",
+                title,
                 style: textTheme.h3Bold,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
               Text(
-                "This action is immediate and cannot be undone.\n $fileCount files will be deleted permanently.",
+                body,
                 style: textTheme.body.copyWith(
                   color: colorScheme.textMuted,
                 ),
@@ -113,16 +109,16 @@ class _DeleteConfirmationBottomSheet extends StatelessWidget {
                     ),
                     elevation: 0,
                   ),
-                  icon: HugeIcon(
+                  icon: const HugeIcon(
                     icon: HugeIcons.strokeRoundedFileUpload,
-                    color: colorScheme.backdropBase,
+                    color: Colors.white,
                     size: 20,
                     strokeWidth: 1.9,
                   ),
                   label: Text(
-                    "Yes, delete files",
+                    deleteButtonLabel,
                     style: textTheme.bodyBold.copyWith(
-                      color: colorScheme.backdropBase,
+                      color: Colors.white,
                     ),
                   ),
                 ),
