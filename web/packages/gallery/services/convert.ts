@@ -210,10 +210,7 @@ export const playableVideoURL = async (
                 const detected = await detectFileTypeInfo(
                     new File([videoBlob], videoFileName),
                 );
-                if (
-                    detected.mimeType &&
-                    detected.mimeType !== videoBlob.type
-                ) {
+                if (detected.mimeType && detected.mimeType !== videoBlob.type) {
                     typedBlob = new Blob([videoBlob], {
                         type: detected.mimeType,
                     });
