@@ -1,12 +1,17 @@
 import { isDesktop } from "ente-base/app";
+import { lowercaseExtension } from "ente-base/file-name";
 import log from "ente-base/log";
 import { workerBridge } from "ente-base/worker/worker-bridge";
 import type { EnteFile } from "ente-media/file";
-import { FileType } from "ente-media/file-type";
+import { FileType, KnownFileTypeInfos } from "ente-media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "ente-media/formats";
 import { heicToJPEG } from "ente-media/heic-convert";
 import { detectFileTypeInfo } from "../utils/detect-type";
 import { convertToMP4 } from "./ffmpeg";
+
+// Note: For Safari detection, we reuse the existing HEIC support probe below.
+// As of 2025, only Safari supports HEIC natively, so `isHEICSupported()` is a
+// practical proxy for Safari engines where stricter blob MIME handling applies.
 
 /**
  * Return a new {@link Blob} containing an image's data in a format that the
@@ -191,7 +196,31 @@ export const playableVideoURL = async (
     videoFileName: string,
     videoBlob: Blob,
 ): Promise<string> => {
-    const videoObjectURL = URL.createObjectURL(videoBlob);
+    // Safari-only MIME correction for blob URLs to avoid NotSupportedError.
+    // Prefer extension-based lookup first (fast, no sniff). Fallback to
+    // content detection only if extension is unknown.
+    let typedBlob: Blob = videoBlob;
+    if (await isHEICSupported()) {
+        const ext = lowercaseExtension(videoFileName);
+        const known = KnownFileTypeInfos.find((f) => f.extension === ext);
+        const knownMIME = known?.mimeType;
+        if (knownMIME && knownMIME !== videoBlob.type) {
+            typedBlob = new Blob([videoBlob], { type: knownMIME });
+        } else {
+            try {
+                const detected = await detectFileTypeInfo(
+                    new File([videoBlob], videoFileName),
+                );
+                if (detected?.mimeType && detected.mimeType !== videoBlob.type) {
+                    typedBlob = new Blob([videoBlob], { type: detected.mimeType });
+                }
+            } catch {
+                // Best-effort only; fall back to original blob on detection failure.
+            }
+        }
+    }
+
+    const videoObjectURL = URL.createObjectURL(typedBlob);
     const isPlayable = await isPlaybackPossible(videoObjectURL);
 
     let shouldConvert = false;
