@@ -167,12 +167,6 @@ class _ArchivePageState extends State<ArchivePage> {
               FileSelectionOverlayBar(
                 widget.overlayType,
                 _selectedFiles,
-                isCollapsed: _isCollapsed,
-                onExpand: () {
-                  setState(() {
-                    _isCollapsed = false;
-                  });
-                },
               ),
             ],
           ),

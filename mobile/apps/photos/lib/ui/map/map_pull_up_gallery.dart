@@ -119,12 +119,6 @@ class _MapPullUpGalleryState extends State<MapPullUpGallery> {
                     _selectedFiles,
                     backgroundColor:
                         getEnteColorScheme(context).backgroundElevated2,
-                    isCollapsed: _isCollapsed,
-                    onExpand: () {
-                      setState(() {
-                        _isCollapsed = false;
-                      });
-                    },
                   ),
                 ),
               ),

@@ -45,14 +45,11 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
   late final StreamSubscription<HideSharedItemsFromHomeGalleryEvent>
       _hideSharedFilesFromHomeSubscription;
   bool _shouldHideSharedItems = localSettings.hideSharedItemsFromHomeGallery;
-  final ValueNotifier<bool> _isScrolling = ValueNotifier(false);
-  bool _isCollapsed = false;
-  bool _hasCollapsedOnce = false;
-  bool _hasFilesSelected = false;
-  Timer? _selectionTimer;
+  final DraggableScrollableController _sheetController =
+      DraggableScrollableController();
 
-  /// This deboucner is to delay the UI update of the shared items toggle
-  /// since it's expensive (a new differnt key is used for the gallery
+  /// This debouncer is to delay the UI update of the shared items toggle
+  /// since it's expensive (a new different key is used for the gallery
   /// widget when hide is toggled), without which, causes the toggle button used
   /// for it in settings to have janky animation.
   final _hideSharedItemsToggleDebouncer = Debouncer(
@@ -71,59 +68,42 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
         });
       });
     });
-
     widget.selectedFiles.addListener(_onSelectionChanged);
   }
 
   void _onSelectionChanged() {
-    final hasSelection = widget.selectedFiles.files.isNotEmpty;
-
-    if (hasSelection && !_hasFilesSelected) {
-      setState(() {
-        _isCollapsed = false;
-        _hasFilesSelected = true;
-      });
-
-      _selectionTimer?.cancel();
-      _selectionTimer = Timer(const Duration(milliseconds: 10), () {});
-    } else if (!hasSelection && _hasFilesSelected) {
-      setState(() {
-        _hasFilesSelected = false;
-        _isCollapsed = false;
-      });
-      _selectionTimer?.cancel();
+    if (widget.selectedFiles.files.isNotEmpty) {
+      if (_sheetController.isAttached) {
+        _sheetController.animateTo(
+          0.40,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
     }
   }
 
   @override
   void dispose() {
-    super.dispose();
     _hideSharedFilesFromHomeSubscription.cancel();
     _hideSharedItemsToggleDebouncer.cancelDebounceTimer();
     widget.selectedFiles.removeListener(_onSelectionChanged);
-    _selectionTimer?.cancel();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final gallery = NotificationListener<ScrollNotification>(
       onNotification: (scrollInfo) {
-        if (scrollInfo is UserScrollNotification && _hasFilesSelected) {
-          final shouldAllowCollapse =
-              _selectionTimer == null || !_selectionTimer!.isActive;
-
-          if (shouldAllowCollapse &&
-              (!_hasCollapsedOnce || !_isCollapsed) &&
-              (scrollInfo.direction == ScrollDirection.forward ||
-                  scrollInfo.direction == ScrollDirection.reverse)) {
-            Future.delayed(const Duration(milliseconds: 10), () {
-              if (mounted && _hasFilesSelected) {
-                setState(() {
-                  _isCollapsed = true;
-                  _hasCollapsedOnce = true;
-                });
-              }
-            });
+        if (scrollInfo is UserScrollNotification && scrollInfo.depth == 0) {
+          if (widget.selectedFiles.files.isNotEmpty &&
+              _sheetController.isAttached &&
+              _sheetController.size > 0.20) {
+            _sheetController.animateTo(
+              0.20,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+            );
           }
         }
         return false;
@@ -188,6 +168,7 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
         showGallerySettingsCTA: true,
       ),
     );
+
     return GalleryFilesState(
       child: SelectionState(
         selectedFiles: widget.selectedFiles,
@@ -195,18 +176,23 @@ class _HomeGalleryWidgetState extends State<HomeGalleryWidget> {
           alignment: Alignment.bottomCenter,
           children: [
             gallery,
-            ValueListenableBuilder<bool>(
-              valueListenable: _isScrolling,
-              builder: (context, isScrolling, _) {
-                return FileSelectionOverlayBar(
-                  GalleryType.homepage,
-                  widget.selectedFiles,
-                  isCollapsed: _isCollapsed,
-                  onExpand: () {
-                    setState(() {
-                      _isCollapsed = false;
-                    });
-                  },
+            DraggableScrollableSheet(
+              controller: _sheetController,
+              initialChildSize: 0.40,
+              minChildSize: 0.25,
+              maxChildSize: 0.40,
+              snap: true,
+              snapSizes: const [0.25, 0.40],
+              builder: (context, scrollController) {
+                return SingleChildScrollView(
+                  controller: scrollController,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: FileSelectionOverlayBar(
+                      GalleryType.homepage,
+                      widget.selectedFiles,
+                    ),
+                  ),
                 );
               },
             ),

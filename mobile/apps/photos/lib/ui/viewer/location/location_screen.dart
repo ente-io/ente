@@ -292,12 +292,6 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
                 FileSelectionOverlayBar(
                   GalleryType.locationTag,
                   _selectedFiles,
-                  isCollapsed: _isCollapsed,
-                  onExpand: () {
-                    setState(() {
-                      _isCollapsed = false;
-                    });
-                  },
                 ),
               ],
             ),

@@ -212,12 +212,6 @@ class _SharedPublicCollectionPageState
                 galleryType,
                 _selectedFiles,
                 collection: widget.c.collection,
-                isCollapsed: _isCollapsed,
-                onExpand: () {
-                  setState(() {
-                    _isCollapsed = false;
-                  });
-                },
               ),
             ],
           ),
