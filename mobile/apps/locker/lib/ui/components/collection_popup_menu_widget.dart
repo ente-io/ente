@@ -33,6 +33,9 @@ class CollectionPopupMenuWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(color: colorScheme.strokeFaint),
       ),
+      menuPadding: EdgeInsets.zero,
+      color: colorScheme.backdropBase,
+      surfaceTintColor: Colors.transparent,
       elevation: 15,
       shadowColor: Colors.black.withValues(alpha: 0.08),
       child: child ??
@@ -57,6 +60,7 @@ class CollectionPopupMenuWidget extends StatelessWidget {
           PopupMenuItem<String>(
             value: action.id,
             padding: EdgeInsets.zero,
+            height: 0,
             child: MenuItemWidget(
               icon: Icon(
                 action.icon,
@@ -87,6 +91,7 @@ class CollectionPopupMenuWidget extends StatelessWidget {
         PopupMenuItem<String>(
           value: 'edit',
           padding: EdgeInsets.zero,
+          height: 0,
           child: MenuItemWidget(
             icon: HugeIcon(
               icon: HugeIcons.strokeRoundedEdit02,
@@ -104,6 +109,7 @@ class CollectionPopupMenuWidget extends StatelessWidget {
         PopupMenuItem<String>(
           value: 'delete',
           padding: EdgeInsets.zero,
+          height: 0,
           child: MenuItemWidget(
             icon: HugeIcon(
               icon: HugeIcons.strokeRoundedDelete01,
@@ -124,6 +130,7 @@ class CollectionPopupMenuWidget extends StatelessWidget {
         PopupMenuItem<String>(
           value: 'leave_collection',
           padding: EdgeInsets.zero,
+          height: 0,
           child: MenuItemWidget(
             icon: HugeIcon(
               icon: HugeIcons.strokeRoundedLogout02,

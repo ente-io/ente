@@ -8,6 +8,7 @@ class MenuItemWidget extends StatelessWidget {
   final bool isLast;
   final bool isDelete;
   final bool isWarning;
+  final VoidCallback? onTap;
 
   const MenuItemWidget({
     super.key,
@@ -17,6 +18,7 @@ class MenuItemWidget extends StatelessWidget {
     this.isLast = false,
     this.isDelete = false,
     this.isWarning = false,
+    this.onTap,
   });
 
   @override
@@ -24,54 +26,45 @@ class MenuItemWidget extends StatelessWidget {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Material(
-          color: Colors.transparent,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: colorScheme.backdropBase,
+          border: !isLast
+              ? Border(
+                  bottom: BorderSide(
+                    color: colorScheme.strokeFaint,
+                    width: 1,
+                  ),
+                )
+              : null,
           borderRadius: BorderRadius.only(
             topLeft: isFirst ? const Radius.circular(15) : Radius.zero,
             topRight: isFirst ? const Radius.circular(15) : Radius.zero,
             bottomLeft: isLast ? const Radius.circular(15) : Radius.zero,
             bottomRight: isLast ? const Radius.circular(15) : Radius.zero,
           ),
-          child: InkWell(
-            borderRadius: BorderRadius.only(
-              topLeft: isFirst ? const Radius.circular(15) : Radius.zero,
-              topRight: isFirst ? const Radius.circular(15) : Radius.zero,
-              bottomLeft: isLast ? const Radius.circular(15) : Radius.zero,
-              bottomRight: isLast ? const Radius.circular(15) : Radius.zero,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 16,
-              ),
-              child: Row(
-                children: [
-                  icon,
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      label,
-                      style: (isDelete || isWarning)
-                          ? textTheme.body
-                              .copyWith(color: colorScheme.warning500)
-                          : textTheme.body,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
         ),
-        if (!isLast)
-          Divider(
-            height: 1,
-            thickness: 1,
-            color: colorScheme.strokeFaint,
-          ),
-      ],
+        padding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
+        child: Row(
+          children: [
+            icon,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                label,
+                style: (isDelete || isWarning)
+                    ? textTheme.body.copyWith(color: colorScheme.warning500)
+                    : textTheme.body,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

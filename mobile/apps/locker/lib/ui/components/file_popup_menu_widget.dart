@@ -38,6 +38,10 @@ class FilePopupMenuWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(color: colorScheme.strokeFaint),
       ),
+      color: colorScheme.backdropBase,
+      surfaceTintColor: Colors.transparent,
+      padding: EdgeInsets.zero,
+      menuPadding: EdgeInsets.zero,
       elevation: 15,
       shadowColor: Colors.black.withValues(alpha: 0.08),
       child: child ??
@@ -62,6 +66,7 @@ class FilePopupMenuWidget extends StatelessWidget {
           PopupMenuItem<String>(
             value: action.id,
             padding: EdgeInsets.zero,
+            height: 0,
             child: MenuItemWidget(
               icon: Icon(
                 action.icon,
@@ -82,6 +87,7 @@ class FilePopupMenuWidget extends StatelessWidget {
       PopupMenuItem<String>(
         value: 'edit',
         padding: EdgeInsets.zero,
+        height: 0,
         child: MenuItemWidget(
           icon: HugeIcon(
             icon: HugeIcons.strokeRoundedPencilEdit02,
@@ -96,6 +102,7 @@ class FilePopupMenuWidget extends StatelessWidget {
       PopupMenuItem<String>(
         value: 'share_link',
         padding: EdgeInsets.zero,
+        height: 0,
         child: MenuItemWidget(
           icon: HugeIcon(
             icon: HugeIcons.strokeRoundedShare08,
@@ -110,6 +117,7 @@ class FilePopupMenuWidget extends StatelessWidget {
       PopupMenuItem<String>(
         value: 'delete',
         padding: EdgeInsets.zero,
+        height: 0,
         child: MenuItemWidget(
           icon: HugeIcon(
             icon: HugeIcons.strokeRoundedDelete02,
