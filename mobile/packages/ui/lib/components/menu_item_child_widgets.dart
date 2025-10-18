@@ -147,27 +147,27 @@ class LeadingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 10),
-      child: SizedBox(
-        height: leadingIconSize,
-        width: leadingIconSize,
-        child: leadingIcon == null
-            ? (leadingIconWidget != null
-                ? FittedBox(
-                    fit: BoxFit.contain,
-                    child: leadingIconWidget,
-                  )
-                : const SizedBox.shrink())
-            : FittedBox(
-                fit: BoxFit.contain,
-                child: Icon(
-                  leadingIcon,
-                  color: leadingIconColor ??
-                      getEnteColorScheme(context).strokeBase,
-                ),
-              ),
+    if (leadingIcon == null && leadingIconWidget == null) {
+      return const SizedBox.shrink();
+    }
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: getEnteColorScheme(context).backgroundElevated,
       ),
+      padding: const EdgeInsets.all(8.0),
+      child: leadingIcon == null
+          ? FittedBox(
+              fit: BoxFit.contain,
+              child: leadingIconWidget,
+            )
+          : FittedBox(
+              fit: BoxFit.contain,
+              child: Icon(
+                leadingIcon,
+                color: leadingIconColor ?? getEnteColorScheme(context).fillBase,
+              ),
+            ),
     );
   }
 }

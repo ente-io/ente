@@ -13,7 +13,6 @@ Future<ButtonResult?> showDeleteConfirmationDialog(
 }) {
   return showModalBottomSheet<ButtonResult>(
     context: context,
-    backgroundColor: Colors.transparent,
     isScrollControlled: true,
     isDismissible: true,
     builder: (context) {
@@ -47,7 +46,8 @@ class _DeleteConfirmationBottomSheet extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: colorScheme.backgroundBase,
+        color: colorScheme.backdropBase,
+        border: Border(top: BorderSide(color: colorScheme.strokeFaint)),
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(24),
           topRight: Radius.circular(24),
@@ -68,7 +68,7 @@ class _DeleteConfirmationBottomSheet extends StatelessWidget {
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(50),
-                        color: colorScheme.backdropBase,
+                        color: colorScheme.backgroundElevated,
                       ),
                       padding: const EdgeInsets.all(8),
                       child: Icon(

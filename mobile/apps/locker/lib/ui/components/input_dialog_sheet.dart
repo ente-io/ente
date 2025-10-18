@@ -80,7 +80,7 @@ class _InputDialogSheetState extends State<InputDialogSheet> {
     return Container(
       width: 400,
       decoration: BoxDecoration(
-        color: colorScheme.backgroundElevated,
+        color: colorScheme.backdropBase,
         borderRadius: BorderRadius.circular(24),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -99,11 +99,15 @@ class _InputDialogSheetState extends State<InputDialogSheet> {
               GestureDetector(
                 onTap: () => Navigator.of(context).pop(),
                 child: Container(
-                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: colorScheme.backgroundElevated,
+                    shape: BoxShape.circle,
+                  ),
+                  padding: const EdgeInsets.all(6),
                   child: Icon(
                     Icons.close,
                     color: colorScheme.textBase,
-                    size: 24,
+                    size: 20,
                   ),
                 ),
               ),

@@ -8,7 +8,6 @@ import "package:ente_legacy/pages/emergency_page.dart";
 import "package:ente_lock_screen/local_authentication_service.dart";
 import "package:ente_ui/components/captioned_text_widget.dart";
 import "package:ente_ui/components/menu_item_widget.dart";
-import "package:ente_ui/theme/ente_theme.dart";
 import "package:ente_ui/utils/dialog_util.dart";
 import "package:ente_utils/navigation_util.dart";
 import "package:ente_utils/platform_util.dart";
@@ -41,10 +40,9 @@ class AccountSectionWidget extends StatelessWidget {
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
           title: l10n.changeEmail,
+          makeTextBold: true,
         ),
-        pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
-        trailingIconIsMuted: true,
         onTap: () async {
           final hasAuthenticated = await LocalAuthenticationService.instance
               .requestLocalAuthentication(
@@ -69,10 +67,9 @@ class AccountSectionWidget extends StatelessWidget {
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
           title: l10n.changePassword,
+          makeTextBold: true,
         ),
-        pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
-        trailingIconIsMuted: true,
         onTap: () async {
           final hasAuthenticated = await LocalAuthenticationService.instance
               .requestLocalAuthentication(
@@ -99,10 +96,9 @@ class AccountSectionWidget extends StatelessWidget {
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
           title: l10n.recoveryKey,
+          makeTextBold: true,
         ),
-        pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
-        trailingIconIsMuted: true,
         onTap: () async {
           final hasAuthenticated = await LocalAuthenticationService.instance
               .requestLocalAuthentication(
@@ -140,10 +136,9 @@ class AccountSectionWidget extends StatelessWidget {
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
           title: context.l10n.legacy,
+          makeTextBold: true,
         ),
-        pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
-        trailingIconIsMuted: true,
         showOnlyLoadingState: true,
         onTap: () async {
           final hasAuthenticated = kDebugMode ||
@@ -169,10 +164,9 @@ class AccountSectionWidget extends StatelessWidget {
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
           title: context.l10n.logout,
+          makeTextBold: true,
         ),
-        pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
-        trailingIconIsMuted: true,
         onTap: () async {
           _onLogoutTapped(context);
         },
@@ -181,10 +175,9 @@ class AccountSectionWidget extends StatelessWidget {
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
           title: context.l10n.deleteAccount,
+          makeTextBold: true,
         ),
-        pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
-        trailingIconIsMuted: true,
         onTap: () async {
           final config = Configuration.instance;
           // ignore: unawaited_futures

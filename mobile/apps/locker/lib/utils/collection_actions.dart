@@ -37,7 +37,7 @@ class CollectionActions {
 
     final result = await showInputDialogSheet(
       context,
-      title: context.l10n.createNewCollection,
+      title: context.l10n.createCollection,
       hintText: context.l10n.documentsHint,
       submitButtonLabel: context.l10n.create,
       onSubmit: (String text) async {

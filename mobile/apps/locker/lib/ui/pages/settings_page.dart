@@ -33,8 +33,9 @@ class SettingsPage extends StatelessWidget {
     }
     final enteColorScheme = getEnteColorScheme(context);
     return Scaffold(
+      backgroundColor: enteColorScheme.backgroundBase,
       body: Container(
-        color: enteColorScheme.backdropBase,
+        color: enteColorScheme.backgroundBase,
         child: _getBody(context, enteColorScheme),
       ),
     );

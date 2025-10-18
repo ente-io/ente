@@ -232,7 +232,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Create your first collection to get started';
 
   @override
-  String get createCollection => 'Create Collection';
+  String get createCollection => 'Create collection';
 
   @override
   String get nothingYet => 'Nothing yet';

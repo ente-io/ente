@@ -2,7 +2,6 @@ import 'dart:io';
 
 import "package:ente_ui/components/captioned_text_widget.dart";
 import "package:ente_ui/components/menu_item_widget.dart";
-import "package:ente_ui/theme/ente_theme.dart";
 import 'package:flutter/material.dart';
 import "package:locker/l10n/l10n.dart";
 import "package:locker/ui/components/expandable_menu_item_widget.dart";
@@ -70,10 +69,9 @@ class SocialsMenuItemWidget extends StatelessWidget {
     return MenuItemWidget(
       captionedTextWidget: CaptionedTextWidget(
         title: text,
+        makeTextBold: true,
       ),
-      pressedColor: getEnteColorScheme(context).fillFaint,
       trailingIcon: Icons.chevron_right_outlined,
-      trailingIconIsMuted: true,
       onTap: () async {
         // ignore: unawaited_futures
         launchUrlString(

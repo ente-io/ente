@@ -469,7 +469,7 @@ abstract class AppLocalizations {
   /// No description provided for @createCollection.
   ///
   /// In en, this message translates to:
-  /// **'Create Collection'**
+  /// **'Create collection'**
   String get createCollection;
 
   /// No description provided for @nothingYet.

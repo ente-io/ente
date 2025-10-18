@@ -78,8 +78,8 @@ class MenuItemWidget extends StatefulWidget {
     this.onLongPress,
     this.menuItemColor,
     this.alignCaptionedTextToLeft = false,
-    this.singleBorderRadius = 4.0,
-    this.multipleBorderRadius = 8.0,
+    this.singleBorderRadius = 20.0,
+    this.multipleBorderRadius = 20.0,
     this.pressedColor,
     this.expandableController,
     this.isBottomBorderRadiusRemoved = false,
@@ -167,7 +167,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 20),
       width: double.infinity,
-      padding: const EdgeInsets.only(left: 16, right: 12),
+      padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.only(
           topLeft: topBorderRadius,
@@ -188,6 +188,9 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
                   leadingIconColor: widget.leadingIconColor,
                   leadingIconWidget: widget.leadingIconWidget,
                 ),
+          widget.leadingIcon == null
+              ? const SizedBox(width: 52)
+              : const SizedBox(width: 12),
           widget.captionedTextWidget,
           if (widget.expandableController != null)
             ExpansionTrailingIcon(
